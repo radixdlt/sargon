@@ -53,10 +53,15 @@ extension IntroWhatIsShieldFeature {
 			VStack {
 				Text("Create a Security Shield").font(.largeTitle)
 				Text("Let's make sure you can always access your accounts - even if you lose your phone or buy a new one.")
+                
+                Spacer()
+                
 				Button("Create security shield") {
 					send(.continueButtonTapped)
 				}
 			}
+            .padding()
+            .navigationTitle("New Shield")
 		}
 	}
 }

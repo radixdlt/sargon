@@ -59,7 +59,10 @@ extension PickFactorSelectKindFeature {
 						}
 					}
 				}
+                
 			}
+            .padding()
+            .navigationTitle("Pick Factor Kind")
 		}
 	}
 }

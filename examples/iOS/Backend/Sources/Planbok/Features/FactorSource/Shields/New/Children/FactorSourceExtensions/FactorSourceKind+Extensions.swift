@@ -36,7 +36,11 @@ extension FactorSourceKind {
 	public var title: String {
 		switch self {
 		case .device: return "This Phone"
-		default: return self.toString()
+        case .arculusCard: return "Arculus Card"
+        case .ledgerHqHardwareWallet: return "Ledger Hardware Wallet"
+        case .trustedContact: return "Trusted Contact"
+        case .securityQuestions: return "Security Questions"
+        case .offDeviceMnemonic: return "Password"
 		}
 	}
 	public var subtitle: String? {

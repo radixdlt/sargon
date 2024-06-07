@@ -38,17 +38,20 @@ public struct PickFactorSourceFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            
+                
             case .view(.confirmSelectedFactorButtonTapped):
-                guard let selected = state.idOfSelected, let factor = state.factorSources[id: selected] else {
+                guard
+                    let selected = state.idOfSelected,
+                    let factor = state.factorSources[id: selected]
+                else {
                     return .none
                 }
-                log.notice("PickFactorSourceFeature: Setting pickedFactor to: \(factor)")
                 state.pickedFactor?.factorSource = factor
                 return .send(.delegate(.done))
-           
+                
             case let .view(.tappedFactorSource(id)):
-                if let selected = state.idOfSelected,  id == selected {
+                if let selected = state.idOfSelected,
+                   id == selected {
                     state.idOfSelected = nil
                 } else {
                     state.idOfSelected = id
@@ -59,6 +62,19 @@ public struct PickFactorSourceFeature {
                 return .none
 
             }
+        }
+    }
+}
+
+extension FactorSource {
+    public var displayLabel: String {
+        switch self {
+        case let .device(value): "\(value.hint.name) (\(value.hint.model))"
+        case let .ledger(value):"\(value.hint.name) (\(value.hint.model))"
+        case let .arculusCard(value): "\(value.hint.name) (\(value.hint.model))"
+        case let .offDeviceMnemonic(value): "\(value.hint.displayName)"
+        case let .trustedContact(value): "\(value.contact.name) (\(value.contact.emailAddress.email))"
+        case let .securityQuestions(value): "Questions: \(value.sealedMnemonic.securityQuestions.map({ q in q.id.description }).joined(separator: ", "))"
         }
     }
 }
@@ -88,13 +104,33 @@ extension PickFactorSourceFeature {
             public let isSelected: Bool
             public let action: () -> Void
             public var body: some SwiftUI.View {
-                HStack {
-                    Button(action: action, label: {
-                        factorSource.hintView()
-                    })
-                    
-                    Text(isSelected ? "✅" : "☑️")
-                }
+                Button(action: action, label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("\(factorSource.displayLabel)")
+                            Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
+                            Labeled("Added", factorSource.addedOn.formatted(.dateTime))
+                            Labeled("ID", "...\(factorSource.id.description.suffix(6))").font(.footnote)
+                        }
+                        .multilineTextAlignment(.leading)
+
+                        Circle()
+                            .stroke(Color.app.gray2, lineWidth: 3)
+                            .fill(isSelected ? Color.app.gray2 : Color.app.gray5)
+                            .frame(width: 20, height: 20)
+                    }
+                    .padding()
+                    .background(Color.app.white)
+                    .foregroundStyle(Color.app.gray1)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .inset(by: 1)
+                            .stroke(.gray, lineWidth: 1)
+                    )
+                    .padding()
+                })
+                .buttonStyle(.plain)
+         
             }
         }
         
@@ -106,15 +142,17 @@ extension PickFactorSourceFeature {
                 Text("You have the the following \(store.kind) factors")
                 
                 ScrollView {
-                    ForEach(factors) { factorSource in
-                        let isSelected = factorSource.id == store.idOfSelected
-                        SelectableFactorView(
-                            factorSource: factorSource,
-                            isSelected: isSelected
-                        ) {
-                            send(.tappedFactorSource(id: factorSource.id))
+                    VStack {
+                        ForEach(factors) { factorSource in
+                            SelectableFactorView(
+                                factorSource: factorSource,
+                                isSelected: factorSource.id == store.idOfSelected
+                            ) {
+                                send(.tappedFactorSource(id: factorSource.id))
+                            }
                         }
                     }
+                 
                 }
 
                 Button("Confirm") {
@@ -123,6 +161,8 @@ extension PickFactorSourceFeature {
                 .buttonStyle(.borderedProminent)
                 .disabled(store.idOfSelected == nil)
             }
+            .background(Color.app.gray5)
+            .padding()
         }
     }
 }

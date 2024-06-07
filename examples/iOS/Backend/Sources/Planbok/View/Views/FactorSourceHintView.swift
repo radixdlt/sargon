@@ -11,7 +11,7 @@ import SwiftUI
 
 extension FactorSource {
 	public func hintView(
-		action: @escaping @Sendable () -> Void = {}
+        action: (() -> Void)? = nil
 	) -> some SwiftUI.View {
 		Group {
 			if let device = asDevice {
@@ -47,11 +47,13 @@ extension TrustedContactFactorSourceContact {
 }
 extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 	public func display(
-		action: @escaping @Sendable () -> Void = {}
+		action: (() -> Void)?
 	) -> some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("#Questions", self.securityQuestions.count)
-			Button("Test", action: action)
+            if let action {
+                Button("Test", action: action)
+            }
 		}
 		.multilineTextAlignment(.leading)
 		.frame(maxWidth: .infinity)

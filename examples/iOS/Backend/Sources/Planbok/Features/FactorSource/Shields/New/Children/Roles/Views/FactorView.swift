@@ -29,7 +29,7 @@ public struct FactorView: SwiftUI.View {
                             Text("\(factorSource.kind.title)")
                             if let subtitle = factorSource.kind.subtitle {
                                 Text("\(subtitle)")
-                                    .foregroundStyle(Color.app.gray3)
+                                    .foregroundStyle(Color.app.gray2)
                             }
                         }
                     }

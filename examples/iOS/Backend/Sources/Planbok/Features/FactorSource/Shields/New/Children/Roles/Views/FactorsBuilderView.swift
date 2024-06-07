@@ -35,8 +35,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 			}
 			.padding()
 			
-			Divider().background(Color.app.gray5)
-			
+			Divider().background(Color.app.gray2)
 			
 			VStack(spacing: 0) {
 				ForEach(factors) { factor in
@@ -60,16 +59,16 @@ public struct FactorsBuilderView: SwiftUI.View {
 				Button("Add factors") {
 					self.factors.append(Factor(factorSource: nil))
 				}
-				.foregroundStyle(Color.app.gray4)
+                .foregroundStyle(Color.app.gray1.opacity(0.7))
 				.padding()
 			}
 			.frame(maxWidth: .infinity, minHeight: 50)
-			.background(Color.app.gray3)
+			.background(Color.app.gray5)
 			
 			
 			Divider().background(Color.app.gray3)
 			
-			Button.init(action: {
+			Button(action: {
 				changeThresholdAction?()
 			}, label: {
 				HStack {
@@ -77,7 +76,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 					Spacer()
 					Text("\(factorThreshold)")
 						.fontWeight(.bold)
-						.foregroundStyle(changeThresholdAction == nil ? Color.app.gray3 : Color.app.blue3)
+						.foregroundStyle(changeThresholdAction == nil ? Color.app.gray2 : Color.app.blue2)
 				}
 				.multilineTextAlignment(.leading)
 			})
@@ -93,12 +92,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 		)
 		.padding()
 	}
-	
-	
 }
-
-
-
 
 #Preview {
 	VStack {
