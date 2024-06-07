@@ -16,6 +16,7 @@ extension FactorSourceKind: Identifiable {
 }
 
 extension FactorSourceKind: CaseIterable {
+	// FIXME: MOVE Into Rust Sargon!
 	public static let allCases: [Self]  =  [
 		.device,
 		.arculusCard,
@@ -24,6 +25,21 @@ extension FactorSourceKind: CaseIterable {
 		.trustedContact,
 		.securityQuestions
 	]
+}
+
+extension FactorSourceKind {
+	// FIXME: MOVE Into Rust Sargon!
+	public func canBeUsedForRole(_ role: Role) -> Bool {
+		switch self {
+		case .securityQuestions:
+			return role == .confirmation
+		case .offDeviceMnemonic:
+			return role != .primary
+		case .trustedContact:
+			return role != .primary
+		default: return true
+		}
+	}
 }
 
 extension FactorSourceKind {

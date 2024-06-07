@@ -35,20 +35,6 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<F
 	}
 }
 
-
-
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<Role>> {
-	static var currentRole: Self {
-		PersistenceKeyDefault(
-			.inMemory("currentRole"),
-			Role.primary
-		)
-	}
-}
-
-
-
 extension Observable {
 	
 	/// Uh, this is hacky!

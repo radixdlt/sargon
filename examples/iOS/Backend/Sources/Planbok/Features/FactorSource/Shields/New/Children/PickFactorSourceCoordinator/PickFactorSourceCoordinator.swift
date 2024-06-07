@@ -20,13 +20,14 @@ public struct PickFactorSourceCoordinator {
     
     @ObservableState
     public struct State: Equatable {
+		public var role: Role {
+			pickKind.role
+		}
         public var path = StackState<Path.State>()
         public var pickKind: PickFactorSelectKindFeature.State
         
-//        @Presents var destination: Destination.State?
-        
-        public init() {
-            self.pickKind = PickFactorSelectKindFeature.State()
+		public init(role: Role) {
+			self.pickKind = PickFactorSelectKindFeature.State(role: role)
         }
     }
     
@@ -37,7 +38,6 @@ public struct PickFactorSourceCoordinator {
             case done
         }
         
-//        case destination(PresentationAction<Destination.Action>)
         case path(StackAction<Path.State, Path.Action>)
         case pickKind(PickFactorSelectKindFeature.Action)
         case delegate(DelegateAction)
@@ -51,11 +51,13 @@ public struct PickFactorSourceCoordinator {
             switch action {
 
             case let .pickKind(.delegate(.selectedKind(kind))):
-                state.path.append(.pickFactorSource(PickFactorSourceFeature.State(kind: kind)))
+				state.path.append(.pickFactorSource(PickFactorSourceFeature.State(
+					role: state.role,
+					kind: kind
+				)))
                 return .none
                 
             case .path(.element(id: _, action: .pickFactorSource(.delegate(.done)))):
-                log.fault("PickFactorSourceCoordinator delegate done")
                 return .send(.delegate(.done))
                 
             case .pickKind:
@@ -69,7 +71,6 @@ public struct PickFactorSourceCoordinator {
             }
         }
         .forEach(\.path, action: \.path)
-//        .ifLet(\.$destination, action: \.destination)
     }
 }
 
@@ -95,12 +96,6 @@ extension PickFactorSourceCoordinator {
                     PickFactorSourceFeature.View(store: store)
                 }
             }
-//            .sheet(
-//                item: $store.scope(state: \.destination?.foo, action: \.destination.foo)
-//            ) { store in
-//                Foo.View(store: store)
-//            }
-
         }
         
 	}

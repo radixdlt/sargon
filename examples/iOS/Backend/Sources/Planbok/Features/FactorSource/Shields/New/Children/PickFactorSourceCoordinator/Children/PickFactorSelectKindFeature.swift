@@ -13,6 +13,10 @@ import ComposableArchitecture
 public struct PickFactorSelectKindFeature {
 	@ObservableState
 	public struct State: Equatable {
+		public let role: Role
+		public init(role: Role) {
+			self.role = role
+		}
 	}
 	
 	@CasePathable
@@ -51,12 +55,21 @@ extension PickFactorSelectKindFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-			VStack {
+			VStack(alignment: .leading) {
 				ScrollView {
 					ForEach(FactorSourceKind.allCases) { kind in
-						Button("`\(kind.title)`") {
+						let canBeUsedForRole = kind.canBeUsedForRole(store.role)
+						Button(action: {
 							send(.kindButtonTapped(kind))
-						}
+						}, label: {
+							VStack(alignment: .leading) {
+								Text("`\(kind.title)`")
+								if !canBeUsedForRole {
+									Text("Cannot be used as \(store.role)")
+								}
+							}
+						})
+						.disabled(!canBeUsedForRole)
 					}
 				}
                 

@@ -27,7 +27,6 @@ public struct NewSecurityShieldCoordinator {
 	public struct State: Equatable {
 		
         @Shared(.pickedFactor) var pickedFactor
-		@Shared(.currentRole) var currentRole
 		
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
@@ -50,15 +49,7 @@ public struct NewSecurityShieldCoordinator {
 		case destination(PresentationAction<Destination.Action>)
 		
 	}
-	func updateCurrentRole(_ state: inout State) -> EffectOf<Self> {
-		if let last = state.path.last {
-			switch last {
-			case .primaryRoleFactors:
-				state.currentRole = .primary
-			}
-		}
-		return .none
-	}
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.intro, action: \.intro) {
 			IntroWhatIsShieldFeature()
@@ -67,18 +58,20 @@ public struct NewSecurityShieldCoordinator {
 			switch action {
 			case .intro(.delegate(.continue)):
 				state.path.append(.primaryRoleFactors(PrimaryRoleFactorsFeature.State()))
-				return updateCurrentRole(&state)
+				return .none
 				
 			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.pickFactor)))):
-				state.destination = . pickFactorSourceCoordinator(PickFactorSourceCoordinator.State())
+				state.destination = . pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(
+					role: .primary
+				))
 				return .none
 				
 			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.continue)))):
 				log.fault("IGNORED should have navigated to next screen")
-				return updateCurrentRole(&state)
+				return .none
 				
 			case .path:
-				return updateCurrentRole(&state)
+				return .none
                 
             case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
                 state.destination = nil

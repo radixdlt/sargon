@@ -18,6 +18,7 @@ public struct PickFactorSourceFeature {
         @SharedReader(.factorSources) var factorSources
         @Shared(.pickedFactor) var pickedFactor
         public var idOfSelected: FactorSourceID? = nil
+		public let role: Role
         public let kind: FactorSourceKind
     }
     
@@ -139,6 +140,8 @@ extension PickFactorSourceFeature {
                 Text("Select A Factor")
                     .font(.largeTitle)
 
+				Text("For \(store.role)")
+				
                 Text("You have the the following \(store.kind) factors")
                 
                 ScrollView {
