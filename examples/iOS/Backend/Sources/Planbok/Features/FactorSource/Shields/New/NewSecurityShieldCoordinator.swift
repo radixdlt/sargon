@@ -26,6 +26,7 @@ public struct NewSecurityShieldCoordinator {
 	@ObservableState
 	public struct State: Equatable {
 		
+        @Shared(.pickedFactor) var pickedFactor
 		@Shared(.currentRole) var currentRole
 		
 		public var intro: IntroWhatIsShieldFeature.State
@@ -82,6 +83,13 @@ public struct NewSecurityShieldCoordinator {
             case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
                 state.destination = nil
                 return .none
+                
+            case .destination(.dismiss):
+                if let pickedFactor = state.pickedFactor, pickedFactor.factorSource == nil {
+                    state.pickedFactor = nil
+                }
+                return .none
+                
 
             case .destination:
                 return .none

@@ -103,7 +103,7 @@ extension PrimaryRoleFactorsFeature {
 					Text("Sign Transactions").font(.largeTitle)
 					
 					Text("These factors are required to withdraw your assets and log in to dApps.")
-						.foregroundStyle(Color.app.gray4)
+						.foregroundStyle(Color.app.gray2)
 					
 					FactorsBuilderView(
 						factors: $store.thresholdFactors.sending(\.view.thresholdFactorsChanged),
