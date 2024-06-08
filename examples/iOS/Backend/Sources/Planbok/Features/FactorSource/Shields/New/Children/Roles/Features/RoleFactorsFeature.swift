@@ -14,42 +14,14 @@ public struct RoleFactorsFeature {
 
 	@ObservableState
 	public struct State: Equatable {
-		@SharedReader(.factorSources) var allInProfile
-        @Shared(.newShieldDraft) var __newShieldDraft
-		
 		public var thresholdFactorsBuilder: FactorsBuilderFeature.State
 		public var overrideFactorsBuilder: FactorsBuilderFeature.State
 		
 		public let role: Role
 		public init(role: Role) {
 			self.role = role
-			self.thresholdFactorsBuilder = FactorsBuilderFeature.State(listKind: .threshold, role: role)
-			self.overrideFactorsBuilder = FactorsBuilderFeature.State(listKind: .override, role: role)
-		}
-
-		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
-			get { __newShieldDraft[role] }
-			set {
-				__newShieldDraft[role] = newValue
-			}
-		}
-		public var threshold: FactorThreshold {
-			get {
-				matrixOfFactorsForRole.threshold
-			}
-			set {
-				matrixOfFactorsForRole.threshold = newValue
-			}
-		}
-
-
-		public var pickedFactorID: Factor.ID? {
-			get {
-				__newShieldDraft.pendingFactorID
-			}
-			set {
-				__newShieldDraft.pendingFactorID = newValue
-			}
+			self.thresholdFactorsBuilder = FactorsBuilderFeature.State(mode: .threshold, role: role)
+			self.overrideFactorsBuilder = FactorsBuilderFeature.State(mode: .override, role: role)
 		}
 	}
 	

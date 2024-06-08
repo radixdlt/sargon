@@ -10,22 +10,22 @@ import SwiftUI
 import Sargon
 import ComposableArchitecture
 
-public enum FactorListKind: Sendable, Hashable {
-	case threshold, override
-}
-
 @Reducer
 public struct FactorsBuilderFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
+		public enum Mode: Sendable, Hashable {
+			case threshold, override
+		}
+		
 		@Shared(.newShieldDraft) var __newShieldDraft
 		
-		public let listKind: FactorListKind
+		public let mode: Mode
 		public let role: Role
 		
-		public init(listKind: FactorListKind, role: Role) {
-			self.listKind = listKind
+		public init(mode: Mode, role: Role) {
+			self.mode = mode
 			self.role = role
 		}
 		
@@ -48,7 +48,7 @@ public struct FactorsBuilderFeature {
 		
 		public var factors: Factors {
 			get {
-				switch listKind {
+				switch mode {
 				case .override:
 					matrixOfFactorsForRole.overrideFactors
 				case .threshold:
@@ -56,7 +56,7 @@ public struct FactorsBuilderFeature {
 				}
 			}
 			set {
-				switch listKind {
+				switch mode {
 				case .override:
 					matrixOfFactorsForRole.overrideFactors = newValue
 				case .threshold:
@@ -74,7 +74,7 @@ public struct FactorsBuilderFeature {
 		}
 		
 		public var title: LocalizedStringKey {
-			switch listKind {
+			switch mode {
 			case .override:
 				"Override Factors"
 			case .threshold:
@@ -83,7 +83,7 @@ public struct FactorsBuilderFeature {
 		}
 		
 		public var canChangeThreshold: Bool {
-			listKind == .threshold
+			mode == .threshold
 		}
 	}
 	
@@ -130,7 +130,7 @@ public struct FactorsBuilderFeature {
 				return .none
 				
 			case .view(.changeThresholdButtonTapped):
-				assert(state.listKind == .threshold)
+				assert(state.mode == .threshold)
 				return .send(.delegate(.setThreshold(
 					role: state.role
 				)))
