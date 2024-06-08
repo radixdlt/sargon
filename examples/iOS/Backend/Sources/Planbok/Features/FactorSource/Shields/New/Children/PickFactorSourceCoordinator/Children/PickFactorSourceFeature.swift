@@ -15,6 +15,7 @@ public struct PickFactorSourceFeature {
     
     @ObservableState
     public struct State: Equatable {
+		
         @SharedReader(.factorSources) var factorSources
 		@Shared(.newShieldDraft) var __newShieldDraft
 		public var pickedFactor: Factor? {
@@ -24,6 +25,9 @@ public struct PickFactorSourceFeature {
 			set {
 				__newShieldDraft.pendingFactor = newValue
 			}
+		}
+		public func isFactorSourceAvailable(id: FactorSourceID) -> Bool {
+			__newShieldDraft.usedFactorSources.contains(where: { $0.id == id }) == false
 		}
         public var idOfSelected: FactorSourceID? = nil
 		public let role: Role
@@ -168,7 +172,7 @@ extension PickFactorSourceFeature {
                         ForEach(factors) { factorSource in
                             SelectableFactorView(
                                 factorSource: factorSource,
-								isAvailable: false,//,!store.idsOfAllPicked().contains(factorSource.id),
+								isAvailable: store.state.isFactorSourceAvailable(id: factorSource.id),
                                 isSelected: factorSource.id == store.idOfSelected
                             ) {
                                 send(.tappedFactorSource(id: factorSource.id))

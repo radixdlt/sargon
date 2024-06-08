@@ -19,12 +19,25 @@ public struct NewShieldDraft: Hashable, Sendable {
 			self.thresholdFactors = thresholdFactors
 			self.overrideFactors = overrideFactors
 		}
+		var usedFactorSources: FactorSources {
+			var all: FactorSources = []
+			all.append(contentsOf: thresholdFactors.compactMap(\.factorSource))
+			all.append(contentsOf: overrideFactors.compactMap(\.factorSource))
+			return all
+		}
 	}
 	public var numberOfDaysUntilAutoConfirmation: UInt16 = 14
 	private var primary: MatrixOfFactorsForRole
 	private var recovery: MatrixOfFactorsForRole
 	private var confirmation: MatrixOfFactorsForRole
 
+	public var usedFactorSources: FactorSources {
+		var allUsed: FactorSources = []
+		allUsed.append(contentsOf: primary.usedFactorSources)
+		allUsed.append(contentsOf: recovery.usedFactorSources)
+		allUsed.append(contentsOf: confirmation.usedFactorSources)
+		return allUsed
+	}
 	public var pendingFactor: Factor?
 	
 	public init() {
