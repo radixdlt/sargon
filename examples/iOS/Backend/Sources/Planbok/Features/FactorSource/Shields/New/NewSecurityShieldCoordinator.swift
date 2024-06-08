@@ -28,22 +28,10 @@ public struct NewSecurityShieldCoordinator {
 	@ObservableState
 	public struct State: Equatable {
 		
-		@Shared(.newShieldDraft) var __newShieldDraft
-		
-		public var pickedFactorID: Factor.ID? {
-			get {
-				__newShieldDraft.pendingFactorID
-			}
-			set {
-				__newShieldDraft.pendingFactorID = newValue
-			}
-		}
-		
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
 	
 		@Presents var destination: Destination.State?
-	
 		
 		public let preset: Shield?
 		public init(preset: Shield?) {
@@ -114,10 +102,6 @@ public struct NewSecurityShieldCoordinator {
 				
 			case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
                 state.destination = nil
-                return .none
-                
-            case .destination(.dismiss):
-				state.pickedFactorID = nil
                 return .none
 
             case .destination:
