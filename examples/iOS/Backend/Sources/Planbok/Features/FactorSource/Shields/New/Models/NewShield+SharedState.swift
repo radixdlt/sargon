@@ -9,11 +9,31 @@ import Foundation
 import Sargon
 import ComposableArchitecture
 
-public struct ThresholdsForRoles: Hashable, Sendable {
-	private var primary: FactorThreshold = .any
-	private var recovery: FactorThreshold = .any
-	private var confirmation: FactorThreshold = .any
-	public subscript(role: Role) -> FactorThreshold {
+public struct NewShieldDraft: Hashable, Sendable {
+	public struct MatrixOfFactorsForRole: Hashable, Sendable {
+		public var thresholdFactors: Factors
+		public var threshold: FactorThreshold
+		public var overrideFactors: Factors
+		fileprivate init(thresholdFactors: Factors = [], threshold: FactorThreshold = .any, overrideFactors: Factors = []) {
+			self.threshold = threshold
+			self.thresholdFactors = thresholdFactors
+			self.overrideFactors = overrideFactors
+		}
+	}
+	public var numberOfDaysUntilAutoConfirmation: UInt16 = 14
+	private var primary: MatrixOfFactorsForRole
+	private var recovery: MatrixOfFactorsForRole
+	private var confirmation: MatrixOfFactorsForRole
+
+	public var pendingFactor: Factor?
+	
+	public init() {
+		self.primary = MatrixOfFactorsForRole()
+		self.recovery = MatrixOfFactorsForRole()
+		self.confirmation = MatrixOfFactorsForRole()
+	}
+
+	public subscript(role: Role) -> MatrixOfFactorsForRole {
 		get {
 			switch role {
 			case .primary: return self.primary
@@ -31,64 +51,39 @@ public struct ThresholdsForRoles: Hashable, Sendable {
 	}
 }
 
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<ThresholdsForRoles>> {
-	static var thresholds: Self {
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<NewShieldDraft>> {
+	static var newShieldDraft: Self {
 		PersistenceKeyDefault(
-			.inMemory("thresholds"),
-			ThresholdsForRoles()
+			.inMemory("newShieldDraft"),
+			NewShieldDraft()
 		)
 	}
 }
 
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<Factor?>> {
-	static var pickedFactor: Self {
-		PersistenceKeyDefault(
-			.inMemory("pickedFactorSource"),
-			nil
-		)
-	}
-}
 
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<Factors>> {
-	static var thresholdFactors: Self {
-		PersistenceKeyDefault(
-			.inMemory("thresholdFactors"),
-			[]
-		)
-	}
-}
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<Factors>> {
-	static var overrideFactors: Self {
-		PersistenceKeyDefault(
-			.inMemory("overrideFactors"),
-			[]
-		)
-	}
-}
-
-extension Observable {
-	
-	/// Uh, this is hacky!
-	public func pickedPendingFactors() -> FactorSources {
-        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
-		@Shared(.overrideFactors) var overrideFactors = []
-		
-		var picked = FactorSources()
-		func addFrom(_ factors: Factors?) {
-			guard let factors else { return  }
-			picked.append(contentsOf: factors.compactMap(\.factorSource))
-		}
-		addFrom(thresholdFactors)
-		addFrom(overrideFactors)
-		
-		return picked
-	}
-	
-	/// Uh, this is hacky!
-	public func idsOfAllPicked() -> Set<FactorSource.ID> {
-		let allPicked = pickedPendingFactors()
-		return Set(allPicked.map(\.id))
-	}
-}
+//extension Observable {
+//	
+//	/// Uh, this is hacky!
+//	public func pickedPendingFactors() -> FactorSources {
+//        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
+//		@Shared(.overrideFactors) var overrideFactors = []
+//		
+//		var picked = FactorSources()
+//		func addFrom(_ factors: Factors?) {
+//			guard let factors else { return  }
+//			picked.append(contentsOf: factors.compactMap(\.factorSource))
+//		}
+//		addFrom(thresholdFactors)
+//		addFrom(overrideFactors)
+//		
+//		return picked
+//	}
+//	
+//	/// Uh, this is hacky!
+//	public func idsOfAllPicked() -> Set<FactorSource.ID> {
+//		let allPicked = pickedPendingFactors()
+//		return Set(allPicked.map(\.id))
+//	}
+//}
 
 

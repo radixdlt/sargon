@@ -16,7 +16,15 @@ public struct PickFactorSourceFeature {
     @ObservableState
     public struct State: Equatable {
         @SharedReader(.factorSources) var factorSources
-        @Shared(.pickedFactor) var pickedFactor
+		@Shared(.newShieldDraft) var __newShieldDraft
+		public var pickedFactor: Factor? {
+			get {
+				__newShieldDraft.pendingFactor
+			}
+			set {
+				__newShieldDraft.pendingFactor = newValue
+			}
+		}
         public var idOfSelected: FactorSourceID? = nil
 		public let role: Role
         public let kind: FactorSourceKind
@@ -160,7 +168,7 @@ extension PickFactorSourceFeature {
                         ForEach(factors) { factorSource in
                             SelectableFactorView(
                                 factorSource: factorSource,
-								isAvailable: !store.idsOfAllPicked().contains(factorSource.id),
+								isAvailable: false,//,!store.idsOfAllPicked().contains(factorSource.id),
                                 isSelected: factorSource.id == store.idOfSelected
                             ) {
                                 send(.tappedFactorSource(id: factorSource.id))

@@ -15,21 +15,31 @@ public struct SetFactorThresholdFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		@Shared(.thresholds) var _thresholds
+		@Shared(.newShieldDraft) var __newShieldDraft
 		public let role: Role
-		public let numberOfFactors: Int
 		public var threshold: FactorThreshold
 		
-		public init(role: Role, numberOfFactors: Int) {
+		public init(role: Role) {
 			self.role = role
-			self.numberOfFactors = numberOfFactors
 			self.threshold = .all
 			
 			self.threshold = alreadySet
 		}
 		
+
+	
+		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
+			__newShieldDraft[role]
+		}
+		
+		public var numberOfFactors: Int {
+			matrixOfFactorsForRole.thresholdFactors.count
+		}
 		public var options: [FactorThreshold] {
 			var options: [FactorThreshold] = [.any, .all]
+			guard numberOfFactors > 0 else {
+				return options
+			}
 			let exceeding1 = UInt8(numberOfFactors - 1)
 			if exceeding1 > 1 {
 				options.append(contentsOf: (1...exceeding1).map(FactorThreshold.threshold))
@@ -37,8 +47,9 @@ public struct SetFactorThresholdFeature {
 			return options
 		}
 		
+		
 		public var alreadySet: FactorThreshold {
-			_thresholds[role]
+			matrixOfFactorsForRole.threshold
 		}
 		public var recommended: FactorThreshold {
 			.any

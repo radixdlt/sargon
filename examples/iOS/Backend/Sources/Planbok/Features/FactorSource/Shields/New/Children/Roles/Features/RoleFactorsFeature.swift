@@ -15,10 +15,7 @@ public struct RoleFactorsFeature {
 	@ObservableState
 	public struct State: Equatable {
 		@SharedReader(.factorSources) var allInProfile
-        @Shared(.pickedFactor) var pickedFactor
-        @Shared(.thresholds) var _thresholds
-        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
-		@Shared(.overrideFactors) var overrideFactors = []
+        @Shared(.newShieldDraft) var __newShieldDraft
 
 		public let role: Role
 		public init(role: Role) {
@@ -26,12 +23,47 @@ public struct RoleFactorsFeature {
 		}
 
 		var available: FactorSources {
-			let idsOfAllPicked = idsOfAllPicked()
-			return allInProfile.filter({ !idsOfAllPicked.contains($0.id) }).asIdentified()
+//			let idsOfAllPicked = idsOfAllPicked()
+			return allInProfile//.filter({ !idsOfAllPicked.contains($0.id) }).asIdentified()
 		}
 		
+		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
+			get { __newShieldDraft[role] }
+			set {
+				__newShieldDraft[role] = newValue
+			}
+		}
 		public var threshold: FactorThreshold {
-			_thresholds[role]
+			get {
+				matrixOfFactorsForRole.threshold
+			}
+			set {
+				matrixOfFactorsForRole.threshold = newValue
+			}
+		}
+		public var thresholdFactors: Factors {
+			get {
+				matrixOfFactorsForRole.thresholdFactors
+			}
+			set {
+				matrixOfFactorsForRole.thresholdFactors = newValue
+			}
+		}
+		public var overrideFactors: Factors {
+			get {
+				matrixOfFactorsForRole.overrideFactors
+			}
+			set {
+				matrixOfFactorsForRole.overrideFactors = newValue
+			}
+		}
+		public var pickedFactor: Factor? {
+			get {
+				__newShieldDraft.pendingFactor
+			}
+			set {
+				__newShieldDraft.pendingFactor = newValue
+			}
 		}
 	}
 	
@@ -51,7 +83,7 @@ public struct RoleFactorsFeature {
         public enum DelegateAction {
 			case `continue`(role: Role)
 			case pickFactor(role: Role)
-			case setThreshold(role: Role, numberOfFactors: Int)
+			case setThreshold(role: Role)
         }
         
         case view(ViewAction)
@@ -70,8 +102,7 @@ public struct RoleFactorsFeature {
 				
 			case .view(.changeThresholdButtonTapped):
 				return .send(.delegate(.setThreshold(
-					role: state.role,
-					numberOfFactors: state.thresholdFactors.count
+					role: state.role
 				)))
 				
 			case let .view(.thresholdFactorsChanged(new)):

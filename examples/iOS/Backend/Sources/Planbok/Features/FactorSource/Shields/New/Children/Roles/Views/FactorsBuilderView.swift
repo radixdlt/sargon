@@ -11,7 +11,12 @@ import Sargon
 import ComposableArchitecture
 
 public struct FactorsBuilderView: SwiftUI.View {
-    @Shared(.pickedFactor) var pickedFactor
+	@Shared(.newShieldDraft) var __newShieldDraft
+	public var pickedFactor: Factor? {
+		get {
+			__newShieldDraft.pendingFactor
+		}
+	}
 	@Binding var factors: IdentifiedArrayOf<Factor>
 	
 	public let factorThreshold: FactorThreshold
@@ -42,7 +47,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 					FactorView(
 						factor: factor,
                         pickAction: {
-                            self.pickedFactor = factor
+							__newShieldDraft.pendingFactor = factor
                             pickAction()
                         }
 					) {

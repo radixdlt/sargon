@@ -28,7 +28,16 @@ public struct NewSecurityShieldCoordinator {
 	@ObservableState
 	public struct State: Equatable {
 		
-        @Shared(.pickedFactor) var pickedFactor
+		@Shared(.newShieldDraft) var __newShieldDraft
+		
+		public var pickedFactor: Factor? {
+			get {
+				__newShieldDraft.pendingFactor
+			}
+			set {
+				__newShieldDraft.pendingFactor = newValue
+			}
+		}
 		
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
@@ -87,10 +96,9 @@ public struct NewSecurityShieldCoordinator {
 				))
 				return .none
 				
-			case let .path(.element(id: _, action: .roleFactors(.delegate(.setThreshold(role, numberOfFactors))))):
+			case let .path(.element(id: _, action: .roleFactors(.delegate(.setThreshold(role))))):
 				state.destination = .setFactorThreshold(SetFactorThresholdFeature.State(
-					role: role,
-					numberOfFactors: numberOfFactors
+					role: role
 				))
 				return .none
 				
