@@ -91,6 +91,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 				.stroke(.gray, lineWidth: 1)
 		)
 		.padding()
+		.buttonStyle(.plain)
 	}
 }
 

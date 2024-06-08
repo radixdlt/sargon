@@ -9,6 +9,37 @@ import Foundation
 import Sargon
 import ComposableArchitecture
 
+public struct ThresholdsForRoles: Hashable, Sendable {
+	private var primary: FactorThreshold = .any
+	private var recovery: FactorThreshold = .any
+	private var confirmation: FactorThreshold = .any
+	public subscript(role: Role) -> FactorThreshold {
+		get {
+			switch role {
+			case .primary: return self.primary
+			case .recovery: return self.recovery
+			case .confirmation: return self.confirmation
+			}
+		}
+		set {
+			switch role {
+			case .primary: self.primary = newValue
+			case .recovery: self.recovery = newValue
+			case .confirmation: self.confirmation = newValue
+			}
+		}
+	}
+}
+
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<ThresholdsForRoles>> {
+	static var thresholds: Self {
+		PersistenceKeyDefault(
+			.inMemory("thresholds"),
+			ThresholdsForRoles()
+		)
+	}
+}
+
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<Factor?>> {
 	static var pickedFactor: Self {
 		PersistenceKeyDefault(

@@ -10,22 +10,29 @@ import Sargon
 import ComposableArchitecture
 
 @Reducer
-public struct PrimaryRoleFactorsFeature {
+public struct RoleFactorsFeature {
 
 	@ObservableState
 	public struct State: Equatable {
 		@SharedReader(.factorSources) var allInProfile
         @Shared(.pickedFactor) var pickedFactor
-		
+        @Shared(.thresholds) var _thresholds
+        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
+		@Shared(.overrideFactors) var overrideFactors = []
+
+		public let role: Role
+		public init(role: Role) {
+			self.role = role
+		}
+
 		var available: FactorSources {
 			let idsOfAllPicked = idsOfAllPicked()
 			return allInProfile.filter({ !idsOfAllPicked.contains($0.id) }).asIdentified()
 		}
 		
-        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
-		@Shared(.overrideFactors) var overrideFactors = []
-
-		public var threshold: FactorThreshold = .any
+		public var threshold: FactorThreshold {
+			_thresholds[role]
+		}
 	}
 	
 	@CasePathable
@@ -42,9 +49,9 @@ public struct PrimaryRoleFactorsFeature {
         }
         
         public enum DelegateAction {
-            case `continue`
-            case pickFactor
-			case setThreshold(current: FactorThreshold, numberOfFactors: Int)
+			case `continue`(role: Role)
+			case pickFactor(role: Role)
+			case setThreshold(role: Role, numberOfFactors: Int)
         }
         
         case view(ViewAction)
@@ -56,14 +63,14 @@ public struct PrimaryRoleFactorsFeature {
 			switch action {
 				
 			case .view(.confirmButtonTapped):
-				return .send(.delegate(.continue))
+				return .send(.delegate(.continue(role: state.role)))
 				
 			case .view(.pickButtonTapped):
-				return .send(.delegate(.pickFactor))
+				return .send(.delegate(.pickFactor(role: state.role)))
 				
 			case .view(.changeThresholdButtonTapped):
 				return .send(.delegate(.setThreshold(
-					current: state.threshold,
+					role: state.role,
 					numberOfFactors: state.thresholdFactors.count
 				)))
 				
@@ -93,7 +100,7 @@ public struct PrimaryRoleFactorsFeature {
 	}
 }
 
-extension PrimaryRoleFactorsFeature {
+extension RoleFactorsFeature {
 	public typealias HostingFeature = Self
 	
 	@ViewAction(for: HostingFeature.self)
@@ -108,9 +115,9 @@ extension PrimaryRoleFactorsFeature {
 		public var body: some SwiftUI.View {
 			ScrollView {
 				VStack(alignment: .center, spacing: 10) {
-					Text("Sign Transactions").font(.largeTitle)
+					Text("\(store.role.title)").font(.largeTitle)
 					
-					Text("These factors are required to withdraw your assets and log in to dApps.")
+					Text("These factors are required to \(store.role.actionDetailed)")
 						.foregroundStyle(Color.app.gray2)
 					
 					FactorsBuilderView(
@@ -159,11 +166,11 @@ extension PrimaryRoleFactorsFeature {
 
 
 #Preview {
-	PrimaryRoleFactorsFeature.View(
+	RoleFactorsFeature.View(
 		store: Store(
-			initialState: PrimaryRoleFactorsFeature.State(),
+			initialState: RoleFactorsFeature.State(role: .primary),
 			reducer: {
-				PrimaryRoleFactorsFeature()
+				RoleFactorsFeature()
 			}
 		)
 	)

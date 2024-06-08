@@ -20,7 +20,8 @@ public struct NewSecurityShieldCoordinator {
 	
 	@Reducer(state: .equatable)
 	public enum Path {
-		case primaryRoleFactors(PrimaryRoleFactorsFeature)
+		case roleFactors(RoleFactorsFeature)
+		case nameShield(NameNewAccountFeature)
 	}
 	
 	
@@ -51,6 +52,26 @@ public struct NewSecurityShieldCoordinator {
 		
 	}
 
+	
+	private func next(lastRole: Role? = nil, _ state: inout State) -> EffectOf<Self> {
+		let nextRole: Role? = switch lastRole {
+		case .none:
+				.primary
+		case .primary:
+				.recovery
+		case .recovery:
+				.confirmation
+		case .confirmation:
+			nil
+		}
+		if let nextRole  {
+			state.path.append(.roleFactors(RoleFactorsFeature.State(role: nextRole)))
+		} else {
+			state.path.append(.nameShield(NameNewAccountFeature.State(index: 0)))
+		}
+		return .none
+	}
+	
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.intro, action: \.intro) {
 			IntroWhatIsShieldFeature()
@@ -58,31 +79,32 @@ public struct NewSecurityShieldCoordinator {
 		Reduce { state, action in
 			switch action {
 			case .intro(.delegate(.continue)):
-				state.path.append(.primaryRoleFactors(PrimaryRoleFactorsFeature.State()))
-				return .none
+				return next(&state)
 				
-			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.pickFactor)))):
+			case let .path(.element(id: _, action: .roleFactors(.delegate(.pickFactor(role))))):
 				state.destination = .pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(
-					role: .primary
+					role: role
 				))
 				return .none
 				
-			case let .path(.element(id: _, action: .primaryRoleFactors(.delegate(.setThreshold(currentThreshold, numberOfFactors))))):
+			case let .path(.element(id: _, action: .roleFactors(.delegate(.setThreshold(role, numberOfFactors))))):
 				state.destination = .setFactorThreshold(SetFactorThresholdFeature.State(
-					role: .primary,
-					numberOfFactors: numberOfFactors,
-					threshold: currentThreshold
+					role: role,
+					numberOfFactors: numberOfFactors
 				))
 				return .none
 				
-			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.continue)))):
-				log.fault("IGNORED should have navigated to next screen")
-				return .none
+			case let .path(.element(id: _, action: .roleFactors(.delegate(.continue(role))))):
+				return next(lastRole: role, &state)
 				
 			case .path:
 				return .none
                 
-            case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
+			case .destination(.presented(.setFactorThreshold(.delegate(.confirm)))):
+				state.destination = nil
+				return .none
+				
+			case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
                 state.destination = nil
                 return .none
                 
@@ -118,14 +140,14 @@ extension NewSecurityShieldCoordinator {
 				IntroWhatIsShieldFeature.View(
 					store: store.scope(state: \.intro, action: \.intro)
 				)
-				.buttonStyle(.borderedProminent)
 			} destination: { store in
 				switch store.case {
-				case let .primaryRoleFactors(store):
-					PrimaryRoleFactorsFeature.View(store: store)
+				case let .roleFactors(store):
+					RoleFactorsFeature.View(store: store)
+				case let .nameShield(store):
+					NameNewAccountFeature.View(store: store)
 				}
 			}
-			.buttonStyle(.plain)
 			.sheet(
 				item: $store.scope(state: \.destination?.pickFactorSourceCoordinator, action: \.destination.pickFactorSourceCoordinator)
 			) { store in
