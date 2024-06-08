@@ -22,11 +22,6 @@ public struct RoleFactorsFeature {
 			self.role = role
 		}
 
-		var available: FactorSources {
-//			let idsOfAllPicked = idsOfAllPicked()
-			return allInProfile//.filter({ !idsOfAllPicked.contains($0.id) }).asIdentified()
-		}
-		
 		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
 			get { __newShieldDraft[role] }
 			set {
