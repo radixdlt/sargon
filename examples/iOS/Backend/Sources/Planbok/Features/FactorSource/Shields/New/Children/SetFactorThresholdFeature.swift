@@ -81,7 +81,7 @@ public struct SetFactorThresholdFeature {
 				return .none
 				
 			case .view(.confirmButtonTapped):
-				
+				state.__newShieldDraft[state.role].threshold = state.threshold
 				return .send(.delegate(.confirm))
 				
 			case .delegate:
@@ -116,32 +116,19 @@ extension SetFactorThresholdFeature {
 		
 		var scrollView: some SwiftUI.View {
 			GeometryReader { geo in
-				let cellWidth = max(geo.size.width / 4, 50)
+				let cellWidth = max(geo.size.width / 4, 50) // must use `max`, will be `0` initially...
 				let contentMarginX = (geo.size.width - cellWidth) / 2
 				ScrollView(.horizontal, showsIndicators: false) {
 					HStack(alignment: .top, spacing: 0) {
 						ForEach(store.options, id: \.self) { option in
 							VStack(alignment: .center, spacing: 0) {
-								Group {
-									if option == store.alreadySet {
-										Text("Current")
-											.font(.system(size: 10))
-											.padding(5)
-											.background(Color.app.gray4)
-											.mask(Capsule())
-									} else {
-										Spacer()
-									}
-								}
-								.frame(width: cellWidth, height: 20)
-								
 								Text("\(option)").font(.system(size: 45))
 									.fontWeight(.bold)
 									.frame(width: cellWidth)
 									.foregroundStyle(option == store.threshold ? Color.app.blue1 : Color.app.gray5)
 								Group {
-									if option == store.recommended {
-										Text("Recommended")
+									if option == store.alreadySet || option == store.recommended  {
+										Text(option == store.alreadySet ? "Current" : "Recommended")
 											.font(.system(size: 10))
 											.padding(5)
 											.background(Color.app.gray4)
@@ -161,7 +148,7 @@ extension SetFactorThresholdFeature {
 							Color.clear.preference(
 								key: ViewOffsetKey.self,
 								value: -$0.frame(
-									in: .named("scroll")
+									in: .named(coordinateSpaceScrollView)
 								)
 								.origin.x
 							)
@@ -173,10 +160,11 @@ extension SetFactorThresholdFeature {
 						send(.changedThreshold(Int(CGFloat(poistionX / cellWidth).rounded())))
 					}
 				}
-				.coordinateSpace(name: "scroll")
+				.coordinateSpace(name: coordinateSpaceScrollView)
 				.contentMargins(contentMarginX)
 			}
 		}
+		private let coordinateSpaceScrollView = "coordinateSpaceScrollView"
 	}
 }
 
