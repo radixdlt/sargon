@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Alexander Cyon on 2024-06-07.
 //
@@ -26,9 +26,9 @@ public struct SetFactorThresholdFeature {
 		public var options: [FactorThreshold] {
 			var options: [FactorThreshold] = [.any, .all]
 			let exceeding1 = UInt8(10 - 1)
-//			if exceeding1 > 1 {
-				options.append(contentsOf: (1..<exceeding1).map(FactorThreshold.threshold))
-//			}
+			//			if exceeding1 > 1 {
+			options.append(contentsOf: (1..<exceeding1).map(FactorThreshold.threshold))
+			//			}
 			return options
 		}
 		
@@ -70,49 +70,55 @@ extension SetFactorThresholdFeature {
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
-		public static let cellWidth: CGFloat = 70
 		public var body: some SwiftUI.View {
 			VStack(alignment: .center) {
 				Text("Choose the number of security factors required for \(store.role.title)")
 				GeometryReader { geo in
-					ScrollViewReader { scrollProxy in
-						ScrollView(.horizontal) {
-							LazyHGrid(rows: [GridItem(.fixed(150))], content: {
-								ForEach(store.options, id: \.self) { option in
-									Button.init(action: {
-										scrollProxy.scrollTo(option, anchor: .center)
-									}, label: {
-										VStack {
-											Text("\(option)").font(.largeTitle)
-												.fontWeight(.bold)
-												.foregroundStyle(option == store.threshold ? Color.app.blue1 : Color.app.gray5)
-											if option == store.recommended {
-												Text("Recommended")
-											}
+					let cellWidth = geo.size.width / 4
+					let contentMarginX = (geo.size.width - cellWidth) / 2
+					ScrollView(.horizontal, showsIndicators: false) {
+						HStack(alignment: .top, spacing: 0) {
+							ForEach(store.options, id: \.self) { option in
+								VStack(alignment: .center, spacing: 0) {
+									Text("\(option)").font(.system(size: 45))
+										.fontWeight(.bold)
+										.frame(width: cellWidth)
+										.foregroundStyle(option == store.threshold ? Color.app.blue1 : Color.app.gray5)
+									Group {
+										if option == store.recommended {
+											Text("Recommended")
+												.font(.system(size: 10))
+												.padding(5)
+												.background(Color.app.gray4)
+												.mask(Capsule())
+										} else {
+											Spacer()
 										}
-									})
-									.buttonStyle(.plain)
-									.id(option)
-									.frame(width: Self.cellWidth)
+									}
+									.frame(width: cellWidth, height: 30)
 								}
-							})
-							.padding(.leading, (geo.size.width - Self.cellWidth) / 2)
-							.background(
-								GeometryReader {
-									Color.clear.preference(
-										key: ViewOffsetKey.self,
-										value: -$0.frame(
-											in: .named("scroll")
-										)
-										.origin.x
-									)
-								}
-							)
-							.onPreferenceChange(ViewOffsetKey.self) {
-								send(.changedThreshold(Int($0 / Self.cellWidth)))
+								.id(option)
+								.frame(width: cellWidth)
 							}
-						}.coordinateSpace(name: "scroll")
+						}
+						.background(
+							GeometryReader {
+								Color.clear.preference(
+									key: ViewOffsetKey.self,
+									value: -$0.frame(
+										in: .named("scroll")
+									)
+									.origin.x
+								)
+							}
+						)
+						.onPreferenceChange(ViewOffsetKey.self) {
+							let poistionX = contentMarginX + $0
+							send(.changedThreshold(Int(CGFloat(poistionX / cellWidth).rounded())))
+						}
 					}
+					.coordinateSpace(name: "scroll")
+					.contentMargins(contentMarginX)
 				}
 				
 				Text("Use \(store.threshold) of your security factors to \(store.role.action)")
