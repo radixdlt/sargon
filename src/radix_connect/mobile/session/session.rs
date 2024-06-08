@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub struct Session {
     pub id: SessionID,
     pub origin: SessionOrigin,
-    pub encryption_key: Exactly32Bytes,
+    pub encryption_key: SymmetricKey,
     // TBA: possibly will contain also the callback path
 }
 

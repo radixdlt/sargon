@@ -19,7 +19,6 @@ pub struct PbHkdfSha256 {}
 
 impl PbHkdfSha256 {
     pub fn hkdf_key_agreement(
-        &self,
         ikm: impl AsRef<[u8]>,
         salt: Option<&[u8]>,
         info: Option<&[u8]>,
@@ -49,7 +48,7 @@ impl VersionedPasswordBasedKeyDerivation for PbHkdfSha256 {
     fn kdf(&self, password: impl AsRef<str>) -> Exactly32Bytes {
         // Input Key Material
         let ikm = password.as_ref().bytes().collect::<Vec<u8>>();
-        self.hkdf_key_agreement(&ikm, None, None)
+        Self::hkdf_key_agreement(&ikm, None, None)
     }
 }
 

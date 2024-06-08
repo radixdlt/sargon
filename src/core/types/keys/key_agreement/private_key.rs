@@ -1,11 +1,12 @@
 use crate::prelude::*;
 use crypto::keys::x25519::SecretKey as X25519PrivateKey;
-use hkdf::Hkdf;
-use k256::sha2::Sha256;
+use crypto::keys::x25519::SharedSecret;
 
 #[derive(derive_more::Debug)]
 #[debug("{}", self.to_hex())]
 pub struct KeyAgreementPrivateKey(X25519PrivateKey);
+
+pub type KeyAgreementSharedSecret = SharedSecret;
 
 impl KeyAgreementPrivateKey {
     pub fn generate() -> Result<Self> {
@@ -16,22 +17,11 @@ impl KeyAgreementPrivateKey {
         self.0.public_key().into()
     }
 
-    pub fn hkdf_key_agreement(
+    pub fn shared_secret_from_key_agreement(
         &self,
         other: &KeyAgreementPublicKey,
-        salt: impl AsRef<[u8]>,
-        info: impl AsRef<[u8]>,
-    ) -> Result<SymmetricKey> {
-        let shared_secret = self.0.diffie_hellman(&other.0).to_bytes();
-        let mut symmetric_key = [0u8; 32]; // 32-byte buffer for the symmetric key
-
-        let hkdf = Hkdf::<Sha256>::new(Some(salt.as_ref()), &shared_secret);
-        hkdf.expand(info.as_ref(), &mut symmetric_key)
-            .map_err(|err| CommonError::HkdfExpandFailed {
-                underlying: err.to_string(),
-            })?;
-
-        Ok(SymmetricKey::from(&symmetric_key))
+    ) -> KeyAgreementSharedSecret {
+        self.0.diffie_hellman(&other.secret_magic)
     }
 }
 
@@ -151,6 +141,16 @@ mod tests {
              KeyAgreementPublicKey::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned())
              .unwrap()
         );
+    }
+
+    #[test]
+    fn shared_secret_from_key_agreement() {
+        let sample_1 = SUT::sample();
+        let other_pb_key = SUT::sample_other().public_key();
+
+        let shared_secret =
+            sample_1.shared_secret_from_key_agreement(&other_pb_key);
+        todo!("Add test")
     }
 
     #[test]
