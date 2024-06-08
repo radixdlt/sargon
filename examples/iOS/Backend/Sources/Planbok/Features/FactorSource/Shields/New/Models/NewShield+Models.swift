@@ -16,6 +16,9 @@ public enum Role: Sendable, Hashable {
 public struct Factor: Hashable, Sendable, Identifiable {
 	public let id = UUID()
 	public var factorSource: FactorSource?
+	public init(factorSource: FactorSource? = nil) {
+		self.factorSource = factorSource
+	}
 }
 
 public typealias Factors = IdentifiedArrayOf<Factor>

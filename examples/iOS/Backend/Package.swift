@@ -18,7 +18,7 @@ let package = Package(
 		.package(name: "Sargon", path: "../../.."),
 		.package(
 			url: "https://github.com/pointfreeco/swift-composable-architecture",
-			from: "1.10.4"),
+			from: "1.11.0"),
 		.package(
 			url: "https://github.com/tgrapperon/swift-dependencies-additions",
 			from: "1.0.2"),

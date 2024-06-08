@@ -18,14 +18,14 @@ public struct PickFactorSourceFeature {
 		
         @SharedReader(.factorSources) var factorSources
 		@Shared(.newShieldDraft) var __newShieldDraft
-		public var pickedFactor: Factor? {
-			get {
-				__newShieldDraft.pendingFactor
-			}
-			set {
-				__newShieldDraft.pendingFactor = newValue
-			}
-		}
+//		public var pickedFactorID: Factor.ID? {
+//			get {
+//				__newShieldDraft.pendingFactorID
+//			}
+//			set {
+//				__newShieldDraft.pendingFactorID = newValue
+//			}
+//		}
 		public func isFactorSourceAvailable(id: FactorSourceID) -> Bool {
 			__newShieldDraft.usedFactorSources.contains(where: { $0.id == id }) == false
 		}
@@ -59,7 +59,7 @@ public struct PickFactorSourceFeature {
                 else {
                     return .none
                 }
-                state.pickedFactor?.factorSource = factor
+				state.__newShieldDraft.pickedFactorSource(factor, role: state.role)
                 return .send(.delegate(.done))
                 
             case let .view(.tappedFactorSource(id)):

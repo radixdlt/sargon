@@ -16,10 +16,15 @@ public struct RoleFactorsFeature {
 	public struct State: Equatable {
 		@SharedReader(.factorSources) var allInProfile
         @Shared(.newShieldDraft) var __newShieldDraft
-
+		
+		public var thresholdFactorsBuilder: FactorsBuilderFeature.State
+		public var overrideFactorsBuilder: FactorsBuilderFeature.State
+		
 		public let role: Role
 		public init(role: Role) {
 			self.role = role
+			self.thresholdFactorsBuilder = FactorsBuilderFeature.State(listKind: .threshold, role: role)
+			self.overrideFactorsBuilder = FactorsBuilderFeature.State(listKind: .override, role: role)
 		}
 
 		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
@@ -36,28 +41,14 @@ public struct RoleFactorsFeature {
 				matrixOfFactorsForRole.threshold = newValue
 			}
 		}
-		public var thresholdFactors: Factors {
+
+
+		public var pickedFactorID: Factor.ID? {
 			get {
-				matrixOfFactorsForRole.thresholdFactors
+				__newShieldDraft.pendingFactorID
 			}
 			set {
-				matrixOfFactorsForRole.thresholdFactors = newValue
-			}
-		}
-		public var overrideFactors: Factors {
-			get {
-				matrixOfFactorsForRole.overrideFactors
-			}
-			set {
-				matrixOfFactorsForRole.overrideFactors = newValue
-			}
-		}
-		public var pickedFactor: Factor? {
-			get {
-				__newShieldDraft.pendingFactor
-			}
-			set {
-				__newShieldDraft.pendingFactor = newValue
+				__newShieldDraft.pendingFactorID = newValue
 			}
 		}
 	}
@@ -68,59 +59,50 @@ public struct RoleFactorsFeature {
 		@CasePathable
 		public enum ViewAction {
 			case confirmButtonTapped
-			case pickButtonTapped
-			case changeThresholdButtonTapped
-			case thresholdFactorsChanged(Factors)
-			case overrideFactorsChanged(Factors)
-            case onPickedFactorChanged(old: Factor?, new: Factor?)
         }
         
         public enum DelegateAction {
 			case `continue`(role: Role)
+			
 			case pickFactor(role: Role)
 			case setThreshold(role: Role)
         }
+		
         
         case view(ViewAction)
 		case delegate(DelegateAction)
+		
+		case thresholdFactorsBuilder(FactorsBuilderFeature.Action)
+		case overrideFactorsBuilder(FactorsBuilderFeature.Action)
+		
 	}
 	
 	public var body: some ReducerOf<Self> {
+		Scope(state: \.thresholdFactorsBuilder, action: \.thresholdFactorsBuilder) {
+			FactorsBuilderFeature()
+		}
+		Scope(state: \.overrideFactorsBuilder, action: \.overrideFactorsBuilder) {
+			FactorsBuilderFeature()
+		}
 		Reduce { state, action in
 			switch action {
 				
+				
 			case .view(.confirmButtonTapped):
 				return .send(.delegate(.continue(role: state.role)))
-				
-			case .view(.pickButtonTapped):
-				return .send(.delegate(.pickFactor(role: state.role)))
-				
-			case .view(.changeThresholdButtonTapped):
-				return .send(.delegate(.setThreshold(
-					role: state.role
-				)))
-				
-			case let .view(.thresholdFactorsChanged(new)):
-				state.thresholdFactors = new
-				return .none
-				
-			case let .view(.overrideFactorsChanged(new)):
-				state.overrideFactors = new
-				return .none
                 
-            case let .view(.onPickedFactorChanged(old, new)):
-                guard let old, let new else { return .none }
-                if state.thresholdFactors.contains(old) {
-                    state.thresholdFactors[id: new.id] = new
-                } else if state.overrideFactors.contains(old) {
-                    state.overrideFactors[id: new.id] = new
-                }
-                // dont forget to nil it!
-                state.pickedFactor = nil
-                return .none
-                
-            case .delegate:
-                return .none
+			case .thresholdFactorsBuilder(.delegate(.pickFactor(let role))), .overrideFactorsBuilder(.delegate(.pickFactor(let role))):
+				return .send(.delegate(.pickFactor(role: role)))
+				
+			case let .thresholdFactorsBuilder(.delegate(.setThreshold(role))):
+				return .send(.delegate(.setThreshold(role: role)))
+				
+			case .thresholdFactorsBuilder:
+				return .none
+			case .overrideFactorsBuilder:
+				return .none
+			case .delegate:
+				return .none
 			}
 		}
 	}
@@ -146,42 +128,15 @@ extension RoleFactorsFeature {
 					Text("These factors are required to \(store.role.actionDetailed)")
 						.foregroundStyle(Color.app.gray2)
 					
-					FactorsBuilderView(
-						factors: $store.thresholdFactors.sending(\.view.thresholdFactorsChanged),
-						factorThreshold: store.threshold,
-						title: "Threshold Factors",
-						titleAction: {
-							log.info("Threshold factors rule!")
-						},
-						changeThresholdAction: {
-							send(.changeThresholdButtonTapped)
-						},
-						pickAction: {
-							send(.pickButtonTapped)
-						}
-					)
-					
-					FactorsBuilderView(
-						factors: $store.overrideFactors.sending(\.view.overrideFactorsChanged),
-						factorThreshold: .any,
-						title: "Override Factors",
-						titleAction: {
-							log.info("Override factors are good.")
-						},
-						changeThresholdAction: nil,
-						pickAction: {
-							send(.pickButtonTapped)
-						}
-					)
+					FactorsBuilderFeature.View(store: store.scope(state: \.thresholdFactorsBuilder, action: \.thresholdFactorsBuilder))
+					FactorsBuilderFeature.View(store: store.scope(state: \.overrideFactorsBuilder, action: \.overrideFactorsBuilder))
+
 					
 					Button("Confirm") {
 						send(.confirmButtonTapped)
 					}
 					.buttonStyle(.borderedProminent)
 				}
-                .onChange(of: store.pickedFactor) { (oldState: Factor?, newState: Factor?) in
-                    send(.onPickedFactorChanged(old: oldState, new: newState))
-                }
 				.padding()
 			}
 		}

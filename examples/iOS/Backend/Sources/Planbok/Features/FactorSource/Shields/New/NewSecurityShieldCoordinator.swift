@@ -30,12 +30,12 @@ public struct NewSecurityShieldCoordinator {
 		
 		@Shared(.newShieldDraft) var __newShieldDraft
 		
-		public var pickedFactor: Factor? {
+		public var pickedFactorID: Factor.ID? {
 			get {
-				__newShieldDraft.pendingFactor
+				__newShieldDraft.pendingFactorID
 			}
 			set {
-				__newShieldDraft.pendingFactor = newValue
+				__newShieldDraft.pendingFactorID = newValue
 			}
 		}
 		
@@ -117,11 +117,8 @@ public struct NewSecurityShieldCoordinator {
                 return .none
                 
             case .destination(.dismiss):
-                if let pickedFactor = state.pickedFactor, pickedFactor.factorSource == nil {
-                    state.pickedFactor = nil
-                }
+				state.pickedFactorID = nil
                 return .none
-                
 
             case .destination:
                 return .none
