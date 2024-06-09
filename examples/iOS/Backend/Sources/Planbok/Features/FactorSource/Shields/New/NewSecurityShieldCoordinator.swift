@@ -21,14 +21,15 @@ public struct NewSecurityShieldCoordinator {
 	
 	@ObservableState
 	public struct State: Equatable {
-		
+		@Shared(.newShieldDraft) var __newShieldDraft
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
 		
-		public let preset: Shield?
 		public init(preset: Shield?) {
-			self.preset = preset
 			self.intro = IntroWhatIsShieldFeature.State()
+			if let preset {
+				__newShieldDraft = .init(preset: preset)				
+			}
 		}
 	}
 	

@@ -20,6 +20,13 @@ public struct MatrixOfFactorsForRole: Hashable, Sendable {
 		self.thresholdFactors = thresholdFactors
 		self.overrideFactors = overrideFactors
 	}
+	init<R>(roleWithFactors: R) where R: RoleFromDraft {
+		self.init(
+			role: R.role,
+			thresholdFactors: roleWithFactors.thresholdFactors.map { Factor.init(factorSource: $0) }.asIdentified(),
+			overrideFactors: roleWithFactors.overrideFactors.map { Factor.init(factorSource: $0) }.asIdentified()
+		)
+	}
 	var usedFactorSources: FactorSources {
 		var all: FactorSources = []
 		all.append(contentsOf: thresholdFactors.compactMap(\.factorSource))
@@ -35,6 +42,19 @@ public struct MatrixOfFactorsForRole: Hashable, Sendable {
 }
 
 public protocol RoleFromDraft {
+	
+	var thresholdFactors: [FactorSource] { get }
+	/**
+	 * How many threshold factors that must be used to perform some function with this role.
+	 */
+	var threshold: UInt16 { get }
+	/**
+	 * Overriding / Super admin / "sudo" / God / factors, **ANY**
+	 * single of these factor which can perform the function of this role,
+	 * disregarding of `threshold`.
+	 */
+	var overrideFactors: [FactorSource] { get }
+	
 	static var role: Role { get }
 	init(thresholdFactors: [FactorSource], threshold: UInt16, overrideFactors: [FactorSource])
 	init?(draft: MatrixOfFactorsForRole)
@@ -154,6 +174,13 @@ public struct NewShieldDraft: Hashable, Sendable {
 		self.primary = MatrixOfFactorsForRole(role: .primary)
 		self.recovery = MatrixOfFactorsForRole(role: .recovery)
 		self.confirmation = MatrixOfFactorsForRole(role: .confirmation)
+	}
+	
+	public init(preset: Shield) {
+		self.primary = .init(roleWithFactors: preset.matrixOfFactors.primaryRole)
+		self.recovery = .init(roleWithFactors: preset.matrixOfFactors.recoveryRole)
+		self.confirmation = .init(roleWithFactors: preset.matrixOfFactors.confirmationRole)
+		self.numberOfDaysUntilAutoConfirmation = UInt16(preset.numberOfEpochsUntilAutoConfirmation / 288)
 	}
 
 	public subscript(role: Role) -> MatrixOfFactorsForRole {
