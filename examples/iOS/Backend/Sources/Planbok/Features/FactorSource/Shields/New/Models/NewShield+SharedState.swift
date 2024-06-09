@@ -89,29 +89,4 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<N
 }
 
 
-//extension Observable {
-//	
-//	/// Uh, this is hacky!
-//	public func pickedPendingFactors() -> FactorSources {
-//        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
-//		@Shared(.overrideFactors) var overrideFactors = []
-//		
-//		var picked = FactorSources()
-//		func addFrom(_ factors: Factors?) {
-//			guard let factors else { return  }
-//			picked.append(contentsOf: factors.compactMap(\.factorSource))
-//		}
-//		addFrom(thresholdFactors)
-//		addFrom(overrideFactors)
-//		
-//		return picked
-//	}
-//	
-//	/// Uh, this is hacky!
-//	public func idsOfAllPicked() -> Set<FactorSource.ID> {
-//		let allPicked = pickedPendingFactors()
-//		return Set(allPicked.map(\.id))
-//	}
-//}
-
 

@@ -25,8 +25,6 @@ public struct SetFactorThresholdFeature {
 			
 			self.threshold = alreadySet
 		}
-		
-
 	
 		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
 			__newShieldDraft[role]
