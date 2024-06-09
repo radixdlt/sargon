@@ -40,6 +40,20 @@ public struct NewShieldDraft: Hashable, Sendable {
 	}
 	public var pendingFactorID: Factor.ID?
 	
+	public mutating func removeFactor(_ factor: Factor, role: Role) {
+		if factor.id == pendingFactorID {
+			pendingFactorID = nil // not really possible in UI, but prudent.
+		}
+		if self[role].thresholdFactors.contains(factor) {
+			self[role].thresholdFactors.remove(factor)
+			// Also decrease factor threshold if needed
+			if self[role].threshold.isGreaterThan(count: self[role].thresholdFactors.count) {
+				self[role].threshold.decrease()
+			}
+		} else if self[role].overrideFactors.contains(factor) {
+			self[role].overrideFactors.remove(factor)
+		}
+	}
 	public mutating func pickedFactorSource(_ factorSource: FactorSource, role: Role) {
 		guard let pendingFactorID else {
 			assertionFailure("Expected pending...")

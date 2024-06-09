@@ -126,7 +126,7 @@ public struct FactorsBuilderFeature {
 				return .send(.delegate(.pickFactor(role: state.role)))
 				
 			case let .view(.removeButtonTapped(toRemove)):
-				state.factors.remove(id: toRemove.id)
+				state.__newShieldDraft.removeFactor(toRemove, role: state.role)
 				return .none
 				
 			case .view(.changeThresholdButtonTapped):
