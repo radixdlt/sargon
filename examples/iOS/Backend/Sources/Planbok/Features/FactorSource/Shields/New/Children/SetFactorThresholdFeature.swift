@@ -182,7 +182,7 @@ extension Role {
 	public var title: String {
 		switch self {
 		case .primary: return "Signing"
-		case .recovery: return "Initiate Recovery"
+		case .recovery: return "Wallet lock & recovery"
 		case .confirmation: return "Confirm Recovery"
 		}
 	}

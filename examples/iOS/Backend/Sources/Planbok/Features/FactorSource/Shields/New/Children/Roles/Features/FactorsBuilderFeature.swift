@@ -101,8 +101,8 @@ public struct FactorsBuilderFeature {
 		}
 		
 		public enum DelegateAction {
-			case pickFactor(role: Role)
-			case setThreshold(role: Role)
+			case pickFactor
+			case setThreshold
 		}
 		
 		case view(ViewAction)
@@ -123,7 +123,7 @@ public struct FactorsBuilderFeature {
 		
 			case let .view(.pickFactorButtonTapped(factor)):
 				state.pickedFactorID = factor.id
-				return .send(.delegate(.pickFactor(role: state.role)))
+				return .send(.delegate(.pickFactor))
 				
 			case let .view(.removeButtonTapped(toRemove)):
 				state.__newShieldDraft.removeFactor(toRemove, role: state.role)
@@ -131,9 +131,7 @@ public struct FactorsBuilderFeature {
 				
 			case .view(.changeThresholdButtonTapped):
 				assert(state.mode == .threshold)
-				return .send(.delegate(.setThreshold(
-					role: state.role
-				)))
+				return .send(.delegate(.setThreshold))
 				
 			case let .view(.factorsChanged(new)):
 				state.factors = new

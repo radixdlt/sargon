@@ -11,13 +11,7 @@ import ComposableArchitecture
 
 @Reducer
 public struct NewSecurityShieldCoordinator {
-	
-	@Reducer(state: .equatable)
-	public enum Destination {
-		case pickFactorSourceCoordinator(PickFactorSourceCoordinator)
-		case setFactorThreshold(SetFactorThresholdFeature)
-	}
-	
+		
 	@Reducer(state: .equatable)
 	public enum Path {
 		case roleFactors(RoleFactorsFeature)
@@ -30,8 +24,6 @@ public struct NewSecurityShieldCoordinator {
 		
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
-	
-		@Presents var destination: Destination.State?
 		
 		public let preset: Shield?
 		public init(preset: Shield?) {
@@ -45,7 +37,6 @@ public struct NewSecurityShieldCoordinator {
 		case path(StackAction<Path.State, Path.Action>)
 		case intro(IntroWhatIsShieldFeature.Action)
 	
-		case destination(PresentationAction<Destination.Action>)
 		case delegate(DelegateAction)
 		
 		public enum DelegateAction {
@@ -81,19 +72,7 @@ public struct NewSecurityShieldCoordinator {
 			switch action {
 			case .intro(.delegate(.continue)):
 				return next(&state)
-				
-			case let .path(.element(id: _, action: .roleFactors(.delegate(.pickFactor(role))))):
-				state.destination = .pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(
-					role: role
-				))
-				return .none
-				
-			case let .path(.element(id: _, action: .roleFactors(.delegate(.setThreshold(role))))):
-				state.destination = .setFactorThreshold(SetFactorThresholdFeature.State(
-					role: role
-				))
-				return .none
-				
+
 			case let .path(.element(id: _, action: .roleFactors(.delegate(.continue(role))))):
 				return next(lastRole: role, &state)
 				
@@ -102,18 +81,7 @@ public struct NewSecurityShieldCoordinator {
 				
 			case .path:
 				return .none
-                
-			case .destination(.presented(.setFactorThreshold(.delegate(.confirm)))):
-				state.destination = nil
-				return .none
-				
-			case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
-                state.destination = nil
-                return .none
 
-            case .destination:
-                return .none
-				
 			case .intro:
 				return .none
 			case .delegate:
@@ -122,7 +90,6 @@ public struct NewSecurityShieldCoordinator {
 			}
 		}
 		.forEach(\.path, action: \.path)
-		.ifLet(\.$destination, action: \.destination)
 	}
 }
 
@@ -146,17 +113,6 @@ extension NewSecurityShieldCoordinator {
 				case let .nameShield(store):
 					NameNewShieldFeature.View(store: store)
 				}
-			}
-			.sheet(
-				item: $store.scope(state: \.destination?.pickFactorSourceCoordinator, action: \.destination.pickFactorSourceCoordinator)
-			) { store in
-				PickFactorSourceCoordinator.View(store: store)
-			}
-			.sheet(
-				item: $store.scope(state: \.destination?.setFactorThreshold, action: \.destination.setFactorThreshold)
-			) { store in
-				SetFactorThresholdFeature.View(store: store)
-					.presentationDetents([.medium])
 			}
 		}
 	}

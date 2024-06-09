@@ -11,6 +11,14 @@ import ComposableArchitecture
 
 @Reducer
 public struct RoleFactorsFeature {
+	
+	
+	@Reducer(state: .equatable)
+	public enum Destination {
+		case pickFactorSourceCoordinator(PickFactorSourceCoordinator)
+		case setFactorThreshold(SetFactorThresholdFeature)
+		case setDaysUntilAutoConfirm(SetDaysUntilAutoConfirm)
+	}
 
 	@ObservableState
 	public struct State: Equatable {
@@ -18,6 +26,13 @@ public struct RoleFactorsFeature {
 		public var thresholdFactorsBuilder: FactorsBuilderFeature.State
 		public var overrideFactorsBuilder: FactorsBuilderFeature.State
 		public let role: Role
+		
+		@Presents var destination: Destination.State?
+		
+		public var daysUntilAutoConfirm: UInt16 {
+			newShieldDraft.numberOfDaysUntilAutoConfirmation
+		}
+		
 		public init(role: Role) {
 			self.role = role
 			self.thresholdFactorsBuilder = FactorsBuilderFeature.State(mode: .threshold, role: role)
@@ -35,14 +50,14 @@ public struct RoleFactorsFeature {
 		@CasePathable
 		public enum ViewAction {
 			case confirmButtonTapped
+			case changeDaysUntilAutoConfirmButtonTapped
         }
         
         public enum DelegateAction {
 			case `continue`(role: Role)
-			
-			case pickFactor(role: Role)
-			case setThreshold(role: Role)
         }
+		
+		case destination(PresentationAction<Destination.Action>)
 		
         
         case view(ViewAction)
@@ -63,24 +78,51 @@ public struct RoleFactorsFeature {
 		Reduce { state, action in
 			switch action {
 				
+			case .view(.changeDaysUntilAutoConfirmButtonTapped):
+				state.destination = .setDaysUntilAutoConfirm(SetDaysUntilAutoConfirm.State())
+				return .none
 				
 			case .view(.confirmButtonTapped):
 				return .send(.delegate(.continue(role: state.role)))
                 
-			case .thresholdFactorsBuilder(.delegate(.pickFactor(let role))), .overrideFactorsBuilder(.delegate(.pickFactor(let role))):
-				return .send(.delegate(.pickFactor(role: role)))
+			case .thresholdFactorsBuilder(.delegate(.pickFactor)), .overrideFactorsBuilder(.delegate(.pickFactor)):
+				state.destination = .pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(role: state.role))
+				return .none
 				
-			case let .thresholdFactorsBuilder(.delegate(.setThreshold(role))):
-				return .send(.delegate(.setThreshold(role: role)))
 				
+			case .thresholdFactorsBuilder(.delegate(.setThreshold)):
+				state.destination = .setFactorThreshold(SetFactorThresholdFeature.State(
+					role: state.role
+				))
+				return .none
+				
+
+			case .destination(.presented(.setFactorThreshold(.delegate(.confirm)))):
+				state.destination = nil
+				return .none
+				
+			case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
+				state.destination = nil
+				return .none
+				
+			case .destination(.presented(.setDaysUntilAutoConfirm(.delegate(.done)))):
+				state.destination = nil
+				return .none
+
 			case .thresholdFactorsBuilder:
 				return .none
+		
 			case .overrideFactorsBuilder:
 				return .none
+				
+			case .destination:
+				return .none
+
 			case .delegate:
 				return .none
 			}
 		}
+		.ifLet(\.$destination, action: \.destination)
 	}
 }
 
@@ -107,6 +149,37 @@ extension RoleFactorsFeature {
 					FactorsBuilderFeature.View(store: store.scope(state: \.thresholdFactorsBuilder, action: \.thresholdFactorsBuilder))
 					FactorsBuilderFeature.View(store: store.scope(state: \.overrideFactorsBuilder, action: \.overrideFactorsBuilder))
 
+					if store.role == .recovery {
+						Button(action: {
+							send(.changeDaysUntilAutoConfirmButtonTapped)
+						}, label: {
+							HStack {
+								Image(systemName: "lock")
+								VStack {
+									Text("Wallet Lock")
+									Text("Lock duration")
+										.font(.system(size: 14))
+										.foregroundStyle(Color.app.gray3)
+								}
+								Spacer()
+								Text("\(store.daysUntilAutoConfirm) days")
+									.fontWeight(.bold)
+									.foregroundStyle(Color.app.blue2)
+							}
+							.padding()
+							.multilineTextAlignment(.leading)
+							.foregroundStyle(Color.app.gray1)
+							.overlay(
+								RoundedRectangle(cornerRadius: 15)
+									.inset(by: 1)
+									.stroke(.gray, lineWidth: 1)
+							)
+							.frame(maxWidth: .infinity)
+							.padding()
+						})
+						.buttonStyle(.plain)
+						.frame(maxWidth: .infinity)
+					}
 					
 					Button("Confirm") {
 						send(.confirmButtonTapped)
@@ -115,6 +188,22 @@ extension RoleFactorsFeature {
 					.disabled(!store.canProceed)
 				}
 				.padding()
+			}
+			.sheet(
+				item: $store.scope(state: \.destination?.setDaysUntilAutoConfirm, action: \.destination.setDaysUntilAutoConfirm)
+			) { store in
+				SetDaysUntilAutoConfirm.View(store: store)
+			}
+			.sheet(
+				item: $store.scope(state: \.destination?.pickFactorSourceCoordinator, action: \.destination.pickFactorSourceCoordinator)
+			) { store in
+				PickFactorSourceCoordinator.View(store: store)
+			}
+			.sheet(
+				item: $store.scope(state: \.destination?.setFactorThreshold, action: \.destination.setFactorThreshold)
+			) { store in
+				SetFactorThresholdFeature.View(store: store)
+					.presentationDetents([.medium])
 			}
 		}
 	}
