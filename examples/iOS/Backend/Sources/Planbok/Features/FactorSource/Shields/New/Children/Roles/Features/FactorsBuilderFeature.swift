@@ -224,7 +224,7 @@ extension FactorsBuilderFeature {
 					.inset(by: 1)
 					.stroke(.gray, lineWidth: 1)
 			)
-			.padding()
+			.padding(.horizontal)
 			.buttonStyle(.plain)
 		}
 	}

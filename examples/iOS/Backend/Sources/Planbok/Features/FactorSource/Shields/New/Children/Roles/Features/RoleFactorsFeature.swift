@@ -140,7 +140,7 @@ extension RoleFactorsFeature {
 		
 		public var body: some SwiftUI.View {
 			ScrollView {
-				VStack(alignment: .center, spacing: 10) {
+				VStack(alignment: .center, spacing: 20) {
 					Text("\(store.role.title)").font(.largeTitle)
 					
 					Text("These factors are required to \(store.role.actionDetailed)")

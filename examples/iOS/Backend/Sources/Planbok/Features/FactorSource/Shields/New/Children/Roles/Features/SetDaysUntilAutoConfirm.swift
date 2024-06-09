@@ -81,21 +81,25 @@ extension SetDaysUntilAutoConfirm {
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("Number of days until auto confirm")
-					.font(.title)
+				Text("Number of days")
+					.font(.largeTitle)
+				
+				Spacer()
 				
 				Text("Will auto confirm after \(store.daysUntilAutoConfirm.description) days.")
 				
 				LabeledTextField(label: "#Days", text: $store.daysUntilAutoConfirm.description.sending(\.view.numberOfDaysChanged))
 					.keyboardType(.numberPad)
 				
+				Spacer()
+				
 				Button("Confirm") {
 					send(.confirmButtonTapped)
 				}
 				.disabled(store.daysFromString == nil)
+				.foregroundStyle(Color.app.white)
 			}
-			.foregroundStyle(Color.app.blue1)
-			.navigationTitle("Set Days")
+			.foregroundStyle(Color.app.gray1)
 			.padding()
 		}
 	}
