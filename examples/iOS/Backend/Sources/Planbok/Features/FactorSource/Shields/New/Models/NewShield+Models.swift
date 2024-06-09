@@ -23,10 +23,8 @@ public struct Factor: Hashable, Sendable, Identifiable {
 
 public typealias Factors = IdentifiedArrayOf<Factor>
 
-
-
-
 public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
+	
 	public func isGreaterThan(count rhs: Int) -> Bool {
 		switch self {
 		case .any: return false
@@ -34,6 +32,7 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 		case let .threshold(lhsThreshold): return lhsThreshold > (rhs - 1)
 		}
 	}
+	
 	public mutating func decrease() {
 		switch self {
 		case .any: break
@@ -48,7 +47,7 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 	
 	case any
 	case all
-	case threshold(UInt8)
+	case threshold(UInt16)
 	
 	public var description: String {
 		switch self {

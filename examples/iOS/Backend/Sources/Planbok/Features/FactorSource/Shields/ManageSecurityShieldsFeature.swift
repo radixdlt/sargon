@@ -53,6 +53,10 @@ public struct ManageSecurityShieldsFeature {
 				state.destination = .newSecurityShield(NewSecurityShieldCoordinator.State(preset: preset))
 				return .none
 				
+			case .destination(.presented(.newSecurityShield(.delegate(.done)))):
+				state.destination = nil
+				return .none
+				
 			case .destination:
 				return .none
 			}
@@ -123,10 +127,16 @@ public struct ShieldCardView: SwiftUI.View {
 	public let shield: Shield
 	public var body: some SwiftUI.View {
 		HStack {
-			Image(systemName: "lock.shield").resizable()
+			Image(systemName: "lock.shield")
+				.resizable()
 				.imageScale(.large)
-				.frame(idealHeight: 100)
+				.aspectRatio(contentMode: .fit)
+				.frame(idealHeight: 50)
 			Text("\(shield.metadata.displayName)")
+				.font(.title2)
+			Spacer()
 		}
+		.foregroundStyle(Color.app.blue1)
+		.padding()
 	}
 }

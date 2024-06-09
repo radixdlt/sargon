@@ -26,7 +26,7 @@ public struct SetFactorThresholdFeature {
 			self.threshold = alreadySet
 		}
 	
-		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
+		public var matrixOfFactorsForRole: MatrixOfFactorsForRole {
 			__newShieldDraft[role]
 		}
 		
@@ -38,7 +38,7 @@ public struct SetFactorThresholdFeature {
 			guard numberOfFactors > 0 else {
 				return options
 			}
-			let exceeding1 = UInt8(numberOfFactors - 1)
+			let exceeding1 = UInt16(numberOfFactors - 1)
 			if exceeding1 > 1 {
 				options.append(contentsOf: (1...exceeding1).map(FactorThreshold.threshold))
 			}

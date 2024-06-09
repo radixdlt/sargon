@@ -14,14 +14,18 @@ public struct RoleFactorsFeature {
 
 	@ObservableState
 	public struct State: Equatable {
+		@Shared(.newShieldDraft) var newShieldDraft
 		public var thresholdFactorsBuilder: FactorsBuilderFeature.State
 		public var overrideFactorsBuilder: FactorsBuilderFeature.State
-		
 		public let role: Role
 		public init(role: Role) {
 			self.role = role
 			self.thresholdFactorsBuilder = FactorsBuilderFeature.State(mode: .threshold, role: role)
 			self.overrideFactorsBuilder = FactorsBuilderFeature.State(mode: .override, role: role)
+		}
+		
+		var canProceed: Bool {
+			newShieldDraft.isValidRole(role)
 		}
 	}
 	
@@ -108,6 +112,7 @@ extension RoleFactorsFeature {
 						send(.confirmButtonTapped)
 					}
 					.buttonStyle(.borderedProminent)
+					.disabled(!store.canProceed)
 				}
 				.padding()
 			}

@@ -39,7 +39,7 @@ public struct FactorsBuilderFeature {
 		}
 
 		
-		public var matrixOfFactorsForRole: NewShieldDraft.MatrixOfFactorsForRole {
+		public var matrixOfFactorsForRole: MatrixOfFactorsForRole {
 			get { __newShieldDraft[role] }
 			set {
 				__newShieldDraft[role] = newValue

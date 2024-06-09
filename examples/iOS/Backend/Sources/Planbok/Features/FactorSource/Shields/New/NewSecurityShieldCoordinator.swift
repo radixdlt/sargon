@@ -21,7 +21,7 @@ public struct NewSecurityShieldCoordinator {
 	@Reducer(state: .equatable)
 	public enum Path {
 		case roleFactors(RoleFactorsFeature)
-		case nameShield(NameNewAccountFeature)
+		case nameShield(NameNewShieldFeature)
 	}
 	
 	
@@ -46,7 +46,11 @@ public struct NewSecurityShieldCoordinator {
 		case intro(IntroWhatIsShieldFeature.Action)
 	
 		case destination(PresentationAction<Destination.Action>)
+		case delegate(DelegateAction)
 		
+		public enum DelegateAction {
+			case done
+		}
 	}
 
 	
@@ -64,7 +68,7 @@ public struct NewSecurityShieldCoordinator {
 		if let nextRole  {
 			state.path.append(.roleFactors(RoleFactorsFeature.State(role: nextRole)))
 		} else {
-			state.path.append(.nameShield(NameNewAccountFeature.State(index: 0)))
+			state.path.append(.nameShield(NameNewShieldFeature.State()))
 		}
 		return .none
 	}
@@ -93,6 +97,9 @@ public struct NewSecurityShieldCoordinator {
 			case let .path(.element(id: _, action: .roleFactors(.delegate(.continue(role))))):
 				return next(lastRole: role, &state)
 				
+			case .path(.element(id: _, action: .nameShield(.delegate(.done)))):
+				return .send(.delegate(.done))
+				
 			case .path:
 				return .none
                 
@@ -109,6 +116,9 @@ public struct NewSecurityShieldCoordinator {
 				
 			case .intro:
 				return .none
+			case .delegate:
+				return .none
+				
 			}
 		}
 		.forEach(\.path, action: \.path)
@@ -134,7 +144,7 @@ extension NewSecurityShieldCoordinator {
 				case let .roleFactors(store):
 					RoleFactorsFeature.View(store: store)
 				case let .nameShield(store):
-					NameNewAccountFeature.View(store: store)
+					NameNewShieldFeature.View(store: store)
 				}
 			}
 			.sheet(
