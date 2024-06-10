@@ -75,16 +75,13 @@ pub fn decimal_formatted_plain(
 /// extern crate sargon;
 /// use sargon::prelude::*;
 ///
-/// assert!(new_decimal_from_f32(208050.17).is_ok());
+/// assert!(new_decimal_from_f32(208050.17).to_string() == "208050.17");
 ///
-/// assert_eq!(
-///     new_decimal_from_f32(f32::MIN_POSITIVE),
-///     Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
-/// );
+/// assert!(new_decimal_from_f32(f32::MIN_POSITIVE).to_string() == "0");
 /// ```
 #[uniffi::export]
-pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
-    value.try_into()
+pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
+    value.into()
 }
 
 /// Creates a new `Decimal192` from a f64 float. Will
@@ -97,10 +94,7 @@ pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
 ///
 /// assert!(new_decimal_from_f64(208050.17).is_ok());
 ///
-/// assert_eq!(
-///     new_decimal_from_f64(f64::MIN_POSITIVE),
-///     Err(CommonError::DecimalOverflow { bad_value: f64::MIN_POSITIVE.to_string() })
-/// );
+/// assert!(new_decimal_from_f64(f64::MIN_POSITIVE).is_ok());
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f64(value: f64) -> Result<Decimal192> {
@@ -480,17 +474,12 @@ mod uniffi_tests {
         let f: f32 = 208050.17;
         assert_eq!(f.to_string(), "208050.17");
         let sut = new_decimal_from_f32(f);
-        assert_eq!(sut.unwrap().to_string(), "208050.17");
+        assert_eq!(sut.to_string(), "208050.17");
         assert_eq!(
             SUT::try_from(f32::MAX).unwrap().to_string(),
             "340282350000000000000000000000000000000"
         );
-        assert_eq!(
-            SUT::try_from(f32::MIN_POSITIVE),
-            Err(CommonError::DecimalOverflow {
-                bad_value: f32::MIN_POSITIVE.to_string()
-            })
-        );
+        assert_eq!(SUT::try_from(f32::MIN_POSITIVE).unwrap().to_string(), "0");
     }
 
     #[test]
@@ -504,10 +493,8 @@ mod uniffi_tests {
             "340282346638528860000000000000000000000"
         );
         assert_eq!(
-            SUT::try_from(f32::MIN_POSITIVE as f64),
-            Err(CommonError::DecimalOverflow {
-                bad_value: (f32::MIN_POSITIVE as f64).to_string()
-            })
+            SUT::try_from(f32::MIN_POSITIVE as f64).unwrap().to_string(),
+            "0"
         );
     }
 
