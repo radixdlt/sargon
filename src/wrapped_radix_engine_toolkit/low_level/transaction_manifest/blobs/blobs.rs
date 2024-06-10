@@ -6,6 +6,27 @@ pub struct Blobs {
     pub(crate) secret_magic: BlobsSecretMagic,
 }
 
+impl Serialize for Blobs {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.secret_magic.secret_magic.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Blobs {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        let secret_magic: BlobsSecretMagic =
+            Vec::<Blob>::deserialize(deserializer).unwrap().into();
+        Ok(secret_magic.into())
+    }
+}
+
 impl From<BlobsSecretMagic> for Blobs {
     fn from(value: BlobsSecretMagic) -> Self {
         Self {

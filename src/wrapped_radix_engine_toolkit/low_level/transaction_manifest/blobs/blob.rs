@@ -1,14 +1,38 @@
 use crate::prelude::*;
 
 /// Blob is a wrapper a bag of bytes
-#[derive(Clone, PartialEq, Eq, Debug, derive_more::Display, uniffi::Record)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    DeserializeFromStr,
+    SerializeDisplay,
+    uniffi::Record,
+    derive_more::Display,
+    derive_more::Debug,
+)]
+#[display("{}", self.to_hex())]
+#[debug("{}", self.to_hex())]
 pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,
+}
+
+impl FromStr for Blob {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let bytes: BagOfBytes = s.parse()?;
+        Ok(bytes.into())
+    }
 }
 
 impl Blob {
     pub fn to_hex(&self) -> String {
         self.secret_magic.to_hex()
+    }
+
+    pub fn from_hex(s: &str) -> Result<Self> {
+        Self::from_str(s)
     }
 }
 
@@ -119,6 +143,15 @@ mod tests {
     fn from_vec() {
         let vec = vec![0xde, 0xad];
         assert_eq!(SUT::from(&vec).to_string(), "dead");
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let model = SUT::sample();
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"),
+        );
     }
 }
 

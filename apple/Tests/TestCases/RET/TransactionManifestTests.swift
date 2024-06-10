@@ -20,7 +20,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
 
     func test_manifest_blobs() {
 		let manifest = TransactionManifest.sample
-        XCTAssertNoDifference(manifest.blobs, [])
+        XCTAssertNoDifference(manifest.blobs, Blobs.sample)
 	}
     
     func test_involved_resource_addresses() {
