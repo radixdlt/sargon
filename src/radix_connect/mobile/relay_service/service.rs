@@ -97,7 +97,7 @@ impl Service {
     pub async fn send_session_handshake_response(
         &self,
         session_id: SessionID,
-        public_key: DiffieHellmanPublicKey,
+        public_key: KeyAgreementPublicKey,
     ) -> Result<()> {
         let request = NetworkRequest::radix_connect_relay_request(
             Request::new_send_handshake_response(
@@ -371,7 +371,7 @@ mod tests {
 
         let req = service.send_session_handshake_response(
             session_id,
-            DiffieHellmanPublicKey::sample(),
+            KeyAgreementPublicKey::sample(),
         );
         let result = timeout(MAX, req).await.unwrap();
         assert!(result.is_err());
@@ -380,7 +380,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_send_session_handshake_response() {
         let mock_antenna = MockAntenna::with_spy(200, (), |request| {
-            let public_key = DiffieHellmanPublicKey::sample();
+            let public_key = KeyAgreementPublicKey::sample();
             let body = Request::new(
                 Method::SendHandshakeResponse,
                 SessionID::sample(),
@@ -409,7 +409,7 @@ mod tests {
 
         let req = service.send_session_handshake_response(
             session_id,
-            DiffieHellmanPublicKey::sample(),
+            KeyAgreementPublicKey::sample(),
         );
         let _ = timeout(MAX, req).await.unwrap();
     }

@@ -5,11 +5,11 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct SessionHandshakeRequest {
     #[serde_as(as = "DisplayFromStr")]
-    pub public_key: DiffieHellmanPublicKey,
+    pub public_key: KeyAgreementPublicKey,
 }
 
 impl SessionHandshakeRequest {
-    pub fn new(public_key: impl Into<DiffieHellmanPublicKey>) -> Self {
+    pub fn new(public_key: impl Into<KeyAgreementPublicKey>) -> Self {
         Self {
             public_key: public_key.into(),
         }
@@ -18,11 +18,11 @@ impl SessionHandshakeRequest {
 
 impl HasSampleValues for SessionHandshakeRequest {
     fn sample() -> Self {
-        Self::new(DiffieHellmanPublicKey::sample())
+        Self::new(KeyAgreementPublicKey::sample())
     }
 
     fn sample_other() -> Self {
-        Self::new(DiffieHellmanPublicKey::sample_other())
+        Self::new(KeyAgreementPublicKey::sample_other())
     }
 }
 

@@ -17,6 +17,21 @@ use k256::sha2::Sha256;
 #[display("{}", self.description())]
 pub struct PbHkdfSha256 {}
 
+impl PbHkdfSha256 {
+    pub fn hkdf_key_agreement(
+        ikm: impl AsRef<[u8]>,
+        salt: Option<&[u8]>,
+        info: Option<&[u8]>,
+    ) -> Exactly32Bytes {
+        let mut okm = [0u8; 32]; // 32-byte buffer for the symmetric key
+
+        let hkdf = Hkdf::<Sha256>::new(salt, ikm.as_ref());
+        hkdf.expand(info.unwrap_or(&[]), &mut okm).unwrap();
+
+        Exactly32Bytes::from(&okm)
+    }
+}
+
 impl VersionOfAlgorithm for PbHkdfSha256 {
     type Version = PasswordBasedKeyDerivationSchemeVersion;
 
@@ -33,11 +48,7 @@ impl VersionedPasswordBasedKeyDerivation for PbHkdfSha256 {
     fn kdf(&self, password: impl AsRef<str>) -> Exactly32Bytes {
         // Input Key Material
         let ikm = password.as_ref().bytes().collect::<Vec<u8>>();
-        let hk = Hkdf::<Sha256>::new(None, &ikm);
-
-        let mut okm = [0u8; 32];
-        hk.expand(&[], &mut okm).unwrap();
-        Exactly32Bytes::from(&okm)
+        Self::hkdf_key_agreement(&ikm, None, None)
     }
 }
 

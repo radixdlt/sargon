@@ -7,7 +7,10 @@ use super::*;
 const CONNECT_URL_PARAM_SESSION_ID: &str = "sessionId";
 const CONNECT_URL_PARAM_ORIGIN: &str = "origin";
 const CONNECT_URL_PARAM_INTERACTION_ID: &str = "interactionId";
+const CONNECT_URL_PARAM_PUBLIC_KEY: &str = "publicKey";
+const CONNECT_URL_PARAM_BROWSER: &str = "browser";
 const CONNECT_URL: &str = "https://d1rxdfxrfmemlj.cloudfront.net";
+const APP_SCHEME: &str = "radixWallet";
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
@@ -19,8 +22,10 @@ pub fn parse_mobile_connect_request(
             bad_value: url.to_owned(),
         }
     })?;
+
     if parsed_url.host_str() != connect_url.host_str()
         || parsed_url.scheme() != connect_url.scheme()
+        || parsed_url.scheme() != APP_SCHEME
     {
         return Err(CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
@@ -36,6 +41,12 @@ pub fn parse_mobile_connect_request(
         .ok_or(CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
         })?;
+    let browser = query_parameters.get(CONNECT_URL_PARAM_BROWSER).ok_or(
+        CommonError::RadixConnectMobileInvalidRequestUrl {
+            bad_value: url.to_owned(),
+        },
+    )?;
+
     let Some(origin) = query_parameters.get(CONNECT_URL_PARAM_ORIGIN) else {
         return query_parameters
             .get(CONNECT_URL_PARAM_INTERACTION_ID)
@@ -51,9 +62,17 @@ pub fn parse_mobile_connect_request(
             .map(RadixConnectMobileConnectRequest::DappInteraction);
     };
 
-    RadixConnectMobileLinkRequest::try_with_origin_and_session_id(
+    let public_key = query_parameters.get(CONNECT_URL_PARAM_PUBLIC_KEY).ok_or(
+        CommonError::RadixConnectMobileInvalidRequestUrl {
+            bad_value: url.to_owned(),
+        },
+    )?;
+
+    RadixConnectMobileLinkRequest::new_from_raw_components(
         origin,
         session_id_string,
+        public_key,
+        browser,
     )
     .map(RadixConnectMobileConnectRequest::Link)
 }

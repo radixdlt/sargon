@@ -6,16 +6,30 @@ use super::super::session::session_id::SessionID;
 pub struct RadixConnectMobileLinkRequest {
     pub origin: Url,
     pub session_id: SessionID,
+    pub public_key: KeyAgreementPublicKey,
+    pub browser: String,
 }
 
 impl RadixConnectMobileLinkRequest {
-    pub fn new(origin: Url, session_id: SessionID) -> Self {
-        Self { origin, session_id }
+    pub fn new(
+        origin: Url,
+        session_id: SessionID,
+        public_key: KeyAgreementPublicKey,
+        browser: String,
+    ) -> Self {
+        Self {
+            origin,
+            session_id,
+            public_key,
+            browser,
+        }
     }
 
-    pub(crate) fn try_with_origin_and_session_id(
+    pub(crate) fn new_from_raw_components(
         origin: impl AsRef<str>,
         session_id: impl AsRef<str>,
+        public_key: impl AsRef<str>,
+        browser: impl AsRef<str>,
     ) -> Result<Self> {
         let origin = parse_url(origin.as_ref()).map_err(|_| {
             CommonError::RadixConnectMobileInvalidOrigin {
@@ -28,7 +42,14 @@ impl RadixConnectMobileLinkRequest {
                     bad_value: session_id.as_ref().to_owned(),
                 }
             })?;
-        Ok(RadixConnectMobileLinkRequest::new(origin, session_id))
+        let public_key =
+            KeyAgreementPublicKey::from_hex(public_key.as_ref().into())?;
+        Ok(RadixConnectMobileLinkRequest::new(
+            origin,
+            session_id,
+            public_key,
+            browser.as_ref().into(),
+        ))
     }
 }
 
@@ -37,6 +58,8 @@ impl HasSampleValues for RadixConnectMobileLinkRequest {
         RadixConnectMobileLinkRequest::new(
             parse_url("radix://app1").unwrap(),
             SessionID::sample(),
+            KeyAgreementPublicKey::sample(),
+            "Chrome".into(),
         )
     }
 
@@ -44,6 +67,8 @@ impl HasSampleValues for RadixConnectMobileLinkRequest {
         RadixConnectMobileLinkRequest::new(
             parse_url("radix://app2").unwrap(),
             SessionID::sample_other(),
+            KeyAgreementPublicKey::sample_other(),
+            "Safari".into(),
         )
     }
 }
@@ -64,14 +89,5 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_new() {
-        let origin = parse_url("radix://app").unwrap();
-        let session_id = SessionID::sample();
-        let sut = SUT::new(origin.clone(), session_id.clone());
-        assert_eq!(sut.origin, origin);
-        assert_eq!(sut.session_id, session_id);
     }
 }
