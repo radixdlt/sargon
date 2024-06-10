@@ -370,10 +370,55 @@ mod tests {
     }
 
     #[test]
+    fn get_set_common() {
+        let test = |sut: SUT| {
+            let mut sut = sut;
+            let mut common = sut.common_properties();
+            let new_date = Timestamp::now_utc();
+            common.last_used_on = new_date.clone();
+            sut.set_common_properties(common);
+            assert_eq!(sut.common_properties().last_used_on, new_date);
+        };
+        FactorSource::sample_values_all().into_iter().for_each(test);
+    }
+
+    #[test]
     fn factor_source_kind_ledger() {
         assert_eq!(
             SUT::sample_ledger().factor_source_kind(),
             FactorSourceKind::LedgerHQHardwareWallet
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_security_questions() {
+        assert_eq!(
+            SUT::sample_security_questions().factor_source_kind(),
+            FactorSourceKind::SecurityQuestions
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_arculus_card() {
+        assert_eq!(
+            SUT::sample_arculus().factor_source_kind(),
+            FactorSourceKind::ArculusCard
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_off_device_mnemonic() {
+        assert_eq!(
+            SUT::sample_off_device().factor_source_kind(),
+            FactorSourceKind::OffDeviceMnemonic
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_trusted_contact() {
+        assert_eq!(
+            SUT::sample_trusted_contact_frank().factor_source_kind(),
+            FactorSourceKind::TrustedContact
         );
     }
 
