@@ -153,9 +153,9 @@ extension SetFactorThresholdFeature {
 						}
 					)
 					.onPreferenceChange(ViewOffsetKey.self) {
-						let poistionX = contentMarginX + $0
+						let positionX = contentMarginX + $0
 						
-						send(.changedThreshold(Int(CGFloat(poistionX / cellWidth).rounded())))
+						send(.changedThreshold(Int(CGFloat(positionX / cellWidth).rounded())))
 					}
 				}
 				.coordinateSpace(name: coordinateSpaceScrollView)

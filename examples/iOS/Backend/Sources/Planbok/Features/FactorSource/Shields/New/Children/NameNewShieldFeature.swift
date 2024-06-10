@@ -107,8 +107,8 @@ extension NameNewShieldFeature {
 				}
 				if let original = store.copyOf {
 					let sameMatrix = original.matrixOfFactors == store.newShieldDraft.matrixOfFactors
-					let copyOrEdittedCopy = sameMatrix ? "Copy" : "**Editted** copy"
-					Text("(\(copyOrEdittedCopy) of: '\(original.metadata.displayName.value)')")
+					let copyOrEditedCopy = sameMatrix ? "Copy" : "**Edited** copy"
+					Text("(\(copyOrEditedCopy) of: '\(original.metadata.displayName.value)')")
 				}
 				Spacer()
 				Button("Continue") {
