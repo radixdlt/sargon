@@ -303,6 +303,25 @@ mod tests {
     }
 
     #[test]
+    fn from_factor_source() {
+        let sut = SUT::sample();
+        let factor_source: FactorSource = sut.clone().into();
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
+    }
+
+    #[test]
+    fn from_factor_source_invalid_got_device() {
+        let wrong = DeviceFactorSource::sample();
+        let factor_source: FactorSource = wrong.clone().into();
+        assert_eq!(
+            SUT::try_from(factor_source),
+            Err(CommonError::InvalidFactorSourceKind {
+                bad_value: "device".to_owned()
+            })
+        );
+    }
+
+    #[test]
     fn roundtrip_sample_all_answers_correct() {
         let m = Mnemonic::sample_security_questions();
         let qas = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();

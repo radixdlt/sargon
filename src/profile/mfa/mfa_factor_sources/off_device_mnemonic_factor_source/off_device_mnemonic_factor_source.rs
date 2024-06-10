@@ -111,36 +111,40 @@ impl BaseIsFactorSource for OffDeviceMnemonicFactorSource {
     }
 }
 
-/// Properties describing a DeviceFactorSource to help user disambiguate between
-/// it and another one.
-#[derive(
-    Serialize,
-    Deserialize,
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-    uniffi::Record,
-)]
-#[serde(rename_all = "camelCase")]
-pub struct OffDeviceFactorSourceHint {
-    pub display_name: DisplayName,
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-impl OffDeviceFactorSourceHint {
-    pub fn new(display_name: DisplayName) -> Self {
-        Self { display_name }
-    }
-}
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = OffDeviceMnemonicFactorSource;
 
-impl HasSampleValues for OffDeviceFactorSourceHint {
-    fn sample() -> Self {
-        Self::new(DisplayName::new("Story about a horse").unwrap())
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
-    fn sample_other() -> Self {
-        Self::new(DisplayName::new("Thrilled with a shark").unwrap())
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn from_factor_source() {
+        let sut = SUT::sample();
+        let factor_source: FactorSource = sut.clone().into();
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
+    }
+
+    #[test]
+    fn from_factor_source_invalid_got_device() {
+        let wrong = DeviceFactorSource::sample();
+        let factor_source: FactorSource = wrong.clone().into();
+        assert_eq!(
+            SUT::try_from(factor_source),
+            Err(CommonError::InvalidFactorSourceKind {
+                bad_value: "device".to_owned()
+            })
+        );
     }
 }

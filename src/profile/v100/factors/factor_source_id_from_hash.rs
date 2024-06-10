@@ -116,48 +116,8 @@ impl FactorSourceIDFromHash {
     }
 
     /// A sample used to facilitate unit tests.
-    pub fn sample_device_other() -> Self {
-        DeviceFactorSource::sample_other().id
-    }
-
-    /// A sample used to facilitate unit tests.
     pub fn sample_ledger() -> Self {
         LedgerHardwareWalletFactorSource::sample().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_ledger_other() -> Self {
-        LedgerHardwareWalletFactorSource::sample_other().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_arculus() -> Self {
-        ArculusCardFactorSource::sample().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_arculus_other() -> Self {
-        ArculusCardFactorSource::sample_other().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_off_device() -> Self {
-        OffDeviceMnemonicFactorSource::sample().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_off_device_other() -> Self {
-        OffDeviceMnemonicFactorSource::sample_other().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_security_questions() -> Self {
-        SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample().id
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_security_questions_other() -> Self {
-        SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other().id
     }
 }
 

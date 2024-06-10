@@ -185,4 +185,23 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn from_factor_source() {
+        let sut = SUT::sample();
+        let factor_source: FactorSource = sut.clone().into();
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
+    }
+
+    #[test]
+    fn from_factor_source_invalid_got_device() {
+        let wrong = DeviceFactorSource::sample();
+        let factor_source: FactorSource = wrong.clone().into();
+        assert_eq!(
+            SUT::try_from(factor_source),
+            Err(CommonError::InvalidFactorSourceKind {
+                bad_value: "device".to_owned()
+            })
+        );
+    }
 }
