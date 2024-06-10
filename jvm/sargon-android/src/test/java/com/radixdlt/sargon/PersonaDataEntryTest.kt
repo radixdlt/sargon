@@ -10,11 +10,11 @@ class PersonaDataEntryTest {
 
     @Test
     fun testEmailJsonRoundtrip() {
-        val sut = PersonaDataEntryEmailAddress.sample()
+        val sut = EmailAddress.sample()
 
         assertEquals(
             sut,
-            PersonaDataEntryEmailAddress.fromJson(sut.toJson())
+            EmailAddress.fromJson(sut.toJson())
         )
     }
 
