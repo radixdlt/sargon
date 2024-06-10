@@ -173,12 +173,11 @@ extension FactorsBuilderFeature {
 				
 				Divider().background(Color.app.gray2)
 				
-				VStack(spacing: 0) {
+				VStack(spacing: 10) {
 					ForEach(store.factors) { factor in
 						FactorView(
 							factor: factor,
 							pickAction: {
-							
 								send(.pickFactorButtonTapped(factor))
 							}
 						) {
@@ -187,8 +186,6 @@ extension FactorsBuilderFeature {
 					}
 					.padding(.horizontal)
 					.padding(.top, 10)
-					
-					Spacer()
 					
 					Button("Add factors") {
 						send(.appendFactorButtonTapped)

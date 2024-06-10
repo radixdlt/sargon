@@ -52,6 +52,8 @@ extension IntroWhatIsShieldFeature {
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("Create a Security Shield").font(.largeTitle)
+
+				Spacer()
 				Text("Let's make sure you can always access your accounts - even if you lose your phone or buy a new one.")
                 
                 Spacer()
