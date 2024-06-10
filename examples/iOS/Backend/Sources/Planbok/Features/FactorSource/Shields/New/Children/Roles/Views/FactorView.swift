@@ -15,6 +15,22 @@ public struct FactorView: SwiftUI.View {
 	public let pickAction: (() -> Void)?
 	public let removeAction: (() -> Void)?
 	
+	public init(
+		factor: Factor,
+		pickAction: (() -> Void)? = nil,
+		removeAction: (() -> Void)? = nil
+	) {
+		self.factor = factor
+		self.pickAction = pickAction
+		self.removeAction = removeAction
+	}
+	
+	public init(
+		_ factorSource: FactorSource
+	) {
+		self.init(factor: Factor(factorSource: factorSource))
+	}
+	
 	public var body: some SwiftUI.View {
 		HStack {
 			if let pickAction {
@@ -40,12 +56,7 @@ public struct FactorView: SwiftUI.View {
 	private var label: some View {
 		Group {
 			if let factorSource = factor.factorSource {
-				HStack {
-					if let factorImageName = factorSource.kind.image {
-						Image(systemName: factorImageName)
-							.imageScale(.large)
-						
-					}
+				Label(title: {
 					VStack(alignment: .leading) {
 						Text("\(factorSource.kind.title)")
 						if let subtitle = factorSource.kind.subtitle {
@@ -53,7 +64,12 @@ public struct FactorView: SwiftUI.View {
 								.foregroundStyle(Color.app.gray2)
 						}
 					}
-				}
+				}, icon: {
+					Image(systemName: factorSource.kind.image)
+						.imageScale(.large)
+						.frame(width: 50)
+				})
+			
 			} else {
 				Text("Select a factor")
 					.fontWeight(.bold)
@@ -63,5 +79,28 @@ public struct FactorView: SwiftUI.View {
 		.padding()
 		.background(Color.app.white)
 		.clipShape(.rect(cornerRadius: 10))
+	}
+}
+
+extension FactorSourceKind {
+	public var image: String {
+		switch self {
+		case .device: return "lock.iphone"
+		case .ledgerHqHardwareWallet: return "applepencil.adapter.usb.c"
+		case .arculusCard: return "key.radiowaves.forward"
+		case .trustedContact: return "person.line.dotted.person"
+		case .securityQuestions: return "person.crop.circle.badge.questionmark"
+		default: return "key.horizontal"
+		}
+	}
+}
+
+#Preview {
+	ScrollView {
+		VStack {
+			ForEach(factorSourcesAllSampleValues().shuffled()) {
+				FactorView($0)
+			}
+		}
 	}
 }

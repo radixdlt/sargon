@@ -43,12 +43,7 @@ extension FactorSourceKind {
 }
 
 extension FactorSourceKind {
-	public var image: String? {
-		switch self {
-		case .device: return "lock.iphone"
-		default: return nil
-		}
-	}
+
 	public var title: String {
 		switch self {
 		case .device: return "This Phone"

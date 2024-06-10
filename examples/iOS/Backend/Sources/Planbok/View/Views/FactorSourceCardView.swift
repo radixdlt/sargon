@@ -33,7 +33,6 @@ public struct FactorSourceCardView: SwiftUI.View {
 		}
 		.multilineTextAlignment(.leading)
 		.frame(maxWidth: .infinity)
-		.background(Color.orange)
 		.padding()
 	}
 }
