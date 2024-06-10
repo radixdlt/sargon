@@ -147,7 +147,7 @@ impl From<f32> for Decimal {
     ///
     /// assert!(Decimal::from(208050.17).to_string() == "208050.17");
     ///
-    /// assert!(Decimal::from(f32::MIN_POSITIVE) == "0");
+    /// assert!(Decimal::from(f32::MIN_POSITIVE).to_string() == "0");
     ///
     /// ```
     fn from(value: f32) -> Self {

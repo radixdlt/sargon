@@ -75,9 +75,9 @@ pub fn decimal_formatted_plain(
 /// extern crate sargon;
 /// use sargon::prelude::*;
 ///
-/// assert!(new_decimal_from_f32(208050.17).is_ok());
+/// assert!(new_decimal_from_f32(208050.17).to_string() == "208050.17");
 ///
-/// assert!(new_decimal_from_f32(f32::MIN_POSITIVE).is_ok());
+/// assert!(new_decimal_from_f32(f32::MIN_POSITIVE).to_string() == "0");
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
