@@ -515,6 +515,9 @@ pub enum CommonError {
     RadixConnectMobileDappRequestNotFound {
         interaction_id: WalletInteractionId,
     } = 10143,
+
+    #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
+    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
 }
 
 #[uniffi::export]

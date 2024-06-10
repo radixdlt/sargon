@@ -19,6 +19,8 @@ pub struct RadixConnectMobile {
     relay_service: RelayService,
     /// The secure storage to be used to store session data.
     secure_storage: WalletClientStorage,
+    /// The client to be used to fetch well-known files.
+    well_known_client: WellKnownClient,
     /// The new sessions that have been created and are waiting to be validated on dApp side.
     /// Once the session is validated, it will be moved to the secure storage.
     /// Validation consists in verifying the origin of the session.
@@ -37,9 +39,12 @@ impl RadixConnectMobile {
     ) -> Self {
         Self {
             relay_service: RelayService::new_with_network_antenna(
-                network_antenna,
+                network_antenna.clone(),
             ),
             secure_storage: WalletClientStorage::new(secure_storage),
+            well_known_client: WellKnownClient::new_with_network_antenna(
+                network_antenna,
+            ),
             new_sessions: RwLock::new(HashMap::new()),
         }
     }
@@ -48,10 +53,25 @@ impl RadixConnectMobile {
     pub async fn handle_linking_request(
         &self,
         request: RadixConnectMobileLinkRequest,
+        dev_mode: bool,
     ) -> Result<Url> {
         let wallet_private_key = KeyAgreementPrivateKey::generate()?;
         let shared_secret = wallet_private_key
             .shared_secret_from_key_agreement(&request.public_key);
+
+        let dapp_definitions = self
+            .well_known_client
+            .get_well_known_file(request.origin.clone())
+            .await?;
+        // pass dev mode to decide if we want to use default callback path or fail linking
+        if !dev_mode && dapp_definitions.callback_path.is_none() {
+            return Err(
+                CommonError::RadixConnectMobileDappCallbackPathNotFound {
+                    origin: request.origin,
+                },
+            );
+        }
+        let callback_path = dapp_definitions.callback_path.unwrap_or_default();
 
         let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
         let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
@@ -64,8 +84,9 @@ impl RadixConnectMobile {
 
         let session = Session::new(
             request.session_id,
-            SessionOrigin::WebDapp(request.origin),
+            SessionOrigin::WebDapp(request.origin.clone()),
             encryption_key,
+            callback_path.clone(),
         );
 
         {
@@ -77,8 +98,7 @@ impl RadixConnectMobile {
                 .unwrap();
         }
 
-        // Add the public key.
-        let mut return_url = request.origin;
+        let mut return_url = request.origin.join(&callback_path.0).unwrap();
         return_url
             .query_pairs_mut()
             .append_pair("sessionID", request.session_id.0.as_str())
@@ -87,7 +107,6 @@ impl RadixConnectMobile {
                 wallet_private_key.public_key().to_hex().as_str(),
             );
 
-        // 5. TODO: use the actual dapp callback path
         Ok(return_url)
     }
 
