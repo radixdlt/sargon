@@ -2,6 +2,20 @@ use super::super::session::*;
 use super::models::*;
 use crate::prelude::*;
 
+#[async_trait::async_trait]
+pub trait WalletInteractionTransport: Send + Sync {
+    async fn get_wallet_interaction_requests(
+        &self,
+        session: Session,
+    ) -> Result<Vec<DappToWalletInteractionUnvalidated>>;
+
+    async fn send_wallet_interaction_response(
+        &self,
+        session: Session,
+        response: WalletToDappInteractionResponse,
+    ) -> Result<()>;
+}
+
 /// The service that interacts with the Radix Connect Relay.
 /// API docs at https://github.com/radixdlt/radix-connect-relay?tab=readme-ov-file#api-v1
 pub struct Service {
@@ -24,8 +38,7 @@ impl Service {
     }
 }
 
-const SERVICE_PATH: &str =
-    "https://radix-connect-relay-dev.rdx-works-main.extratools.works/api/v1";
+const SERVICE_PATH: &str = "https://radix-connect-relay.radixdlt.com/api/v1";
 
 impl NetworkRequest {
     fn radix_connect_relay_request(request: Request) -> Result<Self> {
@@ -34,8 +47,9 @@ impl NetworkRequest {
     }
 }
 
-impl Service {
-    pub async fn get_wallet_interaction_requests(
+#[async_trait::async_trait]
+impl WalletInteractionTransport for Service {
+    async fn get_wallet_interaction_requests(
         &self,
         session: Session,
     ) -> Result<Vec<DappToWalletInteractionUnvalidated>> {
@@ -62,7 +76,7 @@ impl Service {
             .collect()
     }
 
-    pub async fn send_wallet_interaction_response(
+    async fn send_wallet_interaction_response(
         &self,
         session: Session,
         response: WalletToDappInteractionResponse,
@@ -77,33 +91,6 @@ impl Service {
 
         let request = NetworkRequest::radix_connect_relay_request(
             Request::new_send_response(session.id, encrypted_response),
-        )?;
-        self.http_client.execute_network_request(request).await?;
-        Ok(())
-    }
-
-    pub async fn get_session_handshake_request(
-        &self,
-        session_id: SessionID,
-    ) -> Result<SessionHandshakeRequest> {
-        let request = NetworkRequest::radix_connect_relay_request(
-            Request::new_get_handshake_request(session_id),
-        )?;
-        self.http_client
-            .execute_request_with_decoding(request)
-            .await
-    }
-
-    pub async fn send_session_handshake_response(
-        &self,
-        session_id: SessionID,
-        public_key: KeyAgreementPublicKey,
-    ) -> Result<()> {
-        let request = NetworkRequest::radix_connect_relay_request(
-            Request::new_send_handshake_response(
-                session_id,
-                public_key.to_bytes(),
-            ),
         )?;
         self.http_client.execute_network_request(request).await?;
         Ok(())
