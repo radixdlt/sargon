@@ -20,7 +20,7 @@ public struct PickFactorSourceFeature {
 		@Shared(.newShieldDraft) var __newShieldDraft
 
 		public func isFactorSourceAvailable(id: FactorSourceID) -> Bool {
-			__newShieldDraft.usedFactorSources.contains(where: { $0.id == id }) == false
+			__newShieldDraft[role].usedFactorSources.contains(where: { $0.id == id }) == false
 		}
         public var idOfSelected: FactorSourceID? = nil
 		public let role: Role

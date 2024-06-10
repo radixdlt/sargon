@@ -137,6 +137,7 @@ public struct NewShieldDraft: Hashable, Sendable {
 		allUsed.append(contentsOf: confirmation.usedFactorSources)
 		return allUsed
 	}
+	
 	public var pendingFactorID: Factor.ID?
 	
 	public func isValidRole(_ role: Role) -> Bool {
@@ -167,7 +168,7 @@ public struct NewShieldDraft: Hashable, Sendable {
 			return
 		}
 		let id = pendingFactorID
-		assert(!usedFactorSources.contains(factorSource))
+		assert(!self[role].usedFactorSources.contains(factorSource))
 		if self[role].overrideFactors.contains(where: { $0.id == id }) {
 			self[role].overrideFactors[id: id]?.factorSource = factorSource
 		} else if self[role].thresholdFactors.contains(where: { $0.id == id }) {

@@ -17,12 +17,14 @@ val FactorSource.id: FactorSourceId
     get() = when (this) {
         is FactorSource.Device -> value.id.asGeneral()
         is FactorSource.Ledger -> value.id.asGeneral()
+        else -> throw NotImplementedError()
     }
 
 val FactorSource.kind: FactorSourceKind
     get() = when (this) {
         is FactorSource.Device -> value.kind
         is FactorSource.Ledger -> value.kind
+        else -> throw NotImplementedError()
     }
 
 fun DeviceFactorSource.asGeneral() = FactorSource.Device(value = this)
