@@ -80,8 +80,8 @@ pub fn decimal_formatted_plain(
 /// assert!(new_decimal_from_f32(f32::MIN_POSITIVE).is_ok());
 /// ```
 #[uniffi::export]
-pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
-    value.try_into()
+pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
+    value.into()
 }
 
 /// Creates a new `Decimal192` from a f64 float. Will
@@ -474,7 +474,7 @@ mod uniffi_tests {
         let f: f32 = 208050.17;
         assert_eq!(f.to_string(), "208050.17");
         let sut = new_decimal_from_f32(f);
-        assert_eq!(sut.unwrap().to_string(), "208050.17");
+        assert_eq!(sut.to_string(), "208050.17");
         assert_eq!(
             SUT::try_from(f32::MAX).unwrap().to_string(),
             "340282350000000000000000000000000000000"

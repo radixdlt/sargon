@@ -136,24 +136,23 @@ forward_from_for_num!(u64);
 forward_from_for_num!(i32);
 forward_from_for_num!(i64);
 
-impl TryFrom<f32> for Decimal {
-    type Error = crate::CommonError;
-
+impl From<f32> for Decimal {
     /// Creates a new `Decimal192` from a f32 float. Will
-    /// fail if the f32 cannot be losslessly represented
-    /// by the underlying Decimal from Scrypto.
+    /// lose precision if the f32 cannot be losslessly
+    /// represented by the underlying Decimal from Scrypto
     ///
     /// ```
     /// extern crate sargon;
     /// use sargon::prelude::*;
     ///
-    /// assert!(Decimal::try_from(208050.17).is_ok());
+    /// assert!(Decimal::from(208050.17).to_string() == "208050.17");
     ///
-    /// assert!(Decimal::try_from(f32::MIN_POSITIVE).is_ok());
+    /// assert!(Decimal::from(f32::MIN_POSITIVE) == "0");
+    ///
     /// ```
-    fn try_from(value: f32) -> Result<Self, Self::Error> {
+    fn from(value: f32) -> Self {
         let str_value = value.to_string();
-        Self::from_str_value(str_value)
+        Self::from_str_value(str_value).unwrap()
     }
 }
 
@@ -1228,6 +1227,7 @@ mod test_decimal {
         };
         test(0.1, "0.1");
         test(f32::MAX as f64, "340282346638528860000000000000000000000");
+        test(f32::MIN as f64, "-340282346638528860000000000000000000000");
         test(123456789.87654321, "123456789.87654321");
         test(4.012_345_678_901_235, "4.012345678901235"); // precision lost
         test(4.012_345_678_901_234_567_890, "4.012345678901235"); // Over 18 decimals is OK (precision lost)
@@ -1236,12 +1236,14 @@ mod test_decimal {
     #[test]
     fn from_f32_more_than_18_decimals_is_ok() {
         let test = |f: f32, s: &str| {
-            let sut = Decimal192::try_from(f).unwrap();
+            let sut = Decimal192::from(f);
             assert_eq!(sut.to_string(), s);
         };
 
         test(0.1, "0.1");
         test(f32::MAX, "340282350000000000000000000000000000000");
+        test(f32::MIN, "-340282350000000000000000000000000000000");
+        test(f32::MIN_POSITIVE, "0");
         test(123456789.87654321, "123456790");
         test(4.012_346, "4.012346"); // precision lost
         test(4.012_346, "4.012346"); // Over 18 decimals is OK (precision lost)
