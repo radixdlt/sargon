@@ -54,28 +54,31 @@ public struct FactorView: SwiftUI.View {
 	
 	@ViewBuilder
 	private var label: some View {
-		Group {
+		HStack(alignment: .top) {
 			if let factorSource = factor.factorSource {
-				Label(title: {
-					VStack(alignment: .leading) {
-						Text("\(factorSource.kind.title)")
-						if let subtitle = factorSource.kind.subtitle {
-							Text("\(subtitle)")
-								.foregroundStyle(Color.app.gray2)
-						}
+				
+				Image(systemName: factorSource.kind.image)
+					.resizable()
+					.imageScale(.large)
+					.aspectRatio(contentMode: .fit)
+					.frame(width: 40)
+					.rotationEffect(.degrees(factorSource.kind.rotationDegrees))
+					.offset(y: factorSource.kind.rotationDegrees > 0 ? 10 : 0)
+				
+				VStack(alignment: .leading) {
+					Text("\(factorSource.kind.title)")
+					if let subtitle = factorSource.kind.subtitle {
+						Text("\(subtitle)")
+							.foregroundStyle(Color.app.gray2)
 					}
-				}, icon: {
-					Image(systemName: factorSource.kind.image)
-						.imageScale(.large)
-						.frame(width: 50)
-				})
-			
+					Spacer()
+				}
 			} else {
 				Text("Select a factor")
 					.fontWeight(.bold)
 			}
 		}
-		.frame(maxWidth: .infinity, alignment: .leading)
+		.frame(maxWidth: .infinity, idealHeight: 40, alignment: .leading)
 		.padding()
 		.background(Color.app.white)
 		.clipShape(.rect(cornerRadius: 10))
@@ -86,13 +89,20 @@ extension FactorSourceKind {
 	public var image: String {
 		switch self {
 		case .device: return "lock.iphone"
-		case .ledgerHqHardwareWallet: return "applepencil.adapter.usb.c"
+		case .ledgerHqHardwareWallet: return "mediastick"
 		case .arculusCard: return "key.radiowaves.forward"
-		case .trustedContact: return "person.line.dotted.person"
+		case .trustedContact: return "figure.child.and.lock"
 		case .securityQuestions: return "person.crop.circle.badge.questionmark"
-		default: return "key.horizontal"
+		case .offDeviceMnemonic: return "key"
 		}
 	}
+	public var rotationDegrees: CGFloat {
+		switch self {
+		case .ledgerHqHardwareWallet: return 90
+		default: return 0
+		}
+	}
+	
 }
 
 #Preview {
