@@ -84,11 +84,7 @@ public struct MainFeature {
 					
 				case let .element(id: _, action: action):
 					switch action {
-					case .accountDetails:
-						return .none
-						
-					case .shieldDetails:
-						return .none
+			
 						
 					case .settings(.delegate(.navigate(.toShields))):
 						state.path.append(.manageSecurityShields(ManageSecurityShieldsFeature.State()))
@@ -96,6 +92,10 @@ public struct MainFeature {
 						
 					case .settings(.delegate(.navigate(.toFactorSources))):
 						state.path.append(.manageFactorSources(ManageFactorSourcesFeature.State()))
+						return .none
+						
+					case let .shieldDetails(.delegate(.copyAndEdit(preset))):
+						state.path.append(.manageSecurityShields(ManageSecurityShieldsFeature.State(copyAndEdit: preset)))
 						return .none
 						
 					case let .manageSecurityShields(.delegate(.navigate(.toDetailsForShield(shield)))):
@@ -130,6 +130,13 @@ public struct MainFeature {
 			
 					case .manageSpecificFactorSources:
 						return .none
+						
+					case .accountDetails:
+						return .none
+						
+					case .shieldDetails:
+						return .none
+						
 					}
 					
 				case .popFrom(id: _):

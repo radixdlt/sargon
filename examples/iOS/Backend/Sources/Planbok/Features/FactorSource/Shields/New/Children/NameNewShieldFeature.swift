@@ -9,10 +9,17 @@ public struct NameNewShieldFeature {
 	@ObservableState
 	public struct State: Equatable {
 		@Shared(.newShieldDraft) var newShieldDraft
-		public var shieldName: String
+		public var shieldName = ""
 		public var errorMessage: String?
+		var copyOf: Shield? {
+			newShieldDraft.copyOf
+		}
 		public init() {
-			self.shieldName = "My Shield"
+			if let copyOf {
+				self.shieldName = "Copy of \(copyOf.metadata.displayName.value)"
+			} else {
+				self.shieldName = "My Shield"
+			}
 		}
 	}
 	
@@ -89,6 +96,7 @@ extension NameNewShieldFeature {
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("Name Shield").font(.largeTitle)
+		
 				Spacer()
 				LabeledTextField(label: "Shield Name", text: $store.shieldName.sending(\.view.shieldNameChanged))
 				if let error = store.state.errorMessage {
@@ -96,6 +104,11 @@ extension NameNewShieldFeature {
 						.foregroundStyle(Color.red)
 						.font(.footnote)
 						.fontWeight(.bold)
+				}
+				if let original = store.copyOf {
+					let sameMatrix = original.matrixOfFactors == store.newShieldDraft.matrixOfFactors
+					let copyOrEdittedCopy = sameMatrix ? "Copy" : "**Editted** copy"
+					Text("(\(copyOrEdittedCopy) of: '\(original.metadata.displayName.value)')")
 				}
 				Spacer()
 				Button("Continue") {

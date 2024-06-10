@@ -18,8 +18,25 @@ public struct ShieldDetailsFeature {
 	}
 	
 	public enum Action: ViewAction {
-		public enum ViewAction {}
+		public enum ViewAction {
+			case copyAndEditButtonTapped
+		}
+		public enum DelegateAction {
+			case copyAndEdit(Shield)
+		}
 		case view(ViewAction)
+		case delegate(DelegateAction)
+	}
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case .view(.copyAndEditButtonTapped):
+				return .send(.delegate(.copyAndEdit(state.shield)))
+			case .delegate:
+				return .none
+			}
+		}
 	}
 }
 
@@ -49,6 +66,15 @@ extension ShieldDetailsFeature {
 			.background(Color.app.gray5)
 			.navigationTitle(store.state.shield.metadata.displayName.value)
 			.navigationBarTitleDisplayMode(.large)
+			.toolbar {
+				ToolbarItem(placement: .topBarTrailing) {
+					Button("Copy & Edit") {
+						send(.copyAndEditButtonTapped)
+					}
+					.foregroundStyle(.blue)
+					.buttonStyle(.plain)
+				}
+			}
 		}
 		
 		func section<R: RoleFromDraft>(role roleWithFactors: R) -> some SwiftUI.View {

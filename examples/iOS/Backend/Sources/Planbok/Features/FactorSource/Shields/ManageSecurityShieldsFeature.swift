@@ -23,6 +23,12 @@ public struct ManageSecurityShieldsFeature {
 		@SharedReader(.factorSources) var factorSources
 		@Presents var destination: Destination.State?
 		
+		public init(copyAndEdit preset: Shield? = nil) {
+			if let preset {
+				destination = .newSecurityShield(NewSecurityShieldCoordinator.State(copyAndEdit: preset))
+			}
+		}
+		
 		public var canAddSampleShields: Bool {
 			// FIXME: cleanup
 			var used: [FactorSource] = []
@@ -76,7 +82,7 @@ public struct ManageSecurityShieldsFeature {
 				return .send(.internal(.newShield(preset: nil)))
 				
 			case let .internal(.newShield(preset)):
-				state.destination = .newSecurityShield(NewSecurityShieldCoordinator.State(preset: preset))
+				state.destination = .newSecurityShield(NewSecurityShieldCoordinator.State(copyAndEdit: preset))
 				return .none
 				
 			case .destination(.presented(.newSecurityShield(.delegate(.done)))):
@@ -107,16 +113,18 @@ extension ManageSecurityShieldsFeature {
 		}
 		public var body: some SwiftUI.View {
 			VStack {
+	
 				Text("Shields").font(.largeTitle)
 				
-				Text("Security shields are a combination of factors you can use to protect your accounts and personas.")
-				
-				Text("Here are your current security shields.")
-				
-				if store.shields.isEmpty {
-					Text("You have no shields")
-				} else {
-					ScrollView {
+				ScrollView {
+					
+					Text("Security shields are a combination of factors you can use to protect your accounts and personas.")
+					
+					Text("Here are your current security shields.")
+					
+					if store.shields.isEmpty {
+						Text("You have no shields")
+					} else {
 						ForEach(store.shields, id: \.id) { shield in
 							VStack {
 								ShieldCardView(shield: shield) {

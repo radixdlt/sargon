@@ -100,7 +100,7 @@ extension ConfirmationRoleWithFactorSources: RoleFromDraft {
 
 
 public struct NewShieldDraft: Hashable, Sendable {
-
+	public let copyOf: Shield?
 	public var numberOfDaysUntilAutoConfirmation: UInt16 = 14
 	private var primary: MatrixOfFactorsForRole
 	private var recovery: MatrixOfFactorsForRole
@@ -177,12 +177,14 @@ public struct NewShieldDraft: Hashable, Sendable {
 	}
 	
 	public init() {
+		self.copyOf = nil
 		self.primary = MatrixOfFactorsForRole(role: .primary)
 		self.recovery = MatrixOfFactorsForRole(role: .recovery)
 		self.confirmation = MatrixOfFactorsForRole(role: .confirmation)
 	}
 	
-	public init(preset: Shield) {
+	public init(copyAndEdit preset: Shield) {
+		self.copyOf = preset
 		self.primary = .init(roleWithFactors: preset.matrixOfFactors.primaryRole)
 		self.recovery = .init(roleWithFactors: preset.matrixOfFactors.recoveryRole)
 		self.confirmation = .init(roleWithFactors: preset.matrixOfFactors.confirmationRole)

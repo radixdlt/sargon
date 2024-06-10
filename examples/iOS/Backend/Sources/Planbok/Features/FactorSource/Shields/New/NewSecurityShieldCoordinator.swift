@@ -24,11 +24,13 @@ public struct NewSecurityShieldCoordinator {
 		@Shared(.newShieldDraft) var __newShieldDraft
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
-		
-		public init(preset: Shield?) {
+		public init(copyAndEdit preset: Shield?) {
 			self.intro = IntroWhatIsShieldFeature.State()
 			if let preset {
-				__newShieldDraft = .init(preset: preset)				
+				__newShieldDraft = .init(copyAndEdit: preset)
+				
+				// skip intro
+				HostingFeature.next(&self)
 			}
 		}
 	}
@@ -45,8 +47,11 @@ public struct NewSecurityShieldCoordinator {
 		}
 	}
 
-	
-	private func next(lastRole: Role? = nil, _ state: inout State) -> EffectOf<Self> {
+	@discardableResult
+	fileprivate static func next(
+		lastRole: Role? = nil,
+		_ state: inout State
+	) -> EffectOf<Self> {
 		let nextRole: Role? = switch lastRole {
 		case .none:
 				.primary
@@ -72,10 +77,10 @@ public struct NewSecurityShieldCoordinator {
 		Reduce { state, action in
 			switch action {
 			case .intro(.delegate(.continue)):
-				return next(&state)
+				return Self.next(&state)
 
 			case let .path(.element(id: _, action: .roleFactors(.delegate(.continue(role))))):
-				return next(lastRole: role, &state)
+				return Self.next(lastRole: role, &state)
 				
 			case .path(.element(id: _, action: .nameShield(.delegate(.done)))):
 				return .send(.delegate(.done))
