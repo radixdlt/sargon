@@ -22,9 +22,39 @@ impl SargonOS {
             .access_profile_with(|p| p.factor_sources.clone())
     }
 
+    /// Updates the factor source `updated` by mutating current profile and persisting
+    /// the change to secure storage. Throws `UpdateFactorSourceMutateFailed` error if the
+    /// factor source is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    pub async fn update_factor_source(
+        &self,
+        updated: FactorSource,
+    ) -> Result<()> {
+        let id = updated.factor_source_id();
+
+        debug!("Updating FactorSource with ID: {}", &id);
+
+        self.update_profile_with(|mut p| {
+            // p.update_last_used_of_factor_source(&id)
+            p.update_any_factor_source(&id, |fs| *fs = updated.clone())
+                .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
+        })
+        .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourceUpdated { id },
+            ))
+            .await;
+
+        Ok(())
+    }
+
     /// Returns `Ok(false)` if the Profile already contained a factor source with the
     /// same id (Profile unchanged occurred).
-    ///    
+    ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceAdded }`
     ///
@@ -152,7 +182,7 @@ impl SargonOS {
 
 impl SargonOS {
     /// Adds all factor sources to Profile.
-    ///    
+    ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`,
     /// if any of the newly added FactorSources has **main** flag, then we remove the
@@ -639,5 +669,38 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(loaded, expected);
+    }
+
+    #[actix_rt::test]
+    async fn test_update_factor_source() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let mut factor = ArculusCardFactorSource::sample();
+        os.with_timeout(|x| x.add_factor_source(factor.clone().into()))
+            .await
+            .unwrap();
+
+        // ACT
+        let new_name = "new important name";
+        factor.hint.name = new_name.to_owned();
+        os.with_timeout(|x| x.update_factor_source(factor.clone().into()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(os.profile().factor_sources.into_iter().any(|f| {
+            match f {
+                FactorSource::ArculusCard { value } => {
+                    value.hint.name == new_name.to_owned()
+                }
+                _ => false,
+            }
+        }));
+        // factor.
+
+        // assert!(os
+        //     .profile()
+        //     .factor_sources
+        //     .contains_by_id(&FactorSource::sample_other()));
     }
 }

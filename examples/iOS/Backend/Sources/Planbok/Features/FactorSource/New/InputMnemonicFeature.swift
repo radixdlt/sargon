@@ -149,6 +149,8 @@ extension InputMnemonicFeature {
 				}
 				.disabled(store.mnemonic == nil)
 			}
+			.padding()
+			.buttonStyle(.borderedProminent)
 			.alert($store.scope(state: \.destination?.prefillMnemonic, action: \.destination.prefillMnemonic))
 		}
 	}

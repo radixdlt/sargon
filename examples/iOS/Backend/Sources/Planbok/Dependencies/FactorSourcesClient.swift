@@ -13,6 +13,7 @@ import DependenciesMacros
 public struct FactorSourcesClient: Sendable {
    
     public typealias AddFactorSource = @Sendable (FactorSource) async throws -> Void
+    public typealias UpdateFactorSource = @Sendable (FactorSource) async throws -> Void
     public typealias CreateHWFactorSource = @Sendable (MnemonicWithPassphrase, FactorSourceKind) async throws -> FactorSource
     public typealias CreateSecurityQuestionsFactor = @Sendable (AnswersToQuestions) -> SecurityQuestionsNotProductionReadyFactorSource
     public typealias DecryptSecurityQuestionsFactor = @Sendable (AnswersToQuestions, SecurityQuestionsNotProductionReadyFactorSource) throws -> Mnemonic
@@ -22,6 +23,7 @@ public struct FactorSourcesClient: Sendable {
     public var decryptSecurityQuestionsFactor: DecryptSecurityQuestionsFactor
     public var addFactorSource: AddFactorSource
     public var addAllSampleFactors: AddAllSampleFactors
+	public var updateFactorSource: UpdateFactorSource
 }
 
 extension FactorSourcesClient: DependencyKey {
@@ -85,7 +87,7 @@ extension FactorSourcesClient: DependencyKey {
 				try factor.decrypt(questionsAndAnswers: questionsAndAnswers.elements)
 			},
 			addFactorSource: { factorSource in
-				log.notice("Adding New factorSource: \(factorSource)")
+ 				log.notice("Adding New factorSource: \(factorSource)")
 				let _ = try await os.addFactorSource(factorSource: factorSource)
 				log.info("Finished adding new factorSource.")
 			},
@@ -93,6 +95,11 @@ extension FactorSourcesClient: DependencyKey {
 				log.notice("Adding Many Sample factorSources")
 				let _ = try await os.debugAddAllSampleFactors()
 				log.notice("Finished adding Many Sample factorSources")
+			},
+			updateFactorSource: { factorSource in
+				log.notice("Updating factorSource: \(factorSource)")
+				let _ = try await os.updateFactorSource(updated: factorSource)
+				log.info("Finished updating factorSource.")
 			}
 		)
 	}

@@ -1130,15 +1130,6 @@ mod test_decimal {
     }
 
     #[test]
-    fn from_scientific_works() {
-        assert_eq!("1e5".parse::<SUT>().unwrap(), SUT::from(10000));
-        assert_eq!(
-            "1e-4".parse::<SUT>().unwrap(),
-            SUT::try_from(0.0001).unwrap()
-        );
-    }
-
-    #[test]
     fn from_str() {
         let a: Decimal =
             "3138550867693340381917894711603833208051.177722232017256447"

@@ -21,7 +21,7 @@ extension FactorSource {
 			} else if let arculus = asArculus {
 				arculus.hint.display()
 			} else if let offDevice = asOffDeviceMnemonic {
-				offDevice.hint.display()
+				offDevice.hint.display(action: action)
 			} else if let securityQuestions = asSecurityQuestions {
 				securityQuestions.sealedMnemonic.display(action: action)
 			} else if let trustedContact = asTrustedContact {
@@ -60,9 +60,14 @@ extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 	}
 }
 extension OffDeviceFactorSourceHint {
-	public func display() -> some SwiftUI.View {
+	public func display(
+		action: (() -> Void)? = nil
+	) -> some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("Label", displayName)
+			if let action {
+				Button("Edit Label", action: action)
+			}
 		}
 		.multilineTextAlignment(.leading)
 		.frame(maxWidth: .infinity)
