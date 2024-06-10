@@ -21,9 +21,11 @@ public struct MatrixOfFactorsForRole: Hashable, Sendable {
 		self.overrideFactors = overrideFactors
 	}
 	init<R>(roleWithFactors: R) where R: RoleFromDraft {
+		let thresholdFactors = roleWithFactors.thresholdFactors.map { Factor.init(factorSource: $0) }.asIdentified()
 		self.init(
 			role: R.role,
-			thresholdFactors: roleWithFactors.thresholdFactors.map { Factor.init(factorSource: $0) }.asIdentified(),
+			thresholdFactors: thresholdFactors,
+			threshold: .init(count: roleWithFactors.threshold, thresholdFactorsCount: thresholdFactors.count),
 			overrideFactors: roleWithFactors.overrideFactors.map { Factor.init(factorSource: $0) }.asIdentified()
 		)
 	}
@@ -60,14 +62,16 @@ public protocol RoleFromDraft {
 	init?(draft: MatrixOfFactorsForRole)
 }
 extension RoleFromDraft {
+	
 	public init?(draft: MatrixOfFactorsForRole) {
 		precondition(draft.role == Self.role)
 		if draft.thresholdFactorSources.isEmpty && draft.overrideFactorsSources.isEmpty {
 			return nil
 		}
-		if draft.threshold.isGreaterThan(count: draft.thresholdFactorSources.count) {
+		if !draft.threshold.isValid(thresholdFactorCount: draft.thresholdFactorSources.count) {
 			return nil
 		}
+
 		self = .init(
 			thresholdFactors: draft.thresholdFactorSources,
 			threshold: {
@@ -92,6 +96,8 @@ extension RecoveryRoleWithFactorSources: RoleFromDraft {
 extension ConfirmationRoleWithFactorSources: RoleFromDraft {
 	public static let role: Role = .confirmation
 }
+
+
 
 public struct NewShieldDraft: Hashable, Sendable {
 
@@ -148,7 +154,7 @@ public struct NewShieldDraft: Hashable, Sendable {
 		if self[role].thresholdFactors.contains(factor) {
 			self[role].thresholdFactors.remove(factor)
 			// Also decrease factor threshold if needed
-			if self[role].threshold.isGreaterThan(count: self[role].thresholdFactors.count) {
+			if !self[role].threshold.isValid(thresholdFactorCount: self[role].thresholdFactors.count) {
 				self[role].threshold.decrease()
 			}
 		} else if self[role].overrideFactors.contains(factor) {

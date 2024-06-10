@@ -7,10 +7,11 @@ public struct MainFeature {
 	@Dependency(ProfileClient.self) var profileClient
 	@Dependency(AccountsClient.self) var accountsClient
 	
-	@Reducer //(state: .equatable)
+	@Reducer
 	public enum Path {
 		case settings(SettingsFeature)
 		case manageSecurityShields(ManageSecurityShieldsFeature)
+		case shieldDetails(ShieldDetailsFeature)
         case manageFactorSources(ManageFactorSourcesFeature)
         case manageSpecificFactorSources(ManageSpecificFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
@@ -86,6 +87,9 @@ public struct MainFeature {
 					case .accountDetails:
 						return .none
 						
+					case .shieldDetails:
+						return .none
+						
 					case .settings(.delegate(.navigate(.toShields))):
 						state.path.append(.manageSecurityShields(ManageSecurityShieldsFeature.State()))
 						return .none
@@ -94,7 +98,12 @@ public struct MainFeature {
 						state.path.append(.manageFactorSources(ManageFactorSourcesFeature.State()))
 						return .none
 						
-                    case let .manageFactorSources(.delegate(.navigate(.toFactor(kind)))):
+					case let .manageSecurityShields(.delegate(.navigate(.toDetailsForShield(shield)))):
+						state.path.append(.shieldDetails(ShieldDetailsFeature.State(shield: shield)))
+						return .none
+						
+						
+					case let .manageFactorSources(.delegate(.navigate(.toFactor(kind)))):
 						state.path.append(.manageSpecificFactorSources(
 							ManageSpecificFactorSourcesFeature.State(kind: kind)
 						))
@@ -272,6 +281,9 @@ extension MainFeature {
 					
 				case let .accountDetails(store):
 					AccountDetailsFeature.View(store: store)
+					
+				case let .shieldDetails(store):
+					ShieldDetailsFeature.View(store: store)
 					
 				}
 			}

@@ -20,7 +20,22 @@ public struct ManageSecurityShieldsFeature {
 	@ObservableState
 	public struct State {
 		@SharedReader(.shields) var shields
+		@SharedReader(.factorSources) var factorSources
 		@Presents var destination: Destination.State?
+		
+		public var canAddSampleShields: Bool {
+			// FIXME: cleanup
+			var used: [FactorSource] = []
+			let m = Shield.sample.matrixOfFactors
+			used.append(contentsOf: m.primaryRole.thresholdFactors)
+			used.append(contentsOf: m.primaryRole.overrideFactors)
+			used.append(contentsOf: m.recoveryRole.thresholdFactors)
+			used.append(contentsOf: m.recoveryRole.overrideFactors)
+			used.append(contentsOf: m.confirmationRole.thresholdFactors)
+			used.append(contentsOf: m.confirmationRole.overrideFactors)
+			let usedIDs = Set(used.map(\.id))
+			return Set(factorSources.map(\.id)).isSuperset(of: usedIDs)
+		}
 	}
 	
 	public enum Action: ViewAction {
@@ -28,11 +43,19 @@ public struct ManageSecurityShieldsFeature {
 			case newShield(preset: Shield?)
 		}
 		public enum ViewAction {
+			case shieldTapped(Shield)
 			case addNewButtonTapped
 			case addSampleShieldButtonTapped
 			case addSampleOtherShieldButtonTapped
 		}
 		case destination(PresentationAction<Destination.Action>)
+		public enum DelegateAction {
+			public enum Navigate {
+				case toDetailsForShield(Shield)
+			}
+			case navigate(Navigate)
+		}
+		case delegate(DelegateAction)
 		case view(ViewAction)
 		case `internal`(InternalAction)
 	}
@@ -40,6 +63,9 @@ public struct ManageSecurityShieldsFeature {
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
+			case let .view(.shieldTapped(shield)):
+				return .send(.delegate(.navigate(.toDetailsForShield(shield))))
+				
 			case .view(.addSampleShieldButtonTapped):
 				return .send(.internal(.newShield(preset: Shield.sample)))
 
@@ -57,6 +83,8 @@ public struct ManageSecurityShieldsFeature {
 				state.destination = nil
 				return .none
 				
+			case .delegate:
+				return .none
 			case .destination:
 				return .none
 			}
@@ -91,7 +119,9 @@ extension ManageSecurityShieldsFeature {
 					ScrollView {
 						ForEach(store.shields, id: \.id) { shield in
 							VStack {
-								ShieldCardView(shield: shield)
+								ShieldCardView(shield: shield) {
+									send(.shieldTapped(shield))
+								}
 							}
 						}
 					}
@@ -105,10 +135,16 @@ extension ManageSecurityShieldsFeature {
 				Button("Add New Sample") {
 					send(.addSampleShieldButtonTapped)
 				}
+				.disabled(!store.canAddSampleShields)
 				Button("Add New Sample Other") {
 					send(.addSampleOtherShieldButtonTapped)
 				}
+				.disabled(!store.canAddSampleShields)
+				if !store.canAddSampleShields {
+					Text("Add ALL Sample Factors from Manage Factor Sources to be able to add sample shields").font(.footnote)
+				}
 			}
+			.padding(.horizontal)
 			.padding(.bottom, 100)
 			.sheet(
 				item: $store.scope(
@@ -125,18 +161,23 @@ extension ManageSecurityShieldsFeature {
 
 public struct ShieldCardView: SwiftUI.View {
 	public let shield: Shield
+	public let action: () -> Void
 	public var body: some SwiftUI.View {
-		HStack {
-			Image(systemName: "lock.shield")
-				.resizable()
-				.imageScale(.large)
-				.aspectRatio(contentMode: .fit)
-				.frame(idealHeight: 50)
-			Text("\(shield.metadata.displayName)")
-				.font(.title2)
-			Spacer()
-		}
-		.foregroundStyle(Color.app.blue1)
+		Button(action: action, label: {
+			HStack {
+				Image(systemName: "lock.shield")
+					.resizable()
+					.imageScale(.large)
+					.aspectRatio(contentMode: .fit)
+					.frame(idealHeight: 50)
+				Text("\(shield.metadata.displayName)")
+					.font(.title2)
+				Spacer()
+				Image(systemName: "chevron.right")
+			}
+			.foregroundStyle(Color.app.blue1)
+		})
+		.buttonStyle(.plain)
 		.padding()
 	}
 }

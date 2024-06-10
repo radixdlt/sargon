@@ -62,6 +62,7 @@ public struct NameNewShieldFeature {
 					numberOfDaysUntilAutoConfirmation: state.newShieldDraft.numberOfDaysUntilAutoConfirmation,
 					matrixOfFactors: matrixOfFactors
 				)
+				
 				return .run { send in
 					try await shieldClient.saveSecurityShield(shield)
 					await send(.delegate(.done))

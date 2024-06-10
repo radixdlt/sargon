@@ -18,14 +18,7 @@ public struct PickFactorSourceFeature {
 		
         @SharedReader(.factorSources) var factorSources
 		@Shared(.newShieldDraft) var __newShieldDraft
-//		public var pickedFactorID: Factor.ID? {
-//			get {
-//				__newShieldDraft.pendingFactorID
-//			}
-//			set {
-//				__newShieldDraft.pendingFactorID = newValue
-//			}
-//		}
+
 		public func isFactorSourceAvailable(id: FactorSourceID) -> Bool {
 			__newShieldDraft.usedFactorSources.contains(where: { $0.id == id }) == false
 		}

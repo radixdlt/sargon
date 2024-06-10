@@ -24,12 +24,27 @@ public struct Factor: Hashable, Sendable, Identifiable {
 public typealias Factors = IdentifiedArrayOf<Factor>
 
 public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
+	init(count: UInt16, thresholdFactorsCount: Int) {
+		let factorCount = UInt16(thresholdFactorsCount)
+		if count == factorCount {
+			self = .all
+		} else if count == 1 {
+			self = .any
+		} else {
+			self = .threshold(count)
+		}
+	}
 	
-	public func isGreaterThan(count rhs: Int) -> Bool {
+	public func isValid(thresholdFactorCount: Int) -> Bool {
 		switch self {
-		case .any: return false
-		case .all: return rhs <= 1
-		case let .threshold(lhsThreshold): return lhsThreshold > (rhs - 1)
+		case .any: return true
+		case .all: return true
+		case let .threshold(lhsThreshold):
+			let isValid = thresholdFactorCount > lhsThreshold
+			if !isValid {
+				log.fault("Number of factors not greater than threshold")
+			}
+			return isValid
 		}
 	}
 	
