@@ -5,6 +5,12 @@ use super::relay_service::Service as RelayService;
 use crate::prelude::*;
 use std::sync::RwLock;
 
+trait Transport {}
+
+trait SessionStorage {}
+
+trait WalletKeyGenerator {}
+
 /// The Radix Connect Mobile client.
 /// This is the object that will be used by the mobile app to handle interactions sent over Radix Connect Relay.
 #[derive(uniffi::Object)]
@@ -56,7 +62,6 @@ impl RadixConnectMobile {
             Some(&info),
         );
 
-        // 4. Create a new session
         let session = Session::new(
             request.session_id,
             SessionOrigin::WebDapp(request.origin),
@@ -73,9 +78,17 @@ impl RadixConnectMobile {
         }
 
         // Add the public key.
+        let mut return_url = request.origin;
+        return_url
+            .query_pairs_mut()
+            .append_pair("sessionID", request.session_id.0.as_str())
+            .append_pair(
+                "publicKey",
+                wallet_private_key.public_key().to_hex().as_str(),
+            );
 
         // 5. TODO: use the actual dapp callback path
-        Ok(Url::from_str("https://example.com").unwrap())
+        Ok(return_url)
     }
 
     #[uniffi::method]
