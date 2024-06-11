@@ -21,8 +21,10 @@ impl<'de> Deserialize<'de> for Blobs {
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {
-        let secret_magic: BlobsSecretMagic =
-            Vec::<Blob>::deserialize(deserializer).unwrap().into();
+        let option_blobs: Option<Vec<Blob>> =
+            Option::deserialize(deserializer)?;
+        let blobs = option_blobs.unwrap_or_default();
+        let secret_magic: BlobsSecretMagic = blobs.into();
         Ok(secret_magic.into())
     }
 }
@@ -209,5 +211,33 @@ mod uniffi_tests {
             .blobs(),
             [Blob::sample(), Blob::sample_other(),]
         );
+    }
+
+    #[test]
+    fn test_roundtrip_non_empty_blobs() {
+        let json = r#"
+        [
+          "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced", 
+          "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+          "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
+          "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+        ]
+        "#;
+        let deserialized_blobs: Blobs = serde_json::from_str(json).unwrap();
+        assert_eq!(deserialized_blobs, Blobs::sample());
+    }
+
+    #[test]
+    fn test_deserialize_null_to_empty_blobs() {
+        let json = r#"null"#;
+        let deserialized_blobs: Blobs = serde_json::from_str(json).unwrap();
+        assert_eq!(deserialized_blobs, Blobs::default());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_blobs_does_not_deserialize() {
+        let json = r#"[1, 2]"#;
+        let _: Blobs = serde_json::from_str(json).unwrap();
     }
 }
