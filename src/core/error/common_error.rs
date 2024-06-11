@@ -570,6 +570,9 @@ pub enum CommonError {
         "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
     )]
     StructureReferencesUnknownFactorSource = 10161,
+
+    #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
+    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10162,
 }
 
 #[uniffi::export]

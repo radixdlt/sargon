@@ -18,7 +18,7 @@ pub fn new_security_questions_factor_source_sample_other(
 pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
     mnemonic: Mnemonic,
     with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
-) -> SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+) -> Result<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource> {
     SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
         mnemonic, with,
     )
@@ -67,7 +67,7 @@ mod tests {
         let sut = new_security_questions_factor_source_by_encrypting_mnemonic(
             mnemonic.clone(),
             qas.clone(),
-        );
+        ).unwrap();
         let decrypted =
             security_questions_factor_source_decrypt(&sut, qas).unwrap();
         assert_eq!(decrypted, mnemonic);

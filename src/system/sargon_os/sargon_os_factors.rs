@@ -696,11 +696,6 @@ mod tests {
                 _ => false,
             }
         }));
-        // factor.
 
-        // assert!(os
-        //     .profile()
-        //     .factor_sources
-        //     .contains_by_id(&FactorSource::sample_other()));
     }
 }

@@ -25,13 +25,17 @@ pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
 }
 
 impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+    pub const QUESTION_COUNT: usize = 6;
     pub fn new_by_encrypting(
         mnemonic: Mnemonic,
         with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
         kdf_scheme: SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme,
         encryption_scheme: EncryptionScheme,
-    ) -> Self {
+    ) -> Result<Self> {
         let questions_and_answers = with;
+        if questions_and_answers.len() != Self::QUESTION_COUNT {
+            return Err(CommonError::InvalidQuestionsAndAnswersCount { expected: Self::QUESTION_COUNT as u16, found: questions_and_answers.len() as u16 });
+        }
         let security_questions = questions_and_answers
             .iter()
             .map(|qa| qa.question.clone())
@@ -52,12 +56,12 @@ impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
             })
             .collect_vec();
 
-        Self {
+        Ok(Self {
             security_questions,
             encryptions,
             kdf_scheme,
             encryption_scheme,
-        }
+        })
     }
 
     pub fn decrypt(
@@ -93,4 +97,24 @@ impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
         // Failure
         Err(CommonError::FailedToDecryptSealedMnemonic)
     }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic;
+
+    #[test]
+    fn throws_if_incorrect_count() {
+        let too_few = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::just(Security_NOT_PRODUCTION_READY_QuestionAndAnswer::sample());
+        let res = SUT::new_by_encrypting(Mnemonic::sample(), too_few, SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::default(), EncryptionScheme::default());
+        assert_eq!(
+        res,
+        Err(CommonError::InvalidQuestionsAndAnswersCount { expected: 6, found: 1 })
+        );
+    }
+
 }

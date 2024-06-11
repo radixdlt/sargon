@@ -164,25 +164,25 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
         with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
         kdf_scheme: SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme,
         encryption_scheme: EncryptionScheme,
-    ) -> Self {
+    ) -> Result<Self> {
         let questions_and_answers = with;
         let id = FactorSourceIDFromHash::new_for_security_questions(
             &MnemonicWithPassphrase::new(mnemonic.clone()),
         );
-        let sealed_mnemonic = SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic::new_by_encrypting(mnemonic, questions_and_answers, kdf_scheme, encryption_scheme);
+        let sealed_mnemonic = SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic::new_by_encrypting(mnemonic, questions_and_answers, kdf_scheme, encryption_scheme)?;
         let common = FactorSourceCommon::new_babylon();
 
-        Self {
+        Ok(Self {
             id,
             sealed_mnemonic,
             common,
-        }
+        })
     }
 
     pub fn new_by_encrypting(
         mnemonic: Mnemonic,
         with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
-    ) -> Self {
+    ) -> Result<Self> {
         let questions_and_answers = with;
         Self::new_by_encrypting_with_schemes(
             mnemonic,
@@ -325,7 +325,7 @@ mod tests {
     fn roundtrip_sample_all_answers_correct() {
         let m = Mnemonic::sample_security_questions();
         let qas = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
         let decrypted = sut.decrypt(qas).unwrap();
         assert_eq!(m, decrypted);
     }
@@ -343,7 +343,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Change to one wrong answer when decrypting
         qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
@@ -356,7 +356,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Change to two wrong answers when decrypting
         qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
@@ -370,7 +370,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Change all answers to uppercase before decrypting is ok
         qas.update_with(0, |qa| qa.answer = qa.answer.to_uppercase());
@@ -383,7 +383,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Inserting bad chars into answer before decrypting.
         qas.update_with(0, |qa| qa.insert_bad_chars_to_answer());
@@ -396,7 +396,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions_other();
         let qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
         let decrypted = sut.decrypt(qas).unwrap();
         assert_eq!(m, decrypted);
     }
@@ -406,7 +406,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions_other();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Change all answers to uppercase before decrypting is ok
         qas.update_with(0, |qa| qa.answer = qa.answer.to_uppercase());
@@ -419,7 +419,7 @@ mod tests {
         let m = Mnemonic::sample_security_questions_other();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Change to two wrong answers when decrypting
         qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
@@ -432,12 +432,41 @@ mod tests {
         let m = Mnemonic::sample_security_questions_other();
         let mut qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
 
         // Change to two wrong answers when decrypting
         qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
         qas.update_with(3, |qa| qa.answer = "also wrong".to_owned());
         let decrypted = sut.decrypt(qas).unwrap();
         assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn test_too_few_questions() {
+        let m = Mnemonic::sample();
+        type Q = Security_NOT_PRODUCTION_READY_Question;
+        let q0 = Q::drivings_instructor();
+        let a0 = "a";
+
+        let q1 = Q::child_middle_name();
+        let a1 = "d";
+
+        let q2 = Q::math_teacher_highschool();
+        let a2 = "b";
+
+        let q3 = Q::first_school();
+        let a3 = "c";
+
+        type QAS = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers;
+        type QA = Security_NOT_PRODUCTION_READY_QuestionAndAnswer;
+        let qas = QAS::from_iter([
+            QA::new(q0, a0),
+            QA::new(q1, a1),
+            QA::new(q2, a2),
+            QA::new(q3, a3),
+        ]);
+        let res = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        assert_eq!(res,  Err(CommonError::InvalidQuestionsAndAnswersCount { expected: 6, found: 4 }));
     }
 }
