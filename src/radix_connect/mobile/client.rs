@@ -88,14 +88,15 @@ impl RadixConnectMobile {
         }
         let callback_path = dapp_definitions.callback_path.unwrap_or_default();
 
-        let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
-        let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
+        let encryption_key: Exactly32Bytes = shared_secret.as_bytes().into();
+        // let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
+        // let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
 
-        let encryption_key = PbHkdfSha256::hkdf_key_agreement(
-            shared_secret.to_bytes(),
-            Some(&salt),
-            Some(&info),
-        );
+        // let encryption_key = PbHkdfSha256::hkdf_key_agreement(
+        //     shared_secret.to_bytes(),
+        //     Some(&salt),
+        //     Some(&info),
+        // );
 
         let session = Session::new(
             request.session_id,
