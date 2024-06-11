@@ -15,7 +15,7 @@ public struct FactorSourcesClient: Sendable {
     public typealias AddFactorSource = @Sendable (FactorSource) async throws -> Void
     public typealias UpdateFactorSource = @Sendable (FactorSource) async throws -> Void
     public typealias CreateHWFactorSource = @Sendable (MnemonicWithPassphrase, FactorSourceKind) async throws -> FactorSource
-    public typealias CreateSecurityQuestionsFactor = @Sendable (AnswersToQuestions) -> SecurityQuestionsNotProductionReadyFactorSource
+    public typealias CreateSecurityQuestionsFactor = @Sendable (AnswersToQuestions) throws -> SecurityQuestionsNotProductionReadyFactorSource
     public typealias DecryptSecurityQuestionsFactor = @Sendable (AnswersToQuestions, SecurityQuestionsNotProductionReadyFactorSource) throws -> Mnemonic
 	public typealias AddAllSampleFactors = @Sendable () async throws -> Void
     public var createHWFactorSource: CreateHWFactorSource
@@ -78,7 +78,7 @@ extension FactorSourcesClient: DependencyKey {
                 @Dependency(MnemonicClient.self) var mnemonicClient
 
                 let mnemonic = mnemonicClient.generateNewMnemonic(.twentyFour)
-                return SecurityQuestionsNotProductionReadyFactorSource(
+                return try SecurityQuestionsNotProductionReadyFactorSource(
                     mnemonic: mnemonic,
                     questionsAndAnswers: questionsAndAnswers.elements
                 )

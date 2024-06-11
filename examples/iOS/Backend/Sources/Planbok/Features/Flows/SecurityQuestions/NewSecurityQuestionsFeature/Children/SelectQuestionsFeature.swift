@@ -12,7 +12,6 @@ import ComposableArchitecture
 
 @Reducer
 public struct SelectQuestionsFeature {
-
 	
 	@Reducer(state: .equatable)
 	public enum Destination {
@@ -29,6 +28,22 @@ public struct SelectQuestionsFeature {
 	public struct State: Equatable {
 		@Shared(.questions) var questions
 		@Presents var destination: Destination.State?
+        
+        public var canProceed: Bool {
+            // FIXME: change to UniFFI export the `SealedMnemonic::QUESTION_COUNT`...
+            do {
+                let _ = try SecurityQuestionsNotProductionReadyFactorSource(mnemonic: .sample, questionsAndAnswers: questions.enumerated().map({
+                    SecurityNotProductionReadyQuestionAndAnswer.init(question: $0.element, answer: "\($0.offset)")
+                }))
+                return true
+            } catch {
+                return false
+            }
+        }
+        public var questionCount: Int {
+            // FIXME: change to UniFFI export the `SealedMnemonic::QUESTION_COUNT`...
+            6 // might be wrong, the `canProceed` tells the truth though.
+        }
 		
 	}
 	
@@ -70,6 +85,7 @@ public struct SelectQuestionsFeature {
 				return .none
 				
 			case .view(.confirmedQuestions):
+                precondition(state.canProceed)
 				return .send(.delegate(.done(prefillWith: nil)))
 				
 			case let .destination(.presented(.prefillQuestionsAndAnswersAlert(prefillAction))):
@@ -98,11 +114,11 @@ public struct SelectQuestionCard: View {
 	@Shared(.questions) var questions
 	public let question: SecurityNotProductionReadyQuestion
 	public var id: SecurityNotProductionReadyQuestion.ID {
-		question.id
-	}
-	public var isSelected: Bool {
-		questions[id: id] != nil
-	}
+        question.id
+    }
+    public var isSelected: Bool {
+        questions[id: id] != nil
+    }
 	public var body: some SwiftUI.View {
 		Button(action: {
 			if isSelected {
@@ -136,14 +152,13 @@ extension SelectQuestionsFeature {
 	
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
-		let amount = 4
 		@Bindable public var store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("Pick #\(amount) questions").font(.title)
+                Text("Pick #\(store.questionCount) questions").font(.title)
 				Text("Picked: \(store.state.questions.count)")
 				
 				Button("Prefill Q + As") {
@@ -163,7 +178,7 @@ extension SelectQuestionsFeature {
 					send(.confirmedQuestions)
 				}
 				.buttonStyle(.borderedProminent)
-				.disabled(store.state.questions.count != amount)
+				.disabled(!store.canProceed)
 			}
 			.padding()
 			.alert($store.scope(state: \.destination?.prefillQuestionsAndAnswersAlert, action: \.destination.prefillQuestionsAndAnswersAlert))

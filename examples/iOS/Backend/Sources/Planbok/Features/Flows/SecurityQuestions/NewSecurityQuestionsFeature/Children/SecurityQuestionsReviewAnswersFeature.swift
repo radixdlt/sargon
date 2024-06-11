@@ -59,7 +59,7 @@ public struct SecurityQuestionsReviewAnswersFeature {
 				guard !state.isAdding else { return .none }
 				state.isAdding = true
 				return .run { [qas = state.answersToQuestions] send in
-					let factor = factorSourcesClient.createSecurityQuestionsFactor(qas)
+					let factor = try factorSourcesClient.createSecurityQuestionsFactor(qas)
                     try await factorSourcesClient.addFactorSource(factor.asGeneral)
                     await send(.internal(.factorCreatedAndAdded))
 				}
