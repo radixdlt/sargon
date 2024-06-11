@@ -7,6 +7,39 @@ pub struct RadixConnectMobileDappRequest {
     pub session_id: SessionID,
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
+pub struct RadixConnectMobileDappRequestContained {
+    pub request: DappToWalletInteractionUnvalidated,
+    pub session_id: SessionID,
+}
+
+impl RadixConnectMobileDappRequestContained {
+    pub fn new(
+        request: DappToWalletInteractionUnvalidated,
+        session_id: SessionID,
+    ) -> Self {
+        Self {
+            request,
+            session_id,
+        }
+    }
+
+    pub(crate) fn try_with_request_and_session_id(
+        request: DappToWalletInteractionUnvalidated,
+        session_id: impl AsRef<str>,
+    ) -> Result<Self> {
+        let session_id =
+            SessionID::from_str(session_id.as_ref()).map_err(|_| {
+                CommonError::RadixConnectMobileInvalidSessionID {
+                    bad_value: session_id.as_ref().to_owned(),
+                }
+            })?;
+        Ok(RadixConnectMobileDappRequestContained::new(
+            request, session_id,
+        ))
+    }
+}
+
 impl RadixConnectMobileDappRequest {
     pub fn new(
         interaction_id: WalletInteractionId,
