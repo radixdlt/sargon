@@ -117,7 +117,7 @@ impl RadixConnectMobile {
         let mut return_url = request.origin.join(&callback_path.0).unwrap();
         return_url
             .query_pairs_mut()
-            .append_pair("sessionID", request.session_id.0.to_string().as_str())
+            .append_pair("sessionId", request.session_id.0.to_string().as_str())
             .append_pair(
                 "publicKey",
                 wallet_private_key.public_key().to_hex().as_str(),
@@ -139,13 +139,10 @@ impl RadixConnectMobile {
             {
                 Some(session) => {
                     let session_id = session.id;
-
-                    self.new_sessions
-                        .try_write()
-                        .map(|mut new_sessions| {
-                            new_sessions.remove(&session_id);
-                        })
-                        .unwrap();
+                    if let Ok(mut new_sessions) = self.new_sessions.try_write()
+                    {
+                        new_sessions.remove(&session_id);
+                    }
 
                     Some(session.to_owned())
                 }

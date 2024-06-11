@@ -1,3 +1,5 @@
+use hex::ToHex;
+
 use super::super::session::*;
 use super::models::*;
 use crate::prelude::*;
@@ -57,7 +59,7 @@ impl WalletInteractionTransport for Service {
             Request::new_get_requests(session.id),
         )?;
 
-        let encrypted_wallet_interactions: Vec<Vec<u8>> = self
+        let encrypted_wallet_interactions: Vec<String> = self
             .http_client
             .execute_request_with_decoding(request)
             .await?;
@@ -65,7 +67,11 @@ impl WalletInteractionTransport for Service {
         let mut encryption_key = session.encryption_key;
         let decrypted_wallet_interactions = encrypted_wallet_interactions
             .iter()
-            .map(|bytes| {
+            .map(|hex| {
+                let bytes =
+                    hex_decode(hex).map_err(|_| CommonError::StringNotHex {
+                        bad_value: hex.to_owned(),
+                    })?;
                 self.encryption_scheme.decrypt(bytes, &mut encryption_key)
             })
             .collect::<Result<Vec<_>>>()?;
@@ -85,12 +91,14 @@ impl WalletInteractionTransport for Service {
             wallet_to_dapp_interaction_response_to_json_bytes(&response);
 
         let mut encryption_key = session.encryption_key;
-        let encrypted_response = self
+        let encrypted_response: Vec<u8> = self
             .encryption_scheme
             .encrypt(serialized_response.to_vec(), &mut encryption_key);
 
+        let hex = hex_encode(encrypted_response);
+
         let request = NetworkRequest::radix_connect_relay_request(
-            Request::new_send_response(session.id, encrypted_response),
+            Request::new_send_response(session.id, hex),
         )?;
         self.http_client.execute_network_request(request).await?;
         Ok(())
@@ -114,6 +122,7 @@ impl Service {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
+    use hex::ToHex;
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);
 
@@ -184,7 +193,7 @@ mod tests {
         // Encrypt the request
         let encrypted = EncryptionScheme::default()
             .encrypt(body.to_vec(), &mut encryption_key);
-        let requests = vec![encrypted];
+        let requests: Vec<String> = vec![hex_encode(encrypted)];
         let encoded_requests = serde_json::to_vec(&requests).unwrap();
 
         // Setup Service
@@ -232,10 +241,9 @@ mod tests {
             // Encrypt the response
             let encrypted = EncryptionScheme::default()
                 .encrypt(body.to_vec(), &mut encryption_key);
-            let relay_request = Request::new_send_response(
-                SessionID::sample(),
-                encrypted.clone(),
-            );
+            let hex = hex_encode(encrypted);
+            let relay_request =
+                Request::new_send_response(SessionID::sample(), hex.clone());
             let encoded = serde_json::to_vec(&relay_request).unwrap();
 
             // Request that is expected to be sent
@@ -265,7 +273,7 @@ mod tests {
 
             let decrypted_payload = EncryptionScheme::default()
                 .decrypt(
-                    sent_request.data.unwrap().to_vec(),
+                    hex_decode(sent_request.data.unwrap().as_str()).unwrap(),
                     &mut decryption_key,
                 )
                 .unwrap();

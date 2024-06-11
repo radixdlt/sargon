@@ -7,14 +7,14 @@ use crate::radix_connect::mobile::session::session_id::SessionID;
 pub struct Request {
     pub method: Method,
     pub session_id: SessionID,
-    pub data: Option<BagOfBytes>,
+    pub data: Option<String>,
 }
 
 impl Request {
     pub fn new(
         method: Method,
         session_id: impl Into<SessionID>,
-        data: impl Into<Option<BagOfBytes>>,
+        data: impl Into<Option<String>>,
     ) -> Self {
         Self {
             method,
@@ -27,7 +27,7 @@ impl Request {
 impl Request {
     pub fn new_send_request(
         session_id: impl Into<SessionID>,
-        data: impl Into<BagOfBytes>,
+        data: impl Into<String>,
     ) -> Self {
         Self::new(Method::SendRequest, session_id, data.into())
     }
@@ -38,7 +38,7 @@ impl Request {
 
     pub fn new_send_response(
         session_id: impl Into<SessionID>,
-        data: impl Into<BagOfBytes>,
+        data: impl Into<String>,
     ) -> Self {
         Self::new(Method::SendResponse, session_id, data.into())
     }
@@ -53,7 +53,7 @@ impl Request {
 
     pub fn new_send_handshake_response(
         session_id: impl Into<SessionID>,
-        data: impl Into<BagOfBytes>,
+        data: impl Into<String>,
     ) -> Self {
         Self::new(Method::SendHandshakeResponse, session_id, data.into())
     }
@@ -64,14 +64,17 @@ impl Request {
     ) -> Self {
         Self::new_send_handshake_response(
             session_id.into(),
-            public_key.into().to_bytes(),
+            public_key.into().to_hex(),
         )
     }
 }
 
 impl HasSampleValues for Request {
     fn sample() -> Self {
-        Self::new_send_request(SessionID::sample(), BagOfBytes::sample())
+        Self::new_send_request(
+            SessionID::sample(),
+            BagOfBytes::sample().to_hex(),
+        )
     }
 
     fn sample_other() -> Self {
@@ -100,7 +103,7 @@ mod tests {
     #[test]
     fn send_request() {
         let session_id = SessionID::sample();
-        let data = BagOfBytes::sample();
+        let data = BagOfBytes::sample().to_hex();
         let request = SUT::new_send_request(session_id.clone(), data.clone());
         assert_eq!(request.method, Method::SendRequest);
         assert_eq!(request.session_id, session_id);
@@ -119,7 +122,7 @@ mod tests {
     #[test]
     fn send_response() {
         let session_id = SessionID::sample();
-        let data = BagOfBytes::sample();
+        let data = BagOfBytes::sample().to_hex();
         let request = SUT::new_send_response(session_id.clone(), data.clone());
         assert_eq!(request.method, Method::SendResponse);
         assert_eq!(request.session_id, session_id);
@@ -147,7 +150,7 @@ mod tests {
     #[test]
     fn send_handshake_response() {
         let session_id = SessionID::sample();
-        let data = BagOfBytes::sample();
+        let data = BagOfBytes::sample().to_hex();
         let request =
             SUT::new_send_handshake_response(session_id.clone(), data.clone());
         assert_eq!(request.method, Method::SendHandshakeResponse);
@@ -166,16 +169,13 @@ mod tests {
 
         assert_eq!(request.method, Method::SendHandshakeResponse);
         assert_eq!(request.session_id, session_id);
-        assert_eq!(
-            request.data,
-            Some(BagOfBytes::from_hex(public_key.to_hex().as_str()).unwrap())
-        );
+        assert_eq!(request.data, Some(public_key.to_hex()));
     }
 
     #[test]
     fn send_request_json_roundtrip() {
         let session_id = SessionID::sample();
-        let data = BagOfBytes::sample();
+        let data = BagOfBytes::sample().to_hex();
         let request = SUT::new_send_request(session_id.clone(), data.clone());
 
         let expected_json = r#"
@@ -205,7 +205,7 @@ mod tests {
     #[test]
     fn send_response_json_roundtrip() {
         let session_id = SessionID::sample();
-        let data = BagOfBytes::sample();
+        let data = BagOfBytes::sample().to_hex();
         let request = SUT::new_send_response(session_id.clone(), data.clone());
 
         let expected_json = r#"
@@ -249,7 +249,7 @@ mod tests {
     #[test]
     fn send_handshake_response_json_roundtrip() {
         let session_id = SessionID::sample();
-        let data = BagOfBytes::sample();
+        let data = BagOfBytes::sample().to_hex();
         let request =
             SUT::new_send_handshake_response(session_id.clone(), data.clone());
 
