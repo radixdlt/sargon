@@ -74,7 +74,7 @@ internal fun <T : Any> T.encrypt(secretKey: SecretKey): Result<T> = runCatching 
         is ByteArray -> EncryptionHelper.encrypt(input = this, secretKey = secretKey)
             .getOrThrow() as T
 
-        else -> throw UnsupportedOperationException(
+        else -> throw IllegalArgumentException(
             "Encrypting ${this::class.java} type is not supported"
         )
     }
@@ -100,7 +100,7 @@ internal fun <T : Any> T.decrypt(secretKey: SecretKey): Result<T> = runCatching 
         is ByteArray -> EncryptionHelper.decrypt(input = this, secretKey = secretKey)
             .getOrThrow() as T
 
-        else -> throw UnsupportedOperationException(
+        else -> throw IllegalArgumentException(
             "Encrypting ${this::class.java} type is not supported"
         )
     }

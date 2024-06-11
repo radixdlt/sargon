@@ -90,7 +90,7 @@ class EncryptionHelperWithEncryptionKeyTest {
         val message = 10
         val encryptionKey = randomBagOfBytes(byteCount = 32).toUByteArray().toByteArray()
 
-        assertThrows<UnsupportedOperationException> {
+        assertThrows<IllegalArgumentException> {
             message.encrypt(encryptionKey = encryptionKey).getOrThrow()
         }
     }
@@ -100,7 +100,7 @@ class EncryptionHelperWithEncryptionKeyTest {
         val encryptionKey = randomBagOfBytes(byteCount = 32).toUByteArray().toByteArray()
         val encrypted = 2048
 
-        assertThrows<UnsupportedOperationException> {
+        assertThrows<IllegalArgumentException> {
             encrypted.decrypt(encryptionKey = encryptionKey).getOrThrow()
         }
     }
