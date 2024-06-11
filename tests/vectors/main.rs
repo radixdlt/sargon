@@ -539,7 +539,7 @@ mod dapp_to_wallet_interaction_tests {
             ),
             DappToWalletInteractionAccountsRequestItem::new(
                 RequestedQuantity::at_least(4),
-                Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
+                DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
             ),
             DappToWalletInteractionPersonaDataRequestItem::new(
                 true,
@@ -569,7 +569,7 @@ mod dapp_to_wallet_interaction_tests {
                 ),
                 DappToWalletInteractionAccountsRequestItem::new(
                     RequestedQuantity::exactly(4),
-                    Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
@@ -607,7 +607,7 @@ mod dapp_to_wallet_interaction_tests {
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 DappToWalletInteractionAccountsRequestItem::new(
                     RequestedQuantity::at_least(1),
-                    Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap())
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
@@ -630,7 +630,7 @@ mod dapp_to_wallet_interaction_tests {
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 DappToWalletInteractionAccountsRequestItem::new(
                     RequestedQuantity::exactly(1),
-                    Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap())
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
