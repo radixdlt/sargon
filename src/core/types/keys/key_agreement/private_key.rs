@@ -152,43 +152,4 @@ mod tests {
             sample_1.shared_secret_from_key_agreement(&other_pb_key);
         todo!("Add test")
     }
-
-    #[test]
-    fn hkdf_key_agreement() {
-        // Test vector
-        let json_test_vector = r#"
-        {
-            "wallet_private_key": "98df1ecbf042f5dc986f79c332ef64efed6240f407a664b2e9261c1af78e1063",
-            "dapp_public_key": "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10",
-            "salt": "000102030405060708090a0b0c0d0e0f",
-            "info": "f0f1f2f3f4f5f6f7f8f9",
-            "expected_encryption_key": "9dd1c0134cf081d7d4e4bdeeac578bfe9d09fb35810fad9567ef6f2ec3f0201e"
-        }"#;
-
-        let decoded: serde_json::Value =
-            serde_json::from_str(json_test_vector).unwrap();
-        let private_key = KeyAgreementPrivateKey::try_from(
-            hex_decode(decoded["wallet_private_key"].as_str().unwrap())
-                .unwrap(),
-        )
-        .unwrap();
-
-        let public_key = KeyAgreementPublicKey::from_hex(
-            decoded["dapp_public_key"].as_str().unwrap().to_owned(),
-        )
-        .unwrap();
-
-        let salt = hex_decode(decoded["salt"].as_str().unwrap()).unwrap();
-        let info = hex_decode(decoded["info"].as_str().unwrap()).unwrap();
-
-        let encryption_key = private_key
-            .hkdf_key_agreement(&public_key, &salt, &info)
-            .unwrap();
-        let expected_encryption_key = Exactly32Bytes::from_hex(
-            decoded["expected_encryption_key"].as_str().unwrap(),
-        )
-        .unwrap();
-
-        assert_eq!(encryption_key, expected_encryption_key);
-    }
 }

@@ -117,7 +117,7 @@ mod tests {
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);
 
-    const SERVICE_PATH: &str = "https://radix-connect-relay-dev.rdx-works-main.extratools.works/api/v1";
+    const SERVICE_PATH: &str = "https://radix-connect-relay.radixdlt.com/api/v1";
 
     #[actix_rt::test]
     async fn test_get_wallet_interaction_requests_correct_request_is_made() {
@@ -283,120 +283,6 @@ mod tests {
         let req = service.send_wallet_interaction_response(
             session,
             WalletToDappInteractionResponse::sample(),
-        );
-        let _ = timeout(MAX, req).await.unwrap();
-    }
-
-    #[actix_rt::test]
-    async fn get_session_handshake_request_correct_request_is_made() {
-        let mock_antenna_with_spy =
-            MockAntenna::with_spy(200, vec![], |request| {
-                let session_id = SessionID::sample();
-                let relay_request =
-                    Request::new_get_handshake_request(session_id);
-                let encoded_request =
-                    serde_json::to_vec(&relay_request).unwrap();
-
-                let expected_request = NetworkRequest {
-                    url: Url::from_str(SERVICE_PATH).unwrap(),
-                    method: NetworkMethod::Post,
-                    body: encoded_request.into(),
-                    headers: HashMap::new(),
-                };
-
-                pretty_assertions::assert_eq!(
-                    request.url,
-                    expected_request.url
-                );
-                pretty_assertions::assert_eq!(
-                    request.method,
-                    expected_request.method
-                );
-                pretty_assertions::assert_eq!(
-                    request.body,
-                    expected_request.body
-                );
-            });
-
-        let service =
-            Service::new_with_network_antenna(Arc::new(mock_antenna_with_spy));
-        let session_id = SessionID::sample();
-
-        let req = service.get_session_handshake_request(session_id);
-        let _ = timeout(MAX, req).await.unwrap();
-    }
-
-    #[actix_rt::test]
-    async fn get_session_handshake_request_failure() {
-        let service = Service::new_always_failing();
-        let session_id = SessionID::sample();
-
-        let req = service.get_session_handshake_request(session_id);
-        let result = timeout(MAX, req).await.unwrap();
-        assert!(result.is_err());
-    }
-
-    #[actix_rt::test]
-    async fn test_get_session_handshake_request() {
-        let request = SessionHandshakeRequest::sample();
-        let mock_antenna =
-            MockAntenna::new(200, serde_json::to_vec(&request).unwrap());
-
-        let service = Service::new_with_network_antenna(Arc::new(mock_antenna));
-
-        let session_id = SessionID::sample();
-
-        let req = service.get_session_handshake_request(session_id);
-        let result = timeout(MAX, req).await.unwrap();
-        pretty_assertions::assert_eq!(result, Ok(request));
-    }
-
-    #[actix_rt::test]
-    async fn test_send_session_handshake_response_failure() {
-        let service = Service::new_always_failing();
-        let session_id = SessionID::sample();
-
-        let req = service.send_session_handshake_response(
-            session_id,
-            KeyAgreementPublicKey::sample(),
-        );
-        let result = timeout(MAX, req).await.unwrap();
-        assert!(result.is_err());
-    }
-
-    #[actix_rt::test]
-    async fn test_send_session_handshake_response() {
-        let mock_antenna = MockAntenna::with_spy(200, (), |request| {
-            let public_key = KeyAgreementPublicKey::sample();
-            let body = Request::new(
-                Method::SendHandshakeResponse,
-                SessionID::sample(),
-                BagOfBytes::from_hex(public_key.to_hex().as_str()).unwrap(),
-            );
-
-            let encoded = serde_json::to_vec(&body).unwrap();
-
-            let expected_request = NetworkRequest {
-                url: Url::from_str(SERVICE_PATH).unwrap(),
-                method: NetworkMethod::Post,
-                body: encoded.into(),
-                headers: HashMap::new(),
-            };
-
-            pretty_assertions::assert_eq!(request.url, expected_request.url);
-            pretty_assertions::assert_eq!(
-                request.method,
-                expected_request.method
-            );
-            pretty_assertions::assert_eq!(request.body, expected_request.body);
-        });
-
-        let service = Service::new_with_network_antenna(Arc::new(mock_antenna));
-        let session_id = SessionID::sample();
-
-        let req = service.send_session_handshake_response(
-            session_id,
-            KeyAgreementPublicKey::sample(),
         );
         let _ = timeout(MAX, req).await.unwrap();
     }

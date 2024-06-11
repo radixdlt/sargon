@@ -10,7 +10,7 @@ const CONNECT_URL_PARAM_INTERACTION_ID: &str = "interactionId";
 const CONNECT_URL_PARAM_PUBLIC_KEY: &str = "publicKey";
 const CONNECT_URL_PARAM_BROWSER: &str = "browser";
 const CONNECT_URL: &str = "https://d1rxdfxrfmemlj.cloudfront.net";
-const APP_SCHEME: &str = "radixWallet";
+const APP_SCHEME: &str = "radixwallet";
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
@@ -23,9 +23,10 @@ pub fn parse_mobile_connect_request(
         }
     })?;
 
-    if parsed_url.host_str() != connect_url.host_str()
-        || parsed_url.scheme() != connect_url.scheme()
-        || parsed_url.scheme() != APP_SCHEME
+    if !(parsed_url.host_str() == connect_url.host_str()
+        && parsed_url.scheme() == connect_url.scheme()
+        || parsed_url.scheme() == APP_SCHEME
+)
     {
         return Err(CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
@@ -83,24 +84,40 @@ mod tests {
 
     #[test]
     fn parse_url_into_link_request_origin() {
-        let session_id = Uuid::new_v4().to_string();
+        let origin = parse_url("radix://app").unwrap();
+        let session_id = SessionID::sample();
+        let public_key = KeyAgreementPrivateKey::generate().unwrap().public_key();
+        let browser = "chrome".to_string();
         let connect_url = CONNECT_URL.to_owned()
-            + format!("/?sessionId={}&origin=radix%3A%2F%2Fapp", session_id)
+            + format!("/?sessionId={}&origin=radix%3A%2F%2Fapp&publicKey={}&browser=chrome", session_id.to_string(), public_key.to_hex())
                 .as_str();
+
         let result = parse_mobile_connect_request(connect_url);
-        assert!(result.is_ok());
-        match result.unwrap() {
-            RadixConnectMobileConnectRequest::Link(link_request) => {
-                assert_eq!(link_request.session_id.0.to_string(), session_id);
-                assert_eq!(
-                    link_request.origin,
-                    parse_url("radix://app").unwrap()
-                );
-            }
-            _ => {
-                panic!("Expected LinkRequest");
-            }
-        }
+        let expected_result = RadixConnectMobileConnectRequest::Link(
+            RadixConnectMobileLinkRequest::new(origin, session_id, public_key, browser)
+        );
+
+        pretty_assertions::assert_eq!(result, Ok(expected_result));
+    }
+
+    #[test]
+    fn parse_url_app_scheme_into_link_request_origin() {
+        let origin = parse_url("radix://app").unwrap();
+        let session_id = SessionID::sample();
+        let public_key = KeyAgreementPrivateKey::generate().unwrap().public_key();
+        let browser = "chrome".to_string();
+        let connect_url = APP_SCHEME.to_owned()
+            + format!("://?sessionId={}&origin=radix%3A%2F%2Fapp&publicKey={}&browser=chrome", session_id.to_string(), public_key.to_hex())
+                .as_str();
+
+                pretty_assertions::assert_eq!(parse_url(&connect_url).unwrap().scheme(), APP_SCHEME);
+
+        let result = parse_mobile_connect_request(connect_url);
+        let expected_result = RadixConnectMobileConnectRequest::Link(
+            RadixConnectMobileLinkRequest::new(origin, session_id, public_key, browser)
+        );
+
+        pretty_assertions::assert_eq!(result, Ok(expected_result));
     }
 
     #[test]
@@ -110,7 +127,7 @@ mod tests {
         let err = parse_mobile_connect_request(connect_url.clone())
             .err()
             .unwrap();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             err,
             CommonError::RadixConnectMobileInvalidSessionID {
                 bad_value: "123".to_owned()
