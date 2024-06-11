@@ -211,6 +211,7 @@ CALL_METHOD
         let index = 2;
         let resource = ResourceAddress::sample_mainnet_candy();
         let added_guaranteed_amount: Decimal = "0.12344".parse().unwrap();
+        let percentage: Decimal = "0.95".parse().unwrap();
         let divisibility = 4;
         let rounded_guaranteed_amount: Decimal = "0.1234".parse().unwrap();
         assert_eq!(
@@ -225,6 +226,7 @@ CALL_METHOD
         .unwrap();
         manifest = manifest.modify_add_guarantees([TransactionGuarantee::new(
             added_guaranteed_amount,
+            percentage,
             index,
             resource,
             divisibility,
@@ -352,6 +354,7 @@ CALL_METHOD
         manifest_eq(
             manifest.modify_add_guarantees([TransactionGuarantee::new(
                 1337,
+                0,
                 1,
                 ResourceAddress::sample(),
                 10,
@@ -389,6 +392,7 @@ CALL_METHOD
         manifest_eq(
             manifest.modify_add_guarantees([TransactionGuarantee::new(
                 1337,
+                0,
                 1,
                 ResourceAddress::sample(),
                 10,
@@ -462,6 +466,7 @@ CALL_METHOD
             manifest.clone().modify_add_guarantees([
                 TransactionGuarantee::new(
                     0,
+                    0,
                     4,
                     ResourceAddress::sample(),
                     None
@@ -484,6 +489,7 @@ CALL_METHOD
                     TransactionGuarantee::new(
                         i,
                         0,
+                        0,
                         ResourceAddress::sample(),
                         None,
                     )
@@ -504,6 +510,7 @@ CALL_METHOD
             modify_manifest_add_guarantees(
                 manifest.clone(),
                 vec![TransactionGuarantee::new(
+                    0,
                     0,
                     5,
                     ResourceAddress::sample(),

@@ -2,7 +2,11 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct TransactionGuarantee {
+    /// The guaranteed amount to be obtained on this transaction. For manifest & display purposes.
     pub amount: Decimal192,
+
+    /// The percentage the user has selected, which generated the `amount`. For display purposes only.
+    pub percentage: Decimal192,
     pub instruction_index: u64,
     pub resource_address: ResourceAddress,
     pub resource_divisibility: Option<u8>,
@@ -11,12 +15,14 @@ pub struct TransactionGuarantee {
 impl TransactionGuarantee {
     pub fn new(
         amount: impl Into<Decimal192>,
+        percentage: impl Into<Decimal192>,
         instruction_index: u64,
         resource_address: ResourceAddress,
         resource_divisibility: impl Into<Option<u8>>,
     ) -> Self {
         Self {
             amount: amount.into(),
+            percentage: percentage.into(),
             instruction_index,
             resource_address,
             resource_divisibility: resource_divisibility.into(),
@@ -32,11 +38,23 @@ impl TransactionGuarantee {
 
 impl HasSampleValues for TransactionGuarantee {
     fn sample() -> Self {
-        TransactionGuarantee::new(1337, 3, ResourceAddress::sample(), Some(12))
+        TransactionGuarantee::new(
+            1337,
+            "0.95".parse::<Decimal192>().unwrap(),
+            3,
+            ResourceAddress::sample(),
+            Some(12),
+        )
     }
 
     fn sample_other() -> Self {
-        TransactionGuarantee::new(42, 12, ResourceAddress::sample_other(), None)
+        TransactionGuarantee::new(
+            42,
+            "0.90".parse::<Decimal192>().unwrap(),
+            12,
+            ResourceAddress::sample_other(),
+            None,
+        )
     }
 }
 
@@ -60,8 +78,13 @@ mod tests {
 
     #[test]
     fn rounding() {
-        let sut =
-            SUT::new("0.12344", 2, ResourceAddress::sample_mainnet_candy(), 4);
+        let sut = SUT::new(
+            "0.12344",
+            90,
+            2,
+            ResourceAddress::sample_mainnet_candy(),
+            4,
+        );
 
         assert_eq!(sut.rounded_amount(), "0.1234".into());
     }
