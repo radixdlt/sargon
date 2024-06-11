@@ -11,6 +11,7 @@ import ComposableArchitecture
 
 @main
 struct PlanbokApp: App {
+    @UIApplicationDelegateAdaptor var delegate: AppDelegate
 
 	var body: some Scene {
 		WindowGroup {

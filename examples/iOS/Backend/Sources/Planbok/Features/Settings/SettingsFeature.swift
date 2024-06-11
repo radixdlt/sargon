@@ -13,6 +13,8 @@ import SwiftUI
 @Reducer
 public struct SettingsFeature {
 	@Dependency(AccountsClient.self) var accountsClient
+    @Dependency(OverlayWindowClient.self) var overlayWindowClient
+    
 	
 	@Reducer(state: .equatable)
 	public enum Destination {
@@ -69,17 +71,19 @@ public struct SettingsFeature {
 			switch action {
 			case .view(.createManyAccountsButtonTapped):
 				
-				state.destination = .createManyAccountsAlert(.init(
-					title: TextState("How many?"),
-					message: TextState("Will batch create many accounts and then perform one single save action."),
-					buttons: [
-						.cancel(TextState("Cancel"))
-					] + Destination.CreateManyAccountsAlert.allCases.map { action in
-						ButtonState<Destination.CreateManyAccountsAlert>.init(action: action, label: {
-							TextState("Create \(action.rawValue)")
-						})
-					}
-				))
+//				state.destination = .createManyAccountsAlert(.init(
+//					title: TextState("How many?"),
+//					message: TextState("Will batch create many accounts and then perform one single save action."),
+//					buttons: [
+//						.cancel(TextState("Cancel"))
+//					] + Destination.CreateManyAccountsAlert.allCases.map { action in
+//						ButtonState<Destination.CreateManyAccountsAlert>.init(action: action, label: {
+//							TextState("Create \(action.rawValue)")
+//						})
+//					}
+//				))
+                
+                overlayWindowClient.scheduleHUDMessage(.openedSecurityQuestionsSealedMnemonic)
 				return .none
                 
             case .view(.factorSourcesButtonTapped):

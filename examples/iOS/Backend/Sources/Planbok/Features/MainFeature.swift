@@ -222,16 +222,25 @@ public struct MainFeature {
 
 }
 
-public struct DeveloperDisclaimerBanner: View {
-	public var body: some View {
-		Text("Connected to a test network, not Radix main network")
-			.frame(maxWidth: .infinity, alignment: .center)
-			.padding(4)
-			.background(Color.app.orange2)
-			.font(.system(size: 12))
-	}
+public struct BannerThisIsNotRadixWallet: View {
+    public let onMainnet: Bool
+    public init(onMainnet: Bool) {
+        self.onMainnet = onMainnet
+    }
+    public var body: some View {
+        VStack(alignment: .center, spacing: 4) {
+            Text("Demo app, **not** the Radix Wallet app.")
+                .font(.system(size: 22))
+            Text(onMainnet ? "" : "‼️ On Testnet ‼️")
+                .font(.system(size: 12))
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(4)
+        .background(Color.yellow)
+        .foregroundStyle(Color.red)
+        .fontWeight(.bold)
+    }
 
-	public init() {}
 }
 
 
@@ -246,10 +255,11 @@ extension MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-			if store.network != .mainnet {
-				DeveloperDisclaimerBanner()
-			}
-			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
+            BannerThisIsNotRadixWallet(
+                onMainnet: store.network == .mainnet
+            )
+
+            NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				VStack {
 					VStack {
 						Text("ProfileID:")
