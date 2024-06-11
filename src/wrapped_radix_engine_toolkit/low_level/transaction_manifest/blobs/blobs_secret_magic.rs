@@ -1,7 +1,9 @@
 use crate::prelude::*;
 
 /// Vec of Blobs
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
+#[derive(
+    Clone, PartialEq, Eq, Serialize, Deserialize, Debug, uniffi::Record,
+)]
 pub struct BlobsSecretMagic {
     pub(crate) secret_magic: Vec<Blob>,
 }
@@ -25,6 +27,14 @@ impl BlobsSecretMagic {
         I: IntoIterator<Item = BagOfBytes>,
     {
         Self::new(bags.into_iter().map(Blob::from))
+    }
+}
+
+impl From<Vec<Blob>> for BlobsSecretMagic {
+    fn from(value: Vec<Blob>) -> Self {
+        Self {
+            secret_magic: value,
+        }
     }
 }
 

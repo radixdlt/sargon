@@ -14,12 +14,10 @@ impl DappToWalletInteractionTransactionItems {
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSendTransactionItem {
-    pub transaction_manifest: String,
+    #[serde(flatten, with = "UnvalidatedTransactionManifest")]
+    pub unvalidated_manifest: UnvalidatedTransactionManifest,
 
     pub version: TXVersion,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub blobs: Option<Vec<String>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -27,15 +25,13 @@ pub struct DappToWalletInteractionSendTransactionItem {
 
 impl DappToWalletInteractionSendTransactionItem {
     pub fn new(
-        transaction_manifest: impl AsRef<str>,
+        unvalidated_manifest: impl Into<UnvalidatedTransactionManifest>,
         version: impl Into<TXVersion>,
-        blobs: impl Into<Option<Vec<String>>>,
         message: impl Into<Option<String>>,
     ) -> Self {
         Self {
-            transaction_manifest: transaction_manifest.as_ref().to_owned(),
+            unvalidated_manifest: unvalidated_manifest.into(),
             version: version.into(),
-            blobs: blobs.into(),
             message: message.into(),
         }
     }
@@ -54,18 +50,16 @@ impl HasSampleValues for DappToWalletInteractionTransactionItems {
 impl HasSampleValues for DappToWalletInteractionSendTransactionItem {
     fn sample() -> Self {
         Self::new(
-            "transaction_manifest",
+            UnvalidatedTransactionManifest::sample(),
             TXVersion::sample(),
-            vec!["blob".to_owned()],
             "message".to_owned(),
         )
     }
 
     fn sample_other() -> Self {
         Self::new(
-            "transaction_manifest_other",
+            UnvalidatedTransactionManifest::sample_other(),
             TXVersion::sample_other(),
-            vec!["blob_other".to_owned()],
             "message_other".to_owned(),
         )
     }

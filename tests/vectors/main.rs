@@ -530,7 +530,7 @@ mod dapp_to_wallet_interaction_tests {
         DappToWalletInteractionAuthorizedRequestItems::new(
             DappToWalletInteractionAuthRequestItem::LoginWithChallenge(
                 DappToWalletInteractionAuthLoginWithChallengeRequestItem::new(
-                    Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
                 )
             ),
             DappToWalletInteractionResetRequestItem::new(
@@ -539,7 +539,7 @@ mod dapp_to_wallet_interaction_tests {
             ),
             DappToWalletInteractionAccountsRequestItem::new(
                 RequestedQuantity::at_least(4),
-                Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
+                DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
             ),
             DappToWalletInteractionPersonaDataRequestItem::new(
                 true,
@@ -569,7 +569,7 @@ mod dapp_to_wallet_interaction_tests {
                 ),
                 DappToWalletInteractionAccountsRequestItem::new(
                     RequestedQuantity::exactly(4),
-                    Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
@@ -591,25 +591,23 @@ mod dapp_to_wallet_interaction_tests {
         );
 
         let transaction = DappToWalletInteraction::new(
-        WalletInteractionId::from_str("4051ff20-03b0-4a48-8205-0e8e8c673289").unwrap(),
-        DappToWalletInteractionItems::Transaction(
-            DappToWalletInteractionTransactionItems::new(
-                DappToWalletInteractionSendTransactionItem::new(
-                    "CALL_FUNCTION Address(\"package_tdx_2_1pkgxxxxxxxxxplxxxxxxxxxxxxx020379220524xxxxxxxxxe4r780\") \n    \"OneResourcePool\"\n    \"instantiate\"\n    Enum<OwnerRole::Fixed>(Enum<AccessRule::AllowAll>())\n    Enum<AccessRule::AllowAll>() \n    Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\")\n    None;",
-    1,
-                    vec!["0061736d0100000001c8011c60037f7f7f0060027f7f0060027f7f017f60017f0060037f7f7f017f60017f017f60047f7f7f7f0060017f017e60037f7f7f017e60057f7f7f7f7f0060057f7f7f7f7f017f60027f7e017f60037f7f7e0".into()],
-                    "test message".to_owned(),
-                )
+            WalletInteractionId::from_str(
+                "4051ff20-03b0-4a48-8205-0e8e8c673289",
             )
-        ),
-        metadata.clone(),
+            .unwrap(),
+            DappToWalletInteractionItems::Transaction(
+                DappToWalletInteractionTransactionItems::new(
+                    DappToWalletInteractionSendTransactionItem::sample(),
+                ),
+            ),
+            metadata.clone(),
         );
 
         let unauthorized_request_1_items =  DappToWalletInteractionItems::UnauthorizedRequest(
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 DappToWalletInteractionAccountsRequestItem::new(
                     RequestedQuantity::at_least(1),
-                    Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap())
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
@@ -632,7 +630,7 @@ mod dapp_to_wallet_interaction_tests {
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 DappToWalletInteractionAccountsRequestItem::new(
                     RequestedQuantity::exactly(1),
-                    Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap())
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
@@ -709,14 +707,14 @@ mod wallet_to_dapp_interaction_tests {
         let account_1 = WalletInteractionWalletAccount::new(
             AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz")
             .unwrap(),
-            "Dff",
+            DisplayName::sample(),
             AppearanceID::gradient0(),
         );
 
         let account_2 = WalletInteractionWalletAccount::new(
             AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n")
             .unwrap(),
-            "Ghhvgfvf",
+            DisplayName::sample_other(),
             AppearanceID::gradient1(),
         );
 
@@ -729,8 +727,8 @@ mod wallet_to_dapp_interaction_tests {
                             .unwrap(),
                             "Usdudh",
                         ),
-                        Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7")
-                        .unwrap(),
+                        DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7")
+                        .unwrap()),
                         WalletToDappInteractionAuthProof::new(
                             PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
                             .unwrap(),
@@ -742,8 +740,8 @@ mod wallet_to_dapp_interaction_tests {
                 ),
                 WalletToDappInteractionAccountsRequestResponseItem::new(
                     vec![account_1.clone(), account_2.clone()],
-                    Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7")
-                    .unwrap(),
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7")
+                    .unwrap()),
                     vec![
                         WalletToDappInteractionAccountProof::new(
                             account_1.address,
