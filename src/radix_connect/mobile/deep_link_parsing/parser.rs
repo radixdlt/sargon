@@ -122,8 +122,14 @@ mod tests {
 
     #[test]
     fn parse_url_wrong_session_id() {
-        let connect_url =
-            CONNECT_URL.to_owned() + "/?sessionId=123&origin=radix%3A%2F%2Fapp";
+        let interaction_id = Uuid::new_v4().to_string();
+        let connect_url = CONNECT_URL.to_owned()
+        + format!(
+            "/?sessionId=123&interactionId={}&browser=chrome",
+            interaction_id
+        )
+        .as_str();
+
         let err = parse_mobile_connect_request(connect_url.clone())
             .err()
             .unwrap();
@@ -141,7 +147,7 @@ mod tests {
         let interaction_id = Uuid::new_v4().to_string();
         let url = CONNECT_URL.to_owned()
             + format!(
-                "/?sessionId={}&interactionId={}",
+                "/?sessionId={}&interactionId={}&browser=chrome",
                 session_id, interaction_id
             )
             .as_str();
@@ -165,7 +171,7 @@ mod tests {
     fn url_does_not_match_expected() {
         let url = "https://example.com";
         let err = parse_mobile_connect_request(url).err().unwrap();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             err,
             CommonError::RadixConnectMobileInvalidRequestUrl {
                 bad_value: url.to_owned()
@@ -177,7 +183,7 @@ mod tests {
     fn url_invalid() {
         let url = "http/invalid_url";
         let err = parse_mobile_connect_request(url).err().unwrap();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             err,
             CommonError::RadixConnectMobileInvalidRequestUrl {
                 bad_value: url.to_owned()
@@ -188,10 +194,11 @@ mod tests {
     #[test]
     fn url_with_invalid_origin() {
         let session_id = Uuid::new_v4().to_string();
+        let public_key = KeyAgreementPrivateKey::generate().unwrap().public_key();
         let connect_url = CONNECT_URL.to_owned()
-            + format!("/?sessionId={}&origin=invalid", session_id).as_str();
+            + format!("/?sessionId={}&origin=invalid&publicKey={}&browser=chrome", session_id, public_key.to_hex()).as_str();
         let err = parse_mobile_connect_request(connect_url).err().unwrap();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             err,
             CommonError::RadixConnectMobileInvalidOrigin {
                 bad_value: "invalid".to_owned()
@@ -203,7 +210,7 @@ mod tests {
     fn url_does_not_match_any_request() {
         let url = "https://d1rxdfxrfmemlj.cloudfront.net/?invalid=1";
         let err = parse_mobile_connect_request(url).err().unwrap();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             err,
             CommonError::RadixConnectMobileInvalidRequestUrl {
                 bad_value: url.to_owned()
