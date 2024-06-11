@@ -29,7 +29,7 @@ trait WalletKeyGenerator {}
 pub struct RadixConnectMobile {
     /// The Radix Connect Relay service to be used to communicate with dApps.
     wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
-    /// The secure storage to be used to store session data.
+    /// The storage to be used to store session data.
     session_storage: Arc<dyn SessionStorage>,
     /// The client to be used to fetch well-known files.
     well_known_client: WellKnownClient,
@@ -227,16 +227,4 @@ pub fn new_mobile_connect_request(
     url: String,
 ) -> Result<RadixConnectMobileConnectRequest> {
     RadixConnectMobileConnectRequest::from_str(url.as_str())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_new_mobile_connect_request() {
-        let uuid = Uuid::new_v4().to_string();
-        let connect_url = format!("https://d1rxdfxrfmemlj.cloudfront.net/?sessionId={}&origin=radix%3A%2F%2Fapp", uuid);
-        assert!(new_mobile_connect_request(connect_url).is_ok());
-    }
 }

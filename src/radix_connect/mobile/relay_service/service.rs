@@ -117,7 +117,8 @@ mod tests {
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);
 
-    const SERVICE_PATH: &str = "https://radix-connect-relay.radixdlt.com/api/v1";
+    const SERVICE_PATH: &str =
+        "https://radix-connect-relay.radixdlt.com/api/v1";
 
     #[actix_rt::test]
     async fn test_get_wallet_interaction_requests_correct_request_is_made() {

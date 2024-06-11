@@ -25,8 +25,7 @@ pub fn parse_mobile_connect_request(
 
     if !(parsed_url.host_str() == connect_url.host_str()
         && parsed_url.scheme() == connect_url.scheme()
-        || parsed_url.scheme() == APP_SCHEME
-)
+        || parsed_url.scheme() == APP_SCHEME)
     {
         return Err(CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
@@ -86,7 +85,8 @@ mod tests {
     fn parse_url_into_link_request_origin() {
         let origin = parse_url("radix://app").unwrap();
         let session_id = SessionID::sample();
-        let public_key = KeyAgreementPrivateKey::generate().unwrap().public_key();
+        let public_key =
+            KeyAgreementPrivateKey::generate().unwrap().public_key();
         let browser = "chrome".to_string();
         let connect_url = CONNECT_URL.to_owned()
             + format!("/?sessionId={}&origin=radix%3A%2F%2Fapp&publicKey={}&browser=chrome", session_id.to_string(), public_key.to_hex())
@@ -94,7 +94,9 @@ mod tests {
 
         let result = parse_mobile_connect_request(connect_url);
         let expected_result = RadixConnectMobileConnectRequest::Link(
-            RadixConnectMobileLinkRequest::new(origin, session_id, public_key, browser)
+            RadixConnectMobileLinkRequest::new(
+                origin, session_id, public_key, browser,
+            ),
         );
 
         pretty_assertions::assert_eq!(result, Ok(expected_result));
@@ -104,17 +106,23 @@ mod tests {
     fn parse_url_app_scheme_into_link_request_origin() {
         let origin = parse_url("radix://app").unwrap();
         let session_id = SessionID::sample();
-        let public_key = KeyAgreementPrivateKey::generate().unwrap().public_key();
+        let public_key =
+            KeyAgreementPrivateKey::generate().unwrap().public_key();
         let browser = "chrome".to_string();
         let connect_url = APP_SCHEME.to_owned()
             + format!("://?sessionId={}&origin=radix%3A%2F%2Fapp&publicKey={}&browser=chrome", session_id.to_string(), public_key.to_hex())
                 .as_str();
 
-                pretty_assertions::assert_eq!(parse_url(&connect_url).unwrap().scheme(), APP_SCHEME);
+        pretty_assertions::assert_eq!(
+            parse_url(&connect_url).unwrap().scheme(),
+            APP_SCHEME
+        );
 
         let result = parse_mobile_connect_request(connect_url);
         let expected_result = RadixConnectMobileConnectRequest::Link(
-            RadixConnectMobileLinkRequest::new(origin, session_id, public_key, browser)
+            RadixConnectMobileLinkRequest::new(
+                origin, session_id, public_key, browser,
+            ),
         );
 
         pretty_assertions::assert_eq!(result, Ok(expected_result));
@@ -124,11 +132,11 @@ mod tests {
     fn parse_url_wrong_session_id() {
         let interaction_id = Uuid::new_v4().to_string();
         let connect_url = CONNECT_URL.to_owned()
-        + format!(
-            "/?sessionId=123&interactionId={}&browser=chrome",
-            interaction_id
-        )
-        .as_str();
+            + format!(
+                "/?sessionId=123&interactionId={}&browser=chrome",
+                interaction_id
+            )
+            .as_str();
 
         let err = parse_mobile_connect_request(connect_url.clone())
             .err()
@@ -194,9 +202,15 @@ mod tests {
     #[test]
     fn url_with_invalid_origin() {
         let session_id = Uuid::new_v4().to_string();
-        let public_key = KeyAgreementPrivateKey::generate().unwrap().public_key();
+        let public_key =
+            KeyAgreementPrivateKey::generate().unwrap().public_key();
         let connect_url = CONNECT_URL.to_owned()
-            + format!("/?sessionId={}&origin=invalid&publicKey={}&browser=chrome", session_id, public_key.to_hex()).as_str();
+            + format!(
+                "/?sessionId={}&origin=invalid&publicKey={}&browser=chrome",
+                session_id,
+                public_key.to_hex()
+            )
+            .as_str();
         let err = parse_mobile_connect_request(connect_url).err().unwrap();
         pretty_assertions::assert_eq!(
             err,

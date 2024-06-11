@@ -49,8 +49,12 @@ mod tests {
 
     #[test]
     fn test_new_mobile_connect_request() {
-        let uuid = Uuid::new_v4().to_string();
-        let connect_url = format!("https://d1rxdfxrfmemlj.cloudfront.net/?sessionId={}&origin=radix%3A%2F%2Fapp", uuid);
+        let session_id = SessionID::sample();
+        let public_key =
+            KeyAgreementPrivateKey::generate().unwrap().public_key();
+        let connect_url = format!("https://d1rxdfxrfmemlj.cloudfront.net/?sessionId={}&origin=radix%3A%2F%2Fapp&publicKey={}&browser=chrome", session_id.to_string(), public_key.to_hex())
+                ;
+
         assert!(RadixConnectMobileConnectRequest::from_str(
             connect_url.as_str()
         )

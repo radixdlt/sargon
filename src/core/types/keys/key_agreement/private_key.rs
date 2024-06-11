@@ -108,6 +108,8 @@ impl HasSampleValues for KeyAgreementPrivateKey {
 #[cfg(test)]
 mod tests {
 
+    use hex::ToHex;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -150,6 +152,11 @@ mod tests {
 
         let shared_secret =
             sample_1.shared_secret_from_key_agreement(&other_pb_key);
-        todo!("Add test")
+        let bytes: Exactly32Bytes = shared_secret.as_bytes().into();
+        pretty_assertions::assert_eq!(
+            bytes.to_hex(),
+            "e893692f57baa2a99ece829b98ff4987cd7737e68ff97e00a27d7552e6633429"
+                .to_string()
+        );
     }
 }
