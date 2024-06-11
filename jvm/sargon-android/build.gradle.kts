@@ -103,6 +103,7 @@ dependencies {
     // For Storage implementation
     implementation(libs.androidx.datastore.preferences)
 
+    // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
@@ -110,6 +111,12 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))
+
+    // Integration tests
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.junit.ktx)
+    androidTestImplementation(libs.coroutines.test)
 }
 
 publishing {
