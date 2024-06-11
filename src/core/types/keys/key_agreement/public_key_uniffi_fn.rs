@@ -27,7 +27,7 @@ pub fn key_agreement_public_key_to_hex(
 
 /// Returns the public key on **compressed** form (33 bytes)
 #[uniffi::export]
-pub fn key_agreeement_public_key_to_bytes(
+pub fn key_agreement_public_key_to_bytes(
     public_key: &KeyAgreementPublicKey,
 ) -> BagOfBytes {
     BagOfBytes::from(public_key.to_bytes())
