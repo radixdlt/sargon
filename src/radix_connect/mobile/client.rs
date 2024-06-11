@@ -39,6 +39,7 @@ pub struct RadixConnectMobile {
     new_sessions: RwLock<HashMap<SessionID, Session>>,
 }
 
+#[uniffi::export]
 impl RadixConnectMobile {
     // RadixConnectMobile should require a NetworkAntenna and a SecureStorage from the Wallet.
     // The internal components, such as RadixConnectRelayService will be created by the RadixConnectMobile.
@@ -58,7 +59,10 @@ impl RadixConnectMobile {
             new_sessions: RwLock::new(HashMap::new()),
         }
     }
+}
 
+#[uniffi::export]
+impl RadixConnectMobile {
     #[uniffi::method]
     pub async fn handle_linking_request(
         &self,
@@ -126,13 +130,13 @@ impl RadixConnectMobile {
         &self,
         dapp_request: RadixConnectMobileDappRequest,
     ) -> Result<RadixConnectMobileSessionRequest> {
-        let session;
+        let inflight_session;
         {
             let new_sessions = self.new_sessions.try_read().unwrap();
 
-            session = match new_sessions.get(&dapp_request.session_id) {
+            inflight_session = match new_sessions.get(&dapp_request.session_id)
+            {
                 Some(session) => {
-                    self.save_session(session.clone()).await?;
                     let session_id = session.id;
 
                     self.new_sessions
@@ -142,11 +146,19 @@ impl RadixConnectMobile {
                         })
                         .unwrap();
 
-                    session.to_owned()
+                    Some(session.to_owned())
                 }
-                None => self.load_session(dapp_request.session_id).await?,
+                None => None,
             };
         }
+
+        let session = match inflight_session {
+            Some(session) => {
+                self.save_session(session.clone()).await?;
+                session
+            }
+            None => self.load_session(dapp_request.session_id).await?,
+        };
 
         self.wallet_interactions_transport
             .get_wallet_interaction_requests(session)
