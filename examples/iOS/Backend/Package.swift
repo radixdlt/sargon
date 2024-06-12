@@ -23,6 +23,7 @@ let package = Package(
 			url: "https://github.com/tgrapperon/swift-dependencies-additions",
 			from: "1.0.2"),
 		.package(url: "https://github.com/kishikawakatsumi/KeychainAccess", from: "4.2.2"),
+		.package(url: "https://github.com/varkrishna/JSONViewer", revision: "df1a57eddc49b168ff400c8595f72acbe33acc9c"),
 	],
 	targets: [
 		.target(
@@ -36,6 +37,7 @@ let package = Package(
 					name: "DependenciesAdditions",
 					package: "swift-dependencies-additions"),
 				"KeychainAccess",
+				"JSONViewer",
 			],
 			resources: [.process("Assets")],
 			swiftSettings: swiftSettings

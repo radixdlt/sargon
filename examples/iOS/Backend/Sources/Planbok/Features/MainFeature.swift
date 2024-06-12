@@ -15,6 +15,7 @@ public struct MainFeature {
         case manageFactorSources(ManageFactorSourcesFeature)
         case manageSpecificFactorSources(ManageSpecificFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
+		case profileView(DebugProfileFeature)
 	}
 	
 	@Reducer(state: .equatable)
@@ -84,7 +85,9 @@ public struct MainFeature {
 					
 				case let .element(id: _, action: action):
 					switch action {
-			
+					case .settings(.delegate(.navigate(.toProfileView))):
+						state.path.append(.profileView(DebugProfileFeature.State()))
+						return .none
 						
 					case .settings(.delegate(.navigate(.toShields))):
 						state.path.append(.manageSecurityShields(ManageSecurityShieldsFeature.State()))
@@ -119,6 +122,9 @@ public struct MainFeature {
 						}
 						return .none
 						
+					case .profileView:
+						return .none
+						
 					case .settings:
 						return .none
 						
@@ -141,6 +147,7 @@ public struct MainFeature {
 					
 				case .popFrom(id: _):
 					return .none
+					
 				case .push(id: _, state: _):
 					return .none
 				}
@@ -301,7 +308,9 @@ extension MainFeature {
 					
 				case let .shieldDetails(store):
 					ShieldDetailsFeature.View(store: store)
-					
+
+				case let .profileView(store):
+					DebugProfileFeature.View(store: store)
 				}
 			}
 			.sheet(

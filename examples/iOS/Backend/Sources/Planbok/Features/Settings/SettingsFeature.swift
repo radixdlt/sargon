@@ -42,6 +42,7 @@ public struct SettingsFeature {
 			case createManyAccountsButtonTapped
             case factorSourcesButtonTapped
 			case shieldsButtonTapped
+			case profileViewButtonTapped
 		}
 		
 		case view(ViewAction)
@@ -56,6 +57,7 @@ public struct SettingsFeature {
             public enum Navigate {
                 case toFactorSources
 				case toShields
+				case toProfileView
             }
         }
         
@@ -67,6 +69,10 @@ public struct SettingsFeature {
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
+				
+			case .view(.profileViewButtonTapped):
+				return .send(.delegate(.navigate(.toProfileView)))
+				
 			case .view(.createManyAccountsButtonTapped):
 				state.destination = .createManyAccountsAlert(.init(
 					title: TextState("How many?"),
@@ -125,6 +131,11 @@ extension SettingsFeature {
 				)
 				
                 Spacer()
+				
+				Button("Profile View (Debug)") {
+					send(.profileViewButtonTapped)
+				}
+				
                 
                 Button("Handle Factor Sources") {
                     send(.factorSourcesButtonTapped)

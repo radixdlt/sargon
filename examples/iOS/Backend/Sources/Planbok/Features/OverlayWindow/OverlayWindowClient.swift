@@ -27,6 +27,7 @@ public struct OverlayWindowClient: Sendable {
 
 extension OverlayWindowClient: DependencyKey {
     public static let liveValue: Self = {
+		@Dependency(PasteboardClient.self) var pasteboardClient
         let items = AsyncPassthroughSubject<HUDMessage>()
 		
 		let scheduleHUDMessage: ScheduleHUDMessage = { message in
@@ -44,6 +45,15 @@ extension OverlayWindowClient: DependencyKey {
 						)
 					)
 				)
+			}
+		}
+		
+		Task {
+			for try await _ in pasteboardClient.copyEvents() {
+				scheduleHUDMessage(
+					HUDMessage.success(text: "Copied")
+				)
+
 			}
 		}
         
