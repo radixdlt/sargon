@@ -3,6 +3,7 @@ extend-exclude = [
     "fixtures/**",
     "scripts/**",
     "apple/Sources/UniFFI/Sargon.swift",
+    "examples/iOS/Backend/Sources/Planbok/Features/DebugProfileFeature.swift",
     "tarpaulin-report.html",
 ]
 
