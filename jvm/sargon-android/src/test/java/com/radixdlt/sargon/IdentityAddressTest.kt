@@ -38,7 +38,7 @@ class IdentityAddressTest: SampleTestable<IdentityAddress> {
         val addressString = "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g"
         val address = IdentityAddress.init(validatingAddress = addressString)
 
-        assertEquals("iden...w0mg6x", address.formatted())
+        assertEquals("iden...en489g", address.formatted())
         assertEquals(
             addressString,
             address.formatted(format = AddressFormat.FULL)

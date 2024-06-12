@@ -15,7 +15,7 @@ final class SecurityQuestionsFactorSourceTests: SpecificFactorSourceTest<Securit
 	func test_roundtrip() throws {
 		let mnemonic = Mnemonic.sampleSecurityQuestions
 		let qas = newSecurityNOTPRODUCTIONREADYQuestionsAndAnswersSample()
-		let sut = SUT(
+		let sut = try SUT(
 			mnemonic: mnemonic,
 			questionsAndAnswers: qas
 		)
@@ -24,9 +24,9 @@ final class SecurityQuestionsFactorSourceTests: SpecificFactorSourceTest<Securit
 	}
 	
 	
-	func test_new() {
+	func test_new() throws {
 		XCTAssertEqual(
-			SUT(
+			try SUT(
 				mnemonic: .sampleSecurityQuestions,
 				questionsAndAnswers: newSecurityNOTPRODUCTIONREADYQuestionsAndAnswersSample()
 			).id,
