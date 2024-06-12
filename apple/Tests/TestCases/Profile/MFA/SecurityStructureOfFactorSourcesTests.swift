@@ -16,4 +16,10 @@ final class SecurityStructureOfFactorSourcesTests: Test<SecurityStructureOfFacto
         XCTAssertEqual(sut.metadata, .sample)
         XCTAssertEqual(sut.matrixOfFactors, .sample)
     }
+	
+	func test_id() {
+		eachSample { sut in
+			XCTAssertEqual(sut.id, sut.metadata.id)
+		}
+	}
 }
