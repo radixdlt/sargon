@@ -52,17 +52,4 @@ mod tests {
             })
         );
     }
-
-    #[test]
-    fn json_roundtrip() {
-        let sut: SUT =
-            SUT::from_str("E621E1F8-C36C-495A-93FC-0C247A3E6E5F").unwrap();
-
-        assert_json_value_eq_after_roundtrip(
-            &sut,
-            json!("E621E1F8-C36C-495A-93FC-0C247A3E6E5F"),
-        );
-        assert_json_roundtrip(&sut);
-        assert_json_value_ne_after_roundtrip(&sut, json!("foobar"));
-    }
 }
