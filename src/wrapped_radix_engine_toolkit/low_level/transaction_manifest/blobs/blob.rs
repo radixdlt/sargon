@@ -153,6 +153,23 @@ mod tests {
             json!("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"),
         );
     }
+
+    #[test]
+    fn test_to_hex() {
+        let sample_blob = Blob::sample();
+        let hex = sample_blob.to_hex();
+        let expected_hex = sample_blob.secret_magic.to_hex();
+        assert_eq!(hex, expected_hex);
+    }
+
+    #[test]
+    fn test_from_hex() {
+        let hex_str =
+            "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced";
+        let blob = Blob::from_hex(hex_str).unwrap();
+        let expected_blob = Blob::from(BagOfBytes::from_hex(hex_str).unwrap());
+        assert_eq!(blob, expected_blob);
+    }
 }
 
 #[cfg(test)]
