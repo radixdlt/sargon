@@ -68,6 +68,8 @@ extension FactorSourceKind {
 	// FIXME: MOVE Into Rust Sargon!
 	private func canBeUsedForRole(_ role: Role) -> Bool {
 		switch self {
+		case .device:
+			return role == .primary
 		case .securityQuestions:
 			return role == .confirmation
 		case .offDeviceMnemonic:
