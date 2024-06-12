@@ -157,6 +157,12 @@ android.libraryVariants.all {
         "generate${buildTypeUpper}UniFFIBindings",
         Exec::class
     ) {
+        val regenerate = properties["regenerate"] ?: true //TODO improve by using gradle outputs
+
+        onlyIf {
+            regenerate == true || !File("${buildDir}/generated/src/${buildType}/java").exists()
+        }
+
         group = BasePlugin.BUILD_GROUP
 
         workingDir = rootDir.parentFile

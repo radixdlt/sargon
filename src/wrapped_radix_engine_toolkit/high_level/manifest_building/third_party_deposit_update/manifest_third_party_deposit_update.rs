@@ -75,6 +75,36 @@ mod tests {
     type SUT = TransactionManifest;
 
     #[test]
+    fn test_remove_depositor() {
+        let owner = AccountAddress::sample();
+        let manifest = SUT::third_party_deposit_update_by_delta(
+            &owner,
+            ThirdPartyDepositsDelta::sample(),
+        );
+        manifest_eq(
+            manifest,
+            r#"
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "set_default_deposit_rule"
+    Enum<1u8>()
+;
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "remove_resource_preference"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+;
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "remove_authorized_depositor"
+    Enum<1u8>(
+        Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    )
+;"#,
+        );
+    }
+
+    #[test]
     fn update_third_party_deposits() {
         let owner:AccountAddress = "account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf".into();
         let to_json = r#"

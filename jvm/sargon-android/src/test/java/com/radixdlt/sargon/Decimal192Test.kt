@@ -147,9 +147,7 @@ class Decimal192Test : SampleTestable<Decimal192> {
             Float.MAX_VALUE.toBigDecimal().toPlainString(),
             Float.MAX_VALUE.toDecimal192().plainString()
         )
-        assertThrows<CommonException.DecimalOverflow> {
-            Float.MIN_VALUE.toDecimal192()
-        }
+        assertEquals(0.toDecimal192().string, Float.MIN_VALUE.toDecimal192().string)
     }
 
     @Test
@@ -163,7 +161,7 @@ class Decimal192Test : SampleTestable<Decimal192> {
         assertNull(Double.MAX_VALUE.toDecimal192OrNull())
         assertNotNull(10.0.toDecimal192OrNull())
 
-        assertNull(Float.MIN_VALUE.toDecimal192OrNull())
+        assertNotNull(Float.MIN_VALUE.toDecimal192OrNull())
         assertNotNull(3.14f.toDecimal192OrNull())
 
         assertNull(Float.MIN_VALUE.toString().toDecimal192OrNull())

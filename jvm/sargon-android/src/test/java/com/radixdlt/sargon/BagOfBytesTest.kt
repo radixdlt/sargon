@@ -3,7 +3,6 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.hash
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
-import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.acedBagOfBytesSample

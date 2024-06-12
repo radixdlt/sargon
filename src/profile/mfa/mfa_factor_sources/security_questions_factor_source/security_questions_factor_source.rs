@@ -467,6 +467,12 @@ mod tests {
         ]);
         let res = SUT::new_by_encrypting(m.clone(), qas.clone());
 
-        assert_eq!(res,  Err(CommonError::InvalidQuestionsAndAnswersCount { expected: 6, found: 4 }));
+        assert_eq!(
+            res,
+            Err(CommonError::InvalidQuestionsAndAnswersCount {
+                expected: 6,
+                found: 4
+            })
+        );
     }
 }

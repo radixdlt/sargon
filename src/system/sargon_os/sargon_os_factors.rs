@@ -691,11 +691,10 @@ mod tests {
         assert!(os.profile().factor_sources.into_iter().any(|f| {
             match f {
                 FactorSource::ArculusCard { value } => {
-                    value.hint.name == new_name.to_owned()
+                    value.hint.name == *new_name
                 }
                 _ => false,
             }
         }));
-
     }
 }

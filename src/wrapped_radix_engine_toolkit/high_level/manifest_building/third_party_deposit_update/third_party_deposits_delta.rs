@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_engine_interface::blueprints::account::{
     AccountAddAuthorizedDepositorInput as ScryptoAccountAddAuthorizedDepositorInput,
+    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
     AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
     AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
 };
@@ -13,7 +14,7 @@ pub struct ThirdPartyDepositsDelta {
     pub(crate) asset_exceptions_to_add_or_update:
         Vec<ScryptoAccountSetResourcePreferenceInput>,
     pub(crate) depositor_addresses_to_remove:
-        Vec<ScryptoAccountRemoveResourcePreferenceInput>,
+        Vec<ScryptoAccountRemoveAuthorizedDepositorInput>,
     pub(crate) depositor_addresses_to_add:
         Vec<ScryptoAccountAddAuthorizedDepositorInput>,
 }
@@ -69,7 +70,7 @@ impl ThirdPartyDepositsDelta {
                         .into_iter()
                         .contains(x)
                 })
-                .map(ScryptoAccountRemoveResourcePreferenceInput::from)
+                .map(ScryptoAccountRemoveAuthorizedDepositorInput::from)
                 .collect(),
             depositor_addresses_to_add: to
                 .depositors_allow_list
@@ -90,9 +91,18 @@ impl ThirdPartyDepositsDelta {
     }
 }
 
+impl From<ResourceOrNonFungible>
+    for ScryptoAccountRemoveAuthorizedDepositorInput
+{
+    fn from(value: ResourceOrNonFungible) -> Self {
+        Self {
+            badge: value.into(),
+        }
+    }
+}
 impl From<ResourceOrNonFungible> for ScryptoAccountAddAuthorizedDepositorInput {
     fn from(value: ResourceOrNonFungible) -> Self {
-        ScryptoAccountAddAuthorizedDepositorInput {
+        Self {
             badge: value.into(),
         }
     }
@@ -395,7 +405,7 @@ mod tests {
             depositor_addresses
                 .clone()
                 .into_iter()
-                .map(ScryptoAccountRemoveResourcePreferenceInput::from)
+                .map(ScryptoAccountRemoveAuthorizedDepositorInput::from)
                 .collect_vec()
         );
     }
@@ -440,7 +450,7 @@ mod tests {
             expected_depositor_addresses_to_remove
                 .clone()
                 .into_iter()
-                .map(ScryptoAccountRemoveResourcePreferenceInput::from)
+                .map(ScryptoAccountRemoveAuthorizedDepositorInput::from)
                 .collect_vec()
         );
     }

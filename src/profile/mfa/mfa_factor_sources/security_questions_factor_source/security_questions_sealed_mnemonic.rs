@@ -34,7 +34,10 @@ impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
     ) -> Result<Self> {
         let questions_and_answers = with;
         if questions_and_answers.len() != Self::QUESTION_COUNT {
-            return Err(CommonError::InvalidQuestionsAndAnswersCount { expected: Self::QUESTION_COUNT as u16, found: questions_and_answers.len() as u16 });
+            return Err(CommonError::InvalidQuestionsAndAnswersCount {
+                expected: Self::QUESTION_COUNT as u16,
+                found: questions_and_answers.len() as u16,
+            });
         }
         let security_questions = questions_and_answers
             .iter()
@@ -109,12 +112,21 @@ mod tests {
 
     #[test]
     fn throws_if_incorrect_count() {
-        let too_few = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::just(Security_NOT_PRODUCTION_READY_QuestionAndAnswer::sample());
-        let res = SUT::new_by_encrypting(Mnemonic::sample(), too_few, SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::default(), EncryptionScheme::default());
+        let too_few = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::just(
+            Security_NOT_PRODUCTION_READY_QuestionAndAnswer::sample(),
+        );
+        let res = SUT::new_by_encrypting(
+            Mnemonic::sample(),
+            too_few,
+            SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::default(),
+            EncryptionScheme::default(),
+        );
         assert_eq!(
-        res,
-        Err(CommonError::InvalidQuestionsAndAnswersCount { expected: 6, found: 1 })
+            res,
+            Err(CommonError::InvalidQuestionsAndAnswersCount {
+                expected: 6,
+                found: 1
+            })
         );
     }
-
 }

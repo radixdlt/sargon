@@ -67,7 +67,8 @@ mod tests {
         let sut = new_security_questions_factor_source_by_encrypting_mnemonic(
             mnemonic.clone(),
             qas.clone(),
-        ).unwrap();
+        )
+        .unwrap();
         let decrypted =
             security_questions_factor_source_decrypt(&sut, qas).unwrap();
         assert_eq!(decrypted, mnemonic);

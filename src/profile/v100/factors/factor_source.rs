@@ -375,7 +375,7 @@ mod tests {
             let mut sut = sut;
             let mut common = sut.common_properties();
             let new_date = Timestamp::now_utc();
-            common.last_used_on = new_date.clone();
+            common.last_used_on = new_date;
             sut.set_common_properties(common);
             assert_eq!(sut.common_properties().last_used_on, new_date);
         };
