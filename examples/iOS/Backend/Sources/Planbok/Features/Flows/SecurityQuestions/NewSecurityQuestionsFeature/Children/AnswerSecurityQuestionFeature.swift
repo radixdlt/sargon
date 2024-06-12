@@ -34,7 +34,7 @@ public struct AnswerSecurityQuestionFeature {
 		
 		public init(index: Int) {
 			self.init(index: index, answer: "")
-			self.answer = pendingAnswers[questions[index].id] ?? ""
+			self.answer = pendingAnswers[id: questions[index].id]?.answer ?? ""
 		}
 	}
 
@@ -61,7 +61,7 @@ public struct AnswerSecurityQuestionFeature {
 				return .none
 			case .view(.confirmButtonTapped):
 				guard !state.trimmed.isEmpty else { return .none }
-				state.pendingAnswers[state.question.id] = state.trimmed
+				state.pendingAnswers[id: state.question.id] = PendingAnswerToQuestion(questionID: state.question.id, answer: state.trimmed)
 				return .send(.delegate(.done(state.index)))
 			case .delegate:
 				return .none

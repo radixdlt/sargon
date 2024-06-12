@@ -28,7 +28,7 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 			self.questions = securityQuestionsFactorSource
 				.sealedMnemonic
 				.securityQuestions.asIdentified()
-			self.pendingAnswers = [:]
+			self.pendingAnswers = []
 		}
 	}
 	
@@ -57,8 +57,8 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 		} else {
 			precondition(state.pendingAnswers.count == state.questions.count)
 			let answersToQuestionsArray = state.pendingAnswers.map({
-				let question = state.questions[id: $0.key]!
-				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.value)
+				let question = state.questions[id: $0.id]!
+				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.answer)
 			})
 			let answersToQuestions = answersToQuestionsArray.asIdentified()
 		

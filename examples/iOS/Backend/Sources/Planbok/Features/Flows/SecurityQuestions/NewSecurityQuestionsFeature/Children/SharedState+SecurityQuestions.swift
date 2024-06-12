@@ -22,12 +22,20 @@ where Self == PersistenceKeyDefault<InMemoryKey<PendingAnswersToQuestions>> {
 	static var pendingAnswers: Self {
 		PersistenceKeyDefault(
 			.inMemory("pendingAnswers"),
-			[:]
+			[]
 		)
 	}
 }
 
-public typealias PendingAnswersToQuestions = [SecurityNotProductionReadyQuestion.ID: String]
+public struct PendingAnswerToQuestion: Hashable, Sendable, Identifiable {
+	public typealias ID = SecurityNotProductionReadyQuestion.ID
+	public let questionID: ID
+	public let answer: String
+	
+	public var id: ID { questionID }
+}
+
+public typealias PendingAnswersToQuestions = IdentifiedArrayOf<PendingAnswerToQuestion>
 
 extension PersistenceReaderKey
 where Self == PersistenceKeyDefault<InMemoryKey<IdentifiedArrayOf<SecurityNotProductionReadyQuestion>>> {

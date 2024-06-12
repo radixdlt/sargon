@@ -50,8 +50,8 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 		} else {
 			precondition(state.pendingAnswers.count == state.questions.count)
 			let answersToQuestionsArray = state.pendingAnswers.map({
-				let question = state.questions[id: $0.key]!
-				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.value)
+				let question = state.questions[id: $0.id]!
+				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.answer)
 			})
 			let answersToQuestions = answersToQuestionsArray.asIdentified()
 			state.path.append(.reviewAnswers(SecurityQuestionsReviewAnswersFeature.State(
@@ -90,9 +90,8 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 			case let .selectQuestions(.delegate(.done(prefillWith))):
 				if let qas = prefillWith {
 					state.questions = qas.map(\.question).asIdentified()
-					state.pendingAnswers = Dictionary(
-						uniqueKeysWithValues: qas.map({ ($0.question.id, $0.answer) })
-					)
+
+					state.pendingAnswers = qas.map({ PendingAnswerToQuestion.init(questionID: $0.question.id, answer: $0.answer) }).asIdentified()
 
 					state.path = StackState(
 						(0..<qas.count)

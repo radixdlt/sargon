@@ -78,6 +78,7 @@ extension FactorSourcesClient: DependencyKey {
                 @Dependency(MnemonicClient.self) var mnemonicClient
 
                 let mnemonic = mnemonicClient.generateNewMnemonic(.twentyFour)
+				log.notice("Creating new SecurityQuestions FactorSource, mnemonic is:\n'\(mnemonic.phrase)'\nAnswers:\n\(questionsAndAnswers.map(\.answer))")
                 return try SecurityQuestionsNotProductionReadyFactorSource(
                     mnemonic: mnemonic,
                     questionsAndAnswers: questionsAndAnswers.elements

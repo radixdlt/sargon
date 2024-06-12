@@ -64,7 +64,7 @@ public struct SecurityQuestionsReviewAnswersFeature {
                     await send(.internal(.factorCreatedAndAdded))
 				}
 			case .internal(.factorCreatedAndAdded):
-				state.toWipeAnswers = [:] // IMPORTANT! Since this is shared state (in memory) we SHOULD wipe secrets
+				state.toWipeAnswers = [] // IMPORTANT! Since this is shared state (in memory) we SHOULD wipe secrets
 				return .send(.delegate(.factorCreatedAndAdded))
 				
             case .delegate:
