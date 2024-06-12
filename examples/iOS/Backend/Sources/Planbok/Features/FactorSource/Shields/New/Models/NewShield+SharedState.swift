@@ -76,7 +76,7 @@ extension RoleFromDraft {
 			thresholdFactors: draft.thresholdFactorSources,
 			threshold: {
 				switch draft.threshold {
-				case .any: 1
+				case .any: UInt16(min(1, draft.thresholdFactorSources.count))
 				case .all: UInt16(draft.thresholdFactorSources.count)
 				case let .threshold(t): t
 				}

@@ -27,9 +27,46 @@ extension FactorSourceKind: CaseIterable {
 	]
 }
 
+// FIXME: MOVE Into Rust Sargon!
+public enum FactorSourceKindUnavailabilityReason: Hashable, Sendable {
+	case canNeverBeUsedForRole(Role)
+	case exceededLimitOfKindPerRoleReached(exceededLimit: UInt8, Role)
+	
+	public func toString(kind: FactorSourceKind) -> String {
+		switch self {
+		case let .canNeverBeUsedForRole(role): "Cannot be used as \(role)"
+		case let .exceededLimitOfKindPerRoleReached(exceededLimit, role): "Cannot use more than \(exceededLimit) factors of kind \(kind) for \(role)"
+		}
+	}
+}
+
 extension FactorSourceKind {
+	
 	// FIXME: MOVE Into Rust Sargon!
-	public func canBeUsedForRole(_ role: Role) -> Bool {
+	public func unavailabilityForRole(_ role: Role, usedFactorsForRole: FactorSources) -> FactorSourceKindUnavailabilityReason? {
+		guard canBeUsedForRole(role) else {
+			return .canNeverBeUsedForRole(role)
+		}
+		guard let limit = limitOfFactorSourceKindFor(role: role) else {
+			return nil
+		}
+		if usedFactorsForRole.filter({ $0.kind == self }).count >= limit {
+			return .exceededLimitOfKindPerRoleReached(exceededLimit: limit, role)
+		} else {
+			return nil // free to use
+		}
+	}
+	
+	// FIXME: MOVE Into Rust Sargon!
+	private func limitOfFactorSourceKindFor(role: Role) -> UInt8? {
+		switch self {
+		case .device: return 1
+		default: return nil
+		}
+	}
+	
+	// FIXME: MOVE Into Rust Sargon!
+	private func canBeUsedForRole(_ role: Role) -> Bool {
 		switch self {
 		case .securityQuestions:
 			return role == .confirmation
