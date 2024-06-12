@@ -51,14 +51,14 @@ impl HasSampleValues for UnvalidatedTransactionManifest {
     fn sample() -> Self {
         Self::new(
             TransactionManifest::sample().instructions_string(),
-            Blobs::sample(),
+            Blobs::default(),
         )
     }
 
     fn sample_other() -> Self {
         Self::new(
             TransactionManifest::sample_other().instructions_string(),
-            Blobs::sample_other(),
+            Blobs::default(),
         )
     }
 }
@@ -91,7 +91,7 @@ mod tests {
             TransactionManifest::new(
                 TransactionManifest::sample().instructions_string(),
                 NetworkID::Mainnet,
-                Blobs::sample()
+                Blobs::default()
             )
         );
     }
