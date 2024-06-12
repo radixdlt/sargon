@@ -14,7 +14,7 @@ import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.os.storage.EncryptedPreferencesStorage
 import com.radixdlt.sargon.os.storage.KeySpec
 
-class RadixConnectSessionStorage internal constructor(
+internal class RadixConnectSessionStorage internal constructor(
     private val storage: EncryptedPreferencesStorage
 ) : SessionStorage {
 
