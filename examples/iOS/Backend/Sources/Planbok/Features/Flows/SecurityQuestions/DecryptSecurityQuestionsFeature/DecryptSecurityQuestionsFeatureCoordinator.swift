@@ -6,6 +6,7 @@ import ComposableArchitecture
 public struct DecryptSecurityQuestionsFeatureCoordinator {
 	
 	@Dependency(FactorSourcesClient.self) var factorSourcesClient
+	@Dependency(OverlayWindowClient.self) var overlayWindowClient
 	
 	@Reducer(state: .equatable)
 	public enum Path {
@@ -67,9 +68,11 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 					state.securityQuestionsFactorSource
 				)
 				log.info("Decrypted: \(mnemonic.phrase)")
+				overlayWindowClient.scheduleHUDMessage(.openedSecurityQuestionsSealedMnemonic)
 				return .send(.delegate(.done))
 			} catch {
 				log.fault("Failed to decrypt SecurityQuestionsFactorSource with answers to questions, error: \(error)")
+				overlayWindowClient.scheduleHUDMessage(.failedToOpenSecurityQuestionsSealedMnemonic)
 				return .send(.delegate(.done))
 			}
 		}

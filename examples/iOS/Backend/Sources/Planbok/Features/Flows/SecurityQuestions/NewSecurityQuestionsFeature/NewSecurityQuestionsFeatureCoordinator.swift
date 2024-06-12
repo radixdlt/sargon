@@ -21,6 +21,8 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 		
 		public init() {
 			self.selectQuestions = SelectQuestionsFeature.State()
+			questions = .init()
+			pendingAnswers = .init()
 		}
 	}
 	

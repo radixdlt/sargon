@@ -52,7 +52,7 @@ extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 		VStack(alignment: .leading) {
 			Labeled("#Questions", self.securityQuestions.count)
             if let action {
-                Button("Test", action: action)
+                Button("Decrypt with answers", action: action)
             }
 		}
 		.multilineTextAlignment(.leading)

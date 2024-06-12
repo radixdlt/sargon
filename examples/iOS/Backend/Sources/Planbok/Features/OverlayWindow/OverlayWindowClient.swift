@@ -28,12 +28,28 @@ public struct OverlayWindowClient: Sendable {
 extension OverlayWindowClient: DependencyKey {
     public static let liveValue: Self = {
         let items = AsyncPassthroughSubject<HUDMessage>()
+		
+		let scheduleHUDMessage: ScheduleHUDMessage = { message in
+			items.send(message)
+		}
+		
+		Task {
+			for await event in await EventBus.shared.notifications() {
+				scheduleHUDMessage(
+					HUDMessage(
+						text: "Sargon Event: `\(event.event.kind)`",
+						icon: HUDMessage.Icon(
+							systemName: "bell",
+							foregroundColor: .blue
+						)
+					)
+				)
+			}
+		}
         
         return Self(
             getScheduledItems: { items.eraseToAnyAsyncSequence() },
-            scheduleHUDMessage: { message in
-                items.send(message)
-            }
+            scheduleHUDMessage: scheduleHUDMessage
         )
     }()
     
@@ -44,5 +60,6 @@ extension OverlayWindowClient: DependencyKey {
 }
 
 extension HUDMessage {
-    public static let openedSecurityQuestionsSealedMnemonic = Self(text: "Successful decryption with answers.")
+	public static let openedSecurityQuestionsSealedMnemonic = Self.success(text: "Successful decryption with answers.")
+	public static let failedToOpenSecurityQuestionsSealedMnemonic = Self.failure(text: "Failed to decrypt with answers.")
 }

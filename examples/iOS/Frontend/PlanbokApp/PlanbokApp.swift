@@ -24,6 +24,7 @@ struct PlanbokApp: App {
 			)
 			.textFieldStyle(.roundedBorder)
 			.buttonStyle(.borderedProminent)
+			.environment(\.colorScheme, .light)
 		}
     }
 }

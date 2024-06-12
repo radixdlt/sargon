@@ -113,15 +113,16 @@ extension OverlayFeature {
         }
         public var body: some SwiftUI.View {
             
-            EmptyView()
+			Color.clear
                 .task { send(.task) }
-                .sheet(
+                .fullScreenCover(
                     item: $store.scope(
                         state: \.destination?.hud,
                         action: \.destination.hud
                     )
                 ) { store in
                     HUDFeature.View(store: store)
+						.background(TransparentBackground())
                 }
         }
     }

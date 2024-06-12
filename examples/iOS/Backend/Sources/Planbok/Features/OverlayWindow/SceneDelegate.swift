@@ -13,7 +13,6 @@ public final class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObj
         windowScene = scene as? UIWindowScene
         if
             let windowScene,
-            // avoids unimplemented("OverlayWindowClient.isUserInteractionEnabled")
             !_XCTIsTesting
         {
             overlayWindow(in: windowScene)
@@ -25,15 +24,32 @@ public final class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObj
             store: .init(
                 initialState: .init(),
                 reducer: OverlayFeature.init
-            ))
+			))
 
         let overlayWindow = UIWindow(windowScene: scene)
         overlayWindow.rootViewController = UIHostingController(rootView: overlayView)
         overlayWindow.rootViewController?.view.backgroundColor = .clear
         overlayWindow.windowLevel = .normal + 1
         overlayWindow.isUserInteractionEnabled = false
-        overlayWindow.makeKeyAndVisible()
-
+		overlayWindow.backgroundColor = .clear
+		overlayWindow.makeKeyAndVisible()
         self.overlayWindow = overlayWindow
     }
+}
+
+
+struct TransparentBackground: UIViewRepresentable {
+	func makeUIView(context: Context) -> UIView {
+		let view = UIView()
+		DispatchQueue.main.async {
+			view.backgroundColor = .clear
+			view.superview?.backgroundColor = .clear
+			view.superview?.superview?.backgroundColor = .clear
+			view.superview?.superview?.superview?.backgroundColor = .clear
+			view.superview?.superview?.superview?.superview?.backgroundColor = .clear
+		}
+		return view
+	}
+
+	func updateUIView(_ uiView: UIView, context: Context) {}
 }
