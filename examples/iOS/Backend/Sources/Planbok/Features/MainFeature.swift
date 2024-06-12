@@ -262,93 +262,94 @@ extension MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-            BannerThisIsNotRadixWallet(
-                onMainnet: store.network == .mainnet
-            )
-
-            NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-				VStack {
+			VStack(spacing: 0) {
+				
+				BannerThisIsNotRadixWallet(
+					onMainnet: store.network == .mainnet
+				)
+				
+				NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 					VStack {
-						Text("ProfileID:")
-						Text("\(SargonOS.shared.profile.id)")
-					}
-					
-					AccountsFeature.View(
-						store: store.scope(state: \.accounts, action: \.accounts)
-					)
-					
-					Button("Delete Wallet", role: .destructive) {
-						send(.deleteWalletButtonTapped)
-					}
-				}
-				.toolbar {
-					ToolbarItem(placement: .primaryAction) {
-						Button("Settings") {
-							send(.settingsButtonTapped)
+						VStack {
+							Text("ProfileID:")
+							Text("\(SargonOS.shared.profile.id)")
+						}
+						
+						AccountsFeature.View(
+							store: store.scope(state: \.accounts, action: \.accounts)
+						)
+						
+						Button("Delete Wallet", role: .destructive) {
+							send(.deleteWalletButtonTapped)
 						}
 					}
+					.toolbar {
+						ToolbarItem(placement: .primaryAction) {
+							Button("Settings") {
+								send(.settingsButtonTapped)
+							}
+						}
+					}
+				} destination: { store in
+					switch store.case {
+						
+					case let .settings(store):
+						SettingsFeature.View(store: store)
+						
+					case let .manageSecurityShields(store):
+						ManageSecurityShieldsFeature.View(store: store)
+						
+					case let .manageFactorSources(store):
+						ManageFactorSourcesFeature.View(store: store)
+						
+					case let .manageSpecificFactorSources(store):
+						ManageSpecificFactorSourcesFeature.View(store: store)
+						
+					case let .accountDetails(store):
+						AccountDetailsFeature.View(store: store)
+						
+					case let .shieldDetails(store):
+						ShieldDetailsFeature.View(store: store)
+						
+					case let .profileView(store):
+						DebugProfileFeature.View(store: store)
+					}
 				}
-			} destination: { store in
-				switch store.case {
-				
-				case let .settings(store):
-					SettingsFeature.View(store: store)
-				
-				case let .manageSecurityShields(store):
-					ManageSecurityShieldsFeature.View(store: store)
-					
-				case let .manageFactorSources(store):
-					ManageFactorSourcesFeature.View(store: store)
-				
-				case let .manageSpecificFactorSources(store):
-					ManageSpecificFactorSourcesFeature.View(store: store)
-					
-				case let .accountDetails(store):
-					AccountDetailsFeature.View(store: store)
-					
-				case let .shieldDetails(store):
-					ShieldDetailsFeature.View(store: store)
-
-				case let .profileView(store):
-					DebugProfileFeature.View(store: store)
+				.sheet(
+					item: $store.scope(
+						state: \.destination?.createAccount,
+						action: \.destination.createAccount
+					)
+				) { store in
+					CreateAccountFlowFeature.View(store: store)
 				}
+				.sheet(
+					item: $store.scope(
+						state: \.destination?.newHWFactorSource,
+						action: \.destination.newHWFactorSource
+					)
+				) { store in
+					NewHWFactorSourceFeature.View(store: store)
+				}
+				.sheet(
+					item: $store.scope(
+						state: \.destination?.newTrustedContact,
+						action: \.destination.newTrustedContact
+					)
+				) { store in
+					NewTrustedContactFactorSourceFeature.View(store: store)
+				}
+				.sheet(
+					item: $store.scope(
+						state: \.destination?.newSecurityQuestions,
+						action: \.destination.newSecurityQuestions
+					)
+				) { store in
+					NewSecurityQuestionsFeatureCoordinator.View(store: store)
+				}
+				.alert($store.scope(state: \.destination?.deleteProfileAlert, action: \.destination.deleteProfileAlert))
+				
 			}
-			.sheet(
-				item: $store.scope(
-					state: \.destination?.createAccount,
-					action: \.destination.createAccount
-				)
-			) { store in
-				CreateAccountFlowFeature.View(store: store)
-			}
-			.sheet(
-				item: $store.scope(
-					state: \.destination?.newHWFactorSource,
-					action: \.destination.newHWFactorSource
-				)
-			) { store in
-				NewHWFactorSourceFeature.View(store: store)
-			}
-			.sheet(
-				item: $store.scope(
-					state: \.destination?.newTrustedContact,
-					action: \.destination.newTrustedContact
-				)
-			) { store in
-				NewTrustedContactFactorSourceFeature.View(store: store)
-			}
-			.sheet(
-				item: $store.scope(
-					state: \.destination?.newSecurityQuestions,
-					action: \.destination.newSecurityQuestions
-				)
-			) { store in
-				NewSecurityQuestionsFeatureCoordinator.View(store: store)
-			}
-			.alert($store.scope(state: \.destination?.deleteProfileAlert, action: \.destination.deleteProfileAlert))
-			
 		}
-		
-		
 	}
 }

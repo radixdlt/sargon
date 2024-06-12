@@ -15,7 +15,7 @@ public struct SetFactorThresholdFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		@Shared(.newShieldDraft) var __newShieldDraft
+		@Shared(.newShieldDraft) var newShieldDraft
 		public let role: Role
 		public var threshold: FactorThreshold
 		
@@ -27,7 +27,7 @@ public struct SetFactorThresholdFeature {
 		}
 	
 		public var matrixOfFactorsForRole: MatrixOfFactorsForRole {
-			__newShieldDraft[role]
+			newShieldDraft[role]
 		}
 		
 		public var numberOfFactors: Int {
@@ -79,7 +79,7 @@ public struct SetFactorThresholdFeature {
 				return .none
 				
 			case .view(.confirmButtonTapped):
-				state.__newShieldDraft[state.role].threshold = state.threshold
+				state.newShieldDraft[state.role].threshold = state.threshold
 				return .send(.delegate(.confirm))
 				
 			case .delegate:

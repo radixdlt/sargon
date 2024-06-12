@@ -17,10 +17,10 @@ public struct PickFactorSourceFeature {
     public struct State: Equatable {
 		
         @SharedReader(.factorSources) var factorSources
-		@Shared(.newShieldDraft) var __newShieldDraft
+		@Shared(.newShieldDraft) var newShieldDraft
 
 		public func isFactorSourceAvailable(id: FactorSourceID) -> Bool {
-			__newShieldDraft[role].usedFactorSources.contains(where: { $0.id == id }) == false
+			newShieldDraft[role].usedFactorSources.contains(where: { $0.id == id }) == false
 		}
         public var idOfSelected: FactorSourceID? = nil
 		public let role: Role
@@ -52,7 +52,7 @@ public struct PickFactorSourceFeature {
                 else {
                     return .none
                 }
-				state.__newShieldDraft.pickedFactorSource(factor, role: state.role)
+				state.newShieldDraft.pickedFactorSource(factor, role: state.role)
                 return .send(.delegate(.done))
                 
             case let .view(.tappedFactorSource(id)):

@@ -146,8 +146,19 @@ extension RoleFactorsFeature {
 					Text("These factors are required to \(store.role.actionDetailed)")
 						.foregroundStyle(Color.app.gray2)
 					
-					FactorsBuilderFeature.View(store: store.scope(state: \.thresholdFactorsBuilder, action: \.thresholdFactorsBuilder))
-					FactorsBuilderFeature.View(store: store.scope(state: \.overrideFactorsBuilder, action: \.overrideFactorsBuilder))
+					FactorsBuilderFeature.View(
+						store: store.scope(
+							state: \.thresholdFactorsBuilder,
+							action: \.thresholdFactorsBuilder
+						)
+					)
+					
+					FactorsBuilderFeature.View(
+						store: store.scope(
+							state: \.overrideFactorsBuilder,
+							action: \.overrideFactorsBuilder
+						)
+					)
 
 					if store.role == .recovery {
 						Button(action: {

@@ -19,7 +19,7 @@ public struct FactorsBuilderFeature {
 			case threshold, override
 		}
 		
-		@Shared(.newShieldDraft) var __newShieldDraft
+		@Shared(.newShieldDraft) var newShieldDraft
 		
 		public let mode: Mode
 		public let role: Role
@@ -31,18 +31,23 @@ public struct FactorsBuilderFeature {
 		
 		public var threshold: FactorThreshold {
 			get {
-				matrixOfFactorsForRole.threshold
+				if mode == .threshold {
+					matrixOfFactorsForRole.threshold
+				} else {
+					.any
+				}
 			}
 			set {
+				assert(mode == .threshold)
 				matrixOfFactorsForRole.threshold = newValue
 			}
 		}
 
 		
 		public var matrixOfFactorsForRole: MatrixOfFactorsForRole {
-			get { __newShieldDraft[role] }
+			get { newShieldDraft[role] }
 			set {
-				__newShieldDraft[role] = newValue
+				newShieldDraft[role] = newValue
 			}
 		}
 		
@@ -66,10 +71,10 @@ public struct FactorsBuilderFeature {
 		
 		public var pickedFactorID: Factor.ID? {
 			get {
-				__newShieldDraft.pendingFactorID
+				newShieldDraft.pendingFactorID
 			}
 			set {
-				__newShieldDraft.pendingFactorID = newValue
+				newShieldDraft.pendingFactorID = newValue
 			}
 		}
 		
@@ -126,7 +131,7 @@ public struct FactorsBuilderFeature {
 				return .send(.delegate(.pickFactor))
 				
 			case let .view(.removeButtonTapped(toRemove)):
-				state.__newShieldDraft.removeFactor(toRemove, role: state.role)
+				state.newShieldDraft.removeFactor(toRemove, role: state.role)
 				return .none
 				
 			case .view(.changeThresholdButtonTapped):
