@@ -89,17 +89,35 @@ impl MnemonicWithPassphrase {
         keys
     }
 
+    pub fn sign_many(
+        &self,
+        hash_to_sign: &Hash,
+        derivation_paths: Vec<&DerivationPath>,
+    ) -> IndexMap<DerivationPath, SignatureWithPublicKey> {
+        let mut bip39_seed = self.to_seed();
+        let mut signatures =
+            IndexMap::<DerivationPath, SignatureWithPublicKey>::new();
+        for derivation_path in derivation_paths.into_iter() {
+            let private_key = bip39_seed.derive_private_key(derivation_path);
+            bip39_seed.zeroize();
+            let signature = private_key.sign(hash_to_sign);
+            signatures.insert(derivation_path.clone(), signature)
+        }
+
+        // private_key.zeroize(); // FIXME: make `private_key` `mut` and then Zeroize, when RET exposes Zeroize
+        signatures
+    }
+
     pub fn sign(
         &self,
         hash_to_sign: &Hash,
         derivation_path: &DerivationPath,
     ) -> SignatureWithPublicKey {
-        let mut bip39_seed = self.to_seed();
-        let private_key = bip39_seed.derive_private_key(derivation_path);
-        let signature = private_key.sign(hash_to_sign);
-        bip39_seed.zeroize();
-        // private_key.zeroize(); // FIXME: make `private_key` `mut` and then Zeroize, when RET exposes Zeroize
-        signature
+        self.sign_many(hash_to_sign, vec![derivation_path])
+            .first()
+            .unwrap()
+            .1
+            .to_owned()
     }
 
     /// Returns `true` if this MnemonicWithPassphrase successfully validates all `hd_keys`, that is to say,

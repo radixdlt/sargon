@@ -5,10 +5,36 @@ pub struct HierarchicalDeterministicSignature {
     pub factor: HierarchicalDeterministicFactorInstance,
     pub signature: Signature,
 }
+
 impl Identifiable for HierarchicalDeterministicSignature {
     type ID = HierarchicalDeterministicFactorInstance;
     fn id(&self) -> Self::ID {
         self.factor.clone()
+    }
+}
+
+impl From<HierarchicalDeterministicSignature> for SignatureWithPublicKey {
+    fn from(hd_sig: HierarchicalDeterministicSignature) -> Self {
+        match hd_sig.signature {
+            Signature::Ed25519 { value: sig } => Self::Ed25519 {
+                public_key: hd_sig
+                    .factor
+                    .public_key
+                    .public_key
+                    .into_ed25519()
+                    .expect("Should have been Ed25519 PublicKey"),
+                signature: sig,
+            },
+            Signature::Secp256k1 { value: sig } => Self::Secp256k1 {
+                public_key: hd_sig
+                    .factor
+                    .public_key
+                    .public_key
+                    .into_secp256k1()
+                    .expect("Should have been Secp256k1 PublicKey"),
+                signature: sig,
+            },
+        }
     }
 }
 
@@ -17,9 +43,17 @@ pub enum PayloadToSign {
     Intent(IntentHash),
     ROLA(Hash),
 }
+impl From<PayloadToSign> for Hash {
+    fn from(value: PayloadToSign) -> Self {
+        match value {
+            Self::Intent(intent_hash) => intent_hash.hash,
+            Self::ROLA(hash) => hash,
+        }
+    }
+}
 
 #[async_trait::async_trait]
-pub trait SignWithFactorSource<Factor: IsFactorSource> {
+pub trait SignWithFactorSource<Factor: BaseIsFactorSource> {
     async fn sign(
         &self,
         factor_source: Factor,
@@ -31,12 +65,24 @@ pub trait SignWithFactorSource<Factor: IsFactorSource> {
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
 pub trait UseDeviceFactorSourceDriver: Send + Sync + std::fmt::Debug {
+    async fn load_mnemonic_for_factor_source_id(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase>;
+
+    /// Dont implement this is Host. Implement only `load_mnemonic_for_factor_source_id`.
     async fn sign_with_device(
         &self,
         factor_source: DeviceFactorSource,
         derivation_paths: Vec<DerivationPath>,
         payload: PayloadToSign,
-    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>>;
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
+        let mnemonic_with_passphrase = self
+            .load_mnemonic_for_factor_source_id(factor_source.id)
+            .await?;
+        let hash_to_sign = Hash::from(payload);
+        mnemonic_with_passphrase.sign_many(hash_to_sign, derivation_paths)
+    }
 }
 
 #[async_trait::async_trait]
@@ -54,17 +100,108 @@ impl<T: UseDeviceFactorSourceDriver> SignWithFactorSource<DeviceFactorSource>
     }
 }
 
+#[uniffi::export(with_foreign)]
+#[async_trait::async_trait]
+pub trait GenericMnemonicFactorSourceDriver:
+    Send + Sync + std::fmt::Debug
+{
+    async fn sign_with_generic_mnemonic_factor_source(
+        &self,
+        factor_source: FactorSource,
+        derivation_paths: Vec<DerivationPath>,
+        payload: PayloadToSign,
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>>;
+}
+
+#[async_trait::async_trait]
+impl<T: GenericMnemonicFactorSourceDriver> SignWithFactorSource<FactorSource>
+    for T
+{
+    async fn sign(
+        &self,
+        factor_source: FactorSource,
+        derivation_paths: Vec<DerivationPath>,
+        payload: PayloadToSign,
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
+        self.sign_with_generic_mnemonic_factor_source(
+            factor_source,
+            derivation_paths,
+            payload,
+        )
+        .await
+    }
+}
+
+#[uniffi::export(with_foreign)]
+#[async_trait::async_trait]
+pub trait UseSecurityQuestionsFactorSourceDriver:
+    Send + Sync + std::fmt::Debug
+{
+    async fn sign_with_security_questions_factor_source(
+        &self,
+        factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+        derivation_paths: Vec<DerivationPath>,
+        payload: PayloadToSign,
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>>;
+}
+
+#[async_trait::async_trait]
+impl<T: UseSecurityQuestionsFactorSourceDriver>
+    SignWithFactorSource<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
+    for T
+{
+    async fn sign(
+        &self,
+        factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+        derivation_paths: Vec<DerivationPath>,
+        payload: PayloadToSign,
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
+        self.sign_with_security_questions_factor_source(
+            factor_source,
+            derivation_paths,
+            payload,
+        )
+        .await
+    }
+}
+
 #[derive(Debug)]
 pub struct SigningClient {
     use_device_factor_source_driver: Arc<dyn UseDeviceFactorSourceDriver>,
+
+    use_security_questions_factor_source_driver:
+        Arc<dyn UseSecurityQuestionsFactorSourceDriver>,
+
+    use_arculus_factor_source_driver:
+        Arc<dyn GenericMnemonicFactorSourceDriver>,
+    use_off_device_mnemonic_factor_source_driver:
+        Arc<dyn GenericMnemonicFactorSourceDriver>,
+    use_ledger_hardware_wallet_factor_source_driver:
+        Arc<dyn GenericMnemonicFactorSourceDriver>,
 }
 
 impl SigningClient {
     pub(crate) fn new(
         use_device_factor_source_driver: Arc<dyn UseDeviceFactorSourceDriver>,
+        use_security_questions_factor_source_driver: Arc<
+            dyn UseSecurityQuestionsFactorSourceDriver,
+        >,
+        use_arculus_factor_source_driver: Arc<
+            dyn GenericMnemonicFactorSourceDriver,
+        >,
+        use_off_device_mnemonic_factor_source_driver: Arc<
+            dyn GenericMnemonicFactorSourceDriver,
+        >,
+        use_ledger_hardware_wallet_factor_source_driver: Arc<
+            dyn GenericMnemonicFactorSourceDriver,
+        >,
     ) -> Self {
         Self {
             use_device_factor_source_driver,
+            use_arculus_factor_source_driver,
+            use_off_device_mnemonic_factor_source_driver,
+            use_ledger_hardware_wallet_factor_source_driver,
+            use_security_questions_factor_source_driver,
         }
     }
 
@@ -76,8 +213,8 @@ impl SigningClient {
     ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
         let mut signatures_from_all_factors =
             IdentifiedVecOf::<HierarchicalDeterministicSignature>::new();
-        for factor in factor_sources {
-            let signatures = match factor {
+        for factor_source in factor_sources {
+            let signatures = match factor_source {
                 FactorSource::Device { value } => {
                     self.use_device_factor_source_driver
                         .sign_with_device(
@@ -87,7 +224,45 @@ impl SigningClient {
                         )
                         .await?
                 }
-                _ => todo!(),
+                FactorSource::TrustedContact { value: _ } => {
+                    panic!("Cannot sign with TrustedContact")
+                }
+                FactorSource::ArculusCard { value: _ } => {
+                    self.use_arculus_factor_source_driver
+                        .sign_with_generic_mnemonic_factor_source(
+                            factor_source.clone(),
+                            derivation_paths.clone(),
+                            payload.clone(),
+                        )
+                        .await?
+                }
+                FactorSource::Ledger { value: _ } => {
+                    self.use_ledger_hardware_wallet_factor_source_driver
+                        .sign_with_generic_mnemonic_factor_source(
+                            factor_source.clone(),
+                            derivation_paths.clone(),
+                            payload.clone(),
+                        )
+                        .await?
+                }
+                FactorSource::OffDeviceMnemonic { value: _ } => {
+                    self.use_off_device_mnemonic_factor_source_driver
+                        .sign_with_generic_mnemonic_factor_source(
+                            factor_source.clone(),
+                            derivation_paths.clone(),
+                            payload.clone(),
+                        )
+                        .await?
+                }
+                FactorSource::SecurityQuestions { value } => {
+                    self.use_security_questions_factor_source_driver
+                        .sign_with_security_questions_factor_source(
+                            value.clone(),
+                            derivation_paths.clone(),
+                            payload.clone(),
+                        )
+                        .await?
+                }
             };
             signatures_from_all_factors.extend(signatures);
         }
