@@ -7,7 +7,7 @@ extension UnvalidatedTransactionManifest {
 	}
 
     public func transactionManifest(onNetwork networkID: NetworkID) throws -> TransactionManifest {
-        try newTransactionManifest(
+        try newTransactionManifestFromUnvalidatedTransactionManifest(
             unvalidatedTransactionManifest: self, 
             networkId: networkID
         )

@@ -34,19 +34,6 @@ impl From<TransactionManifest> for UnvalidatedTransactionManifest {
     }
 }
 
-impl UnvalidatedTransactionManifest {
-    pub fn transaction_manifest(
-        &self,
-        network_id: NetworkID,
-    ) -> Result<TransactionManifest> {
-        TransactionManifest::new(
-            self.transaction_manifest_string.clone(),
-            network_id,
-            self.blobs.clone(),
-        )
-    }
-}
-
 impl HasSampleValues for UnvalidatedTransactionManifest {
     fn sample() -> Self {
         Self::new(
@@ -84,7 +71,7 @@ mod tests {
     #[test]
     fn transaction_manifest() {
         let transaction_manifest =
-            SUT::sample().transaction_manifest(NetworkID::Mainnet);
+            TransactionManifest::try_from((SUT::sample(), NetworkID::Mainnet));
         pretty_assertions::assert_eq!(
             transaction_manifest,
             TransactionManifest::new(

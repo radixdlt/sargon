@@ -8,14 +8,6 @@ pub fn new_unvalidated_transaction_manifest_from_transaction_manifest(
 }
 
 #[uniffi::export]
-pub fn new_transaction_manifest(
-    unvalidated_transaction_manifest: &UnvalidatedTransactionManifest,
-    network_id: NetworkID,
-) -> Result<TransactionManifest> {
-    unvalidated_transaction_manifest.transaction_manifest(network_id)
-}
-
-#[uniffi::export]
 pub fn new_unvalidated_transaction_manifest_sample(
 ) -> UnvalidatedTransactionManifest {
     UnvalidatedTransactionManifest::sample()
@@ -50,15 +42,5 @@ mod uniffi_tests {
                 transaction_manifest,
             );
         assert_eq!(sut, SUT::sample());
-    }
-
-    #[test]
-    fn test_new_transaction_manifest() {
-        let sut = SUT::sample();
-        let network_id = NetworkID::Mainnet;
-        assert_eq!(
-            new_transaction_manifest(&sut, network_id),
-            sut.transaction_manifest(network_id)
-        )
     }
 }
