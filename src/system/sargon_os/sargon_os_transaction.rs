@@ -108,12 +108,33 @@ impl<T: UseDeviceFactorSourceDriver> SignWithFactorSource<DeviceFactorSource>
 pub trait GenericMnemonicFactorSourceDriver:
     Send + Sync + std::fmt::Debug
 {
+    async fn provide_mnemonic_for_factor_source_id(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<Mnemonic>;
+
+    /// Dont implement this in host, implement `provide_mnemonic_for_factor_source_id`
     async fn sign_with_generic_mnemonic_factor_source(
         &self,
         factor_source: FactorSource,
         derivation_paths: Vec<DerivationPath>,
         payload: PayloadToSign,
-    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>>;
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
+        let factor_source_id = factor_source
+            .factor_source_id()
+            .into_hash()
+            .map_err(|_| CommonError::Unknown)?;
+        let mnemonic = self
+            .provide_mnemonic_for_factor_source_id(factor_source)
+            .await?;
+        let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
+
+        mnemonic_with_passphrase.sign_payload(
+            factor_source_id,
+            derivation_paths,
+            payload,
+        )
+    }
 }
 
 #[async_trait::async_trait]
