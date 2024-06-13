@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// fetch the XRD balance of an account address or submit a signed transaction.
 ///
 /// [docs]: https://radix-babylon-gateway-api.redoc.ly/
-#[derive(uniffi::Object)]
+#[derive(Debug, uniffi::Object)]
 pub struct GatewayClient {
     /// The HTTP client that actually executes the network requests.
     pub http_client: HttpClient,
@@ -14,6 +14,15 @@ pub struct GatewayClient {
     /// The gateway this GatewayClient talks to, which is a (URL, NetworkID) tuple
     /// essentially.
     pub gateway: Gateway,
+}
+
+impl GatewayClient {
+    pub fn network_id(&self) -> NetworkID {
+        self.gateway.network_id()
+    }
+    pub fn change_gateway(&mut self, to: Gateway) {
+        self.gateway = to;
+    }
 }
 
 #[uniffi::export]
@@ -66,6 +75,18 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;
+
+    #[test]
+    fn change_gateway() {
+        let mock_networking_driver =
+            MockNetworkingDriver::with_response(TransactionSubmitResponse {
+                duplicate: true,
+            });
+        let mut sut =
+            SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
+        sut.change_gateway(Gateway::mainnet());
+        assert_eq!(sut.gateway, Gateway::mainnet());
+    }
 
     #[actix_rt::test]
     async fn test_submit_notarized_transaction_mock_duplicate() {

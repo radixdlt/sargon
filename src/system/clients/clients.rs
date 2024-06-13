@@ -6,6 +6,7 @@ pub struct Clients {
     pub secure_storage: SecureStorageClient,
     pub entropy: EntropyClient,
     pub http_client: HttpClient,
+    pub gateway_client: GatewayClient,
     pub unsafe_storage: UnsafeStorageClient,
     pub file_system: FileSystemClient,
     pub event_bus: EventBusClient,
@@ -18,6 +19,7 @@ impl Clients {
             SecureStorageClient::new(drivers.secure_storage.clone());
         let entropy = EntropyClient::new(drivers.entropy_provider.clone());
         let http_client = HttpClient::new(drivers.networking.clone());
+        let gateway_client = GatewayClient { http_client: http_client.clone(), gateway: Gateway::mainnet() };
         let unsafe_storage =
             UnsafeStorageClient::new(drivers.unsafe_storage.clone());
         let file_system = FileSystemClient::new(drivers.file_system.clone());
@@ -27,6 +29,7 @@ impl Clients {
             secure_storage,
             entropy,
             http_client,
+            gateway_client,
             unsafe_storage,
             file_system,
             event_bus,

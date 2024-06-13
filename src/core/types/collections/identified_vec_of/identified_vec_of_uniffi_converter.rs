@@ -5,7 +5,7 @@ use uniffi::TypeId as UFTypeId;
 use uniffi::{
     check_remaining,
     deps::bytes::{Buf, BufMut},
-    metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
+    metadata, Lift, LiftReturn, Lower, LowerReturn, MetadataBuffer, RustBuffer,
 };
 
 use super::import_identified_vec_of_from;
@@ -56,6 +56,17 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
         Self::try_lift_from_rust_buffer(buf)
+    }
+}
+
+unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
+    LiftReturn<UT> for IdentifiedVecOf<V>
+{
+    type ReturnType = <Self as Lift<UT>>::FfiType;
+
+    /// Lift a successfully returned value from a trait interface
+    fn try_lift_successful_return(v: Self::ReturnType) -> uniffi::Result<Self> {
+        <Self as Lift<UT>>::try_lift(v)
     }
 }
 
