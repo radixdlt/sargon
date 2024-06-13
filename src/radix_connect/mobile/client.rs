@@ -135,26 +135,13 @@ impl RadixConnectMobile {
         {
             let new_sessions = self.new_sessions.try_read().unwrap();
 
-            inflight_session = match new_sessions.get(&dapp_request.session_id)
-            {
-                Some(session) => {
-                    let session_id = session.id;
-                    if let Ok(mut new_sessions) = self.new_sessions.try_write()
-                    {
-                        new_sessions.remove(&session_id);
-                    }
-
-                    Some(session.to_owned())
-                }
-                None => None,
-            };
+            inflight_session = new_sessions
+                .get(&dapp_request.session_id)
+                .map(|session| session.to_owned()) //.to_owned()
         }
 
         let session = match inflight_session {
-            Some(session) => {
-                self.save_session(session.clone()).await?;
-                session
-            }
+            Some(session) => session,
             None => self.load_session(dapp_request.session_id).await?,
         };
 
@@ -179,7 +166,33 @@ impl RadixConnectMobile {
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        let session = self.load_session(wallet_response.session_id).await?;
+        let inflight_session;
+        {
+            let new_sessions = self.new_sessions.try_read().unwrap();
+
+            inflight_session = match new_sessions
+                .get(&wallet_response.session_id)
+            {
+                Some(session) => {
+                    let session_id = session.id;
+                    if let Ok(mut new_sessions) = self.new_sessions.try_write()
+                    {
+                        new_sessions.remove(&session_id);
+                    }
+
+                    Some(session.to_owned())
+                }
+                None => None,
+            };
+        }
+
+        let session = match inflight_session {
+            Some(session) => {
+                self.save_session(session.clone()).await?;
+                session
+            }
+            None => self.load_session(wallet_response.session_id).await?,
+        };
 
         self.wallet_interactions_transport
             .send_wallet_interaction_response(session, wallet_response.response)

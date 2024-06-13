@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub enum RadixConnectMobileConnectRequest {
     Link(RadixConnectMobileLinkRequest),
     DappInteraction(RadixConnectMobileDappRequest),
-    DappinteractionContained(RadixConnectMobileDappRequestContained),
+    DappInteractionContained(RadixConnectMobileDappRequestContained),
 }
 
 impl FromStr for RadixConnectMobileConnectRequest {
