@@ -46,8 +46,8 @@ pub enum PayloadToSign {
 impl From<PayloadToSign> for Hash {
     fn from(value: PayloadToSign) -> Self {
         match value {
-            Self::Intent(intent_hash) => intent_hash.hash,
-            Self::ROLA(hash) => hash,
+            PayloadToSign::Intent(intent_hash) => intent_hash.hash,
+            PayloadToSign::ROLA(hash) => hash,
         }
     }
 }
@@ -81,7 +81,17 @@ pub trait UseDeviceFactorSourceDriver: Send + Sync + std::fmt::Debug {
             .load_mnemonic_for_factor_source_id(factor_source.id)
             .await?;
         let hash_to_sign = Hash::from(payload);
-        mnemonic_with_passphrase.sign_many(hash_to_sign, derivation_paths)
+        let signatures = mnemonic_with_passphrase.sign_many(&hash_to_sign, derivation_paths).into_iter().map(|(path, sig_with_key)| 
+            HierarchicalDeterministicSignature {
+                factor: HierarchicalDeterministicFactorInstance::new(
+                    factor_source.id,
+                    HierarchicalDeterministicPublicKey::new(sig_with_key.public_key(), path)
+                ),
+                signature: sig_with_key.signature()
+            }
+        ).collect::<IdentifiedVecOf<HierarchicalDeterministicSignature>>();
+
+        Ok(signatures)
     }
 }
 
@@ -137,12 +147,17 @@ impl<T: GenericMnemonicFactorSourceDriver> SignWithFactorSource<FactorSource>
 pub trait UseSecurityQuestionsFactorSourceDriver:
     Send + Sync + std::fmt::Debug
 {
+    async fn decrypt_factor_source_with_answers(&self, factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource) -> Result<Mnemonic>;
+
+    /// Dont implement this is Host. Implement only `decrypt_factor_source_with_answers`.
     async fn sign_with_security_questions_factor_source(
         &self,
         factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
         derivation_paths: Vec<DerivationPath>,
         payload: PayloadToSign,
-    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>>;
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
+        
+    }
 }
 
 #[async_trait::async_trait]
