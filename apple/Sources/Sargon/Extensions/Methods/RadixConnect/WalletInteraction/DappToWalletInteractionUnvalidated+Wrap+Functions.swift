@@ -2,11 +2,11 @@ import Foundation
 import SargonUniFFI
 
 extension DappToWalletInteractionUnvalidated {
-    public init(jsonData: some DataProtocol) throws {
-        self = try newDappToWalletInteractionUnvalidatedFromJsonBytes(jsonBytes: Data(jsonData))
-    }
-    
-    public func jsonData() -> Data {
-        dappToWalletInteractionUnvalidatedToJsonBytes(dappToWalletInteractionUnvalidated: self)
-    }
+    public func toJSONString(prettyPrinted: Bool = false) -> String {
+		dappToWalletInteractionUnvalidatedToJsonString(interactionUnvalidated: self, prettyPrinted: prettyPrinted)
+	}
+
+    public init(jsonString: String) throws {
+		self = try newDappToWalletInteractionUnvalidatedFromJsonString(jsonStr: jsonString)
+	}
 }
