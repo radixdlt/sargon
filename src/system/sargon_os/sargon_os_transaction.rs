@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HierarchicalDeterministicSignature {
     pub factor: HierarchicalDeterministicFactorInstance,
-    pub signature: Signature
+    pub signature: Signature,
 }
 impl Identifiable for HierarchicalDeterministicSignature {
     type ID = HierarchicalDeterministicFactorInstance;
@@ -74,11 +74,20 @@ impl SigningClient {
         derivation_paths: Vec<DerivationPath>,
         payload: PayloadToSign,
     ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
-        let mut signatures_from_all_factors = IdentifiedVecOf::<HierarchicalDeterministicSignature>::new();
+        let mut signatures_from_all_factors =
+            IdentifiedVecOf::<HierarchicalDeterministicSignature>::new();
         for factor in factor_sources {
             let signatures = match factor {
-                FactorSource::Device { value } => self.use_device_factor_source_driver.sign(value.clone(), derivation_paths.clone(), payload.clone()).await?,
-                _ => todo!()
+                FactorSource::Device { value } => {
+                    self.use_device_factor_source_driver
+                        .sign_with_device(
+                            value.clone(),
+                            derivation_paths.clone(),
+                            payload.clone(),
+                        )
+                        .await?
+                }
+                _ => todo!(),
             };
             signatures_from_all_factors.extend(signatures);
         }
