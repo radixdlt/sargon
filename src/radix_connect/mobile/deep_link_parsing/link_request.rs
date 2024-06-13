@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 use super::super::session::session_id::SessionID;
 
+json_data_convertible!(RadixConnectMobileLinkRequest);
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct RadixConnectMobileLinkRequest {
     pub origin: Url,
@@ -56,7 +58,7 @@ impl RadixConnectMobileLinkRequest {
 impl HasSampleValues for RadixConnectMobileLinkRequest {
     fn sample() -> Self {
         RadixConnectMobileLinkRequest::new(
-            parse_url("radix://app1").unwrap(),
+            parse_url("http://app1.com").unwrap(),
             SessionID::sample(),
             KeyAgreementPublicKey::sample(),
             "Chrome".into(),
@@ -65,12 +67,24 @@ impl HasSampleValues for RadixConnectMobileLinkRequest {
 
     fn sample_other() -> Self {
         RadixConnectMobileLinkRequest::new(
-            parse_url("radix://app2").unwrap(),
+            parse_url("http://app2.com").unwrap(),
             SessionID::sample_other(),
             KeyAgreementPublicKey::sample_other(),
             "Safari".into(),
         )
     }
+}
+
+#[uniffi::export]
+pub fn new_radix_connect_mobile_link_request_sample(
+) -> RadixConnectMobileLinkRequest {
+    RadixConnectMobileLinkRequest::sample()
+}
+
+#[uniffi::export]
+pub fn new_radix_connect_mobile_link_request_sample_other(
+) -> RadixConnectMobileLinkRequest {
+    RadixConnectMobileLinkRequest::sample_other()
 }
 
 #[cfg(test)]
@@ -89,5 +103,22 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn sample_values() {
+        assert_eq!(
+            new_radix_connect_mobile_link_request_sample(),
+            RadixConnectMobileLinkRequest::sample()
+        );
+        assert_eq!(
+            new_radix_connect_mobile_link_request_sample_other(),
+            RadixConnectMobileLinkRequest::sample_other()
+        );
     }
 }
