@@ -597,7 +597,7 @@ mod dapp_to_wallet_interaction_tests {
             .unwrap(),
             DappToWalletInteractionItems::Transaction(
                 DappToWalletInteractionTransactionItems::new(
-                    DappToWalletInteractionSendTransactionItem::sample(),
+                    DappToWalletInteractionSendTransactionItem::sample_other(),
                 ),
             ),
             metadata.clone(),

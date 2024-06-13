@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 /// Vec of Blobs
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
+// #[serde_as]
+// #[serde(transparent)]
 pub struct Blobs {
+    // #[serde_as(deserialize_as = "DefaultOnNull")]
     pub(crate) secret_magic: BlobsSecretMagic,
 }
 
@@ -177,6 +180,34 @@ mod tests {
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }
+
+    #[test]
+    fn test_roundtrip_non_empty_blobs() {
+        let json = r#"
+        [
+          "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced", 
+          "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+          "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
+          "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+        ]
+        "#;
+        let deserialized_blobs: SUT = serde_json::from_str(json).unwrap();
+        assert_eq!(deserialized_blobs, SUT::sample());
+    }
+
+    #[test]
+    fn test_deserialize_null_to_empty_blobs() {
+        let json = r#"null"#;
+        let deserialized_blobs: SUT = serde_json::from_str(json).unwrap();
+        assert_eq!(deserialized_blobs, SUT::default());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_blobs_does_not_deserialize() {
+        let json = "[1, 2]";
+        let _: SUT = serde_json::from_str(json).unwrap();
+    }
 }
 
 #[cfg(test)]
@@ -211,33 +242,5 @@ mod uniffi_tests {
             .blobs(),
             [Blob::sample(), Blob::sample_other(),]
         );
-    }
-
-    #[test]
-    fn test_roundtrip_non_empty_blobs() {
-        let json = r#"
-        [
-          "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced", 
-          "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-          "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
-          "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
-        ]
-        "#;
-        let deserialized_blobs: Blobs = serde_json::from_str(json).unwrap();
-        assert_eq!(deserialized_blobs, Blobs::sample());
-    }
-
-    #[test]
-    fn test_deserialize_null_to_empty_blobs() {
-        let json = r#"null"#;
-        let deserialized_blobs: Blobs = serde_json::from_str(json).unwrap();
-        assert_eq!(deserialized_blobs, Blobs::default());
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_invalid_blobs_does_not_deserialize() {
-        let json = r#"[1, 2]"#;
-        let _: Blobs = serde_json::from_str(json).unwrap();
     }
 }

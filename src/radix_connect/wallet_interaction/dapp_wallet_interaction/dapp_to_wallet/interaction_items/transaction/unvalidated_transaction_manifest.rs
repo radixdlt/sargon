@@ -58,7 +58,7 @@ impl HasSampleValues for UnvalidatedTransactionManifest {
     fn sample_other() -> Self {
         Self::new(
             TransactionManifest::sample_other().instructions_string(),
-            Blobs::default(),
+            Blobs::sample_other(),
         )
     }
 }
@@ -66,7 +66,6 @@ impl HasSampleValues for UnvalidatedTransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = UnvalidatedTransactionManifest;
