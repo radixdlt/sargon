@@ -4,21 +4,10 @@ use crate::prelude::*;
 #[derive(
     Clone, PartialEq, Eq, Serialize, Deserialize, Debug, uniffi::Record,
 )]
-// #[serde_as]
-// #[serde(transparent)]
+#[serde(transparent)]
 pub struct BlobsSecretMagic {
-    // #[serde_as(deserialize_as = "DefaultOnNull")]
     pub(crate) secret_magic: Vec<Blob>,
 }
-
-// impl Default for BlobsSecretMagic {
-//     /// Empty blobs
-//     fn default() -> Self {
-//         Self {
-//             secret_magic: Vec::new()
-//         }
-//     }
-// }
 
 impl BlobsSecretMagic {
     pub fn blobs(&self) -> Vec<Blob> {

@@ -1,35 +1,12 @@
 use crate::prelude::*;
 
 /// Vec of Blobs
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
-// #[serde_as]
-// #[serde(transparent)]
+#[derive(
+    Clone, PartialEq, Eq, Debug, uniffi::Record, Serialize, Deserialize,
+)]
+#[serde(transparent)]
 pub struct Blobs {
-    // #[serde_as(deserialize_as = "DefaultOnNull")]
     pub(crate) secret_magic: BlobsSecretMagic,
-}
-
-impl Serialize for Blobs {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.secret_magic.secret_magic.serialize(serializer)
-    }
-}
-
-impl<'de> Deserialize<'de> for Blobs {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        let option_blobs: Option<Vec<Blob>> =
-            Option::deserialize(deserializer)?;
-        let blobs = option_blobs.unwrap_or_default();
-        let secret_magic: BlobsSecretMagic = blobs.into();
-        Ok(secret_magic.into())
-    }
 }
 
 impl From<BlobsSecretMagic> for Blobs {
@@ -193,13 +170,6 @@ mod tests {
         "#;
         let deserialized_blobs: SUT = serde_json::from_str(json).unwrap();
         assert_eq!(deserialized_blobs, SUT::sample());
-    }
-
-    #[test]
-    fn test_deserialize_null_to_empty_blobs() {
-        let json = r#"null"#;
-        let deserialized_blobs: SUT = serde_json::from_str(json).unwrap();
-        assert_eq!(deserialized_blobs, SUT::default());
     }
 
     #[test]

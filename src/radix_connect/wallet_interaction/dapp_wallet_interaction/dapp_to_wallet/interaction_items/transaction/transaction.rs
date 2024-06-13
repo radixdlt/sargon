@@ -102,4 +102,21 @@ mod tests {
         pretty_assertions::assert_eq!(deserialized, sut);
         assert_json_roundtrip(&sut);
     }
+
+    #[test]
+    fn json_roundtrip_missing_blobs() {
+        let json = r#"
+        {
+            "send" : {
+                "version" : 1,
+                "message" : "message",
+                "transactionManifest" : "CALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n"
+            }
+        }
+        "#;
+        let sut = SUT::sample();
+        let deserialized: SUT = serde_json::from_str(json).unwrap();
+        pretty_assertions::assert_eq!(deserialized, sut);
+        assert_json_roundtrip(&sut);
+    }
 }

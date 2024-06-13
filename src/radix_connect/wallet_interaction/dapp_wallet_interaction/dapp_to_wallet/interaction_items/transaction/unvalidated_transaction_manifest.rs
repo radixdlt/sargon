@@ -7,6 +7,7 @@ pub struct UnvalidatedTransactionManifest {
     #[serde(rename = "transactionManifest")]
     pub transaction_manifest_string: String,
 
+    #[serde(default)]
     pub blobs: Blobs,
 }
 

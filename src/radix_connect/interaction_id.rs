@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 uniffi::custom_newtype!(WalletInteractionId, String);
 
+/// We ought to make `WalletInteractionId` a UUID.
+/// Temporarily, it will be a String because the iOS wallet has specific logic that uses custom IDs for wallet interactions.
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
 )]
