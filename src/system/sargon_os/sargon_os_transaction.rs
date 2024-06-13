@@ -88,6 +88,54 @@ pub trait UseDeviceFactorSourceDriver: Send + Sync + std::fmt::Debug {
     }
 }
 
+#[derive(Debug)]
+pub struct RustUseMnemonicBasedFactorSourceDriver {
+    secure_storage: Arc<SecureStorageClient>,
+}
+
+impl RustUseMnemonicBasedFactorSourceDriver {
+    pub fn new(
+        secure_storage_driver: Arc<dyn SecureStorageDriver>,
+    ) -> Arc<Self> {
+        Arc::new(Self {
+            secure_storage: Arc::new(SecureStorageClient::new(
+                secure_storage_driver,
+            )),
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl UseDeviceFactorSourceDriver for RustUseMnemonicBasedFactorSourceDriver {
+    async fn load_mnemonic_for_factor_source_id(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase> {
+        self.secure_storage
+            .load_mnemonic_with_passphrase(&factor_source_id)
+            .await
+    }
+}
+
+#[async_trait::async_trait]
+impl GenericMnemonicFactorSourceDriver
+    for RustUseMnemonicBasedFactorSourceDriver
+{
+    async fn provide_mnemonic_for_factor_source_id(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<Mnemonic> {
+        let factor_source_id = factor_source
+            .factor_source_id()
+            .into_hash()
+            .map_err(|_| CommonError::Unknown)?;
+        self.secure_storage
+            .load_mnemonic_with_passphrase(&factor_source_id)
+            .await
+            .map(|mwp| mwp.mnemonic)
+    }
+}
+
 #[async_trait::async_trait]
 impl<T: UseDeviceFactorSourceDriver> SignWithFactorSource<DeviceFactorSource>
     for T
@@ -100,6 +148,30 @@ impl<T: UseDeviceFactorSourceDriver> SignWithFactorSource<DeviceFactorSource>
     ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
         self.sign_with_device(factor_source, derivation_paths, payload)
             .await
+    }
+}
+
+#[derive(Debug)]
+pub struct RustAnswerSecurityQuestionsDriver {
+    answers: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+}
+impl RustAnswerSecurityQuestionsDriver {
+    pub fn new(
+        answers: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+    ) -> Arc<Self> {
+        Arc::new(Self { answers })
+    }
+}
+
+#[async_trait::async_trait]
+impl UseSecurityQuestionsFactorSourceDriver
+    for RustAnswerSecurityQuestionsDriver
+{
+    async fn decrypt_factor_source_with_answers(
+        &self,
+        factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+    ) -> Result<Mnemonic> {
+        factor_source.decrypt(self.answers.clone())
     }
 }
 
@@ -240,10 +312,10 @@ impl SigningClient {
     ) -> Self {
         Self {
             use_device_factor_source_driver,
+            use_security_questions_factor_source_driver,
             use_arculus_factor_source_driver,
             use_off_device_mnemonic_factor_source_driver,
             use_ledger_hardware_wallet_factor_source_driver,
-            use_security_questions_factor_source_driver,
         }
     }
 
@@ -364,7 +436,7 @@ impl SargonOS {
             )
             .await?;
         let intent_hash = intent.intent_hash();
-        // let signing = &self.components.signing;
+        let signer = &self.clients.signing;
         /*
         let intent_signature = private_key.sign_intent_hash(&intent_hash);
 

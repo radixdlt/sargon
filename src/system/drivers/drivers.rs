@@ -10,6 +10,15 @@ pub struct Drivers {
     pub event_bus: Arc<dyn EventBusDriver>,
     pub file_system: Arc<dyn FileSystemDriver>,
     pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
+    pub use_device_factor_source_driver: Arc<dyn UseDeviceFactorSourceDriver>,
+    pub use_security_questions_factor_source_driver:
+        Arc<dyn UseSecurityQuestionsFactorSourceDriver>,
+    pub use_arculus_factor_source_driver:
+        Arc<dyn GenericMnemonicFactorSourceDriver>,
+    pub use_off_device_mnemonic_factor_source_driver:
+        Arc<dyn GenericMnemonicFactorSourceDriver>,
+    pub use_ledger_hardware_wallet_factor_source_driver:
+        Arc<dyn GenericMnemonicFactorSourceDriver>,
 }
 
 #[uniffi::export]
@@ -25,6 +34,19 @@ impl Drivers {
         event_bus: Arc<dyn EventBusDriver>,
         file_system: Arc<dyn FileSystemDriver>,
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
+        use_device_factor_source_driver: Arc<dyn UseDeviceFactorSourceDriver>,
+        use_security_questions_factor_source_driver: Arc<
+            dyn UseSecurityQuestionsFactorSourceDriver,
+        >,
+        use_arculus_factor_source_driver: Arc<
+            dyn GenericMnemonicFactorSourceDriver,
+        >,
+        use_off_device_mnemonic_factor_source_driver: Arc<
+            dyn GenericMnemonicFactorSourceDriver,
+        >,
+        use_ledger_hardware_wallet_factor_source_driver: Arc<
+            dyn GenericMnemonicFactorSourceDriver,
+        >,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
@@ -35,6 +57,11 @@ impl Drivers {
             event_bus,
             file_system,
             unsafe_storage,
+            use_device_factor_source_driver,
+            use_arculus_factor_source_driver,
+            use_off_device_mnemonic_factor_source_driver,
+            use_ledger_hardware_wallet_factor_source_driver,
+            use_security_questions_factor_source_driver,
         })
     }
 }
@@ -42,127 +69,216 @@ impl Drivers {
 #[cfg(test)]
 impl Drivers {
     pub fn test() -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage.clone(),
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_networking(networking: Arc<dyn NetworkingDriver>) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             networking,
-            EphemeralSecureStorage::new(),
+            storage,
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_secure_storage(
-        secure_storage: Arc<dyn SecureStorageDriver>,
+        storage: Arc<dyn SecureStorageDriver>,
     ) -> Arc<Self> {
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            secure_storage,
+            storage,
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_entropy_provider(
         entropy_provider: Arc<dyn EntropyProviderDriver>,
     ) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage,
             entropy_provider,
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_host_info(host_info: Arc<dyn HostInfoDriver>) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage,
             RustEntropyDriver::new(),
             host_info,
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_logging(logging: Arc<dyn LoggingDriver>) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage,
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             logging,
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_event_bus(event_bus: Arc<dyn EventBusDriver>) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage,
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             event_bus,
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_file_system(
         file_system: Arc<dyn FileSystemDriver>,
     ) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage,
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             file_system,
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 
     pub fn with_unsafe_storage(
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
     ) -> Arc<Self> {
+        let storage = EphemeralSecureStorage::new();
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(storage.clone());
         Drivers::new(
             RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
+            storage,
             RustEntropyDriver::new(),
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             unsafe_storage,
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         )
     }
 }

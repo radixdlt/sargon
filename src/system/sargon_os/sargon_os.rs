@@ -399,6 +399,12 @@ mod tests {
         let profile = Profile::sample();
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
+
+        let generic_factor_source_driver =
+            RustUseMnemonicBasedFactorSourceDriver::new(
+                secure_storage_driver.clone(),
+            );
+
         secure_storage_client.save_profile(&profile).await.unwrap();
         secure_storage_client
             .save_active_profile_id(profile.id())
@@ -413,6 +419,13 @@ mod tests {
             event_bus_driver.clone(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
+            generic_factor_source_driver.clone(),
+            RustAnswerSecurityQuestionsDriver::new(
+                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
+            ),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
+            generic_factor_source_driver.clone(),
         );
         let bios = Bios::new(drivers);
 
