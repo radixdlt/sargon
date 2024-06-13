@@ -80,18 +80,11 @@ pub trait UseDeviceFactorSourceDriver: Send + Sync + std::fmt::Debug {
         let mnemonic_with_passphrase = self
             .load_mnemonic_for_factor_source_id(factor_source.id)
             .await?;
-        let hash_to_sign = Hash::from(payload);
-        let signatures = mnemonic_with_passphrase.sign_many(&hash_to_sign, derivation_paths).into_iter().map(|(path, sig_with_key)| 
-            HierarchicalDeterministicSignature {
-                factor: HierarchicalDeterministicFactorInstance::new(
-                    factor_source.id,
-                    HierarchicalDeterministicPublicKey::new(sig_with_key.public_key(), path)
-                ),
-                signature: sig_with_key.signature()
-            }
-        ).collect::<IdentifiedVecOf<HierarchicalDeterministicSignature>>();
-
-        Ok(signatures)
+        mnemonic_with_passphrase.sign_payload(
+            factor_source.id,
+            derivation_paths,
+            payload,
+        )
     }
 }
 
@@ -147,7 +140,10 @@ impl<T: GenericMnemonicFactorSourceDriver> SignWithFactorSource<FactorSource>
 pub trait UseSecurityQuestionsFactorSourceDriver:
     Send + Sync + std::fmt::Debug
 {
-    async fn decrypt_factor_source_with_answers(&self, factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource) -> Result<Mnemonic>;
+    async fn decrypt_factor_source_with_answers(
+        &self,
+        factor_source: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+    ) -> Result<Mnemonic>;
 
     /// Dont implement this is Host. Implement only `decrypt_factor_source_with_answers`.
     async fn sign_with_security_questions_factor_source(
@@ -156,7 +152,17 @@ pub trait UseSecurityQuestionsFactorSourceDriver:
         derivation_paths: Vec<DerivationPath>,
         payload: PayloadToSign,
     ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
-        
+        let factor_source_id = factor_source.id;
+        let mnemonic = self
+            .decrypt_factor_source_with_answers(factor_source)
+            .await?;
+        let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
+
+        mnemonic_with_passphrase.sign_payload(
+            factor_source_id,
+            derivation_paths,
+            payload,
+        )
     }
 }
 

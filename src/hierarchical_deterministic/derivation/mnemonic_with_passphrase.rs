@@ -108,6 +108,31 @@ impl MnemonicWithPassphrase {
         signatures
     }
 
+    pub fn sign_payload(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        derivation_paths: Vec<DerivationPath>,
+        payload: PayloadToSign,
+    ) -> Result<IdentifiedVecOf<HierarchicalDeterministicSignature>> {
+        let hash_to_sign = Hash::from(payload);
+        let signatures = self
+            .sign_many(&hash_to_sign, derivation_paths)
+            .into_iter()
+            .map(|(path, sig_with_key)| HierarchicalDeterministicSignature {
+                factor: HierarchicalDeterministicFactorInstance::new(
+                    factor_source_id,
+                    HierarchicalDeterministicPublicKey::new(
+                        sig_with_key.public_key(),
+                        path,
+                    ),
+                ),
+                signature: sig_with_key.signature(),
+            })
+            .collect::<IdentifiedVecOf<HierarchicalDeterministicSignature>>();
+
+        Ok(signatures)
+    }
+
     pub fn sign(
         &self,
         hash_to_sign: &Hash,
