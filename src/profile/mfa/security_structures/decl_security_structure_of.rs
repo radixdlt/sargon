@@ -1,5 +1,44 @@
 use crate::prelude::*;
 
+macro_rules! decl_role_with_factors_additional_impl {
+    (
+        $role: ident,
+        FactorInstance
+    ) => {
+        paste! {
+            impl From<[< $role RoleWithFactorInstance s >]> for ScryptoAccessRule {
+                fn from(value: [< $role RoleWithFactorInstance s >]) -> Self {
+                    ScryptoAccessRule::Protected(ScryptoAccessRuleNode::AnyOf(vec![
+                        ScryptoAccessRuleNode::ProofRule(ScryptoProofRule::CountOf(
+                            value.threshold,
+                            value
+                                .threshold_factors
+                                .into_iter()
+                                .map(|instance| instance.badge)
+                                .map(ScryptoResourceOrNonFungible::from)
+                                .collect(),
+                        )),
+                        ScryptoAccessRuleNode::ProofRule(ScryptoProofRule::AnyOf(
+                            value
+                                .override_factors
+                                .into_iter()
+                                .map(|instance| instance.badge)
+                                .map(ScryptoResourceOrNonFungible::from)
+                                .collect(),
+                        )),
+                    ]))
+                }
+            }
+        }
+    };
+    (
+        $role: ident,
+        $factor: ident
+    ) => {}
+}
+
+pub(crate) use decl_role_with_factors_additional_impl;
+
 macro_rules! decl_role_with_factors {
     (
         $(
@@ -31,7 +70,7 @@ macro_rules! decl_role_with_factors {
                 pub threshold_factors: Vec<$factor>,
 
                 /// How many threshold factors that must be used to perform some function with this role.
-                pub threshold: u16,
+                pub threshold: u8,
 
                 /// Overriding / Super admin / "sudo" / God / factors, **ANY**
                 /// single of these factor which can perform the function of this role,
@@ -42,7 +81,7 @@ macro_rules! decl_role_with_factors {
             impl [< $role RoleWith $factor s >] {
                 pub fn new(
                     threshold_factors: impl IntoIterator<Item = $factor>,
-                    threshold: u16,
+                    threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Self {
                     let _self = Self {
@@ -60,6 +99,8 @@ macro_rules! decl_role_with_factors {
                     factors
                 }
             }
+
+            decl_role_with_factors_additional_impl!($role, $factor);
         }
     };
 }

@@ -81,6 +81,30 @@ impl From<ResourceAddress> for FactorInstanceBadge {
     }
 }
 
+impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
+    fn from(value: FactorInstanceBadge) -> Self {
+        match value {
+            FactorInstanceBadge::Virtual {
+                value:
+                    FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                        value,
+                    },
+            } => ScryptoResourceOrNonFungible::NonFungible(
+                ScryptoNonFungibleGlobalId::from_public_key(
+                    &ScryptoPublicKey::from(value.public_key),
+                ),
+            ),
+            FactorInstanceBadge::Physical { value } => {
+                ScryptoResourceOrNonFungible::Resource(
+                    ScryptoResourceAddress::new_or_panic(
+                        value.secret_magic.node_id().0,
+                    ),
+                )
+            }
+        }
+    }
+}
+
 impl<'de> Deserialize<'de> for FactorInstanceBadge {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
@@ -196,5 +220,33 @@ mod tests {
                 }
             }
         )
+    }
+
+    #[test]
+    fn a_correct_resource_or_non_fungible_is_derived_from_a_physical_factor_instance_badge(
+    ) {
+        let sut = FactorInstanceBadge::sample_physical();
+        let resource_or_non_fungible = ScryptoResourceOrNonFungible::from(sut);
+        assert_eq!(
+            resource_or_non_fungible,
+            ScryptoResourceOrNonFungible::Resource(XRD)
+        );
+    }
+
+    #[test]
+    fn a_correct_resource_or_non_fungible_is_derived_from_a_virtual_factor_instance_badge(
+    ) {
+        let sut = FactorInstanceBadge::sample_virtual();
+        let resource_or_non_fungible = ScryptoResourceOrNonFungible::from(sut);
+        assert_eq!(
+            resource_or_non_fungible,
+            ScryptoResourceOrNonFungible::NonFungible(
+                ScryptoNonFungibleGlobalId::from_public_key(
+                    &ScryptoPublicKey::from(
+                        HierarchicalDeterministicPublicKey::sample().public_key
+                    )
+                )
+            )
+        );
     }
 }

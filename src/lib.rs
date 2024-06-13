@@ -100,6 +100,7 @@ pub mod prelude {
         network::NetworkDefinition as ScryptoNetworkDefinition,
         prelude::{
             recover_secp256k1 as Scrypto_recover_secp256k1,
+            FromPublicKey as ScryptoFromPublicKey,
             ManifestAddress as ScryptoManifestAddress,
             ManifestBucket as ScryptoManifestBucket,
             ManifestCustomValue as ScryptoManifestCustomValue,
@@ -126,13 +127,14 @@ pub mod prelude {
         resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
     };
     pub(crate) use radix_engine_interface::prelude::{
-        AccessRule as ScryptoAccessRule, Epoch as ScryptoEpoch,
+        AccessRule as ScryptoAccessRule,
+        AccessRuleNode as ScryptoAccessRuleNode, Epoch as ScryptoEpoch,
         FungibleResourceRoles as ScryptoFungibleResourceRoles,
         MetadataInit as ScryptoMetadataInit,
         MetadataValue as ScryptoMetadataValue,
         ModuleConfig as ScryptoModuleConfig,
         NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
-        OwnerRole as ScryptoOwnerRole,
+        OwnerRole as ScryptoOwnerRole, ProofRule as ScryptoProofRule,
         RoleAssignmentInit as ScryptoRoleAssignmentInit,
         ToMetadataEntry as ScryptoToMetadataEntry,
         UncheckedUrl as ScryptoUncheckedUrl,
