@@ -163,6 +163,7 @@ class Decimal192Test : SampleTestable<Decimal192> {
 
         assertNotNull(Float.MIN_VALUE.toDecimal192OrNull())
         assertNotNull(3.14f.toDecimal192OrNull())
+        assertNull(Float.NEGATIVE_INFINITY.toDecimal192OrNull())
 
         assertNull(Float.MIN_VALUE.toString().toDecimal192OrNull())
         assertNotNull("3.14".toDecimal192OrNull())
