@@ -1,30 +1,12 @@
 use crate::prelude::*;
 
 /// Vec of Blobs
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
+#[derive(
+    Clone, PartialEq, Eq, Debug, uniffi::Record, Serialize, Deserialize,
+)]
+#[serde(transparent)]
 pub struct Blobs {
     pub(crate) secret_magic: BlobsSecretMagic,
-}
-
-impl Serialize for Blobs {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.secret_magic.secret_magic.serialize(serializer)
-    }
-}
-
-impl<'de> Deserialize<'de> for Blobs {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        let secret_magic: BlobsSecretMagic =
-            Vec::<Blob>::deserialize(deserializer).unwrap().into();
-        Ok(secret_magic.into())
-    }
 }
 
 impl From<BlobsSecretMagic> for Blobs {
@@ -174,6 +156,27 @@ mod tests {
         let roundtrip = |s: SUT| SUT::from(ScryptoBlobsMap::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
+    }
+
+    #[test]
+    fn test_roundtrip_non_empty_blobs() {
+        let json = r#"
+        [
+          "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced", 
+          "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+          "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
+          "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+        ]
+        "#;
+        let deserialized_blobs: SUT = serde_json::from_str(json).unwrap();
+        assert_eq!(deserialized_blobs, SUT::sample());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_blobs_does_not_deserialize() {
+        let json = "[1, 2]";
+        let _: SUT = serde_json::from_str(json).unwrap();
     }
 }
 

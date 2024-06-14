@@ -10,20 +10,12 @@ use crate::prelude::*;
     uniffi::Record,
     derive_more::Display,
     derive_more::Debug,
+    derive_more::FromStr,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,
-}
-
-impl FromStr for Blob {
-    type Err = CommonError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes: BagOfBytes = s.parse()?;
-        Ok(bytes.into())
-    }
 }
 
 impl Blob {
@@ -152,6 +144,23 @@ mod tests {
             &model,
             json!("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"),
         );
+    }
+
+    #[test]
+    fn test_to_hex() {
+        let sample_blob = SUT::sample();
+        let hex = sample_blob.to_hex();
+        let expected_hex = sample_blob.secret_magic.to_hex();
+        assert_eq!(hex, expected_hex);
+    }
+
+    #[test]
+    fn test_from_hex() {
+        let hex_str =
+            "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced";
+        let blob = SUT::from_hex(hex_str).unwrap();
+        let expected_blob = SUT::from(BagOfBytes::from_hex(hex_str).unwrap());
+        assert_eq!(blob, expected_blob);
     }
 }
 

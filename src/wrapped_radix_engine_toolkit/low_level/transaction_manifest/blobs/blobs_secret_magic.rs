@@ -4,6 +4,7 @@ use crate::prelude::*;
 #[derive(
     Clone, PartialEq, Eq, Serialize, Deserialize, Debug, uniffi::Record,
 )]
+#[serde(transparent)]
 pub struct BlobsSecretMagic {
     pub(crate) secret_magic: Vec<Blob>,
 }
@@ -40,13 +41,7 @@ impl From<Vec<Blob>> for BlobsSecretMagic {
 
 impl From<ScryptoBlobs> for BlobsSecretMagic {
     fn from(value: ScryptoBlobs) -> Self {
-        Self {
-            secret_magic: value
-                .blobs
-                .into_iter()
-                .map(|b| b.into())
-                .collect_vec(),
-        }
+        Self::from(value.blobs.into_iter().map(|b| b.into()).collect_vec())
     }
 }
 
@@ -54,9 +49,7 @@ pub(crate) type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
 
 impl From<ScryptoBlobsMap> for BlobsSecretMagic {
     fn from(value: ScryptoBlobsMap) -> Self {
-        BlobsSecretMagic {
-            secret_magic: value.values().map(Blob::from).collect_vec(),
-        }
+        Self::from(value.values().map(Blob::from).collect_vec())
     }
 }
 

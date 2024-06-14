@@ -7,6 +7,7 @@ pub struct UnvalidatedTransactionManifest {
     #[serde(rename = "transactionManifest")]
     pub transaction_manifest_string: String,
 
+    #[serde(default)]
     pub blobs: Blobs,
 }
 
@@ -34,24 +35,11 @@ impl From<TransactionManifest> for UnvalidatedTransactionManifest {
     }
 }
 
-impl UnvalidatedTransactionManifest {
-    pub fn transaction_manifest(
-        &self,
-        network_id: NetworkID,
-    ) -> Result<TransactionManifest> {
-        TransactionManifest::new(
-            self.transaction_manifest_string.clone(),
-            network_id,
-            self.blobs.clone(),
-        )
-    }
-}
-
 impl HasSampleValues for UnvalidatedTransactionManifest {
     fn sample() -> Self {
         Self::new(
             TransactionManifest::sample().instructions_string(),
-            Blobs::sample(),
+            Blobs::default(),
         )
     }
 
@@ -66,7 +54,6 @@ impl HasSampleValues for UnvalidatedTransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = UnvalidatedTransactionManifest;
@@ -85,13 +72,13 @@ mod tests {
     #[test]
     fn transaction_manifest() {
         let transaction_manifest =
-            SUT::sample().transaction_manifest(NetworkID::Mainnet);
+            TransactionManifest::try_from((SUT::sample(), NetworkID::Mainnet));
         pretty_assertions::assert_eq!(
             transaction_manifest,
             TransactionManifest::new(
                 TransactionManifest::sample().instructions_string(),
                 NetworkID::Mainnet,
-                Blobs::sample()
+                Blobs::default()
             )
         );
     }

@@ -1,0 +1,392 @@
+2024-06-14 10:16:06 +0000  Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0x2a58a6bc0; archive(resolved)="<IDEArchive: 0x600012086520>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team(resolved)="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	Chain (16, self inclusive):
+	<IDEDistributionProcessingPipelineContext: 0x2a58a6bc0; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionProcessingPipelineContext: 0x2a58a6910; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x2a58fc180; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x2a58a8f90; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x2a58a8d60; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x49afee780; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x49adf8740; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x49af24b30; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x49af24900; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x600005dea840; teamID='MDH99V28LM', teamName='Radix Publishing Limited', teamType='Company', username='ghenadie.vasiliev-pusca@rdx.works', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x49af246d0; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="(null)">
+	<IDEDistributionContext: 0x2a58dd950; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="(null)">
+	<IDEDistributionContext: 0x2a58de780; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="(null)">
+	<IDEDistributionContext: 0x49a326500; archive = "<IDEArchive: 0x600012086520>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x6000146a69a0>", team="(null)">
+	<IDEDistributionContext: 0x49a3242e0; archive = "<IDEArchive: 0x600012086520>", distributionMethod="(null)", team="(null)">
+	<IDEDistributionContext: 0x2cb84c2c0; archive = "<IDEArchive: 0x600012086520>", distributionMethod="(null)", team="(null)">
+	<IDEDistributionContext: 0x49ac47980; archive = "<IDEArchive: 0x600012086520>", distributionMethod="(null)", team="(null)">
+</IDEDistributionProcessingPipelineContext: 0x2a58a6bc0>
+2024-06-14 10:16:06 +0000  Processing step: IDEDistributionCreateDestRootStep
+2024-06-14 10:16:06 +0000  Processing step: IDEDistributionCopyItemStep
+2024-06-14 10:16:06 +0000  Running /usr/bin/ditto '-V' '/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app'
+2024-06-14 10:16:06 +0000  >>> Copying /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app 
+2024-06-14 10:16:06 +0000  copying file ./_CodeSignature/CodeResources ... 
+2024-06-14 10:16:06 +0000  12428 bytes for ./_CodeSignature/CodeResources
+2024-06-14 10:16:06 +0000  copying file ./iOS-dev.xcconfig ... 
+2024-06-14 10:16:06 +0000  268 bytes for ./iOS-dev.xcconfig
+2024-06-14 10:16:06 +0000  copying file ./en.lproj/InfoPlist.strings ... 
+2024-06-14 10:16:06 +0000  421 bytes for ./en.lproj/InfoPlist.strings
+2024-06-14 10:16:06 +0000  copying file ./gateway-api-schema.yml ... 
+2024-06-14 10:16:06 +0000  200680 bytes for ./gateway-api-schema.yml
+2024-06-14 10:16:06 +0000  copying file ./Project-Alpha.xcconfig ... 
+2024-06-14 10:16:06 +0000  302 bytes for ./Project-Alpha.xcconfig
+2024-06-14 10:16:06 +0000  copying file ./IBMPlexSans-Medium.ttf ... 
+2024-06-14 10:16:06 +0000  177104 bytes for ./IBMPlexSans-Medium.ttf
+2024-06-14 10:16:06 +0000  copying file ./JSONPreview_JSONPreview.bundle/Assets.car ... 
+2024-06-14 10:16:06 +0000  30111 bytes for ./JSONPreview_JSONPreview.bundle/Assets.car
+2024-06-14 10:16:06 +0000  copying file ./JSONPreview_JSONPreview.bundle/PrivacyInfo.xcprivacy ... 
+2024-06-14 10:16:06 +0000  437 bytes for ./JSONPreview_JSONPreview.bundle/PrivacyInfo.xcprivacy
+2024-06-14 10:16:06 +0000  copying file ./JSONPreview_JSONPreview.bundle/Info.plist ... 
+2024-06-14 10:16:06 +0000  692 bytes for ./JSONPreview_JSONPreview.bundle/Info.plist
+2024-06-14 10:16:06 +0000  copying file ./Project-Debug-Opt.xcconfig ... 
+2024-06-14 10:16:06 +0000  331 bytes for ./Project-Debug-Opt.xcconfig
+2024-06-14 10:16:06 +0000  copying file ./SwiftyJSON_SwiftyJSON.bundle/PrivacyInfo.xcprivacy ... 
+2024-06-14 10:16:06 +0000  373 bytes for ./SwiftyJSON_SwiftyJSON.bundle/PrivacyInfo.xcprivacy
+copying file ./SwiftyJSON_SwiftyJSON.bundle/Info.plist ... 
+2024-06-14 10:16:06 +0000  688 bytes for ./SwiftyJSON_SwiftyJSON.bundle/Info.plist
+2024-06-14 10:16:06 +0000  copying file ./Project-Release.xcconfig ... 
+2024-06-14 10:16:06 +0000  344 bytes for ./Project-Release.xcconfig
+2024-06-14 10:16:06 +0000  copying file ./Common.xcconfig ... 
+2024-06-14 10:16:06 +0000  292 bytes for ./Common.xcconfig
+2024-06-14 10:16:06 +0000  copying file ./Project-Shared.xcconfig ... 
+2024-06-14 10:16:06 +0000  2180 bytes for ./Project-Shared.xcconfig
+copying file ./Pre-Alpha ... 
+2024-06-14 10:16:07 +0000  168035968 bytes for ./Pre-Alpha
+2024-06-14 10:16:07 +0000  copying file ./iOS-dev-test.xcconfig ... 
+2024-06-14 10:16:07 +0000  826 bytes for ./iOS-dev-test.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./iOS-release.xcconfig ... 
+2024-06-14 10:16:07 +0000  247 bytes for ./iOS-release.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./Project-Dev.xcconfig ... 
+2024-06-14 10:16:07 +0000  285 bytes for ./Project-Dev.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./CodeScanner_CodeScanner.bundle/Assets.car ... 
+2024-06-14 10:16:07 +0000  54287 bytes for ./CodeScanner_CodeScanner.bundle/Assets.car
+2024-06-14 10:16:07 +0000  copying file ./CodeScanner_CodeScanner.bundle/Info.plist ... 
+2024-06-14 10:16:07 +0000  692 bytes for ./CodeScanner_CodeScanner.bundle/Info.plist
+2024-06-14 10:16:07 +0000  copying file ./Assets.car ... 
+2024-06-14 10:16:07 +0000  8570920 bytes for ./Assets.car
+2024-06-14 10:16:07 +0000  copying file ./IBMPlexSans-SemiBold.ttf ... 
+2024-06-14 10:16:07 +0000  177272 bytes for ./IBMPlexSans-SemiBold.ttf
+2024-06-14 10:16:07 +0000  copying file ./iOS-alpha.xcconfig ... 
+2024-06-14 10:16:07 +0000  251 bytes for ./iOS-alpha.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./iOS-shared.xcconfig ... 
+2024-06-14 10:16:07 +0000  748 bytes for ./iOS-shared.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./iOS-beta.xcconfig ... 
+2024-06-14 10:16:07 +0000  249 bytes for ./iOS-beta.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./generate.sh ... 
+2024-06-14 10:16:07 +0000  2082 bytes for ./generate.sh
+2024-06-14 10:16:07 +0000  copying file ./PrivacyInfo.xcprivacy ... 
+2024-06-14 10:16:07 +0000  1109 bytes for ./PrivacyInfo.xcprivacy
+2024-06-14 10:16:07 +0000  copying file ./iOS-release-opt.xcconfig ... 
+2024-06-14 10:16:07 +0000  151 bytes for ./iOS-release-opt.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./Project-Beta.xcconfig ... 
+2024-06-14 10:16:07 +0000  287 bytes for ./Project-Beta.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./AppIcon.alpha76x76@2x~ipad.png ... 
+2024-06-14 10:16:07 +0000  47028 bytes for ./AppIcon.alpha76x76@2x~ipad.png
+2024-06-14 10:16:07 +0000  copying file ./Project-PreAlpha.xcconfig ... 
+2024-06-14 10:16:07 +0000  354 bytes for ./Project-PreAlpha.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./SensitiveInfo.plist ... 
+2024-06-14 10:16:07 +0000  102 bytes for ./SensitiveInfo.plist
+2024-06-14 10:16:07 +0000  copying file ./Frameworks/WebRTC.framework/_CodeSignature/CodeResources ... 
+2024-06-14 10:16:07 +0000  1798 bytes for ./Frameworks/WebRTC.framework/_CodeSignature/CodeResources
+2024-06-14 10:16:07 +0000  copying file ./Frameworks/WebRTC.framework/WebRTC ... 
+2024-06-14 10:16:07 +0000  10519584 bytes for ./Frameworks/WebRTC.framework/WebRTC
+2024-06-14 10:16:07 +0000  copying file ./Frameworks/WebRTC.framework/Info.plist ... 
+2024-06-14 10:16:07 +0000  751 bytes for ./Frameworks/WebRTC.framework/Info.plist
+2024-06-14 10:16:07 +0000  copying file ./Frameworks/AppsFlyerLib.framework/_CodeSignature/CodeResources ... 
+2024-06-14 10:16:07 +0000  1798 bytes for ./Frameworks/AppsFlyerLib.framework/_CodeSignature/CodeResources
+2024-06-14 10:16:07 +0000  copying file ./Frameworks/AppsFlyerLib.framework/AppsFlyerLib ... 
+2024-06-14 10:16:07 +0000  35088 bytes for ./Frameworks/AppsFlyerLib.framework/AppsFlyerLib
+2024-06-14 10:16:07 +0000  copying file ./Frameworks/AppsFlyerLib.framework/Info.plist ... 
+2024-06-14 10:16:07 +0000  746 bytes for ./Frameworks/AppsFlyerLib.framework/Info.plist
+2024-06-14 10:16:07 +0000  copying file ./embedded.mobileprovision ... 
+2024-06-14 10:16:07 +0000  14134 bytes for ./embedded.mobileprovision
+2024-06-14 10:16:07 +0000  copying file ./Project-Release-Opt.xcconfig ... 
+2024-06-14 10:16:07 +0000  196 bytes for ./Project-Release-Opt.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./IBMPlexSans-Regular.ttf ... 
+2024-06-14 10:16:07 +0000  175748 bytes for ./IBMPlexSans-Regular.ttf
+2024-06-14 10:16:07 +0000  copying file ./Info.plist ... 
+2024-06-14 10:16:07 +0000  2299 bytes for ./Info.plist
+2024-06-14 10:16:07 +0000  copying file ./AppIcon.alpha60x60@2x.png ... 
+2024-06-14 10:16:07 +0000  32571 bytes for ./AppIcon.alpha60x60@2x.png
+2024-06-14 10:16:07 +0000  copying file ./PkgInfo ... 
+2024-06-14 10:16:07 +0000  8 bytes for ./PkgInfo
+2024-06-14 10:16:07 +0000  copying file ./iOS-preAlpha.xcconfig ... 
+2024-06-14 10:16:07 +0000  255 bytes for ./iOS-preAlpha.xcconfig
+2024-06-14 10:16:07 +0000  copying file ./IBMPlexSans-Bold.ttf ... 
+2024-06-14 10:16:07 +0000  175712 bytes for ./IBMPlexSans-Bold.ttf
+2024-06-14 10:16:07 +0000  /usr/bin/ditto exited with 0
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionEmbedProfileStep
+2024-06-14 10:16:07 +0000  Skipping profile for item: <IDEDistributionItem: 0x6000ca019e60; bundleID='com.appsflyer.sdk.lib', path='<DVTFilePath:0x60008ab98c00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000f67853b0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x600083171980; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='com.appsflyer.sdk.lib', executablePath='<DVTFilePath:0x60008ab98e00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib'>', hardenedRuntime='0'>'>
+2024-06-14 10:16:07 +0000  Skipping profile for item: <IDEDistributionItem: 0x6000a6e41020; bundleID='org.webrtc.WebRTC', path='<DVTFilePath:0x60008ab99000:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f46e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x600083171980; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='org.webrtc.WebRTC', executablePath='<DVTFilePath:0x60003ace6680:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC'>', hardenedRuntime='0'>'>
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionInfoPlistStep
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionAppThinningPlistStep
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionAppThinningPlistStep because it said so
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionCompileBitcodeStep
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionCompileBitcodeStep because it said so
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionCodeSlimmingStep
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionCopyBCSymbolMapsStep
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionCopyBCSymbolMapsStep because it said so
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionCopyBCSymbolMapsStep because it said so
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionCopyBCSymbolMapsStep because it said so
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionSymbolsStep
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionSymbolsStep because it said so
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionSymbolsStep because it said so
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionSymbolsStep because it said so
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionAppThinningStep
+2024-06-14 10:16:07 +0000  Skipping step: IDEDistributionAppThinningStep because it said so
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionArchThinningStep
+2024-06-14 10:16:07 +0000  Item /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework doesn't have the entitlement com.apple.developer.web-browser-engine.host enabled, returning ["arm64e"]
+2024-06-14 10:16:07 +0000  Archs to thin for item /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework are ["arm64e"]
+2024-06-14 10:16:07 +0000  Running /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib' '-verify_arch' 'arm64e'
+2024-06-14 10:16:07 +0000  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo exited with 1
+2024-06-14 10:16:07 +0000  Skipping architecture thinning for item "AppsFlyerLib" because arch "arm64e" wasn't found
+2024-06-14 10:16:07 +0000  Item /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework doesn't have the entitlement com.apple.developer.web-browser-engine.host enabled, returning ["arm64e"]
+2024-06-14 10:16:07 +0000  Archs to thin for item /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework are ["arm64e"]
+2024-06-14 10:16:07 +0000  Running /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC' '-verify_arch' 'arm64e'
+2024-06-14 10:16:07 +0000  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo exited with 1
+2024-06-14 10:16:07 +0000  Skipping architecture thinning for item "WebRTC" because arch "arm64e" wasn't found
+2024-06-14 10:16:07 +0000  Item /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app doesn't have the entitlement com.apple.developer.web-browser-engine.host enabled, returning ["arm64e"]
+2024-06-14 10:16:07 +0000  Archs to thin for item /Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app are ["arm64e"]
+2024-06-14 10:16:07 +0000  Running /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Pre-Alpha' '-verify_arch' 'arm64e'
+2024-06-14 10:16:07 +0000  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo exited with 1
+2024-06-14 10:16:07 +0000  Skipping architecture thinning for item "Pre-Alpha" because arch "arm64e" wasn't found
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionODRStep
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionStripXattrsStep
+2024-06-14 10:16:07 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2024-06-14 10:16:07 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2024-06-14 10:16:07 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2024-06-14 10:16:07 +0000  Processing step: IDEDistributionCodesignStep
+2024-06-14 10:16:07 +0000  Entitlements for <IDEDistributionItem: 0x6000ca019e60; bundleID='com.appsflyer.sdk.lib', path='<DVTFilePath:0x60008ab98c00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000f67853b0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x600083171740; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='com.appsflyer.sdk.lib', executablePath='<DVTFilePath:0x60008ab98e00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib'>', hardenedRuntime='0'>'>: {
+}
+2024-06-14 10:16:07 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2024-06-14 10:16:07 +0000  Entitlements for <IDEDistributionItem: 0x6000ca019e60; bundleID='com.appsflyer.sdk.lib', path='<DVTFilePath:0x60008ab98c00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000f67853b0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x60007b10cd80; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='com.appsflyer.sdk.lib', executablePath='<DVTFilePath:0x60008ab98e00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib'>', hardenedRuntime='0'>'> are: {
+}
+2024-06-14 10:16:07 +0000  Writing entitlements for <IDEDistributionItem: 0x6000ca019e60; bundleID='com.appsflyer.sdk.lib', path='<DVTFilePath:0x60008ab98c00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000f67853b0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x60007b10fd80; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='com.appsflyer.sdk.lib', executablePath='<DVTFilePath:0x60008ab98e00:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib'>', hardenedRuntime='0'>'> to: /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/entitlements~~~tHaE0F
+2024-06-14 10:16:07 +0000  Running /usr/bin/codesign '-vvv' '--force' '--sign' '01764070E4DF2D7E574244E251492ED7AB0C3107' '--entitlements' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/entitlements~~~tHaE0F' '--generate-entitlement-der' '--strip-disallowed-xattrs' '--preserve-metadata=identifier,flags,runtime' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework'
+2024-06-14 10:16:07 +0000  /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework: replacing existing signature
+2024-06-14 10:16:07 +0000  /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework: signed bundle with Mach-O thin (arm64) [com.appsflyer.sdk.lib]
+2024-06-14 10:16:07 +0000  /usr/bin/codesign exited with 0
+2024-06-14 10:16:07 +0000  Entitlements for <IDEDistributionItem: 0x6000a6e41020; bundleID='org.webrtc.WebRTC', path='<DVTFilePath:0x60008ab99000:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f46e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x600083171740; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='org.webrtc.WebRTC', executablePath='<DVTFilePath:0x60003ace6680:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC'>', hardenedRuntime='0'>'>: {
+}
+2024-06-14 10:16:07 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2024-06-14 10:16:07 +0000  Entitlements for <IDEDistributionItem: 0x6000a6e41020; bundleID='org.webrtc.WebRTC', path='<DVTFilePath:0x60008ab99000:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f46e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x600083173000; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='org.webrtc.WebRTC', executablePath='<DVTFilePath:0x60003ace6680:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC'>', hardenedRuntime='0'>'> are: {
+}
+2024-06-14 10:16:07 +0000  Writing entitlements for <IDEDistributionItem: 0x6000a6e41020; bundleID='org.webrtc.WebRTC', path='<DVTFilePath:0x60008ab99000:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f46e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x600083171380; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='(null)', teamID='MDH99V28LM', identifier='org.webrtc.WebRTC', executablePath='<DVTFilePath:0x60003ace6680:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC'>', hardenedRuntime='0'>'> to: /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/entitlements~~~JWKSr7
+2024-06-14 10:16:07 +0000  Running /usr/bin/codesign '-vvv' '--force' '--sign' '01764070E4DF2D7E574244E251492ED7AB0C3107' '--entitlements' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/entitlements~~~JWKSr7' '--generate-entitlement-der' '--strip-disallowed-xattrs' '--preserve-metadata=identifier,flags,runtime' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/WebRTC.framework'
+2024-06-14 10:16:07 +0000  /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/WebRTC.framework: replacing existing signature
+2024-06-14 10:16:07 +0000  /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/WebRTC.framework: signed bundle with Mach-O universal (arm64) [org.webrtc.WebRTC]
+2024-06-14 10:16:07 +0000  /usr/bin/codesign exited with 0
+2024-06-14 10:16:07 +0000  Entitlements for <IDEDistributionItem: 0x6000ca01a2e0; bundleID='com.radixpublishing.radixwallet.ios.pre-alpha', path='<DVTFilePath:0x60008ab98580:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f4a00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x60007fe3e700; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='{
+    "application-identifier" = "MDH99V28LM.com.radixpublishing.radixwallet.ios.pre-alpha";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.icloud-container-identifiers" =     (
+        "iCloud.com.radixpublishing.radixwallet.ios.pre-alpha"
+    );
+    "com.apple.developer.icloud-services" =     (
+        CloudKit
+    );
+    "com.apple.developer.team-identifier" = MDH99V28LM;
+    "get-task-allow" = 0;
+}', teamID='MDH99V28LM', identifier='com.radixpublishing.radixwallet.ios.pre-alpha', executablePath='<DVTFilePath:0x600062b0fe80:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Pre-Alpha'>', hardenedRuntime='0'>'>: {
+    "application-identifier" = "MDH99V28LM.com.radixpublishing.radixwallet.ios.pre-alpha";
+    "aps-environment" = production;
+    "com.apple.developer.icloud-container-environment" = Production;
+    "com.apple.developer.icloud-container-identifiers" =     (
+        "iCloud.com.radixpublishing.radixwallet.ios.pre-alpha"
+    );
+    "com.apple.developer.icloud-services" =     (
+        CloudKit
+    );
+    "com.apple.developer.team-identifier" = MDH99V28LM;
+    "get-task-allow" = 0;
+}
+2024-06-14 10:16:07 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2024-06-14 10:16:07 +0000  Entitlements for <IDEDistributionItem: 0x6000ca01a2e0; bundleID='com.radixpublishing.radixwallet.ios.pre-alpha', path='<DVTFilePath:0x60008ab98580:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f4a00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x60007fe3fe40; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='{
+    "application-identifier" = "MDH99V28LM.com.radixpublishing.radixwallet.ios.pre-alpha";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.icloud-container-identifiers" =     (
+        "iCloud.com.radixpublishing.radixwallet.ios.pre-alpha"
+    );
+    "com.apple.developer.icloud-services" =     (
+        CloudKit
+    );
+    "com.apple.developer.team-identifier" = MDH99V28LM;
+    "get-task-allow" = 0;
+}', teamID='MDH99V28LM', identifier='com.radixpublishing.radixwallet.ios.pre-alpha', executablePath='<DVTFilePath:0x600062b0fe80:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Pre-Alpha'>', hardenedRuntime='0'>'> are: {
+    "application-identifier" = "MDH99V28LM.com.radixpublishing.radixwallet.ios.pre-alpha";
+    "aps-environment" = production;
+    "com.apple.developer.icloud-container-environment" = Production;
+    "com.apple.developer.icloud-container-identifiers" =     (
+        "iCloud.com.radixpublishing.radixwallet.ios.pre-alpha"
+    );
+    "com.apple.developer.icloud-services" =     (
+        CloudKit
+    );
+    "com.apple.developer.team-identifier" = MDH99V28LM;
+    "get-task-allow" = 0;
+}
+2024-06-14 10:16:07 +0000  Writing entitlements for <IDEDistributionItem: 0x6000ca01a2e0; bundleID='com.radixpublishing.radixwallet.ios.pre-alpha', path='<DVTFilePath:0x60008ab98580:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x6000c62f4a00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x60007b10cd80; name='Apple Distribution: Radix Publishing Limited (MDH99V28LM)', hash='01764070E4DF2D7E574244E251492ED7AB0C3107', serialNumber='3ADCDAC857724FE90CCDDDFA45456ABD', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2023-12-18 14:39:35 +0000''>', entitlements='{
+    "application-identifier" = "MDH99V28LM.com.radixpublishing.radixwallet.ios.pre-alpha";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.icloud-container-identifiers" =     (
+        "iCloud.com.radixpublishing.radixwallet.ios.pre-alpha"
+    );
+    "com.apple.developer.icloud-services" =     (
+        CloudKit
+    );
+    "com.apple.developer.team-identifier" = MDH99V28LM;
+    "get-task-allow" = 0;
+}', teamID='MDH99V28LM', identifier='com.radixpublishing.radixwallet.ios.pre-alpha', executablePath='<DVTFilePath:0x600062b0fe80:'/Users/ghenadievasiliev-pusca/Library/Developer/Xcode/Archives/2024-06-14/Radix Wallet Pre-Alpha 14.06.2024, 13.11.xcarchive/Products/Applications/Pre-Alpha.app/Pre-Alpha'>', hardenedRuntime='0'>'> to: /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/entitlements~~~NGxJbt
+2024-06-14 10:16:07 +0000  Running /usr/bin/codesign '-vvv' '--force' '--sign' '01764070E4DF2D7E574244E251492ED7AB0C3107' '--entitlements' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/entitlements~~~NGxJbt' '--generate-entitlement-der' '--strip-disallowed-xattrs' '--preserve-metadata=identifier,flags,runtime' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app'
+2024-06-14 10:16:07 +0000  /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app: replacing existing signature
+2024-06-14 10:16:08 +0000  /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app: signed app bundle with Mach-O thin (arm64) [com.radixpublishing.radixwallet.ios.pre-alpha]
+2024-06-14 10:16:08 +0000  /usr/bin/codesign exited with 0
+2024-06-14 10:16:08 +0000  Processing step: IDEDistributionZipODRItemStep
+2024-06-14 10:16:08 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2024-06-14 10:16:08 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2024-06-14 10:16:08 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2024-06-14 10:16:08 +0000  Processing step: IDEDistributionCreateIPAStep
+2024-06-14 10:16:08 +0000  Running /usr/bin/ditto '-V' '-c' '-k' '--norsrc' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root' '/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Packages/Pre-Alpha.ipa'
+2024-06-14 10:16:08 +0000  >>> Copying /var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root 
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/_CodeSignature/CodeResources ... 
+2024-06-14 10:16:08 +0000  12428 bytes for ./Payload/Pre-Alpha.app/_CodeSignature/CodeResources
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/iOS-dev.xcconfig ... 
+2024-06-14 10:16:08 +0000  268 bytes for ./Payload/Pre-Alpha.app/iOS-dev.xcconfig
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/en.lproj/InfoPlist.strings ... 
+2024-06-14 10:16:08 +0000  421 bytes for ./Payload/Pre-Alpha.app/en.lproj/InfoPlist.strings
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/gateway-api-schema.yml ... 
+2024-06-14 10:16:08 +0000  200680 bytes for ./Payload/Pre-Alpha.app/gateway-api-schema.yml
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/Project-Alpha.xcconfig ... 
+2024-06-14 10:16:08 +0000  302 bytes for ./Payload/Pre-Alpha.app/Project-Alpha.xcconfig
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/IBMPlexSans-Medium.ttf ... 
+2024-06-14 10:16:08 +0000  177104 bytes for ./Payload/Pre-Alpha.app/IBMPlexSans-Medium.ttf
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/JSONPreview_JSONPreview.bundle/Assets.car ... 
+2024-06-14 10:16:08 +0000  30111 bytes for ./Payload/Pre-Alpha.app/JSONPreview_JSONPreview.bundle/Assets.car
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/JSONPreview_JSONPreview.bundle/PrivacyInfo.xcprivacy ... 
+2024-06-14 10:16:08 +0000  437 bytes for ./Payload/Pre-Alpha.app/JSONPreview_JSONPreview.bundle/PrivacyInfo.xcprivacy
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/JSONPreview_JSONPreview.bundle/Info.plist ... 
+2024-06-14 10:16:08 +0000  692 bytes for ./Payload/Pre-Alpha.app/JSONPreview_JSONPreview.bundle/Info.plist
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/Project-Debug-Opt.xcconfig ... 
+2024-06-14 10:16:08 +0000  331 bytes for ./Payload/Pre-Alpha.app/Project-Debug-Opt.xcconfig
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/SwiftyJSON_SwiftyJSON.bundle/PrivacyInfo.xcprivacy ... 
+2024-06-14 10:16:08 +0000  373 bytes for ./Payload/Pre-Alpha.app/SwiftyJSON_SwiftyJSON.bundle/PrivacyInfo.xcprivacy
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/SwiftyJSON_SwiftyJSON.bundle/Info.plist ... 
+2024-06-14 10:16:08 +0000  688 bytes for ./Payload/Pre-Alpha.app/SwiftyJSON_SwiftyJSON.bundle/Info.plist
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/Project-Release.xcconfig ... 
+2024-06-14 10:16:08 +0000  344 bytes for ./Payload/Pre-Alpha.app/Project-Release.xcconfig
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/Common.xcconfig ... 
+2024-06-14 10:16:08 +0000  292 bytes for ./Payload/Pre-Alpha.app/Common.xcconfig
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/Project-Shared.xcconfig ... 
+2024-06-14 10:16:08 +0000  2180 bytes for ./Payload/Pre-Alpha.app/Project-Shared.xcconfig
+2024-06-14 10:16:08 +0000  copying file ./Payload/Pre-Alpha.app/Pre-Alpha ... 
+2024-06-14 10:16:12 +0000  168036048 bytes for ./Payload/Pre-Alpha.app/Pre-Alpha
+copying file ./Payload/Pre-Alpha.app/iOS-dev-test.xcconfig ... 
+2024-06-14 10:16:12 +0000  826 bytes for ./Payload/Pre-Alpha.app/iOS-dev-test.xcconfig
+copying file ./Payload/Pre-Alpha.app/iOS-release.xcconfig ... 
+2024-06-14 10:16:12 +0000  247 bytes for ./Payload/Pre-Alpha.app/iOS-release.xcconfig
+copying file ./Payload/Pre-Alpha.app/Project-Dev.xcconfig ... 
+2024-06-14 10:16:12 +0000  285 bytes for ./Payload/Pre-Alpha.app/Project-Dev.xcconfig
+copying file ./Payload/Pre-Alpha.app/CodeScanner_CodeScanner.bundle/Assets.car ... 
+2024-06-14 10:16:12 +0000  54287 bytes for ./Payload/Pre-Alpha.app/CodeScanner_CodeScanner.bundle/Assets.car
+2024-06-14 10:16:12 +0000  copying file ./Payload/Pre-Alpha.app/CodeScanner_CodeScanner.bundle/Info.plist ... 
+692 bytes for ./Payload/Pre-Alpha.app/CodeScanner_CodeScanner.bundle/Info.plist
+copying file ./Payload/Pre-Alpha.app/Assets.car ... 
+2024-06-14 10:16:12 +0000  8570920 bytes for ./Payload/Pre-Alpha.app/Assets.car
+2024-06-14 10:16:12 +0000  copying file ./Payload/Pre-Alpha.app/IBMPlexSans-SemiBold.ttf ... 
+2024-06-14 10:16:12 +0000  177272 bytes for ./Payload/Pre-Alpha.app/IBMPlexSans-SemiBold.ttf
+copying file ./Payload/Pre-Alpha.app/iOS-alpha.xcconfig ... 
+2024-06-14 10:16:12 +0000  251 bytes for ./Payload/Pre-Alpha.app/iOS-alpha.xcconfig
+copying file ./Payload/Pre-Alpha.app/iOS-shared.xcconfig ... 
+2024-06-14 10:16:12 +0000  748 bytes for ./Payload/Pre-Alpha.app/iOS-shared.xcconfig
+copying file ./Payload/Pre-Alpha.app/iOS-beta.xcconfig ... 
+2024-06-14 10:16:12 +0000  249 bytes for ./Payload/Pre-Alpha.app/iOS-beta.xcconfig
+copying file ./Payload/Pre-Alpha.app/generate.sh ... 
+2024-06-14 10:16:12 +0000  2082 bytes for ./Payload/Pre-Alpha.app/generate.sh
+copying file ./Payload/Pre-Alpha.app/PrivacyInfo.xcprivacy ... 
+2024-06-14 10:16:12 +0000  1109 bytes for ./Payload/Pre-Alpha.app/PrivacyInfo.xcprivacy
+copying file ./Payload/Pre-Alpha.app/iOS-release-opt.xcconfig ... 
+2024-06-14 10:16:13 +0000  151 bytes for ./Payload/Pre-Alpha.app/iOS-release-opt.xcconfig
+copying file ./Payload/Pre-Alpha.app/Project-Beta.xcconfig ... 
+2024-06-14 10:16:13 +0000  287 bytes for ./Payload/Pre-Alpha.app/Project-Beta.xcconfig
+copying file ./Payload/Pre-Alpha.app/AppIcon.alpha76x76@2x~ipad.png ... 
+2024-06-14 10:16:13 +0000  47028 bytes for ./Payload/Pre-Alpha.app/AppIcon.alpha76x76@2x~ipad.png
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Project-PreAlpha.xcconfig ... 
+354 bytes for ./Payload/Pre-Alpha.app/Project-PreAlpha.xcconfig
+copying file ./Payload/Pre-Alpha.app/SensitiveInfo.plist ... 
+2024-06-14 10:16:13 +0000  102 bytes for ./Payload/Pre-Alpha.app/SensitiveInfo.plist
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/_CodeSignature/CodeResources ... 
+2024-06-14 10:16:13 +0000  1798 bytes for ./Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/_CodeSignature/CodeResources
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC ... 
+2024-06-14 10:16:13 +0000  10519840 bytes for ./Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/WebRTC
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/Info.plist ... 
+2024-06-14 10:16:13 +0000  751 bytes for ./Payload/Pre-Alpha.app/Frameworks/WebRTC.framework/Info.plist
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/_CodeSignature/CodeResources ... 
+2024-06-14 10:16:13 +0000  1798 bytes for ./Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/_CodeSignature/CodeResources
+copying file ./Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib ... 
+2024-06-14 10:16:13 +0000  35360 bytes for ./Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/AppsFlyerLib
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/Info.plist ... 
+2024-06-14 10:16:13 +0000  746 bytes for ./Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework/Info.plist
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/embedded.mobileprovision ... 
+2024-06-14 10:16:13 +0000  18257 bytes for ./Payload/Pre-Alpha.app/embedded.mobileprovision
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Project-Release-Opt.xcconfig ... 
+2024-06-14 10:16:13 +0000  196 bytes for ./Payload/Pre-Alpha.app/Project-Release-Opt.xcconfig
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/IBMPlexSans-Regular.ttf ... 
+2024-06-14 10:16:13 +0000  175748 bytes for ./Payload/Pre-Alpha.app/IBMPlexSans-Regular.ttf
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/Info.plist ... 
+2024-06-14 10:16:13 +0000  2299 bytes for ./Payload/Pre-Alpha.app/Info.plist
+copying file ./Payload/Pre-Alpha.app/AppIcon.alpha60x60@2x.png ... 
+2024-06-14 10:16:13 +0000  32571 bytes for ./Payload/Pre-Alpha.app/AppIcon.alpha60x60@2x.png
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/PkgInfo ... 
+8 bytes for ./Payload/Pre-Alpha.app/PkgInfo
+copying file ./Payload/Pre-Alpha.app/iOS-preAlpha.xcconfig ... 
+2024-06-14 10:16:13 +0000  255 bytes for ./Payload/Pre-Alpha.app/iOS-preAlpha.xcconfig
+2024-06-14 10:16:13 +0000  copying file ./Payload/Pre-Alpha.app/IBMPlexSans-Bold.ttf ... 
+2024-06-14 10:16:13 +0000  175712 bytes for ./Payload/Pre-Alpha.app/IBMPlexSans-Bold.ttf
+2024-06-14 10:16:13 +0000  /usr/bin/ditto exited with 0
+2024-06-14 10:16:13 +0000  Processing step: IDEDistributionAppStoreInformationStep
+2024-06-14 10:16:13 +0000  Skipping step: IDEDistributionAppStoreInformationStep because it said so
+2024-06-14 10:16:13 +0000  Processing step: IDEDistributionGenerateProcessedDistributionItems
+2024-06-14 10:16:13 +0000  IDEDistributionItem init <DVTFilePath:0x60008ea84200:'/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/WebRTC.framework'>
+2024-06-14 10:16:13 +0000  IDEDistributionItem init <DVTFilePath:0x60008ea84080:'/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app/Frameworks/AppsFlyerLib.framework'>
+2024-06-14 10:16:13 +0000  IDEDistributionItem init <DVTFilePath:0x60008ebec400:'/var/folders/7h/0gplflrs7ybf_95rnv9jv2pr0000gn/T/XcodeDistPipeline.~~~IaGGqR/Root/Payload/Pre-Alpha.app'>
+2024-06-14 10:16:13 +0000  Processing step: IDEDistributionCreateManifestStep
