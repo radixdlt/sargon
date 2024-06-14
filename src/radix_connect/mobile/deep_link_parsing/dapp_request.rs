@@ -91,7 +91,7 @@ mod tests {
     #[test]
     fn try_with_invalid_interaction_id() {
         let session_id = Uuid::new_v4().to_string();
-        let interaction_id = "bad";
+        let interaction_id = "";
         assert_eq!(
             SUT::try_with_interaction_id_and_session_id(
                 interaction_id,
