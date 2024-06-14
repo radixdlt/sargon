@@ -44,6 +44,13 @@ impl ManifestSummary {
                 .collect(),
         }
     }
+
+    pub fn addresses_of_entities_requiring_auth(self) -> IndexSet<AddressOfAccountOrPersona> {
+        let mut sut = IndexSet::<AddressOfAccountOrPersona>::new();
+        sut.extend(self.addresses_of_accounts_requiring_auth.into_iter().map(AddressOfAccountOrPersona::from));
+        sut.extend(self.addresses_of_personas_requiring_auth.into_iter().map(AddressOfAccountOrPersona::from));
+        sut
+    }
 }
 
 impl From<(RetManifestSummary, NetworkID)> for ManifestSummary {

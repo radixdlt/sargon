@@ -25,6 +25,10 @@ impl ProfileHolder {
         self.access_profile_with(|p| p.clone())
     }
 
+    pub fn entities_for_addresses(&self, addresses: IndexSet<AddressOfAccountOrPersona>) -> Result<IndexSet<AccountOrPersona>> {
+        self.try_access_profile_with(|p| p.entities_for_addresses(addresses.clone()))
+    }
+
     pub fn current_network_id(&self) -> NetworkID {
         self.access_profile_with(|p| p.current_network_id())
     }

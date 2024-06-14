@@ -42,6 +42,18 @@ impl From<Persona> for AccountOrPersona {
     }
 }
 
+impl From<&Account> for AccountOrPersona {
+    fn from(value: &Account) -> Self {
+        Self::AccountEntity(value.clone())
+    }
+}
+
+impl From<&Persona> for AccountOrPersona {
+    fn from(value: &Persona) -> Self {
+        Self::PersonaEntity(value.clone())
+    }
+}
+
 impl std::fmt::Display for AccountOrPersona {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

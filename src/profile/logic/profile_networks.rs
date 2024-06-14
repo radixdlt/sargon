@@ -11,6 +11,14 @@ impl Profile {
     pub fn has_any_account_on_any_network(&self) -> bool {
         self.networks.iter().any(|n| !n.accounts.is_empty())
     }
+
+    pub fn entities_for_addresses(&self, addresses: IndexSet<AddressOfAccountOrPersona>) -> Result<IndexSet<AccountOrPersona>> {
+       addresses.into_iter().map(|a| {
+          let network_id = a.network_id();
+          let network = self.networks.get_id(network_id).ok_or(CommonError::UnknownNetworkForID { bad_value: network_id.discriminant() })?;
+          network.entity_of_address(a)
+       }).collect::<Result<IndexSet<AccountOrPersona>>>()
+    }
 }
 
 #[cfg(test)]

@@ -573,6 +573,9 @@ pub enum CommonError {
 
     #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
     InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10162,
+
+    #[error("Unknown Persona")]
+    UnknownPersona = 10163,
 }
 
 #[uniffi::export]
