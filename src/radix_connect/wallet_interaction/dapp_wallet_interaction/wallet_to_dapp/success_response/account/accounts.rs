@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub struct WalletToDappInteractionAccountsRequestResponseItem {
     pub accounts: Vec<WalletInteractionWalletAccount>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub challenge: Option<Exactly32Bytes>,
+    pub challenge: Option<DappToWalletInteractionAuthChallengeNonce>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub proofs: Option<Vec<WalletToDappInteractionAccountProof>>,
 }
@@ -12,7 +12,7 @@ pub struct WalletToDappInteractionAccountsRequestResponseItem {
 impl WalletToDappInteractionAccountsRequestResponseItem {
     pub fn new(
         accounts: Vec<WalletInteractionWalletAccount>,
-        challenge: impl Into<Option<Exactly32Bytes>>,
+        challenge: impl Into<Option<DappToWalletInteractionAuthChallengeNonce>>,
         proofs: impl Into<Option<Vec<WalletToDappInteractionAccountProof>>>,
     ) -> Self {
         Self {
@@ -27,7 +27,7 @@ impl HasSampleValues for WalletToDappInteractionAccountsRequestResponseItem {
     fn sample() -> Self {
         Self::new(
             vec![WalletInteractionWalletAccount::sample()],
-            Exactly32Bytes::sample(),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
             vec![WalletToDappInteractionAccountProof::sample()],
         )
     }
@@ -35,7 +35,7 @@ impl HasSampleValues for WalletToDappInteractionAccountsRequestResponseItem {
     fn sample_other() -> Self {
         Self::new(
             vec![WalletInteractionWalletAccount::sample_other()],
-            Exactly32Bytes::sample_other(),
+            DappToWalletInteractionAuthChallengeNonce::sample_other(),
             vec![WalletToDappInteractionAccountProof::sample_other()],
         )
     }
