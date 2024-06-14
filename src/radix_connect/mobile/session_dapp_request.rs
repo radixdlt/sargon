@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, uniffi::Record)]
+json_data_convertible!(RadixConnectMobileSessionRequest);
+
+#[derive(Debug, PartialEq, uniffi::Record, Serialize, Deserialize)]
 pub struct RadixConnectMobileSessionRequest {
     pub session_id: SessionID,
     pub interaction: DappToWalletInteractionUnvalidated,
@@ -44,6 +46,18 @@ impl HasSampleValues for RadixConnectMobileSessionRequest {
     }
 }
 
+#[uniffi::export]
+pub fn new_radix_connect_mobile_session_request_sample(
+) -> RadixConnectMobileSessionRequest {
+    RadixConnectMobileSessionRequest::sample()
+}
+
+#[uniffi::export]
+pub fn new_radix_connect_mobile_session_request_sample_other(
+) -> RadixConnectMobileSessionRequest {
+    RadixConnectMobileSessionRequest::sample_other()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -60,5 +74,22 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn sample_values() {
+        assert_eq!(
+            new_radix_connect_mobile_session_request_sample(),
+            RadixConnectMobileSessionRequest::sample()
+        );
+        assert_eq!(
+            new_radix_connect_mobile_session_request_sample_other(),
+            RadixConnectMobileSessionRequest::sample_other()
+        );
     }
 }
