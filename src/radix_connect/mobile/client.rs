@@ -64,135 +64,103 @@ impl RadixConnectMobile {
 #[uniffi::export]
 impl RadixConnectMobile {
     #[uniffi::method]
-    pub async fn handle_linking_request(
+    pub async fn handle_deep_link(
         &self,
-        request: RadixConnectMobileLinkRequest,
-        dev_mode: bool,
-    ) -> Result<Url> {
-        let wallet_private_key = KeyAgreementPrivateKey::generate()?;
-        let shared_secret = wallet_private_key
-            .shared_secret_from_key_agreement(&request.public_key);
+        url: String,
+    ) -> Result<RadixConnectMobileSessionRequest> {
+        let request = parse_mobile_connect_request(url)?;
 
-        let dapp_definitions = self
-            .well_known_client
-            .get_well_known_file(request.origin.clone())
-            .await?;
+        // let message = [
+        //     "C".as_bytes(),
+        //     request.request.interaction_id.0.as_bytes(),
+        //     "69".as_bytes(),
+        //     request.dapp_definition_address.to_string().as_bytes(),
+        //     request.origin.to_string().as_bytes(),
+        // ]
+        // .concat();
+        //
+        // let hash = hash_of(message);
+        //
+        // let is_valid_signature = request
+        //     .identity_public_key
+        //     .is_valid_signature_for_hash(&request.signature, &hash);
+        //
 
-        // pass dev mode to decide if we want to use default callback path or fail linking
-        if !dev_mode && dapp_definitions.callback_path.is_none() {
-            return Err(
-                CommonError::RadixConnectMobileDappCallbackPathNotFound {
-                    origin: request.origin,
-                },
-            );
+        let session = self.load_session(request.session_id).await;
+        if session.is_err() {
+            self.create_in_flight_session(&request)?;
         }
-        let callback_path = dapp_definitions.callback_path.unwrap_or_default();
+        let origin_requires_validation = session.is_err();
 
-        let encryption_key: Exactly32Bytes = shared_secret.as_bytes().into();
-        // let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
-        // let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
-
-        // let encryption_key = PbHkdfSha256::hkdf_key_agreement(
-        //     shared_secret.to_bytes(),
-        //     Some(&salt),
-        //     Some(&info),
-        // );
-
-        let session = Session::new(
+        Ok(RadixConnectMobileSessionRequest::new(
             request.session_id,
-            SessionOrigin::WebDapp(request.origin.clone()),
-            encryption_key,
-            callback_path.clone(),
-        );
-
-        {
-            self.new_sessions
-                .try_write()
-                .map(|mut new_sessions| {
-                    new_sessions.insert(request.session_id, session);
-                })
-                .unwrap();
-        }
-
-        let mut return_url = request.origin.join(&callback_path.0).unwrap();
-        return_url
-            .query_pairs_mut()
-            .append_pair("sessionId", request.session_id.0.to_string().as_str())
-            .append_pair(
-                "publicKey",
-                wallet_private_key.public_key().to_hex().as_str(),
-            );
-
-        Ok(return_url)
+            request.request,
+            request.origin,
+            origin_requires_validation,
+        ))
     }
 
     #[uniffi::method]
-    pub async fn handle_dapp_interaction_request(
+    pub async fn request_origin_verified(
         &self,
-        dapp_request: RadixConnectMobileDappRequest,
-    ) -> Result<RadixConnectMobileSessionRequest> {
+        session_id: SessionID,
+    ) -> Result<()> {
         let inflight_session;
         {
             let new_sessions = self.new_sessions.try_read().unwrap();
 
-            inflight_session = new_sessions
-                .get(&dapp_request.session_id)
-                .map(|session| session.to_owned()) //.to_owned()
+            inflight_session = match new_sessions.get(&session_id) {
+                Some(session) => {
+                    if let Ok(mut new_sessions) = self.new_sessions.try_write()
+                    {
+                        new_sessions.remove(&session_id);
+                    }
+                    Ok(session.to_owned())
+                }
+                None => Err(CommonError::Unknown),
+            };
         }
 
-        let session = match inflight_session {
-            Some(session) => session,
-            None => self.load_session(dapp_request.session_id).await?,
-        };
+        self.save_session(inflight_session?.clone()).await
+    }
+
+    #[uniffi::method]
+    pub async fn request_origin_denied(
+        &self,
+        session_id: SessionID,
+    ) -> Result<()> {
+        {
+            if let Ok(mut new_sessions) = self.new_sessions.try_write() {
+                new_sessions.remove(&session_id);
+            }
+        }
 
         self.wallet_interactions_transport
-            .get_wallet_interaction_requests(session)
-            .await?
-            .into_iter()
-            .find(|intraction| {
-                intraction.interaction_id == dapp_request.interaction_id
-            })
-            .map(|interaction| RadixConnectMobileSessionRequest {
-                session_id: dapp_request.session_id,
-                interaction,
-            })
-            .ok_or(CommonError::RadixConnectMobileDappRequestNotFound {
-                interaction_id: dapp_request.interaction_id,
-            })
+            .send_wallet_interaction_error_response(
+                session_id,
+                "Rejected".to_owned(),
+            )
+            .await
     }
+
+    //
+    //     let encryption_key: Exactly32Bytes = shared_secret.as_bytes().into();
+    //     // let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
+    //     // let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
+    //
+    //     // let encryption_key = PbHkdfSha256::hkdf_key_agreement(
+    //     //     shared_secret.to_bytes(),
+    //     //     Some(&salt),
+    //     //     Some(&info),
+    //     // );
+    //
 
     #[uniffi::method]
     pub async fn send_dapp_interaction_response(
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        let inflight_session;
-        {
-            let new_sessions = self.new_sessions.try_read().unwrap();
-
-            inflight_session = match new_sessions
-                .get(&wallet_response.session_id)
-            {
-                Some(session) => {
-                    let session_id = session.id;
-                    if let Ok(mut new_sessions) = self.new_sessions.try_write()
-                    {
-                        new_sessions.remove(&session_id);
-                    }
-
-                    Some(session.to_owned())
-                }
-                None => None,
-            };
-        }
-
-        let session = match inflight_session {
-            Some(session) => {
-                self.save_session(session.clone()).await?;
-                session
-            }
-            None => self.load_session(wallet_response.session_id).await?,
-        };
+        let session = self.load_session(wallet_response.session_id).await?;
 
         self.wallet_interactions_transport
             .send_wallet_interaction_response(session, wallet_response.response)
@@ -215,26 +183,37 @@ impl RadixConnectMobile {
             .save_session(session.id, bytes.into())
             .await
     }
-}
 
-impl WalletClientStorage {
-    fn save_session(&self, session: Session) -> Result<()> {
-        self.save(
-            SecureStorageKey::RadixConnectMobileSession {
-                session_id: session.id,
-            },
-            &session,
-        )
+    fn create_in_flight_session(
+        &self,
+        request: &RadixConnectMobileRequest,
+    ) -> Result<()> {
+        let wallet_private_key = KeyAgreementPrivateKey::generate()?;
+        let wallet_public_key = wallet_private_key.public_key();
+        let shared_secret = wallet_private_key
+            .shared_secret_from_key_agreement(&request.public_key);
+
+        let encryption_key: Exactly32Bytes = shared_secret.as_bytes().into();
+        let session = Session::new(
+            request.session_id,
+            SessionOrigin::WebDapp(request.origin.clone()),
+            encryption_key,
+            request.public_key,
+            request.identity_public_key,
+            wallet_public_key,
+        );
+
+        _ = self.new_sessions.try_write().map(|mut new_sessions| {
+            new_sessions.insert(request.session_id, session);
+        });
+
+        Ok(())
     }
-
-    fn load_session(&self, session_id: SessionID) -> Result<Option<Session>> {
-        self.load(SecureStorageKey::RadixConnectMobileSession { session_id })
-    }
 }
 
-#[uniffi::export]
-pub fn new_mobile_connect_request(
-    url: String,
-) -> Result<RadixConnectMobileConnectRequest> {
-    RadixConnectMobileConnectRequest::from_str(url.as_str())
-}
+// #[uniffi::export]
+// pub fn new_mobile_connect_request(
+//     url: String,
+// ) -> Result<RadixConnectMobileConnectRequest> {
+//     RadixConnectMobileConnectRequest::from_str(url.as_str())
+// }

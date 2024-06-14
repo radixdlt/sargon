@@ -518,6 +518,9 @@ pub enum CommonError {
 
     #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
     RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
+
+    #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
+    InvalidEd25519SignatureFromString { bad_value: String } = 10145,
 }
 
 #[uniffi::export]

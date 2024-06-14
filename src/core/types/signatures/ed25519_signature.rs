@@ -57,6 +57,15 @@ impl Ed25519Signature {
     pub fn to_hex(&self) -> String {
         hex_encode(self.to_bytes())
     }
+
+    pub fn from_hex(hex: String) -> Result<Self> {
+        // We want to ALWAYS go via `try_from(slice: &[u8])` since validates the EC point (`ScryptoEd25519PublicKey` doesn't!)
+        Exactly64Bytes::from_str(hex.as_str())
+            .map_err(|_| CommonError::InvalidEd25519SignatureFromString {
+                bad_value: hex,
+            })
+            .map(|b| b.into())
+    }
 }
 
 impl HasSampleValues for Ed25519Signature {

@@ -7,7 +7,9 @@ pub struct Session {
     pub id: SessionID,
     pub origin: SessionOrigin,
     pub encryption_key: SymmetricKey,
-    pub callback_path: RCMCallbackPath,
+    pub dapp_public_key: KeyAgreementPublicKey,
+    pub dapp_identity_public_key: Ed25519PublicKey,
+    pub wallet_public_key: KeyAgreementPublicKey,
 }
 
 impl Session {
@@ -15,13 +17,17 @@ impl Session {
         id: impl Into<SessionID>,
         origin: SessionOrigin,
         encryption_key: impl Into<Exactly32Bytes>,
-        callback_path: RCMCallbackPath,
+        dapp_public_key: KeyAgreementPublicKey,
+        dapp_identity_public_key: Ed25519PublicKey,
+        wallet_public_key: KeyAgreementPublicKey,
     ) -> Self {
         Self {
             id: id.into(),
             origin,
             encryption_key: encryption_key.into(),
-            callback_path,
+            dapp_public_key,
+            dapp_identity_public_key,
+            wallet_public_key,
         }
     }
 }
@@ -32,7 +38,9 @@ impl HasSampleValues for Session {
             SessionID::sample(),
             SessionOrigin::sample(),
             Exactly32Bytes::sample(),
-            RCMCallbackPath::sample(),
+            KeyAgreementPublicKey::sample(),
+            Ed25519PublicKey::sample(),
+            KeyAgreementPublicKey::sample(),
         )
     }
 
@@ -41,7 +49,9 @@ impl HasSampleValues for Session {
             SessionID::sample_other(),
             SessionOrigin::sample_other(),
             Exactly32Bytes::sample_other(),
-            RCMCallbackPath::sample_other(),
+            KeyAgreementPublicKey::sample(),
+            Ed25519PublicKey::sample(),
+            KeyAgreementPublicKey::sample(),
         )
     }
 }

@@ -4,16 +4,22 @@ use crate::prelude::*;
 pub struct RadixConnectMobileSessionRequest {
     pub session_id: SessionID,
     pub interaction: DappToWalletInteractionUnvalidated,
+    pub origin: Url,
+    pub origin_requires_validation: bool,
 }
 
 impl RadixConnectMobileSessionRequest {
     pub fn new(
         session_id: impl Into<SessionID>,
         interaction: DappToWalletInteractionUnvalidated,
+        origin: Url,
+        origin_requires_validation: bool,
     ) -> Self {
         Self {
             session_id: session_id.into(),
             interaction,
+            origin,
+            origin_requires_validation,
         }
     }
 }
@@ -23,6 +29,8 @@ impl HasSampleValues for RadixConnectMobileSessionRequest {
         Self::new(
             SessionID::sample(),
             DappToWalletInteractionUnvalidated::sample(),
+            Url::parse("https://radix.com").unwrap(),
+            true,
         )
     }
 
@@ -30,6 +38,8 @@ impl HasSampleValues for RadixConnectMobileSessionRequest {
         Self::new(
             SessionID::sample_other(),
             DappToWalletInteractionUnvalidated::sample_other(),
+            Url::parse("https://radix.com").unwrap(),
+            false,
         )
     }
 }
