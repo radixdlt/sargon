@@ -86,6 +86,7 @@ impl Profile {
                             value.transaction_signing.factor_source_id
                                 == factor_source_id
                         }
+                        EntitySecurityState::Secured { value } => panic!("It is complicated. We have not decided exactly on how to do this. Most likely we can do 'eager grabbing' of indices for entities which are securified, and most likely we are going to offset all indices used for securified entities with u32.max/2, assigning them a special 'space'. This might help with account recovery scan.")
                     })
                     .collect_vec()
                     .len()

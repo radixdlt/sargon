@@ -119,27 +119,6 @@ impl Identifiable for Account {
     }
 }
 
-impl PartialOrd for Account {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Account {
-    fn cmp(&self, other: &Self) -> Ordering {
-        match (&self.security_state, &other.security_state) {
-            (
-                EntitySecurityState::Unsecured { value: l },
-                EntitySecurityState::Unsecured { value: r },
-            ) => l
-                .transaction_signing
-                .derivation_path()
-                .last_component()
-                .cmp(r.transaction_signing.derivation_path().last_component()),
-        }
-    }
-}
-
 impl HasSampleValues for Account {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -381,11 +360,6 @@ mod tests {
             format!("{account}"),
             "Alice | account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
         );
-    }
-
-    #[test]
-    fn compare() {
-        assert!(SUT::sample_alice() < SUT::sample_bob());
     }
 
     #[test]

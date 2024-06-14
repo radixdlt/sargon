@@ -30,6 +30,16 @@ impl IsNetworkAware for AccountOrPersona {
     }
 }
 
+
+impl AccountOrPersona {
+    fn security_state(&self) -> &EntitySecurityState {
+        match self {
+            Self::AccountEntity(account) => &account.security_state,
+            Self::PersonaEntity(persona) => &persona.security_state,
+        }
+    }
+}
+
 impl From<Account> for AccountOrPersona {
     fn from(value: Account) -> Self {
         Self::AccountEntity(value)

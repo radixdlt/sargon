@@ -121,7 +121,8 @@ impl AuthorizedPersonaSimple {
         let has_auth_signing_key = match &persona.security_state {
             EntitySecurityState::Unsecured { value: uec } => {
                 uec.authentication_signing.is_some()
-            }
+            },
+            EntitySecurityState::Secured { value: _ } => panic!("We have not decided how we are going to do this, most likely we will create and upload a ROLA key for all securified entities.")
         };
         Ok(AuthorizedPersonaDetailed::new(
             persona.address,

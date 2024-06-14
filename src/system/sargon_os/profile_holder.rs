@@ -27,6 +27,10 @@ impl ProfileHolder {
 
     pub fn entities_for_addresses(&self, addresses: IndexSet<AddressOfAccountOrPersona>) -> Result<IndexSet<AccountOrPersona>> {
         self.try_access_profile_with(|p| p.entities_for_addresses(addresses.clone()))
+        }
+        
+    pub fn signing_factors_of(&self, entities: IndexSet<AccountOrPersona>) -> Result<SigningFactors> {
+        self.try_access_profile_with(|p| p.signing_factors_of(entities.clone()))
     }
 
     pub fn current_network_id(&self) -> NetworkID {

@@ -21,6 +21,10 @@ pub enum EntitySecurityState {
         #[serde(rename = "unsecuredEntityControl")]
         value: UnsecuredEntityControl,
     },
+    Secured {
+        #[serde(rename = "securedEntityControl")]
+        value: SecuredEntityControl
+    }
 }
 
 impl<'de> Deserialize<'de> for EntitySecurityState {
@@ -50,6 +54,10 @@ impl Serialize for EntitySecurityState {
             EntitySecurityState::Unsecured { value } => {
                 state.serialize_field("discriminator", "unsecured")?;
                 state.serialize_field("unsecuredEntityControl", value)?;
+            }
+            EntitySecurityState::Secured { value } => {
+                state.serialize_field("discriminator", "secured")?;
+                state.serialize_field("securedEntityControl", value)?;
             }
         }
         state.end()
