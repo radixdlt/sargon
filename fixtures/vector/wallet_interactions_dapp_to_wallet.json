@@ -88,7 +88,7 @@
     "metadata" : {
       "version" : 2,
       "networkId" : 2,
-      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works/",
+      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works",
       "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze"
     }
   },
