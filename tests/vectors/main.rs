@@ -505,7 +505,6 @@ mod encrypted_profile_tests {
 mod dapp_to_wallet_interaction_tests {
     use super::*;
     use serde_json::Value;
-    use url::Url;
 
     #[test]
     fn test_vector() {
@@ -519,7 +518,7 @@ mod dapp_to_wallet_interaction_tests {
         let metadata = DappToWalletInteractionMetadata::new(
             2,
             NetworkID::Stokenet,
-            Url::from_str("https://dev-sandbox.rdx-works-main.extratools.works").unwrap(),
+            "https://dev-sandbox.rdx-works-main.extratools.works/",
             DappDefinitionAddress::from_str(
                 "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
             )
@@ -590,6 +589,9 @@ mod dapp_to_wallet_interaction_tests {
             metadata.clone(),
         );
 
+        let updated_metadata = metadata.clone().with_updated_origin(
+            "https://dev-sandbox.rdx-works-main.extratools.works",
+        );
         let transaction = DappToWalletInteraction::new(
             WalletInteractionId::from_str(
                 "4051ff20-03b0-4a48-8205-0e8e8c673289",
@@ -600,7 +602,7 @@ mod dapp_to_wallet_interaction_tests {
                     DappToWalletInteractionSendTransactionItem::sample_other(),
                 ),
             ),
-            metadata.clone(),
+            updated_metadata,
         );
 
         let unauthorized_request_1_items =  DappToWalletInteractionItems::UnauthorizedRequest(

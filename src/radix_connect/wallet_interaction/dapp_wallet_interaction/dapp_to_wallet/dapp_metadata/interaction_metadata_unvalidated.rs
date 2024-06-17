@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub struct DappToWalletInteractionMetadataUnvalidated {
     pub version: WalletInteractionVersion,
     pub network_id: NetworkID,
-    pub origin: Url,
+    pub origin: DappOrigin,
     #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: String,
 }
@@ -14,7 +14,7 @@ impl DappToWalletInteractionMetadataUnvalidated {
     pub fn new(
         version: impl Into<WalletInteractionVersion>,
         network_id: impl Into<NetworkID>,
-        origin: impl Into<Url>,
+        origin: impl Into<DappOrigin>,
         dapp_definition_address: impl AsRef<str>,
     ) -> Self {
         Self {
@@ -33,7 +33,7 @@ impl HasSampleValues for DappToWalletInteractionMetadataUnvalidated {
         Self::new(
             WalletInteractionVersion::sample(),
             NetworkID::Stokenet,
-            Url::from_str("https://example.com").unwrap(),
+            "https://example.com",
             DappDefinitionAddress::sample().to_string(),
         )
     }
@@ -42,7 +42,7 @@ impl HasSampleValues for DappToWalletInteractionMetadataUnvalidated {
         Self::new(
             WalletInteractionVersion::sample_other(),
             NetworkID::Stokenet,
-            Url::from_str("https://example.org").unwrap(),
+            "https://example.org",
             DappDefinitionAddress::sample_other().to_string(),
         )
     }
