@@ -2,6 +2,7 @@ use crypto::signatures::ed25519::Signature;
 
 use super::super::session::session_id::SessionID;
 use crate::prelude::*;
+use hex::ToHex;
 
 #[derive(Debug, PartialEq)]
 pub struct RadixConnectMobileRequest {
@@ -65,7 +66,7 @@ impl HasSampleValues for RadixConnectMobileRequest {
 impl RadixConnectMobileRequest {
     pub fn verify_signature(
         &self,
-        interaction_id: WalletInteractionId,
+        interaction_id: &WalletInteractionId,
     ) -> Result<bool> {
         let length_of_dapp_def_address =
             self.dapp_definition_address.address().len(); // Replace this with the actual length value
@@ -73,16 +74,18 @@ impl RadixConnectMobileRequest {
             format!("{:x}", length_of_dapp_def_address);
 
         let message: String = [
-            hex_encode("C".as_bytes()),
-            hex_encode(interaction_id.0.as_bytes()),
+            "C".as_bytes().encode_hex(),
+            interaction_id.0.as_bytes().encode_hex(),
             length_of_dapp_def_address_hex,
-            hex_encode(self.dapp_definition_address.address().as_bytes()),
-            hex_encode(self.origin.to_string().as_bytes()),
+            self.dapp_definition_address
+                .address()
+                .as_bytes()
+                .encode_hex(),
+            self.origin.0.as_bytes().encode_hex(),
         ]
         .concat();
 
         let hash: Hash = hash_of(hex_decode(message).unwrap());
-
         Ok(self
             .identity_public_key
             .is_valid_signature_for_hash(&self.signature, &hash))

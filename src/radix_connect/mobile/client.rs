@@ -4,6 +4,7 @@ use super::deep_link_parsing::*;
 use super::relay_service::Service as RelayService;
 use super::relay_service::WalletInteractionTransport;
 use crate::prelude::*;
+use hex::ToHex;
 use std::sync::RwLock;
 
 #[uniffi::export(with_foreign)]
@@ -70,21 +71,13 @@ impl RadixConnectMobile {
     ) -> Result<RadixConnectMobileSessionRequest> {
         let request = parse_mobile_connect_request(url)?;
 
-        // let message = [
-        //     "C".as_bytes(),
-        //     request.request.interaction_id.0.as_bytes(),
-        //     "69".as_bytes(),
-        //     request.dapp_definition_address.to_string().as_bytes(),
-        //     request.origin.to_string().as_bytes(),
-        // ]
-        // .concat();
-        //
-        // let hash = hash_of(message);
-        //
-        // let is_valid_signature = request
-        //     .identity_public_key
-        //     .is_valid_signature_for_hash(&request.signature, &hash);
-        //
+        let is_valid_signature = request
+            .verify_signature(&request.request.interaction_id)
+            .unwrap();
+
+        if !is_valid_signature {
+            panic!("Invalid Signature");
+        }
 
         let session = self.load_session(request.session_id).await;
         if session.is_err() {

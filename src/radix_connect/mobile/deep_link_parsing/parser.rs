@@ -70,11 +70,7 @@ pub fn parse_mobile_connect_request(
     let identity_public_key_string =
         get_key(url, &query_parameters, CONNECT_URL_PARAM_IDENTITY_KEY)?;
 
-    let origin = parse_url(origin_string.clone()).map_err(|_| {
-        CommonError::RadixConnectMobileInvalidOrigin {
-            bad_value: origin_string,
-        }
-    })?;
+    let origin = DappOrigin::new(origin_string);
     let session_id =
         SessionID::from_str(session_id_string.as_ref()).map_err(|_| {
             CommonError::RadixConnectMobileInvalidSessionID {
@@ -91,7 +87,7 @@ pub fn parse_mobile_connect_request(
 
     Ok(RadixConnectMobileRequest::new(
         session_id,
-        DappOrigin::new(origin.to_string()),
+        origin,
         public_key,
         identity_public_key,
         dapp_definition_address,
@@ -189,41 +185,42 @@ mod tests {
 
         let message: Vec<String> = [
             "C".as_bytes().encode_hex(),
-            "0c7a0f1f-2676-4ef6-b7df-5b794c1d51a9".as_bytes().encode_hex(),
+            "ca8f525f-446b-42ff-b119-642a445d3c71".as_bytes().encode_hex(),
             format!("{:x}", length_of_dapp_def_address),
             "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe".as_bytes().encode_hex(),
-            "https://d3kgzcz7d65kcn.cloudfront.net".as_bytes().encode_hex()
+            "https://d2xmq49o1iddud.cloudfront.net".as_bytes().encode_hex()
         ].to_vec();
 
         let expected_vec: Vec<String> = [
             "43".to_string(),
-            "30633761306631662d323637362d346566362d623764662d356237393463316435316139".to_string(),
+            "63613866353235662d343436622d343266662d623131392d363432613434356433633731".to_string(),
             "45".to_string(),
             "6163636f756e745f7464785f325f3132796639676435337966657037613636396676327433776d376e7a397a65657a776430346e3032613433336b657238767a6136726865".to_string(),
-            "68747470733a2f2f64336b677a637a376436356b636e2e636c6f756466726f6e742e6e6574".to_string()
+            "68747470733a2f2f6432786d7134396f3169646475642e636c6f756466726f6e742e6e6574".to_string()
         ].to_vec();
         // .concat();
 
         pretty_assertions::assert_eq!(message.clone(), expected_vec);
         let message_buffer: String = message.concat();
 
-        pretty_assertions::assert_eq!(message_buffer.clone(), "4330633761306631662d323637362d346566362d623764662d356237393463316435316139456163636f756e745f7464785f325f3132796639676435337966657037613636396676327433776d376e7a397a65657a776430346e3032613433336b657238767a613672686568747470733a2f2f64336b677a637a376436356b636e2e636c6f756466726f6e742e6e6574".to_owned());
+        pretty_assertions::assert_eq!(message_buffer.clone(), "4363613866353235662d343436622d343266662d623131392d363432613434356433633731456163636f756e745f7464785f325f3132796639676435337966657037613636396676327433776d376e7a397a65657a776430346e3032613433336b657238767a613672686568747470733a2f2f6432786d7134396f3169646475642e636c6f756466726f6e742e6e6574".to_owned());
 
         let hash: Hash = hash_of(hex_decode(message_buffer).unwrap());
-        let expected_hash = Hash::from(Exactly32Bytes::from_hex("59d2c74c109df3bc9e54c4307759d433285916a3e51056462ae4448f1c3fc245").unwrap());
+        let expected_hash = Hash::from(Exactly32Bytes::from_hex("29cdf41222be5236c5fefe341955083a25a7275e54a6ca1565d7571064792ace").unwrap());
         pretty_assertions::assert_eq!(hash, expected_hash);
 
-        // let public_key = Ed25519PublicKey::from_hex(
-        //     "aeca99d0dba07c080e3a607e50bb9c5134b8ee708b216f2e84c03c8f92de66ff"
-        //         .to_owned(),
-        // )
-        // .unwrap();
-        // let signature = Ed25519Signature::from_hex("4de24bd12b981d4e6a880c22adf335cf4e56e3e81f676cfc53ad3b9cf8e2be8f0fdd176491aa07626153607a84e4d24003058d1d997d9cb0ca7b5f391c6ccf07".to_owned()).unwrap();
+        let private_key = Ed25519PrivateKey::from_exactly32_bytes(Exactly32Bytes::from_hex("a18e4e44d66f428302494fa34296efdc8db4b32488c853fbe31aab0002c128a5").unwrap()).unwrap();
+        let public_key = Ed25519PublicKey::from_hex(
+            "4f6e9ac218fbaefbb237e3421e43afa8def511aff5c7368dc11a14ce6d889e81"
+                .to_string(),
+        )
+        .unwrap();
+        let signature = Ed25519Signature::from_hex("93bc8fd33cdbd56bc1f7a9b46afc9615b5b42e9aad63227e71b02c57eb88f5f166406182afa82ebe8eb3bfc9e1388adfd60670d098751b1507584999be36c50f".to_owned()).unwrap();
 
-        // let is_valid_signature =
-        //     public_key.is_valid_signature_for_hash(&signature, &hash);
+        let is_valid_signature =
+            public_key.is_valid_signature_for_hash(&signature, &hash);
 
-        // pretty_assertions::assert_eq!(is_valid_signature, true);
+        pretty_assertions::assert_eq!(is_valid_signature, true);
 
         // let hash = hash_of(message);
 
