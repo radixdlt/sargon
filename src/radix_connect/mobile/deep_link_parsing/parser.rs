@@ -91,7 +91,7 @@ pub fn parse_mobile_connect_request(
 
     Ok(RadixConnectMobileRequest::new(
         session_id,
-        origin,
+        DappOrigin::new(origin.to_string()),
         public_key,
         identity_public_key,
         dapp_definition_address,
@@ -113,92 +113,126 @@ fn get_key(
         .map(|value| value.to_owned())
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use hex::ToHex;
+    use rand::random;
 
-//     #[test]
-//     fn parse_url_into_request() {
-//         let session_id = "8feeb997-81ff-46ec-a679-e7e697b01601";
-//         let origin = "https://77c1c1f54ef4.ngrok.app";
-//         let public_key =
-//             "df856ce8d64bd59aca1bec03584513c49e635f350ff6a312021854d62d54171c";
-//         let identity_public_key =
-//             "2e39af5c6905bde9825cd7451b0b6361664ac3a111fcdd10334e5fab6ced9fdf";
-//         let request = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXToIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiIxMTQ4ODFlZDk3YTdlYmVlYTdlNmZhMjM4YzMwANDBiZGJhYTk3YTkzZGI2OTMzY2Q5YjI4YjJmNGUyOGU0MjUwIn0sInJlc2V0Ijp7ImFjY291bnRzIjpmYWxzZSwicGVyc29uYURhdGEiOmZhbHNlfX0sImludGVyYWN0aW9uSWQiOiI0YTJhYTRkOC01ZGIwLTRjMGQtYjI1Yy05NGY0YTk0ZTU5MmMiLCJtZXRhZGF0YSI6eyJ2ZXJzaW9uIjoyLCJkQXBwRGVmaW5pdGlvbkFkZHJlc3MiOiJhY2NvdW50X3RkeF8yXzEyeWY5Z2Q1M3lmZXA3YTY2OWZ2MnQzd203bno5emVlendkMDRuMDJhANDMza2VyOHZ6YTZyaGUiLCJuZXR3b3JrSWQiOjIsIm9yaWdpbiI6Imh0dHBzOi8vNzdjMWMxZjU0ZWY0Lm5ncm9rLmFwcCJ9fQ";
-//         let dapp_definition_address = "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe";
-//         let signature = "884f1ce51dd815c527a31caf77cb2af1c683c41769f3b96e2dc6ef6bd7f786d8db0c48119585a4b98a6b74848402e8f86e33bb3e8de2dceb8338d707df3b6a03";
+    use super::*;
 
-//         let connect_url = APP_SCHEME.to_owned()
-//             + format!(
-//             "://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
-//             session_id,
-//             origin,
-//             public_key,
-//             request,
-//             dapp_definition_address,
-//             signature,
-//            identity_public_key,
-//         )
-//                 .as_str();
+    #[test]
+    fn parse_url_into_request() {
+        // let session_id = "8feeb997-81ff-46ec-a679-e7e697b01601";
+        // let origin = "https://77c1c1f54ef4.ngrok.app";
+        // let public_key =
+        //     "df856ce8d64bd59aca1bec03584513c49e635f350ff6a312021854d62d54171c";
+        // let identity_public_key =
+        //     "2e39af5c6905bde9825cd7451b0b6361664ac3a111fcdd10334e5fab6ced9fdf";
+        // let request = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXToIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiIxMTQ4ODFlZDk3YTdlYmVlYTdlNmZhMjM4YzMwANDBiZGJhYTk3YTkzZGI2OTMzY2Q5YjI4YjJmNGUyOGU0MjUwIn0sInJlc2V0Ijp7ImFjY291bnRzIjpmYWxzZSwicGVyc29uYURhdGEiOmZhbHNlfX0sImludGVyYWN0aW9uSWQiOiI0YTJhYTRkOC01ZGIwLTRjMGQtYjI1Yy05NGY0YTk0ZTU5MmMiLCJtZXRhZGF0YSI6eyJ2ZXJzaW9uIjoyLCJkQXBwRGVmaW5pdGlvbkFkZHJlc3MiOiJhY2NvdW50X3RkeF8yXzEyeWY5Z2Q1M3lmZXA3YTY2OWZ2MnQzd203bno5emVlendkMDRuMDJhANDMza2VyOHZ6YTZyaGUiLCJuZXR3b3JrSWQiOjIsIm9yaWdpbiI6Imh0dHBzOi8vNzdjMWMxZjU0ZWY0Lm5ncm9rLmFwcCJ9fQ";
+        // let dapp_definition_address = "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe";
+        // let signature = "884f1ce51dd815c527a31caf77cb2af1c683c41769f3b96e2dc6ef6bd7f786d8db0c48119585a4b98a6b74848402e8f86e33bb3e8de2dceb8338d707df3b6a03";
 
-//         let result = parse_mobile_connect_request(connect_url);
+        // let connect_url = APP_SCHEME.to_owned()
+        //     + format!(
+        //     "://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+        //     session_id,
+        //     origin,
+        //     public_key,
+        //     request,
+        //     dapp_definition_address,
+        //     signature,
+        //    identity_public_key,
+        // )
+        //         .as_str();
 
-//         let expected_interaction = DappToWalletInteractionUnvalidated::new(
-//             "4a2aa4d8-5db0-4c0d-b25c-94f4a94e592c".parse().unwrap(),
-//             DappToWalletInteractionItems::AuthorizedRequest(
-//                 DappToWalletInteractionAuthorizedRequestItems::new(
-//                     DappToWalletInteractionAuthRequestItem::LoginWithChallenge(
-//                         DappToWalletInteractionAuthLoginWithChallengeRequestItem::new(
-//                             DappToWalletInteractionAuthChallengeNonce(
-//                                 Exactly32Bytes::from_hex("114881ed97a7ebeea7e6fa238c3040bdbaa97a93db6933cd9b28b2f4e28e4250").unwrap()
-//                             )
-//                         )
-//                     ),
-//                     Some(DappToWalletInteractionResetRequestItem::new(false, false)),
-//                     None,
-//                     None,
-//                     None,
-//                     None,
-//                 )
-//             ),
-//             DappToWalletInteractionMetadataUnvalidated::new(
-//                 WalletInteractionVersion(2),
-//                 NetworkID::Stokenet,
-//                 Url::parse(&origin).unwrap(),
-//                 dapp_definition_address.to_owned(),
-//             )
-//         );
-//         let expected_request = RadixConnectMobileRequest::new(
-//             session_id.parse().unwrap(),
-//             Url::parse(&origin).unwrap(),
-//             KeyAgreementPublicKey::from_hex(public_key.to_owned()).unwrap(),
-//             Ed25519PublicKey::from_hex(identity_public_key.to_owned()).unwrap(),
-//             dapp_definition_address.parse().unwrap(),
-//             signature.parse().unwrap(),
-//             expected_interaction,
-//         );
+        // let result = parse_mobile_connect_request(connect_url);
 
-//         // let message = [
-//         //     "C".as_bytes(),
-//         //     expected_request.request.interaction_id.0.as_bytes(),
-//         //     "69".as_bytes(),
-//         //     expected_request
-//         //         .dapp_definition_address
-//         //         .to_string()
-//         //         .as_bytes(),
-//         //     expected_request.origin.to_string().as_bytes(),
-//         // ]
-//         // .concat();
+        // let expected_interaction = DappToWalletInteractionUnvalidated::new(
+        //     "4a2aa4d8-5db0-4c0d-b25c-94f4a94e592c".parse().unwrap(),
+        //     DappToWalletInteractionItems::AuthorizedRequest(
+        //         DappToWalletInteractionAuthorizedRequestItems::new(
+        //             DappToWalletInteractionAuthRequestItem::LoginWithChallenge(
+        //                 DappToWalletInteractionAuthLoginWithChallengeRequestItem::new(
+        //                     DappToWalletInteractionAuthChallengeNonce(
+        //                         Exactly32Bytes::from_hex("114881ed97a7ebeea7e6fa238c3040bdbaa97a93db6933cd9b28b2f4e28e4250").unwrap()
+        //                     )
+        //                 )
+        //             ),
+        //             Some(DappToWalletInteractionResetRequestItem::new(false, false)),
+        //             None,
+        //             None,
+        //             None,
+        //             None,
+        //         )
+        //     ),
+        //     DappToWalletInteractionMetadataUnvalidated::new(
+        //         WalletInteractionVersion(2),
+        //         NetworkID::Stokenet,
+        //         Url::parse(&origin).unwrap(),
+        //         dapp_definition_address.to_owned(),
+        //     )
+        // );
+        // let expected_request = RadixConnectMobileRequest::new(
+        //     session_id.parse().unwrap(),
+        //     Url::parse(&origin).unwrap(),
+        //     KeyAgreementPublicKey::from_hex(public_key.to_owned()).unwrap(),
+        //     Ed25519PublicKey::from_hex(identity_public_key.to_owned()).unwrap(),
+        //     dapp_definition_address.parse().unwrap(),
+        //     signature.parse().unwrap(),
+        //     expected_interaction,
+        // );
 
-//         // let hash = hash_of(message);
+        let length_of_dapp_def_address: u32 = 69; // Replace this with the actual length value
+        let length_of_dapp_def_address_hex =
+            format!("{:x}", length_of_dapp_def_address);
+        //let length_of_dapp_def_address_buffer = hex::decode(length_of_dapp_def_address_hex).expect("Invalid hex string");
 
-//         // let is_valid_signature = expected_request
-//         //     .identity_public_key
-//         //     .is_valid_signature_for_hash(&expected_request.signature, &hash);
+        let message: Vec<String> = [
+            "C".as_bytes().encode_hex(),
+            "0c7a0f1f-2676-4ef6-b7df-5b794c1d51a9".as_bytes().encode_hex(),
+            format!("{:x}", length_of_dapp_def_address),
+            "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe".as_bytes().encode_hex(),
+            "https://d3kgzcz7d65kcn.cloudfront.net".as_bytes().encode_hex()
+        ].to_vec();
 
-//         // pretty_assertions::assert_eq!(is_valid_signature, true);
+        let expected_vec: Vec<String> = [
+            "43".to_string(),
+            "30633761306631662d323637362d346566362d623764662d356237393463316435316139".to_string(),
+            "45".to_string(),
+            "6163636f756e745f7464785f325f3132796639676435337966657037613636396676327433776d376e7a397a65657a776430346e3032613433336b657238767a6136726865".to_string(),
+            "68747470733a2f2f64336b677a637a376436356b636e2e636c6f756466726f6e742e6e6574".to_string()
+        ].to_vec();
+        // .concat();
 
-//         pretty_assertions::assert_eq!(result, Ok(expected_request));
-//     }
-// }
+        pretty_assertions::assert_eq!(message.clone(), expected_vec);
+        let message_buffer: String = message.concat();
+
+        pretty_assertions::assert_eq!(message_buffer.clone(), "4330633761306631662d323637362d346566362d623764662d356237393463316435316139456163636f756e745f7464785f325f3132796639676435337966657037613636396676327433776d376e7a397a65657a776430346e3032613433336b657238767a613672686568747470733a2f2f64336b677a637a376436356b636e2e636c6f756466726f6e742e6e6574".to_owned());
+
+        let hash: Hash = hash_of(hex_decode(message_buffer).unwrap());
+        let expected_hash = Hash::from(Exactly32Bytes::from_hex("59d2c74c109df3bc9e54c4307759d433285916a3e51056462ae4448f1c3fc245").unwrap());
+        pretty_assertions::assert_eq!(hash, expected_hash);
+
+        // let public_key = Ed25519PublicKey::from_hex(
+        //     "aeca99d0dba07c080e3a607e50bb9c5134b8ee708b216f2e84c03c8f92de66ff"
+        //         .to_owned(),
+        // )
+        // .unwrap();
+        // let signature = Ed25519Signature::from_hex("4de24bd12b981d4e6a880c22adf335cf4e56e3e81f676cfc53ad3b9cf8e2be8f0fdd176491aa07626153607a84e4d24003058d1d997d9cb0ca7b5f391c6ccf07".to_owned()).unwrap();
+
+        // let is_valid_signature =
+        //     public_key.is_valid_signature_for_hash(&signature, &hash);
+
+        // pretty_assertions::assert_eq!(is_valid_signature, true);
+
+        // let hash = hash_of(message);
+
+        // let is_valid_signature = expected_request
+        //     .identity_public_key
+        //     .is_valid_signature_for_hash(&expected_request.signature, &hash);
+
+        // pretty_assertions::assert_eq!(is_valid_signature, true);
+
+        //pretty_assertions::assert_eq!(result, Ok(expected_request));
+    }
+}

@@ -40,8 +40,7 @@ impl Service {
     }
 }
 
-const SERVICE_PATH: &str =
-    "https://radix-connect-relay-dev.rdx-works-main.extratools.works/api/v1";
+const SERVICE_PATH: &str = "https://radix-connect-relay.radixdlt.com/api/v1";
 
 impl NetworkRequest {
     fn radix_connect_relay_request() -> Self {
