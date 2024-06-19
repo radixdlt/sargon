@@ -251,7 +251,7 @@ pub enum CommonError {
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,
 
-    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name}")]
+    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name} with error: \"{message}\"")]
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
         type_name: String,
