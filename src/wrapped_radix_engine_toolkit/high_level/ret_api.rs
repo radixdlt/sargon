@@ -123,9 +123,6 @@ pub fn modify_manifest_lock_fee(
 /// # Panics
 /// Panics if any of the TransactionGuarantee's `instruction_index` is out of
 /// bounds.
-///
-/// Also panics if the number of TransactionGuarantee's is larger than the number
-/// of instructions of `manifest` (does not make any sense).
 #[uniffi::export]
 pub fn modify_manifest_add_guarantees(
     manifest: TransactionManifest,

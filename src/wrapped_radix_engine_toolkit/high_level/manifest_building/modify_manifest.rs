@@ -63,10 +63,10 @@ impl TransactionManifest {
     /// # Panics
     /// Panics if any of the TransactionGuarantee's `instruction_index` is out of
     /// bounds.
-    ///
-    /// Also panics if the number of TransactionGuarantee's is larger than the number
-    /// of instructions of `manifest` (does not make any sense).
-    pub(crate) fn modify_add_guarantees<I>(self, guarantees: I) -> Result<TransactionManifest>
+    pub(crate) fn modify_add_guarantees<I>(
+        self,
+        guarantees: I,
+    ) -> Result<TransactionManifest>
     where
         I: IntoIterator<Item = TransactionGuarantee>,
     {
