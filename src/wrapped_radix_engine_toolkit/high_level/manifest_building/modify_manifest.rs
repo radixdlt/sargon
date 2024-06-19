@@ -77,10 +77,6 @@ impl TransactionManifest {
 
         let instruction_count = self.instructions().len() as u64;
 
-        if guarantees.len() > self.instructions().len() {
-            panic!("Does not make sense to add more guarantees than there are instructions.")
-        }
-
         if let Some(oob) = guarantees
             .clone()
             .into_iter()
@@ -442,21 +438,6 @@ CALL_METHOD
 
     #[test]
     #[should_panic(
-        expected = "Does not make sense to add more guarantees than there are instructions."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_if_instructions_empty_but_guarantees_is_not_empty(
-    ) {
-        let manifest = TransactionManifest::empty(NetworkID::Mainnet);
-        assert_eq!(
-            manifest
-                .clone()
-                .modify_add_guarantees([TransactionGuarantee::sample()]),
-            manifest
-        );
-    }
-
-    #[test]
-    #[should_panic(
         expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 4 was specified."
     )]
     fn test_modify_manifest_add_guarantees_panics_index_equal_to_instruction_count(
@@ -472,29 +453,6 @@ CALL_METHOD
                     None
                 )
             ]),
-            manifest
-        );
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Does not make sense to add more guarantees than there are instructions."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_if_more_guarantees_than_instructions(
-    ) {
-        let manifest = TransactionManifest::sample();
-        assert_eq!(
-            manifest.clone().modify_add_guarantees(
-                (0u32..manifest.instructions().len() as u32 + 1).map(|i| {
-                    TransactionGuarantee::new(
-                        i,
-                        0,
-                        0,
-                        ResourceAddress::sample(),
-                        None,
-                    )
-                })
-            ),
             manifest
         );
     }
