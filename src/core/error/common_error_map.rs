@@ -24,7 +24,7 @@ impl<R> MapToFailedToDeserializeJSONToValue<R>
             error!(
                 "Failed to deserialize JSON to {}, from:\n{:?}\nError: {}",
                 type_name::<T>(),
-                input.as_ref(),
+                input.as_ref().to_string().chars().take(500),
                 e
             );
             CommonError::FailedToDeserializeJSONToValue {
@@ -43,7 +43,7 @@ impl<R> MapToFailedToDeserializeJSONToValue<R>
             error!(
                 "Failed to deserialize JSON to {}, from (UTF-8):\n{:?}\nError: {}", 
                 type_name::<T>(),
-                String::from_utf8(input.to_vec()),
+                String::from_utf8(input.to_vec()).map(|json| json.chars().take(500).collect_vec()),
                 e
             );
             CommonError::FailedToDeserializeJSONToValue {
