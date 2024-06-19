@@ -255,6 +255,7 @@ pub enum CommonError {
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
         type_name: String,
+        message: String,
     } = 10070,
 
     #[error("Failed To create ProfileID (UUID) from string: {bad_value}")]
