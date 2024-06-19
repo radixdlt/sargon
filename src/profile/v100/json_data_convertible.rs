@@ -115,7 +115,7 @@ macro_rules! json_data_convertible {
                             );
                         }
                         _ => {
-                            error!("Expected CommonError::FailedToDeserializeJSONToValue but other error occurred")
+                            panic!("Expected CommonError::FailedToDeserializeJSONToValue but other error occurred")
                         }
                     }
                 }
@@ -210,7 +210,7 @@ macro_rules! json_string_convertible {
                             );
                         }
                         _ => {
-                            error!("Expected CommonError::FailedToDeserializeJSONToValue but other error occurred")
+                            panic!("Expected CommonError::FailedToDeserializeJSONToValue but other error occurred")
                         }
                     }
                 }
