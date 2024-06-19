@@ -251,11 +251,11 @@ pub enum CommonError {
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,
 
-    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name} with error: \"{message}\"")]
+    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name} with error: \"{serde_message}\"")]
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
         type_name: String,
-        message: String,
+        serde_message: String,
     } = 10070,
 
     #[error("Failed To create ProfileID (UUID) from string: {bad_value}")]

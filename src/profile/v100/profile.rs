@@ -529,7 +529,7 @@ mod tests {
             Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: "Profile".to_string(),
-                message: "missing field `header` at line 1 column 2"
+                serde_message: "missing field `header` at line 1 column 2"
                     .to_string()
             })
         );
@@ -559,7 +559,7 @@ mod tests {
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 33,
                 type_name: "EncryptedProfileSnapshot".to_string(),
-                message: "expected value at line 1 column 1".to_string()
+                serde_message: "expected value at line 1 column 1".to_string()
             })
         );
     }

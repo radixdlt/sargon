@@ -181,7 +181,7 @@ mod tests {
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 1,
                 type_name: "Profile".to_string(),
-                message: "invalid type: integer `0`, expected struct Profile at line 1 column 1".to_string()
+                serde_message: "invalid type: integer `0`, expected struct Profile at line 1 column 1".to_string()
             })
         );
     }

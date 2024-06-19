@@ -97,7 +97,7 @@ mod tests {
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 0,
                 type_name: "DappToWalletInteractionUnvalidated".to_owned(),
-                message: "EOF while parsing a value at line 1 column 0"
+                serde_message: "EOF while parsing a value at line 1 column 0"
                     .to_string()
             })
         )

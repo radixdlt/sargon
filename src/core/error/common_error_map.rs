@@ -30,7 +30,7 @@ impl<R> MapToFailedToDeserializeJSONToValue<R>
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: input.as_ref().len() as u64,
                 type_name: type_name::<T>(),
-                message: format!("{}", e),
+                serde_message: format!("{}", e),
             }
         })
     }
@@ -49,7 +49,7 @@ impl<R> MapToFailedToDeserializeJSONToValue<R>
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: input.len() as u64,
                 type_name: type_name::<T>(),
-                message: format!("{}", e)
+                serde_message: format!("{}", e)
             }
         })
     }
