@@ -23,4 +23,9 @@ final class SargonErrorTests: Test<SargonError> {
 		let sut = SUT.UnknownNetworkForId(badValue: 99)
 		XCTAssertEqual(sut.debugDescription, "10049: No network found with id: '99'")
 	}
+
+	func test_localized_description() {
+		let sut = SUT.UnknownNetworkForId(badValue: 99)
+		XCTAssertEqual(sut.localizedDescription, "No network found with id: '99'\nCode: 10049")
+	}
 }
