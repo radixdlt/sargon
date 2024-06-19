@@ -130,7 +130,7 @@ pub fn modify_manifest_lock_fee(
 pub fn modify_manifest_add_guarantees(
     manifest: TransactionManifest,
     guarantees: Vec<TransactionGuarantee>,
-) -> TransactionManifest {
+) -> Result<TransactionManifest> {
     manifest.modify_add_guarantees(guarantees)
 }
 
@@ -405,7 +405,8 @@ mod tests {
                     ResourceAddress::sample(),
                     None,
                 )],
-            );
+            )
+            .unwrap();
             let idx = modified
                 .instructions()
                 .clone()

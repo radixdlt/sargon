@@ -66,13 +66,13 @@ impl TransactionManifest {
     ///
     /// Also panics if the number of TransactionGuarantee's is larger than the number
     /// of instructions of `manifest` (does not make any sense).
-    pub(crate) fn modify_add_guarantees<I>(self, guarantees: I) -> Self
+    pub(crate) fn modify_add_guarantees<I>(self, guarantees: I) -> Result<TransactionManifest>
     where
         I: IntoIterator<Item = TransactionGuarantee>,
     {
         let guarantees = guarantees.into_iter().collect_vec();
         if guarantees.is_empty() {
-            return self;
+            return Ok(self);
         };
 
         let instruction_count = self.instructions().len() as u64;
@@ -114,7 +114,7 @@ impl TransactionManifest {
             offset.add_assign(1);
         }
 
-        manifest
+        Ok(manifest)
     }
 
     pub(crate) fn modify_add_lock_fee(
@@ -226,7 +226,8 @@ CALL_METHOD
             index,
             resource,
             divisibility,
-        )]);
+        )])
+        .unwrap();
         let instructions = manifest.instructions().to_owned();
         let instruction = instructions[index as usize + 1].clone();
         assert_eq!(
@@ -354,7 +355,8 @@ CALL_METHOD
                 1,
                 ResourceAddress::sample(),
                 10,
-            )]),
+            )])
+            .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
@@ -392,7 +394,8 @@ CALL_METHOD
                 1,
                 ResourceAddress::sample(),
                 10,
-            )]),
+            )])
+            .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
@@ -427,13 +430,13 @@ CALL_METHOD
     #[test]
     fn test_modify_manifest_add_guarantees_unchanged_if_no_guarantees() {
         let manifest = TransactionManifest::sample();
-        assert_eq!(manifest.clone().modify_add_guarantees([]), manifest);
+        assert_eq!(manifest.clone().modify_add_guarantees([]).unwrap(), manifest);
     }
 
     #[test]
     fn test_modify_manifest_add_guarantees_unchanged_if_instructions_empty() {
         let manifest = TransactionManifest::empty(NetworkID::Mainnet);
-        assert_eq!(manifest.clone().modify_add_guarantees([]), manifest);
+        assert_eq!(manifest.clone().modify_add_guarantees([]).unwrap(), manifest);
     }
 
     #[test]
@@ -452,7 +455,8 @@ CALL_METHOD
                     ResourceAddress::sample(),
                     None
                 )
-            ]),
+            ])
+            .unwrap(),
             manifest
         );
     }
@@ -474,7 +478,8 @@ CALL_METHOD
                     ResourceAddress::sample(),
                     None
                 )]
-            ),
+            )
+            .unwrap(),
             manifest
         );
     }
