@@ -181,7 +181,7 @@ mod tests {
     #[test]
     fn add_guarantees_divisibility_rounding() {
         let instructions_string = r#"
-        CALL_METHOD
+CALL_METHOD
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     "lock_fee"
     Decimal("0.61")
@@ -369,6 +369,103 @@ CALL_METHOD
             ASSERT_WORKTOP_CONTAINS
                 Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
                 Decimal("1337")
+            ;
+            TAKE_FROM_WORKTOP
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+                Bucket("bucket1")
+            ;
+            CALL_METHOD
+                Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+                "try_deposit_or_abort"
+                Bucket("bucket1")
+                Enum<0u8>()
+            ;
+            "#,
+        );
+    }
+
+    #[test]
+    fn test_modify_manifest_add_many_guarantees() {
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
+
+        manifest_eq(
+            manifest
+                .modify_add_guarantees([
+                    TransactionGuarantee::new(
+                        1337,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1338,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1339,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1340,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1341,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1342,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                ])
+                .unwrap(),
+            r#"
+            CALL_METHOD
+                Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+                "withdraw"
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1338")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1339")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1340")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1341")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1342")
             ;
             TAKE_FROM_WORKTOP
                 Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
