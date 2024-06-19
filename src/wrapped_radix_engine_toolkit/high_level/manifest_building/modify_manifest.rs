@@ -220,14 +220,15 @@ CALL_METHOD
             Blobs::default(),
         )
         .unwrap();
-        manifest = manifest.modify_add_guarantees([TransactionGuarantee::new(
-            added_guaranteed_amount,
-            percentage,
-            index,
-            resource,
-            divisibility,
-        )])
-        .unwrap();
+        manifest = manifest
+            .modify_add_guarantees([TransactionGuarantee::new(
+                added_guaranteed_amount,
+                percentage,
+                index,
+                resource,
+                divisibility,
+            )])
+            .unwrap();
         let instructions = manifest.instructions().to_owned();
         let instruction = instructions[index as usize + 1].clone();
         assert_eq!(
@@ -349,14 +350,15 @@ CALL_METHOD
         let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
 
         manifest_eq(
-            manifest.modify_add_guarantees([TransactionGuarantee::new(
-                1337,
-                0,
-                1,
-                ResourceAddress::sample(),
-                10,
-            )])
-            .unwrap(),
+            manifest
+                .modify_add_guarantees([TransactionGuarantee::new(
+                    1337,
+                    0,
+                    1,
+                    ResourceAddress::sample(),
+                    10,
+                )])
+                .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
@@ -388,14 +390,15 @@ CALL_METHOD
         let manifest = TransactionManifest::sample();
 
         manifest_eq(
-            manifest.modify_add_guarantees([TransactionGuarantee::new(
-                1337,
-                0,
-                1,
-                ResourceAddress::sample(),
-                10,
-            )])
-            .unwrap(),
+            manifest
+                .modify_add_guarantees([TransactionGuarantee::new(
+                    1337,
+                    0,
+                    1,
+                    ResourceAddress::sample(),
+                    10,
+                )])
+                .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
@@ -430,13 +433,19 @@ CALL_METHOD
     #[test]
     fn test_modify_manifest_add_guarantees_unchanged_if_no_guarantees() {
         let manifest = TransactionManifest::sample();
-        assert_eq!(manifest.clone().modify_add_guarantees([]).unwrap(), manifest);
+        assert_eq!(
+            manifest.clone().modify_add_guarantees([]).unwrap(),
+            manifest
+        );
     }
 
     #[test]
     fn test_modify_manifest_add_guarantees_unchanged_if_instructions_empty() {
         let manifest = TransactionManifest::empty(NetworkID::Mainnet);
-        assert_eq!(manifest.clone().modify_add_guarantees([]).unwrap(), manifest);
+        assert_eq!(
+            manifest.clone().modify_add_guarantees([]).unwrap(),
+            manifest
+        );
     }
 
     #[test]
@@ -447,16 +456,16 @@ CALL_METHOD
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
-            manifest.clone().modify_add_guarantees([
-                TransactionGuarantee::new(
+            manifest
+                .clone()
+                .modify_add_guarantees([TransactionGuarantee::new(
                     0,
                     0,
                     4,
                     ResourceAddress::sample(),
                     None
-                )
-            ])
-            .unwrap(),
+                )])
+                .unwrap(),
             manifest
         );
     }
