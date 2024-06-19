@@ -59,10 +59,6 @@ where
 impl TransactionManifest {
     /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
     /// term for `assert_worktop_contains`.
-    ///
-    /// # Panics
-    /// Panics if any of the TransactionGuarantee's `instruction_index` is out of
-    /// bounds.
     pub(crate) fn modify_add_guarantees<I>(
         self,
         guarantees: I,
@@ -82,7 +78,10 @@ impl TransactionManifest {
             .into_iter()
             .find(|g| g.instruction_index >= instruction_count)
         {
-            panic!("Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{}, but an 'instruction_index' of {} was specified.", instruction_count, oob.instruction_index)
+            return Err(CommonError::IndexOutOfBounds {
+                index: oob.instruction_index,
+                count: instruction_count,
+            });
         }
 
         // Will be increased with each added guarantee to account for the
@@ -546,37 +545,28 @@ CALL_METHOD
     }
 
     #[test]
-    #[should_panic(
-        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 4 was specified."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_index_equal_to_instruction_count(
+    fn test_modify_manifest_add_guarantees_returns_error_index_equal_to_instruction_count(
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
-            manifest
-                .clone()
-                .modify_add_guarantees([TransactionGuarantee::new(
-                    0,
-                    0,
-                    4,
-                    ResourceAddress::sample(),
-                    None
-                )])
-                .unwrap(),
-            manifest
+            manifest.modify_add_guarantees([TransactionGuarantee::new(
+                0,
+                0,
+                4,
+                ResourceAddress::sample(),
+                None
+            )]),
+            Err(CommonError::IndexOutOfBounds { index: 4, count: 4 })
         );
     }
 
     #[test]
-    #[should_panic(
-        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 5 was specified."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_index_larger_than_instruction_count(
+    fn test_modify_manifest_add_guarantees_returns_error_index_larger_than_instruction_count(
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
             modify_manifest_add_guarantees(
-                manifest.clone(),
+                manifest,
                 vec![TransactionGuarantee::new(
                     0,
                     0,
@@ -584,9 +574,8 @@ CALL_METHOD
                     ResourceAddress::sample(),
                     None
                 )]
-            )
-            .unwrap(),
-            manifest
+            ),
+            Err(CommonError::IndexOutOfBounds { index: 5, count: 4 })
         );
     }
 }
