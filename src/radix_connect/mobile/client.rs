@@ -22,8 +22,6 @@ pub trait SessionStorage: Send + Sync {
     ) -> Result<Option<BagOfBytes>>;
 }
 
-trait WalletKeyGenerator {}
-
 /// The Radix Connect Mobile client.
 /// This is the object that will be used by the mobile app to handle interactions sent over Radix Connect Relay.
 #[derive(uniffi::Object)]
@@ -88,53 +86,6 @@ impl RadixConnectMobile {
             origin_requires_validation,
         ))
     }
-
-    #[uniffi::method]
-    pub async fn request_origin_verified(
-        &self,
-        session_id: SessionID,
-    ) -> Result<()> {
-        match self
-            .new_sessions
-            .try_write()
-            .ok()
-            .and_then(|mut new_sessions| new_sessions.remove(&session_id))
-        {
-            Some(inflight_session) => self.save_session(inflight_session).await,
-            None => Err(CommonError::Unknown),
-        }
-    }
-
-    #[uniffi::method]
-    pub async fn request_origin_denied(
-        &self,
-        session_id: SessionID,
-    ) -> Result<()> {
-        {
-            if let Ok(mut new_sessions) = self.new_sessions.try_write() {
-                new_sessions.remove(&session_id);
-            }
-        }
-
-        self.wallet_interactions_transport
-            .send_wallet_interaction_error_response(
-                session_id,
-                "Rejected".to_owned(),
-            )
-            .await
-    }
-
-    //
-    //     let encryption_key: Exactly32Bytes = shared_secret.as_bytes().into();
-    //     // let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
-    //     // let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
-    //
-    //     // let encryption_key = PbHkdfSha256::hkdf_key_agreement(
-    //     //     shared_secret.to_bytes(),
-    //     //     Some(&salt),
-    //     //     Some(&info),
-    //     // );
-    //
 
     #[uniffi::method]
     pub async fn send_dapp_interaction_response(
