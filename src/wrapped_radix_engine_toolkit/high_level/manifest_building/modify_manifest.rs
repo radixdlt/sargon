@@ -556,7 +556,10 @@ CALL_METHOD
                 ResourceAddress::sample(),
                 None
             )]),
-            Err(CommonError::TXGuaranteeIndexOutOfBounds { index: 4, count: 4 })
+            Err(CommonError::TXGuaranteeIndexOutOfBounds {
+                index: 4,
+                count: 4
+            })
         );
     }
 
@@ -575,7 +578,10 @@ CALL_METHOD
                     None
                 )]
             ),
-            Err(CommonError::TXGuaranteeIndexOutOfBounds { index: 5, count: 4 })
+            Err(CommonError::TXGuaranteeIndexOutOfBounds {
+                index: 5,
+                count: 4
+            })
         );
     }
 }
