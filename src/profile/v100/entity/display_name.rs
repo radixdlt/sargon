@@ -50,7 +50,7 @@ impl DisplayName {
         }
 
         Ok(Self {
-            value: value.chars().take(Self::MAX_LEN).collect(),
+            value: prefix_str(Self::MAX_LEN, value),
         })
     }
 }
