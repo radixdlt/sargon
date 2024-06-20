@@ -30,7 +30,7 @@ final class SargonErrorTests: Test<SargonError> {
 	}
 
 	func test_localized_description_for_non_sensitive_error() {
-		let sut = SUT.FailedToDeserializeJsonToValue(jsonByteCount: 100, typeName: "TypeName")
-		XCTAssertEqual(sut.localizedDescription, "Error code: 10070\nError message: Failed deserialize JSON with #100 bytes to value of type TypeName")
+		let sut = SUT.FailedToDeserializeJsonToValue(jsonByteCount: 100, typeName: "TypeName", serdeMessage: "serdeMessage")
+		XCTAssertEqual(sut.localizedDescription, "Error code: 10070\nError message: Failed deserialize JSON with #100 bytes to value of type TypeName with error: \"serdeMessage\"")
 	} 
 }
