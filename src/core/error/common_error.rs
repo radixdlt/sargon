@@ -230,8 +230,8 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("Invalid DisplayName too long, expected max: {expected}, found: {found}")]
-    InvalidDisplayNameTooLong { expected: u64, found: u64 } = 10063,
+    #[error("FREE")]
+    FREE = 10063,
 
     #[error("Invalid ISO8601 Time string: {bad_value}")]
     InvalidISO8601String { bad_value: String } = 10064,
