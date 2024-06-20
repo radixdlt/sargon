@@ -10,12 +10,6 @@ pub trait WalletInteractionTransport: Send + Sync {
         session: Session,
         response: WalletToDappInteractionResponse,
     ) -> Result<()>;
-
-    async fn send_wallet_interaction_error_response(
-        &self,
-        session_id: SessionID,
-        error: String,
-    ) -> Result<()>;
 }
 
 /// The service that interacts with the Radix Connect Relay.
@@ -52,10 +46,6 @@ impl NetworkRequest {
     ) -> Result<Self> {
         Self::radix_connect_relay_request().with_serializing_body(response)
     }
-
-    fn radix_connect_error_response(response: ErrorResponse) -> Result<Self> {
-        Self::radix_connect_relay_request().with_serializing_body(response)
-    }
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -82,24 +72,6 @@ impl SuccessResponse {
     }
 }
 
-#[derive(Debug, Clone, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub struct ErrorResponse {
-    pub method: String,
-    pub session_id: SessionID,
-    pub error: String,
-}
-
-impl ErrorResponse {
-    fn new(session_id: SessionID, error: String) -> Self {
-        Self {
-            method: "sendResponse".to_owned(),
-            session_id,
-            error,
-        }
-    }
-}
-
 #[async_trait::async_trait]
 impl WalletInteractionTransport for Service {
     async fn send_wallet_interaction_response(
@@ -121,18 +93,6 @@ impl WalletInteractionTransport for Service {
             SuccessResponse::new(session.id, session.wallet_public_key, hex);
         let request =
             NetworkRequest::radix_connect_success_response(success_response)?;
-        self.http_client.execute_network_request(request).await?;
-        Ok(())
-    }
-
-    async fn send_wallet_interaction_error_response(
-        &self,
-        session_id: SessionID,
-        error: String,
-    ) -> Result<()> {
-        let error_response = ErrorResponse::new(session_id, error);
-        let request =
-            NetworkRequest::radix_connect_error_response(error_response)?;
         self.http_client.execute_network_request(request).await?;
         Ok(())
     }
