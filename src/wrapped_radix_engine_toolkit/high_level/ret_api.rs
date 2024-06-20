@@ -119,10 +119,6 @@ pub fn modify_manifest_lock_fee(
 
 /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
 /// term for `assert_worktop_contains`.
-///
-/// # Panics
-/// Panics if any of the TransactionGuarantee's `instruction_index` is out of
-/// bounds.
 #[uniffi::export]
 pub fn modify_manifest_add_guarantees(
     manifest: TransactionManifest,
