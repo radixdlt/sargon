@@ -230,8 +230,8 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("Invalid DisplayName too long, expected max: {expected}, found: {found}")]
-    InvalidDisplayNameTooLong { expected: u64, found: u64 } = 10063,
+    #[error("FREE")]
+    FREE = 10063,
 
     #[error("Invalid ISO8601 Time string: {bad_value}")]
     InvalidISO8601String { bad_value: String } = 10064,
@@ -251,10 +251,11 @@ pub enum CommonError {
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,
 
-    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name}")]
+    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name} with error: \"{serde_message}\"")]
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
         type_name: String,
+        serde_message: String,
     } = 10070,
 
     #[error("Failed To create ProfileID (UUID) from string: {bad_value}")]
@@ -492,47 +493,52 @@ pub enum CommonError {
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
 
+    #[error(
+        "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{count}, but an 'instruction_index' of {index} was specified."
+    )]
+    TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10138,
+
     #[error("Failed to create KeyAgreementPublicKey from hex: {bad_value}")]
-    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10138,
+    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10139,
 
     #[error(
         "Failed to create KeyAgreementPublicKey from bytes: {bad_value:?}"
     )]
-    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10139,
+    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10140,
 
     #[error(
         "Failed to create KeyAgreementPrivateKey from bytes: {bad_value:?}"
     )]
-    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10140,
+    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10141,
 
     #[error("Failed to expand HKDF, reason: '{underlying}'")]
-    HkdfExpandFailed { underlying: String } = 10141,
+    HkdfExpandFailed { underlying: String } = 10142,
 
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
-    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10142,
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10143,
 
     #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
     RadixConnectMobileDappRequestNotFound {
         interaction_id: WalletInteractionId,
-    } = 10143,
+    } = 10144,
 
     #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
-    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
+    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10145,
 
     #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
-    InvalidEd25519SignatureFromString { bad_value: String } = 10145,
+    InvalidEd25519SignatureFromString { bad_value: String } = 10146,
 
     #[error("Radix Connect Mobile dApp public key does not match the session's dApp public key")]
-    RadixConnectMobileDappPublicKeyMismatch = 10146,
+    RadixConnectMobileDappPublicKeyMismatch = 10147,
 
     #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
-    RadixConnectMobileDappIdentityMismatch = 10147,
+    RadixConnectMobileDappIdentityMismatch = 10148,
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
-    RadixConnectMobileInvalidDappSignature = 10148,
+    RadixConnectMobileInvalidDappSignature = 10149,
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
-    RadixConnectMobileInvalidRequestFormat = 10149,
+    RadixConnectMobileInvalidRequestFormat = 10150,
 }
 
 #[uniffi::export]

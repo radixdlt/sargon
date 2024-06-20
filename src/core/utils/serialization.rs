@@ -4,7 +4,7 @@ pub fn deserialize_from_slice<T>(slice: &[u8]) -> Result<T>
 where
     T: for<'a> serde::Deserialize<'a>,
 {
-    serde_json::from_slice(slice).map_err(|_| {
+    serde_json::from_slice(slice).map_err(|err| {
         let type_name = std::any::type_name::<T>().to_string();
         error!(
             "Deserialize json to type: {}\nJSON (utf8):\n{:?}",
@@ -14,6 +14,7 @@ where
         CommonError::FailedToDeserializeJSONToValue {
             json_byte_count: slice.len() as u64,
             type_name,
+            serde_message: err.to_string(),
         }
     })
 }
