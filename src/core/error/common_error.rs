@@ -230,6 +230,7 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
+    /// WARNING: UNUSED, can be replaced by any new error.
     #[error("Invalid DisplayName too long, expected max: {expected}, found: {found}")]
     InvalidDisplayNameTooLong { expected: u64, found: u64 } = 10063,
 

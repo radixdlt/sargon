@@ -44,13 +44,14 @@ impl DisplayName {
     pub const MAX_LEN: usize = 30;
 
     pub fn new(value: impl AsRef<str>) -> Result<Self> {
-        let mut value = value.as_ref().trim().to_string();
+        let value = value.as_ref().trim().to_string();
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }
-        value.truncate(Self::MAX_LEN);
 
-        Ok(Self { value })
+        Ok(Self {
+            value: value.chars().take(Self::MAX_LEN).collect(),
+        })
     }
 }
 
