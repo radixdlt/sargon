@@ -175,7 +175,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			}
 			XCTAssertFalse(hasLockFee())
 			let fee: Decimal192 = 531
-			manifest = manifest.modify(lockFee: fee, addressOfFeePayer: addressOfFeePayer)
+			manifest = try manifest.modify(lockFee: fee, addressOfFeePayer: addressOfFeePayer)
 			XCTAssertTrue(hasLockFee())
 			XCTAssert(manifest.description.contains(addressOfFeePayer.address))
 		}
@@ -198,7 +198,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		)
 
 		XCTAssertFalse(manifest.description.contains(guarantee.amount.description))
-		manifest = manifest.modify(addGuarantees: [guarantee])
+		manifest = try manifest.modify(addGuarantees: [guarantee])
 		XCTAssertTrue(manifest.description.contains(guarantee.amount.description))
 		
 	}

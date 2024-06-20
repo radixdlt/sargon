@@ -492,6 +492,11 @@ pub enum CommonError {
 
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
+
+    #[error(
+        "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{count}, but an 'instruction_index' of {index} was specified."
+    )]
+    TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10138,
 }
 
 #[uniffi::export]
