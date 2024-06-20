@@ -149,7 +149,14 @@ impl RadixConnectMobile {
         let shared_secret = wallet_private_key
             .shared_secret_from_key_agreement(&request.public_key);
 
-        let encryption_key: Exactly32Bytes = shared_secret.as_bytes().into();
+        let dapp_definition_address = request.dapp_definition_address.address();
+        let info = "RCfM";
+        let encryption_key = PbHkdfSha256::hkdf_key_agreement(
+            shared_secret.as_bytes(),
+            Some(dapp_definition_address.as_bytes()),
+            Some(info.as_bytes()),
+        );
+
         let session = Session::new(
             request.session_id,
             SessionOrigin::WebDapp(request.origin.clone()),
