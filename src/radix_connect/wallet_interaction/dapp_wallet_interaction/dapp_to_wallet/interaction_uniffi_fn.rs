@@ -15,13 +15,8 @@ impl DappToWalletInteractionUnvalidated {
         json_str: impl AsRef<str>,
     ) -> Result<DappToWalletInteractionUnvalidated> {
         let json_str = json_str.as_ref();
-        let json_byte_count = json_str.len() as u64;
-        serde_json::from_str(json_str).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count,
-                type_name: type_name::<DappToWalletInteractionUnvalidated>(),
-            }
-        })
+        serde_json::from_str(json_str)
+            .map_failed_to_deserialize_string::<Self>(json_str)
     }
 }
 
@@ -101,7 +96,9 @@ mod tests {
             ),
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 0,
-                type_name: "DappToWalletInteractionUnvalidated".to_owned()
+                type_name: "DappToWalletInteractionUnvalidated".to_owned(),
+                serde_message: "EOF while parsing a value at line 1 column 0"
+                    .to_string()
             })
         )
     }

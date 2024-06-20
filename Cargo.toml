@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.0.13"
+version = "1.0.15"
 edition = "2021"
 build = "build.rs"
 

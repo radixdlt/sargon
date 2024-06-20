@@ -230,8 +230,8 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("Invalid DisplayName too long, expected max: {expected}, found: {found}")]
-    InvalidDisplayNameTooLong { expected: u64, found: u64 } = 10063,
+    #[error("FREE")]
+    FREE = 10063,
 
     #[error("Invalid ISO8601 Time string: {bad_value}")]
     InvalidISO8601String { bad_value: String } = 10064,
@@ -251,10 +251,11 @@ pub enum CommonError {
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,
 
-    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name}")]
+    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name} with error: \"{serde_message}\"")]
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
         type_name: String,
+        serde_message: String,
     } = 10070,
 
     #[error("Failed To create ProfileID (UUID) from string: {bad_value}")]
@@ -504,13 +505,7 @@ impl CommonError {
     }
 
     pub fn is_safe_to_show_error_message(&self) -> bool {
-        matches!(
-            self,
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: _,
-                type_name: _,
-            }
-        )
+        matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
     }
 }
 
@@ -548,6 +543,7 @@ mod tests {
         let sut = CommonError::FailedToDeserializeJSONToValue {
             json_byte_count: 100,
             type_name: "TypeName".to_string(),
+            serde_message: "message".to_string(),
         };
         assert!(is_safe_to_show_error_message_from_error(&sut));
     }
