@@ -107,16 +107,6 @@ impl RadixConnectMobile {
             CommonError::RadixConnectMobileSessionNotFound { session_id },
         )?;
 
-        if is_in_flight_session && !wallet_response.response.is_success() {
-            return self
-                .wallet_interactions_transport
-                .send_wallet_interaction_error_response(
-                    session_id,
-                    "Failure".to_string(),
-                )
-                .await;
-        }
-
         self.wallet_interactions_transport
             .send_wallet_interaction_response(
                 session.clone(),
