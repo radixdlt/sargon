@@ -23,6 +23,15 @@ impl HasSampleValues for WalletToDappInteractionResponse {
     }
 }
 
+impl WalletToDappInteractionResponse {
+    pub fn is_success(&self) -> bool {
+        match self {
+            WalletToDappInteractionResponse::Success(_) => true,
+            WalletToDappInteractionResponse::Failure(_) => false,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

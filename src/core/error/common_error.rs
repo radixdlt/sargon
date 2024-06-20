@@ -521,6 +521,18 @@ pub enum CommonError {
 
     #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
     InvalidEd25519SignatureFromString { bad_value: String } = 10145,
+
+    #[error("Radix Connect Mobile dApp public key does not match the session's dApp public key")]
+    RadixConnectMobileDappPublicKeyMismatch = 10146,
+
+    #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
+    RadixConnectMobileDappIdentityMismatch = 10147,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidDappSignature = 10148,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidRequestFormat = 10149,
 }
 
 #[uniffi::export]

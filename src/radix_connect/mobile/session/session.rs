@@ -32,6 +32,23 @@ impl Session {
     }
 }
 
+impl Session {
+    pub fn validate_request(
+        &self,
+        request: &RadixConnectMobileRequest,
+    ) -> Result<()> {
+        if self.dapp_identity_public_key != request.identity_public_key {
+            return Err(CommonError::RadixConnectMobileDappPublicKeyMismatch);
+        }
+
+        if self.dapp_public_key != request.public_key {
+            return Err(CommonError::RadixConnectMobileDappIdentityMismatch);
+        }
+
+        Ok(())
+    }
+}
+
 impl HasSampleValues for Session {
     fn sample() -> Self {
         Self::new(

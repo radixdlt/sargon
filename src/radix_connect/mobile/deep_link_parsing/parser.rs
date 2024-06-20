@@ -16,24 +16,20 @@ const CONNECT_URL_PARAM_INTERACTION: &str = "request";
 const CONNECT_URL_PARAM_PUBLIC_KEY: &str = "publicKey";
 const CONNECT_URL_PARAM_IDENTITY_KEY: &str = "identity";
 const CONNECT_URL_PARAM_DAPP_DEFINITION_ADDRESS: &str = "dAppDefinitionAddress";
-const CONNECT_URL: &str = "https://d1rxdfxrfmemlj.cloudfront.net";
 const APP_SCHEME: &str = "radixwallet";
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
 ) -> Result<RadixConnectMobileRequest> {
     let url = url.as_ref();
-    let connect_url = parse_url(CONNECT_URL).unwrap();
+
     let parsed_url = parse_url(url).map_err(|_| {
         CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
         }
     })?;
 
-    if !(parsed_url.host_str() == connect_url.host_str()
-        && parsed_url.scheme() == connect_url.scheme()
-        || parsed_url.scheme() == APP_SCHEME)
-    {
+    if parsed_url.scheme() != APP_SCHEME {
         return Err(CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
         });
@@ -53,12 +49,12 @@ pub fn parse_mobile_connect_request(
     let request_string =
         get_key(url, &query_parameters, CONNECT_URL_PARAM_INTERACTION)?;
 
-    let decoded_request =
-        URL_SAFE_NO_PAD.decode(request_string.as_str()).unwrap();
+    let decoded_request = URL_SAFE_NO_PAD
+        .decode(request_string.as_str())
+        .map_err(|_| CommonError::RadixConnectMobileInvalidRequestFormat)?;
     let request = DappToWalletInteractionUnvalidated::new_from_json_bytes(
         decoded_request,
-    )
-    .unwrap();
+    )?;
 
     let dapp_definition_address_string = get_key(
         url,

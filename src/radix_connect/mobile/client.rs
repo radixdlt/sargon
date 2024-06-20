@@ -32,8 +32,6 @@ pub struct RadixConnectMobile {
     wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
     /// The storage to be used to store session data.
     session_storage: Arc<dyn SessionStorage>,
-    /// The client to be used to fetch well-known files.
-    well_known_client: WellKnownClient,
     /// The new sessions that have been created and are waiting to be validated on dApp side.
     /// Once the session is validated, it will be moved to the secure storage.
     /// Validation consists in verifying the origin of the session.
@@ -54,9 +52,6 @@ impl RadixConnectMobile {
                 RelayService::new_with_network_antenna(network_antenna.clone()),
             ),
             session_storage,
-            well_known_client: WellKnownClient::new_with_network_antenna(
-                network_antenna,
-            ),
             new_sessions: RwLock::new(HashMap::new()),
         }
     }
@@ -71,23 +66,24 @@ impl RadixConnectMobile {
     ) -> Result<RadixConnectMobileSessionRequest> {
         let request = parse_mobile_connect_request(url)?;
 
-        let is_valid_signature = request
-            .verify_signature(&request.request.interaction_id)
-            .unwrap();
+        request
+            .verify_request_signature(&request.interaction.interaction_id)?;
 
-        if !is_valid_signature {
-            panic!("Invalid Signature");
-        }
+        let existing_session = self.load_session(request.session_id).await.ok();
+        let origin_requires_validation = existing_session.is_none();
 
-        let session = self.load_session(request.session_id).await;
-        if session.is_err() {
-            self.create_in_flight_session(&request)?;
+        match existing_session {
+            Some(session) => {
+                session.validate_request(&request)?;
+            }
+            None => {
+                self.create_in_flight_session(&request)?;
+            }
         }
-        let origin_requires_validation = session.is_err();
 
         Ok(RadixConnectMobileSessionRequest::new(
             request.session_id,
-            request.request,
+            request.interaction,
             request.origin,
             origin_requires_validation,
         ))
@@ -98,23 +94,15 @@ impl RadixConnectMobile {
         &self,
         session_id: SessionID,
     ) -> Result<()> {
-        let inflight_session;
+        match self
+            .new_sessions
+            .try_write()
+            .ok()
+            .and_then(|mut new_sessions| new_sessions.remove(&session_id))
         {
-            let new_sessions = self.new_sessions.try_read().unwrap();
-
-            inflight_session = match new_sessions.get(&session_id) {
-                Some(session) => {
-                    if let Ok(mut new_sessions) = self.new_sessions.try_write()
-                    {
-                        new_sessions.remove(&session_id);
-                    }
-                    Ok(session.to_owned())
-                }
-                None => Err(CommonError::Unknown),
-            };
+            Some(inflight_session) => self.save_session(inflight_session).await,
+            None => Err(CommonError::Unknown),
         }
-
-        self.save_session(inflight_session?.clone()).await
     }
 
     #[uniffi::method]
@@ -153,11 +141,43 @@ impl RadixConnectMobile {
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        let session = self.load_session(wallet_response.session_id).await?;
+        let session_id = wallet_response.session_id;
+        let in_flight_session = self
+            .new_sessions
+            .try_write()
+            .ok()
+            .and_then(|mut new_sessions| new_sessions.remove(&session_id));
+
+        let existing_session =
+            self.load_session(wallet_response.session_id).await.ok();
+
+        let is_in_flight_session = in_flight_session.is_some();
+        let session = in_flight_session.or(existing_session).ok_or(
+            CommonError::RadixConnectMobileSessionNotFound { session_id },
+        )?;
+
+        if is_in_flight_session && !wallet_response.response.is_success() {
+            return self
+                .wallet_interactions_transport
+                .send_wallet_interaction_error_response(
+                    session_id,
+                    "Failure".to_string(),
+                )
+                .await;
+        }
 
         self.wallet_interactions_transport
-            .send_wallet_interaction_response(session, wallet_response.response)
-            .await
+            .send_wallet_interaction_response(
+                session.clone(),
+                wallet_response.response,
+            )
+            .await?;
+
+        if is_in_flight_session {
+            self.save_session(session).await?;
+        }
+
+        Ok(())
     }
 }
 
@@ -203,10 +223,3 @@ impl RadixConnectMobile {
         Ok(())
     }
 }
-
-// #[uniffi::export]
-// pub fn new_mobile_connect_request(
-//     url: String,
-// ) -> Result<RadixConnectMobileConnectRequest> {
-//     RadixConnectMobileConnectRequest::from_str(url.as_str())
-// }
