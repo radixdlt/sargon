@@ -493,8 +493,8 @@ pub enum CommonError {
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
 
-    #[error("Index out of bounds: {index} >= #{count}")]
-    IndexOutOfBounds { index: u64, count: u64 } = 10138,
+    #[error("Index of transaction Guarantee is out of bounds: {index} >= #{count}")]
+    TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10138,
 }
 
 #[uniffi::export]

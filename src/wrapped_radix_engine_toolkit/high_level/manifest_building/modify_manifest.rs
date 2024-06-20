@@ -78,7 +78,7 @@ impl TransactionManifest {
             .into_iter()
             .find(|g| g.instruction_index >= instruction_count)
         {
-            return Err(CommonError::IndexOutOfBounds {
+            return Err(CommonError::TXGuaranteeIndexOutOfBounds {
                 index: oob.instruction_index,
                 count: instruction_count,
             });
@@ -556,7 +556,7 @@ CALL_METHOD
                 ResourceAddress::sample(),
                 None
             )]),
-            Err(CommonError::IndexOutOfBounds { index: 4, count: 4 })
+            Err(CommonError::TXGuaranteeIndexOutOfBounds { index: 4, count: 4 })
         );
     }
 
@@ -575,7 +575,7 @@ CALL_METHOD
                     None
                 )]
             ),
-            Err(CommonError::IndexOutOfBounds { index: 5, count: 4 })
+            Err(CommonError::TXGuaranteeIndexOutOfBounds { index: 5, count: 4 })
         );
     }
 }
