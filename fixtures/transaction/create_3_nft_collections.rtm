@@ -136,6 +136,327 @@ CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
                 ),
                 false
             ),
+            "extra_BoolArray" => Tuple(
+                Enum<1u8>(
+                    Enum<129u8>(
+                        Array<Bool>(
+                            true,
+                            false
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Decimal" => Tuple(
+                Enum<1u8>(
+                    Enum<7u8>(
+                        Decimal("8")
+                    )
+                ),
+                false
+            ),
+            "extra_DecimalArray" => Tuple(
+                Enum<1u8>(
+                    Enum<135u8>(
+                        Array<Decimal>(
+                            Decimal("1"),
+                            Decimal("2")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_GlobalAddress" => Tuple(
+                Enum<1u8>(
+                    Enum<8u8>(
+                        Address("account_tdx_2_128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvyqrllae")
+                    )
+                ),
+                false
+            ),
+            "extra_GlobalAddressArray" => Tuple(
+                Enum<1u8>(
+                    Enum<136u8>(
+                        Array<Address>(
+                            Address("account_tdx_2_128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvyqrllae"),
+                            Address("account_tdx_2_12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlwkwcf0")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_I32Array" => Tuple(
+                Enum<1u8>(
+                    Enum<133u8>(
+                        Array<I32>(
+                            32i32,
+                            33i32,
+                            34i32,
+                            35i32
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_I64Array" => Tuple(
+                Enum<1u8>(
+                    Enum<134u8>(
+                        Array<I64>(
+                            64i64,
+                            65i64,
+                            66i64,
+                            67i64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Instant" => Tuple(
+                Enum<1u8>(
+                    Enum<12u8>(
+                        1891i64
+                    )
+                ),
+                false
+            ),
+            "extra_InstantArray" => Tuple(
+                Enum<1u8>(
+                    Enum<140u8>(
+                        Array<I64>(
+                            5i64,
+                            1891i64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleGlobalId" => Tuple(
+                Enum<1u8>(
+                    Enum<10u8>(
+                        NonFungibleGlobalId("resource_tdx_2_1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejs3wnhg:<Member_237>")
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleGlobalIdArray" => Tuple(
+                Enum<1u8>(
+                    Enum<138u8>(
+                        Array<Tuple>(
+                            NonFungibleGlobalId("resource_tdx_2_1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejs3wnhg:<Member_237>"),
+                            NonFungibleGlobalId("resource_tdx_2_1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dp0lpzc:<foobar>")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleLocalId" => Tuple(
+                Enum<1u8>(
+                    Enum<11u8>(
+                        NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}")
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleLocalIdArray" => Tuple(
+                Enum<1u8>(
+                    Enum<139u8>(
+                        Array<NonFungibleLocalId>(
+                            NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"),
+                            NonFungibleLocalId("<foobar>")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Origin" => Tuple(
+                Enum<1u8>(
+                    Enum<14u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_OriginArray" => Tuple(
+                Enum<1u8>(
+                    Enum<142u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKey" => Tuple(
+                Enum<1u8>(
+                    Enum<9u8>(
+                        Enum<1u8>(
+                            Bytes("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyArray" => Tuple(
+                Enum<1u8>(
+                    Enum<137u8>(
+                        Array<Enum>(
+                            Enum<1u8>(
+                                Bytes("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf")
+                            ),
+                            Enum<0u8>(
+                                Bytes("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8")
+                            )
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyHash" => Tuple(
+                Enum<1u8>(
+                    Enum<15u8>(
+                        Enum<1u8>(
+                            Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyHashArray" => Tuple(
+                Enum<1u8>(
+                    Enum<143u8>(
+                        Array<Enum>(
+                            Enum<1u8>(
+                                Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                            ),
+                            Enum<0u8>(
+                                Bytes("4a5004504dbbc08c65ba86fcd7592a3ac48db81d217fe2356e75b37f31")
+                            )
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_String" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "foo bar"
+                    )
+                ),
+                false
+            ),
+            "extra_StringArray" => Tuple(
+                Enum<1u8>(
+                    Enum<128u8>(
+                        Array<String>(
+                            "foo",
+                            "bar"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U32Array" => Tuple(
+                Enum<1u8>(
+                    Enum<131u8>(
+                        Array<U32>(
+                            32u32,
+                            33u32,
+                            34u32,
+                            35u32
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U64Array" => Tuple(
+                Enum<1u8>(
+                    Enum<132u8>(
+                        Array<U64>(
+                            64u64,
+                            65u64,
+                            66u64,
+                            67u64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U8Array" => Tuple(
+                Enum<1u8>(
+                    Enum<130u8>(
+                        Bytes("08090a0b")
+                    )
+                ),
+                false
+            ),
+            "extra_Url" => Tuple(
+                Enum<1u8>(
+                    Enum<13u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_UrlArray" => Tuple(
+                Enum<1u8>(
+                    Enum<141u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_bool" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_i32" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        32i32
+                    )
+                ),
+                false
+            ),
+            "extra_i64" => Tuple(
+                Enum<1u8>(
+                    Enum<6u8>(
+                        64i64
+                    )
+                ),
+                false
+            ),
+            "extra_u32" => Tuple(
+                Enum<1u8>(
+                    Enum<3u8>(
+                        32u32
+                    )
+                ),
+                false
+            ),
+            "extra_u64" => Tuple(
+                Enum<1u8>(
+                    Enum<4u8>(
+                        64u64
+                    )
+                ),
+                false
+            ),
+            "extra_u8" => Tuple(
+                Enum<1u8>(
+                    Enum<2u8>(
+                        8u8
+                    )
+                ),
+                false
+            ),
             "icon_url" => Tuple(
                 Enum<1u8>(
                     Enum<13u8>(
@@ -315,6 +636,327 @@ CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
                 ),
                 false
             ),
+            "extra_BoolArray" => Tuple(
+                Enum<1u8>(
+                    Enum<129u8>(
+                        Array<Bool>(
+                            true,
+                            false
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Decimal" => Tuple(
+                Enum<1u8>(
+                    Enum<7u8>(
+                        Decimal("8")
+                    )
+                ),
+                false
+            ),
+            "extra_DecimalArray" => Tuple(
+                Enum<1u8>(
+                    Enum<135u8>(
+                        Array<Decimal>(
+                            Decimal("1"),
+                            Decimal("2")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_GlobalAddress" => Tuple(
+                Enum<1u8>(
+                    Enum<8u8>(
+                        Address("account_tdx_2_128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvyqrllae")
+                    )
+                ),
+                false
+            ),
+            "extra_GlobalAddressArray" => Tuple(
+                Enum<1u8>(
+                    Enum<136u8>(
+                        Array<Address>(
+                            Address("account_tdx_2_128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvyqrllae"),
+                            Address("account_tdx_2_12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlwkwcf0")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_I32Array" => Tuple(
+                Enum<1u8>(
+                    Enum<133u8>(
+                        Array<I32>(
+                            32i32,
+                            33i32,
+                            34i32,
+                            35i32
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_I64Array" => Tuple(
+                Enum<1u8>(
+                    Enum<134u8>(
+                        Array<I64>(
+                            64i64,
+                            65i64,
+                            66i64,
+                            67i64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Instant" => Tuple(
+                Enum<1u8>(
+                    Enum<12u8>(
+                        1891i64
+                    )
+                ),
+                false
+            ),
+            "extra_InstantArray" => Tuple(
+                Enum<1u8>(
+                    Enum<140u8>(
+                        Array<I64>(
+                            5i64,
+                            1891i64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleGlobalId" => Tuple(
+                Enum<1u8>(
+                    Enum<10u8>(
+                        NonFungibleGlobalId("resource_tdx_2_1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejs3wnhg:<Member_237>")
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleGlobalIdArray" => Tuple(
+                Enum<1u8>(
+                    Enum<138u8>(
+                        Array<Tuple>(
+                            NonFungibleGlobalId("resource_tdx_2_1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejs3wnhg:<Member_237>"),
+                            NonFungibleGlobalId("resource_tdx_2_1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dp0lpzc:<foobar>")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleLocalId" => Tuple(
+                Enum<1u8>(
+                    Enum<11u8>(
+                        NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}")
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleLocalIdArray" => Tuple(
+                Enum<1u8>(
+                    Enum<139u8>(
+                        Array<NonFungibleLocalId>(
+                            NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"),
+                            NonFungibleLocalId("<foobar>")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Origin" => Tuple(
+                Enum<1u8>(
+                    Enum<14u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_OriginArray" => Tuple(
+                Enum<1u8>(
+                    Enum<142u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKey" => Tuple(
+                Enum<1u8>(
+                    Enum<9u8>(
+                        Enum<1u8>(
+                            Bytes("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyArray" => Tuple(
+                Enum<1u8>(
+                    Enum<137u8>(
+                        Array<Enum>(
+                            Enum<1u8>(
+                                Bytes("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf")
+                            ),
+                            Enum<0u8>(
+                                Bytes("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8")
+                            )
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyHash" => Tuple(
+                Enum<1u8>(
+                    Enum<15u8>(
+                        Enum<1u8>(
+                            Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyHashArray" => Tuple(
+                Enum<1u8>(
+                    Enum<143u8>(
+                        Array<Enum>(
+                            Enum<1u8>(
+                                Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                            ),
+                            Enum<0u8>(
+                                Bytes("4a5004504dbbc08c65ba86fcd7592a3ac48db81d217fe2356e75b37f31")
+                            )
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_String" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "foo bar"
+                    )
+                ),
+                false
+            ),
+            "extra_StringArray" => Tuple(
+                Enum<1u8>(
+                    Enum<128u8>(
+                        Array<String>(
+                            "foo",
+                            "bar"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U32Array" => Tuple(
+                Enum<1u8>(
+                    Enum<131u8>(
+                        Array<U32>(
+                            32u32,
+                            33u32,
+                            34u32,
+                            35u32
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U64Array" => Tuple(
+                Enum<1u8>(
+                    Enum<132u8>(
+                        Array<U64>(
+                            64u64,
+                            65u64,
+                            66u64,
+                            67u64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U8Array" => Tuple(
+                Enum<1u8>(
+                    Enum<130u8>(
+                        Bytes("08090a0b")
+                    )
+                ),
+                false
+            ),
+            "extra_Url" => Tuple(
+                Enum<1u8>(
+                    Enum<13u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_UrlArray" => Tuple(
+                Enum<1u8>(
+                    Enum<141u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_bool" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_i32" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        32i32
+                    )
+                ),
+                false
+            ),
+            "extra_i64" => Tuple(
+                Enum<1u8>(
+                    Enum<6u8>(
+                        64i64
+                    )
+                ),
+                false
+            ),
+            "extra_u32" => Tuple(
+                Enum<1u8>(
+                    Enum<3u8>(
+                        32u32
+                    )
+                ),
+                false
+            ),
+            "extra_u64" => Tuple(
+                Enum<1u8>(
+                    Enum<4u8>(
+                        64u64
+                    )
+                ),
+                false
+            ),
+            "extra_u8" => Tuple(
+                Enum<1u8>(
+                    Enum<2u8>(
+                        8u8
+                    )
+                ),
+                false
+            ),
             "icon_url" => Tuple(
                 Enum<1u8>(
                     Enum<13u8>(
@@ -490,6 +1132,327 @@ CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
                 Enum<1u8>(
                     Enum<0u8>(
                         "Able: An amazingly innovative and rare NFT collection"
+                    )
+                ),
+                false
+            ),
+            "extra_BoolArray" => Tuple(
+                Enum<1u8>(
+                    Enum<129u8>(
+                        Array<Bool>(
+                            true,
+                            false
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Decimal" => Tuple(
+                Enum<1u8>(
+                    Enum<7u8>(
+                        Decimal("8")
+                    )
+                ),
+                false
+            ),
+            "extra_DecimalArray" => Tuple(
+                Enum<1u8>(
+                    Enum<135u8>(
+                        Array<Decimal>(
+                            Decimal("1"),
+                            Decimal("2")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_GlobalAddress" => Tuple(
+                Enum<1u8>(
+                    Enum<8u8>(
+                        Address("account_tdx_2_128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvyqrllae")
+                    )
+                ),
+                false
+            ),
+            "extra_GlobalAddressArray" => Tuple(
+                Enum<1u8>(
+                    Enum<136u8>(
+                        Array<Address>(
+                            Address("account_tdx_2_128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvyqrllae"),
+                            Address("account_tdx_2_12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlwkwcf0")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_I32Array" => Tuple(
+                Enum<1u8>(
+                    Enum<133u8>(
+                        Array<I32>(
+                            32i32,
+                            33i32,
+                            34i32,
+                            35i32
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_I64Array" => Tuple(
+                Enum<1u8>(
+                    Enum<134u8>(
+                        Array<I64>(
+                            64i64,
+                            65i64,
+                            66i64,
+                            67i64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Instant" => Tuple(
+                Enum<1u8>(
+                    Enum<12u8>(
+                        1891i64
+                    )
+                ),
+                false
+            ),
+            "extra_InstantArray" => Tuple(
+                Enum<1u8>(
+                    Enum<140u8>(
+                        Array<I64>(
+                            5i64,
+                            1891i64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleGlobalId" => Tuple(
+                Enum<1u8>(
+                    Enum<10u8>(
+                        NonFungibleGlobalId("resource_tdx_2_1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejs3wnhg:<Member_237>")
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleGlobalIdArray" => Tuple(
+                Enum<1u8>(
+                    Enum<138u8>(
+                        Array<Tuple>(
+                            NonFungibleGlobalId("resource_tdx_2_1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejs3wnhg:<Member_237>"),
+                            NonFungibleGlobalId("resource_tdx_2_1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dp0lpzc:<foobar>")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleLocalId" => Tuple(
+                Enum<1u8>(
+                    Enum<11u8>(
+                        NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}")
+                    )
+                ),
+                false
+            ),
+            "extra_NonFungibleLocalIdArray" => Tuple(
+                Enum<1u8>(
+                    Enum<139u8>(
+                        Array<NonFungibleLocalId>(
+                            NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"),
+                            NonFungibleLocalId("<foobar>")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_Origin" => Tuple(
+                Enum<1u8>(
+                    Enum<14u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_OriginArray" => Tuple(
+                Enum<1u8>(
+                    Enum<142u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKey" => Tuple(
+                Enum<1u8>(
+                    Enum<9u8>(
+                        Enum<1u8>(
+                            Bytes("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyArray" => Tuple(
+                Enum<1u8>(
+                    Enum<137u8>(
+                        Array<Enum>(
+                            Enum<1u8>(
+                                Bytes("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf")
+                            ),
+                            Enum<0u8>(
+                                Bytes("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8")
+                            )
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyHash" => Tuple(
+                Enum<1u8>(
+                    Enum<15u8>(
+                        Enum<1u8>(
+                            Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_PublicKeyHashArray" => Tuple(
+                Enum<1u8>(
+                    Enum<143u8>(
+                        Array<Enum>(
+                            Enum<1u8>(
+                                Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                            ),
+                            Enum<0u8>(
+                                Bytes("4a5004504dbbc08c65ba86fcd7592a3ac48db81d217fe2356e75b37f31")
+                            )
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_String" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "foo bar"
+                    )
+                ),
+                false
+            ),
+            "extra_StringArray" => Tuple(
+                Enum<1u8>(
+                    Enum<128u8>(
+                        Array<String>(
+                            "foo",
+                            "bar"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U32Array" => Tuple(
+                Enum<1u8>(
+                    Enum<131u8>(
+                        Array<U32>(
+                            32u32,
+                            33u32,
+                            34u32,
+                            35u32
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U64Array" => Tuple(
+                Enum<1u8>(
+                    Enum<132u8>(
+                        Array<U64>(
+                            64u64,
+                            65u64,
+                            66u64,
+                            67u64
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_U8Array" => Tuple(
+                Enum<1u8>(
+                    Enum<130u8>(
+                        Bytes("08090a0b")
+                    )
+                ),
+                false
+            ),
+            "extra_Url" => Tuple(
+                Enum<1u8>(
+                    Enum<13u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_UrlArray" => Tuple(
+                Enum<1u8>(
+                    Enum<141u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
+                    )
+                ),
+                false
+            ),
+            "extra_bool" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_i32" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        32i32
+                    )
+                ),
+                false
+            ),
+            "extra_i64" => Tuple(
+                Enum<1u8>(
+                    Enum<6u8>(
+                        64i64
+                    )
+                ),
+                false
+            ),
+            "extra_u32" => Tuple(
+                Enum<1u8>(
+                    Enum<3u8>(
+                        32u32
+                    )
+                ),
+                false
+            ),
+            "extra_u64" => Tuple(
+                Enum<1u8>(
+                    Enum<4u8>(
+                        64u64
+                    )
+                ),
+                false
+            ),
+            "extra_u8" => Tuple(
+                Enum<1u8>(
+                    Enum<2u8>(
+                        8u8
                     )
                 ),
                 false
