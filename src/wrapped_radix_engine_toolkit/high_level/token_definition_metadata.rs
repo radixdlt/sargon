@@ -15,7 +15,7 @@ impl From<TokenDefinitionMetadata>
     for ScryptoModuleConfig<ScryptoMetadataInit>
 {
     fn from(value: TokenDefinitionMetadata) -> Self {
-        let map = BTreeMap::<String, ScryptoMetadataValue>::from([
+        let mut map = BTreeMap::<String, ScryptoMetadataValue>::from([
             (
                 MetadataKey::Name.to_string(),
                 ScryptoMetadataValue::String(value.name),
@@ -37,6 +37,21 @@ impl From<TokenDefinitionMetadata>
                 ScryptoMetadataValue::StringArray(value.tags),
             ),
         ]);
+
+        for i in 0..5 {
+            map.insert(
+                format!("extra_string_{}", i),
+                ScryptoMetadataValue::String(format!("value_{}", i)),
+            );
+            map.insert(
+                format!("extra_bool_{}", i),
+                ScryptoMetadataValue::Bool(i % 2 == 0),
+            );
+            map.insert(
+                format!("extra_i32_{}", i),
+                ScryptoMetadataValue::I32(i),
+            );
+        }
         let init: ScryptoMetadataInit = map.into();
         ScryptoModuleConfig {
             init,

@@ -373,6 +373,126 @@ mod tests {
                 ),
                 false
             ),
+            "extra_bool_0" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_bool_1" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        false
+                    )
+                ),
+                false
+            ),
+            "extra_bool_2" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_bool_3" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        false
+                    )
+                ),
+                false
+            ),
+            "extra_bool_4" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_i32_0" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        0i32
+                    )
+                ),
+                false
+            ),
+            "extra_i32_1" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        1i32
+                    )
+                ),
+                false
+            ),
+            "extra_i32_2" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        2i32
+                    )
+                ),
+                false
+            ),
+            "extra_i32_3" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        3i32
+                    )
+                ),
+                false
+            ),
+            "extra_i32_4" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        4i32
+                    )
+                ),
+                false
+            ),
+            "extra_string_0" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "value_0"
+                    )
+                ),
+                false
+            ),
+            "extra_string_1" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "value_1"
+                    )
+                ),
+                false
+            ),
+            "extra_string_2" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "value_2"
+                    )
+                ),
+                false
+            ),
+            "extra_string_3" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "value_3"
+                    )
+                ),
+                false
+            ),
+            "extra_string_4" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "value_4"
+                    )
+                ),
+                false
+            ),
             "icon_url" => Tuple(
                 Enum<1u8>(
                     Enum<13u8>(
