@@ -137,7 +137,7 @@ mod tests {
         )
                 .as_str();
 
-        let result = parse_mobile_connect_request(connect_url).unwrap();
+        let result = parse_mobile_connect_request(connect_url);
 
         let expected_interaction = DappToWalletInteractionUnvalidated::new(
             "77cfb38f-5b11-4a8f-be5a-39850bed83ad".parse().unwrap(),
@@ -182,6 +182,23 @@ mod tests {
             expected_interaction,
         );
 
-        pretty_assertions::assert_eq!(result, expected_request);
+        pretty_assertions::assert_eq!(result, Ok(expected_request));
+
+        let invalid_url = "url";
+        let invalid_scheme = "invalid_scheme://";
+
+        pretty_assertions::assert_eq!(
+            parse_mobile_connect_request(invalid_url),
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: invalid_url.to_owned(),
+            })
+        );
+
+        pretty_assertions::assert_eq!(
+            parse_mobile_connect_request(invalid_scheme),
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: invalid_scheme.to_owned(),
+            })
+        );
     }
 }

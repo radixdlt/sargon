@@ -113,6 +113,20 @@ impl RadixConnectMobileRequest {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = RadixConnectMobileRequest;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
     #[test]
     fn signature_verification() {
         let interaction_id = WalletInteractionId::from_str(
@@ -141,6 +155,14 @@ mod tests {
         pretty_assertions::assert_eq!(
             request.verify_request_signature(&interaction_id),
             Ok(()),
+        );
+
+        let invalid_interaction_id =
+            WalletInteractionId::from_str("invalid").unwrap();
+
+        pretty_assertions::assert_eq!(
+            request.verify_request_signature(&invalid_interaction_id),
+            Err(CommonError::RadixConnectMobileInvalidDappSignature)
         )
     }
 }
