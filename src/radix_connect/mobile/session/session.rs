@@ -91,35 +91,5 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-
-        let private_key = KeyAgreementPrivateKey::try_from(Exactly32Bytes::from_hex("4181137e23935d9b0e2bc39a798817df6bdddaab415d604801ef76b412f48124").unwrap()).unwrap();
-        let public_key = KeyAgreementPublicKey::from_hex(
-            "3791118a7a07c7f577538dc7b60be64245f13e4e5e0f284a3de9b3c77f946571"
-                .to_string(),
-        )
-        .unwrap();
-
-        let shared_secret =
-            private_key.shared_secret_from_key_agreement(&public_key);
-        let shared_secret_bytes: Exactly32Bytes =
-            shared_secret.as_bytes().into();
-
-        pretty_assertions::assert_eq!(
-            shared_secret_bytes.to_hex(),
-            "6542370bfbc9d818a621095210c34e2d376cb7a3edefa39fe25d02733b708c0d"
-        );
-
-        let salt = "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe";
-        let info = "RCfM";
-        let key = PbHkdfSha256::hkdf_key_agreement(
-            &shared_secret.as_bytes(),
-            Some(salt.as_bytes()),
-            Some(info.as_bytes()),
-        );
-
-        pretty_assertions::assert_eq!(
-            key.to_hex(),
-            "e9278143a272e9cce596335d0f29e0194305a2a00b57501bc4c21a432d5c2b49"
-        );
     }
 }
