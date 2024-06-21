@@ -294,7 +294,7 @@ mod tests {
         assert_eq!(
             SUT::create_fungible_token(&AccountAddress::sample_mainnet(),)
                 .to_string(),
-            r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
+            r##"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
     Enum<2u8>(
         Enum<0u8>()
     )
@@ -373,7 +373,15 @@ mod tests {
                 ),
                 false
             ),
-            "extra_BoolArray" => Tuple(
+            "extra_bool" => Tuple(
+                Enum<1u8>(
+                    Enum<1u8>(
+                        true
+                    )
+                ),
+                false
+            ),
+            "extra_bool_array" => Tuple(
                 Enum<1u8>(
                     Enum<129u8>(
                         Array<Bool>(
@@ -384,7 +392,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_Decimal" => Tuple(
+            "extra_decimal" => Tuple(
                 Enum<1u8>(
                     Enum<7u8>(
                         Decimal("8")
@@ -392,7 +400,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_DecimalArray" => Tuple(
+            "extra_decimal_array" => Tuple(
                 Enum<1u8>(
                     Enum<135u8>(
                         Array<Decimal>(
@@ -403,7 +411,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_GlobalAddress" => Tuple(
+            "extra_global_address" => Tuple(
                 Enum<1u8>(
                     Enum<8u8>(
                         Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
@@ -411,18 +419,26 @@ mod tests {
                 ),
                 false
             ),
-            "extra_GlobalAddressArray" => Tuple(
+            "extra_global_address_array" => Tuple(
                 Enum<1u8>(
                     Enum<136u8>(
                         Array<Address>(
-                            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"),
-                            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
+                            Address("account_rdx1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql49f4tn9"),
+                            Address("account_rdx129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wynsddje")
                         )
                     )
                 ),
                 false
             ),
-            "extra_I32Array" => Tuple(
+            "extra_i32" => Tuple(
+                Enum<1u8>(
+                    Enum<5u8>(
+                        32i32
+                    )
+                ),
+                false
+            ),
+            "extra_i32_array" => Tuple(
                 Enum<1u8>(
                     Enum<133u8>(
                         Array<I32>(
@@ -435,7 +451,15 @@ mod tests {
                 ),
                 false
             ),
-            "extra_I64Array" => Tuple(
+            "extra_i64" => Tuple(
+                Enum<1u8>(
+                    Enum<6u8>(
+                        64i64
+                    )
+                ),
+                false
+            ),
+            "extra_i64_array" => Tuple(
                 Enum<1u8>(
                     Enum<134u8>(
                         Array<I64>(
@@ -448,7 +472,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_Instant" => Tuple(
+            "extra_instant" => Tuple(
                 Enum<1u8>(
                     Enum<12u8>(
                         1891i64
@@ -456,7 +480,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_InstantArray" => Tuple(
+            "extra_instant_array" => Tuple(
                 Enum<1u8>(
                     Enum<140u8>(
                         Array<I64>(
@@ -467,45 +491,45 @@ mod tests {
                 ),
                 false
             ),
-            "extra_NonFungibleGlobalId" => Tuple(
+            "extra_non_fungible_global_id" => Tuple(
                 Enum<1u8>(
                     Enum<10u8>(
-                        NonFungibleGlobalId("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>")
+                        NonFungibleGlobalId("resource_rdx1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9fty5xkn:#1#")
                     )
                 ),
                 false
             ),
-            "extra_NonFungibleGlobalIdArray" => Tuple(
+            "extra_non_fungible_global_id_array" => Tuple(
                 Enum<1u8>(
                     Enum<138u8>(
                         Array<Tuple>(
-                            NonFungibleGlobalId("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"),
-                            NonFungibleGlobalId("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:<foobar>")
+                            NonFungibleGlobalId("resource_rdx1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9fty5xkn:#1#"),
+                            NonFungibleGlobalId("resource_rdx1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9fty5xkn:#2#")
                         )
                     )
                 ),
                 false
             ),
-            "extra_NonFungibleLocalId" => Tuple(
+            "extra_non_fungible_local_id" => Tuple(
                 Enum<1u8>(
                     Enum<11u8>(
-                        NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}")
+                        NonFungibleLocalId("#1#")
                     )
                 ),
                 false
             ),
-            "extra_NonFungibleLocalIdArray" => Tuple(
+            "extra_non_fungible_local_id_array" => Tuple(
                 Enum<1u8>(
                     Enum<139u8>(
                         Array<NonFungibleLocalId>(
-                            NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"),
-                            NonFungibleLocalId("<foobar>")
+                            NonFungibleLocalId("#1#"),
+                            NonFungibleLocalId("#2#")
                         )
                     )
                 ),
                 false
             ),
-            "extra_Origin" => Tuple(
+            "extra_origin" => Tuple(
                 Enum<1u8>(
                     Enum<14u8>(
                         "https://radixdlt.com"
@@ -513,7 +537,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_OriginArray" => Tuple(
+            "extra_origin_array" => Tuple(
                 Enum<1u8>(
                     Enum<142u8>(
                         Array<String>(
@@ -524,7 +548,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_PublicKey" => Tuple(
+            "extra_public_key" => Tuple(
                 Enum<1u8>(
                     Enum<9u8>(
                         Enum<1u8>(
@@ -534,7 +558,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_PublicKeyArray" => Tuple(
+            "extra_public_key_array" => Tuple(
                 Enum<1u8>(
                     Enum<137u8>(
                         Array<Enum>(
@@ -549,7 +573,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_PublicKeyHash" => Tuple(
+            "extra_public_key_hash" => Tuple(
                 Enum<1u8>(
                     Enum<15u8>(
                         Enum<1u8>(
@@ -559,7 +583,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_PublicKeyHashArray" => Tuple(
+            "extra_public_key_hash_array" => Tuple(
                 Enum<1u8>(
                     Enum<143u8>(
                         Array<Enum>(
@@ -574,7 +598,7 @@ mod tests {
                 ),
                 false
             ),
-            "extra_String" => Tuple(
+            "extra_string" => Tuple(
                 Enum<1u8>(
                     Enum<0u8>(
                         "foo bar"
@@ -582,90 +606,13 @@ mod tests {
                 ),
                 false
             ),
-            "extra_StringArray" => Tuple(
+            "extra_string_array" => Tuple(
                 Enum<1u8>(
                     Enum<128u8>(
                         Array<String>(
                             "foo",
                             "bar"
                         )
-                    )
-                ),
-                false
-            ),
-            "extra_U32Array" => Tuple(
-                Enum<1u8>(
-                    Enum<131u8>(
-                        Array<U32>(
-                            32u32,
-                            33u32,
-                            34u32,
-                            35u32
-                        )
-                    )
-                ),
-                false
-            ),
-            "extra_U64Array" => Tuple(
-                Enum<1u8>(
-                    Enum<132u8>(
-                        Array<U64>(
-                            64u64,
-                            65u64,
-                            66u64,
-                            67u64
-                        )
-                    )
-                ),
-                false
-            ),
-            "extra_U8Array" => Tuple(
-                Enum<1u8>(
-                    Enum<130u8>(
-                        Bytes("08090a0b")
-                    )
-                ),
-                false
-            ),
-            "extra_Url" => Tuple(
-                Enum<1u8>(
-                    Enum<13u8>(
-                        "https://radixdlt.com"
-                    )
-                ),
-                false
-            ),
-            "extra_UrlArray" => Tuple(
-                Enum<1u8>(
-                    Enum<141u8>(
-                        Array<String>(
-                            "https://radixdlt.com",
-                            "https://ociswap.com"
-                        )
-                    )
-                ),
-                false
-            ),
-            "extra_bool" => Tuple(
-                Enum<1u8>(
-                    Enum<1u8>(
-                        true
-                    )
-                ),
-                false
-            ),
-            "extra_i32" => Tuple(
-                Enum<1u8>(
-                    Enum<5u8>(
-                        32i32
-                    )
-                ),
-                false
-            ),
-            "extra_i64" => Tuple(
-                Enum<1u8>(
-                    Enum<6u8>(
-                        64i64
                     )
                 ),
                 false
@@ -678,6 +625,19 @@ mod tests {
                 ),
                 false
             ),
+            "extra_u32_array" => Tuple(
+                Enum<1u8>(
+                    Enum<131u8>(
+                        Array<U32>(
+                            32u32,
+                            33u32,
+                            34u32,
+                            35u32
+                        )
+                    )
+                ),
+                false
+            ),
             "extra_u64" => Tuple(
                 Enum<1u8>(
                     Enum<4u8>(
@@ -686,10 +646,50 @@ mod tests {
                 ),
                 false
             ),
+            "extra_u64_array" => Tuple(
+                Enum<1u8>(
+                    Enum<132u8>(
+                        Array<U64>(
+                            64u64,
+                            65u64,
+                            66u64,
+                            67u64
+                        )
+                    )
+                ),
+                false
+            ),
             "extra_u8" => Tuple(
                 Enum<1u8>(
                     Enum<2u8>(
                         8u8
+                    )
+                ),
+                false
+            ),
+            "extra_u8_array" => Tuple(
+                Enum<1u8>(
+                    Enum<130u8>(
+                        Bytes("08090a0b")
+                    )
+                ),
+                false
+            ),
+            "extra_url" => Tuple(
+                Enum<1u8>(
+                    Enum<13u8>(
+                        "https://radixdlt.com"
+                    )
+                ),
+                false
+            ),
+            "extra_url_array" => Tuple(
+                Enum<1u8>(
+                    Enum<141u8>(
+                        Array<String>(
+                            "https://radixdlt.com",
+                            "https://ociswap.com"
+                        )
                     )
                 ),
                 false
@@ -739,7 +739,7 @@ CALL_METHOD
     Expression("ENTIRE_WORKTOP")
     Enum<0u8>()
 ;
-"#
+"##
         );
     }
 
