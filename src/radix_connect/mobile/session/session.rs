@@ -92,4 +92,15 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_validate_request() {
+        let sut = SUT::sample();
+        assert!(&sut
+            .validate_request(&RadixConnectMobileRequest::sample())
+            .is_ok());
+        assert!(&sut
+            .validate_request(&RadixConnectMobileRequest::sample_other())
+            .is_err())
+    }
 }

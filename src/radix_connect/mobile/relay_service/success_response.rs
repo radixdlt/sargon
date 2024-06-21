@@ -23,3 +23,40 @@ impl SuccessResponse {
         }
     }
 }
+
+impl HasSampleValues for SuccessResponse {
+    fn sample() -> Self {
+        Self::new(
+            SessionID::sample(),
+            KeyAgreementPublicKey::sample(),
+            "data".to_string(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            SessionID::sample_other(),
+            KeyAgreementPublicKey::sample_other(),
+            "data_other".to_string(),
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SuccessResponse;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
