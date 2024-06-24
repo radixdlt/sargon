@@ -550,11 +550,20 @@ impl CommonError {
     pub fn error_code(&self) -> u32 {
         unsafe { *<*const _>::from(self).cast::<u32>() }
     }
+
+    pub fn is_safe_to_show_error_message(&self) -> bool {
+        matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
+    }
 }
 
 #[uniffi::export]
 pub fn error_code_from_error(error: &CommonError) -> u32 {
     error.error_code()
+}
+
+#[uniffi::export]
+pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
+    error.is_safe_to_show_error_message()
 }
 
 #[cfg(test)]
@@ -574,5 +583,21 @@ mod tests {
     fn error_code() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
         assert_eq!(error_code_from_error(&sut), 10049);
+    }
+
+    #[test]
+    fn is_safe_to_show_error_message() {
+        let sut = CommonError::FailedToDeserializeJSONToValue {
+            json_byte_count: 100,
+            type_name: "TypeName".to_string(),
+            serde_message: "message".to_string(),
+        };
+        assert!(is_safe_to_show_error_message_from_error(&sut));
+    }
+
+    #[test]
+    fn is_not_safe_to_show_error_message() {
+        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
+        assert!(!is_safe_to_show_error_message_from_error(&sut));
     }
 }
