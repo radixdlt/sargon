@@ -49,4 +49,10 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn is_success() {
+        assert!(SUT::sample().is_success());
+        assert!(!SUT::sample_other().is_success());
+    }
 }
