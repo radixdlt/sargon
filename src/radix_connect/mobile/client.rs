@@ -7,21 +7,6 @@ use crate::prelude::*;
 use hex::ToHex;
 use std::sync::RwLock;
 
-#[uniffi::export(with_foreign)]
-#[async_trait::async_trait]
-pub trait SessionStorage: Send + Sync {
-    async fn save_session(
-        &self,
-        session_id: SessionID,
-        encoded_session: BagOfBytes,
-    ) -> Result<()>;
-
-    async fn load_session(
-        &self,
-        session_id: SessionID,
-    ) -> Result<Option<BagOfBytes>>;
-}
-
 /// The Radix Connect Mobile client.
 /// This is the object that will be used by the mobile app to handle interactions sent over Radix Connect Relay.
 #[derive(uniffi::Object)]
