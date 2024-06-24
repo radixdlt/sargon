@@ -179,6 +179,20 @@ mod tests {
         );
 
         pretty_assertions::assert_eq!(result, Ok(expected_request));
+
+        let parsed_request = result.unwrap();
+        assert_eq!(parsed_request.session_id.to_string(), SESSION_ID);
+        assert_eq!(parsed_request.origin.to_string(), ORIGIN);
+        assert_eq!(parsed_request.public_key.to_hex(), PUBLIC_KEY);
+        assert_eq!(
+            parsed_request.identity_public_key.to_hex(),
+            IDENTITY_PUBLIC_KEY
+        );
+        assert_eq!(
+            parsed_request.dapp_definition_address.to_string(),
+            DAPP_DEFINITION_ADDRESS
+        );
+        assert_eq!(parsed_request.signature.to_hex(), SIGNATURE);
     }
 
     #[test]
@@ -187,7 +201,12 @@ mod tests {
             "invalidScheme://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
             SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
         );
-        let result = parse_mobile_connect_request(invalid_scheme_url);
+        let result = parse_mobile_connect_request(invalid_scheme_url.clone());
+
+        assert_ne!(
+            parse_url(invalid_scheme_url.clone()).unwrap().scheme(),
+            APP_SCHEME
+        );
         assert!(matches!(
             result,
             Err(CommonError::RadixConnectMobileInvalidRequestUrl { .. })
@@ -352,7 +371,7 @@ mod tests {
             APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, IDENTITY_PUBLIC_KEY
         );
         let result = parse_mobile_connect_request(&missing_signature_url);
-        pretty_assertions::assert_eq!(
+        assert_eq!(
             result,
             Err(CommonError::RadixConnectMobileInvalidRequestUrl {
                 bad_value: missing_signature_url.to_owned(),
@@ -373,5 +392,19 @@ mod tests {
                 bad_value: missing_identity_url.to_owned(),
             })
         );
+    }
+
+    #[test]
+    fn parse_url_with_invalid_dapp_definition_address() {
+        let invalid_dapp_definition_address_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress=invalid_dapp_definition_address&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result =
+            parse_mobile_connect_request(&invalid_dapp_definition_address_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::FailedToDecodeAddressFromBech32 { .. })
+        ));
     }
 }
