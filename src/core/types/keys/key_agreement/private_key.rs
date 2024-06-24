@@ -134,6 +134,24 @@ mod tests {
     }
 
     #[test]
+    fn from_bytes_invalid() {
+        let bytes = BagOfBytes::new();
+        let from_bytes = SUT::try_from(bytes.as_slice());
+        assert_eq!(
+            from_bytes,
+            Err(CommonError::InvalidKeyAgreementPrivateKeyFromBytes {
+                bad_value: bytes.into(),
+            })
+        );
+    }
+
+    #[test]
+    fn generate() {
+        let generate = SUT::generate();
+        assert!(generate.is_ok());
+    }
+
+    #[test]
     fn public_key() {
         let private_key = SUT::sample();
         let public_key = private_key.public_key();
@@ -157,6 +175,15 @@ mod tests {
             bytes.to_hex(),
             "e893692f57baa2a99ece829b98ff4987cd7737e68ff97e00a27d7552e6633429"
                 .to_string()
+        );
+    }
+
+    #[test]
+    fn to_hex() {
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.to_hex(),
+            "98df1ecbf042f5dc986f79c332ef64efed6240f407a664b2e9261c1af78e1063"
         );
     }
 }
