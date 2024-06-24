@@ -38,11 +38,11 @@ impl Session {
         request: &RadixConnectMobileRequest,
     ) -> Result<()> {
         if self.dapp_identity_public_key != request.identity_public_key {
-            return Err(CommonError::RadixConnectMobileDappPublicKeyMismatch);
+            return Err(CommonError::RadixConnectMobileDappIdentityMismatch);
         }
 
         if self.dapp_public_key != request.public_key {
-            return Err(CommonError::RadixConnectMobileDappIdentityMismatch);
+            return Err(CommonError::RadixConnectMobileDappPublicKeyMismatch);
         }
 
         Ok(())
@@ -99,8 +99,23 @@ mod tests {
         assert!(&sut
             .validate_request(&RadixConnectMobileRequest::sample())
             .is_ok());
-        assert!(&sut
-            .validate_request(&RadixConnectMobileRequest::sample_other())
-            .is_err())
+
+        let mut wrong_dapp_public_key_response =
+            RadixConnectMobileRequest::sample();
+        wrong_dapp_public_key_response.public_key =
+            KeyAgreementPublicKey::sample_other();
+        assert_eq!(
+            sut.validate_request(&wrong_dapp_public_key_response),
+            Err(CommonError::RadixConnectMobileDappPublicKeyMismatch)
+        );
+
+        let mut wrong_dapp_identity_response =
+            RadixConnectMobileRequest::sample();
+        wrong_dapp_identity_response.identity_public_key =
+            Ed25519PublicKey::sample_other();
+        assert_eq!(
+            sut.validate_request(&wrong_dapp_identity_response),
+            Err(CommonError::RadixConnectMobileDappIdentityMismatch)
+        );
     }
 }

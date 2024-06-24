@@ -112,31 +112,27 @@ mod tests {
 
     use super::*;
 
+    const SESSION_ID: &str = "8feeb997-81ff-46ec-a679-e7e697b01601";
+    const ORIGIN: &str = "https://radquest-dev.rdx-works-main.extratools.works";
+    const PUBLIC_KEY: &str =
+        "df856ce8d64bd59aca1bec03584513c49e635f350ff6a312021854d62d54171c";
+    const IDENTITY_PUBLIC_KEY: &str =
+        "2e39af5c6905bde9825cd7451b0b6361664ac3a111fcdd10334e5fab6ced9fdf";
+    const REQUEST: &str = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXRoIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiJkYTNlYzhjMjU5MDliNTc3NTlmMTc2ODkwYWU2Mzg1YTRjZTI4NGRjMTI4ZTU2ODAyNmU2ZjIwMWQ5ZDBlNGFlIn0sIm9uZ29pbmdBY2NvdW50cyI6eyJudW1iZXJPZkFjY291bnRzIjp7InF1YW50aWZpZXIiOiJhdExlYXN0IiwicXVhbnRpdHkiOjF9fSwicmVzZXQiOnsiYWNjb3VudHMiOnRydWUsInBlcnNvbmFEYXRhIjpmYWxzZX19LCJpbnRlcmFjdGlvbklkIjoiNzdjZmIzOGYtNWIxMS00YThmLWJlNWEtMzk4NTBiZWQ4M2FkIiwibWV0YWRhdGEiOnsidmVyc2lvbiI6MiwiZEFwcERlZmluaXRpb25BZGRyZXNzIjoiYWNjb3VudF90ZHhfMl8xMngzcm43dHFxcW0zd2d1ejZrbWc1Znk3c2FmOHY5Mmx0NXh1d2duNmtnaDh6YWVqbGY4MGNlIiwibmV0d29ya0lkIjoyLCJvcmlnaW4iOiJodHRwczovL3JhZHF1ZXN0LWRldi5yZHgtd29ya3MtbWFpbi5leHRyYXRvb2xzLndvcmtzIn19&signature=25f0c7741c586666f83e610b05e90a819081c4ff013b05e2ac633e1097f5f5261926b34eaf8cbf3cb7087389720ff8fd4b35b6d3c8a485441bdc3f1818fb0403";
+    const DAPP_DEFINITION_ADDRESS: &str =
+        "account_tdx_2_12x3rn7tqqqm3wguz6kmg5fy7saf8v92lt5xuwgn6kgh8zaejlf80ce";
+    const SIGNATURE: &str = "884f1ce51dd815c527a31caf77cb2af1c683c41769f3b96e2dc6ef6bd7f786d8db0c48119585a4b98a6b74848402e8f86e33bb3e8de2dceb8338d707df3b6a03";
+
+    fn build_base_url() -> String {
+        format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        )
+    }
+
     #[test]
     fn parse_url_into_request() {
-        let session_id = "8feeb997-81ff-46ec-a679-e7e697b01601";
-        let origin = "https://radquest-dev.rdx-works-main.extratools.works";
-        let public_key =
-            "df856ce8d64bd59aca1bec03584513c49e635f350ff6a312021854d62d54171c";
-        let identity_public_key =
-            "2e39af5c6905bde9825cd7451b0b6361664ac3a111fcdd10334e5fab6ced9fdf";
-        let request = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXRoIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiJkYTNlYzhjMjU5MDliNTc3NTlmMTc2ODkwYWU2Mzg1YTRjZTI4NGRjMTI4ZTU2ODAyNmU2ZjIwMWQ5ZDBlNGFlIn0sIm9uZ29pbmdBY2NvdW50cyI6eyJudW1iZXJPZkFjY291bnRzIjp7InF1YW50aWZpZXIiOiJhdExlYXN0IiwicXVhbnRpdHkiOjF9fSwicmVzZXQiOnsiYWNjb3VudHMiOnRydWUsInBlcnNvbmFEYXRhIjpmYWxzZX19LCJpbnRlcmFjdGlvbklkIjoiNzdjZmIzOGYtNWIxMS00YThmLWJlNWEtMzk4NTBiZWQ4M2FkIiwibWV0YWRhdGEiOnsidmVyc2lvbiI6MiwiZEFwcERlZmluaXRpb25BZGRyZXNzIjoiYWNjb3VudF90ZHhfMl8xMngzcm43dHFxcW0zd2d1ejZrbWc1Znk3c2FmOHY5Mmx0NXh1d2duNmtnaDh6YWVqbGY4MGNlIiwibmV0d29ya0lkIjoyLCJvcmlnaW4iOiJodHRwczovL3JhZHF1ZXN0LWRldi5yZHgtd29ya3MtbWFpbi5leHRyYXRvb2xzLndvcmtzIn19&signature=25f0c7741c586666f83e610b05e90a819081c4ff013b05e2ac633e1097f5f5261926b34eaf8cbf3cb7087389720ff8fd4b35b6d3c8a485441bdc3f1818fb0403";
-        let dapp_definition_address = "account_tdx_2_12x3rn7tqqqm3wguz6kmg5fy7saf8v92lt5xuwgn6kgh8zaejlf80ce";
-        let signature = "884f1ce51dd815c527a31caf77cb2af1c683c41769f3b96e2dc6ef6bd7f786d8db0c48119585a4b98a6b74848402e8f86e33bb3e8de2dceb8338d707df3b6a03";
-
-        let connect_url = APP_SCHEME.to_owned()
-            + format!(
-            "://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
-            session_id,
-            origin,
-            public_key,
-            request,
-            dapp_definition_address,
-            signature,
-            identity_public_key,
-        )
-                .as_str();
-
+        let connect_url = build_base_url();
         let result = parse_mobile_connect_request(connect_url);
 
         let expected_interaction = DappToWalletInteractionUnvalidated::new(
@@ -168,37 +164,123 @@ mod tests {
             DappToWalletInteractionMetadataUnvalidated::new(
                 WalletInteractionVersion(2),
                 NetworkID::Stokenet,
-                DappOrigin::from(origin),
-                dapp_definition_address.to_owned(),
+                DappOrigin::from(ORIGIN),
+                DAPP_DEFINITION_ADDRESS,
             )
         );
         let expected_request = RadixConnectMobileRequest::new(
-            session_id.parse().unwrap(),
-            DappOrigin::from(origin),
-            KeyAgreementPublicKey::from_hex(public_key.to_owned()).unwrap(),
-            Ed25519PublicKey::from_hex(identity_public_key.to_owned()).unwrap(),
-            dapp_definition_address.parse().unwrap(),
-            signature.parse().unwrap(),
+            SESSION_ID.parse().unwrap(),
+            DappOrigin::from(ORIGIN),
+            KeyAgreementPublicKey::from_hex(PUBLIC_KEY.to_owned()).unwrap(),
+            Ed25519PublicKey::from_hex(IDENTITY_PUBLIC_KEY.to_owned()).unwrap(),
+            DAPP_DEFINITION_ADDRESS.parse().unwrap(),
+            SIGNATURE.parse().unwrap(),
             expected_interaction,
         );
 
         pretty_assertions::assert_eq!(result, Ok(expected_request));
+    }
 
-        let invalid_url = "url";
-        let invalid_scheme = "invalid_scheme://";
+    #[test]
+    fn parse_url_with_invalid_scheme() {
+        let invalid_scheme_url = format!(
+            "invalid_scheme://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(invalid_scheme_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl { .. })
+        ));
+    }
 
-        pretty_assertions::assert_eq!(
-            parse_mobile_connect_request(invalid_url),
+    #[test]
+    fn parse_url_missing_query_param() {
+        let missing_param_url = format!(
+            "{}://?sessionId={}&origin={}",
+            APP_SCHEME, SESSION_ID, ORIGIN
+        );
+        let result = parse_mobile_connect_request(missing_param_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_invalid_url() {
+        let invalid_url = "invalid_url";
+        let result = parse_mobile_connect_request(invalid_url);
+        assert_eq!(
+            result,
             Err(CommonError::RadixConnectMobileInvalidRequestUrl {
                 bad_value: invalid_url.to_owned(),
             })
         );
+    }
 
-        pretty_assertions::assert_eq!(
-            parse_mobile_connect_request(invalid_scheme),
-            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
-                bad_value: invalid_scheme.to_owned(),
-            })
+    #[test]
+    fn parse_url_with_invalid_request() {
+        let invalid_request_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request=invalid_request&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
         );
+        let result = parse_mobile_connect_request(invalid_request_url);
+        assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestFormat)
+        );
+    }
+
+    #[test]
+    fn parse_url_with_invalid_session_id() {
+        let invalid_session_id_url = format!(
+            "{}://?sessionId=invalid_session_id&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(invalid_session_id_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidSessionID { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_with_invalid_public_key() {
+        let invalid_public_key_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey=invalid_public_key&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(invalid_public_key_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::InvalidKeyAgreementPublicKeyFromHex { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_with_invalid_signature() {
+        let invalid_signature_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature=invalid_signature&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(invalid_signature_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::InvalidEd25519SignatureFromString { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_with_invalid_identity_key() {
+        let invalid_identity_key_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity=invalid_identity_key",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE
+        );
+        let result = parse_mobile_connect_request(invalid_identity_key_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::InvalidEd25519PublicKeyFromString { .. })
+        ));
     }
 }

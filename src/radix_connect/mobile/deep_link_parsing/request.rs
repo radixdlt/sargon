@@ -54,7 +54,7 @@ impl HasSampleValues for RadixConnectMobileRequest {
         RadixConnectMobileRequest::new(
             SessionID::sample(),
             DappOrigin::sample_other(),
-            KeyAgreementPublicKey::sample(),
+            KeyAgreementPublicKey::sample_other(),
             Ed25519PublicKey::sample_other(),
             DappDefinitionAddress::sample(),
             Ed25519Signature::sample(),
