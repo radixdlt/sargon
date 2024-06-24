@@ -181,6 +181,12 @@ mod tests {
         pretty_assertions::assert_eq!(result, Ok(expected_request));
 
         let parsed_request = result.unwrap();
+        let expected_interaction =
+            DappToWalletInteractionUnvalidated::new_from_json_bytes(
+                URL_SAFE_NO_PAD.decode(REQUEST).unwrap(),
+            )
+            .unwrap();
+        assert_eq!(parsed_request.interaction, expected_interaction);
         assert_eq!(parsed_request.session_id.to_string(), SESSION_ID);
         assert_eq!(parsed_request.origin.to_string(), ORIGIN);
         assert_eq!(parsed_request.public_key.to_hex(), PUBLIC_KEY);
