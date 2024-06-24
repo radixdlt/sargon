@@ -19,6 +19,21 @@ impl From<TokenDefinitionMetadata>
     for ScryptoModuleConfig<ScryptoMetadataInit>
 {
     fn from(value: TokenDefinitionMetadata) -> Self {
+        let resource_address = ResourceAddress::sample_stokenet_nft_abandon();
+        let non_fungible_local_id = NonFungibleLocalId::Integer { value: 1 };
+        let non_fungible_local_id_other =
+            NonFungibleLocalId::Integer { value: 2 };
+        let non_fungible_resource_address =
+            NonFungibleResourceAddress::new(resource_address).unwrap();
+        let non_fungible_global_id = NonFungibleGlobalId::new(
+            non_fungible_resource_address,
+            non_fungible_local_id.clone(),
+        );
+        let non_fungible_global_id_other = NonFungibleGlobalId::new(
+            non_fungible_resource_address,
+            non_fungible_local_id_other.clone(),
+        );
+
         let map = BTreeMap::<String, ScryptoMetadataValue>::from([
             (
                 MetadataKey::Name.to_string(),
@@ -41,7 +56,7 @@ impl From<TokenDefinitionMetadata>
                 ScryptoMetadataValue::StringArray(value.tags),
             ),
             (
-                "extra_String".to_string(),
+                "extra_string".to_string(),
                 ScryptoMetadataValue::String("foo bar".to_string()),
             ),
             ("extra_bool".to_string(), ScryptoMetadataValue::Bool(true)),
@@ -51,142 +66,142 @@ impl From<TokenDefinitionMetadata>
             ("extra_i32".to_string(), ScryptoMetadataValue::I32(32)),
             ("extra_i64".to_string(), ScryptoMetadataValue::I64(64)),
             (
-                "extra_Decimal".to_string(),
+                "extra_decimal".to_string(),
                 ScryptoMetadataValue::Decimal(Decimal::eight().into()),
             ),
             (
-                "extra_GlobalAddress".to_string(),
+                "extra_global_address".to_string(),
                 ScryptoMetadataValue::GlobalAddress(GlobalAddress::from(
                     AccountAddress::sample(),
                 )),
             ),
             (
-                "extra_PublicKey".to_string(),
+                "extra_public_key".to_string(),
                 ScryptoMetadataValue::PublicKey(PublicKey::sample().into()),
             ),
             (
-                "extra_NonFungibleGlobalId".to_string(),
+                "extra_non_fungible_global_id".to_string(),
                 ScryptoMetadataValue::NonFungibleGlobalId(
-                    NonFungibleGlobalId::sample().into(),
+                    non_fungible_global_id.clone().into(),
                 ),
             ),
             (
-                "extra_NonFungibleLocalId".to_string(),
+                "extra_non_fungible_local_id".to_string(),
                 ScryptoMetadataValue::NonFungibleLocalId(
-                    NonFungibleLocalId::sample().into(),
+                    non_fungible_local_id.clone().into(),
                 ),
             ),
             (
-                "extra_Instant".to_string(),
+                "extra_instant".to_string(),
                 ScryptoMetadataValue::Instant(Instant::new(1891)),
             ),
             (
-                "extra_Url".to_string(),
+                "extra_url".to_string(),
                 ScryptoMetadataValue::Url(ScryptoUncheckedUrl::of(
                     "https://radixdlt.com",
                 )),
             ),
             (
-                "extra_Origin".to_string(),
+                "extra_origin".to_string(),
                 ScryptoMetadataValue::Origin(UncheckedOrigin::of(
                     "https://radixdlt.com",
                 )),
             ),
             (
-                "extra_PublicKeyHash".to_string(),
+                "extra_public_key_hash".to_string(),
                 ScryptoMetadataValue::PublicKeyHash(
                     PublicKeyHash::sample().into(),
                 ),
             ),
             (
-                "extra_StringArray".to_string(),
+                "extra_string_array".to_string(),
                 ScryptoMetadataValue::StringArray(vec![
                     "foo".to_string(),
                     "bar".to_string(),
                 ]),
             ),
             (
-                "extra_BoolArray".to_string(),
+                "extra_bool_array".to_string(),
                 ScryptoMetadataValue::BoolArray(vec![true, false]),
             ),
             (
-                "extra_U8Array".to_string(),
+                "extra_u8_array".to_string(),
                 ScryptoMetadataValue::U8Array(vec![8, 9, 10, 11]),
             ),
             (
-                "extra_U32Array".to_string(),
+                "extra_u32_array".to_string(),
                 ScryptoMetadataValue::U32Array(vec![32, 33, 34, 35]),
             ),
             (
-                "extra_U64Array".to_string(),
+                "extra_u64_array".to_string(),
                 ScryptoMetadataValue::U64Array(vec![64, 65, 66, 67]),
             ),
             (
-                "extra_I32Array".to_string(),
+                "extra_i32_array".to_string(),
                 ScryptoMetadataValue::I32Array(vec![32, 33, 34, 35]),
             ),
             (
-                "extra_I64Array".to_string(),
+                "extra_i64_array".to_string(),
                 ScryptoMetadataValue::I64Array(vec![64, 65, 66, 67]),
             ),
             (
-                "extra_DecimalArray".to_string(),
+                "extra_decimal_array".to_string(),
                 ScryptoMetadataValue::DecimalArray(vec![
                     Decimal::one().into(),
                     Decimal::two().into(),
                 ]),
             ),
             (
-                "extra_GlobalAddressArray".to_string(),
+                "extra_global_address_array".to_string(),
                 ScryptoMetadataValue::GlobalAddressArray(vec![
-                    GlobalAddress::from(AccountAddress::sample()),
-                    GlobalAddress::from(AccountAddress::sample_other()),
+                    GlobalAddress::from(AccountAddress::sample_stokenet()),
+                    GlobalAddress::from(AccountAddress::sample_stokenet_other()),
                 ]),
             ),
             (
-                "extra_PublicKeyArray".to_string(),
+                "extra_public_key_array".to_string(),
                 ScryptoMetadataValue::PublicKeyArray(vec![
                     PublicKey::sample().into(),
                     PublicKey::sample_other().into(),
                 ]),
             ),
             (
-                "extra_NonFungibleGlobalIdArray".to_string(),
+                "extra_non_fungible_global_id_array".to_string(),
                 ScryptoMetadataValue::NonFungibleGlobalIdArray(vec![
-                    NonFungibleGlobalId::sample().into(),
-                    NonFungibleGlobalId::sample_other().into(),
+                    non_fungible_global_id.clone().into(),
+                    non_fungible_global_id_other.clone().into(),
                 ]),
             ),
             (
-                "extra_NonFungibleLocalIdArray".to_string(),
+                "extra_non_fungible_local_id_array".to_string(),
                 ScryptoMetadataValue::NonFungibleLocalIdArray(vec![
-                    NonFungibleLocalId::sample().into(),
-                    NonFungibleLocalId::sample_other().into(),
+                    non_fungible_local_id.clone().into(),
+                    non_fungible_local_id_other.clone().into(),
                 ]),
             ),
             (
-                "extra_InstantArray".to_string(),
+                "extra_instant_array".to_string(),
                 ScryptoMetadataValue::InstantArray(vec![
                     Instant::new(5),
                     Instant::new(1891),
                 ]),
             ),
             (
-                "extra_UrlArray".to_string(),
+                "extra_url_array".to_string(),
                 ScryptoMetadataValue::UrlArray(vec![
                     ScryptoUncheckedUrl::of("https://radixdlt.com"),
                     ScryptoUncheckedUrl::of("https://ociswap.com"),
                 ]),
             ),
             (
-                "extra_OriginArray".to_string(),
+                "extra_origin_array".to_string(),
                 ScryptoMetadataValue::OriginArray(vec![
                     UncheckedOrigin::of("https://radixdlt.com"),
                     UncheckedOrigin::of("https://ociswap.com"),
                 ]),
             ),
             (
-                "extra_PublicKeyHashArray".to_string(),
+                "extra_public_key_hash_array".to_string(),
                 ScryptoMetadataValue::PublicKeyHashArray(vec![
                     PublicKeyHash::sample().into(),
                     PublicKeyHash::sample_other().into(),

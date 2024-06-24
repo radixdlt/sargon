@@ -86,11 +86,10 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
             oneIn(metadata: \.description)
             oneIn(metadata: \.symbol)
             oneOf(initialSupply.formattedPlain(locale: .test))
-            oneOf(accountAddress.address)
         }
 		// We are not testing with AccountAddress.sampleValues since sampleMainnet & sampleMainnetOther are used
 		// to build the prefilled the dummy metadata extra fields (so they will appear more than once in the manifest).
-		[AccountAddress.sampleStokenet, .sampleStokenetOther].forEach(doTest)
+		AccountAddress.sampleValues.forEach(doTest)
     }
 	
 	func test_create_single_fungible_token() {
