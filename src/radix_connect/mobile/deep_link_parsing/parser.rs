@@ -407,7 +407,7 @@ mod tests {
             APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, SIGNATURE, IDENTITY_PUBLIC_KEY
         );
         let result =
-            parse_mobile_connect_request(&invalid_dapp_definition_address_url);
+            parse_mobile_connect_request(invalid_dapp_definition_address_url);
         assert!(matches!(
             result,
             Err(CommonError::FailedToDecodeAddressFromBech32 { .. })

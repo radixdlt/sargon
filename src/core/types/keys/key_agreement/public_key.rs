@@ -113,10 +113,10 @@ impl HasSampleValues for KeyAgreementPublicKey {
 impl KeyAgreementPublicKey {
     /// A sample used to facilitate unit tests.
     ///
-    /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
+    /// `8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10`
     pub fn sample_alice() -> Self {
         Self::from_hex(
-            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
                 .to_owned(),
         )
         .unwrap()
@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn from_hex() {
         assert_eq!(
-            SUT::from_hex("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42".to_owned()),
+            SUT::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned()),
             Ok(SUT::sample())
         );
     }
@@ -164,7 +164,7 @@ mod tests {
     fn to_hex() {
         assert_eq!(
             SUT::sample().to_hex(),
-            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
         );
     }
 
@@ -173,9 +173,9 @@ mod tests {
         assert_eq!(
             SUT::sample().to_bytes(),
             vec![
-                131, 63, 230, 36, 9, 35, 123, 157, 98, 236, 119, 88, 117, 32,
-                145, 30, 154, 117, 156, 236, 29, 25, 117, 91, 125, 169, 1, 185,
-                109, 202, 61, 66
+                134, 121, 188, 31, 227, 33, 11, 44, 232, 71, 147, 102, 139, 5,
+                33, 143, 220, 76, 34, 11, 192, 83, 135, 183, 210, 172, 13, 76,
+                123, 124, 93, 16
             ]
         );
     }
@@ -183,7 +183,7 @@ mod tests {
     #[test]
     fn from_str() {
         assert_eq!(
-            SUT::from_str("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"),
+            SUT::from_str("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"),
             Ok(SUT::sample())
         );
     }
@@ -192,19 +192,24 @@ mod tests {
     fn try_from_vec() {
         assert_eq!(
             SUT::try_from(vec![
-                131, 63, 230, 36, 9, 35, 123, 157, 98, 236, 119, 88, 117, 32,
-                145, 30, 154, 117, 156, 236, 29, 25, 117, 91, 125, 169, 1, 185,
-                109, 202, 61, 66
+                134, 121, 188, 31, 227, 33, 11, 44, 232, 71, 147, 102, 139, 5,
+                33, 143, 220, 76, 34, 11, 192, 83, 135, 183, 210, 172, 13, 76,
+                123, 124, 93, 16
             ]),
             Ok(SUT::sample())
         );
     }
 
     #[test]
+    fn from_key_agreement_private_key() {
+        assert_eq!(SUT::from(KeyAgreementPrivateKey::sample()), SUT::sample());
+    }
+
+    #[test]
     fn sample() {
         assert_eq!(
             SUT::sample().to_hex(),
-            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
         );
     }
 
@@ -250,7 +255,7 @@ mod tests {
     fn json_roundrip() {
         assert_json_value_eq_after_roundtrip(
             &SUT::sample(),
-            json!("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+            json!("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10")
         );
     }
 }
