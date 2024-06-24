@@ -539,6 +539,12 @@ pub enum CommonError {
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
     RadixConnectMobileInvalidRequestFormat = 10150,
+
+    #[error("Deferred Deep Link invalid deep link value format")]
+    DeferredDeepLinkInvalidValueFormat = 10151,
+
+    #[error("Deferred Deep Link decoding failed")]
+    DeferredDeepLinkDecodingFailed = 10152,
 }
 
 #[uniffi::export]
