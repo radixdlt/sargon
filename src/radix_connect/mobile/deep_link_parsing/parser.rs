@@ -118,7 +118,7 @@ mod tests {
         "df856ce8d64bd59aca1bec03584513c49e635f350ff6a312021854d62d54171c";
     const IDENTITY_PUBLIC_KEY: &str =
         "2e39af5c6905bde9825cd7451b0b6361664ac3a111fcdd10334e5fab6ced9fdf";
-    const REQUEST: &str = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXRoIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiJkYTNlYzhjMjU5MDliNTc3NTlmMTc2ODkwYWU2Mzg1YTRjZTI4NGRjMTI4ZTU2ODAyNmU2ZjIwMWQ5ZDBlNGFlIn0sIm9uZ29pbmdBY2NvdW50cyI6eyJudW1iZXJPZkFjY291bnRzIjp7InF1YW50aWZpZXIiOiJhdExlYXN0IiwicXVhbnRpdHkiOjF9fSwicmVzZXQiOnsiYWNjb3VudHMiOnRydWUsInBlcnNvbmFEYXRhIjpmYWxzZX19LCJpbnRlcmFjdGlvbklkIjoiNzdjZmIzOGYtNWIxMS00YThmLWJlNWEtMzk4NTBiZWQ4M2FkIiwibWV0YWRhdGEiOnsidmVyc2lvbiI6MiwiZEFwcERlZmluaXRpb25BZGRyZXNzIjoiYWNjb3VudF90ZHhfMl8xMngzcm43dHFxcW0zd2d1ejZrbWc1Znk3c2FmOHY5Mmx0NXh1d2duNmtnaDh6YWVqbGY4MGNlIiwibmV0d29ya0lkIjoyLCJvcmlnaW4iOiJodHRwczovL3JhZHF1ZXN0LWRldi5yZHgtd29ya3MtbWFpbi5leHRyYXRvb2xzLndvcmtzIn19&signature=25f0c7741c586666f83e610b05e90a819081c4ff013b05e2ac633e1097f5f5261926b34eaf8cbf3cb7087389720ff8fd4b35b6d3c8a485441bdc3f1818fb0403";
+    const REQUEST: &str = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXRoIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiJkYTNlYzhjMjU5MDliNTc3NTlmMTc2ODkwYWU2Mzg1YTRjZTI4NGRjMTI4ZTU2ODAyNmU2ZjIwMWQ5ZDBlNGFlIn0sIm9uZ29pbmdBY2NvdW50cyI6eyJudW1iZXJPZkFjY291bnRzIjp7InF1YW50aWZpZXIiOiJhdExlYXN0IiwicXVhbnRpdHkiOjF9fSwicmVzZXQiOnsiYWNjb3VudHMiOnRydWUsInBlcnNvbmFEYXRhIjpmYWxzZX19LCJpbnRlcmFjdGlvbklkIjoiNzdjZmIzOGYtNWIxMS00YThmLWJlNWEtMzk4NTBiZWQ4M2FkIiwibWV0YWRhdGEiOnsidmVyc2lvbiI6MiwiZEFwcERlZmluaXRpb25BZGRyZXNzIjoiYWNjb3VudF90ZHhfMl8xMngzcm43dHFxcW0zd2d1ejZrbWc1Znk3c2FmOHY5Mmx0NXh1d2duNmtnaDh6YWVqbGY4MGNlIiwibmV0d29ya0lkIjoyLCJvcmlnaW4iOiJodHRwczovL3JhZHF1ZXN0LWRldi5yZHgtd29ya3MtbWFpbi5leHRyYXRvb2xzLndvcmtzIn19";
     const DAPP_DEFINITION_ADDRESS: &str =
         "account_tdx_2_12x3rn7tqqqm3wguz6kmg5fy7saf8v92lt5xuwgn6kgh8zaejlf80ce";
     const SIGNATURE: &str = "884f1ce51dd815c527a31caf77cb2af1c683c41769f3b96e2dc6ef6bd7f786d8db0c48119585a4b98a6b74848402e8f86e33bb3e8de2dceb8338d707df3b6a03";
@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn parse_url_with_invalid_scheme() {
         let invalid_scheme_url = format!(
-            "invalid_scheme://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            "invalidScheme://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
             SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
         );
         let result = parse_mobile_connect_request(invalid_scheme_url);
@@ -282,5 +282,96 @@ mod tests {
             result,
             Err(CommonError::InvalidEd25519PublicKeyFromString { .. })
         ));
+    }
+
+    #[test]
+    fn parse_url_missing_session_id() {
+        let missing_session_id_url = format!(
+            "{}://?origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(&missing_session_id_url);
+        assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: missing_session_id_url.to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn parse_url_missing_origin() {
+        let missing_origin_url = format!(
+            "{}://?sessionId={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(&missing_origin_url);
+        assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: missing_origin_url.to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn parse_url_missing_interaction() {
+        let missing_interaction_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&dAppDefinitionAddress={}&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, DAPP_DEFINITION_ADDRESS, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(&missing_interaction_url);
+        assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: missing_interaction_url.to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn parse_url_missing_dapp_definition_address() {
+        let missing_dapp_definition_address_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&signature={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, SIGNATURE, IDENTITY_PUBLIC_KEY
+        );
+        let result =
+            parse_mobile_connect_request(&missing_dapp_definition_address_url);
+        assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: missing_dapp_definition_address_url.to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn parse_url_missing_signature() {
+        let missing_signature_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&identity={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, IDENTITY_PUBLIC_KEY
+        );
+        let result = parse_mobile_connect_request(&missing_signature_url);
+        pretty_assertions::assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: missing_signature_url.to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn parse_url_missing_identity() {
+        let missing_identity_url = format!(
+            "{}://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}",
+            APP_SCHEME, SESSION_ID, ORIGIN, PUBLIC_KEY, REQUEST, DAPP_DEFINITION_ADDRESS, SIGNATURE
+        );
+        let result = parse_mobile_connect_request(&missing_identity_url);
+        assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: missing_identity_url.to_owned(),
+            })
+        );
     }
 }
