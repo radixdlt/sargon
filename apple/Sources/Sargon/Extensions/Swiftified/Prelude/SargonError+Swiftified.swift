@@ -20,7 +20,7 @@ extension SargonError: CustomStringConvertible {
 extension SargonError: LocalizedError {
 	public var errorDescription: String? {
 		let errorCodeFormatted = "Error code: \(errorCode)"
-		let errorMessageFormatted: String? = true ? "Error message: \(errorMessage)" : nil
+		let errorMessageFormatted: String? = isSafeToShowErrorMessageFromError(error: self) ? "Error message: \(errorMessage)" : nil
 		return [errorCodeFormatted, errorMessageFormatted]
 					.compactMap { $0 }
 					.joined(separator: "\n")
