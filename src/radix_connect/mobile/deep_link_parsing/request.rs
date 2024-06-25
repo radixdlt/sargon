@@ -64,11 +64,8 @@ impl HasSampleValues for RadixConnectMobileRequest {
 }
 
 impl RadixConnectMobileRequest {
-    pub fn verify_request_signature(
-        &self,
-        interaction_id: &WalletInteractionId,
-    ) -> Result<()> {
-        let message = self.message_for_signature(interaction_id);
+    pub fn verify_request_signature(&self) -> Result<()> {
+        let message = self.message_for_signature();
         self.verify_message_signature(&message)
     }
 
@@ -84,10 +81,8 @@ impl RadixConnectMobileRequest {
         }
     }
 
-    fn message_for_signature(
-        &self,
-        interaction_id: &WalletInteractionId,
-    ) -> Hash {
+    fn message_for_signature(&self) -> Hash {
+        let interaction_id = self.interaction.interaction_id.clone();
         let length_of_dapp_def_address =
             self.dapp_definition_address.address().len();
         let length_of_dapp_def_address_hex =
@@ -144,7 +139,7 @@ mod tests {
         );
 
         let expected_message = Hash::from(Exactly32Bytes::from_hex("29cdf41222be5236c5fefe341955083a25a7275e54a6ca1565d7571064792ace").unwrap());
-        let message = request.message_for_signature(&interaction_id);
+        let message = request.message_for_signature();
         pretty_assertions::assert_eq!(message, expected_message);
 
         pretty_assertions::assert_eq!(
@@ -153,16 +148,8 @@ mod tests {
         );
 
         pretty_assertions::assert_eq!(
-            request.verify_request_signature(&interaction_id),
+            request.verify_request_signature(),
             Ok(()),
-        );
-
-        let invalid_interaction_id =
-            WalletInteractionId::from_str("invalid").unwrap();
-
-        pretty_assertions::assert_eq!(
-            request.verify_request_signature(&invalid_interaction_id),
-            Err(CommonError::RadixConnectMobileInvalidDappSignature)
         )
     }
 }
