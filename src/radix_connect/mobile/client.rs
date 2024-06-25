@@ -59,6 +59,9 @@ impl RadixConnectMobile {
         // Try to parse the deep link ur to RadixConnectMobileRequest
         let request = parse_mobile_connect_request(url)?;
 
+        // TODO: Move in parse_mobile_connect_request
+        request.verify_request_signature()?;
+
         // A session might be already established for the given session_id.
         let existing_session = self.load_session(request.session_id).await.ok();
         // Each new session requires origin validation.
