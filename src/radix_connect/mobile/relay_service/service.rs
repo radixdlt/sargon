@@ -14,7 +14,8 @@ pub trait WalletInteractionTransport: Send + Sync {
 }
 
 /// The service that interacts with the Radix Connect Relay.
-/// API docs at https://github.com/radixdlt/radix-connect-relay?tab=readme-ov-file#api-v1
+/// API docs at https://github.com/radixdlt/radix-connect-relay?tab=readme-ov-file#api-v1.
+/// For now this implements only the wallet interaction response endpoint.
 pub struct Service {
     pub http_client: HttpClient,
     pub encryption_scheme: EncryptionScheme,

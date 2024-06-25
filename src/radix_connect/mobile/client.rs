@@ -10,11 +10,11 @@ use std::sync::RwLock;
 /// The Radix Connect Mobile client that handles the interaction with dApps on mobile through deepLinks.
 #[derive(uniffi::Object)]
 pub struct RadixConnectMobile {
-    /// The Radix Connect Relay service to be used to communicate with dApps.
+    /// The transport to be used to send back the response for the WalletInteraction
     wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
-    /// The storage to be used to store session data.
+    /// The storage to be used to store the sessions established with dApps.
     session_storage: Arc<dyn SessionStorage>,
-    /// The new sessions that have been created and are waiting to be validated on dApp side.
+    /// The new sessions that have been created and are waiting to be by the users.
     /// Once the session is validated, it will be moved to the secure storage.
     /// Validation consists in verifying the origin of the session.
     new_sessions: RwLock<HashMap<SessionID, Session>>,
@@ -35,8 +35,6 @@ impl RadixConnectMobile {
 
 #[uniffi::export]
 impl RadixConnectMobile {
-    // RadixConnectMobile should require a NetworkAntenna and a SecureStorage from the Wallet.
-    // The internal components, such as RadixConnectRelayService will be created by the RadixConnectMobile.
     #[uniffi::constructor]
     pub fn new(
         network_antenna: Arc<dyn NetworkAntenna>,
@@ -78,6 +76,7 @@ impl RadixConnectMobile {
             }
         }
 
+        // Return request to the Wallet to be handled by the user.
         Ok(RadixConnectMobileSessionRequest::new(
             request.session_id,
             request.interaction,
@@ -110,6 +109,7 @@ impl RadixConnectMobile {
 
         let is_success_response = wallet_response.response.is_success();
 
+        // Send the wallet interaction response to the dApp through the transport.
         self.wallet_interactions_transport
             .send_wallet_interaction_response(
                 session.clone(),
@@ -127,23 +127,6 @@ impl RadixConnectMobile {
 }
 
 impl RadixConnectMobile {
-    async fn load_session(&self, session_id: SessionID) -> Result<Session> {
-        let session_bytes =
-            self.session_storage.load_session(session_id).await?.ok_or(
-                CommonError::RadixConnectMobileSessionNotFound { session_id },
-            )?;
-        deserialize_from_slice(session_bytes.as_slice())
-    }
-
-    async fn save_session(&self, session: Session) -> Result<()> {
-        let bytes = serialize(&session)?;
-        self.session_storage
-            .save_session(session.id, bytes.into())
-            .await
-    }
-}
-
-impl RadixConnectMobile {
     const HKDF_KEY_DERIVATION_INFO: &'static str = "RCfM";
 
     fn create_in_flight_session(
@@ -154,7 +137,7 @@ impl RadixConnectMobile {
         let wallet_private_key = KeyAgreementPrivateKey::generate()?;
         let wallet_public_key = wallet_private_key.public_key();
 
-        // 2. Generate secret that is shared by the Wallet and the dApp
+        // 2. Generate the secret that is shared by the Wallet and the dApp
         let shared_secret = wallet_private_key
             .shared_secret_from_key_agreement(&request.public_key);
 
@@ -182,5 +165,22 @@ impl RadixConnectMobile {
         });
 
         Ok(())
+    }
+}
+
+impl RadixConnectMobile {
+    async fn load_session(&self, session_id: SessionID) -> Result<Session> {
+        let session_bytes =
+            self.session_storage.load_session(session_id).await?.ok_or(
+                CommonError::RadixConnectMobileSessionNotFound { session_id },
+            )?;
+        deserialize_from_slice(session_bytes.as_slice())
+    }
+
+    async fn save_session(&self, session: Session) -> Result<()> {
+        let bytes = serialize(&session)?;
+        self.session_storage
+            .save_session(session.id, bytes.into())
+            .await
     }
 }

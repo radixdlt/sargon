@@ -2,13 +2,33 @@ use super::session_id::SessionID;
 use super::session_origin::SessionOrigin;
 use crate::prelude::*;
 
+/// A session established between a dApp and the Wallet.     
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct Session {
+    /// Uniquely identifies a session. This value is known to both the dApp and the Wallet.
+    /// The dApp will send requests by specifying a given session_id and the Wallet will respond by uploading
+    /// the response to the Radix Relay Server for the exact same session_id.
+    /// A dApp my have multiple session ids across different browser.
     pub id: SessionID,
+    /// The origin of the dApp this session is for. It is used first to inform users where a request comes from,
+    /// and second to validate any subsequent request in a session. Once a session is established, for the same
+    /// session_id the origin needs to be the same.
     pub origin: SessionOrigin,
+    /// The encryption key shared by both the dApp and the Wallet, that allows the dApp to decrypt the responses sent
+    /// by the Wallet over the Relay Server. The encryption key is unique per session id and is created after performing a Diffie Hellman key exchange.
     pub encryption_key: SymmetricKey,
+    /// The dapp public key sent over with the request that was used to generate the encryption key.
+    /// The main purpose of having this stored in the session, is verify the validity of any subsequent dApp requests
+    /// for a given session. It is expected that this public should not change after a session is established,
+    /// if it happens to be the case, then most likely a bad actor is trying to hijack the session - the Wallet will reject such requests.
     pub dapp_public_key: KeyAgreementPublicKey,
+    /// The dapp identity public key that was sent over to verify the request signature.
+    /// The main purpose of having this stored in the session, is verify the validity of any subsequent dApp requests
+    /// for a given session. It is expected that this public should not change after a session is established,
+    /// if it happens to be the case, then most likely a bad actor is trying to hijack the session - the Wallet will reject such requests.
     pub dapp_identity_public_key: Ed25519PublicKey,
+    /// The wallet's public key used to generate the encryption_key.
+    /// It is kept in the session and then send along with all of the Wallet's request so that the dApp can regenerate the encryption key if needed.
     pub wallet_public_key: KeyAgreementPublicKey,
 }
 
