@@ -23,7 +23,7 @@ pub struct Session {
     /// if it happens to be the case, then most likely a bad actor is trying to hijack the session - the Wallet will reject such requests.
     pub dapp_public_key: KeyAgreementPublicKey,
     /// The dapp identity public key that was sent over to verify the request signature.
-    /// The main purpose of having this stored in the session, is verify the validity of any subsequent dApp requests
+    /// The main purpose of having this stored in the session, is to verify the validity of any subsequent dApp requests
     /// for a given session. It is expected that this public should not change after a session is established,
     /// if it happens to be the case, then most likely a bad actor is trying to hijack the session - the Wallet will reject such requests.
     pub dapp_identity_public_key: Ed25519PublicKey,
@@ -63,6 +63,10 @@ impl Session {
 
         if self.dapp_public_key != request.public_key {
             return Err(CommonError::RadixConnectMobileDappPublicKeyMismatch);
+        }
+
+        if self.origin != SessionOrigin::WebDapp(request.origin.clone()) {
+            return Err(CommonError::RadixConnectMobileDappOriginMismatch);
         }
 
         Ok(())
@@ -120,22 +124,29 @@ mod tests {
             .validate_request(&RadixConnectMobileRequest::sample())
             .is_ok());
 
-        let mut wrong_dapp_public_key_response =
+        let mut wrong_dapp_public_key_request =
             RadixConnectMobileRequest::sample();
-        wrong_dapp_public_key_response.public_key =
+        wrong_dapp_public_key_request.public_key =
             KeyAgreementPublicKey::sample_other();
-        assert_eq!(
-            sut.validate_request(&wrong_dapp_public_key_response),
+        pretty_assertions::assert_eq!(
+            sut.validate_request(&wrong_dapp_public_key_request),
             Err(CommonError::RadixConnectMobileDappPublicKeyMismatch)
         );
 
-        let mut wrong_dapp_identity_response =
+        let mut wrong_dapp_identity_request =
             RadixConnectMobileRequest::sample();
-        wrong_dapp_identity_response.identity_public_key =
+        wrong_dapp_identity_request.identity_public_key =
             Ed25519PublicKey::sample_other();
-        assert_eq!(
-            sut.validate_request(&wrong_dapp_identity_response),
+        pretty_assertions::assert_eq!(
+            sut.validate_request(&wrong_dapp_identity_request),
             Err(CommonError::RadixConnectMobileDappIdentityMismatch)
+        );
+
+        let mut wrong_dapp_origin_request = RadixConnectMobileRequest::sample();
+        wrong_dapp_origin_request.origin = DappOrigin::sample_other();
+        pretty_assertions::assert_eq!(
+            sut.validate_request(&wrong_dapp_origin_request),
+            Err(CommonError::RadixConnectMobileDappOriginMismatch)
         );
     }
 }
