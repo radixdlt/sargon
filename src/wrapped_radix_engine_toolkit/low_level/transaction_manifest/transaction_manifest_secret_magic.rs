@@ -26,14 +26,11 @@ impl TransactionManifestSecretMagic {
 
 impl HasSampleValues for TransactionManifestSecretMagic {
     fn sample() -> Self {
-        Self::new(Instructions::sample_mainnet(), Blobs::sample())
+        Self::new(Instructions::sample_mainnet(), Blobs::default())
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            Instructions::sample_simulator_other(),
-            Blobs::sample_other(),
-        )
+        Self::new(Instructions::sample_simulator_other(), Blobs::default())
     }
 }
 

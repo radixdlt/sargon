@@ -49,6 +49,7 @@ pub fn parse_mobile_connect_request(
     let request_string =
         get_key(url, &query_parameters, CONNECT_URL_PARAM_INTERACTION)?;
 
+    // The dApp sends WalletInteraction as base64_url encoded in the deepLink url.
     let decoded_request = URL_SAFE_NO_PAD
         .decode(request_string.as_str())
         .map_err(|_| CommonError::RadixConnectMobileInvalidRequestFormat)?;

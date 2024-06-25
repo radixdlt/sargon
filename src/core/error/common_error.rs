@@ -534,11 +534,16 @@ pub enum CommonError {
     #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
     RadixConnectMobileDappIdentityMismatch = 10148,
 
-    #[error("Radix Connect Mobile dApp sent an invalid signature")]
-    RadixConnectMobileInvalidDappSignature = 10149,
+    #[error(
+        "Radix Connect Mobile dApp origin not match the session's dApp origin"
+    )]
+    RadixConnectMobileDappOriginMismatch = 10149,
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
-    RadixConnectMobileInvalidRequestFormat = 10150,
+    RadixConnectMobileInvalidDappSignature = 10150,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidRequestFormat = 10151,
 }
 
 #[uniffi::export]
