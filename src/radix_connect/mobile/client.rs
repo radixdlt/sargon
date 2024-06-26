@@ -483,14 +483,6 @@ mod tests {
             .await
             .unwrap();
 
-        let in_flight_session = sut
-            .new_sessions
-            .read()
-            .unwrap()
-            .get(&request.session_id)
-            .cloned()
-            .unwrap();
-
         // Create a response to be sent back to the dApp
         let interaction_response = WalletToDappInteractionResponse::sample();
         let wallet_response = RadixConnectMobileWalletResponse::new(
