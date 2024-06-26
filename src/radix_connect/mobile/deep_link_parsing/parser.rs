@@ -109,89 +109,76 @@ fn get_key(
 }
 
 #[cfg(test)]
-mod tests {
-    use hex::ToHex;
-    use rand::random;
+#[derive(Deserialize, Clone)]
+pub struct SampleRequestParams {
+    pub session_id: Option<String>,
+    pub origin: Option<String>,
+    pub public_key: Option<String>,
+    pub identity_public_key: Option<String>,
+    pub request: Option<String>,
+    pub dapp_definition_address: Option<String>,
+    pub signature: Option<String>,
+}
 
-    use super::*;
+#[cfg(test)]
+impl SampleRequestParams {
+    pub fn build_base_url_with_scheme(&self, scheme: &str) -> String {
+        let mut params: Vec<String> = Vec::new();
+        if let Some(session_id) = &self.session_id {
+            let str = format!("sessionId={}", session_id);
+            params.push(str);
+        }
 
-    #[derive(Deserialize, Clone)]
-    struct SampleRequestParams {
-        session_id: Option<String>,
-        origin: Option<String>,
-        public_key: Option<String>,
-        identity_public_key: Option<String>,
-        request: Option<String>,
-        dapp_definition_address: Option<String>,
-        signature: Option<String>,
+        if let Some(origin) = &self.origin {
+            let str = format!("origin={}", origin);
+            params.push(str);
+        }
+
+        if let Some(public_key) = &self.public_key {
+            let str = format!("publicKey={}", public_key);
+            params.push(str);
+        }
+
+        if let Some(request) = &self.request {
+            let str = format!("request={}", request);
+            params.push(str);
+        }
+
+        if let Some(dapp_definition_address) = &self.dapp_definition_address {
+            let str =
+                format!("dAppDefinitionAddress={}", dapp_definition_address);
+            params.push(str);
+        }
+
+        if let Some(signature) = &self.signature {
+            let str = format!("signature={}", signature);
+            params.push(str);
+        }
+
+        if let Some(identity_public_key) = &self.identity_public_key {
+            let str = format!("identity={}", identity_public_key);
+            params.push(str);
+        }
+
+        format!("{}://?{}", scheme, params.join("&").to_string())
     }
 
-    impl SampleRequestParams {
-        fn build_base_url_with_scheme(&self, scheme: &str) -> String {
-            let mut params: Vec<String> = Vec::new();
-            if let Some(session_id) = &self.session_id {
-                let str = format!("sessionId={}", session_id);
-                params.push(str);
-            }
-
-            if let Some(origin) = &self.origin {
-                let str = format!("origin={}", origin);
-                params.push(str);
-            }
-
-            if let Some(public_key) = &self.public_key {
-                let str = format!("publicKey={}", public_key);
-                params.push(str);
-            }
-
-            if let Some(request) = &self.request {
-                let str = format!("request={}", request);
-                params.push(str);
-            }
-
-            if let Some(dapp_definition_address) = &self.dapp_definition_address
-            {
-                let str = format!(
-                    "dAppDefinitionAddress={}",
-                    dapp_definition_address
-                );
-                params.push(str);
-            }
-
-            if let Some(signature) = &self.signature {
-                let str = format!("signature={}", signature);
-                params.push(str);
-            }
-
-            if let Some(identity_public_key) = &self.identity_public_key {
-                let str = format!("identity={}", identity_public_key);
-                params.push(str);
-            }
-
-            format!("{}://?{}", scheme, params.join("&").to_string())
-        }
-
-        fn build_base_url(&self) -> String {
-            self.build_base_url_with_scheme(APP_SCHEME)
-        }
-
-        fn new_from_text_vector() -> Self {
-            fixture::<SampleRequestParams>(include_str!(concat!(
-                env!("FIXTURES_VECTOR"),
-                "deep_link_request_params.json"
-            )))
-            .unwrap()
-        }
+    pub fn build_base_url(&self) -> String {
+        self.build_base_url_with_scheme(APP_SCHEME)
     }
 
-    #[test]
-    fn parse_url_into_request() {
-        let request_params = SampleRequestParams::new_from_text_vector();
+    pub fn new_from_text_vector() -> Self {
+        fixture::<SampleRequestParams>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "deep_link_request_params.json"
+        )))
+        .unwrap()
+    }
 
-        let connect_url = request_params.build_base_url();
-        let result = parse_mobile_connect_request(connect_url);
-
-        let expected_interaction = DappToWalletInteractionUnvalidated::new(
+    /// The default interaction that is encoded in the test vector deep_link_request_params.json
+    pub fn test_vector_encoded_interaction(
+    ) -> DappToWalletInteractionUnvalidated {
+        DappToWalletInteractionUnvalidated::new(
             "011cee03-961a-4e55-b69b-6ecad0b068c7".parse().unwrap(),
             DappToWalletInteractionItems::AuthorizedRequest(
                 DappToWalletInteractionAuthorizedRequestItems::new(
@@ -212,10 +199,30 @@ mod tests {
             DappToWalletInteractionMetadataUnvalidated::new(
                 WalletInteractionVersion(2),
                 NetworkID::Stokenet,
-                DappOrigin::from(request_params.origin.clone().unwrap().as_str()),
-                request_params.dapp_definition_address.clone().unwrap().clone(),
+                DappOrigin::from("https://d1vq8n3dnxcyhd.cloudfront.net"),
+                "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe",
             )
-        );
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use hex::ToHex;
+    use rand::random;
+
+    use super::*;
+
+    #[test]
+    fn parse_url_into_request() {
+        let request_params = SampleRequestParams::new_from_text_vector();
+
+        let connect_url = request_params.build_base_url();
+        let result = parse_mobile_connect_request(connect_url);
+
+        let expected_interaction =
+            SampleRequestParams::test_vector_encoded_interaction();
+
         let expected_request = RadixConnectMobileRequest::new(
             request_params.session_id.clone().unwrap().parse().unwrap(),
             DappOrigin::from(request_params.origin.clone().unwrap().as_str()),

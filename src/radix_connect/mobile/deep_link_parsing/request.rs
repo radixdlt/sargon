@@ -82,26 +82,33 @@ impl RadixConnectMobileRequest {
     }
 
     fn message_for_signature(&self) -> Hash {
-        let interaction_id = self.interaction.interaction_id.clone();
-        let length_of_dapp_def_address =
-            self.dapp_definition_address.address().len();
-        let length_of_dapp_def_address_hex =
-            format!("{:x}", length_of_dapp_def_address);
-
-        let message: String = [
-            "C".as_bytes().encode_hex(),
-            interaction_id.0.as_bytes().encode_hex(),
-            length_of_dapp_def_address_hex,
-            self.dapp_definition_address
-                .address()
-                .as_bytes()
-                .encode_hex(),
-            self.origin.0.as_bytes().encode_hex(),
-        ]
-        .concat();
-
-        hash_of(hex_decode(message).unwrap())
+        dapp_message_for_signature(
+            &self.interaction.interaction_id,
+            &self.dapp_definition_address,
+            &self.origin,
+        )
     }
+}
+
+pub fn dapp_message_for_signature(
+    interaction_id: &WalletInteractionId,
+    dapp_definition_address: &DappDefinitionAddress,
+    origin: &DappOrigin,
+) -> Hash {
+    let length_of_dapp_def_address = dapp_definition_address.address().len();
+    let length_of_dapp_def_address_hex =
+        format!("{:x}", length_of_dapp_def_address);
+
+    let message: String = [
+        "C".as_bytes().encode_hex(),
+        interaction_id.0.as_bytes().encode_hex(),
+        length_of_dapp_def_address_hex,
+        dapp_definition_address.address().as_bytes().encode_hex(),
+        origin.0.as_bytes().encode_hex(),
+    ]
+    .concat();
+
+    hash_of(hex_decode(message).unwrap())
 }
 
 #[cfg(test)]

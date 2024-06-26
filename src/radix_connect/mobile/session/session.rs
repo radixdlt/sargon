@@ -57,16 +57,16 @@ impl Session {
         &self,
         request: &RadixConnectMobileRequest,
     ) -> Result<()> {
+        if self.origin != SessionOrigin::WebDapp(request.origin.clone()) {
+            return Err(CommonError::RadixConnectMobileDappOriginMismatch);
+        }
+
         if self.dapp_identity_public_key != request.identity_public_key {
             return Err(CommonError::RadixConnectMobileDappIdentityMismatch);
         }
 
         if self.dapp_public_key != request.public_key {
             return Err(CommonError::RadixConnectMobileDappPublicKeyMismatch);
-        }
-
-        if self.origin != SessionOrigin::WebDapp(request.origin.clone()) {
-            return Err(CommonError::RadixConnectMobileDappOriginMismatch);
         }
 
         Ok(())

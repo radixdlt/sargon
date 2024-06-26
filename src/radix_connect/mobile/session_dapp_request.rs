@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 json_data_convertible!(RadixConnectMobileSessionRequest);
 
-#[derive(Debug, PartialEq, uniffi::Record, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, uniffi::Record)]
 pub struct RadixConnectMobileSessionRequest {
     pub session_id: SessionID,
     pub interaction: DappToWalletInteractionUnvalidated,

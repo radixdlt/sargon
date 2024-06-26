@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, uniffi::Record)]
+#[derive(Debug, PartialEq, Clone, uniffi::Record)]
 pub struct RadixConnectMobileWalletResponse {
     pub session_id: SessionID,
     pub response: WalletToDappInteractionResponse,
