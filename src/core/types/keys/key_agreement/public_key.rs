@@ -15,29 +15,11 @@ use crypto::keys::x25519::PublicKey as X25519PublicKey;
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct KeyAgreementPublicKey {
     pub secret_magic: X25519PublicKey,
-}
-
-uniffi::custom_type!(X25519PublicKey, BagOfBytes);
-
-impl UniffiCustomTypeConverter for X25519PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from_slice(val.as_slice())
-            .map_err(|e| uniffi::deps::anyhow::anyhow!(e.to_string()))
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_bytes().to_vec().into()
-    }
 }
 
 impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {

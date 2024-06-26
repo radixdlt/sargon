@@ -511,9 +511,6 @@ pub enum CommonError {
     )]
     InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10141,
 
-    #[error("Failed to expand HKDF, reason: '{underlying}'")]
-    HkdfExpandFailed { underlying: String } = 10142,
-
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
     RadixConnectMobileSessionNotFound { session_id: SessionID } = 10143,
 
