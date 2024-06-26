@@ -56,4 +56,31 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn json_roundtrip_referrer_and_callback_missing() {
+        let model =
+            SUT::new(DeferredDeepLinkMethod::Desktop, false, None, None);
+        let json = r#"
+        {
+            "method": "desktop",
+            "radquest": false
+        }
+        "#;
+        assert_eq_after_json_roundtrip(&model, json);
+    }
+
+    #[test]
+    fn json_roundtrip_complete() {
+        let model = SUT::sample();
+        let json = r#"
+        {
+            "method": "mobile",
+            "radquest": true,
+            "dapp_referrer": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
+            "dapp_callback": "https://example.com"
+        }
+        "#;
+        assert_eq_after_json_roundtrip(&model, json);
+    }
 }

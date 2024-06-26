@@ -12,22 +12,28 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Enum,
 )]
+
+/// An enum describing the different cards that Wallet can display after onboarding.
+/// Each card has an associated content and optional action.
 pub enum PostOnboardingCard {
-    /// Get started on Radix with RadQuest, and earn XRD and collectible NFTs.
-    StartRadquest { callback_url: Url },
+    /// Content: "Get started on Radix with RadQuest, and earn XRD and collectible NFTs."
+    /// Action: Redirect user to RadQuest.
+    StartRadquest,
 
-    /// Congratulations! Continue your journey on Radquest!
-    #[display("ContinueRadQuest {:?}", callback_url)]
-    ContinueRadQuest { callback_url: Option<Url> },
+    /// Content: "Congratulations! Continue your journey on Radquest!"
+    /// Action: If `should_redirect`, redirect user to RadQuest. Otherwise, none.
+    ContinueRadQuest { should_redirect: bool },
 
-    /// Now that you’ve got the Radix Wallet, you can continue on with using Gumball!
+    /// Content: "Now that you’ve got the Radix Wallet, you can continue on with using {name}!"
+    /// Action: If `callback_url` is available, redirect user to it. Otherwise, none.
     #[display("Dapp {}, {:?}", name, callback_url)]
     Dapp {
         name: String,
         callback_url: Option<Url>,
     },
 
-    /// To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com.
+    /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
+    /// Action: None
     Connector,
 }
 
@@ -41,17 +47,12 @@ impl Identifiable for PostOnboardingCard {
 
 impl PostOnboardingCard {
     pub fn sample_start_radquest() -> Self {
-        Self::StartRadquest {
-            callback_url: Url::parse("https://gumball-club.radixdlt.com/")
-                .unwrap(),
-        }
+        Self::StartRadquest
     }
 
     pub fn sample_continue_radquest() -> Self {
         Self::ContinueRadQuest {
-            callback_url: Some(
-                Url::parse("https://gumball-club.radixdlt.com/").unwrap(),
-            ),
+            should_redirect: true,
         }
     }
 
