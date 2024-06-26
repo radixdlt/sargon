@@ -59,7 +59,6 @@ impl Ed25519Signature {
     }
 
     pub fn from_hex(hex: String) -> Result<Self> {
-        // We want to ALWAYS go via `try_from(slice: &[u8])` since validates the EC point (`ScryptoEd25519PublicKey` doesn't!)
         Exactly64Bytes::from_str(hex.as_str())
             .map_err(|_| CommonError::InvalidEd25519SignatureFromString {
                 bad_value: hex,
@@ -190,5 +189,10 @@ mod tests {
     #[test]
     fn to_hex() {
         assert_eq!(SUT::sample_other().to_hex(), "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09");
+    }
+
+    #[test]
+    fn from_hex() {
+        assert_eq!(SUT::from_hex("06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".to_owned()), Ok(SUT::sample_other()));
     }
 }
