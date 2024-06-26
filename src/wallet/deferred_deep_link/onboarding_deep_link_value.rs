@@ -2,24 +2,24 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct OnboardingDeepLinkValue {
-    pub dapp_referrer: AccountAddress,
-    pub dapp_callback: String,
     pub method: DeferredDeepLinkMethod,
     pub radquest: bool,
+    pub dapp_referrer: Option<DappDefinitionAddress>,
+    pub dapp_callback: Option<String>,
 }
 
 impl OnboardingDeepLinkValue {
     pub fn new(
-        dapp_referrer: AccountAddress,
-        dapp_callback: impl Into<String>,
         method: DeferredDeepLinkMethod,
         radquest: bool,
+        dapp_referrer: Option<DappDefinitionAddress>,
+        dapp_callback: impl Into<Option<String>>,
     ) -> Self {
         Self {
-            dapp_referrer,
-            dapp_callback: dapp_callback.into(),
             method,
             radquest,
+            dapp_referrer,
+            dapp_callback: dapp_callback.into(),
         }
     }
 }
@@ -27,20 +27,15 @@ impl OnboardingDeepLinkValue {
 impl HasSampleValues for OnboardingDeepLinkValue {
     fn sample() -> Self {
         Self::new(
-            AccountAddress::sample(),
-            "https://example.com",
             DeferredDeepLinkMethod::Mobile,
             true,
+            Some(DappDefinitionAddress::sample()),
+            "https://example.com".to_owned(),
         )
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            AccountAddress::sample_other(),
-            "https://example.com",
-            DeferredDeepLinkMethod::Desktop,
-            false,
-        )
+        Self::new(DeferredDeepLinkMethod::Desktop, false, None, None)
     }
 }
 

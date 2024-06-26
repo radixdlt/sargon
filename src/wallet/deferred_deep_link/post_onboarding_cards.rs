@@ -5,15 +5,15 @@ decl_identified_vec_of!(PostOnboardingCard);
 impl HasSampleValues for PostOnboardingCards {
     fn sample() -> Self {
         Self::from_iter([
-            PostOnboardingCard::sample_radquest_visited(),
+            PostOnboardingCard::sample_start_radquest(),
             PostOnboardingCard::sample_connector(),
         ])
     }
 
     fn sample_other() -> Self {
         Self::from_iter([
+            PostOnboardingCard::sample_continue_radquest(),
             PostOnboardingCard::sample_dapp(),
-            PostOnboardingCard::sample_radquest_not_visited(),
         ])
     }
 }
