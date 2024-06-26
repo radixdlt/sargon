@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
-pub trait RCMSessionStorage: Send + Sync {
+pub trait RadixConnectMobileSessionStorage: Send + Sync {
     async fn save_session(
         &self,
         session_id: SessionID,

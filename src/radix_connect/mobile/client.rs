@@ -14,7 +14,7 @@ pub struct RadixConnectMobile {
     wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
 
     /// The storage to be used to store the sessions established with dApps.
-    session_storage: Arc<dyn RCMSessionStorage>,
+    session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
 
     /// The new sessions that have been created and are waiting to be by the users.
     /// Once the session is validated, it will be moved to the secure storage.
@@ -25,7 +25,7 @@ pub struct RadixConnectMobile {
 impl RadixConnectMobile {
     pub fn init(
         wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
-        session_storage: Arc<dyn RCMSessionStorage>,
+        session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
     ) -> Self {
         Self {
             wallet_interactions_transport,
@@ -40,7 +40,7 @@ impl RadixConnectMobile {
     #[uniffi::constructor]
     pub fn new(
         network_antenna: Arc<dyn NetworkAntenna>,
-        session_storage: Arc<dyn RCMSessionStorage>,
+        session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
     ) -> Self {
         Self::init(
             Arc::new(RelayService::new_with_network_antenna(
@@ -248,7 +248,7 @@ mod tests {
     }
 
     #[async_trait::async_trait]
-    impl RCMSessionStorage for MockSessionStorage {
+    impl RadixConnectMobileSessionStorage for MockSessionStorage {
         async fn save_session(
             &self,
             session_id: SessionID,
