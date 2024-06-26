@@ -12,8 +12,10 @@ use std::sync::RwLock;
 pub struct RadixConnectMobile {
     /// The transport to be used to send back the response for the WalletInteraction
     wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
+
     /// The storage to be used to store the sessions established with dApps.
-    session_storage: Arc<dyn SessionStorage>,
+    session_storage: Arc<dyn RCMSessionStorage>,
+
     /// The new sessions that have been created and are waiting to be by the users.
     /// Once the session is validated, it will be moved to the secure storage.
     /// Validation consists in verifying the origin of the session.
@@ -23,7 +25,7 @@ pub struct RadixConnectMobile {
 impl RadixConnectMobile {
     pub fn init(
         wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
-        session_storage: Arc<dyn SessionStorage>,
+        session_storage: Arc<dyn RCMSessionStorage>,
     ) -> Self {
         Self {
             wallet_interactions_transport,
@@ -38,7 +40,7 @@ impl RadixConnectMobile {
     #[uniffi::constructor]
     pub fn new(
         network_antenna: Arc<dyn NetworkAntenna>,
-        session_storage: Arc<dyn SessionStorage>,
+        session_storage: Arc<dyn RCMSessionStorage>,
     ) -> Self {
         Self::init(
             Arc::new(RelayService::new_with_network_antenna(
@@ -246,7 +248,7 @@ mod tests {
     }
 
     #[async_trait::async_trait]
-    impl SessionStorage for MockSessionStorage {
+    impl RCMSessionStorage for MockSessionStorage {
         async fn save_session(
             &self,
             session_id: SessionID,
