@@ -19,12 +19,12 @@ pub struct Session {
     pub encryption_key: SymmetricKey,
     /// The dapp public key sent over with the request that was used to generate the encryption key.
     /// The main purpose of having this stored in the session, is verify the validity of any subsequent dApp requests
-    /// for a given session. It is expected that this public should not change after a session is established,
+    /// for a given session. It is expected that this public key should not change after a session is established,
     /// if it happens to be the case, then most likely a bad actor is trying to hijack the session - the Wallet will reject such requests.
     pub dapp_public_key: KeyAgreementPublicKey,
     /// The dapp identity public key that was sent over to verify the request signature.
     /// The main purpose of having this stored in the session, is to verify the validity of any subsequent dApp requests
-    /// for a given session. It is expected that this public should not change after a session is established,
+    /// for a given session. It is expected that this public key should not change after a session is established,
     /// if it happens to be the case, then most likely a bad actor is trying to hijack the session - the Wallet will reject such requests.
     pub dapp_identity_public_key: Ed25519PublicKey,
     /// The wallet's public key used to generate the encryption_key.
@@ -90,9 +90,9 @@ impl HasSampleValues for Session {
             SessionID::sample_other(),
             SessionOrigin::sample_other(),
             Exactly32Bytes::sample_other(),
-            KeyAgreementPublicKey::sample(),
-            Ed25519PublicKey::sample(),
-            KeyAgreementPublicKey::sample(),
+            KeyAgreementPublicKey::sample_other(),
+            Ed25519PublicKey::sample_other(),
+            KeyAgreementPublicKey::sample_other(),
         )
     }
 }
