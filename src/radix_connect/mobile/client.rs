@@ -51,6 +51,8 @@ impl RadixConnectMobile {
 
 #[uniffi::export]
 impl RadixConnectMobile {
+    /// Try to parse the deep link and create a RadixConnectMobileRequest.
+    /// This is a stateful operation as it will create an in flight session, that needs to be validated by the user.
     #[uniffi::method]
     pub async fn handle_deep_link(
         &self,
@@ -85,18 +87,22 @@ impl RadixConnectMobile {
         ))
     }
 
+    /// Send the Wallet's response to the dApp.
+    /// This is a stateful operation as it will save the session in the secure storage if the user validated the session.
     #[uniffi::method]
     pub async fn send_dapp_interaction_response(
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
         let session_id = wallet_response.session_id;
+
         // Get the in flight session, if any, that required validation from the user.
+        // Not remove at this stage, as the user might retry the interaction.
         let in_flight_session = self
             .new_sessions
-            .try_write()
+            .read()
             .ok()
-            .and_then(|mut new_sessions| new_sessions.remove(&session_id));
+            .and_then(|sessions| sessions.get(&session_id).cloned());
 
         // Get the existing session, if any.
         let existing_session =
@@ -116,6 +122,10 @@ impl RadixConnectMobile {
                 wallet_response.response,
             )
             .await?;
+
+        _ = self.new_sessions.try_write().map(|mut new_sessions| {
+            new_sessions.remove(&session_id);
+        });
 
         if is_in_flight_session && is_success_response {
             // We do consider a session to be validated once user did send a successful interaction back.
@@ -160,11 +170,14 @@ impl RadixConnectMobile {
         );
 
         // 5. Save the session in memory until validated
-        _ = self.new_sessions.try_write().map(|mut new_sessions| {
-            new_sessions.insert(request.session_id, session);
-        });
-
-        Ok(())
+        self.new_sessions
+            .try_write()
+            .map(|mut new_sessions| {
+                new_sessions.insert(request.session_id, session);
+            })
+            .map_err(|_| {
+                CommonError::RadixConnectMobileFailedToCreateNewSession
+            })
     }
 }
 
@@ -185,79 +198,84 @@ impl RadixConnectMobile {
     }
 }
 
-struct MockWalletInteractionTransport {
-    responses: Arc<Mutex<Vec<(Session, WalletToDappInteractionResponse)>>>,
-}
-
-impl MockWalletInteractionTransport {
-    fn new() -> Self {
-        Self {
-            responses: Arc::new(Mutex::new(Vec::new())),
-        }
-    }
-}
-
-#[async_trait::async_trait]
-impl WalletInteractionTransport for MockWalletInteractionTransport {
-    async fn send_wallet_interaction_response(
-        &self,
-        session: Session,
-        response: WalletToDappInteractionResponse,
-    ) -> Result<()> {
-        self.responses.lock().unwrap().push((session, response));
-        Ok(())
-    }
-}
-
-use std::sync::{Arc, Mutex};
-
-struct MockSessionStorage {
-    sessions: Arc<Mutex<HashMap<SessionID, Session>>>,
-}
-
-impl MockSessionStorage {
-    fn new() -> Self {
-        Self {
-            sessions: Arc::new(Mutex::new(HashMap::new())),
-        }
-    }
-}
-
-#[async_trait::async_trait]
-impl SessionStorage for MockSessionStorage {
-    async fn save_session(
-        &self,
-        session_id: SessionID,
-        encoded_session: BagOfBytes,
-    ) -> Result<()> {
-        self.sessions.lock().unwrap().insert(
-            session_id,
-            deserialize_from_slice(encoded_session.as_slice())?,
-        );
-        Ok(())
-    }
-
-    async fn load_session(
-        &self,
-        session_id: SessionID,
-    ) -> Result<Option<BagOfBytes>> {
-        self.sessions
-            .lock()
-            .unwrap()
-            .get(&session_id)
-            .map(|session| {
-                let encoded_session = serialize(session).unwrap();
-                Some(encoded_session.into())
-            })
-            .ok_or(CommonError::RadixConnectMobileSessionNotFound {
-                session_id,
-            })
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Arc, Mutex};
+
+    struct MockWalletInteractionTransport {
+        stubed_result: Result<()>,
+        responses: Arc<Mutex<Vec<(Session, WalletToDappInteractionResponse)>>>,
+    }
+
+    impl MockWalletInteractionTransport {
+        fn new(stubed_result: Result<()>) -> Self {
+            Self {
+                stubed_result,
+                responses: Arc::new(Mutex::new(Vec::new())),
+            }
+        }
+
+        fn succeeding() -> Self {
+            Self::new(Ok(()))
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl WalletInteractionTransport for MockWalletInteractionTransport {
+        async fn send_wallet_interaction_response(
+            &self,
+            session: Session,
+            response: WalletToDappInteractionResponse,
+        ) -> Result<()> {
+            self.responses.lock().unwrap().push((session, response));
+            self.stubed_result.clone()
+        }
+    }
+
+    struct MockSessionStorage {
+        sessions: Arc<Mutex<HashMap<SessionID, Session>>>,
+    }
+
+    impl MockSessionStorage {
+        fn new() -> Self {
+            Self {
+                sessions: Arc::new(Mutex::new(HashMap::new())),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl SessionStorage for MockSessionStorage {
+        async fn save_session(
+            &self,
+            session_id: SessionID,
+            encoded_session: BagOfBytes,
+        ) -> Result<()> {
+            self.sessions.lock().unwrap().insert(
+                session_id,
+                deserialize_from_slice(encoded_session.as_slice())?,
+            );
+            Ok(())
+        }
+
+        async fn load_session(
+            &self,
+            session_id: SessionID,
+        ) -> Result<Option<BagOfBytes>> {
+            self.sessions
+                .lock()
+                .unwrap()
+                .get(&session_id)
+                .map(|session| {
+                    let encoded_session = serialize(session).unwrap();
+                    Some(encoded_session.into())
+                })
+                .ok_or(CommonError::RadixConnectMobileSessionNotFound {
+                    session_id,
+                })
+        }
+    }
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = RadixConnectMobile;
@@ -265,7 +283,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_invalid_deep_link() {
         let sut = SUT::init(
-            Arc::new(MockWalletInteractionTransport::new()),
+            Arc::new(MockWalletInteractionTransport::succeeding()),
             Arc::new(MockSessionStorage::new()),
         );
 
@@ -281,7 +299,7 @@ mod tests {
     async fn test_happy_path_first_session_is_properly_created() {
         let mock_session_storage = Arc::new(MockSessionStorage::new());
         let sut = SUT::init(
-            Arc::new(MockWalletInteractionTransport::new()),
+            Arc::new(MockWalletInteractionTransport::succeeding()),
             mock_session_storage.clone(),
         );
 
@@ -357,7 +375,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_happy_path_no_prior_session_proper_request_is_returned() {
         let sut = SUT::init(
-            Arc::new(MockWalletInteractionTransport::new()),
+            Arc::new(MockWalletInteractionTransport::succeeding()),
             Arc::new(MockSessionStorage::new()),
         );
 
@@ -382,7 +400,8 @@ mod tests {
     // Test that the in flight session will not be saved to session storage if the first wallet interacion is failure
     #[actix_rt::test]
     async fn test_happy_path_no_prior_session_failed_wallet_interaction() {
-        let mock_transport = Arc::new(MockWalletInteractionTransport::new());
+        let mock_transport =
+            Arc::new(MockWalletInteractionTransport::succeeding());
         let mock_session_storage = Arc::new(MockSessionStorage::new());
         let sut =
             SUT::init(mock_transport.clone(), mock_session_storage.clone());
@@ -446,11 +465,63 @@ mod tests {
         );
     }
 
+    // Test that the in flight session will not be saved to session storage if the first wallet interacion is failure
+    #[actix_rt::test]
+    async fn test_happy_path_no_prior_session_failed_to_send_response() {
+        let response_send_error = Err(CommonError::Unknown);
+        let mock_transport =
+            Arc::new(MockWalletInteractionTransport::new(response_send_error));
+        let mock_session_storage = Arc::new(MockSessionStorage::new());
+        let sut =
+            SUT::init(mock_transport.clone(), mock_session_storage.clone());
+
+        let request_params = SampleRequestParams::new_from_text_vector();
+        let request = sut
+            .handle_deep_link(request_params.build_base_url().to_string())
+            .await
+            .unwrap();
+
+        let in_flight_session = sut
+            .new_sessions
+            .read()
+            .unwrap()
+            .get(&request.session_id)
+            .cloned()
+            .unwrap();
+
+        // Create a response to be sent back to the dApp
+        let interaction_response = WalletToDappInteractionResponse::sample();
+        let wallet_response = RadixConnectMobileWalletResponse::new(
+            request.session_id.clone(),
+            interaction_response.clone(),
+        );
+
+        // Send the response back to the dApp
+        let result = sut
+            .send_dapp_interaction_response(wallet_response.clone())
+            .await;
+
+        pretty_assertions::assert_eq!(result.is_err(), true);
+
+        // Assert that the session was not saved to session storage
+        pretty_assertions::assert_eq!(
+            mock_session_storage.sessions.lock().unwrap().len(),
+            0
+        );
+        // Assert that the in flight session was not removed from in flight sessions
+        // On the Wallet side we do allow the user to retry the interaction
+        pretty_assertions::assert_eq!(
+            sut.new_sessions.read().unwrap().len(),
+            1
+        );
+    }
+
     // Test that the in flight session will be saved to session storage if the first wallet interacion is success
     #[actix_rt::test]
     async fn test_happy_path_no_prior_session_user_success_wallet_interaction()
     {
-        let mock_transport = Arc::new(MockWalletInteractionTransport::new());
+        let mock_transport =
+            Arc::new(MockWalletInteractionTransport::succeeding());
         let mock_session_storage = Arc::new(MockSessionStorage::new());
         let sut =
             SUT::init(mock_transport.clone(), mock_session_storage.clone());
@@ -524,7 +595,8 @@ mod tests {
     // Test that after a session is established, the stored session is used for the new dApp requests.
     #[actix_rt::test]
     async fn test_happy_path_existing_session_flow() {
-        let mock_transport = Arc::new(MockWalletInteractionTransport::new());
+        let mock_transport =
+            Arc::new(MockWalletInteractionTransport::succeeding());
         let mock_session_storage = Arc::new(MockSessionStorage::new());
         let sut =
             SUT::init(mock_transport.clone(), mock_session_storage.clone());

@@ -544,6 +544,9 @@ pub enum CommonError {
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
     RadixConnectMobileInvalidRequestFormat = 10151,
+
+    #[error("Radix Connect Mobile failed to create new in flight session")]
+    RadixConnectMobileFailedToCreateNewSession = 10152,
 }
 
 #[uniffi::export]
