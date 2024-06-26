@@ -40,7 +40,7 @@ impl From<OnboardingDeepLinkValue> for DeferredDeepLink {
         if value.dapp_referrer.is_some() && is_mobile {
             if let Some(callback_url) = callback_url.clone() {
                 result.push(PostOnboardingCard::Dapp {
-                    name: ("??".to_string()),
+                    name: ("TODO".to_string()),
                     callback_url: (Some(callback_url)),
                 });
             }
@@ -50,7 +50,7 @@ impl From<OnboardingDeepLinkValue> for DeferredDeepLink {
 
         if value.dapp_referrer.is_some() && !is_mobile {
             result.push(PostOnboardingCard::Dapp {
-                name: ("??".to_string()),
+                name: ("TODO".to_string()),
                 callback_url: (None),
             });
         }
