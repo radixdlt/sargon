@@ -53,14 +53,14 @@ impl RadixConnectMobile {
 
 #[uniffi::export]
 impl RadixConnectMobile {
-    /// Try to parse the deep link and create a RadixConnectMobileRequest.
+    /// Try to parse the deep link and create a RadixConnectMobileDappRequest.
     /// This is a stateful operation as it will create an in flight session, that needs to be validated by the user.
     #[uniffi::method]
     pub async fn handle_deep_link(
         &self,
         url: String,
     ) -> Result<RadixConnectMobileSessionRequest> {
-        // Try to parse the deep link ur to RadixConnectMobileRequest
+        // Try to parse the deep link ur to RadixConnectMobileDappRequest
         let request = parse_mobile_connect_request(url)?;
 
         // A session might be already established for the given session_id.
@@ -143,7 +143,7 @@ impl RadixConnectMobile {
 
     fn create_in_flight_session(
         &self,
-        request: &RadixConnectMobileRequest,
+        request: &RadixConnectMobileDappRequest,
     ) -> Result<()> {
         // 1. Generate the Host's private/public key pair
         let wallet_private_key = KeyAgreementPrivateKey::generate()?;

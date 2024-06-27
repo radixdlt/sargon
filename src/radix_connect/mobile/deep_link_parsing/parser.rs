@@ -1,4 +1,4 @@
-use super::request::RadixConnectMobileRequest;
+use super::request::RadixConnectMobileDappRequest;
 use crate::prelude::*;
 use base64::engine::general_purpose::URL_SAFE;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
@@ -20,7 +20,7 @@ const APP_SCHEME: &str = "radixwallet";
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
-) -> Result<RadixConnectMobileRequest> {
+) -> Result<RadixConnectMobileDappRequest> {
     let url = url.as_ref();
 
     let parsed_url = parse_url(url).map_err(|_| {
@@ -82,7 +82,7 @@ pub fn parse_mobile_connect_request(
         DappDefinitionAddress::from_str(&dapp_definition_address_string)?;
     let signature = Ed25519Signature::from_hex(signature_string)?;
 
-    let request = RadixConnectMobileRequest::new(
+    let request = RadixConnectMobileDappRequest::new(
         session_id,
         origin,
         public_key,
@@ -125,38 +125,46 @@ impl SampleRequestParams {
     pub fn build_base_url_with_scheme(&self, scheme: &str) -> String {
         let mut params: Vec<String> = Vec::new();
         if let Some(session_id) = &self.session_id {
-            let str = format!("sessionId={}", session_id);
+            let str =
+                format!("{}={}", CONNECT_URL_PARAM_SESSION_ID, session_id);
             params.push(str);
         }
 
         if let Some(origin) = &self.origin {
-            let str = format!("origin={}", origin);
+            let str = format!("{}={}", CONNECT_URL_PARAM_ORIGIN, origin);
             params.push(str);
         }
 
         if let Some(public_key) = &self.public_key {
-            let str = format!("publicKey={}", public_key);
+            let str =
+                format!("{}={}", CONNECT_URL_PARAM_PUBLIC_KEY, public_key);
             params.push(str);
         }
 
         if let Some(request) = &self.request {
-            let str = format!("request={}", request);
+            let str = format!("{}={}", CONNECT_URL_PARAM_INTERACTION, request);
             params.push(str);
         }
 
         if let Some(dapp_definition_address) = &self.dapp_definition_address {
-            let str =
-                format!("dAppDefinitionAddress={}", dapp_definition_address);
+            let str = format!(
+                "{}={}",
+                CONNECT_URL_PARAM_DAPP_DEFINITION_ADDRESS,
+                dapp_definition_address
+            );
             params.push(str);
         }
 
         if let Some(signature) = &self.signature {
-            let str = format!("signature={}", signature);
+            let str = format!("{}={}", CONNECT_URL_PARAM_SIGNATURE, signature);
             params.push(str);
         }
 
         if let Some(identity_public_key) = &self.identity_public_key {
-            let str = format!("identity={}", identity_public_key);
+            let str = format!(
+                "{}={}",
+                CONNECT_URL_PARAM_IDENTITY_KEY, identity_public_key
+            );
             params.push(str);
         }
 
@@ -214,6 +222,30 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_connect_url_params() {
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_SESSION_ID,
+            "sessionId"
+        );
+        pretty_assertions::assert_eq!(CONNECT_URL_PARAM_ORIGIN, "origin");
+        pretty_assertions::assert_eq!(CONNECT_URL_PARAM_SIGNATURE, "signature");
+        pretty_assertions::assert_eq!(CONNECT_URL_PARAM_INTERACTION, "request");
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_PUBLIC_KEY,
+            "publicKey"
+        );
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_IDENTITY_KEY,
+            "identity"
+        );
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_DAPP_DEFINITION_ADDRESS,
+            "dAppDefinitionAddress"
+        );
+        pretty_assertions::assert_eq!(APP_SCHEME, "radixwallet");
+    }
+
+    #[test]
     fn parse_url_into_request() {
         let request_params = SampleRequestParams::new_from_text_vector();
 
@@ -223,7 +255,7 @@ mod tests {
         let expected_interaction =
             SampleRequestParams::test_vector_encoded_interaction();
 
-        let expected_request = RadixConnectMobileRequest::new(
+        let expected_request = RadixConnectMobileDappRequest::new(
             request_params.session_id.clone().unwrap().parse().unwrap(),
             DappOrigin::from(request_params.origin.clone().unwrap().as_str()),
             KeyAgreementPublicKey::from_hex(

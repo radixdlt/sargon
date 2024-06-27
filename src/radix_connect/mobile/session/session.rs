@@ -55,7 +55,7 @@ impl Session {
 impl Session {
     pub fn validate_request(
         &self,
-        request: &RadixConnectMobileRequest,
+        request: &RadixConnectMobileDappRequest,
     ) -> Result<()> {
         if self.origin != SessionOrigin::WebDapp(request.origin.clone()) {
             return Err(CommonError::RadixConnectMobileDappOriginMismatch);
@@ -121,11 +121,11 @@ mod tests {
     fn test_validate_request() {
         let sut = SUT::sample();
         assert!(&sut
-            .validate_request(&RadixConnectMobileRequest::sample())
+            .validate_request(&RadixConnectMobileDappRequest::sample())
             .is_ok());
 
         let mut wrong_dapp_public_key_request =
-            RadixConnectMobileRequest::sample();
+            RadixConnectMobileDappRequest::sample();
         wrong_dapp_public_key_request.public_key =
             KeyAgreementPublicKey::sample_other();
         pretty_assertions::assert_eq!(
@@ -134,7 +134,7 @@ mod tests {
         );
 
         let mut wrong_dapp_identity_request =
-            RadixConnectMobileRequest::sample();
+            RadixConnectMobileDappRequest::sample();
         wrong_dapp_identity_request.identity_public_key =
             Ed25519PublicKey::sample_other();
         pretty_assertions::assert_eq!(
@@ -142,7 +142,8 @@ mod tests {
             Err(CommonError::RadixConnectMobileDappIdentityMismatch)
         );
 
-        let mut wrong_dapp_origin_request = RadixConnectMobileRequest::sample();
+        let mut wrong_dapp_origin_request =
+            RadixConnectMobileDappRequest::sample();
         wrong_dapp_origin_request.origin = DappOrigin::sample_other();
         pretty_assertions::assert_eq!(
             sut.validate_request(&wrong_dapp_origin_request),
