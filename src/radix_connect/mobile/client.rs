@@ -71,7 +71,7 @@ impl RadixConnectMobile {
         match existing_session {
             Some(session) => {
                 // Validate the request against the pre-validated session.
-                // This is the protection the Wallet can guarantee after the origin was validated by the user.
+                // This is the protection the Host can guarantee after the origin was validated by the user.
                 session.validate_request(&request)?;
             }
             None => {
@@ -80,7 +80,7 @@ impl RadixConnectMobile {
             }
         }
 
-        // Return request to the Wallet to be handled by the user.
+        // Return request to the Host to be handled by the user.
         Ok(RadixConnectMobileSessionRequest::new(
             request.session_id,
             request.interaction,
@@ -145,11 +145,11 @@ impl RadixConnectMobile {
         &self,
         request: &RadixConnectMobileRequest,
     ) -> Result<()> {
-        // 1. Generate the Wallet's private/public key pair
+        // 1. Generate the Host's private/public key pair
         let wallet_private_key = KeyAgreementPrivateKey::generate()?;
         let wallet_public_key = wallet_private_key.public_key();
 
-        // 2. Generate the secret that is shared by the Wallet and the dApp
+        // 2. Generate the secret that is shared by the Host and the dApp
         let shared_secret = wallet_private_key
             .shared_secret_from_key_agreement(&request.public_key);
 
@@ -157,8 +157,8 @@ impl RadixConnectMobile {
         let dapp_definition_address = request.dapp_definition_address.address();
         let encryption_key = PbHkdfSha256::derive_key(
             shared_secret.as_bytes(),
-            Some(dapp_definition_address.as_bytes()),
-            Some(Self::HKDF_KEY_DERIVATION_INFO.as_bytes()),
+            dapp_definition_address.as_bytes(),
+            Self::HKDF_KEY_DERIVATION_INFO.as_bytes(),
         );
 
         // 4. Create the session
@@ -333,14 +333,12 @@ mod tests {
         // Derive the encryption key from the shared secret
         let expected_encryption_key = PbHkdfSha256::derive_key(
             shared_secret.as_bytes(),
-            Some(
-                request_params
-                    .dapp_definition_address
-                    .clone()
-                    .unwrap()
-                    .as_bytes(),
-            ),
-            Some("RCfM".as_bytes()),
+            request_params
+                .dapp_definition_address
+                .clone()
+                .unwrap()
+                .as_bytes(),
+            "RCfM".as_bytes(),
         );
 
         // Create the expected session with the derived encryption key and the dApp information received
@@ -372,7 +370,7 @@ mod tests {
         );
     }
 
-    // Test that the proper request to be handled by the Wallet is returned when the dApp sends the first request.
+    // Test that the proper request to be handled by the Host is returned when the dApp sends the first request.
     // One of the most important things is that the origin needs to be validated by the user.
     #[actix_rt::test]
     async fn test_happy_path_no_prior_session_proper_request_is_returned() {
@@ -503,7 +501,7 @@ mod tests {
             0
         );
         // Assert that the in flight session was not removed from in flight sessions
-        // On the Wallet side we do allow the user to retry the interaction
+        // On the Host side we do allow the user to retry the interaction
         pretty_assertions::assert_eq!(
             sut.new_sessions.read().unwrap().len(),
             1
