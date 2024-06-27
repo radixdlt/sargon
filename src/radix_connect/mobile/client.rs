@@ -155,7 +155,7 @@ impl RadixConnectMobile {
 
         // 3. Derive the encryption key from the shared secret
         let dapp_definition_address = request.dapp_definition_address.address();
-        let encryption_key = PbHkdfSha256::hkdf_key_agreement(
+        let encryption_key = PbHkdfSha256::derive_key(
             shared_secret.as_bytes(),
             Some(dapp_definition_address.as_bytes()),
             Some(Self::HKDF_KEY_DERIVATION_INFO.as_bytes()),
@@ -331,7 +331,7 @@ mod tests {
             .shared_secret_from_key_agreement(&wallet_public_key);
 
         // Derive the encryption key from the shared secret
-        let expected_encryption_key = PbHkdfSha256::hkdf_key_agreement(
+        let expected_encryption_key = PbHkdfSha256::derive_key(
             shared_secret.as_bytes(),
             Some(
                 request_params

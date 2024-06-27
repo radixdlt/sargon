@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 use crypto::keys::x25519::SharedSecret;
 
+/// PrivateKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPublicKey`.
 #[derive(derive_more::Debug)]
 #[debug("{}", self.to_hex())]
 pub struct KeyAgreementPrivateKey(X25519PrivateKey);

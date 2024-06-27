@@ -2,8 +2,7 @@ use crate::prelude::*;
 use crate::{prelude::*, UniffiCustomTypeConverter};
 use crypto::keys::x25519::PublicKey as X25519PublicKey;
 
-/// A public key for the X25519 key exchange algorithm.
-/// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
+/// PublicKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPrivateKey`.
 #[serde_as]
 #[derive(
     Clone,
@@ -125,8 +124,8 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+        pretty_assertions::assert_eq!(SUT::sample(), SUT::sample());
+        pretty_assertions::assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
@@ -136,7 +135,7 @@ mod tests {
 
     #[test]
     fn from_hex() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned()),
             Ok(SUT::sample())
         );
@@ -144,7 +143,7 @@ mod tests {
 
     #[test]
     fn to_hex() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::sample().to_hex(),
             "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
         );
@@ -152,19 +151,16 @@ mod tests {
 
     #[test]
     fn to_bytes() {
-        assert_eq!(
-            SUT::sample().to_bytes(),
-            vec![
-                134, 121, 188, 31, 227, 33, 11, 44, 232, 71, 147, 102, 139, 5,
-                33, 143, 220, 76, 34, 11, 192, 83, 135, 183, 210, 172, 13, 76,
-                123, 124, 93, 16
-            ]
+        pretty_assertions::assert_eq!(
+            hex_encode(SUT::sample().to_bytes()),
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
+                .to_string()
         );
     }
 
     #[test]
     fn from_str() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::from_str("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"),
             Ok(SUT::sample())
         );
@@ -172,24 +168,23 @@ mod tests {
 
     #[test]
     fn try_from_vec() {
-        assert_eq!(
-            SUT::try_from(vec![
-                134, 121, 188, 31, 227, 33, 11, 44, 232, 71, 147, 102, 139, 5,
-                33, 143, 220, 76, 34, 11, 192, 83, 135, 183, 210, 172, 13, 76,
-                123, 124, 93, 16
-            ]),
+        pretty_assertions::assert_eq!(
+            SUT::try_from(hex_decode(SUT::sample().to_hex()).unwrap()),
             Ok(SUT::sample())
         );
     }
 
     #[test]
     fn from_key_agreement_private_key() {
-        assert_eq!(SUT::from(KeyAgreementPrivateKey::sample()), SUT::sample());
+        pretty_assertions::assert_eq!(
+            SUT::from(KeyAgreementPrivateKey::sample()),
+            SUT::sample()
+        );
     }
 
     #[test]
     fn sample() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::sample().to_hex(),
             "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
         );
@@ -197,7 +192,7 @@ mod tests {
 
     #[test]
     fn sample_other() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::sample_other().to_hex(),
             "c0f0d9d1b1f9c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9"
         );
@@ -205,7 +200,7 @@ mod tests {
 
     #[test]
     fn from_invalid_hex() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::from_hex("bad".to_owned()),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: "bad".to_owned()
@@ -215,7 +210,7 @@ mod tests {
 
     #[test]
     fn from_invalid_bytes() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::try_from(vec![0]),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromBytes {
                 bad_value: vec![0].into()
@@ -225,7 +220,7 @@ mod tests {
 
     #[test]
     fn from_invalid_str() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             "bad".parse::<SUT>(),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: "bad".to_owned()
