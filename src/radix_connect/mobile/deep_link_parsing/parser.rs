@@ -168,7 +168,7 @@ impl SampleRequestParams {
             params.push(str);
         }
 
-        format!("{}://?{}", scheme, params.join("&").to_string())
+        format!("{}://?{}", scheme, params.join("&"))
     }
 
     pub fn build_base_url(&self) -> String {

@@ -356,7 +356,7 @@ mod tests {
                 request_params.identity_public_key.clone().unwrap(),
             )
             .unwrap(),
-            wallet_public_key.clone(),
+            wallet_public_key,
         );
 
         // Assert that the proper session was created
@@ -425,7 +425,7 @@ mod tests {
             WalletToDappInteractionFailureResponse::sample(),
         );
         let wallet_response = RadixConnectMobileWalletResponse::new(
-            request.session_id.clone(),
+            request.session_id,
             interaction_response.clone(),
         );
 
@@ -453,7 +453,7 @@ mod tests {
                 .responses
                 .lock()
                 .unwrap()
-                .get(0)
+                .first()
                 .unwrap()
                 .clone()
         );
@@ -484,7 +484,7 @@ mod tests {
         // Create a response to be sent back to the dApp
         let interaction_response = WalletToDappInteractionResponse::sample();
         let wallet_response = RadixConnectMobileWalletResponse::new(
-            request.session_id.clone(),
+            request.session_id,
             interaction_response.clone(),
         );
 
@@ -535,7 +535,7 @@ mod tests {
         // Create a response to be sent back to the dApp
         let interaction_response = WalletToDappInteractionResponse::sample();
         let wallet_response = RadixConnectMobileWalletResponse::new(
-            request.session_id.clone(),
+            request.session_id,
             interaction_response.clone(),
         );
 
@@ -572,7 +572,7 @@ mod tests {
                 .responses
                 .lock()
                 .unwrap()
-                .get(0)
+                .first()
                 .unwrap()
                 .clone()
         );
@@ -604,10 +604,7 @@ mod tests {
         let response = WalletToDappInteractionResponse::sample();
 
         sut.send_dapp_interaction_response(
-            RadixConnectMobileWalletResponse::new(
-                session_id.clone(),
-                response.clone(),
-            ),
+            RadixConnectMobileWalletResponse::new(session_id, response.clone()),
         )
         .await
         .unwrap();
@@ -628,7 +625,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             request,
             RadixConnectMobileSessionRequest::new(
-                session_id.clone(),
+                session_id,
                 SampleRequestParams::test_vector_encoded_interaction(),
                 DappOrigin::new(request_params.origin.clone().unwrap()),
                 false, // The origin does not need to be validated as the session is already stored
@@ -643,7 +640,7 @@ mod tests {
 
         sut.send_dapp_interaction_response(
             RadixConnectMobileWalletResponse::new(
-                session_id.clone(),
+                session_id,
                 failure_response.clone(),
             ),
         )

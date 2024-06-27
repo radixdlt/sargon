@@ -141,7 +141,7 @@ mod tests {
         assert_eq!(
             from_bytes,
             Err(CommonError::InvalidKeyAgreementPrivateKeyFromBytes {
-                bad_value: bytes.into(),
+                bad_value: bytes,
             })
         );
     }

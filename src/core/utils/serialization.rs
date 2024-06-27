@@ -51,12 +51,9 @@ mod tests {
     fn deserialize_from_slice_error() {
         let slice = b"invalid json";
         let result: Result<String> = super::deserialize_from_slice(slice);
-        assert_eq!(
-            matches!(
-                result,
-                Err(CommonError::FailedToDeserializeJSONToValue { .. })
-            ),
-            true
-        );
+        assert!(matches!(
+            result,
+            Err(CommonError::FailedToDeserializeJSONToValue { .. })
+        ));
     }
 }
