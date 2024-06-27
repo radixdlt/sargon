@@ -99,7 +99,7 @@ impl RadixConnectMobile {
         let session_id = wallet_response.session_id;
 
         // Get the in flight session, if any, that required validation from the user.
-        // Not remove at this stage, as the user might retry the interaction.
+        // Not removed at this stage, as the user might retry the interaction.
         let in_flight_session = self
             .new_sessions
             .read()
@@ -111,7 +111,7 @@ impl RadixConnectMobile {
             self.load_session(wallet_response.session_id).await.ok();
 
         let is_in_flight_session = in_flight_session.is_some();
-        let session = in_flight_session.or(existing_session).ok_or(
+        let session = existing_session.or(in_flight_session).ok_or(
             CommonError::RadixConnectMobileSessionNotFound { session_id },
         )?;
 
