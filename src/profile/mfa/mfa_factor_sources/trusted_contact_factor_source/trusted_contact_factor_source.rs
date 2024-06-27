@@ -182,6 +182,11 @@ mod tests {
     }
 
     #[test]
+    fn kind() {
+        assert_eq!(SUT::kind(), FactorSourceKind::TrustedContact);
+    }
+
+    #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }

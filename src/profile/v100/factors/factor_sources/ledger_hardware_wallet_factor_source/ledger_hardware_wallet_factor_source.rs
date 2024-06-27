@@ -103,31 +103,30 @@ impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = LedgerHardwareWalletFactorSource;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample(),
-            LedgerHardwareWalletFactorSource::sample()
-        );
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample_other(),
-            LedgerHardwareWalletFactorSource::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            LedgerHardwareWalletFactorSource::sample(),
-            LedgerHardwareWalletFactorSource::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn kind() {
+        assert_eq!(SUT::kind(), FactorSourceKind::LedgerHQHardwareWallet);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = LedgerHardwareWalletFactorSource::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"            
@@ -156,12 +155,9 @@ mod tests {
 
     #[test]
     fn from_factor_source() {
-        let sut = LedgerHardwareWalletFactorSource::sample();
+        let sut = SUT::sample();
         let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::try_from(factor_source),
-            Ok(sut)
-        );
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
     }
 
     #[test]
@@ -169,24 +165,18 @@ mod tests {
         let wrong = DeviceFactorSource::sample();
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
-            LedgerHardwareWalletFactorSource::try_from(factor_source),
+            SUT::try_from(factor_source),
             Err(CommonError::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
         );
     }
 
     #[test]
     fn factor_source_id() {
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample().factor_source_id(),
-            LedgerHardwareWalletFactorSource::sample().id.into()
-        );
+        assert_eq!(SUT::sample().factor_source_id(), SUT::sample().id.into());
     }
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample().factor_source_kind(),
-            LedgerHardwareWalletFactorSource::sample().id.kind
-        );
+        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
     }
 }

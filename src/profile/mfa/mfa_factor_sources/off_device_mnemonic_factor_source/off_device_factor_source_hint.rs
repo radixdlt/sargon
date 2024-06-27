@@ -14,17 +14,17 @@ use crate::prelude::*;
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
-pub struct OffDeviceFactorSourceHint {
+pub struct OffDeviceMnemonicHint {
     pub display_name: DisplayName,
 }
 
-impl OffDeviceFactorSourceHint {
+impl OffDeviceMnemonicHint {
     pub fn new(display_name: DisplayName) -> Self {
         Self { display_name }
     }
 }
 
-impl HasSampleValues for OffDeviceFactorSourceHint {
+impl HasSampleValues for OffDeviceMnemonicHint {
     fn sample() -> Self {
         Self::new(DisplayName::new("Story about a horse").unwrap())
     }
@@ -39,7 +39,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = OffDeviceFactorSourceHint;
+    type SUT = OffDeviceMnemonicHint;
 
     #[test]
     fn equality() {

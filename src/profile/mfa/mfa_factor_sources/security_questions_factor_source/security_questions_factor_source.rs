@@ -428,6 +428,11 @@ mod tests {
     }
 
     #[test]
+    fn kind() {
+        assert_eq!(SUT::kind(), FactorSourceKind::SecurityQuestions);
+    }
+
+    #[test]
     fn roundtrip_sample_other_two_incorrect_answer_is_ok() {
         let m = Mnemonic::sample_security_questions_other();
         let mut qas =
