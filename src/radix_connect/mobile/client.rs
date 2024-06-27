@@ -89,7 +89,7 @@ impl RadixConnectMobile {
         ))
     }
 
-    /// Send the Wallet's response to the dApp.
+    /// Send the Host's response to the dApp.
     /// This is a stateful operation as it will save the session in the secure storage if the user validated the session.
     #[uniffi::method]
     pub async fn send_dapp_interaction_response(
