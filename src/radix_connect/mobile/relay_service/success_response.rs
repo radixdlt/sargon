@@ -3,16 +3,21 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SuccessResponse {
+    /// The Radix Connect Relay service specific method.
     pub method: RadixRelayRequestMethod,
+
     /// The unique id of the session established with the dApp.
     pub session_id: SessionID,
+
     /// Wallet's public key to be used to create the shared secret with the dApp.
     pub public_key: KeyAgreementPublicKey,
+
     /// Hex encoded WalletInteractionResponse
     pub data: BagOfBytes,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub enum RadixRelayRequestMethod {
     SendResponse,
 }
