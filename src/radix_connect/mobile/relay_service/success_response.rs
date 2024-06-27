@@ -3,23 +3,28 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SuccessResponse {
-    pub method: String,
+    pub method: RadixRelayRequestMethod,
     /// The unique id of the session established with the dApp.
     pub session_id: SessionID,
     /// Wallet's public key to be used to create the shared secret with the dApp.
     pub public_key: KeyAgreementPublicKey,
     /// Hex encoded WalletInteractionResponse
-    pub data: String,
+    pub data: BagOfBytes,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum RadixRelayRequestMethod {
+    SendResponse,
 }
 
 impl SuccessResponse {
     pub fn new(
         session_id: SessionID,
         wallet_public_key: KeyAgreementPublicKey,
-        interaction_response: String,
+        interaction_response: BagOfBytes,
     ) -> Self {
         Self {
-            method: "sendResponse".to_owned(),
+            method: RadixRelayRequestMethod::SendResponse,
             session_id,
             public_key: wallet_public_key,
             data: interaction_response,
@@ -32,7 +37,7 @@ impl HasSampleValues for SuccessResponse {
         Self::new(
             SessionID::sample(),
             KeyAgreementPublicKey::sample(),
-            "data".to_string(),
+            BagOfBytes::sample(),
         )
     }
 
@@ -40,7 +45,7 @@ impl HasSampleValues for SuccessResponse {
         Self::new(
             SessionID::sample_other(),
             KeyAgreementPublicKey::sample_other(),
-            "data_other".to_string(),
+            BagOfBytes::sample_other(),
         )
     }
 }

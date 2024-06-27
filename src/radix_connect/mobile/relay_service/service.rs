@@ -1,8 +1,8 @@
 use hex::ToHex;
 
 use super::super::session::*;
+use super::success_response::SuccessResponse;
 use crate::prelude::*;
-use crate::radix_connect::mobile::relay_service::SuccessResponse;
 
 #[async_trait::async_trait]
 pub trait WalletInteractionTransport: Send + Sync {
@@ -67,8 +67,11 @@ impl WalletInteractionTransport for Service {
 
         let hex = hex_encode(encrypted_response);
 
-        let success_response =
-            SuccessResponse::new(session.id, session.wallet_public_key, hex);
+        let success_response = SuccessResponse::new(
+            session.id,
+            session.wallet_public_key,
+            hex.parse()?,
+        );
         let request =
             NetworkRequest::radix_connect_success_response(success_response)?;
         self.http_client.execute_network_request(request).await?;
@@ -97,8 +100,13 @@ mod tests {
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);
 
-    const SERVICE_PATH: &str =
-        "https://radix-connect-relay.radixdlt.com/api/v1";
+    #[test]
+    fn test_service_path() {
+        assert_eq!(
+            SERVICE_PATH,
+            "https://radix-connect-relay.radixdlt.com/api/v1"
+        );
+    }
 
     #[actix_rt::test]
     async fn test_send_wallet_interaction_response_failure() {
@@ -135,7 +143,7 @@ mod tests {
             let success_response = SuccessResponse::new(
                 SessionID::sample(),
                 KeyAgreementPublicKey::sample(),
-                hex,
+                hex.parse().unwrap(),
             );
 
             let encoded = serde_json::to_vec(&success_response).unwrap();
@@ -166,10 +174,7 @@ mod tests {
             );
 
             let decrypted_payload = EncryptionScheme::default()
-                .decrypt(
-                    hex_decode(sent_request.data.as_str()).unwrap(),
-                    &mut decryption_key,
-                )
+                .decrypt(sent_request.data.bytes(), &mut decryption_key)
                 .unwrap();
             let decoded_payload: WalletToDappInteractionResponse =
                 serde_json::from_slice(&decrypted_payload).unwrap();
