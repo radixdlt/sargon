@@ -6,6 +6,7 @@ pub struct OnboardingDeepLinkValue {
     pub radquest: bool,
     pub dapp_referrer: Option<DappDefinitionAddress>,
     pub dapp_callback: Option<String>,
+    pub radquest_data: Option<String>,
 }
 
 impl OnboardingDeepLinkValue {
@@ -14,12 +15,14 @@ impl OnboardingDeepLinkValue {
         radquest: bool,
         dapp_referrer: Option<DappDefinitionAddress>,
         dapp_callback: impl Into<Option<String>>,
+        radquest_data: impl Into<Option<String>>,
     ) -> Self {
         Self {
             method,
             radquest,
             dapp_referrer,
             dapp_callback: dapp_callback.into(),
+            radquest_data: radquest_data.into(),
         }
     }
 }
@@ -31,11 +34,12 @@ impl HasSampleValues for OnboardingDeepLinkValue {
             true,
             Some(DappDefinitionAddress::sample()),
             "https://example.com".to_owned(),
+            Some("example_tracking_data".to_owned()),
         )
     }
 
     fn sample_other() -> Self {
-        Self::new(DeferredDeepLinkMethod::Desktop, false, None, None)
+        Self::new(DeferredDeepLinkMethod::Desktop, false, None, None, None)
     }
 }
 
@@ -60,7 +64,7 @@ mod tests {
     #[test]
     fn json_roundtrip_referrer_and_callback_missing() {
         let model =
-            SUT::new(DeferredDeepLinkMethod::Desktop, false, None, None);
+            SUT::new(DeferredDeepLinkMethod::Desktop, false, None, None, None);
         let json = r#"
         {
             "method": "desktop",
@@ -78,7 +82,8 @@ mod tests {
             "method": "mobile",
             "radquest": true,
             "dapp_referrer": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-            "dapp_callback": "https://example.com"
+            "dapp_callback": "https://example.com",
+            "radquest_data": "example_tracking_data"
         }
         "#;
         assert_eq_after_json_roundtrip(&model, json);

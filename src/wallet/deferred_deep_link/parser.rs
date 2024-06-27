@@ -14,7 +14,10 @@ fn decode_deferred_deep_link(
 ) -> Result<OnboardingDeepLinkValue> {
     let decoded_value_json_bytes = URL_SAFE_NO_PAD
         .decode(encoded_value.as_ref())
-        .map_err(|_| CommonError::DeferredDeepLinkInvalidValueFormat)?;
+        .map_err(|e| {
+            println!("{}", e);
+            CommonError::DeferredDeepLinkInvalidValueFormat
+        })?;
 
     let deep_link_value = serde_json::from_slice::<OnboardingDeepLinkValue>(
         decoded_value_json_bytes.as_ref(),
@@ -30,7 +33,7 @@ mod tests_decode {
 
     #[test]
     fn decode_deferred_deep_link_correct() {
-        let encoded_value = "ewogICAgIm1ldGhvZCI6ICJtb2JpbGUiLAogICAgInJhZHF1ZXN0IjogdHJ1ZSwKICAgICJkYXBwX3JlZmVycmVyIjogImFjY291bnRfcmR4MTI4eTZqNzhtdDBhcXY2MzcyZXZ6MjhocnhwOG1uMDZjY2Rka3I3eHBwYzg4aHl2eW52amR3ciIsCiAgICAiZGFwcF9jYWxsYmFjayI6ICJodHRwczovL2V4YW1wbGUuY29tIgp9";
+        let encoded_value = "eyJtZXRob2QiOiJtb2JpbGUiLCJyYWRxdWVzdCI6dHJ1ZSwiZGFwcF9yZWZlcnJlciI6ImFjY291bnRfcmR4MTI4eTZqNzhtdDBhcXY2MzcyZXZ6MjhocnhwOG1uMDZjY2Rka3I3eHBwYzg4aHl2eW52amR3ciIsImRhcHBfY2FsbGJhY2siOiJodHRwczovL2V4YW1wbGUuY29tIiwicmFkcXVlc3RfZGF0YSI6ImV4YW1wbGVfdHJhY2tpbmdfZGF0YSJ9";
         let result = decode_deferred_deep_link(encoded_value).unwrap();
         assert_eq!(result, OnboardingDeepLinkValue::sample());
     }
@@ -69,11 +72,13 @@ mod tests_transform {
             true,
             None,
             None,
+            Some("this is the tracking info".to_owned()),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (true),
+                tracking_data: Some("this is the tracking info".to_owned()),
             },
             PostOnboardingCard::Connector,
         ]);
@@ -88,11 +93,13 @@ mod tests_transform {
             true,
             None,
             None,
+            Some("this is the tracking info".to_owned()),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (false),
+                tracking_data: Some("this is the tracking info".to_owned()),
             },
             PostOnboardingCard::Connector,
         ]);
@@ -107,11 +114,13 @@ mod tests_transform {
             true,
             Some(AccountAddress::sample()),
             Some("https://example.com".to_owned()),
+            None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (true),
+                tracking_data: None,
             },
             PostOnboardingCard::Dapp {
                 name: ("TODO".to_owned()),
@@ -130,11 +139,13 @@ mod tests_transform {
             true,
             Some(AccountAddress::sample()),
             Some("https://example.com".to_owned()),
+            None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (false),
+                tracking_data: None,
             },
             PostOnboardingCard::Connector,
             PostOnboardingCard::Dapp {
@@ -153,10 +164,11 @@ mod tests_transform {
             false,
             None,
             None,
+            None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadquest,
+            PostOnboardingCard::StartRadQuest,
             PostOnboardingCard::Connector,
         ]);
         let expected_result = DeferredDeepLink::Onboarding { cards };
@@ -170,10 +182,11 @@ mod tests_transform {
             false,
             None,
             None,
+            None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadquest,
+            PostOnboardingCard::StartRadQuest,
             PostOnboardingCard::Connector,
         ]);
         let expected_result = DeferredDeepLink::Onboarding { cards };
@@ -187,10 +200,11 @@ mod tests_transform {
             false,
             Some(AccountAddress::sample()),
             Some("https://example.com".to_owned()),
+            None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadquest,
+            PostOnboardingCard::StartRadQuest,
             PostOnboardingCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: Some(Url::parse("https://example.com").unwrap()),
@@ -208,10 +222,11 @@ mod tests_transform {
             false,
             Some(AccountAddress::sample()),
             Some("https://example.com".to_owned()),
+            None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let cards = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadquest,
+            PostOnboardingCard::StartRadQuest,
             PostOnboardingCard::Connector,
             PostOnboardingCard::Dapp {
                 name: ("TODO".to_owned()),

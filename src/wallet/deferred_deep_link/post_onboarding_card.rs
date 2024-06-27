@@ -18,11 +18,19 @@ use crate::prelude::*;
 pub enum PostOnboardingCard {
     /// Content: "Get started on Radix with RadQuest, and earn XRD and collectible NFTs."
     /// Action: Redirect user to RadQuest.
-    StartRadquest,
+    StartRadQuest,
 
     /// Content: "Congratulations! Continue your journey on Radquest!"
-    /// Action: If `should_redirect`, redirect user to RadQuest. Otherwise, none.
-    ContinueRadQuest { should_redirect: bool },
+    /// Action: If `should_redirect`, redirect user to RadQuest with the given `tracking_data`. Otherwise, none.
+    #[display(
+        "ContinueRadquest should_redirect: {}, tracking_data: {:?}",
+        should_redirect,
+        tracking_data
+    )]
+    ContinueRadQuest {
+        should_redirect: bool,
+        tracking_data: Option<String>,
+    },
 
     /// Content: "Now that you’ve got the Radix Wallet, you can continue on with using {name}!"
     /// Action: If `callback_url` is available, redirect user to it. Otherwise, none.
@@ -47,12 +55,13 @@ impl Identifiable for PostOnboardingCard {
 
 impl PostOnboardingCard {
     pub fn sample_start_radquest() -> Self {
-        Self::StartRadquest
+        Self::StartRadQuest
     }
 
     pub fn sample_continue_radquest() -> Self {
         Self::ContinueRadQuest {
             should_redirect: true,
+            tracking_data: None,
         }
     }
 
@@ -75,5 +84,24 @@ impl HasSampleValues for PostOnboardingCard {
 
     fn sample_other() -> Self {
         Self::sample_connector()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DeferredDeepLinkMethod;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

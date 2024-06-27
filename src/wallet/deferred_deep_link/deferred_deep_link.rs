@@ -25,9 +25,10 @@ impl From<OnboardingDeepLinkValue> for DeferredDeepLink {
         if value.radquest {
             result.push(PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (is_mobile),
+                tracking_data: (value.radquest_data),
             })
         } else {
-            result.push(PostOnboardingCard::StartRadquest);
+            result.push(PostOnboardingCard::StartRadQuest);
         }
 
         let callback_url: Option<Url>;
