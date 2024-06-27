@@ -279,6 +279,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "base64"
+version = "0.22.1"
+source = "git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af#e14400697453bcc85997119b874bc03d9601d0af"
+
+[[package]]
 name = "base64ct"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1477,11 +1482,13 @@ version = "0.23.1"
 source = "git+https://github.com/iotaledger/crypto.rs?rev=47460d64fd0514af136ea1c2c6f3aa29ed89d1b8#47460d64fd0514af136ea1c2c6f3aa29ed89d1b8"
 dependencies = [
  "autocfg",
+ "curve25519-dalek 3.2.0",
  "digest 0.10.7",
  "ed25519-zebra",
  "hmac",
  "k256 0.13.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8",
+ "x25519-dalek",
  "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2476,7 +2483,7 @@ name = "reqwest"
 version = "0.12.3"
 source = "git+https://github.com/seanmonstar/reqwest?rev=0720159f6369f54e045a1fd315e0f24b7a0b4a39#0720159f6369f54e045a1fd315e0f24b7a0b4a39"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "bytes",
  "futures-core",
  "futures-util",
@@ -2553,7 +2560,7 @@ version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29993a25686778eb88d4189742cd713c9bce943bc54251a33509dc63cbacf73d"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls-pki-types",
 ]
 
@@ -2592,6 +2599,7 @@ dependencies = [
  "aes-gcm",
  "assert-json-diff",
  "async-trait",
+ "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
  "bip39",
  "camino 1.0.8",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
@@ -2962,7 +2970,7 @@ version = "3.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ad483d2ab0149d5a5ebcd9972a3852711e0153d863bf5a5d0391d28883c4a20"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono",
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "indexmap 1.9.3",
@@ -4129,6 +4137,17 @@ checksum = "a277a57398d4bfa075df44f501a17cfdf8542d224f0d36095a2adc7aee4ef0a5"
 dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "x25519-dalek"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a0c105152107e3b96f6a00a65e86ce82d9b125230e1c4302940eca58ff71f4f"
+dependencies = [
+ "curve25519-dalek 3.2.0",
+ "rand_core 0.5.1",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

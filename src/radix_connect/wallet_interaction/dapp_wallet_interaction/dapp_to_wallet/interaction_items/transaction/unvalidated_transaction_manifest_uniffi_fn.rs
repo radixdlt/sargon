@@ -39,8 +39,15 @@ mod uniffi_tests {
         let transaction_manifest = TransactionManifest::sample();
         let sut =
             new_unvalidated_transaction_manifest_from_transaction_manifest(
-                transaction_manifest,
+                transaction_manifest.clone(),
             );
-        assert_eq!(sut, SUT::sample());
+        pretty_assertions::assert_eq!(
+            sut.transaction_manifest_string,
+            transaction_manifest.instructions_string()
+        );
+        pretty_assertions::assert_eq!(
+            sut.blobs,
+            transaction_manifest.blobs().clone()
+        );
     }
 }

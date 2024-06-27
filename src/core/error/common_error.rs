@@ -497,6 +497,53 @@ pub enum CommonError {
         "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{count}, but an 'instruction_index' of {index} was specified."
     )]
     TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10138,
+
+    #[error("Failed to create KeyAgreementPublicKey from hex: {bad_value}")]
+    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10139,
+
+    #[error(
+        "Failed to create KeyAgreementPublicKey from bytes: {bad_value:?}"
+    )]
+    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10140,
+
+    #[error(
+        "Failed to create KeyAgreementPrivateKey from bytes: {bad_value:?}"
+    )]
+    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10141,
+
+    #[error("RadixConnectMobileSession not found, session id: {session_id}")]
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10142,
+
+    #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
+    RadixConnectMobileDappRequestNotFound {
+        interaction_id: WalletInteractionId,
+    } = 10143,
+
+    #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
+    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
+
+    #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
+    InvalidEd25519SignatureFromString { bad_value: String } = 10145,
+
+    #[error("Radix Connect Mobile dApp public key does not match the session's dApp public key")]
+    RadixConnectMobileDappPublicKeyMismatch = 10146,
+
+    #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
+    RadixConnectMobileDappIdentityMismatch = 10147,
+
+    #[error(
+        "Radix Connect Mobile dApp origin not match the session's dApp origin"
+    )]
+    RadixConnectMobileDappOriginMismatch = 10148,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidDappSignature = 10149,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidRequestFormat = 10150,
+
+    #[error("Radix Connect Mobile failed to create new in flight session")]
+    RadixConnectMobileFailedToCreateNewSession = 10151,
 }
 
 #[uniffi::export]
