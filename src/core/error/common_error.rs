@@ -511,28 +511,30 @@ pub enum CommonError {
     )]
     InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10141,
 
-    #[error("Failed to expand HKDF, reason: '{underlying}'")]
-    HkdfExpandFailed { underlying: String } = 10142,
-
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
-    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10143,
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10142,
 
     #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
     RadixConnectMobileDappRequestNotFound {
         interaction_id: WalletInteractionId,
-    } = 10144,
+    } = 10143,
 
     #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
-    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10145,
+    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
 
     #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
-    InvalidEd25519SignatureFromString { bad_value: String } = 10146,
+    InvalidEd25519SignatureFromString { bad_value: String } = 10145,
 
     #[error("Radix Connect Mobile dApp public key does not match the session's dApp public key")]
-    RadixConnectMobileDappPublicKeyMismatch = 10147,
+    RadixConnectMobileDappPublicKeyMismatch = 10146,
 
     #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
-    RadixConnectMobileDappIdentityMismatch = 10148,
+    RadixConnectMobileDappIdentityMismatch = 10147,
+
+    #[error(
+        "Radix Connect Mobile dApp origin not match the session's dApp origin"
+    )]
+    RadixConnectMobileDappOriginMismatch = 10148,
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
     RadixConnectMobileInvalidDappSignature = 10149,
@@ -540,11 +542,14 @@ pub enum CommonError {
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
     RadixConnectMobileInvalidRequestFormat = 10150,
 
+    #[error("Radix Connect Mobile failed to create new in flight session")]
+    RadixConnectMobileFailedToCreateNewSession = 10151,
+
     #[error("Deferred Deep Link invalid deep link value format")]
-    DeferredDeepLinkInvalidValueFormat = 10151,
+    DeferredDeepLinkInvalidValueFormat = 10152,
 
     #[error("Deferred Deep Link decoding failed")]
-    DeferredDeepLinkDecodingFailed = 10152,
+    DeferredDeepLinkDecodingFailed = 10153,
 }
 
 #[uniffi::export]

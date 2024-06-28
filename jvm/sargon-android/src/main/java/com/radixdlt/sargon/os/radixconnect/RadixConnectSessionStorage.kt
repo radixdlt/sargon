@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.byteArrayPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.SessionId
-import com.radixdlt.sargon.SessionStorage
+import com.radixdlt.sargon.RadixConnectMobileSessionStorage
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.os.storage.EncryptedPreferencesStorage
@@ -16,7 +16,7 @@ import com.radixdlt.sargon.os.storage.KeySpec
 
 internal class RadixConnectSessionStorage internal constructor(
     private val storage: EncryptedPreferencesStorage
-) : SessionStorage {
+) : RadixConnectMobileSessionStorage {
 
     @KoverIgnore
     constructor(context: Context) : this(

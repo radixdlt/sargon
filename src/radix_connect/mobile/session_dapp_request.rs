@@ -2,11 +2,20 @@ use crate::prelude::*;
 
 json_data_convertible!(RadixConnectMobileSessionRequest);
 
-#[derive(Debug, PartialEq, uniffi::Record, Serialize, Deserialize)]
+/// The request received from the dApp that needs to be handled.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, uniffi::Record)]
 pub struct RadixConnectMobileSessionRequest {
+    /// The id of the session established with the dApp.
+    /// Needs to be passed back by the Host as to know which session to respond to.
     pub session_id: SessionID,
+
+    /// The interaction received from the dApp.
     pub interaction: DappToWalletInteractionUnvalidated,
+
+    /// The origin of the dApp.
     pub origin: DappOrigin,
+
+    /// Whether the origin requires validation.
     pub origin_requires_validation: bool,
 }
 

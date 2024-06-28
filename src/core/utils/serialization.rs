@@ -25,3 +25,35 @@ where
 {
     serde_json::to_vec(value).map_err(|_| CommonError::FailedToSerializeToJSON)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deserialize_from_slice() {
+        let value = "hello";
+        let serialized = serde_json::to_vec(&value).unwrap();
+        let deserialized: String =
+            super::deserialize_from_slice(&serialized).unwrap();
+        pretty_assertions::assert_eq!(value, deserialized);
+    }
+
+    #[test]
+    fn serialize() {
+        let value = "hello";
+        let serialized = super::serialize(&value).unwrap();
+        let deserialized: String = serde_json::from_slice(&serialized).unwrap();
+        pretty_assertions::assert_eq!(value, deserialized);
+    }
+
+    #[test]
+    fn deserialize_from_slice_error() {
+        let slice = b"invalid json";
+        let result: Result<String> = super::deserialize_from_slice(slice);
+        assert!(matches!(
+            result,
+            Err(CommonError::FailedToDeserializeJSONToValue { .. })
+        ));
+    }
+}

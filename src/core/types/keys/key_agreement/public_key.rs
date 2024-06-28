@@ -2,8 +2,7 @@ use crate::prelude::*;
 use crate::{prelude::*, UniffiCustomTypeConverter};
 use crypto::keys::x25519::PublicKey as X25519PublicKey;
 
-/// A public key for the X25519 key exchange algorithm.
-/// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
+/// PublicKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPrivateKey`.
 #[serde_as]
 #[derive(
     Clone,
@@ -15,29 +14,11 @@ use crypto::keys::x25519::PublicKey as X25519PublicKey;
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct KeyAgreementPublicKey {
     pub secret_magic: X25519PublicKey,
-}
-
-uniffi::custom_type!(X25519PublicKey, BagOfBytes);
-
-impl UniffiCustomTypeConverter for X25519PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from_slice(val.as_slice())
-            .map_err(|e| uniffi::deps::anyhow::anyhow!(e.to_string()))
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_bytes().to_vec().into()
-    }
 }
 
 impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {
@@ -113,10 +94,10 @@ impl HasSampleValues for KeyAgreementPublicKey {
 impl KeyAgreementPublicKey {
     /// A sample used to facilitate unit tests.
     ///
-    /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
+    /// `8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10`
     pub fn sample_alice() -> Self {
         Self::from_hex(
-            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
                 .to_owned(),
         )
         .unwrap()
@@ -143,8 +124,8 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+        pretty_assertions::assert_eq!(SUT::sample(), SUT::sample());
+        pretty_assertions::assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
@@ -154,63 +135,64 @@ mod tests {
 
     #[test]
     fn from_hex() {
-        assert_eq!(
-            SUT::from_hex("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42".to_owned()),
+        pretty_assertions::assert_eq!(
+            SUT::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned()),
             Ok(SUT::sample())
         );
     }
 
     #[test]
     fn to_hex() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::sample().to_hex(),
-            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
         );
     }
 
     #[test]
     fn to_bytes() {
-        assert_eq!(
-            SUT::sample().to_bytes(),
-            vec![
-                131, 63, 230, 36, 9, 35, 123, 157, 98, 236, 119, 88, 117, 32,
-                145, 30, 154, 117, 156, 236, 29, 25, 117, 91, 125, 169, 1, 185,
-                109, 202, 61, 66
-            ]
+        pretty_assertions::assert_eq!(
+            hex_encode(SUT::sample().to_bytes()),
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
+                .to_string()
         );
     }
 
     #[test]
     fn from_str() {
-        assert_eq!(
-            SUT::from_str("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"),
+        pretty_assertions::assert_eq!(
+            SUT::from_str("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"),
             Ok(SUT::sample())
         );
     }
 
     #[test]
     fn try_from_vec() {
-        assert_eq!(
-            SUT::try_from(vec![
-                131, 63, 230, 36, 9, 35, 123, 157, 98, 236, 119, 88, 117, 32,
-                145, 30, 154, 117, 156, 236, 29, 25, 117, 91, 125, 169, 1, 185,
-                109, 202, 61, 66
-            ]),
+        pretty_assertions::assert_eq!(
+            SUT::try_from(hex_decode(SUT::sample().to_hex()).unwrap()),
             Ok(SUT::sample())
         );
     }
 
     #[test]
+    fn from_key_agreement_private_key() {
+        pretty_assertions::assert_eq!(
+            SUT::from(KeyAgreementPrivateKey::sample()),
+            SUT::sample()
+        );
+    }
+
+    #[test]
     fn sample() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::sample().to_hex(),
-            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
+            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
         );
     }
 
     #[test]
     fn sample_other() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::sample_other().to_hex(),
             "c0f0d9d1b1f9c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9"
         );
@@ -218,7 +200,7 @@ mod tests {
 
     #[test]
     fn from_invalid_hex() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::from_hex("bad".to_owned()),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: "bad".to_owned()
@@ -228,7 +210,7 @@ mod tests {
 
     #[test]
     fn from_invalid_bytes() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             SUT::try_from(vec![0]),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromBytes {
                 bad_value: vec![0].into()
@@ -238,7 +220,7 @@ mod tests {
 
     #[test]
     fn from_invalid_str() {
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             "bad".parse::<SUT>(),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: "bad".to_owned()
@@ -250,7 +232,7 @@ mod tests {
     fn json_roundrip() {
         assert_json_value_eq_after_roundtrip(
             &SUT::sample(),
-            json!("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+            json!("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10")
         );
     }
 }

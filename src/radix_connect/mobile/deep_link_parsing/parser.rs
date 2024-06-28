@@ -1,4 +1,4 @@
-use super::request::RadixConnectMobileRequest;
+use super::request::RadixConnectMobileDappRequest;
 use crate::prelude::*;
 use base64::engine::general_purpose::URL_SAFE;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
@@ -20,7 +20,7 @@ const APP_SCHEME: &str = "radixwallet";
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
-) -> Result<RadixConnectMobileRequest> {
+) -> Result<RadixConnectMobileDappRequest> {
     let url = url.as_ref();
 
     let parsed_url = parse_url(url).map_err(|_| {
@@ -49,6 +49,7 @@ pub fn parse_mobile_connect_request(
     let request_string =
         get_key(url, &query_parameters, CONNECT_URL_PARAM_INTERACTION)?;
 
+    // The dApp sends WalletInteraction as base64_url encoded in the deepLink url.
     let decoded_request = URL_SAFE_NO_PAD
         .decode(request_string.as_str())
         .map_err(|_| CommonError::RadixConnectMobileInvalidRequestFormat)?;
@@ -81,7 +82,7 @@ pub fn parse_mobile_connect_request(
         DappDefinitionAddress::from_str(&dapp_definition_address_string)?;
     let signature = Ed25519Signature::from_hex(signature_string)?;
 
-    Ok(RadixConnectMobileRequest::new(
+    let request = RadixConnectMobileDappRequest::new(
         session_id,
         origin,
         public_key,
@@ -89,7 +90,9 @@ pub fn parse_mobile_connect_request(
         dapp_definition_address,
         signature,
         request,
-    ))
+    );
+    request.verify_request_signature()?;
+    Ok(request)
 }
 
 fn get_key(
@@ -106,60 +109,96 @@ fn get_key(
 }
 
 #[cfg(test)]
-mod tests {
-    use hex::ToHex;
-    use rand::random;
+#[derive(Deserialize, Clone)]
+pub struct SampleRequestParams {
+    pub session_id: Option<String>,
+    pub origin: Option<String>,
+    pub public_key: Option<String>,
+    pub identity_public_key: Option<String>,
+    pub request: Option<String>,
+    pub dapp_definition_address: Option<String>,
+    pub signature: Option<String>,
+}
 
-    use super::*;
+#[cfg(test)]
+impl SampleRequestParams {
+    pub fn build_base_url_with_scheme(&self, scheme: &str) -> String {
+        let mut params: Vec<String> = Vec::new();
+        if let Some(session_id) = &self.session_id {
+            let str =
+                format!("{}={}", CONNECT_URL_PARAM_SESSION_ID, session_id);
+            params.push(str);
+        }
 
-    #[test]
-    fn parse_url_into_request() {
-        let session_id = "8feeb997-81ff-46ec-a679-e7e697b01601";
-        let origin = "https://radquest-dev.rdx-works-main.extratools.works";
-        let public_key =
-            "df856ce8d64bd59aca1bec03584513c49e635f350ff6a312021854d62d54171c";
-        let identity_public_key =
-            "2e39af5c6905bde9825cd7451b0b6361664ac3a111fcdd10334e5fab6ced9fdf";
-        let request = "eyJpdGVtcyI6eyJkaXNjcmltaW5hdG9yIjoiYXV0aG9yaXplZFJlcXVlc3QiLCJhdXRoIjp7ImRpc2NyaW1pbmF0b3IiOiJsb2dpbldpdGhDaGFsbGVuZ2UiLCJjaGFsbGVuZ2UiOiJkYTNlYzhjMjU5MDliNTc3NTlmMTc2ODkwYWU2Mzg1YTRjZTI4NGRjMTI4ZTU2ODAyNmU2ZjIwMWQ5ZDBlNGFlIn0sIm9uZ29pbmdBY2NvdW50cyI6eyJudW1iZXJPZkFjY291bnRzIjp7InF1YW50aWZpZXIiOiJhdExlYXN0IiwicXVhbnRpdHkiOjF9fSwicmVzZXQiOnsiYWNjb3VudHMiOnRydWUsInBlcnNvbmFEYXRhIjpmYWxzZX19LCJpbnRlcmFjdGlvbklkIjoiNzdjZmIzOGYtNWIxMS00YThmLWJlNWEtMzk4NTBiZWQ4M2FkIiwibWV0YWRhdGEiOnsidmVyc2lvbiI6MiwiZEFwcERlZmluaXRpb25BZGRyZXNzIjoiYWNjb3VudF90ZHhfMl8xMngzcm43dHFxcW0zd2d1ejZrbWc1Znk3c2FmOHY5Mmx0NXh1d2duNmtnaDh6YWVqbGY4MGNlIiwibmV0d29ya0lkIjoyLCJvcmlnaW4iOiJodHRwczovL3JhZHF1ZXN0LWRldi5yZHgtd29ya3MtbWFpbi5leHRyYXRvb2xzLndvcmtzIn19&signature=25f0c7741c586666f83e610b05e90a819081c4ff013b05e2ac633e1097f5f5261926b34eaf8cbf3cb7087389720ff8fd4b35b6d3c8a485441bdc3f1818fb0403";
-        let dapp_definition_address = "account_tdx_2_12x3rn7tqqqm3wguz6kmg5fy7saf8v92lt5xuwgn6kgh8zaejlf80ce";
-        let signature = "884f1ce51dd815c527a31caf77cb2af1c683c41769f3b96e2dc6ef6bd7f786d8db0c48119585a4b98a6b74848402e8f86e33bb3e8de2dceb8338d707df3b6a03";
+        if let Some(origin) = &self.origin {
+            let str = format!("{}={}", CONNECT_URL_PARAM_ORIGIN, origin);
+            params.push(str);
+        }
 
-        let connect_url = APP_SCHEME.to_owned()
-            + format!(
-            "://?sessionId={}&origin={}&publicKey={}&request={}&dAppDefinitionAddress={}&signature={}&identity={}",
-            session_id,
-            origin,
-            public_key,
-            request,
-            dapp_definition_address,
-            signature,
-            identity_public_key,
-        )
-                .as_str();
+        if let Some(public_key) = &self.public_key {
+            let str =
+                format!("{}={}", CONNECT_URL_PARAM_PUBLIC_KEY, public_key);
+            params.push(str);
+        }
 
-        let result = parse_mobile_connect_request(connect_url);
+        if let Some(request) = &self.request {
+            let str = format!("{}={}", CONNECT_URL_PARAM_INTERACTION, request);
+            params.push(str);
+        }
 
-        let expected_interaction = DappToWalletInteractionUnvalidated::new(
-            "77cfb38f-5b11-4a8f-be5a-39850bed83ad".parse().unwrap(),
+        if let Some(dapp_definition_address) = &self.dapp_definition_address {
+            let str = format!(
+                "{}={}",
+                CONNECT_URL_PARAM_DAPP_DEFINITION_ADDRESS,
+                dapp_definition_address
+            );
+            params.push(str);
+        }
+
+        if let Some(signature) = &self.signature {
+            let str = format!("{}={}", CONNECT_URL_PARAM_SIGNATURE, signature);
+            params.push(str);
+        }
+
+        if let Some(identity_public_key) = &self.identity_public_key {
+            let str = format!(
+                "{}={}",
+                CONNECT_URL_PARAM_IDENTITY_KEY, identity_public_key
+            );
+            params.push(str);
+        }
+
+        format!("{}://?{}", scheme, params.join("&"))
+    }
+
+    pub fn build_base_url(&self) -> String {
+        self.build_base_url_with_scheme(APP_SCHEME)
+    }
+
+    pub fn new_from_text_vector() -> Self {
+        fixture::<SampleRequestParams>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "deep_link_request_params.json"
+        )))
+        .unwrap()
+    }
+
+    /// The default interaction that is encoded in the test vector deep_link_request_params.json
+    pub fn test_vector_encoded_interaction(
+    ) -> DappToWalletInteractionUnvalidated {
+        DappToWalletInteractionUnvalidated::new(
+            "011cee03-961a-4e55-b69b-6ecad0b068c7".parse().unwrap(),
             DappToWalletInteractionItems::AuthorizedRequest(
                 DappToWalletInteractionAuthorizedRequestItems::new(
                     DappToWalletInteractionAuthRequestItem::LoginWithChallenge(
                         DappToWalletInteractionAuthLoginWithChallengeRequestItem::new(
                             DappToWalletInteractionAuthChallengeNonce(
-                                Exactly32Bytes::from_hex("da3ec8c25909b57759f176890ae6385a4ce284dc128e568026e6f201d9d0e4ae").unwrap()
+                                Exactly32Bytes::from_hex("17ca9f21bd1b38db43923025d7de1311d6f598989474f1434ded8eed806d2c57").unwrap()
                             )
                         )
                     ),
-                    Some(DappToWalletInteractionResetRequestItem::new(true, false)),
-                    Some(
-                        DappToWalletInteractionAccountsRequestItem {
-                            number_of_accounts: RequestedQuantity {
-                                quantifier: RequestedNumberQuantifier::AtLeast,
-                                quantity: 1,
-                            },
-                            challenge: None,
-                        },
-                    ),
+                    Some(DappToWalletInteractionResetRequestItem::new(false, false)),
+                    None,
                     None,
                     None,
                     None,
@@ -168,36 +207,300 @@ mod tests {
             DappToWalletInteractionMetadataUnvalidated::new(
                 WalletInteractionVersion(2),
                 NetworkID::Stokenet,
-                DappOrigin::from(origin),
-                dapp_definition_address.to_owned(),
+                DappOrigin::from("https://d1vq8n3dnxcyhd.cloudfront.net"),
+                "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe",
             )
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use hex::ToHex;
+    use rand::random;
+
+    use super::*;
+
+    #[test]
+    fn test_connect_url_params() {
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_SESSION_ID,
+            "sessionId"
         );
-        let expected_request = RadixConnectMobileRequest::new(
-            session_id.parse().unwrap(),
-            DappOrigin::from(origin),
-            KeyAgreementPublicKey::from_hex(public_key.to_owned()).unwrap(),
-            Ed25519PublicKey::from_hex(identity_public_key.to_owned()).unwrap(),
-            dapp_definition_address.parse().unwrap(),
-            signature.parse().unwrap(),
+        pretty_assertions::assert_eq!(CONNECT_URL_PARAM_ORIGIN, "origin");
+        pretty_assertions::assert_eq!(CONNECT_URL_PARAM_SIGNATURE, "signature");
+        pretty_assertions::assert_eq!(CONNECT_URL_PARAM_INTERACTION, "request");
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_PUBLIC_KEY,
+            "publicKey"
+        );
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_IDENTITY_KEY,
+            "identity"
+        );
+        pretty_assertions::assert_eq!(
+            CONNECT_URL_PARAM_DAPP_DEFINITION_ADDRESS,
+            "dAppDefinitionAddress"
+        );
+        pretty_assertions::assert_eq!(APP_SCHEME, "radixwallet");
+    }
+
+    #[test]
+    fn parse_url_into_request() {
+        let request_params = SampleRequestParams::new_from_text_vector();
+
+        let connect_url = request_params.build_base_url();
+        let result = parse_mobile_connect_request(connect_url);
+
+        let expected_interaction =
+            SampleRequestParams::test_vector_encoded_interaction();
+
+        let expected_request = RadixConnectMobileDappRequest::new(
+            request_params.session_id.clone().unwrap().parse().unwrap(),
+            DappOrigin::from(request_params.origin.clone().unwrap().as_str()),
+            KeyAgreementPublicKey::from_hex(
+                request_params.public_key.clone().unwrap(),
+            )
+            .unwrap(),
+            Ed25519PublicKey::from_hex(
+                request_params.identity_public_key.clone().unwrap(),
+            )
+            .unwrap(),
+            request_params
+                .dapp_definition_address
+                .clone()
+                .unwrap()
+                .parse()
+                .unwrap(),
+            request_params.signature.clone().unwrap().parse().unwrap(),
             expected_interaction,
         );
 
         pretty_assertions::assert_eq!(result, Ok(expected_request));
 
-        let invalid_url = "url";
-        let invalid_scheme = "invalid_scheme://";
-
+        let parsed_request = result.unwrap();
+        let expected_interaction =
+            DappToWalletInteractionUnvalidated::new_from_json_bytes(
+                URL_SAFE_NO_PAD
+                    .decode(request_params.request.unwrap())
+                    .unwrap(),
+            )
+            .unwrap();
         pretty_assertions::assert_eq!(
-            parse_mobile_connect_request(invalid_url),
+            parsed_request.interaction,
+            expected_interaction
+        );
+        pretty_assertions::assert_eq!(
+            parsed_request.session_id.to_string(),
+            request_params.session_id.unwrap()
+        );
+        pretty_assertions::assert_eq!(
+            parsed_request.origin.to_string(),
+            request_params.origin.unwrap()
+        );
+        pretty_assertions::assert_eq!(
+            parsed_request.public_key.to_hex(),
+            request_params.public_key.unwrap()
+        );
+        pretty_assertions::assert_eq!(
+            parsed_request.identity_public_key.to_hex(),
+            request_params.identity_public_key.unwrap()
+        );
+        pretty_assertions::assert_eq!(
+            parsed_request.dapp_definition_address.to_string(),
+            request_params.dapp_definition_address.unwrap()
+        );
+        pretty_assertions::assert_eq!(
+            parsed_request.signature.to_hex(),
+            request_params.signature.unwrap()
+        );
+    }
+
+    #[test]
+    fn parse_url_with_invalid_scheme() {
+        let request_params = SampleRequestParams::new_from_text_vector();
+        let invalid_scheme_url =
+            request_params.build_base_url_with_scheme("invalidScheme");
+        let result = parse_mobile_connect_request(invalid_scheme_url.clone());
+
+        pretty_assertions::assert_ne!(
+            parse_url(invalid_scheme_url.clone()).unwrap().scheme(),
+            APP_SCHEME
+        );
+        assert!(matches!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_missing_query_param() {
+        let missing_param_url = format!("{}://", APP_SCHEME);
+        let result = parse_mobile_connect_request(missing_param_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestUrl { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_invalid_url() {
+        let invalid_url = "invalid_url";
+        let result = parse_mobile_connect_request(invalid_url);
+        pretty_assertions::assert_eq!(
+            result,
             Err(CommonError::RadixConnectMobileInvalidRequestUrl {
                 bad_value: invalid_url.to_owned(),
             })
         );
+    }
 
+    #[test]
+    fn parse_url_with_invalid_request() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.request = "invalid_request".to_string().into();
+        let invalid_request_url = request.build_base_url();
+        let result = parse_mobile_connect_request(invalid_request_url);
         pretty_assertions::assert_eq!(
-            parse_mobile_connect_request(invalid_scheme),
+            result,
+            Err(CommonError::RadixConnectMobileInvalidRequestFormat)
+        );
+    }
+
+    #[test]
+    fn parse_url_with_invalid_session_id() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.session_id = "invalid_session_id".to_string().into();
+
+        let invalid_session_id_url = request.build_base_url();
+        let result = parse_mobile_connect_request(invalid_session_id_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidSessionID { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_with_invalid_public_key() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.public_key = "invalid_public_key".to_string().into();
+
+        let invalid_public_key_url = request.build_base_url();
+        let result = parse_mobile_connect_request(invalid_public_key_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::InvalidKeyAgreementPublicKeyFromHex { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_with_invalid_signature() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.signature = "invalid_signature".to_string().into();
+
+        let invalid_signature_url = request.build_base_url();
+        let result = parse_mobile_connect_request(invalid_signature_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::InvalidEd25519SignatureFromString { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_with_invalid_identity_key() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.identity_public_key = "invalid_identity_key".to_string().into();
+
+        let invalid_identity_key_url = request.build_base_url();
+        let result = parse_mobile_connect_request(invalid_identity_key_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::InvalidEd25519PublicKeyFromString { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_missing_session_id() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.session_id = None;
+
+        assert_deep_link_url_is_invalid(request);
+    }
+
+    #[test]
+    fn parse_url_missing_origin() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.origin = None;
+
+        assert_deep_link_url_is_invalid(request);
+    }
+
+    #[test]
+    fn parse_url_missing_interaction() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.request = None;
+
+        assert_deep_link_url_is_invalid(request);
+    }
+
+    #[test]
+    fn parse_url_missing_dapp_definition_address() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.dapp_definition_address = None;
+
+        assert_deep_link_url_is_invalid(request);
+    }
+
+    #[test]
+    fn parse_url_missing_signature() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.signature = None;
+
+        assert_deep_link_url_is_invalid(request);
+    }
+
+    #[test]
+    fn parse_url_missing_identity() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.identity_public_key = None;
+
+        assert_deep_link_url_is_invalid(request);
+    }
+
+    #[test]
+    fn parse_url_with_invalid_dapp_definition_address() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.dapp_definition_address = "invalid".to_string().into();
+
+        let invalid_dapp_definition_address_url = request.build_base_url();
+        let result =
+            parse_mobile_connect_request(invalid_dapp_definition_address_url);
+        assert!(matches!(
+            result,
+            Err(CommonError::FailedToDecodeAddressFromBech32 { .. })
+        ));
+    }
+
+    #[test]
+    fn parse_url_signature_validation_failed() {
+        let mut request = SampleRequestParams::new_from_text_vector();
+        request.signature = "93bc8fd33cdbd56bc1f7a9b46afc9615b5b42e9aad63227e71b02c57eb88f5f166406182afa82ebe8eb3bfc9e1388adfd60670d098751b1507584999be36c50f".to_string().into();
+
+        let wrogn_signature_url = request.build_base_url();
+        let result = parse_mobile_connect_request(wrogn_signature_url);
+        pretty_assertions::assert_eq!(
+            result,
+            Err(CommonError::RadixConnectMobileInvalidDappSignature)
+        );
+    }
+
+    fn assert_deep_link_url_is_invalid(request: SampleRequestParams) {
+        let bad_url = request.build_base_url();
+        let result = parse_mobile_connect_request(&bad_url);
+        pretty_assertions::assert_eq!(
+            result,
             Err(CommonError::RadixConnectMobileInvalidRequestUrl {
-                bad_value: invalid_scheme.to_owned(),
+                bad_value: bad_url.to_owned(),
             })
         );
     }
