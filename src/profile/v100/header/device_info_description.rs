@@ -70,10 +70,7 @@ impl From<&str> for DeviceInfoDescription {
             return Self::new("iPhone", model);
         }
         // FIXME: Android
-        let name = description.clone();
-        let model = description.clone();
-
-        Self::new(name, model)
+        Self::new(description, description)
     }
 }
 
