@@ -7,7 +7,7 @@ extension Decimal192: ExpressibleByStringLiteral {
 
 extension Decimal192: ExpressibleByFloatLiteral {
 	public init(floatLiteral float: Float32) {
-		try! self.init(float)
+		self.init(float)
 	}
 }
 #endif
