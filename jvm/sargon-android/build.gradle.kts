@@ -93,10 +93,10 @@ dependencies {
     implementation(libs.coroutines.android)
 
     // For Serialization extensions
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
 
     // For Network support
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.12"))
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.14"))
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:okhttp-coroutines")
 
