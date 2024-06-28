@@ -90,6 +90,17 @@ impl SargonOS {
         Ok(true)
     }
 
+    /// Adds all of the provided `factor_sources` to Profile in one single go.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourcesAdded }`
+    ///
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`,
+    /// if the newly added FactorSource is a new **main** flag, then we remove the
+    /// main flag from the old BDFS.
+    ///
+    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
     pub async fn add_factor_sources(
         &self,
         factor_sources: FactorSources,
@@ -137,6 +148,8 @@ impl SargonOS {
             .await
     }
 
+    /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
+    /// either a "BDFS" or an "Olympia" one.
     pub async fn create_device_factor_source(
         &self,
         mnemonic_with_passphrase: MnemonicWithPassphrase,

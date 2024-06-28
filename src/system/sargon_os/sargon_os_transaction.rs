@@ -426,9 +426,13 @@ impl SargonOS {
         manifest: TransactionManifest,
         message: impl Into<Message>,
     ) -> Result<CompiledNotarizedIntent> {
-        let addresses_of_entities_to_sign = manifest.summary().addresses_of_entities_requiring_auth();
-        let entities_to_sign = self.profile_holder.entities_for_addresses(addresses_of_entities_to_sign)?;
-        let factors_to_sign = self.profile_holder.signing_factors_of(entities_to_sign);
+        let addresses_of_entities_to_sign =
+            manifest.summary().addresses_of_entities_requiring_auth();
+        let entities_to_sign = self
+            .profile_holder
+            .entities_for_addresses(addresses_of_entities_to_sign)?;
+        let factors_to_sign =
+            self.profile_holder.signing_factors_of(entities_to_sign);
         let ephemeral_notary = Ed25519PrivateKey::generate();
         let intent = self
             .build_intent(

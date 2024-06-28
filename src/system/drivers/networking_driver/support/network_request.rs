@@ -10,13 +10,26 @@ pub struct NetworkRequest {
 }
 
 impl NetworkRequest {
-    pub fn new_post(url: Url) -> Self {
+    pub fn new(
+        url: impl Into<Url>,
+        method: impl Into<NetworkMethod>,
+        headers: impl Into<HashMap<String, String>>,
+        body: impl Into<BagOfBytes>,
+    ) -> Self {
         Self {
-            url,
-            method: NetworkMethod::Post,
-            headers: HashMap::new(),
-            body: BagOfBytes::new(),
+            url: url.into(),
+            method: method.into(),
+            headers: headers.into(),
+            body: body.into(),
         }
+    }
+
+    pub fn new_post(url: Url) -> Self {
+        Self::new(url, NetworkMethod::Post, [], vec![])
+    }
+
+    pub fn new_get(url: Url) -> Self {
+        Self::new(url, NetworkMethod::Get, [], vec![])
     }
 
     pub fn with_headers(mut self, headers: HashMap<String, String>) -> Self {

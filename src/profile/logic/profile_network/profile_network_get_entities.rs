@@ -9,11 +9,22 @@ impl ProfileNetwork {
         self.accounts.non_hidden()
     }
 
-    pub fn entity_of_address(&self, address: AddressOfAccountOrPersona) -> Result<AccountOrPersona> {
+    pub fn entity_of_address(
+        &self,
+        address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona> {
         match address {
-            AddressOfAccountOrPersona::Account(account_address) => self.accounts.get_id(account_address).map(AccountOrPersona::from).ok_or(CommonError::UnknownAccount),
-            AddressOfAccountOrPersona::Identity(identity_address) => self.personas.get_id(identity_address).map(AccountOrPersona::from).ok_or(CommonError::UnknownPersona),
-        } 
+            AddressOfAccountOrPersona::Account(account_address) => self
+                .accounts
+                .get_id(account_address)
+                .map(AccountOrPersona::from)
+                .ok_or(CommonError::UnknownAccount),
+            AddressOfAccountOrPersona::Identity(identity_address) => self
+                .personas
+                .get_id(identity_address)
+                .map(AccountOrPersona::from)
+                .ok_or(CommonError::UnknownPersona),
+        }
     }
 }
 

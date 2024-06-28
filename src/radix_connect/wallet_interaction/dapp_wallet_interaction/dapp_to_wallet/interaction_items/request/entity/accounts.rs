@@ -6,13 +6,13 @@ pub struct DappToWalletInteractionAccountsRequestItem {
     pub number_of_accounts: RequestedQuantity,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub challenge: Option<Exactly32Bytes>,
+    pub challenge: Option<DappToWalletInteractionAuthChallengeNonce>,
 }
 
 impl DappToWalletInteractionAccountsRequestItem {
     pub fn new(
         number_of_accounts: RequestedQuantity,
-        challenge: impl Into<Option<Exactly32Bytes>>,
+        challenge: impl Into<Option<DappToWalletInteractionAuthChallengeNonce>>,
     ) -> Self {
         Self {
             number_of_accounts,
@@ -23,13 +23,16 @@ impl DappToWalletInteractionAccountsRequestItem {
 
 impl HasSampleValues for DappToWalletInteractionAccountsRequestItem {
     fn sample() -> Self {
-        Self::new(RequestedQuantity::sample(), Exactly32Bytes::sample())
+        Self::new(
+            RequestedQuantity::sample(),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+        )
     }
 
     fn sample_other() -> Self {
         Self::new(
             RequestedQuantity::sample_other(),
-            Exactly32Bytes::sample_other(),
+            DappToWalletInteractionAuthChallengeNonce::sample_other(),
         )
     }
 }

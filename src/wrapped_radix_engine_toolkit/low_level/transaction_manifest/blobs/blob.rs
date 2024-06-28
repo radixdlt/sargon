@@ -1,7 +1,19 @@
 use crate::prelude::*;
 
 /// Blob is a wrapper a bag of bytes
-#[derive(Clone, PartialEq, Eq, Debug, derive_more::Display, uniffi::Record)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    DeserializeFromStr,
+    SerializeDisplay,
+    uniffi::Record,
+    derive_more::Display,
+    derive_more::Debug,
+    derive_more::FromStr,
+)]
+#[display("{}", self.to_hex())]
+#[debug("{}", self.to_hex())]
 pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,
 }
@@ -9,6 +21,10 @@ pub struct Blob {
 impl Blob {
     pub fn to_hex(&self) -> String {
         self.secret_magic.to_hex()
+    }
+
+    pub fn from_hex(s: &str) -> Result<Self> {
+        Self::from_str(s)
     }
 }
 
@@ -119,6 +135,32 @@ mod tests {
     fn from_vec() {
         let vec = vec![0xde, 0xad];
         assert_eq!(SUT::from(&vec).to_string(), "dead");
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let model = SUT::sample();
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"),
+        );
+    }
+
+    #[test]
+    fn test_to_hex() {
+        let sample_blob = SUT::sample();
+        let hex = sample_blob.to_hex();
+        let expected_hex = sample_blob.secret_magic.to_hex();
+        assert_eq!(hex, expected_hex);
+    }
+
+    #[test]
+    fn test_from_hex() {
+        let hex_str =
+            "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced";
+        let blob = SUT::from_hex(hex_str).unwrap();
+        let expected_blob = SUT::from(BagOfBytes::from_hex(hex_str).unwrap());
+        assert_eq!(blob, expected_blob);
     }
 }
 

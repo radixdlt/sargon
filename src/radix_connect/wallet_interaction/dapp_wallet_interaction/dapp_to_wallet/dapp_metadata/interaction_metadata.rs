@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub struct DappToWalletInteractionMetadata {
     pub version: WalletInteractionVersion,
     pub network_id: NetworkID,
-    pub origin: Url,
+    pub origin: DappOrigin,
     #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: DappDefinitionAddress,
 }
@@ -14,7 +14,7 @@ impl DappToWalletInteractionMetadata {
     pub fn new(
         version: impl Into<WalletInteractionVersion>,
         network_id: impl Into<NetworkID>,
-        origin: impl Into<Url>,
+        origin: impl Into<DappOrigin>,
         dapp_definition_address: impl Into<DappDefinitionAddress>,
     ) -> Self {
         Self {
@@ -24,6 +24,13 @@ impl DappToWalletInteractionMetadata {
             dapp_definition_address: dapp_definition_address.into(),
         }
     }
+
+    pub fn with_updated_origin(self, origin: impl Into<DappOrigin>) -> Self {
+        Self {
+            origin: origin.into(),
+            ..self
+        }
+    }
 }
 
 impl HasSampleValues for DappToWalletInteractionMetadata {
@@ -31,7 +38,7 @@ impl HasSampleValues for DappToWalletInteractionMetadata {
         Self::new(
             WalletInteractionVersion::sample(),
             NetworkID::Stokenet,
-            Url::from_str("https://example.com").unwrap(),
+            "https://example.com",
             DappDefinitionAddress::sample(),
         )
     }
@@ -40,7 +47,7 @@ impl HasSampleValues for DappToWalletInteractionMetadata {
         Self::new(
             WalletInteractionVersion::sample_other(),
             NetworkID::Stokenet,
-            Url::from_str("https://example.org").unwrap(),
+            "https://example.org",
             DappDefinitionAddress::sample_other(),
         )
     }
@@ -62,5 +69,13 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn with_updated_origin() {
+        let metadata = SUT::sample();
+        let new_origin = DappOrigin::new("https://example.org");
+        let metadata = metadata.with_updated_origin(new_origin.clone());
+        assert_eq!(metadata.origin, new_origin);
     }
 }

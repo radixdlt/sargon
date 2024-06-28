@@ -34,7 +34,8 @@ fun MnemonicWithPassphrase.Companion.fromJson(
 }.onFailure {
     throw CommonException.FailedToDeserializeJsonToValue(
         jsonByteCount = fromJson.toByteArray(charset = Charsets.UTF_8).size.toULong(),
-        typeName = "MnemonicWithPassphrase"
+        typeName = "MnemonicWithPassphrase",
+        serdeMessage = it.message.orEmpty()
     )
 }.getOrThrow()
 

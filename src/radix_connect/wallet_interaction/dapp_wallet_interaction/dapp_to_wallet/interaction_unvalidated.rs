@@ -40,6 +40,18 @@ impl HasSampleValues for DappToWalletInteractionUnvalidated {
     }
 }
 
+impl DappToWalletInteractionUnvalidated {
+    pub fn sample_with_interaction_id(
+        interaction_id: WalletInteractionId,
+    ) -> Self {
+        Self::new(
+            interaction_id,
+            DappToWalletInteractionItems::sample_other(),
+            DappToWalletInteractionMetadataUnvalidated::sample_other(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,17 +1,17 @@
 use crate::prelude::*;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 pub enum SessionOrigin {
-    WebDapp(Url),
+    WebDapp(DappOrigin),
 }
 
 impl HasSampleValues for SessionOrigin {
     fn sample() -> Self {
-        Self::WebDapp(Url::from_str("https://example.com").unwrap())
+        Self::WebDapp(DappOrigin::sample())
     }
 
     fn sample_other() -> Self {
-        Self::WebDapp(Url::from_str("https://example.org").unwrap())
+        Self::WebDapp(DappOrigin::sample_other())
     }
 }
 

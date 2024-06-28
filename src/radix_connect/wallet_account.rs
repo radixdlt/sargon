@@ -4,19 +4,19 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct WalletInteractionWalletAccount {
     pub address: AccountAddress,
-    pub label: String,
+    pub label: DisplayName,
     pub appearance_id: AppearanceID,
 }
 
 impl WalletInteractionWalletAccount {
     pub fn new(
         address: impl Into<AccountAddress>,
-        label: impl AsRef<str>,
+        label: impl Into<DisplayName>,
         appearance_id: impl Into<AppearanceID>,
     ) -> Self {
         Self {
             address: address.into(),
-            label: label.as_ref().to_owned(),
+            label: label.into(),
             appearance_id: appearance_id.into(),
         }
     }
@@ -24,13 +24,17 @@ impl WalletInteractionWalletAccount {
 
 impl HasSampleValues for WalletInteractionWalletAccount {
     fn sample() -> Self {
-        Self::new(AccountAddress::sample(), "sample1", AppearanceID::sample())
+        Self::new(
+            AccountAddress::sample(),
+            DisplayName::sample(),
+            AppearanceID::sample(),
+        )
     }
 
     fn sample_other() -> Self {
         Self::new(
             AccountAddress::sample_other(),
-            "sample2",
+            DisplayName::sample_other(),
             AppearanceID::sample_other(),
         )
     }

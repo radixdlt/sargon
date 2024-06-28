@@ -8,7 +8,7 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
-pub struct Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
+pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     /// E.g. `"<CITY>, <YEAR>"`
     pub answer_structure: String,
 
@@ -24,7 +24,7 @@ pub struct Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     pub unsafe_answers: Vec<String>,
 }
 
-impl Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
+impl SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     pub fn with_details(
         structure: impl AsRef<str>,
         example: impl AsRef<str>,
@@ -61,7 +61,9 @@ impl Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     }
 }
 
-impl HasSampleValues for Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
+impl HasSampleValues
+    for SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat
+{
     fn sample() -> Self {
         Self::preset_city_and_year()
     }
@@ -84,7 +86,7 @@ pub struct Security_NOT_PRODUCTION_READY_Question {
     pub kind: SecurityQuestionKind,
     pub question: String,
     pub expected_answer_format:
-        Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
+        SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
 }
 
 impl AsRef<str> for Security_NOT_PRODUCTION_READY_Question {
@@ -109,7 +111,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         version: u8,
         kind: SecurityQuestionKind,
         question: impl AsRef<str>,
-        expected_answer_format: Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
+        expected_answer_format: SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
     ) -> Self {
         Self {
             id,
@@ -123,7 +125,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
     fn freeform_with_id(
         id: u16,
         question: impl AsRef<str>,
-        expected_answer_format: Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
+        expected_answer_format: SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
     ) -> Self {
         Self::with_details(
             id,
@@ -148,7 +150,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             0,
             "What was the first exam you failed",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<SCHOOL>, <SCHOOL_GRADE>, <SUBJECT>",
                 "MIT, year 4, Python",
             ),
@@ -172,7 +174,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             1,
             "In which city and which year did your parents meet?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::preset_city_and_year()
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::preset_city_and_year()
         )
     }
 
@@ -189,7 +191,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             2,
             "What was the first concert you attended?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<ARTIST>, <LOCATION>, <YEAR>",
                 "Jean-Michel Jarre, Paris La Défense, 1990",
             ),
@@ -212,7 +214,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             3,
             "What was the name of the boy or the girl you first kissed?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -232,7 +234,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             4,
             "Where were you when you had your first kiss?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::location(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::location(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -252,7 +254,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             5,
             "In what city and which year did you meet your spouse/significant other?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::preset_city_and_year(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::preset_city_and_year(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -272,7 +274,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             6,
             "What is the middle name of your youngest child?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -292,7 +294,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             7,
             "What was the name of your first stuffed animal?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details(
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details(
                 "<NAME>",
                 "Oinky piggy pig",
                 ["Teddy", "Cat", "Dog", "Winnie (the Poh)", "(Peter) Rabbit"],
@@ -316,7 +318,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             8,
             "What is your oldest cousin's middle name?", 
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<NAME>", "Maria", ["Don't use this one if you and your cousin are very close and have plenty of mutual friends."]))
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<NAME>", "Maria", ["Don't use this one if you and your cousin are very close and have plenty of mutual friends."]))
     }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -336,7 +338,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             9,
             "What was the last name of your third grade teacher?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -356,7 +358,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             10,
             "What is the name of a college you applied to but didn't attend?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<UNIVERSITY NAME>",
                 "Oxford",
             ),
@@ -379,7 +381,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             11,
             "What was the name of the first school you remember attending?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<SCHOOL NAME>",
                 "Hogwartz",
             ),
@@ -402,7 +404,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             12,
             "What was your maths teacher's surname in 7th grade?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -422,7 +424,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             13,
             "What was your driving instructor's first name?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -443,7 +445,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             14,
             "What was the street name where your best friend in high school lived?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<STREET NAME WITHOUT NUMBER>", "Baker Street", ["Bad if had several different best friends during high school."]),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<STREET NAME WITHOUT NUMBER>", "Baker Street", ["Bad if had several different best friends during high school."]),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -464,7 +466,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             15,
             "What was the first name of your best friend at kindergarten?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -485,7 +487,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
         Self::freeform_with_id(
             16,
             "What was the name of the street where you were living when you were 8 years old?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<STREET NAME WITHOUT NUMBER>", "Abbey Road", ["Bad if you lived in many places during that year."]),
+            SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<STREET NAME WITHOUT NUMBER>", "Abbey Road", ["Bad if you lived in many places during that year."]),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️

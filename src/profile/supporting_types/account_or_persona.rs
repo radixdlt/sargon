@@ -30,7 +30,6 @@ impl IsNetworkAware for AccountOrPersona {
     }
 }
 
-
 impl AccountOrPersona {
     fn security_state(&self) -> &EntitySecurityState {
         match self {

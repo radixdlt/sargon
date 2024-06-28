@@ -15,7 +15,7 @@ pub fn new_off_device_mnemonic_factor_source_sample_other(
 #[uniffi::export]
 fn new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
     mwp: MnemonicWithPassphrase,
-    hint: OffDeviceFactorSourceHint,
+    hint: OffDeviceMnemonicHint,
 ) -> OffDeviceMnemonicFactorSource {
     let id = FactorSourceIDFromHash::new_for_off_device(&mwp);
     OffDeviceMnemonicFactorSource::new(id, hint)
@@ -49,7 +49,7 @@ mod tests {
         assert_eq!(
             new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
                 MnemonicWithPassphrase::sample_off_device(),
-                OffDeviceFactorSourceHint::sample()
+                OffDeviceMnemonicHint::sample()
             )
             .factor_source_id(),
             SUT::sample().factor_source_id()

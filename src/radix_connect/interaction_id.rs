@@ -1,30 +1,43 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(WalletInteractionId, Uuid);
+uniffi::custom_newtype!(WalletInteractionId, String);
 
+/// We ought to make `WalletInteractionId` a UUID.
+/// Temporarily, it will be a String because the iOS wallet has specific logic that uses custom IDs for wallet interactions.
 #[derive(
-    Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Display,
 )]
-pub struct WalletInteractionId(pub(crate) Uuid);
+pub struct WalletInteractionId(pub(crate) String);
 
 impl FromStr for WalletInteractionId {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Uuid::from_str(s).map(WalletInteractionId).map_err(|_| {
-            CommonError::RadixMobileInvalidInteractionID {
+        if s.is_empty() {
+            Err(CommonError::RadixMobileInvalidInteractionID {
                 bad_value: s.to_owned(),
-            }
-        })
+            })
+        } else {
+            Ok(WalletInteractionId(s.to_owned()))
+        }
     }
 }
 
 impl HasSampleValues for WalletInteractionId {
     fn sample() -> Self {
-        WalletInteractionId(Uuid::from_bytes([0xff; 16]))
+        WalletInteractionId(Uuid::from_bytes([0xff; 16]).to_string())
     }
 
     fn sample_other() -> Self {
-        WalletInteractionId(Uuid::from_bytes([0xde; 16]))
+        WalletInteractionId(Uuid::from_bytes([0xde; 16]).to_string())
     }
 }
 
@@ -44,9 +57,9 @@ mod tests {
     #[test]
     fn inequafrom_invalid_str() {
         assert_eq!(
-            "bad".parse::<SUT>(),
+            "".parse::<SUT>(),
             Err(CommonError::RadixMobileInvalidInteractionID {
-                bad_value: "bad".to_owned()
+                bad_value: "".to_owned()
             })
         );
     }

@@ -45,34 +45,22 @@ impl FactorSourceIDFromAddress {
 impl FactorSourceIDFromAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_trusted_contact_friend_frank() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::sample_frank(),
-        )
+        Self::new_for_trusted_contact(AccountAddress::sample_frank())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_trusted_contact_friend_judy() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::sample_judy(),
-        )
+        Self::new_for_trusted_contact(AccountAddress::sample_judy())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_trusted_contact_friend_oscar() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::sample_oscar(),
-        )
+        Self::new_for_trusted_contact(AccountAddress::sample_oscar())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_trusted_entity_radix() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::sample_radix(),
-        )
+        Self::new_for_trusted_contact(AccountAddress::sample_radix())
     }
 }
 

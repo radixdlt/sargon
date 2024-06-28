@@ -27,7 +27,7 @@ pub struct OffDeviceMnemonicFactorSource {
 
     /// Properties describing a OffDeviceMnemonicFactorSource to help user
     /// disambiguate between it and another one.
-    pub hint: OffDeviceFactorSourceHint,
+    pub hint: OffDeviceMnemonicHint,
 }
 
 impl From<OffDeviceMnemonicFactorSource> for FactorSource {
@@ -38,7 +38,7 @@ impl From<OffDeviceMnemonicFactorSource> for FactorSource {
 
 fn new_off_device_with_mwp(
     mwp: MnemonicWithPassphrase,
-    hint: OffDeviceFactorSourceHint,
+    hint: OffDeviceMnemonicHint,
 ) -> OffDeviceMnemonicFactorSource {
     let id = FactorSourceIDFromHash::new_for_off_device(&mwp);
     let mut source = OffDeviceMnemonicFactorSource::new(id, hint);
@@ -51,7 +51,7 @@ impl OffDeviceMnemonicFactorSource {
     /// Instantiates a new `OffDeviceMnemonicFactorSource`
     pub fn new(
         id: FactorSourceIDFromHash,
-        hint: OffDeviceFactorSourceHint,
+        hint: OffDeviceMnemonicHint,
     ) -> Self {
         Self {
             id,
@@ -65,14 +65,14 @@ impl HasSampleValues for OffDeviceMnemonicFactorSource {
     fn sample() -> Self {
         new_off_device_with_mwp(
             MnemonicWithPassphrase::sample_off_device(),
-            OffDeviceFactorSourceHint::sample(),
+            OffDeviceMnemonicHint::sample(),
         )
     }
 
     fn sample_other() -> Self {
         new_off_device_with_mwp(
             MnemonicWithPassphrase::sample_off_device_other(),
-            OffDeviceFactorSourceHint::sample_other(),
+            OffDeviceMnemonicHint::sample_other(),
         )
     }
 }
@@ -90,7 +90,7 @@ impl TryFrom<FactorSource> for OffDeviceMnemonicFactorSource {
 }
 impl IsFactorSource for OffDeviceMnemonicFactorSource {
     fn kind() -> FactorSourceKind {
-        FactorSourceKind::LedgerHQHardwareWallet
+        FactorSourceKind::OffDeviceMnemonic
     }
 }
 impl BaseIsFactorSource for OffDeviceMnemonicFactorSource {
@@ -117,6 +117,11 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = OffDeviceMnemonicFactorSource;
+
+    #[test]
+    fn kind() {
+        assert_eq!(SUT::kind(), FactorSourceKind::OffDeviceMnemonic);
+    }
 
     #[test]
     fn equality() {

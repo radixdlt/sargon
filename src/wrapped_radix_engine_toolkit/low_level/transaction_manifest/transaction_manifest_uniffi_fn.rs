@@ -10,6 +10,17 @@ pub fn new_transaction_manifest_from_instructions_string_and_blobs(
 }
 
 #[uniffi::export]
+pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
+    unvalidated_transaction_manifest: UnvalidatedTransactionManifest,
+    network_id: NetworkID,
+) -> Result<TransactionManifest> {
+    TransactionManifest::try_from((
+        unvalidated_transaction_manifest,
+        network_id,
+    ))
+}
+
+#[uniffi::export]
 pub fn transaction_manifest_instructions_string(
     manifest: &TransactionManifest,
 ) -> String {
@@ -97,6 +108,20 @@ mod tests {
             .instructions_string(),
             s
         );
+    }
+
+    #[test]
+    fn test_new_transaction_manifest_from_unvalidated_transaction_manifest() {
+        let unvalidated_transaction_manifest =
+            UnvalidatedTransactionManifest::sample();
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            new_transaction_manifest_from_unvalidated_transaction_manifest(
+                unvalidated_transaction_manifest.clone(),
+                network_id
+            ),
+            SUT::try_from((unvalidated_transaction_manifest, network_id))
+        )
     }
 
     #[test]

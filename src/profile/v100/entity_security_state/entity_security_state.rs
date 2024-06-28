@@ -23,8 +23,8 @@ pub enum EntitySecurityState {
     },
     Secured {
         #[serde(rename = "securedEntityControl")]
-        value: SecuredEntityControl
-    }
+        value: SecuredEntityControl,
+    },
 }
 
 impl<'de> Deserialize<'de> for EntitySecurityState {

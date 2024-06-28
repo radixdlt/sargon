@@ -2,11 +2,13 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionAuthLoginWithChallengeRequestItem {
-    pub challenge: Exactly32Bytes,
+    pub challenge: DappToWalletInteractionAuthChallengeNonce,
 }
 
 impl DappToWalletInteractionAuthLoginWithChallengeRequestItem {
-    pub fn new(challenge: impl Into<Exactly32Bytes>) -> Self {
+    pub fn new(
+        challenge: impl Into<DappToWalletInteractionAuthChallengeNonce>,
+    ) -> Self {
         Self {
             challenge: challenge.into(),
         }
@@ -17,11 +19,11 @@ impl HasSampleValues
     for DappToWalletInteractionAuthLoginWithChallengeRequestItem
 {
     fn sample() -> Self {
-        Self::new(Exactly32Bytes::sample())
+        Self::new(DappToWalletInteractionAuthChallengeNonce::sample())
     }
 
     fn sample_other() -> Self {
-        Self::new(Exactly32Bytes::sample_other())
+        Self::new(DappToWalletInteractionAuthChallengeNonce::sample_other())
     }
 }
 

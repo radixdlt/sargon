@@ -76,8 +76,8 @@ extension TransactionManifest {
 
     public func modify(
         addGuarantees guarantees: [TransactionGuarantee]
-    ) -> Self {
-        modifyManifestAddGuarantees(
+    ) throws -> Self {
+        try modifyManifestAddGuarantees(
             manifest: self,
             guarantees: guarantees
         )

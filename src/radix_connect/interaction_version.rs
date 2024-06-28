@@ -13,7 +13,7 @@ impl From<u64> for WalletInteractionVersion {
 
 impl WalletInteractionVersion {
     pub fn current() -> Self {
-        Self(1)
+        Self(2)
     }
 }
 
@@ -47,6 +47,6 @@ mod tests {
 
     #[test]
     fn current() {
-        assert_eq!(SUT::current(), 1.into());
+        assert_eq!(SUT::current(), 2.into());
     }
 }

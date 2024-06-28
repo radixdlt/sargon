@@ -91,6 +91,21 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
     }
 }
 
+impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
+    for TransactionManifest
+{
+    type Error = CommonError;
+    fn try_from(
+        value: (UnvalidatedTransactionManifest, NetworkID),
+    ) -> Result<TransactionManifest> {
+        TransactionManifest::new(
+            value.0.transaction_manifest_string.clone(),
+            value.1,
+            value.0.blobs.clone(),
+        )
+    }
+}
+
 impl TransactionManifest {
     pub fn sargon_built(
         builder: ScryptoManifestBuilder,

@@ -23,9 +23,12 @@ class SargonNetworkAntenna(
     override suspend fun executeNetworkRequest(request: NetworkRequest): NetworkResponse = runCatching {
         val mediaType = request.headers.extractMediaType()
 
-        val requestBody = request.body.toUByteArray().toByteArray().toRequestBody(
-            contentType = mediaType
-        )
+        val requestBody = request.body
+            .toUByteArray()
+            .toByteArray()
+            .takeIf {
+                it.isNotEmpty()
+            }?.toRequestBody(contentType = mediaType)
 
         val okHttpRequest = Request.Builder()
             .url(url = request.url)

@@ -109,7 +109,7 @@ impl EventKind {
     /// the list from SargonOS.
     ///
     /// E.g. if a new account is created using factor source `X` then `x.common.last_used`,
-    /// is updated and an event if kind `FactorSourceUpdated` is emitted, which does
+    /// is updated and an event of kind `FactorSourceUpdated` is emitted, which does
     /// affect factor sources shown by host.
     pub fn affects_factor_sources(&self) -> bool {
         use EventKind::*;

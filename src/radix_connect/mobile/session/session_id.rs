@@ -7,6 +7,7 @@ uniffi::custom_newtype!(SessionID, Uuid);
     Serialize,
     Deserialize,
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Ord,

@@ -23,6 +23,15 @@ impl HasSampleValues for WalletToDappInteractionResponse {
     }
 }
 
+impl WalletToDappInteractionResponse {
+    pub fn is_success(&self) -> bool {
+        match self {
+            WalletToDappInteractionResponse::Success(_) => true,
+            WalletToDappInteractionResponse::Failure(_) => false,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -39,5 +48,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn is_success() {
+        assert!(SUT::sample().is_success());
+        assert!(!SUT::sample_other().is_success());
     }
 }

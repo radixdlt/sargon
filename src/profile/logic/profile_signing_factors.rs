@@ -24,7 +24,7 @@ use std::cell::RefCell;
 //         Self::new(1, [instance])
 //     }
 // }
-    
+
 // #[derive(Clone, Debug, PartialEq, Eq)]
 // pub struct SigningFactorMatrix {
 //     pub threshold_factors: RefCell<SigningFactorList>,
@@ -51,12 +51,13 @@ pub struct SigningFactors {
 }
 
 impl Profile {
-    
-    pub fn signing_factors_of(&self, entities: IndexSet<AccountOrPersona>) -> Result<SigningFactors> {
-
+    pub fn signing_factors_of(
+        &self,
+        entities: IndexSet<AccountOrPersona>,
+    ) -> Result<SigningFactors> {
         // let mut set = IndexSet::<SigningFactorMatrix>::new();
 
-        // entities.into_iter().map(|e| 
+        // entities.into_iter().map(|e|
         //     match e.security_state() {
         //         EntitySecurityState::Unsecured { value: unsecured_entity_control } => {
         //             set.insert(SigningFactorMatrix::new_unsecured(unsecured_entity_control.transaction_signing.factor_instance()))

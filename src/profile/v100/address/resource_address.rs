@@ -123,6 +123,12 @@ impl ResourceAddress {
             .expect("GC membership")
     }
 
+    pub(crate) fn sample_stokenet_nft_abandon() -> Self {
+        "resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x"
+            .parse()
+            .expect("Abandon")
+    }
+
     pub(crate) fn sample_stokenet_nft_other() -> Self {
         "resource_tdx_2_1ngw6cufaxs5p82kw49juy2yfkt53se76vr0xfsu3tvyduuw6s0y6lc"
             .parse()

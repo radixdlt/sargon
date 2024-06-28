@@ -65,7 +65,7 @@ impl Gateway {
         let network = NetworkDefinition::lookup_by_id(id)?;
         Ok(Self { url, network })
     }
-    
+
     pub fn network_id(&self) -> NetworkID {
         self.network.id
     }

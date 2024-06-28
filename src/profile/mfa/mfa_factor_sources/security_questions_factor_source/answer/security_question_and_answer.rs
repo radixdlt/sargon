@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
-/// An pair of security question and answer
+/// A pair of security question and answer
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
     Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,

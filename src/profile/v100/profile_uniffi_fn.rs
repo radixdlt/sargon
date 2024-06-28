@@ -8,13 +8,8 @@ pub fn new_profile_from_json_string(json_str: String) -> Result<Profile> {
 impl Profile {
     pub fn new_from_json_string(json_str: impl AsRef<str>) -> Result<Profile> {
         let json_str = json_str.as_ref();
-        let json_byte_count = json_str.len() as u64;
-        serde_json::from_str(json_str).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count,
-                type_name: type_name::<Profile>(),
-            }
-        })
+        serde_json::from_str(json_str)
+            .map_failed_to_deserialize_string::<Self>(json_str)
     }
 }
 
@@ -262,7 +257,9 @@ mod uniffi_tests {
             new_profile_from_json_string("".to_owned()),
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 0,
-                type_name: "Profile".to_owned()
+                type_name: "Profile".to_owned(),
+                serde_message: "EOF while parsing a value at line 1 column 0"
+                    .to_string()
             })
         )
     }

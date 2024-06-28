@@ -8,6 +8,12 @@ pub fn suffix_str(n: usize, s: impl AsRef<str>) -> String {
     s.as_ref()[split_pos..].to_string()
 }
 
+/// Returns the first `n` chars of the &str `s`. If `n` is bigger than `s` then
+/// the whole `s` is returned.
+pub fn prefix_str(n: usize, s: impl AsRef<str>) -> String {
+    s.as_ref().chars().take(n).collect()
+}
+
 /// Capitalizes the first character in s.
 pub fn capitalize(s: impl AsRef<str>) -> String {
     let mut c = s.as_ref().chars();
@@ -47,7 +53,28 @@ mod tests {
 
     #[test]
     fn string_suffix() {
-        assert_eq!(suffix_str(7, "By the rivers of Babylon"), "Babylon")
+        assert_eq!(
+            suffix_str(7, String::from("By the rivers of Babylon")),
+            "Babylon"
+        )
+    }
+
+    #[test]
+    fn str_prefix() {
+        assert_eq!(prefix_str(8, "Radix... imagine!"), "Radix...")
+    }
+
+    #[test]
+    fn str_prefix_longer_n() {
+        assert_eq!(prefix_str(32, "Radix... imagine!"), "Radix... imagine!")
+    }
+
+    #[test]
+    fn string_prefix() {
+        assert_eq!(
+            prefix_str(7, String::from("By the rivers of Babylon")),
+            "By the "
+        )
     }
 
     #[test]

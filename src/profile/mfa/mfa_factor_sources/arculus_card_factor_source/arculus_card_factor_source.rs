@@ -113,31 +113,25 @@ impl BaseIsFactorSource for ArculusCardFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ArculusCardFactorSource;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            ArculusCardFactorSource::sample(),
-            ArculusCardFactorSource::sample()
-        );
-        assert_eq!(
-            ArculusCardFactorSource::sample_other(),
-            ArculusCardFactorSource::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            ArculusCardFactorSource::sample(),
-            ArculusCardFactorSource::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = ArculusCardFactorSource::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"            
@@ -166,9 +160,14 @@ mod tests {
 
     #[test]
     fn from_factor_source() {
-        let sut = ArculusCardFactorSource::sample();
+        let sut = SUT::sample();
         let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(ArculusCardFactorSource::try_from(factor_source), Ok(sut));
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
+    }
+
+    #[test]
+    fn kind() {
+        assert_eq!(SUT::kind(), FactorSourceKind::ArculusCard);
     }
 
     #[test]
@@ -176,24 +175,18 @@ mod tests {
         let wrong = DeviceFactorSource::sample();
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
-            ArculusCardFactorSource::try_from(factor_source),
+            SUT::try_from(factor_source),
             Err(CommonError::ExpectedArculusCardFactorSourceGotSomethingElse)
         );
     }
 
     #[test]
     fn factor_source_id() {
-        assert_eq!(
-            ArculusCardFactorSource::sample().factor_source_id(),
-            ArculusCardFactorSource::sample().id.into()
-        );
+        assert_eq!(SUT::sample().factor_source_id(), SUT::sample().id.into());
     }
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(
-            ArculusCardFactorSource::sample().factor_source_kind(),
-            ArculusCardFactorSource::sample().id.kind
-        );
+        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
     }
 }

@@ -50,8 +50,7 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 	
 	public mutating func decrease() {
 		switch self {
-		case .any: break
-		case .all: self = .any
+		case .any, .all: break
 		case let .threshold(thres) where thres <= 1:
 			self = .all
 		case let .threshold(thres) where thres > 1:

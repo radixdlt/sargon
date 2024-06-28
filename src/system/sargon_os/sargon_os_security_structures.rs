@@ -38,7 +38,7 @@ impl SargonOS {
         })
     }
 
-    /// Adds the security stricture of factor sources to Profile if none with the
+    /// Adds the security structureof factor sources to Profile if none with the
     /// same ID already exists, and if all factors it references are found in Profile.
     ///
     /// If `structure` references a FactorSource by ID which is unknown to Profile,

@@ -11,8 +11,8 @@ extension Decimal192 {
 		self = try newDecimalFromString(string: string)
 	}
 	
-	public init(_ float32: Float32) throws {
-		self = try newDecimalFromF32(value: float32)
+	public init(_ float32: Float32) {
+		self = newDecimalFromF32(value: float32)
 	}
     
     public init(_ double: Double) throws {
