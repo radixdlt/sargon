@@ -37,7 +37,7 @@ impl AccountAddress {
     /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
     /// for all accounts created by the Babylon Radix Wallets.
     /// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
-    /// imported from the Olympia Wallet.
+    /// imported from the legacy Olympia desktop application.
     pub fn is_legacy_address(&self) -> bool {
         self.entity_type() == ScryptoEntityType::GlobalVirtualSecp256k1Account
     }

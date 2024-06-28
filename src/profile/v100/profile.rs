@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
-/// Representation of the Radix Wallet, contains a list of
-/// users Accounts, Personas, Authorized Dapps per network
-/// the user has used. It also contains all FactorSources,
-/// FactorInstances and wallet App preferences.
+/// The canonical representation of a users accounts, personas,
+/// authorized dapps, security factors, settings and more.
+///
+/// This large structure of values is called 'wallet backup data'
+/// in user facing tests in host applications, but internally at
+/// RDX Works known as "the Profile".
 ///
 /// ```
 /// extern crate sargon;
@@ -86,26 +88,60 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `DeviceFactorSource`, without any
-    /// networks (thus no accounts), with creating device info as "unknown".
-    pub fn new(
+    /// Creates a new Profile from the `DeviceFactorSource` and `DeviceInfo`.
+    ///
+    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
+    /// "empty" (no Accounts, Personas etc).
+    ///
+    /// # Panics
+    /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
+    pub fn from_device_factor_source(
         device_factor_source: DeviceFactorSource,
-        creating_device_name: impl AsRef<str>,
+        creating_device: DeviceInfo,
     ) -> Self {
-        let creating_device_name = creating_device_name.as_ref();
-        let creating_device = DeviceInfo::with_description(
-            format!(
-                "{} - {}",
-                creating_device_name, device_factor_source.hint.model
-            )
-            .as_str(),
-        );
+        if !device_factor_source.is_main_bdfs() {
+            panic!("DeviceFactorSource is not main BDFS");
+        }
+        let bdfs = device_factor_source;
         let header = Header::new(creating_device);
         Self::with(
             header,
-            FactorSources::with_bdfs(device_factor_source),
+            FactorSources::with_bdfs(bdfs),
             AppPreferences::default(),
-            ProfileNetworks::new(),
+            ProfileNetworks::just(ProfileNetwork::new_empty_on(
+                NetworkID::Mainnet,
+            )),
+        )
+    }
+
+    /// Creates a new Profile from the `MnemonicWithPassphrase` and `DeviceInfo`,
+    /// by initializing a `DeviceFactorInstance` using `DeviceInfo` as source for
+    /// `DeviceFactorSourceHint` which will be the BDFS of the Profile.
+    ///
+    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
+    /// "empty" (no Accounts, Personas etc).
+    pub fn from_mnemonic_with_passphrase(
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        creating_device: DeviceInfo,
+    ) -> Self {
+        let bdfs = DeviceFactorSource::babylon(
+            true,
+            &mnemonic_with_passphrase,
+            &creating_device,
+        );
+        Self::from_device_factor_source(bdfs, creating_device)
+    }
+
+    /// Creates a new Profile from the `Mnemonic` (no passphrase) and `DeviceInfo`,
+    /// by initializing a `DeviceFactorInstance` using `DeviceInfo` as source for
+    /// `DeviceFactorSourceHint` which will be the BDFS of the Profile.
+    ///
+    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
+    /// "empty" (no Accounts, Personas etc).
+    pub fn new(mnemonic: Mnemonic, creating_device: DeviceInfo) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            MnemonicWithPassphrase::new(mnemonic),
+            creating_device,
         )
     }
 
@@ -118,6 +154,7 @@ impl Profile {
         if factor_sources.is_empty() {
             panic!("FactorSources MUST NOT be empty.")
         }
+        debug!("Creating new Profile, header: {:?}", &header);
         Self {
             header,
             factor_sources,
@@ -278,6 +315,17 @@ mod tests {
         assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
+    #[test]
+    fn new_creates_empty_mainnet_network() {
+        let sut = SUT::new(Mnemonic::sample(), DeviceInfo::sample());
+        assert_eq!(
+            sut.networks,
+            ProfileNetworks::just(ProfileNetwork::new_empty_on(
+                NetworkID::Mainnet
+            ))
+        );
+    }
+
     #[should_panic(expected = "FactorSources MUST NOT be empty.")]
     #[test]
     fn not_allowed_to_create_profile_with_empty_factor_source() {
@@ -321,6 +369,15 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "DeviceFactorSource is not main BDFS")]
+    fn new_from_non_main_bdfs_panics() {
+        let _ = SUT::from_device_factor_source(
+            DeviceFactorSource::sample_other(),
+            DeviceInfo::sample(),
+        );
+    }
+
+    #[test]
     fn update_factor_source_not_update_when_factor_source_not_found() {
         let mut sut = SUT::sample();
         let wrong_id: &FactorSourceID =
@@ -339,9 +396,9 @@ mod tests {
     fn change_supported_curve_of_factor_source() {
         let mut sut = SUT::sample();
         let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
-        assert!(sut
-            .factor_sources
-            .contains_id(&DeviceFactorSource::sample().id.into()));
+        assert!(sut.factor_sources.contains_id(FactorSourceID::from(
+            DeviceFactorSource::sample().id
+        )));
 
         assert_eq!(
             sut.factor_sources
@@ -393,9 +450,9 @@ mod tests {
         let mut sut = SUT::sample();
         let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
 
-        assert!(sut
-            .factor_sources
-            .contains_id(&DeviceFactorSource::sample().id.into()));
+        assert!(sut.factor_sources.contains_id(FactorSourceID::from(
+            DeviceFactorSource::sample().id
+        )));
 
         assert_eq!(
             sut.factor_sources
@@ -467,7 +524,7 @@ mod tests {
         let mut sut = SUT::sample();
         let account = sut
             .networks
-            .get_id(&NetworkID::Mainnet)
+            .get_id(NetworkID::Mainnet)
             .unwrap()
             .accounts
             .get_at_index(0)
@@ -482,7 +539,7 @@ mod tests {
 
         assert_eq!(
             sut.networks
-                .get_id(&NetworkID::Mainnet)
+                .get_id(NetworkID::Mainnet)
                 .unwrap()
                 .accounts
                 .get_at_index(0)
@@ -497,16 +554,7 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| {
-                SUT::new(
-                    PrivateHierarchicalDeterministicFactorSource::generate_new_babylon(
-						true,
-                        WalletClientModel::Unknown,
-                    )
-                    .factor_source,
-                    "Foo",
-                )
-            })
+            .map(|_| SUT::new(Mnemonic::generate_new(), DeviceInfo::sample()))
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
@@ -659,12 +707,12 @@ mod tests {
 					"creatingDevice": {
 						"id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
 						"date": "2023-09-11T16:05:56.000Z",
-						"description": "iPhone"
+						"description": { "name": "iPhone", "model": "iPhone" }
 					},
 					"lastUsedOnDevice": {
 						"id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
 						"date": "2023-09-11T16:05:56.000Z",
-						"description": "iPhone"
+						"description": { "name": "iPhone", "model": "iPhone" }
 					},
 					"lastModified": "2023-09-11T16:05:56.000Z",
 					"contentHint": {
@@ -738,16 +786,8 @@ mod tests {
 						"fiatCurrencyPriceTarget": "usd"
 					},
 					"gateways": {
-						"current": "https://rcnet-v3.radixdlt.com/",
+						"current": "https://mainnet.radixdlt.com/",
 						"saved": [
-							{
-								"network": {
-									"name": "zabanet",
-									"id": 14,
-									"displayDescription": "RCnet-V3 (Test Network)"
-								},
-								"url": "https://rcnet-v3.radixdlt.com/"
-							},
 							{
 								"network": {
 									"name": "mainnet",

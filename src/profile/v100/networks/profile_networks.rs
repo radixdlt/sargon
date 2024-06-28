@@ -9,7 +9,7 @@ decl_identified_vec_of!(
 
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
-        self.get_id(&address.network_id())
+        self.get_id(address.network_id())
             .and_then(|n| n.accounts.get_id(address))
             .cloned()
     }
@@ -57,24 +57,39 @@ impl HasSampleValues for ProfileNetworks {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ProfileNetworks;
+
     #[test]
     fn inequality() {
-        assert_ne!(ProfileNetworks::sample(), ProfileNetworks::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(ProfileNetworks::sample(), ProfileNetworks::sample());
-        assert_eq!(
-            ProfileNetworks::sample_other(),
-            ProfileNetworks::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn append_is_noop_if_already_contains() {
+        let mut sut = SUT::sample();
+        assert_eq!(sut.len(), 2);
+        assert_eq!(sut[1].accounts.len(), 2);
+
+        let outcome =
+            sut.append(ProfileNetwork::new_empty_on(NetworkID::Stokenet));
+        assert_eq!(outcome, (false, 1));
+
+        // assert NOOP
+        assert_eq!(sut.len(), 2);
+        assert_eq!(sut[1].accounts.len(), 2);
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            ProfileNetworks::from_iter(
+            SUT::from_iter(
                 [ProfileNetwork::sample(), ProfileNetwork::sample()]
                     .into_iter()
             )
@@ -85,7 +100,7 @@ mod tests {
 
     #[test]
     fn duplicates_are_prevented_and_first_added_is_retained() {
-        let mut sut = ProfileNetworks::from_iter([ProfileNetwork::new(
+        let mut sut = SUT::from_iter([ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::from_iter([
                 Account::sample_mainnet_alice(),
@@ -105,7 +120,7 @@ mod tests {
         );
 
         assert_eq!(
-            sut.get_id(&NetworkID::Mainnet).unwrap().accounts.items(),
+            sut.get_id(NetworkID::Mainnet).unwrap().accounts.items(),
             [
                 Account::sample_mainnet_alice(),
                 Account::sample_mainnet_bob()
@@ -115,14 +130,14 @@ mod tests {
 
     #[test]
     fn update_account() {
-        let mut sut = ProfileNetworks::sample();
+        let mut sut = SUT::sample();
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample().address;
         assert_eq!(
             sut.get_id(id)
                 .unwrap()
                 .accounts
-                .get_id(&account_address)
+                .get_id(account_address)
                 .unwrap()
                 .display_name
                 .value,
@@ -137,7 +152,7 @@ mod tests {
             sut.get_id(id)
                 .unwrap()
                 .accounts
-                .get_id(&account_address)
+                .get_id(account_address)
                 .unwrap()
                 .display_name
                 .value,
@@ -147,11 +162,11 @@ mod tests {
 
     #[test]
     fn update_account_unknown_network() {
-        let mut sut = ProfileNetworks::sample();
+        let mut sut = SUT::sample();
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample_nebunet().address;
         assert_eq!(
-            sut.get_id(id).unwrap().accounts.get_id(&account_address),
+            sut.get_id(id).unwrap().accounts.get_id(account_address),
             None
         );
 
@@ -162,16 +177,16 @@ mod tests {
             .is_none());
 
         // Assert unchanged
-        assert_eq!(sut, ProfileNetworks::sample());
+        assert_eq!(sut, SUT::sample());
     }
 
     #[test]
     fn update_account_unknown_account() {
-        let mut sut = ProfileNetworks::sample();
+        let mut sut = SUT::sample();
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample_mainnet_carol().address;
         assert_eq!(
-            sut.get_id(id).unwrap().accounts.get_id(&account_address),
+            sut.get_id(id).unwrap().accounts.get_id(account_address),
             None
         );
 
@@ -182,7 +197,7 @@ mod tests {
             .is_none());
 
         // Assert unchanged
-        assert_eq!(sut, ProfileNetworks::sample());
+        assert_eq!(sut, SUT::sample());
     }
 
     #[test]
@@ -193,20 +208,20 @@ mod tests {
             Personas::default(),
             AuthorizedDapps::default(),
         );
-        assert_eq!(ProfileNetworks::just(network).len(), 1);
+        assert_eq!(SUT::just(network).len(), 1);
     }
 
     #[test]
     fn content_hint() {
         assert_eq!(
-            ProfileNetworks::sample().content_hint(),
+            SUT::sample().content_hint(),
             ContentHint::with_counters(4, 0, 2)
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = ProfileNetworks::sample();
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

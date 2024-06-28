@@ -55,7 +55,7 @@ final class NetworkAntennaTests: TestCase {
 		}()
 		
 
-		let failGateway = GatewayClient(networkAntenna: failURLSession, networkId: .mainnet)
+		let failGateway = GatewayClient(networkingDriver: failURLSession, networkId: .mainnet)
 		do {
 			_ = try await failGateway.xrdBalanceOfAccountOrZero(address: AccountAddress.sample)
 			XCTFail("Expected to fail")

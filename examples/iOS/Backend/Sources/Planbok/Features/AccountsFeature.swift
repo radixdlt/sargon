@@ -1,72 +1,49 @@
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
+
 
 @Reducer
 public struct AccountsFeature {
+	
 	public init() {}
 	
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			
-			case .view(.createNewAccountButtonTapped):
-				return .send(.delegate(.createNewAccount))
-			
-			case .view(.deleteWalletButtonTapped):
-				return .send(.delegate(.deleteWallet))
-			
-			default: return .none
-			}
-		}
-	}
-
 	@ObservableState
 	public struct State: Equatable {
-		public var walletHolder: WalletHolder
-		
-		// FIXME: We really do not want this
-		mutating func refresh() {
-			walletHolder.refresh()
-		}
-		
-		public var profile: Profile {
-			walletHolder.wallet.profile()
-		}
-		
-		public var currentNetworkID: NetworkId {
-			profile.appPreferences.gateways.current.network.id
-		}
-		
-		public var network: ProfileNetwork {
-			profile.networks.first(where: { $0.id == currentNetworkID })!
-		}
-		
-		public var accounts: Accounts {
-			network.accounts
-		}
-		
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-		}
-		
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
-		}
+		@SharedReader(.network) var network
+		@SharedReader(.accountsForDisplay) var accountsForDisplay
 	}
 	
 	public enum Action: ViewAction {
 		public enum ViewAction {
+			case accountCardTapped(AccountForDisplay)
 			case createNewAccountButtonTapped
-			case deleteWalletButtonTapped
 		}
 		public enum DelegateAction {
-			case createNewAccount
-			case deleteWallet
+			case createNewAccount(index: Int)
+			case showDetailsFor(AccountForDisplay)
 		}
 		case view(ViewAction)
 		case delegate(DelegateAction)
 	}
 	
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+
+			case .view(.createNewAccountButtonTapped):
+				return .send(.delegate(.createNewAccount(index: state.accountsForDisplay.count)))
+				
+			case let .view(.accountCardTapped(account)):
+				return .send(.delegate(.showDetailsFor(account)))
+				
+			default: return .none
+			}
+		}
+	}
+}
+
+extension AccountsFeature {
 	@ViewAction(for: AccountsFeature.self)
 	public struct View: SwiftUI.View {
 		
@@ -80,9 +57,17 @@ public struct AccountsFeature {
 			VStack {
 				Text("Accounts").font(.largeTitle)
 				
-				ForEach(store.state.accounts) { account in
-					VStack {
-						AccountView(account: account)
+				if store.state.accountsForDisplay.isEmpty {
+					Text("You dont have any accounts on \(store.state.network.description)")
+				} else {
+					ScrollView {
+						ForEach(store.state.accountsForDisplay) { accountForDisplay in
+							VStack {
+								AccountCardView(accountForDisplay: accountForDisplay) {
+									send(.accountCardTapped(accountForDisplay))
+								}
+							}
+						}
 					}
 				}
 				
@@ -92,9 +77,6 @@ public struct AccountsFeature {
 					send(.createNewAccountButtonTapped)
 				}
 				
-				Button("Delete Wallet", role: .destructive) {
-					send(.deleteWalletButtonTapped)
-				}
 			}
 			.padding()
 		}

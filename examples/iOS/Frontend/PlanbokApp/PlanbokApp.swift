@@ -11,6 +11,7 @@ import ComposableArchitecture
 
 @main
 struct PlanbokApp: App {
+
 	var body: some Scene {
 		WindowGroup {
 			AppFeature.View(

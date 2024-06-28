@@ -19,7 +19,10 @@ class HeaderTest: SampleTestable<Header> {
         val deviceInfo = DeviceInfo(
             id = UUID.randomUUID(),
             date = Timestamp.now(),
-            description = "Unit test"
+            description = DeviceInfoDescription(name = "My Precious", model = "Samsung Galaxy"),
+            systemVersion = "0.0.1",
+            hostAppVersion = "1.6.0",
+            hostVendor = "Samsung"
         )
         val header = Header.init(creatingDevice = deviceInfo)
 

@@ -23,66 +23,34 @@ pub struct AppearanceID {
 
 impl AppearanceID {
     /// The number of different appearances
-    pub const MAX: u8 = 11;
+    pub const COUNT: u8 = 12;
     pub fn new(value: u8) -> Result<Self> {
-        if value > Self::MAX {
+        if value >= Self::COUNT {
             return Err(CommonError::InvalidAppearanceID { bad_value: value });
         }
         Ok(Self { value })
     }
 
     pub fn from_number_of_accounts_on_network(n: usize) -> Self {
-        Self::new((n % ((Self::MAX + 1) as usize)) as u8).unwrap()
+        Self::new((n % (Self::COUNT as usize)) as u8).unwrap()
     }
 
     // Probably want this as a macro... but it is just not worth it, why I boilerplate it.
     fn declare(value: u8) -> Self {
         Self::new(value).expect("Should have declared valid value.")
     }
-    pub fn gradient0() -> Self {
-        Self::declare(0)
-    }
-    pub fn gradient1() -> Self {
-        Self::declare(1)
-    }
-    pub fn gradient2() -> Self {
-        Self::declare(2)
-    }
-    pub fn gradient3() -> Self {
-        Self::declare(3)
-    }
-    pub fn gradient4() -> Self {
-        Self::declare(4)
-    }
-    pub fn gradient5() -> Self {
-        Self::declare(5)
-    }
-    pub fn gradient6() -> Self {
-        Self::declare(6)
-    }
-    pub fn gradient7() -> Self {
-        Self::declare(7)
-    }
-    pub fn gradient8() -> Self {
-        Self::declare(8)
-    }
-    pub fn gradient9() -> Self {
-        Self::declare(9)
-    }
-    pub fn gradient10() -> Self {
-        Self::declare(10)
-    }
-    pub fn gradient11() -> Self {
-        Self::declare(11)
+
+    pub fn all() -> Vec<Self> {
+        (0..Self::COUNT).map(Self::declare).collect_vec()
     }
 }
 
 impl HasSampleValues for AppearanceID {
     fn sample() -> Self {
-        Self::gradient0()
+        *Self::all().first().unwrap()
     }
     fn sample_other() -> Self {
-        Self::gradient11()
+        *Self::all().iter().last().unwrap()
     }
 }
 
@@ -122,6 +90,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn len_is_count() {
+        assert_eq!(SUT::all().len(), SUT::COUNT as usize);
     }
 
     #[test]
@@ -178,6 +151,6 @@ mod tests {
             .into_iter()
             .map(|a| a.value)
             .collect::<HashSet<_>>();
-        assert_eq!(set.len(), (SUT::MAX as usize) + 1);
+        assert_eq!(set.len(), SUT::COUNT as usize);
     }
 }

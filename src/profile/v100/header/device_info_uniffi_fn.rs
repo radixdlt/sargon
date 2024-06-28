@@ -12,13 +12,6 @@ pub fn new_device_info_sample_other() -> DeviceInfo {
     DeviceInfo::sample_other()
 }
 
-/// Instantiates a new `DeviceInfo` with "iPhone" as description, and
-/// generates a new `id` and will use the current `date` for creation date.
-#[uniffi::export]
-pub fn new_device_info_iphone() -> DeviceInfo {
-    DeviceInfo::new_iphone()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -39,10 +32,5 @@ mod tests {
             .len(),
             2
         );
-    }
-
-    #[test]
-    fn test_new_device_info_iphone() {
-        assert_eq!(new_device_info_iphone().description, "iPhone".to_owned())
     }
 }

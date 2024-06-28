@@ -18,20 +18,22 @@ pub struct GatewayClient {
 
 #[uniffi::export]
 impl GatewayClient {
-    /// Constructs a new `GatewayClient` with a NetworkAntenna for a specified
+    /// Constructs a new `GatewayClient` with a NetworkingDriver for a specified
     /// `Gateway`.
     #[uniffi::constructor]
     pub fn with_gateway(
-        network_antenna: Arc<dyn NetworkAntenna>,
+        networking_driver: Arc<dyn NetworkingDriver>,
         gateway: Gateway,
     ) -> Self {
         Self {
-            http_client: HttpClient { network_antenna },
+            http_client: HttpClient {
+                driver: networking_driver,
+            },
             gateway,
         }
     }
 
-    /// Constructs a new `GatewayClient` with a NetworkAntenna for a specified
+    /// Constructs a new `GatewayClient` with a NetworkingDriver for a specified
     /// network, by looking up an Radix DLT provided Gateway on that network.
     ///
     /// # Panics
@@ -39,10 +41,10 @@ impl GatewayClient {
     /// `network_id` - e.g. will panic if you specify `NetworkID::Simulator` (duh).
     #[uniffi::constructor]
     pub fn new(
-        network_antenna: Arc<dyn NetworkAntenna>,
+        networking_driver: Arc<dyn NetworkingDriver>,
         network_id: NetworkID,
     ) -> Self {
-        Self::with_gateway(network_antenna, Gateway::from(network_id))
+        Self::with_gateway(networking_driver, Gateway::from(network_id))
     }
 }
 
@@ -67,11 +69,12 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_submit_notarized_transaction_mock_duplicate() {
-        let mock_antenna =
-            MockAntenna::with_response(TransactionSubmitResponse {
+        let mock_networking_driver =
+            MockNetworkingDriver::with_response(TransactionSubmitResponse {
                 duplicate: true,
             });
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let sut =
+            SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req =
             sut.submit_notarized_transaction(NotarizedTransaction::sample());
         let result = timeout(MAX, req).await.unwrap();

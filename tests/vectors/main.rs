@@ -687,6 +687,8 @@ mod dapp_to_wallet_interaction_tests {
 
 #[cfg(test)]
 mod wallet_to_dapp_interaction_tests {
+    use std::path::Display;
+
     use super::*;
     use serde_json::Value;
 
@@ -710,14 +712,14 @@ mod wallet_to_dapp_interaction_tests {
             AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz")
             .unwrap(),
             DisplayName::sample(),
-            AppearanceID::gradient0(),
+            AppearanceID::new(0).unwrap(),
         );
 
         let account_2 = WalletInteractionWalletAccount::new(
             AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n")
             .unwrap(),
             DisplayName::sample_other(),
-            AppearanceID::gradient1(),
+            AppearanceID::new(1).unwrap(),
         );
 
         let authorized_request_response_items = WalletToDappInteractionResponseItems::AuthorizedRequest(

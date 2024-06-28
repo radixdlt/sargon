@@ -77,44 +77,28 @@ impl Identifiable for Header {
     }
 }
 
-impl Default for Header {
-    fn default() -> Self {
-        Self::new(DeviceInfo::default())
-    }
-}
-
 impl HasSampleValues for Header {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
-        let device = DeviceInfo::new(
-            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            date,
-            "iPhone",
-        );
+        let device_info = DeviceInfo::sample();
         Header::with_values(
             ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
                 .unwrap(),
-            device,
+            device_info.clone(),
             ContentHint::with_counters(4, 0, 2),
-            date,
+            device_info.date,
         )
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
-        let device = DeviceInfo::new(
-            Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
-            date,
-            "iPhone",
-        );
+        let device_info = DeviceInfo::sample_other();
         Header::with_values(
             ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba")
                 .unwrap(),
-            device,
+            device_info.clone(),
             ContentHint::new(),
-            date,
+            device_info.date,
         )
     }
 }
@@ -149,12 +133,12 @@ pub mod tests {
                 "creatingDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                     "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone"
+                    "description": { "name": "iPhone", "model": "iPhone" }
                 },
                 "lastUsedOnDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                     "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone"
+                    "description": { "name": "iPhone", "model": "iPhone" }
                 },
                 "lastModified": "2023-09-11T16:05:56.000Z",
                 "contentHint": {
@@ -168,64 +152,21 @@ pub mod tests {
     }
 
     #[test]
-    fn last_updated() {
-        let a = SUT::default();
-        let b = SUT::default();
-        assert_ne!(a.last_modified, b.last_modified);
-    }
-
-    #[test]
     fn display() {
-        let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
-        let device = DeviceInfo::new(
-            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            date,
-            "iPhone",
-        );
-        let sut = SUT::with_values(
-            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
-                .unwrap(),
-            device,
-            ContentHint::new(),
-            date,
-        );
-        assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
-    }
-
-    #[test]
-    fn creating_device() {
-        let value = DeviceInfo::new_iphone();
-        let sut = SUT {
-            creating_device: value.clone(),
-            ..Default::default()
-        };
-        assert_eq!(sut.creating_device, value)
-    }
-
-    #[test]
-    fn get_id() {
-        let value = profile_id();
-        let sut = SUT {
-            id: value,
-            ..Default::default()
-        };
-        assert_eq!(sut.id, value)
+        let sut = SUT::sample();
+        pretty_assertions::assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 2, #accounts: 4, #personas: 0");
     }
 
     #[test]
     fn snapshot_version() {
         let value = ProfileSnapshotVersion::default();
-        let sut = SUT {
-            snapshot_version: value,
-            ..Default::default()
-        };
+        let sut = SUT::sample();
         assert_eq!(sut.snapshot_version, value)
     }
 }
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_header_sample, new_header_sample_other, HasSampleValues};
 
     use super::*;
 

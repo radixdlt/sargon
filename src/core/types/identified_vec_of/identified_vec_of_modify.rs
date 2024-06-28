@@ -60,6 +60,10 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
         (true, self.len() - 1)
     }
 
+    pub fn extend(&mut self, iter: impl IntoIterator<Item = V>) {
+        self.0.extend(iter.into_iter().map(|i| (i.id(), i)))
+    }
+
     /// Remove and return the item with the `id`.
     ///
     /// Like `Vec::remove``, the item is removed by shifting all of the elements
@@ -247,9 +251,9 @@ mod tests {
     fn update_with_for_existing() {
         let foobar = User::new(0, "Foobar");
         let mut sut = SUT::sample();
-        assert_eq!(sut.get_id(&0), Some(&User::alice()));
+        assert_eq!(sut.get_id(0), Some(&User::alice()));
         assert!(sut.update_with(&0, |u| { *u = foobar.clone() }));
-        assert_eq!(sut.get_id(&0), Some(&foobar));
+        assert_eq!(sut.get_id(0), Some(&foobar));
     }
 
     #[test]
@@ -262,14 +266,14 @@ mod tests {
     fn test_try_try_update_with_succeeds() {
         let foobar = User::new(0, "Foobar");
         let mut sut = SUT::sample();
-        assert_eq!(sut.get_id(&0), Some(&User::alice()));
+        assert_eq!(sut.get_id(0), Some(&User::alice()));
         assert!(sut
             .try_try_update_with(&0, |u| {
                 *u = foobar.clone();
                 Ok(())
             })
             .is_ok());
-        assert_eq!(sut.get_id(&0), Some(&foobar));
+        assert_eq!(sut.get_id(0), Some(&foobar));
     }
 
     #[test]
@@ -288,9 +292,9 @@ mod tests {
     fn test_try_update_with_success() {
         let foobar = User::new(0, "Foobar");
         let mut sut = SUT::sample();
-        assert_eq!(sut.get_id(&0), Some(&User::alice()));
+        assert_eq!(sut.get_id(0), Some(&User::alice()));
         assert!(sut.try_update_with(&0, |u| { *u = foobar.clone() }).is_ok());
-        assert_eq!(sut.get_id(&0), Some(&foobar));
+        assert_eq!(sut.get_id(0), Some(&foobar));
     }
 
     #[test]

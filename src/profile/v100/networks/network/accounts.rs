@@ -7,6 +7,14 @@ decl_identified_vec_of!(
     Account
 );
 
+impl OnSameNetworkValidating for Accounts {
+    type Element = Account;
+
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -70,6 +78,69 @@ mod tests {
     }
 
     #[test]
+    fn test_assert_elements_on_same_network_empty_is_ok_none() {
+        assert_eq!(SUT::new().assert_elements_on_same_network(), Ok(None))
+    }
+
+    #[test]
+    fn test_assert_elements_not_empty_and_on_same_network_err_if_empty() {
+        assert_eq!(
+            SUT::new().assert_elements_not_empty_and_on_same_network(),
+            Err(CommonError::ExpectedNonEmptyCollection)
+        )
+    }
+
+    #[test]
+    fn on_same_network_mainnet() {
+        assert_eq!(
+            SUT::sample()
+                .assert_elements_not_empty_and_on_same_network()
+                .unwrap(),
+            NetworkID::Mainnet
+        )
+    }
+
+    #[test]
+    fn on_same_network_throws_error_if_on_different_mainnet_first() {
+        assert_eq!(
+            SUT::from_iter([
+                Account::sample_mainnet(),
+                Account::sample_stokenet()
+            ])
+            .assert_elements_not_empty_and_on_same_network(),
+            Err(CommonError::NetworkDiscrepancy {
+                expected: NetworkID::Mainnet,
+                actual: NetworkID::Stokenet
+            })
+        )
+    }
+
+    #[test]
+    fn on_same_network_throws_error_if_on_different_stokenet_first() {
+        assert_eq!(
+            SUT::from_iter([
+                Account::sample_stokenet(),
+                Account::sample_mainnet()
+            ])
+            .assert_elements_not_empty_and_on_same_network(),
+            Err(CommonError::NetworkDiscrepancy {
+                expected: NetworkID::Stokenet,
+                actual: NetworkID::Mainnet
+            })
+        )
+    }
+
+    #[test]
+    fn on_same_network_stokenet() {
+        assert_eq!(
+            SUT::sample_other()
+                .assert_elements_not_empty_and_on_same_network()
+                .unwrap(),
+            NetworkID::Stokenet
+        )
+    }
+
+    #[test]
     fn with_one() {
         assert_eq!(SUT::just(Account::sample()).len(), 1)
     }
@@ -88,7 +159,7 @@ mod tests {
             AppearanceID::default(),
         );
         let accounts = SUT::just(account.clone());
-        assert_eq!(accounts.get_id(&address), Some(&account));
+        assert_eq!(accounts.get_id(address), Some(&account));
     }
 
     #[test]

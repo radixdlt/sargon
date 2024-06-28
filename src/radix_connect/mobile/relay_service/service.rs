@@ -29,10 +29,10 @@ impl Service {
         }
     }
 
-    pub fn new_with_network_antenna(
-        network_antenna: Arc<dyn NetworkAntenna>,
+    pub fn new_with_networking_driver(
+        networking_driver: Arc<dyn NetworkingDriver>,
     ) -> Self {
-        Self::new(HttpClient::new(network_antenna))
+        Self::new(HttpClient::new(networking_driver))
     }
 }
 
@@ -82,13 +82,15 @@ impl WalletInteractionTransport for Service {
 #[cfg(test)]
 impl Service {
     fn new_always_failing() -> Self {
-        Self::new_with_network_antenna(Arc::new(
-            MockAntenna::new_always_failing(),
+        Self::new_with_networking_driver(Arc::new(
+            MockNetworkingDriver::new_always_failing(),
         ))
     }
 
     fn new_succeeding_http_client(request: Vec<u8>) -> Self {
-        Self::new_with_network_antenna(Arc::new(MockAntenna::new(200, request)))
+        Self::new_with_networking_driver(Arc::new(MockNetworkingDriver::new(
+            200, request,
+        )))
     }
 }
 
@@ -124,7 +126,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_send_wallet_interaction_response() {
-        let mock_antenna = MockAntenna::with_spy(200, (), |request| {
+        let mock_antenna = MockNetworkingDriver::with_spy(200, (), |request| {
             // Prepare encryption keys
             let mut encryption_key = Session::sample().encryption_key;
             let mut decryption_key = encryption_key;
@@ -185,7 +187,8 @@ mod tests {
             )
         });
 
-        let service = Service::new_with_network_antenna(Arc::new(mock_antenna));
+        let service =
+            Service::new_with_networking_driver(Arc::new(mock_antenna));
         let session = Session::sample();
 
         let req = service.send_wallet_interaction_response(

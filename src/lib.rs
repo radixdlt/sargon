@@ -1,12 +1,15 @@
+#![feature(async_closure)]
+#![feature(let_chains)]
+#![feature(core_intrinsics)]
 #![allow(unused_imports)]
+#![allow(internal_features)]
 
 mod core;
 mod gateway_api;
 mod hierarchical_deterministic;
-mod http_client;
 mod profile;
 mod radix_connect;
-mod wallet;
+mod system;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
@@ -14,10 +17,9 @@ pub mod prelude {
     pub use crate::core::*;
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
-    pub use crate::http_client::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
-    pub use crate::wallet::*;
+    pub use crate::system::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use radix_rust::prelude::{
@@ -46,7 +48,7 @@ pub mod prelude {
     pub(crate) use std::hash::Hash as StdHash;
     pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;
-    pub(crate) use std::sync::Arc;
+    pub(crate) use std::sync::{Arc, RwLock};
 
     pub(crate) use strum::FromRepr;
     pub(crate) use url::Url;

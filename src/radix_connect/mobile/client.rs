@@ -39,12 +39,12 @@ impl RadixConnectMobile {
 impl RadixConnectMobile {
     #[uniffi::constructor]
     pub fn new(
-        network_antenna: Arc<dyn NetworkAntenna>,
+        networking_driver: Arc<dyn NetworkingDriver>,
         session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
     ) -> Self {
         Self::init(
-            Arc::new(RelayService::new_with_network_antenna(
-                network_antenna.clone(),
+            Arc::new(RelayService::new_with_networking_driver(
+                networking_driver.clone(),
             )),
             session_storage,
         )

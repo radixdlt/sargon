@@ -7,27 +7,27 @@ import XCTest
 final class PrivateHierarchicalDeterministicFactorSourceTests: FactorSourceTest<PrivateHierarchicalDeterministicFactorSource> {
 
 	func test_new_babylon() {
-		let sut = SUT.babylon(isMainBDFS: true, mnemonicWithPassphrase: .sample)
+		let sut = SUT.babylon(isMainBDFS: true, mnemonicWithPassphrase: .sample, deviceInfo: .sample)
 		XCTAssertTrue(sut.supportsBabylon)
 	}
 	
 	func test_new_olympia() {
-		let sut = SUT.olympia(mnemonicWithPassphrase: .sample)
+		let sut = SUT.olympia(mnemonicWithPassphrase: .sample, deviceInfo: .sample)
 		XCTAssertTrue(sut.supportsOlympia)
 	}
 	
 	func test_kind_is_device() {
-		XCTAssertEqual(SUT.olympia(mnemonicWithPassphrase: .sample).factorSourceKind, .device)
-		XCTAssertEqual(SUT.babylon(isMainBDFS: true, mnemonicWithPassphrase: .sample).factorSourceKind, .device)
+		XCTAssertEqual(SUT.olympia(mnemonicWithPassphrase: .sample, deviceInfo: .sample).factorSourceKind, .device)
+		XCTAssertEqual(SUT.babylon(isMainBDFS: true, mnemonicWithPassphrase: .sample, deviceInfo: .sample).factorSourceKind, .device)
 	}
 	
 	func test_is_main_bdfs_true() {
-		let sut = SUT.babylon(isMainBDFS: true, mnemonicWithPassphrase: .sample)
+		let sut = SUT.babylon(isMainBDFS: true, mnemonicWithPassphrase: .sample, deviceInfo: .sample)
 		XCTAssertTrue(sut.factorSource.isMainBDFS)
 	}
 	
 	func test_is_main_bdfs_false() {
-		let sut = SUT.babylon(isMainBDFS: false, mnemonicWithPassphrase: .sample)
+		let sut = SUT.babylon(isMainBDFS: false, mnemonicWithPassphrase: .sample, deviceInfo: .sample)
 		XCTAssertFalse(sut.factorSource.isMainBDFS)
 	}
 }

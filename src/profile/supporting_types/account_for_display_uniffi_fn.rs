@@ -10,6 +10,13 @@ pub fn new_account_for_display_sample_other() -> AccountForDisplay {
     AccountForDisplay::sample_other()
 }
 
+#[uniffi::export]
+pub fn new_account_for_display_from_account(
+    account: Account,
+) -> AccountForDisplay {
+    AccountForDisplay::from(account)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -29,6 +36,15 @@ mod tests {
             ])
             .len(),
             2
+        );
+    }
+
+    #[test]
+    fn test_new_account_for_display_from_account() {
+        let sut = Account::sample();
+        assert_eq!(
+            new_account_for_display_from_account(sut.clone()),
+            AccountForDisplay::from(sut)
         );
     }
 }

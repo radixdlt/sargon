@@ -110,53 +110,21 @@ impl SavedGateways {
     }
 }
 
-impl SavedGateways {
-    /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
-    /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
-    /// the `current`, returns `Ok(true)` if `to` was not already `current`.
-    pub fn change_current(&mut self, to: Gateway) -> Result<bool> {
-        if self.current == to {
-            return Ok(false);
-        }
-        let old_current = &self.current;
-        let was_inserted = self.append(old_current.clone());
-        if !was_inserted {
-            return Err(
-                CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
-            );
-        }
-        self.other.remove_id(&to.id());
-        self.current = to;
-        Ok(true)
-    }
-
-    /// Appends `gateway` to the `other` list, without changing the `current` Gateway.
-    /// If `other` already contains `gateway` then `(false, other.len())` is returned.
-    /// If `other` was new then `(true, index_of_new)` is returned.
-    ///
-    /// - Returns: `true` if it was added, `false` if it was already present (noop)
-    pub fn append(&mut self, gateway: Gateway) -> bool {
-        self.other.append(gateway).0
-    }
-}
-
 impl Default for SavedGateways {
     fn default() -> Self {
-        Self::new_with_other(Gateway::mainnet(), vec![Gateway::stokenet()])
+        Self::new_with_other(Gateway::mainnet(), [Gateway::stokenet()])
             .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
 impl HasSampleValues for SavedGateways {
     fn sample() -> Self {
-        let mut gateways = Self::new(Gateway::rcnet());
-        gateways.append(Gateway::mainnet());
-        gateways.append(Gateway::stokenet());
-        gateways
+        SavedGateways::default()
     }
 
     fn sample_other() -> Self {
-        SavedGateways::default()
+        Self::new_with_other(Gateway::stokenet(), [Gateway::mainnet()])
+            .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
@@ -172,7 +140,7 @@ impl HasSampleValues for Gateways {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SavedGateways;
@@ -189,20 +157,20 @@ mod tests {
     }
 
     #[test]
-    fn change_current_to_existing() {
-        let mut sut = SUT::default();
-        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
-        assert_eq!(sut.change_current(Gateway::stokenet()), Ok(true));
-        assert_eq!(sut.current.network.id, NetworkID::Stokenet);
-    }
-
-    #[test]
     fn append() {
         let mut sut = SUT::sample();
         assert!(!sut.append(Gateway::mainnet()));
+        assert!(!sut.append(Gateway::stokenet()));
         assert_eq!(sut, SUT::sample());
         assert!(sut.append(Gateway::kisharnet()));
-        assert_ne!(sut, SUT::sample());
+        assert_eq!(
+            sut,
+            SUT::new_with_other(
+                Gateway::mainnet(),
+                [Gateway::stokenet(), Gateway::kisharnet()]
+            )
+            .unwrap()
+        );
     }
 
     #[test]
@@ -214,22 +182,13 @@ mod tests {
     }
 
     #[test]
-    fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
-        let mut impossible = SUT {
-            current: Gateway::mainnet(),
-            other: Gateways::from_iter([Gateway::mainnet()]),
-        };
-        assert_eq!(
-            impossible.change_current(Gateway::stokenet()),
-            Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
-        );
-    }
-
-    #[test]
     fn change_current_to_current() {
         let mut sut = SUT::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
-        assert_eq!(sut.change_current(Gateway::mainnet()), Ok(false));
+        assert_eq!(
+            sut.change_current(Gateway::mainnet()),
+            ChangeGatewayOutcome::NoChange
+        );
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
     }
 
@@ -245,18 +204,6 @@ mod tests {
     }
 
     #[test]
-    fn change_current_to_new() {
-        let mut sut = SUT::default();
-        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
-        assert_eq!(sut.change_current(Gateway::nebunet()), Ok(true));
-        assert_eq!(sut.current.network.id, NetworkID::Nebunet);
-        assert_eq!(
-            sut.other.items(),
-            [Gateway::stokenet(), Gateway::mainnet()]
-        );
-    }
-
-    #[test]
     fn json_roundtrip() {
         let sut = SUT::sample();
 
@@ -264,17 +211,8 @@ mod tests {
             &sut,
             r#"
             {
-                "current": "https://rcnet-v3.radixdlt.com/",
+                "current": "https://mainnet.radixdlt.com/",
                 "saved": [
-                    {
-                        "network":
-                        {
-                            "name": "zabanet",
-                            "id": 14,
-                            "displayDescription": "RCnet-V3 (Test Network)"
-                        },
-                        "url": "https://rcnet-v3.radixdlt.com/"
-                    },
                     {
                         "network":
                         {

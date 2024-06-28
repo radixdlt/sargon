@@ -6,10 +6,6 @@ import XCTest
 
 final class DeviceInfoTests: Test<DeviceInfo> {
 	
-	func test_new_iphone() {
-		XCTAssertNotEqual(SUT.sample, SUT.iPhone())
-	}
-	
 	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws{
 		let sut = SUT.sample
 		let json = sut.jsonData()

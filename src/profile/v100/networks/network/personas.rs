@@ -81,7 +81,7 @@ mod tests {
         let persona = Persona::sample();
         let address = persona.address;
         let personas = Personas::just(persona.clone());
-        assert_eq!(personas.get_id(&address), Some(&persona));
+        assert_eq!(personas.get_id(address), Some(&persona));
     }
 
     #[test]

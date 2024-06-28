@@ -18,10 +18,10 @@ let package = Package(
 		.package(name: "Sargon", path: "../../.."),
 		.package(
 			url: "https://github.com/pointfreeco/swift-composable-architecture",
-			from: "1.8.0"),
+			from: "1.10.4"),
 		.package(
 			url: "https://github.com/tgrapperon/swift-dependencies-additions",
-			from: "1.0.1"),
+			from: "1.0.2"),
 		.package(url: "https://github.com/kishikawakatsumi/KeychainAccess", from: "4.2.2"),
 	],
 	targets: [

@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import ComposableArchitecture
+import Sargon
 
 @Reducer
 public struct WelcomeFeature {
@@ -27,6 +29,19 @@ public struct WelcomeFeature {
 		case view(ViewAction)
 	}
 	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case .view(.continueButtonTapped):
+				.send(.delegate(.done))
+			case .delegate:
+				.none
+			}
+		}
+	}
+}
+
+extension WelcomeFeature {
 	@ViewAction(for: WelcomeFeature.self)
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<WelcomeFeature>
@@ -54,17 +69,6 @@ The build artifacts of UniFFI are have three major components:
 				}
 			}
 			.padding()
-		}
-	}
-	
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			case .view(.continueButtonTapped):
-				.send(.delegate(.done))
-			case .delegate:
-				.none
-			}
 		}
 	}
 }

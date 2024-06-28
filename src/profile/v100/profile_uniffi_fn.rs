@@ -33,11 +33,21 @@ impl Profile {
 }
 
 #[uniffi::export]
+pub fn new_profile_with_mnemonic(
+    mnemonic: Mnemonic,
+    device_info: DeviceInfo,
+) -> Profile {
+    Profile::new(mnemonic, device_info)
+}
+
+/// # Panics
+/// Panics if `device_factor_source` is not a main BDFS.
+#[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
-    creating_device_name: String,
+    device_info: DeviceInfo,
 ) -> Profile {
-    Profile::new(device_factor_source, creating_device_name.as_str())
+    Profile::from_device_factor_source(device_factor_source, device_info)
 }
 
 #[uniffi::export]
@@ -135,12 +145,22 @@ mod uniffi_tests {
     }
 
     #[test]
+    fn test_new_with_mnemonic() {
+        assert_eq!(
+            new_profile_with_mnemonic(Mnemonic::sample(), DeviceInfo::sample())
+                .bdfs()
+                .id,
+            Profile::new(Mnemonic::sample(), DeviceInfo::sample())
+                .bdfs()
+                .id,
+        );
+    }
+
+    #[test]
     fn new_private_hd() {
         let private = PrivateHierarchicalDeterministicFactorSource::sample();
-        let lhs = super::new_profile(
-            private.factor_source.clone(),
-            "iPhone".to_string(),
-        );
+        let lhs =
+            new_profile(private.factor_source.clone(), DeviceInfo::sample());
         assert_eq!(
             lhs.bdfs().factor_source_id(),
             private.factor_source.factor_source_id()
@@ -149,8 +169,8 @@ mod uniffi_tests {
 
     #[test]
     fn to_string_and_debug_string() {
-        assert_eq!(profile_to_string(&SUT::sample()).len(), 4314);
-        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27076);
+        assert_eq!(profile_to_string(&SUT::sample()).len(), 4282);
+        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27236);
         assert_ne!(
             profile_to_debug_string(&SUT::sample()),
             profile_to_debug_string(&SUT::sample_other())

@@ -1,4 +1,5 @@
 use radix_rust::prelude::IndexSet;
+use std::borrow::Borrow;
 
 use crate::prelude::*;
 
@@ -25,8 +26,8 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     }
 
     /// Return `true`` if an item with `id` exists in the collection.
-    pub fn contains_id(&self, id: &V::ID) -> bool {
-        self.0.contains_key(id)
+    pub fn contains_id(&self, id: impl Borrow<V::ID>) -> bool {
+        self.0.contains_key(id.borrow())
     }
 
     /// Get an item by index
@@ -41,8 +42,8 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// Return a reference to the item, if it is present, else `None``.
     ///
     /// Computes in **O(1)** time (average).
-    pub fn get_id(&self, id: &V::ID) -> Option<&V> {
-        self.0.get(id)
+    pub fn get_id(&self, id: impl Borrow<V::ID>) -> Option<&V> {
+        self.0.get(id.borrow())
     }
 
     /// Return a Vec of references to the items of the collection, in their order.
@@ -73,9 +74,12 @@ mod tests {
     #[test]
     fn get_id() {
         let sut = SUT::sample();
-        assert_eq!(sut.get_id(&0), Some(&User::alice()));
-        assert_eq!(sut.get_id(&2), Some(&User::carol()));
-        assert_eq!(sut.get_id(&200), None);
+        assert_eq!(sut.get_id(0), Some(&User::alice()));
+        assert_eq!(
+            sut.get_id(2), /* Can also omit & */
+            Some(&User::carol())
+        );
+        assert_eq!(sut.get_id(200), None);
     }
 
     #[test]
@@ -103,8 +107,8 @@ mod tests {
     #[test]
     fn contains_id() {
         let sut = SUT::sample();
-        assert!(sut.contains_id(&0));
-        assert!(!sut.contains_id(&200));
+        assert!(sut.contains_id(0));
+        assert!(!sut.contains_id(200));
     }
 
     #[test]

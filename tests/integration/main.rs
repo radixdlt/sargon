@@ -1,5 +1,3 @@
-mod network_antenna_reqwest;
-
 #[cfg(test)]
 mod integration_tests {
 
@@ -9,9 +7,13 @@ mod integration_tests {
     use sargon::prelude::*;
     use std::collections::HashMap;
 
-    use crate::network_antenna_reqwest::new_gateway_client;
-
     const MAX: Duration = Duration::from_secs(5);
+
+    #[cfg(test)]
+    pub fn new_gateway_client(network_id: NetworkID) -> GatewayClient {
+        let driver = RustNetworkingDriver::new();
+        GatewayClient::new(driver, network_id)
+    }
 
     #[actix_rt::test]
     async fn test_xrd_balance_of_account_or_zero() {

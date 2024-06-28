@@ -29,11 +29,11 @@ impl FromStr for ProfileID {
 
 impl HasSampleValues for ProfileID {
     fn sample() -> Self {
-        ProfileID(Uuid::from_bytes([0xff; 16]))
+        ProfileID(Uuid::sample())
     }
 
     fn sample_other() -> Self {
-        ProfileID(Uuid::from_bytes([0xde; 16]))
+        ProfileID(Uuid::sample_other())
     }
 }
 

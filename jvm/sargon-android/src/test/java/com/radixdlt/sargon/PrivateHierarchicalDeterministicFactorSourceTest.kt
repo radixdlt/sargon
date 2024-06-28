@@ -17,7 +17,8 @@ class PrivateHierarchicalDeterministicFactorSourceTest {
     fun testNewBabylon() {
         val sut = PrivateHierarchicalDeterministicFactorSource.babylon(
             isMain = true,
-            mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+            mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+            deviceInfo = DeviceInfo.sample()
         )
         Assertions.assertTrue(sut.factorSource.asGeneral().supportsBabylon)
     }
@@ -25,7 +26,8 @@ class PrivateHierarchicalDeterministicFactorSourceTest {
     @Test
     fun testNewOlympia() {
         val sut = PrivateHierarchicalDeterministicFactorSource.olympia(
-            mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+            mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+            deviceInfo = DeviceInfo.sample()
         )
         Assertions.assertTrue(sut.factorSource.asGeneral().supportsOlympia)
     }
@@ -36,14 +38,16 @@ class PrivateHierarchicalDeterministicFactorSourceTest {
             FactorSourceKind.DEVICE,
             PrivateHierarchicalDeterministicFactorSource.babylon(
                 isMain = true,
-                mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+                mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+                deviceInfo = DeviceInfo.sample()
             ).factorSource.kind
         )
 
         assertEquals(
             FactorSourceKind.DEVICE,
             PrivateHierarchicalDeterministicFactorSource.olympia(
-                mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+                mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+                deviceInfo = DeviceInfo.sample()
             ).factorSource.kind
         )
     }

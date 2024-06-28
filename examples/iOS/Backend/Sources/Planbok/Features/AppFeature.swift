@@ -1,5 +1,5 @@
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 @Reducer
 public struct AppFeature {
@@ -9,8 +9,29 @@ public struct AppFeature {
 		case splash(SplashFeature.State)
 		case onboarding(OnboardingFeature.State)
 		case main(MainFeature.State)
-		public init() {
-			self = .splash(.init())
+		
+		public init(isEmulatingFreshInstall: Bool = false) {
+			
+			let drivers = Drivers(
+				networking: URLSession.shared,
+				   secureStorage: Keychain(service: "rdx.works.planbok"),
+				   entropyProvider: EntropyProvider.shared,
+				   hostInfo: HostInfo(
+					   appVersion: "0.0.1"
+				   ),
+				   logging: Log.shared,
+				   eventBus: EventBus.shared,
+				   fileSystem: FileSystem.shared,
+				   unsafeStorage: UnsafeStorage.init(
+					   userDefaults: .init(
+						   suiteName: "rdx.works"
+					   )!
+				   )
+			   )
+			
+			BIOS.creatingShared(drivers: drivers)
+			
+			self = .splash(.init(isEmulatingFreshInstall: true))
 		}
 	}
 	
@@ -20,50 +41,30 @@ public struct AppFeature {
 		case main(MainFeature.Action)
 	}
 	
-	public struct View: SwiftUI.View {
-		public let store: StoreOf<AppFeature>
-		public init(store: StoreOf<AppFeature>) {
-			self.store = store
-		}
-		public var body: some SwiftUI.View {
-			switch store.state {
-			case .splash:
-				if let store = store.scope(state: \.splash, action: \.splash) {
-					SplashFeature.View(store: store)
-				}
-			case .onboarding:
-				if let store = store.scope(state: \.onboarding, action: \.onboarding) {
-					OnboardingFeature.View(store: store)
-				}
-			case .main:
-				if let store = store.scope(state: \.main, action: \.main) {
-					MainFeature.View(store: store)
-				}
-			}
-		}
-	}
-	
-	
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			
-			case let .splash(.delegate(.walletInitialized(wallet, hasAccount))):
-				if hasAccount {
-					state = .main(MainFeature.State(wallet: wallet))
+			case let .splash(.delegate(.booted(hasAnyAccountOnAnyNetwork))):
+				if hasAnyAccountOnAnyNetwork {
+					state = .main(MainFeature.State())
 				} else {
-					state = .onboarding(OnboardingFeature.State(wallet: wallet))
+					state = .onboarding(OnboardingFeature.State())
 				}
 				return .none
 			
-			case let .onboarding(.delegate(.createdAccount(with: walletHolder))):
-				state = .main(MainFeature.State(walletHolder: walletHolder))
+			case .onboarding(.delegate(.done)):
+				state = .main(MainFeature.State())
 				return .none
 				
 			case .main(.delegate(.deletedWallet)):
-				state = .onboarding(OnboardingFeature.State(wallet: Wallet.generateNewBDFSAndEmptyProfile()))
+				state = .onboarding(OnboardingFeature.State())
+				return .none
+				
+			case .main(.delegate(.emulateFreshInstall)):
+				state = AppFeature.State(isEmulatingFreshInstall: true)
 				return .none
 			
 			default:
@@ -82,3 +83,28 @@ public struct AppFeature {
 	}
 }
 
+extension AppFeature {
+	public struct View: SwiftUI.View {
+		public let store: StoreOf<AppFeature>
+		public init(store: StoreOf<AppFeature>) {
+			self.store = store
+		}
+		
+		public var body: some SwiftUI.View {
+			switch store.state {
+			case .splash:
+				if let store = store.scope(state: \.splash, action: \.splash) {
+					SplashFeature.View(store: store)
+				}
+			case .onboarding:
+				if let store = store.scope(state: \.onboarding, action: \.onboarding) {
+					OnboardingFeature.View(store: store)
+				}
+			case .main:
+				if let store = store.scope(state: \.main, action: \.main) {
+					MainFeature.View(store: store)
+				}
+			}
+		}
+	}
+}
