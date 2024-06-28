@@ -2,7 +2,6 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.clientID
 import com.radixdlt.sargon.extensions.fromJson
-import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.Sample

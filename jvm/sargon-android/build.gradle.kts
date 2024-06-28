@@ -73,6 +73,7 @@ koverReport {
         includes {
             packages("com.radixdlt.sargon.extensions")
             packages("com.radixdlt.sargon.antenna")
+            packages("com.radixdlt.sargon.os")
         }
     }
 
@@ -89,7 +90,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
     // For Coroutines support
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation(libs.coroutines.android)
 
     // For Serialization extensions
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
@@ -99,12 +100,23 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:okhttp-coroutines")
 
+    // For Storage implementation
+    implementation(libs.androidx.datastore.preferences)
+
+    // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))
+
+    // Integration tests
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.junit.ktx)
+    androidTestImplementation(libs.coroutines.test)
 }
 
 publishing {
@@ -157,6 +169,12 @@ android.libraryVariants.all {
         "generate${buildTypeUpper}UniFFIBindings",
         Exec::class
     ) {
+        val regenerate = properties["regenerate"] ?: true //TODO improve by using gradle outputs
+
+        onlyIf {
+            regenerate == true || !File("${buildDir}/generated/src/${buildType}/java").exists()
+        }
+
         group = BasePlugin.BUILD_GROUP
 
         workingDir = rootDir.parentFile

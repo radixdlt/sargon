@@ -522,6 +522,7 @@ decl_exactly_n_bytes!(
     32,
     "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
+pub type SymmetricKey = Exactly32Bytes;
 
 decl_exactly_n_bytes!(
     /// 64 bytes, used by Ed25519Signatures, implementation wise those bytes are

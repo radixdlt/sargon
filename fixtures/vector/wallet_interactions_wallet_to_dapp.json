@@ -21,12 +21,12 @@
                 "accounts" : [
                     {
                       "address" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz",
-                      "label" : "Dff",
+                      "label" : "Spending Account",
                       "appearanceId" : 0
                     },
                     {
                       "address" : "account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n",
-                      "label" : "Ghhvgfvf",
+                      "label" : "Savings Account",
                       "appearanceId" : 1
                     }
                   ],
@@ -74,7 +74,7 @@
                 "accounts" : [
                   {
                     "address" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz",
-                    "label" : "Dff",
+                    "label" : "Spending Account",
                     "appearanceId" : 0
                   }
                 ]

@@ -230,8 +230,8 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("Invalid DisplayName too long, expected max: {expected}, found: {found}")]
-    InvalidDisplayNameTooLong { expected: u64, found: u64 } = 10063,
+    #[error("FREE")]
+    FREE = 10063,
 
     #[error("Invalid ISO8601 Time string: {bad_value}")]
     InvalidISO8601String { bad_value: String } = 10064,
@@ -251,10 +251,11 @@ pub enum CommonError {
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,
 
-    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name}")]
+    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name} with error: \"{serde_message}\"")]
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
         type_name: String,
+        serde_message: String,
     } = 10070,
 
     #[error("Failed To create ProfileID (UUID) from string: {bad_value}")]
@@ -493,57 +494,109 @@ pub enum CommonError {
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
 
     #[error(
+        "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{count}, but an 'instruction_index' of {index} was specified."
+    )]
+    TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10138,
+
+    #[error("Failed to create KeyAgreementPublicKey from hex: {bad_value}")]
+    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10139,
+
+    #[error(
+        "Failed to create KeyAgreementPublicKey from bytes: {bad_value:?}"
+    )]
+    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10140,
+
+    #[error(
+        "Failed to create KeyAgreementPrivateKey from bytes: {bad_value:?}"
+    )]
+    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10141,
+
+    #[error("RadixConnectMobileSession not found, session id: {session_id}")]
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10142,
+
+    #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
+    RadixConnectMobileDappRequestNotFound {
+        interaction_id: WalletInteractionId,
+    } = 10143,
+
+    #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
+    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
+
+    #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
+    InvalidEd25519SignatureFromString { bad_value: String } = 10145,
+
+    #[error("Radix Connect Mobile dApp public key does not match the session's dApp public key")]
+    RadixConnectMobileDappPublicKeyMismatch = 10146,
+
+    #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
+    RadixConnectMobileDappIdentityMismatch = 10147,
+
+    #[error(
+        "Radix Connect Mobile dApp origin not match the session's dApp origin"
+    )]
+    RadixConnectMobileDappOriginMismatch = 10148,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidDappSignature = 10149,
+
+    #[error("Radix Connect Mobile dApp sent an invalid signature")]
+    RadixConnectMobileInvalidRequestFormat = 10150,
+
+    #[error("Radix Connect Mobile failed to create new in flight session")]
+    RadixConnectMobileFailedToCreateNewSession = 10151,
+
+    #[error(
         "Failed to load Profile from secure storage, profile id: {profile_id}"
     )]
-    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10138,
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10152,
 
     #[error("Failed to save DeviceInfo to secure storage")]
-    UnableToSaveDeviceInfoToSecureStorage = 10139,
+    UnableToSaveDeviceInfoToSecureStorage = 10153,
 
     #[error("Unable to acquire read lock for profile")]
-    UnableToAcquireReadLockForProfile = 10140,
+    UnableToAcquireReadLockForProfile = 10154,
 
     #[error("Failed to read from unsafe storage.")]
-    UnsafeStorageReadError = 10141,
+    UnsafeStorageReadError = 10155,
 
     #[error("Failed to write to unsafe storage.")]
-    UnsafeStorageWriteError = 10142,
+    UnsafeStorageWriteError = 10156,
 
     #[error("Failed to create file path from string: '{bad_value}'")]
-    FailedToCreateFilePathFromString { bad_value: String } = 10143,
+    FailedToCreateFilePathFromString { bad_value: String } = 10157,
 
     #[error("Expected collection to not be empty")]
-    ExpectedNonEmptyCollection = 10144,
+    ExpectedNonEmptyCollection = 10158,
 
     #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10145,
+    UnableToAddAllAccountsDuplicatesFound = 10159,
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
     ProfileUsedOnOtherDevice {
         other_device_id: DeviceID,
         this_device_id: DeviceID,
-    } = 10146,
+    } = 10160,
 
     #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
-    InvalidDeviceID { bad_value: String } = 10147,
+    InvalidDeviceID { bad_value: String } = 10161,
 
     #[error("Tried to replace profile with one with a different ProfileID than the current one. Use `import_profile` instead.")]
-    TriedToUpdateProfileWithOneWithDifferentID = 10148,
+    TriedToUpdateProfileWithOneWithDifferentID = 10162,
 
     #[error("Invalid path, bad value: '{bad_value}'")]
-    InvalidPath { bad_value: String } = 10149,
+    InvalidPath { bad_value: String } = 10163,
 
     #[error("Failed to save file: '{path}'")]
-    FailedToSaveFile { path: String } = 10150,
+    FailedToSaveFile { path: String } = 10164,
 
     #[error("Failed to load file: '{path}'")]
-    FailedToLoadFile { path: String } = 10151,
+    FailedToLoadFile { path: String } = 10165,
 
     #[error("Failed to delete file: '{path}'")]
-    FailedToDeleteFile { path: String } = 10152,
+    FailedToDeleteFile { path: String } = 10166,
 
     #[error("Not permission enough to access file: '{path}'")]
-    NotPermissionToAccessFile { path: String } = 10153,
+    NotPermissionToAccessFile { path: String } = 10167,
 }
 
 #[uniffi::export]
@@ -555,11 +608,20 @@ impl CommonError {
     pub fn error_code(&self) -> u32 {
         core::intrinsics::discriminant_value(self)
     }
+
+    pub fn is_safe_to_show_error_message(&self) -> bool {
+        matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
+    }
 }
 
 #[uniffi::export]
 pub fn error_code_from_error(error: &CommonError) -> u32 {
     error.error_code()
+}
+
+#[uniffi::export]
+pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
+    error.is_safe_to_show_error_message()
 }
 
 #[cfg(test)]
@@ -579,5 +641,21 @@ mod tests {
     fn error_code() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
         assert_eq!(error_code_from_error(&sut), 10049);
+    }
+
+    #[test]
+    fn is_safe_to_show_error_message() {
+        let sut = CommonError::FailedToDeserializeJSONToValue {
+            json_byte_count: 100,
+            type_name: "TypeName".to_string(),
+            serde_message: "message".to_string(),
+        };
+        assert!(is_safe_to_show_error_message_from_error(&sut));
+    }
+
+    #[test]
+    fn is_not_safe_to_show_error_message() {
+        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
+        assert!(!is_safe_to_show_error_message_from_error(&sut));
     }
 }
