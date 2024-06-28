@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Alexander Cyon on 2024-06-01.
 //
@@ -11,7 +11,7 @@ import SwiftUI
 
 extension FactorSource {
 	public func hintView(
-        action: (() -> Void)? = nil
+		action: (() -> Void)? = nil
 	) -> some SwiftUI.View {
 		Group {
 			if let device = asDevice {
@@ -51,15 +51,15 @@ extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 	) -> some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("#Questions", self.securityQuestions.count)
-            if let action {
-                Button("Decrypt with answers", action: action)
-            }
+			if let action {
+				Button("Decrypt with answers", action: action)
+			}
 		}
 		.multilineTextAlignment(.leading)
 		.frame(maxWidth: .infinity)
 	}
 }
-extension OffDeviceFactorSourceHint {
+extension OffDeviceMnemonicHint {
 	public func display(
 		action: (() -> Void)? = nil
 	) -> some SwiftUI.View {
