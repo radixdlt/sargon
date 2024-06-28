@@ -78,9 +78,12 @@ impl DeviceFactorSourceHint {
         device_info: &DeviceInfo,
         word_count: BIP39WordCount,
     ) -> Self {
+        // FIXME: Remove this, use `device_info.description` directly when its type has changed from String -> DeviceInfoDescription
+        let description =
+            DeviceInfoDescription::from(device_info.description.as_ref());
         Self::new(
-            device_info.description.name.clone(),
-            device_info.description.model.clone(),
+            description.name.clone(),
+            description.model.clone(),
             device_info.system_version.clone(),
             device_info.host_app_version.clone(),
             device_info.host_vendor.clone(),

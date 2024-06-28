@@ -55,23 +55,22 @@ impl<'de> Deserialize<'de> for DeviceInfoDescription {
                 model: new_format.model,
             }),
             Wrapper::OldFormat(description) => {
-                // Swift used: "\(model) (\(name))"
-                let swift_name_suffix = " (iPhone)";
-                if description.ends_with(swift_name_suffix) {
-                    let model =
-                        description.split(swift_name_suffix).next().unwrap();
-                    return Ok(Self {
-                        name: "iPhone".to_owned(),
-                        model: model.to_owned(),
-                    });
-                }
-                // FIXME: Android
-                let name = description.clone();
-                let model = description.clone();
-
-                Ok(Self { name, model })
+                Ok(Self::from(description.as_ref()))
             }
         }
+    }
+}
+
+impl From<&str> for DeviceInfoDescription {
+    fn from(description: &str) -> Self {
+        // Swift used: "\(model) (\(name))"
+        let swift_name_suffix = " (iPhone)";
+        if description.ends_with(swift_name_suffix) {
+            let model = description.split(swift_name_suffix).next().unwrap();
+            return Self::new("iPhone", model);
+        }
+        // FIXME: Android
+        Self::new(description, description)
     }
 }
 

@@ -32,7 +32,7 @@ pub struct DeviceInfo {
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device
     /// if they are able to.
-    pub description: DeviceInfoDescription,
+    pub description: String, // FIXME: Start using `DeviceInfoDescription` !
 
     /// The **last known** version of the device's operating system, e.g. "iOS 17.4.1".
     ///
@@ -75,7 +75,7 @@ impl DeviceInfo {
         Self {
             id,
             date,
-            description,
+            description: description.to_string(),
             system_version: Some(system_version.as_ref().to_owned()),
             host_app_version: Some(host_app_version.as_ref().to_owned()),
             host_vendor: Some(host_vendor.as_ref().to_owned()),
@@ -121,7 +121,8 @@ impl HasSampleValues for DeviceInfo {
             description: DeviceInfoDescription {
                 name: "iPhone".to_owned(),
                 model: "iPhone".to_owned(),
-            },
+            }
+            .to_string(),
             system_version: None,
             host_app_version: None,
             host_vendor: None,
@@ -136,7 +137,8 @@ impl HasSampleValues for DeviceInfo {
             description: DeviceInfoDescription {
                 name: "Android".to_owned(),
                 model: "Android".to_owned(),
-            },
+            }
+            .to_string(),
             system_version: None,
             host_app_version: None,
             host_vendor: None,
@@ -218,7 +220,7 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#;
         let model = serde_json::from_str::<SUT>(str).unwrap();
@@ -243,7 +245,7 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56.000Z",
-                "description": { "name": "iPhone", "model": "iPhone" }
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -254,7 +256,7 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "date": "1970-01-01T12:34:56Z",
-                "description": { "name": "Nokia", "model": "3310" }
+                "description": "Nokia 3310 (lur)"
             }
             "#,
         );
@@ -278,10 +280,7 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56.000Z",
-                "description": { 
-                    "name": "My nice iPhone", 
-                    "model": "iPhone 15 Pro" 
-                },
+                "description": "My nice iPhone (iPhone 15 Pro)", 
                 "system_version": "17.4.1",
                 "host_app_version": "1.6.0",
                 "host_vendor": "Apple"
@@ -297,7 +296,7 @@ mod tests {
             {
                 "id": "invalid-uuid",
                 "date": "1970-01-01T12:34:56.000Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -307,7 +306,7 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "date": "invalid-date",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -317,7 +316,7 @@ mod tests {
             {
                 "missing_key": "id",
                 "date": "1970-01-01T12:34:56.000Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -327,7 +326,7 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "missing_key": "date",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );

@@ -36,7 +36,7 @@ class ProfileTest : SampleTestable<Profile> {
             deviceInfo = DeviceInfo.sample.other()
         )
 
-        assertEquals("Android", profile.header.creatingDevice.description.name)
+        assertEquals("Android (Android)", profile.header.creatingDevice.description)
     }
 
     @Test

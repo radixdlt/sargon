@@ -752,12 +752,12 @@ mod tests {
 					"creatingDevice": {
 						"id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
 						"date": "2023-09-11T16:05:56.000Z",
-						"description": { "name": "iPhone", "model": "iPhone" }
+						"description": "iPhone (iPhone)"
 					},
 					"lastUsedOnDevice": {
 						"id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
 						"date": "2023-09-11T16:05:56.000Z",
-						"description": { "name": "iPhone", "model": "iPhone" }
+						"description": "iPhone (iPhone)"
 					},
 					"lastModified": "2023-09-11T16:05:56.000Z",
 					"contentHint": {
