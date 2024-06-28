@@ -11,6 +11,18 @@ pub enum EventProfileModified {
 
     /// An existing account has been updated
     AccountUpdated { address: AccountAddress },
+
+    /// Profile updated with a new factor source.
+    FactorSourceAdded { id: FactorSourceID },
+
+    /// Profile updated with many new factor sources.
+    FactorSourcesAdded { ids: Vec<FactorSourceID> },
+
+    /// An existing factor source has been updated
+    FactorSourceUpdated { id: FactorSourceID },
+
+    /// Profile updated with a new Security Structure.
+    SecurityStructureAdded { id: SecurityStructureID },
 }
 
 impl HasEventKind for EventProfileModified {
@@ -19,6 +31,16 @@ impl HasEventKind for EventProfileModified {
             Self::AccountUpdated { address: _ } => EventKind::AccountUpdated,
             Self::AccountAdded { address: _ } => EventKind::AccountAdded,
             Self::AccountsAdded { addresses: _ } => EventKind::AccountsAdded,
+            Self::FactorSourcesAdded { ids: _ } => {
+                EventKind::FactorSourcesAdded
+            }
+            Self::FactorSourceAdded { id: _ } => EventKind::FactorSourceAdded,
+            Self::FactorSourceUpdated { id: _ } => {
+                EventKind::FactorSourceUpdated
+            }
+            Self::SecurityStructureAdded { id: _ } => {
+                EventKind::SecurityStructureAdded
+            }
         }
     }
 }
@@ -69,6 +91,7 @@ mod tests {
             },
             EventKind::AccountAdded,
         );
+
         test(
             SUT::AccountUpdated {
                 address: AccountAddress::sample(),
@@ -80,6 +103,34 @@ mod tests {
                 addresses: vec![AccountAddress::sample()],
             },
             EventKind::AccountsAdded,
+        );
+
+        test(
+            SUT::FactorSourcesAdded {
+                ids: vec![FactorSourceID::sample()],
+            },
+            EventKind::FactorSourcesAdded,
+        );
+
+        test(
+            SUT::FactorSourceAdded {
+                id: FactorSourceID::sample(),
+            },
+            EventKind::FactorSourceAdded,
+        );
+
+        test(
+            SUT::SecurityStructureAdded {
+                id: SecurityStructureID::sample(),
+            },
+            EventKind::SecurityStructureAdded,
+        );
+
+        test(
+            SUT::FactorSourceUpdated {
+                id: FactorSourceID::sample(),
+            },
+            EventKind::FactorSourceUpdated,
         );
     }
 }

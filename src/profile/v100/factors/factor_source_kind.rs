@@ -69,6 +69,20 @@ pub enum FactorSourceKind {
     ///  * Hierarchical deterministic  (**Encrypted** mnemonic)
     #[serde(rename = "securityQuestions")]
     SecurityQuestions,
+
+    /// An Arculus card, in credit card size, communicating with host using NFC.
+    ///
+    /// For more info see [link]
+    ///
+    /// Attributes:
+    ///  * Mine
+    ///  * Off device
+    ///  * Hierarchical deterministic  (**Encrypted** mnemonic)\
+    ///  * Hardware (communicates with host using NFC)
+    ///
+    /// [link]: https://www.getarculus.com/
+    #[serde(rename = "arculusCard")]
+    ArculusCard,
 }
 
 impl FactorSourceKind {

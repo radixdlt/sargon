@@ -9,9 +9,10 @@ class EventBusDriverTests: DriverTest<EventBus> {
 	func test() async throws {
 		let sut = SUT()
 		
+		let expectedEvents = Array<EventKind>([.booted, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
 		let task = Task {
 			var notifications = Set<EventNotification>()
-			for await notification in await sut.notifications().prefix(3) {
+			for await notification in await sut.notifications().prefix(expectedEvents.count) {
 				notifications.insert(notification)
 			}
 			return notifications
@@ -21,7 +22,7 @@ class EventBusDriverTests: DriverTest<EventBus> {
 		let os = try await TestOS(bios: bios)
 		try await os.createAccount()
 		let notifications = await task.value
-		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set([.booted, .profileSaved, .accountAdded]))
+		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
 	}
 	
 }

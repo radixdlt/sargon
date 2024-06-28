@@ -687,7 +687,6 @@ mod dapp_to_wallet_interaction_tests {
 
 #[cfg(test)]
 mod wallet_to_dapp_interaction_tests {
-    use std::path::Display;
 
     use super::*;
     use serde_json::Value;

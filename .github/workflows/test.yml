@@ -33,7 +33,7 @@ jobs:
         uses: RDXWorks-actions/cargo-install@main
         with:
           crate: typos-cli
-          locked: true
+          version: 1.22.7
 
       - name: Check typos
         run: typos

@@ -17,7 +17,7 @@ extension PersonaData {
 		CustomStringConvertible
 	{
 		case name(PersonaDataEntryName)
-		case emailAddress(PersonaDataEntryEmailAddress)
+		case emailAddress(EmailAddress)
 		case phoneNumber(PersonaDataEntryPhoneNumber)
 	}
 }

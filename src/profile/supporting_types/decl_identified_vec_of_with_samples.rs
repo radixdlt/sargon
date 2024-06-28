@@ -12,6 +12,7 @@ macro_rules! decl_identified_vec_of {
             $(
                 #[doc = $expr]
             )*
+            #[allow(non_camel_case_types)]
 			pub type $collection_type = IdentifiedVecOf<$element_type>;
 
             #[uniffi::export]

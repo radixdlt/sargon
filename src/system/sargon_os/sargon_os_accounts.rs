@@ -32,6 +32,9 @@ impl SargonOS {
 
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
     /// index of the next account for the BDFS.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
     pub async fn create_unsaved_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
@@ -55,17 +58,31 @@ impl SargonOS {
     /// this FactorSource as derivation path.
     ///
     /// If you want to add it to Profile, call `os.add_account(account)`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage, since the `last_used_on` date
+    /// of the factor source has been updated.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
     pub async fn create_unsaved_account(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
         let profile = self.profile();
-        profile
+
+        let (factor_source_id, account) = profile
             .create_unsaved_account(network_id, name, async move |fs| {
                 self.load_private_device_factor_source(&fs).await
             })
-            .await
+            .await?;
+
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
+            .await?;
+
+        Ok(account)
     }
 
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
@@ -143,6 +160,10 @@ impl SargonOS {
     /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
     ///
     /// If you want to add them to Profile, call `add_accounts(accounts)`
+    ///
+    /// # Emits Event
+    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
+    /// `factor_source.common.last_used` is updated.
     pub async fn batch_create_unsaved_accounts(
         &self,
         network_id: NetworkID,
@@ -150,7 +171,8 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<Accounts> {
         let profile = self.profile();
-        profile
+
+        let (factor_source_id, accounts) = profile
             .create_unsaved_accounts(
                 network_id,
                 count,
@@ -162,7 +184,13 @@ impl SargonOS {
                     self.load_private_device_factor_source(&fs).await
                 },
             )
-            .await
+            .await?;
+
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
+            .await?;
+
+        Ok(accounts)
     }
 }
 
@@ -187,23 +215,11 @@ impl SargonOS {
         let address = account.address;
 
         debug!("Adding account address: {} to profile", address);
+
         self.add_accounts_without_emitting_account_added_event(Accounts::just(
             account,
         ))
         .await?;
-
-        self.profile_holder.access_profile_with(|p| {
-            let accounts_on_network = p
-                .networks
-                .get_id(address.network_id())
-                .unwrap()
-                .accounts
-                .len();
-            debug!(
-                "Added account address: {} to profile, contains: #{}",
-                address, accounts_on_network
-            );
-        });
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -625,6 +641,72 @@ mod tests {
 
         // ASSERT
         assert!(os.profile().networks[0].accounts.is_empty())
+    }
+
+    #[actix_rt::test]
+    async fn test_create_unsaved_account_emits_factor_source_updated() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ACT
+        os.with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::FactorSourceUpdated));
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_emits_events() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ACT
+        os.with_timeout(|x| {
+            x.create_and_save_new_account(
+                NetworkID::Mainnet,
+                DisplayName::sample(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let events = event_bus_driver
+            .recorded()
+            .iter()
+            .map(|e| e.event.kind())
+            .collect_vec();
+
+        use EventKind::*;
+        assert_eq!(
+            events,
+            vec![
+                Booted,
+                ProfileSaved,
+                FactorSourceUpdated,
+                ProfileSaved,
+                AccountAdded
+            ]
+        );
     }
 
     impl DisplayName {

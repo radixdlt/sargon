@@ -199,9 +199,16 @@ macro_rules! decl_exactly_n_bytes {
             impl [<Exactly $byte_count Bytes>] {
 
                 fn declare_sample(r: &str) -> Self {
-                    let mut s = r.repeat($byte_count / 2);
-                    if s.len() != $byte_count * 2 {
-                        s = format!("{}{}", $byte_count, s);
+                    let mut s = r.repeat($byte_count / 2).to_owned();
+
+                    let target_len = $byte_count * 2;
+
+                    if s.len() != target_len {
+                        let bc = format!("{}", $byte_count);
+                        let bc_len = bc.len();
+                        let subs = &s[0..target_len-bc_len];
+                        s = format!("{}{}", bc, subs);
+                        assert_eq!(s.len(), target_len);
                     }
                     Self::from_str(&s).expect("Valid sample")
                 }
@@ -522,7 +529,6 @@ decl_exactly_n_bytes!(
     32,
     "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
-pub type SymmetricKey = Exactly32Bytes;
 
 decl_exactly_n_bytes!(
     /// 64 bytes, used by Ed25519Signatures, implementation wise those bytes are
@@ -550,4 +556,11 @@ decl_exactly_n_bytes!(
     /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
     12,
     "deaddeaddeaddeaddeaddead", // expected sample value for tests
+);
+
+decl_exactly_n_bytes!(
+    /// 60 bytes, used as encrypted mnemonic for security questions factor
+    /// source. 32 bytes mnemonic when encrypted results in exactly this length.
+    60,
+    "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );

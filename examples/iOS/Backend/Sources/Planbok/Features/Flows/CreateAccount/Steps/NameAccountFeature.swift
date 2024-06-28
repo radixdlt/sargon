@@ -55,10 +55,13 @@ public struct NameNewAccountFeature {
 }
 
 extension NameNewAccountFeature {
-	@ViewAction(for: NameNewAccountFeature.self)
+	
+	public typealias HostingFeature = Self
+	
+	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
-		@Bindable public var store: StoreOf<NameNewAccountFeature>
-		public init(store: StoreOf<NameNewAccountFeature>) {
+		@Bindable public var store: StoreOf<HostingFeature>
+		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {

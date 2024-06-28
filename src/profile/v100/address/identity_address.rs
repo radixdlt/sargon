@@ -49,28 +49,28 @@ impl IdentityAddress {
 
 impl IdentityAddress {
     pub fn sample_mainnet() -> Self {
-        let address: IdentityAddress = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+        let address: IdentityAddress = "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g"
             .parse()
             .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Mainnet);
         address
     }
     pub fn sample_mainnet_other() -> Self {
-        let address: IdentityAddress = "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
+        let address: IdentityAddress = "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw"
             .parse()
             .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Mainnet);
         address
     }
     pub fn sample_stokenet() -> Self {
-        let address: IdentityAddress = "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc"
+        let address: IdentityAddress = "identity_tdx_2_122r7248dkyjwt2kxf36de26w7htdwpzsm3lyjr4p0nvrgwn025dds8"
             .parse()
             .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
     }
     pub fn sample_stokenet_other() -> Self {
-        let address: IdentityAddress = "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08"
+        let address: IdentityAddress = "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq"
             .parse()
             .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Stokenet);

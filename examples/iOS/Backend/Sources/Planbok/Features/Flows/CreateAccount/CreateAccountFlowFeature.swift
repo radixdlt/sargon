@@ -41,7 +41,7 @@ public struct CreateAccountFlowFeature {
 					fatalError("TODO error handling: \(error)")
 				}
 
-			case .nameAccount(_):
+			case .nameAccount:
 				return .none
 				
 			case .delegate:

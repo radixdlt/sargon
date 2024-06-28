@@ -168,96 +168,98 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
-            [
-                {
-                    "securityState": {
-                        "unsecuredEntityControl": {
-                            "transactionSigning": {
-                                "badge": {
-                                    "virtualSource": {
-                                        "hierarchicalDeterministicPublicKey": {
-                                            "publicKey": {
-                                                "curve": "curve25519",
-                                                "compressedData": "18c7409458a82281711b668f833b0485e8fb58a3ceb8a728882bf6b83d3f06a9"
-                                            },
-                                            "derivationPath": {
-                                                "scheme": "cap26",
-                                                "path": "m/44H/1022H/2H/525H/1460H/0H"
-                                            }
-                                        },
-                                        "discriminator": "hierarchicalDeterministicPublicKey"
-                                    },
-                                    "discriminator": "virtualSource"
-                                },
-                                "factorSourceID": {
-                                    "fromHash": {
-                                        "kind": "device",
-                                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                                    },
-                                    "discriminator": "fromHash"
-                                }
-                            }
-                        },
-                        "discriminator": "unsecured"
-                    },
-                    "networkID": 2,
-                    "appearanceID": 0,
-                    "flags": [],
-                    "displayName": "Nadia",
-                    "onLedgerSettings": {
-                        "thirdPartyDeposits": {
-                            "depositRule": "acceptAll",
-                            "assetsExceptionList": [],
-                            "depositorsAllowList": []
-                        }
-                    },
-                    "address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
-                },
-                {
-                    "securityState": {
-                        "unsecuredEntityControl": {
-                            "transactionSigning": {
-                                "badge": {
-                                    "virtualSource": {
-                                        "hierarchicalDeterministicPublicKey": {
-                                            "publicKey": {
-                                                "curve": "curve25519",
-                                                "compressedData": "26b3fd7f65f01ff8e418a56722fde9cc6fc18dc983e0474e6eb6c1cf3bd44f23"
-                                            },
-                                            "derivationPath": {
-                                                "scheme": "cap26",
-                                                "path": "m/44H/1022H/2H/525H/1460H/1H"
-                                            }
-                                        },
-                                        "discriminator": "hierarchicalDeterministicPublicKey"
-                                    },
-                                    "discriminator": "virtualSource"
-                                },
-                                "factorSourceID": {
-                                    "fromHash": {
-                                        "kind": "device",
-                                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                                    },
-                                    "discriminator": "fromHash"
-                                }
-                            }
-                        },
-                        "discriminator": "unsecured"
-                    },
-                    "networkID": 2,
-                    "appearanceID": 1,
-                    "flags": ["deletedByUser"],
-                    "displayName": "Olivia",
-                    "onLedgerSettings": {
-                        "thirdPartyDeposits": {
-                            "depositRule": "acceptAll",
-                            "assetsExceptionList": [],
-                            "depositorsAllowList": []
-                        }
-                    },
-                    "address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
-                }
-            ]
+			[
+				{
+					"networkID": 2,
+					"address": "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m",
+					"displayName": "Nadia",
+					"securityState": {
+						"discriminator": "unsecured",
+						"unsecuredEntityControl": {
+							"transactionSigning": {
+								"factorSourceID": {
+									"discriminator": "fromHash",
+									"fromHash": {
+										"kind": "device",
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+									}
+								},
+								"badge": {
+									"discriminator": "virtualSource",
+									"virtualSource": {
+										"discriminator": "hierarchicalDeterministicPublicKey",
+										"hierarchicalDeterministicPublicKey": {
+											"publicKey": {
+												"curve": "curve25519",
+												"compressedData": "535e0b74beffc99d96acd36ae73444c0e35ebb5707f077f9bf1120b1bb8894c0"
+											},
+											"derivationPath": {
+												"scheme": "cap26",
+												"path": "m/44H/1022H/2H/525H/1460H/0H"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"appearanceID": 0,
+					"flags": [],
+					"onLedgerSettings": {
+						"thirdPartyDeposits": {
+							"depositRule": "acceptAll",
+							"assetsExceptionList": [],
+							"depositorsAllowList": []
+						}
+					}
+				},
+				{
+					"networkID": 2,
+					"address": "account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp",
+					"displayName": "Olivia",
+					"securityState": {
+						"discriminator": "unsecured",
+						"unsecuredEntityControl": {
+							"transactionSigning": {
+								"factorSourceID": {
+									"discriminator": "fromHash",
+									"fromHash": {
+										"kind": "device",
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+									}
+								},
+								"badge": {
+									"discriminator": "virtualSource",
+									"virtualSource": {
+										"discriminator": "hierarchicalDeterministicPublicKey",
+										"hierarchicalDeterministicPublicKey": {
+											"publicKey": {
+												"curve": "curve25519",
+												"compressedData": "436c67c678713be6a4306bf2a64d62d29c9bccb92a776175e5cb6e95e87be55d"
+											},
+											"derivationPath": {
+												"scheme": "cap26",
+												"path": "m/44H/1022H/2H/525H/1460H/1H"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"appearanceID": 1,
+					"flags": [
+						"deletedByUser"
+					],
+					"onLedgerSettings": {
+						"thirdPartyDeposits": {
+							"depositRule": "acceptAll",
+							"assetsExceptionList": [],
+							"depositorsAllowList": []
+						}
+					}
+				}
+			]
             "#,
         );
     }
@@ -268,96 +270,96 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
-            [
-                {
-                    "securityState": {
-                        "unsecuredEntityControl": {
-                            "transactionSigning": {
-                                "badge": {
-                                    "virtualSource": {
-                                        "hierarchicalDeterministicPublicKey": {
-                                            "publicKey": {
-                                                "curve": "curve25519",
-                                                "compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
-                                            },
-                                            "derivationPath": {
-                                                "scheme": "cap26",
-                                                "path": "m/44H/1022H/1H/525H/1460H/0H"
-                                            }
-                                        },
-                                        "discriminator": "hierarchicalDeterministicPublicKey"
-                                    },
-                                    "discriminator": "virtualSource"
-                                },
-                                "factorSourceID": {
-                                    "fromHash": {
-                                        "kind": "device",
-                                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                                    },
-                                    "discriminator": "fromHash"
-                                }
-                            }
-                        },
-                        "discriminator": "unsecured"
-                    },
-                    "networkID": 1,
-                    "appearanceID": 0,
-                    "flags": [],
-                    "displayName": "Alice",
-                    "onLedgerSettings": {
-                        "thirdPartyDeposits": {
-                            "depositRule": "acceptAll",
-                            "assetsExceptionList": [],
-                            "depositorsAllowList": []
-                        }
-                    },
-                    "address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
-                },
-                {
-                    "securityState": {
-                        "unsecuredEntityControl": {
-                            "transactionSigning": {
-                                "badge": {
-                                    "virtualSource": {
-                                        "hierarchicalDeterministicPublicKey": {
-                                            "publicKey": {
-                                                "curve": "curve25519",
-                                                "compressedData": "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
-                                            },
-                                            "derivationPath": {
-                                                "scheme": "cap26",
-                                                "path": "m/44H/1022H/1H/525H/1460H/1H"
-                                            }
-                                        },
-                                        "discriminator": "hierarchicalDeterministicPublicKey"
-                                    },
-                                    "discriminator": "virtualSource"
-                                },
-                                "factorSourceID": {
-                                    "fromHash": {
-                                        "kind": "device",
-                                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                                    },
-                                    "discriminator": "fromHash"
-                                }
-                            }
-                        },
-                        "discriminator": "unsecured"
-                    },
-                    "networkID": 1,
-                    "appearanceID": 1,
-                    "flags": [],
-                    "displayName": "Bob",
-                    "onLedgerSettings": {
-                        "thirdPartyDeposits": {
-                            "depositRule": "acceptAll",
-                            "assetsExceptionList": [],
-                            "depositorsAllowList": []
-                        }
-                    },
-                    "address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
-                }
-            ]
+			[
+				{
+					"networkID": 1,
+					"address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+					"displayName": "Alice",
+					"securityState": {
+						"discriminator": "unsecured",
+						"unsecuredEntityControl": {
+							"transactionSigning": {
+								"factorSourceID": {
+									"discriminator": "fromHash",
+									"fromHash": {
+										"kind": "device",
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+									}
+								},
+								"badge": {
+									"discriminator": "virtualSource",
+									"virtualSource": {
+										"discriminator": "hierarchicalDeterministicPublicKey",
+										"hierarchicalDeterministicPublicKey": {
+											"publicKey": {
+												"curve": "curve25519",
+												"compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+											},
+											"derivationPath": {
+												"scheme": "cap26",
+												"path": "m/44H/1022H/1H/525H/1460H/0H"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"appearanceID": 0,
+					"flags": [],
+					"onLedgerSettings": {
+						"thirdPartyDeposits": {
+							"depositRule": "acceptAll",
+							"assetsExceptionList": [],
+							"depositorsAllowList": []
+						}
+					}
+				},
+				{
+					"networkID": 1,
+					"address": "account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7",
+					"displayName": "Bob",
+					"securityState": {
+						"discriminator": "unsecured",
+						"unsecuredEntityControl": {
+							"transactionSigning": {
+								"factorSourceID": {
+									"discriminator": "fromHash",
+									"fromHash": {
+										"kind": "device",
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+									}
+								},
+								"badge": {
+									"discriminator": "virtualSource",
+									"virtualSource": {
+										"discriminator": "hierarchicalDeterministicPublicKey",
+										"hierarchicalDeterministicPublicKey": {
+											"publicKey": {
+												"curve": "curve25519",
+												"compressedData": "a3a14ce3c0e549ac35f1875738c243bb6f4037f08d7d2a52ef749091a92a0c71"
+											},
+											"derivationPath": {
+												"scheme": "cap26",
+												"path": "m/44H/1022H/1H/525H/1460H/1H"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"appearanceID": 1,
+					"flags": [],
+					"onLedgerSettings": {
+						"thirdPartyDeposits": {
+							"depositRule": "acceptAll",
+							"assetsExceptionList": [],
+							"depositorsAllowList": []
+						}
+					}
+				}
+			]
             "#,
         );
     }

@@ -365,8 +365,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn save_mnemonic_with_passphrase() {
-        let private =
-            PrivateHierarchicalDeterministicFactorSource::sample_other();
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
         let factor_source_id = private.factor_source.id;
         let (sut, storage) = SecureStorageClient::ephemeral();
         let key =
@@ -386,7 +385,7 @@ mod tests {
             .await
             .map(|b| String::from_utf8(b.unwrap().to_vec()).unwrap())
             .unwrap()
-            .contains("zoo"));
+            .contains("device"));
     }
 
     #[actix_rt::test]

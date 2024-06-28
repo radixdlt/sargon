@@ -5,6 +5,7 @@ use crate::prelude::*;
     Serialize,
     Deserialize,
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
@@ -30,23 +31,48 @@ impl FactorSourceIDFromAddress {
 }
 
 impl FactorSourceIDFromAddress {
+    pub fn new_for_trusted_contact(address: AccountAddress) -> Self {
+        Self::new(FactorSourceKind::TrustedContact, address)
+    }
+}
+
+impl FactorSourceIDFromAddress {
     pub fn to_canonical_string(&self) -> String {
         format!("{}:{}", self.kind.discriminant(), self.body)
+    }
+}
+
+impl FactorSourceIDFromAddress {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_trusted_contact_friend_frank() -> Self {
+        Self::new_for_trusted_contact(AccountAddress::sample_frank())
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_trusted_contact_friend_judy() -> Self {
+        Self::new_for_trusted_contact(AccountAddress::sample_judy())
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_trusted_contact_friend_oscar() -> Self {
+        Self::new_for_trusted_contact(AccountAddress::sample_oscar())
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_trusted_entity_radix() -> Self {
+        Self::new_for_trusted_contact(AccountAddress::sample_radix())
     }
 }
 
 impl HasSampleValues for FactorSourceIDFromAddress {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(FactorSourceKind::TrustedContact, AccountAddress::sample())
+        Self::sample_trusted_contact_friend_frank()
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::sample_other(),
-        )
+        Self::sample_trusted_contact_friend_oscar()
     }
 }
 
@@ -78,7 +104,7 @@ mod tests {
     fn display() {
         assert_eq!(
             format!("{}", FactorSourceIDFromAddress::sample()),
-            "trustedContact:account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+            "trustedContact:account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank"
         );
     }
 
@@ -86,7 +112,7 @@ mod tests {
     fn debug() {
         assert_eq!(
             format!("{:?}", FactorSourceIDFromAddress::sample()),
-            "trustedContact:account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+            "trustedContact:account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank"
         );
     }
 
@@ -99,7 +125,7 @@ mod tests {
             r#"
             {
                 "kind": "trustedContact",
-                "body": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+                "body": "account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank"
             }
             "#,
         );

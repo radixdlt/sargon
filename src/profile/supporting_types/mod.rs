@@ -10,6 +10,8 @@ mod authorized_persona_detailed;
 mod authorized_persona_detailed_uniffi_fn;
 mod decl_identified_vec_of_with_samples;
 mod detailed_authorized_personas;
+mod email_address;
+mod email_address_uniffi_fn;
 mod is_network_aware;
 mod on_same_network_validating;
 
@@ -25,5 +27,7 @@ pub use authorized_persona_detailed::*;
 pub use authorized_persona_detailed_uniffi_fn::*;
 pub use decl_identified_vec_of_with_samples::*;
 pub use detailed_authorized_personas::*;
+pub use email_address::*;
+pub use email_address_uniffi_fn::*;
 pub use is_network_aware::*;
 pub use on_same_network_validating::*;

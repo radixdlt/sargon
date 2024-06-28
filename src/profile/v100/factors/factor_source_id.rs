@@ -9,6 +9,7 @@ use crate::prelude::*;
     Deserialize,
     EnumAsInner,
     Clone,
+    Copy,
     Debug,
     PartialEq,
     Eq,
@@ -127,7 +128,7 @@ mod tests {
             {
                 "fromHash": {
                     "kind": "device",
-                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                 },
                 "discriminator" : "fromHash"
             }
@@ -146,7 +147,7 @@ mod tests {
             {
                 "fromAddress": {
                     "kind": "trustedContact",
-                    "body": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+                    "body": "account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank"
                 },
                 "discriminator" : "fromAddress"
             }
@@ -171,7 +172,7 @@ mod tests {
     #[test]
     fn address_into_as_roundtrip() {
         let from_address = FactorSourceIDFromAddress::sample();
-        let id: FactorSourceID = from_address.clone().into(); // test `into()`
+        let id: FactorSourceID = from_address.into(); // test `into()`
         assert_eq!(id.as_address().unwrap(), &from_address);
     }
 

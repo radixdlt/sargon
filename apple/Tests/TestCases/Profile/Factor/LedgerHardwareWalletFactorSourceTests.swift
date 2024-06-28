@@ -13,23 +13,57 @@ import XCTest
 
 final class LedgerHardwareWalletFactorSourceTests: SpecificFactorSourceTest<LedgerHardwareWalletFactorSource> {
 	func test_id_of_ledger() {
-		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
+		eachSample { sut in
+			XCTAssertEqual(sut.id.description, FactorSourceID.hash(value: sut.id).description)
+		}
+	}
+	
+	func test_new() {
+		XCTAssertEqual(
+			SUT(
+				mnemonicWithPassphrase: .init(
+					mnemonic: .sampleLedger,
+					passphrase: ""
+				),
+				hint: .init(name: "Test", model: .nanoS),
+				common: .babylon()
+			).id,
+			SUT.sample.id
+		)
+	}
+	
+	func test_as() {
+		eachSample { sut in
+			XCTAssertEqual(sut.asGeneral.asLedger, sut)
+		}
+	}
+
+	func test_other_wrong() {
+		XCTAssertNil(SUT.extract(from: DeviceFactorSource.sample))
 	}
 	
 	func test_factor_source_id_is_id() {
-		XCTAssertEqual(SUT.sample.id.asGeneral, SUT.sample.factorSourceID)
+		eachSample { sut in
+			XCTAssertEqual(sut.id.asGeneral, sut.factorSourceID)
+		}
 	}
 	
 	func test_kind() {
-		XCTAssertEqual(SUT.sample.factorSourceKind, .ledgerHqHardwareWallet)
+		eachSample { sut in
+			XCTAssertEqual(sut.factorSourceKind, .ledgerHqHardwareWallet)
+		}
 	}
 	
 	func test_as_factor_source_to_string() {
-		XCTAssertEqual(SUT.sample.asGeneral.id.description, SUT.sample.id.description)
+		eachSample { sut in
+			XCTAssertEqual(sut.asGeneral.id.description, sut.id.description)
+		}
 	}
 	
 	func test_as_general() {
-		XCTAssertEqual(SUT.sample.asGeneral, FactorSource.ledger(value: SUT.sample))
+		eachSample { sut in
+			XCTAssertEqual(sut.asGeneral, FactorSource.ledger(value: sut))
+		}
 	}
     
     func test_source_that_supports_babylon() {

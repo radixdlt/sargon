@@ -43,6 +43,66 @@ pub fn new_mnemonic_sample_other() -> Mnemonic {
     Mnemonic::sample_other()
 }
 
+#[uniffi::export]
+pub fn new_mnemonic_sample_device() -> Mnemonic {
+    Mnemonic::sample_device()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device_other() -> Mnemonic {
+    Mnemonic::sample_device_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device_12_words() -> Mnemonic {
+    Mnemonic::sample_device_12_words()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device_12_words_other() -> Mnemonic {
+    Mnemonic::sample_device_12_words_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_ledger() -> Mnemonic {
+    Mnemonic::sample_ledger()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_ledger_other() -> Mnemonic {
+    Mnemonic::sample_ledger_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_off_device() -> Mnemonic {
+    Mnemonic::sample_off_device()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_off_device_other() -> Mnemonic {
+    Mnemonic::sample_off_device_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_security_questions() -> Mnemonic {
+    Mnemonic::sample_security_questions()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_security_questions_other() -> Mnemonic {
+    Mnemonic::sample_security_questions_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_arculus() -> Mnemonic {
+    Mnemonic::sample_arculus()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
+    Mnemonic::sample_arculus_other()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -62,6 +122,41 @@ mod uniffi_tests {
             ])
             .len(),
             2
+        );
+    }
+
+    #[test]
+    fn hash_of_sample_specific() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_mnemonic_sample_device(),
+                new_mnemonic_sample_device_other(),
+                new_mnemonic_sample_device_12_words(),
+                new_mnemonic_sample_device_12_words_other(),
+                new_mnemonic_sample_ledger(),
+                new_mnemonic_sample_ledger_other(),
+                new_mnemonic_sample_off_device(),
+                new_mnemonic_sample_off_device_other(),
+                new_mnemonic_sample_security_questions(),
+                new_mnemonic_sample_security_questions_other(),
+                new_mnemonic_sample_arculus(),
+                new_mnemonic_sample_arculus_other(),
+                // duplicates should be removed
+                new_mnemonic_sample_device(),
+                new_mnemonic_sample_device_other(),
+                new_mnemonic_sample_device_12_words(),
+                new_mnemonic_sample_device_12_words_other(),
+                new_mnemonic_sample_ledger(),
+                new_mnemonic_sample_ledger_other(),
+                new_mnemonic_sample_off_device(),
+                new_mnemonic_sample_off_device_other(),
+                new_mnemonic_sample_security_questions(),
+                new_mnemonic_sample_security_questions_other(),
+                new_mnemonic_sample_arculus(),
+                new_mnemonic_sample_arculus_other(),
+            ])
+            .len(),
+            12
         );
     }
 

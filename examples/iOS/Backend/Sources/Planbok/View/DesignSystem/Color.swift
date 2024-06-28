@@ -45,7 +45,7 @@ extension Color {
 
 extension Color {
 	/// Namespace only
-	public struct App { fileprivate init() {} }
+	public struct App: Sendable { fileprivate init() {} }
 	public static let app = App()
 }
 

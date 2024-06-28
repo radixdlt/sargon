@@ -1,0 +1,118 @@
+{
+	"id": {
+		"kind": "securityQuestions",
+		"body": "aabc6041d95785ecfabe7d5ed5af259e20e4e3f5f95b16fdeca386bc75796b46"
+	},
+	"common": {
+		"cryptoParameters": {
+			"supportedCurves": [
+				"curve25519"
+			],
+			"supportedDerivationPathSchemes": [
+				"cap26"
+			]
+		},
+		"addedOn": "2024-06-03T14:24:37.597Z",
+		"lastUsedOn": "2024-06-03T14:24:37.597Z",
+		"flags": []
+	},
+	"sealedMnemonic": {
+		"securityQuestions": [
+			{
+				"id": 0,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What was the first exam you failed",
+				"expectedAnswerFormat": {
+					"answerStructure": "<SCHOOL>, <SCHOOL_GRADE>, <SUBJECT>",
+					"exampleAnswer": "MIT, year 4, Python",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 1,
+				"version": 1,
+				"kind": "freeform",
+				"question": "In which city and which year did your parents meet?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<CITY>, <YEAR>",
+					"exampleAnswer": "Berlin, 1976",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 2,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What was the first concert you attended?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<ARTIST>, <LOCATION>, <YEAR>",
+					"exampleAnswer": "Jean-Michel Jarre, Paris La Défense, 1990",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 3,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What was the name of the boy or the girl you first kissed?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<NAME>",
+					"exampleAnswer": "Maria",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 4,
+				"version": 1,
+				"kind": "freeform",
+				"question": "Where were you when you had your first kiss?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<LOCATION>",
+					"exampleAnswer": "At bus stop outside of Dallas",
+					"unsafeAnswers": [
+						"Specifying only a country as location would be unsafe"
+					]
+				}
+			},
+			{
+				"id": 5,
+				"version": 1,
+				"kind": "freeform",
+				"question": "In what city and which year did you meet your spouse/significant other?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<CITY>, <YEAR>",
+					"exampleAnswer": "Berlin, 1976",
+					"unsafeAnswers": []
+				}
+			}
+		],
+		"kdfScheme": {
+			"version1": {
+				"kdfKeyExchangesKeysFromQuestionsAndAnswers": null,
+				"kdfEncryptionKeysFromKeyExchangeKeys": null
+			}
+		},
+		"encryptionScheme": {
+			"description": "AESGCM-256",
+			"version": 1
+		},
+		"encryptions": [
+			"dd032b986e242f21fae6e15f93b9c15e187b0cafc90c1a89d90f1f1f2d90fca6c6bb381517929245b7fcea1de21901213141f3ffa8cbd278bfd4a589",
+			"376111f425c6ecfe64b81df590330daeb8432ad9bed4a1f341e839fc95ea5aadd8fa8e9065c7e684029b0a39902c5632baa1b86f03e5ab191d7d88b5",
+			"afe981e01b0bd28a334bb51b4a74a18ec9ec54cfff90ed25102287fed2758d2b6f3dda45d5692e51a4bfb356546c9e5c36b2da01fba9ed9608ba2398",
+			"2c6ee3a4a4013e57f74cd0711fdcda82983852b06c6348d4f60a144c2376047e579f801590b2a5d505998e9dc9fba7acea65bc679d91fd92490f25b9",
+			"a540daa2e7a233a3119a431539dd74b0ff765d82e54b1ee81770070db6c9fa01de1efd54ba2d09c47f8ed5361d7164bd7835114e33b4ae13b59f32e6",
+			"848b89fafaad094433e2e53edad04aac065355eaeb7e285ebfe77a076f2a51b0c36af4ff907b767b2948365e043b33420dae2fc83079eb5e59d1792f",
+			"e698d5c4c029a9bd65bef0731363924ba00f2035aaa81ae8a07a6b80993be8e5f3442a69317963e6079da226057cd8860dcf65fb4c86761d155cf382",
+			"8d6cd06b7e8e9cbf39188207a6bb08b5be8894169a9da714174328cde3972e6f7b0cc1fb03d0d67a75bd6d147b778cba33ee27143a90bc8c81b05280",
+			"cabe2ce3bb581b401a4a8262c88aca3f4846e689b4fdf687fb3183008be9ad3f92d1505db6a9b6e53972f1d77b7f5922c04cd317f7a99763c06b202d",
+			"d288038477ef05ee342fbe131149a0453a4be384f13feb0fc5af78a226350c8d8a19f93aa93b2909f7e08c99a62f0623a0a42e12f0fc1fe5359b8707",
+			"757195845e0df2191202d697e70d816a7d14fea0693637733eed7f9e692f1d94a5f57ed2ca9b7c0bb98282a567455c4a269d8da3f9dd78f3f08fc62c",
+			"cfdb359477a156e5c00f04c1111833bb8397fceb4a55dd7145299ce99d8a7c38da357863b5f44b440328b0ea5a886c03805f1ed4e847b274159b23e4",
+			"ba4d1ddcb32ee7f1ff400ef9ec925630a9d7929ed115a263a36b2a2b085c0e5175aeeddae43bfec701371cc2433ece6f826f488e0821588624b00959",
+			"86716d42e4f4a60a64b62db040b3a410f5791f868103117ff4a2d7d6034803261a3a509d8511cdfb78852568b1f8eb72dc76c3c34b581d2483ebd170",
+			"29cd144ed6e72662dafb294f8a8a075084be7fa227c3abae6fb4e336adbce560d355f08dcafe9512eac65f9896fc123d8a9545e538ba554d674a5c96"
+		]
+	}
+}

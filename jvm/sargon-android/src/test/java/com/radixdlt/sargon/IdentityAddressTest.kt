@@ -18,7 +18,7 @@ class IdentityAddressTest: SampleTestable<IdentityAddress> {
 
     @Test
     fun test() {
-        val addressString = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+        val addressString = "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g"
         val identityAddress = IdentityAddress.init(validatingAddress = addressString)
 
         assertEquals(addressString, identityAddress.string)
@@ -35,10 +35,10 @@ class IdentityAddressTest: SampleTestable<IdentityAddress> {
 
     @Test
     fun testFormat() {
-        val addressString = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+        val addressString = "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g"
         val address = IdentityAddress.init(validatingAddress = addressString)
 
-        assertEquals("iden...w0mg6x", address.formatted())
+        assertEquals("iden...en489g", address.formatted())
         assertEquals(
             addressString,
             address.formatted(format = AddressFormat.FULL)

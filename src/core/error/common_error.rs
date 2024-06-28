@@ -299,8 +299,8 @@ pub enum CommonError {
     #[error("Invalid PersonaData - phone number empty")]
     PersonaDataInvalidPhoneNumberEmpty = 10082,
 
-    #[error("Invalid PersonaData - email address empty")]
-    PersonaDataInvalidEmailAddressEmpty = 10083,
+    #[error("Invalid email address, cannot be empty")]
+    EmailAddressEmpty = 10083,
 
     #[error("Invalid PersonaData - family name empty ")]
     PersonaDataInvalidNameFamilyNameEmpty = 10084,
@@ -488,7 +488,7 @@ pub enum CommonError {
     ElementDoesNotExist { id: String } = 10135,
 
     #[error("Item identified by ID {id} already exist")]
-    ElementAlreadyExist { id: String } = 10136,
+    IdentifiableItemAlreadyExist { id: String } = 10136,
 
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
@@ -597,6 +597,35 @@ pub enum CommonError {
 
     #[error("Not permission enough to access file: '{path}'")]
     NotPermissionToAccessFile { path: String } = 10167,
+
+    #[error("Invalid Arculus Card Model")]
+    InvalidArculusCardModel { bad_value: String } = 10168,
+
+    #[error("Expected ArculusCard factor source got something else")]
+    ExpectedArculusCardFactorSourceGotSomethingElse = 10169,
+
+    #[error("Failed to Derive Key after max attempts")]
+    FailedToDeriveKeyAfterMaxAttempts = 10170,
+
+    #[error("Failed to decrypt sealed mnemonic")]
+    FailedToDecryptSealedMnemonic = 10171,
+
+    #[error("Answers to Security Questions cannot be empty")]
+    AnswersToSecurityQuestionsCannotBeEmpty = 10172,
+
+    #[error("Integrity Violation, mutation of FactorSource is not allowed to mutate its ID")]
+    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10173,
+
+    #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
+    InvalidSecurityStructureID { bad_value: String } = 10174,
+
+    #[error(
+        "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
+    )]
+    StructureReferencesUnknownFactorSource = 10175,
+
+    #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
+    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10176,
 }
 
 #[uniffi::export]

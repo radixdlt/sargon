@@ -37,7 +37,7 @@ mod uniffi_tests {
 
     #[test]
     fn new_from_bech32_get_network_id_and_address() {
-        let b32 = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x";
+        let b32 = "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g";
         let address = new_identity_address(b32.to_owned()).unwrap();
         assert_eq!(identity_address_network_id(&address), NetworkID::Mainnet);
         assert_eq!(identity_address_bech32_address(&address), b32);

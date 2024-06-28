@@ -32,8 +32,8 @@ public struct SplashFeature {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
-			Image("Splash", bundle: Bundle.module)
-				.resizable()
+            Text("Swift Sargon")
+                .font(.largeTitle)
 				.ignoresSafeArea(edges: [.top, .bottom])
 				.onAppear {
 					send(.appear)

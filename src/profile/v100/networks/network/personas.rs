@@ -93,7 +93,7 @@ mod tests {
             [
                 {
 					"networkID": 1,
-					"address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+					"address": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
 					"displayName": "Satoshi",
 					"securityState": {
 						"discriminator": "unsecured",
@@ -103,7 +103,7 @@ mod tests {
 									"discriminator": "fromHash",
 									"fromHash": {
 										"kind": "device",
-										"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 									}
 								},
 								"badge": {
@@ -113,7 +113,7 @@ mod tests {
 										"hierarchicalDeterministicPublicKey": {
 											"publicKey": {
 												"curve": "curve25519",
-												"compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+												"compressedData": "e284e28bfca2103d554854d7cce822a2682610eb16b4c27bcd1b9cbd78bb931a"
 											},
 											"derivationPath": {
 												"scheme": "cap26",
@@ -160,7 +160,7 @@ mod tests {
 				},
 				{
 					"networkID": 1,
-					"address": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+					"address": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 					"displayName": "Batman",
 					"securityState": {
 						"discriminator": "unsecured",
@@ -170,7 +170,7 @@ mod tests {
 									"discriminator": "fromHash",
 									"fromHash": {
 										"kind": "device",
-										"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 									}
 								},
 								"badge": {
@@ -180,7 +180,7 @@ mod tests {
 										"hierarchicalDeterministicPublicKey": {
 											"publicKey": {
 												"curve": "curve25519",
-												"compressedData": "1fe80badc0520334ee339e4010491d417ca3aed0c9621698b10655529f0ee506"
+												"compressedData": "675aa54df762f24df8f6b38122e75058a18fe55a3dbb030b4c0bb504bacc7e81"
 											},
 											"derivationPath": {
 												"scheme": "cap26",
@@ -231,7 +231,7 @@ mod tests {
 			[
 				{
 					"networkID": 2,
-					"address": "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc",
+					"address": "identity_tdx_2_122r7248dkyjwt2kxf36de26w7htdwpzsm3lyjr4p0nvrgwn025dds8",
 					"displayName": "Skywalker",
 					"securityState": {
 						"discriminator": "unsecured",
@@ -241,7 +241,7 @@ mod tests {
 									"discriminator": "fromHash",
 									"fromHash": {
 										"kind": "device",
-										"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 									}
 								},
 								"badge": {
@@ -251,7 +251,7 @@ mod tests {
 										"hierarchicalDeterministicPublicKey": {
 											"publicKey": {
 												"curve": "curve25519",
-												"compressedData": "3c4d6f1267485854313c1ed81aea193b8f750cd081e3aa4dea29b93c34ca2261"
+												"compressedData": "d3dd2992834813ba76d6619021560b759e81f7391a5cdbb8478feb3bfa8cb9e4"
 											},
 											"derivationPath": {
 												"scheme": "cap26",
@@ -290,7 +290,7 @@ mod tests {
 				},
 				{
 					"networkID": 2,
-					"address": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+					"address": "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq",
 					"displayName": "Granger",
 					"securityState": {
 						"discriminator": "unsecured",
@@ -300,7 +300,7 @@ mod tests {
 									"discriminator": "fromHash",
 									"fromHash": {
 										"kind": "device",
-										"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 									}
 								},
 								"badge": {
@@ -310,7 +310,7 @@ mod tests {
 										"hierarchicalDeterministicPublicKey": {
 											"publicKey": {
 												"curve": "curve25519",
-												"compressedData": "b6885032393165d56cce19850c2a3dbb80733d21c78c7314223e9c3a75f64c8d"
+												"compressedData": "c287e135eac194e4d6b6c65a2545988686b941509043bab026ef9717fd6b4f4e"
 											},
 											"derivationPath": {
 												"scheme": "cap26",

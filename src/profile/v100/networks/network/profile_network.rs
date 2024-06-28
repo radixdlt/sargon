@@ -269,7 +269,7 @@ mod tests {
 				"accounts": [
 					{
 						"networkID": 1,
-						"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+						"address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
 						"displayName": "Alice",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -279,7 +279,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -289,7 +289,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+													"compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -313,7 +313,7 @@ mod tests {
 					},
 					{
 						"networkID": 1,
-						"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69",
+						"address": "account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7",
 						"displayName": "Bob",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -323,7 +323,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -333,7 +333,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+													"compressedData": "a3a14ce3c0e549ac35f1875738c243bb6f4037f08d7d2a52ef749091a92a0c71"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -359,7 +359,7 @@ mod tests {
 				"personas": [
 					{
 						"networkID": 1,
-						"address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+						"address": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
 						"displayName": "Satoshi",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -369,7 +369,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -379,7 +379,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+													"compressedData": "e284e28bfca2103d554854d7cce822a2682610eb16b4c27bcd1b9cbd78bb931a"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -426,7 +426,7 @@ mod tests {
 					},
 					{
 						"networkID": 1,
-						"address": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+						"address": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 						"displayName": "Batman",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -436,7 +436,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -446,7 +446,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "1fe80badc0520334ee339e4010491d417ca3aed0c9621698b10655529f0ee506"
+													"compressedData": "675aa54df762f24df8f6b38122e75058a18fe55a3dbb030b4c0bb504bacc7e81"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -491,7 +491,7 @@ mod tests {
 						"displayName": "Radix Dashboard",
 						"referencesToAuthorizedPersonas": [
 							{
-								"identityAddress": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+								"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
 								"lastLogin": "2024-01-31T14:23:45.000Z",
 								"sharedAccounts": {
 									"request": {
@@ -499,8 +499,8 @@ mod tests {
 										"quantity": 2
 									},
 									"ids": [
-										"account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
-										"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+										"account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+										"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 									]
 								},
 								"sharedPersonaData": {
@@ -528,7 +528,7 @@ mod tests {
 								}
 							},
 							{
-								"identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+								"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 								"lastLogin": "2024-01-31T14:23:45.000Z",
 								"sharedAccounts": {
 									"request": {
@@ -536,7 +536,7 @@ mod tests {
 										"quantity": 1
 									},
 									"ids": [
-										"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+										"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 									]
 								},
 								"sharedPersonaData": {
@@ -569,7 +569,7 @@ mod tests {
 						"displayName": "Gumball Club",
 						"referencesToAuthorizedPersonas": [
 							{
-								"identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+								"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 								"lastLogin": "2024-01-31T14:23:45.000Z",
 								"sharedAccounts": {
 									"request": {
@@ -577,7 +577,7 @@ mod tests {
 										"quantity": 1
 									},
 									"ids": [
-										"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+										"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 									]
 								},
 								"sharedPersonaData": {
@@ -621,7 +621,7 @@ mod tests {
 				"accounts": [
 					{
 						"networkID": 2,
-						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
+						"address": "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m",
 						"displayName": "Nadia",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -631,7 +631,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -641,7 +641,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "18c7409458a82281711b668f833b0485e8fb58a3ceb8a728882bf6b83d3f06a9"
+													"compressedData": "535e0b74beffc99d96acd36ae73444c0e35ebb5707f077f9bf1120b1bb8894c0"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -665,7 +665,7 @@ mod tests {
 					},
 					{
 						"networkID": 2,
-						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
+						"address": "account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp",
 						"displayName": "Olivia",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -675,7 +675,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -685,7 +685,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "26b3fd7f65f01ff8e418a56722fde9cc6fc18dc983e0474e6eb6c1cf3bd44f23"
+													"compressedData": "436c67c678713be6a4306bf2a64d62d29c9bccb92a776175e5cb6e95e87be55d"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -713,7 +713,7 @@ mod tests {
 				"personas": [
 					{
 						"networkID": 2,
-						"address": "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc",
+						"address": "identity_tdx_2_122r7248dkyjwt2kxf36de26w7htdwpzsm3lyjr4p0nvrgwn025dds8",
 						"displayName": "Skywalker",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -723,7 +723,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -733,7 +733,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "3c4d6f1267485854313c1ed81aea193b8f750cd081e3aa4dea29b93c34ca2261"
+													"compressedData": "d3dd2992834813ba76d6619021560b759e81f7391a5cdbb8478feb3bfa8cb9e4"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -772,7 +772,7 @@ mod tests {
 					},
 					{
 						"networkID": 2,
-						"address": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+						"address": "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq",
 						"displayName": "Granger",
 						"securityState": {
 							"discriminator": "unsecured",
@@ -782,7 +782,7 @@ mod tests {
 										"discriminator": "fromHash",
 										"fromHash": {
 											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+											"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 										}
 									},
 									"badge": {
@@ -792,7 +792,7 @@ mod tests {
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
-													"compressedData": "b6885032393165d56cce19850c2a3dbb80733d21c78c7314223e9c3a75f64c8d"
+													"compressedData": "c287e135eac194e4d6b6c65a2545988686b941509043bab026ef9717fd6b4f4e"
 												},
 												"derivationPath": {
 													"scheme": "cap26",
@@ -839,7 +839,7 @@ mod tests {
 						"displayName": "Dev Console",
 						"referencesToAuthorizedPersonas": [
 							{
-								"identityAddress": "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc",
+								"identityAddress": "identity_tdx_2_122r7248dkyjwt2kxf36de26w7htdwpzsm3lyjr4p0nvrgwn025dds8",
 								"lastLogin": "2024-01-31T14:23:45.000Z",
 								"sharedAccounts": {
 									"request": {
@@ -847,8 +847,8 @@ mod tests {
 										"quantity": 2
 									},
 									"ids": [
-										"account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
-										"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+										"account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m",
+										"account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 									]
 								},
 								"sharedPersonaData": {
@@ -874,7 +874,7 @@ mod tests {
 								}
 							},
 							{
-								"identityAddress": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+								"identityAddress": "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq",
 								"lastLogin": "2024-01-31T14:23:45.000Z",
 								"sharedAccounts": {
 									"request": {
@@ -882,7 +882,7 @@ mod tests {
 										"quantity": 1
 									},
 									"ids": [
-										"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+										"account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 									]
 								},
 								"sharedPersonaData": {
@@ -915,7 +915,7 @@ mod tests {
 						"displayName": "Sandbox",
 						"referencesToAuthorizedPersonas": [
 							{
-								"identityAddress": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+								"identityAddress": "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq",
 								"lastLogin": "2024-01-31T14:23:45.000Z",
 								"sharedAccounts": {
 									"request": {
@@ -923,7 +923,7 @@ mod tests {
 										"quantity": 1
 									},
 									"ids": [
-										"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+										"account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 									]
 								},
 								"sharedPersonaData": {

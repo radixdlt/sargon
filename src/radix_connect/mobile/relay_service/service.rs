@@ -61,7 +61,7 @@ impl WalletInteractionTransport for Service {
             wallet_to_dapp_interaction_response_to_json_bytes(&response);
 
         let mut encryption_key = session.encryption_key;
-        let encrypted_response: Vec<u8> = self
+        let encrypted_response = self
             .encryption_scheme
             .encrypt(serialized_response.to_vec(), &mut encryption_key);
 

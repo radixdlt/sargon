@@ -101,7 +101,7 @@ mod tests {
 					"displayName": "Radix Dashboard",
 					"referencesToAuthorizedPersonas": [
 						{
-							"identityAddress": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+							"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
 							"lastLogin": "2024-01-31T14:23:45.000Z",
 							"sharedAccounts": {
 								"request": {
@@ -109,8 +109,8 @@ mod tests {
 									"quantity": 2
 								},
 								"ids": [
-									"account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
-									"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+									"account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+									"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 								]
 							},
 							"sharedPersonaData": {
@@ -138,7 +138,7 @@ mod tests {
 							}
 						},
 						{
-							"identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+							"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 							"lastLogin": "2024-01-31T14:23:45.000Z",
 							"sharedAccounts": {
 								"request": {
@@ -146,7 +146,7 @@ mod tests {
 									"quantity": 1
 								},
 								"ids": [
-									"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+									"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 								]
 							},
 							"sharedPersonaData": {
@@ -179,7 +179,7 @@ mod tests {
 					"displayName": "Gumball Club",
 					"referencesToAuthorizedPersonas": [
 						{
-							"identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+							"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 							"lastLogin": "2024-01-31T14:23:45.000Z",
 							"sharedAccounts": {
 								"request": {
@@ -187,7 +187,7 @@ mod tests {
 									"quantity": 1
 								},
 								"ids": [
-									"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+									"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 								]
 							},
 							"sharedPersonaData": {
@@ -232,7 +232,7 @@ mod tests {
 					"displayName": "Dev Console",
 					"referencesToAuthorizedPersonas": [
 						{
-							"identityAddress": "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc",
+							"identityAddress": "identity_tdx_2_122r7248dkyjwt2kxf36de26w7htdwpzsm3lyjr4p0nvrgwn025dds8",
 							"lastLogin": "2024-01-31T14:23:45.000Z",
 							"sharedAccounts": {
 								"request": {
@@ -240,8 +240,8 @@ mod tests {
 									"quantity": 2
 								},
 								"ids": [
-									"account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
-									"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+									"account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m",
+									"account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 								]
 							},
 							"sharedPersonaData": {
@@ -267,7 +267,7 @@ mod tests {
 							}
 						},
 						{
-							"identityAddress": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+							"identityAddress": "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq",
 							"lastLogin": "2024-01-31T14:23:45.000Z",
 							"sharedAccounts": {
 								"request": {
@@ -275,7 +275,7 @@ mod tests {
 									"quantity": 1
 								},
 								"ids": [
-									"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+									"account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 								]
 							},
 							"sharedPersonaData": {
@@ -308,7 +308,7 @@ mod tests {
 					"displayName": "Sandbox",
 					"referencesToAuthorizedPersonas": [
 						{
-							"identityAddress": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+							"identityAddress": "identity_tdx_2_12tltwh00wvvur4yymv63pwhhwhjzvu4za2fy7vnyue36v5dtq3pgvq",
 							"lastLogin": "2024-01-31T14:23:45.000Z",
 							"sharedAccounts": {
 								"request": {
@@ -316,7 +316,7 @@ mod tests {
 									"quantity": 1
 								},
 								"ids": [
-									"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+									"account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 								]
 							},
 							"sharedPersonaData": {

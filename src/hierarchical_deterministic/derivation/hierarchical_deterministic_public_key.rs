@@ -59,12 +59,12 @@ impl HasSampleValues for HierarchicalDeterministicPublicKey {
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
 
         assert_eq!(
-            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+            "88ec4649da764965f862510dbe53d551a3fc2da49e1ef1f383d9d17006773bee",
             private_key.to_hex()
         );
         let public_key = private_key.public_key();
         assert_eq!(
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
+            "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36",
             public_key.to_hex()
         );
 
@@ -72,25 +72,19 @@ impl HasSampleValues for HierarchicalDeterministicPublicKey {
     }
 
     fn sample_other() -> Self {
-        let mwp = MnemonicWithPassphrase::with_passphrase(
-            Mnemonic::from_phrase(
-     "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
-            )
-            .unwrap(),
-            "".into(),
-        );
+        let mwp = MnemonicWithPassphrase::sample_other();
         let seed = mwp.to_seed();
         let private_key = seed.derive_private_key(
             &BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
         );
 
         assert_eq!(
-            "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
+            "09c5ec59b0cc08d07e5ed4aaee8c583264ffa060563d4b531e15db13d35b2a87",
             private_key.to_hex()
         );
         let public_key = private_key.public_key();
         assert_eq!(
-            "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
+            "038c9ae8b50356cfd87b6e8c069c14cbda692578e87cd41291701947a2d1b794c4",
             public_key.to_hex()
         );
 
@@ -101,26 +95,40 @@ impl HasSampleValues for HierarchicalDeterministicPublicKey {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = HierarchicalDeterministicPublicKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
     #[test]
     fn to_hex() {
         assert_eq!(
-            HierarchicalDeterministicPublicKey::sample().to_hex(),
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+            SUT::sample().to_hex(),
+            "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
         );
     }
 
     #[test]
     fn json() {
-        let model = HierarchicalDeterministicPublicKey::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
 			{
 				"publicKey": {
 					"curve": "curve25519",
-					"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+					"compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
 				},
 				"derivationPath": {
 					"scheme": "cap26",

@@ -1,15 +1,15 @@
 package com.radixdlt.sargon.samples
 
-import com.radixdlt.sargon.PersonaDataEntryEmailAddress
+import com.radixdlt.sargon.EmailAddress
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.newPersonaDataEntryEmailAddressSample
 import com.radixdlt.sargon.newPersonaDataEntryEmailAddressSampleOther
 
 @UsesSampleValues
-val PersonaDataEntryEmailAddress.Companion.sample: Sample<PersonaDataEntryEmailAddress>
-    get() = object : Sample<PersonaDataEntryEmailAddress> {
-        override fun invoke(): PersonaDataEntryEmailAddress = newPersonaDataEntryEmailAddressSample()
+val EmailAddress.Companion.sample: Sample<EmailAddress>
+    get() = object : Sample<EmailAddress> {
+        override fun invoke(): EmailAddress = newPersonaDataEntryEmailAddressSample()
 
-        override fun other(): PersonaDataEntryEmailAddress = newPersonaDataEntryEmailAddressSampleOther()
+        override fun other(): EmailAddress = newPersonaDataEntryEmailAddressSampleOther()
 
     }

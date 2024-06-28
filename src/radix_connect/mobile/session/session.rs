@@ -18,7 +18,7 @@ pub struct Session {
 
     /// The encryption key shared by both the dApp and the Wallet, that allows the dApp to decrypt the responses sent
     /// by the Wallet over the Relay Server. The encryption key is unique per session id and is created after performing a Diffie Hellman key exchange.
-    pub encryption_key: SymmetricKey,
+    pub encryption_key: EncryptionKey,
 
     /// The dapp public key sent over with the request that was used to generate the encryption key.
     /// The main purpose of having this stored in the session, is verify the validity of any subsequent dApp requests
@@ -41,7 +41,7 @@ impl Session {
     pub fn new(
         id: impl Into<SessionID>,
         origin: SessionOrigin,
-        encryption_key: impl Into<Exactly32Bytes>,
+        encryption_key: impl Into<EncryptionKey>,
         dapp_public_key: KeyAgreementPublicKey,
         dapp_identity_public_key: Ed25519PublicKey,
         wallet_public_key: KeyAgreementPublicKey,
@@ -83,7 +83,7 @@ impl HasSampleValues for Session {
         Self::new(
             SessionID::sample(),
             SessionOrigin::sample(),
-            Exactly32Bytes::sample(),
+            EncryptionKey::sample(),
             KeyAgreementPublicKey::sample(),
             Ed25519PublicKey::sample(),
             KeyAgreementPublicKey::sample(),
@@ -94,7 +94,7 @@ impl HasSampleValues for Session {
         Self::new(
             SessionID::sample_other(),
             SessionOrigin::sample_other(),
-            Exactly32Bytes::sample_other(),
+            EncryptionKey::sample_other(),
             KeyAgreementPublicKey::sample_other(),
             Ed25519PublicKey::sample_other(),
             KeyAgreementPublicKey::sample_other(),

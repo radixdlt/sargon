@@ -8,16 +8,17 @@
 import Foundation
 import SargonUniFFI
 
-extension PersonaDataEntryEmailAddress: SargonModel {}
-extension PersonaDataEntryEmailAddress: SargonStringCodable {}
-extension PersonaDataEntryEmailAddress: CustomStringConvertible {
+public typealias PersonaDataEntryEmailAddress = EmailAddress
+extension EmailAddress: SargonModel {}
+extension EmailAddress: SargonStringCodable {}
+extension EmailAddress: CustomStringConvertible {
 	public var description: String {
 		email
 	}
 }
 
-// MARK: - PersonaDataEntryEmailAddress + PersonaDataEntryProtocol
-extension PersonaDataEntryEmailAddress: PersonaDataEntryProtocol {
+// MARK: - EmailAddress + PersonaDataEntryProtocol
+extension EmailAddress: PersonaDataEntryProtocol {
 	public static var kind: PersonaData.Entry.Kind {
 		.emailAddress
 	}

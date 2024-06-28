@@ -203,7 +203,7 @@ mod tests {
                 "free"
             ;
             CALL_METHOD
-                Address("account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr")
+                Address("account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp")
                 "try_deposit_batch_or_abort"
                 Expression("ENTIRE_WORKTOP")
                 Enum<0u8>()
@@ -220,7 +220,7 @@ mod tests {
             ),
             r#"
             SET_METADATA
-                Address("account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr")
+                Address("account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp")
                 "account_type"
                 Enum<0u8>(
                     "dapp definition"

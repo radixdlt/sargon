@@ -6,7 +6,7 @@ declare_shared_with_dapp!(
     SharedToDappWithPersonaAccountAddresses,
     AccountAddress,
     "Exactly: 2 - #2 ids shared",
-    "Exactly: 2 - shared ids: [account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8, account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69]",
+    "Exactly: 2 - shared ids: [account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87, account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7]",
     r#"
     {
         "request": {
@@ -14,8 +14,8 @@ declare_shared_with_dapp!(
             "quantity": 2
         },
         "ids": [
-            "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
-            "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+            "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
         ]
     }
     "#

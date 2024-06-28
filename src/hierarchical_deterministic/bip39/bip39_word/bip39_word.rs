@@ -33,27 +33,28 @@ impl PartialOrd for BIP39Word {
 }
 
 impl BIP39Word {
-    pub fn new(word: &'static str, language: BIP39Language) -> Result<Self> {
+    pub fn new(word: impl AsRef<str>, language: BIP39Language) -> Result<Self> {
+        let word = word.as_ref();
         let index =
             index_of_word_in_bip39_wordlist_of_language(word, language.into())
                 .ok_or(CommonError::UnknownBIP39Word)?;
         Ok(Self {
-            word: word.to_string(),
+            word: word.to_owned(),
             index,
             language,
         })
     }
-    pub fn english(word: &'static str) -> Result<Self> {
+    pub fn english(word: impl AsRef<str>) -> Result<Self> {
         Self::new(word, BIP39Language::English)
     }
 }
 
 fn index_of_word_in_bip39_wordlist_of_language(
-    word: &'static str,
+    word: impl AsRef<str>,
     language: bip39::Language,
 ) -> Option<U11> {
     language
-        .find_word(word)
+        .find_word(word.as_ref())
         .map(|i| U11::new(i).expect("Less than 2048"))
 }
 
