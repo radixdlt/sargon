@@ -12,6 +12,6 @@ fun RadixConnectMobile.Companion.init(
     context: Context,
     okHttpClient: OkHttpClient
 ) = RadixConnectMobile(
-    networkAntenna = SargonNetworkAntenna(client = okHttpClient),
+    networkingDriver = SargonNetworkingDriver(client = okHttpClient),
     sessionStorage = RadixConnectSessionStorage(context = context)
 )
