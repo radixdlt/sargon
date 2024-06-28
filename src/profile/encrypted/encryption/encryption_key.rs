@@ -11,8 +11,11 @@ uniffi::custom_newtype!(EncryptionKey, Exactly32Bytes);
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
+    Serialize,
+    Deserialize,
     Hash,
 )]
+#[serde(transparent)]
 pub struct EncryptionKey(pub Exactly32Bytes);
 
 impl EncryptionKey {

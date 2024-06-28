@@ -13,6 +13,15 @@ use crate::prelude::*;
 /// assert_eq!("Satoshi".parse::<SUT>().unwrap().to_string(), "Satoshi");
 /// ```
 ///
+/// Names with longer than 30 chars are trimmed.
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+/// #[allow(clippy::upper_case_acronyms)]
+/// type SUT = DisplayName;
+/// assert_eq!("A very big name that is over than 30 characters long".parse::<SUT>().unwrap().to_string(), "A very big name that is over t");
+/// ```
+///
 #[derive(
     Clone,
     Debug,
@@ -39,14 +48,10 @@ impl DisplayName {
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }
-        if value.len() > Self::MAX_LEN {
-            return Err(CommonError::InvalidDisplayNameTooLong {
-                expected: Self::MAX_LEN as u64,
-                found: value.len() as u64,
-            });
-        }
 
-        Ok(Self { value })
+        Ok(Self {
+            value: prefix_str(Self::MAX_LEN, value),
+        })
     }
 }
 
@@ -96,11 +101,8 @@ mod tests {
     fn invalid() {
         let s = "this is a much much too long display name";
         assert_eq!(
-            SUT::new(s),
-            Err(CommonError::InvalidDisplayNameTooLong {
-                expected: SUT::MAX_LEN as u64,
-                found: s.len() as u64
-            })
+            SUT::new(s).unwrap().value,
+            "this is a much much too long d"
         );
     }
 
@@ -140,9 +142,6 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<SUT>(json!(
-            "this is a much much too long display name"
-        ));
         assert_json_value_fails::<SUT>(json!(""));
         assert_json_value_fails::<SUT>(json!("   "));
     }

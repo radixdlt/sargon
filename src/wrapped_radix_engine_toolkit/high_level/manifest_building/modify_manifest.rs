@@ -59,34 +59,29 @@ where
 impl TransactionManifest {
     /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
     /// term for `assert_worktop_contains`.
-    ///
-    /// # Panics
-    /// Panics if any of the TransactionGuarantee's `instruction_index` is out of
-    /// bounds.
-    ///
-    /// Also panics if the number of TransactionGuarantee's is larger than the number
-    /// of instructions of `manifest` (does not make any sense).
-    pub(crate) fn modify_add_guarantees<I>(self, guarantees: I) -> Self
+    pub(crate) fn modify_add_guarantees<I>(
+        self,
+        guarantees: I,
+    ) -> Result<TransactionManifest>
     where
         I: IntoIterator<Item = TransactionGuarantee>,
     {
         let guarantees = guarantees.into_iter().collect_vec();
         if guarantees.is_empty() {
-            return self;
+            return Ok(self);
         };
 
         let instruction_count = self.instructions().len() as u64;
-
-        if guarantees.len() > self.instructions().len() {
-            panic!("Does not make sense to add more guarantees than there are instructions.")
-        }
 
         if let Some(oob) = guarantees
             .clone()
             .into_iter()
             .find(|g| g.instruction_index >= instruction_count)
         {
-            panic!("Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{}, but an 'instruction_index' of {} was specified.", instruction_count, oob.instruction_index)
+            return Err(CommonError::TXGuaranteeIndexOutOfBounds {
+                index: oob.instruction_index,
+                count: instruction_count,
+            });
         }
 
         // Will be increased with each added guarantee to account for the
@@ -118,7 +113,7 @@ impl TransactionManifest {
             offset.add_assign(1);
         }
 
-        manifest
+        Ok(manifest)
     }
 
     pub(crate) fn modify_add_lock_fee(
@@ -185,7 +180,7 @@ mod tests {
     #[test]
     fn add_guarantees_divisibility_rounding() {
         let instructions_string = r#"
-        CALL_METHOD
+CALL_METHOD
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     "lock_fee"
     Decimal("0.61")
@@ -224,13 +219,15 @@ CALL_METHOD
             Blobs::default(),
         )
         .unwrap();
-        manifest = manifest.modify_add_guarantees([TransactionGuarantee::new(
-            added_guaranteed_amount,
-            percentage,
-            index,
-            resource,
-            divisibility,
-        )]);
+        manifest = manifest
+            .modify_add_guarantees([TransactionGuarantee::new(
+                added_guaranteed_amount,
+                percentage,
+                index,
+                resource,
+                divisibility,
+            )])
+            .unwrap();
         let instructions = manifest.instructions().to_owned();
         let instruction = instructions[index as usize + 1].clone();
         assert_eq!(
@@ -352,13 +349,15 @@ CALL_METHOD
         let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
 
         manifest_eq(
-            manifest.modify_add_guarantees([TransactionGuarantee::new(
-                1337,
-                0,
-                1,
-                ResourceAddress::sample(),
-                10,
-            )]),
+            manifest
+                .modify_add_guarantees([TransactionGuarantee::new(
+                    1337,
+                    0,
+                    1,
+                    ResourceAddress::sample(),
+                    10,
+                )])
+                .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
@@ -386,17 +385,116 @@ CALL_METHOD
     }
 
     #[test]
+    fn test_modify_manifest_add_many_guarantees() {
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
+
+        manifest_eq(
+            manifest
+                .modify_add_guarantees([
+                    TransactionGuarantee::new(
+                        1337,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1338,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1339,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1340,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1341,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                    TransactionGuarantee::new(
+                        1342,
+                        0,
+                        1,
+                        ResourceAddress::sample(),
+                        10,
+                    ),
+                ])
+                .unwrap(),
+            r#"
+            CALL_METHOD
+                Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
+                "withdraw"
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1338")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1339")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1340")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1341")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1342")
+            ;
+            TAKE_FROM_WORKTOP
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+                Bucket("bucket1")
+            ;
+            CALL_METHOD
+                Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
+                "try_deposit_or_abort"
+                Bucket("bucket1")
+                Enum<0u8>()
+            ;
+            "#,
+        );
+    }
+
+    #[test]
     fn test_modify_manifest_add_guarantees_to_manifest_with_lock_fee() {
         let manifest = TransactionManifest::sample();
 
         manifest_eq(
-            manifest.modify_add_guarantees([TransactionGuarantee::new(
-                1337,
-                0,
-                1,
-                ResourceAddress::sample(),
-                10,
-            )]),
+            manifest
+                .modify_add_guarantees([TransactionGuarantee::new(
+                    1337,
+                    0,
+                    1,
+                    ResourceAddress::sample(),
+                    10,
+                )])
+                .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
@@ -431,84 +529,47 @@ CALL_METHOD
     #[test]
     fn test_modify_manifest_add_guarantees_unchanged_if_no_guarantees() {
         let manifest = TransactionManifest::sample();
-        assert_eq!(manifest.clone().modify_add_guarantees([]), manifest);
+        assert_eq!(
+            manifest.clone().modify_add_guarantees([]).unwrap(),
+            manifest
+        );
     }
 
     #[test]
     fn test_modify_manifest_add_guarantees_unchanged_if_instructions_empty() {
         let manifest = TransactionManifest::empty(NetworkID::Mainnet);
-        assert_eq!(manifest.clone().modify_add_guarantees([]), manifest);
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Does not make sense to add more guarantees than there are instructions."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_if_instructions_empty_but_guarantees_is_not_empty(
-    ) {
-        let manifest = TransactionManifest::empty(NetworkID::Mainnet);
         assert_eq!(
-            manifest
-                .clone()
-                .modify_add_guarantees([TransactionGuarantee::sample()]),
+            manifest.clone().modify_add_guarantees([]).unwrap(),
             manifest
         );
     }
 
     #[test]
-    #[should_panic(
-        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 4 was specified."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_index_equal_to_instruction_count(
+    fn test_modify_manifest_add_guarantees_returns_error_index_equal_to_instruction_count(
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
-            manifest.clone().modify_add_guarantees([
-                TransactionGuarantee::new(
-                    0,
-                    0,
-                    4,
-                    ResourceAddress::sample(),
-                    None
-                )
-            ]),
-            manifest
+            manifest.modify_add_guarantees([TransactionGuarantee::new(
+                0,
+                0,
+                4,
+                ResourceAddress::sample(),
+                None
+            )]),
+            Err(CommonError::TXGuaranteeIndexOutOfBounds {
+                index: 4,
+                count: 4
+            })
         );
     }
 
     #[test]
-    #[should_panic(
-        expected = "Does not make sense to add more guarantees than there are instructions."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_if_more_guarantees_than_instructions(
-    ) {
-        let manifest = TransactionManifest::sample();
-        assert_eq!(
-            manifest.clone().modify_add_guarantees(
-                (0u32..manifest.instructions().len() as u32 + 1).map(|i| {
-                    TransactionGuarantee::new(
-                        i,
-                        0,
-                        0,
-                        ResourceAddress::sample(),
-                        None,
-                    )
-                })
-            ),
-            manifest
-        );
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 5 was specified."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_index_larger_than_instruction_count(
+    fn test_modify_manifest_add_guarantees_returns_error_index_larger_than_instruction_count(
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
             modify_manifest_add_guarantees(
-                manifest.clone(),
+                manifest,
                 vec![TransactionGuarantee::new(
                     0,
                     0,
@@ -517,7 +578,10 @@ CALL_METHOD
                     None
                 )]
             ),
-            manifest
+            Err(CommonError::TXGuaranteeIndexOutOfBounds {
+                index: 5,
+                count: 4
+            })
         );
     }
 }

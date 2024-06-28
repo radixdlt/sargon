@@ -86,9 +86,10 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
             oneIn(metadata: \.description)
             oneIn(metadata: \.symbol)
             oneOf(initialSupply.formattedPlain(locale: .test))
-            oneOf(accountAddress.address)
         }
-        AccountAddress.sampleValues.forEach(doTest)
+		// We are not testing with AccountAddress.sampleValues since sampleMainnet & sampleMainnetOther are used
+		// to build the prefilled the dummy metadata extra fields (so they will appear more than once in the manifest).
+		AccountAddress.sampleValues.forEach(doTest)
     }
 	
 	func test_create_single_fungible_token() {
@@ -175,7 +176,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			}
 			XCTAssertFalse(hasLockFee())
 			let fee: Decimal192 = 531
-			manifest = manifest.modify(lockFee: fee, addressOfFeePayer: addressOfFeePayer)
+			manifest = try manifest.modify(lockFee: fee, addressOfFeePayer: addressOfFeePayer)
 			XCTAssertTrue(hasLockFee())
 			XCTAssert(manifest.description.contains(addressOfFeePayer.address))
 		}
@@ -198,7 +199,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		)
 
 		XCTAssertFalse(manifest.description.contains(guarantee.amount.description))
-		manifest = manifest.modify(addGuarantees: [guarantee])
+		manifest = try manifest.modify(addGuarantees: [guarantee])
 		XCTAssertTrue(manifest.description.contains(guarantee.amount.description))
 		
 	}
