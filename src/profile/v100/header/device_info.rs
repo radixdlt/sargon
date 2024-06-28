@@ -32,7 +32,7 @@ pub struct DeviceInfo {
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device
     /// if they are able to.
-    pub description: DeviceInfoDescription,
+    pub description: String, // FIXME: Start using `DeviceInfoDescription` !
 
     /// The **last known** version of the device's operating system, e.g. "iOS 17.4.1".
     ///
@@ -75,7 +75,7 @@ impl DeviceInfo {
         Self {
             id,
             date,
-            description,
+            description: description.to_string(),
             system_version: Some(system_version.as_ref().to_owned()),
             host_app_version: Some(host_app_version.as_ref().to_owned()),
             host_vendor: Some(host_vendor.as_ref().to_owned()),
@@ -121,7 +121,8 @@ impl HasSampleValues for DeviceInfo {
             description: DeviceInfoDescription {
                 name: "iPhone".to_owned(),
                 model: "iPhone".to_owned(),
-            },
+            }
+            .to_string(),
             system_version: None,
             host_app_version: None,
             host_vendor: None,
@@ -136,7 +137,8 @@ impl HasSampleValues for DeviceInfo {
             description: DeviceInfoDescription {
                 name: "Android".to_owned(),
                 model: "Android".to_owned(),
-            },
+            }
+            .to_string(),
             system_version: None,
             host_app_version: None,
             host_vendor: None,
