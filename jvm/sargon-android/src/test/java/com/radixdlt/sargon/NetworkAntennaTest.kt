@@ -1,6 +1,6 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.antenna.SargonNetworkAntenna
+import com.radixdlt.sargon.antenna.SargonNetworkingDriver
 import com.radixdlt.sargon.extensions.compareTo
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.extensions.toHttpMethod
@@ -19,7 +19,7 @@ class NetworkAntennaTest {
     @Test
     @Tag("IntegrationTests")
     fun testNetwork() = runBlocking {
-        val client = GatewayClient(SargonNetworkAntenna(okHttpClient), NetworkId.MAINNET)
+        val client = GatewayClient(SargonNetworkingDriver(okHttpClient), NetworkId.MAINNET)
 
         val xrdBalance = client.xrdBalanceOfAccountOrZero(address = AccountAddress.sampleMainnet())
 

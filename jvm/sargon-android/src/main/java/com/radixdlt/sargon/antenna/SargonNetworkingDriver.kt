@@ -17,7 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.executeAsync
 
-class SargonNetworkAntenna(
+class SargonNetworkingDriver(
     private val client: OkHttpClient
 ) : NetworkingDriver {
     override suspend fun executeNetworkRequest(request: NetworkRequest): NetworkResponse = runCatching {
