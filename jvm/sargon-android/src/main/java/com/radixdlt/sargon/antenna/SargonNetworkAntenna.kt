@@ -15,7 +15,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.executeAsync
 
 class SargonNetworkAntenna(
     private val client: OkHttpClient
@@ -36,7 +35,7 @@ class SargonNetworkAntenna(
             .method(method = request.method.toHttpMethod(), body = requestBody)
             .build()
 
-        client.newCall(okHttpRequest).executeAsync()
+        client.newCall(okHttpRequest).execute()
     }.toNetworkResponse()
 
     @KoverIgnore
