@@ -4,7 +4,7 @@ use base64::Engine;
 
 pub fn parse_deferred_deep_link(
     encoded_value: impl AsRef<str>,
-) -> Result<DeferredDeepLink> {
+) -> Result<PostOnboardingCards> {
     let decoded = decode_deferred_deep_link(encoded_value)?;
     transform_onboarding_deep_link_value(decoded)
 }
@@ -55,10 +55,44 @@ mod tests_decode {
 
 fn transform_onboarding_deep_link_value(
     value: OnboardingDeepLinkValue,
-) -> Result<DeferredDeepLink> {
-    // NOTE: This won't be inside a From/Into implementation anymore and instead will have async logic
-    // performed here, where we will download the dApp metadata and set its name.
-    Ok(value.into())
+) -> Result<PostOnboardingCards> {
+    // NOTE: Here we will download the dApp metadata and set its name.
+    let mut result = Vec::new();
+
+    let is_mobile = value.method == DeferredDeepLinkMethod::Mobile;
+    if value.radquest {
+        result.push(PostOnboardingCard::ContinueRadQuest {
+            should_redirect: (is_mobile),
+            tracking_data: (value.radquest_data),
+        })
+    } else {
+        result.push(PostOnboardingCard::StartRadQuest);
+    }
+
+    let callback_url: Option<Url>;
+    if let Some(dapp_callback) = value.dapp_callback {
+        callback_url = Url::parse(&dapp_callback).ok();
+    } else {
+        callback_url = None;
+    }
+
+    if value.dapp_referrer.is_some() && is_mobile {
+        if let Some(callback_url) = callback_url.clone() {
+            result.push(PostOnboardingCard::Dapp {
+                name: ("TODO".to_string()),
+                callback_url: (Some(callback_url)),
+            });
+        }
+    }
+
+    if value.dapp_referrer.is_some() && !is_mobile {
+        result.push(PostOnboardingCard::Dapp {
+            name: ("TODO".to_string()),
+            callback_url: (None),
+        });
+    }
+
+    Ok(PostOnboardingCards::from_iter(result))
 }
 
 #[cfg(test)]
@@ -75,14 +109,12 @@ mod tests_transform {
             Some("this is the tracking info".to_owned()),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
+        let expected_result = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (true),
                 tracking_data: Some("this is the tracking info".to_owned()),
             },
-            PostOnboardingCard::Connector,
         ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
         assert_eq!(result, expected_result);
     }
 
@@ -96,14 +128,12 @@ mod tests_transform {
             Some("this is the tracking info".to_owned()),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
+        let expected_result = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (false),
                 tracking_data: Some("this is the tracking info".to_owned()),
             },
-            PostOnboardingCard::Connector,
         ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
         assert_eq!(result, expected_result);
     }
 
@@ -117,7 +147,7 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
+        let expected_result = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (true),
                 tracking_data: None,
@@ -126,9 +156,7 @@ mod tests_transform {
                 name: ("TODO".to_owned()),
                 callback_url: Some(Url::parse("https://example.com").unwrap()),
             },
-            PostOnboardingCard::Connector,
         ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
         assert_eq!(result, expected_result);
     }
 
@@ -142,18 +170,16 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
+        let expected_result = PostOnboardingCards::from_iter([
             PostOnboardingCard::ContinueRadQuest {
                 should_redirect: (false),
                 tracking_data: None,
             },
-            PostOnboardingCard::Connector,
             PostOnboardingCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: None,
             },
         ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
         assert_eq!(result, expected_result);
     }
 
@@ -167,11 +193,8 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadQuest,
-            PostOnboardingCard::Connector,
-        ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
+        let expected_result =
+            PostOnboardingCards::from_iter([PostOnboardingCard::StartRadQuest]);
         assert_eq!(result, expected_result);
     }
 
@@ -185,11 +208,8 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadQuest,
-            PostOnboardingCard::Connector,
-        ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
+        let expected_result =
+            PostOnboardingCards::from_iter([PostOnboardingCard::StartRadQuest]);
         assert_eq!(result, expected_result);
     }
 
@@ -203,15 +223,13 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
+        let expected_result = PostOnboardingCards::from_iter([
             PostOnboardingCard::StartRadQuest,
             PostOnboardingCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: Some(Url::parse("https://example.com").unwrap()),
             },
-            PostOnboardingCard::Connector,
         ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
         assert_eq!(result, expected_result);
     }
 
@@ -225,15 +243,13 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let cards = PostOnboardingCards::from_iter([
+        let expected_result = PostOnboardingCards::from_iter([
             PostOnboardingCard::StartRadQuest,
-            PostOnboardingCard::Connector,
             PostOnboardingCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: None,
             },
         ]);
-        let expected_result = DeferredDeepLink::Onboarding { cards };
         assert_eq!(result, expected_result);
     }
 }

@@ -550,6 +550,9 @@ pub enum CommonError {
 
     #[error("Deferred Deep Link decoding failed")]
     DeferredDeepLinkDecodingFailed = 10153,
+
+    #[error("Failed updating post-onboarding cards from deferred deep link")]
+    FailedUpdatingPostOnboardingCardsFromDeferredDeepLink = 10154,
 }
 
 #[uniffi::export]
