@@ -30,6 +30,17 @@ impl WalletToDappInteractionResponse {
             WalletToDappInteractionResponse::Failure(_) => false,
         }
     }
+
+    pub fn interaction_id(&self) -> WalletInteractionId {
+        match self {
+            WalletToDappInteractionResponse::Success(response) => {
+                response.interaction_id.clone()
+            }
+            WalletToDappInteractionResponse::Failure(response) => {
+                response.interaction_id.clone()
+            }
+        }
+    }
 }
 
 #[cfg(test)]

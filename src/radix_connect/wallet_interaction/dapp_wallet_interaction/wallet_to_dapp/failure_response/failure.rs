@@ -41,6 +41,16 @@ impl HasSampleValues for WalletToDappInteractionFailureResponse {
     }
 }
 
+impl WalletToDappInteractionFailureResponse {
+    pub fn sample_with_id(interaction_id: WalletInteractionId) -> Self {
+        Self::new(
+            interaction_id,
+            DappWalletInteractionErrorType::sample(),
+            "sample1".to_owned(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
