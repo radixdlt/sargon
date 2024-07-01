@@ -18,7 +18,7 @@ pub trait HomeCardsObserver: Send + Sync + std::fmt::Debug {
 #[derive(uniffi::Object)]
 pub struct HomeCardsManager {
     #[allow(dead_code)] // Remove this line after gateway_client is being used
-    gateway_client: GatewayClient,
+    parser: DeferredDeepLinkParser,
     #[allow(dead_code)] // Remove this line after cards_storage is being used
     cards_storage: Arc<dyn HomeCardsStorage>,
     observer: Arc<dyn HomeCardsObserver>,
@@ -32,7 +32,7 @@ impl HomeCardsManager {
         observer: Arc<dyn HomeCardsObserver>,
     ) -> Self {
         Self {
-            gateway_client,
+            parser: DeferredDeepLinkParser::new(gateway_client),
             cards_storage,
             observer,
             cards: RwLock::new(HomeCards::new()),
@@ -64,7 +64,7 @@ impl HomeCardsManager {
         &self,
         encoded_value: String,
     ) -> Result<()> {
-        let deep_link_cards = parse_deferred_deep_link(encoded_value)?;
+        let deep_link_cards = self.parser.parse(encoded_value)?;
         _ = self
             .cards
             .try_write()
