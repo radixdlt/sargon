@@ -2,27 +2,26 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct OnboardingDeepLinkValue {
+    /// Indicates the device the user is coming from.
     pub method: DeferredDeepLinkMethod,
-    pub radquest: bool,
+
+    /// Indicates the definition address of the dApp that referred the user to the Wallet
     pub dapp_referrer: Option<DappDefinitionAddress>,
-    pub dapp_callback: Option<String>,
-    pub radquest_data: Option<String>,
+
+    /// Indicates the particular dApp defining the user flow.
+    pub special_dapp: Option<DeferredDeepLinkSpecialDapp>,
 }
 
 impl OnboardingDeepLinkValue {
     pub fn new(
         method: DeferredDeepLinkMethod,
-        radquest: bool,
         dapp_referrer: Option<DappDefinitionAddress>,
-        dapp_callback: impl Into<Option<String>>,
-        radquest_data: impl Into<Option<String>>,
+        special_dapp: Option<DeferredDeepLinkSpecialDapp>,
     ) -> Self {
         Self {
             method,
-            radquest,
             dapp_referrer,
-            dapp_callback: dapp_callback.into(),
-            radquest_data: radquest_data.into(),
+            special_dapp,
         }
     }
 }
@@ -31,15 +30,13 @@ impl HasSampleValues for OnboardingDeepLinkValue {
     fn sample() -> Self {
         Self::new(
             DeferredDeepLinkMethod::Mobile,
-            true,
             Some(DappDefinitionAddress::sample()),
-            "https://example.com".to_owned(),
-            Some("example_tracking_data".to_owned()),
+            Some(DeferredDeepLinkSpecialDapp::RadQuest),
         )
     }
 
     fn sample_other() -> Self {
-        Self::new(DeferredDeepLinkMethod::Desktop, false, None, None, None)
+        Self::new(DeferredDeepLinkMethod::Desktop, None, None)
     }
 }
 
@@ -62,13 +59,11 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_referrer_and_callback_missing() {
-        let model =
-            SUT::new(DeferredDeepLinkMethod::Desktop, false, None, None, None);
+    fn json_roundtrip_referrer_and_special_dapp_missing() {
+        let model = SUT::new(DeferredDeepLinkMethod::Desktop, None, None);
         let json = r#"
         {
-            "method": "desktop",
-            "radquest": false
+            "method": "desktop"
         }
         "#;
         assert_eq_after_json_roundtrip(&model, json);
@@ -80,10 +75,8 @@ mod tests {
         let json = r#"
         {
             "method": "mobile",
-            "radquest": true,
             "dapp_referrer": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-            "dapp_callback": "https://example.com",
-            "radquest_data": "example_tracking_data"
+            "special_dapp": "radquest"
         }
         "#;
         assert_eq_after_json_roundtrip(&model, json);

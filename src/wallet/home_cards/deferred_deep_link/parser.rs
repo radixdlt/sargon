@@ -33,7 +33,7 @@ mod tests_decode {
 
     #[test]
     fn decode_deferred_deep_link_correct() {
-        let encoded_value = "eyJtZXRob2QiOiJtb2JpbGUiLCJyYWRxdWVzdCI6dHJ1ZSwiZGFwcF9yZWZlcnJlciI6ImFjY291bnRfcmR4MTI4eTZqNzhtdDBhcXY2MzcyZXZ6MjhocnhwOG1uMDZjY2Rka3I3eHBwYzg4aHl2eW52amR3ciIsImRhcHBfY2FsbGJhY2siOiJodHRwczovL2V4YW1wbGUuY29tIiwicmFkcXVlc3RfZGF0YSI6ImV4YW1wbGVfdHJhY2tpbmdfZGF0YSJ9";
+        let encoded_value = "eyJtZXRob2QiOiJtb2JpbGUiLCJkYXBwX3JlZmVycmVyIjoiYWNjb3VudF9yZHgxMjh5Nmo3OG10MGFxdjYzNzJldnoyOGhyeHA4bW4wNmNjZGRrcjd4cHBjODhoeXZ5bnZqZHdyIiwic3BlY2lhbF9kYXBwIjoicmFkcXVlc3QifQ";
         let result = decode_deferred_deep_link(encoded_value).unwrap();
         assert_eq!(result, OnboardingDeepLinkValue::sample());
     }
@@ -47,50 +47,33 @@ mod tests_decode {
 
     #[test]
     fn decode_deferred_deep_link_decoding_failed() {
-        let encoded_value = "bm90IGEgdmFsaWQgSlNPTg==";
+        let encoded_value = "e30";
         let result = decode_deferred_deep_link(encoded_value).unwrap_err();
-        assert_eq!(result, CommonError::DeferredDeepLinkInvalidValueFormat);
+        assert_eq!(result, CommonError::DeferredDeepLinkDecodingFailed);
     }
 }
 
 fn transform_onboarding_deep_link_value(
     value: OnboardingDeepLinkValue,
 ) -> Result<HomeCards> {
-    // NOTE: Here we will download the dApp metadata and set its name.
     let mut result = Vec::new();
 
-    let is_mobile = value.method == DeferredDeepLinkMethod::Mobile;
-    if value.radquest {
-        result.push(HomeCard::ContinueRadQuest {
-            should_redirect: (is_mobile),
-            tracking_data: (value.radquest_data),
-        })
+    if let Some(special_dapp) = value.special_dapp {
+        if special_dapp == DeferredDeepLinkSpecialDapp::RadQuest {
+            result.push(HomeCard::ContinueRadQuest);
+        } else {
+            result.push(HomeCard::StartRadQuest);
+        }
     } else {
         result.push(HomeCard::StartRadQuest);
     }
 
-    let callback_url: Option<Url>;
-    if let Some(dapp_callback) = value.dapp_callback {
-        callback_url = Url::parse(&dapp_callback).ok();
-    } else {
-        callback_url = None;
+    if value.dapp_referrer.is_some() {
+        // TODO: Download the dApp metadata and set its icon_url
+        result.push(HomeCard::Dapp { icon_url: (None) });
     }
 
-    if value.dapp_referrer.is_some() && is_mobile {
-        if let Some(callback_url) = callback_url.clone() {
-            result.push(HomeCard::Dapp {
-                name: ("TODO".to_string()),
-                callback_url: (Some(callback_url)),
-            });
-        }
-    }
-
-    if value.dapp_referrer.is_some() && !is_mobile {
-        result.push(HomeCard::Dapp {
-            name: ("TODO".to_string()),
-            callback_url: (None),
-        });
-    }
+    result.push(HomeCard::Connector);
 
     Ok(HomeCards::from_iter(result))
 }
@@ -100,151 +83,63 @@ mod tests_transform {
     use super::*;
 
     #[test]
-    fn transform_radquest_mobile_without_referrer() {
+    fn transform_radquest_without_referrer() {
         let value = OnboardingDeepLinkValue::new(
             DeferredDeepLinkMethod::Mobile,
-            true,
             None,
-            None,
-            Some("this is the tracking info".to_owned()),
-        );
-        let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result =
-            HomeCards::from_iter([HomeCard::ContinueRadQuest {
-                should_redirect: (true),
-                tracking_data: Some("this is the tracking info".to_owned()),
-            }]);
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn transform_radquest_desktop_without_referrer() {
-        let value = OnboardingDeepLinkValue::new(
-            DeferredDeepLinkMethod::Desktop,
-            true,
-            None,
-            None,
-            Some("this is the tracking info".to_owned()),
-        );
-        let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result =
-            HomeCards::from_iter([HomeCard::ContinueRadQuest {
-                should_redirect: (false),
-                tracking_data: Some("this is the tracking info".to_owned()),
-            }]);
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn transform_radquest_mobile_with_referrer() {
-        let value = OnboardingDeepLinkValue::new(
-            DeferredDeepLinkMethod::Mobile,
-            true,
-            Some(AccountAddress::sample()),
-            Some("https://example.com".to_owned()),
-            None,
+            Some(DeferredDeepLinkSpecialDapp::RadQuest),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let expected_result = HomeCards::from_iter([
-            HomeCard::ContinueRadQuest {
-                should_redirect: (true),
-                tracking_data: None,
-            },
-            HomeCard::Dapp {
-                name: ("TODO".to_owned()),
-                callback_url: Some(Url::parse("https://example.com").unwrap()),
-            },
+            HomeCard::ContinueRadQuest,
+            HomeCard::Connector,
         ]);
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn transform_radquest_desktop_with_referrer() {
+    fn transform_radquest_with_referrer() {
         let value = OnboardingDeepLinkValue::new(
-            DeferredDeepLinkMethod::Desktop,
-            true,
+            DeferredDeepLinkMethod::Mobile,
             Some(AccountAddress::sample()),
-            Some("https://example.com".to_owned()),
-            None,
+            Some(DeferredDeepLinkSpecialDapp::RadQuest),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let expected_result = HomeCards::from_iter([
-            HomeCard::ContinueRadQuest {
-                should_redirect: (false),
-                tracking_data: None,
-            },
-            HomeCard::Dapp {
-                name: ("TODO".to_owned()),
-                callback_url: None,
-            },
+            HomeCard::ContinueRadQuest,
+            HomeCard::Dapp { icon_url: (None) },
+            HomeCard::Connector,
         ]);
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn transform_not_radquest_mobile_without_referrer() {
-        let value = OnboardingDeepLinkValue::new(
-            DeferredDeepLinkMethod::Mobile,
-            false,
-            None,
-            None,
-            None,
-        );
-        let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn transform_not_radquest_desktop_without_referrer() {
+    fn transform_no_special_dapp_without_referrer() {
         let value = OnboardingDeepLinkValue::new(
             DeferredDeepLinkMethod::Desktop,
-            false,
             None,
-            None,
-            None,
-        );
-        let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
-    fn transform_not_radquest_mobile_with_referrer() {
-        let value = OnboardingDeepLinkValue::new(
-            DeferredDeepLinkMethod::Mobile,
-            false,
-            Some(AccountAddress::sample()),
-            Some("https://example.com".to_owned()),
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::StartRadQuest,
-            HomeCard::Dapp {
-                name: ("TODO".to_owned()),
-                callback_url: Some(Url::parse("https://example.com").unwrap()),
-            },
+            HomeCard::Connector,
         ]);
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn transform_not_radquest_desktop_with_referrer() {
+    fn transform_no_special_dapp_with_referrer() {
         let value = OnboardingDeepLinkValue::new(
-            DeferredDeepLinkMethod::Desktop,
-            false,
+            DeferredDeepLinkMethod::Mobile,
             Some(AccountAddress::sample()),
-            Some("https://example.com".to_owned()),
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::StartRadQuest,
-            HomeCard::Dapp {
-                name: ("TODO".to_owned()),
-                callback_url: None,
-            },
+            HomeCard::Dapp { icon_url: (None) },
+            HomeCard::Connector,
         ]);
         assert_eq!(result, expected_result);
     }

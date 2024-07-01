@@ -16,29 +16,18 @@ use crate::prelude::*;
 /// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.
 pub enum HomeCard {
-    /// Content: "Get started on Radix with RadQuest, and earn XRD and collectible NFTs."
+    /// Content: "Start RadQuest, learn about Radix, earn XRD and collectibles."
     /// Action: Redirect user to RadQuest.
     StartRadQuest,
 
-    /// Content: "Congratulations! Continue your journey on Radquest!"
-    /// Action: If `should_redirect`, redirect user to RadQuest with the given `tracking_data`. Otherwise, none.
-    #[display(
-        "ContinueRadquest should_redirect: {}, tracking_data: {:?}",
-        should_redirect,
-        tracking_data
-    )]
-    ContinueRadQuest {
-        should_redirect: bool,
-        tracking_data: Option<String>,
-    },
+    /// Content: "Continue your Radix journey in your browser. Tap to dismiss."
+    /// Action: None.
+    ContinueRadQuest,
 
-    /// Content: "Now that you’ve got the Radix Wallet, you can continue on with using {name}!"
-    /// Action: If `callback_url` is available, redirect user to it. Otherwise, none.
-    #[display("Dapp {}, {:?}", name, callback_url)]
-    Dapp {
-        name: String,
-        callback_url: Option<Url>,
-    },
+    /// Content: "You can now connect with your Radix Wallet. Tap to dismiss."
+    /// Action: None.
+    #[display("Dapp {:?}", icon_url)]
+    Dapp { icon_url: Option<Url> },
 
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
@@ -53,37 +42,13 @@ impl Identifiable for HomeCard {
     }
 }
 
-impl HomeCard {
-    pub fn sample_start_radquest() -> Self {
+impl HasSampleValues for HomeCard {
+    fn sample() -> Self {
         Self::StartRadQuest
     }
 
-    pub fn sample_continue_radquest() -> Self {
-        Self::ContinueRadQuest {
-            should_redirect: true,
-            tracking_data: None,
-        }
-    }
-
-    pub fn sample_dapp() -> Self {
-        Self::Dapp {
-            name: "OciSwap".into(),
-            callback_url: None,
-        }
-    }
-
-    pub fn sample_connector() -> Self {
-        Self::Connector
-    }
-}
-
-impl HasSampleValues for HomeCard {
-    fn sample() -> Self {
-        Self::sample_start_radquest()
-    }
-
     fn sample_other() -> Self {
-        Self::sample_connector()
+        Self::ContinueRadQuest
     }
 }
 
