@@ -8,6 +8,7 @@ mod integration_tests {
     use actix_rt::time::timeout;
     use sargon::prelude::*;
     use std::collections::HashMap;
+    use url::Url;
 
     use crate::network_antenna_reqwest::new_gateway_client;
 
@@ -221,8 +222,10 @@ mod integration_tests {
         assert_eq!(
             response,
             Some(
-                "https://assets.radixdlt.com/icons/icon-xrd-32x32.png"
-                    .to_string()
+                Url::parse(
+                    "https://assets.radixdlt.com/icons/icon-xrd-32x32.png"
+                )
+                .unwrap()
             )
         );
     }

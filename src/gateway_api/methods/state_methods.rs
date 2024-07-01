@@ -60,7 +60,7 @@ impl GatewayClient {
     pub async fn icon_url_of_address(
         &self,
         address: String,
-    ) -> Result<Option<String>> {
+    ) -> Result<Option<Url>> {
         let response: StateEntityDetailsResponse = self
             .state_entity_details(StateEntityDetailsRequest::address(
                 address.clone(),
@@ -86,9 +86,7 @@ impl GatewayClient {
         };
 
         match item.value.typed {
-            MetadataTypedValue::MetadataUrlValue { value } => {
-                Ok(Some(value.to_string()))
-            }
+            MetadataTypedValue::MetadataUrlValue { value } => Ok(Some(value)),
             _ => Err(CommonError::InvalidMetadataFormat),
         }
     }

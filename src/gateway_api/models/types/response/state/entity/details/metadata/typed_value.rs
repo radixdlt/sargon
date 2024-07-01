@@ -68,9 +68,3 @@ pub enum MetadataTypedValue {
     #[serde(rename = "UrlArray")]
     MetadataUrlArrayValue {},
 }
-
-impl Default for MetadataTypedValue {
-    fn default() -> Self {
-        Self::MetadataBoolValue {}
-    }
-}

@@ -64,7 +64,7 @@ impl HomeCardsManager {
         &self,
         encoded_value: String,
     ) -> Result<()> {
-        let deep_link_cards = self.parser.parse(encoded_value)?;
+        let deep_link_cards = self.parser.parse(encoded_value).await?;
         _ = self
             .cards
             .try_write()
