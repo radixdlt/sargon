@@ -14,5 +14,4 @@ pub enum AddressFormat {
     Full,
     Raw,
     Default,
-    Middle,
 }

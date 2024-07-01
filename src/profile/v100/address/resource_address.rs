@@ -308,14 +308,6 @@ mod tests {
     }
 
     #[test]
-    fn formatted_middle() {
-        assert_eq!(
-            SUT::sample().formatted(AddressFormat::Middle),
-            "urce_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxx"
-        );
-    }
-
-    #[test]
     fn display() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
         let a = SUT::try_from_bech32(s).unwrap();
