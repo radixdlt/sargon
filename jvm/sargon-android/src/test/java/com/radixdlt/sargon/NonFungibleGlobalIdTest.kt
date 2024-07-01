@@ -44,7 +44,7 @@ class NonFungibleGlobalIdTest {
             nonFungibleLocalId = NonFungibleLocalId.init("#1#")
         )
 
-        assertEquals("reso...c9wlxa:1", address.formatted())
+        assertEquals("reso...c9wlxa:#1#", address.formatted())
         assertEquals(
             "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:1",
             address.formatted(format = AddressFormat.FULL)

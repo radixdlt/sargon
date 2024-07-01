@@ -49,8 +49,7 @@ final class NonFungibleGlobalIDTests: IdentifiableByStringProtocolTest<NonFungib
             )
         )
         XCTAssertNoDifference(sut.formatted(.raw), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}")
-		XCTAssertNoDifference(sut.formatted(.default), "reso...c9wlxa:dead...3210")
-		XCTAssertNoDifference(sut.formatted(.middle), "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej:beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654")
+		XCTAssertNoDifference(sut.formatted(.default), "reso...c9wlxa:{dead...3210}")
     }
 	
 	func test_formatted_string() throws {
@@ -59,7 +58,6 @@ final class NonFungibleGlobalIDTests: IdentifiableByStringProtocolTest<NonFungib
 			localID: .stringID("foobar")
 		)
 		XCTAssertNoDifference(sut.formatted(.raw), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<foobar>")
-		XCTAssertNoDifference(sut.formatted(.default), "reso...c9wlxa:foobar")
-		XCTAssertNoDifference(sut.formatted(.middle), "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej")
+		XCTAssertNoDifference(sut.formatted(.default), "reso...c9wlxa:<foobar>")
 	}
 }

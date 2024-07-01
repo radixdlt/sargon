@@ -30,7 +30,6 @@ final class LegacyOlympiaAccountAddressTests: BaseAddressTest<LegacyOlympiaAccou
     func test_formatted() {
         XCTAssertNoDifference(SUT.sampleOther.formatted(.default), "rdx...0xqm2ylge")
         XCTAssertNoDifference(SUT.sampleOther.formatted(.raw), "rdx1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup0xqm2ylge")
-		XCTAssertNoDifference(SUT.sampleOther.formatted(.middle), "1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup")
     }
 }
 
