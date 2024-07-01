@@ -25,50 +25,9 @@
 			},
 			"metadata":
 			{
-				"total_count": 5,
+				"total_count": 4,
 				"items":
 				[
-					{
-						"key": "tags",
-						"value":
-						{
-							"raw_hex": "5c228001200c0206536172676f6e055275737479",
-							"programmatic_json":
-							{
-								"variant_id": 128,
-								"fields":
-								[
-									{
-										"element_kind": "String",
-										"elements":
-										[
-											{
-												"value": "Sargon",
-												"kind": "String"
-											},
-											{
-												"value": "Rusty",
-												"kind": "String"
-											}
-										],
-										"kind": "Array"
-									}
-								],
-								"kind": "Enum"
-							},
-							"typed":
-							{
-								"values":
-								[
-									"Sargon",
-									"Rusty"
-								],
-								"type": "StringArray"
-							}
-						},
-						"is_locked": false,
-						"last_updated_at_state_version": 73654060
-					},
 					{
 						"key": "icon_url",
 						"value":

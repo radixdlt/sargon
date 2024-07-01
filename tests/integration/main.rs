@@ -210,4 +210,20 @@ mod integration_tests {
         println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
         assert!(account_address.is_legacy_address())
     }
+
+    #[actix_rt::test]
+    async fn test_xrd_icon_url() {
+        let xrd_address = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".to_owned();
+        let gateway_client = new_gateway_client(NetworkID::Mainnet);
+        let sut = gateway_client.icon_url_of_address(xrd_address);
+
+        let response = timeout(MAX, sut).await.unwrap().unwrap();
+        assert_eq!(
+            response,
+            Some(
+                "https://assets.radixdlt.com/icons/icon-xrd-32x32.png"
+                    .to_string()
+            )
+        );
+    }
 }

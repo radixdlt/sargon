@@ -556,6 +556,9 @@ pub enum CommonError {
 
     #[error("Home cards not found")]
     HomeCardsNotFound = 10155,
+
+    #[error("Invalid Metadata format")]
+    InvalidMetadataFormat = 10156,
 }
 
 #[uniffi::export]

@@ -23,9 +23,6 @@ pub fn new_unvalidated_transaction_manifest_sample_other(
 mod uniffi_tests {
     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = UnvalidatedTransactionManifest;
-
     #[test]
     fn sample_values() {
         assert_ne!(
