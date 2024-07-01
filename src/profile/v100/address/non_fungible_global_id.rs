@@ -349,7 +349,7 @@ mod tests {
         // local_id: ruid
         local_id = NonFungibleLocalId::ruid(hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()).unwrap();
         item = SUT::new(resource_address, local_id);
-        // TODO
+        println!("{}", item.formatted(AddressFormat::Raw));
         assert_eq!(
             item.formatted(AddressFormat::Default),
             "reso...c9wlxa:{dead...3210}"
