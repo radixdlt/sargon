@@ -13,9 +13,9 @@ use crate::prelude::*;
     uniffi::Enum,
 )]
 
-/// An enum describing the different cards that Wallet can display after onboarding.
+/// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.
-pub enum PostOnboardingCard {
+pub enum HomeCard {
     /// Content: "Get started on Radix with RadQuest, and earn XRD and collectible NFTs."
     /// Action: Redirect user to RadQuest.
     StartRadQuest,
@@ -45,7 +45,7 @@ pub enum PostOnboardingCard {
     Connector,
 }
 
-impl Identifiable for PostOnboardingCard {
+impl Identifiable for HomeCard {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
@@ -53,7 +53,7 @@ impl Identifiable for PostOnboardingCard {
     }
 }
 
-impl PostOnboardingCard {
+impl HomeCard {
     pub fn sample_start_radquest() -> Self {
         Self::StartRadQuest
     }
@@ -77,7 +77,7 @@ impl PostOnboardingCard {
     }
 }
 
-impl HasSampleValues for PostOnboardingCard {
+impl HasSampleValues for HomeCard {
     fn sample() -> Self {
         Self::sample_start_radquest()
     }

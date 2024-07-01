@@ -4,7 +4,7 @@ use base64::Engine;
 
 pub fn parse_deferred_deep_link(
     encoded_value: impl AsRef<str>,
-) -> Result<PostOnboardingCards> {
+) -> Result<HomeCards> {
     let decoded = decode_deferred_deep_link(encoded_value)?;
     transform_onboarding_deep_link_value(decoded)
 }
@@ -55,18 +55,18 @@ mod tests_decode {
 
 fn transform_onboarding_deep_link_value(
     value: OnboardingDeepLinkValue,
-) -> Result<PostOnboardingCards> {
+) -> Result<HomeCards> {
     // NOTE: Here we will download the dApp metadata and set its name.
     let mut result = Vec::new();
 
     let is_mobile = value.method == DeferredDeepLinkMethod::Mobile;
     if value.radquest {
-        result.push(PostOnboardingCard::ContinueRadQuest {
+        result.push(HomeCard::ContinueRadQuest {
             should_redirect: (is_mobile),
             tracking_data: (value.radquest_data),
         })
     } else {
-        result.push(PostOnboardingCard::StartRadQuest);
+        result.push(HomeCard::StartRadQuest);
     }
 
     let callback_url: Option<Url>;
@@ -78,7 +78,7 @@ fn transform_onboarding_deep_link_value(
 
     if value.dapp_referrer.is_some() && is_mobile {
         if let Some(callback_url) = callback_url.clone() {
-            result.push(PostOnboardingCard::Dapp {
+            result.push(HomeCard::Dapp {
                 name: ("TODO".to_string()),
                 callback_url: (Some(callback_url)),
             });
@@ -86,13 +86,13 @@ fn transform_onboarding_deep_link_value(
     }
 
     if value.dapp_referrer.is_some() && !is_mobile {
-        result.push(PostOnboardingCard::Dapp {
+        result.push(HomeCard::Dapp {
             name: ("TODO".to_string()),
             callback_url: (None),
         });
     }
 
-    Ok(PostOnboardingCards::from_iter(result))
+    Ok(HomeCards::from_iter(result))
 }
 
 #[cfg(test)]
@@ -109,12 +109,11 @@ mod tests_transform {
             Some("this is the tracking info".to_owned()),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = PostOnboardingCards::from_iter([
-            PostOnboardingCard::ContinueRadQuest {
+        let expected_result =
+            HomeCards::from_iter([HomeCard::ContinueRadQuest {
                 should_redirect: (true),
                 tracking_data: Some("this is the tracking info".to_owned()),
-            },
-        ]);
+            }]);
         assert_eq!(result, expected_result);
     }
 
@@ -128,12 +127,11 @@ mod tests_transform {
             Some("this is the tracking info".to_owned()),
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = PostOnboardingCards::from_iter([
-            PostOnboardingCard::ContinueRadQuest {
+        let expected_result =
+            HomeCards::from_iter([HomeCard::ContinueRadQuest {
                 should_redirect: (false),
                 tracking_data: Some("this is the tracking info".to_owned()),
-            },
-        ]);
+            }]);
         assert_eq!(result, expected_result);
     }
 
@@ -147,12 +145,12 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = PostOnboardingCards::from_iter([
-            PostOnboardingCard::ContinueRadQuest {
+        let expected_result = HomeCards::from_iter([
+            HomeCard::ContinueRadQuest {
                 should_redirect: (true),
                 tracking_data: None,
             },
-            PostOnboardingCard::Dapp {
+            HomeCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: Some(Url::parse("https://example.com").unwrap()),
             },
@@ -170,12 +168,12 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = PostOnboardingCards::from_iter([
-            PostOnboardingCard::ContinueRadQuest {
+        let expected_result = HomeCards::from_iter([
+            HomeCard::ContinueRadQuest {
                 should_redirect: (false),
                 tracking_data: None,
             },
-            PostOnboardingCard::Dapp {
+            HomeCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: None,
             },
@@ -193,8 +191,7 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result =
-            PostOnboardingCards::from_iter([PostOnboardingCard::StartRadQuest]);
+        let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
         assert_eq!(result, expected_result);
     }
 
@@ -208,8 +205,7 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result =
-            PostOnboardingCards::from_iter([PostOnboardingCard::StartRadQuest]);
+        let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
         assert_eq!(result, expected_result);
     }
 
@@ -223,9 +219,9 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadQuest,
-            PostOnboardingCard::Dapp {
+        let expected_result = HomeCards::from_iter([
+            HomeCard::StartRadQuest,
+            HomeCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: Some(Url::parse("https://example.com").unwrap()),
             },
@@ -243,9 +239,9 @@ mod tests_transform {
             None,
         );
         let result = transform_onboarding_deep_link_value(value).unwrap();
-        let expected_result = PostOnboardingCards::from_iter([
-            PostOnboardingCard::StartRadQuest,
-            PostOnboardingCard::Dapp {
+        let expected_result = HomeCards::from_iter([
+            HomeCard::StartRadQuest,
+            HomeCard::Dapp {
                 name: ("TODO".to_owned()),
                 callback_url: None,
             },
