@@ -4,12 +4,12 @@ decl_identified_vec_of!(HomeCard);
 
 impl HasSampleValues for HomeCards {
     fn sample() -> Self {
-        Self::from_iter([HomeCard::StartRadQuest, HomeCard::Connector])
+        Self::from_iter([HomeCard::sample(), HomeCard::Connector])
     }
 
     fn sample_other() -> Self {
         Self::from_iter([
-            HomeCard::ContinueRadQuest,
+            HomeCard::sample_other(),
             HomeCard::Dapp { icon_url: (None) },
         ])
     }

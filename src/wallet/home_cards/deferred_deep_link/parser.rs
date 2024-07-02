@@ -111,8 +111,6 @@ impl DeferredDeepLinkParser {
             }
         }
 
-        result.push(HomeCard::Connector);
-
         Ok(HomeCards::from_iter(result))
     }
 }
@@ -128,7 +126,12 @@ mod tests_transform {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DeferredDeepLinkParser;
 
-    fn make_sut(icon_url: Url) -> SUT {
+    fn make_sut(icon_url: Url, shouldSucceed: bool) -> SUT {
+        let key = if shouldSucceed {
+            MetadataKey::IconUrl
+        } else {
+            MetadataKey::Name
+        };
         let mock_antenna =
             MockAntenna::with_response(StateEntityDetailsResponse {
                 items: vec![StateEntityDetailsResponseItem {
@@ -136,7 +139,7 @@ mod tests_transform {
                     fungible_resources: None,
                     metadata: EntityMetadataCollection {
                         items: vec![EntityMetadataItem {
-                            key: MetadataKey::IconUrl.to_string(),
+                            key: key.to_string(),
                             value: EntityMetadataItemValue {
                                 typed: MetadataTypedValue::MetadataUrlValue {
                                     value: (icon_url),
@@ -169,17 +172,15 @@ mod tests_transform {
         );
         let req = sut.transform_onboarding_deep_link_value(value);
         let result = timeout(MAX, req).await.unwrap().unwrap();
-        let expected_result = HomeCards::from_iter([
-            HomeCard::ContinueRadQuest,
-            HomeCard::Connector,
-        ]);
+        let expected_result =
+            HomeCards::from_iter([HomeCard::ContinueRadQuest]);
         assert_eq!(result, expected_result);
     }
 
     #[actix_rt::test]
     async fn transform_radquest_with_referrer() {
         let icon_url = Url::parse("https://www.example.com").unwrap();
-        let sut = make_sut(icon_url.clone());
+        let sut = make_sut(icon_url.clone(), true);
         let value = OnboardingDeepLinkValue::new(
             DeferredDeepLinkMethod::Mobile,
             Some(AccountAddress::sample_stokenet()),
@@ -192,7 +193,6 @@ mod tests_transform {
             HomeCard::Dapp {
                 icon_url: (Some(icon_url)),
             },
-            HomeCard::Connector,
         ]);
         assert_eq!(result, expected_result);
     }
@@ -207,17 +207,14 @@ mod tests_transform {
         );
         let req = sut.transform_onboarding_deep_link_value(value);
         let result = timeout(MAX, req).await.unwrap().unwrap();
-        let expected_result = HomeCards::from_iter([
-            HomeCard::StartRadQuest,
-            HomeCard::Connector,
-        ]);
+        let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
         assert_eq!(result, expected_result);
     }
 
     #[actix_rt::test]
     async fn transform_no_special_dapp_with_referrer() {
         let icon_url = Url::parse("https://www.example.com").unwrap();
-        let sut = make_sut(icon_url.clone());
+        let sut = make_sut(icon_url.clone(), true);
         let value = OnboardingDeepLinkValue::new(
             DeferredDeepLinkMethod::Mobile,
             Some(AccountAddress::sample_stokenet()),
@@ -230,7 +227,6 @@ mod tests_transform {
             HomeCard::Dapp {
                 icon_url: (Some(icon_url)),
             },
-            HomeCard::Connector,
         ]);
         assert_eq!(result, expected_result);
     }
@@ -238,6 +234,24 @@ mod tests_transform {
     #[actix_rt::test]
     async fn transform_no_special_dapp_with_referrer_that_cannot_be_retrieved()
     {
+        let icon_url = Url::parse("https://www.example.com").unwrap();
+        let sut = make_sut(icon_url.clone(), false);
+        let value = OnboardingDeepLinkValue::new(
+            DeferredDeepLinkMethod::Mobile,
+            Some(AccountAddress::sample()),
+            None,
+        );
+        let req = sut.transform_onboarding_deep_link_value(value);
+        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let expected_result = HomeCards::from_iter([
+            HomeCard::StartRadQuest,
+            HomeCard::Dapp { icon_url: (None) },
+        ]);
+        assert_eq!(result, expected_result);
+    }
+
+    #[actix_rt::test]
+    async fn transform_no_special_dapp_with_referrer_failing_request() {
         let sut = make_failing_sut();
         let value = OnboardingDeepLinkValue::new(
             DeferredDeepLinkMethod::Mobile,
@@ -249,7 +263,19 @@ mod tests_transform {
         let expected_result = HomeCards::from_iter([
             HomeCard::StartRadQuest,
             HomeCard::Dapp { icon_url: (None) },
-            HomeCard::Connector,
+        ]);
+        assert_eq!(result, expected_result);
+    }
+
+    #[actix_rt::test]
+    async fn integration_test() {
+        let sut = make_failing_sut();
+        let encoded_value = "eyJtZXRob2QiOiJtb2JpbGUiLCJkYXBwX3JlZmVycmVyIjoiYWNjb3VudF9yZHgxMjh5Nmo3OG10MGFxdjYzNzJldnoyOGhyeHA4bW4wNmNjZGRrcjd4cHBjODhoeXZ5bnZqZHdyIiwic3BlY2lhbF9kYXBwIjoicmFkcXVlc3QifQ";
+        let req = sut.parse(encoded_value);
+        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let expected_result = HomeCards::from_iter([
+            HomeCard::ContinueRadQuest,
+            HomeCard::Dapp { icon_url: (None) },
         ]);
         assert_eq!(result, expected_result);
     }
