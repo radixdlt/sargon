@@ -160,22 +160,28 @@ impl NonFungibleGlobalId {
 
     pub fn formatted(&self, format: AddressFormat) -> String {
         match format {
-            AddressFormat::Default | AddressFormat::Full => format!(
+            AddressFormat::Default => {
+                let local_id_formatted = match self.non_fungible_local_id {
+                    NonFungibleLocalId::Ruid { value: _ } => format_string(
+                        self.non_fungible_local_id.to_string(),
+                        5,
+                        5,
+                    ),
+                    _ => self.non_fungible_local_id.to_string(),
+                };
+
+                format!(
+                    "{}:{}",
+                    self.resource_address.formatted(format),
+                    local_id_formatted
+                )
+            }
+            AddressFormat::Full => format!(
                 "{}:{}",
                 self.resource_address.formatted(format),
                 self.non_fungible_local_id.formatted(format)
             ),
             AddressFormat::Raw => self.to_canonical_string(),
-            AddressFormat::Middle => match self.non_fungible_local_id {
-                NonFungibleLocalId::Ruid { value: _ } => {
-                    format!(
-                        "{}:{}",
-                        self.resource_address.formatted(format),
-                        self.non_fungible_local_id.formatted(format)
-                    )
-                }
-                _ => self.resource_address.formatted(format),
-            },
         }
     }
 }
@@ -300,7 +306,7 @@ mod tests {
     fn formatted_default() {
         assert_eq!(
             SUT::sample_ruid().formatted(AddressFormat::Default),
-            "reso...c9wlxa:dead...3210"
+            "reso...c9wlxa:{dead...3210}"
         );
     }
 
@@ -321,11 +327,7 @@ mod tests {
         let mut item = SUT::new(resource_address, local_id);
         assert_eq!(
             item.formatted(AddressFormat::Default),
-            "reso...c9wlxa:12345678"
-        );
-        assert_eq!(
-            item.formatted(AddressFormat::Middle),
-            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej"
+            "reso...c9wlxa:#12345678#"
         );
 
         // local_id: string
@@ -333,11 +335,7 @@ mod tests {
         item = SUT::new(resource_address, local_id);
         assert_eq!(
             item.formatted(AddressFormat::Default),
-            "reso...c9wlxa:foobar"
-        );
-        assert_eq!(
-            item.formatted(AddressFormat::Middle),
-            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej"
+            "reso...c9wlxa:<foobar>"
         );
 
         // local_id: bytes
@@ -345,21 +343,17 @@ mod tests {
         item = SUT::new(resource_address, local_id);
         assert_eq!(
             item.formatted(AddressFormat::Default),
-            "reso...c9wlxa:dead"
-        );
-        assert_eq!(
-            item.formatted(AddressFormat::Middle),
-            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej"
+            "reso...c9wlxa:[dead]"
         );
 
         // local_id: ruid
         local_id = NonFungibleLocalId::ruid(hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()).unwrap();
         item = SUT::new(resource_address, local_id);
+        println!("{}", item.formatted(AddressFormat::Raw));
         assert_eq!(
             item.formatted(AddressFormat::Default),
-            "reso...c9wlxa:dead...3210"
+            "reso...c9wlxa:{dead...3210}"
         );
-        assert_eq!(item.formatted(AddressFormat::Middle), "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej:beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654");
     }
 
     #[test]

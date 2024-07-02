@@ -35,6 +35,15 @@ impl HasSampleValues for WalletToDappInteractionSuccessResponse {
     }
 }
 
+impl WalletToDappInteractionSuccessResponse {
+    pub fn sample_with_id(interaction_id: WalletInteractionId) -> Self {
+        Self::new(
+            interaction_id,
+            WalletToDappInteractionResponseItems::sample(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
