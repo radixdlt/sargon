@@ -551,14 +551,14 @@ pub enum CommonError {
     #[error("Deferred Deep Link decoding failed")]
     DeferredDeepLinkDecodingFailed = 10153,
 
-    #[error("Failed updating home cards from deferred deep link")]
-    FailedUpdatingHomeCardsFromDeferredDeepLink = 10154,
-
-    #[error("Home cards not found")]
-    HomeCardsNotFound = 10155,
+    #[error("Failed updating home cards")]
+    FailedUpdatingHomeCards = 10154,
 
     #[error("Invalid Metadata format")]
-    InvalidMetadataFormat = 10156,
+    InvalidMetadataFormat = 10155,
+
+    #[error("Failed accessing home cards")]
+    FailedAccessingHomeCards = 10156,
 }
 
 #[uniffi::export]

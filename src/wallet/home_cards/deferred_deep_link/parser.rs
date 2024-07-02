@@ -2,25 +2,30 @@ use crate::prelude::*;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 
-pub struct DeferredDeepLinkParser {
+#[async_trait::async_trait]
+pub trait DeferredDeepLinkParser: Send + Sync {
+    async fn parse(&self, encoded_value: String) -> Result<HomeCards>;
+}
+
+pub struct Parser {
     gateway_client: GatewayClient,
 }
 
-impl DeferredDeepLinkParser {
+impl Parser {
     pub fn new(gateway_client: GatewayClient) -> Self {
         Self { gateway_client }
     }
 }
 
-impl DeferredDeepLinkParser {
-    pub async fn parse(
-        &self,
-        encoded_value: impl AsRef<str>,
-    ) -> Result<HomeCards> {
+#[async_trait::async_trait]
+impl DeferredDeepLinkParser for Parser {
+    async fn parse(&self, encoded_value: String) -> Result<HomeCards> {
         let decoded = self.decode(encoded_value)?;
         self.transform_onboarding_deep_link_value(decoded).await
     }
+}
 
+impl Parser {
     fn decode(
         &self,
         encoded_value: impl AsRef<str>,
@@ -47,7 +52,7 @@ mod tests_decode {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeferredDeepLinkParser;
+    type SUT = Parser;
 
     fn make_sut() -> SUT {
         SUT::new(GatewayClient::new(
@@ -81,7 +86,7 @@ mod tests_decode {
     }
 }
 
-impl DeferredDeepLinkParser {
+impl Parser {
     async fn transform_onboarding_deep_link_value(
         &self,
         value: OnboardingDeepLinkValue,
@@ -124,10 +129,10 @@ mod tests_transform {
     const MAX: Duration = Duration::from_millis(10);
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeferredDeepLinkParser;
+    type SUT = Parser;
 
-    fn make_sut(icon_url: Url, shouldSucceed: bool) -> SUT {
-        let key = if shouldSucceed {
+    fn make_sut(icon_url: Url, should_succeed: bool) -> SUT {
+        let key = if should_succeed {
             MetadataKey::IconUrl
         } else {
             MetadataKey::Name
@@ -271,7 +276,7 @@ mod tests_transform {
     async fn integration_test() {
         let sut = make_failing_sut();
         let encoded_value = "eyJtZXRob2QiOiJtb2JpbGUiLCJkYXBwX3JlZmVycmVyIjoiYWNjb3VudF9yZHgxMjh5Nmo3OG10MGFxdjYzNzJldnoyOGhyeHA4bW4wNmNjZGRrcjd4cHBjODhoeXZ5bnZqZHdyIiwic3BlY2lhbF9kYXBwIjoicmFkcXVlc3QifQ";
-        let req = sut.parse(encoded_value);
+        let req = sut.parse(encoded_value.to_string());
         let result = timeout(MAX, req).await.unwrap().unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::ContinueRadQuest,
