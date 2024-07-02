@@ -3,7 +3,6 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 
 pub struct DeferredDeepLinkParser {
-    #[allow(dead_code)] // Remove this line after gateway_client is being used
     gateway_client: GatewayClient,
 }
 
