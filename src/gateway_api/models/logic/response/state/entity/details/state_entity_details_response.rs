@@ -48,4 +48,14 @@ mod tests {
         .unwrap();
         // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
     }
+
+    #[test]
+    fn json_single_resource_no_metadata() {
+        let _ = fixture_and_json::<SUT>(include_str!(concat!(
+            env!("FIXTURES_MODELS_GW"),
+            "state/response_entity_details__single_resource_no_metadata.json"
+        )))
+        .unwrap();
+        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
+    }
 }

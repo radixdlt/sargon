@@ -9,10 +9,7 @@ use crate::prelude::*;
     Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
 )]
 pub struct StateEntityDetailsOptIns {
-    #[serde(
-        rename = "explicit_metadata",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub explicit_metadata: Option<Vec<MetadataKey>>,
 }
 

@@ -27,6 +27,10 @@ pub enum MetadataKey {
     Pool,
 }
 
+pub fn dapp_metadata_keys() -> Vec<MetadataKey> {
+    vec![MetadataKey::Name, MetadataKey::IconUrl]
+}
+
 impl From<MetadataKey> for String {
     fn from(value: MetadataKey) -> Self {
         value.to_string()

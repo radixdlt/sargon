@@ -10,7 +10,7 @@ impl GatewayClient {
     ) -> Result<Option<Decimal192>> {
         let response: StateEntityDetailsResponse = self
             .state_entity_details(StateEntityDetailsRequest::new(vec![
-                address.address()
+                address.into()
             ]))
             .await?;
 
@@ -56,38 +56,34 @@ impl GatewayClient {
 }
 
 impl GatewayClient {
-    /// Fetches the metadata for the given address and returns the `icon_url` value.
-    pub async fn icon_url_of_address(
+    /// Fetches the metadata for the given entity.
+    pub async fn fetch_entity_metadata(
         &self,
-        address: String,
-    ) -> Result<Option<Url>> {
-        let response: StateEntityDetailsResponse = self
+        address: Address,
+        explicit_metadata: Vec<MetadataKey>,
+    ) -> Result<EntityMetadataCollection> {
+        let response = self
             .state_entity_details(StateEntityDetailsRequest::address(
-                address.clone(),
-                vec![MetadataKey::IconUrl],
+                address,
+                explicit_metadata,
             ))
             .await?;
 
-        let Some(response_item) = response
-            .items
-            .into_iter()
-            .find(|x| x.address.to_string() == address)
+        let Some(response_item) =
+            response.items.into_iter().find(|x| x.address == address)
         else {
-            return Ok(None);
+            return Err(CommonError::EntityNotFound);
         };
 
-        let Some(item) = response_item
-            .metadata
-            .items
-            .into_iter()
-            .find(|x| x.key == MetadataKey::IconUrl.to_string())
-        else {
-            return Ok(None);
-        };
+        Ok(response_item.metadata)
+    }
 
-        match item.value.typed {
-            MetadataTypedValue::MetadataUrlValue { value } => Ok(Some(value)),
-            _ => Err(CommonError::InvalidMetadataFormat),
-        }
+    /// Fetches the metadata for the given dapp.
+    pub async fn fetch_dapp_metadata(
+        &self,
+        address: DappDefinitionAddress,
+    ) -> Result<EntityMetadataCollection> {
+        self.fetch_entity_metadata(address.into(), dapp_metadata_keys())
+            .await
     }
 }

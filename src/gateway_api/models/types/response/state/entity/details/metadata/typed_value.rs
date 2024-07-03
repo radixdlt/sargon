@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+/// Note: Current implementation only adds support for associated values of `MetadataStringValue` & `MetadataUrlValue` variants.
+///
+/// Will need to add support for remaining variants if we want to check its values.
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug, uniffi::Enum)]
 #[serde(tag = "type")]
 pub enum MetadataTypedValue {

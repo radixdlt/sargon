@@ -213,17 +213,21 @@ mod integration_tests {
     }
 
     #[actix_rt::test]
-    async fn test_xrd_icon_url() {
-        let xrd_address = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".to_owned();
-        let gateway_client = new_gateway_client(NetworkID::Mainnet);
-        let sut = gateway_client.icon_url_of_address(xrd_address);
+    async fn test_dapp_metadata() {
+        let gumball_address = AccountAddress::try_from_bech32(
+            "account_tdx_2_129nx5lgkk3fz9gqf3clppeljkezeyyymqqejzp97tpk0r8els7hg3j",
+        )
+        .unwrap();
+        let gateway_client = new_gateway_client(NetworkID::Stokenet);
+        let sut = gateway_client.fetch_dapp_metadata(gumball_address);
 
         let response = timeout(MAX, sut).await.unwrap().unwrap();
+        let icon_url = response.get_icon_url();
         assert_eq!(
-            response,
+            icon_url,
             Some(
                 Url::parse(
-                    "https://assets.radixdlt.com/icons/icon-xrd-32x32.png"
+                    "https://stokenet-gumball-club.radixdlt.com/assets/gumball-club.png"
                 )
                 .unwrap()
             )

@@ -25,9 +25,83 @@
 			},
 			"metadata":
 			{
-				"total_count": 0,
+				"total_count": 2,
 				"items":
-				[]
+				[
+					{
+						"key": "owner_keys",
+						"value":
+						{
+							"raw_hex": "5c228f01202201010120071d3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+							"programmatic_json":
+							{
+								"variant_id": 143,
+								"fields":
+								[
+									{
+										"element_kind": "Enum",
+										"elements":
+										[
+											{
+												"variant_id": 1,
+												"fields":
+												[
+													{
+														"element_kind": "U8",
+														"hex": "3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+														"kind": "Bytes"
+													}
+												],
+												"kind": "Enum"
+											}
+										],
+										"kind": "Array"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"values":
+								[
+									{
+										"hash_hex": "3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+										"key_hash_type": "EddsaEd25519"
+									}
+								],
+								"type": "PublicKeyHashArray"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 0
+					},
+					{
+						"key": "owner_badge",
+						"value":
+						{
+							"raw_hex": "5c220b01c0021e513ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+							"programmatic_json":
+							{
+								"variant_id": 11,
+								"fields":
+								[
+									{
+										"value": "[513ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8]",
+										"kind": "NonFungibleLocalId"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "[513ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8]",
+								"type": "NonFungibleLocalId"
+							}
+						},
+						"is_locked": true,
+						"last_updated_at_state_version": 0
+					}
+				]
 			},
 			"explicit_metadata":
 			{

@@ -554,8 +554,8 @@ pub enum CommonError {
     #[error("Failed updating home cards")]
     FailedUpdatingHomeCards = 10154,
 
-    #[error("Invalid Metadata format")]
-    InvalidMetadataFormat = 10155,
+    #[error("Entity not found")]
+    EntityNotFound = 10155,
 
     #[error("Home cards not found")]
     HomeCardsNotFound = 10156,

@@ -37,13 +37,10 @@ impl Parser {
                 CommonError::DeferredDeepLinkInvalidValueFormat
             })?;
 
-        let deep_link_value =
-            serde_json::from_slice::<OnboardingDeepLinkValue>(
-                decoded_value_json_bytes.as_ref(),
-            )
-            .map_err(|_| CommonError::DeferredDeepLinkDecodingFailed)?;
-
-        Ok(deep_link_value)
+        serde_json::from_slice::<OnboardingDeepLinkValue>(
+            decoded_value_json_bytes.as_ref(),
+        )
+        .map_err(|_| CommonError::DeferredDeepLinkDecodingFailed)
     }
 }
 
@@ -104,14 +101,16 @@ impl Parser {
         }
 
         if let Some(dapp_referrer) = value.dapp_referrer {
-            match self
-                .gateway_client
-                .icon_url_of_address(dapp_referrer.to_string())
-                .await
-            {
-                Ok(icon_url) => result.push(HomeCard::Dapp {
-                    icon_url: (icon_url),
-                }),
+            match self.gateway_client.fetch_dapp_metadata(dapp_referrer).await {
+                Ok(metadata) => {
+                    if let Some(icon_url) = metadata.get_icon_url() {
+                        result.push(HomeCard::Dapp {
+                            icon_url: Some(icon_url),
+                        });
+                    } else {
+                        result.push(HomeCard::Dapp { icon_url: None });
+                    }
+                }
                 Err(_) => result.push(HomeCard::Dapp { icon_url: None }),
             }
         }
