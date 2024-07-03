@@ -121,6 +121,7 @@ impl HomeCardsManager {
         f(&mut write_guard);
 
         let updated_cards = write_guard.clone();
+        updated_cards.sort();
 
         self.observer.handle_cards_update(updated_cards.clone());
         Ok(updated_cards)
@@ -165,35 +166,45 @@ mod tests {
     use std::sync::{Arc, Mutex};
 
     struct MockHomeCardsStorage {
-        cards: Arc<Mutex<HomeCards>>,
+        stubbed_load_cards_result: Result<Option<BagOfBytes>>,
     }
 
     impl MockHomeCardsStorage {
-        fn new() -> Self {
+        fn new_empty() -> Self {
             Self {
-                cards: Arc::new(Mutex::new(HomeCards::new())),
+                stubbed_load_cards_result: Self::encode_cards(HomeCards::new()),
             }
         }
 
         fn new_with_stored_cards(cards: HomeCards) -> Self {
             Self {
-                cards: Arc::new(Mutex::new(cards)),
+                stubbed_load_cards_result: Self::encode_cards(cards),
             }
+        }
+
+        fn new_with_error() -> Self {
+            Self {
+                stubbed_load_cards_result: Err(
+                    CommonError::FailedAccessingHomeCards,
+                ),
+            }
+        }
+
+        fn encode_cards(cards: HomeCards) -> Result<Option<BagOfBytes>> {
+            serialize(&cards).map(|cards| Some(cards.into()))
         }
     }
 
     #[async_trait::async_trait]
     impl HomeCardsStorage for MockHomeCardsStorage {
         async fn save_cards(&self, encoded_cards: BagOfBytes) -> Result<()> {
-            let cards: HomeCards =
+            let _: HomeCards =
                 deserialize_from_slice(encoded_cards.as_slice())?;
-            *self.cards.lock().unwrap() = cards;
             Ok(())
         }
 
         async fn load_cards(&self) -> Result<Option<BagOfBytes>> {
-            let cards = self.cards.lock().unwrap().clone();
-            serialize(&cards).map(|cards| Some(cards.into()))
+            self.stubbed_load_cards_result.clone()
         }
     }
 
@@ -227,10 +238,6 @@ mod tests {
         fn succeeding(cards: HomeCards) -> Self {
             Self::new(Ok(cards))
         }
-
-        fn empty() -> Self {
-            Self::new(Ok(HomeCards::new()))
-        }
     }
 
     #[async_trait::async_trait]
@@ -247,8 +254,9 @@ mod tests {
     async fn test_init_cards_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
-        let manager = SUT::init(
-            Arc::new(MockDeferredDeepLinkParser::empty()),
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
             Arc::new(MockHomeCardsStorage::new_with_stored_cards(
                 expected_cards.clone(),
             )),
@@ -264,9 +272,10 @@ mod tests {
     #[actix_rt::test]
     async fn test_init_cards_without_stored_cards() {
         let observer = Arc::new(MockHomeCardsObserver::new());
-        let manager = HomeCardsManager::init(
-            Arc::new(MockDeferredDeepLinkParser::empty()),
-            Arc::new(MockHomeCardsStorage::new()),
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_empty()),
             observer.clone(),
         );
         let expected_cards = HomeCards::new();
@@ -278,12 +287,31 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_init_cards_when_failed_accessing_storage() {
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_error()),
+            observer.clone(),
+        );
+        let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+
+        manager.init_cards().await.unwrap();
+
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+    }
+
+    #[actix_rt::test]
     async fn test_handle_deferred_deep_link() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let stored_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
-        let deep_link_cards =
-            HomeCards::from_iter(vec![HomeCard::ContinueRadQuest]);
-        let manager = HomeCardsManager::init(
+        let deep_link_cards = HomeCards::from_iter(vec![
+            HomeCard::Dapp { icon_url: None },
+            HomeCard::ContinueRadQuest,
+        ]);
+        let manager = SUT::init(
             Arc::new(MockDeferredDeepLinkParser::succeeding(
                 deep_link_cards.clone(),
             )),
@@ -301,6 +329,7 @@ mod tests {
 
         let expected_cards = HomeCards::from_iter(vec![
             HomeCard::ContinueRadQuest,
+            HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
         ]);
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
@@ -309,21 +338,41 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_remove_card() {
-        let storage = Arc::new(MockHomeCardsStorage::new());
-        let observer = Arc::new(MockHomeCardsObserver::new());
-        let parser = Arc::new(MockDeferredDeepLinkParser {
-            stubbed_result: Ok(HomeCards::new()),
-        });
-
-        let manager =
-            HomeCardsManager::init(parser, storage.clone(), observer.clone());
-
         let initial_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
-        manager.save_cards(initial_cards.clone()).await.unwrap();
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_stored_cards(
+                initial_cards,
+            )),
+            observer.clone(),
+        );
 
+        manager.init_cards().await.unwrap();
         manager.remove_card(HomeCard::Connector).await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         assert!(handled_cards.unwrap().is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn test_remove_card_does_nothing_if_card_does_not_exist() {
+        let initial_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_stored_cards(
+                initial_cards.clone(),
+            )),
+            observer.clone(),
+        );
+
+        manager.init_cards().await.unwrap();
+        manager.remove_card(HomeCard::StartRadQuest).await.unwrap();
+
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), initial_cards);
     }
 }

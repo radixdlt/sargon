@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::cmp::Ordering;
 
 #[derive(
     Serialize,
@@ -52,12 +53,35 @@ impl HasSampleValues for HomeCard {
     }
 }
 
+impl Ord for HomeCard {
+    fn cmp(&self, other: &Self) -> Ordering {
+        fn order_value(card: &HomeCard) -> usize {
+            use HomeCard::*;
+
+            match card {
+                StartRadQuest => 0,
+                ContinueRadQuest => 1,
+                Dapp { .. } => 2,
+                Connector => 3,
+            }
+        }
+
+        order_value(self).cmp(&order_value(other))
+    }
+}
+
+impl PartialOrd for HomeCard {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeferredDeepLinkMethod;
+    type SUT = HomeCard;
 
     #[test]
     fn equality() {
@@ -68,5 +92,15 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn identifiable() {
+        assert_eq!(SUT::sample().id(), SUT::sample());
+    }
+
+    #[test]
+    fn compare() {
+        assert!(SUT::sample() < SUT::sample_other());
     }
 }
