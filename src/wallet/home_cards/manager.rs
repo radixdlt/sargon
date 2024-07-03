@@ -51,31 +51,28 @@ impl HomeCardsManager {
 
 #[uniffi::export]
 impl HomeCardsManager {
-    /// Initializes home cards by loading from storage.
-    /// If there were no stored home cards, initializes and saves to storage default cards.
+    /// Initializes home cards by loading from storage..
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn init_cards(&self) -> Result<()> {
-        match self.load_cards().await {
-            Ok(home_cards) => {
-                _ = self
-                    .update_cards(|write_guard| {
-                        self.insert_cards(write_guard, home_cards)
-                    })
-                    .await;
-                Ok(())
-            }
-            Err(CommonError::FailedAccessingHomeCards) => {
-                let default_cards = HomeCards::from_iter([HomeCard::Connector]);
-                let updated_cards = self
-                    .update_cards(|write_guard| {
-                        self.insert_cards(write_guard, default_cards)
-                    })
-                    .await?;
-                self.save_cards(updated_cards).await
-            }
-            Err(e) => Err(e),
-        }
+        let stored_cars = self.load_cards().await?;
+        self.update_cards(|write_guard| {
+            self.insert_cards(write_guard, stored_cars)
+        })
+        .await?;
+        Ok(())
+    }
+
+    /// Initializes and saves to storage default cards.
+    /// Notifies `HomeCardsObserver`.
+    pub async fn init_cards_for_new_wallet(&self) -> Result<()> {
+        let default_cards = HomeCards::from_iter([HomeCard::Connector]);
+        let updated_cards = self
+            .update_cards(|write_guard| {
+                self.insert_cards(write_guard, default_cards)
+            })
+            .await?;
+        self.save_cards(updated_cards).await
     }
 
     /// Handles a deferred deep link by parsing it, saving the generated home cards to storage and notifying the observer.
@@ -149,14 +146,17 @@ impl HomeCardsManager {
             .cards_storage
             .load_cards()
             .await?
-            .ok_or(CommonError::FailedAccessingHomeCards)?;
+            .ok_or(CommonError::HomeCardsNotFound)?;
         deserialize_from_slice(cards_bytes.as_slice())
     }
 
     /// Saves the home cards to storage.
     async fn save_cards(&self, cards: HomeCards) -> Result<()> {
         let bytes = serialize(&cards)?;
-        self.cards_storage.save_cards(bytes.into()).await
+        self.cards_storage
+            .save_cards(bytes.into())
+            .await
+            .map_err(|_| CommonError::FailedSavingHomeCards)
     }
 }
 
@@ -166,27 +166,38 @@ mod tests {
     use std::sync::{Arc, Mutex};
 
     struct MockHomeCardsStorage {
+        stubbed_save_cards_result: Result<()>,
         stubbed_load_cards_result: Result<Option<BagOfBytes>>,
     }
 
     impl MockHomeCardsStorage {
         fn new_empty() -> Self {
             Self {
+                stubbed_save_cards_result: Ok(()),
                 stubbed_load_cards_result: Self::encode_cards(HomeCards::new()),
             }
         }
 
         fn new_with_stored_cards(cards: HomeCards) -> Self {
             Self {
+                stubbed_save_cards_result: Ok(()),
                 stubbed_load_cards_result: Self::encode_cards(cards),
             }
         }
 
-        fn new_with_error() -> Self {
+        fn new_with_load_error() -> Self {
             Self {
-                stubbed_load_cards_result: Err(
-                    CommonError::FailedAccessingHomeCards,
+                stubbed_save_cards_result: Ok(()),
+                stubbed_load_cards_result: Err(CommonError::HomeCardsNotFound),
+            }
+        }
+
+        fn new_with_save_error() -> Self {
+            Self {
+                stubbed_save_cards_result: Err(
+                    CommonError::FailedSavingHomeCards,
                 ),
+                stubbed_load_cards_result: Self::encode_cards(HomeCards::new()),
             }
         }
 
@@ -200,7 +211,7 @@ mod tests {
         async fn save_cards(&self, encoded_cards: BagOfBytes) -> Result<()> {
             let _: HomeCards =
                 deserialize_from_slice(encoded_cards.as_slice())?;
-            Ok(())
+            self.stubbed_save_cards_result.clone()
         }
 
         async fn load_cards(&self) -> Result<Option<BagOfBytes>> {
@@ -270,7 +281,21 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_init_cards_without_stored_cards() {
+    async fn test_failing_init_cards() {
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_load_error()),
+            observer.clone(),
+        );
+
+        let result = manager.init_cards().await.unwrap_err();
+        assert_eq!(result, CommonError::HomeCardsNotFound);
+    }
+
+    #[actix_rt::test]
+    async fn test_init_cards_for_new_wallet() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
@@ -278,29 +303,26 @@ mod tests {
             Arc::new(MockHomeCardsStorage::new_empty()),
             observer.clone(),
         );
-        let expected_cards = HomeCards::new();
+        let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
 
-        manager.init_cards().await.unwrap();
+        manager.init_cards_for_new_wallet().await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
     }
 
     #[actix_rt::test]
-    async fn test_init_cards_when_failed_accessing_storage() {
+    async fn test_init_cards_for_new_wallet_failing() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
             NetworkID::Stokenet,
-            Arc::new(MockHomeCardsStorage::new_with_error()),
+            Arc::new(MockHomeCardsStorage::new_with_save_error()),
             observer.clone(),
         );
-        let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
 
-        manager.init_cards().await.unwrap();
-
-        let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+        let result = manager.init_cards_for_new_wallet().await.unwrap_err();
+        assert_eq!(result, CommonError::FailedSavingHomeCards);
     }
 
     #[actix_rt::test]
