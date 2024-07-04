@@ -51,10 +51,10 @@ impl HomeCardsManager {
 
 #[uniffi::export]
 impl HomeCardsManager {
-    /// Initializes home cards by loading from storage..
+    /// Initializes `HomeCards` by loading from storage.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
-    pub async fn init_cards(&self) -> Result<()> {
+    pub async fn wallet_started(&self) -> Result<()> {
         let stored_cars = self.load_cards().await?;
         self.update_cards(|write_guard| {
             self.insert_cards(write_guard, stored_cars)
@@ -63,9 +63,9 @@ impl HomeCardsManager {
         Ok(())
     }
 
-    /// Initializes and saves to storage default cards.
+    /// Initializes and saves to storage default `HomeCards`.
     /// Notifies `HomeCardsObserver`.
-    pub async fn init_cards_for_new_wallet(&self) -> Result<()> {
+    pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([HomeCard::Connector]);
         let updated_cards = self
             .update_cards(|write_guard| {
@@ -75,10 +75,10 @@ impl HomeCardsManager {
         self.save_cards(updated_cards).await
     }
 
-    /// Handles a deferred deep link by parsing it, saving the generated home cards to storage and notifying the observer.
+    /// Handles a deferred deep link by parsing it and saving the generated `HomeCards` to `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
-    pub async fn handle_deferred_deep_link(
+    pub async fn deep_link_received(
         &self,
         encoded_value: String,
     ) -> Result<()> {
@@ -91,10 +91,10 @@ impl HomeCardsManager {
         self.save_cards(updated_cards).await
     }
 
-    /// Removes a specified home card, save the updated home cards to storage and notifies the observer.
+    /// Dismisses a specified `HomeCard` by removing it from `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
-    pub async fn remove_card(&self, card: HomeCard) -> Result<()> {
+    pub async fn card_dismissed(&self, card: HomeCard) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {
                 write_guard.remove_id(&card);
@@ -262,7 +262,7 @@ mod tests {
     type SUT = HomeCardsManager;
 
     #[actix_rt::test]
-    async fn test_init_cards_with_stored_cards() {
+    async fn test_wallet_started_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
@@ -274,14 +274,14 @@ mod tests {
             observer.clone(),
         );
 
-        manager.init_cards().await.unwrap();
+        manager.wallet_started().await.unwrap();
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
 
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
     }
 
     #[actix_rt::test]
-    async fn test_failing_init_cards() {
+    async fn test_wallet_started_failing() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
@@ -290,12 +290,12 @@ mod tests {
             observer.clone(),
         );
 
-        let result = manager.init_cards().await.unwrap_err();
+        let result = manager.wallet_started().await.unwrap_err();
         assert_eq!(result, CommonError::HomeCardsNotFound);
     }
 
     #[actix_rt::test]
-    async fn test_init_cards_for_new_wallet() {
+    async fn test_wallet_created() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
@@ -305,14 +305,14 @@ mod tests {
         );
         let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
 
-        manager.init_cards_for_new_wallet().await.unwrap();
+        manager.wallet_created().await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
     }
 
     #[actix_rt::test]
-    async fn test_init_cards_for_new_wallet_failing() {
+    async fn test_wallet_created_failing() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
@@ -321,12 +321,30 @@ mod tests {
             observer.clone(),
         );
 
-        let result = manager.init_cards_for_new_wallet().await.unwrap_err();
+        let result = manager.wallet_created().await.unwrap_err();
         assert_eq!(result, CommonError::FailedSavingHomeCards);
     }
 
     #[actix_rt::test]
-    async fn test_handle_deferred_deep_link() {
+    async fn test_wallet_created_with_stored_cards() {
+        let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_stored_cards(
+                expected_cards.clone(),
+            )),
+            observer.clone(),
+        );
+
+        manager.wallet_created().await.unwrap();
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+    }
+
+    #[actix_rt::test]
+    async fn test_deep_link_received() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let stored_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let deep_link_cards = HomeCards::from_iter(vec![
@@ -343,9 +361,9 @@ mod tests {
             observer.clone(),
         );
 
-        manager.init_cards().await.unwrap();
+        manager.wallet_started().await.unwrap();
         manager
-            .handle_deferred_deep_link("encoded_value".to_string())
+            .deep_link_received("encoded_value".to_string())
             .await
             .unwrap();
 
@@ -359,7 +377,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_remove_card() {
+    async fn test_card_dismissed() {
         let initial_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
@@ -371,15 +389,15 @@ mod tests {
             observer.clone(),
         );
 
-        manager.init_cards().await.unwrap();
-        manager.remove_card(HomeCard::Connector).await.unwrap();
+        manager.wallet_started().await.unwrap();
+        manager.card_dismissed(HomeCard::Connector).await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         assert!(handled_cards.unwrap().is_empty());
     }
 
     #[actix_rt::test]
-    async fn test_remove_card_does_nothing_if_card_does_not_exist() {
+    async fn test_card_dismissed_does_nothing_if_card_does_not_exist() {
         let initial_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
@@ -391,8 +409,11 @@ mod tests {
             observer.clone(),
         );
 
-        manager.init_cards().await.unwrap();
-        manager.remove_card(HomeCard::StartRadQuest).await.unwrap();
+        manager.wallet_started().await.unwrap();
+        manager
+            .card_dismissed(HomeCard::StartRadQuest)
+            .await
+            .unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards.unwrap(), initial_cards);
