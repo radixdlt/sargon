@@ -21,7 +21,8 @@ impl Parser {
 impl DeferredDeepLinkParser for Parser {
     async fn parse(&self, encoded_value: String) -> Result<HomeCards> {
         let decoded = self.decode(encoded_value)?;
-        self.transform_onboarding_deep_link_value(decoded).await
+        let result = self.transform_onboarding_deep_link_value(decoded).await;
+        Ok(result)
     }
 }
 
@@ -32,15 +33,40 @@ impl Parser {
     ) -> Result<OnboardingDeepLinkValue> {
         let decoded_value_json_bytes = URL_SAFE_NO_PAD
             .decode(encoded_value.as_ref())
-            .map_err(|e| {
-                println!("{}", e);
-                CommonError::DeferredDeepLinkInvalidValueFormat
+            .map_err(|e| CommonError::DeferredDeepLinkInvalidValueFormat {
+                bad_value: e.to_string(),
             })?;
 
-        serde_json::from_slice::<OnboardingDeepLinkValue>(
-            decoded_value_json_bytes.as_ref(),
-        )
-        .map_err(|_| CommonError::DeferredDeepLinkDecodingFailed)
+        deserialize_from_slice(decoded_value_json_bytes.as_slice())
+    }
+}
+
+impl Parser {
+    async fn transform_onboarding_deep_link_value(
+        &self,
+        value: OnboardingDeepLinkValue,
+    ) -> HomeCards {
+        let mut result = Vec::new();
+
+        match value.special_dapp {
+            Some(DeferredDeepLinkSpecialDapp::RadQuest) => {
+                result.push(HomeCard::ContinueRadQuest)
+            }
+            _ => result.push(HomeCard::StartRadQuest),
+        }
+
+        if let Some(dapp_referrer) = value.dapp_referrer {
+            let icon_url = self
+                .gateway_client
+                .fetch_dapp_metadata(dapp_referrer)
+                .await
+                .ok()
+                .and_then(|metadata| metadata.get_icon_url());
+
+            result.push(HomeCard::Dapp { icon_url });
+        }
+
+        HomeCards::from_iter(result)
     }
 }
 
@@ -70,52 +96,22 @@ mod tests_decode {
     fn decode_invalid_value_format() {
         let sut = make_sut();
         let encoded_value = "invalid format";
-        let result = sut.decode(encoded_value).unwrap_err();
-        assert_eq!(result, CommonError::DeferredDeepLinkInvalidValueFormat);
+        let result = sut.decode(encoded_value);
+        assert!(matches!(
+            result,
+            Err(CommonError::DeferredDeepLinkInvalidValueFormat { .. })
+        ));
     }
 
     #[test]
     fn decode_decoding_failed() {
         let sut = make_sut();
         let encoded_value = "e30";
-        let result = sut.decode(encoded_value).unwrap_err();
-        assert_eq!(result, CommonError::DeferredDeepLinkDecodingFailed);
-    }
-}
-
-impl Parser {
-    async fn transform_onboarding_deep_link_value(
-        &self,
-        value: OnboardingDeepLinkValue,
-    ) -> Result<HomeCards> {
-        let mut result = Vec::new();
-
-        if let Some(special_dapp) = value.special_dapp {
-            if special_dapp == DeferredDeepLinkSpecialDapp::RadQuest {
-                result.push(HomeCard::ContinueRadQuest);
-            } else {
-                result.push(HomeCard::StartRadQuest);
-            }
-        } else {
-            result.push(HomeCard::StartRadQuest);
-        }
-
-        if let Some(dapp_referrer) = value.dapp_referrer {
-            match self.gateway_client.fetch_dapp_metadata(dapp_referrer).await {
-                Ok(metadata) => {
-                    if let Some(icon_url) = metadata.get_icon_url() {
-                        result.push(HomeCard::Dapp {
-                            icon_url: Some(icon_url),
-                        });
-                    } else {
-                        result.push(HomeCard::Dapp { icon_url: None });
-                    }
-                }
-                Err(_) => result.push(HomeCard::Dapp { icon_url: None }),
-            }
-        }
-
-        Ok(HomeCards::from_iter(result))
+        let result = sut.decode(encoded_value);
+        assert!(matches!(
+            result,
+            Err(CommonError::FailedToDeserializeJSONToValue { .. })
+        ));
     }
 }
 
@@ -175,7 +171,7 @@ mod tests_transform {
             Some(DeferredDeepLinkSpecialDapp::RadQuest),
         );
         let req = sut.transform_onboarding_deep_link_value(value);
-        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let result = timeout(MAX, req).await.unwrap();
         let expected_result =
             HomeCards::from_iter([HomeCard::ContinueRadQuest]);
         assert_eq!(result, expected_result);
@@ -191,7 +187,7 @@ mod tests_transform {
             Some(DeferredDeepLinkSpecialDapp::RadQuest),
         );
         let req = sut.transform_onboarding_deep_link_value(value);
-        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let result = timeout(MAX, req).await.unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp {
@@ -210,7 +206,7 @@ mod tests_transform {
             None,
         );
         let req = sut.transform_onboarding_deep_link_value(value);
-        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let result = timeout(MAX, req).await.unwrap();
         let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
         assert_eq!(result, expected_result);
     }
@@ -225,7 +221,7 @@ mod tests_transform {
             None,
         );
         let req = sut.transform_onboarding_deep_link_value(value);
-        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let result = timeout(MAX, req).await.unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::StartRadQuest,
             HomeCard::Dapp {
@@ -246,7 +242,7 @@ mod tests_transform {
             None,
         );
         let req = sut.transform_onboarding_deep_link_value(value);
-        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let result = timeout(MAX, req).await.unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::StartRadQuest,
             HomeCard::Dapp { icon_url: (None) },
@@ -263,7 +259,7 @@ mod tests_transform {
             None,
         );
         let req = sut.transform_onboarding_deep_link_value(value);
-        let result = timeout(MAX, req).await.unwrap().unwrap();
+        let result = timeout(MAX, req).await.unwrap();
         let expected_result = HomeCards::from_iter([
             HomeCard::StartRadQuest,
             HomeCard::Dapp { icon_url: (None) },

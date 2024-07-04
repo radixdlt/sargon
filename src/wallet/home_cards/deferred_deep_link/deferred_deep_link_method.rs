@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// The platform from which a deferred link was originated.
+/// More info [here](https://radixdlt.atlassian.net/wiki/spaces/PROJ/pages/3514990595/URL+Parameters+Definition+for+Wallet+RadQuest+Onboarding#Deep-Link-Value)
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum DeferredDeepLinkMethod {
