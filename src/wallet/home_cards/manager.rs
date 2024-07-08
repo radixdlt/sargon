@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use std::sync::{RwLock, RwLockWriteGuard};
+use std::{
+    borrow::Borrow,
+    sync::{RwLock, RwLockWriteGuard},
+};
 
 /// Manages the home cards by handling storage, parsing, and updating operations.
 #[derive(uniffi::Object)]
@@ -66,7 +69,11 @@ impl HomeCardsManager {
     /// Initializes and saves to storage default `HomeCards`.
     /// Notifies `HomeCardsObserver`.
     pub async fn wallet_created(&self) -> Result<()> {
-        let default_cards = HomeCards::from_iter([HomeCard::Connector]);
+        let default_cards = HomeCards::from_iter([
+            HomeCard::Connector,
+            // TODO: Uncomment when RadQuest is public
+            // HomeCard::StartRadQuest,
+        ]);
         let updated_cards = self
             .update_cards(|write_guard| {
                 self.insert_cards(write_guard, default_cards)
@@ -76,6 +83,7 @@ impl HomeCardsManager {
     }
 
     /// Handles a deferred deep link by parsing it and saving the generated `HomeCards` to `HomeCardsStorage`.
+    /// `HomeCard::ContinueRadQuest` if found in the link parsing result, replaces `HomeCard::StartRadQuest` if it's stored.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn deep_link_received(
@@ -83,9 +91,25 @@ impl HomeCardsManager {
         encoded_value: String,
     ) -> Result<()> {
         let deep_link_cards = self.parser.parse(encoded_value).await?;
+        let stored_cards = self.load_cards().await?;
         let updated_cards = self
             .update_cards(|write_guard| {
-                self.insert_cards(write_guard, deep_link_cards)
+                let mut new_cards = stored_cards.clone();
+                let card_to_remove = &HomeCard::StartRadQuest;
+                if stored_cards.contains_id(card_to_remove)
+                    && deep_link_cards.contains_id(&HomeCard::ContinueRadQuest)
+                {
+                    new_cards.remove_id(card_to_remove);
+                    write_guard.remove_id(card_to_remove);
+                }
+                deep_link_cards.into_iter().for_each(|card| {
+                    if new_cards.try_insert_unique(card).is_ok() {
+                        debug!("Home card inserted");
+                    } else {
+                        debug!("Home card insert failed");
+                    }
+                });
+                self.insert_cards(write_guard, new_cards)
             })
             .await?;
         self.save_cards(updated_cards).await
@@ -303,7 +327,11 @@ mod tests {
             Arc::new(MockHomeCardsStorage::new_empty()),
             observer.clone(),
         );
-        let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+        let expected_cards = HomeCards::from_iter(vec![
+            // TODO: Uncomment when RadQuest is public
+            // HomeCard::StartRadQuest,
+            HomeCard::Connector,
+        ]);
 
         manager.wallet_created().await.unwrap();
 
@@ -327,7 +355,11 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_wallet_created_with_stored_cards() {
-        let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+        let expected_cards = HomeCards::from_iter(vec![
+            // TODO: Uncomment when RadQuest is public
+            // HomeCard::StartRadQuest,
+            HomeCard::Connector,
+        ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
@@ -346,7 +378,10 @@ mod tests {
     #[actix_rt::test]
     async fn test_deep_link_received() {
         let observer = Arc::new(MockHomeCardsObserver::new());
-        let stored_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+        let stored_cards = HomeCards::from_iter(vec![
+            HomeCard::Connector,
+            HomeCard::StartRadQuest,
+        ]);
         let deep_link_cards = HomeCards::from_iter(vec![
             HomeCard::Dapp { icon_url: None },
             HomeCard::ContinueRadQuest,
