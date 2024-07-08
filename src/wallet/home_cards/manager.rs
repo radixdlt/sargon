@@ -1,10 +1,8 @@
 use crate::prelude::*;
-use std::{
-    borrow::Borrow,
-    sync::{RwLock, RwLockWriteGuard},
-};
+use std::sync::{RwLock, RwLockWriteGuard};
 
 /// Manages the home cards by handling storage, parsing, and updating operations.
+/// Call `bootstrap` before invoking any other public functions.
 #[derive(uniffi::Object)]
 pub struct HomeCardsManager {
     /// Parser for handling deferred deep links.
@@ -55,18 +53,20 @@ impl HomeCardsManager {
 #[uniffi::export]
 impl HomeCardsManager {
     /// Initializes `HomeCards` by loading from storage.
+    /// This function should be called before invoking any other public functions.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
-    pub async fn wallet_started(&self) -> Result<()> {
+    pub async fn bootstrap(&self) -> Result<()> {
         let stored_cars = self.load_cards().await?;
         self.update_cards(|write_guard| {
-            self.insert_cards(write_guard, stored_cars)
+            Self::insert_cards(write_guard, stored_cars)
         })
         .await?;
         Ok(())
     }
 
     /// Initializes and saves to storage default `HomeCards`.
+    /// Marks the wallet creation and populates the set of cards required for a new wallet.
     /// Notifies `HomeCardsObserver`.
     pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([
@@ -76,40 +76,24 @@ impl HomeCardsManager {
         ]);
         let updated_cards = self
             .update_cards(|write_guard| {
-                self.insert_cards(write_guard, default_cards)
+                Self::insert_cards(write_guard, default_cards.clone())
             })
             .await?;
         self.save_cards(updated_cards).await
     }
 
     /// Handles a deferred deep link by parsing it and saving the generated `HomeCards` to `HomeCardsStorage`.
-    /// `HomeCard::ContinueRadQuest` if found in the link parsing result, replaces `HomeCard::StartRadQuest` if it's stored.
+    /// `HomeCard::ContinueRadQuest` if found in the link parsing result, replaces `HomeCard::StartRadQuest`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
-    pub async fn deep_link_received(
+    pub async fn deferred_deep_link_received(
         &self,
         encoded_value: String,
     ) -> Result<()> {
         let deep_link_cards = self.parser.parse(encoded_value).await?;
-        let stored_cards = self.load_cards().await?;
         let updated_cards = self
             .update_cards(|write_guard| {
-                let mut new_cards = stored_cards.clone();
-                let card_to_remove = &HomeCard::StartRadQuest;
-                if stored_cards.contains_id(card_to_remove)
-                    && deep_link_cards.contains_id(&HomeCard::ContinueRadQuest)
-                {
-                    new_cards.remove_id(card_to_remove);
-                    write_guard.remove_id(card_to_remove);
-                }
-                deep_link_cards.into_iter().for_each(|card| {
-                    if new_cards.try_insert_unique(card).is_ok() {
-                        debug!("Home card inserted");
-                    } else {
-                        debug!("Home card insert failed");
-                    }
-                });
-                self.insert_cards(write_guard, new_cards)
+                Self::insert_cards(write_guard, deep_link_cards)
             })
             .await?;
         self.save_cards(updated_cards).await
@@ -129,7 +113,7 @@ impl HomeCardsManager {
 }
 
 impl HomeCardsManager {
-    /// Updates home cards both in-memory and in storage after applying `f` function, then notifies the observer.
+    /// Updates in-memory home cards after applying `f` function, then notifies the observer.
     async fn update_cards<F>(&self, f: F) -> Result<HomeCards>
     where
         F: FnOnce(&mut RwLockWriteGuard<HomeCards>),
@@ -149,17 +133,37 @@ impl HomeCardsManager {
     }
 
     fn insert_cards(
-        &self,
         write_guard: &mut RwLockWriteGuard<HomeCards>,
         cards: HomeCards,
     ) {
-        cards.into_iter().for_each(|card| {
+        println!("Cards to insert before: {:?}", write_guard.clone());
+
+        let cards_to_insert = if write_guard
+            .contains_id(&HomeCard::StartRadQuest)
+            && cards.contains_id(&HomeCard::ContinueRadQuest)
+        {
+            write_guard.remove_id(&HomeCard::StartRadQuest);
+            cards
+        } else if write_guard.contains_id(&HomeCard::ContinueRadQuest)
+            && cards.contains_id(&HomeCard::StartRadQuest)
+        {
+            let mut updated_cards = cards.clone();
+            updated_cards.remove_id(&HomeCard::StartRadQuest);
+            updated_cards
+        } else {
+            cards
+        };
+        println!("Cards to insert after: {:?}", write_guard.clone());
+
+        cards_to_insert.into_iter().for_each(|card| {
             if write_guard.try_insert_unique(card).is_ok() {
                 debug!("Home card inserted");
             } else {
                 debug!("Home card insert failed");
             }
-        })
+        });
+
+        println!("Updated cards: {:?}", write_guard.clone());
     }
 }
 
@@ -286,7 +290,7 @@ mod tests {
     type SUT = HomeCardsManager;
 
     #[actix_rt::test]
-    async fn test_wallet_started_with_stored_cards() {
+    async fn test_bootstrap_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
@@ -298,14 +302,14 @@ mod tests {
             observer.clone(),
         );
 
-        manager.wallet_started().await.unwrap();
+        manager.bootstrap().await.unwrap();
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
 
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
     }
 
     #[actix_rt::test]
-    async fn test_wallet_started_failing() {
+    async fn test_bootstrap_failing() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockAntenna::new_always_failing()),
@@ -314,7 +318,7 @@ mod tests {
             observer.clone(),
         );
 
-        let result = manager.wallet_started().await.unwrap_err();
+        let result = manager.bootstrap().await.unwrap_err();
         assert_eq!(result, CommonError::HomeCardsNotFound);
     }
 
@@ -376,7 +380,37 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_deep_link_received() {
+    async fn test_wallet_created_after_deferred_deep_link_received() {
+        let deep_link_cards = HomeCards::from_iter(vec![
+            HomeCard::Dapp { icon_url: None },
+            HomeCard::ContinueRadQuest,
+        ]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::init(
+            Arc::new(MockDeferredDeepLinkParser::succeeding(
+                deep_link_cards.clone(),
+            )),
+            Arc::new(MockHomeCardsStorage::new_empty()),
+            observer.clone(),
+        );
+
+        manager
+            .deferred_deep_link_received("encoded_value".to_string())
+            .await
+            .unwrap();
+        manager.wallet_created().await.unwrap();
+
+        let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::Dapp { icon_url: None },
+            HomeCard::ContinueRadQuest,
+            HomeCard::Connector,
+        ]);
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+    }
+
+    #[actix_rt::test]
+    async fn test_deferred_deep_link_received() {
         let observer = Arc::new(MockHomeCardsObserver::new());
         let stored_cards = HomeCards::from_iter(vec![
             HomeCard::Connector,
@@ -396,11 +430,13 @@ mod tests {
             observer.clone(),
         );
 
-        manager.wallet_started().await.unwrap();
+        manager.bootstrap().await.unwrap();
         manager
-            .deep_link_received("encoded_value".to_string())
+            .deferred_deep_link_received("encoded_value".to_string())
             .await
             .unwrap();
+        // Covers the case where `HomeCard::StartRadQuest` shouldn't replace the already existing `HomeCard::ContinueRadQuest`
+        manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
             HomeCard::ContinueRadQuest,
@@ -424,7 +460,7 @@ mod tests {
             observer.clone(),
         );
 
-        manager.wallet_started().await.unwrap();
+        manager.bootstrap().await.unwrap();
         manager.card_dismissed(HomeCard::Connector).await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
@@ -444,7 +480,7 @@ mod tests {
             observer.clone(),
         );
 
-        manager.wallet_started().await.unwrap();
+        manager.bootstrap().await.unwrap();
         manager
             .card_dismissed(HomeCard::StartRadQuest)
             .await
