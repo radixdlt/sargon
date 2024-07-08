@@ -15,6 +15,14 @@ pub fn new_app_preferences_default() -> AppPreferences {
     AppPreferences::default()
 }
 
+#[uniffi::export]
+pub fn app_preferences_has_gateway_with_url(
+    app_preferences: AppPreferences,
+    url: Url,
+) -> bool {
+    app_preferences.has_gateway_with_url(url)
+}
+
 #[cfg(test)]
 mod tests {
 
