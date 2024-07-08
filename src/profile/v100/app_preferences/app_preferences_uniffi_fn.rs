@@ -41,4 +41,12 @@ mod tests {
     fn test_default() {
         assert_eq!(new_app_preferences_default(), AppPreferences::default());
     }
+
+    #[test]
+    fn test_app_preferences_has_gateway_with_url() {
+        assert!(app_preferences_has_gateway_with_url(
+            SUT::sample(),
+            Url::parse("https://mainnet.radixdlt.com").unwrap()
+        ));
+    }
 }
