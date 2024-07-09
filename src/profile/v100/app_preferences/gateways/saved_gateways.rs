@@ -81,14 +81,13 @@ impl<'de> Deserialize<'de> for SavedGateways {
         let saved = wrapped.saved.clone();
         let mut other = IdentifiedVecOf::<Gateway>::new();
         for item in saved {
-            let _ = other.try_insert_unique(item.clone()).map_err(|e| {
+            if let Err(e) = other.try_insert_unique(item.clone()) {
                 error!(
                     "Failed to insert unique Gateway {}, error: {:?}",
                     item,
                     e.clone()
-                );
-                e
-            });
+                )
+            };
         }
 
         other.remove_id(&current.id());
