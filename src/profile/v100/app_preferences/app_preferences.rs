@@ -85,6 +85,12 @@ impl HasSampleValues for AppPreferences {
     }
 }
 
+impl AppPreferences {
+    pub fn has_gateway_with_url(&self, url: Url) -> bool {
+        self.gateways.all().into_iter().any(|g| g.id() == url)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -121,6 +127,22 @@ mod tests {
     #[test]
     fn get_transaction() {
         assert_eq!(SUT::sample().transaction, TransactionPreferences::sample())
+    }
+
+    #[test]
+    fn test_has_gateway_with_url() {
+        let sut = SUT::sample();
+        // Test without the "/" at the end
+        let mut url = Url::parse("https://mainnet.radixdlt.com").unwrap();
+        assert!(sut.has_gateway_with_url(url));
+
+        // Test with the "/" at the end
+        url = Url::parse("https://mainnet.radixdlt.com/").unwrap();
+        assert!(sut.has_gateway_with_url(url));
+
+        // Test with a Url that isn't present
+        url = Url::parse("https://radixdlt.com/").unwrap();
+        assert!(!sut.has_gateway_with_url(url));
     }
 
     #[test]

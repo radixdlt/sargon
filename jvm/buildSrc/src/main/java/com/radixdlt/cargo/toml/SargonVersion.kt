@@ -21,4 +21,12 @@ private fun Project.parseGitHash(): String {
     return String(out.toByteArray(), Charsets.UTF_8).trim()
 }
 
-fun Project.sargonVersion(): String = "${parseTomlVersion()}-${parseGitHash()}"
+fun Project.sargonVersion(): String {
+    val customBuildName = System.getenv("CUSTOM_BUILD_NAME")?.takeIf {
+        it.isNotBlank()
+    }?.replace("\\s+".toRegex(), "-")?.let {
+        "-${it}"
+    }.orEmpty()
+
+    return "${parseTomlVersion()}${customBuildName}-${parseGitHash()}"
+}

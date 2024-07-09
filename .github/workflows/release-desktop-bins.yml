@@ -2,6 +2,11 @@ name: CD Desktop Binaries
 
 on:
   workflow_dispatch:
+    inputs:
+      build_name:
+        description: "A custom version name. The resulting name will have the format <cargo.version.patch>-<custom-name>-<rev> (E.g. 1.0.23-custom-name-2eb68d8c)."
+        required: true
+        type: string
   push:
     tags:
       - "**"
@@ -21,6 +26,7 @@ jobs:
     env:
       RUST_TOOLCHAIN: nightly-2024-01-11
       RUST_COMPONENTS: "rust-std"
+      CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
