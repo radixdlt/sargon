@@ -136,26 +136,8 @@ impl HomeCardsManager {
         write_guard: &mut RwLockWriteGuard<HomeCards>,
         cards: HomeCards,
     ) {
-        println!("Cards to insert before: {:?}", write_guard.clone());
-
-        let cards_to_insert = if write_guard
-            .contains_id(&HomeCard::StartRadQuest)
-            && cards.contains_id(&HomeCard::ContinueRadQuest)
-        {
-            write_guard.remove_id(&HomeCard::StartRadQuest);
-            cards
-        } else if write_guard.contains_id(&HomeCard::ContinueRadQuest)
-            && cards.contains_id(&HomeCard::StartRadQuest)
-        {
-            let mut updated_cards = cards.clone();
-            updated_cards.remove_id(&HomeCard::StartRadQuest);
-            updated_cards
-        } else {
-            cards
-        };
-        println!("Cards to insert after: {:?}", write_guard.clone());
-
-        cards_to_insert.into_iter().for_each(|card| {
+        // Insert all cards into write_guard
+        cards.into_iter().for_each(|card| {
             if write_guard.try_insert_unique(card).is_ok() {
                 debug!("Home card inserted");
             } else {
@@ -163,7 +145,10 @@ impl HomeCardsManager {
             }
         });
 
-        println!("Updated cards: {:?}", write_guard.clone());
+        // Check if ContinueRadQuest is present and remove StartRadQuest if it is
+        if write_guard.contains_id(&HomeCard::ContinueRadQuest) {
+            write_guard.remove_id(&HomeCard::StartRadQuest);
+        }
     }
 }
 
