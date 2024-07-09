@@ -1,9 +1,11 @@
+mod home_cards;
 mod secure_storage;
 mod wallet;
 mod wallet_accounts;
 mod wallet_device_factor_sources;
 mod wallet_profile_io;
 
+pub use home_cards::*;
 pub use secure_storage::*;
 pub use wallet::*;
 pub use wallet_accounts::*;

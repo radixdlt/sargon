@@ -1,8 +1,18 @@
 use crate::prelude::*;
 use strum::*;
 
-#[derive(Debug, PartialEq, Eq, strum::EnumString, strum::Display)]
+#[derive(
+    Debug,
+    PartialEq,
+    Eq,
+    strum::EnumString,
+    strum::Display,
+    Clone,
+    Serialize,
+    Deserialize,
+)]
 #[strum(serialize_all = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum MetadataKey {
     AccountType,
     OwnerKeys,
@@ -11,6 +21,14 @@ pub enum MetadataKey {
     IconUrl,
     Description,
     Tags,
+    DappDefinition,
+    DappDefinitions,
+    Validator,
+    Pool,
+}
+
+pub fn dapp_metadata_keys() -> Vec<MetadataKey> {
+    vec![MetadataKey::Name, MetadataKey::IconUrl]
 }
 
 impl From<MetadataKey> for String {

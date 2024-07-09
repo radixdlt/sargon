@@ -544,6 +544,21 @@ pub enum CommonError {
 
     #[error("Radix Connect Mobile failed to create new in flight session")]
     RadixConnectMobileFailedToCreateNewSession = 10151,
+
+    #[error("Deferred Deep Link invalid value format {bad_value}.")]
+    DeferredDeepLinkInvalidValueFormat { bad_value: String } = 10152,
+
+    #[error("Failed updating home cards")]
+    FailedUpdatingHomeCards = 10153,
+
+    #[error("Entity not found")]
+    EntityNotFound = 10154,
+
+    #[error("Home cards not found")]
+    HomeCardsNotFound = 10155,
+
+    #[error("Failed saving home cards")]
+    FailedSavingHomeCards = 10156,
 }
 
 #[uniffi::export]

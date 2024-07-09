@@ -8,6 +8,7 @@ mod integration_tests {
     use actix_rt::time::timeout;
     use sargon::prelude::*;
     use std::collections::HashMap;
+    use url::Url;
 
     use crate::network_antenna_reqwest::new_gateway_client;
 
@@ -209,5 +210,27 @@ mod integration_tests {
             submit_tx_use_faucet(private_key, network_id).await.unwrap();
         println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
         assert!(account_address.is_legacy_address())
+    }
+
+    #[actix_rt::test]
+    async fn test_dapp_metadata() {
+        let gumball_address = AccountAddress::try_from_bech32(
+            "account_tdx_2_129nx5lgkk3fz9gqf3clppeljkezeyyymqqejzp97tpk0r8els7hg3j",
+        )
+        .unwrap();
+        let gateway_client = new_gateway_client(NetworkID::Stokenet);
+        let sut = gateway_client.fetch_dapp_metadata(gumball_address);
+
+        let response = timeout(MAX, sut).await.unwrap().unwrap();
+        let icon_url = response.get_icon_url();
+        assert_eq!(
+            icon_url,
+            Some(
+                Url::parse(
+                    "https://stokenet-gumball-club.radixdlt.com/assets/gumball-club.png"
+                )
+                .unwrap()
+            )
+        );
     }
 }

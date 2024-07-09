@@ -12,4 +12,5 @@ use crate::prelude::*;
 pub struct StateEntityDetailsResponseItem {
     pub address: Address,
     pub fungible_resources: Option<FungibleResourcesCollection>,
+    pub metadata: EntityMetadataCollection,
 }
