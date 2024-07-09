@@ -9,3 +9,9 @@ import Foundation
 import SargonUniFFI
 
 extension AppPreferences: SargonModel {}
+
+extension AppPreferences {
+	public func hasGateway(with url: URL) -> Bool {
+		appPreferencesHasGatewayWithUrl(appPreferences: self, url: url)
+	}
+}

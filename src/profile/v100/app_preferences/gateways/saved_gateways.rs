@@ -66,24 +66,33 @@ impl<'de> Deserialize<'de> for SavedGateways {
         struct Wrapper {
             #[serde(rename = "current")]
             url: Url,
-            saved: IdentifiedVecOf<Gateway>,
+            saved: Vec<Gateway>,
         }
         let wrapped = Wrapper::deserialize(deserializer)?;
         let current = wrapped
             .saved
             .iter()
             .find(|g| g.id() == wrapped.url)
-            .clone()
             .ok_or({
                 CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
             })
             .map_err(de::Error::custom)?;
 
-        let mut other = wrapped.saved.clone();
+        let saved = wrapped.saved.clone();
+        let mut other = IdentifiedVecOf::<Gateway>::new();
+        for item in saved {
+            if let Err(e) = other.try_insert_unique(item.clone()) {
+                error!(
+                    "Failed to insert unique Gateway {}, error: {:?}",
+                    item,
+                    e.clone()
+                )
+            };
+        }
 
         other.remove_id(&current.id());
 
-        SavedGateways::new_with_other(current, other.items())
+        SavedGateways::new_with_other(current.clone(), other.items())
             .map_err(de::Error::custom)
     }
 }
@@ -297,6 +306,56 @@ mod tests {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn deserialize_from_json_ignore_repetitions() {
+        let json = r#"
+        {
+                "current": "https://rcnet-v3.radixdlt.com/",
+                "saved": [
+                    {
+                        "network":
+                        {
+                            "name": "zabanet",
+                            "id": 14,
+                            "displayDescription": "RCnet-V3 (Test Network)"
+                        },
+                        "url": "https://rcnet-v3.radixdlt.com/"
+                    },
+                    {
+                        "network":
+                        {
+                            "name": "mainnet",
+                            "id": 1,
+                            "displayDescription": "Mainnet"
+                        },
+                        "url": "https://mainnet.radixdlt.com/"
+                    },
+                    {
+                        "network":
+                        {
+                            "name": "stokenet",
+                            "id": 2,
+                            "displayDescription": "Stokenet"
+                        },
+                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
+                    },
+                    {
+                        "network":
+                        {
+                            "name": "different",
+                            "id": 11,
+                            "displayDescription": "All differs but Url is the same than stokenet"
+                        },
+                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
+                    }
+                ]
+            }
+        "#;
+
+        let sut = serde_json::from_str::<SUT>(json).unwrap();
+        assert_eq!(sut, SUT::sample());
     }
 
     #[test]
