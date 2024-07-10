@@ -118,7 +118,6 @@ impl LegacyOlympiaAccountAddress {
         match format {
             AddressFormat::Default => format_string(self.to_string(), 3, 9),
             AddressFormat::Full | AddressFormat::Raw => self.to_string(),
-            AddressFormat::Middle => trim_string(self.to_string(), 3, 9),
         }
     }
 }
@@ -228,14 +227,6 @@ mod tests {
         assert_eq!(
             SUT::sample_other().formatted(AddressFormat::Raw),
             "rdx1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup0xqm2ylge"
-        );
-    }
-
-    #[test]
-    fn formatted_middle() {
-        assert_eq!(
-            SUT::sample_other().formatted(AddressFormat::Middle),
-            "1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup"
         );
     }
 

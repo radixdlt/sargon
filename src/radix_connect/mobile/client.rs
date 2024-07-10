@@ -19,7 +19,10 @@ pub struct RadixConnectMobile {
     /// The new sessions that have been created and are waiting to be by the users.
     /// Once the session is validated, it will be moved to the secure storage.
     /// Validation consists in verifying the origin of the session.
-    new_sessions: RwLock<HashMap<SessionID, Session>>,
+    /// There can be multiple sessions in flight for the same session id, for the scenario
+    /// when users send multiple requests to the same session without validating the first one.
+    new_sessions:
+        RwLock<HashMap<SessionID, HashMap<WalletInteractionId, Session>>>,
 }
 
 impl RadixConnectMobile {
@@ -97,14 +100,20 @@ impl RadixConnectMobile {
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
         let session_id = wallet_response.session_id;
+        let interaction_id = wallet_response.response.interaction_id();
 
         // Get the in flight session, if any, that required validation from the user.
         // Not removed at this stage, as the user might retry the interaction.
-        let in_flight_session = self
-            .new_sessions
-            .read()
-            .ok()
-            .and_then(|sessions| sessions.get(&session_id).cloned());
+        let in_flight_session =
+            self.new_sessions.read().ok().and_then(|sessions| {
+                let sessions_for_id = sessions.get(&session_id).cloned();
+
+                sessions_for_id.and_then(|session| {
+                    session
+                        .get(&wallet_response.response.interaction_id())
+                        .cloned()
+                })
+            });
 
         // Get the existing session, if any.
         let existing_session =
@@ -125,8 +134,20 @@ impl RadixConnectMobile {
             )
             .await?;
 
+        // Remove the in flight session from the in flight sessions only after it was successfully saved.
         _ = self.new_sessions.try_write().map(|mut new_sessions| {
-            new_sessions.remove(&session_id);
+            let sessions_for_interaction_id = new_sessions
+                .get_mut(&session_id)
+                .map(|sessions_for_interaction_id| {
+                    sessions_for_interaction_id.remove(&interaction_id);
+                    sessions_for_interaction_id.clone()
+                });
+
+            if sessions_for_interaction_id
+                .is_some_and(|sessions| sessions.is_empty())
+            {
+                new_sessions.remove(&session_id);
+            }
         });
 
         if is_in_flight_session && is_success_response {
@@ -175,7 +196,10 @@ impl RadixConnectMobile {
         self.new_sessions
             .try_write()
             .map(|mut new_sessions| {
-                new_sessions.insert(request.session_id, session);
+                new_sessions.entry(request.session_id).or_default().insert(
+                    request.interaction.interaction_id.clone(),
+                    session,
+                );
             })
             .map_err(|_| {
                 CommonError::RadixConnectMobileFailedToCreateNewSession
@@ -319,9 +343,25 @@ mod tests {
             .await
             .unwrap();
 
+        let session_id = SessionID(
+            request_params.session_id.clone().unwrap().parse().unwrap(),
+        );
+
+        let interaction_id =
+            SampleRequestParams::test_vector_encoded_interaction()
+                .interaction_id
+                .clone();
+
         // Assert that a new session was created and stored in memory
-        let created_session: Option<Session> =
-            sut.new_sessions.read().unwrap().values().next().cloned();
+        let created_session = sut
+            .new_sessions
+            .read()
+            .unwrap()
+            .get(&session_id)
+            .unwrap()
+            .get(&interaction_id)
+            .cloned();
+
         pretty_assertions::assert_eq!(created_session.is_some(), true);
         let created_session = created_session.unwrap();
 
@@ -412,22 +452,26 @@ mod tests {
             .await
             .unwrap();
 
-        let in_flight_session = sut
-            .new_sessions
-            .read()
-            .unwrap()
-            .get(&request.session_id)
-            .cloned()
-            .unwrap();
-
         // Create a response to be sent back to the dApp
         let interaction_response = WalletToDappInteractionResponse::Failure(
-            WalletToDappInteractionFailureResponse::sample(),
+            WalletToDappInteractionFailureResponse::sample_with_id(
+                request.interaction.interaction_id.clone(),
+            ),
         );
         let wallet_response = RadixConnectMobileWalletResponse::new(
             request.session_id,
             interaction_response.clone(),
         );
+
+        let in_flight_session = sut
+            .new_sessions
+            .read()
+            .unwrap()
+            .get(&request.session_id)
+            .unwrap()
+            .get(&request.interaction.interaction_id)
+            .cloned()
+            .unwrap();
 
         // Send the response back to the dApp
         sut.send_dapp_interaction_response(wallet_response.clone())
@@ -529,11 +573,17 @@ mod tests {
             .read()
             .unwrap()
             .get(&request.session_id)
+            .unwrap()
+            .get(&request.interaction.interaction_id)
             .cloned()
             .unwrap();
 
         // Create a response to be sent back to the dApp
-        let interaction_response = WalletToDappInteractionResponse::sample();
+        let interaction_response = WalletToDappInteractionResponse::Success(
+            WalletToDappInteractionSuccessResponse::sample_with_id(
+                request.interaction.interaction_id.clone(),
+            ),
+        );
         let wallet_response = RadixConnectMobileWalletResponse::new(
             request.session_id,
             interaction_response.clone(),
@@ -601,7 +651,12 @@ mod tests {
         let session_id = SessionID(
             request_params.session_id.clone().unwrap().parse().unwrap(),
         );
-        let response = WalletToDappInteractionResponse::sample();
+        let response = WalletToDappInteractionResponse::Success(
+            WalletToDappInteractionSuccessResponse::sample_with_id(
+                SampleRequestParams::test_vector_encoded_interaction()
+                    .interaction_id,
+            ),
+        );
 
         sut.send_dapp_interaction_response(
             RadixConnectMobileWalletResponse::new(session_id, response.clone()),
