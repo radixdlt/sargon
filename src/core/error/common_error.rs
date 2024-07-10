@@ -545,87 +545,102 @@ pub enum CommonError {
     #[error("Radix Connect Mobile failed to create new in flight session")]
     RadixConnectMobileFailedToCreateNewSession = 10151,
 
+    #[error("Deferred Deep Link invalid value format {bad_value}.")]
+    DeferredDeepLinkInvalidValueFormat { bad_value: String } = 10152,
+
+    #[error("Failed updating home cards")]
+    FailedUpdatingHomeCards = 10153,
+
+    #[error("Entity not found")]
+    EntityNotFound = 10154,
+
+    #[error("Home cards not found")]
+    HomeCardsNotFound = 10155,
+
+    #[error("Failed saving home cards")]
+    FailedSavingHomeCards = 10156,
+
     #[error(
         "Failed to load Profile from secure storage, profile id: {profile_id}"
     )]
-    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10152,
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10157,
 
     #[error("Failed to save DeviceInfo to secure storage")]
-    UnableToSaveDeviceInfoToSecureStorage = 10153,
+    UnableToSaveDeviceInfoToSecureStorage = 10158,
 
     #[error("Unable to acquire read lock for profile")]
-    UnableToAcquireReadLockForProfile = 10154,
+    UnableToAcquireReadLockForProfile = 10159,
 
     #[error("Failed to read from unsafe storage.")]
-    UnsafeStorageReadError = 10155,
+    UnsafeStorageReadError = 10160,
 
     #[error("Failed to write to unsafe storage.")]
-    UnsafeStorageWriteError = 10156,
+    UnsafeStorageWriteError = 10161,
 
     #[error("Failed to create file path from string: '{bad_value}'")]
-    FailedToCreateFilePathFromString { bad_value: String } = 10157,
+    FailedToCreateFilePathFromString { bad_value: String } = 10162,
 
     #[error("Expected collection to not be empty")]
-    ExpectedNonEmptyCollection = 10158,
+    ExpectedNonEmptyCollection = 10163,
 
     #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10159,
+    UnableToAddAllAccountsDuplicatesFound = 10164,
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
     ProfileUsedOnOtherDevice {
         other_device_id: DeviceID,
         this_device_id: DeviceID,
-    } = 10160,
+    } = 10165,
 
     #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
-    InvalidDeviceID { bad_value: String } = 10161,
+    InvalidDeviceID { bad_value: String } = 10166,
 
     #[error("Tried to replace profile with one with a different ProfileID than the current one. Use `import_profile` instead.")]
-    TriedToUpdateProfileWithOneWithDifferentID = 10162,
+    TriedToUpdateProfileWithOneWithDifferentID = 10167,
 
     #[error("Invalid path, bad value: '{bad_value}'")]
-    InvalidPath { bad_value: String } = 10163,
+    InvalidPath { bad_value: String } = 10168,
 
     #[error("Failed to save file: '{path}'")]
-    FailedToSaveFile { path: String } = 10164,
+    FailedToSaveFile { path: String } = 10169,
 
     #[error("Failed to load file: '{path}'")]
-    FailedToLoadFile { path: String } = 10165,
+    FailedToLoadFile { path: String } = 10170,
 
     #[error("Failed to delete file: '{path}'")]
-    FailedToDeleteFile { path: String } = 10166,
+    FailedToDeleteFile { path: String } = 10171,
 
     #[error("Not permission enough to access file: '{path}'")]
-    NotPermissionToAccessFile { path: String } = 10167,
+    NotPermissionToAccessFile { path: String } = 10172,
 
     #[error("Invalid Arculus Card Model")]
-    InvalidArculusCardModel { bad_value: String } = 10168,
+    InvalidArculusCardModel { bad_value: String } = 10173,
 
     #[error("Expected ArculusCard factor source got something else")]
-    ExpectedArculusCardFactorSourceGotSomethingElse = 10169,
+    ExpectedArculusCardFactorSourceGotSomethingElse = 10174,
 
     #[error("Failed to Derive Key after max attempts")]
-    FailedToDeriveKeyAfterMaxAttempts = 10170,
+    FailedToDeriveKeyAfterMaxAttempts = 10175,
 
     #[error("Failed to decrypt sealed mnemonic")]
-    FailedToDecryptSealedMnemonic = 10171,
+    FailedToDecryptSealedMnemonic = 10176,
 
     #[error("Answers to Security Questions cannot be empty")]
-    AnswersToSecurityQuestionsCannotBeEmpty = 10172,
+    AnswersToSecurityQuestionsCannotBeEmpty = 10177,
 
     #[error("Integrity Violation, mutation of FactorSource is not allowed to mutate its ID")]
-    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10173,
+    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10178,
 
     #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
-    InvalidSecurityStructureID { bad_value: String } = 10174,
+    InvalidSecurityStructureID { bad_value: String } = 10179,
 
     #[error(
         "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
     )]
-    StructureReferencesUnknownFactorSource = 10175,
+    StructureReferencesUnknownFactorSource = 10180,
 
     #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
-    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10176,
+    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10181,
 }
 
 #[uniffi::export]

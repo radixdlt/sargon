@@ -7,6 +7,7 @@
 mod core;
 mod gateway_api;
 mod hierarchical_deterministic;
+mod home_cards;
 mod profile;
 mod radix_connect;
 mod system;
@@ -17,6 +18,7 @@ pub mod prelude {
     pub use crate::core::*;
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
+    pub use crate::home_cards::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::system::*;
