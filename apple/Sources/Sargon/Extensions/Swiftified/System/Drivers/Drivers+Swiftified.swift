@@ -55,7 +55,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: unsafeStorage
+			unsafeStorage: unsafeStorage,
+            profileChangeDriver: .shared
 		)
 	}
 }
