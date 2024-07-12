@@ -545,7 +545,7 @@ mod tests {
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
                     [], // reserved_instructions
-                    ["resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9".parse::<ResourceAddress>().unwrap()], // presented_proofs
+                    [ResourceSpecifier::non_fungible("resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9", vec!["<Member_44>".parse().unwrap()])], // presented_proofs
                     ["component_tdx_2_1crje3en7zsrna9t5vyywn3z3t9ht34l9udxjcpjvdhpcw9v6vlzru8".parse::<ComponentAddress>().unwrap()], // encountered_component_addresses
                     [
                         DetailedManifestClass::General
