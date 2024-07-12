@@ -39,7 +39,7 @@ pub struct ExecutionSummary {
     pub reserved_instructions: Vec<ReservedInstruction>,
 
     /// The list of the resources of proofs that were presented in the manifest.
-    pub presented_proofs: Vec<ResourceAddress>,
+    pub presented_proofs: Vec<ResourceSpecifier>,
 
     /// The set of all the encountered `ComponentAddress`es` in the manifest. This is
     /// to be primarily used for the "using dApps" section of the wallet's tx
@@ -70,7 +70,7 @@ impl ExecutionSummary {
         >,
         newly_created_non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
         reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
-        presented_proofs: impl IntoIterator<Item = ResourceAddress>,
+        presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
         encountered_component_addresses: impl IntoIterator<Item = ComponentAddress>,
         detailed_classification: impl IntoIterator<Item = DetailedManifestClass>,
         fee_locks: impl Into<FeeLocks>,
@@ -142,10 +142,7 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
             ret.reserved_instructions
                 .into_iter()
                 .map(ReservedInstruction::from),
-            ret
-                // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
-                // have to assert Android does the same.
-                .presented_proofs
+            ret.presented_proofs
                 .values()
                 .cloned()
                 .flat_map(|vec| filter_try_to_vec_network_aware(vec, n)),
