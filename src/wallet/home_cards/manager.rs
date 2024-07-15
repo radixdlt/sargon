@@ -110,6 +110,18 @@ impl HomeCardsManager {
             .await?;
         self.save_cards(updated_cards).await
     }
+
+    /// Clears the home cards from the `HomeCardsStorage`.
+    /// Notifies `HomeCardsObserver`.
+    #[uniffi::method]
+    pub async fn wallet_reset(&self) -> Result<()> {
+        let updated_cards = self
+            .update_cards(|write_guard| {
+                **write_guard = HomeCards::new();
+            })
+            .await?;
+        self.save_cards(updated_cards).await
+    }
 }
 
 impl HomeCardsManager {
@@ -473,5 +485,28 @@ mod tests {
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards.unwrap(), initial_cards);
+    }
+
+    #[actix_rt::test]
+    async fn test_wallet_reset() {
+        let initial_cards = HomeCards::from_iter(vec![
+            HomeCard::ContinueRadQuest,
+            HomeCard::Connector,
+        ]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockAntenna::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_stored_cards(
+                initial_cards.clone(),
+            )),
+            observer.clone(),
+        );
+
+        manager.bootstrap().await.unwrap();
+        manager.wallet_reset().await.unwrap();
+
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
     }
 }
