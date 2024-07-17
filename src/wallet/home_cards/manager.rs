@@ -99,6 +99,19 @@ impl HomeCardsManager {
         self.save_cards(updated_cards).await
     }
 
+    /// Marks the wallet restoration.
+    /// Ensures only the expected `HomeCards` remain in `HomeCardsStorage` - currently none.
+    /// Notifies `HomeCardsObserver`.
+    #[uniffi::method]
+    pub async fn wallet_restored(&self) -> Result<()> {
+        let updated_cards = self
+            .update_cards(|write_guard| {
+                **write_guard = HomeCards::new();
+            })
+            .await?;
+        self.save_cards(updated_cards).await
+    }
+
     /// Dismisses a specified `HomeCard` by removing it from `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
@@ -442,6 +455,31 @@ mod tests {
         ]);
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+    }
+
+    #[actix_rt::test]
+    async fn test_deferred_deep_link_received_then_wallet_restored() {
+        let deep_link_cards = HomeCards::from_iter(vec![
+            HomeCard::Dapp { icon_url: None },
+            HomeCard::ContinueRadQuest,
+        ]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::init(
+            Arc::new(MockDeferredDeepLinkParser::succeeding(
+                deep_link_cards.clone(),
+            )),
+            Arc::new(MockHomeCardsStorage::new_empty()),
+            observer.clone(),
+        );
+
+        manager
+            .deferred_deep_link_received("encoded_value".to_string())
+            .await
+            .unwrap();
+        manager.wallet_restored().await.unwrap();
+
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
     }
 
     #[actix_rt::test]
