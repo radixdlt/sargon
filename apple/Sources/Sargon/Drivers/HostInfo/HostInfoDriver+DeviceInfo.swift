@@ -10,14 +10,14 @@ import SargonUniFFI
 
 /// An `HostInfoDriver` actor being able to read host info, i.e
 /// details about the iPhone the app is running on.
-public final actor HostInfo {
+public final actor AppleHostInfoDriver {
 	fileprivate var appVersion: String
 	public init(appVersion: String) {
 		self.appVersion = appVersion
 	}
 }
 
-extension HostInfo {
+extension AppleHostInfoDriver {
 	nonisolated public func hostAppVersion() async -> String {
 		await self.appVersion
 	}
@@ -34,7 +34,7 @@ extension HostInfo {
 
 #if canImport(UIKit)
 import UIKit
-extension HostInfo: HostInfoDriver {
+extension AppleHostInfoDriver: HostInfoDriver {
 	
 	
 	nonisolated public func hostDeviceName() async -> String {
@@ -51,7 +51,7 @@ extension HostInfo: HostInfoDriver {
 }
 #else
 
-extension HostInfo: HostInfoDriver {
+extension AppleHostInfoDriver: HostInfoDriver {
 
 	nonisolated public func hostDeviceSystemVersion() async -> String {
 		let info = ProcessInfo.processInfo.operatingSystemVersion

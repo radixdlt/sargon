@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.DeviceInfo
+import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.NonEmptyMax32Bytes
 import com.radixdlt.sargon.PrivateHierarchicalDeterministicFactorSource
@@ -12,29 +12,29 @@ import com.radixdlt.sargon.newPrivateHdFactorSourceOlympiaFromMnemonicWithPassph
 fun PrivateHierarchicalDeterministicFactorSource.Companion.init(
     isMainBDFS: Boolean,
     entropy: NonEmptyMax32Bytes,
-    deviceInfo: DeviceInfo
+    hostInfo: HostInfo
 ) = newPrivateHdFactorSourceBabylon(
     isMain = isMainBDFS,
     entropy = entropy,
-    deviceInfo = deviceInfo
+    hostInfo = hostInfo
 )
 
 
 fun PrivateHierarchicalDeterministicFactorSource.Companion.olympia(
     mnemonicWithPassphrase: MnemonicWithPassphrase,
-    deviceInfo: DeviceInfo
+    hostInfo: HostInfo
 ) = newPrivateHdFactorSourceOlympiaFromMnemonicWithPassphrase(
     mnemonicWithPassphrase = mnemonicWithPassphrase,
-    deviceInfo = deviceInfo
+    hostInfo = hostInfo
 )
 
 fun PrivateHierarchicalDeterministicFactorSource.Companion.babylon(
     isMain: Boolean,
     mnemonicWithPassphrase: MnemonicWithPassphrase,
-    deviceInfo: DeviceInfo
+    hostInfo: HostInfo
 ) = newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase(
     isMain = isMain,
     mnemonicWithPassphrase = mnemonicWithPassphrase,
-    deviceInfo = deviceInfo
+    hostInfo = hostInfo
 )
 

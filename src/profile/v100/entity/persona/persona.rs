@@ -117,8 +117,7 @@ impl Persona {
         E: IntoIterator<Item = String>,
     {
         let mwp = MnemonicWithPassphrase::sample();
-        let bdfs =
-            DeviceFactorSource::babylon(true, &mwp, &DeviceInfo::sample());
+        let bdfs = DeviceFactorSource::babylon(true, &mwp, &HostInfo::sample());
 
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);

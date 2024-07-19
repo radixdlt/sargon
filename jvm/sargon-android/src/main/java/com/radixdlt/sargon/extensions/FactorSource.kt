@@ -1,10 +1,10 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.DeviceFactorSource
-import com.radixdlt.sargon.DeviceInfo
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSourceKind
+import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
@@ -32,20 +32,20 @@ fun LedgerHardwareWalletFactorSource.asGeneral() = FactorSource.Ledger(value = t
 
 fun FactorSource.Device.Companion.olympia(
     mnemonicWithPassphrase: MnemonicWithPassphrase,
-    deviceInfo: DeviceInfo
+    hostInfo: HostInfo
 ) = newDeviceFactorSourceOlympia(
     mnemonicWithPassphrase = mnemonicWithPassphrase,
-    deviceInfo = deviceInfo
+    hostInfo = hostInfo
 ).asGeneral()
 
 fun FactorSource.Device.Companion.babylon(
     isMain: Boolean,
     mnemonicWithPassphrase: MnemonicWithPassphrase,
-    deviceInfo: DeviceInfo
+    hostInfo: HostInfo
 ) = newDeviceFactorSourceBabylon(
     isMain = isMain,
     mnemonicWithPassphrase = mnemonicWithPassphrase,
-    deviceInfo = deviceInfo
+    hostInfo = hostInfo
 ).asGeneral()
 
 val FactorSource.Device.isMain: Boolean

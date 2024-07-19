@@ -5,13 +5,13 @@ import SargonUniFFI
 import XCTest
 
 private let appVersion = "0.0.0"
-extension HostInfo {
+extension AppleHostInfoDriver {
 	init() {
 		self.init(appVersion: appVersion)
 	}
 }
 
-class HostInfoDriverTests: DriverTest<HostInfo> {
+class HostInfoDriverTests: DriverTest<AppleHostInfoDriver> {
 	
 	func test_app_version() async throws {
 		let sut = SUT()

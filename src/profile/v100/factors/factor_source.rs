@@ -468,8 +468,49 @@ mod tests {
                         "lastUsedOn": "2023-09-11T16:05:56.000Z"
                     },
                     "hint": {
-                        "name": "iPhone",
-                        "model": "iPhone",
+                        "name": "My precious",
+                        "model": "iPhone SE 2nd gen",
+                        "mnemonicWordCount": 24,
+                        "systemVersion": "iOS 17.4.1",
+                        "hostAppVersion": "1.6.4",
+                        "hostVendor": "Apple"
+                    }
+                }
+            }
+            "#,
+        )
+    }
+
+    #[test]
+    fn json_roundtrip_device_without_host_info() {
+        let mut device = DeviceFactorSource::sample_babylon();
+        device.hint.system_version = None;
+        device.hint.host_app_version = None;
+        device.hint.host_vendor = None;
+        let model = FactorSource::from(device);
+
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "discriminator": "device",
+                "device": {
+                    "id": {
+                        "kind": "device",
+                        "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                    },
+                    "common": {
+                        "flags": ["main"],
+                        "addedOn": "2023-09-11T16:05:56.000Z",
+                        "cryptoParameters": {
+                            "supportedCurves": ["curve25519"],
+                            "supportedDerivationPathSchemes": ["cap26"]
+                        },
+                        "lastUsedOn": "2023-09-11T16:05:56.000Z"
+                    },
+                    "hint": {
+                        "name": "My precious",
+                        "model": "iPhone SE 2nd gen",
                         "mnemonicWordCount": 24
                     }
                 }

@@ -12,6 +12,8 @@ mod decl_identified_vec_of_with_samples;
 mod detailed_authorized_personas;
 mod email_address;
 mod email_address_uniffi_fn;
+mod host_info;
+mod host_info_uniffi_fn;
 mod is_network_aware;
 mod on_same_network_validating;
 
@@ -29,5 +31,7 @@ pub use decl_identified_vec_of_with_samples::*;
 pub use detailed_authorized_personas::*;
 pub use email_address::*;
 pub use email_address_uniffi_fn::*;
+pub use host_info::*;
+pub use host_info_uniffi_fn::*;
 pub use is_network_aware::*;
 pub use on_same_network_validating::*;

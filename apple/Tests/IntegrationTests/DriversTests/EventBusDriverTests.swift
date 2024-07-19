@@ -27,9 +27,9 @@ class EventBusDriverTests: DriverTest<EventBus> {
 	
 }
 
-extension HostInfoDriver where Self == HostInfo {
+extension HostInfoDriver where Self == AppleHostInfoDriver {
 	static var shared: Self {
-		HostInfo(appVersion: "0.0.0")
+		AppleHostInfoDriver(appVersion: "0.0.0")
 	}
 }
 

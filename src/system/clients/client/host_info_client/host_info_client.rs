@@ -21,6 +21,30 @@ impl HostInfoClient {
         )
     }
 
+    pub async fn resolve_host_info(
+        &self,
+        stored_device_id: DeviceID,
+        stored_device_date: Timestamp,
+    ) -> HostInfo {
+        let host_device_name = self.driver.host_device_name().await;
+        let host_device_model = self.driver.host_device_model().await;
+        let host_os_version = self.driver.host_device_system_version().await;
+        let host_app_version = self.driver.host_app_version().await;
+        let host_vendor = self.driver.host_device_vendor().await;
+
+        HostInfo {
+            id: stored_device_id,
+            date: stored_device_date,
+            description: DeviceInfoDescription::new(
+                host_device_name,
+                host_device_model,
+            ),
+            host_os_version,
+            host_app_version,
+            host_vendor,
+        }
+    }
+
     pub async fn create_device_info(&self) -> DeviceInfo {
         let host_name = self.driver.host_device_name().await;
         let host_model = self.driver.host_device_model().await;
@@ -63,11 +87,11 @@ mod tests {
                 Timestamp::sample(),
                 DeviceInfoDescription::new(
                     "Rosebud",
-                    "Rust Sargon Unknown Device Model"
+                    "Rust Sargon Unknown Device Model",
                 ),
                 "macos",
                 "0.0.0",
-                "Rust Sargon Unknown Vendor"
+                "Rust Sargon Unknown Vendor",
             )
         );
     }

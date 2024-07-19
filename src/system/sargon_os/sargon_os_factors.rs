@@ -155,17 +155,17 @@ impl SargonOS {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
     ) -> Result<DeviceFactorSource> {
-        let device_info = self.device_info().await?;
+        let host_info = self.host_info().await?;
         let factor_source = match factor_type {
             DeviceFactorSourceType::Olympia => DeviceFactorSource::olympia(
                 &mnemonic_with_passphrase,
-                &device_info,
+                &host_info,
             ),
             DeviceFactorSourceType::Babylon { is_main } => {
                 DeviceFactorSource::babylon(
                     is_main,
                     &mnemonic_with_passphrase,
-                    &device_info,
+                    &host_info,
                 )
             }
         };
@@ -477,7 +477,7 @@ mod tests {
         let new_bdfs = DeviceFactorSource::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
         assert_ne!(old_bdfs_id, new_bdfs.factor_source_id());
 
@@ -518,7 +518,7 @@ mod tests {
                     DeviceFactorSource::babylon(
                         false,
                         &mwp,
-                        &DeviceInfo::sample_other(),
+                        &HostInfo::sample_other(),
                     )
                     .into(),
                 )

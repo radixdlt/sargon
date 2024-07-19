@@ -37,7 +37,6 @@ import com.radixdlt.sargon.NonEmptyMax32Bytes
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.SecureStorageDriver
-import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.toBagOfBytes
@@ -57,69 +56,69 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
-    var walletState: Wallet? by remember { mutableStateOf(null) }
-    var profile: Profile? by remember { mutableStateOf(null) }
-
-    Scaffold(
-            modifier = modifier,
-            topBar = { TopAppBar(title = { Text(text = "Wallet Test") }) },
-            bottomBar = {
-                if (walletState == null) {
-                    Button(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            onClick = {
-                                walletState =
-                                        Wallet.with(
-                                                entropy = ByteArray(32) { 0xFF.toByte() },
-                                                secureStorage = storage
-                                        )
-                                profile = walletState?.profile()
-                            }
-                    ) { Text(text = "Generate new Wallet") }
-                } else if (profile?.networks?.isEmpty() == true) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        var accountName by remember { mutableStateOf("") }
-                        TextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                value = accountName,
-                                onValueChange = { accountName = it },
-                                label = { Text(text = "New Account Name") },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                keyboardActions =
-                                        KeyboardActions(
-                                                onDone = {
-                                                    walletState?.createAndSaveNewAccount(
-                                                            networkId = NetworkId.MAINNET,
-                                                            name = DisplayName(accountName)
-                                                    )
-
-                                                    profile = walletState?.profile()
-                                                }
-                                        )
-                        )
-                    }
-                }
-            }
-    ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
-            items(profile?.networks.orEmpty()) {
-                Network(
-                        network = it,
-                        onAccountAdd = { newName ->
-                            walletState?.createNewAccount(NetworkId.MAINNET, DisplayName(newName))
-                                    ?.let {
-                                        walletState?.addAccount(it)
-
-                                        profile = walletState?.profile()
-                                    }
-                        }
-                )
-            }
-        }
-    }
+//    var walletState: Wallet? by remember { mutableStateOf(null) }
+//    var profile: Profile? by remember { mutableStateOf(null) }
+//
+//    Scaffold(
+//            modifier = modifier,
+//            topBar = { TopAppBar(title = { Text(text = "Wallet Test") }) },
+//            bottomBar = {
+//                if (walletState == null) {
+//                    Button(
+//                            modifier = Modifier
+//                                .padding(16.dp)
+//                                .fillMaxWidth(),
+//                            onClick = {
+//                                walletState =
+//                                        Wallet.with(
+//                                                entropy = ByteArray(32) { 0xFF.toByte() },
+//                                                secureStorage = storage
+//                                        )
+//                                profile = walletState?.profile()
+//                            }
+//                    ) { Text(text = "Generate new Wallet") }
+//                } else if (profile?.networks?.isEmpty() == true) {
+//                    Column(modifier = Modifier.padding(16.dp)) {
+//                        var accountName by remember { mutableStateOf("") }
+//                        TextField(
+//                                modifier = Modifier.fillMaxWidth(),
+//                                value = accountName,
+//                                onValueChange = { accountName = it },
+//                                label = { Text(text = "New Account Name") },
+//                                singleLine = true,
+//                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+//                                keyboardActions =
+//                                        KeyboardActions(
+//                                                onDone = {
+//                                                    walletState?.createAndSaveNewAccount(
+//                                                            networkId = NetworkId.MAINNET,
+//                                                            name = DisplayName(accountName)
+//                                                    )
+//
+//                                                    profile = walletState?.profile()
+//                                                }
+//                                        )
+//                        )
+//                    }
+//                }
+//            }
+//    ) { padding ->
+//        LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
+//            items(profile?.networks.orEmpty()) {
+//                Network(
+//                        network = it,
+//                        onAccountAdd = { newName ->
+//                            walletState?.createNewAccount(NetworkId.MAINNET, DisplayName(newName))
+//                                    ?.let {
+//                                        walletState?.addAccount(it)
+//
+//                                        profile = walletState?.profile()
+//                                    }
+//                        }
+//                )
+//            }
+//        }
+//    }
 }
 
 @Composable
@@ -166,21 +165,21 @@ fun Network(
     }
 }
 
-val Wallet.Companion.defaultPhoneName: String
-    get() = "Android Phone"
-
-fun Wallet.Companion.with(
-        entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
-        phoneName: String = Wallet.Companion.defaultPhoneName,
-        secureStorage: SecureStorageDriver
-): Wallet {
-    return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-            entropy = NonEmptyMax32Bytes(entropy.toBagOfBytes()),
-            walletClientModel = WalletClientModel.ANDROID,
-            walletClientName = phoneName,
-            secureStorage = secureStorage
-    )
-}
+//val Wallet.Companion.defaultPhoneName: String
+//    get() = "Android Phone"
+//
+//fun Wallet.Companion.with(
+//        entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
+//        phoneName: String = Wallet.Companion.defaultPhoneName,
+//        secureStorage: SecureStorageDriver
+//): Wallet {
+//    return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
+//            entropy = NonEmptyMax32Bytes(entropy.toBagOfBytes()),
+//            walletClientModel = WalletClientModel.ANDROID,
+//            walletClientName = phoneName,
+//            secureStorage = secureStorage
+//    )
+//}
 
 @OptIn(UsesSampleValues::class)
 @Preview(showBackground = true)

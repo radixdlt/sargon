@@ -11,7 +11,8 @@ impl SargonOS {
         profile: &mut Profile,
         device_info: DeviceInfo,
     ) -> bool {
-        let was_needed = profile.header.last_used_on_device != device_info;
+        let was_needed =
+            profile.header.last_used_on_device.id != device_info.id;
         profile.update_header(device_info);
         was_needed
     }
@@ -20,12 +21,12 @@ impl SargonOS {
     /// header
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
         debug!("Claiming profile, id: {}", &profile.id());
-        let device_info = self.device_info().await?;
-        Self::claim_provided_profile(profile, device_info.clone());
+        let host_info = self.host_info().await?;
+        Self::claim_provided_profile(profile, host_info.clone().into());
         info!(
             "Claimed profile, id: {}, with device info: {}",
             &profile.id(),
-            device_info
+            host_info
         );
         Ok(())
     }
@@ -119,12 +120,15 @@ impl SargonOS {
     /// Returns `true` if the profile was changed (i.e. if claim was indeed needed),
     /// `false`` otherwise.
     pub async fn claim_active_profile(&self) -> Result<bool> {
-        let device_info = self.device_info().await?;
+        let host_info = self.host_info().await?;
 
         self.maybe_validate_ownership_update_profile_with(
             false, // we do NOT validate ownership, since this method is claiming
             |mut p| {
-                Ok(Self::claim_provided_profile(&mut p, device_info.clone()))
+                Ok(Self::claim_provided_profile(
+                    &mut p,
+                    host_info.clone().into(),
+                ))
             },
         )
         .await
@@ -211,9 +215,9 @@ impl SargonOS {
         err_on_lack_of_ownership: bool,
     ) -> Result<bool> {
         debug!("Checking if profile.header.last_used_on_device is self.device_info");
-        let device_info = Self::get_device_info(clients).await?;
+        let host_info = Self::get_host_info(clients).await?;
         let last_used = profile.header.last_used_on_device.clone();
-        if last_used == device_info {
+        if last_used.id == host_info.id {
             debug!("Ownership check passed (profile.header.last_used_on_device == self.device_info)");
             Ok(true)
         } else {
@@ -227,7 +231,7 @@ impl SargonOS {
             if err_on_lack_of_ownership {
                 Err(CommonError::ProfileUsedOnOtherDevice {
                     other_device_id: last_used.id,
-                    this_device_id: device_info.id,
+                    this_device_id: host_info.id,
                 })
             } else {
                 // used by SargonOS::boot
@@ -477,8 +481,8 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let device_info = os.device_info().await.unwrap();
-        assert_eq!(os.profile().header.last_used_on_device, device_info);
+        let host_info = os.host_info().await.unwrap();
+        assert_eq!(os.profile().header.last_used_on_device, host_info.into());
     }
 
     #[actix_rt::test]
@@ -649,8 +653,8 @@ mod tests {
     ) {
         // ARRANGE
         let os = SUT::fast_boot().await;
-        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
-        assert_eq!(&os.profile().header.creating_device, &device_info);
+        let host_info = os.with_timeout(|x| x.host_info()).await.unwrap();
+        assert_eq!(&os.profile().header.creating_device, &host_info.into());
 
         // ACT
         os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
@@ -658,8 +662,8 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
-        assert_eq!(&os.profile().header.creating_device, &device_info);
+        let host_info = os.with_timeout(|x| x.host_info()).await.unwrap();
+        assert_eq!(&os.profile().header.creating_device, &host_info.into());
     }
 
     #[actix_rt::test]

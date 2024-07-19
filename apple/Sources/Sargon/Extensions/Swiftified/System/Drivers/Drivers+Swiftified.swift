@@ -32,7 +32,7 @@ extension Drivers {
 	) {
 		self.init(
 			secureStorage: secureStorageDriver,
-			hostInfo: HostInfo(appVersion: appVersion),
+			hostInfo: AppleHostInfoDriver(appVersion: appVersion),
 			unsafeStorage: UnsafeStorage(
 				userDefaults: .init(suiteName: userDefaultsSuite)!
 			)

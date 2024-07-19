@@ -38,7 +38,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             FactorSource.Device.babylon(
                 isMain = true,
                 mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
-                deviceInfo = DeviceInfo.sample()
+                hostInfo = HostInfo.sample()
             ).isMain
         )
     }
@@ -49,7 +49,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             FactorSource.Device.babylon(
                 isMain = false,
                 mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
-                deviceInfo = DeviceInfo.sample()
+                hostInfo = HostInfo.sample()
             ).isMain
         )
     }
@@ -59,7 +59,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         val factorSource = FactorSource.Device.babylon(
             isMain = false,
             mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
-            deviceInfo = DeviceInfo.sample()
+            hostInfo = HostInfo.sample()
         )
         assertTrue(factorSource.supportsBabylon)
         assertFalse(factorSource.supportsOlympia)
@@ -69,7 +69,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
     fun testNewOlympia() {
         val factorSource = FactorSource.Device.olympia(
             mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
-            deviceInfo = DeviceInfo.sample()
+            hostInfo = HostInfo.sample()
         )
         assertTrue(factorSource.supportsOlympia)
         assertFalse(factorSource.supportsBabylon)

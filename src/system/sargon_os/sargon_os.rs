@@ -102,14 +102,14 @@ impl SargonOS {
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
-        let device_info = Self::get_device_info(clients).await?;
+        let host_info = Self::get_host_info(clients).await?;
 
         let is_main = true;
         let private_bdfs = match mnemonic_with_passphrase {
             Some(mwp) => {
                 debug!("Using specified MnemonicWithPassphrase, perhaps we are running in at test...");
 
-                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &device_info)
+                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &host_info)
             }
             None => {
                 debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
@@ -120,7 +120,7 @@ impl SargonOS {
                     is_main,
                     entropy,
                     BIP39Passphrase::default(),
-                    &device_info
+                    &host_info
                 )
             }
         };
@@ -129,20 +129,18 @@ impl SargonOS {
         debug!("Creating new Profile...");
         let profile = Profile::from_device_factor_source(
             private_bdfs.factor_source.clone(),
-            device_info,
+            host_info,
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn device_info(&self) -> Result<DeviceInfo> {
-        Self::get_device_info(&self.clients).await
+    pub(crate) async fn host_info(&self) -> Result<HostInfo> {
+        Self::get_host_info(&self.clients).await
     }
 
-    pub(crate) async fn get_device_info(
-        clients: &Clients,
-    ) -> Result<DeviceInfo> {
-        debug!("Get device info");
+    pub(crate) async fn get_host_info(clients: &Clients) -> Result<HostInfo> {
+        debug!("Get Host info");
         let secure_storage = &clients.secure_storage;
 
         let device_info = match secure_storage.load_device_info().await? {
@@ -160,7 +158,18 @@ impl SargonOS {
             }
         };
 
-        Ok(device_info)
+        let host_info = clients
+            .host
+            .resolve_host_info(device_info.id, device_info.date)
+            .await;
+
+        let new_device_info = host_info.clone().into();
+        if device_info != new_device_info {
+            debug!("Device info: has been updated {:?}", &new_device_info);
+            secure_storage.save_device_info(&new_device_info).await?;
+        }
+
+        Ok(host_info)
     }
 }
 
@@ -279,7 +288,7 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+        let host_info = os.with_timeout(|x| x.host_info()).await.unwrap();
 
         // ACT
         let add_res =
@@ -290,7 +299,7 @@ mod tests {
             add_res,
             Err(CommonError::ProfileUsedOnOtherDevice {
                 other_device_id: profile.header.last_used_on_device.id,
-                this_device_id: device_info.id
+                this_device_id: host_info.id
             })
         );
     }
@@ -300,7 +309,7 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(Mnemonic::sample(), DeviceInfo::sample());
+        let profile = Profile::new(Mnemonic::sample(), HostInfo::sample());
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
@@ -338,7 +347,7 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(Mnemonic::sample(), DeviceInfo::sample());
+        let profile = Profile::new(Mnemonic::sample(), HostInfo::sample());
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();

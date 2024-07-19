@@ -12,23 +12,23 @@ extension PrivateHierarchicalDeterministicFactorSource {
 	
 	public static func olympia(
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
-		deviceInfo: DeviceInfo
+		hostInfo: HostInfo
 	) -> Self {
 		newPrivateHdFactorSourceOlympiaFromMnemonicWithPassphrase(
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
-			deviceInfo: deviceInfo
+			hostInfo: hostInfo
 		)
 	}
 	
 	public static func babylon(
 		isMainBDFS: Bool,
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
-		deviceInfo: DeviceInfo
+		hostInfo: HostInfo
 	) -> Self {
 		newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase(
 			isMain: isMainBDFS,
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
-			deviceInfo: deviceInfo
+			hostInfo: hostInfo
 		)
 	}
 }
