@@ -33,10 +33,6 @@ impl HostInfoDriver for RustHostInfoDriver {
         "Rust Sargon Unknown Device Model".to_owned()
     }
 
-    async fn host_device_id(&self) -> Option<DeviceID> {
-        None
-    }
-
     async fn host_device_vendor(&self) -> String {
         "Rust Sargon Unknown Vendor".to_owned()
     }

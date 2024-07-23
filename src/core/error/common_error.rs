@@ -565,8 +565,8 @@ pub enum CommonError {
     )]
     UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10157,
 
-    #[error("Failed to save DeviceInfo to secure storage")]
-    UnableToSaveDeviceInfoToSecureStorage = 10158,
+    #[error("Failed to save HostId to secure storage")]
+    UnableToSaveHostIdToSecureStorage = 10158,
 
     #[error("Unable to acquire read lock for profile")]
     UnableToAcquireReadLockForProfile = 10159,

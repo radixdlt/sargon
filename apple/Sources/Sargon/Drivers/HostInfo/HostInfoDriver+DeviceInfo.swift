@@ -21,11 +21,6 @@ extension AppleHostInfoDriver {
 	nonisolated public func hostAppVersion() async -> String {
 		await self.appVersion
 	}
-	/// We cannot read a stable device if on iOS. We return `nil` so that Rust Sargon can generate
-	/// and save a device identifier for us.
-	public func hostDeviceId() async -> DeviceId? {
-		nil
-	}
 	
 	public func hostDeviceVendor() async -> String {
 		"Apple"

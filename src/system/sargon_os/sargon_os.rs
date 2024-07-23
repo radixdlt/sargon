@@ -143,31 +143,22 @@ impl SargonOS {
         debug!("Get Host info");
         let secure_storage = &clients.secure_storage;
 
-        let device_info = match secure_storage.load_device_info().await? {
-            Some(loaded_device_info) => {
-                debug!("Found saved device info: {:?}", &loaded_device_info);
-                loaded_device_info
+        let host_id = match secure_storage.load_host_id().await? {
+            Some(loaded_host_id) => {
+                debug!("Found saved host id: {:?}", &loaded_host_id);
+                loaded_host_id
             }
             None => {
-                debug!("Found no saved device info, creating new.");
-                let new_device_info = clients.host.create_device_info().await;
-                debug!("Created new device info: {:?}", &new_device_info);
-                secure_storage.save_device_info(&new_device_info).await?;
-                debug!("Saved new device info");
-                new_device_info
+                debug!("Found no saved host id, creating new.");
+                let new_host_id = HostId::generate_new();
+                debug!("Created new host id: {:?}", &new_host_id);
+                secure_storage.save_host_id(&new_host_id).await?;
+                debug!("Saved new host id");
+                new_host_id
             }
         };
 
-        let host_info = clients
-            .host
-            .resolve_host_info(device_info.id, device_info.date)
-            .await;
-
-        let new_device_info = host_info.clone().into();
-        if device_info != new_device_info {
-            debug!("Device info: has been updated {:?}", &new_device_info);
-            secure_storage.save_device_info(&new_device_info).await?;
-        }
+        let host_info = clients.host.resolve_host_info(host_id).await;
 
         Ok(host_info)
     }
@@ -220,9 +211,11 @@ impl SargonOS {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use actix_rt::time::timeout;
     use std::time::Duration;
+
+    use actix_rt::time::timeout;
+
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;

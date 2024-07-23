@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub enum SecureStorageKey {
     SnapshotHeadersList,
     ActiveProfileID,
-    DeviceInfo,
+    HostID,
     DeviceFactorSourceMnemonic {
         factor_source_id: FactorSourceIDFromHash,
     },
@@ -22,7 +22,7 @@ impl SecureStorageKey {
                 SecureStorageKey::ActiveProfileID =>
                     "activeProfileID".to_owned(),
                 SecureStorageKey::SnapshotHeadersList => "headers".to_owned(),
-                SecureStorageKey::DeviceInfo => "device_info".to_owned(),
+                SecureStorageKey::HostID => "host_id".to_owned(),
                 SecureStorageKey::DeviceFactorSourceMnemonic {
                     factor_source_id,
                 } => format!("device_factor_source_{}", factor_source_id),

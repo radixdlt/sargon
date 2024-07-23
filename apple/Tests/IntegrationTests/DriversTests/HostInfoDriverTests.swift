@@ -19,12 +19,6 @@ class HostInfoDriverTests: DriverTest<AppleHostInfoDriver> {
 		XCTAssertEqual(info, appVersion)
 	}
 	
-	func test_device_id_is_nil() async throws {
-		let sut = SUT()
-		let id = await sut.hostDeviceId()
-		XCTAssertNil(id)
-	}
-	
 	func test_device_name_not_empty() async throws {
 		let sut = SUT()
 		let info = await sut.hostDeviceName()

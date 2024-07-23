@@ -9,7 +9,7 @@ pub struct HostInfo {
     /// device.
     pub id: DeviceID,
 
-    /// The date this description of the device was made, might
+    /// The date this description of the device id was generated, might
     /// be equal to when the app was first ever launched on the
     /// device.
     pub date: Timestamp,
@@ -28,6 +28,25 @@ pub struct HostInfo {
     /// The vendor of the host client, e.g. "Apple" for iPhone clients,
     /// or "Samsung" for Android clients.
     pub host_vendor: String,
+}
+
+impl HostInfo {
+    pub fn new(
+        host_id: HostId,
+        description: DeviceInfoDescription,
+        host_os_version: impl AsRef<str>,
+        host_app_version: impl AsRef<str>,
+        host_vendor: impl AsRef<str>,
+    ) -> Self {
+        Self {
+            id: host_id.id,
+            date: host_id.generated_at,
+            description,
+            host_os_version: host_os_version.as_ref().to_owned(),
+            host_app_version: host_app_version.as_ref().to_owned(),
+            host_vendor: host_vendor.as_ref().to_owned(),
+        }
+    }
 }
 
 // HostInfo can be converted to DeviceInfo but not the opposite
