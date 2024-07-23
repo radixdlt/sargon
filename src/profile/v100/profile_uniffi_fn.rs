@@ -35,9 +35,10 @@ impl Profile {
 #[uniffi::export]
 pub fn new_profile_with_mnemonic(
     mnemonic: Mnemonic,
+    host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    Profile::new(mnemonic, host_info)
+    Profile::new(mnemonic, host_id, host_info)
 }
 
 /// # Panics
@@ -45,9 +46,10 @@ pub fn new_profile_with_mnemonic(
 #[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
+    host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    Profile::from_device_factor_source(device_factor_source, host_info)
+    Profile::from_device_factor_source(device_factor_source, host_id, host_info)
 }
 
 #[uniffi::export]
@@ -147,20 +149,31 @@ mod uniffi_tests {
     #[test]
     fn test_new_with_mnemonic() {
         assert_eq!(
-            new_profile_with_mnemonic(Mnemonic::sample(), HostInfo::sample())
-                .bdfs()
-                .id,
-            Profile::new(Mnemonic::sample(), HostInfo::sample())
-                .bdfs()
-                .id,
+            new_profile_with_mnemonic(
+                Mnemonic::sample(),
+                HostId::sample(),
+                HostInfo::sample()
+            )
+            .bdfs()
+            .id,
+            Profile::new(
+                Mnemonic::sample(),
+                HostId::sample(),
+                HostInfo::sample()
+            )
+            .bdfs()
+            .id,
         );
     }
 
     #[test]
     fn new_private_hd() {
         let private = PrivateHierarchicalDeterministicFactorSource::sample();
-        let lhs =
-            new_profile(private.factor_source.clone(), HostInfo::sample());
+        let lhs = new_profile(
+            private.factor_source.clone(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
         assert_eq!(
             lhs.bdfs().factor_source_id(),
             private.factor_source.factor_source_id()

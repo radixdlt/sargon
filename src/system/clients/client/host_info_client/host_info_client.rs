@@ -21,7 +21,7 @@ impl HostInfoClient {
         )
     }
 
-    pub async fn resolve_host_info(&self, with_host_id: HostId) -> HostInfo {
+    pub async fn resolve_host_info(&self) -> HostInfo {
         let host_device_name = self.driver.host_device_name().await;
         let host_device_model = self.driver.host_device_model().await;
         let host_os_version = self.driver.host_device_system_version().await;
@@ -29,8 +29,6 @@ impl HostInfoClient {
         let host_vendor = self.driver.host_device_vendor().await;
 
         HostInfo {
-            id: with_host_id.id,
-            date: with_host_id.generated_at,
             description: DeviceInfoDescription::new(
                 host_device_name,
                 host_device_model,
@@ -53,15 +51,13 @@ mod tests {
     #[actix_rt::test]
     async fn test_resolve_host_info() {
         let sut = SUT::new(RustHostInfoDriver::new());
-        let host_id = HostId::sample();
-        let mut info = sut.resolve_host_info(host_id).await;
+        let mut info = sut.resolve_host_info().await;
         // Mutating this in order to keep tests stable
         info.host_app_version = "1.0.0".to_owned();
 
         pretty_assertions::assert_eq!(
             info,
             HostInfo::new(
-                host_id,
                 DeviceInfoDescription::new(
                     "Rosebud",
                     "Rust Sargon Unknown Device Model",

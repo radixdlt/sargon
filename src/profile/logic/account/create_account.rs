@@ -108,6 +108,7 @@ mod tests {
         let sut = Profile::from_device_factor_source(
             PrivateHierarchicalDeterministicFactorSource::sample()
                 .factor_source,
+            HostId::sample(),
             HostInfo::sample(),
         );
 

@@ -21,8 +21,12 @@ impl SargonOS {
     /// header
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
         debug!("Claiming profile, id: {}", &profile.id());
-        let host_info = self.host_info().await?;
-        Self::claim_provided_profile(profile, host_info.clone().into());
+        let host_id = self.host_id().await?;
+        let host_info = self.host_info().await;
+        let claiming_device_info =
+            DeviceInfo::new_from_info(&host_id, &host_info);
+
+        Self::claim_provided_profile(profile, claiming_device_info);
         info!(
             "Claimed profile, id: {}, with device info: {}",
             &profile.id(),
@@ -120,14 +124,15 @@ impl SargonOS {
     /// Returns `true` if the profile was changed (i.e. if claim was indeed needed),
     /// `false`` otherwise.
     pub async fn claim_active_profile(&self) -> Result<bool> {
-        let host_info = self.host_info().await?;
+        let host_id = self.host_id().await?;
+        let host_info = self.host_info().await;
 
         self.maybe_validate_ownership_update_profile_with(
             false, // we do NOT validate ownership, since this method is claiming
             |mut p| {
                 Ok(Self::claim_provided_profile(
                     &mut p,
-                    host_info.clone().into(),
+                    DeviceInfo::new_from_info(&host_id, &host_info),
                 ))
             },
         )
@@ -215,9 +220,9 @@ impl SargonOS {
         err_on_lack_of_ownership: bool,
     ) -> Result<bool> {
         debug!("Checking if profile.header.last_used_on_device is self.device_info");
-        let host_info = Self::get_host_info(clients).await?;
+        let host_id = Self::get_host_id(clients).await?;
         let last_used = profile.header.last_used_on_device.clone();
-        if last_used.id == host_info.id {
+        if last_used.id == host_id.id {
             debug!("Ownership check passed (profile.header.last_used_on_device == self.device_info)");
             Ok(true)
         } else {
@@ -231,7 +236,7 @@ impl SargonOS {
             if err_on_lack_of_ownership {
                 Err(CommonError::ProfileUsedOnOtherDevice {
                     other_device_id: last_used.id,
-                    this_device_id: host_info.id,
+                    this_device_id: host_id.id,
                 })
             } else {
                 // used by SargonOS::boot
@@ -481,8 +486,12 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let host_info = os.host_info().await.unwrap();
-        assert_eq!(os.profile().header.last_used_on_device, host_info.into());
+        let host_id = os.host_id().await.unwrap();
+        let host_info = os.host_info().await;
+        assert_eq!(
+            os.profile().header.last_used_on_device,
+            DeviceInfo::new_from_info(&host_id, &host_info)
+        );
     }
 
     #[actix_rt::test]
@@ -653,8 +662,12 @@ mod tests {
     ) {
         // ARRANGE
         let os = SUT::fast_boot().await;
-        let host_info = os.with_timeout(|x| x.host_info()).await.unwrap();
-        assert_eq!(&os.profile().header.creating_device, &host_info.into());
+        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
+        let host_info = os.with_timeout(|x| x.host_info()).await;
+        assert_eq!(
+            &os.profile().header.creating_device,
+            &DeviceInfo::new_from_info(&host_id, &host_info)
+        );
 
         // ACT
         os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
@@ -662,8 +675,12 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let host_info = os.with_timeout(|x| x.host_info()).await.unwrap();
-        assert_eq!(&os.profile().header.creating_device, &host_info.into());
+        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
+        let host_info = os.with_timeout(|x| x.host_info()).await;
+        assert_eq!(
+            &os.profile().header.creating_device,
+            &DeviceInfo::new_from_info(&host_id, &host_info)
+        );
     }
 
     #[actix_rt::test]

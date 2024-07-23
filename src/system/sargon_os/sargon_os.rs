@@ -102,7 +102,8 @@ impl SargonOS {
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
-        let host_info = Self::get_host_info(clients).await?;
+        let host_id = Self::get_host_id(clients).await?;
+        let host_info = Self::get_host_info(clients).await;
 
         let is_main = true;
         let private_bdfs = match mnemonic_with_passphrase {
@@ -129,24 +130,25 @@ impl SargonOS {
         debug!("Creating new Profile...");
         let profile = Profile::from_device_factor_source(
             private_bdfs.factor_source.clone(),
+            host_id,
             host_info,
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn host_info(&self) -> Result<HostInfo> {
-        Self::get_host_info(&self.clients).await
+    pub(crate) async fn host_id(&self) -> Result<HostId> {
+        Self::get_host_id(&self.clients).await
     }
 
-    pub(crate) async fn get_host_info(clients: &Clients) -> Result<HostInfo> {
-        debug!("Get Host info");
+    pub(crate) async fn get_host_id(clients: &Clients) -> Result<HostId> {
+        debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
 
-        let host_id = match secure_storage.load_host_id().await? {
+        match secure_storage.load_host_id().await? {
             Some(loaded_host_id) => {
                 debug!("Found saved host id: {:?}", &loaded_host_id);
-                loaded_host_id
+                Ok(loaded_host_id)
             }
             None => {
                 debug!("Found no saved host id, creating new.");
@@ -154,13 +156,18 @@ impl SargonOS {
                 debug!("Created new host id: {:?}", &new_host_id);
                 secure_storage.save_host_id(&new_host_id).await?;
                 debug!("Saved new host id");
-                new_host_id
+                Ok(new_host_id)
             }
-        };
+        }
+    }
 
-        let host_info = clients.host.resolve_host_info(host_id).await;
+    pub(crate) async fn host_info(&self) -> HostInfo {
+        Self::get_host_info(&self.clients).await
+    }
 
-        Ok(host_info)
+    pub(crate) async fn get_host_info(clients: &Clients) -> HostInfo {
+        debug!("Get Host info");
+        clients.host.resolve_host_info().await
     }
 }
 
@@ -281,7 +288,7 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        let host_info = os.with_timeout(|x| x.host_info()).await.unwrap();
+        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
 
         // ACT
         let add_res =
@@ -292,7 +299,7 @@ mod tests {
             add_res,
             Err(CommonError::ProfileUsedOnOtherDevice {
                 other_device_id: profile.header.last_used_on_device.id,
-                this_device_id: host_info.id
+                this_device_id: host_id.id
             })
         );
     }
@@ -302,7 +309,11 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(Mnemonic::sample(), HostInfo::sample());
+        let profile = Profile::new(
+            Mnemonic::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
@@ -340,7 +351,11 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(Mnemonic::sample(), HostInfo::sample());
+        let profile = Profile::new(
+            Mnemonic::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();

@@ -155,7 +155,7 @@ impl SargonOS {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
     ) -> Result<DeviceFactorSource> {
-        let host_info = self.host_info().await?;
+        let host_info = self.host_info().await;
         let factor_source = match factor_type {
             DeviceFactorSourceType::Olympia => DeviceFactorSource::olympia(
                 &mnemonic_with_passphrase,

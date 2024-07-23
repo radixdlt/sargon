@@ -25,6 +25,7 @@ class ProfileTest : SampleTestable<Profile> {
 
     @Test
     fun testInit() {
+        val hostId = HostId.sample.other()
         val hostInfo = HostInfo.sample.other()
         val hdFactorSource = PrivateHierarchicalDeterministicFactorSource.init(
             isMainBDFS = true,
@@ -34,6 +35,7 @@ class ProfileTest : SampleTestable<Profile> {
 
         val profile = Profile.init(
             deviceFactorSource = hdFactorSource.factorSource.asGeneral(),
+            hostId = hostId,
             hostInfo = hostInfo
         )
 

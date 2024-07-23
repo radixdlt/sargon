@@ -97,13 +97,15 @@ impl Profile {
     /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
     pub fn from_device_factor_source(
         device_factor_source: DeviceFactorSource,
-        creating_device: HostInfo,
+        host_id: HostId,
+        host_info: HostInfo,
     ) -> Self {
         if !device_factor_source.is_main_bdfs() {
             panic!("DeviceFactorSource is not main BDFS");
         }
         let bdfs = device_factor_source;
-        let header = Header::new(creating_device.into());
+        let header =
+            Header::new(DeviceInfo::new_from_info(&host_id, &host_info));
         Self::with(
             header,
             FactorSources::with_bdfs(bdfs),
@@ -122,6 +124,7 @@ impl Profile {
     /// "empty" (no Accounts, Personas etc).
     pub fn from_mnemonic_with_passphrase(
         mnemonic_with_passphrase: MnemonicWithPassphrase,
+        host_id: HostId,
         host_info: HostInfo,
     ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
@@ -129,7 +132,7 @@ impl Profile {
             &mnemonic_with_passphrase,
             &host_info,
         );
-        Self::from_device_factor_source(bdfs, host_info)
+        Self::from_device_factor_source(bdfs, host_id, host_info)
     }
 
     /// Creates a new Profile from the `Mnemonic` (no passphrase) and `DeviceInfo`,
@@ -138,9 +141,14 @@ impl Profile {
     ///
     /// The Profile is initialized with a Mainnet ProfileNetwork, which is
     /// "empty" (no Accounts, Personas etc).
-    pub fn new(mnemonic: Mnemonic, host_info: HostInfo) -> Self {
+    pub fn new(
+        mnemonic: Mnemonic,
+        host_id: HostId,
+        host_info: HostInfo,
+    ) -> Self {
         Self::from_mnemonic_with_passphrase(
             MnemonicWithPassphrase::new(mnemonic),
+            host_id,
             host_info,
         )
     }
@@ -362,7 +370,8 @@ mod tests {
 
     #[test]
     fn new_creates_empty_mainnet_network() {
-        let sut = SUT::new(Mnemonic::sample(), HostInfo::sample());
+        let sut =
+            SUT::new(Mnemonic::sample(), HostId::sample(), HostInfo::sample());
         assert_eq!(
             sut.networks,
             ProfileNetworks::just(ProfileNetwork::new_empty_on(
@@ -418,6 +427,7 @@ mod tests {
     fn new_from_non_main_bdfs_panics() {
         let _ = SUT::from_device_factor_source(
             DeviceFactorSource::sample_other(),
+            HostId::sample(),
             HostInfo::sample(),
         );
     }
@@ -599,7 +609,13 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| SUT::new(Mnemonic::generate_new(), HostInfo::sample()))
+            .map(|_| {
+                SUT::new(
+                    Mnemonic::generate_new(),
+                    HostId::sample(),
+                    HostInfo::sample(),
+                )
+            })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
