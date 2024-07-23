@@ -150,10 +150,10 @@ impl HomeCardsManager {
         f(&mut write_guard);
 
         let updated_cards = write_guard.clone();
-        updated_cards.sort();
+        let sorted_cards = updated_cards.sort();
 
-        self.observer.handle_cards_update(updated_cards.clone());
-        Ok(updated_cards)
+        self.observer.handle_cards_update(sorted_cards.clone());
+        Ok(sorted_cards)
     }
 
     fn insert_cards(
@@ -347,8 +347,11 @@ mod tests {
 
         manager.wallet_created().await.unwrap();
 
-        let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+        let handled_cards =
+            observer.handled_cards.lock().unwrap().clone().unwrap();
+        pretty_assertions::assert_eq!(handled_cards, expected_cards);
+        pretty_assertions::assert_eq!(handled_cards[0], expected_cards[0]);
+        pretty_assertions::assert_eq!(handled_cards[1], expected_cards[1]);
     }
 
     #[actix_rt::test]
