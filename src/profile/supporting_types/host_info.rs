@@ -14,7 +14,7 @@ pub struct HostInfo {
     /// device.
     pub date: Timestamp,
 
-    /// A short description of the device, we devices should
+    /// A short description of the device. The host should
     /// read the device model and a given name from the device
     /// if they are able to.
     pub description: DeviceInfoDescription,
