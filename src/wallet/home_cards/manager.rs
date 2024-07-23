@@ -71,8 +71,7 @@ impl HomeCardsManager {
     pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([
             HomeCard::Connector,
-            // TODO: Uncomment when RadQuest is public
-            // HomeCard::StartRadQuest,
+            HomeCard::StartRadQuest,
         ]);
         let updated_cards = self
             .update_cards(|write_guard| {
@@ -342,8 +341,7 @@ mod tests {
             observer.clone(),
         );
         let expected_cards = HomeCards::from_iter(vec![
-            // TODO: Uncomment when RadQuest is public
-            // HomeCard::StartRadQuest,
+            HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
 
@@ -370,8 +368,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_wallet_created_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![
-            // TODO: Uncomment when RadQuest is public
-            // HomeCard::StartRadQuest,
+            HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
