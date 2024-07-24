@@ -54,7 +54,15 @@ impl ThirdPartyDepositsDelta {
                         .clone()
                         .unwrap_or_default()
                         .into_iter()
-                        .any(|w| w.exception_rule == x.exception_rule)
+                        .any(|w| {
+                            if w.id() == x.id() {
+                                // Rule update for the same asset
+                                w.exception_rule == x.exception_rule
+                            } else {
+                                // New asset
+                                false
+                            }
+                        })
                 })
                 .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect(),
@@ -282,6 +290,39 @@ mod tests {
         assert_eq!(
             sut.asset_exceptions_to_add_or_update,
             asset_exceptions
+                .into_iter()
+                .map(ScryptoAccountSetResourcePreferenceInput::from)
+                .collect_vec()
+        );
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
+    }
+
+    #[test]
+    fn delta_asset_exceptions_to_add_for_same_rule() {
+        let same_rule = DepositAddressExceptionRule::Allow;
+        let existing_exception =
+            AssetException::new(ResourceAddress::sample(), same_rule);
+        let new_exception =
+            AssetException::new(ResourceAddress::sample_other(), same_rule);
+
+        let sut = SUT::new(
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                [existing_exception],
+                [],
+            ),
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                [existing_exception, new_exception],
+                [],
+            ),
+        );
+        assert_eq!(sut.deposit_rule, None);
+        assert_eq!(
+            sut.asset_exceptions_to_add_or_update,
+            [new_exception]
                 .into_iter()
                 .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect_vec()

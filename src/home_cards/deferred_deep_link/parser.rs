@@ -48,11 +48,9 @@ impl Parser {
     ) -> HomeCards {
         let mut result = Vec::new();
 
-        match value.special_dapp {
-            Some(DeferredDeepLinkSpecialDapp::RadQuest) => {
-                result.push(HomeCard::ContinueRadQuest)
-            }
-            _ => result.push(HomeCard::StartRadQuest),
+        if let Some(DeferredDeepLinkSpecialDapp::RadQuest) = value.special_dapp
+        {
+            result.push(HomeCard::ContinueRadQuest)
         }
 
         if let Some(dapp_referrer) = value.dapp_referrer {
@@ -207,7 +205,7 @@ mod tests_transform {
         );
         let req = sut.transform_onboarding_deep_link_value(value);
         let result = timeout(MAX, req).await.unwrap();
-        let expected_result = HomeCards::from_iter([HomeCard::StartRadQuest]);
+        let expected_result = HomeCards::new();
         assert_eq!(result, expected_result);
     }
 
@@ -222,12 +220,9 @@ mod tests_transform {
         );
         let req = sut.transform_onboarding_deep_link_value(value);
         let result = timeout(MAX, req).await.unwrap();
-        let expected_result = HomeCards::from_iter([
-            HomeCard::StartRadQuest,
-            HomeCard::Dapp {
-                icon_url: (Some(icon_url)),
-            },
-        ]);
+        let expected_result = HomeCards::from_iter([HomeCard::Dapp {
+            icon_url: (Some(icon_url)),
+        }]);
         assert_eq!(result, expected_result);
     }
 
@@ -243,10 +238,8 @@ mod tests_transform {
         );
         let req = sut.transform_onboarding_deep_link_value(value);
         let result = timeout(MAX, req).await.unwrap();
-        let expected_result = HomeCards::from_iter([
-            HomeCard::StartRadQuest,
-            HomeCard::Dapp { icon_url: (None) },
-        ]);
+        let expected_result =
+            HomeCards::from_iter([HomeCard::Dapp { icon_url: (None) }]);
         assert_eq!(result, expected_result);
     }
 
@@ -260,10 +253,8 @@ mod tests_transform {
         );
         let req = sut.transform_onboarding_deep_link_value(value);
         let result = timeout(MAX, req).await.unwrap();
-        let expected_result = HomeCards::from_iter([
-            HomeCard::StartRadQuest,
-            HomeCard::Dapp { icon_url: (None) },
-        ]);
+        let expected_result =
+            HomeCards::from_iter([HomeCard::Dapp { icon_url: (None) }]);
         assert_eq!(result, expected_result);
     }
 

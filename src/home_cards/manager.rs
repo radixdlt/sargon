@@ -71,8 +71,7 @@ impl HomeCardsManager {
     pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([
             HomeCard::Connector,
-            // TODO: Uncomment when RadQuest is public
-            // HomeCard::StartRadQuest,
+            HomeCard::StartRadQuest,
         ]);
         let updated_cards = self
             .update_cards(|write_guard| {
@@ -99,6 +98,19 @@ impl HomeCardsManager {
         self.save_cards(updated_cards).await
     }
 
+    /// Marks the wallet restoration.
+    /// Ensures only the expected `HomeCards` remain in `HomeCardsStorage` - currently none.
+    /// Notifies `HomeCardsObserver`.
+    #[uniffi::method]
+    pub async fn wallet_restored(&self) -> Result<()> {
+        let updated_cards = self
+            .update_cards(|write_guard| {
+                **write_guard = HomeCards::new();
+            })
+            .await?;
+        self.save_cards(updated_cards).await
+    }
+
     /// Dismisses a specified `HomeCard` by removing it from `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
@@ -106,6 +118,18 @@ impl HomeCardsManager {
         let updated_cards = self
             .update_cards(|write_guard| {
                 write_guard.remove_id(&card);
+            })
+            .await?;
+        self.save_cards(updated_cards).await
+    }
+
+    /// Clears the home cards from the `HomeCardsStorage`.
+    /// Notifies `HomeCardsObserver`.
+    #[uniffi::method]
+    pub async fn wallet_reset(&self) -> Result<()> {
+        let updated_cards = self
+            .update_cards(|write_guard| {
+                **write_guard = HomeCards::new();
             })
             .await?;
         self.save_cards(updated_cards).await
@@ -126,10 +150,10 @@ impl HomeCardsManager {
         f(&mut write_guard);
 
         let updated_cards = write_guard.clone();
-        updated_cards.sort();
+        let sorted_cards = updated_cards.sort();
 
-        self.observer.handle_cards_update(updated_cards.clone());
-        Ok(updated_cards)
+        self.observer.handle_cards_update(sorted_cards.clone());
+        Ok(sorted_cards)
     }
 
     fn insert_cards(
@@ -317,15 +341,17 @@ mod tests {
             observer.clone(),
         );
         let expected_cards = HomeCards::from_iter(vec![
-            // TODO: Uncomment when RadQuest is public
-            // HomeCard::StartRadQuest,
+            HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
 
         manager.wallet_created().await.unwrap();
 
-        let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+        let handled_cards =
+            observer.handled_cards.lock().unwrap().clone().unwrap();
+        pretty_assertions::assert_eq!(handled_cards, expected_cards);
+        pretty_assertions::assert_eq!(handled_cards[0], expected_cards[0]);
+        pretty_assertions::assert_eq!(handled_cards[1], expected_cards[1]);
     }
 
     #[actix_rt::test]
@@ -345,8 +371,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_wallet_created_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![
-            // TODO: Uncomment when RadQuest is public
-            // HomeCard::StartRadQuest,
+            HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
@@ -433,6 +458,31 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_deferred_deep_link_received_then_wallet_restored() {
+        let deep_link_cards = HomeCards::from_iter(vec![
+            HomeCard::Dapp { icon_url: None },
+            HomeCard::ContinueRadQuest,
+        ]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::init(
+            Arc::new(MockDeferredDeepLinkParser::succeeding(
+                deep_link_cards.clone(),
+            )),
+            Arc::new(MockHomeCardsStorage::new_empty()),
+            observer.clone(),
+        );
+
+        manager
+            .deferred_deep_link_received("encoded_value".to_string())
+            .await
+            .unwrap();
+        manager.wallet_restored().await.unwrap();
+
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
+    }
+
+    #[actix_rt::test]
     async fn test_card_dismissed() {
         let initial_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
@@ -473,5 +523,28 @@ mod tests {
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards.unwrap(), initial_cards);
+    }
+
+    #[actix_rt::test]
+    async fn test_wallet_reset() {
+        let initial_cards = HomeCards::from_iter(vec![
+            HomeCard::ContinueRadQuest,
+            HomeCard::Connector,
+        ]);
+        let observer = Arc::new(MockHomeCardsObserver::new());
+        let manager = SUT::new(
+            Arc::new(MockNetworkingDriver::new_always_failing()),
+            NetworkID::Stokenet,
+            Arc::new(MockHomeCardsStorage::new_with_stored_cards(
+                initial_cards.clone(),
+            )),
+            observer.clone(),
+        );
+
+        manager.bootstrap().await.unwrap();
+        manager.wallet_reset().await.unwrap();
+
+        let handled_cards = observer.handled_cards.lock().unwrap().clone();
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
     }
 }
