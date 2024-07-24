@@ -11,8 +11,8 @@ extension AppleHostInfoDriver {
 	}
 }
 
-class HostInfoDriverTests: DriverTest<AppleHostInfoDriver> {
-	
+class AppleHostInfoDriverTests: DriverTest<AppleHostInfoDriver> {
+
 	func test_app_version() async throws {
 		let sut = SUT()
 		let info = await sut.hostAppVersion()
@@ -25,10 +25,10 @@ class HostInfoDriverTests: DriverTest<AppleHostInfoDriver> {
 		XCTAssertFalse(info.isEmpty)
 	}
 	
-	func test_device_system_not_empty() async throws {
+	func test_device_os_name_not_empty() async throws {
 		let sut = SUT()
-		let info = await sut.hostDeviceSystemVersion()
-		XCTAssertFalse(info.isEmpty)
+		let info = await sut.hostOs()
+		XCTAssertFalse(info.name().isEmpty)
 	}
 	
 	func test_device_model_not_empty() async throws {

@@ -1,6 +1,5 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.DeviceInfo
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.HostId
 import com.radixdlt.sargon.HostInfo

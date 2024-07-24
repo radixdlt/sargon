@@ -79,9 +79,9 @@ impl DeviceFactorSourceHint {
         Self::new(
             description.name,
             description.model,
-            host_info.host_os_version.clone(),
+            host_info.host_os.version(),
             host_info.host_app_version.clone(),
-            host_info.host_vendor.clone(),
+            host_info.host_os.vendor(),
             word_count,
         )
     }

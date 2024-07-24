@@ -82,14 +82,16 @@ impl DeviceInfo {
         }
     }
 
+    /// Instantiates a new `DeviceInfo` with information retrieved from host
+    /// like `host_id` and `host_info`
     pub fn new_from_info(host_id: &HostId, host_info: &HostInfo) -> Self {
         Self::new(
             host_id.id,
             host_id.generated_at,
             host_info.description.clone(),
-            host_info.host_os_version.clone(),
+            host_info.host_os.version(),
             host_info.host_app_version.clone(),
-            host_info.host_vendor.clone(),
+            host_info.host_os.vendor().clone(),
         )
     }
 }
@@ -204,9 +206,9 @@ mod tests {
                 host_id.id,
                 host_id.generated_at,
                 host_info.description,
-                host_info.host_os_version,
+                host_info.host_os.version(),
                 host_info.host_app_version,
-                host_info.host_vendor
+                host_info.host_os.vendor()
             )
         )
     }

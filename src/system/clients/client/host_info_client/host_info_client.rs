@@ -12,30 +12,27 @@ impl HostInfoClient {
 
     pub(crate) async fn summary(&self) -> String {
         let host_model = self.driver.host_device_model().await;
-        let host_os_version = self.driver.host_device_system_version().await;
+        let host_os = self.driver.host_os().await;
         let host_app_version = self.driver.host_app_version().await;
-        let host_vendor = self.driver.host_device_vendor().await;
         format!(
-            "App v{} running in host OS: {} on device: {} ({})",
-            host_app_version, host_os_version, host_model, host_vendor
+            "App v{} running in host OS: {} on device: {}",
+            host_app_version, host_os, host_model
         )
     }
 
     pub async fn resolve_host_info(&self) -> HostInfo {
         let host_device_name = self.driver.host_device_name().await;
         let host_device_model = self.driver.host_device_model().await;
-        let host_os_version = self.driver.host_device_system_version().await;
         let host_app_version = self.driver.host_app_version().await;
-        let host_vendor = self.driver.host_device_vendor().await;
+        let host_os = self.driver.host_os().await;
 
         HostInfo {
             description: DeviceInfoDescription::new(
                 host_device_name,
                 host_device_model,
             ),
-            host_os_version,
+            host_os,
             host_app_version,
-            host_vendor,
         }
     }
 }
@@ -62,9 +59,8 @@ mod tests {
                     "Rosebud",
                     "Rust Sargon Unknown Device Model",
                 ),
-                "macos",
-                "1.0.0",
-                "Rust Sargon Unknown Vendor",
+                HostOS::other("macos", "Apple", "14.5"),
+                "1.0.0"
             )
         );
     }

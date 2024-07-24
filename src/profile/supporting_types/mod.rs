@@ -16,6 +16,8 @@ mod host_id;
 mod host_id_uniffi_fn;
 mod host_info;
 mod host_info_uniffi_fn;
+mod host_os;
+mod host_os_uniffi_fn;
 mod is_network_aware;
 mod on_same_network_validating;
 
@@ -37,5 +39,6 @@ pub use host_id::*;
 pub use host_id_uniffi_fn::*;
 pub use host_info::*;
 pub use host_info_uniffi_fn::*;
+pub use host_os::*;
 pub use is_network_aware::*;
 pub use on_same_network_validating::*;

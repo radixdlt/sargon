@@ -21,17 +21,16 @@ extension AppleHostInfoDriver {
 	nonisolated public func hostAppVersion() async -> String {
 		await self.appVersion
 	}
-	
-	public func hostDeviceVendor() async -> String {
-		"Apple"
-	}
 }
 
 #if canImport(UIKit)
 import UIKit
 extension AppleHostInfoDriver: HostInfoDriver {
 	
-	
+	public func hostOs() async -> HostOs {
+		return HostOs.ios(version: UIDevice.current.systemVersion)
+	}
+
 	nonisolated public func hostDeviceName() async -> String {
 		await UIDevice.current.name
 	}
@@ -47,10 +46,10 @@ extension AppleHostInfoDriver: HostInfoDriver {
 #else
 
 extension AppleHostInfoDriver: HostInfoDriver {
-
-	nonisolated public func hostDeviceSystemVersion() async -> String {
+	public func hostOs() async -> HostOs {
 		let info = ProcessInfo.processInfo.operatingSystemVersion
-		return "\(info.majorVersion).\(info.minorVersion).\(info.patchVersion)"
+		let version =  "\(info.majorVersion).\(info.minorVersion).\(info.patchVersion)"
+		return HostOs.ios(version: version)
 	}
 	
 	nonisolated public func hostDeviceModel() async -> String {
