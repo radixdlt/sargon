@@ -28,22 +28,22 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
     pub fn new_olympia_with_mnemonic_with_passphrase(
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        device_info: &DeviceInfo,
+        host_info: &HostInfo,
     ) -> Self {
         let device_factor_source =
-            DeviceFactorSource::olympia(&mnemonic_with_passphrase, device_info);
+            DeviceFactorSource::olympia(&mnemonic_with_passphrase, host_info);
         Self::new(mnemonic_with_passphrase, device_factor_source)
     }
 
     pub fn new_babylon_with_mnemonic_with_passphrase(
         is_main: bool,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        device_info: &DeviceInfo,
+        host_info: &HostInfo,
     ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
             is_main,
             &mnemonic_with_passphrase,
-            device_info,
+            host_info,
         );
         Self::new(mnemonic_with_passphrase, bdfs)
     }
@@ -52,7 +52,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         is_main: bool,
         entropy: BIP39Entropy,
         passphrase: BIP39Passphrase,
-        device_info: &DeviceInfo,
+        host_info: &HostInfo,
     ) -> Self {
         let mnemonic = Mnemonic::from_entropy(entropy);
         let mnemonic_with_passphrase =
@@ -60,20 +60,17 @@ impl PrivateHierarchicalDeterministicFactorSource {
         Self::new_babylon_with_mnemonic_with_passphrase(
             is_main,
             mnemonic_with_passphrase,
-            device_info,
+            host_info,
         )
     }
 
-    pub fn generate_new_babylon(
-        is_main: bool,
-        device_info: &DeviceInfo,
-    ) -> Self {
+    pub fn generate_new_babylon(is_main: bool, host_info: &HostInfo) -> Self {
         let mnemonic = Mnemonic::generate_new();
         let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
         Self::new_babylon_with_mnemonic_with_passphrase(
             is_main,
             mnemonic_with_passphrase,
-            device_info,
+            host_info,
         )
     }
 }
@@ -172,7 +169,7 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| SUT::generate_new_babylon(true, &DeviceInfo::sample()))
+            .map(|_| SUT::generate_new_babylon(true, &HostInfo::sample()))
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }

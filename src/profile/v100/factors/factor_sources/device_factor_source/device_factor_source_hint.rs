@@ -74,19 +74,14 @@ impl DeviceFactorSourceHint {
         }
     }
 
-    pub fn with_info(
-        device_info: &DeviceInfo,
-        word_count: BIP39WordCount,
-    ) -> Self {
-        // FIXME: Remove this, use `device_info.description` directly when its type has changed from String -> DeviceInfoDescription
-        let description =
-            DeviceInfoDescription::from(device_info.description.as_ref());
+    pub fn with_info(host_info: &HostInfo, word_count: BIP39WordCount) -> Self {
+        let description = host_info.description.clone();
         Self::new(
-            description.name.clone(),
-            description.model.clone(),
-            device_info.system_version.clone(),
-            device_info.host_app_version.clone(),
-            device_info.host_vendor.clone(),
+            description.name,
+            description.model,
+            host_info.host_os.version(),
+            host_info.host_app_version.clone(),
+            host_info.host_os.vendor(),
             word_count,
         )
     }

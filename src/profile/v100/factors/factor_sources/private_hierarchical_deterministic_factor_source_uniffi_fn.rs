@@ -4,14 +4,14 @@ use crate::prelude::*;
 pub fn new_private_hd_factor_source_babylon(
     is_main: bool,
     entropy: NonEmptyMax32Bytes,
-    device_info: &DeviceInfo,
+    host_info: &HostInfo,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
     BIP39Entropy::try_from(entropy).map(|entropy| {
         PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
             is_main,
             entropy,
             BIP39Passphrase::default(),
-            device_info,
+            host_info,
         )
     })
 }
@@ -20,17 +20,17 @@ pub fn new_private_hd_factor_source_babylon(
 pub fn new_private_hd_factor_source_babylon_from_mnemonic_with_passphrase(
     is_main: bool,
     mnemonic_with_passphrase: MnemonicWithPassphrase,
-    device_info: &DeviceInfo,
+    host_info: &HostInfo,
 ) -> PrivateHierarchicalDeterministicFactorSource {
-    PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mnemonic_with_passphrase, device_info)
+    PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mnemonic_with_passphrase, host_info)
 }
 
 #[uniffi::export]
 pub fn new_private_hd_factor_source_olympia_from_mnemonic_with_passphrase(
     mnemonic_with_passphrase: MnemonicWithPassphrase,
-    device_info: &DeviceInfo,
+    host_info: &HostInfo,
 ) -> PrivateHierarchicalDeterministicFactorSource {
-    PrivateHierarchicalDeterministicFactorSource::new_olympia_with_mnemonic_with_passphrase(mnemonic_with_passphrase, device_info)
+    PrivateHierarchicalDeterministicFactorSource::new_olympia_with_mnemonic_with_passphrase(mnemonic_with_passphrase, host_info)
 }
 
 #[uniffi::export]
@@ -72,7 +72,7 @@ mod tests {
         let private: SUT = new_private_hd_factor_source_babylon(
             true,
             Entropy32Bytes::new([0xff; 32]).into(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         )
         .unwrap();
         assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
@@ -85,7 +85,7 @@ mod tests {
             new_private_hd_factor_source_babylon_from_mnemonic_with_passphrase(
                 true,
                 MnemonicWithPassphrase::sample(),
-                &DeviceInfo::sample(),
+                &HostInfo::sample(),
             );
         assert!(&sut.factor_source.supports_babylon());
         assert!(!&sut.factor_source.supports_olympia());
@@ -98,7 +98,7 @@ mod tests {
             new_private_hd_factor_source_babylon_from_mnemonic_with_passphrase(
                 true,
                 MnemonicWithPassphrase::sample(),
-                &DeviceInfo::sample(),
+                &HostInfo::sample(),
             );
         assert!(sut.factor_source.is_main_bdfs());
     }
@@ -109,7 +109,7 @@ mod tests {
         let sut =
             new_private_hd_factor_source_olympia_from_mnemonic_with_passphrase(
                 MnemonicWithPassphrase::sample(),
-                &DeviceInfo::sample(),
+                &HostInfo::sample(),
             );
         assert!(&sut.factor_source.supports_olympia());
         assert!(!&sut.factor_source.supports_babylon());

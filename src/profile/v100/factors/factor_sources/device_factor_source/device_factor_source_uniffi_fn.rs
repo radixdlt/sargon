@@ -14,17 +14,17 @@ pub fn new_device_factor_source_sample_other() -> DeviceFactorSource {
 pub fn new_device_factor_source_babylon(
     is_main: bool,
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
-    device_info: &DeviceInfo,
+    host_info: &HostInfo,
 ) -> DeviceFactorSource {
-    DeviceFactorSource::babylon(is_main, mnemonic_with_passphrase, device_info)
+    DeviceFactorSource::babylon(is_main, mnemonic_with_passphrase, host_info)
 }
 
 #[uniffi::export]
 pub fn new_device_factor_source_olympia(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
-    device_info: &DeviceInfo,
+    host_info: &HostInfo,
 ) -> DeviceFactorSource {
-    DeviceFactorSource::olympia(mnemonic_with_passphrase, device_info)
+    DeviceFactorSource::olympia(mnemonic_with_passphrase, host_info)
 }
 
 #[uniffi::export]
@@ -45,7 +45,7 @@ mod tests {
     fn test_new_olympia() {
         let olympia = new_device_factor_source_olympia(
             &MnemonicWithPassphrase::sample(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
 
         assert!(factor_source_supports_olympia(&olympia.clone().into()));
@@ -57,7 +57,7 @@ mod tests {
         let babylon = new_device_factor_source_babylon(
             true,
             &MnemonicWithPassphrase::sample(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
 
         assert!(factor_source_supports_babylon(&babylon.clone().into()));
@@ -69,7 +69,7 @@ mod tests {
         let babylon = new_device_factor_source_babylon(
             false,
             &MnemonicWithPassphrase::sample(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
 
         assert!(!device_factor_source_is_main_bdfs(&babylon));
@@ -80,7 +80,7 @@ mod tests {
         let babylon = new_device_factor_source_babylon(
             true,
             &MnemonicWithPassphrase::sample(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
 
         assert!(device_factor_source_is_main_bdfs(&babylon));

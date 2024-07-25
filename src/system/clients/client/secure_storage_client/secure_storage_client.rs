@@ -161,29 +161,24 @@ impl SecureStorageClient {
     }
 
     //======
-    // DeviceInfo CR(U)D
+    // HostId CR(U)D
     //======
 
-    /// Loads the  DeviceInfo if any
-    pub async fn load_device_info(&self) -> Result<Option<DeviceInfo>> {
-        trace!("Loading device info");
-        self.load(SecureStorageKey::DeviceInfo).await
+    /// Loads the HostId if any
+    pub async fn load_host_id(&self) -> Result<Option<HostId>> {
+        trace!("Loading host id");
+        self.load(SecureStorageKey::HostID).await
     }
 
     /// Saves [`DeviceInfo`]
-    pub async fn save_device_info(
-        &self,
-        device_info: &DeviceInfo,
-    ) -> Result<()> {
-        debug!("Saving new device info: {:?}", device_info);
-        self.save(SecureStorageKey::DeviceInfo, device_info)
+    pub async fn save_host_id(&self, host_id: &HostId) -> Result<()> {
+        debug!("Saving new host id: {:?}", host_id);
+        self.save(SecureStorageKey::HostID, host_id)
             .await
-            .inspect(|_| debug!("Saved new device info."))
+            .inspect(|_| debug!("Saved new host id."))
             .map_err(|e| {
-                error!(
-                    "Failed to save device info to secure storage - error {e}",
-                );
-                CommonError::UnableToSaveDeviceInfoToSecureStorage
+                error!("Failed to save host id to secure storage - error {e}",);
+                CommonError::UnableToSaveHostIdToSecureStorage
             })
     }
 
@@ -457,11 +452,11 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn save_fail_save_device_info() {
+    async fn save_fail_save_host_id() {
         let sut = SecureStorageClient::always_fail();
         assert_eq!(
-            sut.save_device_info(&DeviceInfo::sample()).await,
-            Err(CommonError::UnableToSaveDeviceInfoToSecureStorage)
+            sut.save_host_id(&HostId::sample()).await,
+            Err(CommonError::UnableToSaveHostIdToSecureStorage)
         );
     }
 }

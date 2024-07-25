@@ -102,14 +102,15 @@ impl SargonOS {
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
-        let device_info = Self::get_device_info(clients).await?;
+        let host_id = Self::get_host_id(clients).await?;
+        let host_info = Self::get_host_info(clients).await;
 
         let is_main = true;
         let private_bdfs = match mnemonic_with_passphrase {
             Some(mwp) => {
                 debug!("Using specified MnemonicWithPassphrase, perhaps we are running in at test...");
 
-                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &device_info)
+                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &host_info)
             }
             None => {
                 debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
@@ -120,7 +121,7 @@ impl SargonOS {
                     is_main,
                     entropy,
                     BIP39Passphrase::default(),
-                    &device_info
+                    &host_info
                 )
             }
         };
@@ -129,38 +130,44 @@ impl SargonOS {
         debug!("Creating new Profile...");
         let profile = Profile::from_device_factor_source(
             private_bdfs.factor_source.clone(),
-            device_info,
+            host_id,
+            host_info,
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn device_info(&self) -> Result<DeviceInfo> {
-        Self::get_device_info(&self.clients).await
+    pub(crate) async fn host_id(&self) -> Result<HostId> {
+        Self::get_host_id(&self.clients).await
     }
 
-    pub(crate) async fn get_device_info(
-        clients: &Clients,
-    ) -> Result<DeviceInfo> {
-        debug!("Get device info");
+    pub(crate) async fn get_host_id(clients: &Clients) -> Result<HostId> {
+        debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
 
-        let device_info = match secure_storage.load_device_info().await? {
-            Some(loaded_device_info) => {
-                debug!("Found saved device info: {:?}", &loaded_device_info);
-                loaded_device_info
+        match secure_storage.load_host_id().await? {
+            Some(loaded_host_id) => {
+                debug!("Found saved host id: {:?}", &loaded_host_id);
+                Ok(loaded_host_id)
             }
             None => {
-                debug!("Found no saved device info, creating new.");
-                let new_device_info = clients.host.create_device_info().await;
-                debug!("Created new device info: {:?}", &new_device_info);
-                secure_storage.save_device_info(&new_device_info).await?;
-                debug!("Saved new device info");
-                new_device_info
+                debug!("Found no saved host id, creating new.");
+                let new_host_id = HostId::generate_new();
+                debug!("Created new host id: {:?}", &new_host_id);
+                secure_storage.save_host_id(&new_host_id).await?;
+                debug!("Saved new host id");
+                Ok(new_host_id)
             }
-        };
+        }
+    }
 
-        Ok(device_info)
+    pub(crate) async fn host_info(&self) -> HostInfo {
+        Self::get_host_info(&self.clients).await
+    }
+
+    pub(crate) async fn get_host_info(clients: &Clients) -> HostInfo {
+        debug!("Get Host info");
+        clients.host.resolve_host_info().await
     }
 }
 
@@ -211,9 +218,11 @@ impl SargonOS {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use actix_rt::time::timeout;
     use std::time::Duration;
+
+    use actix_rt::time::timeout;
+
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -279,7 +288,7 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
 
         // ACT
         let add_res =
@@ -290,7 +299,7 @@ mod tests {
             add_res,
             Err(CommonError::ProfileUsedOnOtherDevice {
                 other_device_id: profile.header.last_used_on_device.id,
-                this_device_id: device_info.id
+                this_device_id: host_id.id
             })
         );
     }
@@ -300,7 +309,11 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(Mnemonic::sample(), DeviceInfo::sample());
+        let profile = Profile::new(
+            Mnemonic::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
@@ -338,7 +351,11 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(Mnemonic::sample(), DeviceInfo::sample());
+        let profile = Profile::new(
+            Mnemonic::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();

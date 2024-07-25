@@ -10,33 +10,27 @@ import SargonUniFFI
 
 /// An `HostInfoDriver` actor being able to read host info, i.e
 /// details about the iPhone the app is running on.
-public final actor HostInfo {
+public final actor AppleHostInfoDriver {
 	fileprivate var appVersion: String
 	public init(appVersion: String) {
 		self.appVersion = appVersion
 	}
 }
 
-extension HostInfo {
+extension AppleHostInfoDriver {
 	nonisolated public func hostAppVersion() async -> String {
 		await self.appVersion
-	}
-	/// We cannot read a stable device if on iOS. We return `nil` so that Rust Sargon can generate
-	/// and save a device identifier for us.
-	public func hostDeviceId() async -> DeviceId? {
-		nil
-	}
-	
-	public func hostDeviceVendor() async -> String {
-		"Apple"
 	}
 }
 
 #if canImport(UIKit)
 import UIKit
-extension HostInfo: HostInfoDriver {
+extension AppleHostInfoDriver: HostInfoDriver {
 	
-	
+	public func hostOs() async -> HostOs {
+		return HostOs.ios(version: UIDevice.current.systemVersion)
+	}
+
 	nonisolated public func hostDeviceName() async -> String {
 		await UIDevice.current.name
 	}
@@ -51,11 +45,11 @@ extension HostInfo: HostInfoDriver {
 }
 #else
 
-extension HostInfo: HostInfoDriver {
-
-	nonisolated public func hostDeviceSystemVersion() async -> String {
+extension AppleHostInfoDriver: HostInfoDriver {
+	public func hostOs() async -> HostOs {
 		let info = ProcessInfo.processInfo.operatingSystemVersion
-		return "\(info.majorVersion).\(info.minorVersion).\(info.patchVersion)"
+		let version =  "\(info.majorVersion).\(info.minorVersion).\(info.patchVersion)"
+		return HostOs.ios(version: version)
 	}
 	
 	nonisolated public func hostDeviceModel() async -> String {

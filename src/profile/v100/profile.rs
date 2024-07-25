@@ -97,13 +97,15 @@ impl Profile {
     /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
     pub fn from_device_factor_source(
         device_factor_source: DeviceFactorSource,
-        creating_device: DeviceInfo,
+        host_id: HostId,
+        host_info: HostInfo,
     ) -> Self {
         if !device_factor_source.is_main_bdfs() {
             panic!("DeviceFactorSource is not main BDFS");
         }
         let bdfs = device_factor_source;
-        let header = Header::new(creating_device);
+        let header =
+            Header::new(DeviceInfo::new_from_info(&host_id, &host_info));
         Self::with(
             header,
             FactorSources::with_bdfs(bdfs),
@@ -122,14 +124,15 @@ impl Profile {
     /// "empty" (no Accounts, Personas etc).
     pub fn from_mnemonic_with_passphrase(
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        creating_device: DeviceInfo,
+        host_id: HostId,
+        host_info: HostInfo,
     ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
             true,
             &mnemonic_with_passphrase,
-            &creating_device,
+            &host_info,
         );
-        Self::from_device_factor_source(bdfs, creating_device)
+        Self::from_device_factor_source(bdfs, host_id, host_info)
     }
 
     /// Creates a new Profile from the `Mnemonic` (no passphrase) and `DeviceInfo`,
@@ -138,10 +141,15 @@ impl Profile {
     ///
     /// The Profile is initialized with a Mainnet ProfileNetwork, which is
     /// "empty" (no Accounts, Personas etc).
-    pub fn new(mnemonic: Mnemonic, creating_device: DeviceInfo) -> Self {
+    pub fn new(
+        mnemonic: Mnemonic,
+        host_id: HostId,
+        host_info: HostInfo,
+    ) -> Self {
         Self::from_mnemonic_with_passphrase(
             MnemonicWithPassphrase::new(mnemonic),
-            creating_device,
+            host_id,
+            host_info,
         )
     }
 
@@ -362,7 +370,8 @@ mod tests {
 
     #[test]
     fn new_creates_empty_mainnet_network() {
-        let sut = SUT::new(Mnemonic::sample(), DeviceInfo::sample());
+        let sut =
+            SUT::new(Mnemonic::sample(), HostId::sample(), HostInfo::sample());
         assert_eq!(
             sut.networks,
             ProfileNetworks::just(ProfileNetwork::new_empty_on(
@@ -418,7 +427,8 @@ mod tests {
     fn new_from_non_main_bdfs_panics() {
         let _ = SUT::from_device_factor_source(
             DeviceFactorSource::sample_other(),
-            DeviceInfo::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
         );
     }
 
@@ -599,7 +609,13 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| SUT::new(Mnemonic::generate_new(), DeviceInfo::sample()))
+            .map(|_| {
+                SUT::new(
+                    Mnemonic::generate_new(),
+                    HostId::sample(),
+                    HostInfo::sample(),
+                )
+            })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
@@ -790,9 +806,12 @@ mod tests {
 								]
 							},
 							"hint": {
-								"name": "iPhone",
-								"model": "iPhone",
-								"mnemonicWordCount": 24
+								"name": "My precious",
+								"model": "iPhone SE 2nd gen",
+								"mnemonicWordCount": 24,
+								"systemVersion": "iOS 17.4.1",
+                                 "hostAppVersion": "1.6.4",
+                                 "hostVendor": "Apple"
 							}
 						}
 					},

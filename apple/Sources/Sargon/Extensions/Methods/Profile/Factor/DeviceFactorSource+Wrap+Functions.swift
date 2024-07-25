@@ -12,23 +12,23 @@ extension DeviceFactorSource {
 
 	public static func olympia(
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
-		deviceInfo: DeviceInfo
+		hostInfo: HostInfo
 	) -> Self {
 		newDeviceFactorSourceOlympia(
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
-			deviceInfo: deviceInfo
+			hostInfo: hostInfo
 		)
 	}
 	
 	public static func babylon(
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
 		isMain: Bool,
-		deviceInfo: DeviceInfo
+		hostInfo: HostInfo
 	) -> Self {
 		newDeviceFactorSourceBabylon(
 			isMain: isMain,
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
-			deviceInfo: deviceInfo
+			hostInfo: hostInfo
 		)
 	}
 	

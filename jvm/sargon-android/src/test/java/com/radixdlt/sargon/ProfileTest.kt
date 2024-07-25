@@ -25,18 +25,21 @@ class ProfileTest : SampleTestable<Profile> {
 
     @Test
     fun testInit() {
+        val hostId = HostId.sample.other()
+        val hostInfo = HostInfo.sample.other()
         val hdFactorSource = PrivateHierarchicalDeterministicFactorSource.init(
             isMainBDFS = true,
             entropy = NonEmptyMax32Bytes(bagOfBytes = randomBagOfBytes(byteCount = 32)),
-            deviceInfo = DeviceInfo.sample.other()
+            hostInfo = hostInfo
         )
 
         val profile = Profile.init(
             deviceFactorSource = hdFactorSource.factorSource.asGeneral(),
-            deviceInfo = DeviceInfo.sample.other()
+            hostId = hostId,
+            hostInfo = hostInfo
         )
 
-        assertEquals("Android (Android)", profile.header.creatingDevice.description)
+        assertEquals("My Pixel (Pixel 8 Pro)", profile.header.creatingDevice.description)
     }
 
     @Test

@@ -78,14 +78,14 @@ impl DeviceFactorSource {
     pub fn babylon(
         is_main: bool,
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
-        device_info: &DeviceInfo,
+        host_info: &HostInfo,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
             mnemonic_with_passphrase,
         );
         let hint = DeviceFactorSourceHint::with_info(
-            device_info,
+            host_info,
             mnemonic_with_passphrase.mnemonic.word_count,
         );
         Self::new(id, FactorSourceCommon::new_bdfs(is_main), hint)
@@ -93,14 +93,14 @@ impl DeviceFactorSource {
 
     pub fn olympia(
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
-        device_info: &DeviceInfo,
+        host_info: &HostInfo,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
             mnemonic_with_passphrase,
         );
         let hint = DeviceFactorSourceHint::with_info(
-            device_info,
+            host_info,
             mnemonic_with_passphrase.mnemonic.word_count,
         );
         Self::new(id, FactorSourceCommon::new_olympia(), hint)
@@ -130,7 +130,7 @@ impl DeviceFactorSource {
         let mut source = Self::babylon(
             true,
             &MnemonicWithPassphrase::sample_device(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
         source.common.last_used_on = Timestamp::sample();
         source.common.added_on = Timestamp::sample();
@@ -142,7 +142,7 @@ impl DeviceFactorSource {
         let mut source = Self::babylon(
             false,
             &MnemonicWithPassphrase::sample_device_other(),
-            &DeviceInfo::sample_other(),
+            &HostInfo::sample_other(),
         );
         source.common.last_used_on = Timestamp::sample_other();
         source.common.added_on = Timestamp::sample_other();
@@ -153,7 +153,7 @@ impl DeviceFactorSource {
     pub fn sample_olympia() -> Self {
         let mut source = Self::olympia(
             &MnemonicWithPassphrase::sample_device_12_words(),
-            &DeviceInfo::sample_other(),
+            &HostInfo::sample_other(),
         );
         source.common.last_used_on = Timestamp::sample();
         source.common.added_on = Timestamp::sample();
@@ -164,7 +164,7 @@ impl DeviceFactorSource {
     pub fn sample_olympia_other() -> Self {
         let mut source = Self::olympia(
             &MnemonicWithPassphrase::sample_device_12_words_other(),
-            &DeviceInfo::sample(),
+            &HostInfo::sample(),
         );
         source.common.last_used_on = Timestamp::sample_other();
         source.common.added_on = Timestamp::sample_other();
@@ -195,7 +195,7 @@ mod tests {
         assert!(SUT::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
-            &DeviceInfo::sample()
+            &HostInfo::sample()
         )
         .is_main_bdfs());
     }
@@ -218,8 +218,45 @@ mod tests {
                 },
                 "hint": {
                     "mnemonicWordCount": 24,
-                    "model": "iPhone",
-                    "name": "iPhone"
+                    "model": "iPhone SE 2nd gen",
+                    "name": "My precious",
+                    "systemVersion": "iOS 17.4.1",
+                    "hostAppVersion": "1.6.4",
+                    "hostVendor": "Apple"
+                },
+                "id": {
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a",
+                    "kind": "device"
+                }
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_without_host_details() {
+        let mut model = SUT::sample();
+        model.hint.system_version = None;
+        model.hint.host_app_version = None;
+        model.hint.host_vendor = None;
+
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "common": {
+                    "addedOn": "2023-09-11T16:05:56.000Z",
+                    "cryptoParameters": {
+                        "supportedCurves": ["curve25519"],
+                        "supportedDerivationPathSchemes": ["cap26"]
+                    },
+                    "flags": ["main"],
+                    "lastUsedOn": "2023-09-11T16:05:56.000Z"
+                },
+                "hint": {
+                    "mnemonicWordCount": 24,
+                    "model": "iPhone SE 2nd gen",
+                    "name": "My precious"
                 },
                 "id": {
                     "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a",
