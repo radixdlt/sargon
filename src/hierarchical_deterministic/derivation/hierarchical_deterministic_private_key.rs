@@ -69,7 +69,7 @@ impl HasSampleValues for HierarchicalDeterministicPrivateKey {
     fn sample() -> Self {
         Self::new(
             Ed25519PrivateKey::from_str(
-                "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+                "88ec4649da764965f862510dbe53d551a3fc2da49e1ef1f383d9d17006773bee",
             )
             .unwrap()
             .into(),
@@ -82,7 +82,7 @@ impl HasSampleValues for HierarchicalDeterministicPrivateKey {
     fn sample_other() -> Self {
         Self::new(
             Secp256k1PrivateKey::from_str(
-                "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
+                "09c5ec59b0cc08d07e5ed4aaee8c583264ffa060563d4b531e15db13d35b2a87",
             )
             .unwrap()
             .into(),
@@ -117,7 +117,7 @@ mod tests {
         let sut = SUT::sample();
         assert_eq!(
             sut.public_key().to_hex(),
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+            "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
         );
     }
 

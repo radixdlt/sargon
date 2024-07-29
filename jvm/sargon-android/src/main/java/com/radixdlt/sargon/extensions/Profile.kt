@@ -1,6 +1,8 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.FactorSource
+import com.radixdlt.sargon.HostId
+import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileFileContents
 import com.radixdlt.sargon.checkIfEncryptedProfileJsonContainsLegacyP2pLinks
@@ -14,10 +16,12 @@ import com.radixdlt.sargon.profileToJsonString
 
 fun Profile.Companion.init(
     deviceFactorSource: FactorSource.Device,
-    creatingDeviceName: String
+    hostId: HostId,
+    hostInfo: HostInfo
 ) = newProfile(
     deviceFactorSource = deviceFactorSource.value,
-    creatingDeviceName = creatingDeviceName
+    hostId = hostId,
+    hostInfo = hostInfo
 )
 
 fun Profile.Companion.analyzeContentsOfFile(contents: String): ProfileFileContents =

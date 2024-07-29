@@ -14,10 +14,10 @@ impl WellKnownClient {
         Self { http_client }
     }
 
-    pub fn new_with_network_antenna(
-        network_antenna: Arc<dyn NetworkAntenna>,
+    pub fn new_with_networking_driver(
+        networking_driver: Arc<dyn NetworkingDriver>,
     ) -> Self {
-        Self::new(HttpClient::new(network_antenna))
+        Self::new(HttpClient::new(networking_driver))
     }
 }
 
@@ -44,8 +44,8 @@ impl WellKnownClient {
 #[cfg(test)]
 impl WellKnownClient {
     fn new_always_failing() -> Self {
-        Self::new_with_network_antenna(Arc::new(
-            MockAntenna::new_always_failing(),
+        Self::new_with_networking_driver(Arc::new(
+            MockNetworkingDriver::new_always_failing(),
         ))
     }
 }
@@ -78,23 +78,24 @@ mod tests {
     #[actix_rt::test]
     async fn test_get_well_known_file_correct_request_made() {
         // ARRANGE
-        let mock_antenna_with_spy = MockAntenna::with_spy(200, vec![], |_| {
-            let request = NetworkRequest::get_well_known(
-                Url::from_str(TEST_ORIGIN).unwrap(),
-            );
+        let mock_antenna_with_spy =
+            MockNetworkingDriver::with_spy(200, vec![], |_| {
+                let request = NetworkRequest::get_well_known(
+                    Url::from_str(TEST_ORIGIN).unwrap(),
+                );
 
-            let expected_request = NetworkRequest::new_get(
-                Url::from_str(TEST_ORIGIN)
-                    .unwrap()
-                    .join(SUFFIX_WELL_KNOWN_FILE)
-                    .unwrap(),
-            );
+                let expected_request = NetworkRequest::new_get(
+                    Url::from_str(TEST_ORIGIN)
+                        .unwrap()
+                        .join(SUFFIX_WELL_KNOWN_FILE)
+                        .unwrap(),
+                );
 
-            // ASSERT
-            pretty_assertions::assert_eq!(request, expected_request);
-        });
+                // ASSERT
+                pretty_assertions::assert_eq!(request, expected_request);
+            });
 
-        let client = WellKnownClient::new_with_network_antenna(Arc::new(
+        let client = WellKnownClient::new_with_networking_driver(Arc::new(
             mock_antenna_with_spy,
         ));
         // ACT

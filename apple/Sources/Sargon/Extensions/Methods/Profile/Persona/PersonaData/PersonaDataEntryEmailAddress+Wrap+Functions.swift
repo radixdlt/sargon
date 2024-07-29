@@ -9,7 +9,7 @@ import Foundation
 import SargonUniFFI
 
 // PersonaDataEntryEmailAddress -> SargonStringCodable
-extension PersonaDataEntryEmailAddress {
+extension EmailAddress {
 	public init(jsonStringLiteral: String) throws {
 		self = try newPersonaDataEntryEmailAddressFromJsonString(jsonString: jsonStringLiteral)
 	}

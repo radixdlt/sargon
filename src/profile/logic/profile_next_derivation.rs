@@ -11,9 +11,9 @@ impl Profile {
     {
         let id = id.into();
         self.factor_sources
-            .get_id(&id)
+            .get_id(id)
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: id.clone(),
+                bad_value: id,
             })
             .and_then(|f| {
                 f.clone().try_into().map_err(|_| {
@@ -32,14 +32,16 @@ impl Profile {
         self.factor_source_by_id(*id)
     }
 
-    pub fn bdfs(&self) -> DeviceFactorSource {
-        let device_factor_source = self
-            .factor_sources
+    pub fn device_factor_sources(&self) -> Vec<DeviceFactorSource> {
+        self.factor_sources
             .iter()
             .filter_map(|f| f.as_device().cloned())
-            .collect_vec();
+            .collect_vec()
+    }
 
-        let explicit_main = device_factor_source
+    pub fn bdfs(&self) -> DeviceFactorSource {
+        let device_factor_sources = self.device_factor_sources();
+        let explicit_main = device_factor_sources
             .clone()
             .into_iter()
             .filter(|x| x.is_main_bdfs())
@@ -47,7 +49,7 @@ impl Profile {
             .first()
             .cloned();
 
-        let implicit_main = device_factor_source
+        let implicit_main = device_factor_sources
             .into_iter()
             .filter(|x| x.common.supports_babylon())
             .collect_vec()
@@ -74,7 +76,7 @@ impl Profile {
         };
         let index = self
             .networks
-            .get_id(&network_id)
+            .get_id(network_id)
             .map(|n| {
                 n.accounts
                     .items()
@@ -221,7 +223,10 @@ mod tests {
     fn device_factor_source_by_id_success_device() {
         let profile = Profile::sample();
         let dfs = DeviceFactorSource::sample_babylon();
-        assert_eq!(profile.device_factor_source_by_id(&dfs.id), Ok(dfs));
+        pretty_assertions::assert_eq!(
+            profile.device_factor_source_by_id(&dfs.id),
+            Ok(dfs)
+        );
     }
 
     #[test]

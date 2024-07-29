@@ -37,7 +37,7 @@ impl AccountAddress {
     /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
     /// for all accounts created by the Babylon Radix Wallets.
     /// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
-    /// imported from the Olympia Wallet.
+    /// imported from the legacy Olympia desktop application.
     pub fn is_legacy_address(&self) -> bool {
         self.entity_type() == ScryptoEntityType::GlobalVirtualSecp256k1Account
     }
@@ -88,7 +88,7 @@ impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {
         let address = AccountAddress::try_from_bech32(
-                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
+                "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m",
             )
             .unwrap();
         assert_eq!(address.network_id(), NetworkID::Stokenet);
@@ -98,11 +98,43 @@ impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet_other() -> Self {
         let address = AccountAddress::try_from_bech32(
-                "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
+                "account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp",
             )
             .unwrap();
         assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
+    }
+
+    pub fn sample_grace() -> Self {
+        Self::from_str("account_rdx128c4f8dnuvd73d2r3fl95ryfuavw5zjf8zr57hjw0qjagz7s7grace").unwrap()
+    }
+
+    pub fn sample_frank() -> Self {
+        Self::from_str("account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank").unwrap()
+    }
+
+    pub fn sample_judy() -> Self {
+        // Or alternatively: `"account_rdx12xc095hk3g8klf8gvz5q6qy9pl9e7v5m5eju0xctzvesnyhnfdjudy"`
+        // Or alternatively: `"account_rdx12x82w84l6n55m78h8eldedeca52tp8tpuu3342g5lw4f9v85znjudy"`
+        Self::from_str("account_rdx12y0389ew2xn7w02d059hhye6t0mjzqxqyavsetyg2j3p3xqyepjudy").unwrap()
+    }
+
+    pub fn sample_oscar() -> Self {
+        Self::from_str("account_rdx129uc6rf5vmkj2gau7fgxlsqdg8008nca8yd57sxx4v67dyw7u0scar").unwrap()
+    }
+
+    pub fn sample_trudy() -> Self {
+        Self::from_str("account_rdx1284z0gpg9vnhevn7sytdncszc7ukcrycntg7zjktqvggmwe6ctrudy").unwrap()
+    }
+    pub fn sample_radix() -> Self {
+        // Or alternatively: `"account_rdx12yql52whel8xjttrw84tau270asj92ssu9pgqzgrftd4m8ptm8zrdx"`
+        // Or alternatively: `"account_rdx129sctf9rusf0ceq6ap2ca8r030f2mf8z0a2fx90jg5yxtladqrprdx"`
+        // Or alternatively: `"account_rdx1287mp2d20wfmc8tyluryehz3j53jn0f9jmkdxp9808vrjxetu9prdx"`
+        // Or alternatively: `"account_rdx1282v25pw9y59ny74rv7aht6q0qgqs4g85q20zmustkyu6mxphp5rdx"`
+        // Or alternatively: `"account_rdx128avae2px32e8t7vcax0axvt0afa5lrw4rwjlksev48wamgs472rdx"`
+        // Or alternatively: `"account_rdx128g9urn56vyu2axptn9r4rctggn9f0phlu3mzd6mz6lsdkxkd7hrdx"`
+        // Or alternatively: `"account_rdx129mvy35wx370ey2sxqces5ddq5sqj4q7xxhwl3ejpvu8gd8ta3erdx"`
+        Self::from_str("account_rdx12y7uww27s250g9d3d72ey9wdp5z78zpmq5la0r0wgw4fkf6y8eerdx").unwrap()
     }
 }
 

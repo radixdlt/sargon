@@ -1,19 +1,15 @@
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 @Reducer
 public struct NameNewAccountFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let walletHolder: WalletHolder
-		public var accountName = ""
+		public var accountName: String
 		public var errorMessage: String?
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-		}
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
+		public init(index: Int = 0) {
+			self.accountName = "Unnamed \(index)"
 		}
 	}
 	
@@ -28,33 +24,6 @@ public struct NameNewAccountFeature {
 		}
 		case delegate(Delegate)
 		case view(ViewAction)
-	}
-	
-	@ViewAction(for: NameNewAccountFeature.self)
-	public struct View: SwiftUI.View {
-		@Bindable public var store: StoreOf<NameNewAccountFeature>
-		public init(store: StoreOf<NameNewAccountFeature>) {
-			self.store = store
-		}
-		public var body: some SwiftUI.View {
-			VStack {
-				Text("Name Account").font(.largeTitle)
-				Spacer()
-				LabeledTextField(label: "Account Name", text: $store.accountName.sending(\.view.accountNameChanged))
-				if let error = store.state.errorMessage {
-					Text("\(error)")
-						.foregroundStyle(Color.red)
-						.font(.footnote)
-						.fontWeight(.bold)
-				}
-				Spacer()
-				Button("Continue") {
-					send(.continueButtonTapped)
-				}
-				.buttonStyle(.borderedProminent)
-			}
-			.padding()
-		}
 	}
 	
 	public init() {}
@@ -81,6 +50,38 @@ public struct NameNewAccountFeature {
 				return .none
 		
 			}
+		}
+	}
+}
+
+extension NameNewAccountFeature {
+	
+	public typealias HostingFeature = Self
+	
+	@ViewAction(for: HostingFeature.self)
+	public struct View: SwiftUI.View {
+		@Bindable public var store: StoreOf<HostingFeature>
+		public init(store: StoreOf<HostingFeature>) {
+			self.store = store
+		}
+		public var body: some SwiftUI.View {
+			VStack {
+				Text("Name Account").font(.largeTitle)
+				Spacer()
+				LabeledTextField(label: "Account Name", text: $store.accountName.sending(\.view.accountNameChanged))
+				if let error = store.state.errorMessage {
+					Text("\(error)")
+						.foregroundStyle(Color.red)
+						.font(.footnote)
+						.fontWeight(.bold)
+				}
+				Spacer()
+				Button("Continue") {
+					send(.continueButtonTapped)
+				}
+				.buttonStyle(.borderedProminent)
+			}
+			.padding()
 		}
 	}
 }

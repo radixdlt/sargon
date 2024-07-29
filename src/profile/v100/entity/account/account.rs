@@ -176,11 +176,8 @@ impl Account {
         name: &str,
         is_hidden: bool,
     ) -> Self {
-        let mwp = MnemonicWithPassphrase::sample();
-        let bdfs =
-            DeviceFactorSource::babylon(true, &mwp, WalletClientModel::Iphone);
         let private_hd_factor_source =
-            PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+            PrivateHierarchicalDeterministicFactorSource::sample();
         let account_creating_factor_instance = private_hd_factor_source
             .derive_entity_creation_factor_instance(network_id, index);
 
@@ -382,7 +379,7 @@ mod tests {
         let account = SUT::sample();
         assert_eq!(
             format!("{account}"),
-            "Alice | account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+            "Alice | account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
         );
     }
 
@@ -460,7 +457,7 @@ mod tests {
 									"hierarchicalDeterministicPublicKey": {
 										"publicKey": {
 											"curve": "curve25519",
-											"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+											"compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
 										},
 										"derivationPath": {
 											"scheme": "cap26",
@@ -474,7 +471,7 @@ mod tests {
 							"factorSourceID": {
 								"fromHash": {
 									"kind": "device",
-									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+									"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 								},
 								"discriminator": "fromHash"
 							}
@@ -493,7 +490,7 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+				"address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
 			}
             "#,
         );
@@ -514,7 +511,7 @@ mod tests {
 									"hierarchicalDeterministicPublicKey": {
 										"publicKey": {
 											"curve": "curve25519",
-											"compressedData": "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+											"compressedData": "a3a14ce3c0e549ac35f1875738c243bb6f4037f08d7d2a52ef749091a92a0c71"
 										},
 										"derivationPath": {
 											"scheme": "cap26",
@@ -528,7 +525,7 @@ mod tests {
 							"factorSourceID": {
 								"fromHash": {
 									"kind": "device",
-									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+									"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 								},
 								"discriminator": "fromHash"
 							}
@@ -547,7 +544,7 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+				"address": "account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
 			}
             "#,
         );
@@ -568,7 +565,7 @@ mod tests {
 									"hierarchicalDeterministicPublicKey": {
 										"publicKey": {
 											"curve": "curve25519",
-											"compressedData": "18c7409458a82281711b668f833b0485e8fb58a3ceb8a728882bf6b83d3f06a9"
+											"compressedData": "535e0b74beffc99d96acd36ae73444c0e35ebb5707f077f9bf1120b1bb8894c0"
 										},
 										"derivationPath": {
 											"scheme": "cap26",
@@ -582,7 +579,7 @@ mod tests {
 							"factorSourceID": {
 								"fromHash": {
 									"kind": "device",
-									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+									"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 								},
 								"discriminator": "fromHash"
 							}
@@ -601,7 +598,7 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+				"address": "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
 			}
             "#,
         );
@@ -622,7 +619,7 @@ mod tests {
 									"hierarchicalDeterministicPublicKey": {
 										"publicKey": {
 											"curve": "curve25519",
-											"compressedData": "26b3fd7f65f01ff8e418a56722fde9cc6fc18dc983e0474e6eb6c1cf3bd44f23"
+											"compressedData": "436c67c678713be6a4306bf2a64d62d29c9bccb92a776175e5cb6e95e87be55d"
 										},
 										"derivationPath": {
 											"scheme": "cap26",
@@ -636,7 +633,7 @@ mod tests {
 							"factorSourceID": {
 								"fromHash": {
 									"kind": "device",
-									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+									"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
 								},
 								"discriminator": "fromHash"
 							}
@@ -655,7 +652,7 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+				"address": "account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp"
 			}
             "#,
         );

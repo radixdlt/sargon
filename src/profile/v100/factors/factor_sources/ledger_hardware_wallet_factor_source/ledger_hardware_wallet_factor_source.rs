@@ -21,13 +21,22 @@ pub struct LedgerHardwareWalletFactorSource {
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
-    ///
-    /// Has interior mutability since we must be able to update the
-    /// last used date.
     pub common: FactorSourceCommon,
 
     /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
     pub hint: LedgerHardwareWalletHint,
+}
+
+fn new_ledger_with_mwp(
+    mwp: MnemonicWithPassphrase,
+    hint: LedgerHardwareWalletHint,
+    common: FactorSourceCommon,
+) -> LedgerHardwareWalletFactorSource {
+    let id = FactorSourceIDFromHash::new_for_ledger(&mwp);
+    let mut source = LedgerHardwareWalletFactorSource::new(id, common, hint);
+    source.common.last_used_on = Timestamp::sample();
+    source.common.added_on = Timestamp::sample();
+    source
 }
 
 impl LedgerHardwareWalletFactorSource {
@@ -43,18 +52,18 @@ impl LedgerHardwareWalletFactorSource {
 
 impl HasSampleValues for LedgerHardwareWalletFactorSource {
     fn sample() -> Self {
-        Self::new(
-            FactorSourceIDFromHash::sample_ledger(),
-            FactorSourceCommon::sample(),
+        new_ledger_with_mwp(
+            MnemonicWithPassphrase::sample_ledger(),
             LedgerHardwareWalletHint::sample(),
+            FactorSourceCommon::new_bdfs(false),
         )
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            FactorSourceIDFromHash::sample_ledger_other(),
-            FactorSourceCommon::sample_other(),
+        new_ledger_with_mwp(
+            MnemonicWithPassphrase::sample_ledger_other(),
             LedgerHardwareWalletHint::sample_other(),
+            FactorSourceCommon::new_olympia(),
         )
     }
 }
@@ -65,9 +74,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
     fn try_from(value: FactorSource) -> Result<Self> {
         match value {
             FactorSource::Ledger { value: factor } => Ok(factor),
-            FactorSource::Device { value: _ } => {
-                Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
-            }
+            _ =>  Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
         }
     }
 }
@@ -88,42 +95,45 @@ impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_id(&self) -> FactorSourceID {
         self.clone().id.into()
     }
+
+    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
+        self.common = updated
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = LedgerHardwareWalletFactorSource;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample(),
-            LedgerHardwareWalletFactorSource::sample()
-        );
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample_other(),
-            LedgerHardwareWalletFactorSource::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            LedgerHardwareWalletFactorSource::sample(),
-            LedgerHardwareWalletFactorSource::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn kind() {
+        assert_eq!(SUT::kind(), FactorSourceKind::LedgerHQHardwareWallet);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = LedgerHardwareWalletFactorSource::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"            
             {
                 "id": {
                     "kind": "ledgerHQHardwareWallet",
-                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                    "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                 },
                 "common": {
                     "addedOn": "2023-09-11T16:05:56.000Z",
@@ -131,7 +141,7 @@ mod tests {
                         "supportedCurves": ["curve25519"],
                         "supportedDerivationPathSchemes": ["cap26"]
                     },
-                    "flags": ["main"],
+                    "flags": [],
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
@@ -145,12 +155,9 @@ mod tests {
 
     #[test]
     fn from_factor_source() {
-        let sut = LedgerHardwareWalletFactorSource::sample();
+        let sut = SUT::sample();
         let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::try_from(factor_source),
-            Ok(sut)
-        );
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
     }
 
     #[test]
@@ -158,24 +165,18 @@ mod tests {
         let wrong = DeviceFactorSource::sample();
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
-            LedgerHardwareWalletFactorSource::try_from(factor_source),
+            SUT::try_from(factor_source),
             Err(CommonError::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
         );
     }
 
     #[test]
     fn factor_source_id() {
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample().factor_source_id(),
-            LedgerHardwareWalletFactorSource::sample().id.into()
-        );
+        assert_eq!(SUT::sample().factor_source_id(), SUT::sample().id.into());
     }
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::sample().factor_source_kind(),
-            LedgerHardwareWalletFactorSource::sample().id.kind
-        );
+        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
     }
 }

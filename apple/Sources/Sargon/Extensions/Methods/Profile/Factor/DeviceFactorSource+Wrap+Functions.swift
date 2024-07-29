@@ -11,22 +11,24 @@ import SargonUniFFI
 extension DeviceFactorSource {
 
 	public static func olympia(
-		mnemonicWithPassphrase: MnemonicWithPassphrase
+		mnemonicWithPassphrase: MnemonicWithPassphrase,
+		hostInfo: HostInfo
 	) -> Self {
 		newDeviceFactorSourceOlympia(
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
-			walletClientModel: .iphone
+			hostInfo: hostInfo
 		)
 	}
 	
 	public static func babylon(
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
-		isMain: Bool
+		isMain: Bool,
+		hostInfo: HostInfo
 	) -> Self {
 		newDeviceFactorSourceBabylon(
 			isMain: isMain,
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
-			walletClientModel: .iphone
+			hostInfo: hostInfo
 		)
 	}
 	

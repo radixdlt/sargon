@@ -112,7 +112,7 @@ mod tests {
                     "device": {
                         "id": {
                             "kind": "device",
-                            "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                            "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                         },
                         "common": {
                             "flags": ["main"],
@@ -124,9 +124,12 @@ mod tests {
                             "lastUsedOn": "2023-09-11T16:05:56.000Z"
                         },
                         "hint": {
-                            "name": "Unknown Name",
-                            "model": "iPhone",
-                            "mnemonicWordCount": 24
+                            "name": "My precious",
+                            "model": "iPhone SE 2nd gen",
+                            "mnemonicWordCount": 24,
+                            "systemVersion": "iOS 17.4.1",
+                            "hostAppVersion": "1.6.4",
+                            "hostVendor": "Apple"
                         }
                     }
                 },
@@ -135,7 +138,7 @@ mod tests {
                     "ledgerHQHardwareWallet": {
                         "id": {
                             "kind": "ledgerHQHardwareWallet",
-                            "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                            "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                         },
                         "common": {
                             "addedOn": "2023-09-11T16:05:56.000Z",
@@ -143,7 +146,7 @@ mod tests {
                                 "supportedCurves": ["curve25519"],
                                 "supportedDerivationPathSchemes": ["cap26"]
                             },
-                            "flags": ["main"],
+                            "flags": [],
                             "lastUsedOn": "2023-09-11T16:05:56.000Z"
                         },
                         "hint": {

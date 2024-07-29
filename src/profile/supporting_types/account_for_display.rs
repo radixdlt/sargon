@@ -13,10 +13,12 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[display("{label} | {address}")]
+#[display("{display_name} | {address}")]
 pub struct AccountForDisplay {
     pub address: AccountAddress,
-    pub label: DisplayName,
+
+    #[serde(rename = "label")]
+    pub display_name: DisplayName,
 
     #[serde(rename = "appearanceID")]
     pub appearance_id: AppearanceID,
@@ -25,12 +27,12 @@ pub struct AccountForDisplay {
 impl AccountForDisplay {
     pub fn new(
         address: impl Into<AccountAddress>,
-        label: impl Into<DisplayName>,
+        display_name: impl Into<DisplayName>,
         appearance_id: impl Into<AppearanceID>,
     ) -> Self {
         Self {
             address: address.into(),
-            label: label.into(),
+            display_name: display_name.into(),
             appearance_id: appearance_id.into(),
         }
     }
@@ -51,6 +53,12 @@ impl HasSampleValues for AccountForDisplay {
             DisplayName::sample_other(),
             AppearanceID::sample_other(),
         )
+    }
+}
+
+impl From<Account> for AccountForDisplay {
+    fn from(value: Account) -> Self {
+        Self::new(value.address, value.display_name, value.appearance_id)
     }
 }
 
@@ -89,5 +97,18 @@ mod tests {
     #[test]
     fn test_is_network_aware() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn from_account() {
+        let lhs = SUT::from(Account::sample());
+        assert_eq!(
+            lhs,
+            SUT::new(
+                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+                DisplayName::new("Alice").unwrap(),
+                AppearanceID::new(0).unwrap(),
+            )
+        )
     }
 }

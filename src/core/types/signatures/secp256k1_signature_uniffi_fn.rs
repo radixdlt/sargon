@@ -55,7 +55,7 @@ mod tests {
     fn test_to_string() {
         assert_eq!(
             secp256k1_signature_to_string(&SUT::sample()),
-            "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef"
+            "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12"
         )
     }
 

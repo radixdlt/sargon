@@ -7,7 +7,6 @@ var swiftSettings: [SwiftSetting] = [
 	.enableExperimentalFeature("StrictConcurrency")
 ]
 
-
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
 let useLocalFramework = true
@@ -42,8 +41,21 @@ let package = Package(
 		)
 	],
 	dependencies: [
+        // We use XCTestDynamicOverlay to have different `description` of e.g. Decimal192
+		// for tests vs not tests (we use a .test `Locale`)
+		.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.1.2"),
+		
+		// `XCTAssertNoDifference` used in test
 		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
+
+        // Hopefully only temporary! We use `SwiftJSON` to be able to mark some Sargon models
+        // as `Swift.Codable`. See the SargonObjectCodable protocol for details.
+        // In the future hopefully no JSON coding happens in wallets,
+        // i.e. Sargon does ALL JSON coding, then we can remove this.
 		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
+		
+		// Multicast / Share of notifications in EventBus
+		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.2"),
 	],
 	targets: [
 		binaryTarget,
@@ -57,6 +69,8 @@ let package = Package(
 			dependencies: [
 				.target(name: "SargonUniFFI"),
 				"SwiftyJSON",
+				.product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+				"AsyncExtensions"
 			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
@@ -67,8 +81,7 @@ let package = Package(
 				.target(name: "Sargon"),
 				.product(name: "CustomDump", package: "swift-custom-dump"),
 			],
-			path: "apple/Tests",
-			swiftSettings: swiftSettings
+			path: "apple/Tests"
 		),
 	]
 )

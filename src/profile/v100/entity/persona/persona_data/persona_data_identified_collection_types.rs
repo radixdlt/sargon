@@ -62,10 +62,10 @@ macro_rules! declare_collection_of_identified_entry {
             }
         }
 
-        impl<'a> IntoIterator for &'a $struct_name {
+        impl IntoIterator for $struct_name {
             type Item = $id_ent_type;
             type IntoIter =
-           IdentifiedVecOfIterator<'a, $id_ent_type>;
+           OwnedIdentifiedVecOfIterator<$id_ent_type>;
 
             fn into_iter(self) -> Self::IntoIter {
                 self.collection.into_iter()

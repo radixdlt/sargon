@@ -172,7 +172,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.createMultipleFungibleTokens(
                                                 addressOfOwner =
                                                                 AccountAddress.init(
-                                                                                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                                                "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                                                 )
                                 )
 
@@ -180,7 +180,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
                         assertTrue(
                                         contains(
-                                                        "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                        "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                         )
                         )
                         assertEquals(10, occurrences("symbol"))
@@ -194,7 +194,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.createMultipleFungibleTokens(
                                                 addressOfOwner =
                                                                 AccountAddress.init(
-                                                                                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                                                "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                                                 ),
                                                 count = count
                                 )
@@ -203,7 +203,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
                         assertTrue(
                                         contains(
-                                                        "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                        "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                         )
                         )
                         assertEquals(count.toInt(), occurrences("symbol"))
@@ -219,7 +219,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.createMultipleNonFungibleTokens(
                                                 addressOfOwner =
                                                                 AccountAddress.init(
-                                                                                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                                                "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                                                 ),
                                                 collectionCount = collections.toUByte(),
                                                 nftsPerCollection = nftsPerCollection.toUByte()
@@ -229,7 +229,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
                         assertTrue(
                                         contains(
-                                                        "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                        "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                         )
                         )
                         assertEquals(
@@ -246,14 +246,14 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.createMultipleNonFungibleTokens(
                                                 addressOfOwner =
                                                                 AccountAddress.init(
-                                                                                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                                                "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                                                 )
                                 )
 
                 with(manifest.instructionsString) {
                         assertTrue(
                                         contains(
-                                                        "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+                                                        "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m"
                                         )
                         )
                 }

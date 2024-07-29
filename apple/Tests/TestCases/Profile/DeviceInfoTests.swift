@@ -6,10 +6,6 @@ import XCTest
 
 final class DeviceInfoTests: Test<DeviceInfo> {
 	
-	func test_new_iphone() {
-		XCTAssertNotEqual(SUT.sample, SUT.iPhone())
-	}
-	
 	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws{
 		let sut = SUT.sample
 		let json = sut.jsonData()
@@ -52,7 +48,7 @@ final class DeviceInfoTests: Test<DeviceInfo> {
         {
             "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
             "date": "2023-09-11T16:05:56.000Z",
-            "description": "iPhone"
+            "description": "iPhone (iPhone)"
         }
         """)
 
@@ -63,7 +59,7 @@ final class DeviceInfoTests: Test<DeviceInfo> {
         {
             "id": "66F07CA2-A9D9-49E5-8152-77ACA3D1DD74",
             "date": "2023-09-11T16:05:56Z",
-            "description": "iPhone"
+            "description": "iPhone (iPhone)"
         }
         """)
         
@@ -72,7 +68,7 @@ final class DeviceInfoTests: Test<DeviceInfo> {
         {
             "id": "\(UUID().uuidString)",
             "date": "\(Date.now.ISO8601Format())",
-            "description": "iPhone"
+            "description": "iPhone (iPhone)"
         }
         """, expected: nil)
 	}

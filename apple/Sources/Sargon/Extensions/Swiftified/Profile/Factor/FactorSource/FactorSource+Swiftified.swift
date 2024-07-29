@@ -6,7 +6,6 @@ extension FactorSource: CustomStringConvertible {
 	public var description: String {
 		toString()
 	}
-	
 }
 
 extension FactorSource: Identifiable {
@@ -14,7 +13,11 @@ extension FactorSource: Identifiable {
 	public var id: ID {
 		switch self {
 		case let .device(value): value.id.asGeneral
+		case let .arculusCard(value): value.id.asGeneral
+		case let .securityQuestions(value): value.id.asGeneral
 		case let .ledger(value): value.id.asGeneral
+		case let .offDeviceMnemonic(value): value.id.asGeneral
+		case let .trustedContact(value): value.id.asGeneral
 		}
 	}
 }
@@ -28,6 +31,10 @@ extension FactorSource: BaseFactorSourceProtocol {
 		switch self {
 		case let .device(value): value.factorSourceKind
 		case let .ledger(value): value.factorSourceKind
+		case let .securityQuestions(value): value.factorSourceKind
+		case let .arculusCard(value): value.factorSourceKind
+		case let .offDeviceMnemonic(value): value.factorSourceKind
+		case let .trustedContact(value): value.factorSourceKind
 		}
 	}
 	
@@ -36,6 +43,10 @@ extension FactorSource: BaseFactorSourceProtocol {
 			switch self {
 			case let .device(value): value.common
 			case let .ledger(value): value.common
+			case let .securityQuestions(value): value.common
+			case let .arculusCard(value): value.common
+			case let .offDeviceMnemonic(value): value.common
+			case let .trustedContact(value): value.common
 			}
 		}
 		set {
@@ -46,6 +57,18 @@ extension FactorSource: BaseFactorSourceProtocol {
 			case var .ledger(source):
 				source.common = newValue
 				self = .ledger(value: source)
+			case var .offDeviceMnemonic(source):
+				source.common = newValue
+				self = .offDeviceMnemonic(value: source)
+			case var .arculusCard(source):
+				source.common = newValue
+				self = .arculusCard(value: source)
+			case var .securityQuestions(source):
+				source.common = newValue
+				self = .securityQuestions(value: source)
+			case var .trustedContact(source):
+				source.common = newValue
+				self = .trustedContact(value: source)
 			}
 		}
 	}
@@ -71,4 +94,22 @@ extension FactorSource: BaseFactorSourceProtocol {
 		public let actualKind: FactorSourceKind
 	}
 	
+	public var asDevice: DeviceFactorSource? {
+		extract()
+	}
+	public var asLedger: LedgerHardwareWalletFactorSource? {
+		extract()
+	}
+	public var asArculus: ArculusCardFactorSource? {
+		extract()
+	}
+	public var asOffDeviceMnemonic: OffDeviceMnemonicFactorSource? {
+		extract()
+	}
+	public var asSecurityQuestions: SecurityQuestionsNotProductionReadyFactorSource? {
+		extract()
+	}
+	public var asTrustedContact: TrustedContactFactorSource? {
+		extract()
+	}
 }

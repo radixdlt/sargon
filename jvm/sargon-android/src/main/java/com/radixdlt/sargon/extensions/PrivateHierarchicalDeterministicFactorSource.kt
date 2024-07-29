@@ -1,9 +1,9 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.NonEmptyMax32Bytes
 import com.radixdlt.sargon.PrivateHierarchicalDeterministicFactorSource
-import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.newPrivateHdFactorSourceBabylon
 import com.radixdlt.sargon.newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase
 import com.radixdlt.sargon.newPrivateHdFactorSourceOlympiaFromMnemonicWithPassphrase
@@ -12,27 +12,29 @@ import com.radixdlt.sargon.newPrivateHdFactorSourceOlympiaFromMnemonicWithPassph
 fun PrivateHierarchicalDeterministicFactorSource.Companion.init(
     isMainBDFS: Boolean,
     entropy: NonEmptyMax32Bytes,
-    walletClientModel: WalletClientModel
+    hostInfo: HostInfo
 ) = newPrivateHdFactorSourceBabylon(
     isMain = isMainBDFS,
     entropy = entropy,
-    walletClientModel = walletClientModel
+    hostInfo = hostInfo
 )
 
 
 fun PrivateHierarchicalDeterministicFactorSource.Companion.olympia(
-    mnemonicWithPassphrase: MnemonicWithPassphrase
+    mnemonicWithPassphrase: MnemonicWithPassphrase,
+    hostInfo: HostInfo
 ) = newPrivateHdFactorSourceOlympiaFromMnemonicWithPassphrase(
     mnemonicWithPassphrase = mnemonicWithPassphrase,
-    walletClientModel = WalletClientModel.ANDROID
+    hostInfo = hostInfo
 )
 
 fun PrivateHierarchicalDeterministicFactorSource.Companion.babylon(
     isMain: Boolean,
-    mnemonicWithPassphrase: MnemonicWithPassphrase
+    mnemonicWithPassphrase: MnemonicWithPassphrase,
+    hostInfo: HostInfo
 ) = newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase(
     isMain = isMain,
     mnemonicWithPassphrase = mnemonicWithPassphrase,
-    walletClientModel = WalletClientModel.ANDROID
+    hostInfo = hostInfo
 )
 

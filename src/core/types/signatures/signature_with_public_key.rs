@@ -152,15 +152,16 @@ impl SignatureWithPublicKey {
 impl HasSampleValues for SignatureWithPublicKey {
     fn sample() -> Self {
         let private_key: Ed25519PrivateKey =
-            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003"
+            "88ec4649da764965f862510dbe53d551a3fc2da49e1ef1f383d9d17006773bee"
                 .parse()
                 .unwrap();
         let public_key = private_key.public_key();
         assert_eq!(
             &public_key.to_hex(),
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+            "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
         );
-        let signature: Ed25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
+
+        let signature: Ed25519Signature = "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103".parse().unwrap();
         public_key
             .is_valid_signature_for_hash(&signature, &Self::sample_hash());
 
@@ -169,13 +170,13 @@ impl HasSampleValues for SignatureWithPublicKey {
 
     fn sample_other() -> Self {
         let private_key: Secp256k1PrivateKey =
-            "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4"
+            "09c5ec59b0cc08d07e5ed4aaee8c583264ffa060563d4b531e15db13d35b2a87"
                 .parse()
                 .unwrap();
         let public_key = private_key.public_key();
-        assert_eq!(&public_key.to_hex(), "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8");
+        assert_eq!(&public_key.to_hex(), "038c9ae8b50356cfd87b6e8c069c14cbda692578e87cd41291701947a2d1b794c4");
 
-        let signature: Secp256k1Signature = "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().unwrap();
+        let signature: Secp256k1Signature = "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12".parse().unwrap();
         public_key
             .is_valid_signature_for_hash(&signature, &Self::sample_hash());
 
@@ -186,7 +187,6 @@ impl HasSampleValues for SignatureWithPublicKey {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SignatureWithPublicKey;
@@ -205,7 +205,7 @@ mod tests {
     #[test]
     fn signature() {
         let pubkey: Ed25519PublicKey =
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+            "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
                 .parse()
                 .unwrap();
         assert!(pubkey.is_valid_signature_for_hash(
@@ -283,11 +283,11 @@ mod tests {
         assert_eq!(
             TryInto::<SUT>::try_into((
                 ScryptoSignatureWithPublicKey::Secp256k1 {
-                    signature: ScryptoSecp256k1Signature::from_str("018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef").unwrap()
+                    signature: ScryptoSecp256k1Signature::from_str("0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12").unwrap()
                 },
                 Hash::sample()
             )).unwrap().into_secp256k1().unwrap().0,
-            Secp256k1PublicKey::from_str("02634e157ed84916e1a79c8c0e802772d2b095ea4e5636243a0cade9896dd4b500").unwrap()
+            Secp256k1PublicKey::from_str("0395679954e3c312cab9905070effb4935e4b1e5b82f987396cabdb8faf9e554d0").unwrap()
         );
     }
 }

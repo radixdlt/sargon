@@ -268,7 +268,7 @@ pub enum CommonError {
     ProfileDoesNotContainFactorSourceWithID { bad_value: FactorSourceID } =
         10073,
 
-    #[error("No active ProfileID found in SecureStorage.")]
+    #[error("No active ProfileID found in SecureStorageDriver.")]
     NoActiveProfileIDSet = 10074,
 
     #[error("No Profile snapshot found for ProfileID {bad_value}")]
@@ -277,20 +277,20 @@ pub enum CommonError {
     #[error("Account Already Present {bad_value}")]
     AccountAlreadyPresent { bad_value: AccountAddress } = 10076,
 
-    #[error("Unable to acquire write lock for Profile inside Wallet")]
+    #[error("Unable to acquire write lock for Profile.")]
     UnableToAcquireWriteLockForProfile = 10077,
 
-    #[error("Failed save Mnemonic to SecureStorage with FactorSourceID: {bad_value}")]
+    #[error("Failed save Mnemonic to SecureStorageDriver with FactorSourceID: {bad_value}")]
     UnableToSaveMnemonicToSecureStorage { bad_value: FactorSourceIDFromHash } =
         10078,
 
     #[error(
-        "Failed load Mnemonic from SecureStorage with FactorSourceID: {bad_value}"
+        "Failed load Mnemonic from SecureStorageDriver with FactorSourceID: {bad_value}"
     )]
     UnableToLoadMnemonicFromSecureStorage { bad_value: FactorSourceIDFromHash } =
         10079,
 
-    #[error("Failed save FactorSource to SecureStorage, FactorSourceID: {bad_value}")]
+    #[error("Failed save FactorSource to SecureStorageDriver, FactorSourceID: {bad_value}")]
     UnableToSaveFactorSourceToProfile { bad_value: FactorSourceID } = 10080,
 
     #[error("Expected IdentityPath but got something else.")]
@@ -299,8 +299,8 @@ pub enum CommonError {
     #[error("Invalid PersonaData - phone number empty")]
     PersonaDataInvalidPhoneNumberEmpty = 10082,
 
-    #[error("Invalid PersonaData - email address empty")]
-    PersonaDataInvalidEmailAddressEmpty = 10083,
+    #[error("Invalid email address, cannot be empty")]
+    EmailAddressEmpty = 10083,
 
     #[error("Invalid PersonaData - family name empty ")]
     PersonaDataInvalidNameFamilyNameEmpty = 10084,
@@ -488,7 +488,7 @@ pub enum CommonError {
     ElementDoesNotExist { id: String } = 10135,
 
     #[error("Item identified by ID {id} already exist")]
-    ElementAlreadyExist { id: String } = 10136,
+    IdentifiableItemAlreadyExist { id: String } = 10136,
 
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
@@ -559,6 +559,88 @@ pub enum CommonError {
 
     #[error("Failed saving home cards")]
     FailedSavingHomeCards = 10156,
+
+    #[error(
+        "Failed to load Profile from secure storage, profile id: {profile_id}"
+    )]
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10157,
+
+    #[error("Failed to save HostId to secure storage")]
+    UnableToSaveHostIdToSecureStorage = 10158,
+
+    #[error("Unable to acquire read lock for profile")]
+    UnableToAcquireReadLockForProfile = 10159,
+
+    #[error("Failed to read from unsafe storage.")]
+    UnsafeStorageReadError = 10160,
+
+    #[error("Failed to write to unsafe storage.")]
+    UnsafeStorageWriteError = 10161,
+
+    #[error("Failed to create file path from string: '{bad_value}'")]
+    FailedToCreateFilePathFromString { bad_value: String } = 10162,
+
+    #[error("Expected collection to not be empty")]
+    ExpectedNonEmptyCollection = 10163,
+
+    #[error("Failed to add all accounts, found duplicated account.")]
+    UnableToAddAllAccountsDuplicatesFound = 10164,
+
+    #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
+    ProfileUsedOnOtherDevice {
+        other_device_id: DeviceID,
+        this_device_id: DeviceID,
+    } = 10165,
+
+    #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
+    InvalidDeviceID { bad_value: String } = 10166,
+
+    #[error("Tried to replace profile with one with a different ProfileID than the current one. Use `import_profile` instead.")]
+    TriedToUpdateProfileWithOneWithDifferentID = 10167,
+
+    #[error("Invalid path, bad value: '{bad_value}'")]
+    InvalidPath { bad_value: String } = 10168,
+
+    #[error("Failed to save file: '{path}'")]
+    FailedToSaveFile { path: String } = 10169,
+
+    #[error("Failed to load file: '{path}'")]
+    FailedToLoadFile { path: String } = 10170,
+
+    #[error("Failed to delete file: '{path}'")]
+    FailedToDeleteFile { path: String } = 10171,
+
+    #[error("Not permission enough to access file: '{path}'")]
+    NotPermissionToAccessFile { path: String } = 10172,
+
+    #[error("Invalid Arculus Card Model")]
+    InvalidArculusCardModel { bad_value: String } = 10173,
+
+    #[error("Expected ArculusCard factor source got something else")]
+    ExpectedArculusCardFactorSourceGotSomethingElse = 10174,
+
+    #[error("Failed to Derive Key after max attempts")]
+    FailedToDeriveKeyAfterMaxAttempts = 10175,
+
+    #[error("Failed to decrypt sealed mnemonic")]
+    FailedToDecryptSealedMnemonic = 10176,
+
+    #[error("Answers to Security Questions cannot be empty")]
+    AnswersToSecurityQuestionsCannotBeEmpty = 10177,
+
+    #[error("Integrity Violation, mutation of FactorSource is not allowed to mutate its ID")]
+    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10178,
+
+    #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
+    InvalidSecurityStructureID { bad_value: String } = 10179,
+
+    #[error(
+        "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
+    )]
+    StructureReferencesUnknownFactorSource = 10180,
+
+    #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
+    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10181,
 }
 
 #[uniffi::export]
@@ -568,7 +650,7 @@ pub fn error_message_from_error(error: &CommonError) -> String {
 
 impl CommonError {
     pub fn error_code(&self) -> u32 {
-        unsafe { *<*const _>::from(self).cast::<u32>() }
+        core::intrinsics::discriminant_value(self)
     }
 
     pub fn is_safe_to_show_error_message(&self) -> bool {

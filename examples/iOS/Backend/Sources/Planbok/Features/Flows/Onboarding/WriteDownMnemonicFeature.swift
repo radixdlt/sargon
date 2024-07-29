@@ -6,20 +6,20 @@
 //
 
 import Foundation
+import ComposableArchitecture
+import Sargon
 
 @Reducer
 public struct WriteDownMnemonicFeature {
-	
-	@Dependency(\.keychain) var keychain
 
+	@Dependency(MnemonicClient.self) var mnemonicClient
+	
 	public init() {}
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let walletHolder: WalletHolder
 		public var mnemonic: String?
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
+		public init() {
 		}
 	}
 	
@@ -31,9 +31,39 @@ public struct WriteDownMnemonicFeature {
 			case revealMnemonicButtonTapped
 			case continueButtonTapped
 		}
+		public enum InternalAction {
+			case loadedPrivateHDFactor(PrivateHierarchicalDeterministicFactorSource)
+		}
 		case delegate(DelegateAction)
 		case view(ViewAction)
+		case `internal`(InternalAction)
 	}
+
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case let .internal(.loadedPrivateHDFactor(privateHDFactor)):
+				state.mnemonic = privateHDFactor.mnemonicWithPassphrase.mnemonic.phrase
+				return .none
+				
+			case .view(.revealMnemonicButtonTapped):
+				return .run { send in
+					let id = try SargonOS.shared.profile().factorSources.first!.id.extract(as: FactorSourceIdFromHash.self)
+					let privateHDFactor = try await mnemonicClient.loadMnemonic(id)
+					await send(.internal(.loadedPrivateHDFactor(privateHDFactor)))
+				} catch: { error, send in
+					fatalError("error \(error)")
+				}
+			case .view(.continueButtonTapped):
+				return .send(.delegate(.done))
+			case .delegate:
+				return .none
+			}
+		}
+	}
+}
+
+extension WriteDownMnemonicFeature {
 	
 	@ViewAction(for: WriteDownMnemonicFeature.self)
 	public struct View: SwiftUI.View {
@@ -61,24 +91,4 @@ public struct WriteDownMnemonicFeature {
 		}
 	}
 	
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			case .view(.revealMnemonicButtonTapped):
-				let wallet = state.walletHolder.wallet
-			
-				do {
-					let bdfsMnemonic = try wallet.mainBdfsMnemonicWithPassphrase()
-					state.mnemonic = bdfsMnemonic.mnemonic.phrase
-				} catch {
-					fatalError("handle error: \(error)")
-				}
-				return .none
-			case .view(.continueButtonTapped):
-				return .send(.delegate(.done))
-			case .delegate:
-				return .none
-			}
-		}
-	}
 }

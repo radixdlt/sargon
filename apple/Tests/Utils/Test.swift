@@ -5,6 +5,18 @@ import SargonUniFFI
 import XCTest
 
 class TestCase: XCTestCase {
+	
+	class func shouldEnableRustLog() -> Bool {
+		false
+	}
+	
+	class override func setUp() {
+		if shouldEnableRustLog() {
+			rustLoggerInit()
+		}
+		super.setUp()
+	}
+	
 	override func setUp() {
 		self.continueAfterFailure = false
 	}

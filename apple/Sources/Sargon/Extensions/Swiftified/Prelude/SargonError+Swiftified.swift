@@ -21,13 +21,10 @@ extension SargonError: LocalizedError {
 	public var errorDescription: String? {
 		let errorCodeFormatted = "Error code: \(errorCode)"
 
+        var errorMessageFormatted: String?
 		#if DEBUG
-		let isSafeToShowErrorMessage = true
-		#else
-		let isSafeToShowErrorMessage = isSafeToShowErrorMessageFromError(error: self)
+        errorMessageFormatted = "Error message: \(errorMessage)"
 		#endif
-
-		let errorMessageFormatted: String? = isSafeToShowErrorMessage ? "Error message: \(errorMessage)" : nil
 
 		return [errorCodeFormatted, errorMessageFormatted]
 					.compactMap { $0 }

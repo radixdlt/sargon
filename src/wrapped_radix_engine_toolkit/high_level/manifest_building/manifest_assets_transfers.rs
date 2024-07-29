@@ -314,7 +314,7 @@ mod tests {
             Bucket("bucket1")
         ;
         CALL_METHOD
-            Address("account_rdx12xvg2sssh0rpca6e8xyqv5vf4nqu928083yzf0fdrnvjdz2pvc000x")
+            Address("account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv")
             "try_deposit_or_abort"
             Bucket("bucket1")
             Enum<0u8>()
@@ -325,7 +325,7 @@ mod tests {
             Bucket("bucket2")
         ;
         CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
             "try_deposit_or_abort"
             Bucket("bucket2")
             Enum<0u8>()
@@ -342,7 +342,7 @@ mod tests {
             Bucket("bucket3")
         ;
         CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
             "try_deposit_or_abort"
             Bucket("bucket3")
             Enum<0u8>()
@@ -365,7 +365,7 @@ mod tests {
             Bucket("bucket4")
         ;
         CALL_METHOD
-            Address("account_rdx12xvg2sssh0rpca6e8xyqv5vf4nqu928083yzf0fdrnvjdz2pvc000x")
+            Address("account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv")
             "try_deposit_or_abort"
             Bucket("bucket4")
             Enum<0u8>()
@@ -378,7 +378,7 @@ mod tests {
             Bucket("bucket5")
         ;
         CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
             "try_deposit_or_abort"
             Bucket("bucket5")
             Enum<0u8>()
@@ -399,7 +399,7 @@ mod tests {
             Bucket("bucket6")
         ;
         CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
             "try_deposit_or_abort"
             Bucket("bucket6")
             Enum<0u8>()

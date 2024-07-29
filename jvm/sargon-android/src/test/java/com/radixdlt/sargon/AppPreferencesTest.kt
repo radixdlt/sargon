@@ -24,7 +24,7 @@ class AppPreferencesTest: SampleTestable<AppPreferences> {
                 security = Security(
                     isCloudProfileSyncEnabled = true,
                     isDeveloperModeEnabled = false,
-                    structureConfigurationReferences = emptyList()
+                    securityStructuresOfFactorSourceIds = emptyList()
                 ),
                 transaction = TransactionPreferences(defaultDepositGuarantee = 0.99.toDecimal192())
             ),

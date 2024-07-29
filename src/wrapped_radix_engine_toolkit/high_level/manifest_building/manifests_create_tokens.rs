@@ -182,7 +182,7 @@ impl TransactionManifest {
 
         let multiple_fungibles: MultipleFungibleTokens =
             serde_json::from_value(json).unwrap();
-        info!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
+        debug!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
         let all_fungibles = multiple_fungibles.tokens;
         let max_count = all_fungibles.len();
         let count = count.into().map(|c| c as usize).unwrap_or(max_count);
@@ -423,8 +423,8 @@ mod tests {
                 Enum<1u8>(
                     Enum<136u8>(
                         Array<Address>(
-                            Address("account_rdx1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql49f4tn9"),
-                            Address("account_rdx129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wynsddje")
+                            Address("account_rdx128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4j0785p"),
+                            Address("account_rdx12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9l00qnqm")
                         )
                     )
                 ),

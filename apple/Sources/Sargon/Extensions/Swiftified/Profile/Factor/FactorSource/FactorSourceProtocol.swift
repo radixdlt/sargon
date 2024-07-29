@@ -49,3 +49,6 @@ public protocol FactorSourceProtocol: BaseFactorSourceProtocol {
 	static var kind: FactorSourceKind { get }
 	static func extract(from: some BaseFactorSourceProtocol) -> Self?
 }
+extension FactorSourceProtocol {
+	public var factorSourceKind: FactorSourceKind { Self.kind }
+}

@@ -92,7 +92,7 @@ mod tests {
         );
         assert_eq!(
             sut.private_key.private_key.to_hex(),
-            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003"
+            "88ec4649da764965f862510dbe53d551a3fc2da49e1ef1f383d9d17006773bee"
         );
     }
 

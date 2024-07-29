@@ -53,6 +53,42 @@ impl FactorSourceIDFromHash {
             mnemonic_with_passphrase,
         )
     }
+
+    pub fn new_for_ledger(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            mnemonic_with_passphrase,
+        )
+    }
+
+    pub fn new_for_security_questions(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::SecurityQuestions,
+            mnemonic_with_passphrase,
+        )
+    }
+
+    pub fn new_for_arculus(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
+            mnemonic_with_passphrase,
+        )
+    }
+
+    pub fn new_for_off_device(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::OffDeviceMnemonic,
+            mnemonic_with_passphrase,
+        )
+    }
 }
 
 impl FactorSourceIDFromHash {
@@ -76,76 +112,59 @@ impl HasSampleValues for FactorSourceIDFromHash {
 impl FactorSourceIDFromHash {
     /// A sample used to facilitate unit tests.
     pub fn sample_device() -> Self {
-        Self::new_for_device(&MnemonicWithPassphrase::sample())
+        DeviceFactorSource::sample().id
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_ledger() -> Self {
-        Self::from_mnemonic_with_passphrase(
-            FactorSourceKind::LedgerHQHardwareWallet,
-            &MnemonicWithPassphrase::sample(),
-        )
-    }
-
-    /// A sample used to facilitate unit tests.
-    pub fn sample_ledger_other() -> Self {
-        Self::from_mnemonic_with_passphrase(
-            FactorSourceKind::LedgerHQHardwareWallet,
-            &MnemonicWithPassphrase::sample_other(),
-        )
+        LedgerHardwareWalletFactorSource::sample().id
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSourceIDFromHash;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            FactorSourceIDFromHash::sample(),
-            FactorSourceIDFromHash::sample()
-        );
-        assert_eq!(
-            FactorSourceIDFromHash::sample_other(),
-            FactorSourceIDFromHash::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            FactorSourceIDFromHash::sample(),
-            FactorSourceIDFromHash::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", FactorSourceIDFromHash::sample()),
-            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+            format!("{}", SUT::sample()),
+            "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
         );
     }
 
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", FactorSourceIDFromHash::sample()),
-            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+            format!("{:?}", SUT::sample()),
+            "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
         );
     }
 
     #[test]
     fn json_roundtrip_sample() {
-        let model = FactorSourceIDFromHash::sample();
+        let model = SUT::sample();
 
         assert_eq_after_json_roundtrip(
             &model,
             r#"
             {
                 "kind": "device",
-                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
             }
             "#,
         );
@@ -154,13 +173,13 @@ mod tests {
     #[test]
     fn json_from_sample_mnemonic() {
         let mwp = MnemonicWithPassphrase::sample();
-        let model = FactorSourceIDFromHash::new_for_device(&mwp);
+        let model = SUT::new_for_device(&mwp);
         assert_eq_after_json_roundtrip(
             &model,
             r#"
             {
                 "kind": "device",
-                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
             }
             "#,
         );
@@ -192,7 +211,7 @@ mod tests {
             Mnemonic::from_phrase(&vector.phrase).unwrap(),
             BIP39Passphrase::new(vector.pass),
         );
-        let id = FactorSourceIDFromHash::new_for_device(&mwp);
+        let id = SUT::new_for_device(&mwp);
         assert_eq!(id.to_string(), vector.expected_id);
     }
 

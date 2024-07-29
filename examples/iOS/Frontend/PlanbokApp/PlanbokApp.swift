@@ -11,6 +11,8 @@ import ComposableArchitecture
 
 @main
 struct PlanbokApp: App {
+    @UIApplicationDelegateAdaptor var delegate: AppDelegate
+
 	var body: some Scene {
 		WindowGroup {
 			AppFeature.View(
@@ -22,6 +24,7 @@ struct PlanbokApp: App {
 			)
 			.textFieldStyle(.roundedBorder)
 			.buttonStyle(.borderedProminent)
+			.environment(\.colorScheme, .light)
 		}
     }
 }

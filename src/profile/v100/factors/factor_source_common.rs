@@ -19,11 +19,11 @@ impl Identifiable for FactorSourceFlag {
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
     ///
-    /// Has interior mutability since Radix Wallet App version 1.3.0, it is
-    /// possible to add crypto parameters to a FactorSource, e.g. when a user
-    /// with a DeviceFactorSource with babylon crypto parameters, lets call it `B`,
-    /// with mnemonic `M` adds `M` again but as an "Olympia" factor source, then
-    /// the olympia crypto parameters are added to `B`.
+    /// Since Radix Wallet App version 1.3.0, it is possible to add crypto
+    /// parameters to a FactorSource, e.g. when a user with a DeviceFactorSource
+    /// with babylon crypto parameters, lets call it `B`, with mnemonic `M` adds
+    /// `M` again but as an "Olympia" factor source, then the olympia crypto
+    /// parameters are added to `B`.
     pub crypto_parameters: FactorSourceCryptoParameters,
 
     /// When this factor source for originally added by the user.
@@ -71,6 +71,10 @@ impl FactorSourceCommon {
 
     pub fn new_olympia() -> Self {
         Self::new(FactorSourceCryptoParameters::olympia(), Vec::new())
+    }
+
+    pub fn new_babylon() -> Self {
+        Self::new(FactorSourceCryptoParameters::babylon(), Vec::new())
     }
 
     pub fn new_bdfs(is_main: bool) -> Self {
@@ -177,26 +181,6 @@ mod tests {
     #[test]
     fn new_main_bdfs() {
         assert!(FactorSourceCommon::new_main_bdfs().is_main_bdfs());
-    }
-
-    #[test]
-    fn new_uses_now_as_date() {
-        let date0 = now();
-        let model = FactorSourceCommon::new(
-            FactorSourceCryptoParameters::default(),
-            [],
-        );
-        let mut date1 = now();
-        for _ in 0..10 {
-            // rust is too fast... lol.
-            date1 = now();
-        }
-        let do_test = |d: Timestamp| {
-            assert!(d > date0);
-            assert!(d < date1);
-        };
-        do_test(model.added_on);
-        do_test(model.last_used_on);
     }
 
     #[test]

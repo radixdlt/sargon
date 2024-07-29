@@ -1,14 +1,16 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.PersonaDataEntryEmailAddress
+import com.radixdlt.sargon.EmailAddress
 import com.radixdlt.sargon.newPersonaDataEntryEmailAddressFromJsonString
 import com.radixdlt.sargon.personaDataEntryEmailAddressToJsonString
 
+typealias PersonaDataEntryEmailAddress = EmailAddress
+
 @Throws(SargonException::class)
-fun PersonaDataEntryEmailAddress.Companion.fromJson(
+fun EmailAddress.Companion.fromJson(
     jsonString: String
-): PersonaDataEntryEmailAddress =
+): EmailAddress =
     newPersonaDataEntryEmailAddressFromJsonString(jsonString = jsonString)
 
-fun PersonaDataEntryEmailAddress.toJson(): String =
+fun EmailAddress.toJson(): String =
     personaDataEntryEmailAddressToJsonString(personaDataEntryEmailAddress = this)

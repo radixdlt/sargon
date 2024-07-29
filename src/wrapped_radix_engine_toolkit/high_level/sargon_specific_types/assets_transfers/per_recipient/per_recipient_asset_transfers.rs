@@ -76,7 +76,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                 ],
             ),
             PerRecipientAssetTransfer::new(
-                AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap(),
+                AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap(),
                 [PerRecipientFungibleTransfer::new(
                     ResourceAddress::sample_mainnet_xrd(),
                     Decimal192::from_str("987654.1234").unwrap(),

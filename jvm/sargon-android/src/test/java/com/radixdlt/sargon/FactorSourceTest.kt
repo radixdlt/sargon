@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import android.bluetooth.BluetoothClass.Device
 import com.radixdlt.sargon.extensions.babylon
 import com.radixdlt.sargon.extensions.isMain
 import com.radixdlt.sargon.extensions.kind
@@ -36,7 +37,8 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         assertTrue(
             FactorSource.Device.babylon(
                 isMain = true,
-                mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+                mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+                hostInfo = HostInfo.sample()
             ).isMain
         )
     }
@@ -46,7 +48,8 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         assertFalse(
             FactorSource.Device.babylon(
                 isMain = false,
-                mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+                mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+                hostInfo = HostInfo.sample()
             ).isMain
         )
     }
@@ -55,7 +58,8 @@ class FactorSourceTest : SampleTestable<FactorSource> {
     fun testNewBabylon() {
         val factorSource = FactorSource.Device.babylon(
             isMain = false,
-            mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+            mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+            hostInfo = HostInfo.sample()
         )
         assertTrue(factorSource.supportsBabylon)
         assertFalse(factorSource.supportsOlympia)
@@ -64,7 +68,8 @@ class FactorSourceTest : SampleTestable<FactorSource> {
     @Test
     fun testNewOlympia() {
         val factorSource = FactorSource.Device.olympia(
-            mnemonicWithPassphrase = MnemonicWithPassphrase.sample()
+            mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
+            hostInfo = HostInfo.sample()
         )
         assertTrue(factorSource.supportsOlympia)
         assertFalse(factorSource.supportsBabylon)

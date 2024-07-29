@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Either a "physical" badge (NFT) or some source for recreation of a producer
+/// Either a "physical" badge (resource) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
 #[derive(
@@ -20,20 +20,43 @@ pub enum FactorInstanceBadge {
         #[serde(rename = "virtualSource")]
         value: FactorInstanceBadgeVirtualSource,
     },
+    Physical {
+        value: ResourceAddress,
+    },
 }
 
 impl HasSampleValues for FactorInstanceBadge {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        FactorInstanceBadge::Virtual {
-            value: FactorInstanceBadgeVirtualSource::sample(),
-        }
+        Self::sample_virtual()
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        FactorInstanceBadge::Virtual {
+        Self::sample_physical()
+    }
+}
+
+impl FactorInstanceBadge {
+    /// A sample used to facilitate unit tests.
+    fn sample_virtual() -> Self {
+        Self::Virtual {
+            value: FactorInstanceBadgeVirtualSource::sample(),
+        }
+    }
+
+    #[allow(unused)]
+    /// A sample used to facilitate unit tests.
+    fn sample_virtual_other() -> Self {
+        Self::Virtual {
             value: FactorInstanceBadgeVirtualSource::sample_other(),
+        }
+    }
+
+    /// A sample used to facilitate unit tests.
+    fn sample_physical() -> Self {
+        Self::Physical {
+            value: ResourceAddress::sample(),
         }
     }
 }
@@ -48,6 +71,36 @@ impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadge {
     fn from(value: HierarchicalDeterministicPublicKey) -> Self {
         Self::Virtual {
             value: value.into(),
+        }
+    }
+}
+
+impl From<ResourceAddress> for FactorInstanceBadge {
+    fn from(value: ResourceAddress) -> Self {
+        Self::Physical { value }
+    }
+}
+
+impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
+    fn from(value: FactorInstanceBadge) -> Self {
+        match value {
+            FactorInstanceBadge::Virtual {
+                value:
+                    FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                        value,
+                    },
+            } => ScryptoResourceOrNonFungible::NonFungible(
+                ScryptoNonFungibleGlobalId::from_public_key(
+                    &ScryptoPublicKey::from(value.public_key),
+                ),
+            ),
+            FactorInstanceBadge::Physical { value } => {
+                ScryptoResourceOrNonFungible::Resource(
+                    ScryptoResourceAddress::new_or_panic(
+                        value.secret_magic.node_id().0,
+                    ),
+                )
+            }
         }
     }
 }
@@ -76,8 +129,13 @@ impl Serialize for FactorInstanceBadge {
         let mut state =
             serializer.serialize_struct("FactorInstanceBadge", 2)?;
         match self {
-            FactorInstanceBadge::Virtual { value } => {
+            Self::Virtual { value } => {
                 let discriminant = "virtualSource";
+                state.serialize_field("discriminator", discriminant)?;
+                state.serialize_field(discriminant, value)?;
+            }
+            Self::Physical { value } => {
+                let discriminant = "physical";
                 state.serialize_field("discriminator", discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }
@@ -121,7 +179,7 @@ mod tests {
 					"hierarchicalDeterministicPublicKey": {
 						"publicKey": {
 							"curve": "curve25519",
-							"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+							"compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
 						},
 						"derivationPath": {
 							"scheme": "cap26",
@@ -162,5 +220,33 @@ mod tests {
                 }
             }
         )
+    }
+
+    #[test]
+    fn a_correct_resource_or_non_fungible_is_derived_from_a_physical_factor_instance_badge(
+    ) {
+        let sut = FactorInstanceBadge::sample_physical();
+        let resource_or_non_fungible = ScryptoResourceOrNonFungible::from(sut);
+        assert_eq!(
+            resource_or_non_fungible,
+            ScryptoResourceOrNonFungible::Resource(XRD)
+        );
+    }
+
+    #[test]
+    fn a_correct_resource_or_non_fungible_is_derived_from_a_virtual_factor_instance_badge(
+    ) {
+        let sut = FactorInstanceBadge::sample_virtual();
+        let resource_or_non_fungible = ScryptoResourceOrNonFungible::from(sut);
+        assert_eq!(
+            resource_or_non_fungible,
+            ScryptoResourceOrNonFungible::NonFungible(
+                ScryptoNonFungibleGlobalId::from_public_key(
+                    &ScryptoPublicKey::from(
+                        HierarchicalDeterministicPublicKey::sample().public_key
+                    )
+                )
+            )
+        );
     }
 }

@@ -22,7 +22,7 @@ pub struct DeviceInfo {
     /// query iOS for a unique identifier of the device, thus
     /// the iOS team has made their own impl of a best effort
     /// stable identifier.
-    pub id: Uuid,
+    pub id: DeviceID,
 
     /// The date this description of the device was made, might
     /// be equal to when the app was first ever launched on the
@@ -32,65 +32,115 @@ pub struct DeviceInfo {
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device
     /// if they are able to.
+    pub description: String, // FIXME: Start using `DeviceInfoDescription` !
+
+    /// The **last known** version of the device's operating system, e.g. "iOS 17.4.1".
     ///
-    /// E.g. "My Red Phone (iPhone SE 2nd Gen)"
-    pub description: String,
+    /// It is possible that the host device has been updated to a new
+    /// version than recorded here, but Sargon or host clients might
+    /// just not have updated this value here.
+    ///
+    /// MUST be optional since this was added on 2024-05-03 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub system_version: Option<String>,
+
+    /// The **last known** version of the host app, for example the Radix iOS Wallet version - e.g. "1.6.1"
+    ///
+    /// It is possible that the host device has been updated to a new
+    /// version than recorded here, but Sargon or host clients might
+    /// just not have updated this value here.
+    ///
+    /// MUST be optional since this was added on 2024-05-03 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub host_app_version: Option<String>,
+
+    /// The vendor of the host client, e.g. "Apple" for iPhone clients,
+    /// or "Samsung" for Android clients.
+    ///
+    /// MUST be optional since this was added on 2024-05-16 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub host_vendor: Option<String>,
 }
 
 impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
     pub fn new(
-        id: Uuid,
+        id: DeviceID,
         date: Timestamp,
-        description: impl AsRef<str>,
+        description: DeviceInfoDescription,
+        system_version: impl AsRef<str>,
+        host_app_version: impl AsRef<str>,
+        host_vendor: impl AsRef<str>,
     ) -> Self {
         Self {
             id,
             date,
-            description: description.as_ref().to_owned(),
+            description: description.to_string(),
+            system_version: Some(system_version.as_ref().to_owned()),
+            host_app_version: Some(host_app_version.as_ref().to_owned()),
+            host_vendor: Some(host_vendor.as_ref().to_owned()),
         }
     }
 
-    /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
-    /// and will use the current `date` for creation date.
-    pub fn with_description(description: impl AsRef<str>) -> Self {
-        Self::new(id(), now(), description)
-    }
-
-    /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
-    /// generates a new `id` and will use the current `date` for creation date.
-    pub fn new_iphone() -> Self {
-        Self::with_description("iPhone")
-    }
-
-    /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
-    /// generates a new `id` and will use the current `date` for creation date.
-    pub fn new_unknown_device() -> Self {
-        Self::with_description("Unknown device")
+    /// Instantiates a new `DeviceInfo` with information retrieved from host
+    /// like `host_id` and `host_info`
+    pub fn new_from_info(host_id: &HostId, host_info: &HostInfo) -> Self {
+        Self::new(
+            host_id.id,
+            host_id.generated_at,
+            host_info.description.clone(),
+            host_info.host_os.version(),
+            host_info.host_app_version.clone(),
+            host_info.host_os.vendor().clone(),
+        )
     }
 }
 
-impl Default for DeviceInfo {
-    fn default() -> Self {
-        Self::new_unknown_device()
+#[cfg(test)]
+impl DeviceInfo {
+    fn new_unknown() -> Self {
+        Self::new(
+            DeviceID::generate_new(),
+            now(),
+            DeviceInfoDescription::new("Unknown", "Unknown"),
+            "Unknown",
+            "Unknown",
+            "Unknown",
+        )
     }
 }
 
 impl HasSampleValues for DeviceInfo {
     fn sample() -> Self {
-        Self::new(
-            Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
-            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            "iPhone",
-        )
+        Self {
+            id: DeviceID::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74")
+                .unwrap(),
+            date: Timestamp::sample(),
+            description: DeviceInfoDescription {
+                name: "iPhone".to_owned(),
+                model: "iPhone".to_owned(),
+            }
+            .to_string(),
+            system_version: None,
+            host_app_version: None,
+            host_vendor: None,
+        }
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            Uuid::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd").unwrap(),
-            Timestamp::parse("2023-12-24T17:13:56.123Z").unwrap(),
-            "Android",
-        )
+        Self {
+            id: DeviceID::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd")
+                .unwrap(),
+            date: Timestamp::sample_other(),
+            description: DeviceInfoDescription {
+                name: "Android".to_owned(),
+                model: "Android".to_owned(),
+            }
+            .to_string(),
+            system_version: None,
+            host_app_version: None,
+            host_vendor: None,
+        }
     }
 }
 
@@ -113,48 +163,54 @@ mod tests {
     }
 
     #[test]
-    fn new_iphone() {
-        assert_eq!(SUT::new_iphone().description, "iPhone");
-    }
-
-    #[test]
-    fn with_description() {
-        assert_eq!(SUT::with_description("Nokia").description, "Nokia");
-    }
-
-    #[test]
-    fn new_has_description_unknown_device() {
-        assert_eq!(SUT::new_unknown_device().description, "Unknown device");
-    }
-
-    #[test]
     fn display() {
         let id_str = "12345678-bbbb-cccc-dddd-abcd12345678";
-        let id = Uuid::from_str(id_str).unwrap();
+        let id = DeviceID::from_str(id_str).unwrap();
         let sut = SUT::new(
             id,
             Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            "Foo",
+            DeviceInfoDescription::new("Foo", "Unknown"),
+            "Unknown",
+            "Unknown",
+            "Unknown",
         );
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             format!("{sut}"),
-            format!("Foo | created: 2023-09-11 | #{}", id_str)
+            format!("Foo (Unknown) | created: 2023-09-11 | #{}", id_str)
         )
     }
 
     #[test]
     fn id_is_unique() {
-        let n = 1000;
+        let n = 20;
         let ids = (0..n)
-            .map(|_| SUT::new_iphone())
+            .map(|_| SUT::new_unknown())
             .map(|d| d.id)
-            .collect::<HashSet<Uuid>>();
+            .collect::<HashSet<DeviceID>>();
         assert_eq!(ids.len(), n);
     }
 
     #[test]
     fn date_is_now() {
-        assert!(SUT::new_iphone().date.year() >= 2023);
+        assert!(SUT::new_unknown().date.year() >= 2023);
+    }
+
+    #[test]
+    fn test_new_from_info() {
+        let host_id = HostId::sample();
+        let host_info = HostInfo::sample();
+
+        assert_eq!(
+            DeviceInfo::new_from_info(&host_id, &host_info),
+            DeviceInfo::new(
+                host_id.id,
+                host_id.generated_at,
+                host_info.description,
+                host_info.host_os.version(),
+                host_info.host_app_version,
+                host_info.host_os.vendor()
+            )
+        )
     }
 
     #[test]
@@ -163,13 +219,18 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#;
         let model = serde_json::from_str::<SUT>(str).unwrap();
         assert_eq!(model.date.day(), 11);
         let json = serde_json::to_string(&model).unwrap();
         assert!(json.contains("56.000Z"));
+    }
+
+    #[test]
+    fn json_nanoseconds_precision() {
+        assert_json_roundtrip(&SUT::new_unknown());
     }
 
     #[test]
@@ -183,7 +244,7 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56.000Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -194,10 +255,37 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "date": "1970-01-01T12:34:56Z",
-                "description": "Nokia"
+                "description": "Nokia 3310 (lur)"
             }
             "#,
         );
+    }
+
+    #[test]
+    fn json_roundtrip_with_system_and_app_version() {
+        let sut = SUT::new(
+            DeviceID::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
+            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
+            DeviceInfoDescription::new("My nice iPhone", "iPhone 15 Pro"),
+            "17.4.1",
+            "1.6.0",
+            "Apple",
+        );
+        assert_eq_after_json_roundtrip(
+            &sut,
+            // The JSON string literal below contains `.000` ISO8601
+            // milliseconds which is not set on the sample
+            r#"
+            {
+                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
+                "date": "2023-09-11T16:05:56.000Z",
+                "description": "My nice iPhone (iPhone 15 Pro)", 
+                "system_version": "17.4.1",
+                "host_app_version": "1.6.0",
+                "host_vendor": "Apple"
+            }
+            "#,
+        )
     }
 
     #[test]
@@ -207,7 +295,7 @@ mod tests {
             {
                 "id": "invalid-uuid",
                 "date": "1970-01-01T12:34:56.000Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -217,7 +305,7 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "date": "invalid-date",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -227,7 +315,7 @@ mod tests {
             {
                 "missing_key": "id",
                 "date": "1970-01-01T12:34:56.000Z",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
@@ -237,7 +325,7 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "missing_key": "date",
-                "description": "iPhone"
+                "description": "iPhone (iPhone)"
             }
             "#,
         );
