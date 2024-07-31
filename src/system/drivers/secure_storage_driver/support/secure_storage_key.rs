@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum SecureStorageKey {
-    SnapshotHeadersList,
     ActiveProfileID,
     HostID,
     DeviceFactorSourceMnemonic {
@@ -21,7 +20,6 @@ impl SecureStorageKey {
             match self {
                 SecureStorageKey::ActiveProfileID =>
                     "activeProfileID".to_owned(),
-                SecureStorageKey::SnapshotHeadersList => "headers".to_owned(),
                 SecureStorageKey::HostID => "host_id".to_owned(),
                 SecureStorageKey::DeviceFactorSourceMnemonic {
                     factor_source_id,
@@ -47,10 +45,6 @@ mod tests {
         assert_eq!(
             SecureStorageKey::ActiveProfileID.identifier(),
             "secure_storage_key_activeProfileID"
-        );
-        assert_eq!(
-            SecureStorageKey::SnapshotHeadersList.identifier(),
-            "secure_storage_key_headers"
         );
         assert_eq!(
             SecureStorageKey::DeviceFactorSourceMnemonic {

@@ -3,7 +3,6 @@ package com.radixdlt.sargon.os.radixconnect
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.radixdlt.sargon.SessionId
 import com.radixdlt.sargon.extensions.randomBagOfBytes
-import com.radixdlt.sargon.os.storage.EncryptedPreferencesStorage
 import com.radixdlt.sargon.os.storage.EncryptionHelper
 import com.radixdlt.sargon.os.storage.KeySpec
 import io.mockk.every
@@ -29,11 +28,9 @@ class RadixConnectSessionStorageTest {
     lateinit var tmpDir: File
 
     private val sut = RadixConnectSessionStorage(
-        storage = EncryptedPreferencesStorage(
-            datastore = PreferenceDataStoreFactory.create(scope = testScope) {
-                File(tmpDir, "radix_connect_session_storage.preferences_pb")
-            }
-        )
+        dataStore = PreferenceDataStoreFactory.create(scope = testScope) {
+            File(tmpDir, "radix_connect_session_storage.preferences_pb")
+        }
     )
 
     @Test

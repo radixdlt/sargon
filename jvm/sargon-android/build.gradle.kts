@@ -46,6 +46,7 @@ android {
             java.srcDir("${buildDir}/generated/src/release/java")
         }
     }
+    packaging { resources.excludes.add("META-INF/*") }
 }
 
 cargoNdk {
@@ -96,18 +97,21 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // For Network support
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.12"))
-    implementation("com.squareup.okhttp3:okhttp")
-    implementation("com.squareup.okhttp3:okhttp-coroutines")
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.coroutines)
 
     // For Storage implementation
     implementation(libs.androidx.datastore.preferences)
+
+    // For logging
+    implementation(libs.timber)
 
     // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))
@@ -117,6 +121,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.test.junit.ktx)
     androidTestImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
+    androidTestImplementation(libs.okhttp.mock.web.server)
 }
 
 publishing {
