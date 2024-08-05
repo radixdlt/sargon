@@ -18,9 +18,9 @@ pub fn new_app_preferences_default() -> AppPreferences {
 #[uniffi::export]
 pub fn app_preferences_has_gateway_with_url(
     app_preferences: AppPreferences,
-    url: Url,
+    url: Url, // UniFFIUrl
 ) -> bool {
-    app_preferences.has_gateway_with_url(url)
+    app_preferences.has_gateway_with_url(url) // (url.url)
 }
 
 #[cfg(test)]

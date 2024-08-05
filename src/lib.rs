@@ -11,6 +11,7 @@ mod home_cards;
 mod profile;
 mod radix_connect;
 mod system;
+mod types;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
