@@ -79,9 +79,7 @@ impl SargonOS {
         let mut profile = profile;
         self.claim_profile(&mut profile).await?;
 
-        self.secure_storage
-            .save_profile_and_active_profile_id(&profile)
-            .await?;
+        self.secure_storage.save_profile(&profile).await?;
 
         debug!(
             "Saved imported profile into secure storage, id: {}",
@@ -120,9 +118,7 @@ impl SargonOS {
             .save_private_hd_factor_source(&bdfs)
             .await?;
 
-        self.secure_storage
-            .save_profile_and_active_profile_id(&profile)
-            .await?;
+        self.secure_storage.save_profile(&profile).await?;
 
         Ok(profile_id)
     }
@@ -186,12 +182,7 @@ impl SargonOS {
         let secure_storage = &self.secure_storage;
 
         secure_storage
-            .save(
-                SecureStorageKey::ProfileSnapshot {
-                    profile_id: profile.header.id,
-                },
-                profile,
-            )
+            .save(SecureStorageKey::ProfileSnapshot, profile)
             .await?;
 
         self.event_bus
@@ -215,7 +206,6 @@ impl SargonOS {
         }
 
         secure_storage.delete_profile(self.profile().id()).await?;
-        secure_storage.delete_active_profile_id().await?;
         Ok(())
     }
 
@@ -342,7 +332,7 @@ mod tests {
 
         // ASSERT
         let saved = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
@@ -411,7 +401,7 @@ mod tests {
             .contains_id(new_account.id()));
 
         let loaded = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
@@ -421,26 +411,6 @@ mod tests {
             .unwrap()
             .accounts
             .contains_id(new_account.id()));
-    }
-
-    #[actix_rt::test]
-    async fn test_import_profile_active_profile_id_is_set() {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        // ACT
-        os.with_timeout(|x| x.import_profile(Profile::sample()))
-            .await
-            .unwrap();
-
-        // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(active_profile_id, os.profile().id());
     }
 
     #[actix_rt::test]
@@ -467,24 +437,25 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_delete_profile_then_create_new_with_bdfs_old_profile_is_deleted(
+    async fn test_delete_profile_then_create_new_with_bdfs_new_profile_replaces_old(
     ) {
         // ARRANGE
         let bdfs = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
-        let profile_id = os.profile().id();
 
         // ACT
-        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+        let new_profile_id = os
+            .with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
             .await
             .unwrap();
 
         // ASSERT
-        let load_old_profile_result = os
-            .with_timeout(|x| x.secure_storage.load_profile_with_id(profile_id))
-            .await;
+        let load_current_profile = os
+            .with_timeout(|x| x.secure_storage.load_profile())
+            .await
+            .unwrap();
 
-        assert!(load_old_profile_result.is_err());
+        assert_eq!(load_current_profile.unwrap().id(), new_profile_id)
     }
 
     #[actix_rt::test]
@@ -524,7 +495,7 @@ mod tests {
 
         // ASSERT
         let active_profile = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
@@ -573,15 +544,11 @@ mod tests {
         let second = os.profile().id();
         assert_ne!(second, first);
         let load_profile_res = os
-            .with_timeout(|x| x.secure_storage.load_profile_with_id(second))
-            .await;
+            .with_timeout(|x| x.secure_storage.load_profile())
+            .await
+            .unwrap();
 
-        assert_eq!(
-            load_profile_res,
-            Err(CommonError::UnableToLoadProfileFromSecureStorage {
-                profile_id: second
-            })
-        );
+        assert!(load_profile_res.is_none());
     }
 
     #[actix_rt::test]

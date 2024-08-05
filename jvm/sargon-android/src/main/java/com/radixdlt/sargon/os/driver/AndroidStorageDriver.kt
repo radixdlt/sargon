@@ -92,7 +92,6 @@ internal class AndroidStorageDriver(
             encryptedStorage = encryptedPreferencesDatastore,
             biometricAuthorizationDriver = biometricAuthorizationDriver
         )
-        is SecureStorageKey.ActiveProfileId -> null
     }?.let { mapping ->
         Result.success(mapping)
     }

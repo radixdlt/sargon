@@ -48,7 +48,7 @@ impl SargonOS {
 
         let secure_storage = &clients.secure_storage;
 
-        if let Some(loaded) = secure_storage.load_active_profile().await? {
+        if let Some(loaded) = secure_storage.load_profile().await? {
             Ok(Arc::new(Self {
                 clients,
                 profile_holder: ProfileHolder::new(loaded),
@@ -61,9 +61,7 @@ impl SargonOS {
 
             secure_storage.save_private_hd_factor_source(&bdfs).await?;
 
-            secure_storage
-                .save_profile_and_active_profile_id(&profile)
-                .await?;
+            secure_storage.save_profile(&profile).await?;
 
             info!("Saved new Profile and BDFS, finish booting SargonOS");
 
@@ -223,13 +221,13 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
+        let active_profile = os
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
 
-        assert_eq!(active_profile_id, os.profile().id());
+        assert_eq!(active_profile.id(), os.profile().id());
     }
 
     #[actix_rt::test]
@@ -240,10 +238,6 @@ mod tests {
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
         let drivers = Drivers::with_secure_storage(secure_storage_driver);
         let bios = Bios::new(drivers);
 
@@ -256,37 +250,6 @@ mod tests {
         // ASSERT
         let active_profile = os.profile();
         assert_eq!(active_profile.id(), profile.id());
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_with_existing_profile_active_profile_id() {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::sample();
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
-        // ACT
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(active_profile_id, profile.id());
     }
 
     #[actix_rt::test]
