@@ -1,3 +1,3 @@
-mod uniffi_url;
+mod ffi_url;
 
-pub use uniffi_url::*;
+pub use ffi_url::*;
