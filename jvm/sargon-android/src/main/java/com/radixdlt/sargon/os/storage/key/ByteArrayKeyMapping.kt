@@ -9,7 +9,7 @@ import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.extensions.identifier
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.extensions.toByteArray
-import com.radixdlt.sargon.os.storage.KeySpec
+import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.remove
 import com.radixdlt.sargon.os.storage.write
@@ -30,12 +30,12 @@ internal class ByteArrayKeyMapping private constructor(
 
     internal constructor(
         key: SecureStorageKey,
-        keySpec: KeySpec,
+        keystoreAccessRequest: KeystoreAccessRequest,
         storage: DataStore<Preferences>
     ) : this(
         ByteArrayKeyMappingInput.Secure(
             key = key,
-            keySpec = keySpec,
+            keystoreAccessRequest = keystoreAccessRequest,
             storage = storage
         )
     )
@@ -49,7 +49,7 @@ internal class ByteArrayKeyMapping private constructor(
         is ByteArrayKeyMappingInput.Secure -> input.storage.write(
             preferencesKey,
             bagOfBytes.toByteArray(),
-            input.keySpec
+            input.keystoreAccessRequest
         )
 
         is ByteArrayKeyMappingInput.Unsecure -> input.storage.write(
@@ -59,7 +59,10 @@ internal class ByteArrayKeyMapping private constructor(
     }
 
     override suspend fun read(): Result<BagOfBytes?> = when (input) {
-        is ByteArrayKeyMappingInput.Secure -> input.storage.read(preferencesKey, input.keySpec).map {
+        is ByteArrayKeyMappingInput.Secure -> input.storage.read(
+            preferencesKey,
+            input.keystoreAccessRequest
+        ).map {
             it?.toBagOfBytes()
         }
         is ByteArrayKeyMappingInput.Unsecure -> input.storage.read(preferencesKey).map {
@@ -82,7 +85,7 @@ internal class ByteArrayKeyMapping private constructor(
 
         data class Secure(
             val key: SecureStorageKey,
-            val keySpec: KeySpec,
+            val keystoreAccessRequest: KeystoreAccessRequest,
             override val storage: DataStore<Preferences>,
         ) : ByteArrayKeyMappingInput
     }

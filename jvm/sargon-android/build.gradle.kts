@@ -90,6 +90,12 @@ dependencies {
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
+    // For lifecycle callbacks
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // For biometric requests for secure storage
+    implementation(libs.androidx.biometric.ktx)
+
     // For Coroutines support
     implementation(libs.coroutines.android)
 

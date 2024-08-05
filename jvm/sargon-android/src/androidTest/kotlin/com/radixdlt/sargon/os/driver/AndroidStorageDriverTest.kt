@@ -112,11 +112,22 @@ class AndroidStorageDriverTest {
     }
 
     companion object {
-        fun sut(context: Context, scope: CoroutineScope) = AndroidStorageDriver(
+        internal fun sut(
+            context: Context,
+            scope: CoroutineScope,
+            onAuthorize: () -> Result<Unit> = { Result.success(Unit) }
+        ) = AndroidStorageDriver(
             encryptedPreferencesDatastore = encryptedDataStore(context, scope),
             preferencesDatastore = unEncryptedDataStore(context, scope),
-            deviceInfoDatastore = deviceInfoDataStore(context, scope)
+            deviceInfoDatastore = deviceInfoDataStore(context, scope),
+            biometricAuthorizationDriver = TestBiometricAuthorizationDriver(onAuthorize)
         )
+
+        private class TestBiometricAuthorizationDriver(
+            private val onAuthorize: () -> Result<Unit>
+        ): BiometricAuthorizationDriver {
+            override suspend fun authorize(): Result<Unit> = onAuthorize()
+        }
 
         private fun encryptedDataStore(
             context: Context,

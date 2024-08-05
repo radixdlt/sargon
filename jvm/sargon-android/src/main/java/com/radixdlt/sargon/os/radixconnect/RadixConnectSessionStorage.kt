@@ -12,7 +12,7 @@ import com.radixdlt.sargon.SessionId
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.extensions.toByteArray
-import com.radixdlt.sargon.os.storage.KeySpec
+import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.write
 
@@ -32,13 +32,13 @@ internal class RadixConnectSessionStorage internal constructor(
         dataStore.write(
             key = sessionId.key(),
             value = encodedSession.toByteArray(),
-            keySpec = KeySpec.RadixConnect()
+            keystoreAccessRequest = KeystoreAccessRequest.ForRadixConnect
         )
     }
 
     override suspend fun loadSession(sessionId: SessionId): BagOfBytes? = dataStore.read(
         key = sessionId.key(),
-        keySpec = KeySpec.RadixConnect()
+        keystoreAccessRequest = KeystoreAccessRequest.ForRadixConnect
     ).getOrNull()?.toBagOfBytes()
 
     private fun SessionId.key() = byteArrayPreferencesKey(name = toString())

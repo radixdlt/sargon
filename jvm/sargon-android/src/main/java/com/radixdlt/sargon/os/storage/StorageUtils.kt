@@ -6,33 +6,49 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import com.radixdlt.sargon.annotation.KoverIgnore
+import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.extensions.toUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
+private suspend fun KeystoreAccessRequest?.requestAuthorizationIfNeeded() =
+    this?.requestAuthorization() ?: Result.success(Unit)
+
+/**
+ * Reads the contents associated with the given [key] from the data store.
+ * If a [KeystoreAccessRequest] is provided then the data written will be decrypted using keystore
+ */
 internal suspend fun <T> DataStore<Preferences>.read(
     key: Preferences.Key<T>,
-    keySpec: KeySpec? = null
-): Result<T?> {
-    val value = data.catchIOException().map { preferences -> preferences[key] }.firstOrNull()
-
-    return if (keySpec != null && value != null) {
-        value.decrypt(keySpec)
-    } else {
-        Result.success(value)
+    keystoreAccessRequest: KeystoreAccessRequest? = null
+): Result<T?> = keystoreAccessRequest
+    .requestAuthorizationIfNeeded()
+    .mapCatching {
+        data.catchIOException().map { preferences -> preferences[key] }.firstOrNull()
+    }.then { value ->
+        if (keystoreAccessRequest != null && value != null) {
+            value.decrypt(keystoreAccessRequest.keySpec)
+        } else {
+            Result.success(value)
+        }
     }
-}
 
+/**
+ * Associates the [value] with the given [key] to the data store.
+ * If a [KeystoreAccessRequest] is provided then the data will be encrypted using keystore
+ */
 internal suspend fun <T> DataStore<Preferences>.write(
     key: Preferences.Key<T>,
     value: T,
-    keySpec: KeySpec? = null
-) = if (keySpec != null && value != null) {
-    value.encrypt(keySpec)
-} else {
-    Result.success(value)
+    keystoreAccessRequest: KeystoreAccessRequest? = null
+): Result<Unit> = keystoreAccessRequest.requestAuthorizationIfNeeded().then {
+    if (keystoreAccessRequest != null && value != null) {
+        value.encrypt(keystoreAccessRequest.keySpec)
+    } else {
+        Result.success(value)
+    }
 }.mapCatching { modified ->
     edit { preferences ->
         preferences[key] = modified

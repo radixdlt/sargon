@@ -15,7 +15,8 @@ import com.radixdlt.sargon.os.storage.key.HostIdKeyMapping
 import com.radixdlt.sargon.os.storage.key.ProfileSnapshotKeyMapping
 import timber.log.Timber
 
-class AndroidStorageDriver(
+internal class AndroidStorageDriver(
+    private val biometricAuthorizationDriver: BiometricAuthorizationDriver,
     private val encryptedPreferencesDatastore: DataStore<Preferences>,
     private val preferencesDatastore: DataStore<Preferences>,
     private val deviceInfoDatastore: DataStore<Preferences>
@@ -88,7 +89,8 @@ class AndroidStorageDriver(
 
         is SecureStorageKey.DeviceFactorSourceMnemonic -> DeviceFactorSourceMnemonicKeyMapping(
             key = this,
-            encryptedStorage = encryptedPreferencesDatastore
+            encryptedStorage = encryptedPreferencesDatastore,
+            biometricAuthorizationDriver = biometricAuthorizationDriver
         )
         is SecureStorageKey.ActiveProfileId -> null
     }?.let { mapping ->
@@ -108,7 +110,7 @@ class AndroidStorageDriver(
 
     private fun <T> Result<T>.reportFailure(message: String, commonError: CommonException) =
         onFailure { error ->
-            Timber.w(error, message)
+            Timber.tag("Sargon").w(error, message)
             when (error) {
                 is CommonException -> throw error
                 else -> throw commonError
