@@ -12,6 +12,11 @@ extension AppPreferences: SargonModel {}
 
 extension AppPreferences {
 	public func hasGateway(with url: URL) -> Bool {
-		appPreferencesHasGatewayWithUrl(appPreferences: self, url: url)
+		do {
+			let ffiUrl = try FfiUrl.parse(urlPath: url.absoluteString)
+			return appPreferencesHasGatewayWithUrl(appPreferences: self, url: ffiUrl)
+		} catch {
+			return false
+		}
 	}
 }
