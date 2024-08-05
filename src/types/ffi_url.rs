@@ -1,3 +1,4 @@
+use uniffi::deps::bytes::Buf;
 use uniffi::{Lift, RustBuffer};
 
 use crate::prelude::*;
@@ -26,6 +27,7 @@ unsafe impl Lift<UniFfiTag> for FfiUrl {
     }
 
     fn try_read(buf: &mut &[u8]) -> uniffi::Result<Self> {
+        buf.advance(4);
         let url = Url::try_read(buf)?;
         Ok(Self { url })
     }
