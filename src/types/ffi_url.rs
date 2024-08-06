@@ -18,9 +18,14 @@ pub struct FfiUrl {
 #[uniffi::export]
 impl FfiUrl {
     #[uniffi::constructor]
-    pub fn new(url: Url) -> Result<Self> {
-        Ok(Self { url })
+    pub fn new(url_path: String) -> Result<Self> {
+        Self::from_str(&url_path)
     }
+}
+
+#[uniffi::export]
+pub fn ffi_url_get_url(ffi_url: &FfiUrl) -> Url {
+    ffi_url.url.clone()
 }
 
 impl FromStr for FfiUrl {
@@ -28,7 +33,7 @@ impl FromStr for FfiUrl {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let url = parse_url(s)?;
-        Self::new(url)
+        Ok(Self { url })
     }
 }
 
@@ -41,14 +46,21 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let url = Url::parse("https://radixdlt.com").unwrap();
-        let result = SUT::new(url.clone());
-        assert_eq!(result.unwrap().url, url);
+        let url_path = "https://radixdlt.com";
+        let result = SUT::new(url_path.to_string());
+        assert_eq!(result.unwrap().url, Url::parse(url_path).unwrap());
     }
 
     #[test]
     fn test_from_str() {
         let result = SUT::from_str("https://radixdlt.com");
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_get_url() {
+        let url_path = "https://radixdlt.com";
+        let sut = SUT::new(url_path.to_string()).unwrap();
+        assert_eq!(ffi_url_get_url(&sut), Url::parse(url_path).unwrap());
     }
 }
