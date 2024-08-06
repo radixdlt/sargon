@@ -1,9 +1,17 @@
 use uniffi::deps::bytes::Buf;
-use uniffi::{Lift, RustBuffer};
 
 use crate::prelude::*;
 use crate::UniFfiTag;
 
+/// A wrapper around `Url` that allows us to safely deal with Urls generated on hosts.
+///
+/// Context: We have defined a custom type conversion between Rust's `Url` and the hosts analogues.
+/// However, a Url could be considered valid on host but not on Rust. For example, Swift allows to build a Url
+/// from string `"invalid input"`, while Rust doesn't.
+///
+/// Therefore, if a given Rust function expects a `Url` as param and is sent one from host side which is invalid,
+/// the code will panic. However, if we send the wrapper instead, we make sure the conversion is safely done on the
+/// host side, dealing with the failing conversion properly rather than panicking.
 #[derive(Debug, PartialEq, Eq, Hash, uniffi::Object, derive_more::Display)]
 #[uniffi::export(Debug, Display, Eq, Hash)]
 pub struct FfiUrl {
@@ -13,22 +21,22 @@ pub struct FfiUrl {
 #[uniffi::export]
 impl FfiUrl {
     #[uniffi::constructor]
-    pub fn parse(url_path: String) -> Result<Self> {
-        let url = parse_url(url_path)?;
+    pub fn new(url: Url) -> Result<Self> {
         Ok(Self { url })
     }
 }
 
-unsafe impl Lift<UniFfiTag> for FfiUrl {
-    type FfiType = RustBuffer;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
-        Self::try_lift_from_rust_buffer(buf)
-    }
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FfiUrl;
 
-    fn try_read(buf: &mut &[u8]) -> uniffi::Result<Self> {
-        buf.advance(4);
-        let url = Url::try_read(buf)?;
-        Ok(Self { url })
+    #[test]
+    fn test_new() {
+        let url = Url::parse("https://radixdlt.com").unwrap();
+        let result = SUT::new(url.clone());
+        assert_eq!(result.unwrap().url, url);
     }
 }

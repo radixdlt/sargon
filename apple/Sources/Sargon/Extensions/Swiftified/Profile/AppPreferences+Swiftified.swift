@@ -11,12 +11,8 @@ import SargonUniFFI
 extension AppPreferences: SargonModel {}
 
 extension AppPreferences {
-	public func hasGateway(with url: URL) -> Bool {
-		do {
-			let ffiUrl = try FfiUrl.parse(urlPath: url.absoluteString)
-			return appPreferencesHasGatewayWithUrl(appPreferences: self, url: ffiUrl)
-		} catch {
-			return false
-		}
+	public func hasGateway(with url: URL) throws -> Bool {
+		let ffiUrl = try FfiUrl(url: url)
+		return appPreferencesHasGatewayWithUrl(appPreferences: self, url: ffiUrl)
 	}
 }

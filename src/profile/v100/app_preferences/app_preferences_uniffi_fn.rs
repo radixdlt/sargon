@@ -19,9 +19,9 @@ pub fn new_app_preferences_default() -> AppPreferences {
 #[uniffi::export]
 pub fn app_preferences_has_gateway_with_url(
     app_preferences: AppPreferences,
-    url: FfiUrl,
+    url: &FfiUrl,
 ) -> bool {
-    app_preferences.has_gateway_with_url(url.url)
+    app_preferences.has_gateway_with_url(url.url.clone())
 }
 
 #[cfg(test)]
@@ -47,7 +47,8 @@ mod tests {
     fn test_app_preferences_has_gateway_with_url() {
         assert!(app_preferences_has_gateway_with_url(
             SUT::sample(),
-            FfiUrl::parse("https://mainnet.radixdlt.com".to_string()).unwrap()
+            &FfiUrl::new(Url::parse("https://mainnet.radixdlt.com").unwrap())
+                .unwrap()
         ));
     }
 }
