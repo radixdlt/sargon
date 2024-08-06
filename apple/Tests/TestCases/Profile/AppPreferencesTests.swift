@@ -16,26 +16,17 @@ final class AppPreferencesTests: Test<AppPreferences> {
 		XCTAssertEqual(SUT.default.transaction.defaultDepositGuarantee, 0.99)
 	}
 	
-	func test_has_gateway() {
-		// Valid URLs
-		do {
-			var result = try SUT.default.hasGateway(with: .init(string: "https://mainnet.radixdlt.com/")!)
-			XCTAssertTrue(result)
-			result = try SUT.default.hasGateway(with: .init(string: "https://mainnet.radixdlt.com")!)
-			XCTAssertTrue(result)
-			result = try SUT.default.hasGateway(with: .init(string: "https://radixdlt.com")!)
-			XCTAssertFalse(result)
-		} catch {
-			XCTFail("Unexpected failure")
-		}
+	func test_has_gateway_valid() throws {
+		XCTAssertTrue(try SUT.default.hasGateway(with: .init(string: "https://mainnet.radixdlt.com/")!))
+		XCTAssertTrue(try SUT.default.hasGateway(with: .init(string: "https://mainnet.radixdlt.com")!))
+		XCTAssertFalse(try SUT.default.hasGateway(with: .init(string: "https://radixdlt.com")!))
 		
-		// Invalid URL
-		do {
-			let url = URL(string: "Rust considers this invalid")
-			XCTAssertNotNil(url)
-			let _ = try SUT.default.hasGateway(with: url!)
-			XCTFail("Should have thrown")
-		} catch let error {
+	}
+	
+	func test_has_gateway_invalid() {
+		let url = URL(string: "Rust considers this invalid")
+		XCTAssertNotNil(url)
+		XCTAssertThrowsError(try SUT.default.hasGateway(with: url!)) { error in
 			XCTAssertEqual(error.localizedDescription, "Failed to convert arg \'url\': relative URL without a base")
 		}
 	}

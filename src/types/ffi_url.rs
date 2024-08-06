@@ -26,6 +26,15 @@ impl FfiUrl {
     }
 }
 
+impl FromStr for FfiUrl {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let url = parse_url(s)?;
+        Self::new(url)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -38,5 +47,11 @@ mod tests {
         let url = Url::parse("https://radixdlt.com").unwrap();
         let result = SUT::new(url.clone());
         assert_eq!(result.unwrap().url, url);
+    }
+
+    #[test]
+    fn test_from_str() {
+        let result = SUT::from_str("https://radixdlt.com");
+        assert!(result.is_ok());
     }
 }

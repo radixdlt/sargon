@@ -47,8 +47,7 @@ mod tests {
     fn test_app_preferences_has_gateway_with_url() {
         assert!(app_preferences_has_gateway_with_url(
             SUT::sample(),
-            &FfiUrl::new(Url::parse("https://mainnet.radixdlt.com").unwrap())
-                .unwrap()
+            &FfiUrl::from_str("https://mainnet.radixdlt.com").unwrap()
         ));
     }
 }
