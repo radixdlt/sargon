@@ -1,7 +1,4 @@
-use uniffi::deps::bytes::Buf;
-
 use crate::prelude::*;
-use crate::UniFfiTag;
 
 /// A wrapper around `Url` that allows us to safely deal with Urls generated on hosts.
 ///
