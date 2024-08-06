@@ -30,7 +30,7 @@ internal class HostIdKeyMapping(
     private fun HostId.Companion.fromJsonBytes(jsonBytes: BagOfBytes) =
         newHostIdFromJsonBytes(jsonBytes)
     private fun HostId.toJsonBytes() = hostIdToJsonBytes(hostId = this)
-    private fun HostId.asEntry() = HostIdEntry(
+    private fun HostId.asEntry() = HostIdAndroidEntry(
         id = id,
         date = generatedAt
     )
@@ -44,7 +44,7 @@ internal class HostIdKeyMapping(
     override suspend fun read(): Result<BagOfBytes?> = deviceStorage.read(preferencesKey)
         .mapCatching { entrySerialized ->
             if (entrySerialized != null) {
-                HostIdEntry.fromJsonString(entrySerialized).toHostId().toJsonBytes()
+                HostIdAndroidEntry.fromJsonString(entrySerialized).toHostId().toJsonBytes()
             } else {
                 null
             }
@@ -68,12 +68,15 @@ internal class HostIdKeyMapping(
  *  -- model: String
  *  the intention was to keep a stable identifier along with some more data.
  *
- *  - From version 1.X.X there is no need to keep the all the rest of the data in the preferences.
- * Thus only the id and date are kept and the rest of the values will be calculated on the fly.
- * So [HostIdEntry] contains actually a subset of critical data being kept in DeviceInfo previously.
+ *  - From version 1.8.3 there is no need to keep the all the rest of the data in the preferences.
+ * The update was to bridge compatibility with sargon os and android implementation
+ *
+ * Only the id and date are kept and the rest of the values are not needed, since [HostInfo] will
+ * be calculated on the fly by sargon os.
+ * So [HostIdAndroidEntry] contains actually a subset of critical data being kept in DeviceInfo previously.
  */
 @Serializable
-data class HostIdEntry(
+data class HostIdAndroidEntry(
     @Serializable(with = UuidSerializer::class)
     val id: Uuid,
     @Serializable(with = TimestampSerializer::class)
@@ -96,6 +99,6 @@ data class HostIdEntry(
             }
 
         fun fromJsonString(jsonString: String) = jsonSerializer
-            .decodeFromString<HostIdEntry>(jsonString)
+            .decodeFromString<HostIdAndroidEntry>(jsonString)
     }
 }

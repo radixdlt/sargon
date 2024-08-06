@@ -24,17 +24,17 @@ internal class AndroidStorageDriver(
 
     override suspend fun loadData(key: SecureStorageKey): BagOfBytes? = key
         .mapping()
-        ?.then { it.read() }
-        ?.reportFailure(
+        .then { it.read() }
+        .reportFailure(
             "Failed to load data for $key",
             CommonException.SecureStorageReadException()
         )
-        ?.getOrNull()
+        .getOrNull()
 
     override suspend fun saveData(key: SecureStorageKey, data: BagOfBytes) {
         key.mapping()
-            ?.then { it.write(data) }
-            ?.reportFailure(
+            .then { it.write(data) }
+            .reportFailure(
                 "Failed to save data for $key",
                 CommonException.SecureStorageWriteException()
             )
@@ -42,8 +42,8 @@ internal class AndroidStorageDriver(
 
     override suspend fun deleteDataForKey(key: SecureStorageKey) {
         key.mapping()
-            ?.then { it.remove() }
-            ?.reportFailure(
+            .then { it.remove() }
+            .reportFailure(
                 "Failed to remove data for $key",
                 CommonException.SecureStorageWriteException()
             )
@@ -51,17 +51,17 @@ internal class AndroidStorageDriver(
 
     override suspend fun loadData(key: UnsafeStorageKey): BagOfBytes? = key
         .mapping()
-        ?.then { it.read() }
-        ?.reportFailure(
+        .then { it.read() }
+        .reportFailure(
             "Failed to load data for $key",
             CommonException.UnsafeStorageReadException()
         )
-        ?.getOrNull()
+        .getOrNull()
 
     override suspend fun saveData(key: UnsafeStorageKey, data: BagOfBytes) {
         key.mapping()
-            ?.then { it.write(data) }
-            ?.reportFailure(
+            .then { it.write(data) }
+            .reportFailure(
                 "Failed to save data for $key",
                 CommonException.UnsafeStorageWriteException()
             )
@@ -69,8 +69,8 @@ internal class AndroidStorageDriver(
 
     override suspend fun deleteDataForKey(key: UnsafeStorageKey) {
         key.mapping()
-            ?.then { it.remove() }
-            ?.reportFailure(
+            .then { it.remove() }
+            .reportFailure(
                 "Failed to remove data for $key",
                 CommonException.UnsafeStorageWriteException()
             )
@@ -92,7 +92,7 @@ internal class AndroidStorageDriver(
             encryptedStorage = encryptedPreferencesDatastore,
             biometricAuthorizationDriver = biometricAuthorizationDriver
         )
-    }?.let { mapping ->
+    }.let { mapping ->
         Result.success(mapping)
     }
 
@@ -101,9 +101,7 @@ internal class AndroidStorageDriver(
             key = this,
             storage = preferencesDatastore
         )
-
-        else -> null
-    }?.let { mapping ->
+    }.let { mapping ->
         Result.success(mapping)
     }
 

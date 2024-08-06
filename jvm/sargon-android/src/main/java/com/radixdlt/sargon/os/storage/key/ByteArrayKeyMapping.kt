@@ -75,7 +75,7 @@ internal class ByteArrayKeyMapping private constructor(
         is ByteArrayKeyMappingInput.Unsecure -> input.storage.remove(preferencesKey)
     }
 
-    internal sealed interface ByteArrayKeyMappingInput {
+    private sealed interface ByteArrayKeyMappingInput {
         val storage: DataStore<Preferences>
 
         data class Unsecure(

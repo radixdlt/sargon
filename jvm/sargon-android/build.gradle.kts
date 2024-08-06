@@ -69,6 +69,8 @@ koverReport {
     filters {
         excludes {
             packages("com.radixdlt.sargon.samples")
+            // Drivers are tested in androidTest
+            packages("com.radixdlt.sargon.os.driver")
             annotatedBy("com.radixdlt.sargon.annotation.KoverIgnore")
         }
         includes {

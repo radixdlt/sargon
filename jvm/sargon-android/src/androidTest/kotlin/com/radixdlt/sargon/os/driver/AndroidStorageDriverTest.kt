@@ -7,7 +7,6 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import androidx.test.filters.SmallTest
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageKey
@@ -52,7 +51,7 @@ class AndroidStorageDriverTest {
         val sut = sut(testContext, backgroundScope)
         val profile = Profile.sample()
         val jsonBytes = bagOfBytes(profile.toJson())
-        val key = SecureStorageKey.ProfileSnapshot(profileId = profile.header.id)
+        val key = SecureStorageKey.ProfileSnapshot
         sut.saveData(key, jsonBytes)
 
         val receivedBytes = sut.loadData(key)
@@ -68,7 +67,7 @@ class AndroidStorageDriverTest {
         val sut = sut(testContext, backgroundScope)
         val profile = Profile.sample()
         val jsonBytes = bagOfBytes(profile.toJson())
-        val key = SecureStorageKey.ProfileSnapshot(profileId = profile.header.id)
+        val key = SecureStorageKey.ProfileSnapshot
         sut.saveData(key, jsonBytes)
         assertEquals(
             profile,
@@ -78,21 +77,6 @@ class AndroidStorageDriverTest {
         sut.deleteDataForKey(key)
 
         assertNull(sut.loadData(key))
-    }
-
-    @Test
-    fun testSecureStorageKeysNotOperationalOnAndroid() = runTest {
-        val sut = sut(testContext, backgroundScope)
-
-        val notOperationalKeys = listOf(SecureStorageKey.ActiveProfileId)
-
-        notOperationalKeys.forEach { key ->
-            val bytes = randomBagOfBytes(2)
-
-            sut.saveData(key, bytes)
-
-            assertNull(sut.loadData(key))
-        }
     }
 
     @Test

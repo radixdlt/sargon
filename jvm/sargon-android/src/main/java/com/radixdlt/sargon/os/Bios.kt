@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Drivers
+import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.os.driver.AndroidBiometricAuthorizationDriver
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
@@ -18,6 +19,7 @@ import com.radixdlt.sargon.os.driver.BiometricsHandler
 import okhttp3.OkHttpClient
 import timber.log.Timber
 
+@KoverIgnore
 fun Bios.Companion.from(
     context: Context,
     enableLogging: Boolean,

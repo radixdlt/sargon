@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.annotation.KoverIgnore
 import timber.log.Timber
 
 inline fun <FirstResult, SecondResult> Result<FirstResult>.then(
@@ -26,6 +27,7 @@ inline fun <T> Result<T>.mapError(
 
 fun <T> Result<T>.toUnit() = map {}
 
+@KoverIgnore
 internal fun <T> Result<T>.logFailure(): Result<T> = onFailure { error ->
     Timber.w(error)
 }

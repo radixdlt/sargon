@@ -105,6 +105,7 @@ fun Decimal192.Companion.parseFromTextField(
 /**
  * A pair of an input represented with a decimal
  */
+@KoverIgnore
 class TextInputDecimal(
     val input: String,
     decimalSeparator: Char

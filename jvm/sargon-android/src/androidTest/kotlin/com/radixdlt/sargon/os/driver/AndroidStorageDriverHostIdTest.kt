@@ -12,7 +12,7 @@ import com.radixdlt.sargon.hostIdToJsonBytes
 import com.radixdlt.sargon.newHostIdFromJsonBytes
 import com.radixdlt.sargon.os.driver.AndroidStorageDriverTest.Companion.OLD_DEVICE_INFO_PREFERENCES
 import com.radixdlt.sargon.os.driver.AndroidStorageDriverTest.Companion.sut
-import com.radixdlt.sargon.os.storage.key.HostIdEntry
+import com.radixdlt.sargon.os.storage.key.HostIdAndroidEntry
 import com.radixdlt.sargon.samples.sample
 import com.radixdlt.sargon.serializer.TimestampSerializer
 import com.radixdlt.sargon.serializer.UuidSerializer
@@ -154,7 +154,7 @@ class AndroidStorageDriverHostIdTest {
     ) {
 
         companion object {
-            fun random() = HostIdEntry(
+            fun random() = HostIdAndroidEntry(
                 id = UUID.randomUUID(),
                 date = Timestamp.now()
             )
