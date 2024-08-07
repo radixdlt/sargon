@@ -17,15 +17,19 @@ impl EphemeralUnsafeStorage {
     }
 }
 
+#[async_trait::async_trait]
 impl UnsafeStorageDriver for EphemeralUnsafeStorage {
-    fn load_data(&self, key: UnsafeStorageKey) -> Result<Option<BagOfBytes>> {
+    async fn load_data(
+        &self,
+        key: UnsafeStorageKey,
+    ) -> Result<Option<BagOfBytes>> {
         self.storage
             .try_read()
             .map_err(|_| CommonError::UnsafeStorageReadError)
             .map(|s| s.get(&key).cloned())
     }
 
-    fn save_data(
+    async fn save_data(
         &self,
         key: UnsafeStorageKey,
         value: BagOfBytes,
@@ -39,7 +43,7 @@ impl UnsafeStorageDriver for EphemeralUnsafeStorage {
         Ok(())
     }
 
-    fn delete_data_for_key(&self, key: UnsafeStorageKey) -> Result<()> {
+    async fn delete_data_for_key(&self, key: UnsafeStorageKey) -> Result<()> {
         let mut storage = self
             .storage
             .try_write()

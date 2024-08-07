@@ -2,7 +2,9 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.mapError
 import com.radixdlt.sargon.extensions.then
+import com.radixdlt.sargon.extensions.toUnit
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -60,5 +62,15 @@ class ResultTest {
         assertThrows<IllegalStateException> {
             result.getOrThrow()
         }
+    }
+
+    @Test
+    fun testToUnit() {
+        val result = Result.success(10)
+
+        assertInstanceOf(
+            Unit::class.java,
+            result.toUnit().getOrThrow()
+        )
     }
 }

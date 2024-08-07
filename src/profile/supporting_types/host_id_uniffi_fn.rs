@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(HostId);
+
 #[uniffi::export]
 pub fn new_host_id_sample() -> HostId {
     HostId::sample()

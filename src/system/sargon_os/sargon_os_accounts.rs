@@ -757,7 +757,7 @@ mod tests {
 
         // ASSERT
         let saved_profile = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();

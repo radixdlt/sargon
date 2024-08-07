@@ -28,7 +28,7 @@ import UIKit
 extension AppleHostInfoDriver: HostInfoDriver {
 	
 	public func hostOs() async -> HostOs {
-        await .ios(version: UIDevice.current.systemVersion)
+		return HostOs.ios(version: UIDevice.current.systemVersion)
 	}
 
 	nonisolated public func hostDeviceName() async -> String {

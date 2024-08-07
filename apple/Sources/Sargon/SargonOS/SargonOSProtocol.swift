@@ -29,12 +29,6 @@ extension SargonOSProtocol {
 
 // MARK: Extensions
 extension SargonOSProtocol {
-	
-	@available(*, deprecated, message: "SHOULD migrate to use more specialized access methods on SargonOS instead, e.g. `accountsOnCurrentNetwork`.")
-	public var profile: Profile {
-		os.profile()
-	}
-	
 	public var currentNetworkID: NetworkID {
 		os.currentNetworkId()
 	}

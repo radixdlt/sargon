@@ -35,3 +35,5 @@ internal fun randomBagOfBytes(byteCount: Int): BagOfBytes = with(SecureRandom())
     nextBytes(bytes)
     bytes.toBagOfBytes()
 }
+
+internal fun BagOfBytes.toByteArray() = toUByteArray().toByteArray()

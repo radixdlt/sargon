@@ -80,7 +80,6 @@ class MnemonicWithPassphraseTest {
             MnemonicWithPassphrase.fromJson(invalidJson)
         }
 
-
         val iOSJsonLike = mnemonicWithPassphraseToJsonBytes(
             MnemonicWithPassphrase(
                 mnemonic = Mnemonic.init("remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),

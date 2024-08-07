@@ -2,15 +2,11 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum SecureStorageKey {
-    SnapshotHeadersList,
-    ActiveProfileID,
     HostID,
     DeviceFactorSourceMnemonic {
         factor_source_id: FactorSourceIDFromHash,
     },
-    ProfileSnapshot {
-        profile_id: ProfileID,
-    },
+    ProfileSnapshot,
 }
 
 impl SecureStorageKey {
@@ -19,15 +15,12 @@ impl SecureStorageKey {
         format!(
             "secure_storage_key_{}",
             match self {
-                SecureStorageKey::ActiveProfileID =>
-                    "activeProfileID".to_owned(),
-                SecureStorageKey::SnapshotHeadersList => "headers".to_owned(),
                 SecureStorageKey::HostID => "host_id".to_owned(),
                 SecureStorageKey::DeviceFactorSourceMnemonic {
                     factor_source_id,
                 } => format!("device_factor_source_{}", factor_source_id),
-                SecureStorageKey::ProfileSnapshot { profile_id } =>
-                    format!("profile_snapshot_{}", profile_id),
+                SecureStorageKey::ProfileSnapshot =>
+                    "profile_snapshot".to_owned(),
             }
         )
     }
@@ -45,14 +38,6 @@ mod tests {
     #[test]
     fn identifier() {
         assert_eq!(
-            SecureStorageKey::ActiveProfileID.identifier(),
-            "secure_storage_key_activeProfileID"
-        );
-        assert_eq!(
-            SecureStorageKey::SnapshotHeadersList.identifier(),
-            "secure_storage_key_headers"
-        );
-        assert_eq!(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: FactorSourceIDFromHash::sample()
             }
@@ -60,11 +45,8 @@ mod tests {
             "secure_storage_key_device_factor_source_device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
         );
         assert_eq!(
-            SecureStorageKey::ProfileSnapshot {
-                profile_id: ProfileID::sample()
-            }
-            .identifier(),
-            "secure_storage_key_profile_snapshot_ffffffff-ffff-ffff-ffff-ffffffffffff"
+            SecureStorageKey::ProfileSnapshot.identifier(),
+            "secure_storage_key_profile_snapshot"
         );
     }
 }
@@ -75,9 +57,7 @@ mod uniffi_tests {
 
     #[test]
     fn identifier() {
-        let key = SecureStorageKey::ProfileSnapshot {
-            profile_id: ProfileID::sample(),
-        };
+        let key = SecureStorageKey::ProfileSnapshot;
         assert_eq!(
             key.clone().identifier(),
             secure_storage_key_identifier(&key)

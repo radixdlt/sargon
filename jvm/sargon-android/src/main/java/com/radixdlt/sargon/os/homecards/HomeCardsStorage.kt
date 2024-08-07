@@ -7,25 +7,21 @@ import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.HomeCardsStorage
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.toBagOfBytes
-import com.radixdlt.sargon.os.storage.PreferencesStorage
+import com.radixdlt.sargon.extensions.toByteArray
+import com.radixdlt.sargon.os.storage.read
+import com.radixdlt.sargon.os.storage.write
 
+@KoverIgnore
 internal class HomeCardsStorageImpl internal constructor(
-    private val storage: PreferencesStorage
+    private val dataStore: DataStore<Preferences>
 ) : HomeCardsStorage {
 
-    @KoverIgnore
-    constructor(dataStore: DataStore<Preferences>) : this(
-        storage = PreferencesStorage(
-            datastore = dataStore
-        )
-    )
-
     override suspend fun saveCards(encodedCards: BagOfBytes) {
-        storage.set(KEY_HOME_CARDS, encodedCards.toUByteArray().toByteArray())
+        dataStore.write(KEY_HOME_CARDS, encodedCards.toByteArray())
     }
 
     override suspend fun loadCards(): BagOfBytes? {
-        return storage.get(KEY_HOME_CARDS).getOrNull()?.toBagOfBytes()
+        return dataStore.read(KEY_HOME_CARDS).getOrNull()?.toBagOfBytes()
     }
 
     companion object {
