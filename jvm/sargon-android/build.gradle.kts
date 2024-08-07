@@ -46,6 +46,7 @@ android {
             java.srcDir("${buildDir}/generated/src/release/java")
         }
     }
+    packaging { resources.excludes.add("META-INF/*") }
 }
 
 cargoNdk {
@@ -68,6 +69,8 @@ koverReport {
     filters {
         excludes {
             packages("com.radixdlt.sargon.samples")
+            // Drivers are tested in androidTest
+            packages("com.radixdlt.sargon.os.driver")
             annotatedBy("com.radixdlt.sargon.annotation.KoverIgnore")
         }
         includes {
@@ -89,6 +92,12 @@ dependencies {
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
+    // For lifecycle callbacks
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // For biometric requests for secure storage
+    implementation(libs.androidx.biometric.ktx)
+
     // For Coroutines support
     implementation(libs.coroutines.android)
 
@@ -96,18 +105,21 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // For Network support
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.12"))
-    implementation("com.squareup.okhttp3:okhttp")
-    implementation("com.squareup.okhttp3:okhttp-coroutines")
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.coroutines)
 
     // For Storage implementation
     implementation(libs.androidx.datastore.preferences)
+
+    // For logging
+    implementation(libs.timber)
 
     // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))
@@ -117,6 +129,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.test.junit.ktx)
     androidTestImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
+    androidTestImplementation(libs.okhttp.mock.web.server)
 }
 
 publishing {
