@@ -182,8 +182,8 @@ mod uniffi_tests {
 
     #[test]
     fn to_string_and_debug_string() {
-        assert_eq!(profile_to_string(&SUT::sample()).len(), 4292);
-        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27145);
+        assert_eq!(profile_to_string(&SUT::sample()).len(), 4404);
+        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27312);
         assert_ne!(
             profile_to_debug_string(&SUT::sample()),
             profile_to_debug_string(&SUT::sample_other())

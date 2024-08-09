@@ -31,6 +31,9 @@ pub struct AppPreferences {
 
     /// Default config related to making of transactions
     pub transaction: TransactionPreferences,
+
+    /// Configuration related to resources
+    pub resource: ResourcePreferences,
 }
 
 impl AppPreferences {
@@ -41,8 +44,13 @@ impl AppPreferences {
         gateways: {}
         security: {}
         transaction: {}
+        resource: {}
         "#,
-            self.display, self.gateways, self.security, self.transaction
+            self.display,
+            self.gateways,
+            self.security,
+            self.transaction,
+            self.resource
         )
     }
 }
@@ -53,12 +61,14 @@ impl AppPreferences {
         gateways: SavedGateways,
         security: Security,
         transaction: TransactionPreferences,
+        resource: ResourcePreferences,
     ) -> Self {
         Self {
             display,
             gateways,
             security,
             transaction,
+            resource,
         }
     }
 }
@@ -71,6 +81,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample(),
             Security::sample(),
             TransactionPreferences::sample(),
+            ResourcePreferences::sample(),
         )
     }
 
@@ -81,6 +92,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample_other(),
             Security::sample_other(),
             TransactionPreferences::sample_other(),
+            ResourcePreferences::sample_other(),
         )
     }
 }
@@ -184,6 +196,13 @@ mod tests {
                 },
                 "transaction": {
                     "defaultDepositGuarantee": "0.975"
+                },
+                "resource": {
+                  "flags": {
+                    "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
+                      "deletedByUser"
+                    ]
+                  }
                 }
             }
             "#,
