@@ -52,7 +52,10 @@ impl SargonOS {
         })
         .await?;
 
-        self.clients.profile_change.emit(profile).await;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(profile))
+            .await;
 
         Ok(())
     }

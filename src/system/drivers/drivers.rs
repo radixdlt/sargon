@@ -10,7 +10,7 @@ pub struct Drivers {
     pub event_bus: Arc<dyn EventBusDriver>,
     pub file_system: Arc<dyn FileSystemDriver>,
     pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
-    pub profile_change_driver: Arc<dyn ProfileChangeDriver>,
+    pub profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
 }
 
 #[uniffi::export]
@@ -26,7 +26,7 @@ impl Drivers {
         event_bus: Arc<dyn EventBusDriver>,
         file_system: Arc<dyn FileSystemDriver>,
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
-        profile_change_driver: Arc<dyn ProfileChangeDriver>,
+        profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
@@ -37,7 +37,7 @@ impl Drivers {
             event_bus,
             file_system,
             unsafe_storage,
-            profile_change_driver,
+            profile_state_change_driver,
         })
     }
 }
@@ -54,7 +54,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -68,7 +68,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -84,7 +84,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -100,7 +100,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -114,7 +114,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -128,7 +128,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -142,7 +142,7 @@ impl Drivers {
             event_bus,
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -158,7 +158,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             file_system,
             EphemeralUnsafeStorage::new(),
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 
@@ -174,7 +174,7 @@ impl Drivers {
             RustEventBusDriver::new(),
             RustFileSystemDriver::new(),
             unsafe_storage,
-            RustProfileChangeDriver::new(),
+            RustProfileStateChangeDriver::new(),
         )
     }
 }

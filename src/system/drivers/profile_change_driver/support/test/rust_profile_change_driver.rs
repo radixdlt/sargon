@@ -2,30 +2,33 @@ use crate::prelude::*;
 use std::sync::RwLock;
 
 #[derive(Debug)]
-pub struct RustProfileChangeDriver {
-    recorded: RwLock<Vec<Profile>>,
-    spy: fn(Profile) -> (),
+pub struct RustProfileStateChangeDriver {
+    recorded: RwLock<Vec<ProfileState>>,
+    spy: fn(ProfileState) -> (),
 }
 
 #[async_trait::async_trait]
-impl ProfileChangeDriver for RustProfileChangeDriver {
-    async fn handle_profile_change(&self, changed_profile: Profile) {
+impl ProfileStateChangeDriver for RustProfileStateChangeDriver {
+    async fn handle_profile_state_change(
+        &self,
+        changed_profile_state: ProfileState,
+    ) {
         self.recorded
             .try_write()
             .unwrap()
-            .push(changed_profile.clone());
-        (self.spy)(changed_profile)
+            .push(changed_profile_state.clone());
+        (self.spy)(changed_profile_state)
     }
 }
 
-impl RustProfileChangeDriver {
-    pub fn recorded(&self) -> Vec<Profile> {
+impl RustProfileStateChangeDriver {
+    pub fn recorded(&self) -> Vec<ProfileState> {
         self.recorded.try_read().unwrap().clone()
     }
     pub fn new() -> Arc<Self> {
         Self::with_spy(|_| {})
     }
-    pub fn with_spy(spy: fn(Profile) -> ()) -> Arc<Self> {
+    pub fn with_spy(spy: fn(ProfileState) -> ()) -> Arc<Self> {
         Arc::new(Self {
             spy,
             recorded: RwLock::new(Vec::new()),
