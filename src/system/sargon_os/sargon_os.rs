@@ -10,7 +10,7 @@ use crate::prelude::*;
 /// phone.
 #[derive(Debug, uniffi::Object)]
 pub struct SargonOS {
-    pub(crate) profile_holder: ProfileHolder,
+    pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
 }
 
@@ -51,7 +51,7 @@ impl SargonOS {
         if let Some(loaded) = secure_storage.load_profile().await? {
             Ok(Arc::new(Self {
                 clients,
-                profile_holder: ProfileHolder::new(loaded),
+                profile_state_holder: ProfileStateHolder::new_with(loaded),
             }))
         } else {
             info!("No saved profile found, creating a new one...");
@@ -67,7 +67,7 @@ impl SargonOS {
 
             let os = Arc::new(Self {
                 clients,
-                profile_holder: ProfileHolder::new(profile),
+                profile_state_holder: ProfileStateHolder::new_with(profile),
             });
             os.event_bus
                 .emit(EventNotification::new(Event::Booted))
@@ -227,7 +227,7 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(active_profile.id(), os.profile().id());
+        assert_eq!(active_profile.id(), os.profile().unwrap().id());
     }
 
     #[actix_rt::test]
@@ -249,7 +249,7 @@ mod tests {
 
         // ASSERT
         let active_profile = os.profile();
-        assert_eq!(active_profile.id(), profile.id());
+        assert_eq!(active_profile.unwrap().id(), profile.id());
     }
 
     #[actix_rt::test]

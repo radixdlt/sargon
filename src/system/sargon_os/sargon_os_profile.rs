@@ -39,13 +39,14 @@ impl SargonOS {
 #[uniffi::export]
 impl SargonOS {
     pub async fn set_profile(&self, profile: Profile) -> Result<()> {
-        if profile.id() != self.profile().id() {
+        // TODO the ? in here maybe is not correct
+        if profile.id() != self.profile()?.id() {
             return Err(
                 CommonError::TriedToUpdateProfileWithOneWithDifferentID,
             );
         }
 
-        self.update_profile_with(|mut p| {
+        self.update_profile_with(|p| {
             *p = profile.clone();
             Ok(())
         })
@@ -57,14 +58,14 @@ impl SargonOS {
     }
 
     /// Checks if current Profile contains any `ProfileNetwork`s.
-    pub fn has_any_network(&self) -> bool {
-        self.profile_holder
+    pub fn has_any_network(&self) -> Result<bool> {
+        self.profile_state_holder
             .access_profile_with(|p| !p.networks.is_empty())
     }
 
     /// Has **any** account, at all, including hidden, on any network.
-    pub fn has_any_account_on_any_network(&self) -> bool {
-        self.profile_holder
+    pub fn has_any_account_on_any_network(&self) -> Result<bool> {
+        self.profile_state_holder
             .access_profile_with(|p| p.has_any_account_on_any_network())
     }
 
@@ -86,7 +87,7 @@ impl SargonOS {
             imported_id
         );
 
-        self.profile_holder.replace_profile_with(profile)?;
+        self.profile_state_holder.replace_profile_with(profile)?;
         debug!(
             "Replaced held profile with imported one, id: {}",
             imported_id
@@ -123,8 +124,8 @@ impl SargonOS {
         Ok(profile_id)
     }
 
-    pub fn profile(&self) -> Profile {
-        self.profile_holder.profile()
+    pub fn profile(&self) -> Result<Profile> {
+        self.profile_state_holder.profile()
     }
 
     /// Do NOT use in production. Instead use `delete_profile_then_create_new_with_bdfs`
@@ -151,10 +152,10 @@ impl SargonOS {
     /// of the active profile to secure storage.
     pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
-        F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
+        F: Fn(&mut Profile) -> Result<R>,
     {
-        let res = self.profile_holder.update_profile_with(mutate)?;
-        self.profile_holder.update_profile_with(|mut p| {
+        let res = self.profile_state_holder.update_profile_with(mutate)?;
+        self.profile_state_holder.update_profile_with(|p| {
             p.update_header(None);
             Ok(())
         })?;
@@ -170,7 +171,8 @@ impl SargonOS {
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
     pub(crate) async fn save_existing_profile(&self) -> Result<()> {
-        self.save_profile(&self.profile()).await
+        let profile = &self.profile()?;
+        self.save_profile(profile).await
     }
 
     ///  Saves **provided** `profile`` into secure storage, if it's 'owned by host'.
@@ -198,14 +200,14 @@ impl SargonOS {
     async fn delete_profile_and_mnemonics(&self) -> Result<()> {
         let secure_storage = &self.secure_storage;
         let device_factor_sources = self
-            .profile_holder
-            .access_profile_with(|p| p.device_factor_sources());
+            .profile_state_holder
+            .access_profile_with(|p| p.device_factor_sources())?;
 
         for dfs in device_factor_sources.iter() {
             secure_storage.delete_mnemonic(&dfs.id).await?
         }
 
-        secure_storage.delete_profile(self.profile().id()).await?;
+        secure_storage.delete_profile(self.profile()?.id()).await?;
         Ok(())
     }
 
@@ -223,7 +225,8 @@ impl SargonOS {
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         self.delete_profile_and_mnemonics().await?;
         let (profile, bdfs) = self.new_profile_and_bdfs().await?;
-        self.profile_holder.replace_profile_with(profile.clone())?;
+        self.profile_state_holder
+            .replace_profile_with(profile.clone())?;
         Ok((profile, bdfs))
     }
 }
@@ -245,7 +248,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(
-            os.current_network(),
+            os.current_network().unwrap(),
             ProfileNetwork::new_empty_on(NetworkID::Mainnet)
         );
     }
@@ -261,7 +264,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(os.has_any_network());
+        assert!(os.has_any_network().unwrap());
     }
 
     #[actix_rt::test]
@@ -275,7 +278,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(os.has_any_account_on_any_network());
+        assert!(os.has_any_account_on_any_network().unwrap());
     }
 
     #[actix_rt::test]
@@ -290,7 +293,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.profile().id(), p.id());
+        assert_eq!(os.profile().unwrap().id(), p.id());
     }
 
     #[actix_rt::test]
@@ -354,7 +357,7 @@ mod tests {
         let host_id = os.host_id().await.unwrap();
         let host_info = os.host_info().await;
         assert_eq!(
-            os.profile().header.last_used_on_device,
+            os.profile().unwrap().header.last_used_on_device,
             DeviceInfo::new_from_info(&host_id, &host_info)
         );
     }
@@ -372,7 +375,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_ne!(&os.profile().header.last_modified, last_modified);
+        assert_ne!(&os.profile().unwrap().header.last_modified, last_modified);
     }
 
     #[actix_rt::test]
@@ -394,6 +397,7 @@ mod tests {
         // ASSERT
         assert!(os
             .profile()
+            .unwrap()
             .networks
             .get_id(NetworkID::Stokenet)
             .unwrap()
@@ -511,7 +515,7 @@ mod tests {
         let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
         let host_info = os.with_timeout(|x| x.host_info()).await;
         assert_eq!(
-            &os.profile().header.creating_device,
+            &os.profile().unwrap().header.creating_device,
             &DeviceInfo::new_from_info(&host_id, &host_info)
         );
 
@@ -524,7 +528,7 @@ mod tests {
         let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
         let host_info = os.with_timeout(|x| x.host_info()).await;
         assert_eq!(
-            &os.profile().header.creating_device,
+            &os.profile().unwrap().header.creating_device,
             &DeviceInfo::new_from_info(&host_id, &host_info)
         );
     }
@@ -533,7 +537,7 @@ mod tests {
     async fn test_emulate_fresh_install_does_not_save_new() {
         // ARRANGE
         let os = SUT::fast_boot().await;
-        let first = os.profile().id();
+        let first = os.profile().unwrap().id();
 
         // ACT
         os.with_timeout(|x| x.emulate_fresh_install())
@@ -541,7 +545,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let second = os.profile().id();
+        let second = os.profile().unwrap().id();
         assert_ne!(second, first);
         let load_profile_res = os
             .with_timeout(|x| x.secure_storage.load_profile())
@@ -556,7 +560,7 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
-        let mut profile = os.profile();
+        let mut profile = os.profile().unwrap();
         let new_network = ProfileNetwork::new(
             NetworkID::Stokenet,
             Accounts::just(Account::sample_stokenet()),
@@ -572,7 +576,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.profile().networks, profile.networks); // header has been updated so cannot do full profile comparison.
+        assert_eq!(os.profile().unwrap().networks, profile.networks); // header has been updated so cannot do full profile comparison.
     }
 
     #[actix_rt::test]

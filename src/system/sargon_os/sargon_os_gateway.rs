@@ -9,26 +9,26 @@ impl SargonOS {
     /// of the active Profile. This is the canonical value of "current network",
     /// which affects which accounts host clients display to end user and to
     /// which network transactions are submitted, amongst other behaviors.
-    pub fn current_network_id(&self) -> NetworkID {
-        self.profile_holder.current_network_id()
+    pub fn current_network_id(&self) -> Result<NetworkID> {
+        self.profile_state_holder.current_network_id()
     }
 
     /// The current gateway host client is using, which affects `current_network_id`.
     /// All Network Requests reading from Radix ledger and submission of new
     /// transactions will go the the Radix Network of the current Gateway.
-    pub fn current_gateway(&self) -> Gateway {
-        self.profile_holder.current_gateway().clone()
+    pub fn current_gateway(&self) -> Result<Gateway> {
+        self.profile_state_holder.current_gateway()
     }
 
     /// Returns the `gateways` values of the current Profile.
-    pub fn gateways(&self) -> SavedGateways {
-        self.profile_holder.gateways().clone()
+    pub fn gateways(&self) -> Result<SavedGateways> {
+        self.profile_state_holder.gateways()
     }
 
     /// Returns the `ProfileNetwork` corresponding to the network ID set by the
     /// current gateway.
-    pub fn current_network(&self) -> ProfileNetwork {
-        self.profile_holder.current_network().clone()
+    pub fn current_network(&self) -> Result<ProfileNetwork> {
+        self.profile_state_holder.current_network()
     }
 }
 
@@ -52,7 +52,7 @@ impl SargonOS {
         info!("Changing current gateway to: {}", &to);
         let network_id = to.network.id;
         let outcome = self
-            .update_profile_with(|mut p| {
+            .update_profile_with(|p| {
                 let outcome =
                     p.app_preferences.gateways.change_current(to.clone());
                 match outcome {
@@ -99,7 +99,8 @@ mod tests {
     async fn test_change_gateway_creates_empty_network_if_needed() {
         // ARRANGE
         let os = SUT::fast_boot().await;
-        let number_of_networks_before_change = os.profile().networks.len();
+        let number_of_networks_before_change =
+            os.profile().unwrap().networks.len();
 
         // ACT
         os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
@@ -108,7 +109,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(
-            os.profile().networks.len(),
+            os.profile().unwrap().networks.len(),
             number_of_networks_before_change + 1
         );
     }
@@ -124,7 +125,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.gateways().current, Gateway::stokenet())
+        assert_eq!(os.gateways().unwrap().current, Gateway::stokenet())
     }
 
     #[actix_rt::test]
@@ -138,7 +139,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.current_gateway(), Gateway::stokenet())
+        assert_eq!(os.current_gateway().unwrap(), Gateway::stokenet())
     }
 
     #[actix_rt::test]
@@ -152,7 +153,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.current_network_id(), NetworkID::Stokenet)
+        assert_eq!(os.current_network_id().unwrap(), NetworkID::Stokenet)
     }
 
     #[actix_rt::test]

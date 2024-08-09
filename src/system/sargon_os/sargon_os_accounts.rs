@@ -9,15 +9,15 @@ use crate::prelude::*;
 impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
-    pub fn accounts_on_current_network(&self) -> Accounts {
-        self.profile_holder.accounts_on_current_network()
+    pub fn accounts_on_current_network(&self) -> Result<Accounts> {
+        self.profile_state_holder.accounts_on_current_network()
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,
-    ) -> AccountsForDisplay {
-        self.profile_holder
+    ) -> Result<AccountsForDisplay> {
+        self.profile_state_holder
             .accounts_for_display_on_current_network()
     }
 
@@ -27,7 +27,7 @@ impl SargonOS {
         &self,
         address: AccountAddress,
     ) -> Result<Account> {
-        self.profile_holder.account_by_address(address)
+        self.profile_state_holder.account_by_address(address)
     }
 
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
@@ -70,7 +70,7 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let profile = self.profile();
+        let profile = self.profile()?;
 
         let (factor_source_id, account) = profile
             .create_unsaved_account(network_id, name, async move |fs| {
@@ -170,7 +170,7 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
-        let profile = self.profile();
+        let profile = self.profile()?;
 
         let (factor_source_id, accounts) = profile
             .create_unsaved_accounts(
@@ -274,7 +274,7 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountUpdated { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
-        self.update_profile_with(|mut p| {
+        self.update_profile_with(|p| {
             if p.update_account(&updated.address, |old| *old = updated.clone())
                 .is_none()
             {
@@ -326,7 +326,7 @@ impl SargonOS {
 
         debug!("Adding #{} accounts to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_accounts_to_add, network_id);
 
-        self.update_profile_with(|mut p| {
+        self.update_profile_with(|p| {
             let networks = &mut p.networks;
 
             if networks.contains_id(network_id) {
@@ -380,7 +380,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.profile().networks[0].accounts.len(), 1);
+        assert_eq!(os.profile().unwrap().networks[0].accounts.len(), 1);
     }
 
     #[actix_rt::test]
@@ -396,12 +396,16 @@ mod tests {
         // ASSERT
         assert_eq!(
             os.profile()
+                .unwrap()
                 .header
                 .content_hint
                 .number_of_accounts_on_all_networks_in_total,
             1
         );
-        assert_eq!(os.profile().header.content_hint.number_of_networks, 1);
+        assert_eq!(
+            os.profile().unwrap().header.content_hint.number_of_networks,
+            1
+        );
     }
 
     #[actix_rt::test]
@@ -421,7 +425,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(unsaved_account, Account::sample());
-        assert_eq!(os.profile().networks[0].accounts.len(), 0); // not added
+        assert_eq!(os.profile().unwrap().networks[0].accounts.len(), 0); // not added
     }
 
     #[actix_rt::test]
@@ -456,7 +460,10 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.profile().networks[0].accounts, Accounts::just(account));
+        assert_eq!(
+            os.profile().unwrap().networks[0].accounts,
+            Accounts::just(account)
+        );
     }
 
     #[actix_rt::test]
@@ -539,7 +546,7 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        let indices = os.profile().networks[0]
+        let indices = os.profile().unwrap().networks[0]
             .accounts
             .iter()
             .map(|x| {
@@ -577,7 +584,7 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        let names = os.profile().networks[0]
+        let names = os.profile().unwrap().networks[0]
             .accounts
             .iter()
             .map(|x| x.display_name.value.clone())
@@ -611,7 +618,7 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        let appearance_ids = os.profile().networks[0]
+        let appearance_ids = os.profile().unwrap().networks[0]
             .accounts
             .iter()
             .map(|x| x.appearance_id)
@@ -640,7 +647,7 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        assert!(os.profile().networks[0].accounts.is_empty())
+        assert!(os.profile().unwrap().networks[0].accounts.is_empty())
     }
 
     #[actix_rt::test]
@@ -736,7 +743,10 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.profile().networks[0].accounts[0], account.clone())
+        assert_eq!(
+            os.profile().unwrap().networks[0].accounts[0],
+            account.clone()
+        )
     }
 
     #[actix_rt::test]
@@ -846,7 +856,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_accounts_on_current_network_empty() {
         let os = SUT::fast_boot().await;
-        assert_eq!(os.accounts_on_current_network(), Accounts::new());
+        assert_eq!(os.accounts_on_current_network().unwrap(), Accounts::new());
     }
 
     #[actix_rt::test]
@@ -861,7 +871,10 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.accounts_on_current_network(), Accounts::just(account));
+        assert_eq!(
+            os.accounts_on_current_network().unwrap(),
+            Accounts::just(account)
+        );
     }
 
     #[actix_rt::test]
@@ -881,7 +894,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert_eq!(os.accounts_on_current_network(), Accounts::new());
+        assert_eq!(os.accounts_on_current_network().unwrap(), Accounts::new());
     }
 
     #[actix_rt::test]
@@ -897,7 +910,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(
-            os.accounts_for_display_on_current_network(),
+            os.accounts_for_display_on_current_network().unwrap(),
             AccountsForDisplay::just(AccountForDisplay::from(account))
         );
     }

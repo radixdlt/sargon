@@ -12,13 +12,13 @@ pub enum DeviceFactorSourceType {
 impl SargonOS {
     /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
     /// a `DeviceFactorSource`.
-    pub fn bdfs(&self) -> DeviceFactorSource {
-        self.profile_holder.access_profile_with(|p| p.bdfs())
+    pub fn bdfs(&self) -> Result<DeviceFactorSource> {
+        self.profile_state_holder.access_profile_with(|p| p.bdfs())
     }
 
     /// Returns all the factor sources
-    pub fn factor_sources(&self) -> FactorSources {
-        self.profile_holder
+    pub fn factor_sources(&self) -> Result<FactorSources> {
+        self.profile_state_holder
             .access_profile_with(|p| p.factor_sources.clone())
     }
 
@@ -36,7 +36,7 @@ impl SargonOS {
 
         debug!("Updating FactorSource with ID: {}", &id);
 
-        self.update_profile_with(|mut p| {
+        self.update_profile_with(|p| {
             // p.update_last_used_of_factor_source(&id)
             p.update_any_factor_source(&id, |fs| *fs = updated.clone())
                 .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
@@ -70,7 +70,7 @@ impl SargonOS {
     ) -> Result<bool> {
         let id = factor_source.factor_source_id();
 
-        let contains = self.factor_source_ids().contains(&id);
+        let contains = self.factor_source_ids()?.contains(&id);
 
         if contains {
             return Ok(false);
@@ -186,8 +186,8 @@ impl SargonOS {
         id: &FactorSourceIDFromHash,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
         let device_factor_source = self
-            .profile_holder
-            .access_profile_with(|p| p.device_factor_source_by_id(id))?;
+            .profile_state_holder
+            .try_access_profile_with(|p| p.device_factor_source_by_id(id))?;
         self.load_private_device_factor_source(&device_factor_source)
             .await
     }
@@ -212,7 +212,7 @@ impl SargonOS {
             .map(|x| x.id())
             .collect::<IndexSet<_>>();
         let existing_ids = self
-            .factor_source_ids()
+            .factor_source_ids()?
             .into_iter()
             .collect::<IndexSet<_>>();
 
@@ -230,9 +230,9 @@ impl SargonOS {
 
         let is_any_of_new_factors_main_bdfs =
             new_factors_only.iter().any(|x| x.is_main_bdfs());
-        let id_of_old_bdfs = self.bdfs().factor_source_id();
+        let id_of_old_bdfs = self.bdfs()?.factor_source_id();
 
-        self.update_profile_with(|mut p| {
+        self.update_profile_with(|p| {
             p.factor_sources.extend(new_factors_only.clone());
             Ok(())
         })
@@ -241,17 +241,16 @@ impl SargonOS {
         if is_any_of_new_factors_main_bdfs {
             self.update_factor_source_remove_flag_main(id_of_old_bdfs)
                 .await?;
-            assert!(
-                ids_of_factors_to_add.contains(&self.bdfs().factor_source_id())
-            )
+            assert!(ids_of_factors_to_add
+                .contains(&self.bdfs()?.factor_source_id()))
         }
 
         Ok(ids_of_new_factor_sources.into_iter().collect_vec())
     }
 
     /// Returns IDs of all the factor sources.
-    pub fn factor_source_ids(&self) -> HashSet<FactorSourceID> {
-        self.profile_holder.access_profile_with(|p| {
+    pub fn factor_source_ids(&self) -> Result<HashSet<FactorSourceID>> {
+        self.profile_state_holder.access_profile_with(|p| {
             HashSet::from_iter(p.factor_sources.iter().map(|s| s.id()))
         })
     }
@@ -274,10 +273,8 @@ impl SargonOS {
             &id
         );
 
-        self.update_profile_with(|mut p| {
-            p.update_last_used_of_factor_source(&id)
-        })
-        .await?;
+        self.update_profile_with(|p| p.update_last_used_of_factor_source(&id))
+            .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -299,7 +296,7 @@ impl SargonOS {
             &id
         );
 
-        self.update_profile_with(|mut p| {
+        self.update_profile_with(|p| {
             p.update_factor_source_remove_flag_main(&id)
         })
         .await?;
@@ -375,7 +372,9 @@ impl SargonOS {
     pub async fn main_bdfs_mnemonic_with_passphrase(
         &self,
     ) -> Result<MnemonicWithPassphrase> {
-        let bdfs = self.profile_holder.access_profile_with(|p| p.bdfs());
+        let bdfs = self
+            .profile_state_holder
+            .access_profile_with(|p| p.bdfs())?;
         self.mnemonic_with_passphrase_of_device_factor_source_by_id(&bdfs.id)
             // tarpaulin will incorrectly flag next line is missed
             .await
@@ -418,7 +417,7 @@ mod tests {
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
         // ACT
-        let loaded = os.bdfs();
+        let loaded = os.bdfs().unwrap();
 
         // ASSERT
         assert_eq!(
@@ -463,6 +462,7 @@ mod tests {
         assert!(inserted);
         assert!(os
             .profile()
+            .unwrap()
             .factor_sources
             .contains_by_id(&FactorSource::sample_other()));
     }
@@ -473,7 +473,7 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
-        let old_bdfs_id = os.bdfs().factor_source_id();
+        let old_bdfs_id = os.bdfs().unwrap().factor_source_id();
         let new_bdfs = DeviceFactorSource::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
@@ -491,9 +491,10 @@ mod tests {
 
         // ASSERT
         assert!(inserted);
-        assert_eq!(os.bdfs(), new_bdfs);
+        assert_eq!(os.bdfs().unwrap(), new_bdfs);
         let old_bdfs = os
             .profile()
+            .unwrap()
             .factor_sources
             .get_id(old_bdfs_id)
             .unwrap()
@@ -509,7 +510,7 @@ mod tests {
         let mwp = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
-        let bdfs = os.bdfs();
+        let bdfs = os.bdfs().unwrap();
 
         // ACT
         let inserted = os
@@ -529,7 +530,7 @@ mod tests {
         // ASSERT
         assert!(!inserted); // already exists
         assert_eq!(
-            os.profile().factor_sources,
+            os.profile().unwrap().factor_sources,
             FactorSources::just(bdfs.into())
         );
     }
@@ -701,7 +702,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(os.profile().factor_sources.into_iter().any(|f| {
+        assert!(os.profile().unwrap().factor_sources.into_iter().any(|f| {
             match f {
                 FactorSource::ArculusCard { value } => {
                     value.hint.name == *new_name

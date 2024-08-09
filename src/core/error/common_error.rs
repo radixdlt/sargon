@@ -268,379 +268,376 @@ pub enum CommonError {
     ProfileDoesNotContainFactorSourceWithID { bad_value: FactorSourceID } =
         10073,
 
-    #[error("No active ProfileID found in SecureStorageDriver.")]
-    NoActiveProfileIDSet = 10074,
-
-    #[error("No Profile snapshot found for ProfileID {bad_value}")]
-    ProfileSnapshotNotFound { bad_value: ProfileID } = 10075,
-
     #[error("Account Already Present {bad_value}")]
-    AccountAlreadyPresent { bad_value: AccountAddress } = 10076,
+    AccountAlreadyPresent { bad_value: AccountAddress } = 10074,
 
     #[error("Unable to acquire write lock for Profile.")]
-    UnableToAcquireWriteLockForProfile = 10077,
+    UnableToAcquireWriteLockForProfile = 10075,
 
     #[error("Failed save Mnemonic to SecureStorageDriver with FactorSourceID: {bad_value}")]
     UnableToSaveMnemonicToSecureStorage { bad_value: FactorSourceIDFromHash } =
-        10078,
+        10076,
 
     #[error(
         "Failed load Mnemonic from SecureStorageDriver with FactorSourceID: {bad_value}"
     )]
     UnableToLoadMnemonicFromSecureStorage { bad_value: FactorSourceIDFromHash } =
-        10079,
+        10077,
 
     #[error("Failed save FactorSource to SecureStorageDriver, FactorSourceID: {bad_value}")]
-    UnableToSaveFactorSourceToProfile { bad_value: FactorSourceID } = 10080,
+    UnableToSaveFactorSourceToProfile { bad_value: FactorSourceID } = 10078,
 
     #[error("Expected IdentityPath but got something else.")]
-    ExpectedIdentityPathButGotSomethingElse = 10081,
+    ExpectedIdentityPathButGotSomethingElse = 10079,
 
     #[error("Invalid PersonaData - phone number empty")]
-    PersonaDataInvalidPhoneNumberEmpty = 10082,
+    PersonaDataInvalidPhoneNumberEmpty = 10080,
 
     #[error("Invalid email address, cannot be empty")]
-    EmailAddressEmpty = 10083,
+    EmailAddressEmpty = 10081,
 
     #[error("Invalid PersonaData - family name empty ")]
-    PersonaDataInvalidNameFamilyNameEmpty = 10084,
+    PersonaDataInvalidNameFamilyNameEmpty = 10082,
 
     #[error("Invalid PersonaData - given names empty")]
-    PersonaDataInvalidNameGivenNamesEmpty = 10085,
+    PersonaDataInvalidNameGivenNamesEmpty = 10083,
 
     #[error("Invalid UUID (v4), got: {bad_value}")]
-    InvalidUUIDv4 { bad_value: String } = 10086,
+    InvalidUUIDv4 { bad_value: String } = 10084,
 
     #[error("Unrecognized Locale Identifier: {bad_value}")]
-    UnrecognizedLocaleIdentifier { bad_value: String } = 10087,
+    UnrecognizedLocaleIdentifier { bad_value: String } = 10085,
 
     #[error("Failed to create Address (via RetAddress) from node_id (hex): {node_id_as_hex}, network_id: {network_id}")]
     FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {
         node_id_as_hex: String,
         network_id: NetworkID,
-    } = 10088,
+    } = 10086,
 
     #[error("Invalid Olympia address string: {bad_value}")]
-    InvalidOlympiaAddressString { bad_value: String } = 10089,
+    InvalidOlympiaAddressString { bad_value: String } = 10087,
 
     #[error(
         "Invalid Transaction Manifest Instructions String: '{underlying}'"
     )]
-    InvalidInstructionsString { underlying: String } = 10090,
+    InvalidInstructionsString { underlying: String } = 10088,
 
     #[error(
         "Failed to get execution summary from TransactionManifest using RET {underlying}"
     )]
-    ExecutionSummaryFail { underlying: String } = 10091,
+    ExecutionSummaryFail { underlying: String } = 10089,
 
     #[error("Failed to get TransactionReceipt from encoded bytes.")]
-    FailedToDecodeEncodedReceipt = 10092,
+    FailedToDecodeEncodedReceipt = 10090,
 
     #[error("Invalid byte count, was empty")]
-    BytesEmpty = 10093,
+    BytesEmpty = 10091,
 
     #[error("Invalid byte count, expected at most {max}, found: {found}")]
-    TooManyBytes { max: u64, found: u64 } = 10094,
+    TooManyBytes { max: u64, found: u64 } = 10092,
 
     #[error("Invalid Manifest Instructions String, found network in instructions {found_in_instructions}, but specified to constructor: {specified_to_instructions_ctor}")]
     InvalidInstructionsWrongNetwork {
         found_in_instructions: NetworkID,
         specified_to_instructions_ctor: NetworkID,
-    } = 10095,
+    } = 10093,
 
     #[error(
         "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
     )]
-    FailedToUniFFIDecodeBytesToManifestInstructions = 10096,
+    FailedToUniFFIDecodeBytesToManifestInstructions = 10094,
 
     #[error("Failed to decode Transaction Hash, value: {bad_value}")]
-    FailedToDecodeTransactionHash { bad_value: String } = 10097,
+    FailedToDecodeTransactionHash { bad_value: String } = 10095,
 
     #[error("Failed to hash transaction intent")]
-    FailedToHashIntent = 10098,
+    FailedToHashIntent = 10096,
 
     #[error("Encrypted Messages are not yet supported")]
-    EncryptedMessagesAreNotYetSupported = 10099,
+    EncryptedMessagesAreNotYetSupported = 10097,
 
     #[error("Failed to Bech32 decode transaction Hash after having tested all Network IDs, from: {bad_value}")]
     FailedToBech32DecodeTransactionHashAfterHavingTestedAllNetworkID {
         bad_value: String,
-    } = 10100,
+    } = 10098,
 
     #[error("Failed to parse Signature from {bad_value}")]
-    FailedToParseSignatureFromString { bad_value: String } = 10101,
+    FailedToParseSignatureFromString { bad_value: String } = 10099,
 
     #[error(
         "Invalid IntentSignatures for Intent some didn't validate IntentHash"
     )]
-    InvalidSignaturesForIntentSomeDidNotValidateIntentHash = 10102,
+    InvalidSignaturesForIntentSomeDidNotValidateIntentHash = 10100,
 
     #[error("Failed to decompile bytes into NotarizedTransaction")]
-    FailedToDecompileBytesIntoNotarizedTransaction = 10103,
+    FailedToDecompileBytesIntoNotarizedTransaction = 10101,
 
     #[error("Failed to recover secp256k1 PublicKey from signature")]
-    FailedToRecoverSecp256k1PublicKeyFromSignature = 10104,
+    FailedToRecoverSecp256k1PublicKeyFromSignature = 10102,
 
     #[error("Fungible ResourceAddress in NonFungible context is not allowed.")]
-    FungibleResourceAddressNotAcceptedInNonFungibleContext = 10105,
+    FungibleResourceAddressNotAcceptedInNonFungibleContext = 10103,
 
     #[error("Failed to convert to Decimal192 from f32 due to overflow, value: {bad_value}")]
-    DecimalOverflow { bad_value: String } = 10106,
+    DecimalOverflow { bad_value: String } = 10104,
 
     #[error("Invalid Olympia address, not mainnet: {bad_value}")]
-    InvalidAddressNotOlympiaMainnet { bad_value: String } = 10107,
+    InvalidAddressNotOlympiaMainnet { bad_value: String } = 10105,
 
     #[error("Failed to parse Signature from {bad_value}")]
-    FailedToParseSignatureFromBytes { bad_value: String } = 10108,
+    FailedToParseSignatureFromBytes { bad_value: String } = 10106,
 
     #[error(
         "Invalid Transaction Intent, failed to encode, reason: '{underlying}'"
     )]
-    InvalidIntentFailedToEncode { underlying: String } = 10109,
+    InvalidIntentFailedToEncode { underlying: String } = 10107,
 
     #[error(
         "Invalid Instructions, failed to decompile, reason: '{underlying}'"
     )]
-    InvalidInstructionsFailedToDecompile { underlying: String } = 10110,
+    InvalidInstructionsFailedToDecompile { underlying: String } = 10108,
 
     #[error("Invalid Transaction, max SBOR depth exceeded: '{max}'")]
-    InvalidTransactionMaxSBORDepthExceeded { max: u16 } = 10111,
+    InvalidTransactionMaxSBORDepthExceeded { max: u16 } = 10109,
 
     #[error("Invalid Signed Intent, failed to encode, reason: '{underlying}'")]
-    InvalidSignedIntentFailedToEncode { underlying: String } = 10112,
+    InvalidSignedIntentFailedToEncode { underlying: String } = 10110,
 
     #[error(
         "Invalid Notarized Intent, failed to encode, reason: '{underlying}'"
     )]
-    InvalidNotarizedIntentFailedToEncode { underlying: String } = 10113,
+    InvalidNotarizedIntentFailedToEncode { underlying: String } = 10111,
 
     #[error("Networking response bad code")]
-    NetworkResponseBadCode = 10114,
+    NetworkResponseBadCode = 10112,
 
     #[error("Networking response body was empty")]
-    NetworkResponseEmptyBody = 10115,
+    NetworkResponseEmptyBody = 10113,
 
     #[error("Networking response fail json deserialize into {into_type}")]
-    NetworkResponseJSONDeserialize { into_type: String } = 10116,
+    NetworkResponseJSONDeserialize { into_type: String } = 10114,
 
     #[error("Networking request invalid url {bad_value}")]
-    NetworkRequestInvalidUrl { bad_value: String } = 10117,
+    NetworkRequestInvalidUrl { bad_value: String } = 10115,
 
     #[error("Networking request failed, reason: '{underlying}'")]
-    NetworkRequestGenericFailure { underlying: String } = 10118,
+    NetworkRequestGenericFailure { underlying: String } = 10116,
 
     #[error("Submitted transaction was duplicate.")]
-    GatewaySubmitDuplicateTX { intent_hash: String } = 10119,
+    GatewaySubmitDuplicateTX { intent_hash: String } = 10117,
 
     #[error("SupportedCurves must not be empty.")]
-    SupportedCurvesMustNotBeEmpty = 10120,
+    SupportedCurvesMustNotBeEmpty = 10118,
 
     #[error("Networks must not be empty")]
-    ProfileNetworksMustNotBeEmpty = 10121,
+    ProfileNetworksMustNotBeEmpty = 10119,
 
     #[error("Unknown SLIP10 Curve '{bad_value}'")]
-    UnknownSLIP10Curve { bad_value: String } = 10122,
+    UnknownSLIP10Curve { bad_value: String } = 10120,
 
     #[error("AES Decryption failed")]
-    AESDecryptionFailed = 10123,
+    AESDecryptionFailed = 10121,
 
     #[error("Invalid AES Sealedbox, too few bytes expected at least: {expected_at_least}, found: {found}.")]
-    InvalidAESBytesTooShort { expected_at_least: u64, found: u64 } = 10124,
+    InvalidAESBytesTooShort { expected_at_least: u64, found: u64 } = 10122,
 
     #[error("Invalid Factor Source kind, bad value: {bad_value}")]
-    InvalidFactorSourceKind { bad_value: String } = 10125,
+    InvalidFactorSourceKind { bad_value: String } = 10123,
 
     #[error("Invalid LedgerHardwareWalletModel, bad value: {bad_value}")]
-    InvalidLedgerHardwareWalletModel { bad_value: String } = 10126,
+    InvalidLedgerHardwareWalletModel { bad_value: String } = 10124,
 
     #[error("RadixConnectMobile invalid URL, bad value: {bad_value}")]
-    RadixConnectMobileInvalidRequestUrl { bad_value: String } = 10127,
+    RadixConnectMobileInvalidRequestUrl { bad_value: String } = 10125,
 
     #[error("RadixConnectMobile invalid origin, bad value: {bad_value}")]
-    RadixConnectMobileInvalidOrigin { bad_value: String } = 10128,
+    RadixConnectMobileInvalidOrigin { bad_value: String } = 10126,
 
     #[error("Failed to create Session (UUID) from string: {bad_value}")]
-    RadixConnectMobileInvalidSessionID { bad_value: String } = 10129,
+    RadixConnectMobileInvalidSessionID { bad_value: String } = 10127,
 
     #[error("Failed to create InteractionID (UUID) from string: {bad_value}")]
-    RadixMobileInvalidInteractionID { bad_value: String } = 10130,
+    RadixMobileInvalidInteractionID { bad_value: String } = 10128,
 
     #[error("Network discrepancy, expected : {expected}, actual: {actual}")]
     NetworkDiscrepancy {
         expected: NetworkID,
         actual: NetworkID,
-    } = 10131,
+    } = 10129,
 
     #[error("Discrepancy, Authorized Dapp references Persona which does not exist {address}")]
     DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
         address: IdentityAddress,
-    } = 10132,
+    } = 10130,
 
     #[error("Discrepancy, Authorized Dapp references Account which does not exist {address}")]
     DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
         address: AccountAddress,
-    } = 10133,
+    } = 10131,
 
     #[error("AuthorizedDapp references field id that does not exist")]
-    AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
+    AuthorizedDappReferencesFieldIDThatDoesNotExist = 10132,
 
     #[error("Item identified by ID {id} does not exist")]
-    ElementDoesNotExist { id: String } = 10135,
+    ElementDoesNotExist { id: String } = 10133,
 
     #[error("Item identified by ID {id} already exist")]
-    IdentifiableItemAlreadyExist { id: String } = 10136,
+    IdentifiableItemAlreadyExist { id: String } = 10134,
 
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
-    InvalidRadixConnectPurpose { bad_value: String } = 10137,
+    InvalidRadixConnectPurpose { bad_value: String } = 10135,
 
     #[error(
         "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{count}, but an 'instruction_index' of {index} was specified."
     )]
-    TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10138,
+    TXGuaranteeIndexOutOfBounds { index: u64, count: u64 } = 10136,
 
     #[error("Failed to create KeyAgreementPublicKey from hex: {bad_value}")]
-    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10139,
+    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10137,
 
     #[error(
         "Failed to create KeyAgreementPublicKey from bytes: {bad_value:?}"
     )]
-    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10140,
+    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10138,
 
     #[error(
         "Failed to create KeyAgreementPrivateKey from bytes: {bad_value:?}"
     )]
-    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10141,
+    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10139,
 
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
-    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10142,
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10140,
 
     #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
     RadixConnectMobileDappRequestNotFound {
         interaction_id: WalletInteractionId,
-    } = 10143,
+    } = 10141,
 
     #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
-    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10144,
+    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10142,
 
     #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
-    InvalidEd25519SignatureFromString { bad_value: String } = 10145,
+    InvalidEd25519SignatureFromString { bad_value: String } = 10143,
 
     #[error("Radix Connect Mobile dApp public key does not match the session's dApp public key")]
-    RadixConnectMobileDappPublicKeyMismatch = 10146,
+    RadixConnectMobileDappPublicKeyMismatch = 10144,
 
     #[error("Radix Connect Mobile dApp identity not match the session's dApp identity")]
-    RadixConnectMobileDappIdentityMismatch = 10147,
+    RadixConnectMobileDappIdentityMismatch = 10145,
 
     #[error(
         "Radix Connect Mobile dApp origin not match the session's dApp origin"
     )]
-    RadixConnectMobileDappOriginMismatch = 10148,
+    RadixConnectMobileDappOriginMismatch = 10146,
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
-    RadixConnectMobileInvalidDappSignature = 10149,
+    RadixConnectMobileInvalidDappSignature = 10147,
 
     #[error("Radix Connect Mobile dApp sent an invalid signature")]
-    RadixConnectMobileInvalidRequestFormat = 10150,
+    RadixConnectMobileInvalidRequestFormat = 10148,
 
     #[error("Radix Connect Mobile failed to create new in flight session")]
-    RadixConnectMobileFailedToCreateNewSession = 10151,
+    RadixConnectMobileFailedToCreateNewSession = 10149,
 
     #[error("Deferred Deep Link invalid value format {bad_value}.")]
-    DeferredDeepLinkInvalidValueFormat { bad_value: String } = 10152,
+    DeferredDeepLinkInvalidValueFormat { bad_value: String } = 10150,
 
     #[error("Failed updating home cards")]
-    FailedUpdatingHomeCards = 10153,
+    FailedUpdatingHomeCards = 10151,
 
     #[error("Entity not found")]
-    EntityNotFound = 10154,
+    EntityNotFound = 10152,
 
     #[error("Home cards not found")]
-    HomeCardsNotFound = 10155,
+    HomeCardsNotFound = 10153,
 
     #[error("Failed saving home cards")]
-    FailedSavingHomeCards = 10156,
+    FailedSavingHomeCards = 10154,
 
     #[error(
         "Failed to load Profile from secure storage, profile id: {profile_id}"
     )]
-    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10157,
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10155,
 
     #[error("Failed to save HostId to secure storage")]
-    UnableToSaveHostIdToSecureStorage = 10158,
+    UnableToSaveHostIdToSecureStorage = 10156,
 
     #[error("Unable to acquire read lock for profile")]
-    UnableToAcquireReadLockForProfile = 10159,
+    UnableToAcquireReadLockForProfile = 10157,
 
     #[error("Failed to read from unsafe storage.")]
-    UnsafeStorageReadError = 10160,
+    UnsafeStorageReadError = 10158,
 
     #[error("Failed to write to unsafe storage.")]
-    UnsafeStorageWriteError = 10161,
+    UnsafeStorageWriteError = 10159,
 
     #[error("Failed to create file path from string: '{bad_value}'")]
-    FailedToCreateFilePathFromString { bad_value: String } = 10162,
+    FailedToCreateFilePathFromString { bad_value: String } = 10160,
 
     #[error("Expected collection to not be empty")]
-    ExpectedNonEmptyCollection = 10163,
+    ExpectedNonEmptyCollection = 10161,
 
     #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10164,
+    UnableToAddAllAccountsDuplicatesFound = 10162,
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
     ProfileUsedOnOtherDevice {
         other_device_id: DeviceID,
         this_device_id: DeviceID,
-    } = 10165,
+    } = 10163,
 
     #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
-    InvalidDeviceID { bad_value: String } = 10166,
+    InvalidDeviceID { bad_value: String } = 10164,
 
     #[error("Tried to replace profile with one with a different ProfileID than the current one. Use `import_profile` instead.")]
-    TriedToUpdateProfileWithOneWithDifferentID = 10167,
+    TriedToUpdateProfileWithOneWithDifferentID = 10165,
 
     #[error("Invalid path, bad value: '{bad_value}'")]
-    InvalidPath { bad_value: String } = 10168,
+    InvalidPath { bad_value: String } = 10166,
 
     #[error("Failed to save file: '{path}'")]
-    FailedToSaveFile { path: String } = 10169,
+    FailedToSaveFile { path: String } = 10167,
 
     #[error("Failed to load file: '{path}'")]
-    FailedToLoadFile { path: String } = 10170,
+    FailedToLoadFile { path: String } = 10168,
 
     #[error("Failed to delete file: '{path}'")]
-    FailedToDeleteFile { path: String } = 10171,
+    FailedToDeleteFile { path: String } = 10169,
 
     #[error("Not permission enough to access file: '{path}'")]
-    NotPermissionToAccessFile { path: String } = 10172,
+    NotPermissionToAccessFile { path: String } = 10170,
 
     #[error("Invalid Arculus Card Model")]
-    InvalidArculusCardModel { bad_value: String } = 10173,
+    InvalidArculusCardModel { bad_value: String } = 10171,
 
     #[error("Expected ArculusCard factor source got something else")]
-    ExpectedArculusCardFactorSourceGotSomethingElse = 10174,
+    ExpectedArculusCardFactorSourceGotSomethingElse = 10172,
 
     #[error("Failed to Derive Key after max attempts")]
-    FailedToDeriveKeyAfterMaxAttempts = 10175,
+    FailedToDeriveKeyAfterMaxAttempts = 10173,
 
     #[error("Failed to decrypt sealed mnemonic")]
-    FailedToDecryptSealedMnemonic = 10176,
+    FailedToDecryptSealedMnemonic = 10174,
 
     #[error("Answers to Security Questions cannot be empty")]
-    AnswersToSecurityQuestionsCannotBeEmpty = 10177,
+    AnswersToSecurityQuestionsCannotBeEmpty = 10175,
 
     #[error("Integrity Violation, mutation of FactorSource is not allowed to mutate its ID")]
-    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10178,
+    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10176,
 
     #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
-    InvalidSecurityStructureID { bad_value: String } = 10179,
+    InvalidSecurityStructureID { bad_value: String } = 10177,
 
     #[error(
         "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
     )]
-    StructureReferencesUnknownFactorSource = 10180,
+    StructureReferencesUnknownFactorSource = 10178,
 
     #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
-    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10181,
+    InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10179,
+
+    #[error("No Profile is yet loaded. Current state is: {current_state}")]
+    ProfileStateNotLoaded { current_state: String } = 10180,
 }
 
 #[uniffi::export]
