@@ -39,7 +39,6 @@ impl SargonOS {
 #[uniffi::export]
 impl SargonOS {
     pub async fn set_profile(&self, profile: Profile) -> Result<()> {
-        // TODO the ? in here maybe is not correct
         if profile.id() != self.profile()?.id() {
             return Err(
                 CommonError::TriedToUpdateProfileWithOneWithDifferentID,
