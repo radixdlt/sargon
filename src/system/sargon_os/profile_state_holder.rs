@@ -25,21 +25,9 @@ pub struct ProfileStateHolder {
 }
 
 impl ProfileStateHolder {
-    pub fn new_with_none() -> Self {
+    pub fn new(profile_state: ProfileState) -> Self {
         Self {
-            profile_state: RwLock::new(ProfileState::None),
-        }
-    }
-
-    pub fn new_with(profile: Profile) -> Self {
-        Self {
-            profile_state: RwLock::new(ProfileState::Loaded(profile)),
-        }
-    }
-
-    pub fn new_with_error(error: CommonError) -> Self {
-        Self {
-            profile_state: RwLock::new(ProfileState::Incompatible(error)),
+            profile_state: RwLock::new(profile_state),
         }
     }
 }
@@ -139,13 +127,16 @@ impl ProfileStateHolder {
     }
 
     /// Sets the profile held by this `ProfileStateHolder` to `profile`.
-    pub(super) fn replace_profile_with(&self, profile: Profile) -> Result<()> {
+    pub(super) fn replace_profile_state_with(
+        &self,
+        profile_state: ProfileState,
+    ) -> Result<()> {
         let mut lock = self
             .profile_state
             .try_write()
             .map_err(|_| CommonError::UnableToAcquireWriteLockForProfile)?;
 
-        *lock = ProfileState::Loaded(profile);
+        *lock = profile_state;
         Ok(())
     }
 
@@ -178,41 +169,43 @@ mod tests {
 
     #[test]
     fn test_new_none_profile_state_holder() {
+        let state = ProfileState::None;
         assert_eq!(
-            ProfileStateHolder::new_with_none()
+            ProfileStateHolder::new(state.clone())
                 .profile_state
                 .try_read()
                 .unwrap()
                 .to_owned(),
-            ProfileState::None
+            state
         )
     }
 
     #[test]
     fn test_new_incompatible_profile_state_holder() {
-        let error = CommonError::InvalidISO8601String {
-            bad_value: "-".to_owned(),
-        };
+        let state =
+            ProfileState::Incompatible(CommonError::InvalidISO8601String {
+                bad_value: "-".to_owned(),
+            });
         assert_eq!(
-            ProfileStateHolder::new_with_error(error.clone())
+            ProfileStateHolder::new(state.clone())
                 .profile_state
                 .try_read()
                 .unwrap()
                 .to_owned(),
-            ProfileState::Incompatible(error)
+            state
         )
     }
 
     #[test]
     fn test_new_loaded_profile_state_holder() {
-        let profile = Profile::sample();
+        let state = ProfileState::Loaded(Profile::sample());
         assert_eq!(
-            ProfileStateHolder::new_with(profile.clone())
+            ProfileStateHolder::new(state.clone())
                 .profile_state
                 .try_read()
                 .unwrap()
                 .to_owned(),
-            ProfileState::Loaded(profile)
+            state,
         )
     }
 }

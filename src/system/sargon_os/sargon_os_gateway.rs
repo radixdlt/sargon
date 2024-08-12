@@ -165,8 +165,8 @@ mod tests {
 
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
@@ -189,8 +189,8 @@ mod tests {
 
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         os.with_timeout(|x| x.change_current_gateway(Gateway::mainnet()))

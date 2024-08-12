@@ -90,7 +90,8 @@ impl SargonOS {
             imported_id
         );
 
-        self.profile_state_holder.replace_profile_with(profile)?;
+        self.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(profile))?;
         debug!(
             "Replaced held profile with imported one, id: {}",
             imported_id
@@ -107,38 +108,8 @@ impl SargonOS {
         Ok(())
     }
 
-    /// Deletes the profile and the active profile id and all references Device
-    /// factor sources from secure storage, and creates a new empty profile
-    /// and a new bdfs, and saves those into secure storage, returns the ID of
-    /// the new profile.
-    pub async fn delete_profile_then_create_new_with_bdfs(
-        &self,
-    ) -> Result<ProfileID> {
-        let (profile, bdfs) = self
-            .delete_profile_and_mnemonics_replace_in_memory_without_persisting()
-            .await?;
-        let profile_id = profile.id();
-        self.secure_storage
-            .save_private_hd_factor_source(&bdfs)
-            .await?;
-
-        self.secure_storage.save_profile(&profile).await?;
-
-        Ok(profile_id)
-    }
-
     pub fn profile(&self) -> Result<Profile> {
         self.profile_state_holder.profile()
-    }
-
-    /// Do NOT use in production. Instead use `delete_profile_then_create_new_with_bdfs`
-    /// in production. This method does not persist the new profile.
-    pub async fn emulate_fresh_install(&self) -> Result<()> {
-        warn!("Emulate fresh install of app. Will delete Profile and secrets from secure storage, without saving the new. BAD state.");
-        let _ = self
-            .delete_profile_and_mnemonics_replace_in_memory_without_persisting()
-            .await?;
-        Ok(())
     }
 }
 
@@ -197,9 +168,9 @@ impl SargonOS {
         Ok(())
     }
 
-    /// Deletes the profile and the active profile id and all references Device
+    /// Deletes the profile and all references Device
     /// factor sources from secure storage, does **NOT** change the in-memory
-    /// profile in `profile_holder`.
+    /// profile in `profile_state_holder`.
     async fn delete_profile_and_mnemonics(&self) -> Result<()> {
         let secure_storage = &self.secure_storage;
         let device_factor_sources = self
@@ -214,23 +185,18 @@ impl SargonOS {
         Ok(())
     }
 
-    /// Deletes the profile and the active profile id and all references Device
-    /// factor sources from secure storage, and creates a new empty profile
-    /// and a new bdfs and replaces the in-memory profile held by profile_holder,
-    /// **without** persisting the neither the profile nor the new BDFS to secure
-    /// storage.
+    /// Deletes the profile and all references Device factor sources from secure storage.
     ///
     /// This method is typically only relevant for testing purposes, emulating a
     /// fresh install of wallet apps, wallet apps can call this method and then
     /// force quit, which should be equivalent with a fresh install of the app.
-    pub async fn delete_profile_and_mnemonics_replace_in_memory_without_persisting(
+    pub async fn delete_profile_and_mnemonics_replace_in_memory_with_none(
         &self,
-    ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
+    ) -> Result<()> {
         self.delete_profile_and_mnemonics().await?;
-        let (profile, bdfs) = self.new_profile_and_bdfs().await?;
         self.profile_state_holder
-            .replace_profile_with(profile.clone())?;
-        Ok((profile, bdfs))
+            .replace_profile_state_with(ProfileState::None)?;
+        Ok(())
     }
 }
 
@@ -308,7 +274,6 @@ mod tests {
 
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
 
         let p = Profile::sample();
@@ -428,9 +393,11 @@ mod tests {
         let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
 
         // ACT
-        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.delete_profile_and_mnemonics_replace_in_memory_with_none()
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         let id = FactorSourceIDFromHash::new_for_device(&bdfs);
@@ -444,17 +411,17 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_delete_profile_then_create_new_with_bdfs_new_profile_replaces_old(
-    ) {
+    async fn test_delete_profile_is_deleted() {
         // ARRANGE
         let bdfs = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
 
         // ACT
-        let new_profile_id = os
-            .with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.delete_profile_and_mnemonics_replace_in_memory_with_none()
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         let load_current_profile = os
@@ -462,100 +429,7 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(load_current_profile.unwrap().id(), new_profile_id)
-    }
-
-    #[actix_rt::test]
-    async fn test_delete_profile_then_create_new_with_bdfs_new_bdfs_is_saved() {
-        // ARRANGE
-        let bdfs = MnemonicWithPassphrase::sample();
-        let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
-
-        // ACT
-        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
-            .await
-            .unwrap();
-
-        // ASSERT
-        let saved_bdfs = os
-            .with_timeout(|x| x.main_bdfs_mnemonic_with_passphrase())
-            .await
-            .unwrap();
-
-        assert_ne!(saved_bdfs, bdfs);
-    }
-
-    #[actix_rt::test]
-    async fn test_delete_profile_then_create_new_with_bdfs_new_profile_is_saved(
-    ) {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-        let profile = Profile::sample();
-        os.with_timeout(|x| x.import_profile(profile.clone()))
-            .await
-            .unwrap();
-
-        // ACT
-        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
-            .await
-            .unwrap();
-
-        // ASSERT
-        let active_profile = os
-            .with_timeout(|x| x.secure_storage.load_profile())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_ne!(active_profile.id(), profile.id());
-    }
-
-    #[actix_rt::test]
-    async fn test_delete_profile_then_create_new_with_bdfs_device_info_is_unchanged(
-    ) {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
-        let host_info = os.with_timeout(|x| x.host_info()).await;
-        assert_eq!(
-            &os.profile().unwrap().header.creating_device,
-            &DeviceInfo::new_from_info(&host_id, &host_info)
-        );
-
-        // ACT
-        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
-            .await
-            .unwrap();
-
-        // ASSERT
-        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
-        let host_info = os.with_timeout(|x| x.host_info()).await;
-        assert_eq!(
-            &os.profile().unwrap().header.creating_device,
-            &DeviceInfo::new_from_info(&host_id, &host_info)
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_emulate_fresh_install_does_not_save_new() {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-        let first = os.profile().unwrap().id();
-
-        // ACT
-        os.with_timeout(|x| x.emulate_fresh_install())
-            .await
-            .unwrap();
-
-        // ASSERT
-        let second = os.profile().unwrap().id();
-        assert_ne!(second, first);
-        let load_profile_res = os
-            .with_timeout(|x| x.secure_storage.load_profile())
-            .await
-            .unwrap();
-
-        assert!(load_profile_res.is_none());
+        assert!(load_current_profile.is_none());
     }
 
     #[actix_rt::test]

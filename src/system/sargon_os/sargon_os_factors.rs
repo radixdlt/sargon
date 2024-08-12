@@ -612,8 +612,8 @@ mod tests {
 
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         let ids = os
