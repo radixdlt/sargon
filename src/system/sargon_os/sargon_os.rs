@@ -61,15 +61,74 @@ impl SargonOS {
     pub async fn new_wallet(&self) -> Result<()> {
         let (profile, bdfs) = self.create_new_profile_with_bdfs(None).await?;
 
-        self.secure_storage
-            .save_private_hd_factor_source(&bdfs)
-            .await?;
         self.secure_storage.save_profile(&profile).await?;
+        let bdfs_store_result = self
+            .secure_storage
+            .save_private_hd_factor_source(&bdfs)
+            .await;
+        if let Some(error) = bdfs_store_result.err() {
+            self.secure_storage.delete_profile(profile.id()).await?;
+            return Err(error);
+        }
+
         self.profile_state_holder.replace_profile_state_with(
             ProfileState::Loaded(profile.clone()),
         )?;
         // TODO what if one of them fails. Should we undo all of them?
         info!("Saved new Profile and BDFS, finish creating wallet");
+
+        Ok(())
+    }
+
+    pub async fn import_wallet(
+        &self,
+        profile: &Profile,
+        bdfs_skipped: bool,
+    ) -> Result<()> {
+        let imported_id = profile.id();
+        debug!("Importing profile, id: {}", imported_id);
+        let mut profile = profile.clone();
+        self.claim_profile(&mut profile).await?;
+        self.secure_storage.save_profile(&profile).await?;
+        debug!(
+            "Saved imported profile into secure storage, id: {}",
+            imported_id
+        );
+        self.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(profile))?;
+
+        if bdfs_skipped {
+            let entropy: BIP39Entropy = self.clients.entropy.bip39_entropy();
+
+            let host_info = self.host_info().await;
+            let bdfs = PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+                true,
+                entropy,
+                BIP39Passphrase::default(),
+                &host_info
+            );
+
+            let bdfs_result = self
+                .add_factor_source(FactorSource::from(
+                    bdfs.clone().factor_source,
+                ))
+                .await;
+            if let Some(error) = bdfs_result.err() {
+                self.secure_storage.delete_profile(imported_id).await?;
+                return Err(error);
+            }
+            self.secure_storage
+                .save_private_hd_factor_source(&bdfs)
+                .await?;
+        }
+
+        self.event_bus
+            .emit(EventNotification::new(Event::ProfileImported {
+                id: imported_id,
+            }))
+            .await;
+
+        info!("Successfully imported profile, id: {}", imported_id);
 
         Ok(())
     }
@@ -285,19 +344,59 @@ mod tests {
 
         os.new_wallet().await.unwrap();
 
-        let profile = os.profile();
-        assert!(profile.is_ok());
+        let profile = os.profile().unwrap();
+        let bdfs = profile.bdfs();
+
+        assert!(os
+            .clients
+            .secure_storage
+            .load_mnemonic_with_passphrase(&bdfs.id)
+            .await
+            .is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn test_wallet_import_without_bdfs_skip() {
+        let os = SUT::fast_boot().await;
+        let profile_to_import = Profile::sample();
+
+        os.import_wallet(&profile_to_import, false).await.unwrap();
+
+        assert_eq!(os.profile().unwrap().bdfs(), profile_to_import.bdfs());
+    }
+
+    #[actix_rt::test]
+    async fn test_wallet_import_with_bdfs_skip() {
+        let os = SUT::fast_boot().await;
+        let profile_to_import = Profile::sample();
+
+        os.import_wallet(&profile_to_import, true).await.unwrap();
+
+        assert_ne!(os.profile().unwrap().bdfs(), profile_to_import.bdfs());
     }
 
     #[actix_rt::test]
     async fn test_delete_wallet() {
         let os = SUT::fast_boot().await;
         os.new_wallet().await.unwrap();
-        let profile_result = os.profile();
-        assert!(profile_result.is_ok());
+        let profile = os.profile().unwrap();
+        let bdfs = profile.bdfs();
 
         os.delete_wallet().await.unwrap();
-        let profile_result = os.profile();
-        assert!(profile_result.is_err());
+
+        // Assert in memory profile is None
+        assert!(os.profile().is_err());
+        // Assert in profile is deleted from storage
+        assert_eq!(
+            os.clients.secure_storage.load_profile().await.unwrap(),
+            None
+        );
+        // Assert mnemonic is deleted from storage
+        assert!(os
+            .clients
+            .secure_storage
+            .load_mnemonic_with_passphrase(&bdfs.id)
+            .await
+            .is_err());
     }
 }
