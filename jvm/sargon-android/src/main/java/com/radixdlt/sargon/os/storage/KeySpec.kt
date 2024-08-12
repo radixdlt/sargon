@@ -10,8 +10,42 @@ import java.security.ProviderException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-// Unfortunately this class relies on Android APIs which are difficult to mock in unit tests.
-// Integration tests can cover it, but they need to run on an actual device.
+/**
+ * A request to the keystore that describes which [KeySpec] should be used for cryptographic
+ * operations. [requestAuthorization] is only invoked for [KeySpec]s that are defined with
+ * [KeyGenParameterSpec#Builder#setUserAuthenticationRequired] to true
+ */
+internal sealed interface KeystoreAccessRequest {
+
+    val keySpec: KeySpec
+
+    suspend fun requestAuthorization(): Result<Unit>
+
+    data object ForProfile: KeystoreAccessRequest {
+        override val keySpec: KeySpec = KeySpec.Profile()
+
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+    }
+
+    data object ForRadixConnect: KeystoreAccessRequest {
+        override val keySpec: KeySpec = KeySpec.RadixConnect()
+
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+    }
+
+    data class ForMnemonic(
+        private val onRequestAuthorization: suspend () -> Result<Unit>
+    ): KeystoreAccessRequest {
+        override val keySpec: KeySpec = KeySpec.Mnemonic()
+
+        override suspend fun requestAuthorization(): Result<Unit> = onRequestAuthorization()
+
+    }
+}
+
+/**
+ * The description of the key that describes for cryptographic operations on keystore.
+ */
 @KoverIgnore
 internal sealed class KeySpec(val alias: String) {
 

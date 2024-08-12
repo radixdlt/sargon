@@ -91,99 +91,44 @@ impl SecureStorageClient {
     // Profile CR(U)D
     //======
 
-    /// Loads the active Profile if any, by first loading the active
-    /// profile id.
-    pub async fn load_active_profile(&self) -> Result<Option<Profile>> {
-        debug!("Loading active profile");
-        let Some(id) = self.load_active_profile_id().await? else {
-            trace!("Found no active profile id");
-            return Ok(None);
-        };
-        self.load_profile_with_id(id).await.map(Some)
-    }
-
-    /// Loads the Profile with the given `profile_id`.
-    pub async fn load_profile_with_id(
-        &self,
-        profile_id: ProfileID,
-    ) -> Result<Profile> {
-        debug!("Loading profile profile with id: {}", profile_id);
-        self.load_or(
-            SecureStorageKey::ProfileSnapshot { profile_id },
-            CommonError::UnableToLoadProfileFromSecureStorage { profile_id },
-        )
-        .await
-        .inspect(|_| debug!("Loaded profile"))
-        .inspect_err(|e| error!("Failed to load profile, error {e}"))
-    }
-
-    /// Loads the active ProfileID if any
-    pub async fn load_active_profile_id(&self) -> Result<Option<ProfileID>> {
-        trace!("Loading active profile id");
-        self.load(SecureStorageKey::ActiveProfileID).await
-    }
-
-    /// Save `profile` and saves its id as active profile id
-    pub async fn save_profile_and_active_profile_id(
-        &self,
-        profile: &Profile,
-    ) -> Result<()> {
-        debug!(
-            "Saving profile, id: {}, and setting it as active",
-            &profile.id()
-        );
-        self.save_profile(profile).await?;
-        self.save_active_profile_id(profile.id()).await
+    /// Loads the Profile.
+    pub async fn load_profile(&self) -> Result<Option<Profile>> {
+        debug!("Loading profile");
+        self.load(SecureStorageKey::ProfileSnapshot)
+            .await
+            .inspect(|_| debug!("Loaded profile"))
+            .inspect_err(|e| error!("Failed to load profile, error {e}"))
     }
 
     /// Save `profile`
     pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
         let profile_id = profile.id();
         debug!("Saving profile with id: {}", profile_id);
-        self.save(SecureStorageKey::ProfileSnapshot { profile_id }, profile)
+        self.save(SecureStorageKey::ProfileSnapshot, profile)
             .await
             .inspect(|_| debug!("Saved profile with id {}", profile_id))
             .inspect_err(|e| error!("Failed to save profile, error {e}"))
     }
 
-    /// Save `profile_id` as the active profile id
-    pub async fn save_active_profile_id(
-        &self,
-        profile_id: ProfileID,
-    ) -> Result<()> {
-        debug!("Saving active profile id: {}", profile_id);
-        self.save(SecureStorageKey::ActiveProfileID, &profile_id)
-            .await
-            .inspect(|_| debug!("Saved active profile id"))
-            .inspect_err(|e| {
-                error!("Failed to save active profile id, error {e}")
-            })
-    }
-
     //======
-    // DeviceInfo CR(U)D
+    // HostId CR(U)D
     //======
 
-    /// Loads the  DeviceInfo if any
-    pub async fn load_device_info(&self) -> Result<Option<DeviceInfo>> {
-        trace!("Loading device info");
-        self.load(SecureStorageKey::DeviceInfo).await
+    /// Loads the HostId if any
+    pub async fn load_host_id(&self) -> Result<Option<HostId>> {
+        trace!("Loading host id");
+        self.load(SecureStorageKey::HostID).await
     }
 
     /// Saves [`DeviceInfo`]
-    pub async fn save_device_info(
-        &self,
-        device_info: &DeviceInfo,
-    ) -> Result<()> {
-        debug!("Saving new device info: {:?}", device_info);
-        self.save(SecureStorageKey::DeviceInfo, device_info)
+    pub async fn save_host_id(&self, host_id: &HostId) -> Result<()> {
+        debug!("Saving new host id: {:?}", host_id);
+        self.save(SecureStorageKey::HostID, host_id)
             .await
-            .inspect(|_| debug!("Saved new device info."))
+            .inspect(|_| debug!("Saved new host id."))
             .map_err(|e| {
-                error!(
-                    "Failed to save device info to secure storage - error {e}",
-                );
-                CommonError::UnableToSaveDeviceInfoToSecureStorage
+                error!("Failed to save host id to secure storage - error {e}",);
+                CommonError::UnableToSaveHostIdToSecureStorage
             })
     }
 
@@ -252,16 +197,7 @@ impl SecureStorageClient {
     pub async fn delete_profile(&self, id: ProfileID) -> Result<()> {
         warn!("Deleting profile with id: {}", id);
         self.driver
-            .delete_data_for_key(SecureStorageKey::ProfileSnapshot {
-                profile_id: id,
-            })
-            .await
-    }
-
-    pub async fn delete_active_profile_id(&self) -> Result<()> {
-        warn!("Deleting active profile id");
-        self.driver
-            .delete_data_for_key(SecureStorageKey::ActiveProfileID)
+            .delete_data_for_key(SecureStorageKey::ProfileSnapshot)
             .await
     }
 }
@@ -291,29 +227,8 @@ mod tests {
     async fn load_ok_when_none() {
         let sut = make_sut();
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
+            sut.load::<Profile>(SecureStorageKey::ProfileSnapshot).await,
             Ok(None)
-        );
-    }
-
-    #[actix_rt::test]
-    async fn load_fail_to_deserialize_json() {
-        let sut = make_sut();
-
-        assert!(sut
-            .save(
-                SecureStorageKey::ActiveProfileID,
-                &0u8, // obviously a u8 is not a Profile
-            )
-            .await
-            .is_ok());
-        assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
-            Err(CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: 1,
-                type_name: "Profile".to_owned(),
-                serde_message: "invalid type: integer `0`, expected struct Profile at line 1 column 1".to_owned(),
-            })
         );
     }
 
@@ -322,11 +237,11 @@ mod tests {
         let sut = make_sut();
 
         assert!(sut
-            .save(SecureStorageKey::ActiveProfileID, &Profile::sample())
+            .save(SecureStorageKey::ProfileSnapshot, &Profile::sample())
             .await
             .is_ok());
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
+            sut.load::<Profile>(SecureStorageKey::ProfileSnapshot).await,
             Ok(Some(Profile::sample()))
         );
     }
@@ -336,12 +251,12 @@ mod tests {
         let sut = make_sut();
 
         assert!(sut
-            .save(SecureStorageKey::ActiveProfileID, &Profile::sample())
+            .save(SecureStorageKey::ProfileSnapshot, &Profile::sample())
             .await
             .is_ok());
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
-                SecureStorageKey::ActiveProfileID,
+                SecureStorageKey::ProfileSnapshot,
                 Profile::sample_other()
             )
             .await,
@@ -355,7 +270,7 @@ mod tests {
 
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
-                SecureStorageKey::ActiveProfileID,
+                SecureStorageKey::ProfileSnapshot,
                 Profile::sample_other()
             )
             .await,
@@ -448,7 +363,7 @@ mod tests {
         let (sut, _) = SecureStorageClient::ephemeral();
         assert_eq!(
             sut.save(
-                SecureStorageKey::ActiveProfileID,
+                SecureStorageKey::ProfileSnapshot,
                 &AlwaysFailSerialize {}
             )
             .await,
@@ -457,11 +372,11 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn save_fail_save_device_info() {
+    async fn save_fail_save_host_id() {
         let sut = SecureStorageClient::always_fail();
         assert_eq!(
-            sut.save_device_info(&DeviceInfo::sample()).await,
-            Err(CommonError::UnableToSaveDeviceInfoToSecureStorage)
+            sut.save_host_id(&HostId::sample()).await,
+            Err(CommonError::UnableToSaveHostIdToSecureStorage)
         );
     }
 }

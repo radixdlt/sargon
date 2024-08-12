@@ -12,6 +12,14 @@ pub fn new_device_info_sample_other() -> DeviceInfo {
     DeviceInfo::sample_other()
 }
 
+#[uniffi::export]
+pub fn new_device_info_from_host_info(
+    host_id: &HostId,
+    host_info: &HostInfo,
+) -> DeviceInfo {
+    DeviceInfo::new_from_info(host_id, host_info)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -32,5 +40,16 @@ mod tests {
             .len(),
             2
         );
+    }
+
+    #[test]
+    fn test_new_from_host_info() {
+        let host_id = HostId::sample();
+        let host_info = HostInfo::sample();
+
+        assert_eq!(
+            new_device_info_from_host_info(&host_id, &host_info),
+            DeviceInfo::new_from_info(&host_id, &host_info)
+        )
     }
 }

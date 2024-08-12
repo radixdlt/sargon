@@ -22,7 +22,8 @@ mod tests {
 
     #[test]
     fn test_empty_profile_has_any_account_on_any_network_is_false() {
-        let sut = SUT::new(Mnemonic::sample(), DeviceInfo::sample());
+        let sut =
+            SUT::new(Mnemonic::sample(), HostId::sample(), HostInfo::sample());
         assert!(!sut.has_any_account_on_any_network());
     }
 

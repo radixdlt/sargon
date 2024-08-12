@@ -124,9 +124,12 @@ mod tests {
                             "lastUsedOn": "2023-09-11T16:05:56.000Z"
                         },
                         "hint": {
-                            "name": "iPhone",
-                            "model": "iPhone",
-                            "mnemonicWordCount": 24
+                            "name": "My precious",
+                            "model": "iPhone SE 2nd gen",
+                            "mnemonicWordCount": 24,
+                            "systemVersion": "iOS 17.4.1",
+                            "hostAppVersion": "1.6.4",
+                            "hostVendor": "Apple"
                         }
                     }
                 },

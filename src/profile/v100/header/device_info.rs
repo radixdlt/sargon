@@ -82,32 +82,30 @@ impl DeviceInfo {
         }
     }
 
-    /// Instantiates a new `DeviceInfo` with all needed details,
-    /// formatting a `description` from host name and host model.
-    pub fn with_details(
-        id: impl Into<Option<DeviceID>>,
-        name: impl AsRef<str>,
-        model: impl AsRef<str>,
-        system_version: impl AsRef<str>,
-        host_app_version: impl AsRef<str>,
-        host_vendor: impl AsRef<str>,
-    ) -> Self {
+    /// Instantiates a new `DeviceInfo` with information retrieved from host
+    /// like `host_id` and `host_info`
+    pub fn new_from_info(host_id: &HostId, host_info: &HostInfo) -> Self {
         Self::new(
-            id.into().unwrap_or(DeviceID::generate_new()),
-            now(),
-            DeviceInfoDescription::new(name, model),
-            system_version,
-            host_app_version,
-            host_vendor,
+            host_id.id,
+            host_id.generated_at,
+            host_info.description.clone(),
+            host_info.host_os.version(),
+            host_info.host_app_version.clone(),
+            host_info.host_os.vendor().clone(),
         )
     }
 }
 
 #[cfg(test)]
 impl DeviceInfo {
-    pub fn new_unknown() -> Self {
-        Self::with_details(
-            None, "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
+    fn new_unknown() -> Self {
+        Self::new(
+            DeviceID::generate_new(),
+            now(),
+            DeviceInfoDescription::new("Unknown", "Unknown"),
+            "Unknown",
+            "Unknown",
+            "Unknown",
         )
     }
 }
@@ -165,23 +163,6 @@ mod tests {
     }
 
     #[test]
-    fn with_details() {
-        assert_eq!(
-            SUT::with_details(
-                None,
-                "My precious",
-                "iPhone SE 2nd gen",
-                "iOS 17.4.1",
-                "1.6.4",
-                "Apple"
-            )
-            .description
-            .to_string(),
-            "My precious (iPhone SE 2nd gen)"
-        );
-    }
-
-    #[test]
     fn display() {
         let id_str = "12345678-bbbb-cccc-dddd-abcd12345678";
         let id = DeviceID::from_str(id_str).unwrap();
@@ -212,6 +193,24 @@ mod tests {
     #[test]
     fn date_is_now() {
         assert!(SUT::new_unknown().date.year() >= 2023);
+    }
+
+    #[test]
+    fn test_new_from_info() {
+        let host_id = HostId::sample();
+        let host_info = HostInfo::sample();
+
+        assert_eq!(
+            DeviceInfo::new_from_info(&host_id, &host_info),
+            DeviceInfo::new(
+                host_id.id,
+                host_id.generated_at,
+                host_info.description,
+                host_info.host_os.version(),
+                host_info.host_app_version,
+                host_info.host_os.vendor()
+            )
+        )
     }
 
     #[test]

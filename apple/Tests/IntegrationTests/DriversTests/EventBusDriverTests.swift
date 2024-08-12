@@ -27,9 +27,9 @@ class EventBusDriverTests: DriverTest<EventBus> {
 	
 }
 
-extension HostInfoDriver where Self == HostInfo {
+extension HostInfoDriver where Self == AppleHostInfoDriver {
 	static var shared: Self {
-		HostInfo(appVersion: "0.0.0")
+		AppleHostInfoDriver(appVersion: "0.0.0")
 	}
 }
 
@@ -54,7 +54,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
 		)
 	}
 	
@@ -67,8 +68,9 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
-		
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
+
 		)
 	}
 	
@@ -81,7 +83,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
 		)
 	}
 	
@@ -94,7 +97,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
 		)
 	}
 	
@@ -107,7 +111,8 @@ extension Drivers {
 			logging: logging,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
 		)
 	}
 	
@@ -120,7 +125,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: eventBus,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
 		)
 	}
 	
@@ -133,7 +139,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: fileSystem,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileChangeDriver: .shared
 		)
 	}
 	
@@ -146,7 +153,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: unsafeStorage
+			unsafeStorage: unsafeStorage,
+			profileChangeDriver: .shared
 		)
 	}
 }

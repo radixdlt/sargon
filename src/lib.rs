@@ -11,6 +11,7 @@ mod home_cards;
 mod profile;
 mod radix_connect;
 mod system;
+mod types;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
@@ -53,6 +54,7 @@ pub mod prelude {
     pub(crate) use std::sync::{Arc, RwLock};
 
     pub(crate) use strum::FromRepr;
+    pub(crate) use strum::IntoEnumIterator;
     pub(crate) use url::Url;
     pub(crate) use uuid::Uuid;
 

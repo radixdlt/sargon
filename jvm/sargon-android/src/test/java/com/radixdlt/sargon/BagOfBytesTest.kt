@@ -1,10 +1,12 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.bagOfBytesOf
 import com.radixdlt.sargon.extensions.hash
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toBagOfBytes
+import com.radixdlt.sargon.extensions.toByteArray
 import com.radixdlt.sargon.samples.acedBagOfBytesSample
 import com.radixdlt.sargon.samples.appendingCafeSample
 import com.radixdlt.sargon.samples.appendingDeadbeefSample
@@ -90,6 +92,19 @@ class BagOfBytesTest {
 
         assertThrows<IllegalStateException>("Should throw exception due to not even character length") {
             "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaceda".hexToBagOfBytes()
+        }
+    }
+
+    @Test
+    fun testRoundtrip() {
+        repeat(1000) {
+            val bagOfBytes = randomBagOfBytes(32)
+            val byteArray = bagOfBytes.toByteArray()
+
+            assertEquals(
+                bagOfBytes,
+                bagOfBytesOf(byteArray)
+            )
         }
     }
 

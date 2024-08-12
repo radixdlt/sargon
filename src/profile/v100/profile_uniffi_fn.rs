@@ -35,9 +35,10 @@ impl Profile {
 #[uniffi::export]
 pub fn new_profile_with_mnemonic(
     mnemonic: Mnemonic,
-    device_info: DeviceInfo,
+    host_id: HostId,
+    host_info: HostInfo,
 ) -> Profile {
-    Profile::new(mnemonic, device_info)
+    Profile::new(mnemonic, host_id, host_info)
 }
 
 /// # Panics
@@ -45,9 +46,10 @@ pub fn new_profile_with_mnemonic(
 #[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
-    device_info: DeviceInfo,
+    host_id: HostId,
+    host_info: HostInfo,
 ) -> Profile {
-    Profile::from_device_factor_source(device_factor_source, device_info)
+    Profile::from_device_factor_source(device_factor_source, host_id, host_info)
 }
 
 #[uniffi::export]
@@ -147,20 +149,31 @@ mod uniffi_tests {
     #[test]
     fn test_new_with_mnemonic() {
         assert_eq!(
-            new_profile_with_mnemonic(Mnemonic::sample(), DeviceInfo::sample())
-                .bdfs()
-                .id,
-            Profile::new(Mnemonic::sample(), DeviceInfo::sample())
-                .bdfs()
-                .id,
+            new_profile_with_mnemonic(
+                Mnemonic::sample(),
+                HostId::sample(),
+                HostInfo::sample()
+            )
+            .bdfs()
+            .id,
+            Profile::new(
+                Mnemonic::sample(),
+                HostId::sample(),
+                HostInfo::sample()
+            )
+            .bdfs()
+            .id,
         );
     }
 
     #[test]
     fn new_private_hd() {
         let private = PrivateHierarchicalDeterministicFactorSource::sample();
-        let lhs =
-            new_profile(private.factor_source.clone(), DeviceInfo::sample());
+        let lhs = new_profile(
+            private.factor_source.clone(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
         assert_eq!(
             lhs.bdfs().factor_source_id(),
             private.factor_source.factor_source_id()
@@ -169,8 +182,8 @@ mod uniffi_tests {
 
     #[test]
     fn to_string_and_debug_string() {
-        assert_eq!(profile_to_string(&SUT::sample()).len(), 4276);
-        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27115);
+        assert_eq!(profile_to_string(&SUT::sample()).len(), 4292);
+        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27145);
         assert_ne!(
             profile_to_debug_string(&SUT::sample()),
             profile_to_debug_string(&SUT::sample_other())

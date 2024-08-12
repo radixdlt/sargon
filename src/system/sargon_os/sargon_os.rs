@@ -48,7 +48,7 @@ impl SargonOS {
 
         let secure_storage = &clients.secure_storage;
 
-        if let Some(loaded) = secure_storage.load_active_profile().await? {
+        if let Some(loaded) = secure_storage.load_profile().await? {
             Ok(Arc::new(Self {
                 clients,
                 profile_holder: ProfileHolder::new(loaded),
@@ -61,9 +61,7 @@ impl SargonOS {
 
             secure_storage.save_private_hd_factor_source(&bdfs).await?;
 
-            secure_storage
-                .save_profile_and_active_profile_id(&profile)
-                .await?;
+            secure_storage.save_profile(&profile).await?;
 
             info!("Saved new Profile and BDFS, finish booting SargonOS");
 
@@ -92,14 +90,15 @@ impl SargonOS {
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
-        let device_info = Self::get_device_info(clients).await?;
+        let host_id = Self::get_host_id(clients).await?;
+        let host_info = Self::get_host_info(clients).await;
 
         let is_main = true;
         let private_bdfs = match mnemonic_with_passphrase {
             Some(mwp) => {
                 debug!("Using specified MnemonicWithPassphrase, perhaps we are running in at test...");
 
-                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &device_info)
+                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &host_info)
             }
             None => {
                 debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
@@ -110,7 +109,7 @@ impl SargonOS {
                     is_main,
                     entropy,
                     BIP39Passphrase::default(),
-                    &device_info
+                    &host_info
                 )
             }
         };
@@ -119,38 +118,44 @@ impl SargonOS {
         debug!("Creating new Profile...");
         let profile = Profile::from_device_factor_source(
             private_bdfs.factor_source.clone(),
-            device_info,
+            host_id,
+            host_info,
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn device_info(&self) -> Result<DeviceInfo> {
-        Self::get_device_info(&self.clients).await
+    pub(crate) async fn host_id(&self) -> Result<HostId> {
+        Self::get_host_id(&self.clients).await
     }
 
-    pub(crate) async fn get_device_info(
-        clients: &Clients,
-    ) -> Result<DeviceInfo> {
-        debug!("Get device info");
+    pub(crate) async fn get_host_id(clients: &Clients) -> Result<HostId> {
+        debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
 
-        let device_info = match secure_storage.load_device_info().await? {
-            Some(loaded_device_info) => {
-                debug!("Found saved device info: {:?}", &loaded_device_info);
-                loaded_device_info
+        match secure_storage.load_host_id().await? {
+            Some(loaded_host_id) => {
+                debug!("Found saved host id: {:?}", &loaded_host_id);
+                Ok(loaded_host_id)
             }
             None => {
-                debug!("Found no saved device info, creating new.");
-                let new_device_info = clients.host.create_device_info().await;
-                debug!("Created new device info: {:?}", &new_device_info);
-                secure_storage.save_device_info(&new_device_info).await?;
-                debug!("Saved new device info");
-                new_device_info
+                debug!("Found no saved host id, creating new.");
+                let new_host_id = HostId::generate_new();
+                debug!("Created new host id: {:?}", &new_host_id);
+                secure_storage.save_host_id(&new_host_id).await?;
+                debug!("Saved new host id");
+                Ok(new_host_id)
             }
-        };
+        }
+    }
 
-        Ok(device_info)
+    pub(crate) async fn host_info(&self) -> HostInfo {
+        Self::get_host_info(&self.clients).await
+    }
+
+    pub(crate) async fn get_host_info(clients: &Clients) -> HostInfo {
+        debug!("Get Host info");
+        clients.host.resolve_host_info().await
     }
 }
 
@@ -201,9 +206,11 @@ impl SargonOS {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use actix_rt::time::timeout;
     use std::time::Duration;
+
+    use actix_rt::time::timeout;
+
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -214,13 +221,13 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
+        let active_profile = os
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
 
-        assert_eq!(active_profile_id, os.profile().id());
+        assert_eq!(active_profile.id(), os.profile().id());
     }
 
     #[actix_rt::test]
@@ -231,10 +238,6 @@ mod tests {
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
         let drivers = Drivers::with_secure_storage(secure_storage_driver);
         let bios = Bios::new(drivers);
 
@@ -247,37 +250,6 @@ mod tests {
         // ASSERT
         let active_profile = os.profile();
         assert_eq!(active_profile.id(), profile.id());
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_with_existing_profile_active_profile_id() {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::sample();
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
-        // ACT
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(active_profile_id, profile.id());
     }
 
     #[actix_rt::test]

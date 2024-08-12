@@ -34,7 +34,7 @@ mod tests {
 
     #[test]
     fn to_string() {
-        assert_eq!(factor_source_to_string(&SUT::sample()), "iPhone iPhone device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a")
+        assert_eq!(factor_source_to_string(&SUT::sample()), "My precious iPhone SE 2nd gen device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a")
     }
 
     #[test]
