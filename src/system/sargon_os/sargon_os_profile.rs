@@ -38,6 +38,24 @@ impl SargonOS {
 
 #[uniffi::export]
 impl SargonOS {
+    pub async fn set_profile(&self, profile: Profile) -> Result<()> {
+        if profile.id() != self.profile().id() {
+            return Err(
+                CommonError::TriedToUpdateProfileWithOneWithDifferentID,
+            );
+        }
+
+        self.update_profile_with(|mut p| {
+            *p = profile.clone();
+            Ok(())
+        })
+        .await?;
+
+        self.clients.profile_change.emit(profile).await;
+
+        Ok(())
+    }
+
     /// Checks if current Profile contains any `ProfileNetwork`s.
     pub fn has_any_network(&self) -> bool {
         self.profile_holder
@@ -48,37 +66,6 @@ impl SargonOS {
     pub fn has_any_account_on_any_network(&self) -> bool {
         self.profile_holder
             .access_profile_with(|p| p.has_any_account_on_any_network())
-    }
-
-    /// Returns the current profile in full. This is a COSTLY operation
-    /// and hosts SHOULD NOT do it lightheartedly, prefer using more specific
-    /// reading operations such as `os.current_network_id` or `os.accounts_for_display_on_current_network` etc, which are cheap operations compared
-    /// to using this.
-    ///
-    /// In the future will will most likely deprecate this method.
-    pub fn profile(&self) -> Profile {
-        self.profile_holder.profile()
-    }
-
-    #[allow(non_snake_case)]
-    #[deprecated(
-        since = "0.0.1",
-        note = "Hosts SHOULD migrate to use more specialized methods on SargonOS instead, e.g. `createAndSaveNewAccount`. And SargonOS should be the SOLE object to perform the mutation and persisting."
-    )]
-    pub async fn DEPRECATED_save_ffi_changed_profile(
-        &self,
-        profile: Profile,
-    ) -> Result<()> {
-        if profile.id() != self.profile().id() {
-            return Err(
-                CommonError::TriedToUpdateProfileWithOneWithDifferentID,
-            );
-        }
-        self.update_profile_with(|mut p| {
-            *p = profile.clone();
-            Ok(())
-        })
-        .await
     }
 
     /// Imports the `profile`, claims it, set it as active (current) one and
@@ -92,9 +79,7 @@ impl SargonOS {
         let mut profile = profile;
         self.claim_profile(&mut profile).await?;
 
-        self.secure_storage
-            .save_profile_and_active_profile_id(&profile)
-            .await?;
+        self.secure_storage.save_profile(&profile).await?;
 
         debug!(
             "Saved imported profile into secure storage, id: {}",
@@ -118,27 +103,6 @@ impl SargonOS {
         Ok(())
     }
 
-    /// Claims the active profile, meaning the `last_used_on_device` in `header`
-    /// is updated.
-    ///
-    /// Returns `true` if the profile was changed (i.e. if claim was indeed needed),
-    /// `false`` otherwise.
-    pub async fn claim_active_profile(&self) -> Result<bool> {
-        let host_id = self.host_id().await?;
-        let host_info = self.host_info().await;
-
-        self.maybe_validate_ownership_update_profile_with(
-            false, // we do NOT validate ownership, since this method is claiming
-            |mut p| {
-                Ok(Self::claim_provided_profile(
-                    &mut p,
-                    DeviceInfo::new_from_info(&host_id, &host_info),
-                ))
-            },
-        )
-        .await
-    }
-
     /// Deletes the profile and the active profile id and all references Device
     /// factor sources from secure storage, and creates a new empty profile
     /// and a new bdfs, and saves those into secure storage, returns the ID of
@@ -154,11 +118,19 @@ impl SargonOS {
             .save_private_hd_factor_source(&bdfs)
             .await?;
 
-        self.secure_storage
-            .save_profile_and_active_profile_id(&profile)
-            .await?;
+        self.secure_storage.save_profile(&profile).await?;
 
         Ok(profile_id)
+    }
+
+    /// Returns the current profile in full. This is a COSTLY operation
+    /// and hosts SHOULD NOT do it lightheartedly, prefer using more specific
+    /// reading operations such as `os.current_network_id` or `os.accounts_for_display_on_current_network` etc, which are cheap operations compared
+    /// to using this.
+    ///
+    /// In the future will will most likely deprecate this method.
+    pub fn profile(&self) -> Profile {
+        self.profile_holder.profile()
     }
 
     /// Do NOT use in production. Instead use `delete_profile_then_create_new_with_bdfs`
@@ -173,92 +145,6 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    /// Returns `Err`` if the **active** profile is not 'owned by host',
-    /// meaning `profile.header.last_used_on_device.id != device_info.id`.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileUsedOnOtherDevice` if `profile` is not 'owned by
-    /// host'.
-    pub(crate) async fn validate_is_allowed_to_mutate_active_profile(
-        &self,
-    ) -> Result<()> {
-        Self::validate_is_allowed_to_update_provided_profile(
-            &self.clients,
-            &self.profile(),
-        )
-        .await
-    }
-
-    /// Returns `Err` if the **provided** `profile` is not 'owned by host',
-    /// meaning `profile.header.last_used_on_device.id != device_info.id`.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileUsedOnOtherDevice` if `profile` is not 'owned by
-    /// host'.
-    pub(crate) async fn validate_is_allowed_to_update_provided_profile(
-        clients: &Clients,
-        profile: &Profile,
-    ) -> Result<()> {
-        Self::check_is_allowed_to_update_provided_profile(
-            clients, profile, true,
-        )
-        .await?;
-        Ok(())
-    }
-
-    /// Checks if the **provided** `profile` is not 'owned by host',
-    /// meaning `profile.header.last_used_on_device.id != device_info.id`,
-    /// and if `err_on_lack_of_ownership` an Err is returns, otherwise `Ok(false)`
-    /// is returned.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileUsedOnOtherDevice` if `profile` is not 'owned by
-    /// host'.
-    pub(crate) async fn check_is_allowed_to_update_provided_profile(
-        clients: &Clients,
-        profile: &Profile,
-        err_on_lack_of_ownership: bool,
-    ) -> Result<bool> {
-        debug!("Checking if profile.header.last_used_on_device is self.device_info");
-        let host_id = Self::get_host_id(clients).await?;
-        let last_used = profile.header.last_used_on_device.clone();
-        if last_used.id == host_id.id {
-            debug!("Ownership check passed (profile.header.last_used_on_device == self.device_info)");
-            Ok(true)
-        } else {
-            warn!("Profile was last used on another device, will not be able to update it until it has been claimed.");
-            clients
-                .event_bus
-                .emit(EventNotification::profile_used_on_other_device(
-                    last_used.clone(),
-                ))
-                .await;
-            if err_on_lack_of_ownership {
-                Err(CommonError::ProfileUsedOnOtherDevice {
-                    other_device_id: last_used.id,
-                    this_device_id: host_id.id,
-                })
-            } else {
-                // used by SargonOS::boot
-                Ok(false)
-            }
-        }
-    }
-
-    /// Validates ownership of Profile, then updates and **saves** it to
-    /// secure storage, after mutating it with `mutate`.
-    ///
-    /// # Emits
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
-    where
-        F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
-    {
-        self.maybe_validate_ownership_update_profile_with(true, mutate)
-            .await
-    }
-
     /// Updates and **saves** profile to secure storage, after
     /// mutating it with `mutate`, optionally validating ownership of Profile
     /// first.
@@ -269,17 +155,10 @@ impl SargonOS {
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub(crate) async fn maybe_validate_ownership_update_profile_with<F, R>(
-        &self,
-        validate_ownership: bool, // should only ever pass `false` from `claim`
-        mutate: F,
-    ) -> Result<R>
+    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
     {
-        if validate_ownership {
-            self.validate_is_allowed_to_mutate_active_profile().await?;
-        }
         let res = self.profile_holder.update_profile_with(mutate)?;
         self.profile_holder.update_profile_with(|mut p| {
             p.update_header(None);
@@ -306,17 +185,10 @@ impl SargonOS {
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
     pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
-        self.validate_is_allowed_to_mutate_active_profile().await?;
-
         let secure_storage = &self.secure_storage;
 
         secure_storage
-            .save(
-                SecureStorageKey::ProfileSnapshot {
-                    profile_id: profile.header.id,
-                },
-                profile,
-            )
+            .save(SecureStorageKey::ProfileSnapshot, profile)
             .await?;
 
         self.event_bus
@@ -340,7 +212,6 @@ impl SargonOS {
         }
 
         secure_storage.delete_profile(self.profile().id()).await?;
-        secure_storage.delete_active_profile_id().await?;
         Ok(())
     }
 
@@ -467,7 +338,7 @@ mod tests {
 
         // ASSERT
         let saved = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
@@ -536,7 +407,7 @@ mod tests {
             .contains_id(new_account.id()));
 
         let loaded = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
@@ -546,26 +417,6 @@ mod tests {
             .unwrap()
             .accounts
             .contains_id(new_account.id()));
-    }
-
-    #[actix_rt::test]
-    async fn test_import_profile_active_profile_id_is_set() {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        // ACT
-        os.with_timeout(|x| x.import_profile(Profile::sample()))
-            .await
-            .unwrap();
-
-        // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(active_profile_id, os.profile().id());
     }
 
     #[actix_rt::test]
@@ -592,24 +443,25 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_delete_profile_then_create_new_with_bdfs_old_profile_is_deleted(
+    async fn test_delete_profile_then_create_new_with_bdfs_new_profile_replaces_old(
     ) {
         // ARRANGE
         let bdfs = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
-        let profile_id = os.profile().id();
 
         // ACT
-        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+        let new_profile_id = os
+            .with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
             .await
             .unwrap();
 
         // ASSERT
-        let load_old_profile_result = os
-            .with_timeout(|x| x.secure_storage.load_profile_with_id(profile_id))
-            .await;
+        let load_current_profile = os
+            .with_timeout(|x| x.secure_storage.load_profile())
+            .await
+            .unwrap();
 
-        assert!(load_old_profile_result.is_err());
+        assert_eq!(load_current_profile.unwrap().id(), new_profile_id)
     }
 
     #[actix_rt::test]
@@ -649,7 +501,7 @@ mod tests {
 
         // ASSERT
         let active_profile = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
@@ -698,19 +550,15 @@ mod tests {
         let second = os.profile().id();
         assert_ne!(second, first);
         let load_profile_res = os
-            .with_timeout(|x| x.secure_storage.load_profile_with_id(second))
-            .await;
+            .with_timeout(|x| x.secure_storage.load_profile())
+            .await
+            .unwrap();
 
-        assert_eq!(
-            load_profile_res,
-            Err(CommonError::UnableToLoadProfileFromSecureStorage {
-                profile_id: second
-            })
-        );
+        assert!(load_profile_res.is_none());
     }
 
     #[actix_rt::test]
-    async fn test_deprecated_save_ffi_changed_profile() {
+    async fn test_set_profile() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -725,28 +573,21 @@ mod tests {
         profile.networks.append(new_network.clone());
 
         // ACT
-        os.with_timeout(|x| {
-            x.DEPRECATED_save_ffi_changed_profile(profile.clone())
-        })
-        .await
-        .unwrap();
+        os.with_timeout(|x| x.set_profile(profile.clone()))
+            .await
+            .unwrap();
 
         // ASSERT
         assert_eq!(os.profile().networks, profile.networks); // header has been updated so cannot do full profile comparison.
     }
 
     #[actix_rt::test]
-    async fn test_deprecated_save_ffi_changed_profile_is_err_when_different_profile_id(
-    ) {
+    async fn test_set_profile_is_err_when_different_profile_id() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
         // ACT
-        let res = os
-            .with_timeout(|x| {
-                x.DEPRECATED_save_ffi_changed_profile(Profile::sample())
-            })
-            .await;
+        let res = os.with_timeout(|x| x.set_profile(Profile::sample())).await;
 
         // ASSERT
         assert_eq!(
