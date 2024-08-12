@@ -432,7 +432,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_deprecated_save_ffi_changed_profile() {
+    async fn test_set_profile() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -456,8 +456,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_deprecated_save_ffi_changed_profile_is_err_when_different_profile_id(
-    ) {
+    async fn test_set_profile_is_err_when_different_profile_id() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
