@@ -123,6 +123,12 @@ impl SargonOS {
         Ok(profile_id)
     }
 
+    /// Returns the current profile in full. This is a COSTLY operation
+    /// and hosts SHOULD NOT do it lightheartedly, prefer using more specific
+    /// reading operations such as `os.current_network_id` or `os.accounts_for_display_on_current_network` etc, which are cheap operations compared
+    /// to using this.
+    ///
+    /// In the future will will most likely deprecate this method.
     pub fn profile(&self) -> Profile {
         self.profile_holder.profile()
     }
@@ -552,7 +558,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_deprecated_save_ffi_changed_profile() {
+    async fn test_set_profile() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -576,8 +582,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_deprecated_save_ffi_changed_profile_is_err_when_different_profile_id(
-    ) {
+    async fn test_set_profile_is_err_when_different_profile_id() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
