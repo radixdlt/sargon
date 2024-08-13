@@ -161,7 +161,6 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    // new wallet/or test
     pub(crate) async fn create_new_profile_with_bdfs(
         &self,
         mnemonic_with_passphrase: Option<MnemonicWithPassphrase>,
