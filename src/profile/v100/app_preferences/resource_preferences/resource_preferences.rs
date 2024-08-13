@@ -40,7 +40,6 @@ impl ResourcePreferences {
 }
 
 impl HasSampleValues for ResourcePreferences {
-    /// A sample used to facilitate unit tests.
     fn sample() -> Self {
         Self {
             resource_flags: [(
@@ -51,7 +50,6 @@ impl HasSampleValues for ResourcePreferences {
         }
     }
 
-    /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
         Self {
             resource_flags: [(
@@ -64,6 +62,17 @@ impl HasSampleValues for ResourcePreferences {
 }
 
 impl ResourcePreferences {
+    pub fn get_hidden_resources(&self) -> Vec<ResourceAddress> {
+        self.resource_flags
+            .iter()
+            .filter(|(_, flags)| {
+                flags.contains_by_id(&EntityFlag::DeletedByUser)
+            })
+            .map(|(resource, _)| *resource)
+            .sorted()
+            .collect()
+    }
+
     pub fn is_resource_hidden(&self, resource: ResourceAddress) -> bool {
         match self.resource_flags.get(&resource) {
             Some(flags) => flags.contains_by_id(&EntityFlag::DeletedByUser),
@@ -101,6 +110,22 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn hidden_resources() {
+        let mut sut = SUT::new();
+        assert!(sut.get_hidden_resources().is_empty());
+
+        let resource_one = ResourceAddress::sample_other();
+        let resource_two = ResourceAddress::sample();
+        sut.hide_resource(resource_one);
+        sut.hide_resource(resource_two);
+
+        assert_eq!(
+            vec![resource_one, resource_two],
+            sut.get_hidden_resources()
+        );
     }
 
     #[test]

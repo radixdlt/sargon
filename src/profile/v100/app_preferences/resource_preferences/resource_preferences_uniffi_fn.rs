@@ -1,6 +1,23 @@
 use crate::prelude::*;
 
 #[uniffi::export]
+pub fn new_resource_preferences_sample() -> ResourcePreferences {
+    ResourcePreferences::sample()
+}
+
+#[uniffi::export]
+pub fn new_resource_preferences_sample_other() -> ResourcePreferences {
+    ResourcePreferences::sample_other()
+}
+
+#[uniffi::export]
+pub fn resource_preferences_get_hidden_resources(
+    resource_preferences: ResourcePreferences,
+) -> Vec<ResourceAddress> {
+    resource_preferences.get_hidden_resources()
+}
+
+#[uniffi::export]
 pub fn resource_preferences_has_resource_hidden(
     resource_preferences: ResourcePreferences,
     resource: ResourceAddress,
@@ -35,6 +52,18 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourcePreferences;
+
+    #[test]
+    fn test_hidden_resources() {
+        let mut sut = SUT::sample();
+        sut.hide_resource(ResourceAddress::sample_other());
+        sut.hide_resource(ResourceAddress::sample());
+
+        assert_eq!(
+            vec![ResourceAddress::sample_other(), ResourceAddress::sample()],
+            sut.get_hidden_resources()
+        );
+    }
 
     #[test]
     fn test_hide_unhide_resource() {

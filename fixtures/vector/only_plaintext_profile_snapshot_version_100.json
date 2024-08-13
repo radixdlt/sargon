@@ -46,6 +46,13 @@
         },
         "transaction": {
             "defaultDepositGuarantee": "0.975"
+        },
+        "resource": {
+            "resourceFlags": {
+                "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
+                    "deletedByUser"
+                ]
+            }
         }
     },
     "networks": [
