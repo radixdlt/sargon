@@ -19,7 +19,9 @@ class EventBusDriverTests: DriverTest<EventBus> {
 		}
 		
 		let bios = BIOS(drivers: .withEventBus(sut))
-		let os = try await TestOS(bios: bios)
+		let os = await TestOS(bios: bios)
+		try await os.os.newWallet()
+
 		try await os.createAccount()
 		let notifications = await task.value
 		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
@@ -55,7 +57,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -69,7 +71,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 
 		)
 	}
@@ -84,7 +86,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -98,7 +100,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -112,7 +114,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -126,7 +128,7 @@ extension Drivers {
 			eventBus: eventBus,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -140,7 +142,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: fileSystem,
 			unsafeStorage: .shared,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -154,7 +156,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
-			profileChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 }

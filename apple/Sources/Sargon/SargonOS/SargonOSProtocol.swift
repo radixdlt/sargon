@@ -30,20 +30,28 @@ extension SargonOSProtocol {
 // MARK: Extensions
 extension SargonOSProtocol {
 	public var currentNetworkID: NetworkID {
-		os.currentNetworkId()
+		get throws {
+			try os.currentNetworkId()
+		}
 	}
 	
 	public var gateways: SavedGateways {
-		os.gateways()
+		get throws {
+			try os.gateways()
+		}
 	}
 	
 	@available(*, deprecated, message: "Consider using faster `accountsForDisplayOnCurrentNetwork` and follow up with ")
 	public var accountsOnCurrentNetwork: [Account] {
-		os.accountsOnCurrentNetwork()
+		get throws {
+			try os.accountsOnCurrentNetwork()
+		}
 	}
 	
 	public var accountsForDisplayOnCurrentNetwork: [AccountForDisplay] {
-		os.accountsForDisplayOnCurrentNetwork()
+		get throws {
+			try os.accountsForDisplayOnCurrentNetwork()
+		}
 	}
 	
 	public func accountByAddress(_ address: AccountAddress) throws -> Account {
