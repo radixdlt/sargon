@@ -49,13 +49,20 @@ impl SargonOS {
 
         let os = Arc::new(Self {
             clients,
-            profile_state_holder: ProfileStateHolder::new(profile_state),
+            profile_state_holder: ProfileStateHolder::new(
+                profile_state.clone(),
+            ),
         });
+        os.clients
+            .profile_state_change
+            .emit(profile_state.clone())
+            .await;
 
         os.event_bus
             .emit(EventNotification::new(Event::Booted))
             .await;
 
+        info!("Sargon os Booted with profile state: {}", profile_state);
         os
     }
 
@@ -75,7 +82,10 @@ impl SargonOS {
         self.profile_state_holder.replace_profile_state_with(
             ProfileState::Loaded(profile.clone()),
         )?;
-        // TODO what if one of them fails. Should we undo all of them?
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(profile))
+            .await;
         info!("Saved new Profile and BDFS, finish creating wallet");
 
         Ok(())
@@ -91,12 +101,12 @@ impl SargonOS {
         let mut profile = profile.clone();
         self.claim_profile(&mut profile).await?;
         self.secure_storage.save_profile(&profile).await?;
+        self.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(profile))?;
         debug!(
             "Saved imported profile into secure storage, id: {}",
             imported_id
         );
-        self.profile_state_holder
-            .replace_profile_state_with(ProfileState::Loaded(profile))?;
 
         if bdfs_skipped {
             let entropy: BIP39Entropy = self.clients.entropy.bip39_entropy();
@@ -106,7 +116,7 @@ impl SargonOS {
                 true,
                 entropy,
                 BIP39Passphrase::default(),
-                &host_info
+                &host_info,
             );
 
             let bdfs_result = self
@@ -123,6 +133,11 @@ impl SargonOS {
                 .await?;
         }
 
+        let profile_to_report = self.profile_state_holder.profile()?;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(profile_to_report))
+            .await;
         self.event_bus
             .emit(EventNotification::new(Event::ProfileImported {
                 id: imported_id,
@@ -136,7 +151,12 @@ impl SargonOS {
 
     pub async fn delete_wallet(&self) -> Result<()> {
         self.delete_profile_and_mnemonics_replace_in_memory_with_none()
-            .await
+            .await?;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::None)
+            .await;
+        Ok(())
     }
 }
 
@@ -168,7 +188,7 @@ impl SargonOS {
                     is_main,
                     entropy,
                     BIP39Passphrase::default(),
-                    &host_info
+                    &host_info,
                 )
             }
         };

@@ -96,7 +96,13 @@ impl SecureStorageClient {
         debug!("Loading profile");
         self.load(SecureStorageKey::ProfileSnapshot)
             .await
-            .inspect(|_| debug!("Loaded profile"))
+            .inspect(|some_profile| {
+                if some_profile.is_some() {
+                    debug!("Loaded profile")
+                } else {
+                    debug!("No profile available")
+                }
+            })
             .inspect_err(|e| error!("Failed to load profile, error {e}"))
     }
 

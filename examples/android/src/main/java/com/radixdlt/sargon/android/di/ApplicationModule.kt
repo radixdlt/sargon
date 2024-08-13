@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.android.BuildConfig
+import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
+import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.BiometricsHandler
 import com.radixdlt.sargon.os.from
 import dagger.Module
@@ -129,9 +131,20 @@ object ApplicationModule {
 
     @Provides
     @Singleton
+    fun provideEventBusDriver(): AndroidEventBusDriver = AndroidEventBusDriver()
+
+    @Provides
+    @Singleton
+    fun provideProfileStateChangeDriver(): AndroidProfileStateChangeDriver =
+        AndroidProfileStateChangeDriver()
+
+    @Provides
+    @Singleton
     fun provideBios(
         @ApplicationContext context: Context,
         httpClient: OkHttpClient,
+        eventBusDriver: AndroidEventBusDriver,
+        profileStateChangeDriver: AndroidProfileStateChangeDriver,
         biometricsHandler: BiometricsHandler,
         @EncryptedPreferences encryptedPreferences: DataStore<Preferences>,
         @NonEncryptedPreferences preferences: DataStore<Preferences>,
@@ -143,6 +156,8 @@ object ApplicationModule {
         biometricsHandler = biometricsHandler,
         encryptedPreferencesDataStore = encryptedPreferences,
         preferencesDatastore = preferences,
-        deviceInfoDatastore = deviceInfoPreferences
+        deviceInfoDatastore = deviceInfoPreferences,
+        eventBusDriver = eventBusDriver,
+        profileStateChangeDriver = profileStateChangeDriver
     )
 }
