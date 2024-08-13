@@ -142,6 +142,11 @@ mod tests {
     }
 
     #[test]
+    fn get_resource() {
+        assert_eq!(SUT::sample().resource, ResourcePreferences::sample())
+    }
+
+    #[test]
     fn test_has_gateway_with_url() {
         let sut = SUT::sample();
         // Test without the "/" at the end
@@ -198,7 +203,7 @@ mod tests {
                     "defaultDepositGuarantee": "0.975"
                 },
                 "resource": {
-                  "flags": {
+                  "resourceFlags": {
                     "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
                       "deletedByUser"
                     ]

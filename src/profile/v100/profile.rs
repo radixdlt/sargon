@@ -881,7 +881,7 @@ mod tests {
 						"defaultDepositGuarantee": "0.975"
 					},
 					"resource": {
-						"flags": {
+						"resourceFlags": {
 							"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
 								"deletedByUser"
 							]
