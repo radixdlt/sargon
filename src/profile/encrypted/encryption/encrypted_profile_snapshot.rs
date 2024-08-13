@@ -149,25 +149,27 @@ mod tests {
     }
 
     // TODO: Find out how to encrypt Profile with new app preferences modified and fix tests
-    /*
+
     #[test]
     fn decrypt_sample() {
+        // Uses Profile::sample()
         let sut = SUT::sample();
         let decrypted = sut.decrypt("babylon").unwrap();
         assert_eq!(
             decrypted.header.id,
-            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
                 .unwrap()
         );
     }
 
     #[test]
     fn decrypt_sample_other() {
+        // Uses Profile::sample()
         let sut = SUT::sample_other();
         let decrypted = sut.decrypt("").unwrap();
         assert_eq!(
             decrypted.header.id,
-            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
                 .unwrap()
         );
     }
@@ -178,8 +180,6 @@ mod tests {
         let decrypted_sample_other = SUT::sample_other().decrypt("").unwrap();
         assert_eq!(decrypted_sample, decrypted_sample_other);
     }
-
-    */
 
     #[test]
     fn encryption_roundtrip() {

@@ -644,8 +644,6 @@ mod tests {
         );
     }
 
-    // TODO: Find out how to encrypt Profile with new app preferences modified and fix tests
-    /*
     #[test]
     fn from_encrypted_profile_json_str_valid() {
         let json_str =
@@ -655,12 +653,10 @@ mod tests {
                 .unwrap();
         assert_eq!(
             sut.header.id,
-            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
                 .unwrap()
         );
     }
-
-    */
 
     #[test]
     fn from_encrypted_profile_json_str_invalid_is_err() {
@@ -742,7 +738,7 @@ mod tests {
             serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
         let password = "babylon";
         assert!(
-            SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+            !SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
                 json, password
             )
         );
