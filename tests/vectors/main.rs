@@ -489,16 +489,16 @@ mod encrypted_profile_tests {
         }
     }
 
-    // #[test]
-    // fn test_vectors() {
-    //     let fixture = fixture::<Fixture>(include_str!(concat!(
-    //         env!("FIXTURES_VECTOR"),
-    //         "multi_profile_snapshots_test_version_100_patch_after_app_version_120.json"
-    //     )))
-    //     .expect("Encrypted Profile tests");
+    #[test]
+    fn test_vectors() {
+        let fixture = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "multi_profile_snapshots_test_version_100_patch_after_app_version_120.json"
+        )))
+        .expect("Encrypted Profile tests");
 
-    //     fixture.test();
-    // }
+        fixture.test();
+    }
 }
 
 #[cfg(test)]
