@@ -5,6 +5,7 @@ package com.radixdlt.sargon.android
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -23,6 +25,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -40,6 +45,10 @@ import com.radixdlt.sargon.extensions.errorCode
 import com.radixdlt.sargon.extensions.errorMessage
 import com.radixdlt.sargon.extensions.isMain
 import com.radixdlt.sargon.extensions.kind
+import com.radixdlt.sargon.extensions.name
+import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.vendor
+import com.radixdlt.sargon.extensions.version
 import com.radixdlt.sargon.os.driver.BiometricsHandler
 import com.radixdlt.sargon.samples.sample
 import dagger.hilt.android.AndroidEntryPoint
@@ -106,33 +115,82 @@ fun WalletContent(
             }
         }
     ) { padding ->
-        when (val profileState = state.profileState) {
-            is ProfileState.None -> NoProfileContent(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp),
-                onCreateNewWallet = viewModel::onCreateNewWallet,
-                onImportWallet = {
-                    viewModel.onImportWallet(Profile.sample())
+        Column(modifier = Modifier.padding(padding)) {
+            state.info?.let { info ->
+                var isHostInfoVisible by remember {
+                    mutableStateOf(false)
                 }
-            )
 
-            is ProfileState.Incompatible -> IncompatibleProfile(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp),
-                error = profileState.v1
-            )
-
-            is ProfileState.Loaded -> ProfileContent(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp),
-                profile = profileState.v1,
-                onDevModeChanged = { enabled ->
-                    viewModel.onDevModeChanged(enabled)
+                TextButton(
+                    onClick = { isHostInfoVisible = !isHostInfoVisible }
+                ) {
+                    Text(text = "Host information (ℹ)")
                 }
-            )
+
+                AnimatedVisibility(visible = isHostInfoVisible) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Host ID",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.id.id}"
+                        )
+
+                        Text(
+                            text = "Host description",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.info.description.string}"
+                        )
+
+                        Text(
+                            text = "Host OS",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.info.hostOs.name} - ${info.info.hostOs.vendor} - ${info.info.hostOs.version}"
+                        )
+
+                        Text(
+                            text = "App Version",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.info.hostAppVersion}"
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+            }
+
+            when (val profileState = state.profileState) {
+                is ProfileState.None -> NoProfileContent(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    onCreateNewWallet = viewModel::onCreateNewWallet,
+                    onImportWallet = {
+                        viewModel.onImportWallet(Profile.sample())
+                    }
+                )
+
+                is ProfileState.Incompatible -> IncompatibleProfile(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    error = profileState.v1
+                )
+
+                is ProfileState.Loaded -> ProfileContent(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    profile = profileState.v1,
+                    onDevModeChanged = { enabled ->
+                        viewModel.onDevModeChanged(enabled)
+                    }
+                )
+            }
         }
     }
 }
