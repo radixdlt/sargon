@@ -59,7 +59,7 @@ impl ResourcePreferences {
     pub fn description(&self) -> String {
         format!(
             r#"
-			fungible: {:#?}
+            fungible: {:#?}
             non_fungible: {:#?}
             pool_unit: {:#?}
 			"#,
@@ -73,8 +73,12 @@ impl HasSampleValues for ResourcePreferences {
         Self {
             fungible: [(ResourceAddress::sample(), EntityFlags::sample())]
                 .into(),
-            non_fungible: [].into(),
-            pool_unit: [].into(),
+            non_fungible: [(
+                NonFungibleGlobalId::sample(),
+                EntityFlags::sample(),
+            )]
+            .into(),
+            pool_unit: [(PoolAddress::sample(), EntityFlags::sample())].into(),
         }
     }
 
@@ -85,41 +89,99 @@ impl HasSampleValues for ResourcePreferences {
                 EntityFlags::sample_other(),
             )]
             .into(),
-            non_fungible: [].into(),
-            pool_unit: [].into(),
+            non_fungible: [(
+                NonFungibleGlobalId::sample_other(),
+                EntityFlags::sample_other(),
+            )]
+            .into(),
+            pool_unit: [(
+                PoolAddress::sample_other(),
+                EntityFlags::sample_other(),
+            )]
+            .into(),
         }
     }
 }
 
 impl ResourcePreferences {
-    pub fn get_hidden_resources(&self) -> Vec<ResourceAddress> {
-        self.fungible
+    pub fn get_hidden_resources(&self) -> HiddenResources {
+        let fungible = self
+            .fungible
             .iter()
             .filter(|(_, flags)| {
                 flags.contains_by_id(&EntityFlag::DeletedByUser)
             })
             .map(|(resource, _)| *resource)
             .sorted()
-            .collect()
-    }
+            .collect();
 
-    pub fn is_resource_hidden(&self, resource: ResourceAddress) -> bool {
-        match self.fungible.get(&resource) {
-            Some(flags) => flags.contains_by_id(&EntityFlag::DeletedByUser),
-            None => false,
+        let non_fungible: Vec<NonFungibleGlobalId> = self
+            .non_fungible
+            .iter()
+            .filter(|(_, flags)| {
+                flags.contains_by_id(&EntityFlag::DeletedByUser)
+            })
+            .map(|(global_id, _)| global_id.clone())
+            .sorted()
+            .collect();
+
+        let pool_unit = self
+            .pool_unit
+            .iter()
+            .filter(|(_, flags)| {
+                flags.contains_by_id(&EntityFlag::DeletedByUser)
+            })
+            .map(|(pool_address, _)| *pool_address)
+            .sorted()
+            .collect();
+
+        HiddenResources {
+            fungible,
+            non_fungible,
+            pool_unit,
         }
     }
 
-    pub fn hide_resource(&mut self, resource: ResourceAddress) {
-        self.fungible
-            .entry(resource)
-            .or_default()
-            .insert(EntityFlag::DeletedByUser);
+    pub fn hide_resource(&mut self, kind: ResourcePreferenceKind) {
+        match kind {
+            ResourcePreferenceKind::Fungible(value) => {
+                self.fungible
+                    .entry(value)
+                    .or_default()
+                    .insert(EntityFlag::DeletedByUser);
+            }
+            ResourcePreferenceKind::NonFungible(value) => {
+                self.non_fungible
+                    .entry(value)
+                    .or_default()
+                    .insert(EntityFlag::DeletedByUser);
+            }
+            ResourcePreferenceKind::PoolUnit(value) => {
+                self.pool_unit
+                    .entry(value)
+                    .or_default()
+                    .insert(EntityFlag::DeletedByUser);
+            }
+        }
     }
 
-    pub fn unhide_resource(&mut self, resource: ResourceAddress) {
-        if let Some(flags) = self.fungible.get_mut(&resource) {
-            flags.remove_flag(&EntityFlag::DeletedByUser);
+    pub fn unhide_resource(&mut self, kind: ResourcePreferenceKind) {
+        match kind {
+            ResourcePreferenceKind::Fungible(value) => {
+                if let Some(flags) = self.fungible.get_mut(&value) {
+                    flags.remove_flag(&EntityFlag::DeletedByUser);
+                }
+            }
+            ResourcePreferenceKind::NonFungible(value) => {
+                if let Some(flags) = self.non_fungible.get_mut(&value) {
+                    flags.remove_flag(&EntityFlag::DeletedByUser);
+                }
+            }
+            ResourcePreferenceKind::PoolUnit(value) => {
+                if let Some(flags) = self.pool_unit.get_mut(&value) {
+                    flags.remove_flag(&EntityFlag::DeletedByUser);
+                }
+            }
         }
     }
 }
@@ -144,35 +206,37 @@ mod tests {
 
     #[test]
     fn hidden_resources() {
+        use crate::ResourcePreferenceKind::*;
         let mut sut = SUT::new();
-        assert!(sut.get_hidden_resources().is_empty());
 
-        let resource_one = ResourceAddress::sample_other();
-        let resource_two = ResourceAddress::sample();
-        sut.hide_resource(resource_one);
-        sut.hide_resource(resource_two);
+        // Test with no resources are hidden
+        let mut result = sut.get_hidden_resources();
+        assert!(result.fungible.is_empty());
+        assert!(result.non_fungible.is_empty());
+        assert!(result.pool_unit.is_empty());
 
-        assert_eq!(
-            vec![resource_one, resource_two],
-            sut.get_hidden_resources()
-        );
-    }
+        // Test with some fungible resources hidden
+        let fungible_one = ResourceAddress::sample_other();
+        let fungible_two = ResourceAddress::sample();
+        sut.hide_resource(Fungible(fungible_one));
+        sut.hide_resource(Fungible(fungible_two));
 
-    #[test]
-    fn hide_unhide_resource() {
-        let mut sut = SUT::new();
-        let resource = ResourceAddress::sample();
+        result = sut.get_hidden_resources();
+        assert_eq!(vec![fungible_one, fungible_two], result.fungible);
+        assert!(result.non_fungible.is_empty());
+        assert!(result.pool_unit.is_empty());
 
-        // Test the resource isn't hidden by default
-        assert!(!sut.is_resource_hidden(resource));
+        // Test hiding some non-fungible and pool unit, and unhiding one of the fungibles
+        let non_fungible = NonFungibleGlobalId::sample();
+        let pool_unit = PoolAddress::sample();
+        sut.unhide_resource(Fungible(fungible_one));
+        sut.hide_resource(NonFungible(non_fungible.clone()));
+        sut.hide_resource(PoolUnit(pool_unit));
 
-        // Hide the resource
-        sut.hide_resource(resource);
-        assert!(sut.is_resource_hidden(resource));
-
-        // Unhide the resource
-        sut.unhide_resource(resource);
-        assert!(!sut.is_resource_hidden(resource));
+        result = sut.get_hidden_resources();
+        assert_eq!(vec![fungible_two], result.fungible);
+        assert_eq!(vec![non_fungible], result.non_fungible);
+        assert_eq!(vec![pool_unit], result.pool_unit);
     }
 
     #[test]
@@ -184,6 +248,16 @@ mod tests {
             {
                 "fungible": {
                     "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
+                        "deletedByUser"
+                    ]
+                },
+                "nonFungible": {
+                    "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>": [
+                        "deletedByUser"
+                    ]
+                },
+                "poolUnit": {
+                    "pool_rdx1c5dkfdtdqvczcwzdyvzeuhddyha768p2q28erden533fty8h68ay6m": [
                         "deletedByUser"
                     ]
                 }

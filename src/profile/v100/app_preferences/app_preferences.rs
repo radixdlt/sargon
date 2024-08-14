@@ -33,6 +33,7 @@ pub struct AppPreferences {
     pub transaction: TransactionPreferences,
 
     /// Configuration related to resources
+    #[serde(default)]
     pub resource: ResourcePreferences,
 }
 
@@ -203,11 +204,21 @@ mod tests {
                     "defaultDepositGuarantee": "0.975"
                 },
                 "resource": {
-                  "fungible": {
-                    "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
-                      "deletedByUser"
-                    ]
-                  }
+                    "fungible": {
+                        "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
+                            "deletedByUser"
+                        ]
+                    },
+                    "nonFungible": {
+                        "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>": [
+                            "deletedByUser"
+                        ]
+                    },
+                    "poolUnit": {
+                        "pool_rdx1c5dkfdtdqvczcwzdyvzeuhddyha768p2q28erden533fty8h68ay6m": [
+                            "deletedByUser"
+                        ]
+                    }
                 }
             }
             "#,
