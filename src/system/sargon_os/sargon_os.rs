@@ -160,6 +160,14 @@ impl SargonOS {
             .await;
         Ok(())
     }
+
+    pub async fn resolve_host_id(&self) -> Result<HostId> {
+        self.host_id().await
+    }
+
+    pub async fn resolve_host_info(&self) -> HostInfo {
+        self.host_info().await
+    }
 }
 
 impl SargonOS {
@@ -420,5 +428,22 @@ mod tests {
             .load_mnemonic_with_passphrase(&bdfs.id)
             .await
             .is_err());
+    }
+
+    #[actix_rt::test]
+    async fn test_resolve_host_id() {
+        let os = SUT::fast_boot().await;
+
+        assert_eq!(
+            os.resolve_host_id().await.unwrap(),
+            os.host_id().await.unwrap()
+        )
+    }
+
+    #[actix_rt::test]
+    async fn test_resolve_host_info() {
+        let os = SUT::fast_boot().await;
+
+        assert_eq!(os.resolve_host_info().await, os.host_info().await)
     }
 }

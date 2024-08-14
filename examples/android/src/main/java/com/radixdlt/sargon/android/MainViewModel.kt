@@ -3,20 +3,17 @@ package com.radixdlt.sargon.android
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.radixdlt.sargon.Account
-import com.radixdlt.sargon.DisplayName
-import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.OnLedgerSettings
+import com.radixdlt.sargon.HostId
+import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.Profile
-import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.Timestamp
-import com.radixdlt.sargon.extensions.asIdentifiable
-import com.radixdlt.sargon.extensions.default
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,12 +26,25 @@ class MainViewModel @Inject constructor(
 
     val state = combine(
         sargonOsManager.sargonState,
-        sargonOsManager.profileState
+        sargonOsManager.profileState,
     ) { sargonState, profileState ->
         State(
             sargonState,
             profileState
         )
+    }.map { state ->
+        if (state.info == null) {
+            val osState = state.sargonState as? SargonOsManager.SargonState.Booted ?: return@map state
+
+            state.copy(
+                info = HostInformation(
+                    id = osState.os.resolveHostId(),
+                    info = osState.os.resolveHostInfo()
+                )
+            )
+        } else {
+            state
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
@@ -100,7 +110,13 @@ class MainViewModel @Inject constructor(
     data class State(
         val sargonState: SargonOsManager.SargonState = SargonOsManager.SargonState.Idle,
         val profileState: ProfileState = ProfileState.None,
-        val accounts: List<Account> = emptyList()
+        val accounts: List<Account> = emptyList(),
+        val info: HostInformation? = null
+    )
+
+    data class HostInformation(
+        val id: HostId,
+        val info: HostInfo
     )
 
 }
