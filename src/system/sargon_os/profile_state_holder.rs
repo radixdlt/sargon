@@ -126,7 +126,7 @@ impl ProfileStateHolder {
         .and_then(access)
     }
 
-    /// Sets the profile held by this `ProfileStateHolder` to `profile`.
+    /// Sets the `ProfileState` held by this `ProfileStateHolder` to the latest `profile_state`.
     pub(super) fn replace_profile_state_with(
         &self,
         profile_state: ProfileState,
