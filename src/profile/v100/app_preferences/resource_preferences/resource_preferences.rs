@@ -15,55 +15,85 @@ use std::hash::Hasher;
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
-#[display("{:#?}", self.resource_flags)]
+#[display("{}", self.description())]
 pub struct ResourcePreferences {
-    /// A dictionary detailing the user preferences for each resource.
+    /// A dictionary detailing the user preferences for fungible resources.
     #[serde(default)]
-    pub resource_flags: HashMap<ResourceAddress, EntityFlags>,
+    pub fungible: HashMap<ResourceAddress, EntityFlags>,
+
+    /// A dictionary detailing the user preferences for non-fungible resources.
+    #[serde(default)]
+    pub non_fungible: HashMap<NonFungibleGlobalId, EntityFlags>,
+
+    /// A dictionary detailing the user preferences for pool units.
+    #[serde(default)]
+    pub pool_unit: HashMap<PoolAddress, EntityFlags>,
 }
 
 impl Hash for ResourcePreferences {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let mut pairs: Vec<_> = self.resource_flags.iter().collect();
-        pairs.sort_by_key(|i| i.0);
+        let mut fungible_pairs: Vec<_> = self.fungible.iter().collect();
+        fungible_pairs.sort_by_key(|i| i.0);
 
-        Hash::hash(&pairs, state);
+        let mut non_fungible_pairs: Vec<_> = self.non_fungible.iter().collect();
+        non_fungible_pairs.sort_by_key(|i| i.0);
+
+        let mut pool_unit_pairs: Vec<_> = self.pool_unit.iter().collect();
+        pool_unit_pairs.sort_by_key(|i| i.0);
+
+        Hash::hash(&fungible_pairs, state);
+        Hash::hash(&non_fungible_pairs, state);
+        Hash::hash(&pool_unit_pairs, state);
     }
 }
 
 impl ResourcePreferences {
     pub fn new() -> Self {
         Self {
-            resource_flags: HashMap::new(),
+            fungible: HashMap::new(),
+            non_fungible: HashMap::new(),
+            pool_unit: HashMap::new(),
         }
+    }
+
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+			fungible: {:#?}
+            non_fungible: {:#?}
+            pool_unit: {:#?}
+			"#,
+            self.fungible, self.non_fungible, self.pool_unit,
+        )
     }
 }
 
 impl HasSampleValues for ResourcePreferences {
     fn sample() -> Self {
         Self {
-            resource_flags: [(
-                ResourceAddress::sample(),
-                EntityFlags::sample(),
-            )]
-            .into(),
+            fungible: [(ResourceAddress::sample(), EntityFlags::sample())]
+                .into(),
+            non_fungible: [].into(),
+            pool_unit: [].into(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            resource_flags: [(
+            fungible: [(
                 ResourceAddress::sample_other(),
                 EntityFlags::sample_other(),
             )]
             .into(),
+            non_fungible: [].into(),
+            pool_unit: [].into(),
         }
     }
 }
 
 impl ResourcePreferences {
     pub fn get_hidden_resources(&self) -> Vec<ResourceAddress> {
-        self.resource_flags
+        self.fungible
             .iter()
             .filter(|(_, flags)| {
                 flags.contains_by_id(&EntityFlag::DeletedByUser)
@@ -74,21 +104,21 @@ impl ResourcePreferences {
     }
 
     pub fn is_resource_hidden(&self, resource: ResourceAddress) -> bool {
-        match self.resource_flags.get(&resource) {
+        match self.fungible.get(&resource) {
             Some(flags) => flags.contains_by_id(&EntityFlag::DeletedByUser),
             None => false,
         }
     }
 
     pub fn hide_resource(&mut self, resource: ResourceAddress) {
-        self.resource_flags
+        self.fungible
             .entry(resource)
             .or_default()
             .insert(EntityFlag::DeletedByUser);
     }
 
     pub fn unhide_resource(&mut self, resource: ResourceAddress) {
-        if let Some(flags) = self.resource_flags.get_mut(&resource) {
+        if let Some(flags) = self.fungible.get_mut(&resource) {
             flags.remove_flag(&EntityFlag::DeletedByUser);
         }
     }
@@ -152,7 +182,7 @@ mod tests {
             &sut,
             r#"
             {
-                "resourceFlags": {
+                "fungible": {
                     "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
                         "deletedByUser"
                     ]
