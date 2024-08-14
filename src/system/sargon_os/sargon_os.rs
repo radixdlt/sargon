@@ -69,13 +69,15 @@ impl SargonOS {
     pub async fn new_wallet(&self) -> Result<()> {
         let (profile, bdfs) = self.create_new_profile_with_bdfs(None).await?;
 
-        self.secure_storage.save_profile(&profile).await?;
-        let bdfs_store_result = self
-            .secure_storage
+        self.secure_storage
             .save_private_hd_factor_source(&bdfs)
-            .await;
-        if let Some(error) = bdfs_store_result.err() {
-            self.secure_storage.delete_profile(profile.id()).await?;
+            .await?;
+        let save_profile_result =
+            self.secure_storage.save_profile(&profile).await;
+        if let Some(error) = save_profile_result.err() {
+            self.secure_storage
+                .delete_mnemonic(&bdfs.factor_source.id)
+                .await?;
             return Err(error);
         }
 
