@@ -26,13 +26,14 @@ class AndroidLoggingDriverTest {
     @Test
     fun `test logs emitted in correct level`() {
         val input = listOf(
-            TestTree.Log(level = LogLevel.INFO, message = "info"),
-            TestTree.Log(level = LogLevel.TRACE, message = "verbose"),
-            TestTree.Log(level = LogLevel.WARN, message = "warn"),
-            TestTree.Log(level = LogLevel.ERROR, message = "error"),
-            TestTree.Log(level = LogLevel.DEBUG, message = "debug")
+            TestTree.Log(level = LogLevel.INFO, tag = "sargon", message = "info"),
+            TestTree.Log(level = LogLevel.TRACE, tag = "sargon", message = "verbose"),
+            TestTree.Log(level = LogLevel.WARN, tag = "sargon", message = "warn"),
+            TestTree.Log(level = LogLevel.ERROR, tag = "sargon", message = "error"),
+            TestTree.Log(level = LogLevel.DEBUG, tag = "sargon", message = "debug")
         )
-        val sut = AndroidLoggingDriver()
+        // Setting to false to avoid planting android debug tree, since logTree is planted.
+        val sut = AndroidLoggingDriver(isLoggingEnabled = false)
 
         input.forEach { log ->
             sut.log(log.level, log.message)

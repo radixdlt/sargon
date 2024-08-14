@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Drivers
+import com.radixdlt.sargon.EventBusDriver
+import com.radixdlt.sargon.ProfileStateChangeDriver
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.os.driver.AndroidBiometricAuthorizationDriver
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
@@ -13,7 +15,7 @@ import com.radixdlt.sargon.os.driver.AndroidFileSystemDriver
 import com.radixdlt.sargon.os.driver.AndroidHostInfoDriver
 import com.radixdlt.sargon.os.driver.AndroidLoggingDriver
 import com.radixdlt.sargon.os.driver.AndroidNetworkingDriver
-import com.radixdlt.sargon.os.driver.AndroidProfileChangeDriver
+import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.AndroidStorageDriver
 import com.radixdlt.sargon.os.driver.BiometricsHandler
 import okhttp3.OkHttpClient
@@ -27,12 +29,10 @@ fun Bios.Companion.from(
     biometricsHandler: BiometricsHandler,
     encryptedPreferencesDataStore: DataStore<Preferences>,
     preferencesDatastore: DataStore<Preferences>,
-    deviceInfoDatastore: DataStore<Preferences>
+    deviceInfoDatastore: DataStore<Preferences>,
+    eventBusDriver: EventBusDriver,
+    profileStateChangeDriver: ProfileStateChangeDriver
 ): Bios {
-    if (enableLogging) {
-        Timber.plant(Timber.DebugTree())
-    }
-
     val storageDriver = AndroidStorageDriver(
         biometricAuthorizationDriver = AndroidBiometricAuthorizationDriver(
             biometricsHandler = biometricsHandler
@@ -48,10 +48,10 @@ fun Bios.Companion.from(
             unsafeStorage = storageDriver,
             entropyProvider = AndroidEntropyProviderDriver(),
             hostInfo = AndroidHostInfoDriver(context),
-            logging = AndroidLoggingDriver(),
-            eventBus = AndroidEventBusDriver(),
+            logging = AndroidLoggingDriver(enableLogging),
+            eventBus = eventBusDriver,
             fileSystem = AndroidFileSystemDriver(context),
-            profileChangeDriver = AndroidProfileChangeDriver()
+            profileStateChangeDriver = profileStateChangeDriver
         )
     )
 }

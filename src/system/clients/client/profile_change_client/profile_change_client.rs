@@ -1,18 +1,20 @@
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub struct ProfileChangeClient {
-    driver: Arc<dyn ProfileChangeDriver>,
+pub struct ProfileStateChangeClient {
+    driver: Arc<dyn ProfileStateChangeDriver>,
 }
 
-impl ProfileChangeClient {
-    pub(crate) fn new(driver: Arc<dyn ProfileChangeDriver>) -> Self {
+impl ProfileStateChangeClient {
+    pub(crate) fn new(driver: Arc<dyn ProfileStateChangeDriver>) -> Self {
         Self { driver }
     }
 }
 
-impl ProfileChangeClient {
-    pub async fn emit(&self, changed_profile: Profile) {
-        self.driver.handle_profile_change(changed_profile).await
+impl ProfileStateChangeClient {
+    pub async fn emit(&self, changed_profile_state: ProfileState) {
+        self.driver
+            .handle_profile_state_change(changed_profile_state)
+            .await
     }
 }

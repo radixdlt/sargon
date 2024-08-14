@@ -56,7 +56,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
-            profileChangeDriver: .shared
+            profileStateChangeDriver: .shared
 		)
 	}
 }
