@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalUnsignedTypes::class)
 
-package com.radixdlt.sargon.antenna
+package com.radixdlt.sargon.os.driver
 
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.NetworkRequest
@@ -9,18 +9,22 @@ import com.radixdlt.sargon.NetworkingDriver
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.extensions.toHttpMethod
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.Headers.Companion.toHeaders
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.executeAsync
+import okhttp3.coroutines.executeAsync
 
-class SargonNetworkingDriver(
+class AndroidNetworkingDriver(
     private val client: OkHttpClient
 ) : NetworkingDriver {
-    override suspend fun executeNetworkRequest(request: NetworkRequest): NetworkResponse = runCatching {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun executeNetworkRequest(
+        request: NetworkRequest
+    ): NetworkResponse = runCatching {
         val mediaType = request.headers.extractMediaType()
 
         val requestBody = request.body

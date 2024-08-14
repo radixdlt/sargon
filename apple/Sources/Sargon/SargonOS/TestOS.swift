@@ -31,8 +31,8 @@ public final class TestOS {
 		self.os = os
 	}
 	
-	public convenience init(bios: BIOS) async throws {
-		let os = try await SargonOS.boot(bios: bios)
+	public convenience init(bios: BIOS) async {
+		let os = await SargonOS.boot(bios: bios)
 		self.init(os: os)
 	}
 	
@@ -42,8 +42,8 @@ extension TestOS: SargonOSProtocol {}
 
 // MARK: Private
 extension TestOS {
-	private func nextAccountName() -> DisplayName {
-        let index = accountsForDisplayOnCurrentNetwork.count
+	private func nextAccountName() throws -> DisplayName {
+        let index = try accountsForDisplayOnCurrentNetwork.count
 		return DisplayName(value: "Unnamed \(index)")
 	}
 }

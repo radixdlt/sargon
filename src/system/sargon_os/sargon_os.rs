@@ -10,7 +10,7 @@ use crate::prelude::*;
 /// phone.
 #[derive(Debug, uniffi::Object)]
 pub struct SargonOS {
-    pub(crate) profile_holder: ProfileHolder,
+    pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
 }
 
@@ -27,16 +27,7 @@ impl Deref for SargonOS {
 #[uniffi::export]
 impl SargonOS {
     #[uniffi::constructor]
-    pub async fn boot(bios: Arc<Bios>) -> Result<Arc<Self>> {
-        Self::boot_with_bdfs(bios, None).await
-    }
-}
-
-impl SargonOS {
-    pub async fn boot_with_bdfs(
-        bios: Arc<Bios>,
-        bdfs_mnemonic: Option<MnemonicWithPassphrase>,
-    ) -> Result<Arc<Self>> {
+    pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
         let clients = Clients::new(bios);
 
         let sargon_info = SargonBuildInformation::get();
@@ -47,63 +38,147 @@ impl SargonOS {
         info!("Host: {}", host_info);
 
         let secure_storage = &clients.secure_storage;
+        let profile_state = secure_storage.load_profile().await.map_or_else(
+            ProfileState::Incompatible,
+            |some_profile| {
+                some_profile
+                    .map(ProfileState::Loaded)
+                    .unwrap_or(ProfileState::None)
+            },
+        );
 
-        if let Some(loaded) = secure_storage.load_active_profile().await? {
-            info!("Loaded saved profile {}", &loaded.header);
-            let is_owner = Self::check_is_allowed_to_update_provided_profile(
-                &clients, &loaded, false,
-            )
+        let os = Arc::new(Self {
+            clients,
+            profile_state_holder: ProfileStateHolder::new(
+                profile_state.clone(),
+            ),
+        });
+        os.clients
+            .profile_state_change
+            .emit(profile_state.clone())
+            .await;
+
+        os.event_bus
+            .emit(EventNotification::new(Event::Booted))
+            .await;
+
+        info!("Sargon os Booted with profile state: {}", profile_state);
+        os
+    }
+
+    pub async fn new_wallet(&self) -> Result<()> {
+        let (profile, bdfs) = self.create_new_profile_with_bdfs(None).await?;
+
+        self.secure_storage
+            .save_private_hd_factor_source(&bdfs)
             .await?;
-
-            if !is_owner {
-                warn!("Loaded saved profile was last used on another device, will continue booting OS, but will unable to update Profile.");
-            }
-
-            Ok(Arc::new(Self {
-                clients,
-                profile_holder: ProfileHolder::new(loaded),
-            }))
-        } else {
-            info!("No saved profile found, creating a new one...");
-            let (profile, bdfs) =
-                Self::create_new_profile_with_bdfs(&clients, bdfs_mnemonic)
-                    .await?;
-
-            secure_storage.save_private_hd_factor_source(&bdfs).await?;
-
-            secure_storage
-                .save_profile_and_active_profile_id(&profile)
+        let save_profile_result =
+            self.secure_storage.save_profile(&profile).await;
+        if let Some(error) = save_profile_result.err() {
+            self.secure_storage
+                .delete_mnemonic(&bdfs.factor_source.id)
                 .await?;
-
-            info!("Saved new Profile and BDFS, finish booting SargonOS");
-
-            let os = Arc::new(Self {
-                clients,
-                profile_holder: ProfileHolder::new(profile),
-            });
-            os.event_bus
-                .emit(EventNotification::new(Event::Booted))
-                .await;
-            Ok(os)
+            return Err(error);
         }
+
+        self.profile_state_holder.replace_profile_state_with(
+            ProfileState::Loaded(profile.clone()),
+        )?;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(profile))
+            .await;
+        info!("Saved new Profile and BDFS, finish creating wallet");
+
+        Ok(())
+    }
+
+    pub async fn import_wallet(
+        &self,
+        profile: &Profile,
+        bdfs_skipped: bool,
+    ) -> Result<()> {
+        let imported_id = profile.id();
+        debug!("Importing profile, id: {}", imported_id);
+        let mut profile = profile.clone();
+        self.claim_profile(&mut profile).await?;
+        self.secure_storage.save_profile(&profile).await?;
+        self.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(profile))?;
+        debug!(
+            "Saved imported profile into secure storage, id: {}",
+            imported_id
+        );
+
+        if bdfs_skipped {
+            let entropy: BIP39Entropy = self.clients.entropy.bip39_entropy();
+
+            let host_info = self.host_info().await;
+            let bdfs = PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+                true,
+                entropy,
+                BIP39Passphrase::default(),
+                &host_info,
+            );
+
+            let bdfs_result = self
+                .add_factor_source(FactorSource::from(
+                    bdfs.clone().factor_source,
+                ))
+                .await;
+            if let Some(error) = bdfs_result.err() {
+                self.secure_storage.delete_profile(imported_id).await?;
+                return Err(error);
+            }
+            self.secure_storage
+                .save_private_hd_factor_source(&bdfs)
+                .await?;
+        }
+
+        let profile_to_report = self.profile_state_holder.profile()?;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(profile_to_report))
+            .await;
+        self.event_bus
+            .emit(EventNotification::new(Event::ProfileImported {
+                id: imported_id,
+            }))
+            .await;
+
+        info!("Successfully imported profile, id: {}", imported_id);
+
+        Ok(())
+    }
+
+    pub async fn delete_wallet(&self) -> Result<()> {
+        self.delete_profile_and_mnemonics_replace_in_memory_with_none()
+            .await?;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::None)
+            .await;
+        Ok(())
+    }
+
+    pub async fn resolve_host_id(&self) -> Result<HostId> {
+        self.host_id().await
+    }
+
+    pub async fn resolve_host_info(&self) -> HostInfo {
+        self.host_info().await
     }
 }
 
 impl SargonOS {
-    pub(crate) async fn new_profile_and_bdfs(
+    pub(crate) async fn create_new_profile_with_bdfs(
         &self,
-    ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
-        Self::create_new_profile_with_bdfs(&self.clients, None).await
-    }
-
-    async fn create_new_profile_with_bdfs(
-        clients: &Clients,
         mnemonic_with_passphrase: Option<MnemonicWithPassphrase>,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
-        let host_id = Self::get_host_id(clients).await?;
-        let host_info = Self::get_host_info(clients).await;
+        let host_id = self.host_id().await?;
+        let host_info = self.host_info().await;
 
         let is_main = true;
         let private_bdfs = match mnemonic_with_passphrase {
@@ -115,13 +190,14 @@ impl SargonOS {
             None => {
                 debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
 
-                let entropy: BIP39Entropy = clients.entropy.bip39_entropy();
+                let entropy: BIP39Entropy =
+                    self.clients.entropy.bip39_entropy();
 
                 PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
                     is_main,
                     entropy,
                     BIP39Passphrase::default(),
-                    &host_info
+                    &host_info,
                 )
             }
         };
@@ -197,7 +273,20 @@ impl SargonOS {
     ) -> Result<Arc<Self>> {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        Self::boot_with_bdfs(bios, bdfs_mnemonic.into()).await
+        let os = Self::boot(bios).await;
+        let (profile, bdfs) = os
+            .create_new_profile_with_bdfs(bdfs_mnemonic.into())
+            .await?;
+
+        os.secure_storage
+            .save_private_hd_factor_source(&bdfs)
+            .await?;
+        os.secure_storage.save_profile(&profile).await?;
+        os.profile_state_holder.replace_profile_state_with(
+            ProfileState::Loaded(profile.clone()),
+        )?;
+
+        Ok(os)
     }
 
     pub async fn fast_boot() -> Arc<Self> {
@@ -233,13 +322,13 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
+        let active_profile = os
+            .with_timeout(|x| x.secure_storage.load_profile())
             .await
             .unwrap()
             .unwrap();
 
-        assert_eq!(active_profile_id, os.profile().id());
+        assert_eq!(active_profile.id(), os.profile().unwrap().id());
     }
 
     #[actix_rt::test]
@@ -250,231 +339,17 @@ mod tests {
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
         let drivers = Drivers::with_secure_storage(secure_storage_driver);
         let bios = Bios::new(drivers);
 
         // ACT
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
 
         // ASSERT
         let active_profile = os.profile();
-        assert_eq!(active_profile.id(), profile.id());
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_with_existing_unowned_profile_cannot_be_mutated() {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::sample();
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        let host_id = os.with_timeout(|x| x.host_id()).await.unwrap();
-
-        // ACT
-        let add_res =
-            os.with_timeout(|x| x.add_account(Account::sample())).await;
-
-        // ASSERT
-        assert_eq!(
-            add_res,
-            Err(CommonError::ProfileUsedOnOtherDevice {
-                other_device_id: profile.header.last_used_on_device.id,
-                this_device_id: host_id.id
-            })
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_with_existing_unowned_profile_is_not_mutated_if_tried_to(
-    ) {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(
-            Mnemonic::sample(),
-            HostId::sample(),
-            HostInfo::sample(),
-        );
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        let new_account = Account::sample_stokenet();
-        // ACT
-        let _ = os
-            .with_timeout(|x| x.add_account(new_account.clone()))
-            .await;
-
-        // ASSERT
-        assert_eq!(os.profile(), profile.clone()); // not changed in memory
-
-        let loaded_profile = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
-            .await
-            .unwrap()
-            .unwrap();
-        assert_eq!(loaded_profile, profile); // not changed in secure storage
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_with_existing_unowned_profile_when_claimed_can_be_changed(
-    ) {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::new(
-            Mnemonic::sample(),
-            HostId::sample(),
-            HostInfo::sample(),
-        );
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        let new_account = Account::sample_stokenet();
-        // ACT
-        let claim_was_needed =
-            os.with_timeout(|x| x.claim_active_profile()).await.unwrap();
-        let _ = os
-            .with_timeout(|x| x.add_account(new_account.clone()))
-            .await;
-
-        // ASSERT
-        assert!(claim_was_needed);
-        assert_ne!(os.profile(), profile.clone()); // was changed in memory
-        assert_eq!(
-            os.profile()
-                .networks
-                .get_id(NetworkID::Stokenet)
-                .unwrap()
-                .accounts[0],
-            new_account.clone()
-        );
-
-        let loaded_profile = os
-            .with_timeout(|x| x.secure_storage.load_active_profile())
-            .await
-            .unwrap()
-            .unwrap();
-        assert_ne!(loaded_profile.clone(), profile); // was changed in secure storage
-
-        assert_eq!(
-            loaded_profile
-                .networks
-                .get_id(NetworkID::Stokenet)
-                .unwrap()
-                .accounts[0],
-            new_account.clone()
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_not_owned_emits_event() {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let event_bus_driver = RustEventBusDriver::new();
-        let profile = Profile::sample();
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::new(
-            RustNetworkingDriver::new(),
-            secure_storage_driver.clone(),
-            RustEntropyDriver::new(),
-            RustHostInfoDriver::new(),
-            RustLoggingDriver::new(),
-            event_bus_driver.clone(),
-            RustFileSystemDriver::new(),
-            EphemeralUnsafeStorage::new(),
-        );
-        let bios = Bios::new(drivers);
-
-        // ACT
-        let _ = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        // ASSERT
-        assert!(event_bus_driver
-            .recorded()
-            .iter()
-            .any(|e| e.event.kind() == EventKind::ProfileUsedOnOtherDevice));
-    }
-
-    #[actix_rt::test]
-    async fn test_boot_with_existing_profile_active_profile_id() {
-        // ARRANGE (and ACT)
-        let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile = Profile::sample();
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
-        secure_storage_client
-            .save_active_profile_id(profile.id())
-            .await
-            .unwrap();
-        let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
-        // ACT
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        // ASSERT
-        let active_profile_id = os
-            .with_timeout(|x| x.secure_storage.load_active_profile_id())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(active_profile_id, profile.id());
+        assert_eq!(active_profile.unwrap().id(), profile.id());
     }
 
     #[actix_rt::test]
@@ -491,5 +366,84 @@ mod tests {
             );
             rust_logger_log_at_every_level()
         });
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet() {
+        let os = SUT::fast_boot().await;
+
+        os.new_wallet().await.unwrap();
+
+        let profile = os.profile().unwrap();
+        let bdfs = profile.bdfs();
+
+        assert!(os
+            .clients
+            .secure_storage
+            .load_mnemonic_with_passphrase(&bdfs.id)
+            .await
+            .is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn test_wallet_import_without_bdfs_skip() {
+        let os = SUT::fast_boot().await;
+        let profile_to_import = Profile::sample();
+
+        os.import_wallet(&profile_to_import, false).await.unwrap();
+
+        assert_eq!(os.profile().unwrap().bdfs(), profile_to_import.bdfs());
+    }
+
+    #[actix_rt::test]
+    async fn test_wallet_import_with_bdfs_skip() {
+        let os = SUT::fast_boot().await;
+        let profile_to_import = Profile::sample();
+
+        os.import_wallet(&profile_to_import, true).await.unwrap();
+
+        assert_ne!(os.profile().unwrap().bdfs(), profile_to_import.bdfs());
+    }
+
+    #[actix_rt::test]
+    async fn test_delete_wallet() {
+        let os = SUT::fast_boot().await;
+        os.new_wallet().await.unwrap();
+        let profile = os.profile().unwrap();
+        let bdfs = profile.bdfs();
+
+        os.delete_wallet().await.unwrap();
+
+        // Assert in memory profile is None
+        assert!(os.profile().is_err());
+        // Assert in profile is deleted from storage
+        assert_eq!(
+            os.clients.secure_storage.load_profile().await.unwrap(),
+            None
+        );
+        // Assert mnemonic is deleted from storage
+        assert!(os
+            .clients
+            .secure_storage
+            .load_mnemonic_with_passphrase(&bdfs.id)
+            .await
+            .is_err());
+    }
+
+    #[actix_rt::test]
+    async fn test_resolve_host_id() {
+        let os = SUT::fast_boot().await;
+
+        assert_eq!(
+            os.resolve_host_id().await.unwrap(),
+            os.host_id().await.unwrap()
+        )
+    }
+
+    #[actix_rt::test]
+    async fn test_resolve_host_info() {
+        let os = SUT::fast_boot().await;
+
+        assert_eq!(os.resolve_host_info().await, os.host_info().await)
     }
 }

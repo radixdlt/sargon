@@ -7,16 +7,17 @@ impl SargonOS {
     pub fn security_structures_of_factor_sources(
         &self,
     ) -> Result<SecurityStructuresOfFactorSources> {
-        self.profile_holder
-            .access_profile_with(|p| p.security_structures_of_factor_sources())
+        self.profile_state_holder.try_access_profile_with(|p| {
+            p.security_structures_of_factor_sources()
+        })
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
     /// in profile.
     pub fn security_structures_of_factor_source_ids(
         &self,
-    ) -> SecurityStructuresOfFactorSourceIDs {
-        self.profile_holder.access_profile_with(|p| {
+    ) -> Result<SecurityStructuresOfFactorSourceIDs> {
+        self.profile_state_holder.access_profile_with(|p| {
             p.app_preferences
                 .security
                 .security_structures_of_factor_source_ids
@@ -30,7 +31,7 @@ impl SargonOS {
         &self,
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<SecurityStructureOfFactorSources> {
-        self.profile_holder.try_access_profile_with(|p| {
+        self.profile_state_holder.try_access_profile_with(|p| {
             SecurityStructureOfFactorSources::try_from((
                 structure_of_ids,
                 &p.factor_sources,
@@ -60,7 +61,7 @@ impl SargonOS {
         let structure_id_level =
             SecurityStructureOfFactorSourceIDs::from(structure.clone());
 
-        let ids_of_factors_in_profile = self.factor_source_ids();
+        let ids_of_factors_in_profile = self.factor_source_ids()?;
         let ids_in_structure = structure_id_level
             .all_factors()
             .into_iter()
@@ -78,7 +79,7 @@ impl SargonOS {
         }
 
         let inserted = self
-            .update_profile_with(|mut p| {
+            .update_profile_with(|p| {
                 Ok(p.app_preferences
                     .security
                     .security_structures_of_factor_source_ids
@@ -138,6 +139,7 @@ mod tests {
         assert!(inserted);
         assert!(os
             .profile()
+            .unwrap()
             .app_preferences
             .security
             .security_structures_of_factor_source_ids
@@ -180,7 +182,6 @@ mod tests {
 
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
 
         // ACT
@@ -208,8 +209,8 @@ mod tests {
 
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
-            .unwrap()
             .unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_factors())
             .await
@@ -277,7 +278,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(
-            os.security_structures_of_factor_source_ids(),
+            os.security_structures_of_factor_source_ids().unwrap(),
             SecurityStructuresOfFactorSourceIDs::from_iter([
                 structure_id_sample.clone(),
                 structure_id_sample_other.clone(),

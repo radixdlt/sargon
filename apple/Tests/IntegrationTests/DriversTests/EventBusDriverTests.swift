@@ -19,7 +19,9 @@ class EventBusDriverTests: DriverTest<EventBus> {
 		}
 		
 		let bios = BIOS(drivers: .withEventBus(sut))
-		let os = try await TestOS(bios: bios)
+		let os = await TestOS(bios: bios)
+		try await os.os.newWallet()
+
 		try await os.createAccount()
 		let notifications = await task.value
 		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
@@ -54,7 +56,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -67,8 +70,9 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
-		
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
+
 		)
 	}
 	
@@ -81,7 +85,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -94,7 +99,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -107,7 +113,8 @@ extension Drivers {
 			logging: logging,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -120,7 +127,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: eventBus,
 			fileSystem: .shared,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -133,7 +141,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: fileSystem,
-			unsafeStorage: .shared
+			unsafeStorage: .shared,
+			profileStateChangeDriver: .shared
 		)
 	}
 	
@@ -146,7 +155,8 @@ extension Drivers {
 			logging: .shared,
 			eventBus: .shared,
 			fileSystem: .shared,
-			unsafeStorage: unsafeStorage
+			unsafeStorage: unsafeStorage,
+			profileStateChangeDriver: .shared
 		)
 	}
 }

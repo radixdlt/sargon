@@ -9,6 +9,7 @@ pub struct Clients {
     pub unsafe_storage: UnsafeStorageClient,
     pub file_system: FileSystemClient,
     pub event_bus: EventBusClient,
+    pub profile_state_change: ProfileStateChangeClient,
 }
 
 impl Clients {
@@ -22,6 +23,9 @@ impl Clients {
             UnsafeStorageClient::new(drivers.unsafe_storage.clone());
         let file_system = FileSystemClient::new(drivers.file_system.clone());
         let event_bus = EventBusClient::new(drivers.event_bus.clone());
+        let profile_change = ProfileStateChangeClient::new(
+            drivers.profile_state_change_driver.clone(),
+        );
         Self {
             host,
             secure_storage,
@@ -30,6 +34,7 @@ impl Clients {
             unsafe_storage,
             file_system,
             event_bus,
+            profile_state_change: profile_change,
         }
     }
 

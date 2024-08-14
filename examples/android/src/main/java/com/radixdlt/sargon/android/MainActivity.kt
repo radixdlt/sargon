@@ -1,190 +1,363 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, UsesSampleValues::class)
 
 package com.radixdlt.sargon.android
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.radixdlt.sargon.DisplayName
-import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.NonEmptyMax32Bytes
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.radixdlt.sargon.CommonException
+import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.Profile
-import com.radixdlt.sargon.ProfileNetwork
-import com.radixdlt.sargon.SecureStorageDriver
+import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
-import com.radixdlt.sargon.extensions.toBagOfBytes
+import com.radixdlt.sargon.extensions.errorCode
+import com.radixdlt.sargon.extensions.errorMessage
+import com.radixdlt.sargon.extensions.isMain
+import com.radixdlt.sargon.extensions.kind
+import com.radixdlt.sargon.extensions.name
+import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.vendor
+import com.radixdlt.sargon.extensions.version
+import com.radixdlt.sargon.os.driver.BiometricsHandler
 import com.radixdlt.sargon.samples.sample
-import kotlin.random.Random
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-class MainActivity : ComponentActivity() {
+@AndroidEntryPoint
+class MainActivity : FragmentActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var biometricsHandler: BiometricsHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val storage = EphemeralKeystore()
+        biometricsHandler.register(this)
 
-        setContent { SargonAndroidTheme { WalletContent(storage = storage) } }
-    }
-}
-
-@Composable
-fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
-//    var walletState: Wallet? by remember { mutableStateOf(null) }
-//    var profile: Profile? by remember { mutableStateOf(null) }
-//
-//    Scaffold(
-//            modifier = modifier,
-//            topBar = { TopAppBar(title = { Text(text = "Wallet Test") }) },
-//            bottomBar = {
-//                if (walletState == null) {
-//                    Button(
-//                            modifier = Modifier
-//                                .padding(16.dp)
-//                                .fillMaxWidth(),
-//                            onClick = {
-//                                walletState =
-//                                        Wallet.with(
-//                                                entropy = ByteArray(32) { 0xFF.toByte() },
-//                                                secureStorage = storage
-//                                        )
-//                                profile = walletState?.profile()
-//                            }
-//                    ) { Text(text = "Generate new Wallet") }
-//                } else if (profile?.networks?.isEmpty() == true) {
-//                    Column(modifier = Modifier.padding(16.dp)) {
-//                        var accountName by remember { mutableStateOf("") }
-//                        TextField(
-//                                modifier = Modifier.fillMaxWidth(),
-//                                value = accountName,
-//                                onValueChange = { accountName = it },
-//                                label = { Text(text = "New Account Name") },
-//                                singleLine = true,
-//                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-//                                keyboardActions =
-//                                        KeyboardActions(
-//                                                onDone = {
-//                                                    walletState?.createAndSaveNewAccount(
-//                                                            networkId = NetworkId.MAINNET,
-//                                                            name = DisplayName(accountName)
-//                                                    )
-//
-//                                                    profile = walletState?.profile()
-//                                                }
-//                                        )
-//                        )
-//                    }
-//                }
-//            }
-//    ) { padding ->
-//        LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
-//            items(profile?.networks.orEmpty()) {
-//                Network(
-//                        network = it,
-//                        onAccountAdd = { newName ->
-//                            walletState?.createNewAccount(NetworkId.MAINNET, DisplayName(newName))
-//                                    ?.let {
-//                                        walletState?.addAccount(it)
-//
-//                                        profile = walletState?.profile()
-//                                    }
-//                        }
-//                )
-//            }
-//        }
-//    }
-}
-
-@Composable
-fun Network(
-    modifier: Modifier = Modifier,
-    network: ProfileNetwork,
-    onAccountAdd: (String) -> Unit
-) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(modifier = Modifier.padding(horizontal = 16.dp), text = "${network.id}")
-
-//        network.accounts.forEach { account ->
-//            Text(
-//                    modifier = Modifier.padding(horizontal = 32.dp),
-//                    text = account.displayName.value,
-//                    style = MaterialTheme.typography.labelLarge
-//            )
-//            Text(
-//                    modifier = Modifier.padding(horizontal = 32.dp),
-//                    text = account.address.string,
-//                    style = MaterialTheme.typography.labelSmall
-//            )
-//            HorizontalDivider(modifier = Modifier.padding(horizontal = 32.dp))
-//        }
-
-        Column(modifier = Modifier.padding(16.dp)) {
-            var newAccountName by remember { mutableStateOf("") }
-            TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = newAccountName,
-                    onValueChange = { newAccountName = it },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions =
-                            KeyboardActions(
-                                    onDone = {
-                                        onAccountAdd(newAccountName)
-                                        newAccountName = ""
-                                    }
-                            )
-            )
+        setContent {
+            SargonAndroidTheme {
+                WalletContent(viewModel = viewModel)
+            }
         }
     }
 }
 
-//val Wallet.Companion.defaultPhoneName: String
-//    get() = "Android Phone"
-//
-//fun Wallet.Companion.with(
-//        entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
-//        phoneName: String = Wallet.Companion.defaultPhoneName,
-//        secureStorage: SecureStorageDriver
-//): Wallet {
-//    return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-//            entropy = NonEmptyMax32Bytes(entropy.toBagOfBytes()),
-//            walletClientModel = WalletClientModel.ANDROID,
-//            walletClientName = phoneName,
-//            secureStorage = secureStorage
-//    )
-//}
-
-@OptIn(UsesSampleValues::class)
-@Preview(showBackground = true)
 @Composable
-fun NetworkPreview() {
-    val profile = Profile.sample()
-    Network(network = profile.networks.first(), onAccountAdd = {})
+fun WalletContent(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel
+) {
+    val state: MainViewModel.State by viewModel.state.collectAsStateWithLifecycle()
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(text = "Sargon App")
+                        val status = when (state.sargonState) {
+                            SargonOsManager.SargonState.Idle -> "Idle"
+                            is SargonOsManager.SargonState.Booted -> "Booted"
+                        }
+                        Text(
+                            text = "OS Status: $status",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+
+                }
+            )
+        },
+        bottomBar = {
+            if (state.profileState is ProfileState.Loaded) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    onClick = { viewModel.onDeleteWallet() }
+                ) {
+                    Text(text = "Delete wallet")
+                }
+            }
+        }
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding)) {
+            state.info?.let { info ->
+                var isHostInfoVisible by remember {
+                    mutableStateOf(false)
+                }
+
+                TextButton(
+                    onClick = { isHostInfoVisible = !isHostInfoVisible }
+                ) {
+                    Text(text = "Host information (ℹ)")
+                }
+
+                AnimatedVisibility(visible = isHostInfoVisible) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Host ID",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.id.id}"
+                        )
+
+                        Text(
+                            text = "Host description",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.info.description.string}"
+                        )
+
+                        Text(
+                            text = "Host OS",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.info.hostOs.name} - ${info.info.hostOs.vendor} - ${info.info.hostOs.version}"
+                        )
+
+                        Text(
+                            text = "App Version",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "\t${info.info.hostAppVersion}"
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+            }
+
+            when (val profileState = state.profileState) {
+                is ProfileState.None -> NoProfileContent(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    onCreateNewWallet = viewModel::onCreateNewWallet,
+                    onImportWallet = {
+                        viewModel.onImportWallet(Profile.sample())
+                    }
+                )
+
+                is ProfileState.Incompatible -> IncompatibleProfile(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    error = profileState.v1
+                )
+
+                is ProfileState.Loaded -> ProfileContent(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    profile = profileState.v1,
+                    onDevModeChanged = { enabled ->
+                        viewModel.onDevModeChanged(enabled)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoProfileContent(
+    modifier: Modifier = Modifier,
+    onCreateNewWallet: () -> Unit,
+    onImportWallet: () -> Unit,
+) {
+    Column(modifier = modifier) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            text = "Welcome to Sargon OS",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onCreateNewWallet
+        ) {
+            Text(text = "Create new profile")
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onImportWallet
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Import sample profile")
+                Text(
+                    text = "(Skips Main Seed Phrase)",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+        }
+    }
+
+}
+
+@Composable
+private fun IncompatibleProfile(
+    modifier: Modifier = Modifier,
+    error: CommonException
+) {
+    Text(
+        modifier = modifier,
+        text = "Error loading profile: [${error.errorCode}]  - ${error.errorMessage}"
+    )
+}
+
+@Composable
+private fun ProfileContent(
+    modifier: Modifier = Modifier,
+    profile: Profile,
+    onDevModeChanged: (Boolean) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text(
+            text = "Profile",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(text = "\t${profile.header.id}")
+
+        Text(
+            text = "Last Update:",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(text = "\t${profile.header.lastModified}")
+
+        Text(
+            text = "Created:",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(text = "\t${profile.header.creatingDevice.description}\n\t${profile.header.creatingDevice.date}")
+
+        Text(
+            text = "Imported:",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(text = "\t${profile.header.lastUsedOnDevice.description}\n\t${profile.header.lastUsedOnDevice.date}")
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Dev Mode:",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Switch(
+                checked = profile.appPreferences.security.isDeveloperModeEnabled,
+                onCheckedChange = onDevModeChanged
+            )
+        }
+
+        Text(
+            text = "Factor Sources:",
+            style = MaterialTheme.typography.titleMedium
+        )
+        profile.factorSources.forEach { fs ->
+            val fsHint = when (fs) {
+                is FactorSource.ArculusCard -> "${fs.value.hint.name} ${fs.value.hint.model}"
+                is FactorSource.Device -> "${fs.value.hint.name} ${fs.value.hint.model}"
+                is FactorSource.Ledger -> "${fs.value.hint.name} ${fs.value.hint.model}"
+                is FactorSource.OffDeviceMnemonic -> "${fs.value.hint.displayName}"
+                is FactorSource.SecurityQuestions -> "security questions"
+                is FactorSource.TrustedContact -> "${fs.value.contact.name} - ${fs.value.contact.emailAddress.email} "
+            }
+
+            val kind = if (fs is FactorSource.Device) {
+                val main = if (fs.isMain) "MAIN" else ""
+                "[${fs.kind} $main]"
+            } else {
+                "[${fs.kind}]"
+            }
+            Text(text = "• $kind - $fsHint")
+        }
+        Text(
+            text = "Networks:",
+            style = MaterialTheme.typography.titleMedium
+        )
+        profile.networks.forEach { network ->
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = "- ${network.id}",
+                style = MaterialTheme.typography.titleSmall
+            )
+
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = "Accounts:",
+                style = MaterialTheme.typography.titleSmall
+            )
+            network.accounts.forEach { account ->
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = "• ${account.displayName.value}"
+                )
+            }
+
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = "Personas:",
+                style = MaterialTheme.typography.titleSmall
+            )
+            network.personas.forEach { persona ->
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = "• ${persona.displayName.value}"
+                )
+            }
+        }
+
+    }
+
 }
