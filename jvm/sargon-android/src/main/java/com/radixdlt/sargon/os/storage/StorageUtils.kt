@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retryWhen
 
 private suspend fun KeystoreAccessRequest?.requestAuthorizationIfNeeded() =
     this?.requestAuthorization() ?: Result.success(Unit)
@@ -22,11 +23,15 @@ private suspend fun KeystoreAccessRequest?.requestAuthorizationIfNeeded() =
  */
 internal suspend fun <T> DataStore<Preferences>.read(
     key: Preferences.Key<T>,
-    keystoreAccessRequest: KeystoreAccessRequest? = null
+    keystoreAccessRequest: KeystoreAccessRequest? = null,
+    retryWhen: suspend ((Throwable, Long) -> Boolean) = { _, _ -> false }
 ): Result<T?> = keystoreAccessRequest
     .requestAuthorizationIfNeeded()
     .mapCatching {
-        data.catchIOException().map { preferences -> preferences[key] }.firstOrNull()
+        data
+            .retryWhen { cause, attempt -> retryWhen(cause, attempt) }
+            .catchIOException()
+            .map { preferences -> preferences[key] }.firstOrNull()
     }.then { value ->
         if (keystoreAccessRequest != null && value != null) {
             value.decrypt(keystoreAccessRequest.keySpec)
