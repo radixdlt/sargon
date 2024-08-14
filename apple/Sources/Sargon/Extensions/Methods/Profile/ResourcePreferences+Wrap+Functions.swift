@@ -9,19 +9,15 @@ import Foundation
 import SargonUniFFI
 
 extension ResourcePreferences {
-	public var hiddenResources: [ResourceAddress] {
+	public var hiddenResources: HiddenResources {
 		resourcePreferencesGetHiddenResources(resourcePreferences: self)
 	}
 	
-	public func hasResourceHidden(resource: ResourceAddress) -> Bool {
-		resourcePreferencesHasResourceHidden(resourcePreferences: self, resource: resource)
+	public mutating func hideResource(kind: ResourcePreferenceKind) {
+		self = resourcePreferencesHideResource(resourcePreferences: self, kind: kind)
 	}
 	
-	public mutating func hideResource(resource: ResourceAddress) {
-		self = resourcePreferencesHideResource(resourcePreferences: self, resource: resource)
-	}
-	
-	public mutating func unhideResource(resource: ResourceAddress) {
-		self = resourcePreferencesUnhideResource(resourcePreferences: self, resource: resource)
+	public mutating func unhideResource(kind: ResourcePreferenceKind) {
+		self = resourcePreferencesUnhideResource(resourcePreferences: self, kind: kind)
 	}
 }

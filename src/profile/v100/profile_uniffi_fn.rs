@@ -234,7 +234,7 @@ mod uniffi_tests {
         let json =
             serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
         let password = "babylon";
-        assert!(!check_if_encrypted_profile_json_contains_legacy_p2p_links(
+        assert!(check_if_encrypted_profile_json_contains_legacy_p2p_links(
             json,
             password.to_owned()
         ));

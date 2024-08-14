@@ -13,23 +13,26 @@ import XCTest
 
 final class ResourcePreferencesTests: Test<ResourcePreferences> {
 	func test_hidden_resources() {
-		var sut = SUT(resourceFlags: [:])
-		XCTAssertTrue(sut.hiddenResources.isEmpty)
+		var sut = SUT(fungible: [:], nonFungible: [:], poolUnit: [:])
+		XCTAssertTrue(sut.hiddenResources.fungible.isEmpty)
+		XCTAssertTrue(sut.hiddenResources.nonFungible.isEmpty)
+		XCTAssertTrue(sut.hiddenResources.poolUnit.isEmpty)
 		
-		sut.hideResource(resource: .sampleOther)
-		sut.hideResource(resource: .sample)
-		XCTAssertEqual([.sampleOther, .sample], sut.hiddenResources)
-	}
-	
-	func test_hide_unhide() {
-		var sut = SUT(resourceFlags: [:])
-		let resource: ResourceAddress = .sample
-		XCTAssertFalse(sut.hasResourceHidden(resource: resource))
+		// Hide resources
+		sut.hideResource(kind: .fungible(.sample))
+		sut.hideResource(kind: .fungible(.sampleOther))
+		sut.hideResource(kind: .nonFungible(.sample))
+		sut.hideResource(kind: .poolUnit(.sample))
 		
-		sut.hideResource(resource: resource)
-		XCTAssertTrue(sut.hasResourceHidden(resource: .sample))
+		XCTAssertEqual([.sampleOther, .sample], sut.hiddenResources.fungible)
+		XCTAssertEqual([.sample], sut.hiddenResources.nonFungible)
+		XCTAssertEqual([.sample], sut.hiddenResources.poolUnit)
 		
-		sut.unhideResource(resource: resource)
-		XCTAssertFalse(sut.hasResourceHidden(resource: .sample))
+		// Unhide resources
+		sut.unhideResource(kind: .fungible(.sampleOther))
+		sut.unhideResource(kind: .nonFungible(.sample))
+		XCTAssertEqual([.sample], sut.hiddenResources.fungible)
+		XCTAssertTrue(sut.hiddenResources.nonFungible.isEmpty)
+		XCTAssertEqual([.sample], sut.hiddenResources.poolUnit)
 	}
 }

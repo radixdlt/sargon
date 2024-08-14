@@ -653,7 +653,7 @@ mod tests {
                 .unwrap();
         assert_eq!(
             sut.header.id,
-            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
+            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
                 .unwrap()
         );
     }
@@ -738,7 +738,7 @@ mod tests {
             serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
         let password = "babylon";
         assert!(
-            !SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+            SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
                 json, password
             )
         );
