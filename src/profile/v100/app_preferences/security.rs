@@ -16,13 +16,17 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[display(
-    "cloud? {}, dev? {}",
+    "cloud? {}, dev? {}, advanced lock? {}",
     is_cloud_profile_sync_enabled,
-    is_developer_mode_enabled
+    is_developer_mode_enabled,
+    is_advanced_lock_enabled
 )]
 pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
     pub is_developer_mode_enabled: bool,
+
+    #[serde(default)]
+    pub is_advanced_lock_enabled: bool,
 
     #[serde(rename = "securityStructuresOfFactorSourceIDs")]
     #[serde(default)]
@@ -35,32 +39,49 @@ impl Security {
     pub fn new(
         is_cloud_profile_sync_enabled: bool,
         is_developer_mode_enabled: bool,
+        is_advanced_lock_enabled: bool,
         security_structures_of_factor_source_ids: SecurityStructuresOfFactorSourceIDs,
     ) -> Self {
         Self {
             is_cloud_profile_sync_enabled,
             is_developer_mode_enabled,
+            is_advanced_lock_enabled,
             security_structures_of_factor_source_ids,
         }
     }
 }
 
 impl Default for Security {
-    /// By default we cloud profile sync is enabled and developer mode is disabled, with an empty `structure_configuration_references` list.
+    /// By default cloud profile sync is enabled, while developer mode and avdanced lock is disabled, with an empty `structure_configuration_references` list.
     fn default() -> Self {
-        Self::new(true, false, SecurityStructuresOfFactorSourceIDs::new())
+        Self::new(
+            true,
+            false,
+            false,
+            SecurityStructuresOfFactorSourceIDs::new(),
+        )
     }
 }
 
 impl HasSampleValues for Security {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(true, true, SecurityStructuresOfFactorSourceIDs::new())
+        Self::new(
+            true,
+            true,
+            false,
+            SecurityStructuresOfFactorSourceIDs::new(),
+        )
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(false, false, SecurityStructuresOfFactorSourceIDs::new())
+        Self::new(
+            false,
+            false,
+            true,
+            SecurityStructuresOfFactorSourceIDs::new(),
+        )
     }
 }
 
@@ -83,13 +104,18 @@ mod tests {
     }
 
     #[test]
-    fn default_developer_mode_is_enabled() {
+    fn default_is_cloud_profile_sync_enabled() {
         assert!(SUT::default().is_cloud_profile_sync_enabled);
     }
 
     #[test]
     fn default_is_developer_mode_disabled() {
         assert!(!SUT::default().is_developer_mode_enabled);
+    }
+
+    #[test]
+    fn default_is_advanced_lock_disabled() {
+        assert!(!SUT::default().is_advanced_lock_enabled);
     }
 
     #[test]
@@ -108,7 +134,8 @@ mod tests {
             {
                 "isCloudProfileSyncEnabled": true,
                 "securityStructuresOfFactorSourceIDs": [],
-                "isDeveloperModeEnabled": true
+                "isDeveloperModeEnabled": true,
+                "isAdvancedLockEnabled": false
             }
             "#,
         )
@@ -126,6 +153,7 @@ mod tests {
             {
                 "isCloudProfileSyncEnabled": true,
                 "isDeveloperModeEnabled": true,
+                "isAdvancedLockEnabled": false,
                 "securityStructuresOfFactorSourceIDs": [
                     {
                         "metadata": {
@@ -336,7 +364,7 @@ mod tests {
     }
 
     #[test]
-    fn json_deserialize_without_security_structures() {
+    fn json_deserialize_without_security_structures_nor_advanced_lock() {
         let json = r#"
             {
                 "isCloudProfileSyncEnabled": true,
@@ -345,6 +373,7 @@ mod tests {
             "#;
 
         let sut: SUT = serde_json::from_str(json).unwrap();
-        assert!(sut.security_structures_of_factor_source_ids.is_empty())
+        assert!(sut.security_structures_of_factor_source_ids.is_empty());
+        assert!(!sut.is_advanced_lock_enabled);
     }
 }
