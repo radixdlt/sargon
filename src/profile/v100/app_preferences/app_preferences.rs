@@ -34,7 +34,7 @@ pub struct AppPreferences {
 
     /// Configuration related to resources
     #[serde(default)]
-    pub resource: ResourcePreferences,
+    pub resource: AssetPreferences,
 }
 
 impl AppPreferences {
@@ -62,7 +62,7 @@ impl AppPreferences {
         gateways: SavedGateways,
         security: Security,
         transaction: TransactionPreferences,
-        resource: ResourcePreferences,
+        resource: AssetPreferences,
     ) -> Self {
         Self {
             display,
@@ -82,7 +82,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample(),
             Security::sample(),
             TransactionPreferences::sample(),
-            ResourcePreferences::sample(),
+            AssetPreferences::sample(),
         )
     }
 
@@ -93,7 +93,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample_other(),
             Security::sample_other(),
             TransactionPreferences::sample_other(),
-            ResourcePreferences::sample_other(),
+            AssetPreferences::sample_other(),
         )
     }
 }
@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn get_resource() {
-        assert_eq!(SUT::sample().resource, ResourcePreferences::sample())
+        assert_eq!(SUT::sample().resource, AssetPreferences::sample())
     }
 
     #[test]
