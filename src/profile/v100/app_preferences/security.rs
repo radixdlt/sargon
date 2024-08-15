@@ -1,41 +1,5 @@
 use crate::prelude::*;
 
-// TODO: How to place this in under src/core/types ?
-macro_rules! decl_bool_type {
-    ($name:ident, $default_value:expr) => {
-        #[derive(
-            Serialize,
-            Deserialize,
-            Debug,
-            PartialEq,
-            Eq,
-            Clone,
-            Hash,
-            derive_more::Display,
-        )]
-        #[serde(transparent)]
-        pub struct $name(pub bool);
-
-        impl Default for $name {
-            fn default() -> Self {
-                $name($default_value)
-            }
-        }
-
-        impl HasSampleValues for $name {
-            fn sample() -> Self {
-                $name($default_value)
-            }
-
-            fn sample_other() -> Self {
-                $name(!$default_value)
-            }
-        }
-
-        uniffi::custom_newtype!($name, bool);
-    };
-}
-
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
