@@ -1,17 +1,10 @@
 use crate::prelude::*;
 
 #[derive(
-    Deserialize,
-    Serialize,
-    Clone,
-    PartialEq,
-    Default,
-    Eq,
-    Debug,
-    Hash,
-    uniffi::Record,
+    Deserialize, Serialize, Clone, PartialEq, Eq, Debug, Hash, uniffi::Record,
 )]
 pub struct AssetPreference {
+    pub asset_address: AssetAddress,
     pub visibility: AssetVisibility,
 }
 
@@ -19,19 +12,35 @@ impl AssetPreference {
     pub fn set_visibility(&mut self, visibility: AssetVisibility) {
         self.visibility = visibility;
     }
+
+    pub fn new(
+        asset_address: impl Into<AssetAddress>,
+        visibility: AssetVisibility,
+    ) -> Self {
+        Self {
+            asset_address: asset_address.into(),
+            visibility,
+        }
+    }
+}
+
+impl Identifiable for AssetPreference {
+    type ID = AssetAddress;
+    fn id(&self) -> Self::ID {
+        self.asset_address.clone()
+    }
 }
 
 impl HasSampleValues for AssetPreference {
     fn sample() -> Self {
-        Self {
-            visibility: AssetVisibility::sample(),
-        }
+        Self::new(ResourceAddress::sample(), AssetVisibility::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            visibility: AssetVisibility::sample_other(),
-        }
+        Self::new(
+            NonFungibleGlobalId::sample(),
+            AssetVisibility::sample_other(),
+        )
     }
 }
 
@@ -69,6 +78,10 @@ mod tests {
             &sut,
             r#"
             {
+                "asset_address": {
+                    "kind": "fungible",
+                    "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                },
                 "visibility": "hidden"
             }
             "#,

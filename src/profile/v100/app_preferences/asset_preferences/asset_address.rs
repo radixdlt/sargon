@@ -3,6 +3,8 @@ use crate::prelude::*;
 #[derive(
     Clone,
     Debug,
+    Serialize,
+    Deserialize,
     PartialEq,
     Eq,
     Hash,
@@ -11,10 +13,37 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Enum,
 )]
+#[serde(tag = "kind", content = "value")]
+#[serde(rename_all = "camelCase")]
 pub enum AssetAddress {
     Fungible(ResourceAddress),
     NonFungible(NonFungibleGlobalId),
     PoolUnit(PoolAddress),
+}
+
+impl Identifiable for AssetAddress {
+    type ID = Self;
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
+}
+
+impl From<ResourceAddress> for AssetAddress {
+    fn from(value: ResourceAddress) -> Self {
+        Self::Fungible(value)
+    }
+}
+
+impl From<NonFungibleGlobalId> for AssetAddress {
+    fn from(value: NonFungibleGlobalId) -> Self {
+        Self::NonFungible(value)
+    }
+}
+
+impl From<PoolAddress> for AssetAddress {
+    fn from(value: PoolAddress) -> Self {
+        Self::PoolUnit(value)
+    }
 }
 
 impl HasSampleValues for AssetAddress {
@@ -39,75 +68,6 @@ impl AssetAddress {
 
     pub(crate) fn sample_pool_unit() -> Self {
         Self::PoolUnit(PoolAddress::sample())
-    }
-}
-
-impl<'de> Deserialize<'de> for AssetAddress {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        #[derive(Deserialize, Serialize)]
-        struct Wrapper {
-            kind: String,
-            value: String,
-        }
-        let wrapper = Wrapper::deserialize(deserializer)?;
-        
-        let asset_address = match wrapper.kind.as_str() {
-            "fungible" => {
-                match wrapper.value.parse::<ResourceAddress>() {
-                    Ok(res) => AssetAddress::Fungible(res),
-                    Err(e) => Err(serde::de::Error::custom(e))?,
-                }
-            },
-            "nonFungible" => {
-                match wrapper.value.parse::<NonFungibleGlobalId>() {
-                    Ok(res) => AssetAddress::NonFungible(res),
-                    Err(e) => Err(serde::de::Error::custom(e))?,
-                }
-            },
-            "poolUnit" => {
-                match wrapper.value.parse::<PoolAddress>() {
-                    Ok(res) => AssetAddress::PoolUnit(res),
-                    Err(e) => Err(serde::de::Error::custom(e))?,
-                }
-            },
-            _ => unreachable!()
-        };
-        
-        Ok(asset_address)
-    }
-}
-
-impl Serialize for AssetAddress {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("AssetAddress", 2)?;
-        state.serialize_field("kind", &self.kind())?;
-        state.serialize_field("value", &self.value())?;
-        state.end()
-    }
-}
-
-impl AssetAddress {
-    fn kind(&self) -> String {
-        match self {
-            AssetAddress::Fungible(_) => "fungible".to_owned(),
-            AssetAddress::NonFungible(_) => "nonFungible".to_owned(),
-            AssetAddress::PoolUnit(_) => "poolUnit".to_owned(),
-        }
-    }
-
-    fn value(&self) -> String {
-        match self {
-            AssetAddress::Fungible(value) => value.address(),
-            AssetAddress::NonFungible(value) => value.to_string(),
-            AssetAddress::PoolUnit(value) => value.to_string(),
-        }
     }
 }
 

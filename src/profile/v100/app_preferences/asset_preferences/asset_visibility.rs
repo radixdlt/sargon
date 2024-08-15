@@ -59,10 +59,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(
-            &SUT::Hidden,
-            json!("hidden"),
-        );
+        assert_json_value_eq_after_roundtrip(&SUT::Hidden, json!("hidden"));
         assert_json_roundtrip(&SUT::Hidden);
     }
 }
