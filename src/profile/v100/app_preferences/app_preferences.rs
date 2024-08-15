@@ -197,7 +197,7 @@ mod tests {
                 },
                 "security": {
                     "isCloudProfileSyncEnabled": true,
-                    "isDeveloperModeEnabled": true,
+                    "isDeveloperModeEnabled": false,
                     "isAdvancedLockEnabled": false,
                     "securityStructuresOfFactorSourceIDs": []
                 },

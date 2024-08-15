@@ -870,7 +870,7 @@ mod tests {
 					},
 					"security": {
 						"isCloudProfileSyncEnabled": true,
-						"isDeveloperModeEnabled": true,
+						"isDeveloperModeEnabled": false,
 						"securityStructuresOfFactorSourceIDs": []
 					},
 					"transaction": {

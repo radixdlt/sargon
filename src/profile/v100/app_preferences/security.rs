@@ -1,5 +1,41 @@
 use crate::prelude::*;
 
+// TODO: How to place this in under src/core/types ?
+macro_rules! decl_bool_type {
+    ($name:ident, $default_value:expr) => {
+        #[derive(
+            Serialize,
+            Deserialize,
+            Debug,
+            PartialEq,
+            Eq,
+            Clone,
+            Hash,
+            derive_more::Display,
+        )]
+        #[serde(transparent)]
+        pub struct $name(pub bool);
+
+        impl Default for $name {
+            fn default() -> Self {
+                $name($default_value)
+            }
+        }
+
+        impl HasSampleValues for $name {
+            fn sample() -> Self {
+                $name($default_value)
+            }
+
+            fn sample_other() -> Self {
+                $name(!$default_value)
+            }
+        }
+
+        uniffi::custom_newtype!($name, bool);
+    };
+}
+
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
@@ -22,11 +58,11 @@ use crate::prelude::*;
     is_advanced_lock_enabled
 )]
 pub struct Security {
-    pub is_cloud_profile_sync_enabled: bool,
-    pub is_developer_mode_enabled: bool,
+    pub is_cloud_profile_sync_enabled: IsCloudProfileSyncEnabled,
+    pub is_developer_mode_enabled: IsDeveloperModeEnabled,
 
     #[serde(default)]
-    pub is_advanced_lock_enabled: bool,
+    pub is_advanced_lock_enabled: IsAdvancedLockEnabled,
 
     #[serde(rename = "securityStructuresOfFactorSourceIDs")]
     #[serde(default)]
@@ -34,12 +70,16 @@ pub struct Security {
         SecurityStructuresOfFactorSourceIDs,
 }
 
+decl_bool_type!(IsCloudProfileSyncEnabled, true);
+decl_bool_type!(IsDeveloperModeEnabled, false);
+decl_bool_type!(IsAdvancedLockEnabled, false);
+
 impl Security {
     /// Instantiates a new AppPreferences Security configuration.
     pub fn new(
-        is_cloud_profile_sync_enabled: bool,
-        is_developer_mode_enabled: bool,
-        is_advanced_lock_enabled: bool,
+        is_cloud_profile_sync_enabled: IsCloudProfileSyncEnabled,
+        is_developer_mode_enabled: IsDeveloperModeEnabled,
+        is_advanced_lock_enabled: IsAdvancedLockEnabled,
         security_structures_of_factor_source_ids: SecurityStructuresOfFactorSourceIDs,
     ) -> Self {
         Self {
@@ -55,9 +95,9 @@ impl Default for Security {
     /// By default cloud profile sync is enabled, while developer mode and avdanced lock is disabled, with an empty `structure_configuration_references` list.
     fn default() -> Self {
         Self::new(
-            true,
-            false,
-            false,
+            IsCloudProfileSyncEnabled::default(),
+            IsDeveloperModeEnabled::default(),
+            IsAdvancedLockEnabled::default(),
             SecurityStructuresOfFactorSourceIDs::new(),
         )
     }
@@ -67,9 +107,9 @@ impl HasSampleValues for Security {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
         Self::new(
-            true,
-            true,
-            false,
+            IsCloudProfileSyncEnabled::sample(),
+            IsDeveloperModeEnabled::sample(),
+            IsAdvancedLockEnabled::sample(),
             SecurityStructuresOfFactorSourceIDs::new(),
         )
     }
@@ -77,9 +117,9 @@ impl HasSampleValues for Security {
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
         Self::new(
-            false,
-            false,
-            true,
+            IsCloudProfileSyncEnabled::sample_other(),
+            IsDeveloperModeEnabled::sample_other(),
+            IsAdvancedLockEnabled::sample_other(),
             SecurityStructuresOfFactorSourceIDs::new(),
         )
     }
@@ -105,17 +145,17 @@ mod tests {
 
     #[test]
     fn default_is_cloud_profile_sync_enabled() {
-        assert!(SUT::default().is_cloud_profile_sync_enabled);
+        assert!(SUT::default().is_cloud_profile_sync_enabled.0);
     }
 
     #[test]
     fn default_is_developer_mode_disabled() {
-        assert!(!SUT::default().is_developer_mode_enabled);
+        assert!(!SUT::default().is_developer_mode_enabled.0);
     }
 
     #[test]
     fn default_is_advanced_lock_disabled() {
-        assert!(!SUT::default().is_advanced_lock_enabled);
+        assert!(!SUT::default().is_advanced_lock_enabled.0);
     }
 
     #[test]
@@ -134,7 +174,7 @@ mod tests {
             {
                 "isCloudProfileSyncEnabled": true,
                 "securityStructuresOfFactorSourceIDs": [],
-                "isDeveloperModeEnabled": true,
+                "isDeveloperModeEnabled": false,
                 "isAdvancedLockEnabled": false
             }
             "#,
@@ -152,7 +192,7 @@ mod tests {
             r#"
             {
                 "isCloudProfileSyncEnabled": true,
-                "isDeveloperModeEnabled": true,
+                "isDeveloperModeEnabled": false,
                 "isAdvancedLockEnabled": false,
                 "securityStructuresOfFactorSourceIDs": [
                     {
@@ -374,6 +414,6 @@ mod tests {
 
         let sut: SUT = serde_json::from_str(json).unwrap();
         assert!(sut.security_structures_of_factor_source_ids.is_empty());
-        assert!(!sut.is_advanced_lock_enabled);
+        assert!(!sut.is_advanced_lock_enabled.0);
     }
 }
