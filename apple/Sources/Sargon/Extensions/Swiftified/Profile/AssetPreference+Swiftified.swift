@@ -8,4 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension ResourcePreferences: SargonModel {}
+public typealias AssetPreferences = [AssetPreference]
+
+//extension AssetPreferences: SargonModel {}
