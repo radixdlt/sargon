@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.AssetPreferences
 import com.radixdlt.sargon.extensions.default
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.samples.Sample
@@ -7,7 +8,7 @@ import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class AppPreferencesTest: SampleTestable<AppPreferences> {
+class AppPreferencesTest : SampleTestable<AppPreferences> {
 
     override val samples: List<Sample<AppPreferences>>
         get() = listOf(AppPreferences.sample)
@@ -24,9 +25,11 @@ class AppPreferencesTest: SampleTestable<AppPreferences> {
                 security = Security(
                     isCloudProfileSyncEnabled = true,
                     isDeveloperModeEnabled = false,
+                    isAdvancedLockEnabled = false,
                     securityStructuresOfFactorSourceIds = emptyList()
                 ),
-                transaction = TransactionPreferences(defaultDepositGuarantee = 0.99.toDecimal192())
+                transaction = TransactionPreferences(defaultDepositGuarantee = 0.99.toDecimal192()),
+                assets = AssetPreferences().asList()
             ),
             AppPreferences.default()
         )
