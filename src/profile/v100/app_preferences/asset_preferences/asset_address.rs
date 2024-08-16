@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// An enum representation of an Asset for which the user can set up its preferences.
 #[derive(
     Clone,
     Debug,
@@ -87,6 +88,16 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn from() {
+        assert_eq!(SUT::sample_fungible(), ResourceAddress::sample().into());
+        assert_eq!(
+            SUT::sample_non_fungible(),
+            NonFungibleGlobalId::sample_other().into()
+        );
+        assert_eq!(SUT::sample_pool_unit(), PoolAddress::sample().into())
     }
 
     #[test]

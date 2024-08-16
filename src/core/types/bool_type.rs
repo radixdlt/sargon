@@ -31,6 +31,14 @@ macro_rules! decl_bool_type {
             }
         }
 
+        impl Deref for $name {
+            type Target = bool;
+
+            fn deref(&self) -> &Self::Target {
+                &self.0
+            }
+        }
+
         uniffi::custom_newtype!($name, bool);
     };
 }
@@ -62,21 +70,28 @@ mod tests {
 
     #[test]
     fn default() {
-        assert!(ExampleTrue::default().0);
+        assert!(*ExampleTrue::default());
 
-        assert!(!ExampleFalse::default().0);
+        assert!(!*ExampleFalse::default());
+    }
+
+    #[test]
+    fn debug() {
+        let str = "ExampleTrue(true)";
+        let sut = ExampleTrue::sample();
+        assert_eq!(format!("{:?}", sut), str);
     }
 
     #[test]
     fn modification() {
         let mut example_true = ExampleTrue::default();
-        assert!(example_true.0);
+        assert!(*example_true);
         example_true.0 = false;
-        assert!(!example_true.0);
+        assert!(!*example_true);
 
         let mut example_false = ExampleFalse::default();
-        assert!(!example_false.0);
+        assert!(!*example_false);
         example_false.0 = true;
-        assert!(example_false.0);
+        assert!(*example_false);
     }
 }

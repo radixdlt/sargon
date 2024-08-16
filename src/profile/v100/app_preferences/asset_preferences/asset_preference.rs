@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// A preference the user has configured off-ledger for a given asset.
+/// Allows users, for example, to hide a given asset on their accounts.
 #[derive(
     Deserialize, Serialize, Clone, PartialEq, Eq, Debug, Hash, uniffi::Record,
 )]
@@ -9,10 +11,6 @@ pub struct AssetPreference {
 }
 
 impl AssetPreference {
-    pub fn set_visibility(&mut self, visibility: AssetVisibility) {
-        self.visibility = visibility;
-    }
-
     pub fn new(
         asset_address: impl Into<AssetAddress>,
         visibility: AssetVisibility,
@@ -67,7 +65,7 @@ mod tests {
         let mut sut = SUT::sample();
         assert_eq!(AssetVisibility::Hidden, sut.visibility);
 
-        sut.set_visibility(AssetVisibility::Visible);
+        sut.visibility = AssetVisibility::Visible;
         assert_eq!(AssetVisibility::Visible, sut.visibility);
     }
 

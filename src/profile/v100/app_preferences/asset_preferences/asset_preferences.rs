@@ -29,9 +29,9 @@ impl AssetPreferences {
     }
 
     pub fn hide_asset(&mut self, asset: AssetAddress) {
-        if !self.update_with(asset.id(), |x| {
-            x.set_visibility(AssetVisibility::Hidden)
-        }) {
+        if !self
+            .update_with(asset.id(), |x| x.visibility = AssetVisibility::Hidden)
+        {
             let item = AssetPreference::new(asset, AssetVisibility::Hidden);
             self.append(item);
         }
@@ -39,7 +39,7 @@ impl AssetPreferences {
 
     pub fn unhide_asset(&mut self, asset: AssetAddress) {
         if !self.update_with(asset.id(), |x| {
-            x.set_visibility(AssetVisibility::Visible)
+            x.visibility = AssetVisibility::Visible
         }) {
             let item = AssetPreference::new(asset, AssetVisibility::Visible);
             self.append(item);
@@ -74,6 +74,12 @@ mod tests {
         let mut result = sut.get_hidden_assets();
         assert!(result.is_empty());
 
+        // Test unhiding an asset that wasn't present
+        let pool_unit = AssetAddress::PoolUnit(PoolAddress::sample());
+        sut.unhide_asset(pool_unit.clone());
+        result = sut.get_hidden_assets();
+        assert!(result.is_empty());
+
         // Test with some assets hidden
         let fungible_one =
             AssetAddress::Fungible(ResourceAddress::sample_other());
@@ -93,7 +99,6 @@ mod tests {
         // Test hiding some non-fungible and pool unit, and unhiding one of the fungibles
         let non_fungible =
             AssetAddress::NonFungible(NonFungibleGlobalId::sample());
-        let pool_unit = AssetAddress::PoolUnit(PoolAddress::sample());
         sut.unhide_asset(fungible_one);
         sut.hide_asset(non_fungible.clone());
         sut.hide_asset(pool_unit.clone());

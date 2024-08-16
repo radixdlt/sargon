@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Flags used to mark the visibility of an Asset
+/// Indicates the visibility of an Asset.
 #[derive(
     Serialize,
     Deserialize,
@@ -55,6 +55,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_default() {
+        assert_eq!(AssetVisibility::Visible, AssetVisibility::default());
     }
 
     #[test]
