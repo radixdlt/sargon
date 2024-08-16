@@ -870,29 +870,28 @@ mod tests {
 					},
 					"security": {
 						"isCloudProfileSyncEnabled": true,
-						"isDeveloperModeEnabled": true,
+						"isDeveloperModeEnabled": false,
 						"securityStructuresOfFactorSourceIDs": []
 					},
 					"transaction": {
 						"defaultDepositGuarantee": "0.975"
 					},
-					"resource": {
-						"fungible": {
-							"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd": [
-								"deletedByUser"
-							]
+					"assets": [
+						{
+							"asset_address": {
+								"kind": "fungible",
+								"value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+							},
+							"visibility": "hidden"
 						},
-						"nonFungible": {
-							"resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>": [
-								"deletedByUser"
-							]
-						},
-						"poolUnit": {
-							"pool_rdx1c5dkfdtdqvczcwzdyvzeuhddyha768p2q28erden533fty8h68ay6m": [
-								"deletedByUser"
-							]
+						{
+							"asset_address": {
+								"kind": "nonFungible",
+								"value": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+							},
+							"visibility": "visible"
 						}
-					}
+					]
 				},
 				"networks": [
 					{
