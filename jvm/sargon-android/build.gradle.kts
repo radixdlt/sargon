@@ -46,7 +46,6 @@ android {
             java.srcDir("${buildDir}/generated/src/release/java")
         }
     }
-    packaging { resources.excludes.add("META-INF/*") }
 }
 
 cargoNdk {

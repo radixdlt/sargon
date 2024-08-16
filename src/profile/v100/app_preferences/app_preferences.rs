@@ -31,6 +31,10 @@ pub struct AppPreferences {
 
     /// Default config related to making of transactions
     pub transaction: TransactionPreferences,
+
+    /// Configuration related to assets
+    #[serde(default)]
+    pub assets: AssetPreferences,
 }
 
 impl AppPreferences {
@@ -41,8 +45,13 @@ impl AppPreferences {
         gateways: {}
         security: {}
         transaction: {}
+        assets: {:?}
         "#,
-            self.display, self.gateways, self.security, self.transaction
+            self.display,
+            self.gateways,
+            self.security,
+            self.transaction,
+            self.assets
         )
     }
 }
@@ -53,12 +62,14 @@ impl AppPreferences {
         gateways: SavedGateways,
         security: Security,
         transaction: TransactionPreferences,
+        assets: AssetPreferences,
     ) -> Self {
         Self {
             display,
             gateways,
             security,
             transaction,
+            assets,
         }
     }
 }
@@ -71,6 +82,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample(),
             Security::sample(),
             TransactionPreferences::sample(),
+            AssetPreferences::sample(),
         )
     }
 
@@ -81,6 +93,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample_other(),
             Security::sample_other(),
             TransactionPreferences::sample_other(),
+            AssetPreferences::sample_other(),
         )
     }
 }
@@ -130,6 +143,11 @@ mod tests {
     }
 
     #[test]
+    fn get_assets() {
+        assert_eq!(SUT::sample().assets, AssetPreferences::sample())
+    }
+
+    #[test]
     fn test_has_gateway_with_url() {
         let sut = SUT::sample();
         // Test without the "/" at the end
@@ -153,25 +171,25 @@ mod tests {
             r#"
             {
                 "display": {
-                    "fiatCurrencyPriceTarget": "usd",
-                    "isCurrencyAmountVisible": true
+                    "isCurrencyAmountVisible": true,
+                    "fiatCurrencyPriceTarget": "usd"
                 },
                 "gateways": {
                     "current": "https://mainnet.radixdlt.com/",
                     "saved": [
                         {
                             "network": {
-                                "name": "mainnet",
-                                "id": 1,
-                                "displayDescription": "Mainnet"
+                            "name": "mainnet",
+                            "id": 1,
+                            "displayDescription": "Mainnet"
                             },
                             "url": "https://mainnet.radixdlt.com/"
                         },
                         {
                             "network": {
-                                "name": "stokenet",
-                                "id": 2,
-                                "displayDescription": "Stokenet"
+                            "name": "stokenet",
+                            "id": 2,
+                            "displayDescription": "Stokenet"
                             },
                             "url": "https://babylon-stokenet-gateway.radixdlt.com/"
                         }
@@ -179,13 +197,30 @@ mod tests {
                 },
                 "security": {
                     "isCloudProfileSyncEnabled": true,
-                    "securityStructuresOfFactorSourceIDs": [],
-                    "isDeveloperModeEnabled": true
+                    "isDeveloperModeEnabled": false,
+                    "isAdvancedLockEnabled": false,
+                    "securityStructuresOfFactorSourceIDs": []
                 },
                 "transaction": {
                     "defaultDepositGuarantee": "0.975"
-                }
-            }
+                },
+                "assets": [
+                    {
+                        "asset_address": {
+                            "kind": "fungible",
+                            "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                        },
+                        "visibility": "hidden"
+                    },
+                    {
+                        "asset_address": {
+                            "kind": "nonFungible",
+                            "value": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+                        },
+                        "visibility": "visible"
+                    }
+                ]
+            }               
             "#,
         )
     }

@@ -870,12 +870,28 @@ mod tests {
 					},
 					"security": {
 						"isCloudProfileSyncEnabled": true,
-						"isDeveloperModeEnabled": true,
+						"isDeveloperModeEnabled": false,
 						"securityStructuresOfFactorSourceIDs": []
 					},
 					"transaction": {
 						"defaultDepositGuarantee": "0.975"
-					}
+					},
+					"assets": [
+						{
+							"asset_address": {
+								"kind": "fungible",
+								"value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+							},
+							"visibility": "hidden"
+						},
+						{
+							"asset_address": {
+								"kind": "nonFungible",
+								"value": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+							},
+							"visibility": "visible"
+						}
+					]
 				},
 				"networks": [
 					{
