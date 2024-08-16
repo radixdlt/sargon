@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.AssetPreferences
 import com.radixdlt.sargon.extensions.default
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.samples.Sample
@@ -28,11 +29,7 @@ class AppPreferencesTest : SampleTestable<AppPreferences> {
                     securityStructuresOfFactorSourceIds = emptyList()
                 ),
                 transaction = TransactionPreferences(defaultDepositGuarantee = 0.99.toDecimal192()),
-                resource = ResourcePreferences(
-                    fungible = emptyMap(),
-                    nonFungible = emptyMap(),
-                    poolUnit = emptyMap()
-                )
+                assets = AssetPreferences().asList()
             ),
             AppPreferences.default()
         )
