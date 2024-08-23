@@ -32,9 +32,9 @@ pub struct AppPreferences {
     /// Default config related to making of transactions
     pub transaction: TransactionPreferences,
 
-    /// Configuration related to assets
+    /// Configuration related to resources
     #[serde(default)]
-    pub assets: AssetPreferences,
+    pub resources: ResourcePreferences,
 }
 
 impl AppPreferences {
@@ -45,13 +45,13 @@ impl AppPreferences {
         gateways: {}
         security: {}
         transaction: {}
-        assets: {:?}
+        resources: {:?}
         "#,
             self.display,
             self.gateways,
             self.security,
             self.transaction,
-            self.assets
+            self.resources
         )
     }
 }
@@ -62,14 +62,14 @@ impl AppPreferences {
         gateways: SavedGateways,
         security: Security,
         transaction: TransactionPreferences,
-        assets: AssetPreferences,
+        resources: ResourcePreferences,
     ) -> Self {
         Self {
             display,
             gateways,
             security,
             transaction,
-            assets,
+            resources,
         }
     }
 }
@@ -82,7 +82,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample(),
             Security::sample(),
             TransactionPreferences::sample(),
-            AssetPreferences::sample(),
+            ResourcePreferences::sample(),
         )
     }
 
@@ -93,7 +93,7 @@ impl HasSampleValues for AppPreferences {
             SavedGateways::sample_other(),
             Security::sample_other(),
             TransactionPreferences::sample_other(),
-            AssetPreferences::sample_other(),
+            ResourcePreferences::sample_other(),
         )
     }
 }
@@ -143,8 +143,8 @@ mod tests {
     }
 
     #[test]
-    fn get_assets() {
-        assert_eq!(SUT::sample().assets, AssetPreferences::sample())
+    fn get_resources() {
+        assert_eq!(SUT::sample().resources, ResourcePreferences::sample())
     }
 
     #[test]
@@ -204,18 +204,18 @@ mod tests {
                 "transaction": {
                     "defaultDepositGuarantee": "0.975"
                 },
-                "assets": [
+                "resources": [
                     {
-                        "asset_address": {
+                        "resource": {
                             "kind": "fungible",
                             "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
                         },
                         "visibility": "hidden"
                     },
                     {
-                        "asset_address": {
+                        "resource": {
                             "kind": "nonFungible",
-                            "value": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+                            "value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
                         },
                         "visibility": "visible"
                     }

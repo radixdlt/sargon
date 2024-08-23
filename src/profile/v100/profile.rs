@@ -876,18 +876,18 @@ mod tests {
 					"transaction": {
 						"defaultDepositGuarantee": "0.975"
 					},
-					"assets": [
+					"resources": [
 						{
-							"asset_address": {
+							"resource": {
 								"kind": "fungible",
 								"value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
 							},
 							"visibility": "hidden"
 						},
 						{
-							"asset_address": {
+							"resource": {
 								"kind": "nonFungible",
-								"value": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+								"value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
 							},
 							"visibility": "visible"
 						}

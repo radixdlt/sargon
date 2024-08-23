@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Indicates the visibility of an Asset.
+/// Indicates the visibility of a resource.
 #[derive(
     Serialize,
     Deserialize,
@@ -18,18 +18,18 @@ use crate::prelude::*;
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
-pub enum AssetVisibility {
+pub enum ResourceVisibility {
     Hidden,
     Visible,
 }
 
-impl Default for AssetVisibility {
+impl Default for ResourceVisibility {
     fn default() -> Self {
         Self::Visible
     }
 }
 
-impl HasSampleValues for AssetVisibility {
+impl HasSampleValues for ResourceVisibility {
     fn sample() -> Self {
         Self::Hidden
     }
@@ -44,7 +44,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AssetVisibility;
+    type SUT = ResourceVisibility;
 
     #[test]
     fn equality() {
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn test_default() {
-        assert_eq!(AssetVisibility::Visible, AssetVisibility::default());
+        assert_eq!(ResourceVisibility::Visible, ResourceVisibility::default());
     }
 
     #[test]
