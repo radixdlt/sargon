@@ -1,43 +1,45 @@
 use crate::prelude::*;
 
-/// A preference the user has configured off-ledger for a given asset.
-/// Allows users, for example, to hide a given asset on their accounts.
+/// A preference the user has configured off-ledger for a given resource.
+/// Allows users, for example, to hide a given resource on their accounts.
+///
+/// Named like this to differ from RET's `ResourcePreference`.
 #[derive(
     Deserialize, Serialize, Clone, PartialEq, Eq, Debug, Hash, uniffi::Record,
 )]
-pub struct AssetPreference {
-    pub asset_address: AssetAddress,
-    pub visibility: AssetVisibility,
+pub struct ResourceAppPreference {
+    pub resource: ResourceIdentifier,
+    pub visibility: ResourceVisibility,
 }
 
-impl AssetPreference {
+impl ResourceAppPreference {
     pub fn new(
-        asset_address: impl Into<AssetAddress>,
-        visibility: AssetVisibility,
+        resource: impl Into<ResourceIdentifier>,
+        visibility: ResourceVisibility,
     ) -> Self {
         Self {
-            asset_address: asset_address.into(),
+            resource: resource.into(),
             visibility,
         }
     }
 }
 
-impl Identifiable for AssetPreference {
-    type ID = AssetAddress;
+impl Identifiable for ResourceAppPreference {
+    type ID = ResourceIdentifier;
     fn id(&self) -> Self::ID {
-        self.asset_address.clone()
+        self.resource.clone()
     }
 }
 
-impl HasSampleValues for AssetPreference {
+impl HasSampleValues for ResourceAppPreference {
     fn sample() -> Self {
-        Self::new(ResourceAddress::sample(), AssetVisibility::sample())
+        Self::new(ResourceIdentifier::sample(), ResourceVisibility::sample())
     }
 
     fn sample_other() -> Self {
         Self::new(
-            NonFungibleGlobalId::sample(),
-            AssetVisibility::sample_other(),
+            ResourceIdentifier::sample_other(),
+            ResourceVisibility::sample_other(),
         )
     }
 }
@@ -47,7 +49,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AssetPreference;
+    type SUT = ResourceAppPreference;
 
     #[test]
     fn equality() {
@@ -63,10 +65,10 @@ mod tests {
     #[test]
     fn visibility() {
         let mut sut = SUT::sample();
-        assert_eq!(AssetVisibility::Hidden, sut.visibility);
+        assert_eq!(ResourceVisibility::Hidden, sut.visibility);
 
-        sut.visibility = AssetVisibility::Visible;
-        assert_eq!(AssetVisibility::Visible, sut.visibility);
+        sut.visibility = ResourceVisibility::Visible;
+        assert_eq!(ResourceVisibility::Visible, sut.visibility);
     }
 
     #[test]
@@ -76,7 +78,7 @@ mod tests {
             &sut,
             r#"
             {
-                "asset_address": {
+                "resource": {
                     "kind": "fungible",
                     "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
                 },

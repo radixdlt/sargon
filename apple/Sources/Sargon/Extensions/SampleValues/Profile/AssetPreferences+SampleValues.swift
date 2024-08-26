@@ -9,8 +9,8 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension [AssetPreference] {
-	public static let sample: Self = newAssetPreferencesSample()
-	public static let sampleOther: Self = newAssetPreferencesSampleOther()
+extension [ResourceAppPreference] {
+	public static let sample: Self = newResourcePreferencesSample()
+	public static let sampleOther: Self = newResourcePreferencesSampleOther()
 }
 #endif // DEBUG

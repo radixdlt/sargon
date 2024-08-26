@@ -1,14 +1,17 @@
 use crate::prelude::*;
 
-decl_identified_vec_of!(AssetAddresses, AssetAddress);
+decl_identified_vec_of!(HiddenResources, ResourceIdentifier);
 
-impl HasSampleValues for AssetAddresses {
+impl HasSampleValues for HiddenResources {
     fn sample() -> Self {
-        Self::from_iter([AssetAddress::sample(), AssetAddress::sample_other()])
+        Self::from_iter([
+            ResourceIdentifier::sample(),
+            ResourceIdentifier::sample_other(),
+        ])
     }
 
     fn sample_other() -> Self {
-        Self::from_iter([AssetAddress::sample_other()])
+        Self::from_iter([ResourceIdentifier::sample_other()])
     }
 }
 
@@ -17,7 +20,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AssetAddresses;
+    type SUT = HiddenResources;
 
     #[test]
     fn equality() {

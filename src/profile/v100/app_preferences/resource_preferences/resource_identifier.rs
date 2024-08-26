@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// An enum representation of an Asset for which the user can set up its preferences.
+/// An enum representation of an resource for which the user can set up its preferences.
 #[derive(
     Clone,
     Debug,
@@ -16,38 +16,26 @@ use crate::prelude::*;
 )]
 #[serde(tag = "kind", content = "value")]
 #[serde(rename_all = "camelCase")]
-pub enum AssetAddress {
+pub enum ResourceIdentifier {
     Fungible(ResourceAddress),
-    NonFungible(NonFungibleGlobalId),
+    NonFungible(ResourceAddress),
     PoolUnit(PoolAddress),
 }
 
-impl Identifiable for AssetAddress {
+impl Identifiable for ResourceIdentifier {
     type ID = Self;
     fn id(&self) -> Self::ID {
         self.clone()
     }
 }
 
-impl From<ResourceAddress> for AssetAddress {
-    fn from(value: ResourceAddress) -> Self {
-        Self::Fungible(value)
-    }
-}
-
-impl From<NonFungibleGlobalId> for AssetAddress {
-    fn from(value: NonFungibleGlobalId) -> Self {
-        Self::NonFungible(value)
-    }
-}
-
-impl From<PoolAddress> for AssetAddress {
+impl From<PoolAddress> for ResourceIdentifier {
     fn from(value: PoolAddress) -> Self {
         Self::PoolUnit(value)
     }
 }
 
-impl HasSampleValues for AssetAddress {
+impl HasSampleValues for ResourceIdentifier {
     fn sample() -> Self {
         Self::sample_fungible()
     }
@@ -58,13 +46,13 @@ impl HasSampleValues for AssetAddress {
 }
 
 #[allow(unused)]
-impl AssetAddress {
+impl ResourceIdentifier {
     pub(crate) fn sample_fungible() -> Self {
         Self::Fungible(ResourceAddress::sample())
     }
 
     pub(crate) fn sample_non_fungible() -> Self {
-        Self::NonFungible(NonFungibleGlobalId::sample_other())
+        Self::NonFungible(ResourceAddress::sample_other())
     }
 
     pub(crate) fn sample_pool_unit() -> Self {
@@ -77,7 +65,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AssetAddress;
+    type SUT = ResourceIdentifier;
 
     #[test]
     fn equality() {
@@ -92,11 +80,6 @@ mod tests {
 
     #[test]
     fn from() {
-        assert_eq!(SUT::sample_fungible(), ResourceAddress::sample().into());
-        assert_eq!(
-            SUT::sample_non_fungible(),
-            NonFungibleGlobalId::sample_other().into()
-        );
         assert_eq!(SUT::sample_pool_unit(), PoolAddress::sample().into())
     }
 
@@ -117,7 +100,7 @@ mod tests {
             r#"
             {
                 "kind": "nonFungible",
-                "value": "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:<foobar>"
+                "value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
             }
             "#,
         );
