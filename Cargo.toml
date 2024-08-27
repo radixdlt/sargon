@@ -88,8 +88,8 @@ radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto",
 
 radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "c699783b487e9c1eb78847f9093d918d3dbd5e39" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "c699783b487e9c1eb78847f9093d918d3dbd5e39" }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "476d779fee08ed1e561ac8fc8730a2a404b7de79" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "476d779fee08ed1e561ac8fc8730a2a404b7de79" }
 
 # enum-iterator = "1.4.1"
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }

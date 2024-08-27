@@ -184,7 +184,7 @@ impl NonFungibleResourceAddress {
             &generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(),
         );
         let ret_address =
-            RetResourceAddress::new(node_id, network_id.discriminant())
+            RetResourceAddress::new(node_id.0, network_id.discriminant())
                 .unwrap();
         Self::from_str(&ret_address.to_string()).unwrap()
     }
