@@ -74,22 +74,20 @@ strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf1501
   "derive",
 ] }
 
-sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad", features = [
-  "serde",
-] }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
-radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad", features = [
+sbor = { version = "1.2.0" }
+radix-rust = { version = "1.2.0", features = ["serde"] }
+radix-engine = { version = "1.2.0" }
+radix-common = { version = "1.2.0", features = [
   "serde",
   "secp256k1_sign_and_validate",
 ] }
-radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
+radix-common-derive = { version = "1.2.0" }
+radix-engine-interface = { version = "1.2.0" }
 
-radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
+radix-transactions = { version = "1.2.0" }
 
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "c699783b487e9c1eb78847f9093d918d3dbd5e39" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "c699783b487e9c1eb78847f9093d918d3dbd5e39" }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "476d779fee08ed1e561ac8fc8730a2a404b7de79" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "476d779fee08ed1e561ac8fc8730a2a404b7de79" }
 
 # enum-iterator = "1.4.1"
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
