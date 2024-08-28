@@ -223,6 +223,7 @@ pub mod prelude {
                 CanonicalAddress as RetIsAddressTrait,
                 CanonicalComponentAddress as RetComponentAddress,
                 CanonicalIdentityAddress as RetIdentityAddress,
+                CanonicalLockerAddress as RetLockerAddress,
                 CanonicalPackageAddress as RetPackageAddress,
                 CanonicalPoolAddress as RetPoolAddress,
                 CanonicalResourceAddress as RetResourceAddress,

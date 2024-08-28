@@ -4,7 +4,7 @@ address_union!(
     /// A tagged union of addresses.
     ///
     /// Does not include `LegacyOlympiaAccountAddress` nor `NonFungibleResourceAddress`
-    enum Address: accessController, account, component, identity, package, pool, resource, validator, vault
+    enum Address: accessController, account, component, identity, package, pool, resource, validator, vault, locker
 );
 
 #[cfg(test)]
@@ -21,6 +21,6 @@ mod tests {
         // Duplicates should be removed
         set.extend(SUT::sample_values_all());
 
-        assert_eq!(set.len(), 36);
+        assert_eq!(set.len(), 40);
     }
 }

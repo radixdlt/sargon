@@ -21,6 +21,7 @@ from_scrypto_global_address!(AccessControllerAddress);
 from_scrypto_global_address!(AccountAddress);
 from_scrypto_global_address!(IdentityAddress);
 from_scrypto_global_address!(ComponentAddress);
+from_scrypto_global_address!(LockerAddress);
 
 macro_rules! from_scrypto_address_variant {
 
@@ -57,6 +58,7 @@ from_scrypto_component_address!(IdentityAddress);
 from_scrypto_component_address!(ComponentAddress);
 from_scrypto_component_address!(ValidatorAddress);
 from_scrypto_component_address!(PoolAddress);
+from_scrypto_component_address!(LockerAddress);
 
 macro_rules! is_dynamic_component_address {
     ($address_type: ty) => {
@@ -99,6 +101,7 @@ is_dynamic_component_address!(ComponentAddress);
 is_dynamic_component_address!(IdentityAddress);
 is_dynamic_component_address!(ValidatorAddress);
 is_dynamic_component_address!(VaultAddress);
+is_dynamic_component_address!(LockerAddress);
 
 is_dynamic_resource_address!(ResourceAddress);
 is_dynamic_resource_address!(NonFungibleResourceAddress);
