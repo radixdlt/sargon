@@ -615,5 +615,5 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         openFile(name, "dat").readText().hexToBagOfBytes()
 
         private fun openFile(name: String, extension: String) =
-                        File("../../" + "fixtures/transaction/$name.$extension")
+                        File("../../" + "crates/sargon/fixtures/transaction/$name.$extension")
 }
