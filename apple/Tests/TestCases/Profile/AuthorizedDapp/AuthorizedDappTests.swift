@@ -19,6 +19,13 @@ final class AuthorizedDappTests: Test<AuthorizedDapp> {
 			XCTAssertEqual(sut.id, sut.dAppDefinitionAddress)
 		}
 	}
+	
+	func test_show_deposits() {
+		var sut = SUT.sample
+		XCTAssertTrue(sut.showDeposits)
+		sut.showDeposits(false)
+		XCTAssertFalse(sut.showDeposits)
+	}
 
 	func test_codable() throws {
 		let raw = """

@@ -17,4 +17,12 @@ extension AuthorizedDapp {
 	public func jsonData() -> Data {
 		authorizedDappToJsonBytes(authorizedDapp: self)
 	}
+	
+	public mutating func showDeposits(_ show: Bool) {
+		preferences.deposits = show ? .visible : .hidden
+	}
+	
+	public var showDeposits: Bool {
+		preferences.deposits == .visible
+	}
 }
