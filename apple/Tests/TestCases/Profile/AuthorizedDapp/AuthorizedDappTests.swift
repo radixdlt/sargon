@@ -22,9 +22,9 @@ final class AuthorizedDappTests: Test<AuthorizedDapp> {
 	
 	func test_show_deposits() {
 		var sut = SUT.sample
-		XCTAssertTrue(sut.showDeposits)
+		XCTAssertTrue(sut.isDepositsVisible)
 		sut.showDeposits(false)
-		XCTAssertFalse(sut.showDeposits)
+		XCTAssertFalse(sut.isDepositsVisible)
 	}
 
 	func test_codable() throws {

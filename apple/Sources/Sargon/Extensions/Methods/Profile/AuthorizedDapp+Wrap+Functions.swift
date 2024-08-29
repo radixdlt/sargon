@@ -22,7 +22,7 @@ extension AuthorizedDapp {
 		preferences.deposits = show ? .visible : .hidden
 	}
 	
-	public var showDeposits: Bool {
+	public var isDepositsVisible: Bool {
 		preferences.deposits == .visible
 	}
 }
