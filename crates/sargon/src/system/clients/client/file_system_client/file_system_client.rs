@@ -77,7 +77,8 @@ mod tests {
     }
 
     fn file_in_tmp() -> PathBuf {
-        let dir_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("target/tmp");
+        let dir_path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/tmp");
         file_in_dir(dir_path)
     }
 
@@ -163,7 +164,7 @@ mod tests {
     async fn test_delete_dir_does_not_work() {
         let path = String::from(
             Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("target/")
+                .join("../../target/")
                 .to_string_lossy(),
         );
         let sut = SUT::test();
