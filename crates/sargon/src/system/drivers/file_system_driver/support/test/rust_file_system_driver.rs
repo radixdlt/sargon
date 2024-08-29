@@ -71,7 +71,8 @@ mod tests {
     }
 
     fn file_in_tmp() -> String {
-        let dir_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("target/tmp");
+        let dir_path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/tmp");
         file_in_dir(dir_path)
     }
 
@@ -130,7 +131,7 @@ mod tests {
         let sut = SUT::new();
         let path = String::from(
             Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("target/")
+                .join("../../target/")
                 .to_string_lossy(),
         );
         let res = sut.delete_file(path.clone()).await;
