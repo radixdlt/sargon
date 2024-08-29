@@ -35,6 +35,10 @@ pub struct AuthorizedDapp {
     /// bad duplication of data (which might go stale), instead we refer to the
     /// necessary data by IDs.
     pub references_to_authorized_personas: ReferencesToAuthorizedPersonas,
+
+    /// The preferences the user has configured for this Dapp.
+    #[serde(default)]
+    pub preferences: AuthorizedDappPreferences,
 }
 
 impl IsNetworkAware for AuthorizedDapp {
@@ -51,11 +55,13 @@ impl AuthorizedDapp {
 			dapp_definition_address: {}
 			display_name: {}
 			references_to_authorized_personas: {}
+			preferences: {}
 			"#,
             self.network_id,
             self.dapp_definition_address,
             self.display_name.clone().unwrap_or("<NONE>".to_owned()),
             self.references_to_authorized_personas,
+            self.preferences,
         )
     }
 
@@ -64,6 +70,7 @@ impl AuthorizedDapp {
         dapp_definition_address: DappDefinitionAddress,
         display_name: impl Into<Option<String>>,
         references_to_authorized_personas: ReferencesToAuthorizedPersonas,
+        preferences: AuthorizedDappPreferences,
     ) -> Self {
         assert_eq!(dapp_definition_address.network_id(), network_id,  "Discrepancy, found an DappDefinitionAddress on other network than {network_id}");
         assert!(references_to_authorized_personas.ids().iter().all(|i| i.network_id() == network_id), "Discrepancy, found an (Authorized)Persona(Simple) on other network than {network_id}");
@@ -72,6 +79,7 @@ impl AuthorizedDapp {
             dapp_definition_address,
             display_name: display_name.into(),
             references_to_authorized_personas,
+            preferences,
         }
     }
 }
@@ -98,52 +106,56 @@ impl AuthorizedDapp {
     pub fn sample_mainnet_dashboard() -> Self {
         Self::new(
             NetworkID::Mainnet,
-             "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5"
+            "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5"
              .parse()
              .expect("Valid Dapp Def Address"),
-              "Radix Dashboard".to_owned(), 
-			  ReferencesToAuthorizedPersonas::from_iter([
+            "Radix Dashboard".to_owned(), 
+			ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_mainnet(),
                     AuthorizedPersonaSimple::sample_mainnet_other()
-                ])
-            )
+                ]),
+			AuthorizedDappPreferences::sample(),
+        )
     }
     pub fn sample_mainnet_gumballclub() -> Self {
         Self::new(
             NetworkID::Mainnet,
-             "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t"
+            "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t"
              .parse()
              .expect("Valid Dapp Def Address"),
-              "Gumball Club".to_owned(), 
-			  ReferencesToAuthorizedPersonas::from_iter([
+            "Gumball Club".to_owned(), 
+			ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_mainnet_other()
-                ])
-            )
+                ]),
+            AuthorizedDappPreferences::sample(),
+		)
     }
     pub fn sample_stokenet_devconsole() -> Self {
         Self::new(
             NetworkID::Stokenet,
-             "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4"
+            "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4"
              .parse()
              .expect("Valid Dapp Def Address"),
-              "Dev Console".to_owned(), 
-			  ReferencesToAuthorizedPersonas::from_iter([
+            "Dev Console".to_owned(), 
+			ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_stokenet(),
                     AuthorizedPersonaSimple::sample_stokenet_other()
-                ])
-            )
+                ]),
+			AuthorizedDappPreferences::sample(),
+        )
     }
     pub fn sample_stokenet_sandbox() -> Self {
         Self::new(
             NetworkID::Stokenet,
-             "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe"
+            "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe"
              .parse()
              .expect("Valid Dapp Def Address"),
-              "Sandbox".to_owned(), 
-			  ReferencesToAuthorizedPersonas::from_iter([
+            "Sandbox".to_owned(), 
+			ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_stokenet_other()
-                ])
-            )
+                ]),
+			AuthorizedDappPreferences::sample(),
+        )
     }
 
     pub fn sample_mainnet() -> Self {
