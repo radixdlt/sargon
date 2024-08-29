@@ -1,28 +1,19 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Hash,
-    Eq,
-    derive_more::Display,
-    uniffi::Record,
+    Clone, Debug, PartialEq, Hash, Eq, derive_more::Display, uniffi::Record,
 )]
 #[display("{dapp_definition_address}")]
-#[serde(rename_all = "camelCase")]
 pub struct AuthorizedDappDetailed {
-    #[serde(rename = "networkID")]
     pub network_id: NetworkID,
 
-    #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: AccountAddress,
 
     pub display_name: Option<DisplayName>,
 
     pub detailed_authorized_personas: DetailedAuthorizedPersonas,
+
+    pub preferences: AuthorizedDappPreferences,
 }
 
 impl AuthorizedDappDetailed {
@@ -31,12 +22,14 @@ impl AuthorizedDappDetailed {
         dapp_definition_address: impl Into<AccountAddress>,
         display_name: impl Into<Option<DisplayName>>,
         detailed_authorized_personas: DetailedAuthorizedPersonas,
+        preferences: AuthorizedDappPreferences,
     ) -> Self {
         Self {
             network_id: network_id.into(),
             dapp_definition_address: dapp_definition_address.into(),
             display_name: display_name.into(),
             detailed_authorized_personas,
+            preferences,
         }
     }
 }
@@ -48,6 +41,7 @@ impl HasSampleValues for AuthorizedDappDetailed {
             AccountAddress::sample(),
             DisplayName::sample(),
             DetailedAuthorizedPersonas::sample(),
+            AuthorizedDappPreferences::sample(),
         )
     }
 
@@ -57,6 +51,7 @@ impl HasSampleValues for AuthorizedDappDetailed {
             AccountAddress::sample_other(),
             DisplayName::sample_other(),
             DetailedAuthorizedPersonas::sample_other(),
+            AuthorizedDappPreferences::sample_other(),
         )
     }
 }

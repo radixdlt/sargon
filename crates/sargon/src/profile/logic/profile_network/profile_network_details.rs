@@ -159,6 +159,7 @@ impl ProfileNetwork {
                 .clone()
                 .and_then(|x| DisplayName::new(x).ok()),
             detailed_authorized_personas,
+            dapp.preferences.clone(),
         ))
     }
 }
@@ -294,5 +295,7 @@ mod tests {
                 .shared_persona_data,
             &Persona::sample_mainnet_batman().persona_data
         );
+
+        assert_eq!(&details.preferences, &dapp.preferences);
     }
 }
