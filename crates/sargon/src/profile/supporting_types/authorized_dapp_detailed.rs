@@ -1,30 +1,18 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Hash,
-    Eq,
-    derive_more::Display,
-    uniffi::Record,
+    Clone, Debug, PartialEq, Hash, Eq, derive_more::Display, uniffi::Record,
 )]
 #[display("{dapp_definition_address}")]
-#[serde(rename_all = "camelCase")]
 pub struct AuthorizedDappDetailed {
-    #[serde(rename = "networkID")]
     pub network_id: NetworkID,
 
-    #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: AccountAddress,
 
     pub display_name: Option<DisplayName>,
 
     pub detailed_authorized_personas: DetailedAuthorizedPersonas,
 
-    #[serde(default)]
     pub preferences: AuthorizedDappPreferences,
 }
 
