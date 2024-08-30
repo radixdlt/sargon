@@ -74,7 +74,7 @@ impl TransactionManifest {
                     ids.len()
                 }
             };
-            if current_batch_size <= size {
+            if current_batch_size < size {
                 claimable_resources_batch.push(claimable);
             } else {
                 break;
@@ -87,6 +87,7 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use radix_transactions::manifest::ast::ValueKind::ResourceAddress;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
@@ -136,5 +137,19 @@ mod tests {
         );
 
         manifest_eq(manifest, expected_manifest)
+    }
+
+    #[test]
+    fn claim_limited_to_required_batch_size() {
+        let manifest = SUT::account_locker_claim(
+            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".into(),
+            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into(),
+            (0..100).map(|i| AccountLockerClaimableResource::NonFungible {
+                resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
+                ids: vec![NonFungibleLocalId::integer(i)]
+            }).collect(),
+        );
+
+        assert_eq!(manifest.instructions().len(), 50)
     }
 }
