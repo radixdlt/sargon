@@ -196,9 +196,11 @@ fun TransactionManifest.executionSummary(encodedReceipt: BagOfBytes) =
 fun TransactionManifest.Companion.accountLockerClaim(
     lockerAddress: LockerAddress,
     claimant: AccountAddress,
-    claimableResources: List<AccountLockerClaimableResource>
+    claimableResources: List<AccountLockerClaimableResource>,
+    useTryDepositOrAbort: Boolean
 ) = manifestAccountLockerClaim(
     lockerAddress = lockerAddress,
     claimant = claimant,
-    claimableResources = claimableResources
+    claimableResources = claimableResources,
+    useTryDepositOrAbort = useTryDepositOrAbort
 )

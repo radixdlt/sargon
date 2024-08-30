@@ -63,12 +63,14 @@ extension TransactionManifest {
     public static func accountLockerClaim(
         lockerAddress: LockerAddress,
         claimant: AccountAddress,
-        claimableResources: [AccountLockerClaimableResource]
+        claimableResources: [AccountLockerClaimableResource],
+        useTryDepositOrAbort: Bool
     ) -> Self {
         manifestAccountLockerClaim(
             lockerAddress: lockerAddress,
             claimant: claimant,
-            claimableResources: claimableResources
+            claimableResources: claimableResources,
+            useTryDepositOrAbort: useTryDepositOrAbort
         )
     }
 }

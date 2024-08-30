@@ -173,11 +173,13 @@ pub fn manifest_account_locker_claim(
     locker_address: &LockerAddress,
     claimant: &AccountAddress,
     claimable_resources: Vec<AccountLockerClaimableResource>,
+    use_try_deposit_or_abort: bool,
 ) -> TransactionManifest {
     TransactionManifest::account_locker_claim(
         locker_address,
         claimant,
         claimable_resources,
+        use_try_deposit_or_abort,
     )
 }
 
@@ -482,6 +484,7 @@ mod tests {
             &LockerAddress::sample(),
             &AccountAddress::sample(),
             vec![AccountLockerClaimableResource::sample()],
+            true,
         );
         assert_eq!(manifest.instructions().len(), 2);
     }

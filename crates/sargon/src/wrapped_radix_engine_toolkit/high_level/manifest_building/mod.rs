@@ -1,8 +1,8 @@
-mod account_locker;
 mod addresses_manifest_builder_support;
 mod assert_manifest;
 mod bucket;
 mod bucket_factory;
+mod manifest_account_locker;
 mod manifest_assets_transfers;
 mod manifests;
 mod manifests_create_tokens;
@@ -10,11 +10,11 @@ mod metadata;
 mod modify_manifest;
 mod third_party_deposit_update;
 
-pub use account_locker::*;
 pub use addresses_manifest_builder_support::*;
 pub use assert_manifest::*;
 pub use bucket::*;
 pub use bucket_factory::*;
+pub use manifest_account_locker::*;
 pub use manifest_assets_transfers::*;
 pub use manifests::*;
 pub use manifests_create_tokens::*;

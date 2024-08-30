@@ -605,7 +605,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             instructionsString = openFile("account_locker_claim", "rtm").readText(),
             networkId = NetworkId.MAINNET
         )
-        val actualManifest = TransactionManifest.accountLockerClaim(
+        var actualManifest = TransactionManifest.accountLockerClaim(
             lockerAddress = LockerAddress.init("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz"),
             claimant = AccountAddress.init("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"),
             claimableResources = listOf(
@@ -629,7 +629,8 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     resourceAddress = ResourceAddress.init("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"),
                     ids = listOf(NonFungibleLocalId.stringId("foobar"))
                 )
-            )
+            ),
+            useTryDepositOrAbort = false
         )
 
         assertEquals(expectedManifest.instructionsString, actualManifest.instructionsString)
@@ -638,6 +639,17 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             assertTrue(contains("claim"))
             assertTrue(contains("claim_non_fungibles"))
             assertTrue(contains("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"))
+        }
+
+        actualManifest = TransactionManifest.accountLockerClaim(
+            lockerAddress = LockerAddress.init("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz"),
+            claimant = AccountAddress.init("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"),
+            claimableResources = emptyList(),
+            useTryDepositOrAbort = true
+        )
+
+        with(actualManifest.instructionsString) {
+            assertTrue(isEmpty())
         }
     }
 

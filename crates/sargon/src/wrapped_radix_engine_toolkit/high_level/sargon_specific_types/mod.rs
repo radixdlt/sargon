@@ -1,6 +1,7 @@
 #[macro_use]
 mod address_union;
 
+mod account_locker;
 mod address_of_account_or_persona;
 mod assets_transfers;
 mod build_information;
@@ -17,3 +18,5 @@ pub use address_union::*;
 pub use stake_claim::*;
 pub use stake_claim_uniffi_fn::*;
 pub use transaction_guarantee::*;
+
+pub use account_locker::*;

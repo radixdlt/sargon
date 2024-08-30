@@ -1,15 +1,27 @@
 use crate::prelude::*;
 
+/// A claimable resource in an account locker.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum AccountLockerClaimableResource {
+    /// A fungible resource with a specific claimable amount
     Fungible {
         resource_address: ResourceAddress,
         amount: Decimal192,
     },
+    /// A non-fungible resource with specific claimable IDs
     NonFungible {
         resource_address: ResourceAddress,
         ids: Vec<NonFungibleLocalId>,
     },
+}
+
+impl AccountLockerClaimableResource {
+    pub fn resource_count(&self) -> usize {
+        match self {
+            Self::Fungible { .. } => 1,
+            Self::NonFungible { ids, .. } => ids.len(),
+        }
+    }
 }
 
 impl HasSampleValues for AccountLockerClaimableResource {
