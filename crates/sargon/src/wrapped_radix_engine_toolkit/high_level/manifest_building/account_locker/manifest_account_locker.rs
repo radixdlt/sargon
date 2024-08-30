@@ -65,22 +65,18 @@ impl TransactionManifest {
         size: usize,
     ) -> Vec<AccountLockerClaimableResource> {
         let mut current_batch_size = 0;
-        let mut claimable_resources_batch: Vec<AccountLockerClaimableResource> =
-            Vec::with_capacity(size);
-        for claimable in claimable_resources {
-            current_batch_size += match &claimable {
-                AccountLockerClaimableResource::Fungible { .. } => 1,
-                AccountLockerClaimableResource::NonFungible { ids, .. } => {
-                    ids.len()
-                }
-            };
-            if current_batch_size < size {
-                claimable_resources_batch.push(claimable);
-            } else {
-                break;
-            }
-        }
-        claimable_resources_batch
+        claimable_resources
+            .into_iter()
+            .take_while(|claimable| {
+                current_batch_size += match claimable {
+                    AccountLockerClaimableResource::Fungible { .. } => 1,
+                    AccountLockerClaimableResource::NonFungible {
+                        ids, ..
+                    } => ids.len(),
+                };
+                current_batch_size < size
+            })
+            .collect()
     }
 }
 
