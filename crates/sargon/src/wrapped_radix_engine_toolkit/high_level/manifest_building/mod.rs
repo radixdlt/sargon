@@ -1,3 +1,4 @@
+mod account_locker;
 mod addresses_manifest_builder_support;
 mod assert_manifest;
 mod bucket;
@@ -9,6 +10,7 @@ mod metadata;
 mod modify_manifest;
 mod third_party_deposit_update;
 
+pub use account_locker::*;
 pub use addresses_manifest_builder_support::*;
 pub use assert_manifest::*;
 pub use bucket::*;
