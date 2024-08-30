@@ -73,7 +73,7 @@ impl TransactionManifest {
     fn build_claimable_batch(
         claimable_resources: Vec<AccountLockerClaimableResource>,
         size: usize,
-    ) -> Vec<AccountLockerClaimableResource> {
+    ) -> IndexSet<AccountLockerClaimableResource> {
         let mut current_batch_size = 0;
         claimable_resources
             .into_iter()
