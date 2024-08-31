@@ -221,11 +221,10 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
             let manifest = SUT.accountLockerClaim(
 				lockerAddress: LockerAddress.sample,
 				claimant: accountAddress,
-				claimableResources: [AccountLockerClaimableResource.fungible(resourceAddress: ResourceAddress.sample, amount: Decimal192.sample)],
-				useTryDepositOrAbort: false
+				claimableResources: [AccountLockerClaimableResource.fungible(resourceAddress: ResourceAddress.sample, amount: Decimal192.sample)]
 			)
             XCTAssert(manifest.description.contains(accountAddress.address))
-            XCTAssertEqual(manifest.description.ranges(of: ";").count, 2) // 2 instructions
+            XCTAssertEqual(manifest.description.ranges(of: ";").count, 3) // 3 instructions
         }
         AccountAddress.sampleValues.forEach(doTest)
     }

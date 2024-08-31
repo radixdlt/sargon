@@ -5,6 +5,16 @@ CALL_METHOD
     Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
     Decimal("123")
 ;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
+    Decimal("123")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "deposit"
+    Bucket("bucket1")
+;
 CALL_METHOD
     Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
     "claim_non_fungibles"
@@ -14,14 +24,17 @@ CALL_METHOD
         NonFungibleLocalId("#1#")
     )
 ;
-CALL_METHOD
-    Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
-    "claim_non_fungibles"
-    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+TAKE_NON_FUNGIBLES_FROM_WORKTOP
     Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
     Array<NonFungibleLocalId>(
-        NonFungibleLocalId("#2#")
+        NonFungibleLocalId("#1#")
     )
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "deposit"
+    Bucket("bucket2")
 ;
 CALL_METHOD
     Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
@@ -29,6 +42,16 @@ CALL_METHOD
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
     Decimal("1500")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1500")
+    Bucket("bucket3")
+;
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "deposit"
+    Bucket("bucket3")
 ;
 CALL_METHOD
     Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
@@ -39,8 +62,15 @@ CALL_METHOD
         NonFungibleLocalId("<foobar>")
     )
 ;
+TAKE_NON_FUNGIBLES_FROM_WORKTOP
+    Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+    Array<NonFungibleLocalId>(
+        NonFungibleLocalId("<foobar>")
+    )
+    Bucket("bucket4")
+;
 CALL_METHOD
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
-    "deposit_batch"
-    Expression("ENTIRE_WORKTOP")
+    "deposit"
+    Bucket("bucket4")
 ;

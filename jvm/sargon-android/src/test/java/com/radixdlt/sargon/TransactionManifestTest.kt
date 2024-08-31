@@ -617,10 +617,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     resourceAddress = ResourceAddress.init("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"),
                     ids = listOf(NonFungibleLocalId.intId(1.toULong()))
                 ),
-                AccountLockerClaimableResource.NonFungible(
-                    resourceAddress = ResourceAddress.init("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"),
-                    ids = listOf(NonFungibleLocalId.intId(2.toULong()))
-                ),
                 AccountLockerClaimableResource.Fungible(
                     resourceAddress = ResourceAddress.init("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"),
                     amount = 1500.toDecimal192()
@@ -629,8 +625,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     resourceAddress = ResourceAddress.init("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"),
                     ids = listOf(NonFungibleLocalId.stringId("foobar"))
                 )
-            ),
-            useTryDepositOrAbort = false
+            )
         )
 
         assertEquals(expectedManifest.instructionsString, actualManifest.instructionsString)
@@ -644,8 +639,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         actualManifest = TransactionManifest.accountLockerClaim(
             lockerAddress = LockerAddress.init("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz"),
             claimant = AccountAddress.init("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"),
-            claimableResources = emptyList(),
-            useTryDepositOrAbort = true
+            claimableResources = emptyList()
         )
 
         with(actualManifest.instructionsString) {

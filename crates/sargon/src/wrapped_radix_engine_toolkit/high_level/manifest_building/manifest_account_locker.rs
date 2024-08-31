@@ -15,9 +15,9 @@ impl TransactionManifest {
         locker_address: &LockerAddress,
         claimant: &AccountAddress,
         claimable_resources: Vec<AccountLockerClaimableResource>,
-        use_try_deposit_or_abort: bool,
     ) -> Self {
         let mut builder = ScryptoManifestBuilder::new();
+        let bucket_factory = BucketFactory::default();
         let claimant_arg: ScryptoComponentAddress = (*claimant).into();
         let claimable_resources =
             Self::build_claimable_batch(claimable_resources, 50);
@@ -37,6 +37,15 @@ impl TransactionManifest {
                         ACCOUNT_LOCKER_CLAIM_IDENT,
                         (claimant_arg, resource_arg, amount_arg),
                     );
+
+                    let bucket = &bucket_factory.next();
+
+                    builder = builder.take_from_worktop(
+                        resource_arg,
+                        amount_arg,
+                        bucket,
+                    );
+                    builder = builder.deposit(claimant_arg, bucket);
                 }
                 AccountLockerClaimableResource::NonFungible {
                     resource_address,
@@ -50,23 +59,22 @@ impl TransactionManifest {
                     builder = builder.call_method(
                         locker_address,
                         ACCOUNT_LOCKER_CLAIM_NON_FUNGIBLES_IDENT,
-                        (claimant_arg, resource_arg, ids_arg),
+                        (claimant_arg, resource_arg, ids_arg.clone()),
                     );
+
+                    let bucket = &bucket_factory.next();
+
+                    builder = builder.take_non_fungibles_from_worktop(
+                        resource_arg,
+                        ids_arg,
+                        bucket,
+                    );
+
+                    builder = builder.deposit(claimant_arg, bucket);
                 }
             }
         }
 
-        if !claimable_resources.is_empty() {
-            builder = if use_try_deposit_or_abort {
-                builder.try_deposit_batch_or_abort(
-                    claimant_arg,
-                    ManifestExpression::EntireWorktop,
-                    None,
-                )
-            } else {
-                builder.deposit_batch(claimant_arg)
-            }
-        }
         TransactionManifest::sargon_built(builder, claimant.network_id())
     }
 
@@ -79,7 +87,7 @@ impl TransactionManifest {
             .into_iter()
             .take_while(|claimable| {
                 current_batch_size += claimable.resource_count();
-                current_batch_size < size
+                current_batch_size <= size
             })
             .collect()
     }
@@ -99,7 +107,6 @@ mod tests {
             &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".into(),
             &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into(),
             vec![],
-            false
         );
         manifest_eq(manifest, "")
     }
@@ -123,10 +130,6 @@ mod tests {
                     resource_address: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".into(),
                     ids: vec![NonFungibleLocalId::integer(1)],
                 },
-                AccountLockerClaimableResource::NonFungible {
-                    resource_address: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".into(),
-                    ids: vec![NonFungibleLocalId::integer(2)],
-                },
                 AccountLockerClaimableResource::Fungible {
                     resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".into(),
                     amount: 1500.into(),
@@ -136,7 +139,6 @@ mod tests {
                     ids: vec![NonFungibleLocalId::string("foobar").unwrap()],
                 },
             ],
-            false
         );
 
         manifest_eq(manifest, expected_manifest)
@@ -151,9 +153,8 @@ mod tests {
                 resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
                 ids: vec![NonFungibleLocalId::integer(i)]
             }).collect(),
-            true
         );
 
-        assert_eq!(manifest.instructions().len(), 50)
+        assert_eq!(manifest.instructions().len(), 150)
     }
 }
