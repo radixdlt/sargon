@@ -216,6 +216,19 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		}
 	}
 
+    func test_account_locker_claim() {
+        func doTest(_ accountAddress: AccountAddress) {
+            let manifest = SUT.accountLockerClaim(
+				lockerAddress: LockerAddress.sample,
+				claimant: accountAddress,
+				claimableResources: [AccountLockerClaimableResource.fungible(resourceAddress: ResourceAddress.sample, amount: Decimal192.sample)]
+			)
+            XCTAssert(manifest.description.contains(accountAddress.address))
+            XCTAssertEqual(manifest.description.ranges(of: ";").count, 3) // 3 instructions
+        }
+        AccountAddress.sampleValues.forEach(doTest)
+    }
+
 }
 
 extension TestCase {

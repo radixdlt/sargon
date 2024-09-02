@@ -168,6 +168,19 @@ pub fn manifest_per_asset_transfers(
     TransactionManifest::per_asset_transfers(transfers)
 }
 
+#[uniffi::export]
+pub fn manifest_account_locker_claim(
+    locker_address: &LockerAddress,
+    claimant: &AccountAddress,
+    claimable_resources: Vec<AccountLockerClaimableResource>,
+) -> TransactionManifest {
+    TransactionManifest::account_locker_claim(
+        locker_address,
+        claimant,
+        claimable_resources,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -461,5 +474,15 @@ mod tests {
             manifest_per_asset_transfers(transfers.clone().transpose()),
             manifest_per_recipient_transfers(transfers)
         );
+    }
+
+    #[test]
+    fn test_account_locker_claim() {
+        let manifest = manifest_account_locker_claim(
+            &LockerAddress::sample(),
+            &AccountAddress::sample(),
+            vec![AccountLockerClaimableResource::sample()],
+        );
+        assert_eq!(manifest.instructions().len(), 3);
     }
 }

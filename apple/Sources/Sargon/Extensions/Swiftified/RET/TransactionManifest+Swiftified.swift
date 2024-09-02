@@ -59,6 +59,18 @@ extension TransactionManifest {
             to: newFromUI
         )
     }
+
+    public static func accountLockerClaim(
+        lockerAddress: LockerAddress,
+        claimant: AccountAddress,
+        claimableResources: [AccountLockerClaimableResource]
+    ) -> Self {
+        manifestAccountLockerClaim(
+            lockerAddress: lockerAddress,
+            claimant: claimant,
+            claimableResources: claimableResources
+        )
+    }
 }
 
 // MARK: Modify Manifest
