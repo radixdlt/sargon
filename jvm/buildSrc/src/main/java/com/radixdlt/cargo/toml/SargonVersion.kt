@@ -6,7 +6,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 private fun Project.parseTomlVersion(): String {
-    val tomlFile = File(projectDir.parentFile.parentFile, "Cargo.toml").toPath()
+    val sargonCrate = File(projectDir.parentFile.parentFile, "crates/sargon")
+    val tomlFile = File(sargonCrate, "Cargo.toml").toPath()
 
     val toml = Toml.parse(tomlFile)
     return toml.getString("package.version").orEmpty()
