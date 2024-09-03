@@ -49,7 +49,8 @@ android {
 
     testOptions {
         packaging {
-            resources.excludes.add("META-INF/*")
+            resources.merges.add("META-INF/LICENSE.md")
+            resources.merges.add("META-INF/LICENSE-notice.md")
         }
     }
 }
