@@ -24,7 +24,6 @@ import timber.log.Timber
 @KoverIgnore
 fun Bios.Companion.from(
     context: Context,
-    enableLogging: Boolean,
     httpClient: OkHttpClient,
     biometricsHandler: BiometricsHandler,
     encryptedPreferencesDataStore: DataStore<Preferences>,
@@ -48,7 +47,7 @@ fun Bios.Companion.from(
             unsafeStorage = storageDriver,
             entropyProvider = AndroidEntropyProviderDriver(),
             hostInfo = AndroidHostInfoDriver(context),
-            logging = AndroidLoggingDriver(enableLogging),
+            logging = AndroidLoggingDriver(),
             eventBus = eventBusDriver,
             fileSystem = AndroidFileSystemDriver(context),
             profileStateChangeDriver = profileStateChangeDriver
