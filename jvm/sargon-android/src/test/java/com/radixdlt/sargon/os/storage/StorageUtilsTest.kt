@@ -8,6 +8,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.slot
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -15,10 +17,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import javax.crypto.spec.SecretKeySpec
+import kotlin.io.encoding.ExperimentalEncodingApi
+import android.util.Base64 as AndroidBase64
+import kotlin.io.encoding.Base64.Default.Mime as KotlinLikeAndroidBase64
 
 class StorageUtilsTest {
 
@@ -32,6 +38,24 @@ class StorageUtilsTest {
         File(tmpDir, "test.preferences_pb")
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
+    @BeforeEach
+    fun before() {
+        val byteArrayInputSlot = slot<ByteArray>()
+        mockkStatic(AndroidBase64::class)
+        every {
+            AndroidBase64.encodeToString(capture(byteArrayInputSlot), AndroidBase64.DEFAULT)
+        } answers {
+            KotlinLikeAndroidBase64.encode(byteArrayInputSlot.captured)
+        }
+
+        val stringInputSlot = slot<String>()
+        every {
+            AndroidBase64.decode(capture(stringInputSlot), AndroidBase64.DEFAULT)
+        } answers {
+            KotlinLikeAndroidBase64.decode(stringInputSlot.captured)
+        }
+    }
 
     @Test
     fun testReadWhenNullValueWithoutAuhotize() = runTest(context = testDispatcher) {
