@@ -1,0 +1,17 @@
+CALL_METHOD
+    Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
+    "claim"
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+    Decimal("50")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+    Decimal("50")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+    "deposit"
+    Bucket("bucket1")
+;

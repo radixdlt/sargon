@@ -3,6 +3,7 @@ use radix_common::prelude::ManifestExpression;
 use radix_engine_interface::blueprints::locker::{
     ACCOUNT_LOCKER_CLAIM_IDENT, ACCOUNT_LOCKER_CLAIM_NON_FUNGIBLES_IDENT,
 };
+use std::cmp::min;
 
 impl From<AccountAddress> for ScryptoComponentAddress {
     fn from(value: AccountAddress) -> ScryptoComponentAddress {
@@ -23,7 +24,7 @@ impl TransactionManifest {
             Self::build_claimable_batch(claimable_resources, 50);
 
         for claimable in claimable_resources.iter() {
-            match claimable.clone() {
+            let (resource_arg, amount_arg) = match claimable.clone() {
                 AccountLockerClaimableResource::Fungible {
                     resource_address,
                     amount,
@@ -31,48 +32,30 @@ impl TransactionManifest {
                     let resource_arg: ScryptoResourceAddress =
                         resource_address.into();
                     let amount_arg: ScryptoDecimal192 = amount.into();
-
-                    builder = builder.call_method(
-                        locker_address,
-                        ACCOUNT_LOCKER_CLAIM_IDENT,
-                        (claimant_arg, resource_arg, amount_arg),
-                    );
-
-                    let bucket = &bucket_factory.next();
-
-                    builder = builder.take_from_worktop(
-                        resource_arg,
-                        amount_arg,
-                        bucket,
-                    );
-                    builder = builder.deposit(claimant_arg, bucket);
+                    (resource_arg, amount_arg)
                 }
                 AccountLockerClaimableResource::NonFungible {
                     resource_address,
-                    ids,
+                    count,
                 } => {
                     let resource_arg: ScryptoResourceAddress =
                         resource_address.into();
-                    let ids_arg: Vec<ScryptoNonFungibleLocalId> =
-                        ids.iter().map(|id| id.clone().into()).collect();
-
-                    builder = builder.call_method(
-                        locker_address,
-                        ACCOUNT_LOCKER_CLAIM_NON_FUNGIBLES_IDENT,
-                        (claimant_arg, resource_arg, ids_arg.clone()),
-                    );
-
-                    let bucket = &bucket_factory.next();
-
-                    builder = builder.take_non_fungibles_from_worktop(
-                        resource_arg,
-                        ids_arg,
-                        bucket,
-                    );
-
-                    builder = builder.deposit(claimant_arg, bucket);
+                    let amount_arg: ScryptoDecimal192 = count.into();
+                    (resource_arg, amount_arg)
                 }
-            }
+            };
+
+            builder = builder.call_method(
+                locker_address,
+                ACCOUNT_LOCKER_CLAIM_IDENT,
+                (claimant_arg, resource_arg, amount_arg),
+            );
+
+            let bucket = &bucket_factory.next();
+
+            builder =
+                builder.take_from_worktop(resource_arg, amount_arg, bucket);
+            builder = builder.deposit(claimant_arg, bucket);
         }
 
         TransactionManifest::sargon_built(builder, claimant.network_id())
@@ -80,16 +63,37 @@ impl TransactionManifest {
 
     fn build_claimable_batch(
         claimable_resources: Vec<AccountLockerClaimableResource>,
-        size: usize,
+        size: u64,
     ) -> IndexSet<AccountLockerClaimableResource> {
         let mut current_batch_size = 0;
-        claimable_resources
-            .into_iter()
-            .take_while(|claimable| {
-                current_batch_size += claimable.resource_count();
-                current_batch_size <= size
-            })
-            .collect()
+        let mut result = IndexSet::new();
+
+        for claimable in claimable_resources {
+            let resource_count = claimable.resource_count();
+            if current_batch_size + resource_count > size {
+                if let AccountLockerClaimableResource::NonFungible {
+                    resource_address,
+                    ..
+                } = claimable
+                {
+                    let remaining_size = size - current_batch_size;
+                    if remaining_size > 0 {
+                        result.insert(
+                            AccountLockerClaimableResource::NonFungible {
+                                resource_address,
+                                count: remaining_size,
+                            },
+                        );
+                    }
+                    break;
+                }
+            } else {
+                current_batch_size += resource_count;
+                result.insert(claimable);
+            }
+        }
+
+        result
     }
 }
 
@@ -128,7 +132,7 @@ mod tests {
                 },
                 AccountLockerClaimableResource::NonFungible {
                     resource_address: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".into(),
-                    ids: vec![NonFungibleLocalId::integer(1)],
+                    count: 10,
                 },
                 AccountLockerClaimableResource::Fungible {
                     resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".into(),
@@ -136,7 +140,7 @@ mod tests {
                 },
                 AccountLockerClaimableResource::NonFungible {
                     resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
-                    ids: vec![NonFungibleLocalId::string("foobar").unwrap()],
+                    count: 1,
                 },
             ],
         );
@@ -146,15 +150,21 @@ mod tests {
 
     #[test]
     fn claim_limited_to_required_batch_size() {
+        let expected_manifest = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "account_locker_claim_max_nft_items.rtm"
+        ));
         let manifest = SUT::account_locker_claim(
             &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".into(),
             &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into(),
-            (0..100).map(|i| AccountLockerClaimableResource::NonFungible {
-                resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
-                ids: vec![NonFungibleLocalId::integer(i)]
-            }).collect(),
+            vec![
+                AccountLockerClaimableResource::NonFungible {
+                    resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
+                    count: 100,
+                }
+            ],
         );
 
-        assert_eq!(manifest.instructions().len(), 150)
+        manifest_eq(manifest, expected_manifest)
     }
 }

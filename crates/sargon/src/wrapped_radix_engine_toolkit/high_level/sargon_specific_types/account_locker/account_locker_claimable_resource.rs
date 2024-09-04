@@ -8,18 +8,18 @@ pub enum AccountLockerClaimableResource {
         resource_address: ResourceAddress,
         amount: Decimal192,
     },
-    /// A non-fungible resource with specific claimable IDs
+    /// A non-fungible resource with a specific claimable item count
     NonFungible {
         resource_address: ResourceAddress,
-        ids: Vec<NonFungibleLocalId>,
+        count: u64,
     },
 }
 
 impl AccountLockerClaimableResource {
-    pub fn resource_count(&self) -> usize {
+    pub fn resource_count(&self) -> u64 {
         match self {
             Self::Fungible { .. } => 1,
-            Self::NonFungible { ids, .. } => ids.len(),
+            Self::NonFungible { count, .. } => *count,
         }
     }
 }
@@ -35,10 +35,7 @@ impl HasSampleValues for AccountLockerClaimableResource {
     fn sample_other() -> Self {
         Self::NonFungible {
             resource_address: ResourceAddress::sample_other(),
-            ids: vec![
-                NonFungibleLocalId::sample(),
-                NonFungibleLocalId::sample_other(),
-            ],
+            count: 2,
         }
     }
 }
