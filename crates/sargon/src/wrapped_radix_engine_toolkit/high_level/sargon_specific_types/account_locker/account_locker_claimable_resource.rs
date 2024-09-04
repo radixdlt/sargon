@@ -24,6 +24,12 @@ impl AccountLockerClaimableResource {
         }
     }
 
+    /// Coerces the resource count to be at most the given maximum.
+    ///
+    /// If the resource is fungible, it will be returned as is,
+    /// because it's always considered to be a single resource regardless of the amount.
+    ///
+    /// If the resource is non-fungible, the count will be clamped to the given maximum.
     pub fn coerce_resource_count_at_most(&self, maximum: u64) -> Self {
         assert!(maximum > 0, "Invalid input, maximum must be greater than 0");
         match self {
