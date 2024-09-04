@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::cmp::min;
 
 /// A claimable resource in an account locker.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
@@ -20,6 +21,20 @@ impl AccountLockerClaimableResource {
         match self {
             Self::Fungible { .. } => 1,
             Self::NonFungible { count, .. } => *count,
+        }
+    }
+
+    pub fn coerce_resource_count_at_most(&self, maximum: u64) -> Self {
+        assert!(maximum > 0, "Invalid input, maximum must be greater than 0");
+        match self {
+            Self::Fungible { .. } => self.clone(),
+            Self::NonFungible {
+                resource_address,
+                count,
+            } => Self::NonFungible {
+                resource_address: *resource_address,
+                count: min(*count, maximum),
+            },
         }
     }
 }

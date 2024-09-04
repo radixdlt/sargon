@@ -63,34 +63,16 @@ impl TransactionManifest {
 
     fn build_claimable_batch(
         claimable_resources: Vec<AccountLockerClaimableResource>,
-        size: u64,
+        max_size: u64,
     ) -> IndexSet<AccountLockerClaimableResource> {
-        let mut current_batch_size = 0;
-        let mut result = IndexSet::new();
+        let mut resource_count_left_to_add = max_size;
+        let mut result = IndexSet::<AccountLockerClaimableResource>::new();
 
-        for claimable in claimable_resources {
-            let resource_count = claimable.resource_count();
-            if current_batch_size + resource_count > size {
-                if let AccountLockerClaimableResource::NonFungible {
-                    resource_address,
-                    ..
-                } = claimable
-                {
-                    let remaining_size = size - current_batch_size;
-                    if remaining_size > 0 {
-                        result.insert(
-                            AccountLockerClaimableResource::NonFungible {
-                                resource_address,
-                                count: remaining_size,
-                            },
-                        );
-                    }
-                    break;
-                }
-            } else {
-                current_batch_size += resource_count;
-                result.insert(claimable);
-            }
+        for claimable_resource in claimable_resources {
+            let updated_resource = claimable_resource
+                .coerce_resource_count_at_most(resource_count_left_to_add);
+            result.insert(updated_resource.clone());
+            resource_count_left_to_add -= updated_resource.resource_count();
         }
 
         result
