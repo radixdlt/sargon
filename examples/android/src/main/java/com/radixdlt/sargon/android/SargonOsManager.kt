@@ -2,7 +2,6 @@ package com.radixdlt.sargon.android
 
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Profile
-import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.SargonOs
 import com.radixdlt.sargon.android.di.ApplicationScope
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
@@ -27,30 +26,41 @@ class SargonOsManager @Inject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope
 ) {
 
-    private val _sargon_state = MutableStateFlow<SargonState>(SargonState.Idle)
+    private val _sargonState = MutableStateFlow<SargonState>(SargonState.Idle)
+    private val _profileState = MutableStateFlow<ProfileState>(ProfileState.NotInitialised)
 
     val sargonState: StateFlow<SargonState>
-        get() = _sargon_state.asStateFlow()
+        get() = _sargonState.asStateFlow()
 
-    val sargonOs: Flow<SargonOs> = _sargon_state
+    val sargonOs: Flow<SargonOs> = sargonState
         .filterIsInstance<SargonState.Booted>()
         .map { it.os }
 
-    val profileState: Flow<ProfileState> = profileStateChangeDriver.profileState
-    val profile: Flow<Profile> = profileStateChangeDriver.profile
+    val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
+    val profile: Flow<Profile> = profileState
+        .filterIsInstance<ProfileState.Restored>()
+        .map { it.profile }
 
     init {
-        boot()
-    }
-
-    private fun boot() = applicationScope.launch {
-        if (_sargon_state.value is SargonState.Booted) {
-            return@launch
+        applicationScope.launch {
+            profileStateChangeDriver
+                .profileState
+                .map { state ->
+                    when (state) {
+                        is com.radixdlt.sargon.ProfileState.None -> ProfileState.None
+                        is com.radixdlt.sargon.ProfileState.Incompatible -> ProfileState.Incompatible(cause = state.v1)
+                        is com.radixdlt.sargon.ProfileState.Loaded -> ProfileState.Restored(profile = state.v1)
+                    }
+                }.collect { state ->
+                    _profileState.update { state }
+                }
         }
 
-        withContext(Dispatchers.Default) {
-            val os = SargonOs.boot(bios)
-            _sargon_state.update { SargonState.Booted(os) }
+        applicationScope.launch {
+            withContext(Dispatchers.Default) {
+                val os = SargonOs.boot(bios)
+                _sargonState.update { SargonState.Booted(os) }
+            }
         }
     }
 
@@ -59,6 +69,17 @@ class SargonOsManager @Inject constructor(
         data class Booted(
             val os: SargonOs
         ): SargonState
+    }
+
+    sealed interface ProfileState {
+        data object NotInitialised : ProfileState
+        data object None : ProfileState
+        data class Incompatible(val cause: Throwable) : ProfileState
+        data class Restored(val profile: Profile) : ProfileState {
+            fun hasNetworks(): Boolean {
+                return profile.networks.isNotEmpty()
+            }
+        }
     }
 
 }
