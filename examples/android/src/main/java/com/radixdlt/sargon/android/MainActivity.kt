@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -103,7 +104,7 @@ fun WalletContent(
             )
         },
         bottomBar = {
-            if (state.profileState is ProfileState.Loaded) {
+            if (state.profileState is SargonOsManager.ProfileState.Restored) {
                 Button(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -115,7 +116,11 @@ fun WalletContent(
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
             state.info?.let { info ->
                 var isHostInfoVisible by remember {
                     mutableStateOf(false)
@@ -167,7 +172,13 @@ fun WalletContent(
             }
 
             when (val profileState = state.profileState) {
-                is ProfileState.None -> NoProfileContent(
+                is SargonOsManager.ProfileState.NotInitialised -> CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(32.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+
+                is SargonOsManager.ProfileState.None -> NoProfileContent(
                     modifier = Modifier
                         .padding(16.dp),
                     onCreateNewWallet = viewModel::onCreateNewWallet,
@@ -176,16 +187,16 @@ fun WalletContent(
                     }
                 )
 
-                is ProfileState.Incompatible -> IncompatibleProfile(
+                is SargonOsManager.ProfileState.Incompatible -> IncompatibleProfile(
                     modifier = Modifier
                         .padding(16.dp),
-                    error = profileState.v1
+                    error = profileState.cause as CommonException
                 )
 
-                is ProfileState.Loaded -> ProfileContent(
+                is SargonOsManager.ProfileState.Restored -> ProfileContent(
                     modifier = Modifier
                         .padding(16.dp),
-                    profile = profileState.v1,
+                    profile = profileState.profile,
                     onDevModeChanged = { enabled ->
                         viewModel.onDevModeChanged(enabled)
                     }
