@@ -9,6 +9,7 @@ import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.Accounts
 import com.radixdlt.sargon.extensions.AuthorizedDapps
 import com.radixdlt.sargon.extensions.Personas
+import com.radixdlt.sargon.extensions.ResourceAppPreferences
 
 @UsesSampleValues
 val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
@@ -23,7 +24,8 @@ val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
             ).asList(),
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleMainnet()
-            ).asList()
+            ).asList(),
+            resourcePreferences = ResourceAppPreferences.sample().asList()
         )
 
         override fun other(): ProfileNetwork = ProfileNetwork(
@@ -36,7 +38,8 @@ val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
             ).asList(),
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleMainnet.other()
-            ).asList()
+            ).asList(),
+            resourcePreferences = ResourceAppPreferences.sample.other().asList()
         )
     }
 
@@ -53,7 +56,8 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
             ).asList(),
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleStokenet()
-            ).asList()
+            ).asList(),
+            resourcePreferences = ResourceAppPreferences.sample().asList()
         )
 
         override fun other(): ProfileNetwork = ProfileNetwork(
@@ -66,6 +70,7 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
             ).asList(),
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleStokenet.other()
-            ).asList()
+            ).asList(),
+            resourcePreferences = ResourceAppPreferences.sample.other().asList()
         )
     }

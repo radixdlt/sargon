@@ -1,6 +1,5 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.ResourceAppPreferences
 import com.radixdlt.sargon.extensions.default
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.samples.Sample
@@ -28,8 +27,7 @@ class AppPreferencesTest : SampleTestable<AppPreferences> {
                     isAdvancedLockEnabled = false,
                     securityStructuresOfFactorSourceIds = emptyList()
                 ),
-                transaction = TransactionPreferences(defaultDepositGuarantee = 0.99.toDecimal192()),
-                resources = ResourceAppPreferences().asList()
+                transaction = TransactionPreferences(defaultDepositGuarantee = 0.99.toDecimal192())
             ),
             AppPreferences.default()
         )
