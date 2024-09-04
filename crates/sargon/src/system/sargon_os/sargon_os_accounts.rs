@@ -351,6 +351,7 @@ impl SargonOS {
                     accounts.clone(),
                     Personas::default(),
                     AuthorizedDapps::default(),
+                    ResourcePreferences::default(),
                 );
                 networks.append(network);
                 Ok(())

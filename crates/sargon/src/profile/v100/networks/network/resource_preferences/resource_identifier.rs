@@ -22,6 +22,18 @@ pub enum ResourceIdentifier {
     PoolUnit(PoolAddress),
 }
 
+impl IsNetworkAware for ResourceIdentifier {
+    fn network_id(&self) -> NetworkID {
+        match self {
+            Self::NonFungible(resource_address) => {
+                resource_address.network_id()
+            }
+            Self::Fungible(resource_address) => resource_address.network_id(),
+            Self::PoolUnit(pool_address) => pool_address.network_id(),
+        }
+    }
+}
+
 impl Identifiable for ResourceIdentifier {
     type ID = Self;
     fn id(&self) -> Self::ID {
@@ -37,25 +49,29 @@ impl From<PoolAddress> for ResourceIdentifier {
 
 impl HasSampleValues for ResourceIdentifier {
     fn sample() -> Self {
-        Self::sample_fungible()
+        Self::sample_fungible_mainnet()
     }
 
     fn sample_other() -> Self {
-        Self::sample_non_fungible()
+        Self::sample_non_fungible_stokenet()
     }
 }
 
 #[allow(unused)]
 impl ResourceIdentifier {
-    pub(crate) fn sample_fungible() -> Self {
-        Self::Fungible(ResourceAddress::sample())
+    pub(crate) fn sample_fungible_mainnet() -> Self {
+        Self::Fungible(ResourceAddress::sample_mainnet())
     }
 
-    pub(crate) fn sample_non_fungible() -> Self {
-        Self::NonFungible(ResourceAddress::sample_other())
+    pub(crate) fn sample_non_fungible_mainnet() -> Self {
+        Self::NonFungible(ResourceAddress::sample_mainnet_other())
     }
 
-    pub(crate) fn sample_pool_unit() -> Self {
+    pub(crate) fn sample_non_fungible_stokenet() -> Self {
+        Self::NonFungible(ResourceAddress::sample_stokenet())
+    }
+
+    pub(crate) fn sample_pool_unit_mainnet() -> Self {
         Self::PoolUnit(PoolAddress::sample())
     }
 }
@@ -80,13 +96,28 @@ mod tests {
 
     #[test]
     fn from() {
-        assert_eq!(SUT::sample_pool_unit(), PoolAddress::sample().into())
+        assert_eq!(
+            SUT::sample_pool_unit_mainnet(),
+            PoolAddress::sample().into()
+        )
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(
+            SUT::sample_fungible_mainnet().network_id(),
+            NetworkID::Mainnet
+        );
+        assert_eq!(
+            SUT::sample_non_fungible_stokenet().network_id(),
+            NetworkID::Stokenet
+        );
     }
 
     #[test]
     fn json_roundtrip() {
         assert_eq_after_json_roundtrip(
-            &SUT::sample_fungible(),
+            &SUT::sample_fungible_mainnet(),
             r#"
             {
                 "kind": "fungible",
@@ -96,7 +127,7 @@ mod tests {
         );
 
         assert_eq_after_json_roundtrip(
-            &SUT::sample_non_fungible(),
+            &SUT::sample_non_fungible_mainnet(),
             r#"
             {
                 "kind": "nonFungible",
@@ -106,7 +137,17 @@ mod tests {
         );
 
         assert_eq_after_json_roundtrip(
-            &SUT::sample_pool_unit(),
+            &SUT::sample_non_fungible_stokenet(),
+            r#"
+            {
+                "kind": "nonFungible",
+                "value": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
+            }
+            "#,
+        );
+
+        assert_eq_after_json_roundtrip(
+            &SUT::sample_pool_unit_mainnet(),
             r#"
             {
                 "kind": "poolUnit",
