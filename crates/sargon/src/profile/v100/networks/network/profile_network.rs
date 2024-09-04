@@ -295,6 +295,22 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(
+        expected = "Discrepancy, found a ResourceAppPreference on other network than mainnet"
+    )]
+    fn panic_when_network_id_mismatch_between_resource_preferences_and_value() {
+        SUT::new(
+            NetworkID::Mainnet,
+            Accounts::sample_mainnet(),
+            Personas::sample_mainnet(),
+            AuthorizedDapps::sample_mainnet(),
+            ResourcePreferences::from_iter([
+                ResourceAppPreference::sample_non_fungible_stokenet(),
+            ]),
+        );
+    }
+
+    #[test]
     fn json_roundtrip_sample_mainnet() {
         let sut = SUT::sample_mainnet();
         assert_eq_after_json_roundtrip(

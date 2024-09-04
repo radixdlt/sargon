@@ -112,6 +112,10 @@ mod tests {
             SUT::sample_non_fungible_stokenet().network_id(),
             NetworkID::Stokenet
         );
+        assert_eq!(
+            SUT::sample_pool_unit_mainnet().network_id(),
+            NetworkID::Mainnet
+        );
     }
 
     #[test]
