@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.android
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.radixdlt.sargon.Account
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -56,6 +58,8 @@ class MainViewModel @Inject constructor(
             val os = sargonOsManager.sargonOs.first()
             runCatching {
                 os.newWallet()
+            }.onFailure { error ->
+                Timber.tag("sargon app").w(error)
             }
         }
     }
@@ -65,6 +69,8 @@ class MainViewModel @Inject constructor(
             val os = sargonOsManager.sargonOs.first()
             runCatching {
                 os.importWallet(profile = profile, bdfsSkipped = true)
+            }.onFailure { error ->
+                Timber.tag("sargon app").w(error)
             }
         }
     }
@@ -74,6 +80,8 @@ class MainViewModel @Inject constructor(
             val os = sargonOsManager.sargonOs.first()
             runCatching {
                 os.deleteWallet()
+            }.onFailure { error ->
+                Timber.tag("sargon app").w(error)
             }
         }
     }

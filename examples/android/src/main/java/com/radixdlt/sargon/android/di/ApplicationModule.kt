@@ -151,7 +151,6 @@ object ApplicationModule {
         @DeviceInfoPreferences deviceInfoPreferences: DataStore<Preferences>,
     ): Bios = Bios.from(
         context = context,
-        enableLogging = BuildConfig.DEBUG,
         httpClient = httpClient,
         biometricsHandler = biometricsHandler,
         encryptedPreferencesDataStore = encryptedPreferences,

@@ -107,7 +107,7 @@ internal class AndroidStorageDriver(
 
     private fun <T> Result<T>.reportFailure(message: String, commonError: CommonException) =
         onFailure { error ->
-            Timber.tag("Sargon").w(error, message)
+            Timber.tag("sargon").w(error, message)
             when (error) {
                 is CommonException -> throw error
                 else -> throw commonError
