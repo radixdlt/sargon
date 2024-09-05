@@ -33,6 +33,10 @@ pub struct ProfileNetwork {
     /// [`AuthorizedDapp`]s that the user has interacted with.
     #[serde(rename = "authorizedDapps")]
     pub authorized_dapps: AuthorizedDapps,
+
+    /// Configuration related to resources
+    #[serde(default)]
+    pub resource_preferences: ResourcePreferences,
 }
 
 impl IsNetworkAware for ProfileNetwork {
@@ -49,8 +53,13 @@ impl ProfileNetwork {
 			accounts: {}
 			personas: {}
 			authorized_dapps: {}
+			resource_preferences: {:?}
 			"#,
-            self.id, self.accounts, self.personas, self.authorized_dapps,
+            self.id,
+            self.accounts,
+            self.personas,
+            self.authorized_dapps,
+            self.resource_preferences
         )
     }
 }
@@ -76,11 +85,13 @@ impl ProfileNetwork {
         accounts: impl Into<Accounts>,
         personas: impl Into<Personas>,
         authorized_dapps: impl Into<AuthorizedDapps>,
+        resource_preferences: impl Into<ResourcePreferences>,
     ) -> Self {
         let network_id = network_id.into();
         let accounts = accounts.into();
         let personas = personas.into();
         let authorized_dapps = authorized_dapps.into();
+        let resource_preferences = resource_preferences.into();
         assert!(
             accounts
                 .get_all()
@@ -102,11 +113,21 @@ impl ProfileNetwork {
                 .all(|d| d.network_id == network_id),
             "Discrepancy, found an AuthorizedDapp on other network than {network_id}"
         );
+
+        assert!(
+            resource_preferences
+                .get_all()
+                .into_iter()
+                .all(|d| d.network_id() == network_id),
+            "Discrepancy, found a ResourceAppPreference on other network than {network_id}"
+        );
+
         Self {
             id: network_id,
             accounts,
             personas,
             authorized_dapps,
+            resource_preferences,
         }
     }
 
@@ -118,6 +139,7 @@ impl ProfileNetwork {
             Accounts::new(),
             Personas::new(),
             AuthorizedDapps::new(),
+            ResourcePreferences::new(),
         )
     }
 }
@@ -160,6 +182,7 @@ impl ProfileNetwork {
             Accounts::sample_mainnet(),
             Personas::sample_mainnet(),
             AuthorizedDapps::sample_mainnet(),
+            ResourcePreferences::sample_mainnet(),
         )
     }
 
@@ -170,6 +193,7 @@ impl ProfileNetwork {
             Accounts::sample_stokenet(),
             Personas::sample_stokenet(),
             AuthorizedDapps::sample_stokenet(),
+            ResourcePreferences::sample_stokenet(),
         )
     }
 }
@@ -203,6 +227,14 @@ mod tests {
     }
 
     #[test]
+    fn get_resources() {
+        assert_eq!(
+            SUT::sample().resource_preferences,
+            ResourcePreferences::sample()
+        )
+    }
+
+    #[test]
     fn duplicate_accounts_are_filtered_out() {
         assert_eq!(
             SUT::new(
@@ -212,6 +244,7 @@ mod tests {
                 ),
                 Personas::default(),
                 AuthorizedDapps::default(),
+                ResourcePreferences::default(),
             )
             .accounts
             .len(),
@@ -229,6 +262,7 @@ mod tests {
             Accounts::just(Account::sample_stokenet()),
             Personas::default(),
             AuthorizedDapps::default(),
+            ResourcePreferences::default(),
         );
     }
 
@@ -242,6 +276,7 @@ mod tests {
             Accounts::sample_mainnet(),
             Personas::just(Persona::sample_stokenet()),
             AuthorizedDapps::default(),
+            ResourcePreferences::default(),
         );
     }
 
@@ -255,6 +290,23 @@ mod tests {
             Accounts::sample_mainnet(),
             Personas::sample_mainnet(),
             AuthorizedDapps::just(AuthorizedDapp::sample_stokenet()),
+            ResourcePreferences::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy, found a ResourceAppPreference on other network than mainnet"
+    )]
+    fn panic_when_network_id_mismatch_between_resource_preferences_and_value() {
+        SUT::new(
+            NetworkID::Mainnet,
+            Accounts::sample_mainnet(),
+            Personas::sample_mainnet(),
+            AuthorizedDapps::sample_mainnet(),
+            ResourcePreferences::from_iter([
+                ResourceAppPreference::sample_non_fungible_stokenet(),
+            ]),
         );
     }
 
@@ -604,7 +656,23 @@ mod tests {
 							}
 						]
 					}
-				]
+				],
+                "resource_preferences": [
+                    {
+                        "resource": {
+                            "kind": "fungible",
+                            "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                        },
+                        "visibility": "hidden"
+                    },
+                    {
+                        "resource": {
+                            "kind": "nonFungible",
+                            "value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
+                        },
+                        "visibility": "visible"
+                    }
+                ]
 			}
             "#,
         );
@@ -950,7 +1018,16 @@ mod tests {
 							}
 						]
 					}
-				]
+				],
+                "resource_preferences": [
+                    {
+                        "resource": {
+                            "kind": "nonFungible",
+                            "value": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
+                        },
+                        "visibility": "visible"
+                    }
+                ]
 			}
             "#,
         )

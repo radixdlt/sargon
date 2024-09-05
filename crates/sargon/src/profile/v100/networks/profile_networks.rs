@@ -108,6 +108,7 @@ mod tests {
             ]),
             Personas::default(),
             AuthorizedDapps::default(),
+            ResourcePreferences::default(),
         )]);
         assert!(
             !sut.append(ProfileNetwork::new(
@@ -115,6 +116,7 @@ mod tests {
                 Accounts::from_iter([Account::sample_mainnet_carol()]),
                 Personas::default(),
                 AuthorizedDapps::default(),
+                ResourcePreferences::default(),
             ))
             .0
         );
@@ -207,6 +209,7 @@ mod tests {
             Accounts::just(Account::sample_mainnet()),
             Personas::default(),
             AuthorizedDapps::default(),
+            ResourcePreferences::default(),
         );
         assert_eq!(SUT::just(network).len(), 1);
     }
@@ -566,6 +569,22 @@ mod tests {
 								}
 							]
 						}
+					],
+					"resource_preferences": [
+						{
+							"resource": {
+								"kind": "fungible",
+								"value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+							},
+							"visibility": "hidden"
+						},
+						{
+							"resource": {
+								"kind": "nonFungible",
+								"value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
+							},
+							"visibility": "visible"
+						}
 					]
 				},
 				{
@@ -901,6 +920,15 @@ mod tests {
 									}
 								}
 							]
+						}
+					],
+					"resource_preferences": [
+						{
+							"resource": {
+								"kind": "nonFungible",
+								"value": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
+							},
+							"visibility": "visible"
 						}
 					]
 				}

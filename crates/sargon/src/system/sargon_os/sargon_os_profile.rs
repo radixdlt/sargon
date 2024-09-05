@@ -442,6 +442,7 @@ mod tests {
             Accounts::just(Account::sample_stokenet()),
             Personas::new(),
             AuthorizedDapps::new(),
+            ResourcePreferences::new(),
         );
 
         profile.networks.append(new_network.clone());

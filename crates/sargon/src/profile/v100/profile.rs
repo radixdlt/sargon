@@ -810,8 +810,8 @@ mod tests {
 								"model": "iPhone SE 2nd gen",
 								"mnemonicWordCount": 24,
 								"systemVersion": "iOS 17.4.1",
-                                 "hostAppVersion": "1.6.4",
-                                 "hostVendor": "Apple"
+								"hostAppVersion": "1.6.4",
+								"hostVendor": "Apple"
 							}
 						}
 					},
@@ -875,23 +875,7 @@ mod tests {
 					},
 					"transaction": {
 						"defaultDepositGuarantee": "0.975"
-					},
-					"resources": [
-						{
-							"resource": {
-								"kind": "fungible",
-								"value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-							},
-							"visibility": "hidden"
-						},
-						{
-							"resource": {
-								"kind": "nonFungible",
-								"value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
-							},
-							"visibility": "visible"
-						}
-					]
+					}
 				},
 				"networks": [
 					{
@@ -1234,6 +1218,22 @@ mod tests {
 									}
 								]
 							}
+						],
+						"resource_preferences": [
+							{
+								"resource": {
+									"kind": "fungible",
+									"value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+								},
+								"visibility": "hidden"
+							},
+							{
+								"resource": {
+									"kind": "nonFungible",
+									"value": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
+								},
+								"visibility": "visible"
+							}
 						]
 					},
 					{
@@ -1569,6 +1569,15 @@ mod tests {
 										}
 									}
 								]
+							}
+						],
+						"resource_preferences": [
+							{
+								"resource": {
+									"kind": "nonFungible",
+									"value": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
+								},
+								"visibility": "visible"
 							}
 						]
 					}
