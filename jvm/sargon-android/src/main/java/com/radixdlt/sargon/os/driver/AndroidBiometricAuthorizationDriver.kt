@@ -6,15 +6,14 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -26,7 +25,6 @@ internal interface BiometricAuthorizationDriver {
 }
 
 class BiometricsFailure(
-    @BiometricPrompt.AuthenticationError
     val errorCode: Int,
     val errorMessage: String?
 ) : Exception("[$errorCode] $errorMessage")
@@ -48,24 +46,24 @@ class BiometricsHandler(
     private val biometricsResultsChannel = Channel<Result<Unit>>()
 
     fun register(activity: FragmentActivity) {
-        activity.lifecycleScope.launch {
-            // Listen to biometric prompt requests while the activity is at least started.
-            activity.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                biometricRequestsChannel.receiveAsFlow().collectLatest {
-                    val result = requestBiometricsAuthorization(activity)
+        biometricRequestsChannel
+            .receiveAsFlow()
+            .flowWithLifecycle(
+                lifecycle = activity.lifecycle,
+                minActiveState = Lifecycle.State.STARTED
+            )
+            .onEach {
+                val result = requestBiometricsAuthorization(activity)
 
-                    // Send back the result to sargon os
-                    biometricsResultsChannel.send(result)
-                }
+                // Send back the result to sargon os
+                biometricsResultsChannel.send(result)
             }
-        }
+            .launchIn(activity.lifecycleScope)
     }
 
     internal suspend fun askForBiometrics(): Result<Unit> {
-        // Suspend until an activity is subscribed to this channel
-        withTimeout(5000) {
-            biometricRequestsChannel.send(Unit)
-        }
+        // Suspend until an activity is subscribed to this channel and is at least started
+        biometricRequestsChannel.send(Unit)
 
         // If an activity is already registered, then we need to wait until the user provides
         // the response from the biometrics prompt
