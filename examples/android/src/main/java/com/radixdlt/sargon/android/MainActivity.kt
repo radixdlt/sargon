@@ -35,11 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.Profile
-import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.errorCode
