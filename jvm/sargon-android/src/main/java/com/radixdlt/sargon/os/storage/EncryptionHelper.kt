@@ -115,7 +115,7 @@ internal fun <T : Any> T.decrypt(secretKey: SecretKey): Result<T> = runCatching 
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.encrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
+fun <T : Any> T.encrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
     .then { encrypt(secretKey = it) }
 
 /**
@@ -124,7 +124,7 @@ internal fun <T : Any> T.encrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecret
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.decrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
+fun <T : Any> T.decrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
     .then { decrypt(secretKey = it) }
 
 /**
@@ -133,7 +133,7 @@ internal fun <T : Any> T.decrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecret
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.encrypt(encryptionKey: ByteArray) = encrypt(
+fun <T : Any> T.encrypt(encryptionKey: ByteArray) = encrypt(
     secretKey = SecretKeySpec(encryptionKey, EncryptionHelper.AES_ALGORITHM)
 )
 
@@ -143,7 +143,7 @@ internal fun <T : Any> T.encrypt(encryptionKey: ByteArray) = encrypt(
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.decrypt(encryptionKey: ByteArray) = decrypt(
+fun <T : Any> T.decrypt(encryptionKey: ByteArray) = decrypt(
     secretKey = SecretKeySpec(encryptionKey, EncryptionHelper.AES_ALGORITHM)
 )
 
