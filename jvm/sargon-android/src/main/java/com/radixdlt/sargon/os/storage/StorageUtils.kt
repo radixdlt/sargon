@@ -21,7 +21,7 @@ private suspend fun KeystoreAccessRequest?.requestAuthorizationIfNeeded() =
  * Reads the contents associated with the given [key] from the data store.
  * If a [KeystoreAccessRequest] is provided then the data written will be decrypted using keystore
  */
-internal suspend fun <T> DataStore<Preferences>.read(
+suspend fun <T> DataStore<Preferences>.read(
     key: Preferences.Key<T>,
     keystoreAccessRequest: KeystoreAccessRequest? = null,
     retryWhen: suspend ((Throwable, Long) -> Boolean) = { _, _ -> false }
@@ -44,7 +44,7 @@ internal suspend fun <T> DataStore<Preferences>.read(
  * Associates the [value] with the given [key] to the data store.
  * If a [KeystoreAccessRequest] is provided then the data will be encrypted using keystore
  */
-internal suspend fun <T> DataStore<Preferences>.write(
+suspend fun <T> DataStore<Preferences>.write(
     key: Preferences.Key<T>,
     value: T,
     keystoreAccessRequest: KeystoreAccessRequest? = null
@@ -60,7 +60,7 @@ internal suspend fun <T> DataStore<Preferences>.write(
     }
 }.toUnit()
 
-internal suspend fun <T> DataStore<Preferences>.remove(key: Preferences.Key<T>) = runCatching {
+suspend fun <T> DataStore<Preferences>.remove(key: Preferences.Key<T>) = runCatching {
     edit { preferences ->
         preferences.remove(key)
     }

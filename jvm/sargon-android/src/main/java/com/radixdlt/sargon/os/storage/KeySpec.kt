@@ -16,7 +16,7 @@ import javax.crypto.SecretKey
  * operations. [requestAuthorization] is only invoked for [KeySpec]s that are defined with
  * [KeyGenParameterSpec#Builder#setUserAuthenticationRequired] to true
  */
-internal sealed interface KeystoreAccessRequest {
+sealed interface KeystoreAccessRequest {
 
     val keySpec: KeySpec
 
@@ -30,6 +30,12 @@ internal sealed interface KeystoreAccessRequest {
 
     data object ForRadixConnect: KeystoreAccessRequest {
         override val keySpec: KeySpec = KeySpec.RadixConnect()
+
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+    }
+
+    data class ForCache(private val alias: String): KeystoreAccessRequest {
+        override val keySpec: KeySpec = KeySpec.Cache(alias)
 
         override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
     }
@@ -48,7 +54,7 @@ internal sealed interface KeystoreAccessRequest {
  * The description of the key that describes for cryptographic operations on keystore.
  */
 @KoverIgnore
-internal sealed class KeySpec(val alias: String) {
+sealed class KeySpec(val alias: String) {
 
     /**
      * The implementation of these methods are heavily based on this:
@@ -110,6 +116,12 @@ internal sealed class KeySpec(val alias: String) {
             // automatically deleted from the keystore
             return result.exceptionOrNull() is KeyPermanentlyInvalidatedException
         }
+    }
+
+    @KoverIgnore
+    class Cache(alias: String): KeySpec(alias) {
+        override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
+            .build()
     }
 
     @KoverIgnore
