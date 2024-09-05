@@ -8,8 +8,17 @@ use crate::prelude::*;
     Deserialize, Serialize, Clone, PartialEq, Eq, Debug, Hash, uniffi::Record,
 )]
 pub struct ResourceAppPreference {
+    /// The resource for which the preference is set up.
     pub resource: ResourceIdentifier,
+
+    /// The visibility of the resource (hidden or visible).
     pub visibility: ResourceVisibility,
+}
+
+impl IsNetworkAware for ResourceAppPreference {
+    fn network_id(&self) -> NetworkID {
+        self.resource.network_id()
+    }
 }
 
 impl ResourceAppPreference {
@@ -31,16 +40,36 @@ impl Identifiable for ResourceAppPreference {
     }
 }
 
+impl ResourceAppPreference {
+    pub(crate) fn sample_fungible_mainnet() -> Self {
+        Self::new(
+            ResourceIdentifier::sample_fungible_mainnet(),
+            ResourceVisibility::sample(),
+        )
+    }
+
+    pub(crate) fn sample_non_fungible_mainnet() -> Self {
+        Self::new(
+            ResourceIdentifier::sample_non_fungible_mainnet(),
+            ResourceVisibility::sample_other(),
+        )
+    }
+
+    pub(crate) fn sample_non_fungible_stokenet() -> Self {
+        Self::new(
+            ResourceIdentifier::sample_non_fungible_stokenet(),
+            ResourceVisibility::sample_other(),
+        )
+    }
+}
+
 impl HasSampleValues for ResourceAppPreference {
     fn sample() -> Self {
-        Self::new(ResourceIdentifier::sample(), ResourceVisibility::sample())
+        Self::sample_fungible_mainnet()
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            ResourceIdentifier::sample_other(),
-            ResourceVisibility::sample_other(),
-        )
+        Self::sample_non_fungible_stokenet()
     }
 }
 
@@ -69,6 +98,11 @@ mod tests {
 
         sut.visibility = ResourceVisibility::Visible;
         assert_eq!(ResourceVisibility::Visible, sut.visibility);
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]

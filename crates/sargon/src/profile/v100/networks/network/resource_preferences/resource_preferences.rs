@@ -10,14 +10,24 @@ decl_identified_vec_of!(
 
 impl HasSampleValues for ResourcePreferences {
     fn sample() -> Self {
-        Self::from_iter([
-            ResourceAppPreference::sample(),
-            ResourceAppPreference::sample_other(),
-        ])
+        Self::sample_mainnet()
     }
 
     fn sample_other() -> Self {
-        Self::from_iter([ResourceAppPreference::sample_other()])
+        Self::sample_stokenet()
+    }
+}
+
+impl ResourcePreferences {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::from_iter([
+            ResourceAppPreference::sample_fungible_mainnet(),
+            ResourceAppPreference::sample_non_fungible_mainnet(),
+        ])
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::from_iter([ResourceAppPreference::sample_non_fungible_stokenet()])
     }
 }
 

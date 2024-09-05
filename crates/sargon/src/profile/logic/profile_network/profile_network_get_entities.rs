@@ -35,6 +35,7 @@ mod tests {
             accounts.clone().to_owned(),
             Personas::new(),
             AuthorizedDapps::new(),
+            ResourcePreferences::new(),
         );
         assert_eq!(
             &profile_network.accounts_non_hidden().items(),
@@ -60,6 +61,7 @@ mod tests {
             Accounts::new(),
             personas,
             AuthorizedDapps::new(),
+            ResourcePreferences::new(),
         );
         assert_eq!(
             &sut.personas_non_hidden().items(),
