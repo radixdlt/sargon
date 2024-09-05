@@ -24,7 +24,7 @@ internal interface BiometricAuthorizationDriver {
 
 }
 
-class BiometricsFailure(
+internal class BiometricsFailure(
     val errorCode: Int,
     val errorMessage: String?
 ) : Exception("[$errorCode] $errorMessage")

@@ -13,16 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,12 +36,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.FactorSource
+import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
@@ -197,6 +206,12 @@ fun WalletContent(
                     profile = profileState.profile,
                     onDevModeChanged = { enabled ->
                         viewModel.onDevModeChanged(enabled)
+                    },
+                    onAccountAdded = { networkId, accountName ->
+                        viewModel.onCreateAccountWithDevice(
+                            networkId = networkId,
+                            accountName = accountName
+                        )
                     }
                 )
             }
@@ -262,7 +277,8 @@ private fun IncompatibleProfile(
 private fun ProfileContent(
     modifier: Modifier = Modifier,
     profile: Profile,
-    onDevModeChanged: (Boolean) -> Unit
+    onDevModeChanged: (Boolean) -> Unit,
+    onAccountAdded: (networkId: NetworkId, accountName: String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -353,6 +369,35 @@ private fun ProfileContent(
                     text = "• ${account.displayName.value}"
                 )
             }
+            var newAccountName by remember {
+                mutableStateOf("")
+            }
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = newAccountName,
+                onValueChange = {
+                    newAccountName = it
+                },
+                placeholder = {
+                    Text(text = "New Account name...")
+                },
+                maxLines = 1,
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (newAccountName.isBlank()) return@KeyboardActions
+
+                        onAccountAdded(
+                            network.id,
+                            newAccountName
+                        )
+
+                        newAccountName = ""
+                    }
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                )
+            )
 
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),

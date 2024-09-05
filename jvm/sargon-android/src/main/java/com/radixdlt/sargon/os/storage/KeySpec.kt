@@ -4,6 +4,7 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
+import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.annotation.KoverIgnore
 import java.security.KeyStore
 import java.security.ProviderException
@@ -62,6 +63,11 @@ internal sealed class KeySpec(val alias: String) {
 
     internal abstract fun generateSecretKey(): Result<SecretKey>
 
+    open fun delete(): Result<Unit> = runCatching {
+        val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
+        keyStore.deleteEntry(alias)
+    }
+
     internal fun getSecretKey(): Result<SecretKey?> = runCatching {
         val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
         (keyStore.getEntry(alias, null) as? KeyStore.SecretKeyEntry)?.secretKey
@@ -77,6 +83,10 @@ internal sealed class KeySpec(val alias: String) {
     class RadixConnect(alias: String = KEY_ALIAS_RADIX_CONNECT): KeySpec(alias) {
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
             .build()
+
+        override fun delete(): Result<Unit> = runCatching {
+            error("KeySpec for RadixConnect should not be deleted")
+        }
     }
 
     @KoverIgnore
@@ -88,13 +98,13 @@ internal sealed class KeySpec(val alias: String) {
             .setAuthenticationRequired(authenticationTimeout = authenticationTimeoutSeconds)
             .build()
 
-        fun checkIfPermanentlyInvalidated(input: String): Boolean {
+        fun checkIfPermanentlyInvalidated(): Boolean {
             // on pixel 6 pro when lock screen is removed, key entry for an alias is null
             val secretKeyResult = getSecretKey()
             if (secretKeyResult.isFailure || secretKeyResult.getOrNull() == null) return true
 
             val secretKey = requireNotNull(secretKeyResult.getOrNull())
-            val result = input.encrypt(secretKey = secretKey)
+            val result = Uuid.randomUUID().toString().encrypt(secretKey = secretKey)
             // according to documentation this is exception that should be thrown if we try to use
             // invalidated key, but behavior I saw when removing lock screen is that key is
             // automatically deleted from the keystore
