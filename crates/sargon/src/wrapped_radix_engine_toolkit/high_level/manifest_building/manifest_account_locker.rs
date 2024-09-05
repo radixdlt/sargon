@@ -74,6 +74,7 @@ impl TransactionManifest {
             result.insert(updated_resource.clone());
             number_of_items_to_add -= updated_resource.number_of_items();
 
+            // can never be negative thanks to clamping performed in `coerce_number_of_items_at_most`
             if number_of_items_to_add == 0 {
                 break;
             }
