@@ -17,18 +17,14 @@ CALL_METHOD
 ;
 CALL_METHOD
     Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
-    "claim_non_fungibles"
+    "claim"
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
-    Array<NonFungibleLocalId>(
-        NonFungibleLocalId("#1#")
-    )
+    Decimal("10")
 ;
-TAKE_NON_FUNGIBLES_FROM_WORKTOP
+TAKE_FROM_WORKTOP
     Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
-    Array<NonFungibleLocalId>(
-        NonFungibleLocalId("#1#")
-    )
+    Decimal("10")
     Bucket("bucket2")
 ;
 CALL_METHOD
@@ -55,18 +51,14 @@ CALL_METHOD
 ;
 CALL_METHOD
     Address("locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz")
-    "claim_non_fungibles"
+    "claim"
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
-    Array<NonFungibleLocalId>(
-        NonFungibleLocalId("<foobar>")
-    )
+    Decimal("1")
 ;
-TAKE_NON_FUNGIBLES_FROM_WORKTOP
+TAKE_FROM_WORKTOP
     Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
-    Array<NonFungibleLocalId>(
-        NonFungibleLocalId("<foobar>")
-    )
+    Decimal("1")
     Bucket("bucket4")
 ;
 CALL_METHOD
