@@ -167,9 +167,6 @@ impl SecureStorageClient {
             mnemonic_with_passphrase,
         )
         .await
-        .map_err(|_| {
-            CommonError::UnableToSaveMnemonicToSecureStorage { bad_value: *id }
-        })
     }
 
     /// Loads a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
@@ -307,22 +304,6 @@ mod tests {
             .map(|b| String::from_utf8(b.unwrap().to_vec()).unwrap())
             .unwrap()
             .contains("device"));
-    }
-
-    #[actix_rt::test]
-    async fn save_mnemonic_with_passphrase_failure() {
-        let sut = SecureStorageClient::always_fail();
-        let id = FactorSourceIDFromHash::sample();
-        assert_eq!(
-            sut.save_mnemonic_with_passphrase(
-                &MnemonicWithPassphrase::sample(),
-                &id
-            )
-            .await,
-            Err(CommonError::UnableToSaveMnemonicToSecureStorage {
-                bad_value: id
-            })
-        );
     }
 
     #[actix_rt::test]

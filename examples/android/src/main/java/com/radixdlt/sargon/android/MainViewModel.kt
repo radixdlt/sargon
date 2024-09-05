@@ -3,8 +3,10 @@ package com.radixdlt.sargon.android
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.radixdlt.sargon.Account
+import com.radixdlt.sargon.DisplayName
 import com.radixdlt.sargon.HostId
 import com.radixdlt.sargon.HostInfo
+import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,6 +80,24 @@ class MainViewModel @Inject constructor(
             val os = sargonOsManager.sargonOs.first()
             runCatching {
                 os.deleteWallet()
+            }.onFailure { error ->
+                Timber.tag("sargon app").w(error)
+            }
+        }
+    }
+
+    fun onCreateAccountWithDevice(
+        networkId: NetworkId,
+        accountName: String
+    ) = viewModelScope.launch {
+        withContext(Dispatchers.Default) {
+            val os = sargonOsManager.sargonOs.first()
+
+            runCatching {
+                os.createAndSaveNewAccount(
+                    networkId = networkId,
+                    name = DisplayName(accountName)
+                )
             }.onFailure { error ->
                 Timber.tag("sargon app").w(error)
             }

@@ -230,8 +230,12 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("FREE")]
-    FREE = 10063,
+    #[error("Failed to access secure storage for key {}: [{error_code}] \"{error_message}\"", key.identifier())]
+    SecureStorageAccessError {
+        key: SecureStorageKey,
+        error_code: u8,
+        error_message: String,
+    } = 10063,
 
     #[error("Invalid ISO8601 Time string: {bad_value}")]
     InvalidISO8601String { bad_value: String } = 10064,
@@ -239,13 +243,13 @@ pub enum CommonError {
     #[error("Unknown account.")]
     UnknownAccount = 10065,
 
-    #[error("Failed to read from secure storage (Keychain).")]
+    #[error("Failed to read from secure storage.")]
     SecureStorageReadError = 10066,
 
     #[error("Failed to load DeviceFactorSource from secure storage")]
     UnableToLoadDeviceFactorSourceFromSecureStorage = 10067,
 
-    #[error("Failed to write to secure storage (Keychain).")]
+    #[error("Failed to write to secure storage.")]
     SecureStorageWriteError = 10068,
 
     #[error("Failed Serialize value to JSON.")]

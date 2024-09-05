@@ -25,55 +25,37 @@ internal class AndroidStorageDriver(
     override suspend fun loadData(key: SecureStorageKey): BagOfBytes? = key
         .mapping()
         .then { it.read() }
-        .reportFailure(
-            "Failed to load data for $key",
-            CommonException.SecureStorageReadException()
-        )
+        .reportSecureStorageReadFailure(key = key)
         .getOrNull()
 
     override suspend fun saveData(key: SecureStorageKey, data: BagOfBytes) {
         key.mapping()
             .then { it.write(data) }
-            .reportFailure(
-                "Failed to save data for $key",
-                CommonException.SecureStorageWriteException()
-            )
+            .reportSecureStorageWriteFailure(key = key)
     }
 
     override suspend fun deleteDataForKey(key: SecureStorageKey) {
         key.mapping()
             .then { it.remove() }
-            .reportFailure(
-                "Failed to remove data for $key",
-                CommonException.SecureStorageWriteException()
-            )
+            .reportSecureStorageWriteFailure(key = key)
     }
 
     override suspend fun loadData(key: UnsafeStorageKey): BagOfBytes? = key
         .mapping()
         .then { it.read() }
-        .reportFailure(
-            "Failed to load data for $key",
-            CommonException.UnsafeStorageReadException()
-        )
+        .reportUnsafeStorageReadFailure()
         .getOrNull()
 
     override suspend fun saveData(key: UnsafeStorageKey, data: BagOfBytes) {
         key.mapping()
             .then { it.write(data) }
-            .reportFailure(
-                "Failed to save data for $key",
-                CommonException.UnsafeStorageWriteException()
-            )
+            .reportUnsafeStorageWriteFailure()
     }
 
     override suspend fun deleteDataForKey(key: UnsafeStorageKey) {
         key.mapping()
             .then { it.remove() }
-            .reportFailure(
-                "Failed to remove data for $key",
-                CommonException.UnsafeStorageWriteException()
-            )
+            .reportUnsafeStorageWriteFailure()
     }
 
     private fun SecureStorageKey.mapping() = when (this) {
@@ -105,12 +87,47 @@ internal class AndroidStorageDriver(
         Result.success(mapping)
     }
 
-    private fun <T> Result<T>.reportFailure(message: String, commonError: CommonException) =
-        onFailure { error ->
-            Timber.tag("sargon").w(error, message)
-            when (error) {
-                is CommonException -> throw error
-                else -> throw commonError
-            }
+    private fun <T> Result<T>.reportSecureStorageReadFailure(
+        key: SecureStorageKey
+    ) = onFailure { error ->
+        Timber.tag("Sargon").w(error,"Read")
+        throw when (error) {
+            is BiometricsFailure -> CommonException.SecureStorageAccessException(
+                key = key,
+                errorCode = error.errorCode.toUByte(),
+                errorMessage = error.errorMessage.orEmpty()
+            )
+            is CommonException -> error
+            else -> CommonException.SecureStorageReadException()
         }
+    }
+
+    private fun <T> Result<T>.reportSecureStorageWriteFailure(
+        key: SecureStorageKey
+    ) = onFailure { error ->
+        Timber.tag("Sargon").w(error,"Write")
+        throw when (error) {
+            is BiometricsFailure -> CommonException.SecureStorageAccessException(
+                key = key,
+                errorCode = error.errorCode.toUByte(),
+                errorMessage = error.errorMessage.orEmpty()
+            )
+            is CommonException -> error
+            else -> CommonException.SecureStorageWriteException()
+        }
+    }
+
+    private fun <T> Result<T>.reportUnsafeStorageReadFailure() = onFailure { error ->
+        throw when (error) {
+            is CommonException -> error
+            else -> CommonException.UnsafeStorageReadException()
+        }
+    }
+
+    private fun <T> Result<T>.reportUnsafeStorageWriteFailure() = onFailure { error ->
+        throw when (error) {
+            is CommonException -> error
+            else -> CommonException.UnsafeStorageWriteException()
+        }
+    }
 }
