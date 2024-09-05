@@ -69,11 +69,6 @@ sealed class KeySpec(val alias: String) {
 
     internal abstract fun generateSecretKey(): Result<SecretKey>
 
-    open fun delete(): Result<Unit> = runCatching {
-        val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
-        keyStore.deleteEntry(alias)
-    }
-
     internal fun getSecretKey(): Result<SecretKey?> = runCatching {
         val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
         (keyStore.getEntry(alias, null) as? KeyStore.SecretKeyEntry)?.secretKey
@@ -89,10 +84,6 @@ sealed class KeySpec(val alias: String) {
     class RadixConnect(alias: String = KEY_ALIAS_RADIX_CONNECT): KeySpec(alias) {
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
             .build()
-
-        override fun delete(): Result<Unit> = runCatching {
-            error("KeySpec for RadixConnect should not be deleted")
-        }
     }
 
     @KoverIgnore
@@ -194,5 +185,15 @@ sealed class KeySpec(val alias: String) {
         private const val KEY_ALIAS_PROFILE = "EncryptedProfileAlias"
         private const val KEY_ALIAS_MNEMONIC = "EncryptedMnemonicAlias"
         private const val KEY_ALIAS_RADIX_CONNECT = "EncryptedRadixConnectSessionAlias"
+
+        /**
+         * Removes the given [keySpecs] from [KeyStore]
+         */
+        fun remove(keySpecs: List<KeySpec>): Result<Unit> = runCatching {
+            val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
+            keySpecs.forEach {
+                keyStore.deleteEntry(it.alias)
+            }
+        }
     }
 }

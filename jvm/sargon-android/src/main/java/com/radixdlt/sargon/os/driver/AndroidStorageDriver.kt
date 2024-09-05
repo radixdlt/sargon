@@ -90,7 +90,6 @@ internal class AndroidStorageDriver(
     private fun <T> Result<T>.reportSecureStorageReadFailure(
         key: SecureStorageKey
     ) = onFailure { error ->
-        Timber.tag("Sargon").w(error,"Read")
         throw when (error) {
             is BiometricsFailure -> CommonException.SecureStorageAccessException(
                 key = key,
@@ -105,7 +104,6 @@ internal class AndroidStorageDriver(
     private fun <T> Result<T>.reportSecureStorageWriteFailure(
         key: SecureStorageKey
     ) = onFailure { error ->
-        Timber.tag("Sargon").w(error,"Write")
         throw when (error) {
             is BiometricsFailure -> CommonException.SecureStorageAccessException(
                 key = key,
