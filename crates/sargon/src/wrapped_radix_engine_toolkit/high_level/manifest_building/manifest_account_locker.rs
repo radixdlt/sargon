@@ -36,7 +36,7 @@ impl TransactionManifest {
                 }
                 AccountLockerClaimableResource::NonFungible {
                     resource_address,
-                    count,
+                    number_of_items: count,
                 } => {
                     let resource_arg: ScryptoResourceAddress =
                         resource_address.into();
@@ -65,14 +65,18 @@ impl TransactionManifest {
         claimable_resources: Vec<AccountLockerClaimableResource>,
         max_size: u64,
     ) -> IndexSet<AccountLockerClaimableResource> {
-        let mut resource_count_left_to_add = max_size;
+        let mut number_of_items_to_add = max_size;
         let mut result = IndexSet::<AccountLockerClaimableResource>::new();
 
         for claimable_resource in claimable_resources {
             let updated_resource = claimable_resource
-                .coerce_resource_count_at_most(resource_count_left_to_add);
+                .coerce_number_of_items_at_most(number_of_items_to_add);
             result.insert(updated_resource.clone());
-            resource_count_left_to_add -= updated_resource.resource_count();
+            number_of_items_to_add -= updated_resource.number_of_items();
+
+            if number_of_items_to_add == 0 {
+                break;
+            }
         }
 
         result
@@ -114,7 +118,7 @@ mod tests {
                 },
                 AccountLockerClaimableResource::NonFungible {
                     resource_address: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".into(),
-                    count: 10,
+                    number_of_items: 10,
                 },
                 AccountLockerClaimableResource::Fungible {
                     resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".into(),
@@ -122,7 +126,7 @@ mod tests {
                 },
                 AccountLockerClaimableResource::NonFungible {
                     resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
-                    count: 1,
+                    number_of_items: 1,
                 },
             ],
         );
@@ -142,7 +146,11 @@ mod tests {
             vec![
                 AccountLockerClaimableResource::NonFungible {
                     resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
-                    count: 100,
+                    number_of_items: 100,
+                },
+                AccountLockerClaimableResource::Fungible {
+                    resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".into(),
+                    amount: Decimal192::one(),
                 }
             ],
         );
