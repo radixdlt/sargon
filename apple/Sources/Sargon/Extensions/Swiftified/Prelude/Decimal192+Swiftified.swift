@@ -9,7 +9,6 @@ extension Decimal192: ExpressibleByIntegerLiteral {
 	}
 }
 
-
 extension Decimal192: Comparable {
 	public static func > (lhs: Self, rhs: Self) -> Bool {
 		lhs.greaterThan(other: rhs)
@@ -101,4 +100,17 @@ extension Decimal192: Codable {
 		let string = try container.decode(String.self)
 		try self.init(string)
 	}
+}
+
+extension Decimal192 {
+	public static let one: Self 	= 1
+	public static let two: Self 	= 2
+	public static let three: Self 	= 3
+	public static let four: Self 	= 4
+	public static let five: Self 	= 5
+	public static let six: Self 	= 6
+	public static let seven: Self = 7
+	public static let eight: Self = 8
+	public static let nine: Self 	= 9
+	public static let ten: Self 	= 10
 }
