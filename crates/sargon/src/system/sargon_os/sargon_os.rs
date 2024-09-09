@@ -151,6 +151,35 @@ impl SargonOS {
         Ok(())
     }
 
+    pub async fn derive_wallet(
+        &self,
+        device_factor_source: DeviceFactorSource,
+        accounts: Accounts,
+    ) -> Result<()> {
+        debug!("Deriving Profile from BDFS");
+
+        let host_id = self.host_id().await?;
+        let host_info = self.host_info().await;
+
+        let profile = Profile::from_device_factor_source(
+            device_factor_source,
+            host_id,
+            host_info,
+            Some(accounts),
+        );
+
+        self.secure_storage.save_profile(&profile).await?;
+        self.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(profile))?;
+
+        self.event_bus
+            .emit(EventNotification::new(Event::ProfileSaved))
+            .await;
+
+        info!("Successfully derived profile");
+        Ok(())
+    }
+
     pub async fn delete_wallet(&self) -> Result<()> {
         self.delete_profile_and_mnemonics_replace_in_memory_with_none()
             .await?;
@@ -208,6 +237,7 @@ impl SargonOS {
             private_bdfs.factor_source.clone(),
             host_id,
             host_info,
+            None::<Accounts>,
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
@@ -403,6 +433,22 @@ mod tests {
         os.import_wallet(&profile_to_import, true).await.unwrap();
 
         assert_ne!(os.profile().unwrap().bdfs(), profile_to_import.bdfs());
+    }
+
+    #[actix_rt::test]
+    async fn test_derive_wallet() {
+        let os = SUT::fast_boot().await;
+
+        os.derive_wallet(
+            DeviceFactorSource::sample(),
+            Accounts::sample_mainnet(),
+        )
+        .await
+        .unwrap();
+
+        let profile = os.profile().unwrap();
+
+        assert!(profile.has_any_account_on_any_network());
     }
 
     #[actix_rt::test]

@@ -49,7 +49,12 @@ pub fn new_profile(
     host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    Profile::from_device_factor_source(device_factor_source, host_id, host_info)
+    Profile::from_device_factor_source(
+        device_factor_source,
+        host_id,
+        host_info,
+        None::<Accounts>,
+    )
 }
 
 #[uniffi::export]

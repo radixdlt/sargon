@@ -1,8 +1,10 @@
+use crate::prelude::*;
+
 /// An error kind that might be returned during access to secure storage driver. These errors are
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
 /// it `is_manual_cancellation`.
-#[derive(Clone, Debug, PartialEq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, strum::EnumIter, uniffi::Enum)]
 pub enum SecureStorageAccessErrorKind {
     /// The hardware is unavailable. Try again later.
     HardwareUnavailable,
@@ -60,10 +62,6 @@ pub enum SecureStorageAccessErrorKind {
 
     /// The device does not have pin, pattern, or password set up.
     NoDeviceCredential,
-
-    /// A security vulnerability has been discovered with one or more hardware sensors.
-    /// The affected sensor(s) are unavailable until a security update has addressed the issue.
-    SecurityUpdateRequired,
 }
 
 impl SecureStorageAccessErrorKind {
@@ -71,6 +69,13 @@ impl SecureStorageAccessErrorKind {
         self == &SecureStorageAccessErrorKind::UserCancelled
             || self == &SecureStorageAccessErrorKind::NegativeButton
     }
+}
+
+#[uniffi::export]
+pub fn secure_storage_access_error_kind_is_manual_cancellation(
+    kind: SecureStorageAccessErrorKind,
+) -> bool {
+    kind.is_manual_cancellation()
 }
 
 #[cfg(test)]
@@ -110,7 +115,20 @@ mod tests {
             .is_manual_cancellation());
         assert!(!SecureStorageAccessErrorKind::NoDeviceCredential
             .is_manual_cancellation());
-        assert!(!SecureStorageAccessErrorKind::SecurityUpdateRequired
-            .is_manual_cancellation());
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn test() {
+        for kind in SecureStorageAccessErrorKind::iter() {
+            assert_eq!(
+                kind.is_manual_cancellation(),
+                secure_storage_access_error_kind_is_manual_cancellation(kind)
+            );
+        }
     }
 }
