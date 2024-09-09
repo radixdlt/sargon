@@ -169,8 +169,11 @@ impl SargonOS {
         );
 
         self.secure_storage.save_profile(&profile).await?;
+        let profile_state = ProfileState::Loaded(profile);
         self.profile_state_holder
-            .replace_profile_state_with(ProfileState::Loaded(profile))?;
+            .replace_profile_state_with(profile_state.clone())?;
+
+        self.clients.profile_state_change.emit(profile_state).await;
 
         self.event_bus
             .emit(EventNotification::new(Event::ProfileSaved))
