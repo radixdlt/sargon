@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 class AndroidProfileStateChangeDriverTest {
 
-    private val sut = AndroidProfileStateChangeDriver()
+    private val sut = AndroidProfileStateChangeDriver
 
     @Test
     fun testProfileIsEmitted() = runTest {

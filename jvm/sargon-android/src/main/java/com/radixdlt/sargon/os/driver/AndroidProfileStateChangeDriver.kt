@@ -4,25 +4,23 @@ import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.ProfileStateChangeDriver
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 
-class AndroidProfileStateChangeDriver : ProfileStateChangeDriver {
+object AndroidProfileStateChangeDriver : ProfileStateChangeDriver {
 
-    private val _profileStateChanges = MutableSharedFlow<ProfileState>()
+    private val _profileState: MutableStateFlow<ProfileState?> = MutableStateFlow(null)
 
-    val profileState: SharedFlow<ProfileState> = _profileStateChanges.asSharedFlow()
-    val profile: Flow<Profile> = profileState.filterIsInstance<ProfileState.Loaded>().map {
-        it.v1
-    }
+    val profileState: StateFlow<ProfileState?> = _profileState.asStateFlow()
+    val profile: Flow<Profile> = _profileState
+        .filterIsInstance<ProfileState.Loaded>()
+        .map { it.v1 }
 
     override suspend fun handleProfileStateChange(changedProfileState: ProfileState) {
-        _profileStateChanges.emit(changedProfileState)
+        _profileState.update { changedProfileState }
     }
 }
