@@ -3,6 +3,7 @@ package com.radixdlt.sargon.os.driver
 import android.os.Build
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.AuthenticationError
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,7 @@ internal interface BiometricAuthorizationDriver {
 }
 
 internal class BiometricsFailure(
+    @AuthenticationError
     val errorCode: Int,
     val errorMessage: String?
 ) : Exception("[$errorCode] $errorMessage")

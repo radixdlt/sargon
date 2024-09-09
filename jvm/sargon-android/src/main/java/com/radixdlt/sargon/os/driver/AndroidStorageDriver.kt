@@ -1,9 +1,11 @@
 package com.radixdlt.sargon.os.driver
 
+import androidx.biometric.BiometricPrompt
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.CommonException
+import com.radixdlt.sargon.SecureStorageAccessErrorKind
 import com.radixdlt.sargon.SecureStorageDriver
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageDriver
@@ -13,7 +15,6 @@ import com.radixdlt.sargon.os.storage.key.ByteArrayKeyMapping
 import com.radixdlt.sargon.os.storage.key.DeviceFactorSourceMnemonicKeyMapping
 import com.radixdlt.sargon.os.storage.key.HostIdKeyMapping
 import com.radixdlt.sargon.os.storage.key.ProfileSnapshotKeyMapping
-import timber.log.Timber
 
 internal class AndroidStorageDriver(
     private val biometricAuthorizationDriver: BiometricAuthorizationDriver,
@@ -91,11 +92,7 @@ internal class AndroidStorageDriver(
         key: SecureStorageKey
     ) = onFailure { error ->
         throw when (error) {
-            is BiometricsFailure -> CommonException.SecureStorageAccessException(
-                key = key,
-                errorCode = error.errorCode.toUByte(),
-                errorMessage = error.errorMessage.orEmpty()
-            )
+            is BiometricsFailure -> error.toCommonException(key)
             is CommonException -> error
             else -> CommonException.SecureStorageReadException()
         }
@@ -105,11 +102,7 @@ internal class AndroidStorageDriver(
         key: SecureStorageKey
     ) = onFailure { error ->
         throw when (error) {
-            is BiometricsFailure -> CommonException.SecureStorageAccessException(
-                key = key,
-                errorCode = error.errorCode.toUByte(),
-                errorMessage = error.errorMessage.orEmpty()
-            )
+            is BiometricsFailure -> error.toCommonException(key)
             is CommonException -> error
             else -> CommonException.SecureStorageWriteException()
         }
@@ -128,4 +121,25 @@ internal class AndroidStorageDriver(
             else -> CommonException.UnsafeStorageWriteException()
         }
     }
+
+    private fun BiometricsFailure.toCommonException(key: SecureStorageKey) = CommonException.SecureStorageAccessException(
+        key = key,
+        errorKind = when (errorCode) {
+            BiometricPrompt.ERROR_CANCELED -> SecureStorageAccessErrorKind.CANCELLED
+            BiometricPrompt.ERROR_HW_NOT_PRESENT -> SecureStorageAccessErrorKind.HARDWARE_NOT_PRESENT
+            BiometricPrompt.ERROR_HW_UNAVAILABLE -> SecureStorageAccessErrorKind.HARDWARE_UNAVAILABLE
+            BiometricPrompt.ERROR_LOCKOUT -> SecureStorageAccessErrorKind.LOCKOUT
+            BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> SecureStorageAccessErrorKind.LOCKOUT_PERMANENT
+            BiometricPrompt.ERROR_NEGATIVE_BUTTON -> SecureStorageAccessErrorKind.NEGATIVE_BUTTON
+            BiometricPrompt.ERROR_NO_BIOMETRICS -> SecureStorageAccessErrorKind.NO_BIOMETRICS
+            BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL -> SecureStorageAccessErrorKind.NO_DEVICE_CREDENTIAL
+            BiometricPrompt.ERROR_NO_SPACE -> SecureStorageAccessErrorKind.NO_SPACE
+            BiometricPrompt.ERROR_TIMEOUT -> SecureStorageAccessErrorKind.TIMEOUT
+            BiometricPrompt.ERROR_UNABLE_TO_PROCESS -> SecureStorageAccessErrorKind.UNABLE_TO_PROCESS
+            BiometricPrompt.ERROR_USER_CANCELED -> SecureStorageAccessErrorKind.USER_CANCELLED
+            BiometricPrompt.ERROR_VENDOR -> SecureStorageAccessErrorKind.VENDOR
+            else -> throw CommonException.Unknown()
+        },
+        errorMessage = errorMessage.orEmpty()
+    )
 }
