@@ -8,6 +8,7 @@ import com.radixdlt.sargon.HostId
 import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
+import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -135,7 +136,7 @@ class MainViewModel @Inject constructor(
 
     data class State(
         val sargonState: SargonOsManager.SargonState = SargonOsManager.SargonState.Idle,
-        val profileState: SargonOsManager.ProfileState = SargonOsManager.ProfileState.NotInitialised,
+        val profileState: ProfileState? = null,
         val accounts: List<Account> = emptyList(),
         val info: HostInformation? = null
     )

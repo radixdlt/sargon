@@ -20,14 +20,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,17 +34,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
+import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.errorCode
@@ -111,7 +108,7 @@ fun WalletContent(
             )
         },
         bottomBar = {
-            if (state.profileState is SargonOsManager.ProfileState.Restored) {
+            if (state.profileState is ProfileState.Loaded) {
                 Button(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -179,13 +176,13 @@ fun WalletContent(
             }
 
             when (val profileState = state.profileState) {
-                is SargonOsManager.ProfileState.NotInitialised -> CircularProgressIndicator(
+                null -> CircularProgressIndicator(
                     modifier = Modifier
                         .padding(32.dp)
                         .align(Alignment.CenterHorizontally)
                 )
 
-                is SargonOsManager.ProfileState.None -> NoProfileContent(
+                is ProfileState.None -> NoProfileContent(
                     modifier = Modifier
                         .padding(16.dp),
                     onCreateNewWallet = viewModel::onCreateNewWallet,
@@ -194,16 +191,16 @@ fun WalletContent(
                     }
                 )
 
-                is SargonOsManager.ProfileState.Incompatible -> IncompatibleProfile(
+                is ProfileState.Incompatible -> IncompatibleProfile(
                     modifier = Modifier
                         .padding(16.dp),
-                    error = profileState.cause as CommonException
+                    error = profileState.v1
                 )
 
-                is SargonOsManager.ProfileState.Restored -> ProfileContent(
+                is ProfileState.Loaded -> ProfileContent(
                     modifier = Modifier
                         .padding(16.dp),
-                    profile = profileState.profile,
+                    profile = profileState.v1,
                     onDevModeChanged = { enabled ->
                         viewModel.onDevModeChanged(enabled)
                     },

@@ -131,12 +131,12 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideEventBusDriver(): AndroidEventBusDriver = AndroidEventBusDriver()
+    fun provideEventBusDriver(): AndroidEventBusDriver = AndroidEventBusDriver
 
     @Provides
     @Singleton
     fun provideProfileStateChangeDriver(): AndroidProfileStateChangeDriver =
-        AndroidProfileStateChangeDriver()
+        AndroidProfileStateChangeDriver
 
     @Provides
     @Singleton
