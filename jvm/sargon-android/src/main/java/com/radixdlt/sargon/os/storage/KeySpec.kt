@@ -67,7 +67,7 @@ sealed class KeySpec(val alias: String) {
             existingSecretKey ?: generateSecretKey().getOrThrow()
         }
 
-    internal abstract fun generateSecretKey(): Result<SecretKey>
+    abstract fun generateSecretKey(): Result<SecretKey>
 
     internal fun getSecretKey(): Result<SecretKey?> = runCatching {
         val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
