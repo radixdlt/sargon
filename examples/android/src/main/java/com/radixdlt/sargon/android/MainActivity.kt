@@ -54,6 +54,7 @@ import com.radixdlt.sargon.extensions.name
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.vendor
 import com.radixdlt.sargon.extensions.version
+import com.radixdlt.sargon.os.SargonOsState
 import com.radixdlt.sargon.os.driver.BiometricsHandler
 import com.radixdlt.sargon.samples.sample
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,8 +96,8 @@ fun WalletContent(
                     Column {
                         Text(text = "Sargon App")
                         val status = when (state.sargonState) {
-                            SargonOsManager.SargonState.Idle -> "Idle"
-                            is SargonOsManager.SargonState.Booted -> "Booted"
+                            SargonOsState.Idle -> "Idle"
+                            is SargonOsState.Booted -> "Booted"
                         }
                         Text(
                             text = "OS Status: $status",

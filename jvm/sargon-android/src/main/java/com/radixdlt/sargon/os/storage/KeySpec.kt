@@ -206,7 +206,10 @@ sealed class KeySpec(val alias: String) {
             val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
             keySpecs.forEach {
                 try {
-                    keyStore.deleteEntry(it.alias)
+                    if (keyStore.containsAlias(it.alias)) {
+                        keyStore.deleteEntry(it.alias)
+                        Timber.tag("sargon").w("Key spec ${it.alias} deleted successfully")
+                    }
                 } catch (_: KeyStoreException) {
                     Timber.tag("sargon").w("Deleting key spec ${it.alias} failed. Generating a new one...")
                     // In cases like these the only option is to regenerate the same key

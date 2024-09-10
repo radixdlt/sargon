@@ -36,6 +36,19 @@ class KeystoreAccessRequestTest {
     }
 
     @Test
+    fun testSpecsOfCache() = runTest {
+        val request = KeystoreAccessRequest.ForCache("an alias")
+
+        assertInstanceOf(KeySpec.Cache::class.java, request.keySpec)
+
+        try {
+            request.requestAuthorization().getOrThrow()
+        } catch (exception: Exception) {
+            assert(false) { "requestAuthorization for Radix Connect should succeed but didn't" }
+        }
+    }
+
+    @Test
     fun testSpecsOfMnemonic() = runTest {
         val request = KeystoreAccessRequest.ForMnemonic(
             onRequestAuthorization = { Result.success(Unit) }
