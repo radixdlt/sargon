@@ -10,6 +10,9 @@ import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.Timestamp
+import com.radixdlt.sargon.os.SargonOsManager
+import com.radixdlt.sargon.os.SargonOsState
+import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,12 +27,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val sargonOsManager: SargonOsManager
+    private val sargonOsManager: SargonOsManager,
+    private val profileStateChangeDriver: AndroidProfileStateChangeDriver
 ) : ViewModel() {
 
     val state = combine(
         sargonOsManager.sargonState,
-        sargonOsManager.profileState,
+        profileStateChangeDriver.profileState,
     ) { sargonState, profileState ->
         State(
             sargonState,
@@ -37,7 +41,7 @@ class MainViewModel @Inject constructor(
         )
     }.map { state ->
         if (state.info == null) {
-            val osState = state.sargonState as? SargonOsManager.SargonState.Booted ?: return@map state
+            val osState = state.sargonState as? SargonOsState.Booted ?: return@map state
 
             state.copy(
                 info = HostInformation(
@@ -56,7 +60,7 @@ class MainViewModel @Inject constructor(
 
     fun onCreateNewWallet() = viewModelScope.launch {
         withContext(Dispatchers.Default) {
-            val os = sargonOsManager.sargonOs.first()
+            val os = sargonOsManager.sargonOs
             runCatching {
                 os.newWallet()
             }.onFailure { error ->
@@ -67,7 +71,7 @@ class MainViewModel @Inject constructor(
 
     fun onImportWallet(profile: Profile) = viewModelScope.launch {
         withContext(Dispatchers.Default) {
-            val os = sargonOsManager.sargonOs.first()
+            val os = sargonOsManager.sargonOs
             runCatching {
                 os.importWallet(profile = profile, bdfsSkipped = true)
             }.onFailure { error ->
@@ -78,7 +82,7 @@ class MainViewModel @Inject constructor(
 
     fun onDeleteWallet() = viewModelScope.launch {
         withContext(Dispatchers.Default) {
-            val os = sargonOsManager.sargonOs.first()
+            val os = sargonOsManager.sargonOs
             runCatching {
                 os.deleteWallet()
             }.onFailure { error ->
@@ -92,7 +96,7 @@ class MainViewModel @Inject constructor(
         accountName: String
     ) = viewModelScope.launch {
         withContext(Dispatchers.Default) {
-            val os = sargonOsManager.sargonOs.first()
+            val os = sargonOsManager.sargonOs
 
             runCatching {
                 os.createAndSaveNewAccount(
@@ -107,8 +111,8 @@ class MainViewModel @Inject constructor(
 
     fun onDevModeChanged(enabled: Boolean) = viewModelScope.launch {
         withContext(Dispatchers.Default) {
-            val os = sargonOsManager.sargonOs.first()
-            val profile = sargonOsManager.profile.first()
+            val os = sargonOsManager.sargonOs
+            val profile = profileStateChangeDriver.profile.first()
 
             runCatching {
                 os.setProfile(profile.mutate {
@@ -135,7 +139,7 @@ class MainViewModel @Inject constructor(
     }
 
     data class State(
-        val sargonState: SargonOsManager.SargonState = SargonOsManager.SargonState.Idle,
+        val sargonState: SargonOsState = SargonOsState.Idle,
         val profileState: ProfileState? = null,
         val accounts: List<Account> = emptyList(),
         val info: HostInformation? = null
