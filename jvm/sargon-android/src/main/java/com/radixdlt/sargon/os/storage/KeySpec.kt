@@ -6,7 +6,9 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.annotation.KoverIgnore
+import timber.log.Timber
 import java.security.KeyStore
+import java.security.KeyStoreException
 import java.security.ProviderException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -67,7 +69,7 @@ sealed class KeySpec(val alias: String) {
             existingSecretKey ?: generateSecretKey().getOrThrow()
         }
 
-    abstract fun generateSecretKey(): Result<SecretKey>
+    internal abstract fun generateSecretKey(): Result<SecretKey>
 
     internal fun getSecretKey(): Result<SecretKey?> = runCatching {
         val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
@@ -187,12 +189,29 @@ sealed class KeySpec(val alias: String) {
         private const val KEY_ALIAS_RADIX_CONNECT = "EncryptedRadixConnectSessionAlias"
 
         /**
-         * Removes the given [keySpecs] from [KeyStore]
+         * Resets the given [keySpecs] from [KeyStore]
+         *
+         * This usually deletes the entry from [KeyStore].
+         *
+         * In android devices <= 30 we noticed that keys associated to device credentials such
+         * as [KEY_ALIAS_MNEMONIC] throw [KeyStoreException] when [KeyStore.deleteEntry] is called,
+         * only when the user resets their device credentials to new ones.
+         *
+         * This made it impossible to associate the same key alias to the new device credentials,
+         * resulting to all encrypt/decrypt methods failing. In such cases, the only possible
+         * solution is to regenerate a new key with the same alias and associate it with the new
+         * device credentials
          */
-        fun remove(keySpecs: List<KeySpec>): Result<Unit> = runCatching {
+        fun reset(keySpecs: List<KeySpec>): Result<Unit> = runCatching {
             val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
             keySpecs.forEach {
-                keyStore.deleteEntry(it.alias)
+                try {
+                    keyStore.deleteEntry(it.alias)
+                } catch (_: KeyStoreException) {
+                    Timber.tag("sargon").w("Deleting key spec ${it.alias} failed. Generating a new one...")
+                    // In cases like these the only option is to regenerate the same key
+                    it.generateSecretKey().getOrThrow()
+                }
             }
         }
     }
