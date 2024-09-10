@@ -1089,4 +1089,73 @@ mod tests {
                 )
             );
     }
+
+    #[test]
+    fn account_locker_claim_fungibles_and_non_fungibles() {
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "account_locker_claim_fungibles_and_non_fungibles.dat"
+        ));
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "account_locker_claim_fungibles_and_non_fungibles.rtm"
+        ));
+
+        let transaction_manifest = TransactionManifest::new(
+            instructions_string,
+            NetworkID::Stokenet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        let sut = transaction_manifest
+            .execution_summary(
+                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
+            )
+            .unwrap();
+
+        let acc: AccountAddress = "account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x".into();
+        let fungible_address: ResourceAddress = "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".into();
+        let non_fungible_address: ResourceAddress = "resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27".into();
+
+        // let test = "locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a".parse::<ComponentAddress>().unwrap();
+
+        pretty_assertions::assert_eq!(
+            sut,
+            SUT::new(
+                [],
+                [(
+                    acc,
+                    vec![
+                        ResourceIndicator::non_fungible(
+                            non_fungible_address,
+                            NonFungibleResourceIndicator::by_amount(4, PredictedNonFungibleLocalIds::new(
+                                [
+                                    NonFungibleLocalId::integer(3),
+                                    NonFungibleLocalId::integer(5),
+                                    NonFungibleLocalId::integer(4),
+                                    NonFungibleLocalId::integer(6)
+                                ],
+                                1
+                            ))
+                        ),
+                        ResourceIndicator::fungible(
+                            fungible_address,
+                            FungibleResourceIndicator::guaranteed(30)
+                        ),
+                    ]
+                )],
+                vec!["account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x".into()], // addresses_of_accounts_requiring_auth
+                [], // addresses_of_identities_requiring_auth
+                [], // newly_created_non_fungibles
+                [], // reserved_instructions
+                [], // presented_proofs
+                [], // encountered_component_addresses
+                [DetailedManifestClass::General],
+                FeeLocks::default(),
+                FeeSummary::new("0.2674585", "0.07226045", "0.19378661776", 0,),
+                NewEntities::default()
+            )
+        );
+    }
 }
