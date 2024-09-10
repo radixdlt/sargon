@@ -29,8 +29,8 @@ fun Bios.Companion.from(
     encryptedPreferencesDataStore: DataStore<Preferences>,
     preferencesDatastore: DataStore<Preferences>,
     deviceInfoDatastore: DataStore<Preferences>,
-    eventBusDriver: EventBusDriver,
-    profileStateChangeDriver: ProfileStateChangeDriver
+    eventBusDriver: AndroidEventBusDriver,
+    profileStateChangeDriver: AndroidProfileStateChangeDriver,
 ): Bios {
     val storageDriver = AndroidStorageDriver(
         biometricAuthorizationDriver = AndroidBiometricAuthorizationDriver(
