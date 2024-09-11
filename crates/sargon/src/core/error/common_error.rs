@@ -648,6 +648,11 @@ pub enum CommonError {
         global_address_as_hex: String,
         network_id: NetworkID,
     } = 10181,
+
+    #[error(
+        "The provided entities do not derive from the given factor source"
+    )]
+    EntitiesNotDerivedByFactorSource = 10182,
 }
 
 #[uniffi::export]

@@ -151,18 +151,40 @@ impl SargonOS {
         Ok(())
     }
 
-    pub async fn derive_wallet(
+    pub async fn new_wallet_with_derived_bdfs(
         &self,
-        device_factor_source: DeviceFactorSource,
+        hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
         accounts: Accounts,
     ) -> Result<()> {
         debug!("Deriving Profile from BDFS");
+
+        let hd_keys: Vec<HierarchicalDeterministicPublicKey> = accounts
+            .iter()
+            .map(|account| {
+                account
+                    .security_state
+                    .into_unsecured()
+                    .map(|c| c.transaction_signing.public_key)
+                    .map_err(|_| CommonError::EntitiesNotDerivedByFactorSource)
+            })
+            .try_collect()?;
+
+        if !hd_factor_source
+            .mnemonic_with_passphrase
+            .validate_public_keys(hd_keys)
+        {
+            return Err(CommonError::EntitiesNotDerivedByFactorSource);
+        }
+
+        self.secure_storage
+            .save_private_hd_factor_source(&hd_factor_source)
+            .await?;
 
         let host_id = self.host_id().await?;
         let host_info = self.host_info().await;
 
         let profile = Profile::from_device_factor_source(
-            device_factor_source,
+            hd_factor_source.factor_source,
             host_id,
             host_info,
             Some(accounts),
@@ -179,7 +201,7 @@ impl SargonOS {
             .emit(EventNotification::new(Event::ProfileSaved))
             .await;
 
-        info!("Successfully derived profile");
+        info!("Successfully derived Profile");
         Ok(())
     }
 
@@ -439,11 +461,11 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_derive_wallet() {
+    async fn test_new_wallet_through_derived_bdfs() {
         let os = SUT::fast_boot().await;
 
-        os.derive_wallet(
-            DeviceFactorSource::sample(),
+        os.new_wallet_with_derived_bdfs(
+            PrivateHierarchicalDeterministicFactorSource::sample(),
             Accounts::sample_mainnet(),
         )
         .await
@@ -452,6 +474,49 @@ mod tests {
         let profile = os.profile().unwrap();
 
         assert!(profile.has_any_account_on_any_network());
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
+        let os = SUT::fast_boot().await;
+
+        os.new_wallet_with_derived_bdfs(
+            PrivateHierarchicalDeterministicFactorSource::sample(),
+            Accounts::new(),
+        )
+        .await
+        .unwrap();
+
+        let profile = os.profile().unwrap();
+
+        assert!(!profile.networks.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet_through_derived_bdfs_with_accounts_derived_from_other_hd_factor_source(
+    ) {
+        let os = SUT::fast_boot().await;
+
+        let other_hd =
+            PrivateHierarchicalDeterministicFactorSource::sample_other();
+        let invalid_account = Account::new(
+            other_hd
+                .derive_entity_creation_factor_instance(NetworkID::Mainnet, 0),
+            DisplayName::new("Invalid Account").unwrap(),
+            AppearanceID::sample(),
+        );
+
+        let result = os
+            .new_wallet_with_derived_bdfs(
+                PrivateHierarchicalDeterministicFactorSource::sample(),
+                Accounts::just(invalid_account),
+            )
+            .await;
+
+        assert_eq!(
+            result.unwrap_err(),
+            CommonError::EntitiesNotDerivedByFactorSource
+        )
     }
 
     #[actix_rt::test]
