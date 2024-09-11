@@ -3,12 +3,12 @@ use crate::prelude::*;
 address_union!(
     /// A tagged union of all the encountered addresses in the manifest.
     /// This is to be primarily used for the "using dApps" section of the wallet's tx review screen.
-    enum ManifestEncounteredAddress: component, locker
+    enum ManifestEncounteredComponentAddress: component, locker
 );
 
 macro_rules! impl_try_from_for_manifest_encountered_address {
     ($($variant:ident => $address_type:ty),*) => {
-        impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for ManifestEncounteredAddress {
+        impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for ManifestEncounteredComponentAddress {
             type Error = CommonError;
 
             fn try_from(value: (ScryptoGlobalAddress, NetworkID)) -> Result<Self> {
@@ -16,7 +16,7 @@ macro_rules! impl_try_from_for_manifest_encountered_address {
 
                 $(
                     if let Ok(address) = <$address_type>::try_from((global_address, network_id)) {
-                        return Ok(ManifestEncounteredAddress::$variant(address));
+                        return Ok(ManifestEncounteredComponentAddress::$variant(address));
                     }
                 )*
 
@@ -39,7 +39,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = ManifestEncounteredAddress;
+    type SUT = ManifestEncounteredComponentAddress;
 
     #[test]
     fn sample_values_count() {

@@ -2,11 +2,11 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension ManifestEncounteredAddress {
-	public static let sampleMainnet: Self = newManifestEncounteredAddressSampleMainnet()
-	public static let sampleMainnetOther: Self = newManifestEncounteredAddressSampleMainnetOther()
+extension ManifestEncounteredComponentAddress {
+	public static let sampleMainnet: Self = newManifestEncounteredComponentAddressSampleMainnet()
+	public static let sampleMainnetOther: Self = newManifestEncounteredComponentAddressSampleMainnetOther()
 
-	public static let sampleStokenet: Self = newManifestEncounteredAddressSampleStokenet()
-	public static let sampleStokenetOther: Self = newManifestEncounteredAddressSampleStokenetOther()
+	public static let sampleStokenet: Self = newManifestEncounteredComponentAddressSampleStokenet()
+	public static let sampleStokenetOther: Self = newManifestEncounteredComponentAddressSampleStokenetOther()
 }
 #endif

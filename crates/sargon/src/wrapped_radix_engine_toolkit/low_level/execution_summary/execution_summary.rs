@@ -41,10 +41,10 @@ pub struct ExecutionSummary {
     /// The list of the resources of proofs that were presented in the manifest.
     pub presented_proofs: Vec<ResourceSpecifier>,
 
-    /// The set of all the encountered `ManifestEncounteredAddress`es` in the manifest. This is
+    /// The set of all the encountered `ManifestEncounteredComponentAddress`es` in the manifest. This is
     /// to be primarily used for the "using dApps" section of the wallet's tx
     /// review screen.
-    pub encountered_addresses: Vec<ManifestEncounteredAddress>,
+    pub encountered_addresses: Vec<ManifestEncounteredComponentAddress>,
 
     /// Information on how much fees were contingent and how much were not.
     pub fee_locks: FeeLocks,
@@ -71,7 +71,9 @@ impl ExecutionSummary {
         newly_created_non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
         reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
         presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
-        encountered_addresses: impl IntoIterator<Item = ManifestEncounteredAddress>,
+        encountered_addresses: impl IntoIterator<
+            Item = ManifestEncounteredComponentAddress,
+        >,
         detailed_classification: impl IntoIterator<Item = DetailedManifestClass>,
         fee_locks: impl Into<FeeLocks>,
         fee_summary: impl Into<FeeSummary>,

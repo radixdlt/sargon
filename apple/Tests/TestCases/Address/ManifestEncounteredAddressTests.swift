@@ -4,6 +4,6 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class ManifestEncounteredAddressTests: AddressTest<ManifestEncounteredAddress> {
+final class ManifestEncounteredComponentAddressTests: AddressTest<ManifestEncounteredComponentAddress> {
 	
 }

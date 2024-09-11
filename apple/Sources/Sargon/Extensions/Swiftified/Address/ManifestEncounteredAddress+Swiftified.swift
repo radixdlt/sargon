@@ -1,6 +1,6 @@
 import SargonUniFFI
 
-extension ManifestEncounteredAddress: AddressProtocol {
+extension ManifestEncounteredComponentAddress: AddressProtocol {
 	public var asGeneral: Address {
 		switch self {
 		case let .component(componentAddress): Address.component(componentAddress)
