@@ -1,7 +1,7 @@
 package com.radixdlt.sargon.os.driver
 
 import android.content.Context
-import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
@@ -14,7 +14,6 @@ import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.mnemonicWithPassphraseToJsonBytes
 import com.radixdlt.sargon.newMnemonicWithPassphraseFromJsonBytes
 import com.radixdlt.sargon.os.driver.AndroidStorageDriverTest.Companion.sut
-import com.radixdlt.sargon.os.driver.BiometricsFailure.AuthenticationNotPossible
 import com.radixdlt.sargon.os.storage.EncryptionHelper
 import com.radixdlt.sargon.samples.sample
 import io.mockk.every
@@ -48,7 +47,10 @@ class AndroidStorageDriverDeviceFactorSourceMnemonicTest {
             context = testContext,
             scope = backgroundScope,
             onAuthorize = {
-                Result.failure(AuthenticationNotPossible(BiometricManager.BIOMETRIC_STATUS_UNKNOWN))
+                Result.failure(BiometricsFailure(
+                    errorCode = BiometricPrompt.ERROR_USER_CANCELED,
+                    errorMessage = "The user cancelled."
+                ))
             }
         )
 
@@ -66,7 +68,7 @@ class AndroidStorageDriverDeviceFactorSourceMnemonicTest {
         }.onFailure { error ->
             assertTrue(
                 "Expected CommonException.SecureStorageWriteException but got $error",
-                error is CommonException.SecureStorageWriteException
+                error is CommonException.SecureStorageAccessException
             )
         }.onSuccess {
             error("Save operation did not throw when it should.")
@@ -118,7 +120,12 @@ class AndroidStorageDriverDeviceFactorSourceMnemonicTest {
                     Result.success(Unit)
                 } else {
                     mockUnauthorize()
-                    Result.failure(AuthenticationNotPossible(BiometricManager.BIOMETRIC_STATUS_UNKNOWN))
+                    Result.failure(
+                        BiometricsFailure(
+                            errorCode = BiometricPrompt.ERROR_USER_CANCELED,
+                            errorMessage = "The user cancelled"
+                        )
+                    )
                 }
             }
         )
