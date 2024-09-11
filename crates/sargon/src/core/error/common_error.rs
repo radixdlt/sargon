@@ -638,6 +638,12 @@ pub enum CommonError {
 
     #[error("No Profile is yet loaded. Current state is: {current_state}")]
     ProfileStateNotLoaded { current_state: String } = 10180,
+
+    #[error("Failed to create Address from global_address (hex): {global_address_as_hex}, network_id: {network_id}")]
+    FailedToCreateAddressFromGlobalAddressAndNetworkID {
+        global_address_as_hex: String,
+        network_id: NetworkID,
+    } = 10181,
 }
 
 #[uniffi::export]

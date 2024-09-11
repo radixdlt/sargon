@@ -615,7 +615,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 ),
                 AccountLockerClaimableResource.NonFungible(
                     resourceAddress = ResourceAddress.init("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"),
-                    ids = listOf(NonFungibleLocalId.intId(1.toULong()))
+                    numberOfItems = 10.toULong()
                 ),
                 AccountLockerClaimableResource.Fungible(
                     resourceAddress = ResourceAddress.init("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"),
@@ -623,7 +623,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 ),
                 AccountLockerClaimableResource.NonFungible(
                     resourceAddress = ResourceAddress.init("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"),
-                    ids = listOf(NonFungibleLocalId.stringId("foobar"))
+                    numberOfItems = 1.toULong()
                 )
             )
         )
@@ -632,7 +632,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
         with(actualManifest.instructionsString) {
             assertTrue(contains("claim"))
-            assertTrue(contains("claim_non_fungibles"))
             assertTrue(contains("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"))
         }
 

@@ -1,0 +1,34 @@
+CALL_METHOD
+    Address("locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a")
+    "claim"
+    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
+    Address("resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27")
+    Decimal("4")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27")
+    Decimal("4")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
+    "deposit"
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a")
+    "claim"
+    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
+    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+    Decimal("30")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+    Decimal("30")
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
+    "deposit"
+    Bucket("bucket2")
+;
