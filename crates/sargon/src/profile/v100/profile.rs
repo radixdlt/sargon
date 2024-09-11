@@ -88,10 +88,9 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `DeviceFactorSource` and `DeviceInfo`.
+    /// Creates a new Profile from the `DeviceFactorSource` and `DeviceInfo` and some [Accounts]
     ///
-    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
-    /// "empty" (no Accounts, Personas etc).
+    /// The Profile is initialized with a Mainnet ProfileNetwork, and some [Accounts] in it.
     ///
     /// # Panics
     /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
