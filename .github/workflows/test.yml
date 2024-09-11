@@ -139,23 +139,12 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Remove unused software
+      - name: Remove old xcode versions
         run: |
-          sudo rm -rf \
-          "$AGENT_TOOLSDIRECTORY" \
-          /opt/google/chrome \
-          /opt/microsoft/msedge \
-          /opt/microsoft/powershell \
-          /opt/pipx \
-          /usr/lib/mono \
-          /usr/local/julia* \
-          /usr/local/lib/node_modules \
-          /usr/local/share/chromium \
-          /usr/local/share/powershell \
-          /usr/share/dotnet \
-          /usr/local/share/boost \
-          /opt/ghc \
-          df -h /
+          echo "Removing old Xcode versions..."
+          find /Applications/ -name "Xcode*" | sort -r | tail --lines=+2 | xargs rm -rf
+          echo "Available Xcode versions after removal:"
+          find /Applications -name "Xcode_*" -maxdepth 1 -mindepth 1
 
       - name: Install Rust Toolchain for aarch64-linux-android
         uses: RDXWorks-actions/toolchain@master
