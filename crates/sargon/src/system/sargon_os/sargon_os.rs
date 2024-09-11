@@ -72,22 +72,15 @@ impl SargonOS {
         self.secure_storage
             .save_private_hd_factor_source(&bdfs)
             .await?;
-        let save_profile_result =
-            self.secure_storage.save_profile(&profile).await;
-        if let Some(error) = save_profile_result.err() {
+
+        let set_profile_result = self.set_profile(profile).await;
+        if let Some(error) = set_profile_result.err() {
             self.secure_storage
                 .delete_mnemonic(&bdfs.factor_source.id)
                 .await?;
             return Err(error);
         }
 
-        self.profile_state_holder.replace_profile_state_with(
-            ProfileState::Loaded(profile.clone()),
-        )?;
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(profile))
-            .await;
         info!("Saved new Profile and BDFS, finish creating wallet");
 
         Ok(())
@@ -190,16 +183,7 @@ impl SargonOS {
             Some(accounts),
         );
 
-        self.secure_storage.save_profile(&profile).await?;
-        let profile_state = ProfileState::Loaded(profile);
-        self.profile_state_holder
-            .replace_profile_state_with(profile_state.clone())?;
-
-        self.clients.profile_state_change.emit(profile_state).await;
-
-        self.event_bus
-            .emit(EventNotification::new(Event::ProfileSaved))
-            .await;
+        self.set_profile(profile).await?;
 
         info!("Successfully derived Profile");
         Ok(())
@@ -425,7 +409,9 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_new_wallet() {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
 
         os.new_wallet().await.unwrap();
 
@@ -462,7 +448,9 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs() {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
 
         os.new_wallet_with_derived_bdfs(
             PrivateHierarchicalDeterministicFactorSource::sample(),
@@ -478,7 +466,9 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
 
         os.new_wallet_with_derived_bdfs(
             PrivateHierarchicalDeterministicFactorSource::sample(),
@@ -495,7 +485,9 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs_with_accounts_derived_from_other_hd_factor_source(
     ) {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
 
         let other_hd =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
@@ -521,7 +513,9 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_delete_wallet() {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
         os.new_wallet().await.unwrap();
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();
