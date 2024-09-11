@@ -139,6 +139,15 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - name: Remove old xcode versions
+        run: |
+          echo "Searching for Xcode versions:"
+          find /Applications -name "Xcode_*" -maxdepth 1 -mindepth 1
+          echo "Removing old Xcode versions..."
+          find /Applications -name "Xcode_*" -maxdepth 1 -mindepth 1 | grep -v ${{ matrix.xcode }} | xargs rm -rf
+          echo "Available Xcode versions after removal:"
+          find /Applications -name "Xcode_*" -maxdepth 1 -mindepth 1
+
       - name: Install Rust Toolchain for aarch64-linux-android
         uses: RDXWorks-actions/toolchain@master
         with:
