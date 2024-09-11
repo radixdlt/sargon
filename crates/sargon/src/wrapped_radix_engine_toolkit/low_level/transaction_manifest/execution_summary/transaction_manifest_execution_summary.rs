@@ -474,7 +474,7 @@ mod tests {
                 ["resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9:<Member_44>".parse::<NonFungibleGlobalId>().unwrap()], // newly_created_non_fungibles
                 [], // reserved_instructions
                 [], // presented_proofs
-                ["component_tdx_2_1czg6rq9vms7t402fedtpzkjah25hh7snyu3ysgxk3pwlz4d3tugm7j".parse::<ComponentAddress>().unwrap()], // encountered_component_addresses
+                ["component_tdx_2_1czg6rq9vms7t402fedtpzkjah25hh7snyu3ysgxk3pwlz4d3tugm7j".parse::<ManifestEncounteredAddress>().unwrap()], // encountered_component_addresses
                 [
                     DetailedManifestClass::General
                 ],
@@ -546,7 +546,7 @@ mod tests {
                     [], // newly_created_non_fungibles
                     [], // reserved_instructions
                     [ResourceSpecifier::non_fungible("resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9", vec!["<Member_44>".parse().unwrap()])], // presented_proofs
-                    ["component_tdx_2_1crje3en7zsrna9t5vyywn3z3t9ht34l9udxjcpjvdhpcw9v6vlzru8".parse::<ComponentAddress>().unwrap()], // encountered_component_addresses
+                    ["component_tdx_2_1crje3en7zsrna9t5vyywn3z3t9ht34l9udxjcpjvdhpcw9v6vlzru8".parse::<ManifestEncounteredAddress>().unwrap()], // encountered_component_addresses
                     [
                         DetailedManifestClass::General
                     ],
@@ -1118,8 +1118,6 @@ mod tests {
         let fungible_address: ResourceAddress = "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".into();
         let non_fungible_address: ResourceAddress = "resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27".into();
 
-        // let test = "locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a".parse::<ComponentAddress>().unwrap();
-
         pretty_assertions::assert_eq!(
             sut,
             SUT::new(
@@ -1150,7 +1148,7 @@ mod tests {
                 [], // newly_created_non_fungibles
                 [], // reserved_instructions
                 [], // presented_proofs
-                [], // encountered_component_addresses
+                ["locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a".parse::<ManifestEncounteredAddress>().unwrap()],
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
                 FeeSummary::new("0.2674585", "0.07226045", "0.19378661776", 0,),
