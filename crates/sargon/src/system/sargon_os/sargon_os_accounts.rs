@@ -709,7 +709,8 @@ mod tests {
             events,
             vec![
                 Booted,
-                ProfileSaved,
+                ProfileSaved, // Save of initial profile
+                ProfileSaved, // Save of the new account
                 FactorSourceUpdated,
                 ProfileSaved,
                 AccountAdded

@@ -39,22 +39,30 @@ impl SargonOS {
 #[uniffi::export]
 impl SargonOS {
     pub async fn set_profile(&self, profile: Profile) -> Result<()> {
-        if profile.id() != self.profile()?.id() {
-            return Err(
-                CommonError::TriedToUpdateProfileWithOneWithDifferentID,
-            );
-        }
+        let profile_state = if let Ok(current_profile) = self.profile() {
+            if current_profile.id() != profile.id() {
+                return Err(
+                    CommonError::TriedToUpdateProfileWithOneWithDifferentID,
+                );
+            }
 
-        self.update_profile_with(|p| {
-            *p = profile.clone();
-            Ok(())
-        })
-        .await?;
+            self.update_profile_with(|p| {
+                *p = profile.clone();
+                Ok(())
+            })
+            .await?;
 
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(profile))
-            .await;
+            ProfileState::Loaded(profile)
+        } else {
+            let new_profile_state = ProfileState::Loaded(profile);
+            self.profile_state_holder
+                .replace_profile_state_with(new_profile_state.clone())?;
+            self.save_existing_profile().await?;
+
+            new_profile_state
+        };
+
+        self.clients.profile_state_change.emit(profile_state).await;
 
         Ok(())
     }
@@ -469,5 +477,19 @@ mod tests {
             res,
             Err(CommonError::TriedToUpdateProfileWithOneWithDifferentID)
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_set_profile_when_no_profile_exists() {
+        // ARRANGE
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SargonOS::boot(bios).await;
+
+        // ACT
+        let _ = os.with_timeout(|x| x.set_profile(Profile::sample())).await;
+
+        // ASSERT
+        assert_eq!(os.profile().unwrap(), Profile::sample());
     }
 }
