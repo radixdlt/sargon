@@ -39,7 +39,7 @@ impl SargonOS {
 #[uniffi::export]
 impl SargonOS {
     pub async fn set_profile(&self, profile: Profile) -> Result<()> {
-        let profile_state = if let Ok(current_profile) = self.profile() {
+        if let Ok(current_profile) = self.profile() {
             if current_profile.id() != profile.id() {
                 return Err(
                     CommonError::TriedToUpdateProfileWithOneWithDifferentID,
@@ -51,18 +51,17 @@ impl SargonOS {
                 Ok(())
             })
             .await?;
-
-            ProfileState::Loaded(profile)
         } else {
-            let new_profile_state = ProfileState::Loaded(profile);
             self.profile_state_holder
-                .replace_profile_state_with(new_profile_state.clone())?;
+                .replace_profile_state_with(ProfileState::Loaded(profile))?;
             self.save_existing_profile().await?;
-
-            new_profile_state
         };
 
-        self.clients.profile_state_change.emit(profile_state).await;
+        let updated_profile = self.profile()?;
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(updated_profile))
+            .await;
 
         Ok(())
     }

@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use std::{borrow::Borrow, sync::RwLock};
 
-#[derive(Debug, Clone, PartialEq, derive_more::Display, uniffi::Enum)]
+#[derive(
+    Debug, Clone, PartialEq, EnumAsInner, derive_more::Display, uniffi::Enum,
+)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {
     /// When no profile exists in secure storage when OS is booted.
