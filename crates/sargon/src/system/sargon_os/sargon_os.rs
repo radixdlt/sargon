@@ -242,11 +242,11 @@ impl SargonOS {
         debug!("Created BDFS (unsaved)");
 
         debug!("Creating new Profile...");
-        let profile = Profile::from_device_factor_source(
-            private_bdfs.factor_source.clone(),
-            host_id,
-            host_info,
-            None::<Accounts>,
+        let profile = Profile::with(
+            Header::new(DeviceInfo::new_from_info(&host_id, &host_info)),
+            FactorSources::with_bdfs(private_bdfs.factor_source.clone()),
+            AppPreferences::default(),
+            ProfileNetworks::default(),
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
@@ -313,9 +313,14 @@ impl SargonOS {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
         let os = Self::boot(bios).await;
-        let (profile, bdfs) = os
+        let (mut profile, bdfs) = os
             .create_new_profile_with_bdfs(bdfs_mnemonic.into())
             .await?;
+
+        // Append Mainnet network since initial profile has no network
+        profile
+            .networks
+            .append(ProfileNetwork::new_empty_on(NetworkID::Mainnet));
 
         os.secure_storage
             .save_private_hd_factor_source(&bdfs)
@@ -424,6 +429,8 @@ mod tests {
             .load_mnemonic_with_passphrase(&bdfs.id)
             .await
             .is_ok());
+
+        assert!(profile.networks.is_empty());
     }
 
     #[actix_rt::test]
