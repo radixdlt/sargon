@@ -818,7 +818,7 @@ mod tests {
 					"lastModified": "2023-09-11T16:05:56.000Z",
 					"contentHint": {
 						"numberOfAccountsOnAllNetworksInTotal": 4,
-						"numberOfPersonasOnAllNetworksInTotal": 0,
+						"numberOfPersonasOnAllNetworksInTotal": 4,
 						"numberOfNetworks": 2
 					}
 				},
