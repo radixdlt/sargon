@@ -38,14 +38,29 @@ impl SargonOS {
         info!("Host: {}", host_info);
 
         let secure_storage = &clients.secure_storage;
-        let profile_state = secure_storage.load_profile().await.map_or_else(
-            ProfileState::Incompatible,
-            |some_profile| {
+        let mut profile_state = secure_storage
+            .load_profile()
+            .await
+            .map_or_else(ProfileState::Incompatible, |some_profile| {
                 some_profile
                     .map(ProfileState::Loaded)
                     .unwrap_or(ProfileState::None)
-            },
-        );
+            });
+
+        // If an ephemeral profile was created (a profile with no networks) then it is not
+        // considered as a Loaded profile.
+        if let Some(profile) = profile_state.as_loaded()
+            && profile.networks.is_empty()
+        {
+            // Delete profile and its associated mnemonics
+            let device_factor_sources = profile.device_factor_sources();
+            for dfs in device_factor_sources.iter() {
+                let _ = secure_storage.delete_mnemonic(&dfs.id).await;
+            }
+            let _ = secure_storage.delete_profile(profile.id()).await;
+
+            profile_state = ProfileState::None;
+        }
 
         let os = Arc::new(Self {
             clients,
@@ -394,6 +409,48 @@ mod tests {
         // ASSERT
         let active_profile = os.profile();
         assert_eq!(active_profile.unwrap().id(), profile.id());
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_when_existing_profile_with_no_networks_profile_state_considered_none(
+    ) {
+        // ARRANGE
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios.clone()).await;
+        let (first_profile, first_bdfs) =
+            os.create_new_profile_with_bdfs(None).await.unwrap();
+
+        os.secure_storage
+            .save_private_hd_factor_source(&first_bdfs)
+            .await
+            .unwrap();
+        os.secure_storage
+            .save_profile(&first_profile)
+            .await
+            .unwrap();
+        os.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(
+                first_profile.clone(),
+            ))
+            .unwrap();
+
+        // ACT
+        let new_os = SUT::boot(bios.clone()).await;
+
+        // ASSERT
+        assert!(new_os.profile().is_err());
+        assert!(new_os
+            .secure_storage
+            .load_profile()
+            .await
+            .unwrap()
+            .is_none());
+        assert!(new_os
+            .secure_storage
+            .load_mnemonic_with_passphrase(&first_bdfs.factor_source.id)
+            .await
+            .is_err())
     }
 
     #[actix_rt::test]
