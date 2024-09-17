@@ -53,13 +53,13 @@ impl ProfileStateHolder {
     }
 
     pub fn current_network(&self) -> Result<ProfileNetwork> {
-        self.access_profile_with(|p| p.current_network().clone())
+        self.try_access_profile_with(|p| p.current_network().map(|n| n.clone()))
     }
 
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Result<Accounts> {
-        self.access_profile_with(|p| p.accounts_on_current_network())
+        self.try_access_profile_with(|p| p.accounts_on_current_network())
     }
 
     /// Returns all the SecurityStructuresOfFactorSources,
@@ -76,7 +76,7 @@ impl ProfileStateHolder {
     pub fn accounts_for_display_on_current_network(
         &self,
     ) -> Result<AccountsForDisplay> {
-        self.access_profile_with(|p| {
+        self.try_access_profile_with(|p| {
             p.accounts_for_display_on_current_network()
         })
     }
