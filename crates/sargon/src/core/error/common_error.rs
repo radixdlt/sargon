@@ -653,6 +653,9 @@ pub enum CommonError {
         "The provided entities do not derive from the given factor source"
     )]
     EntitiesNotDerivedByFactorSource = 10182,
+
+    #[error("The network {network_id} does not exist in profile")]
+    NoNetworkInProfile { network_id: NetworkID } = 10183,
 }
 
 #[uniffi::export]

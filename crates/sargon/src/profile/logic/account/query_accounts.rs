@@ -3,18 +3,20 @@ use crate::prelude::*;
 impl Profile {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
-    pub fn accounts_on_current_network(&self) -> Accounts {
-        self.current_network().accounts.non_hidden()
+    pub fn accounts_on_current_network(&self) -> Result<Accounts> {
+        self.current_network().map(|n| n.accounts.non_hidden())
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,
-    ) -> AccountsForDisplay {
-        self.accounts_on_current_network()
-            .iter()
-            .map(AccountForDisplay::from)
-            .collect::<AccountsForDisplay>()
+    ) -> Result<AccountsForDisplay> {
+        self.accounts_on_current_network().map(|accounts| {
+            accounts
+                .iter()
+                .map(AccountForDisplay::from)
+                .collect::<AccountsForDisplay>()
+        })
     }
 
     /// Looks up the account by account address, returns Err if the account is
@@ -44,7 +46,7 @@ mod tests {
     fn test_accounts_on_current_network() {
         let sut = SUT::sample();
         assert_eq!(
-            sut.accounts_on_current_network(),
+            sut.accounts_on_current_network().unwrap(),
             Accounts::sample_mainnet()
         );
     }
@@ -53,7 +55,7 @@ mod tests {
     fn test_accounts_on_current_network_stokenet() {
         let sut = SUT::sample_other();
         assert_eq!(
-            sut.accounts_on_current_network(),
+            sut.accounts_on_current_network().unwrap(),
             Accounts::just(Account::sample_stokenet_nadia()) // olivia is hidden
         );
     }
@@ -62,7 +64,7 @@ mod tests {
     fn test_accounts_for_display_on_current_network() {
         let sut = SUT::sample();
         assert_eq!(
-            sut.accounts_for_display_on_current_network(),
+            sut.accounts_for_display_on_current_network().unwrap(),
             Accounts::sample_mainnet()
                 .iter()
                 .map(AccountForDisplay::from)
