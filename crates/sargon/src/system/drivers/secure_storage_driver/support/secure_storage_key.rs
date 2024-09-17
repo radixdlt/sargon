@@ -8,7 +8,7 @@ pub enum SecureStorageKey {
         factor_source_id: FactorSourceIDFromHash,
     },
     ProfileSnapshot {
-        // Note: 
+        // Note:
         // `profile_id` is only meant to be used by the iOS Host for backward compatibility.
         // iOS Host stores multiple profiles in the secure storage uniquely identified by `profile_id`,
         // while Android Host stores only one profile in the secure storage.
@@ -19,10 +19,7 @@ pub enum SecureStorageKey {
 impl PartialEq<SecureStorageKey> for SecureStorageKey {
     fn eq(&self, other: &SecureStorageKey) -> bool {
         match (self, other) {
-            (
-                SecureStorageKey::HostID,
-                SecureStorageKey::HostID,
-            ) => true,
+            (SecureStorageKey::HostID, SecureStorageKey::HostID) => true,
             (
                 SecureStorageKey::DeviceFactorSourceMnemonic {
                     factor_source_id: a,
@@ -80,7 +77,9 @@ impl SecureStorageKey {
 impl SecureStorageKey {
     pub fn load_profile_snapshot() -> Self {
         let profile_id_noop = ProfileID::sample();
-        SecureStorageKey::ProfileSnapshot { profile_id: profile_id_noop }
+        SecureStorageKey::ProfileSnapshot {
+            profile_id: profile_id_noop,
+        }
     }
 }
 
@@ -115,7 +114,7 @@ mod uniffi_tests {
 
     #[test]
     fn identifier() {
-        let key =   SecureStorageKey::load_profile_snapshot();
+        let key = SecureStorageKey::load_profile_snapshot();
         assert_eq!(
             key.clone().identifier(),
             secure_storage_key_identifier(&key)
