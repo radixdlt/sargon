@@ -54,7 +54,6 @@ class ProfileSnapshotKeyMappingTest {
         mockProfileAccessRequest()
 
         val sut = ProfileSnapshotKeyMapping(
-            key = SecureStorageKey.ProfileSnapshot,
             encryptedStorage = storage
         )
 
@@ -108,7 +107,6 @@ class ProfileSnapshotKeyMappingTest {
         }
 
         val sut = ProfileSnapshotKeyMapping(
-            key = SecureStorageKey.ProfileSnapshot,
             encryptedStorage = storage
         )
 
@@ -123,7 +121,6 @@ class ProfileSnapshotKeyMappingTest {
         every { storage.data } returns flow { throw IOException() }
 
         val sut = ProfileSnapshotKeyMapping(
-            key = SecureStorageKey.ProfileSnapshot,
             encryptedStorage = storage
         )
 
@@ -137,7 +134,6 @@ class ProfileSnapshotKeyMappingTest {
         every { storage.data } returns flow { throw RuntimeException("some error") }
 
         val sut = ProfileSnapshotKeyMapping(
-            key = SecureStorageKey.ProfileSnapshot,
             encryptedStorage = storage
         )
 

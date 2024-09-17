@@ -1,10 +1,12 @@
 package com.radixdlt.sargon.os.storage.key
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.radixdlt.sargon.ProfileId
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toByteArray
+import com.radixdlt.sargon.newProfileIdSample
 import com.radixdlt.sargon.os.storage.EncryptionHelper
 import com.radixdlt.sargon.os.storage.KeySpec
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
@@ -63,7 +65,7 @@ class ByteArrayKeyMappingTest {
     fun testSecureStorageKeyRoundtrip() = runTest(context = testDispatcher) {
         // Even thought profile snapshot does not store data in byte array,
         // it is just used to facilitate the test
-        val key = SecureStorageKey.ProfileSnapshot
+        val key = SecureStorageKey.ProfileSnapshot(newProfileIdSample())
         mockProfileAccessRequest()
 
         val sut = ByteArrayKeyMapping(
