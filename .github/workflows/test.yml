@@ -40,7 +40,7 @@ jobs:
 
   phylum-analyze:
     if: ${{ github.event.pull_request }}
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@fix-phylum-pr-label
     permissions:
       id-token: write
       pull-requests: write
