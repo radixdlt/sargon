@@ -1,0 +1,7 @@
+id: fb999d0c-b260-474e-8c08-2f163aa2c75f
+name: sargon
+created_at: 2024-06-03T13:06:05.511629+02:00
+group_name: Wallet
+depfiles:
+  - path: ./Cargo.lock
+    type: cargo
