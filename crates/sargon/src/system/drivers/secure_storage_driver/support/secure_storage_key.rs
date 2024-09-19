@@ -78,7 +78,7 @@ impl SecureStorageKey {
     pub fn load_profile_snapshot() -> Self {
         // This id will not be used to load the profile snapshot.
         // It is only a stub to conform to the SecureStorageKey definition.
-        let dummy_id = ProfileID(Uuid::from_bytes([0x00; 16])); 
+        let dummy_id = ProfileID(Uuid::from_bytes([0x00; 16]));
         SecureStorageKey::ProfileSnapshot {
             profile_id: dummy_id,
         }
