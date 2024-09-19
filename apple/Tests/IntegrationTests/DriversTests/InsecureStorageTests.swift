@@ -9,7 +9,7 @@ class InsecureStorageDriverTests: DriverTest<Insecure︕！TestOnly︕！Ephemer
     func test() async throws {
         let sut = SUT.init(keychainService: "test")
         let data = Data.sampleAced
-        let key = SUT.Key.profileSnapshot
+        let key = SUT.Key.profileSnapshot(profileId: newProfileIdSample())
         try await sut.saveData(key: key, data: data)
         let loaded = try await sut.loadData(key: key)
         XCTAssertEqual(loaded, data)

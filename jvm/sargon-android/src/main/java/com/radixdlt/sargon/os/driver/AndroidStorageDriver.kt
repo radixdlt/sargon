@@ -61,7 +61,6 @@ internal class AndroidStorageDriver(
 
     private fun SecureStorageKey.mapping() = when (this) {
         is SecureStorageKey.ProfileSnapshot -> ProfileSnapshotKeyMapping(
-            key = this,
             encryptedStorage = encryptedPreferencesDatastore
         )
 

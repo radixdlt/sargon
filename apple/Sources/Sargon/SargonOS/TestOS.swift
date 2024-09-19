@@ -42,14 +42,9 @@ extension TestOS: SargonOSProtocol {}
 
 // MARK: Private
 extension TestOS {
-	private func nextAccountName() throws -> DisplayName {
-		do {
-			let index = try accountsForDisplayOnCurrentNetwork.count
+	private func nextAccountName() -> DisplayName {
+			let index = (try? accountsForDisplayOnCurrentNetwork.count) ?? 0
 			return DisplayName(value: "Unnamed \(index)")
-		} catch CommonError.NoNetworkInProfile(_) {
-			return DisplayName(value: "Unnamed 0")
-		}
-
 	}
 }
 

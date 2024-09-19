@@ -94,7 +94,7 @@ impl SecureStorageClient {
     /// Loads the Profile.
     pub async fn load_profile(&self) -> Result<Option<Profile>> {
         debug!("Loading profile");
-        self.load(SecureStorageKey::ProfileSnapshot)
+        self.load(SecureStorageKey::load_profile_snapshot())
             .await
             .inspect(|some_profile| {
                 if some_profile.is_some() {
@@ -110,10 +110,15 @@ impl SecureStorageClient {
     pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
         let profile_id = profile.id();
         debug!("Saving profile with id: {}", profile_id);
-        self.save(SecureStorageKey::ProfileSnapshot, profile)
-            .await
-            .inspect(|_| debug!("Saved profile with id {}", profile_id))
-            .inspect_err(|e| error!("Failed to save profile, error {e}"))
+        self.save(
+            SecureStorageKey::ProfileSnapshot {
+                profile_id: profile.id(),
+            },
+            profile,
+        )
+        .await
+        .inspect(|_| debug!("Saved profile with id {}", profile_id))
+        .inspect_err(|e| error!("Failed to save profile, error {e}"))
     }
 
     //======
@@ -200,7 +205,9 @@ impl SecureStorageClient {
     pub async fn delete_profile(&self, id: ProfileID) -> Result<()> {
         warn!("Deleting profile with id: {}", id);
         self.driver
-            .delete_data_for_key(SecureStorageKey::ProfileSnapshot)
+            .delete_data_for_key(SecureStorageKey::ProfileSnapshot {
+                profile_id: id,
+            })
             .await
     }
 }
@@ -230,7 +237,8 @@ mod tests {
     async fn load_ok_when_none() {
         let sut = make_sut();
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ProfileSnapshot).await,
+            sut.load::<Profile>(SecureStorageKey::load_profile_snapshot())
+                .await,
             Ok(None)
         );
     }
@@ -239,13 +247,22 @@ mod tests {
     async fn load_successful() {
         let sut = make_sut();
 
+        let profile = Profile::sample();
         assert!(sut
-            .save(SecureStorageKey::ProfileSnapshot, &Profile::sample())
+            .save(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id()
+                },
+                &profile
+            )
             .await
             .is_ok());
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ProfileSnapshot).await,
-            Ok(Some(Profile::sample()))
+            sut.load::<Profile>(SecureStorageKey::ProfileSnapshot {
+                profile_id: profile.id()
+            })
+            .await,
+            Ok(Some(profile))
         );
     }
 
@@ -253,17 +270,25 @@ mod tests {
     async fn load_unwrap_or_some_default_not_used() {
         let sut = make_sut();
 
+        let profile = Profile::sample();
         assert!(sut
-            .save(SecureStorageKey::ProfileSnapshot, &Profile::sample())
+            .save(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id()
+                },
+                &profile
+            )
             .await
             .is_ok());
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
-                SecureStorageKey::ProfileSnapshot,
-                Profile::sample_other()
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id()
+                },
+                profile.clone()
             )
             .await,
-            Profile::sample()
+            profile
         );
     }
 
@@ -273,7 +298,7 @@ mod tests {
 
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
-                SecureStorageKey::ProfileSnapshot,
+                SecureStorageKey::load_profile_snapshot(),
                 Profile::sample_other()
             )
             .await,
@@ -350,7 +375,7 @@ mod tests {
         let (sut, _) = SecureStorageClient::ephemeral();
         assert_eq!(
             sut.save(
-                SecureStorageKey::ProfileSnapshot,
+                SecureStorageKey::load_profile_snapshot(),
                 &AlwaysFailSerialize {}
             )
             .await,

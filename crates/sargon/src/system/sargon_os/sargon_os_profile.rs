@@ -164,7 +164,12 @@ impl SargonOS {
         let secure_storage = &self.secure_storage;
 
         secure_storage
-            .save(SecureStorageKey::ProfileSnapshot, profile)
+            .save(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id(),
+                },
+                profile,
+            )
             .await?;
 
         self.event_bus
