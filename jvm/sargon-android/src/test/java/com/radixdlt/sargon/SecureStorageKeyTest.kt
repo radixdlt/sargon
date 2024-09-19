@@ -21,10 +21,10 @@ class SecureStorageKeyTest {
             SecureStorageKey.HostId.identifier
         )
 
-//        assertEquals(
-//            "secure_storage_key_profile_snapshot",
-//            SecureStorageKey.ProfileSnapshot
-//        )
+        assertEquals(
+            "secure_storage_key_profile_snapshot",
+            SecureStorageKey.ProfileSnapshot(profileId = newProfileIdSample()).identifier
+        )
     }
 
 }
