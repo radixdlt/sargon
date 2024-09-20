@@ -62,4 +62,6 @@ jobs:
       - name: Upload Artifacts
         uses: RDXWorks-actions/upload-artifact@main
         with:
+          name: ${{ matrix.build-target.toolchain }}-${{ matrix.build-target.binary }}
           path: "target/${{ matrix.build-target.toolchain }}/release/${{ matrix.build-target.binary }}"
+          if-no-files-found: error
