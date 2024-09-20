@@ -327,8 +327,8 @@ pub enum CommonError {
     )]
     ExecutionSummaryFail { underlying: String } = 10089,
 
-    #[error("Failed to get TransactionReceipt from encoded bytes.")]
-    FailedToDecodeEncodedReceipt = 10090,
+    #[error("Failed to get TransactionReceipt from engine toolkit bytes.")]
+    FailedToDecodeEngineToolkitReceipt = 10090,
 
     #[error("Invalid byte count, was empty")]
     BytesEmpty = 10091,

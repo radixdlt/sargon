@@ -51,9 +51,9 @@ pub fn transaction_manifest_involved_pool_addresses(
 #[uniffi::export]
 pub fn transaction_manifest_execution_summary(
     manifest: &TransactionManifest,
-    encoded_receipt: BagOfBytes,
+    engine_toolkit_receipt: BagOfBytes,
 ) -> Result<ExecutionSummary> {
-    manifest.execution_summary(encoded_receipt)
+    manifest.execution_summary(engine_toolkit_receipt)
 }
 
 #[uniffi::export]

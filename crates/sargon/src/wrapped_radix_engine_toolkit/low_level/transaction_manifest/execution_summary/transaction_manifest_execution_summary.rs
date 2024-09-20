@@ -5,11 +5,11 @@ use radix_engine_toolkit::functions::manifest::execution_summary as RET_executio
 impl TransactionManifest {
     pub fn execution_summary(
         &self,
-        encoded_receipt: BagOfBytes,
+        engine_toolkit_receipt: BagOfBytes,
     ) -> Result<ExecutionSummary> {
         let network_definition = self.network_id().network_definition();
-        let receipt_str = String::from_utf8(encoded_receipt.bytes)
-            .map_err(|_| CommonError::FailedToDecodeEncodedReceipt)?;
+        let receipt_str = String::from_utf8(engine_toolkit_receipt.bytes)
+            .map_err(|_| CommonError::FailedToDecodeEngineToolkitReceipt)?;
         let receipt = serde_json::from_str::<
             RetSerializableToolkitTransactionReceipt,
         >(&receipt_str)
@@ -21,7 +21,7 @@ impl TransactionManifest {
                 ))
                 .ok()
         })
-        .ok_or(CommonError::FailedToDecodeEncodedReceipt)?;
+        .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
 
         self.execution_summary_with_receipt(receipt)
     }
