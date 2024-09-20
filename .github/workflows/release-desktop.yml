@@ -47,6 +47,12 @@ jobs:
           components: ${{ env.RUST_COMPONENTS }}
           target: ${{ matrix.build-target.toolchain }}
 
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
       - name: Build and publish Desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:
