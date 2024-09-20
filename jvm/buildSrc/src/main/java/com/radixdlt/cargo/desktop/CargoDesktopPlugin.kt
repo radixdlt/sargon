@@ -12,49 +12,53 @@ abstract class CargoDesktopConfiguration {
 
 class CargoDesktopPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        val extension = target.extensions.create<CargoDesktopConfiguration>("cargoDesktop")
         target.afterEvaluate {
-            val buildType = extension.buildType
-                ?: BuildType.from(properties["buildType"] as String?) ?: BuildType.DEBUG
+            BuildType.values().forEach { buildType ->
+                tasks.register("buildCargo${buildType.capitalised}") {
+                    group = BasePlugin.BUILD_GROUP
 
-            val cargoTask = tasks.register("buildCargo${buildType.capitalised}") {
-                group = BasePlugin.BUILD_GROUP
+                    var targetTriple: DesktopTargetTriple? = null
+                    doFirst {
+                        val current = project.currentTargetTriple().also {
+                            targetTriple = it
+                        }
 
-                var targetTriple: DesktopTargetTriple? = null
-                doFirst {
-                    val current = project.currentTargetTriple().also {
-                        targetTriple = it
+                        exec {
+                            commandLine("mkdir", "-p", "src/main/resources/${current.jnaName}")
+                        }
                     }
 
-                    exec {
-                        commandLine("mkdir", "-p", "src/main/resources/${current.jnaName}")
+                    doLast {
+                        val current = targetTriple ?: return@doLast
+
+                        println("Building for ${current.rustTargetTripleName}")
+                        exec {
+                            workingDir = projectDir.parentFile.parentFile
+                            val commands = listOf(
+                                "cargo",
+                                "build",
+                                if (buildType.isRelease()) "--release" else null,
+                                "--target",
+                                current.rustTargetTripleName
+                            ).mapNotNull { it }
+
+                            commandLine(commands)
+                        }
+
+                        exec {
+                            workingDir = projectDir.parentFile.parentFile
+                            commandLine(
+                                "cp",
+                                "target/${current.rustTargetTripleName}/${buildType.lowercase}/${current.binaryName}",
+                                "${projectDir}/src/main/resources/${current.jnaName}/${current.binaryName}"
+                            )
+                        }
                     }
-                }
 
-                doLast {
-                    val current = targetTriple ?: return@doLast
-
-                    println("Building for ${current.rustTargetTripleName}")
-                    exec {
-                        workingDir = projectDir.parentFile.parentFile
-                        val commands = listOf(
-                            "cargo",
-                            "build",
-                            if (buildType.isRelease()) "--release" else null,
-                            "--target",
-                            current.rustTargetTripleName
-                        ).mapNotNull { it }
-
-                        commandLine(commands)
-                    }
-
-                    exec {
-                        workingDir = projectDir.parentFile.parentFile
-                        commandLine(
-                            "cp",
-                            "target/${current.rustTargetTripleName}/${buildType.lowercase}/${current.binaryName}",
-                            "${projectDir}/src/main/resources/${current.jnaName}/${current.binaryName}"
-                        )
+                    onlyIf {
+                        val skipCargo = (properties["skip-cargo"] as? String)
+                            ?.toBooleanStrictOrNull() ?: false
+                        !skipCargo
                     }
                 }
             }
@@ -79,7 +83,11 @@ class CargoDesktopPlugin : Plugin<Project> {
             }
 
             tasks.getByName("compileJava") {
-                dependsOn(cargoTask)
+                val extension = target.extensions.create<CargoDesktopConfiguration>("cargoDesktop")
+                val buildType = extension.buildType
+                    ?: BuildType.from(properties["buildType"] as String?) ?: BuildType.DEBUG
+
+                dependsOn(tasks.getByName("buildCargo${buildType.capitalised}"))
             }
 
             tasks.getByName("clean") {
