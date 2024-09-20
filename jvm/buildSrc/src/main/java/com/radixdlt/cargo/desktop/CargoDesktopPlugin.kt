@@ -7,7 +7,7 @@ import org.gradle.kotlin.dsl.create
 import java.io.ByteArrayOutputStream
 
 abstract class CargoDesktopConfiguration {
-    var buildType: BuildType = BuildType.RELEASE
+    var buildType: BuildType? = null
 }
 
 class CargoDesktopPlugin : Plugin<Project> {
@@ -15,6 +15,7 @@ class CargoDesktopPlugin : Plugin<Project> {
         val extension = target.extensions.create<CargoDesktopConfiguration>("cargoDesktop")
         target.afterEvaluate {
             val buildType = extension.buildType
+                ?: BuildType.from(properties["buildType"] as String?) ?: BuildType.DEBUG
 
             val cargoTask = tasks.register("buildCargo${buildType.capitalised}") {
                 group = BasePlugin.BUILD_GROUP
@@ -67,12 +68,12 @@ class CargoDesktopPlugin : Plugin<Project> {
                 }
 
                 doLast {
-                    val target = currentTargetTriple ?: return@doLast
+                    val targetTriple = currentTargetTriple ?: return@doLast
 
                     exec {
                         workingDir = rootDir.parentFile
-                        println("Cleaning for ${target.rustTargetTripleName}")
-                        commandLine("cargo", "clean", "--target", target.rustTargetTripleName)
+                        println("Cleaning for ${targetTriple.rustTargetTripleName}")
+                        commandLine("cargo", "clean", "--target", targetTriple.rustTargetTripleName)
                     }
                 }
             }

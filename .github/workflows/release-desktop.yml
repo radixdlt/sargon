@@ -49,7 +49,7 @@ jobs:
       - name: Build and publish Desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-desktop-release:publish
+          arguments: sargon-desktop:publish -PbuildType=release
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

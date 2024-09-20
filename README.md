@@ -389,7 +389,7 @@ Two modules are published in [Github's maven](https://github.com/radixdlt/sargon
 
 - `sargon-desktop-bins`
 
-  (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop-bins.yml))
+  (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop.yml))
 
   Contains only the runtime sargon binaries, built for desktop. Used when running Unit tests.
 

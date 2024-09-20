@@ -120,8 +120,7 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.turbine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testDebugRuntimeOnly(project(":sargon-desktop-debug"))
-    testReleaseRuntimeOnly(project(":sargon-desktop-release"))
+    testRuntimeOnly(project(":sargon-desktop"))
 
     // Integration tests
     androidTestImplementation(libs.androidx.test.runner)
