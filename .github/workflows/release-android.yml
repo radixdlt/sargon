@@ -11,7 +11,8 @@ on:
     tags:
       - "**"
     branches:
-      - main
+#      - main
+      - ci/ubuntu-runners
 
 permissions:
   id-token: write
@@ -19,14 +20,14 @@ permissions:
   packages: write
 env:
   CARGO_TERM_COLOR: always
-  MACHINE: macos-14-xlarge
+  MACHINE: ubuntu-latest
 jobs:
   build:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     env:
-      RUST_TOOLCHAIN: nightly-2024-01-11
+      RUST_TOOLCHAIN: nightly-2024-07-30
       RUST_COMPONENTS: "rust-std"
-      CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
+      CUSTOM_BUILD_NAME: "test"
     steps:
       - uses: RDXWorks-actions/checkout@main
 
