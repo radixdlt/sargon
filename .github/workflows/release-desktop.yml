@@ -83,6 +83,9 @@ jobs:
           distribution: "adopt"
           java-version: "17"
 
+      - name: Prune Tags
+        run: git fetch --prune --tags
+
       - name: Copy desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:

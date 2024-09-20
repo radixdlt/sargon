@@ -26,7 +26,7 @@ publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
-            artifactId = "sargon-desktop"
+            artifactId = "sargon-desktop-bins"
             version = project.sargonVersion()
 
             from(components["java"])
