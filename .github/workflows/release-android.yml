@@ -11,7 +11,7 @@ on:
     tags:
       - "**"
     branches:
-#      - main
+      - main
       - ci/ubuntu-runners
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
     env:
       RUST_TOOLCHAIN: nightly-2024-07-30
       RUST_COMPONENTS: "rust-std"
-      CUSTOM_BUILD_NAME: "test"
+      CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
