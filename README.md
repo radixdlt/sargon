@@ -151,92 +151,163 @@ Alternatively if you wanna skip code cove
 ## Android
 
 ### Prerequisites
+<details>
+<summary>MacOs</summary>
 
-#### Install `jenv`
+* #### Install `jenv`
+  ```sh
+  brew install jenv
+  ```
+  Dont forget to add to eval to zsh
+  ```sh
+  export PATH="$HOME/.jenv/bin:$PATH"
+  eval "$(jenv init -)"
+  ```
 
-```sh
-brew install jenv
-```
+* #### Install Java (openjdk@17)
+  ```sh
+  brew install openjdk@17
+  ```
+  #### Add `openjdk` version to `jenv`
+  ```sh
+  jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
+  ```
+* #### `cargo-ndk`
+  ```sh
+  cargo install cargo-ndk
+  ```
+* Download the Command Line tools [here](https://developer.android.com/studio#command-tools) and unzip
+  ```sh
+  mkdir -p ~/Library/Android/sdk/cmdline-tools
+  mv <download/path>/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
+  ```
+  ```sh
+  ## In your profile (like .zshrc)
+  export ANDROID_HOME=$HOME/Library/Android/sdk
+  export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+  export PATH=$PATH:$ANDROID_HOME/platform-tools
+  # Make sure to also include the SDK ROOT in order to build the mac os desktop binaries
+  export SDKROOT="`xcrun --show-sdk-path`
+  ```
+  ```sh
+  ## Source your profile 
+  source ~/.zshrc
+  ```
+  ```sh
+  ## Assert that it works with
+  sdkmanager --version
+  ```
+* Download the latest ndk
+  ```sh
+  ## Print the list of available ANDKs
+  sdkmanager --list | grep ndk
+  ```
+  ```sh
+  ## Install the latest ndk like ndk;27.1.12297006 
+  sdkmanager --install "ndk;<version.of.ndk>"
+  ```
+  ```sh
+  ## Export ndk 
+  ## In your profile (like .bashrc, or .zshrc etc)
+  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk
+  ```
+</details>
 
-Dont forget to add to eval to zsh
+<details>
+<summary>Linux</summary>
 
-```sh
-export PATH="$HOME/.jenv/bin:$PATH"
-eval "$(jenv init -)"
-```
+* #### (Optional) Install build essentials 
+  ```sh
+  apt-get install build-essential
+  apt-get install cmake
+  ```
+* #### Install Java (openjdk-17)
+  ```sh
+  apt-get install openjdk-17-jre
+  ```
+* #### `cargo-ndk`
+  ```sh
+  cargo install cargo-ndk
+  ```
+* Download the Command Line tools [here](https://developer.android.com/studio#command-tools) and unzip
+  ```sh
+  mkdir -p ~/Library/Android/sdk/cmdline-tools
+  mv <download/path>/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
+  ```
+  ```sh
+  ## In your profile (like .zshrc)
+  export ANDROID_HOME=$HOME/Library/Android/sdk
+  export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+  export PATH=$PATH:$ANDROID_HOME/platform-tools
+  ```
+  ```sh
+  ## Source your profile 
+  source ~/.bashrc
+  ```
+  ```sh
+  ## Assert that it works with
+  sdkmanager --version
+  ```
+* Download the latest ndk
+  ```sh
+  ## Print the list of available ANDKs
+  sdkmanager --list | grep ndk
+  ```
+  ```sh
+  ## Install the latest ndk like ndk;27.1.12297006 
+  sdkmanager --install "ndk;<version.of.ndk>"
+  ```
+  ```sh
+  ## Export ndk 
+  ## In your profile (like .bashrc, or .zshrc etc)
+  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk
+  ```
+</details>
 
-(or similar)
-
-#### Install Java (openjdk@17)
-
-```sh
-brew install openjdk@17
-```
-
-#### Add `openjdk` version to `jenv`
-
-```sh
-jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
-```
-
-(or similar)
-
-#### `ktlint`
-
-```sh
-brew install ktlint
-```
-
-#### `cargo-ndk`
-
-```sh
-cargo install cargo-ndk
-```
-
-#### Rust targets (Android)
-
+### Install Rust targets (Android)
 ```sh
 rustup target add aarch64-linux-android armv7-linux-androideabi
 ```
 
-#### Rust targets (Desktop Binaries)
+### Install Rust targets (Desktop Binaries)
+<details>
+<summary>MacOs</summary>
 
 ```sh
 rustup target add aarch64-apple-darwin
 ```
+</details>
 
-#### NDK
+<details>
+<summary>Linux</summary>
 
-Download the latest NDK from android studio
-
-Then make sure that you have added these in your path
-
+```sh
+rustup target add // TODO
 ```
-export ANDROID_HOME=<path-to-your-sdk>
-export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/<version>
+</details>
 
-# Make sure to also include the SDK ROOT in order to build the mac os desktop binaries
-export SDKROOT="`xcrun --show-sdk-path`"
-```
-
-Then you can build both libraries as a usual
-
+### Build
 ```sh
 cd jvm
 
-# For android library (Debug)
+# Sargon Android
+# (Debug)
 ./gradlew sargon-android:assembleDebug
-# For android library (Release)
+# (Release)
 ./gradlew sargon-android:assembleRelease
 
-# For desktop binaries
-./gradlew sargon-desktop-bins:assemble
+# Desktop Binaries
+./gradlew sargon-desktop-bins:assemble // TODO
 ```
 
-### Test JVM
-
+### Unit Tests (Running locally)
 ```sh
-./jvm/gradlew -p jvm/sargon-android testDebugUnitTest
+./gradlew sargon-android:testDebugUnitTest
+```
+### Instrumentation Tests (Running on a device)
+```sh
+# Make sure you have a device or emulator is connected to ADB
+./gradlew sargon-android:connectedDebugAndroidTest
 ```
 
 # Release
@@ -328,6 +399,7 @@ Two modules are published in [Github's maven](https://github.com/radixdlt/sargon
   testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
   ```
 
+// TODO
 > [!IMPORTANT]  
 > Currently only supporting `aarch64-apple-darwin` (apple silicon). So when running Unit tests for your client app, make sure to run them on an apple silicon machine. In the future we will try to add more target architectures.
 
@@ -339,6 +411,8 @@ See iOS example app in [examples/iOS](examples/iOS)
 
 ## Android
 
-Import the `/jvm` directory in Android Studio and run the `app` configuration.
+See Android example app in [examples/android](examples/android)
+
+Import the `/jvm` directory in Android Studio and run the `android` configuration.
 
 [vscodeext]: https://github.com/radixdlt/radix-transaction-manifest-extension
