@@ -1,3 +1,4 @@
+import com.radixdlt.cargo.desktop.DesktopTargetTriple
 import com.radixdlt.cargo.toml.sargonVersion
 
 plugins {
@@ -44,3 +45,32 @@ publishing {
     }
 }
 
+tasks.register("copyGithubArtifacts") {
+    doFirst {
+        DesktopTargetTriple.ciSupported.forEach { triple ->
+            exec {
+                commandLine("mkdir", "-p", "src/main/resources/${triple.jnaName}")
+            }
+        }
+    }
+
+    doLast {
+        val rustProjectDir = projectDir.parentFile.parentFile
+        val artifactsDir = File(rustProjectDir, "artifacts")
+
+        val fileTargets = artifactsDir.listFiles()?.map { file ->
+            file to DesktopTargetTriple.current(file.name)
+        }.orEmpty()
+
+        fileTargets.forEach { target ->
+            exec {
+                workingDir = rustProjectDir
+                commandLine(
+                    "cp",
+                    "${target.first.canonicalPath}/${target.second.binaryName}",
+                    "${projectDir}/src/main/resources/${target.second.jnaName}/${target.second.binaryName}"
+                )
+            }
+        }
+    }
+}

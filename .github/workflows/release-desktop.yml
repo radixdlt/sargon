@@ -36,7 +36,6 @@ jobs:
     env:
       RUST_TOOLCHAIN: nightly-2024-01-11
       RUST_COMPONENTS: "rust-std"
-      CUSTOM_BUILD_NAME: "test"
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -53,7 +52,7 @@ jobs:
           distribution: "adopt"
           java-version: "17"
 
-      - name: Build and publish Desktop binaries
+      - name: Build desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:
           arguments: sargon-desktop:assemble -PbuildType=release
@@ -62,6 +61,34 @@ jobs:
       - name: Upload Artifacts
         uses: RDXWorks-actions/upload-artifact@main
         with:
-          name: ${{ matrix.build-target.toolchain }}-${{ matrix.build-target.binary }}
+          name: ${{ matrix.build-target.toolchain }}
           path: "target/${{ matrix.build-target.toolchain }}/release/${{ matrix.build-target.binary }}"
           if-no-files-found: error
+
+  publish:
+    runs-on: ubuntu-latest
+    CUSTOM_BUILD_NAME: "test"
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/download-artifact@main
+        with:
+          path: artifacts
+
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
+      - name: Copy desktop binaries
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-desktop:copyGithubArtifacts
+          build-root-directory: jvm
+
+      - name: Publish desktop binaries
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-desktop:publish -Pskip-cargo=true
+          build-root-directory: jvm
