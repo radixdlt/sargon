@@ -67,7 +67,8 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    CUSTOM_BUILD_NAME: "test"
+    env:
+      CUSTOM_BUILD_NAME: "test"
     steps:
       - uses: RDXWorks-actions/checkout@main
 
