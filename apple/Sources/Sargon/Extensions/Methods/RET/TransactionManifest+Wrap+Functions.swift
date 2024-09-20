@@ -39,10 +39,10 @@ extension TransactionManifest {
         transactionManifestSummary(manifest: self)
     }
     
-    public func executionSummary(encodedReceipt: Data) throws -> ExecutionSummary {
+    public func executionSummary(engineToolkitReceipt: Data) throws -> ExecutionSummary {
         try transactionManifestExecutionSummary(
             manifest: self,
-            encodedReceipt: encodedReceipt
+            engineToolkitReceipt: engineToolkitReceipt
         )
     }
 }
