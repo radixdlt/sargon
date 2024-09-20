@@ -9,7 +9,7 @@ impl TransactionManifest {
     ) -> Result<ExecutionSummary> {
         let network_definition = self.network_id().network_definition();
         let receipt_str = String::from_utf8(encoded_receipt.bytes)
-            .map_err(|_| CommonError::Unknown)?;
+            .map_err(|_| CommonError::FailedToDecodeEncodedReceipt)?;
         let receipt = serde_json::from_str::<
             RetSerializableToolkitTransactionReceipt,
         >(&receipt_str)
@@ -21,7 +21,7 @@ impl TransactionManifest {
                 ))
                 .ok()
         })
-        .ok_or(CommonError::Unknown)?;
+        .ok_or(CommonError::FailedToDecodeEncodedReceipt)?;
 
         self.execution_summary_with_receipt(receipt)
     }

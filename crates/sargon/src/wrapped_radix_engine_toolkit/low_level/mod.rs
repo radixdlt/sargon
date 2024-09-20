@@ -23,7 +23,6 @@ mod transaction_header_uniffi_fn;
 mod transaction_intent;
 mod transaction_intent_uniffi_fn;
 mod transaction_manifest;
-mod transaction_receipt;
 
 pub use address_conversion::*;
 pub use compiled_notarized_intent::*;
@@ -50,4 +49,3 @@ pub use transaction_header_uniffi_fn::*;
 pub use transaction_intent::*;
 pub use transaction_intent_uniffi_fn::*;
 pub use transaction_manifest::*;
-pub use transaction_receipt::*;
