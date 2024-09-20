@@ -59,6 +59,8 @@ pub mod prelude {
     pub(crate) use uuid::Uuid;
 
     pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use native_radix_engine_toolkit::receipt::RuntimeToolkitTransactionReceipt as RetRuntimeToolkitTransactionReceipt;
+    pub(crate) use native_radix_engine_toolkit::receipt::SerializableToolkitTransactionReceipt as RetSerializableToolkitTransactionReceipt;
     pub(crate) use paste::*;
     pub(crate) use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
@@ -72,7 +74,10 @@ pub mod prelude {
     pub(crate) use sbor::Versioned;
 
     pub(crate) use radix_common::{
-        address::AddressBech32Encoder as ScryptoAddressBech32Encoder,
+        address::{
+            AddressBech32Decoder as ScryptoAddressBech32Decoder,
+            AddressBech32Encoder as ScryptoAddressBech32Encoder,
+        },
         crypto::{
             blake2b_256_hash, verify_ed25519 as scrypto_verify_ed25519,
             verify_secp256k1 as scrypto_verify_secp256k1,

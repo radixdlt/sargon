@@ -1,33 +1,45 @@
 use crate::prelude::*;
 
 use radix_engine_toolkit::functions::manifest::execution_summary as RET_execution_summary;
-use native_radix_engine_toolkit::receipt::RuntimeToolkitTransactionReceipt;
 
 impl TransactionManifest {
     pub fn execution_summary(
         &self,
         encoded_receipt: BagOfBytes,
     ) -> Result<ExecutionSummary> {
-        //let receipt: TransactionReceipt = encoded_receipt.try_into()?;
-        let receipt: RuntimeToolkitTransactionReceipt = encoded_receipt.try_into()?;
+        let network_definition = self.network_id().network_definition();
+        let receipt_str = String::from_utf8(encoded_receipt.bytes)
+            .map_err(|_| CommonError::Unknown)?;
+        let receipt = serde_json::from_str::<
+            RetSerializableToolkitTransactionReceipt,
+        >(&receipt_str)
+        .ok()
+        .and_then(|receipt| {
+            receipt
+                .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
+                    &network_definition,
+                ))
+                .ok()
+        })
+        .ok_or(CommonError::Unknown)?;
+
         self.execution_summary_with_receipt(receipt)
     }
 
     fn execution_summary_with_receipt(
         &self,
-        receipt: RuntimeToolkitTransactionReceipt,
+        receipt: RetRuntimeToolkitTransactionReceipt,
     ) -> Result<ExecutionSummary> {
-        let ret_execution_summary =
-            RET_execution_summary(&self.scrypto_manifest(), &receipt.decoded)
-                .map_err(|e| {
-                error!(
-                    "Failed to get execution summary from RET, error: {:?}",
-                    e
-                );
-                CommonError::ExecutionSummaryFail {
-                    underlying: format!("{:?}", e),
-                }
-            })?;
+        let ret_execution_summary = RET_execution_summary(
+            &self.scrypto_manifest(),
+            &receipt,
+        )
+        .map_err(|e| {
+            error!("Failed to get execution summary from RET, error: {:?}", e);
+            CommonError::ExecutionSummaryFail {
+                underlying: format!("{:?}", e),
+            }
+        })?;
 
         Ok(ExecutionSummary::from((
             ret_execution_summary,

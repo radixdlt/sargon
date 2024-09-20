@@ -83,6 +83,7 @@ radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6e
 ] }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
+native-radix-engine-toolkit = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", package = "radix-engine-toolkit" }
 
 radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
 

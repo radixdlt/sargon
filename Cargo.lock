@@ -2646,6 +2646,7 @@ dependencies = [
  "radix-common-derive",
  "radix-engine",
  "radix-engine-interface",
+ "radix-engine-toolkit 1.2.0",
  "radix-engine-toolkit 2.1.2",
  "radix-engine-toolkit-json",
  "radix-rust",
