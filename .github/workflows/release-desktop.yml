@@ -34,7 +34,7 @@ jobs:
             binary: libsargon.dylib
     runs-on: ${{ matrix.build-target.runner }}
     env:
-      RUST_TOOLCHAIN: nightly-2024-01-11
+      RUST_TOOLCHAIN: nightly-2024-07-30
       RUST_COMPONENTS: "rust-std"
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -45,6 +45,10 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
           target: ${{ matrix.build-target.toolchain }}
+          default: 'true'
+
+      - name: Rustc version
+        run: cargo --version --verbose
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
