@@ -64,21 +64,14 @@ mod tests {
         assert_eq!(
             TransactionManifest::sample()
                 .execution_summary(BagOfBytes::from_hex("dead").unwrap()),
-            Err(CommonError::FailedToDecodeEncodedReceipt)
+            Err(CommonError::FailedToDecodeEngineToolkitReceipt)
         );
     }
 
     #[test]
     fn failure_if_receipt_result_is_abort() {
-        let encoded_receipt_hex =
-            include_str!(concat!(env!("FIXTURES_TX"), "create_pool.dat"));
-        let wrong_receipt_raw =
-            BagOfBytes::from_hex(encoded_receipt_hex).unwrap();
-        let mut wrong_receipt: TransactionReceipt =
-            wrong_receipt_raw.try_into().unwrap();
-        wrong_receipt.decoded.result = TransactionResult::Abort(AbortResult {
-            reason: AbortReason::ConfiguredAbortTriggeredOnFeeLoanRepayment,
-        });
+        let wrong_receipt = ScryptoRuntimeToolkitTransactionReceipt::Abort { reason: "whatever".to_owned() };
+            
         assert_eq!(
             TransactionManifest::sample()
                 .execution_summary_with_receipt(wrong_receipt),
