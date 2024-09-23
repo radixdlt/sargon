@@ -11,7 +11,7 @@ impl TransactionManifest {
         let receipt_str = String::from_utf8(engine_toolkit_receipt.bytes)
             .map_err(|_| CommonError::FailedToDecodeEngineToolkitReceipt)?;
         let receipt = serde_json::from_str::<
-            RetSerializableToolkitTransactionReceipt,
+            ScryptoSerializableToolkitTransactionReceipt,
         >(&receipt_str)
         .ok()
         .and_then(|receipt| {
@@ -28,7 +28,7 @@ impl TransactionManifest {
 
     fn execution_summary_with_receipt(
         &self,
-        receipt: RetRuntimeToolkitTransactionReceipt,
+        receipt: ScryptoRuntimeToolkitTransactionReceipt,
     ) -> Result<ExecutionSummary> {
         let ret_execution_summary = RET_execution_summary(
             &self.scrypto_manifest(),

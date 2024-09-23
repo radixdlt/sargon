@@ -59,8 +59,8 @@ pub mod prelude {
     pub(crate) use uuid::Uuid;
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use native_radix_engine_toolkit::receipt::RuntimeToolkitTransactionReceipt as RetRuntimeToolkitTransactionReceipt;
-    pub(crate) use native_radix_engine_toolkit::receipt::SerializableToolkitTransactionReceipt as RetSerializableToolkitTransactionReceipt;
+    pub(crate) use native_radix_engine_toolkit::receipt::RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt;
+    pub(crate) use native_radix_engine_toolkit::receipt::SerializableToolkitTransactionReceipt as ScryptoSerializableToolkitTransactionReceipt;
     pub(crate) use paste::*;
     pub(crate) use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
