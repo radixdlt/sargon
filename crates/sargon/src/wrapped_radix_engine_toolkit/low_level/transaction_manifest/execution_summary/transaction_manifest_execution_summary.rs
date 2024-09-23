@@ -715,10 +715,12 @@ mod tests {
             env!("FIXTURES_TX"),
             "stake_to_three_validators.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+        let transaction_preview_response = fixture_and_json::<TransactionPreviewResponse>(include_str!(concat!(
             env!("FIXTURES_TX"),
-            "stake_to_three_validators.dat"
-        ));
+            "stake_to_three_validators.json"
+        )))
+        .unwrap();
+        let receipt_bytes = serde_json::to_vec(&transaction_preview_response.0.radix_engine_toolkit_receipt).unwrap();
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -729,20 +731,20 @@ mod tests {
 
         let sut = transaction_manifest
             .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
+                BagOfBytes::from(receipt_bytes),
             )
             .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
-        let validator_0: ValidatorAddress = "validator_tdx_2_1sdatqsl6rx05yy2yvpf6ckfl7x8dluvzkcyljkn0x4lxkgucc0xz2w".parse().unwrap();
-        let validator_0_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6".parse().unwrap();
+        let validator_0: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
+        let validator_0_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t45l9ku3r5mwxazht2qutmhhk3660hqqvxkkyl8rxs20n9k2zv0w7t".parse().unwrap();
 
-        let validator_1: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
-        let validator_1_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t45l9ku3r5mwxazht2qutmhhk3660hqqvxkkyl8rxs20n9k2zv0w7t".parse().unwrap();
+        let validator_1: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
+        let validator_1_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse().unwrap();
 
-        let validator_2: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
-        let validator_2_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse().unwrap();
+        let validator_2: ValidatorAddress = "validator_tdx_2_1svr6rmtd9ts5zx8d3euwmmp6mmjdtcj2q7zlmd8xjrn4qx7q5snkas".parse().unwrap();
+        let validator_2_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t48zl3qmcv3pf24r0765q4zc6rrk83cfjv6wza2xksej80pcfd7p5g".parse().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -751,7 +753,7 @@ mod tests {
                     acc_gk,
                     vec![ResourceIndicator::fungible(
                         ResourceAddress::sample_stokenet_xrd(),
-                        FungibleResourceIndicator::guaranteed(3566)
+                        FungibleResourceIndicator::guaranteed(3000)
                     )]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
@@ -759,22 +761,22 @@ mod tests {
                     vec![
                         ResourceIndicator::fungible(
                             validator_0_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(11, 3)
+                            FungibleResourceIndicator::predicted(0, 5)
                         ),
                         ResourceIndicator::fungible(
                             validator_1_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(222, 7)
+                            FungibleResourceIndicator::predicted(0, 10)
                         ),
                         ResourceIndicator::fungible(
                             validator_2_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(3333, 11)
+                            FungibleResourceIndicator::predicted(0, 15)
                         ),
                     ]
                 )], // addresses_of_accounts_deposited_into
                 [acc_gk], // addresses_of_accounts_requiring_auth
                 [],       // addresses_of_identities_requiring_auth
                 [],       // newly_created_non_fungibles
-                [],       // reserved_instructions
+                [ReservedInstruction::AccountLockFee],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
                 [DetailedManifestClass::ValidatorStake {
@@ -783,29 +785,10 @@ mod tests {
                         validator_1,
                         validator_2
                     ],
-                    validator_stakes: vec![
-                        TrackedValidatorStake::new(
-                            validator_0,
-                            11,
-                            validator_0_resource_address_of_stake,
-                            11
-                        ),
-                        TrackedValidatorStake::new(
-                            validator_1,
-                            222,
-                            validator_1_resource_address_of_stake,
-                            222
-                        ),
-                        TrackedValidatorStake::new(
-                            validator_2,
-                            3333,
-                            validator_2_resource_address_of_stake,
-                            3333
-                        ),
-                    ]
+                    validator_stakes: vec![]
                 }],
                 FeeLocks::default(),
-                FeeSummary::new("0.34071685", "0.1150347", "0.32796859177", 0,),
+                FeeSummary::new("0.3527215", "0.1150347", "0.32796859177", 0,),
                 NewEntities::default()
             )
         );
