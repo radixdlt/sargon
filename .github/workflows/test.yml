@@ -155,20 +155,6 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain for aarch64-linux-android
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-linux-android
-
-      - name: Install Rust Toolchain for armv7-linux-androideabi
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: armv7-linux-androideabi
-
       - name: Install Rust Toolchain for x86_64-unknown-linux-gnu
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -188,9 +174,6 @@ jobs:
 
       - name: Setup Android SDK
         uses: RDXWorks-actions/setup-android@v2
-
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
 
       - name: Test JVM with coverage
         run: ./jvm/gradlew -p jvm/sargon-android koverXmlReportDebug

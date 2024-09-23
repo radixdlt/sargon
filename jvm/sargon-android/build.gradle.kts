@@ -183,8 +183,7 @@ android.libraryVariants.all {
     val generateBindings = tasks.register("generate${buildTypeUpper}UniFFIBindings") {
         group = BasePlugin.BUILD_GROUP
 
-        var binaryFile: File? = null
-        doFirst {
+        doLast {
             // Uniffi needs a binary library to generate the bindings
             // - If in a previous task an android binary is generated, we use that
             //   (the build is intended to be used in an android device)
@@ -201,7 +200,7 @@ android.libraryVariants.all {
                 .filter { path -> path.endsWith("libsargon.so") }
                 .map { File(it) }.toList().firstOrNull()
 
-            binaryFile = androidBinaryFile ?: Files.walk(File("${rootDir}/sargon-desktop/src/main").toPath())
+            val binaryFile = androidBinaryFile ?: Files.walk(File("${rootDir}/sargon-desktop/src/main").toPath())
                 // Desktop binaries are searched
                 .filter { !Files.isDirectory(it) }
                 .map { it.toString() }
@@ -213,9 +212,7 @@ android.libraryVariants.all {
                 .find { file ->
                     file.parentFile.name == hostTarget.jnaName
                 }
-        }
 
-        doLast {
             val file = binaryFile
                 ?.relativeTo(rootDir.parentFile)
                 ?: error("Could not find library file to generate bindings")
