@@ -36,13 +36,35 @@ final class TransactionManifestTests: Test<TransactionManifest> {
     }
     
     func test_execution_summary() throws {
-        let name = "transfer_1to2_multiple_nf_and_f_tokens"
-        let receipt = try encodedReceipt(name)
+        let name = "third_party_deposits_update"
+		let engineToolkitReceiptStr = """
+		  {
+			  "kind": "CommitSuccess",
+			  "state_updates_summary": {
+				"new_entities": [],
+				"metadata_updates": {},
+				"non_fungible_data_updates": {},
+				"newly_minted_non_fungibles": []
+			  },
+			  "worktop_changes": {},
+			  "fee_summary": {
+				"execution_fees_in_xrd": "0.07638415",
+				"finalization_fees_in_xrd": "0.0105008",
+				"storage_fees_in_xrd": "0.03871917658",
+				"royalty_fees_in_xrd": "0"
+			  },
+			  "locked_fees": {
+				"contingent": "0",
+				"non_contingent": "0"
+			  }
+			}
+		"""
+		let receipt = engineToolkitReceiptStr.data(using: .utf8)!
         let manifest = try rtm(name)
         
-        let summary = try manifest.executionSummary(encodedReceipt: receipt)
+        let summary = try manifest.executionSummary(engineToolkitReceipt: receipt)
         
-        XCTAssertNoDifference(summary.addressesOfAccountsRequiringAuth, ["account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk"])
+        XCTAssertNoDifference(summary.addressesOfAccountsRequiringAuth, ["account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a"])
     }
 	
 	func test_from_instructions_string_with_max_sbor_depth_is_ok() throws {

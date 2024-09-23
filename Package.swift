@@ -55,7 +55,7 @@ let package = Package(
 		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
 		
 		// Multicast / Share of notifications in EventBus
-		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.2"),
+		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.3"),
 	],
 	targets: [
 		binaryTarget,

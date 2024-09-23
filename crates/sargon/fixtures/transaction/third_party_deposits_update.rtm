@@ -1,24 +1,15 @@
 CALL_METHOD
-    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
+    "lock_fee"
+    Decimal("0.2652577793095")
+;
+CALL_METHOD
+    Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
     "set_default_deposit_rule"
     Enum<1u8>()
 ;
 CALL_METHOD
-    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
     "remove_resource_preference"
-    Address("resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp")
-;
-CALL_METHOD
-    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
-    "remove_authorized_depositor"
-    Enum<1u8>(
-        Address("resource_tdx_2_1ngw6cufaxs5p82kw49juy2yfkt53se76vr0xfsu3tvyduuw6s0y6lc")
-    )
-;
-CALL_METHOD
-    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
-    "add_authorized_depositor"
-    Enum<1u8>(
-        Address("resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9")
-    )
+    Address("resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq")
 ;

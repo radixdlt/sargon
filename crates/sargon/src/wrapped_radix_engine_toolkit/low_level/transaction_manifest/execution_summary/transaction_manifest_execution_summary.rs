@@ -3,16 +3,18 @@ use crate::prelude::*;
 use radix_engine_toolkit::functions::manifest::execution_summary as RET_execution_summary;
 
 impl TransactionManifest {
+    /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt` data.
+    ///
+    /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
+    /// The field will be a JSON that host apps should parse into a .
     pub fn execution_summary(
         &self,
-        engine_toolkit_receipt: BagOfBytes,
+        engine_toolkit_receipt: impl AsRef<str>,
     ) -> Result<ExecutionSummary> {
         let network_definition = self.network_id().network_definition();
-        let receipt_str = String::from_utf8(engine_toolkit_receipt.bytes)
-            .map_err(|_| CommonError::FailedToDecodeEngineToolkitReceipt)?;
         let receipt = serde_json::from_str::<
             ScryptoSerializableToolkitTransactionReceipt,
-        >(&receipt_str)
+        >(&engine_toolkit_receipt.as_ref())
         .ok()
         .and_then(|receipt| {
             receipt
@@ -62,16 +64,17 @@ mod tests {
     #[test]
     fn invalid_receipt() {
         assert_eq!(
-            TransactionManifest::sample()
-                .execution_summary(BagOfBytes::from_hex("dead").unwrap()),
+            TransactionManifest::sample().execution_summary("dead"),
             Err(CommonError::FailedToDecodeEngineToolkitReceipt)
         );
     }
 
     #[test]
     fn failure_if_receipt_result_is_abort() {
-        let wrong_receipt = ScryptoRuntimeToolkitTransactionReceipt::Abort { reason: "whatever".to_owned() };
-            
+        let wrong_receipt = ScryptoRuntimeToolkitTransactionReceipt::Abort {
+            reason: "whatever".to_owned(),
+        };
+
         assert_eq!(
             TransactionManifest::sample()
                 .execution_summary_with_receipt(wrong_receipt),
@@ -89,13 +92,13 @@ mod tests {
 
     #[test]
     fn transfer_1to2_multiple_nf_and_f_tokens() {
-        let encoded_receipt_hex = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "transfer_1to2_multiple_nf_and_f_tokens.dat"
-        ));
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
             "transfer_1to2_multiple_nf_and_f_tokens.rtm"
+        ));
+        let receipt = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "transfer_1to2_multiple_nf_and_f_tokens.dat"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -105,76 +108,76 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
+        let acc_v3: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".into();
 
         pretty_assertions::assert_eq!(
             sut,
             SUT::new(
                 [
                     (
-                        acc_gk,
+                        acc_v3,
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
-                                FungibleResourceIndicator::guaranteed("36.4567896543")
-                            ),
-                            ResourceIndicator::fungible(
-                                "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6",
-                                FungibleResourceIndicator::guaranteed("5.24")
-                            ),
-                            ResourceIndicator::fungible(
-                                "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs",
-                                FungibleResourceIndicator::guaranteed("42.23727")
-                            ),
-                            ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-                                FungibleResourceIndicator::guaranteed("237.987654")
+                                FungibleResourceIndicator::guaranteed("10")
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq",
+                                FungibleResourceIndicator::guaranteed("5")
+                            ),
+                            ResourceIndicator::non_fungible(
+                                "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7",
+                                NonFungibleResourceIndicator::by_ids([
+                                    NonFungibleLocalId::integer(64),
+                                ])
+                            ),
+                            ResourceIndicator::non_fungible(
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                NonFungibleResourceIndicator::by_ids([
+                                    NonFungibleLocalId::string("Member_6").unwrap(),
+                                ])
                             ),
                         ]
                     )
-                ],
+                ], //withdrawals
                 [
                     (
-                        AccountAddress::from("account_tdx_2_12x0xzsa3dm2tthpz3nwsvh94e8kq7acu0x2kfjlpv5kulsynt7rpwp"),
+                        AccountAddress::from("account_tdx_2_129n8v0x9q2zj78293sv7xhz9zcysvcvwp70pc6826k8f7dte96sfcn"),
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
-                                FungibleResourceIndicator::guaranteed("12.4567896543")
-                            )
+                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+                                FungibleResourceIndicator::guaranteed("10")
+                            ),
+                            ResourceIndicator::non_fungible(
+                                "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7",
+                                NonFungibleResourceIndicator::by_ids([
+                                    NonFungibleLocalId::integer(64),
+                                ])
+                            ),
                         ]
                     ),
                     (
-                        AccountAddress::from("account_tdx_2_12xwdc3gsu48juzkj56s0zz0vqx26xcmw9kehcudm85w57cynter9z4"),
+                        AccountAddress::from("account_tdx_2_12x58hfy598wl5vukv3sqrkc7h3n699nqygufncycayeuwydel8esnu"),
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
-                                FungibleResourceIndicator::guaranteed(24)
+                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq",
+                                FungibleResourceIndicator::guaranteed(5)
                             ),
-                            ResourceIndicator::fungible(
-                                "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6",
-                                FungibleResourceIndicator::guaranteed("5.24")
+                            ResourceIndicator::non_fungible(
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                NonFungibleResourceIndicator::by_ids([
+                                    NonFungibleLocalId::string("Member_6").unwrap(),
+                                ])
                             ),
-                            ResourceIndicator::fungible(
-                                "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs",
-                                FungibleResourceIndicator::guaranteed("42.23727")
-                            ),
-                            ResourceIndicator::fungible(
-                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-                                FungibleResourceIndicator::guaranteed("237.987654")
-                            )
                         ]
                     )
-                ],
-                [acc_gk],
+                ], //deposits
+                [acc_v3],
                 [],
                 [],
-                [],
+                [ReservedInstruction::AccountLockFee],
                 [],
                 [],
                 [
@@ -185,9 +188,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.4077857",
-                    "0.1307814",
-                    "0.52433013014",
+                    "0.37765305",
+                    "0.10476895",
+                    "0.3614425597",
                     0,
                 ),
                 NewEntities::default()
@@ -197,13 +200,13 @@ mod tests {
 
     #[test]
     fn third_party_deposits_update() {
-        let encoded_receipt_hex = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "third_party_deposits_update.dat"
-        ));
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
             "third_party_deposits_update.rtm"
+        ));
+        let receipt = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "third_party_deposits_update.dat"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -213,13 +216,9 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_g2: AccountAddress = "account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2".into();
+        let acc_g2: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -229,7 +228,7 @@ mod tests {
                 [acc_g2], // addresses_of_accounts_requiring_auth
                 [],               // addresses_of_identities_requiring_auth
                 [],               // newly_created_non_fungibles
-                [ReservedInstruction::AccountUpdateSettings],
+                [ReservedInstruction::AccountLockFee, ReservedInstruction::AccountUpdateSettings],
                 [],               // presented_proofs
                 [],               // encountered_component_addresses
                 [
@@ -240,7 +239,7 @@ mod tests {
                         >::from_iter([(
                             acc_g2,
                             HashMap::<_, _>::from_iter([(
-                                ResourceAddress::sample_stokenet_gc_tokens(),
+                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".into(),
                                 ResourcePreferenceUpdate::Remove,
                             )]),
                         )]),
@@ -249,31 +248,15 @@ mod tests {
                                 acc_g2,
                                 DepositRule::DenyAll,
                             )]),
-                        authorized_depositors_added: HashMap::<
-                            AccountAddress,
-                            Vec<ResourceOrNonFungible>,
-                        >::from_iter([(
-                            acc_g2,
-                            vec![ResourceOrNonFungible::Resource {
-                                value: ResourceAddress::sample_stokenet_nft_gc_membership(),
-                            }],
-                        )]),
-                        authorized_depositors_removed: HashMap::<
-                            AccountAddress,
-                            Vec<ResourceOrNonFungible>,
-                        >::from_iter([(
-                            acc_g2,
-                            vec![ResourceOrNonFungible::Resource {
-                                value: ResourceAddress::sample_stokenet_nft_other(),
-                            }],
-                        )]),
+                        authorized_depositors_added: HashMap::new(),
+                        authorized_depositors_removed: HashMap::new(),
                     }
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.092499",
-                    "0.02100205",
-                    "0.08459091041",
+                    "0.07638415",
+                    "0.0105008",
+                    "0.03871917658",
                     0
                 ),
                 NewEntities::default()
@@ -283,13 +266,13 @@ mod tests {
 
     #[test]
     fn create_single_fungible() {
-        let encoded_receipt_hex = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_single_fungible.dat"
-        ));
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
             "create_single_fungible.rtm"
+        ));
+        let receipt = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_single_fungible.dat"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -299,24 +282,20 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_g2: AccountAddress = "account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2".into();
-        let token_address: ResourceAddress = "resource_tdx_2_1t4wty7nq976ej4wtx7p4ckm073p32cyaajk4cq256rcvzz20e7qrm9".into();
+        let acc_v3: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".into();
+        let token_address: ResourceAddress = "resource_tdx_2_1tkd0xf49tvq4wjdxn7khkt9l900750rd2jqdajukgwsyv8k9md5hh6".into();
 
         pretty_assertions::assert_eq!(
             sut,
             SUT::new(
                 [],
                 [(
-                    acc_g2,
+                    acc_v3,
                     vec![ResourceIndicator::fungible(
                         token_address,
-                        FungibleResourceIndicator::predicted(100000, 1)
+                        FungibleResourceIndicator::predicted(21000000, 1)
                     )]
                 )],
                 [], // addresses_of_accounts_requiring_auth
@@ -327,30 +306,21 @@ mod tests {
                 [], // encountered_component_addresses
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
-                FeeSummary::new("0.15800815", "0.1160115", "0.25339126151", 0,),
-                NewEntities::new([(
-                    token_address,
-                    NewlyCreatedResource::with(
-                        "MyResource",
-                        "VIP",
-                        "A very innovative and important resource",
-                        "https://i.imgur.com/A2itmif.jpeg",
-                        []
-                    )
-                )])
+                FeeSummary::new("0.1585925", "0.1210119", "0.26540755769", 0,),
+                NewEntities::new([])
             )
         );
     }
 
     #[test]
-    fn create_nft_collections() {
-        let encoded_receipt_hex = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_nft_collections.dat"
-        ));
+    fn create_nft_collection() {
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "create_nft_collections.rtm"
+            "create_nft_collection.rtm"
+        ));
+        let receipt = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_nft_collection.dat"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -360,24 +330,54 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
+
+        let acc: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".into();
+        let non_fungible_address: ResourceAddress = "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl".into();
 
         pretty_assertions::assert_eq!(
                 sut,
                 SUT::new(
                     [], // addresses_of_accounts_withdrawn_from
-                    [], // addresses_of_accounts_deposited_into
+                    [(
+                        acc,
+                        vec![
+                            ResourceIndicator::non_fungible(
+                                non_fungible_address,
+                                NonFungibleResourceIndicator::by_all(
+                                    PredictedDecimal::new(10, 1),
+                                    PredictedNonFungibleLocalIds::new(
+                                        [
+                                            NonFungibleLocalId::integer(0),
+                                            NonFungibleLocalId::integer(1),
+                                            NonFungibleLocalId::integer(2),
+                                            NonFungibleLocalId::integer(3),
+                                            NonFungibleLocalId::integer(4),
+                                            NonFungibleLocalId::integer(5),
+                                            NonFungibleLocalId::integer(6),
+                                            NonFungibleLocalId::integer(7),
+                                            NonFungibleLocalId::integer(8),
+                                            NonFungibleLocalId::integer(9),
+                                        ],
+                                        1
+                                    )
+                                )
+                            ),
+                        ]
+                    )], // addresses_of_accounts_deposited_into
                     [], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [
-                        "resource_tdx_2_1nfe6ugwjvuqc7aqhcltnwmp8xfkpqnm9mc8n9jh5xcvnx38r2wncre:#0#",
-                        "resource_tdx_2_1nfe6ugwjvuqc7aqhcltnwmp8xfkpqnm9mc8n9jh5xcvnx38r2wncre:#1#", 
-                        "resource_tdx_2_1ntwlumm8g8hsx0emmxgj3akcx6aajspx06llvfmq733x2ssm4v3g0e:#0#",
-                        "resource_tdx_2_1ntwlumm8g8hsx0emmxgj3akcx6aajspx06llvfmq733x2ssm4v3g0e:#1#"
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#0#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#1#", 
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#2#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#3#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#4#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#5#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#6#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#7#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#8#",
+                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#9#",
                     ].into_iter().map(NonFungibleGlobalId::from_str).map(Result::unwrap).collect_vec(), // newly_created_non_fungibles
                     [], // reserved_instructions
                     [], // presented_proofs
@@ -387,33 +387,12 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.21852455",
-                        "0.3320334",
-                        "0.73328016927",
+                        "0.18451315",
+                        "0.40604035",
+                        "0.96845625165",
                         0,
                     ),
-                    NewEntities::new([
-                        (
-                            ResourceAddress::from("resource_tdx_2_1ntwlumm8g8hsx0emmxgj3akcx6aajspx06llvfmq733x2ssm4v3g0e"),
-                            NewlyCreatedResource::with(
-                                "Abandon",
-                                "ABANDON",
-                                "Abandon: An amazingly innovative and rare NFT collection",
-                                "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg",
-                                ["Unique".to_string(), "FOMO".to_string(), "Advanced".to_string()]
-                            )
-                        ),
-                        (
-                            ResourceAddress::from("resource_tdx_2_1nfe6ugwjvuqc7aqhcltnwmp8xfkpqnm9mc8n9jh5xcvnx38r2wncre"),
-                            NewlyCreatedResource::with(
-                                "Ability",
-                                "ABILITY",
-                                "Ability: An amazingly innovative and rare NFT collection",
-                                "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg",
-                                ["Unique".to_string(), "FOMO".to_string(), "Advanced".to_string()]
-                            )
-                        )
-                    ])
+                    NewEntities::new([])
                 )
             );
     }
@@ -424,7 +403,7 @@ mod tests {
             env!("FIXTURES_TX"),
             "mint_nft_gumball_card.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
             "mint_nft_gumball_card.dat"
         ));
@@ -436,23 +415,19 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
+        let acc_ac: AccountAddress = "account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac".into();
 
         pretty_assertions::assert_eq!(
             sut,
             SUT::new(
                 [
                     (
-                        acc_gk,
+                        acc_ac,
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp",
+                                "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck",
                                 FungibleResourceIndicator::guaranteed(5)
                             ),
                         ]
@@ -460,34 +435,32 @@ mod tests {
                 ],
                 [
                     (
-                        acc_gk,
+                        acc_ac,
                         vec![
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9",
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
                                 NonFungibleResourceIndicator::by_amount(1, PredictedNonFungibleLocalIds::new(
-                                    [
-                                        NonFungibleLocalId::string("Member_44").unwrap()
-                                    ],
-                                    3
+                                    [],
+                                    4
                                 ))
                             )
                         ]
                     )
                 ],
                 [
-                    acc_gk
+                    acc_ac,
                 ], // addresses_of_accounts_requiring_auth
                 [], // addresses_of_identities_requiring_auth
-                ["resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9:<Member_44>".parse::<NonFungibleGlobalId>().unwrap()], // newly_created_non_fungibles
-                [], // reserved_instructions
+                ["resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue:<Member_83>".parse::<NonFungibleGlobalId>().unwrap()], // newly_created_non_fungibles
+                [ReservedInstruction::AccountLockFee], // reserved_instructions
                 [], // presented_proofs
-                ["component_tdx_2_1czg6rq9vms7t402fedtpzkjah25hh7snyu3ysgxk3pwlz4d3tugm7j".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
+                ["component_tdx_2_1cpd3cgy9kaxvxlptkkgxkm3qvfyqkrsl03kyz532p7e2gk0ygs4xrd".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
                 [
                     DetailedManifestClass::General
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.3751137",
+                    "0.3737913",
                     "0.0467599",
                     "0.14677047477",
                     0,
@@ -503,7 +476,7 @@ mod tests {
             env!("FIXTURES_TX"),
             "present_proof_swap_candy.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
             "present_proof_swap_candy.dat"
         ));
@@ -515,51 +488,37 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let acc_ac: AccountAddress = "account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac".parse().unwrap();
 
         pretty_assertions::assert_eq!(
                 sut,
                 SUT::new(
                     [
                         (
-                            acc_gk,
+                            acc_ac,
                             vec![
                                 ResourceIndicator::fungible(
-                                    "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp",
+                                    "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck",
                                     FungibleResourceIndicator::guaranteed(1)
                                 ),
                             ]
                         )
                     ], // addresses_of_accounts_withdrawn_from
-                    [
-                        (
-                            acc_gk,
-                            vec![
-                                ResourceIndicator::fungible(
-                                     "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3",
-                                    FungibleResourceIndicator::predicted(30, 4)
-                                )
-                            ]
-                        ),
-                    ], // addresses_of_accounts_deposited_into
-                    [acc_gk], // addresses_of_accounts_requiring_auth
+                    [], // addresses_of_accounts_deposited_into
+                    [acc_ac], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
-                    [], // reserved_instructions
-                    [ResourceSpecifier::non_fungible("resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9", vec!["<Member_44>".parse().unwrap()])], // presented_proofs
-                    ["component_tdx_2_1crje3en7zsrna9t5vyywn3z3t9ht34l9udxjcpjvdhpcw9v6vlzru8".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
+                    [ReservedInstruction::AccountLockFee], // reserved_instructions
+                    [ResourceSpecifier::non_fungible("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue", vec!["<Member_83>".parse().unwrap()])], // presented_proofs
+                    ["component_tdx_2_1cr4pa9ex9xhwzfjzclv8vjnfylw93wvhkwcwc0xlahpkel0krxqedw".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
                     [
                         DetailedManifestClass::General
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.50142635",
+                        "0.4943021",
                         "0.0467589",
                         "0.13551711803",
                         0,
@@ -573,7 +532,8 @@ mod tests {
     fn create_pool() {
         let instructions_string =
             include_str!(concat!(env!("FIXTURES_TX"), "create_pool.rtm"));
-        let encoded_receipt_hex =
+
+        let receipt =
             include_str!(concat!(env!("FIXTURES_TX"), "create_pool.dat"));
 
         let transaction_manifest = TransactionManifest::new(
@@ -583,41 +543,25 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         pretty_assertions::assert_eq!(
-                sut,
-                SUT::new(
-                    [], // addresses_of_account_withdrawls
-                    [], // addresses_of_accounts_deposited_into
-                    [], // addresses_of_accounts_requiring_auth
-                    [], // addresses_of_identities_requiring_auth
-                    [], // newly_created_non_fungibles
-                    [], // reserved_instructions
-                    [], // presented_proofs
-                    [], // encountered_component_addresses
-                    [
-                        DetailedManifestClass::General
-                    ],
-                    FeeLocks::default(),
-                    FeeSummary::new(
-                        "0.1495719",
-                        "0.1557717",
-                        "0.3290176335",
-                        0,
-                    ),
-                    NewEntities::new([
-                        (
-                            "resource_tdx_2_1t57kl0kuvneehavfv9u0szngxwmek9qq4ecqv0yg59w83axqdak5xc".parse::<ResourceAddress>().unwrap(),
-                             NewlyCreatedResource::empty()
-                        )
-                    ])
-                )
-            );
+            sut,
+            SUT::new(
+                [], // addresses_of_account_withdrawls
+                [], // addresses_of_accounts_deposited_into
+                [], // addresses_of_accounts_requiring_auth
+                [], // addresses_of_identities_requiring_auth
+                [], // newly_created_non_fungibles
+                [], // reserved_instructions
+                [], // presented_proofs
+                [], // encountered_component_addresses
+                [DetailedManifestClass::General],
+                FeeLocks::default(),
+                FeeSummary::new("0.15184175", "0.1607719", "0.33388137243", 0,),
+                NewEntities::new([])
+            )
+        );
     }
 
     #[test]
@@ -626,7 +570,8 @@ mod tests {
             env!("FIXTURES_TX"),
             "contribute_to_bi_pool.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
             "contribute_to_bi_pool.dat"
         ));
@@ -637,76 +582,43 @@ mod tests {
             Blobs::default(),
         )
         .unwrap();
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
         let pool_address = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse::<PoolAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
-                sut,
-                SUT::new(
-                    [
-                        (
-                            acc_gk,
-                            vec![
-                                ResourceIndicator::fungible(
-                                    ResourceAddress::sample_stokenet_xrd(),
-                                    FungibleResourceIndicator::guaranteed(237)
-                                ),
-                                ResourceIndicator::fungible(
-                                    r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
-                                    FungibleResourceIndicator::guaranteed(1337)
-                                ),
-                            ]
-                        )
-                    ],
-                    [
-                        (
-                            acc_gk,
-                            vec![
-                                ResourceIndicator::fungible(
-                                    "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs",
-                                    FungibleResourceIndicator::predicted("562.91118304755680169", 5)
-                                ),
-                            ]
-                        )
-                    ], // addresses_of_accounts_deposited_into
-                    [acc_gk], // addresses_of_accounts_requiring_auth
-                    [], // addresses_of_identities_requiring_auth
-                    [], // newly_created_non_fungibles
-                    [], // reserved_instructions
-                    [], // presented_proofs
-                    [], // encountered_component_addresses
-                    [
-                        DetailedManifestClass::PoolContribution {
-                            pool_addresses: vec![pool_address],
-                            pool_contributions: vec![
-                                TrackedPoolContribution::new(
-                                    pool_address,
-                                    [
-                                        ("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(), Decimal::from(1337)),
-                                        (ResourceAddress::sample_stokenet_xrd(), Decimal::from(237)),
-                                    ],
-                                    "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(),
-                                    Decimal::from_str("562.91118304755680169").unwrap()
-                                )
-                            ]
-                        }
-                    ],
-                    FeeLocks::default(),
-                    FeeSummary::new(
-                        "0.27435815",
-                        "0.04276125",
-                        "0.17910003354",
-                        0,
-                    ),
-                    NewEntities::default()
-                )
-            );
+            sut,
+            SUT::new(
+                [(
+                    acc_gk,
+                    vec![
+                        ResourceIndicator::fungible(
+                            ResourceAddress::sample_stokenet_xrd(),
+                            FungibleResourceIndicator::guaranteed(237)
+                        ),
+                        ResourceIndicator::fungible(
+                            r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
+                            FungibleResourceIndicator::guaranteed(1337)
+                        ),
+                    ]
+                )],
+                [],       // addresses_of_accounts_deposited_into
+                [acc_gk], // addresses_of_accounts_requiring_auth
+                [],       // addresses_of_identities_requiring_auth
+                [],       // newly_created_non_fungibles
+                [],       // reserved_instructions
+                [],       // presented_proofs
+                [],       // encountered_component_addresses
+                [DetailedManifestClass::PoolContribution {
+                    pool_addresses: vec![pool_address],
+                    pool_contributions: vec![]
+                }],
+                FeeLocks::new(0.36962, 0),
+                FeeSummary::new("0.1493972", "0.01125345", "0.0782012926", 0,),
+                NewEntities::default()
+            )
+        );
     }
 
     #[test]
@@ -715,12 +627,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "stake_to_three_validators.rtm"
         ));
-        let transaction_preview_response = fixture_and_json::<TransactionPreviewResponse>(include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "stake_to_three_validators.json"
-        )))
-        .unwrap();
-        let receipt_bytes = serde_json::to_vec(&transaction_preview_response.0.radix_engine_toolkit_receipt).unwrap();
+            "stake_to_three_validators.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -729,11 +639,7 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from(receipt_bytes),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
@@ -776,7 +682,7 @@ mod tests {
                 [acc_gk], // addresses_of_accounts_requiring_auth
                 [],       // addresses_of_identities_requiring_auth
                 [],       // newly_created_non_fungibles
-                [ReservedInstruction::AccountLockFee],       // reserved_instructions
+                [ReservedInstruction::AccountLockFee], // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
                 [DetailedManifestClass::ValidatorStake {
@@ -800,7 +706,7 @@ mod tests {
             env!("FIXTURES_TX"),
             "redeem_from_bi_pool.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
             "redeem_from_bi_pool.dat"
         ));
@@ -812,17 +718,11 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk = AccountAddress::from("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk");
-        let resource_address_of_pool = ResourceAddress::from("resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs");
-        let pool_address = PoolAddress::from("pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3");
-        let token0 = ResourceAddress::from("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy");
-        let token1 = ResourceAddress::sample_stokenet_xrd();
+        let acc_gk = AccountAddress::from("account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3");
+        let resource_address_of_pool = ResourceAddress::from("resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25");
+        let pool_address = PoolAddress::from("pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830");
 
         pretty_assertions::assert_eq!(
             sut,
@@ -831,48 +731,27 @@ mod tests {
                     acc_gk,
                     vec![ResourceIndicator::fungible(
                         resource_address_of_pool,
-                        FungibleResourceIndicator::guaranteed(500)
+                        FungibleResourceIndicator::guaranteed(1)
                     )]
                 )], // addresses_of_accounts_withdrawn_from
-                [(
-                    acc_gk,
-                    vec![
-                        ResourceIndicator::fungible(
-                            ResourceAddress::sample_stokenet_xrd(),
-                            FungibleResourceIndicator::predicted(
-                                "210.512783488241137505",
-                                3
-                            )
-                        ),
-                        ResourceIndicator::fungible(
-                            token0,
-                            FungibleResourceIndicator::predicted(
-                                "1187.5763355433",
-                                3
-                            )
-                        )
-                    ]
-                )], // addresses_of_accounts_deposited_into
+                [], // addresses_of_accounts_deposited_into
                 [acc_gk], // addresses_of_accounts_requiring_auth
                 [],       // addresses_of_identities_requiring_auth
                 [],       // newly_created_non_fungibles
-                [],       // reserved_instructions
+                [ReservedInstruction::AccountLockFee],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
                 [DetailedManifestClass::PoolRedemption {
                     pool_addresses: vec![pool_address],
                     pool_redemptions: vec![TrackedPoolRedemption::new(
                         pool_address,
-                        resource_address_of_pool,
-                        500,
-                        [
-                            (token0, "1187.5763355433".parse().unwrap()),
-                            (token1, "210.512783488241137505".parse().unwrap()),
-                        ]
+                        ResourceAddress::from("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"),
+                        3.162277,
+                        []
                     )]
                 }],
                 FeeLocks::default(),
-                FeeSummary::new("0.25753315", "0.0325088", "0.12760162134", 0,),
+                FeeSummary::new("0.26154965", "0.0325088", "0.12760162134", 0,),
                 NewEntities::default()
             )
         );
@@ -884,7 +763,7 @@ mod tests {
             env!("FIXTURES_TX"),
             "unstake_partially_from_one_validator.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
             "unstake_partially_from_one_validator.dat"
         ));
@@ -896,15 +775,11 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
 
-        let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{192ed08c15075e36-ec4892a8ba3b86f1-a1e050a6563b787e-adc9813f7fc90480}".into();
+        let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}".into();
 
         let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".into();
 
@@ -917,7 +792,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn", 
-                                    FungibleResourceIndicator::guaranteed(1234)
+                                    FungibleResourceIndicator::guaranteed(500)
                                 ),
                             ]
                         )
@@ -930,12 +805,10 @@ mod tests {
                                ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
                                 NonFungibleResourceIndicator::by_all(
-                                    PredictedDecimal::new(1, 3),
+                                    PredictedDecimal::new(0, 4),
                                     PredictedNonFungibleLocalIds::new(
-                                        [
-                                            NonFungibleLocalId::ruid(hex_decode("192ed08c15075e36ec4892a8ba3b86f1a1e050a6563b787eadc9813f7fc90480").unwrap()).unwrap()
-                                        ],
-                                        3
+                                        [],
+                                        4
                                     )
                                 )
                             )
@@ -946,21 +819,18 @@ mod tests {
                     [acc_gk],
                     [], // addresses_of_identities_requiring_auth
                     [nf_global_id.clone()], // newly_created_non_fungibles
-                    [], // reserved_instructions
+                    [ReservedInstruction::AccountLockFee], // reserved_instructions
                     [], // presented_proofs
                     [], // encountered_component_addresses
                     [
                         DetailedManifestClass::ValidatorUnstake {
                             validator_addresses: vec![validator],
-                            claims_non_fungible_data: HashMap::<NonFungibleGlobalId, UnstakeData>::from_iter([(
-                                nf_global_id,
-                                UnstakeData::new("Stake Claim", 42215, 1234)
-                            )])
+                            claims_non_fungible_data: HashMap::<NonFungibleGlobalId, UnstakeData>::new(),
                         }
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.2788849",
+                        "0.2848875",
                         "0.06251535",
                         "0.16927718825",
                         0,
@@ -971,14 +841,14 @@ mod tests {
     }
 
     #[test]
-    fn claim_two_validator_stakes() {
+    fn claim_two_stakes_from_one_validator() {
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "claim_two_validator_stakes.rtm"
+            "claim_two_stakes_from_one_validator.rtm"
         ));
-        let encoded_receipt_hex = include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "claim_two_validator_stakes.dat"
+            "claim_two_stakes_from_one_validator.dat"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -988,19 +858,11 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
 
-        let validator_1: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".into();
-        let validator_1_resource_address_of_stake: NonFungibleResourceAddress = "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw".into();
-
-        let validator_2: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".into();
-        let validator_2_resource_address_of_stake: NonFungibleResourceAddress = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".into();
+        let validator: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".into();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -1012,13 +874,8 @@ mod tests {
                                 ResourceIndicator::non_fungible(
                                     "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw",
                                     NonFungibleResourceIndicator::by_ids([
-                                        NonFungibleLocalId::ruid(hex_decode("97c2b05d8529be58152d79c176d61d68f87611f279e0daa3d486426d5330795c").unwrap()).unwrap()
-                                    ])
-                                ),
-                                ResourceIndicator::non_fungible(
-                                    "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
-                                    NonFungibleResourceIndicator::by_ids([
-                                        NonFungibleLocalId::ruid(hex_decode("f1edc2f0f8f54d33dab8e1bf90e196ce9714ef7b85478c6c82486b47a79b3002").unwrap()).unwrap()
+                                        NonFungibleLocalId::ruid(hex_decode("1c1ce92c810094a765659db6a666c19c6cea4367bb789b55276b137712ceecce").unwrap()).unwrap(),
+                                        NonFungibleLocalId::ruid(hex_decode("5aebd0270caf3f8751031498741f57b5d24fe0d62a976589519c6a92423888cc").unwrap()).unwrap()
                                     ])
                                 ),
                             ]
@@ -1030,49 +887,28 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     ResourceAddress::sample_stokenet_xrd(),
-                                    FungibleResourceIndicator::guaranteed(110)
+                                    FungibleResourceIndicator::guaranteed(150)
                                 ),
-                                ResourceIndicator::fungible(
-                                    ResourceAddress::sample_stokenet_xrd(),
-                                    FungibleResourceIndicator::guaranteed(1234)
-                        ),
                             ]
                         ),
                     ], // addresses_of_accounts_deposited_into
                     [acc_gk], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
-                    [], // reserved_instructions
+                    [ReservedInstruction::AccountLockFee], // reserved_instructions
                     [], // presented_proofs
                     [], // encountered_component_addresses
                     [
                         DetailedManifestClass::ValidatorClaim {
-                            validator_addresses: vec![validator_1, validator_2],
-                            validator_claims: vec![
-                                TrackedValidatorClaim::new(
-                                    validator_1,
-                                    validator_1_resource_address_of_stake,
-                                    [
-                                        NonFungibleLocalId::from("{97c2b05d8529be58-152d79c176d61d68-f87611f279e0daa3-d486426d5330795c}")
-                                    ],
-                                    110
-                                ),
-                                TrackedValidatorClaim::new(
-                                    validator_2,
-                                    validator_2_resource_address_of_stake,
-                                    [
-                                        NonFungibleLocalId::from("{f1edc2f0f8f54d33-dab8e1bf90e196ce-9714ef7b85478c6c-82486b47a79b3002}")
-                                    ],
-                                    1234
-                                ),
-                            ]
+                            validator_addresses: vec![validator],
+                            validator_claims: vec![]
                         }
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.30518895",
-                        "0.05851055",
-                        "0.1916885343",
+                        "0.2383276",
+                        "0.041757",
+                        "0.11224746511",
                         0,
                     ),
                     NewEntities::default()
@@ -1082,16 +918,14 @@ mod tests {
 
     #[test]
     fn account_locker_claim_fungibles_and_non_fungibles() {
-        let transaction_preview_response = fixture_and_json::<TransactionPreviewResponse>(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "account_locker_claim_fungibles_and_non_fungibles.json"
-        )))
-        .unwrap();
-        let receipt_bytes = serde_json::to_vec(&transaction_preview_response.0.radix_engine_toolkit_receipt).unwrap();
-        
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
             "account_locker_claim_fungibles_and_non_fungibles.rtm"
+        ));
+
+        let receipt = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "account_locker_claim_fungibles_and_non_fungibles.dat"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -1101,16 +935,12 @@ mod tests {
         )
         .unwrap();
 
-        let sut = transaction_manifest
-            .execution_summary(
-                BagOfBytes::from(receipt_bytes),
-            )
-            .unwrap();
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         let acc: AccountAddress = "account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".into();
         let fungible_address: ResourceAddress = "resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32".into();
         let non_fungible_address: ResourceAddress = "resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3".into();
-        
+
         pretty_assertions::assert_eq!(
             sut,
             SUT::new(

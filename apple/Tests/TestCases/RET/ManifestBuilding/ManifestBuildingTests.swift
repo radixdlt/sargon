@@ -232,13 +232,6 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 }
 
 extension TestCase {
-    
-    func encodedReceipt(_ name: String) throws -> Data {
-        let utf8 = try openTransactionFile(name, extension: "dat")
-        let hex = try XCTUnwrap(String(data: utf8, encoding: .utf8))
-        return try Data(hex: hex)
-    }
-    
     func rtm(_ rtmFile: String) throws -> TransactionManifest {
         let data = try openTransactionFile(rtmFile, extension: "rtm")
         let instructionsString = try XCTUnwrap(String(data: data, encoding: .utf8))

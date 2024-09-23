@@ -6,9 +6,9 @@ CALL_FUNCTION
         Enum<0u8>()
     )
     Enum<0u8>()
-        Tuple(
+    Tuple(
         Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"),
-        Address("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy")
+        Address("resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32")
     )
     Enum<0u8>()
 ;

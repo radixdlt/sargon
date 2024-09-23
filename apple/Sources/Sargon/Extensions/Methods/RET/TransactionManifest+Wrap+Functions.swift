@@ -39,7 +39,11 @@ extension TransactionManifest {
         transactionManifestSummary(manifest: self)
     }
     
-    public func executionSummary(engineToolkitReceipt: Data) throws -> ExecutionSummary {
+	/// Creates the `ExecutionSummary` based on the `engineToolkitReceipt` data. 
+    /// 
+    /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
+    /// Its content will be parsed into a `String` representation and used as parameter here.
+    public func executionSummary(engineToolkitReceipt: String) throws -> ExecutionSummary {
         try transactionManifestExecutionSummary(
             manifest: self,
             engineToolkitReceipt: engineToolkitReceipt

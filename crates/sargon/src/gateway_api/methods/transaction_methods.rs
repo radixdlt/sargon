@@ -9,21 +9,24 @@ impl GatewayClient {
             .map(|state| Epoch::from(state.epoch))
     }
 
-    /// Returns the "EncodedReceipt" by running a "dry run" of a
-    /// transaction - a preview of the transaction. The "EncodedReceipt" is
+    /// Returns the String version of the `radix_engine_toolkit_receipt` by running a "dry run" of a
+    /// transaction - a preview of the transaction. The `radix_engine_toolkit_receipt`` is
     /// required by the [`execution_summary` method](TransactionManifest::execution_summary)
     /// on [`TransactionManifest`].
     pub async fn dry_run_transaction(
         &self,
         intent: TransactionIntent,
         signer_public_keys: Vec<PublicKey>,
-    ) -> Result<BagOfBytes> {
+    ) -> Result<String> {
         let request =
             TransactionPreviewRequest::new(intent, signer_public_keys, None);
         self.transaction_preview(request)
             .await
-            .map(|r| r.encoded_receipt)
-            .and_then(|s| BagOfBytes::from_str(&s))
+            .map(|r| r.radix_engine_toolkit_receipt)
+            .and_then(|s| {
+                serde_json::to_string(&s)
+                    .map_err(|_| CommonError::FailedToSerializeToJSON)
+            })
     }
 
     /// Submits a signed transaction payload to the network.
