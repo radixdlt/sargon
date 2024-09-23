@@ -1099,10 +1099,13 @@ mod tests {
 
     #[test]
     fn account_locker_claim_fungibles_and_non_fungibles() {
-        let encoded_receipt_hex = include_str!(concat!(
+        let transaction_preview_response = fixture_and_json::<TransactionPreviewResponse>(include_str!(concat!(
             env!("FIXTURES_TX"),
-            "account_locker_claim_fungibles_and_non_fungibles.dat"
-        ));
+            "account_locker_claim_fungibles_and_non_fungibles.json"
+        )))
+        .unwrap();
+        let receipt_bytes = serde_json::to_vec(&transaction_preview_response.0.radix_engine_toolkit_receipt).unwrap();
+        
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
             "account_locker_claim_fungibles_and_non_fungibles.rtm"
@@ -1117,14 +1120,14 @@ mod tests {
 
         let sut = transaction_manifest
             .execution_summary(
-                BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
+                BagOfBytes::from(receipt_bytes),
             )
             .unwrap();
 
-        let acc: AccountAddress = "account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x".into();
-        let fungible_address: ResourceAddress = "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".into();
-        let non_fungible_address: ResourceAddress = "resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27".into();
-
+        let acc: AccountAddress = "account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".into();
+        let fungible_address: ResourceAddress = "resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32".into();
+        let non_fungible_address: ResourceAddress = "resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3".into();
+        
         pretty_assertions::assert_eq!(
             sut,
             SUT::new(
@@ -1134,31 +1137,27 @@ mod tests {
                     vec![
                         ResourceIndicator::non_fungible(
                             non_fungible_address,
-                            NonFungibleResourceIndicator::by_amount(4, PredictedNonFungibleLocalIds::new(
+                            NonFungibleResourceIndicator::by_amount(1, PredictedNonFungibleLocalIds::new(
                                 [
-                                    NonFungibleLocalId::integer(3),
-                                    NonFungibleLocalId::integer(5),
-                                    NonFungibleLocalId::integer(4),
-                                    NonFungibleLocalId::integer(6)
                                 ],
-                                1
+                                2
                             ))
                         ),
                         ResourceIndicator::fungible(
                             fungible_address,
-                            FungibleResourceIndicator::guaranteed(30)
+                            FungibleResourceIndicator::guaranteed(3)
                         ),
                     ]
                 )],
-                vec!["account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x".into()], // addresses_of_accounts_requiring_auth
+                vec!["account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".into()], // addresses_of_accounts_requiring_auth
                 [], // addresses_of_identities_requiring_auth
                 [], // newly_created_non_fungibles
-                [], // reserved_instructions
+                [ReservedInstruction::AccountLockFee], // reserved_instructions
                 [], // presented_proofs
-                ["locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a".parse::<ManifestEncounteredComponentAddress>().unwrap()],
+                ["locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx".parse::<ManifestEncounteredComponentAddress>().unwrap()],
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
-                FeeSummary::new("0.2674585", "0.07226045", "0.19378661776", 0,),
+                FeeSummary::new("0.2516311", "0.03200635", "0.12903213279", 0,),
                 NewEntities::default()
             )
         );
