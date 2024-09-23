@@ -585,10 +585,10 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     @Test
     fun test_execution_summary() {
         val name = "transfer_1to2_multiple_nf_and_f_tokens"
-        val receipt = encodedReceipt(name)
+        val receipt = engineToolkitReceipt(name)
         val manifest = manifest(name)
 
-        val summary = manifest.executionSummary(encodedReceipt = receipt)
+        val summary = manifest.executionSummary(engineToolkitReceipt = receipt)
         assertEquals(
             listOf(
                 AccountAddress.init(
@@ -661,7 +661,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             networkId = NetworkId.STOKENET
         )
 
-    private fun encodedReceipt(name: String): BagOfBytes =
+    private fun engineToolkitReceipt(name: String): BagOfBytes =
         openFile(name, "dat").readText().hexToBagOfBytes()
 
     private fun openFile(name: String, extension: String) =

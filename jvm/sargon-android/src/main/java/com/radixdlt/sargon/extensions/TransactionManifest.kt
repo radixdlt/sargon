@@ -190,8 +190,8 @@ val TransactionManifest.summary: ManifestSummary
     get() = transactionManifestSummary(manifest = this)
 
 @Throws(SargonException::class)
-fun TransactionManifest.executionSummary(encodedReceipt: BagOfBytes) =
-    transactionManifestExecutionSummary(manifest = this, encodedReceipt = encodedReceipt)
+fun TransactionManifest.executionSummary(engineToolkitReceipt: BagOfBytes) =
+    transactionManifestExecutionSummary(manifest = this, engineToolkitReceipt = engineToolkitReceipt)
 
 fun TransactionManifest.Companion.accountLockerClaim(
     lockerAddress: LockerAddress,
