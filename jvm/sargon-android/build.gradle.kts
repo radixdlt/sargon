@@ -1,6 +1,8 @@
+import com.radixdlt.cargo.desktop.currentTargetTriple
 import com.radixdlt.cargo.toml.sargonVersion
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Files
 
 plugins {
     alias(libs.plugins.android.library)
@@ -178,39 +180,61 @@ android.libraryVariants.all {
     val buildType = name
     val buildTypeUpper = buildType.capitalized()
 
-    val generateBindings = tasks.register(
-        "generate${buildTypeUpper}UniFFIBindings",
-        Exec::class
-    ) {
-        val regenerate = properties["regenerate"] ?: true //TODO improve by using gradle outputs
-
-        onlyIf {
-            regenerate == true || !File("${buildDir}/generated/src/${buildType}/java").exists()
-        }
-
+    val generateBindings = tasks.register("generate${buildTypeUpper}UniFFIBindings") {
         group = BasePlugin.BUILD_GROUP
 
-        workingDir = rootDir.parentFile
-        commandLine(
-            "cargo", "run", "--features", "build-binary", "--bin", "sargon-bindgen", "generate", "--library",
-            "${rootDir}/${project.name}/src/main/jniLibs/arm64-v8a/libsargon.so", "--language", "kotlin",
-            "--out-dir", "${buildDir}/generated/src/${buildType}/java"
-        )
+        var binaryFile: File? = null
+        doFirst {
+            // Uniffi needs a binary library to generate the bindings
+            // - If in a previous task an android binary is generated, we use that
+            //   (the build is intended to be used in an android device)
+            // - If no android binary is found, we need to find a desktop generated one that was built
+            //   for the same arch as the one the current task was invoked
+            //   (the build was intended to run unit tests, so no android binaries were built)
+            // - If no binaries are found, we fail the build
+            val hostTarget = project.currentTargetTriple()
 
-        dependsOn("buildCargoNdk${buildTypeUpper}")
+            // Android binaries take priority
+            val androidBinaryFile = Files.walk(File("${rootDir}/sargon-android/src/main").toPath())
+                .filter { !Files.isDirectory(it) }
+                .map { it.toString() }
+                .filter { path -> path.endsWith("libsargon.so") }
+                .map { File(it) }.toList().firstOrNull()
+
+            binaryFile = androidBinaryFile ?: Files.walk(File("${rootDir}/sargon-desktop/src/main").toPath())
+                // Desktop binaries are searched
+                .filter { !Files.isDirectory(it) }
+                .map { it.toString() }
+                .filter { path ->
+                    path.endsWith("libsargon.so") || path.endsWith("libsargon.dylib") || path.endsWith("libsargon.dll")
+                }
+                .map { File(it) }
+                .toList()
+                .find { file ->
+                    file.parentFile.name == hostTarget.jnaName
+                }
+        }
+
+        doLast {
+            val file = binaryFile
+                ?.relativeTo(rootDir.parentFile)
+                ?: error("Could not find library file to generate bindings")
+
+            exec {
+                workingDir = rootDir.parentFile
+                commandLine(
+                    "cargo", "run",
+                    "--features", "build-binary",
+                    "--bin", "sargon-bindgen",
+                    "generate", "--library", file.toString(),
+                    "--language", "kotlin",
+                    "--out-dir", "${buildDir}/generated/src/${buildType}/java"
+                )
+            }
+        }
     }
 
     javaCompileProvider.get().dependsOn(generateBindings)
-
-    // Some stuff here is broken, since Android Tests don't run after running gradle build,
-    // but do otherwise. Also CI is funky.
-    tasks.named("compile${buildTypeUpper}Kotlin").configure {
-        dependsOn(generateBindings)
-    }
-
-    tasks.named("connectedDebugAndroidTest").configure {
-        dependsOn(generateBindings)
-    }
 }
 
 tasks.register("cargoClean") {

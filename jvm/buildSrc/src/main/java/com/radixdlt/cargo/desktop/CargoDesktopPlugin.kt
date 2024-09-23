@@ -95,21 +95,21 @@ class CargoDesktopPlugin : Plugin<Project> {
             }
         }
     }
+}
 
-    private fun Project.currentTargetTriple(): DesktopTargetTriple {
-        val rustcVersion: String = ByteArrayOutputStream().use { outputStream ->
-            project.exec {
-                commandLine("rustc", "--version", "--verbose")
-                standardOutput = outputStream
-            }
-            outputStream.toString()
+fun Project.currentTargetTriple(): DesktopTargetTriple {
+    val rustcVersion: String = ByteArrayOutputStream().use { outputStream ->
+        project.exec {
+            commandLine("rustc", "--version", "--verbose")
+            standardOutput = outputStream
         }
-
-        val regex = "host: (.+)".toRegex()
-        val host = regex.find(rustcVersion)
-            ?.destructured
-            ?.component1() ?: throw RuntimeException("No host found in $rustcVersion")
-
-        return DesktopTargetTriple.current(host)
+        outputStream.toString()
     }
+
+    val regex = "host: (.+)".toRegex()
+    val host = regex.find(rustcVersion)
+        ?.destructured
+        ?.component1() ?: throw RuntimeException("No host found in $rustcVersion")
+
+    return DesktopTargetTriple.current(host)
 }
