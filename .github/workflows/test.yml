@@ -12,13 +12,13 @@ permissions:
   contents: read
 env:
   CARGO_TERM_COLOR: always
-  RUST_TOOLCHAIN: nightly-2024-01-11
+  RUST_TOOLCHAIN: nightly-2024-07-30
   RUST_COMPONENTS: "rust-std"
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
   # typos
   check-typos:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -58,7 +58,7 @@ jobs:
 
   # cargo check
   check-cargo-check:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -74,7 +74,7 @@ jobs:
 
   # cargo fmt check
   check-formatting:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -90,7 +90,7 @@ jobs:
 
   # clippy
   check-clippy:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -106,7 +106,7 @@ jobs:
 
   # Rust unit, doc and integration
   test-rust:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -153,7 +153,7 @@ jobs:
 
   # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -178,11 +178,11 @@ jobs:
           components: ${{ env.RUST_COMPONENTS }}
           target: armv7-linux-androideabi
 
-      - name: Install Rust Toolchain for aarch64-apple-darwin
+      - name: Install Rust Toolchain for x86_64-unknown-linux-gnu
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          target: aarch64-apple-darwin
+          target: x86_64-unknown-linux-gnu
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
