@@ -12,6 +12,7 @@ on:
       - "**"
     branches:
       - main
+      - ci/ubuntu-runners
 
 permissions:
   id-token: write
