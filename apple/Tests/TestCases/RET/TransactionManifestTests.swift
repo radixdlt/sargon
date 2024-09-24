@@ -37,29 +37,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
     
     func test_execution_summary() throws {
         let name = "third_party_deposits_update"
-		let engineToolkitReceiptStr = """
-		  {
-			  "kind": "CommitSuccess",
-			  "state_updates_summary": {
-				"new_entities": [],
-				"metadata_updates": {},
-				"non_fungible_data_updates": {},
-				"newly_minted_non_fungibles": []
-			  },
-			  "worktop_changes": {},
-			  "fee_summary": {
-				"execution_fees_in_xrd": "0.07638415",
-				"finalization_fees_in_xrd": "0.0105008",
-				"storage_fees_in_xrd": "0.03871917658",
-				"royalty_fees_in_xrd": "0"
-			  },
-			  "locked_fees": {
-				"contingent": "0",
-				"non_contingent": "0"
-			  }
-			}
-		"""
-		let receipt = engineToolkitReceiptStr.data(using: .utf8)!
+		let receipt = try engineToolkitReceipt(name)
         let manifest = try rtm(name)
         
         let summary = try manifest.executionSummary(engineToolkitReceipt: receipt)
