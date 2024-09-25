@@ -83,7 +83,9 @@ jobs:
         phylum_group_name: Wallet
         phylum_project_id: fb999d0c-b260-474e-8c08-2f163aa2c75f
         github_repository: ${{ github.repository }}
-        add_report_comment_to_pull_request: true#  # cargo check
+        add_report_comment_to_pull_request: true
+        
+  # cargo check
   check-cargo-check:
     runs-on: ubuntu-latest
     steps:
