@@ -7,10 +7,11 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Debug,
-    uniffi::Record,
 )]
 pub struct TransactionPreviewResponse {
     /** Hex-encoded binary blob. */
     pub encoded_receipt: String,
+    pub radix_engine_toolkit_receipt:
+        ScryptoSerializableToolkitTransactionReceipt,
     pub logs: Vec<TransactionPreviewResponseLogsInner>,
 }

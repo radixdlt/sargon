@@ -31,6 +31,7 @@ impl TransactionPreviewRequest {
             flags: flags
                 .into()
                 .unwrap_or(TransactionPreviewRequestFlags::default()),
+            opt_ins: TransactionPreviewRequestOptIns::default(),
         }
     }
 }

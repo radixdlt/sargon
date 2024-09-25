@@ -1,34 +1,39 @@
 CALL_METHOD
-    Address("locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a")
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    "lock_fee"
+    Decimal("0.595383053951")
+;
+CALL_METHOD
+    Address("locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx")
     "claim"
-    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
-    Address("resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27")
-    Decimal("4")
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    Address("resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3")
+    Decimal("1")
 ;
 TAKE_FROM_WORKTOP
-    Address("resource_tdx_2_1nflxr7dvp29hxhjjp53strsdgv2kv9dxlx6ys52lafrgyljrhwkt27")
-    Decimal("4")
+    Address("resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3")
+    Decimal("1")
     Bucket("bucket1")
 ;
 CALL_METHOD
-    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
     "deposit"
     Bucket("bucket1")
 ;
 CALL_METHOD
-    Address("locker_tdx_2_1drgp40wpu5cj0zady4s0pec6rld8muge0j2xx9xuwwc474uzlgja6a")
+    Address("locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx")
     "claim"
-    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
-    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
-    Decimal("30")
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    Address("resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32")
+    Decimal("3")
 ;
 TAKE_FROM_WORKTOP
-    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
-    Decimal("30")
+    Address("resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32")
+    Decimal("3")
     Bucket("bucket2")
 ;
 CALL_METHOD
-    Address("account_tdx_2_12xlu6x99ssrwrs8cnafka8476ursxfyfde3kfyk7d4s9c5kdvcs77x")
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
     "deposit"
     Bucket("bucket2")
 ;

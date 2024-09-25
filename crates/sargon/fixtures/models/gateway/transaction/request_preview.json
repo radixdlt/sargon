@@ -24,5 +24,9 @@
 		}
 	],
 	"start_epoch_inclusive": 51652,
-	"tip_percentage": 0
+	"tip_percentage": 0,
+	"opt_ins":
+	{
+		"radix_engine_toolkit_receipt": true
+	}
 }

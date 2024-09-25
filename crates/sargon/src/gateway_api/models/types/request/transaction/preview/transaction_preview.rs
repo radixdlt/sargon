@@ -36,4 +36,7 @@ pub(crate) struct TransactionPreviewRequest {
     pub(crate) signer_public_keys: Vec<GWPublicKey>,
 
     pub(crate) flags: TransactionPreviewRequestFlags,
+
+    /** A set of flags to configure the response of the transaction preview. */
+    pub(crate) opt_ins: TransactionPreviewRequestOptIns,
 }

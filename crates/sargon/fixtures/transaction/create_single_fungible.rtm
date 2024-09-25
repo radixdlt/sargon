@@ -1,58 +1,115 @@
 CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-    Enum<0u8>()									# Owner role
-    true										# Whether the engine should track supply
-    10u8										# Divisibility (between 0u8 and 18u8)
-    Decimal("100000")							# Initial supply
-    Tuple(
-        Enum<0u8>(),							# None | Mint Roles (if None: defaults to DenyAll, DenyAll)
-        Enum<0u8>(),							# None | Burn Roles (if None: defaults to DenyAll, DenyAll)
-        Enum<0u8>(),							# None | Freeze Roles (if None: defaults to DenyAll, DenyAll)
-        Enum<0u8>(),							# None | Recall Roles (if None: defaults to DenyAll, DenyAll)
-        Enum<0u8>(),							# None | Withdraw Roles (if None: defaults to AllowAll, DenyAll)
-        Enum<0u8>()								# None | Deposit Roles (if None: defaults to AllowAll, DenyAll)
+    Enum<2u8>(
+        Enum<0u8>()
     )
-    Tuple(										# Metadata initialization
-        Map<String, Tuple>(						# Initial metadata values
-            "name" => Tuple(
+    true
+    10u8
+    Decimal("21000000")
+    Tuple(
+        Enum<1u8>(
+            Tuple(
                 Enum<1u8>(
-                    Enum<0u8>("MyResource")		# Resource NAME
+                    Enum<0u8>()
                 ),
-                false							# Locked
-            ),
-            "description" => Tuple(				# Resource DESCRIPTION
                 Enum<1u8>(
-                    Enum<0u8>(
-                        "A
-                        very
-                        innovative
-                        and
-                        important
-                        resource"
-                    )
-                ),
-                false							# Locked
-            ),
-            "icon_url" => Tuple(				# Resource URL
-                Enum<1u8>(
-                    Enum<13u8>(
-                        "https://i.imgur.com/A2itmif.jpeg"
-                    )
-                ),
-                false							# Locked
-            ),
-            "symbol" => Tuple(					# Resource SYMBOL
-                Enum<1u8>(
-                    Enum<0u8>("VIP")
-                ),
-                false							# Locked
+                    Enum<1u8>()
+                )
             )
         ),
-        Map<String, Enum>()						# Metadata roles
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<0u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<0u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<0u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<0u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<0u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        )
     )
-    Enum<0u8>()									# None | No Address Reservation
+    Tuple(
+        Map<String, Tuple>(
+            "description" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "The brightest component in the Radix ecosystem."
+                    )
+                ),
+                false
+            ),
+            "name" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "Stella"
+                    )
+                ),
+                false
+            ),
+            "symbol" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "STAR"
+                    )
+                ),
+                false
+            ),
+            "tags" => Tuple(
+                Enum<1u8>(
+                    Enum<128u8>(
+                        Array<String>(
+                            "Bright"
+                        )
+                    )
+                ),
+                false
+            )
+        ),
+        Map<String, Enum>()
+    )
+    Enum<0u8>()
 ;
 CALL_METHOD
-    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    Address("account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3")
     "try_deposit_batch_or_abort"
     Expression("ENTIRE_WORKTOP")
     Enum<0u8>()

@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.14"
+version = "1.1.16"
 edition = "2021"
 build = "build.rs"
 
@@ -74,20 +74,21 @@ strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf1501
   "derive",
 ] }
 
-sbor = { version = "1.2.0" }
-radix-rust = { version = "1.2.0", features = ["serde"] }
-radix-engine = { version = "1.2.0" }
-radix-common = { version = "1.2.0", features = [
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", features = ["serde"] }
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", features = [
   "serde",
   "secp256k1_sign_and_validate",
 ] }
-radix-common-derive = { version = "1.2.0" }
-radix-engine-interface = { version = "1.2.0" }
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
+native-radix-engine-toolkit = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", package = "radix-engine-toolkit" }
 
-radix-transactions = { version = "1.2.0" }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
 
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "476d779fee08ed1e561ac8fc8730a2a404b7de79" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "476d779fee08ed1e561ac8fc8730a2a404b7de79" }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "12a9ce36cc8c36c728f095b450caeb45195eb431" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "12a9ce36cc8c36c728f095b450caeb45195eb431" }
 
 # enum-iterator = "1.4.1"
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }

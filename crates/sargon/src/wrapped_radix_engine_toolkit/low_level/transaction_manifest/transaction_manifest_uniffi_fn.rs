@@ -51,9 +51,9 @@ pub fn transaction_manifest_involved_pool_addresses(
 #[uniffi::export]
 pub fn transaction_manifest_execution_summary(
     manifest: &TransactionManifest,
-    encoded_receipt: BagOfBytes,
+    engine_toolkit_receipt: String,
 ) -> Result<ExecutionSummary> {
-    manifest.execution_summary(encoded_receipt)
+    manifest.execution_summary(engine_toolkit_receipt)
 }
 
 #[uniffi::export]
@@ -150,14 +150,14 @@ mod tests {
 
     #[test]
     fn test_execution_summary() {
-        let encoded_receipt_hex = include_str!(concat!(
+        let receipt = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "transfer_1to2_multiple_nf_and_f_tokens.dat"
+            "unstake_partially_from_one_validator.dat"
         ));
 
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "transfer_1to2_multiple_nf_and_f_tokens.rtm"
+            "unstake_partially_from_one_validator.rtm"
         ));
 
         let transaction_manifest = TransactionManifest::new(
@@ -169,11 +169,11 @@ mod tests {
 
         let sut = transaction_manifest_execution_summary(
             &transaction_manifest,
-            BagOfBytes::from_hex(encoded_receipt_hex).unwrap(),
+            receipt.to_owned(),
         )
         .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
         assert_eq!(sut.addresses_of_accounts_requiring_auth, vec![acc_gk])
     }
 

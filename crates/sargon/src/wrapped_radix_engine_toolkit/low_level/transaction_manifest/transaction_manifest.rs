@@ -398,6 +398,6 @@ BURN_RESOURCE
         )
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();
-        assert_eq!(pool_addresses, ["pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3"].into_iter().map(PoolAddress::from).collect_vec());
+        assert_eq!(pool_addresses, ["pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830"].into_iter().map(PoolAddress::from).collect_vec());
     }
 }

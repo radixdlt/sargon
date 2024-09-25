@@ -189,9 +189,16 @@ val TransactionManifest.involvedResourceAddresses: List<ResourceAddress>
 val TransactionManifest.summary: ManifestSummary
     get() = transactionManifestSummary(manifest = this)
 
+/**
+ * Creates the `ExecutionSummary` based on the `engineToolkitReceipt` data. 
+ *
+ * Such value should be obtained from the Gateway `/transaction/preview` endpoint,
+ * under the `radix_engine_toolkit_receipt` field.
+ * The content should be parsed as a String.
+ */
 @Throws(SargonException::class)
-fun TransactionManifest.executionSummary(encodedReceipt: BagOfBytes) =
-    transactionManifestExecutionSummary(manifest = this, encodedReceipt = encodedReceipt)
+fun TransactionManifest.executionSummary(engineToolkitReceipt: String) =
+    transactionManifestExecutionSummary(manifest = this, engineToolkitReceipt = engineToolkitReceipt)
 
 fun TransactionManifest.Companion.accountLockerClaim(
     lockerAddress: LockerAddress,
