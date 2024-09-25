@@ -68,23 +68,24 @@ jobs:
   
   # phylum
   phylum-analyze:
-      if: ${{ github.event.pull_request }}
-      uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
-      permissions:
-        id-token: write
-        pull-requests: write
-        contents: read
-        deployments: write
-      secrets:
-        phylum_api_key: ${{ secrets.PHYLUM_API_KEY }}
-      with:
-        phylum_pr_number: ${{ github.event.number }}
-        phylum_pr_name: ${{ github.head_ref }}
-        phylum_group_name: Wallet
-        phylum_project_id: fb999d0c-b260-474e-8c08-2f163aa2c75f
-        github_repository: ${{ github.repository }}
-        add_report_comment_to_pull_request: true
-        
+
+    if: ${{ github.event.pull_request }}
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
+    permissions:
+      id-token: write
+      pull-requests: write
+      contents: read
+      deployments: write
+    secrets:
+      phylum_api_key: ${{ secrets.PHYLUM_API_KEY }}
+    with:
+      phylum_pr_number: ${{ github.event.number }}
+      phylum_pr_name: ${{ github.head_ref }}
+      phylum_group_name: Wallet
+      phylum_project_id: fb999d0c-b260-474e-8c08-2f163aa2c75f
+      github_repository: ${{ github.repository }}
+      add_report_comment_to_pull_request: true
+
   # cargo check
   check-cargo-check:
     runs-on: ubuntu-latest
