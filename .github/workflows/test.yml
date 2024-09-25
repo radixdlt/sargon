@@ -42,7 +42,10 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout@main
+      - name: Checkout repository
+        uses: RDXWorks-actions/checkout@main
+        with:
+          fetch-depth: 0 # Ensure the full git history is fetched
 
       - name: Verify Cargo.toml version bump
         run: |
