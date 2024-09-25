@@ -57,8 +57,6 @@ mod integration_tests {
         assert!(epoch > Epoch::from(0));
     }
 
-    // Commented until GW 1.7.2 is released (which has `radix_engine_toolkit_receipt` inside the the Transaction Review response)
-    /*
     #[actix_rt::test]
     async fn dry_run_transaction() {
         // ARRANGE
@@ -132,7 +130,6 @@ mod integration_tests {
             )])
         );
     }
-     */
 
     async fn submit_tx_use_faucet(
         private_key: impl Into<PrivateKey>,
