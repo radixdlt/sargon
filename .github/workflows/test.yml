@@ -44,16 +44,13 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install cargo-edit
-        run: cargo install cargo-edit
-
       - name: Verify Cargo.toml version bump
         run: |
           # Extract the version from Cargo.toml on the base branch
           base_version=$(git show origin/${{ github.event.pull_request.base.ref }}:crates/sargon/Cargo.toml | grep '^version' | sed 's/version = "\(.*\)"/\1/')
-          
+
           # Extract the version from the PR branch
-          pr_version=$(grep '^version' creates/sargon/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          pr_version=$(grep '^version' crates/sargon/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 
           # Compare the versions
           echo "Base version: $base_version"
