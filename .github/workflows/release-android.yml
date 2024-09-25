@@ -19,12 +19,12 @@ permissions:
   packages: write
 env:
   CARGO_TERM_COLOR: always
-  MACHINE: macos-14-xlarge
+  MACHINE: ubuntu-latest
 jobs:
   build:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     env:
-      RUST_TOOLCHAIN: nightly-2024-01-11
+      RUST_TOOLCHAIN: nightly-2024-07-30
       RUST_COMPONENTS: "rust-std"
       CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
     steps:
@@ -62,7 +62,7 @@ jobs:
       - name: Build and publish Android
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-android:publish
+          arguments: sargon-android:publishAndroidPublicationToGitHubPackagesRepository
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

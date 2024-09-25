@@ -13,4 +13,10 @@ enum class BuildType {
 
     val capitalised: String
         get() = lowercase.capitalized()
+
+    companion object {
+        fun from(property: String?) = property?.lowercase()?.let { propertyLowercased ->
+            BuildType.values().find { it.lowercase == propertyLowercased }
+        }
+    }
 }

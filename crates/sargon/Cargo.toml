@@ -206,3 +206,6 @@ cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a
 
 [features]
 build-binary = ["camino", "clap", "regex"]
+
+[lints.rust]
+unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }

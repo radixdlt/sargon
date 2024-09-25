@@ -1,6 +1,8 @@
+import com.radixdlt.cargo.desktop.DesktopTargetTriple
+import com.radixdlt.cargo.desktop.currentTargetTriple
 import com.radixdlt.cargo.toml.sargonVersion
-import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Files
 
 plugins {
     alias(libs.plugins.android.library)
@@ -8,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.cargo.ndk)
     alias(libs.plugins.kotlin.kover)
+    id("com.radixdlt.cargo.desktop")
     id("maven-publish")
 }
 
@@ -31,6 +34,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -38,13 +42,42 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     sourceSets {
-        getByName("debug") {
-            java.srcDir("${buildDir}/generated/src/debug/java")
+        getByName("main") {
+            java.srcDir("${buildDir}/generated/src/kotlin")
         }
-        getByName("release") {
-            java.srcDir("${buildDir}/generated/src/release/java")
+
+        configureEach {
+            if (name.startsWith("test")) {
+                // Unit tests need to be linked with "desktop", native to the machine, libraries
+                resources.srcDirs("${buildDir}/generated/src/resources")
+            } else {
+                // The rest of the tasks are android related and need to link
+                // with the android jniLibs
+                jniLibs.srcDirs("${buildDir}/generated/src/jniLibs")
+            }
         }
+    }
+
+    packaging {
+        // Need to merge junit 4 & 5 licences
+        resources.merges.addAll(
+            listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+            )
+        )
+    }
+
+    // This task is used when publishing `sargon-desktop-bins`.
+    // Before generating a Jar we need all native libs to have been built for all desktop
+    // architectures.
+    // The building is handled by github. After that the `copyExternalArtifacts` needs to copy
+    // all the built libraries into the resources directory.
+    tasks.register<Jar>("desktopJar") {
+        from("${buildDir}/generated/src/resources")
+        dependsOn("copyExternalArtifacts")
     }
 }
 
@@ -56,6 +89,10 @@ cargoNdk {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // Need to specifically set the path for JNA
+    // The binary file is not automatically included in the classpath
+    val triple = project.currentTargetTriple()
+    systemProperties["jna.library.path"] = "${buildDir}/generated/src/resources/${triple.jnaName}"
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -114,14 +151,13 @@ dependencies {
     implementation(libs.timber)
 
     // Unit tests
+    testImplementation("net.java.dev.jna:jna:5.13.0")
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.turbine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testDebugRuntimeOnly(project(":sargon-desktop-debug"))
-    testReleaseRuntimeOnly(project(":sargon-desktop-release"))
 
     // Integration tests
     androidTestImplementation(libs.androidx.test.runner)
@@ -135,13 +171,26 @@ dependencies {
 
 publishing {
     publications {
-        register<MavenPublication>("release") {
+        // Publishing the android library we just need to build the library from the release component
+        register<MavenPublication>("android") {
             groupId = "com.radixdlt.sargon"
             artifactId = "sargon-android"
             version = project.sargonVersion()
 
             afterEvaluate {
                 from(components["release"])
+            }
+        }
+
+        // Publishing the desktop bins we need to run the `desktopJar` task. For more info check
+        // the comments of that task.
+        register<MavenPublication>("desktop") {
+            groupId = "com.radixdlt.sargon"
+            artifactId = "sargon-desktop-bins"
+            version = project.sargonVersion()
+
+            afterEvaluate {
+                artifact(tasks.getByName("desktopJar"))
             }
         }
     }
@@ -175,42 +224,101 @@ tasks.register("prepareLocalProperties") {
     tasks.getByName("preBuild").dependsOn(this)
 }
 
-android.libraryVariants.all {
-    val buildType = name
-    val buildTypeUpper = buildType.capitalized()
-
-    val generateBindings = tasks.register(
-        "generate${buildTypeUpper}UniFFIBindings",
-        Exec::class
-    ) {
-        val regenerate = properties["regenerate"] ?: true //TODO improve by using gradle outputs
-
-        onlyIf {
-            regenerate == true || !File("${buildDir}/generated/src/${buildType}/java").exists()
-        }
-
+afterEvaluate {
+    val generateBindings = tasks.register("generateUniFFIBindings") {
         group = BasePlugin.BUILD_GROUP
 
-        workingDir = rootDir.parentFile
-        commandLine(
-            "cargo", "run", "--features", "build-binary", "--bin", "sargon-bindgen", "generate", "--library",
-            "${rootDir}/${project.name}/src/main/jniLibs/arm64-v8a/libsargon.so", "--language", "kotlin",
-            "--out-dir", "${buildDir}/generated/src/${buildType}/java"
-        )
+        doLast {
+            // Uniffi needs a binary library to generate the bindings
+            // - If in a previous task an android binary is generated, we use that
+            //   (the build is intended to be used in an android device)
+            // - If no android binary is found, we need to find a desktop generated one that was built
+            //   for the same arch as the one the current task was invoked
+            //   (the build was intended to run unit tests, so no android binaries were built)
+            // - If no binaries are found, we fail the build
+            val hostTarget = project.currentTargetTriple()
 
-        dependsOn("buildCargoNdk${buildTypeUpper}")
+            // Android binaries take priority
+            val binaryFile = Files.walk(File("${buildDir}/generated/src").toPath())
+                .filter { !Files.isDirectory(it) }
+                .map { it.toString() }
+                .filter { path ->
+                    path.endsWith("libsargon.so") || path.endsWith("libsargon.dylib") || path.endsWith("libsargon.dll")
+                }
+                .map { File(it) }
+                .toList()
+                .find {
+                    it.absolutePath.contains("jniLibs") || it.parentFile.name == hostTarget.jnaName
+                }
+                ?.relativeTo(rootDir.parentFile) ?: error("Could not find library file to generate bindings")
+
+            exec {
+                workingDir = rootDir.parentFile
+                commandLine(
+                    "cargo", "run",
+                    "--features", "build-binary",
+                    "--bin", "sargon-bindgen",
+                    "generate", "--library", binaryFile.toString(),
+                    "--language", "kotlin",
+                    "--out-dir", "${buildDir}/generated/src/kotlin"
+                )
+            }
+        }
+    }
+    tasks.getByName("buildCargoDesktopDebug").finalizedBy(generateBindings)
+    tasks.getByName("buildCargoDesktopRelease").finalizedBy(generateBindings)
+
+    val copyJniLibs = tasks.register("copyJniLibs") {
+        doLast {
+            copy {
+                from("src/main/jniLibs")
+                into("${buildDir}/generated/src/jniLibs")
+            }
+            delete("src/main/jniLibs")
+        }
+
+        finalizedBy(generateBindings)
+    }
+    tasks.getByName("buildCargoNdkDebug").finalizedBy(copyJniLibs)
+    tasks.getByName("buildCargoNdkRelease").finalizedBy(copyJniLibs)
+
+    tasks.getByName("testDebugUnitTest").dependsOn("buildCargoDesktopDebug")
+    tasks.getByName("testReleaseUnitTest").dependsOn("buildCargoDesktopRelease")
+}
+
+// Task that copies externally built artifacts into resources directory
+tasks.register("copyExternalArtifacts") {
+    doFirst {
+        DesktopTargetTriple.ciSupported.forEach { triple ->
+            exec {
+                commandLine("mkdir", "-p", "${buildDir}/generated/src/resources/${triple.jnaName}")
+            }
+        }
     }
 
-    javaCompileProvider.get().dependsOn(generateBindings)
+    doLast {
+        val rustProjectDir = projectDir.parentFile.parentFile
+        val artifactsDir = File(rustProjectDir, "artifacts")
 
-    // Some stuff here is broken, since Android Tests don't run after running gradle build,
-    // but do otherwise. Also CI is funky.
-    tasks.named("compile${buildTypeUpper}Kotlin").configure {
-        dependsOn(generateBindings)
-    }
+        val fileTargets = artifactsDir.listFiles()?.mapNotNull { file ->
+            val triple = DesktopTargetTriple.from(file.name) ?: return@mapNotNull null
+            file to triple
+        }.orEmpty()
 
-    tasks.named("connectedDebugAndroidTest").configure {
-        dependsOn(generateBindings)
+        if (fileTargets.isEmpty()) {
+            error("No files found in ${artifactsDir.absolutePath}")
+        }
+
+        fileTargets.forEach { target ->
+            exec {
+                workingDir = rustProjectDir
+                commandLine(
+                    "cp",
+                    "${target.first.canonicalPath}/${target.second.binaryName}",
+                    "${buildDir}/generated/src/resources/${target.second.jnaName}/${target.second.binaryName}"
+                )
+            }
+        }
     }
 }
 
@@ -219,13 +327,7 @@ tasks.register("cargoClean") {
     doLast {
         exec {
             workingDir = rootDir.parentFile
-            println("Cleaning for aarch64-linux-android")
-            commandLine("cargo", "clean", "--target", "aarch64-linux-android")
-        }
-        exec {
-            workingDir = rootDir.parentFile
-            println("Cleaning for armv7-linux-androideabi")
-            commandLine("cargo", "clean", "--target", "armv7-linux-androideabi")
+            commandLine("cargo", "clean")
         }
     }
 }

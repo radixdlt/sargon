@@ -1,0 +1,98 @@
+name: CD Desktop Binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: "A custom version name. The resulting name will have the format <cargo.version.patch>-<custom-name>-<rev> (E.g. 1.0.23-custom-name-2eb68d8c)."
+        required: false
+        type: string
+  push:
+    tags:
+      - "**"
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+env:
+  CARGO_TERM_COLOR: always
+  MACHINE: ubuntu-latest
+jobs:
+  build:
+    strategy:
+      matrix:
+        build-target:
+          - runner: ubuntu-latest
+            toolchain: x86_64-unknown-linux-gnu
+            binary: libsargon.so
+          - runner: macos-latest
+            toolchain: aarch64-apple-darwin
+            binary: libsargon.dylib
+    runs-on: ${{ matrix.build-target.runner }}
+    env:
+      RUST_TOOLCHAIN: nightly-2024-07-30
+      RUST_COMPONENTS: "rust-std"
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: ${{ matrix.build-target.toolchain }}
+          default: 'true'
+
+      - name: Rustc version
+        run: cargo --version --verbose
+
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
+      - name: Build desktop binaries
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-android:buildCargoDesktopRelease
+          build-root-directory: jvm
+
+      - name: Upload Artifacts
+        uses: RDXWorks-actions/upload-artifact@main
+        with:
+          name: ${{ matrix.build-target.toolchain }}
+          path: "target/${{ matrix.build-target.toolchain }}/release/${{ matrix.build-target.binary }}"
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/download-artifact@main
+        with:
+          path: artifacts
+
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
+      - name: Prune Tags
+        run: git fetch --prune --tags
+
+      - name: Publish desktop binaries
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-android:publishDesktopPublicationToGitHubPackagesRepository
+          build-root-directory: jvm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
