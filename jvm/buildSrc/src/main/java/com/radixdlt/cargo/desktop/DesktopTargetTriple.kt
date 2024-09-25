@@ -33,10 +33,21 @@ sealed interface DesktopTargetTriple {
     }
 
     companion object {
-        val all = listOf(DarwinAArch64, DarwinX8664, LinuxArmel, LinuxX8664, LinuxWin32X8664)
+        private val all = listOf(
+            DarwinAArch64,
+            DarwinX8664,
+            LinuxArmel,
+            LinuxX8664,
+            LinuxWin32X8664
+        )
 
-        // Currently our CI supports building on Mac OS and we don't care about Mac Intel for now.
-        // So we skip the rest.
-        val supported = listOf(DarwinAArch64)
+        val ciSupported = listOf(
+            DarwinAArch64,
+            LinuxX8664
+        )
+
+        fun from(tripleName: String) : DesktopTargetTriple? = all.find {
+            it.rustTargetTripleName == tripleName
+        }
     }
 }

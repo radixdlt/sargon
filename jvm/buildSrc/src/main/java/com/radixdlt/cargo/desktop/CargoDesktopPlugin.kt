@@ -3,32 +3,34 @@ package com.radixdlt.cargo.desktop
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.kotlin.dsl.create
+import java.io.ByteArrayOutputStream
 
 abstract class CargoDesktopConfiguration {
-    var buildType: BuildType = BuildType.RELEASE
+    var buildType: BuildType? = null
 }
 
 class CargoDesktopPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        val extension = target.extensions.create<CargoDesktopConfiguration>("cargoDesktop")
         target.afterEvaluate {
-            val buildType = extension.buildType
+            BuildType.values().forEach { buildType ->
+                tasks.register("buildCargoDesktop${buildType.capitalised}") {
+                    group = BasePlugin.BUILD_GROUP
 
-            val cargoTask = tasks.register("buildCargo${buildType.capitalised}") {
-                group = BasePlugin.BUILD_GROUP
+                    var targetTriple: DesktopTargetTriple? = null
+                    doFirst {
+                        val current = project.currentTargetTriple().also {
+                            targetTriple = it
+                        }
 
-                doFirst {
-                    DesktopTargetTriple.supported.forEach { triple ->
                         exec {
-                            commandLine("mkdir", "-p", "src/main/resources/${triple.jnaName}")
+                            commandLine("mkdir", "-p", "${buildDir}/generated/src/resources/${current.jnaName}")
                         }
                     }
-                }
 
-                doLast {
-                    DesktopTargetTriple.supported.forEach { triple ->
-                        println("Building for ${triple.rustTargetTripleName}")
+                    doLast {
+                        val current = targetTriple ?: return@doLast
+
+                        println("Building for ${current.rustTargetTripleName}")
                         exec {
                             workingDir = projectDir.parentFile.parentFile
                             val commands = listOf(
@@ -36,7 +38,7 @@ class CargoDesktopPlugin : Plugin<Project> {
                                 "build",
                                 if (buildType.isRelease()) "--release" else null,
                                 "--target",
-                                triple.rustTargetTripleName
+                                current.rustTargetTripleName
                             ).mapNotNull { it }
 
                             commandLine(commands)
@@ -46,35 +48,31 @@ class CargoDesktopPlugin : Plugin<Project> {
                             workingDir = projectDir.parentFile.parentFile
                             commandLine(
                                 "cp",
-                                "target/${triple.rustTargetTripleName}/${buildType.lowercase}/${triple.binaryName}",
-                                "${projectDir}/src/main/resources/${triple.jnaName}/${triple.binaryName}"
+                                "target/${current.rustTargetTripleName}/${buildType.lowercase}/${current.binaryName}",
+                                "${buildDir}/generated/src/resources/${current.jnaName}/${current.binaryName}"
                             )
                         }
                     }
                 }
             }
-
-            val cleanTask = tasks.register("cargoClean") {
-                group = BasePlugin.BUILD_GROUP
-
-                doLast {
-                    DesktopTargetTriple.supported.forEach { triple ->
-                        exec {
-                            workingDir = rootDir.parentFile
-                            println("Cleaning for ${triple.rustTargetTripleName}")
-                            commandLine("cargo", "clean", "--target", triple.rustTargetTripleName)
-                        }
-                    }
-                }
-            }
-
-            tasks.getByName("compileJava") {
-                dependsOn(cargoTask)
-            }
-
-            tasks.getByName("clean") {
-                dependsOn(cleanTask)
-            }
         }
     }
+}
+
+fun Project.currentTargetTriple(): DesktopTargetTriple {
+    val rustcVersion: String = ByteArrayOutputStream().use { outputStream ->
+        project.exec {
+            commandLine("rustc", "--version", "--verbose")
+            standardOutput = outputStream
+        }
+        outputStream.toString()
+    }
+
+    val regex = "host: (.+)".toRegex()
+    val host = regex.find(rustcVersion)
+        ?.destructured
+        ?.component1() ?: throw RuntimeException("No host found in $rustcVersion")
+
+    return DesktopTargetTriple.from(host)
+        ?: error("No compatible DesktopTargetTriple found called '$host'")
 }

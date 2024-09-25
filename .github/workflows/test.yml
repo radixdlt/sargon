@@ -12,13 +12,13 @@ permissions:
   contents: read
 env:
   CARGO_TERM_COLOR: always
-  RUST_TOOLCHAIN: nightly-2024-01-11
+  RUST_TOOLCHAIN: nightly-2024-07-30
   RUST_COMPONENTS: "rust-std"
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
   # typos
   check-typos:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -58,7 +58,7 @@ jobs:
 
   # cargo check
   check-cargo-check:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -74,7 +74,7 @@ jobs:
 
   # cargo fmt check
   check-formatting:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -90,7 +90,7 @@ jobs:
 
   # clippy
   check-clippy:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -106,7 +106,7 @@ jobs:
 
   # Rust unit, doc and integration
   test-rust:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -153,36 +153,20 @@ jobs:
 
   # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Remove old xcode versions
-        run: |
-          echo "Removing old Xcode versions..."
-          find /Applications/ -name "Xcode*" | sort -r | tail --lines=+2 | xargs rm -rf
-          echo "Available Xcode versions after removal:"
-          find /Applications -name "Xcode_*" -maxdepth 1 -mindepth 1
-
-      - name: Install Rust Toolchain for aarch64-linux-android
+      - name: Install Rust Toolchain for x86_64-unknown-linux-gnu
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-linux-android
+          target: x86_64-unknown-linux-gnu
+          default: 'true'
 
-      - name: Install Rust Toolchain for armv7-linux-androideabi
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: armv7-linux-androideabi
-
-      - name: Install Rust Toolchain for aarch64-apple-darwin
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          target: aarch64-apple-darwin
+      - name: Rustc version
+        run: cargo --version --verbose
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
@@ -193,11 +177,11 @@ jobs:
       - name: Setup Android SDK
         uses: RDXWorks-actions/setup-android@v2
 
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
-
-      - name: Test JVM with coverage
-        run: ./jvm/gradlew -p jvm/sargon-android koverXmlReportDebug
+      - name: Unit test with coverage
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-android:koverXmlReportDebug
+          build-root-directory: jvm
 
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
