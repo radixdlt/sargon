@@ -89,6 +89,10 @@ cargoNdk {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // Need to specifically set the path for JNA
+    // The binary file is not automatically included in the classpath
+    val triple = project.currentTargetTriple()
+    systemProperties["jna.library.path"] = "${buildDir}/generated/src/resources/${triple.jnaName}"
 }
 
 tasks.withType<KotlinCompile>().configureEach {
