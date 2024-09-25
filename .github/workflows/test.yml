@@ -38,6 +38,35 @@ jobs:
       - name: Check typos
         run: typos
 
+  # version bump
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install cargo-edit
+        run: cargo install cargo-edit
+
+      - name: Verify Cargo.toml version bump
+        run: |
+          # Extract the version from Cargo.toml on the base branch
+          base_version=$(git show origin/${{ github.event.pull_request.base.ref }}:crates/sargon/Cargo.toml | grep '^version' | sed 's/version = "\(.*\)"/\1/')
+          
+          # Extract the version from the PR branch
+          pr_version=$(grep '^version' creates/sargon/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+
+          # Compare the versions
+          echo "Base version: $base_version"
+          echo "PR version: $pr_version"
+
+          if [ "$base_version" = "$pr_version" ]; then
+            echo "Version bump not detected in Cargo.toml. Please update the version."
+            exit 1
+          else
+            echo "Version bump detected!"
+          fi
+  
+  # phylum
   phylum-analyze:
       if: ${{ github.event.pull_request }}
       uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
