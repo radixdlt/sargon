@@ -16,138 +16,138 @@ env:
   RUST_COMPONENTS: "rust-std"
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
-#  # typos
-#  check-typos:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - name: Install Rust Toolchain
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          default: true
-#          profile: minimal
-#
-#      - name: Install typos
-#        uses: RDXWorks-actions/cargo-install@main
-#        with:
-#          crate: typos-cli
-#          version: 1.22.7
-#
-#      - name: Check typos
-#        run: typos
-#
-#  phylum-analyze:
-#      if: ${{ github.event.pull_request }}
-#      uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
-#      permissions:
-#        id-token: write
-#        pull-requests: write
-#        contents: read
-#        deployments: write
-#      secrets:
-#        phylum_api_key: ${{ secrets.PHYLUM_API_KEY }}
-#      with:
-#        phylum_pr_number: ${{ github.event.number }}
-#        phylum_pr_name: ${{ github.head_ref }}
-#        phylum_group_name: Wallet
-#        phylum_project_id: fb999d0c-b260-474e-8c08-2f163aa2c75f
-#        github_repository: ${{ github.repository }}
-#        add_report_comment_to_pull_request: true#  # cargo check
-#  check-cargo-check:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - name: Install Rust Toolchain
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          default: true
-#          profile: minimal
-#
-#      - name: Cargo Check
-#        run: cargo check --all
-#
-#  # cargo fmt check
-#  check-formatting:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - name: Install Rust Toolchain
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          default: true
-#          components: rustfmt
-#
-#      - name: Check formatting
-#        run: cargo fmt --check
-#
-#  # clippy
-#  check-clippy:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - name: Install Rust Toolchain
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          default: true
-#          components: clippy
-#
-#      - name: Clippy Check
-#        run: cargo clippy --all
-#
-#  # Rust unit, doc and integration
-#  test-rust:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - name: Install Rust Toolchain
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          default: true
-#
-#      - name: Run rust tests
-#        run: cargo test
-#
-#  # Swift testing on macOS (Apple Silicon)
-#  test-swift:
-#    runs-on: macos-14-xlarge
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - uses: RDXWorks-actions/setup-xcode@master
-#        with:
-#          xcode-version: "15.3.0"
-#
-#      - name: Install Rust Toolchain for aarch64-apple-darwin
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          target: aarch64-apple-darwin
-#
-#      - name: Build for macOS target and run swift test
-#        env:
-#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          rustup target add aarch64-apple-darwin
-#          sh ./scripts/ios/test.sh --build --codecov ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
-#
-#      - name: Upload to CodeCov.io
-#        uses: RDXWorks-actions/codecov-action@main
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          fail_ci_if_error: true
-#          files: ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
-#          name: codecov-swift
-#          flags: swift
+  # typos
+  check-typos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          profile: minimal
+
+      - name: Install typos
+        uses: RDXWorks-actions/cargo-install@main
+        with:
+          crate: typos-cli
+          version: 1.22.7
+
+      - name: Check typos
+        run: typos
+
+  phylum-analyze:
+      if: ${{ github.event.pull_request }}
+      uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
+      permissions:
+        id-token: write
+        pull-requests: write
+        contents: read
+        deployments: write
+      secrets:
+        phylum_api_key: ${{ secrets.PHYLUM_API_KEY }}
+      with:
+        phylum_pr_number: ${{ github.event.number }}
+        phylum_pr_name: ${{ github.head_ref }}
+        phylum_group_name: Wallet
+        phylum_project_id: fb999d0c-b260-474e-8c08-2f163aa2c75f
+        github_repository: ${{ github.repository }}
+        add_report_comment_to_pull_request: true#  # cargo check
+  check-cargo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          profile: minimal
+
+      - name: Cargo Check
+        run: cargo check --all
+
+  # cargo fmt check
+  check-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+  # clippy
+  check-clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          components: clippy
+
+      - name: Clippy Check
+        run: cargo clippy --all
+
+  # Rust unit, doc and integration
+  test-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+
+      - name: Run rust tests
+        run: cargo test
+
+  # Swift testing on macOS (Apple Silicon)
+  test-swift:
+    runs-on: macos-14-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          xcode-version: "15.3.0"
+
+      - name: Install Rust Toolchain for aarch64-apple-darwin
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          target: aarch64-apple-darwin
+
+      - name: Build for macOS target and run swift test
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rustup target add aarch64-apple-darwin
+          sh ./scripts/ios/test.sh --build --codecov ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
+
+      - name: Upload to CodeCov.io
+        uses: RDXWorks-actions/codecov-action@main
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          files: ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
+          name: codecov-swift
+          flags: swift
 
   # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
@@ -190,36 +190,36 @@ jobs:
           name: codecov-jvm
           flags: kotlin
 
-#  # Code Coverage uses Tarpaulin and uploads to CodeCov.io
-#  code-coverage:
-#    runs-on: macos-14-xlarge
-#    steps:
-#      - uses: RDXWorks-actions/checkout@main
-#
-#      - uses: RDXWorks-actions/setup-xcode@master
-#        with:
-#          # trying to fix https://github.com/rust-lang/rust/issues/113783
-#          xcode-version: "15.3.0"
-#
-#      - name: Install Rust Toolchain
-#        uses: RDXWorks-actions/toolchain@master
-#        with:
-#          toolchain: ${{ env.RUST_TOOLCHAIN }}
-#          default: true
-#
-#      - name: Install cargo tarpaulin
-#        uses: RDXWorks-actions/cargo-install@main
-#        with:
-#          crate: cargo-tarpaulin
-#          tag: 0.30.0
-#          locked: true
-#
-#      - name: Code Coverage - Generate
-#        run: cargo tarpaulin
-#
-#      - name: Code Coverage - Upload to CodeCov.io
-#        uses: RDXWorks-actions/codecov-action@main
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          fail_ci_if_error: true
-#          flags: rust
+  # Code Coverage uses Tarpaulin and uploads to CodeCov.io
+  code-coverage:
+    runs-on: macos-14-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          # trying to fix https://github.com/rust-lang/rust/issues/113783
+          xcode-version: "15.3.0"
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+
+      - name: Install cargo tarpaulin
+        uses: RDXWorks-actions/cargo-install@main
+        with:
+          crate: cargo-tarpaulin
+          tag: 0.30.0
+          locked: true
+
+      - name: Code Coverage - Generate
+        run: cargo tarpaulin
+
+      - name: Code Coverage - Upload to CodeCov.io
+        uses: RDXWorks-actions/codecov-action@main
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          flags: rust
