@@ -282,22 +282,17 @@ rustup target add aarch64-apple-darwin
 <summary>Linux</summary>
 
 ```sh
-rustup target add // TODO
+rustup target add x86_64-unknown-linux-gnu
 ```
 </details>
 
 ### Build
 ```sh
 cd jvm
-
-# Sargon Android
 # (Debug)
 ./gradlew sargon-android:assembleDebug
 # (Release)
 ./gradlew sargon-android:assembleRelease
-
-# Desktop Binaries
-./gradlew sargon-desktop-bins:assemble // TODO
 ```
 
 ### Unit Tests (Running locally)
@@ -399,9 +394,8 @@ Two modules are published in [Github's maven](https://github.com/radixdlt/sargon
   testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
   ```
 
-// TODO
 > [!IMPORTANT]  
-> Currently only supporting `aarch64-apple-darwin` (apple silicon). So when running Unit tests for your client app, make sure to run them on an apple silicon machine. In the future we will try to add more target architectures.
+> Currently only supporting `aarch64-apple-darwin` (apple silicon) and `x86_64-unknown-linux-gnu`. So when running Unit tests for your client app, make sure to run them on an apple silicon or linux machine. We can add more architectures in the future, if requested.
 
 # Example apps
 
