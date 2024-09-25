@@ -59,7 +59,7 @@ jobs:
       - name: Build desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-desktop:assemble -PbuildType=release
+          arguments: sargon-android:buildCargoDesktopRelease
           build-root-directory: jvm
 
       - name: Upload Artifacts
@@ -90,16 +90,10 @@ jobs:
       - name: Prune Tags
         run: git fetch --prune --tags
 
-      - name: Copy desktop binaries
-        uses: RDXWorks-actions/gradle-build-action@main
-        with:
-          arguments: sargon-desktop:copyGithubArtifacts
-          build-root-directory: jvm
-
       - name: Publish desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-desktop:publish -Pskip-cargo=true
+          arguments: sargon-android:publishDesktopPublicationToGitHubPackagesRepository
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -62,7 +62,7 @@ jobs:
       - name: Build and publish Android
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-android:publish
+          arguments: sargon-android:publishAndroidPublicationToGitHubPackagesRepository
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

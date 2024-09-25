@@ -175,8 +175,11 @@ jobs:
       - name: Setup Android SDK
         uses: RDXWorks-actions/setup-android@v2
 
-      - name: Test JVM with coverage
-        run: ./jvm/gradlew -p jvm/sargon-android koverXmlReportDebug
+      - name: Unit test with coverage
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-android:koverXmlReportDebug
+          build-root-directory: jvm
 
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main

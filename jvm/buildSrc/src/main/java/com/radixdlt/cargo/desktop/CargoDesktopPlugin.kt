@@ -3,7 +3,6 @@ package com.radixdlt.cargo.desktop
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.kotlin.dsl.create
 import java.io.ByteArrayOutputStream
 
 abstract class CargoDesktopConfiguration {
@@ -14,7 +13,7 @@ class CargoDesktopPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.afterEvaluate {
             BuildType.values().forEach { buildType ->
-                tasks.register("buildCargo${buildType.capitalised}") {
+                tasks.register("buildCargoDesktop${buildType.capitalised}") {
                     group = BasePlugin.BUILD_GROUP
 
                     var targetTriple: DesktopTargetTriple? = null
@@ -24,7 +23,7 @@ class CargoDesktopPlugin : Plugin<Project> {
                         }
 
                         exec {
-                            commandLine("mkdir", "-p", "src/main/resources/${current.jnaName}")
+                            commandLine("mkdir", "-p", "${buildDir}/generated/src/resources/${current.jnaName}")
                         }
                     }
 
@@ -50,48 +49,11 @@ class CargoDesktopPlugin : Plugin<Project> {
                             commandLine(
                                 "cp",
                                 "target/${current.rustTargetTripleName}/${buildType.lowercase}/${current.binaryName}",
-                                "${projectDir}/src/main/resources/${current.jnaName}/${current.binaryName}"
+                                "${buildDir}/generated/src/resources/${current.jnaName}/${current.binaryName}"
                             )
                         }
                     }
-
-                    onlyIf {
-                        val skipCargo = (properties["skip-cargo"] as? String)
-                            ?.toBooleanStrictOrNull() ?: false
-                        !skipCargo
-                    }
                 }
-            }
-
-            val cleanTask = tasks.register("cargoClean") {
-                group = BasePlugin.BUILD_GROUP
-
-                var currentTargetTriple: DesktopTargetTriple? = null
-                doFirst {
-                    currentTargetTriple = project.currentTargetTriple()
-                }
-
-                doLast {
-                    val targetTriple = currentTargetTriple ?: return@doLast
-
-                    exec {
-                        workingDir = rootDir.parentFile
-                        println("Cleaning for ${targetTriple.rustTargetTripleName}")
-                        commandLine("cargo", "clean", "--target", targetTriple.rustTargetTripleName)
-                    }
-                }
-            }
-
-            tasks.getByName("compileJava") {
-                val extension = target.extensions.create<CargoDesktopConfiguration>("cargoDesktop")
-                val buildType = extension.buildType
-                    ?: BuildType.from(properties["buildType"] as String?) ?: BuildType.DEBUG
-
-                dependsOn(tasks.getByName("buildCargo${buildType.capitalised}"))
-            }
-
-            tasks.getByName("clean") {
-                dependsOn(cleanTask)
             }
         }
     }
@@ -111,5 +73,6 @@ fun Project.currentTargetTriple(): DesktopTargetTriple {
         ?.destructured
         ?.component1() ?: throw RuntimeException("No host found in $rustcVersion")
 
-    return DesktopTargetTriple.current(host)
+    return DesktopTargetTriple.from(host)
+        ?: error("No compatible DesktopTargetTriple found called '$host'")
 }

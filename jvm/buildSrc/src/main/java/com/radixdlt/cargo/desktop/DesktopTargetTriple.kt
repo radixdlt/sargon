@@ -46,8 +46,8 @@ sealed interface DesktopTargetTriple {
             LinuxX8664
         )
 
-        fun current(host: String) : DesktopTargetTriple = all.find {
-            it.rustTargetTripleName == host
-        } ?: throw RuntimeException("No compatible DesktopTargetTriple found called '$host'")
+        fun from(tripleName: String) : DesktopTargetTriple? = all.find {
+            it.rustTargetTripleName == tripleName
+        }
     }
 }
