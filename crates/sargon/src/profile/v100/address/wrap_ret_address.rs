@@ -18,7 +18,9 @@ pub trait IsAddress:
 
 /// Helps with unit testing, so that we do not need to explicitly specify each
 /// (Sargon) Address types corresponding RET address type, but can use, e.g.
-/// `AccountAddress::RetAddress` instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
+/// `AccountAddress::RetAddress`
+/// instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
+#[allow(dead_code)]
 pub(crate) trait FromRetAddress {
     type RetAddress;
 }
