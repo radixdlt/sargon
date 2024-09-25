@@ -584,7 +584,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     @Test
     fun test_execution_summary() {
-        val name = "transfer_1to2_multiple_nf_and_f_tokens"
+        val name = "third_party_deposits_update"
         val receipt = engineToolkitReceipt(name)
         val manifest = manifest(name)
 
@@ -592,7 +592,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         assertEquals(
             listOf(
                 AccountAddress.init(
-                    "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk"
+                    "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a"
                 )
             ),
             summary.addressesOfAccountsRequiringAuth
@@ -661,8 +661,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             networkId = NetworkId.STOKENET
         )
 
-    private fun engineToolkitReceipt(name: String): BagOfBytes =
-        openFile(name, "dat").readText().hexToBagOfBytes()
+    private fun engineToolkitReceipt(name: String): String = openFile(name, "dat").readText()
 
     private fun openFile(name: String, extension: String) =
         File("../../" + "crates/sargon/fixtures/transaction/$name.$extension")
