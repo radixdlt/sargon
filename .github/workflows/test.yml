@@ -68,7 +68,6 @@ jobs:
   
   # phylum
   phylum-analyze:
-
     if: ${{ github.event.pull_request }}
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
     permissions:
