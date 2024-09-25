@@ -5,7 +5,7 @@ on:
     inputs:
       build_name:
         description: "A custom version name. The resulting name will have the format <cargo.version.patch>-<custom-name>-<rev> (E.g. 1.0.23-custom-name-2eb68d8c)."
-        required: true
+        required: false
         type: string
   push:
     tags:
