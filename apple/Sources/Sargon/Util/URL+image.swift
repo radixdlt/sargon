@@ -3,7 +3,7 @@ import SargonUniFFI
 
 extension URL {
 	public func isVectorImage(type: VectorImageType) -> Bool {
-		imageUrlUtilsIsVectorImage(url: self, imageType: type)
+		imageUrlUtilsIsVectorImage(url: self.absoluteString, imageType: type)
 	}
 
 	public func imageURL(imageServiceURL: URL, size: CGSize) throws -> URL {
