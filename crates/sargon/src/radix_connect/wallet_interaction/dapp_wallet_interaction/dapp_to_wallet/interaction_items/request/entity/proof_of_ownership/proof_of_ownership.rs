@@ -6,27 +6,27 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub enum DappToWalletInteractionProofOfOwnershipRequestItem {
     #[serde(rename = "accountsProofOfOwnership")]
-    Accounts(DappToWalletInteractionAccountsProofOfOwnershipRequestItem),
+    Accounts(DappToWalletInteractionAccountsProof),
 
     #[serde(rename = "personaProofOfOwnership")]
-    Persona(DappToWalletInteractionPersonaProofOfOwnershipRequestItem),
+    Persona(DappToWalletInteractionPersonaProof),
 }
 
-impl From<DappToWalletInteractionAccountsProofOfOwnershipRequestItem>
+impl From<DappToWalletInteractionAccountsProof>
     for DappToWalletInteractionProofOfOwnershipRequestItem
 {
     fn from(
-        value: DappToWalletInteractionAccountsProofOfOwnershipRequestItem,
+        value: DappToWalletInteractionAccountsProof,
     ) -> Self {
         Self::Accounts(value)
     }
 }
 
-impl From<DappToWalletInteractionPersonaProofOfOwnershipRequestItem>
+impl From<DappToWalletInteractionPersonaProof>
     for DappToWalletInteractionProofOfOwnershipRequestItem
 {
     fn from(
-        value: DappToWalletInteractionPersonaProofOfOwnershipRequestItem,
+        value: DappToWalletInteractionPersonaProof,
     ) -> Self {
         Self::Persona(value)
     }
@@ -34,14 +34,13 @@ impl From<DappToWalletInteractionPersonaProofOfOwnershipRequestItem>
 
 impl HasSampleValues for DappToWalletInteractionProofOfOwnershipRequestItem {
     fn sample() -> Self {
-        Self::Accounts(DappToWalletInteractionAccountsProofOfOwnershipRequestItem::sample())
+        Self::Accounts(DappToWalletInteractionAccountsProof::sample())
     }
 
     fn sample_other() -> Self {
-        Self::Persona(DappToWalletInteractionPersonaProofOfOwnershipRequestItem::sample())
+        Self::Persona(DappToWalletInteractionPersonaProof::sample())
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -65,7 +64,15 @@ mod tests {
     fn from_accounts() {
         assert_eq!(
             SUT::sample(),
-            DappToWalletInteractionAccountsProofOfOwnershipRequestItem::sample().into()
+            DappToWalletInteractionAccountsProof::sample().into()
+        )
+    }
+
+    #[test]
+    fn from_persona() {
+        assert_eq!(
+            SUT::sample_other(),
+            DappToWalletInteractionPersonaProof::sample().into()
         )
     }
 

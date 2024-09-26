@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// A request to prove ownership of a given list of `Persona`.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappToWalletInteractionPersonaProofOfOwnershipRequestItem {
+pub struct DappToWalletInteractionPersonaProof {
     /// The `IdentityAddress` for which the wallet must prove ownership.
     pub identity_address: IdentityAddress,
 
@@ -11,7 +11,7 @@ pub struct DappToWalletInteractionPersonaProofOfOwnershipRequestItem {
     pub challenge: DappToWalletInteractionAuthChallengeNonce,
 }
 
-impl DappToWalletInteractionPersonaProofOfOwnershipRequestItem {
+impl DappToWalletInteractionPersonaProof {
     pub fn new(
         identity_address: IdentityAddress,
         challenge: impl Into<DappToWalletInteractionAuthChallengeNonce>,
@@ -24,7 +24,7 @@ impl DappToWalletInteractionPersonaProofOfOwnershipRequestItem {
 }
 
 impl HasSampleValues
-    for DappToWalletInteractionPersonaProofOfOwnershipRequestItem
+    for DappToWalletInteractionPersonaProof
 {
     fn sample() -> Self {
         Self::new(
@@ -46,7 +46,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionPersonaProofOfOwnershipRequestItem;
+    type SUT = DappToWalletInteractionPersonaProof;
 
     #[test]
     fn equality() {

@@ -1,7 +1,7 @@
 mod accounts;
 mod persona;
-mod proof;
+mod proof_of_ownership;
 
 pub use accounts::*;
 pub use persona::*;
-pub use proof::*;
+pub use proof_of_ownership::*;
