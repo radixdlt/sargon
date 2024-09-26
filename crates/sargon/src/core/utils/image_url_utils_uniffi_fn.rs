@@ -3,7 +3,7 @@ use crate::types::*;
 
 #[uniffi::export]
 pub fn image_url_utils_is_vector_image(
-    url: &Url,
+    url: &str,
     image_type: VectorImageType,
 ) -> bool {
     is_vector_image(url, image_type)
@@ -26,11 +26,11 @@ mod tests {
 
     #[test]
     fn test_image_url_utils_is_vector_image() {
-        let url = parse_url("https://svgshare.com/i/U7z.svg").unwrap();
+        let url = "https://svgshare.com/i/U7z.svg";
         let image_type = VectorImageType::Svg;
 
         assert_eq!(
-            is_vector_image(&url, image_type),
+            is_vector_image(url, image_type),
             image_url_utils_is_vector_image(&url, image_type)
         )
     }
