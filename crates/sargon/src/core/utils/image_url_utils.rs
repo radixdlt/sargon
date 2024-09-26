@@ -65,6 +65,13 @@ mod tests {
     }
 
     #[test]
+    fn test_is_vector_image_invalid_url() {
+        let url = "invalid";
+
+        assert_eq!(is_vector_image(url, VectorImageType::sample()), false);
+    }
+
+    #[test]
     fn test_is_vector_image_with_image_origin_url() {
         let url = "https://image-service-dev.extratools.works/?imageOrigin=https%3A%2F%2Fsvgshare.com%2Fi%2FU7z.svg&imageSize=1024x1024&format=png";
 
