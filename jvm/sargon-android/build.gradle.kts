@@ -124,9 +124,7 @@ koverReport {
 }
 
 dependencies {
-    // Cannot use version catalogues for aar. For some reason when published to Maven,
-    // the jna dependency cannot be resolved
-    implementation("net.java.dev.jna:jna:5.13.0@aar")
+    implementation("${libs.jna.get()}@aar")
 
     // For lifecycle callbacks
     implementation(libs.androidx.appcompat)
@@ -138,7 +136,7 @@ dependencies {
     implementation(libs.coroutines.android)
 
     // For Serialization extensions
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.kotlinx.serialization.json)
 
     // For Network support
     implementation(libs.okhttp)
@@ -151,7 +149,7 @@ dependencies {
     implementation(libs.timber)
 
     // Unit tests
-    testImplementation("net.java.dev.jna:jna:5.13.0")
+    testImplementation(libs.jna)
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
@@ -191,6 +189,18 @@ publishing {
 
             afterEvaluate {
                 artifact(tasks.getByName("desktopJar"))
+            }
+
+            pom {
+                withXml {
+                    val dependencies = asNode().appendNode("dependencies")
+
+                    val jni = dependencies.appendNode("dependency")
+                    jni.appendNode("groupId", "net.java.dev.jna")
+                    jni.appendNode("artifactId", "jna")
+                    jni.appendNode("version", libs.versions.jna.get())
+                    jni.appendNode("scope", "runtime")
+                }
             }
         }
     }
