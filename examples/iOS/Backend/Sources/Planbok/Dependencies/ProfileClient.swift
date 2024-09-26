@@ -30,10 +30,10 @@ extension ProfileClient: DependencyKey {
 	public static func live(os: SargonOS) -> Self {
 		return Self(
 			activeProfile: {
-				os.profile()
+				try! os.profile()
 			},
 			deleteProfileAndMnemonicsThenCreateNew: {
-				let _ = try await os.deleteProfileThenCreateNewWithBdfs()
+                try await os.deleteWallet()
 			},
 			importProfile: {
 				try await os.importProfile(profile: $0)
@@ -42,7 +42,8 @@ extension ProfileClient: DependencyKey {
 				try Profile(encrypted: $0, decryptionPassword: $1)
 			},
 			emulateFreshInstallOfAppThenRestart: {
-				try await os.emulateFreshInstall()
+                log.warning("TODO Migrate `emulateFreshInstallOfAppThenRestart`, not in Sargon anymore.")
+                try await os.deleteWallet()
 			}
 		)
 	}

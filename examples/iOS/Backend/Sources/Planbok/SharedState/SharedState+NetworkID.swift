@@ -12,7 +12,7 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Net
 extension PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static let sharedNetwork = Self(
 		SargonKey(
-			accessing: \.currentNetworkID,
+            mapping: { try $0.currentNetworkID },
 			fetchIf: \.affectsCurrentNetwork
 		),
 		.default

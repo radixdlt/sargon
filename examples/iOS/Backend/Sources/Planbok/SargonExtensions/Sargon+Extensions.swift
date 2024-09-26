@@ -21,7 +21,7 @@ extension NetworkID {
 extension SargonOS {
 	
 	public var accountsForDisplayOnCurrentNetworkIdentified: AccountsForDisplay {
-		accountsForDisplayOnCurrentNetwork.asIdentified()
+		try! accountsForDisplayOnCurrentNetwork.asIdentified()
 	}
 	
 }

@@ -1,6 +1,48 @@
 import Sargon
 import ComposableArchitecture
 
+final class ProfileStateChangeDriverClass {
+    init() {}
+    static let shared = ProfileStateChangeDriverClass()
+}
+extension ProfileStateChangeDriverClass: ProfileStateChangeDriver {
+    func handleProfileStateChange(changedProfileState: ProfileState) async {
+        log.warning("profileStateChangeDriver not used, ignored event")
+        switch changedProfileState {
+        case .incompatible(let error):
+            fatalError("incompatible profile snapshot format, error: \(error)")
+        case .loaded(let loadedProfile):
+            log.notice("Loaded profile - id: \(loadedProfile.header.id)")
+        case .none:
+            log.notice("Profle changed to `none`.")
+        }
+    }
+}
+
+final class HostInfoDriverClass {
+    init() {}
+    static let shared = HostInfoDriverClass()
+}
+extension HostInfoDriverClass: HostInfoDriver {
+    func hostOs() async -> HostOs {
+        HostOs.ios(version: "read")
+    }
+    
+    func hostDeviceName() async -> String {
+        "iPhone wip"
+    }
+    
+    func hostAppVersion() async -> String {
+       "0.0.1"
+    }
+    
+    func hostDeviceModel() async -> String {
+        "iPhone wip"
+    }
+    
+    
+}
+
 @Reducer
 public struct AppFeature {
 	
@@ -11,14 +53,11 @@ public struct AppFeature {
 		case main(MainFeature.State)
 		
 		public init(isEmulatingFreshInstall: Bool = false) {
-			
 			let drivers = Drivers(
 				networking: URLSession.shared,
 				   secureStorage: Keychain(service: "rdx.works.planbok"),
 				   entropyProvider: EntropyProvider.shared,
-				   hostInfo: HostInfo(
-					   appVersion: "0.0.1"
-				   ),
+                hostInfo: HostInfoDriverClass.shared,
 				   logging: Log.shared,
 				   eventBus: EventBus.shared,
 				   fileSystem: FileSystem.shared,
@@ -26,7 +65,7 @@ public struct AppFeature {
 					   userDefaults: .init(
 						   suiteName: "rdx.works"
 					   )!
-				   )
+                   ), profileStateChangeDriver: ProfileStateChangeDriverClass.shared
 			   )
 			
 			BIOS.creatingShared(drivers: drivers)

@@ -61,7 +61,7 @@ public struct OnboardingFeature {
 					state.destination = .importProfile(.init())
 					return .none
 					
-				case .element(id: _, action: .newOrImportProfile(.delegate(.newProfile))):
+				case .element(id: _, action: .newOrImportProfile(.delegate(.createdNewEmptyProfile))):
 					state.destination = .createAccount(CreateAccountFlowFeature.State(index: 0))
 					return .none
 					

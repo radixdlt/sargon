@@ -22,7 +22,7 @@ public struct NewOrImportProfileFeature {
 	public enum Action: ViewAction {
 		
 		public enum DelegateAction {
-			case newProfile
+			case createdNewEmptyProfile
 			case importProfile
 		}
 		
@@ -40,10 +40,16 @@ public struct NewOrImportProfileFeature {
 			switch action {
 			
 			case .view(.importProfileButtonTapped):
-					.send(.delegate(.importProfile))
-				
-			case .view(.newProfileButtonTapped):
-					.send(.delegate(.newProfile))
+                    .send(.delegate(.importProfile))
+                 
+                
+            case .view(.newProfileButtonTapped):
+                    .run { send in
+                        try await SargonOS.shared.newWallet()
+                        await send(.delegate(.createdNewEmptyProfile))
+                    } catch: { error, _ in
+                        fatalError("Failed to create Profile, error: \(error)")
+                    }
 				
 			case .delegate:
 					.none

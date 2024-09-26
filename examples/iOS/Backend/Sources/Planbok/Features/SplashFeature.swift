@@ -58,9 +58,10 @@ public struct SplashFeature {
 						bootingWith: BIOS.shared,
 						isEmulatingFreshInstall: isEmulatingFreshInstall
 					)
+                    let hasAnyAccountOnAnyNetwork = (try? os.hasAnyAccountOnAnyNetwork()) ?? false
 					await send(
 						.delegate(.booted(
-							hasAnyAccountOnAnyNetwork: os.hasAnyAccountOnAnyNetwork()
+							hasAnyAccountOnAnyNetwork: hasAnyAccountOnAnyNetwork
 						))
 					)
 				}
