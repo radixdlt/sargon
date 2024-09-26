@@ -9,6 +9,9 @@ pub struct DappToWalletInteractionUnauthorizedRequestItems {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
         Option<DappToWalletInteractionPersonaDataRequestItem>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub proof_of_ownership: Option<DappToWalletInteractionProofOfOwnershipRequestItem>,
 }
 
 impl DappToWalletInteractionUnauthorizedRequestItems {
@@ -19,10 +22,14 @@ impl DappToWalletInteractionUnauthorizedRequestItems {
         one_time_persona_data: impl Into<
             Option<DappToWalletInteractionPersonaDataRequestItem>,
         >,
+        proof_of_ownership: impl Into<
+            Option<DappToWalletInteractionProofOfOwnershipRequestItem>,
+        >,
     ) -> Self {
         Self {
             one_time_accounts: one_time_accounts.into(),
             one_time_persona_data: one_time_persona_data.into(),
+            proof_of_ownership: proof_of_ownership.into(),
         }
     }
 }
@@ -32,6 +39,7 @@ impl HasSampleValues for DappToWalletInteractionUnauthorizedRequestItems {
         Self::new(
             DappToWalletInteractionAccountsRequestItem::sample(),
             DappToWalletInteractionPersonaDataRequestItem::sample(),
+            DappToWalletInteractionProofOfOwnershipRequestItem::sample(),
         )
     }
 
@@ -39,6 +47,7 @@ impl HasSampleValues for DappToWalletInteractionUnauthorizedRequestItems {
         Self::new(
             DappToWalletInteractionAccountsRequestItem::sample_other(),
             DappToWalletInteractionPersonaDataRequestItem::sample_other(),
+            DappToWalletInteractionProofOfOwnershipRequestItem::sample_other(),
         )
     }
 }
