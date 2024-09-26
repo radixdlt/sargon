@@ -547,6 +547,7 @@ mod dapp_to_wallet_interaction_tests {
             ),
             None,
             None,
+            None,
         )
     );
 
@@ -575,6 +576,7 @@ mod dapp_to_wallet_interaction_tests {
                     RequestedQuantity::at_least(1),
                     RequestedQuantity::at_least(1),
                 ),
+                None,
                 None,
                 None,
             )
@@ -615,7 +617,8 @@ mod dapp_to_wallet_interaction_tests {
                     true,
                     RequestedQuantity::exactly(1),
                     RequestedQuantity::exactly(1),
-                )
+                ),
+                None
             )
         );
 
@@ -638,7 +641,8 @@ mod dapp_to_wallet_interaction_tests {
                     true,
                     RequestedQuantity::at_least(1),
                     RequestedQuantity::at_least(1),
-                )
+                ),
+                None
             )
         );
 
@@ -771,6 +775,7 @@ mod wallet_to_dapp_interaction_tests {
                 persona_data.clone(),
                 None,
                 None,
+                None,
             )
         );
 
@@ -794,6 +799,7 @@ mod wallet_to_dapp_interaction_tests {
                         None,
                     ),
                     persona_data.clone(),
+                    None,
                 ),
             );
 
