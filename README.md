@@ -382,6 +382,7 @@ This will produce the following message when successfully finished
 ✅ Library is published in maven local with version:
 1.1.19-c74d9cbf-SNAPSHOT
 ```
+Note that such local maven builds are in debug mode and have a `-SNAPSHOT` suffix.
 
 Copy the version name to your project but make sure that `mavenLocal()` is included in your project's `settings.gradle` 
 ```gradle
