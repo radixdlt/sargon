@@ -153,5 +153,24 @@
       "origin" : "https://dev-sandbox.rdx-works-main.extratools.works/",
       "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze"
     }
+  },
+  {
+    "interactionId": "2916ad16-52a0-4564-a611-4971883c1322",
+    "items": {
+      "discriminator": "unauthorizedRequest",
+      "proofOfOwnership": {
+        "discriminator": "accountsProofOfOwnership",
+        "accountAddresses": [
+          "account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90"
+        ],
+        "challenge": "4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c"
+      }
+    },
+    "metadata": {
+      "version": 2,
+      "dAppDefinitionAddress": "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
+      "networkId": 2,
+      "origin": "https://dev-sandbox.rdx-works-main.extratools.works/"
+    }
   }
 ]

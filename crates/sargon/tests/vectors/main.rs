@@ -642,7 +642,7 @@ mod dapp_to_wallet_interaction_tests {
                     RequestedQuantity::at_least(1),
                     RequestedQuantity::at_least(1),
                 ),
-                None
+                None,
             )
         );
 
@@ -655,12 +655,35 @@ mod dapp_to_wallet_interaction_tests {
             metadata.clone(),
         );
 
+        let unauthorized_request_3_items =  DappToWalletInteractionItems::UnauthorizedRequest(
+            DappToWalletInteractionUnauthorizedRequestItems::new(
+                None,
+                None,
+                DappToWalletInteractionProofOfOwnershipRequestItem::Accounts(DappToWalletInteractionAccountsProof::new(
+                    vec![
+                        AccountAddress::from_str("account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90").unwrap(),
+                    ], 
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c").unwrap())
+                )),
+            )
+        );
+
+        let unauthorized_request_3 = DappToWalletInteraction::new(
+            WalletInteractionId::from_str(
+                "2916ad16-52a0-4564-a611-4971883c1322",
+            )
+            .unwrap(),
+            unauthorized_request_3_items,
+            metadata.clone(),
+        );
+
         let interactions = vec![
             authorized_request_with_challenge,
             authorized_request_without_challenge,
             transaction,
             unauthorized_request_1,
             unauthorized_request_2,
+            unauthorized_request_3,
         ];
 
         for (fixture, expected) in
