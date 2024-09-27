@@ -215,7 +215,7 @@ mod tests {
     }
 
     #[test]
-    fn test_concurent_access_read_after_write() {
+    fn test_concurrent_access_read_after_write() {
         let state = ProfileState::Loaded(Profile::sample());
         let sut = ProfileStateHolder::new(state.clone());
         let state_holder = Arc::new(sut);
@@ -251,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn test_concurent_access_writes() {
+    fn test_concurrent_access_writes() {
         let profile = Profile::sample();
         let state = ProfileState::Loaded(profile);
         let sut = ProfileStateHolder::new(state.clone());
@@ -328,7 +328,7 @@ mod tests {
     }
 
     #[test]
-    fn test_concurent_access_poisoned_lock() {
+    fn test_concurrent_access_poisoned_lock() {
         let state = ProfileState::Loaded(Profile::sample());
         let sut = ProfileStateHolder::new(state.clone());
         let state_holder = Arc::new(sut);
