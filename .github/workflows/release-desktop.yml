@@ -46,9 +46,6 @@ jobs:
           target: ${{ matrix.build-target.toolchain }}
           default: 'true'
 
-      - name: Rustc version
-        run: cargo --version --verbose
-
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
@@ -92,7 +89,7 @@ jobs:
       - name: Publish desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-android:publishDesktopPublicationToGitHubPackagesRepository
+          arguments: sargon-android:publishDesktopReleasePublicationToGitHubPackagesRepository
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
