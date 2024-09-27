@@ -94,10 +94,9 @@ impl ProfileStateHolder {
     where
         F: Fn(&Profile) -> T,
     {
-        let guard = self
-            .profile_state
-            .read()
-            .unwrap_or_else(|poison| poison.into_inner());
+        let guard = self.profile_state.read().expect(
+            "Stop execution due to the profile state lock being poisoned",
+        );
 
         let state = &*guard;
         match state {
@@ -113,10 +112,9 @@ impl ProfileStateHolder {
     where
         F: Fn(&Profile) -> Result<T>,
     {
-        let guard = self
-            .profile_state
-            .read()
-            .unwrap_or_else(|poison| poison.into_inner());
+        let guard = self.profile_state.read().expect(
+            "Stop execution due to the profile state lock being poisoned",
+        );
 
         let state = &*guard;
         match state {
@@ -133,10 +131,9 @@ impl ProfileStateHolder {
         &self,
         profile_state: ProfileState,
     ) -> Result<()> {
-        let mut lock = self
-            .profile_state
-            .write()
-            .unwrap_or_else(|poison| poison.into_inner());
+        let mut lock = self.profile_state.write().expect(
+            "Stop execution due to the profile state lock being poisoned",
+        );
 
         *lock = profile_state;
         Ok(())
@@ -149,10 +146,9 @@ impl ProfileStateHolder {
     where
         F: Fn(&mut Profile) -> Result<R>,
     {
-        let mut guard = self
-            .profile_state
-            .write()
-            .unwrap_or_else(|poison| poison.into_inner());
+        let mut guard = self.profile_state.write().expect(
+            "Stop execution due to the profile state lock being poisoned",
+        );
 
         let state = &mut *guard;
 
