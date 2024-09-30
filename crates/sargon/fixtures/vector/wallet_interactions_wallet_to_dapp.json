@@ -136,31 +136,26 @@
           "discriminator" : "success",
           "interactionId" : "17d530f6-0cb6-4122-8540-64e46a2e0f84",
           "items" : {
-              "discriminator" : "authorizedRequest",
-              "auth" : {
-                  "discriminator" : "loginWithChallenge",
-                  "persona" : {
-                      "identityAddress" : "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
-                      "label" : "Usdudh"
-                  },
-                  "challenge" : "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
-                  "proof" : {
-                    "publicKey" : "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
-                    "curve" : "curve25519",
-                    "signature" : "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
-                  }
-              },
-              "proofOfOwnership": {
+            "discriminator" : "unauthorizedRequest",
+            "proofOfOwnership": {
               "challenge": "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
               "proofs": [
                 {
-                    "identityAddress": "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+                    "accountAddress": "account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90",
                     "proof": {
                         "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
                         "curve": "curve25519",
                         "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
                     }
-                }
+                },
+                {
+                  "identityAddress": "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+                  "proof": {
+                      "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
+                      "curve": "curve25519",
+                      "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
+                  }
+              }
               ]
             }
           }
