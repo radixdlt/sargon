@@ -46,24 +46,46 @@ jobs:
         uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0 # Ensure the full git history is fetched
+	
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag is $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
 
       - name: Verify Cargo.toml version bump
         run: |
-          # Extract the version from Cargo.toml on the base branch
-          base_version=$(git show origin/${{ github.event.pull_request.base.ref }}:crates/sargon/Cargo.toml | grep '^version' | sed 's/version = "\(.*\)"/\1/')
+          # Extract the version from the latest tag
+          latest_tag_version=$LATEST_TAG
 
-          # Extract the version from the PR branch
+          # Extract the version from Cargo.toml in the PR branch
           pr_version=$(grep '^version' crates/sargon/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 
-          # Compare the versions
-          echo "Base version: $base_version"
+          echo "Latest tag version: $latest_tag_version"
           echo "PR version: $pr_version"
 
-          if [ "$base_version" = "$pr_version" ]; then
-            echo "Version bump not detected in Cargo.toml. Please update the version."
-            exit 1
+          # Split the versions into major, minor, and patch components
+          IFS='.' read -r -a tag_version_parts <<< "$latest_tag_version"
+          IFS='.' read -r -a pr_version_parts <<< "$pr_version"
+
+          major_diff=$((pr_version_parts[0] - tag_version_parts[0]))
+          minor_diff=$((pr_version_parts[1] - tag_version_parts[1]))
+          patch_diff=$((pr_version_parts[2] - tag_version_parts[2]))
+
+          # Check if the PR version is a valid bump
+          if [ "$major_diff" -eq 1 ] && [ "${pr_version_parts[1]}" -eq 0 ] && [ "${pr_version_parts[2]}" -eq 0 ]; then
+            echo "Major version bump valid!"
+          elif [ "$major_diff" -eq 0 ] && [ "$minor_diff" -eq 1 ] && [ "${pr_version_parts[2]}" -eq 0 ]; then
+            echo "Minor version bump valid!"
+          elif [ "$major_diff" -eq 0 ] && [ "$minor_diff" -eq 0 ] && [ "$patch_diff" -eq 1 ]; then
+            echo "Patch version bump valid!"
           else
-            echo "Version bump detected!"
+            echo "Version bump is invalid!"
+            exit 1
           fi
   
   # phylum
