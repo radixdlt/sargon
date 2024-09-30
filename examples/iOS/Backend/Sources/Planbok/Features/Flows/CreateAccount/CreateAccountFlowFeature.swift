@@ -37,7 +37,7 @@ public struct CreateAccountFlowFeature {
 				return .run { send in
 					try await accountsClient.createAndSaveAccount(name)
 					await send(.delegate(.createdAccount))
-				} catch: { _, error in
+				} catch: { error, _ in
 					fatalError("TODO error handling: \(error)")
 				}
 

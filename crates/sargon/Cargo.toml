@@ -1,13 +1,8 @@
 [package]
 name = "sargon"
-version = "1.1.19"
+version = "1.1.23"
 edition = "2021"
 build = "build.rs"
-
-[profile.release]
-incremental = false
-panic = 'unwind'
-codegen-units = 1
 
 [[test]]
 name = "vectors"
@@ -75,7 +70,9 @@ strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf1501
 ] }
 
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", features = ["serde"] }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", features = [
+  "serde",
+] }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae" }
 radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "6ec9c337246b5d4cf3c142bd9af80e9e8bd5fbae", features = [
   "serde",

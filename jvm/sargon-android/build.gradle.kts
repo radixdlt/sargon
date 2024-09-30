@@ -1,6 +1,8 @@
 import com.radixdlt.cargo.desktop.DesktopTargetTriple
 import com.radixdlt.cargo.desktop.currentTargetTriple
 import com.radixdlt.cargo.toml.sargonVersion
+import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.internal.logging.text.StyledTextOutput
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files
 
@@ -70,14 +72,24 @@ android {
         )
     }
 
-    // This task is used when publishing `sargon-desktop-bins`.
-    // Before generating a Jar we need all native libs to have been built for all desktop
-    // architectures.
-    // The building is handled by github. After that the `copyExternalArtifacts` needs to copy
-    // all the built libraries into the resources directory.
-    tasks.register<Jar>("desktopJar") {
-        from("${buildDir}/generated/src/resources")
-        dependsOn("copyExternalArtifacts")
+    buildTypes.forEach {
+        val buildTypeVariant = it.name.capitalized()
+        tasks.register<Jar>("desktopJar${buildTypeVariant}") {
+            from("${buildDir}/generated/src/resources")
+
+            if (it.isDebuggable) {
+                // For debug we only need to build for the current architecture. Used by maven publication in
+                // debug mode.
+                dependsOn("buildCargoDesktopDebug")
+            } else {
+                // This task is used when publishing `sargon-desktop-bins`.
+                // Before generating a Jar we need all native libs to have been built for all desktop
+                // architectures.
+                // The building is handled by github. After that the `copyExternalArtifacts` needs to copy
+                // all the built libraries into the resources directory.
+                dependsOn("copyExternalArtifacts")
+            }
+        }
     }
 }
 
@@ -124,9 +136,7 @@ koverReport {
 }
 
 dependencies {
-    // Cannot use version catalogues for aar. For some reason when published to Maven,
-    // the jna dependency cannot be resolved
-    implementation("net.java.dev.jna:jna:5.13.0@aar")
+    implementation("${libs.jna.get()}@aar")
 
     // For lifecycle callbacks
     implementation(libs.androidx.appcompat)
@@ -138,7 +148,7 @@ dependencies {
     implementation(libs.coroutines.android)
 
     // For Serialization extensions
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.kotlinx.serialization.json)
 
     // For Network support
     implementation(libs.okhttp)
@@ -151,7 +161,7 @@ dependencies {
     implementation(libs.timber)
 
     // Unit tests
-    testImplementation("net.java.dev.jna:jna:5.13.0")
+    testImplementation(libs.jna)
     testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
@@ -171,26 +181,42 @@ dependencies {
 
 publishing {
     publications {
-        // Publishing the android library we just need to build the library from the release component
-        register<MavenPublication>("android") {
-            groupId = "com.radixdlt.sargon"
-            artifactId = "sargon-android"
-            version = project.sargonVersion()
+        android.buildTypes.forEach {
+            val buildTypeVariant = it.name.capitalized()
 
-            afterEvaluate {
-                from(components["release"])
+            // Publishing the android library we just need to build the library from the release component
+            register<MavenPublication>("android$buildTypeVariant") {
+                groupId = "com.radixdlt.sargon"
+                artifactId = "sargon-android"
+                version = project.sargonVersion(it.isDebuggable)
+
+                afterEvaluate {
+                    from(components[it.name])
+                }
             }
-        }
 
-        // Publishing the desktop bins we need to run the `desktopJar` task. For more info check
-        // the comments of that task.
-        register<MavenPublication>("desktop") {
-            groupId = "com.radixdlt.sargon"
-            artifactId = "sargon-desktop-bins"
-            version = project.sargonVersion()
+            // Publishing the desktop bins we need to run the `desktopJar` task. For more info check
+            // the comments of that task.
+            register<MavenPublication>("desktop$buildTypeVariant") {
+                groupId = "com.radixdlt.sargon"
+                artifactId = "sargon-desktop-bins"
+                version = project.sargonVersion(it.isDebuggable)
 
-            afterEvaluate {
-                artifact(tasks.getByName("desktopJar"))
+                afterEvaluate {
+                    artifact(tasks.getByName("desktopJar$buildTypeVariant"))
+                }
+
+                pom {
+                    withXml {
+                        val dependencies = asNode().appendNode("dependencies")
+
+                        val jni = dependencies.appendNode("dependency")
+                        jni.appendNode("groupId", "net.java.dev.jna")
+                        jni.appendNode("artifactId", "jna")
+                        jni.appendNode("version", libs.versions.jna.get())
+                        jni.appendNode("scope", "runtime")
+                    }
+                }
             }
         }
     }
@@ -284,6 +310,20 @@ afterEvaluate {
 
     tasks.getByName("testDebugUnitTest").dependsOn("buildCargoDesktopDebug")
     tasks.getByName("testReleaseUnitTest").dependsOn("buildCargoDesktopRelease")
+
+    tasks.register("buildForLocalDev") {
+        group = "publishing"
+
+        doLast {
+            println("✅ Library is published in maven local with version:")
+            println(project.sargonVersion(true))
+        }
+
+        dependsOn(
+            "publishAndroidDebugPublicationToMavenLocal",
+            "publishDesktopDebugPublicationToMavenLocal"
+        )
+    }
 }
 
 // Task that copies externally built artifacts into resources directory
