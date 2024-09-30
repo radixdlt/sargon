@@ -691,15 +691,14 @@ mod dapp_to_wallet_interaction_tests {
             )
         );
 
-        let accounts_and_persona_proof_request =
-            DappToWalletInteraction::new(
-                WalletInteractionId::from_str(
-                    "17d530f6-0cb6-4122-8540-64e46a2e0f84",
-                )
-                .unwrap(),
-                accounts_and_persona_proof_request_items,
-                metadata.clone(),
-            );
+        let accounts_and_persona_proof_request = DappToWalletInteraction::new(
+            WalletInteractionId::from_str(
+                "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+            )
+            .unwrap(),
+            accounts_and_persona_proof_request_items,
+            metadata.clone(),
+        );
 
         let interactions = vec![
             authorized_request_with_challenge,
@@ -947,15 +946,16 @@ mod wallet_to_dapp_interaction_tests {
             ),
         );
 
-        let accounts_and_persona_proof_response = WalletToDappInteractionResponse::Success(
-            WalletToDappInteractionSuccessResponse::new(
-                WalletInteractionId::from_str(
-                    "17d530f6-0cb6-4122-8540-64e46a2e0f84",
-                )
-                .unwrap(),
-                accounts_and_persona_proof_response_items,
-            ),
-        );
+        let accounts_and_persona_proof_response =
+            WalletToDappInteractionResponse::Success(
+                WalletToDappInteractionSuccessResponse::new(
+                    WalletInteractionId::from_str(
+                        "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+                    )
+                    .unwrap(),
+                    accounts_and_persona_proof_response_items,
+                ),
+            );
 
         let responses = vec![
             authorized_request_response,
