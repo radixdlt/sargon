@@ -131,9 +131,10 @@ impl ProfileStateHolder {
         &self,
         profile_state: ProfileState,
     ) -> Result<()> {
-        let mut lock = self.profile_state.write().expect(
-            "Stop execution due to the profile state lock being poisoned",
-        );
+        let mut lock = self
+            .profile_state
+            .write()
+            .unwrap_or_else(|poison| poison.into_inner());
 
         *lock = profile_state;
         Ok(())
@@ -324,6 +325,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     fn test_concurrent_access_poisoned_lock() {
         let state = ProfileState::Loaded(Profile::sample());
         let sut = ProfileStateHolder::new(state.clone());
@@ -338,23 +340,20 @@ mod tests {
                     profile.networks.try_update_with(
                         &NetworkID::Mainnet,
                         |network| {
-                            let _res = network.accounts.try_insert_unique(
-                                Account::sample_mainnet_carol(),
-                            );
+                            let _res = network
+                                .accounts
+                                .try_insert_unique(
+                                    Account::sample_mainnet_carol(),
+                                )
+                                .unwrap();
+                            panic!("Simulate panic in thread");
                         },
                     )
                 });
-            panic!("Simulate panic in thread");
         });
-
-        // Give the other thread time to acquire the write lock
-        thread::sleep(Duration::from_millis(100));
-        let mainnet_accounts = state_holder.current_network().unwrap().accounts;
 
         let _ = handle.join(); // Wait for the thread to finish
 
-        let mut expected_accounts = Accounts::sample_mainnet();
-        expected_accounts.insert(Account::sample_mainnet_carol());
-        pretty_assertions::assert_eq!(mainnet_accounts, expected_accounts);
+        state_holder.current_network().unwrap();
     }
 }
