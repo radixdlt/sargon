@@ -60,7 +60,7 @@ jobs:
       - name: Verify Cargo.toml version bump
         run: |
           # Extract the version from the latest tag
-          latest_tag_version=$LATEST_TAG
+          latest_tag_version=$latest_tag
 
           # Extract the version from Cargo.toml in the PR branch
           pr_version=$(grep '^version' crates/sargon/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
