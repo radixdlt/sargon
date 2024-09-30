@@ -49,7 +49,7 @@ public protocol RoleFromDraft {
 	/**
 	 * How many threshold factors that must be used to perform some function with this role.
 	 */
-	var threshold: UInt16 { get }
+	var threshold: UInt8 { get }
 	/**
 	 * Overriding / Super admin / "sudo" / God / factors, **ANY**
 	 * single of these factor which can perform the function of this role,
@@ -58,7 +58,7 @@ public protocol RoleFromDraft {
 	var overrideFactors: [FactorSource] { get }
 	
 	static var role: Role { get }
-	init(thresholdFactors: [FactorSource], threshold: UInt16, overrideFactors: [FactorSource])
+	init(thresholdFactors: [FactorSource], threshold: UInt8, overrideFactors: [FactorSource])
 	init?(draft: MatrixOfFactorsForRole)
 }
 extension RoleFromDraft {
@@ -76,8 +76,8 @@ extension RoleFromDraft {
 			thresholdFactors: draft.thresholdFactorSources,
 			threshold: {
 				switch draft.threshold {
-				case .any: UInt16(min(1, draft.thresholdFactorSources.count))
-				case .all: UInt16(draft.thresholdFactorSources.count)
+				case .any: UInt8(min(1, draft.thresholdFactorSources.count))
+				case .all: UInt8(draft.thresholdFactorSources.count)
 				case let .threshold(t): t
 				}
 			}(),

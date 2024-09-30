@@ -18,7 +18,7 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Sav
 extension PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static let sharedSavedGateways = Self(
 		SargonKey(
-			accessing: \.gateways,
+            mapping: { try $0.gateways },
 			fetchIf: \.affectsSavedGateways
 		),
 			.default

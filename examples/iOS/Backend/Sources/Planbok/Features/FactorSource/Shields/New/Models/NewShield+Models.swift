@@ -24,8 +24,8 @@ public struct Factor: Hashable, Sendable, Identifiable {
 public typealias Factors = IdentifiedArrayOf<Factor>
 
 public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
-	init(count: UInt16, thresholdFactorsCount: Int) {
-		let factorCount = UInt16(thresholdFactorsCount)
+	init(count: UInt8, thresholdFactorsCount: Int) {
+		let factorCount = UInt8(thresholdFactorsCount)
 		if count == factorCount {
 			self = .all
 		} else if count == 1 {
@@ -61,7 +61,7 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 	
 	case any
 	case all
-	case threshold(UInt16)
+	case threshold(UInt8)
 	
 	public var description: String {
 		switch self {
