@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.android.BuildConfig
+import com.radixdlt.sargon.os.SargonOsManager
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.BiometricsHandler
@@ -131,12 +132,12 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideEventBusDriver(): AndroidEventBusDriver = AndroidEventBusDriver()
+    fun provideEventBusDriver(): AndroidEventBusDriver = AndroidEventBusDriver
 
     @Provides
     @Singleton
     fun provideProfileStateChangeDriver(): AndroidProfileStateChangeDriver =
-        AndroidProfileStateChangeDriver()
+        AndroidProfileStateChangeDriver
 
     @Provides
     @Singleton
@@ -151,7 +152,6 @@ object ApplicationModule {
         @DeviceInfoPreferences deviceInfoPreferences: DataStore<Preferences>,
     ): Bios = Bios.from(
         context = context,
-        enableLogging = BuildConfig.DEBUG,
         httpClient = httpClient,
         biometricsHandler = biometricsHandler,
         encryptedPreferencesDataStore = encryptedPreferences,
@@ -159,5 +159,17 @@ object ApplicationModule {
         deviceInfoDatastore = deviceInfoPreferences,
         eventBusDriver = eventBusDriver,
         profileStateChangeDriver = profileStateChangeDriver
+    )
+
+    @Provides
+    @Singleton
+    fun provideSargonOsManager(
+        bios: Bios,
+        @ApplicationScope applicationScope: CoroutineScope,
+        @DefaultDispatcher dispatcher: CoroutineDispatcher
+    ): SargonOsManager = SargonOsManager.factory(
+        bios = bios,
+        applicationScope = applicationScope,
+        defaultDispatcher = dispatcher
     )
 }

@@ -16,10 +16,13 @@ impl Profile {
     /// The ProfileNetwork of the currently used Network dependent on the `current`
     /// Gateway set in AppPreferences. This affects which Accounts users see in
     /// "Home screen" in wallet apps.
-    pub fn current_network(&self) -> &ProfileNetwork {
-        self.networks
-            .get_id(self.current_network_id())
-            .expect("Should have current network")
+    pub fn current_network(&self) -> Result<&ProfileNetwork> {
+        let current_network_id = self.current_network_id();
+        self.networks.get_id(current_network_id).ok_or(
+            CommonError::NoNetworkInProfile {
+                network_id: current_network_id,
+            },
+        )
     }
 }
 

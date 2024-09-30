@@ -4,8 +4,11 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
+import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.annotation.KoverIgnore
+import timber.log.Timber
 import java.security.KeyStore
+import java.security.KeyStoreException
 import java.security.ProviderException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -15,7 +18,7 @@ import javax.crypto.SecretKey
  * operations. [requestAuthorization] is only invoked for [KeySpec]s that are defined with
  * [KeyGenParameterSpec#Builder#setUserAuthenticationRequired] to true
  */
-internal sealed interface KeystoreAccessRequest {
+sealed interface KeystoreAccessRequest {
 
     val keySpec: KeySpec
 
@@ -29,6 +32,12 @@ internal sealed interface KeystoreAccessRequest {
 
     data object ForRadixConnect: KeystoreAccessRequest {
         override val keySpec: KeySpec = KeySpec.RadixConnect()
+
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+    }
+
+    data class ForCache(private val alias: String): KeystoreAccessRequest {
+        override val keySpec: KeySpec = KeySpec.Cache(alias)
 
         override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
     }
@@ -47,7 +56,7 @@ internal sealed interface KeystoreAccessRequest {
  * The description of the key that describes for cryptographic operations on keystore.
  */
 @KoverIgnore
-internal sealed class KeySpec(val alias: String) {
+sealed class KeySpec(val alias: String) {
 
     /**
      * The implementation of these methods are heavily based on this:
@@ -88,18 +97,24 @@ internal sealed class KeySpec(val alias: String) {
             .setAuthenticationRequired(authenticationTimeout = authenticationTimeoutSeconds)
             .build()
 
-        fun checkIfPermanentlyInvalidated(input: String): Boolean {
+        fun checkIfPermanentlyInvalidated(): Boolean {
             // on pixel 6 pro when lock screen is removed, key entry for an alias is null
             val secretKeyResult = getSecretKey()
             if (secretKeyResult.isFailure || secretKeyResult.getOrNull() == null) return true
 
             val secretKey = requireNotNull(secretKeyResult.getOrNull())
-            val result = input.encrypt(secretKey = secretKey)
+            val result = Uuid.randomUUID().toString().encrypt(secretKey = secretKey)
             // according to documentation this is exception that should be thrown if we try to use
             // invalidated key, but behavior I saw when removing lock screen is that key is
             // automatically deleted from the keystore
             return result.exceptionOrNull() is KeyPermanentlyInvalidatedException
         }
+    }
+
+    @KoverIgnore
+    class Cache(alias: String): KeySpec(alias) {
+        override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
+            .build()
     }
 
     @KoverIgnore
@@ -172,5 +187,35 @@ internal sealed class KeySpec(val alias: String) {
         private const val KEY_ALIAS_PROFILE = "EncryptedProfileAlias"
         private const val KEY_ALIAS_MNEMONIC = "EncryptedMnemonicAlias"
         private const val KEY_ALIAS_RADIX_CONNECT = "EncryptedRadixConnectSessionAlias"
+
+        /**
+         * Resets the given [keySpecs] from [KeyStore]
+         *
+         * This usually deletes the entry from [KeyStore].
+         *
+         * In android devices <= 30 we noticed that keys associated to device credentials such
+         * as [KEY_ALIAS_MNEMONIC] throw [KeyStoreException] when [KeyStore.deleteEntry] is called,
+         * only when the user resets their device credentials to new ones.
+         *
+         * This made it impossible to associate the same key alias to the new device credentials,
+         * resulting to all encrypt/decrypt methods failing. In such cases, the only possible
+         * solution is to regenerate a new key with the same alias and associate it with the new
+         * device credentials
+         */
+        fun reset(keySpecs: List<KeySpec>): Result<Unit> = runCatching {
+            val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
+            keySpecs.forEach {
+                try {
+                    if (keyStore.containsAlias(it.alias)) {
+                        keyStore.deleteEntry(it.alias)
+                        Timber.tag("sargon").w("Key spec ${it.alias} deleted successfully")
+                    }
+                } catch (_: KeyStoreException) {
+                    Timber.tag("sargon").w("Deleting key spec ${it.alias} failed. Generating a new one...")
+                    // In cases like these the only option is to regenerate the same key
+                    it.generateSecretKey().getOrThrow()
+                }
+            }
+        }
     }
 }

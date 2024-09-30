@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 
 class AndroidEventBusDriverTest {
 
-    private val sut = AndroidEventBusDriver()
+    private val sut = AndroidEventBusDriver
 
     @Test
     fun testProfileIsEmitted() = runTest {

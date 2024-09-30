@@ -88,10 +88,9 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `DeviceFactorSource` and `DeviceInfo`.
+    /// Creates a new Profile from the `DeviceFactorSource` and `DeviceInfo` and some [Accounts]
     ///
-    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
-    /// "empty" (no Accounts, Personas etc).
+    /// The Profile is initialized with a Mainnet ProfileNetwork, and some [Accounts] in it.
     ///
     /// # Panics
     /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
@@ -99,6 +98,7 @@ impl Profile {
         device_factor_source: DeviceFactorSource,
         host_id: HostId,
         host_info: HostInfo,
+        maybe_accounts: Option<impl Into<Accounts>>,
     ) -> Self {
         if !device_factor_source.is_main_bdfs() {
             panic!("DeviceFactorSource is not main BDFS");
@@ -106,13 +106,20 @@ impl Profile {
         let bdfs = device_factor_source;
         let header =
             Header::new(DeviceInfo::new_from_info(&host_id, &host_info));
+
+        let mainnet_network = match maybe_accounts {
+            None => ProfileNetwork::new_empty_on(NetworkID::Mainnet),
+            Some(accounts) => ProfileNetwork::new_with_accounts(
+                NetworkID::Mainnet,
+                accounts.into(),
+            ),
+        };
+
         Self::with(
             header,
             FactorSources::with_bdfs(bdfs),
             AppPreferences::default(),
-            ProfileNetworks::just(ProfileNetwork::new_empty_on(
-                NetworkID::Mainnet,
-            )),
+            ProfileNetworks::just(mainnet_network),
         )
     }
 
@@ -132,7 +139,12 @@ impl Profile {
             &mnemonic_with_passphrase,
             &host_info,
         );
-        Self::from_device_factor_source(bdfs, host_id, host_info)
+        Self::from_device_factor_source(
+            bdfs,
+            host_id,
+            host_info,
+            None::<Accounts>,
+        )
     }
 
     /// Creates a new Profile from the `Mnemonic` (no passphrase) and `DeviceInfo`,
@@ -429,6 +441,34 @@ mod tests {
             DeviceFactorSource::sample_other(),
             HostId::sample(),
             HostInfo::sample(),
+            None::<Accounts>,
+        );
+    }
+
+    #[test]
+    fn new_from_main_bdfs_with_accounts() {
+        let accounts = Accounts::sample_mainnet();
+        let profile = SUT::from_device_factor_source(
+            DeviceFactorSource::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
+            Some(accounts),
+        );
+
+        assert!(profile.has_any_account_on_any_network())
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy, found an Account on other network than mainnet"
+    )]
+    fn new_from_main_bdfs_with_stokenet_accounts_panics() {
+        let accounts = Accounts::sample_stokenet();
+        SUT::from_device_factor_source(
+            DeviceFactorSource::sample(),
+            HostId::sample(),
+            HostInfo::sample(),
+            Some(accounts),
         );
     }
 
@@ -778,7 +818,7 @@ mod tests {
 					"lastModified": "2023-09-11T16:05:56.000Z",
 					"contentHint": {
 						"numberOfAccountsOnAllNetworksInTotal": 4,
-						"numberOfPersonasOnAllNetworksInTotal": 0,
+						"numberOfPersonasOnAllNetworksInTotal": 4,
 						"numberOfNetworks": 2
 					}
 				},

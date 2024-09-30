@@ -39,21 +39,28 @@ impl SargonOS {
 #[uniffi::export]
 impl SargonOS {
     pub async fn set_profile(&self, profile: Profile) -> Result<()> {
-        if profile.id() != self.profile()?.id() {
-            return Err(
-                CommonError::TriedToUpdateProfileWithOneWithDifferentID,
-            );
-        }
+        if let Ok(current_profile) = self.profile() {
+            if current_profile.id() != profile.id() {
+                return Err(
+                    CommonError::TriedToUpdateProfileWithOneWithDifferentID,
+                );
+            }
 
-        self.update_profile_with(|p| {
-            *p = profile.clone();
-            Ok(())
-        })
-        .await?;
+            self.update_profile_with(|p| {
+                *p = profile.clone();
+                Ok(())
+            })
+            .await?;
+        } else {
+            self.profile_state_holder
+                .replace_profile_state_with(ProfileState::Loaded(profile))?;
+            self.save_existing_profile().await?;
+        };
 
+        let updated_profile = self.profile()?;
         self.clients
             .profile_state_change
-            .emit(ProfileState::Loaded(profile))
+            .emit(ProfileState::Loaded(updated_profile))
             .await;
 
         Ok(())
@@ -157,7 +164,12 @@ impl SargonOS {
         let secure_storage = &self.secure_storage;
 
         secure_storage
-            .save(SecureStorageKey::ProfileSnapshot, profile)
+            .save(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id(),
+                },
+                profile,
+            )
             .await?;
 
         self.event_bus
@@ -469,5 +481,19 @@ mod tests {
             res,
             Err(CommonError::TriedToUpdateProfileWithOneWithDifferentID)
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_set_profile_when_no_profile_exists() {
+        // ARRANGE
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SargonOS::boot(bios).await;
+
+        // ACT
+        let _ = os.with_timeout(|x| x.set_profile(Profile::sample())).await;
+
+        // ASSERT
+        assert_eq!(os.profile().unwrap(), Profile::sample());
     }
 }

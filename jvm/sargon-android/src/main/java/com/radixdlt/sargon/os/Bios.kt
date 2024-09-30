@@ -24,14 +24,13 @@ import timber.log.Timber
 @KoverIgnore
 fun Bios.Companion.from(
     context: Context,
-    enableLogging: Boolean,
     httpClient: OkHttpClient,
     biometricsHandler: BiometricsHandler,
     encryptedPreferencesDataStore: DataStore<Preferences>,
     preferencesDatastore: DataStore<Preferences>,
     deviceInfoDatastore: DataStore<Preferences>,
-    eventBusDriver: EventBusDriver,
-    profileStateChangeDriver: ProfileStateChangeDriver
+    eventBusDriver: AndroidEventBusDriver,
+    profileStateChangeDriver: AndroidProfileStateChangeDriver,
 ): Bios {
     val storageDriver = AndroidStorageDriver(
         biometricAuthorizationDriver = AndroidBiometricAuthorizationDriver(
@@ -48,7 +47,7 @@ fun Bios.Companion.from(
             unsafeStorage = storageDriver,
             entropyProvider = AndroidEntropyProviderDriver(),
             hostInfo = AndroidHostInfoDriver(context),
-            logging = AndroidLoggingDriver(enableLogging),
+            logging = AndroidLoggingDriver(),
             eventBus = eventBusDriver,
             fileSystem = AndroidFileSystemDriver(context),
             profileStateChangeDriver = profileStateChangeDriver

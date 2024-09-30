@@ -177,6 +177,22 @@ impl Drivers {
             RustProfileStateChangeDriver::new(),
         )
     }
+
+    pub fn with_profile_state_change(
+        profile_state_change: Arc<dyn ProfileStateChangeDriver>,
+    ) -> Arc<Self> {
+        Drivers::new(
+            RustNetworkingDriver::new(),
+            EphemeralSecureStorage::new(),
+            RustEntropyDriver::new(),
+            RustHostInfoDriver::new(),
+            RustLoggingDriver::new(),
+            RustEventBusDriver::new(),
+            RustFileSystemDriver::new(),
+            EphemeralUnsafeStorage::new(),
+            profile_state_change,
+        )
+    }
 }
 
 #[cfg(test)]
