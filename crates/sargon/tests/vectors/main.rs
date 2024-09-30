@@ -655,7 +655,7 @@ mod dapp_to_wallet_interaction_tests {
             metadata.clone(),
         );
 
-        let unauthorized_request_3_items =  DappToWalletInteractionItems::UnauthorizedRequest(
+        let accounts_proof_request_items =  DappToWalletInteractionItems::UnauthorizedRequest(
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 None,
                 None,
@@ -668,12 +668,41 @@ mod dapp_to_wallet_interaction_tests {
             )
         );
 
-        let unauthorized_request_3 = DappToWalletInteraction::new(
+        let accounts_proof_request = DappToWalletInteraction::new(
             WalletInteractionId::from_str(
                 "2916ad16-52a0-4564-a611-4971883c1322",
             )
             .unwrap(),
-            unauthorized_request_3_items,
+            accounts_proof_request_items,
+            metadata.clone(),
+        );
+
+        // Persona proof of ownership
+        let persona_proof_request_items =  DappToWalletInteractionItems::AuthorizedRequest(
+            DappToWalletInteractionAuthorizedRequestItems::new(
+                DappToWalletInteractionAuthRequestItem::LoginWithChallenge(
+                    DappToWalletInteractionAuthLoginWithChallengeRequestItem::new(
+                        DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
+                    )
+                ),
+                None,
+                None,
+                None,
+                None,
+                None,
+                DappToWalletInteractionProofOfOwnershipRequestItem::Persona(DappToWalletInteractionPersonaProof::new(
+                    IdentityAddress::from_str("identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva").unwrap(), 
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("55e56e54f1a7b58f60429747c7b13dfa40e9e7c58e18dde1afde8b0c54f7ba67").unwrap())
+                )),
+            )
+        );
+
+        let persona_proof_request = DappToWalletInteraction::new(
+            WalletInteractionId::from_str(
+                "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+            )
+            .unwrap(),
+            persona_proof_request_items,
             metadata.clone(),
         );
 
@@ -683,7 +712,8 @@ mod dapp_to_wallet_interaction_tests {
             transaction,
             unauthorized_request_1,
             unauthorized_request_2,
-            unauthorized_request_3,
+            accounts_proof_request,
+            persona_proof_request,
         ];
 
         for (fixture, expected) in
@@ -859,11 +889,89 @@ mod wallet_to_dapp_interaction_tests {
             )
         ));
 
+        let accounts_proof_response_items =
+        WalletToDappInteractionResponseItems::UnauthorizedRequest(
+            WalletToDappInteractionUnauthorizedRequestResponseItems::new(
+                None,
+                None,
+                WalletToDappInteractionProofOfOwnershipRequestResponseItem::new(
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c").unwrap()),
+                    vec![WalletToDappInteractionProofOfOwnership::Account(WalletToDappInteractionAccountProof::new(
+                        AccountAddress::from_str("account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90").unwrap(), 
+                        WalletToDappInteractionAuthProof::new(
+                            PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
+                            .unwrap(),
+                            SLIP10Curve::Curve25519,
+                            Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
+                            .unwrap()
+                        ),
+                    ))]
+                ),
+            ),
+        );
+
+        let accounts_proof_response = WalletToDappInteractionResponse::Success(
+            WalletToDappInteractionSuccessResponse::new(
+                WalletInteractionId::from_str("2916ad16-52a0-4564-a611-4971883c1322").unwrap(), 
+                accounts_proof_response_items
+            )
+        );
+
+        let persona_proof_response_items = WalletToDappInteractionResponseItems::AuthorizedRequest(
+            WalletToDappInteractionAuthorizedRequestResponseItems::new(
+                WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(
+                    WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem::new(
+                        DappWalletInteractionPersona::new(
+                            IdentityAddress::from_str("identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva")
+                            .unwrap(),
+                            "Usdudh",
+                        ),
+                        DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630")
+                        .unwrap()),
+                        WalletToDappInteractionAuthProof::new(
+                            PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
+                            .unwrap(),
+                            SLIP10Curve::Curve25519,
+                            Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
+                            .unwrap()
+                        ),
+                    )
+                ), 
+                None,
+                None,
+                None, 
+                None, 
+                WalletToDappInteractionProofOfOwnershipRequestResponseItem::new(
+                    DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
+                    vec![WalletToDappInteractionProofOfOwnership::Persona(WalletToDappInteractionPersonaProof::new(
+                            IdentityAddress::from_str("identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva").unwrap(),  
+                            WalletToDappInteractionAuthProof::new(
+                                PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
+                                .unwrap(),
+                                SLIP10Curve::Curve25519,
+                                Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
+                                .unwrap()
+                            ),
+                        ))
+                    ],
+                )
+            )
+        );
+
+        let persona_proof_response = WalletToDappInteractionResponse::Success(
+            WalletToDappInteractionSuccessResponse::new(
+                WalletInteractionId::from_str("17d530f6-0cb6-4122-8540-64e46a2e0f84").unwrap(), 
+                persona_proof_response_items
+            )
+        );
+
         let responses = vec![
             authorized_request_response,
             unauthorized_request_response,
             failure_response,
             transaction_response,
+            accounts_proof_response,
+            persona_proof_response,
         ];
 
         let encoded = serde_json::to_string(&responses).unwrap();

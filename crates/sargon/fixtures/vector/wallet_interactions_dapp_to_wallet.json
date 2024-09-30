@@ -172,5 +172,27 @@
       "networkId": 2,
       "origin": "https://dev-sandbox.rdx-works-main.extratools.works/"
     }
+  },
+  {
+    "interactionId" : "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+    "items" : {
+      "discriminator" : "authorizedRequest",
+      "auth" : {
+        "discriminator" : "loginWithChallenge",
+        "challenge" : "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630"
+      },
+      "reset": null,
+      "proofOfOwnership": {
+        "discriminator": "personaProofOfOwnership",
+        "identityAddress": "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+        "challenge": "55e56e54f1a7b58f60429747c7b13dfa40e9e7c58e18dde1afde8b0c54f7ba67"
+      }
+    },
+    "metadata": {
+      "version": 2,
+      "networkId": 2,
+      "origin": "https://dev-sandbox.rdx-works-main.extratools.works/",
+      "dAppDefinitionAddress": "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze"
+    }
   }
 ]
