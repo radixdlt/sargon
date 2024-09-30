@@ -661,7 +661,7 @@ mod dapp_to_wallet_interaction_tests {
                     DappToWalletInteractionAuthChallengeNonce(Exactly32Bytes::from_hex("4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c").unwrap()), 
                     vec![
                         AccountAddress::from_str("account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90").unwrap(),
-                    ], 
+                    ],
                     None,
                 ),
             )
@@ -913,7 +913,7 @@ mod wallet_to_dapp_interaction_tests {
             ),
         );
 
-        let accounts_and_persona_proof_response_items = 
+        let accounts_and_persona_proof_response_items =
         WalletToDappInteractionResponseItems::UnauthorizedRequest(
             WalletToDappInteractionUnauthorizedRequestResponseItems::new(
                 None,
