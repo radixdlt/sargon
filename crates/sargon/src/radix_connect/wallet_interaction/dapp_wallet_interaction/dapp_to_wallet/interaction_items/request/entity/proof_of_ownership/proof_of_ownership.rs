@@ -15,9 +15,7 @@ pub enum DappToWalletInteractionProofOfOwnershipRequestItem {
 impl From<DappToWalletInteractionAccountsProof>
     for DappToWalletInteractionProofOfOwnershipRequestItem
 {
-    fn from(
-        value: DappToWalletInteractionAccountsProof,
-    ) -> Self {
+    fn from(value: DappToWalletInteractionAccountsProof) -> Self {
         Self::Accounts(value)
     }
 }
@@ -25,9 +23,7 @@ impl From<DappToWalletInteractionAccountsProof>
 impl From<DappToWalletInteractionPersonaProof>
     for DappToWalletInteractionProofOfOwnershipRequestItem
 {
-    fn from(
-        value: DappToWalletInteractionPersonaProof,
-    ) -> Self {
+    fn from(value: DappToWalletInteractionPersonaProof) -> Self {
         Self::Persona(value)
     }
 }

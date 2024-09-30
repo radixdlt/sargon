@@ -21,7 +21,8 @@ pub struct DappToWalletInteractionAuthorizedRequestItems {
         Option<DappToWalletInteractionPersonaDataRequestItem>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub proof_of_ownership: Option<DappToWalletInteractionProofOfOwnershipRequestItem>,
+    pub proof_of_ownership:
+        Option<DappToWalletInteractionProofOfOwnershipRequestItem>,
 }
 
 impl DappToWalletInteractionAuthorizedRequestItems {

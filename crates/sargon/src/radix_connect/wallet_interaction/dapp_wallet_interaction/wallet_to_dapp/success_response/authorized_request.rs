@@ -4,25 +4,26 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
     pub auth: WalletToDappInteractionAuthRequestResponseItem,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ongoing_accounts:
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ongoing_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_accounts:
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub proof_of_ownership: Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
+    pub proof_of_ownership:
+        Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
 }
 
 impl WalletToDappInteractionAuthorizedRequestResponseItems {
@@ -63,7 +64,8 @@ impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
             WalletToDappInteractionAccountsRequestResponseItem::sample(),
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(),
+            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(
+            ),
         )
     }
 

@@ -12,7 +12,8 @@ pub struct WalletToDappInteractionUnauthorizedRequestResponseItems {
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub proof_of_ownership: Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
+    pub proof_of_ownership:
+        Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
 }
 
 impl WalletToDappInteractionUnauthorizedRequestResponseItems {
@@ -42,7 +43,8 @@ impl HasSampleValues
         Self::new(
             WalletToDappInteractionAccountsRequestResponseItem::sample(),
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(),
+            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(
+            ),
         )
     }
 

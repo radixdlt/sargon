@@ -912,9 +912,12 @@ mod wallet_to_dapp_interaction_tests {
 
         let accounts_proof_response = WalletToDappInteractionResponse::Success(
             WalletToDappInteractionSuccessResponse::new(
-                WalletInteractionId::from_str("2916ad16-52a0-4564-a611-4971883c1322").unwrap(), 
-                accounts_proof_response_items
-            )
+                WalletInteractionId::from_str(
+                    "2916ad16-52a0-4564-a611-4971883c1322",
+                )
+                .unwrap(),
+                accounts_proof_response_items,
+            ),
         );
 
         let persona_proof_response_items = WalletToDappInteractionResponseItems::AuthorizedRequest(
@@ -960,9 +963,12 @@ mod wallet_to_dapp_interaction_tests {
 
         let persona_proof_response = WalletToDappInteractionResponse::Success(
             WalletToDappInteractionSuccessResponse::new(
-                WalletInteractionId::from_str("17d530f6-0cb6-4122-8540-64e46a2e0f84").unwrap(), 
-                persona_proof_response_items
-            )
+                WalletInteractionId::from_str(
+                    "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+                )
+                .unwrap(),
+                persona_proof_response_items,
+            ),
         );
 
         let responses = vec![

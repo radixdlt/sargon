@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionProofOfOwnershipRequestResponseItem {
     pub challenge: DappToWalletInteractionAuthChallengeNonce,
-    
+
     pub proofs: Vec<WalletToDappInteractionProofOfOwnership>,
 }
 
@@ -21,11 +21,16 @@ impl WalletToDappInteractionProofOfOwnershipRequestResponseItem {
     }
 }
 
-impl HasSampleValues for WalletToDappInteractionProofOfOwnershipRequestResponseItem {
+impl HasSampleValues
+    for WalletToDappInteractionProofOfOwnershipRequestResponseItem
+{
     fn sample() -> Self {
         Self::new(
             DappToWalletInteractionAuthChallengeNonce::sample(),
-            vec![WalletToDappInteractionProofOfOwnership::sample(), WalletToDappInteractionProofOfOwnership::sample_other()],
+            vec![
+                WalletToDappInteractionProofOfOwnership::sample(),
+                WalletToDappInteractionProofOfOwnership::sample_other(),
+            ],
         )
     }
 

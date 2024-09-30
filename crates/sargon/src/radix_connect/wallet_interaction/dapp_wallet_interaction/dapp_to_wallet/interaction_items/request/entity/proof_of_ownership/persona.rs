@@ -23,9 +23,7 @@ impl DappToWalletInteractionPersonaProof {
     }
 }
 
-impl HasSampleValues
-    for DappToWalletInteractionPersonaProof
-{
+impl HasSampleValues for DappToWalletInteractionPersonaProof {
     fn sample() -> Self {
         Self::new(
             IdentityAddress::sample(),

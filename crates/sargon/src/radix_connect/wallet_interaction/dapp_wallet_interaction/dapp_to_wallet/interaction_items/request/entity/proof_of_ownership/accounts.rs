@@ -23,9 +23,7 @@ impl DappToWalletInteractionAccountsProof {
     }
 }
 
-impl HasSampleValues
-    for DappToWalletInteractionAccountsProof
-{
+impl HasSampleValues for DappToWalletInteractionAccountsProof {
     fn sample() -> Self {
         Self::new(
             vec![AccountAddress::sample(), AccountAddress::sample_other()],
