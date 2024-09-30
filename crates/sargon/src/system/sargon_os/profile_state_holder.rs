@@ -131,10 +131,9 @@ impl ProfileStateHolder {
         &self,
         profile_state: ProfileState,
     ) -> Result<()> {
-        let mut lock = self
-            .profile_state
-            .write()
-            .unwrap_or_else(|poison| poison.into_inner());
+        let mut lock = self.profile_state.write().expect(
+            "Stop execution due to the profile state lock being poisoned",
+        );
 
         *lock = profile_state;
         Ok(())
