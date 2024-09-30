@@ -247,7 +247,7 @@ mod tests {
     }
 
     #[test]
-    fn test_concurrent_access_writes() {
+    fn test_concurrent_access_writes_order_is_preserved() {
         let profile = Profile::sample();
         let state = ProfileState::Loaded(profile);
         let sut = ProfileStateHolder::new(state.clone());
@@ -325,7 +325,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_concurrent_access_poisoned_lock() {
+    fn test_concurrent_access_poisoned_lock_panics() {
         let state = ProfileState::Loaded(Profile::sample());
         let sut = ProfileStateHolder::new(state.clone());
         let state_holder = Arc::new(sut);
