@@ -65,11 +65,11 @@ extension PersistenceKeyDefault<SargonKey<Shields>> {
 extension SargonOS {
     
     public var factorSources: FactorSources {
-        factorSources().asIdentified()
+        try! factorSources().asIdentified()
     }
 	
 	public var shieldReferences: ShieldReferences {
-		securityStructuresOfFactorSourceIds().asIdentified()
+        try! securityStructuresOfFactorSourceIds().asIdentified()
 	}
 	
 	public var shields: Shields {

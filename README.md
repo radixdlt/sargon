@@ -368,6 +368,40 @@ See [`.github/workflows/release.yml`](.github/workflows/release.yml)
 
 ## Android
 
+### Locally
+In order to build sargon for local development we will leverage the local maven repository. Instead of publishing the package in a maven server, we can publish it locally. 
+
+In order to publish both android and desktop binaries with a simple command run  
+```sh
+cd jvm/
+./gradlew sargon-android:buildForLocalDev  // This builds both sargon-android and sargon-desktop-bins
+```
+This will produce the following message when successfully finished
+```txt
+> Task :sargon-android:buildForLocalDev
+✅ Library is published in maven local with version:
+1.1.19-c74d9cbf-SNAPSHOT
+```
+Note that such local maven builds are in debug mode and have a `-SNAPSHOT` suffix.
+
+Copy the version name to your project but make sure that `mavenLocal()` is included in your project's `settings.gradle` 
+```gradle
+dependencyResolutionManagement {
+    ...
+    repositories {
+        mavenLocal()
+        ...
+    }
+}
+```
+> [!TIP]
+> The libraries that are published in local maven will reside in:
+> ```
+> $HOME/.m2/repository/com/radixdlt/sargon
+> ```
+
+### CD
+
 Two modules are published in [Github's maven](https://github.com/radixdlt/sargon/packages/).
 
 - `sargon-android`

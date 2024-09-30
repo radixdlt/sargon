@@ -127,7 +127,7 @@ jobs:
 
       - uses: RDXWorks-actions/setup-xcode@master
         with:
-          xcode-version: "15.3.0"
+          xcode-version: "16.0.0"
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
@@ -165,9 +165,6 @@ jobs:
           target: x86_64-unknown-linux-gnu
           default: 'true'
 
-      - name: Rustc version
-        run: cargo --version --verbose
-
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
@@ -201,7 +198,7 @@ jobs:
       - uses: RDXWorks-actions/setup-xcode@master
         with:
           # trying to fix https://github.com/rust-lang/rust/issues/113783
-          xcode-version: "15.3.0"
+          xcode-version: "16.0.0"
 
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
