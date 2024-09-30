@@ -46,7 +46,7 @@ jobs:
         uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0 # Ensure the full git history is fetched
-	
+
       - name: Fetch all tags
         run: git fetch --tags
 
