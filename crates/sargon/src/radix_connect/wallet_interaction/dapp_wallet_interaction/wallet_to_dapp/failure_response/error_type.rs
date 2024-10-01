@@ -24,6 +24,7 @@ pub enum DappWalletInteractionErrorType {
     InvalidRequest,
     IncompatibleVersion,
     FailedToSignAuthChallenge,
+    InvalidPersonaOrAccounts
 }
 
 impl HasSampleValues for DappWalletInteractionErrorType {
