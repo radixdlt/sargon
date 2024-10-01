@@ -230,8 +230,12 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("FREE")]
-    FREE = 10063,
+    #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", key.identifier())]
+    SecureStorageAccessError {
+        key: SecureStorageKey,
+        error_kind: SecureStorageAccessErrorKind,
+        error_message: String,
+    } = 10063,
 
     #[error("Invalid ISO8601 Time string: {bad_value}")]
     InvalidISO8601String { bad_value: String } = 10064,
@@ -239,13 +243,13 @@ pub enum CommonError {
     #[error("Unknown account.")]
     UnknownAccount = 10065,
 
-    #[error("Failed to read from secure storage (Keychain).")]
+    #[error("Failed to read from secure storage.")]
     SecureStorageReadError = 10066,
 
     #[error("Failed to load DeviceFactorSource from secure storage")]
     UnableToLoadDeviceFactorSourceFromSecureStorage = 10067,
 
-    #[error("Failed to write to secure storage (Keychain).")]
+    #[error("Failed to write to secure storage.")]
     SecureStorageWriteError = 10068,
 
     #[error("Failed Serialize value to JSON.")]
@@ -644,6 +648,14 @@ pub enum CommonError {
         global_address_as_hex: String,
         network_id: NetworkID,
     } = 10181,
+
+    #[error(
+        "The provided entities do not derive from the given factor source"
+    )]
+    EntitiesNotDerivedByFactorSource = 10182,
+
+    #[error("The network {network_id} does not exist in profile")]
+    NoNetworkInProfile { network_id: NetworkID } = 10183,
 }
 
 #[uniffi::export]

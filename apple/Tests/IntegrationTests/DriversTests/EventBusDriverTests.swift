@@ -9,7 +9,7 @@ class EventBusDriverTests: DriverTest<EventBus> {
 	func test() async throws {
 		let sut = SUT()
 		
-		let expectedEvents = Array<EventKind>([.booted, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
+		let expectedEvents = Array<EventKind>([.booted, .profileSaved, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
 		let task = Task {
 			var notifications = Set<EventNotification>()
 			for await notification in await sut.notifications().prefix(expectedEvents.count) {

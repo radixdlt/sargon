@@ -2,6 +2,7 @@
 
 package com.radixdlt.sargon.os.storage
 
+import android.util.Base64
 import com.radixdlt.sargon.extensions.then
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
@@ -11,7 +12,6 @@ import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 internal object EncryptionHelper {
@@ -64,12 +64,12 @@ internal object EncryptionHelper {
 @Suppress("UNCHECKED_CAST")
 internal fun <T : Any> T.encrypt(secretKey: SecretKey): Result<T> = runCatching {
     when (this) {
-        is String -> Base64.encode(
-            source = EncryptionHelper.encrypt(
-                input = toByteArray(),
-                secretKey = secretKey
-            ).getOrThrow()
-        ) as T
+        is String -> EncryptionHelper.encrypt(
+            input = toByteArray(),
+            secretKey = secretKey
+        ).mapCatching {
+            Base64.encodeToString(it, Base64.DEFAULT) as T
+        }.getOrThrow()
 
         is ByteArray -> EncryptionHelper.encrypt(input = this, secretKey = secretKey)
             .getOrThrow() as T
@@ -91,7 +91,10 @@ internal fun <T : Any> T.decrypt(secretKey: SecretKey): Result<T> = runCatching 
     when (this) {
         is String -> String(
             EncryptionHelper.decrypt(
-                input = Base64.decode(source = this),
+                input = Base64.decode(
+                    this,
+                    Base64.DEFAULT
+                ),
                 secretKey = secretKey
             ).getOrThrow(),
             StandardCharsets.UTF_8
@@ -112,7 +115,7 @@ internal fun <T : Any> T.decrypt(secretKey: SecretKey): Result<T> = runCatching 
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.encrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
+fun <T : Any> T.encrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
     .then { encrypt(secretKey = it) }
 
 /**
@@ -121,7 +124,7 @@ internal fun <T : Any> T.encrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecret
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.decrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
+fun <T : Any> T.decrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecretKey()
     .then { decrypt(secretKey = it) }
 
 /**
@@ -130,7 +133,7 @@ internal fun <T : Any> T.decrypt(keySpec: KeySpec) = keySpec.getOrGenerateSecret
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.encrypt(encryptionKey: ByteArray) = encrypt(
+fun <T : Any> T.encrypt(encryptionKey: ByteArray) = encrypt(
     secretKey = SecretKeySpec(encryptionKey, EncryptionHelper.AES_ALGORITHM)
 )
 
@@ -140,7 +143,7 @@ internal fun <T : Any> T.encrypt(encryptionKey: ByteArray) = encrypt(
  * The receiver must be either a [String] or a [ByteArray]. Other types are not supported as
  * of this moment.
  */
-internal fun <T : Any> T.decrypt(encryptionKey: ByteArray) = decrypt(
+fun <T : Any> T.decrypt(encryptionKey: ByteArray) = decrypt(
     secretKey = SecretKeySpec(encryptionKey, EncryptionHelper.AES_ALGORITHM)
 )
 

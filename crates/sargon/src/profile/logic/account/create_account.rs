@@ -110,6 +110,7 @@ mod tests {
                 .factor_source,
             HostId::sample(),
             HostInfo::sample(),
+            None::<Accounts>,
         );
 
         let (_, accounts) = sut

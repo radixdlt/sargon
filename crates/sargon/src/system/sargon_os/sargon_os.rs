@@ -38,14 +38,29 @@ impl SargonOS {
         info!("Host: {}", host_info);
 
         let secure_storage = &clients.secure_storage;
-        let profile_state = secure_storage.load_profile().await.map_or_else(
-            ProfileState::Incompatible,
-            |some_profile| {
+        let mut profile_state = secure_storage
+            .load_profile()
+            .await
+            .map_or_else(ProfileState::Incompatible, |some_profile| {
                 some_profile
                     .map(ProfileState::Loaded)
                     .unwrap_or(ProfileState::None)
-            },
-        );
+            });
+
+        // If an ephemeral profile was created (a profile with no networks) then it is not
+        // considered as a Loaded profile.
+        if let Some(profile) = profile_state.as_loaded()
+            && profile.networks.is_empty()
+        {
+            // Delete profile and its associated mnemonics
+            let device_factor_sources = profile.device_factor_sources();
+            for dfs in device_factor_sources.iter() {
+                let _ = secure_storage.delete_mnemonic(&dfs.id).await;
+            }
+            let _ = secure_storage.delete_profile(profile.id()).await;
+
+            profile_state = ProfileState::None;
+        }
 
         let os = Arc::new(Self {
             clients,
@@ -72,22 +87,15 @@ impl SargonOS {
         self.secure_storage
             .save_private_hd_factor_source(&bdfs)
             .await?;
-        let save_profile_result =
-            self.secure_storage.save_profile(&profile).await;
-        if let Some(error) = save_profile_result.err() {
+
+        let set_profile_result = self.set_profile(profile).await;
+        if let Some(error) = set_profile_result.err() {
             self.secure_storage
                 .delete_mnemonic(&bdfs.factor_source.id)
                 .await?;
             return Err(error);
         }
 
-        self.profile_state_holder.replace_profile_state_with(
-            ProfileState::Loaded(profile.clone()),
-        )?;
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(profile))
-            .await;
         info!("Saved new Profile and BDFS, finish creating wallet");
 
         Ok(())
@@ -151,6 +159,51 @@ impl SargonOS {
         Ok(())
     }
 
+    pub async fn new_wallet_with_derived_bdfs(
+        &self,
+        hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
+        accounts: Accounts,
+    ) -> Result<()> {
+        debug!("Deriving Profile from BDFS");
+
+        let hd_keys: Vec<HierarchicalDeterministicPublicKey> = accounts
+            .iter()
+            .map(|account| {
+                account
+                    .security_state
+                    .into_unsecured()
+                    .map(|c| c.transaction_signing.public_key)
+                    .map_err(|_| CommonError::EntitiesNotDerivedByFactorSource)
+            })
+            .try_collect()?;
+
+        if !hd_factor_source
+            .mnemonic_with_passphrase
+            .validate_public_keys(hd_keys)
+        {
+            return Err(CommonError::EntitiesNotDerivedByFactorSource);
+        }
+
+        self.secure_storage
+            .save_private_hd_factor_source(&hd_factor_source)
+            .await?;
+
+        let host_id = self.host_id().await?;
+        let host_info = self.host_info().await;
+
+        let profile = Profile::from_device_factor_source(
+            hd_factor_source.factor_source,
+            host_id,
+            host_info,
+            Some(accounts),
+        );
+
+        self.set_profile(profile).await?;
+
+        info!("Successfully derived Profile");
+        Ok(())
+    }
+
     pub async fn delete_wallet(&self) -> Result<()> {
         self.delete_profile_and_mnemonics_replace_in_memory_with_none()
             .await?;
@@ -204,10 +257,11 @@ impl SargonOS {
         debug!("Created BDFS (unsaved)");
 
         debug!("Creating new Profile...");
-        let profile = Profile::from_device_factor_source(
-            private_bdfs.factor_source.clone(),
-            host_id,
-            host_info,
+        let profile = Profile::with(
+            Header::new(DeviceInfo::new_from_info(&host_id, &host_info)),
+            FactorSources::with_bdfs(private_bdfs.factor_source.clone()),
+            AppPreferences::default(),
+            ProfileNetworks::default(),
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
@@ -274,9 +328,14 @@ impl SargonOS {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
         let os = Self::boot(bios).await;
-        let (profile, bdfs) = os
+        let (mut profile, bdfs) = os
             .create_new_profile_with_bdfs(bdfs_mnemonic.into())
             .await?;
+
+        // Append Mainnet network since initial profile has no network
+        profile
+            .networks
+            .append(ProfileNetwork::new_empty_on(NetworkID::Mainnet));
 
         os.secure_storage
             .save_private_hd_factor_source(&bdfs)
@@ -353,6 +412,48 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_boot_when_existing_profile_with_no_networks_profile_state_considered_none(
+    ) {
+        // ARRANGE
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios.clone()).await;
+        let (first_profile, first_bdfs) =
+            os.create_new_profile_with_bdfs(None).await.unwrap();
+
+        os.secure_storage
+            .save_private_hd_factor_source(&first_bdfs)
+            .await
+            .unwrap();
+        os.secure_storage
+            .save_profile(&first_profile)
+            .await
+            .unwrap();
+        os.profile_state_holder
+            .replace_profile_state_with(ProfileState::Loaded(
+                first_profile.clone(),
+            ))
+            .unwrap();
+
+        // ACT
+        let new_os = SUT::boot(bios.clone()).await;
+
+        // ASSERT
+        assert!(new_os.profile().is_err());
+        assert!(new_os
+            .secure_storage
+            .load_profile()
+            .await
+            .unwrap()
+            .is_none());
+        assert!(new_os
+            .secure_storage
+            .load_mnemonic_with_passphrase(&first_bdfs.factor_source.id)
+            .await
+            .is_err())
+    }
+
+    #[actix_rt::test]
     async fn test_change_log_level() {
         // ARRANGE (and ACT)
         let _ = SUT::fast_boot().await;
@@ -370,7 +471,9 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_new_wallet() {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
 
         os.new_wallet().await.unwrap();
 
@@ -383,6 +486,8 @@ mod tests {
             .load_mnemonic_with_passphrase(&bdfs.id)
             .await
             .is_ok());
+
+        assert!(profile.networks.is_empty());
     }
 
     #[actix_rt::test]
@@ -406,8 +511,75 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_new_wallet_through_derived_bdfs() {
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
+
+        os.new_wallet_with_derived_bdfs(
+            PrivateHierarchicalDeterministicFactorSource::sample(),
+            Accounts::sample_mainnet(),
+        )
+        .await
+        .unwrap();
+
+        let profile = os.profile().unwrap();
+
+        assert!(profile.has_any_account_on_any_network());
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
+
+        os.new_wallet_with_derived_bdfs(
+            PrivateHierarchicalDeterministicFactorSource::sample(),
+            Accounts::new(),
+        )
+        .await
+        .unwrap();
+
+        let profile = os.profile().unwrap();
+
+        assert!(!profile.networks.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet_through_derived_bdfs_with_accounts_derived_from_other_hd_factor_source(
+    ) {
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
+
+        let other_hd =
+            PrivateHierarchicalDeterministicFactorSource::sample_other();
+        let invalid_account = Account::new(
+            other_hd
+                .derive_entity_creation_factor_instance(NetworkID::Mainnet, 0),
+            DisplayName::new("Invalid Account").unwrap(),
+            AppearanceID::sample(),
+        );
+
+        let result = os
+            .new_wallet_with_derived_bdfs(
+                PrivateHierarchicalDeterministicFactorSource::sample(),
+                Accounts::just(invalid_account),
+            )
+            .await;
+
+        assert_eq!(
+            result.unwrap_err(),
+            CommonError::EntitiesNotDerivedByFactorSource
+        )
+    }
+
+    #[actix_rt::test]
     async fn test_delete_wallet() {
-        let os = SUT::fast_boot().await;
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = SUT::boot(bios).await;
         os.new_wallet().await.unwrap();
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();

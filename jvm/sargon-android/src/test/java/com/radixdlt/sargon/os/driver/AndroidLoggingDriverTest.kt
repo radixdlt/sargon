@@ -32,8 +32,7 @@ class AndroidLoggingDriverTest {
             TestTree.Log(level = LogLevel.ERROR, tag = "sargon", message = "error"),
             TestTree.Log(level = LogLevel.DEBUG, tag = "sargon", message = "debug")
         )
-        // Setting to false to avoid planting android debug tree, since logTree is planted.
-        val sut = AndroidLoggingDriver(isLoggingEnabled = false)
+        val sut = AndroidLoggingDriver()
 
         input.forEach { log ->
             sut.log(log.level, log.message)

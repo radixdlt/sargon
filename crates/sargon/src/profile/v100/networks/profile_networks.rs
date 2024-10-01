@@ -34,7 +34,13 @@ impl ProfileNetworks {
     pub fn content_hint(&self) -> ContentHint {
         let number_of_accounts =
             self.iter().fold(0, |acc, x| acc + x.accounts.len());
-        ContentHint::with_counters(number_of_accounts, 0, self.len())
+        let number_of_personas =
+            self.iter().fold(0, |per, x| per + x.personas.len());
+        ContentHint::with_counters(
+            number_of_accounts,
+            number_of_personas,
+            self.len(),
+        )
     }
 }
 
@@ -218,7 +224,7 @@ mod tests {
     fn content_hint() {
         assert_eq!(
             SUT::sample().content_hint(),
-            ContentHint::with_counters(4, 0, 2)
+            ContentHint::with_counters(4, 4, 2)
         );
     }
 

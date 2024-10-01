@@ -14,7 +14,6 @@ use crate::prelude::*;
 )]
 #[serde(transparent)]
 pub struct ProfileID(pub(crate) Uuid);
-uniffi::custom_newtype!(ProfileID, Uuid);
 
 impl FromStr for ProfileID {
     type Err = CommonError;
