@@ -1,0 +1,11 @@
+
+namespace sargon {};
+
+// HERE BE DRAGONS
+// Due to Kotlin equals being broken for ByteArray
+// Which otherwise UniFFI converts `Vec<u8>` to, we MUST use
+// our own "bag of bytes" which we convert to a Kotlin `List<Byte>`
+// which DOES have a working equals!
+// HERE BE DRAGONS
+[Custom]
+typedef sequence<i8> BagOfBytes;

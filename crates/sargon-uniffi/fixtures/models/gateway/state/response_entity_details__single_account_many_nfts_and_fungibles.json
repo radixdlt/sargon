@@ -1,0 +1,2980 @@
+{
+	"ledger_state":
+	{
+		"network": "stokenet",
+		"state_version": 73654157,
+		"proposer_round_timestamp": "2024-04-10T08:36:43.74Z",
+		"epoch": 51651,
+		"round": 411
+	},
+	"items":
+	[
+		{
+			"address": "account_tdx_2_12ylv4l9tj9vx0myyge2s7mzmgnzjmk9fgu3h72dn62s8d9lcafxzds",
+			"fungible_resources":
+			{
+				"total_count": 11,
+				"items":
+				[
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1trlp0h0jtkdzr5h79sp9c60wgrpznxlsx4j68djwht5tn6apzkx3m0",
+									"amount": "9991.09666653402",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c055261646978",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Radix",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Radix",
+											"type": "String"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c3468747470733a2f2f6173736574732e7261646978646c742e636f6d2f69636f6e732f69636f6e2d7872642d33327833322e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://assets.radixdlt.com/icons/icon-xrd-32x32.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://assets.radixdlt.com/icons/icon-xrd-32x32.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c9e01546865205261646978205075626c6963204e6574776f726b2773206e617469766520746f6b656e2c207573656420746f2070617920746865206e6574776f726b2773207265717569726564207472616e73616374696f6e206665657320616e6420746f2073656375726520746865206e6574776f726b207468726f756768207374616b696e6720746f206974732076616c696461746f72206e6f6465732e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes.",
+											"type": "String"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c03585244",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "XRD",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "XRD",
+											"type": "String"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c00",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1trenve8ltw9lk2snmjng9fwu72d85xtanwyx47haln86dx3x5x4wlm",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t5znvqz9uaqj4afa2xwuzxy6mum3u2406r5gx9fcjpepfauu25qwm7",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0c5363726962626c65636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Scribblecoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Scribblecoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5868747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f65646974696e672d757365722d616374696f6e2f70656e63696c2d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/editing-user-action/pencil-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/editing-user-action/pencil-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c5b5363726962626c65636f696e202d206d616b696e6720697473206d61726b20696e2074686520776f726c64206f66206469676974616c2063757272656e63792c206f6e65207472616e73616374696f6e20617420612074696d6521",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Scribblecoin - making its mark in the world of digital currency, one transaction at a time!",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Scribblecoin - making its mark in the world of digital currency, one transaction at a time!",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c055343524942",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "SCRIB",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "SCRIB",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tq6fhk82u9r9t3473phmvh4h0cjw8n67zndnwr2qrmykvd3t65dt9w",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t4s3vqdeasekxcqfudltsp65n4tlx6xy9z9mm440v79q53zfjsm8mm",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c08476c6f77636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Glowcoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Glowcoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5c68747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f617274732d677261706869632d7368617065732f676c6172652d737461722d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/glare-star-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/glare-star-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c54476c6f77636f696e202d20696c6c756d696e6174696e6720746865207061746820746f2066696e616e6369616c2066726565646f6d2077697468206974732072616469616e74207472616e73616374696f6e7321",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Glowcoin - illuminating the path to financial freedom with its radiant transactions!",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Glowcoin - illuminating the path to financial freedom with its radiant transactions!",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c04474c4f57",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "GLOW",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "GLOW",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tzcm7l58c0zvsh4cy9ptj4m36qrkj3m7x9wt3lj0gxj5r0u8cr6uj6",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1thkcveg0p2l35kvwlxasltvw0wjgsrpch6yfjct9qahze3wce8ukj8",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c09426c697373636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Blisscoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Blisscoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5b68747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f656d6f6a692d656d6f7469636f6e2f6c61756768696e672d626c61636b2d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/emoji-emoticon/laughing-black-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/emoji-emoticon/laughing-black-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c70426c697373636f696e202d20657870657269656e6365207075726520626c6973732077697468206576657279207472616e73616374696f6e212048617070696e6573732067756172616e7465656420696e2074686520776f726c64206f66206469676974616c2063757272656e63792e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Blisscoin - experience pure bliss with every transaction! Happiness guaranteed in the world of digital currency.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Blisscoin - experience pure bliss with every transaction! Happiness guaranteed in the world of digital currency.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c05424c495353",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "BLISS",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "BLISS",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tqzsqja9g2jpccv5q02xp0nuw2gzr7z8sr9hm7j0uthzyj7yv9tac9",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t4ljhq7gdhuklfpe2vvdrpy2uuf2ff9n7at20z7f3pmwshpjgvyv7r",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0a526f636b65746675656c",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Rocketfuel",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Rocketfuel",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c6568747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f7472616e73706f72746174696f6e2d6175746f6d6f746976652f726f636b65742d6c61756e63682d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/transportation-automotive/rocket-launch-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/transportation-automotive/rocket-launch-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c65526f636b65746675656c202d20706f776572696e6720796f757220696e766573746d656e747320746f206e657720686569676874732120537472617020696e20666f722061206a6f75726e657920746f20746865206d6f6f6e20616e64206265796f6e642e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Rocketfuel - powering your investments to new heights! Strap in for a journey to the moon and beyond.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Rocketfuel - powering your investments to new heights! Strap in for a journey to the moon and beyond.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c044655454c",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "FUEL",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "FUEL",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tqr6uqrcae6eh9pvt7gfq0k5qzctsfujdsx8fk9gdympjks408s73d",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1tk40xeu6lfzgzwjyrkw6rvveeue9gs0wxspqutcyrktzjwc65hrh9l",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c094a656c6c79636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Jellycoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Jellycoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5968747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f616e696d616c732d616e642d62697264732f6a656c6c79666973682d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/jellyfish-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/jellyfish-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c5e4a656c6c79636f696e202d206d616b696e6720796f757220696e766573746d656e747320776f62626c652077697468206578636974656d656e7421204469766520696e746f206120706f6f6c206f662073776565742070726f666974732e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Jellycoin - making your investments wobble with excitement! Dive into a pool of sweet profits.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Jellycoin - making your investments wobble with excitement! Dive into a pool of sweet profits.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c054a454c4c59",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "JELLY",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "JELLY",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1trv245s7clmc8yjskr6n52x26vsxytpr6rert20udsvfjr33xg56q7",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t4dr4f2xcxjfr0a5d9vxdz2h7pwz67z9mqamv9jtez38unwx7lvz92",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0842697465636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Bitecoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Bitecoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5568747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f616e696d616c732d616e642d62697264732f736861726b2d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/shark-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/shark-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c7042697465636f696e202d2074616b696e672061206269672062697465206f7574206f66207468652063727970746f63757272656e6379206d61726b6574212053696e6b20796f757220746565746820696e746f2070726f6669747320776974682042697465636f696e20746f6461792e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Bitecoin - taking a big bite out of the cryptocurrency market! Sink your teeth into profits with Bitecoin today.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Bitecoin - taking a big bite out of the cryptocurrency market! Sink your teeth into profits with Bitecoin today.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0442495445",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "BITE",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "BITE",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tzf3zlvdt3m66yelvret4kdnymsy6pgyhl22q74vjn2w2pmpwt3hgs",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t4skra7nnudarl50jp9uxgyh32tynjumnlcgkzlr6qm3k4f3hlx4g0",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0850617773636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Pawscoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Pawscoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5368747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f616e696d616c732d616e642d62697264732f7061772d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/paw-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/paw-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c6150617773636f696e202d20746865207061772d736f6d65206469676974616c2063757272656e63792074686174206c65617665732061206c617374696e6720696d7072657373696f6e2077697468206576657279207472616e73616374696f6e21",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Pawscoin - the paw-some digital currency that leaves a lasting impression with every transaction!",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Pawscoin - the paw-some digital currency that leaves a lasting impression with every transaction!",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0450415753",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "PAWS",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "PAWS",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tqwy89mkv68fjfnzzvpkf7n57tcd4jnrkqhayczqhysnvet7wrhq6c",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t40c6yfuvau7t0w8rkeuqq97f3662y0d4dayxq8w2mym4965krp559",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c09537061636563616b65",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Spacecake",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Spacecake",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5268747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f666f6f642d616e642d6472696e6b732f63616b652d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/food-and-drinks/cake-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/food-and-drinks/cake-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c64537061636563616b65202d206675656c696e6720696e74657267616c6163746963207472616e73616374696f6e732077697468206120737072696e6b6c65206f662073776565746e657373212049742773206f7574206f66207468697320776f726c6421",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Spacecake - fueling intergalactic transactions with a sprinkle of sweetness! It's out of this world!",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Spacecake - fueling intergalactic transactions with a sprinkle of sweetness! It's out of this world!",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0443414b45",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "CAKE",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "CAKE",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tpp0r7dq4wu9xalrdrlek3nsgtedzgmgdsyh36sf49h8fs7p8cuvft",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1t45vncjuyac0u65cscu44kvsxsrgqkpmvg9a0jquwwh6dy7kl33slp",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c09517561636b636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Quackcoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Quackcoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5468747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f616e696d616c732d616e642d62697264732f6475636b2d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/duck-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/duck-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c784469766520696e746f2074686520717561636b7920776f726c64206f662063727970746f207769746820517561636b636f696e212049742773206d616b696e6720776176657320616e64207475726e696e6720686561647320666173746572207468616e20796f752063616e2073617920276475636b2721",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Dive into the quacky world of crypto with Quackcoin! It's making waves and turning heads faster than you can say 'duck'!",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Dive into the quacky world of crypto with Quackcoin! It's making waves and turning heads faster than you can say 'duck'!",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c05515541434b",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "QUACK",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "QUACK",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tqd4clkva5lt0dg5sjd773fk5x2c68vavrkhw7qu2nh6cl0xrkfyvh",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1tklpwgg2gsfwl79rwdpe3gsn2xl24mf05pudtvvkqpqd3qlqtf8yef",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0850757272636f696e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Purrcoin",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Purrcoin",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5868747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f616e696d616c732d616e642d62697264732f6361742d666163652d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/cat-face-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/animals-and-birds/cat-face-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c704a6f696e2074686520707572722d66656374207265766f6c7574696f6e20696e206469676974616c2063757272656e637920776974682050757272636f696e21204974277320746865206361742773206d656f7720696e2074686520776f726c64206f6620626c6f636b636861696e2e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Join the purr-fect revolution in digital currency with Purrcoin! It's the cat's meow in the world of blockchain.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Join the purr-fect revolution in digital currency with Purrcoin! It's the cat's meow in the world of blockchain.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0450555252",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "PURR",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "PURR",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0206536172676f6e055275737479",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Sargon",
+															"kind": "String"
+														},
+														{
+															"value": "Rusty",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Sargon",
+												"Rusty"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73654060
+								}
+							]
+						}
+					}
+				]
+			},
+			"non_fungible_resources":
+			{
+				"total_count": 5,
+				"items":
+				[
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"total_count": 10,
+									"vault_address": "internal_vault_tdx_2_1nzqzqc0mg53pm4kwucdp6x3fjdt3534vwl8dlnkw7shl7nc9dkh8nk",
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1ngv6vuxn03khftr9939pyvl7qrtt0v6csul5v2csqf6p50adkpjx64",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0541626f7665",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Above",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Above",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c6168747470733a2f2f696d6167652d736572766963652d746573742d696d616765732e73332e65752d776573742d322e616d617a6f6e6177732e636f6d2f77616c6c65745f746573745f696d616765732f4672616d652b362d6c617267652e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Frame+6-large.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Frame+6-large.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c3641626f76653a20416e20616d617a696e676c7920696e6e6f76617469766520616e642072617265204e465420636f6c6c656374696f6e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Above: An amazingly innovative and rare NFT collection",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Above: An amazingly innovative and rare NFT collection",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0541424f5645",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "ABOVE",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "ABOVE",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0306556e6971756504464f4d4f08416476616e636564",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Unique",
+															"kind": "String"
+														},
+														{
+															"value": "FOMO",
+															"kind": "String"
+														},
+														{
+															"value": "Advanced",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Unique",
+												"FOMO",
+												"Advanced"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"total_count": 10,
+									"vault_address": "internal_vault_tdx_2_1nq35lt8ezp4lfmp29vmgq8sk3tqg26aa77cf7mx8gqamnk9rn0exju",
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1ng9qglheajmctgr3ahnnv3yvjhdkpm3rrgc45ujrz5a499hf5r02ym",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0541626f7574",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "About",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "About",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c7368747470733a2f2f696d6167652d736572766963652d746573742d696d616765732e73332e65752d776573742d322e616d617a6f6e6177732e636f6d2f77616c6c65745f746573745f696d616765732f46696c6c696e672b53746174696f6e2b427265616b666173742d736d616c6c2e6a7067",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Filling+Station+Breakfast-small.jpg",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Filling+Station+Breakfast-small.jpg",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c3641626f75743a20416e20616d617a696e676c7920696e6e6f76617469766520616e642072617265204e465420636f6c6c656374696f6e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "About: An amazingly innovative and rare NFT collection",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "About: An amazingly innovative and rare NFT collection",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0541424f5554",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "ABOUT",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "ABOUT",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0306556e6971756504464f4d4f08416476616e636564",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Unique",
+															"kind": "String"
+														},
+														{
+															"value": "FOMO",
+															"kind": "String"
+														},
+														{
+															"value": "Advanced",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Unique",
+												"FOMO",
+												"Advanced"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"total_count": 10,
+									"vault_address": "internal_vault_tdx_2_1npvlf6g9aqz25rt4c3la6zamwge83e96kyue5wvx7sc5fnwm6nwr0y",
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1n24330848d0qdu2hz3jzfrq6rk6pxq9002eww0mv7mqtamcj6th5zr",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c0441626c65",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Able",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Able",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c7468747470733a2f2f696d6167652d736572766963652d746573742d696d616765732e73332e65752d776573742d322e616d617a6f6e6177732e636f6d2f77616c6c65745f746573745f696d616765732f46696c6c696e672b53746174696f6e2b427265616b666173742d6d656469756d2e6a7067",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Filling+Station+Breakfast-medium.jpg",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Filling+Station+Breakfast-medium.jpg",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c3541626c653a20416e20616d617a696e676c7920696e6e6f76617469766520616e642072617265204e465420636f6c6c656374696f6e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Able: An amazingly innovative and rare NFT collection",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Able: An amazingly innovative and rare NFT collection",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0441424c45",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "ABLE",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "ABLE",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0306556e6971756504464f4d4f08416476616e636564",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Unique",
+															"kind": "String"
+														},
+														{
+															"value": "FOMO",
+															"kind": "String"
+														},
+														{
+															"value": "Advanced",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Unique",
+												"FOMO",
+												"Advanced"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"total_count": 10,
+									"vault_address": "internal_vault_tdx_2_1nrj0uh6jkhuefpjjwr78kerhm960ea29uleje7ewjkrjjmw0mjqk3f",
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1ngya0vwrl2yjjuhquqymf2afjau6n2d7lynss4yu2ycavhha9mymgn",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c074162696c697479",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Ability",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Ability",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c7368747470733a2f2f696d6167652d736572766963652d746573742d696d616765732e73332e65752d776573742d322e616d617a6f6e6177732e636f6d2f77616c6c65745f746573745f696d616765732f46696c6c696e672b53746174696f6e2b427265616b666173742d6c617267652e6a7067",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Filling+Station+Breakfast-large.jpg",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/Filling+Station+Breakfast-large.jpg",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c384162696c6974793a20416e20616d617a696e676c7920696e6e6f76617469766520616e642072617265204e465420636f6c6c656374696f6e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Ability: An amazingly innovative and rare NFT collection",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Ability: An amazingly innovative and rare NFT collection",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c074142494c495459",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "ABILITY",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "ABILITY",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0306556e6971756504464f4d4f08416476616e636564",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Unique",
+															"kind": "String"
+														},
+														{
+															"value": "FOMO",
+															"kind": "String"
+														},
+														{
+															"value": "Advanced",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Unique",
+												"FOMO",
+												"Advanced"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"total_count": 10,
+									"vault_address": "internal_vault_tdx_2_1np5lx6ea6fqljdw9x6rryjqap4zxkrp7ye8zg0a359r0pplj3sjjwy",
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1ntkmxen44prp7w3svq7qfd4yypsvdd8n6nslwjhnls83dnprerwuxt",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c074162616e646f6e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Abandon",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Abandon",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c6568747470733a2f2f696d6167652d736572766963652d746573742d696d616765732e73332e65752d776573742d322e616d617a6f6e6177732e636f6d2f77616c6c65745f746573745f696d616765732f7363727970746f6e6175745f70617463682e737667",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/scryptonaut_patch.svg",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/scryptonaut_patch.svg",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c384162616e646f6e3a20416e20616d617a696e676c7920696e6e6f76617469766520616e642072617265204e465420636f6c6c656374696f6e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Abandon: An amazingly innovative and rare NFT collection",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Abandon: An amazingly innovative and rare NFT collection",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c074142414e444f4e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "ABANDON",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "ABANDON",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								},
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0306556e6971756504464f4d4f08416476616e636564",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Unique",
+															"kind": "String"
+														},
+														{
+															"value": "FOMO",
+															"kind": "String"
+														},
+														{
+															"value": "Advanced",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Unique",
+												"FOMO",
+												"Advanced"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73653987
+								}
+							]
+						}
+					}
+				]
+			},
+			"metadata":
+			{
+				"total_count": 2,
+				"items":
+				[
+					{
+						"key": "owner_keys",
+						"value":
+						{
+							"raw_hex": "5c228f01202201010120071d3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+							"programmatic_json":
+							{
+								"variant_id": 143,
+								"fields":
+								[
+									{
+										"element_kind": "Enum",
+										"elements":
+										[
+											{
+												"variant_id": 1,
+												"fields":
+												[
+													{
+														"element_kind": "U8",
+														"hex": "3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+														"kind": "Bytes"
+													}
+												],
+												"kind": "Enum"
+											}
+										],
+										"kind": "Array"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"values":
+								[
+									{
+										"hash_hex": "3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+										"key_hash_type": "EddsaEd25519"
+									}
+								],
+								"type": "PublicKeyHashArray"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73648065
+					},
+					{
+						"key": "owner_badge",
+						"value":
+						{
+							"raw_hex": "5c220b01c0021e513ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+							"programmatic_json":
+							{
+								"variant_id": 11,
+								"fields":
+								[
+									{
+										"value": "[513ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8]",
+										"kind": "NonFungibleLocalId"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "[513ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8]",
+								"type": "NonFungibleLocalId"
+							}
+						},
+						"is_locked": true,
+						"last_updated_at_state_version": 73648065
+					}
+				]
+			},
+			"explicit_metadata":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"details":
+			{
+				"package_address": "package_tdx_2_1pkgxxxxxxxxxaccntxxxxxxxxxx000929625493xxxxxxxxx9jat20",
+				"blueprint_name": "Account",
+				"blueprint_version": "1.0.0",
+				"state":
+				{
+					"default_deposit_rule": "Accept"
+				},
+				"role_assignments":
+				{
+					"owner":
+					{
+						"rule":
+						{
+							"type": "Protected",
+							"access_rule":
+							{
+								"type": "ProofRule",
+								"proof_rule":
+								{
+									"type": "Require",
+									"requirement":
+									{
+										"type": "NonFungible",
+										"non_fungible":
+										{
+											"local_id":
+											{
+												"id_type": "Bytes",
+												"sbor_hex": "5cc0021d3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+												"simple_rep": "[3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8]"
+											},
+											"resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+										}
+									}
+								}
+							}
+						},
+						"updater": "Object"
+					},
+					"entries":
+					[
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "securify"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "Protected",
+									"access_rule":
+									{
+										"type": "ProofRule",
+										"proof_rule":
+										{
+											"type": "Require",
+											"requirement":
+											{
+												"type": "NonFungible",
+												"non_fungible":
+												{
+													"local_id":
+													{
+														"id_type": "Bytes",
+														"sbor_hex": "5cc0021d3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8",
+														"simple_rep": "[3ecafcab915867ec8446550f6c5b44c52dd8a947237f29b3d2a07697f8]"
+													},
+													"resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+												}
+											}
+										}
+									}
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "_self_"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						}
+					]
+				},
+				"type": "Component"
+			}
+		}
+	]
+}

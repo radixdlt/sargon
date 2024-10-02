@@ -1,0 +1,77 @@
+{
+  "kind": "CommitSuccess",
+  "state_updates_summary": {
+    "new_entities": [],
+    "metadata_updates": {},
+    "non_fungible_data_updates": {},
+    "newly_minted_non_fungibles": []
+  },
+  "worktop_changes": {
+    "0": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25",
+          "amount": "1"
+        }
+      }
+    ],
+    "1": [
+      {
+        "kind": "Take",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25",
+          "amount": "1"
+        }
+      }
+    ],
+    "2": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+          "amount": "3.162277"
+        }
+      },
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1tkx5re7dyhr8updty5spde2nsr0kpnhq953m09xg3u6hf3u6j4fsqf",
+          "amount": "0.316227766016837933"
+        }
+      }
+    ],
+    "3": [
+      {
+        "kind": "Take",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+          "amount": "3.162277"
+        }
+      },
+      {
+        "kind": "Take",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1tkx5re7dyhr8updty5spde2nsr0kpnhq953m09xg3u6hf3u6j4fsqf",
+          "amount": "0.316227766016837933"
+        }
+      }
+    ]
+  },
+  "fee_summary": {
+    "execution_fees_in_xrd": "0.26154965",
+    "finalization_fees_in_xrd": "0.0325088",
+    "storage_fees_in_xrd": "0.12760162134",
+    "royalty_fees_in_xrd": "0"
+  },
+  "locked_fees": {
+    "contingent": "0",
+    "non_contingent": "0"
+  }
+}

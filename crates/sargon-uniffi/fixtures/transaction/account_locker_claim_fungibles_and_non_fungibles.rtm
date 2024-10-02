@@ -1,0 +1,39 @@
+CALL_METHOD
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    "lock_fee"
+    Decimal("0.595383053951")
+;
+CALL_METHOD
+    Address("locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx")
+    "claim"
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    Address("resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3")
+    Decimal("1")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3")
+    Decimal("1")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    "deposit"
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx")
+    "claim"
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    Address("resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32")
+    Decimal("3")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32")
+    Decimal("3")
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
+    "deposit"
+    Bucket("bucket2")
+;

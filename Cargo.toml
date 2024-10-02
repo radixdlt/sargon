@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["crates/sargon"]
+members = [
+    "crates/sargon",
+    "crates/sargon-uniffi"
+]
 default-members = ["crates/sargon"]
 
 [profile.release]

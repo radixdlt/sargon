@@ -1,0 +1,69 @@
+{
+  "kind": "CommitSuccess",
+  "state_updates_summary": {
+    "new_entities": [],
+    "metadata_updates": {},
+    "non_fungible_data_updates": {
+      "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}": "5c21030c0b5374616b6520436c61696d0a2394000000000000a0000050efe2d6e41a1b000000000000000000000000000000"
+    },
+    "newly_minted_non_fungibles": [
+      "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}"
+    ]
+  },
+  "worktop_changes": {
+    "0": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn",
+          "amount": "500"
+        }
+      }
+    ],
+    "1": [
+      {
+        "kind": "Take",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn",
+          "amount": "500"
+        }
+      }
+    ],
+    "2": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Ids",
+          "resource_address": "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
+          "ids": [
+            "{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}"
+          ]
+        }
+      }
+    ],
+    "3": [
+      {
+        "kind": "Take",
+        "value": {
+          "kind": "Ids",
+          "resource_address": "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
+          "ids": [
+            "{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}"
+          ]
+        }
+      }
+    ]
+  },
+  "fee_summary": {
+    "execution_fees_in_xrd": "0.2848875",
+    "finalization_fees_in_xrd": "0.06251535",
+    "storage_fees_in_xrd": "0.16927718825",
+    "royalty_fees_in_xrd": "0"
+  },
+  "locked_fees": {
+    "contingent": "0",
+    "non_contingent": "0"
+  }
+}
