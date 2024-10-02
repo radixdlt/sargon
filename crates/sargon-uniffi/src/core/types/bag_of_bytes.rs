@@ -1,6 +1,7 @@
 use std::ops::{Deref, DerefMut, Neg};
 
 use crate::prelude::*;
+use sargon::BagOfBytes as InternalBagOfBytes;
 
 /// This is a TEMPORARY workaround until Kotlin => ByteArray equatable issue for
 /// Records has been solved, see: https://github.com/mozilla/uniffi-rs/issues/1985
@@ -25,6 +26,18 @@ use crate::prelude::*;
 #[debug("{}", self.to_hex())]
 pub struct BagOfBytes {
     pub(crate) bytes: Vec<u8>,
+}
+
+impl From<InternalBagOfBytes> for BagOfBytes {
+    fn from(value: InternalBagOfBytes) -> Self {
+        value.bytes().into()
+    }
+}
+
+impl Into<InternalBagOfBytes> for BagOfBytes {
+    fn into(self) -> InternalBagOfBytes {
+        self.bytes.into()
+    }
 }
 
 impl AsRef<[u8]> for BagOfBytes {

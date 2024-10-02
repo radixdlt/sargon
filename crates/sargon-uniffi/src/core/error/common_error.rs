@@ -1,8 +1,21 @@
 use crate::prelude::*;
+use sargon::CommonError as InternalCommonError;
 
 use thiserror::Error as ThisError;
 
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
+
+impl From<InternalCommonError> for CommonError {
+    fn from(value: InternalCommonError) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalCommonError> for CommonError {
+    fn into(self) -> InternalCommonError {
+        unimplemented!()
+    }
+}
 
 #[repr(u32)]
 #[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
