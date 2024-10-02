@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::EventBusDriver as InternalEventBusDriver;
+use sargon::EventNotification as InternalEventNotification;
 
 /// A driver which received and asynchronously *handles* event notifications
 /// emitted by the `SargonOS`. Letting the method be async allows for Rust side
@@ -23,4 +25,21 @@ pub trait EventBusDriver: Send + Sync + std::fmt::Debug {
         &self,
         event_notification: EventNotification,
     );
+}
+
+#[derive(Debug)]
+pub struct EventBusDriverAdapter {
+    pub wrapped: Arc<dyn EventBusDriver>,
+}
+
+#[async_trait::async_trait]
+impl InternalEventBusDriver for EventBusDriverAdapter {
+    async fn handle_event_notification(
+        &self,
+        event_notification: InternalEventNotification,
+    ) {
+            self.wrapped
+                .handle_event_notification(event_notification.into())
+                .await
+    }
 }
