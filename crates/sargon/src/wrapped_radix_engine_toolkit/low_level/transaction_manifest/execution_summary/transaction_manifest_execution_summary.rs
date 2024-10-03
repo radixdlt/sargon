@@ -307,7 +307,10 @@ mod tests {
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
                 FeeSummary::new("0.1585925", "0.1210119", "0.26540755769", 0,),
-                NewEntities::new([])
+                NewEntities::new([(
+                    token_address,
+                    NewlyCreatedResource::empty()
+                )])
             )
         );
     }
@@ -392,7 +395,9 @@ mod tests {
                         "0.96845625165",
                         0,
                     ),
-                    NewEntities::new([])
+                    NewEntities::new([
+                        (non_fungible_address, NewlyCreatedResource::default())
+                    ])
                 )
             );
     }
@@ -559,7 +564,9 @@ mod tests {
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
                 FeeSummary::new("0.15184175", "0.1607719", "0.33388137243", 0,),
-                NewEntities::new([])
+                NewEntities::new([
+                    (ResourceAddress::try_from_bech32("resource_tdx_2_1tkrg7uwrc9sw3tkckuxwu65euwppxa00f7aqtx5ujd0aa22gej6nm7").unwrap(), NewlyCreatedResource::default())
+                ])
             )
         );
     }
