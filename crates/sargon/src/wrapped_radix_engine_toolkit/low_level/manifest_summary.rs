@@ -46,8 +46,8 @@ impl ManifestSummary {
     }
 }
 
-impl From<(RetManifestSummary, NetworkID)> for ManifestSummary {
-    fn from(value: (RetManifestSummary, NetworkID)) -> Self {
+impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
+    fn from(value: (RetStaticAnalysis, NetworkID)) -> Self {
         let (ret, network_id) = value;
 
         let addresses_of_accounts_withdrawn_from =

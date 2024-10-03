@@ -61,7 +61,9 @@ impl HasSampleValues for IntentSignatures {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-            signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
+            signatures.push(private_key.sign_transaction_intent_hash(
+                &intent.transaction_intent_hash(),
+            ))
         }
 
         IntentSignatures::new(signatures)
@@ -74,7 +76,9 @@ impl HasSampleValues for IntentSignatures {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-            signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
+            signatures.push(private_key.sign_transaction_intent_hash(
+                &intent.transaction_intent_hash(),
+            ))
         }
 
         IntentSignatures::new(signatures)
@@ -106,7 +110,7 @@ mod tests {
         let roundtrip = |si: SignedIntent| {
             let first =
                 ScryptoIntentSignatures::from(si.clone().intent_signatures);
-            let second = si.clone().intent().intent_hash().hash;
+            let second = si.clone().intent().transaction_intent_hash().hash;
             assert_eq!(
                 SUT::try_from((first, second)).unwrap(),
                 si.intent_signatures

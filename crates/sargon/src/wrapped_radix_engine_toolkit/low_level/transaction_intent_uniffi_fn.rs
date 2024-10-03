@@ -11,8 +11,10 @@ pub fn new_transaction_intent_sample_other() -> TransactionIntent {
 }
 
 #[uniffi::export]
-pub fn transaction_intent_hash(intent: &TransactionIntent) -> IntentHash {
-    intent.intent_hash()
+pub fn transaction_intent_hash(
+    intent: &TransactionIntent,
+) -> TransactionIntentHash {
+    intent.transaction_intent_hash()
 }
 
 #[uniffi::export]
@@ -50,7 +52,7 @@ mod tests {
     #[test]
     fn test_transaction_intent_hash() {
         let sut = SUT::sample();
-        assert_eq!(transaction_intent_hash(&sut), sut.intent_hash())
+        assert_eq!(transaction_intent_hash(&sut), sut.transaction_intent_hash())
     }
 
     #[test]

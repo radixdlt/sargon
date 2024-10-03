@@ -35,17 +35,19 @@ impl GatewayClient {
     pub async fn submit_notarized_transaction(
         &self,
         notarized_transaction: NotarizedTransaction,
-    ) -> Result<IntentHash> {
-        let intent_hash =
-            notarized_transaction.signed_intent().intent().intent_hash();
+    ) -> Result<TransactionIntentHash> {
+        let transaction_intent_hash = notarized_transaction
+            .signed_intent()
+            .intent()
+            .transaction_intent_hash();
         let request = TransactionSubmitRequest::new(notarized_transaction);
         self.transaction_submit(request).await.and_then(|r| {
             if r.duplicate {
                 Err(CommonError::GatewaySubmitDuplicateTX {
-                    intent_hash: intent_hash.to_string(),
+                    intent_hash: transaction_intent_hash.to_string(),
                 })
             } else {
-                Ok(intent_hash)
+                Ok(transaction_intent_hash)
             }
         })
     }

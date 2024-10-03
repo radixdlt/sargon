@@ -35,7 +35,7 @@ extension TransactionManifest {
         transactionManifestInvolvedResourceAddresses(manifest: self)
     }
     
-    public var summary: ManifestSummary {
+    public var summary: ManifestSummary? {
         transactionManifestSummary(manifest: self)
     }
     

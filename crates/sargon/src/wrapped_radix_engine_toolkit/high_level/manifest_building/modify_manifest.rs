@@ -10,24 +10,16 @@ pub trait InspectInstruction {
 impl InspectInstruction for ScryptoInstruction {
     fn is_lock_fee(&self) -> bool {
         match self {
-            ScryptoInstruction::CallMethod {
-                address: _,
-                method_name,
-                args: _,
-            } => method_name == ACCOUNT_LOCK_FEE_IDENT,
+            ScryptoInstruction::CallMethod(call_method) => {
+                call_method.method_name == ACCOUNT_LOCK_FEE_IDENT
+            }
             _ => false,
         }
     }
 
     // FIXME: this will be simpler once we get EnumAsInner on `ScryptoInstruction`
     fn is_assert_worktop_contains(&self) -> bool {
-        matches!(
-            self,
-            ScryptoInstruction::AssertWorktopContains {
-                resource_address: _,
-                amount: _,
-            }
-        )
+        matches!(self, ScryptoInstruction::AssertWorktopContains(_))
     }
 }
 
@@ -164,6 +156,7 @@ enum InstructionPosition {
 #[cfg(test)]
 mod tests {
     use radix_engine_interface::blueprints::account::AccountLockFeeInput;
+    use radix_transactions::manifest::{AssertWorktopContains, DropAllProofs};
 
     use super::*;
 
@@ -174,7 +167,7 @@ mod tests {
 
     #[test]
     fn is_lock_fee() {
-        assert!(!ScryptoInstruction::DropAllProofs.is_lock_fee());
+        assert!(!ScryptoInstruction::DropAllProofs(DropAllProofs).is_lock_fee());
     }
 
     #[test]
@@ -232,10 +225,10 @@ CALL_METHOD
         let instruction = instructions[index as usize + 1].clone();
         assert_eq!(
             instruction,
-            ScryptoInstruction::AssertWorktopContains {
+            ScryptoInstruction::AssertWorktopContains(AssertWorktopContains {
                 resource_address: resource.into(),
-                amount: rounded_guaranteed_amount.into()
-            }
+                amount: rounded_guaranteed_amount.into(),
+            })
         );
     }
 

@@ -32,7 +32,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
     }
     
     func test_manifest_summary() {
-        XCTAssertNoDifference(SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
+        XCTAssertNoDifference(SUT.sample.summary?.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
     }
     
     func test_execution_summary() throws {

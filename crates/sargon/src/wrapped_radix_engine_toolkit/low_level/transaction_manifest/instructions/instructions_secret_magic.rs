@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use radix_transactions::manifest::{
+    DropAuthZoneProofs, DropAuthZoneRegularProofs, DropAuthZoneSignatureProofs,
+};
 
 /// An internal representation of a collection of Instructions,
 /// which intentions is to allow the `struct Instructions`
@@ -44,20 +47,24 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
 
 impl From<ScryptoInstructions> for InstructionsSecretMagic {
     fn from(value: ScryptoInstructions) -> Self {
-        Self(value.0)
+        Self(value.0.to_vec())
     }
 }
 
 impl HasSampleValues for InstructionsSecretMagic {
     fn sample() -> Self {
         Self(vec![
-            ScryptoInstruction::DropAuthZoneProofs, // sbor: 0x12
-            ScryptoInstruction::DropAuthZoneRegularProofs, // sbor: 0x13
+            ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs), // sbor: 0x12
+            ScryptoInstruction::DropAuthZoneRegularProofs(
+                DropAuthZoneRegularProofs,
+            ), // sbor: 0x13
         ])
     }
 
     fn sample_other() -> Self {
-        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs]) // sbor: 0x17
+        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs(
+            DropAuthZoneSignatureProofs,
+        )]) // sbor: 0x17
     }
 }
 
@@ -79,10 +86,15 @@ mod tests {
     fn from_scrypto() {
         assert_eq!(
             SUT::sample(),
-            ScryptoInstructions(vec![
-                ScryptoInstruction::DropAuthZoneProofs,
-                ScryptoInstruction::DropAuthZoneRegularProofs,
-            ])
+            ScryptoInstructions(
+                vec![
+                    ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
+                    ScryptoInstruction::DropAuthZoneRegularProofs(
+                        DropAuthZoneRegularProofs
+                    ),
+                ]
+                .into()
+            )
             .into()
         );
     }

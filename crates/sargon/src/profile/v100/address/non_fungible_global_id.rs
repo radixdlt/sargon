@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use radix_common::address::{AddressBech32Decoder, AddressBech32Encoder};
+use radix_engine_toolkit::utils::*;
 
 #[derive(
     Clone,
@@ -65,39 +67,6 @@ impl From<&ResourceAddress> for ScryptoResourceAddress {
     }
 }
 
-impl TryFrom<RetNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
-    type Error = crate::CommonError;
-
-    fn try_from(
-        value: RetNonFungibleGlobalIdInternal,
-    ) -> sbor::prelude::Result<Self, Self::Error> {
-        let (scrypto_resource_address, scrypto_local_id) =
-            value.non_fungible_global_id.into_parts();
-
-        TryInto::<NetworkID>::try_into(value.network_id)
-            .and_then(|network_id| {
-                ResourceAddress::new(
-                    scrypto_resource_address.into_node_id(),
-                    network_id,
-                )
-            })
-            .map(|r| Self::new_unchecked(r, scrypto_local_id.into()))
-    }
-}
-
-impl From<NonFungibleGlobalId> for RetNonFungibleGlobalId {
-    fn from(value: NonFungibleGlobalId) -> Self {
-        let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
-            ScryptoResourceAddress::from(&value.resource_address),
-            value.non_fungible_local_id.clone().into(),
-        );
-        RetNonFungibleGlobalId::new(
-            scrypto_global_id,
-            value.network_id().discriminant(),
-        )
-    }
-}
-
 impl From<NonFungibleGlobalId> for ScryptoNonFungibleGlobalId {
     fn from(value: NonFungibleGlobalId) -> Self {
         Self::new(
@@ -117,25 +86,42 @@ impl From<(ScryptoNonFungibleGlobalId, NetworkID)> for NonFungibleGlobalId {
     }
 }
 
-impl NonFungibleGlobalId {
-    fn network_id(&self) -> NetworkID {
-        self.resource_address.network_id()
-    }
-
-    fn engine(&self) -> RetNonFungibleGlobalId {
-        self.clone().into()
-    }
-}
-
 impl FromStr for NonFungibleGlobalId {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        RetNonFungibleGlobalIdInternal::from_str(s)
-            .map_err(|_| CommonError::InvalidNonFungibleGlobalID {
+        let resource_address_string = s.split(':').next().ok_or(
+            CommonError::InvalidNonFungibleGlobalID {
                 bad_value: s.to_owned(),
-            })
-            .and_then(TryInto::<Self>::try_into)
+            },
+        )?;
+
+        let network_id = network_id_from_address_string(
+            resource_address_string,
+        )
+        .ok_or(CommonError::InvalidNonFungibleGlobalID {
+            bad_value: s.to_owned(),
+        })?;
+        let network_definition = network_definition_from_network_id(network_id);
+        let bech32_decoder = AddressBech32Decoder::new(&network_definition);
+
+        let non_fungible_global_id =
+            ScryptoNonFungibleGlobalId::try_from_canonical_string(
+                &bech32_decoder,
+                s,
+            )
+            .map_err(|_| {
+                CommonError::InvalidNonFungibleGlobalID {
+                    bad_value: s.to_owned(),
+                }
+            })?;
+
+        TryInto::<NetworkID>::try_into(network_id).and_then(|network_id| {
+            Ok(NonFungibleGlobalId::from((
+                non_fungible_global_id,
+                network_id,
+            )))
+        })
     }
 }
 
@@ -155,7 +141,11 @@ impl NonFungibleGlobalId {
     ///
     /// `resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>`
     pub fn to_canonical_string(&self) -> String {
-        format!("{}", self.engine().0)
+        let network_definition =
+            self.resource_address.network_id().network_definition();
+        let bech32_encoder = AddressBech32Encoder::new(&network_definition);
+        ScryptoNonFungibleGlobalId::from(self.clone())
+            .to_canonical_string(&bech32_encoder)
     }
 
     pub fn formatted(&self, format: AddressFormat) -> String {
@@ -434,6 +424,16 @@ mod tests {
                 resource_address.into(),
                 local_id.into()
             )
+        );
+    }
+
+    #[test]
+    fn test_to_canonical_string() {
+        let sut = SUT::sample();
+
+        pretty_assertions::assert_eq!(
+            sut.to_canonical_string(),
+            "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>".to_string()
         );
     }
 }

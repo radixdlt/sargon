@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::functions::manifest::execution_summary as RET_execution_summary;
+use radix_engine_toolkit::functions::transaction_v1::manifest::dynamically_analyze as RET_dynamically_analyze;
 
 impl TransactionManifest {
     /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt` data.
@@ -32,19 +32,20 @@ impl TransactionManifest {
         &self,
         receipt: ScryptoRuntimeToolkitTransactionReceipt,
     ) -> Result<ExecutionSummary> {
-        let ret_execution_summary = RET_execution_summary(
-            &self.scrypto_manifest(),
-            &receipt,
-        )
-        .map_err(|e| {
-            error!("Failed to get execution summary from RET, error: {:?}", e);
-            CommonError::ExecutionSummaryFail {
-                underlying: format!("{:?}", e),
-            }
-        })?;
+        let ret_dynamic_analysis =
+            RET_dynamically_analyze(&self.scrypto_manifest(), &receipt)
+                .map_err(|e| {
+                    error!(
+                        "Failed to get execution summary from RET, error: {:?}",
+                        e
+                    );
+                    CommonError::ExecutionSummaryFail {
+                        underlying: format!("{:?}", e),
+                    }
+                })?;
 
         Ok(ExecutionSummary::from((
-            ret_execution_summary,
+            ret_dynamic_analysis,
             self.network_id(),
         )))
     }
@@ -801,8 +802,7 @@ mod tests {
                       (
                         acc_gk,
                         vec![
-                            (
-                               ResourceIndicator::non_fungible(
+                            ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
                                 NonFungibleResourceIndicator::by_all(
                                     PredictedDecimal::new(0, 4),
@@ -811,7 +811,6 @@ mod tests {
                                         4
                                     )
                                 )
-                            )
                             )
                         ]
                       )

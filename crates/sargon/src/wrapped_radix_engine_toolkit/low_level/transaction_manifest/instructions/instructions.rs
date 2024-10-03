@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
 use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+use radix_transactions::manifest::CallMethod;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
 #[display("{}", self.instructions_string())]
@@ -38,11 +39,11 @@ impl Instructions {
     }
 }
 
-impl TryFrom<(&[ScryptoInstruction], NetworkID)> for Instructions {
+impl TryFrom<(&Vec<ScryptoInstruction>, NetworkID)> for Instructions {
     type Error = CommonError;
 
     fn try_from(
-        value: (&[ScryptoInstruction], NetworkID),
+        value: (&Vec<ScryptoInstruction>, NetworkID),
     ) -> Result<Self, CommonError> {
         let scrypto = value.0;
         let network_id = value.1;
@@ -52,7 +53,7 @@ impl TryFrom<(&[ScryptoInstruction], NetworkID)> for Instructions {
 
         Ok(Self {
             secret_magic: InstructionsSecretMagic::from(ScryptoInstructions(
-                scrypto.to_owned(),
+                scrypto.to_owned().into(),
             )),
             network_id,
         })
@@ -60,11 +61,17 @@ impl TryFrom<(&[ScryptoInstruction], NetworkID)> for Instructions {
 }
 
 fn instructions_string_from(
-    scrypto_instructions: &[ScryptoInstruction],
+    scrypto_instructions: &Vec<ScryptoInstruction>,
     network_id: NetworkID,
 ) -> Result<String, CommonError> {
+    // FIXME: refactor instructions_string_from?
+    let manifest = ScryptoTransactionManifest {
+        instructions: scrypto_instructions.clone(),
+        blobs: Default::default(),
+        object_names: Default::default(),
+    };
     let network_definition = network_id.network_definition();
-    scrypto_decompile(scrypto_instructions, &network_definition).map_err(|e| {
+    scrypto_decompile(&manifest, &network_definition).map_err(|e| {
         CommonError::InvalidInstructionsFailedToDecompile {
             underlying: format!("{:?}", e),
         }
@@ -106,7 +113,7 @@ impl Instructions {
         let nested_value = manifest_value_with_sbor_depth(depth);
         let dummy_address =
             ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);
-        let instruction = ScryptoInstruction::CallMethod {
+        let instruction = ScryptoInstruction::CallMethod(CallMethod {
             address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
                 &dummy_address,
             )
@@ -114,8 +121,8 @@ impl Instructions {
             .into(),
             method_name: "dummy".to_owned(),
             args: nested_value,
-        };
-        instructions_string_from(&[instruction], network_id)
+        });
+        instructions_string_from(&vec![instruction], network_id)
             .and_then(|x: String| Self::new(x, network_id))
     }
 
@@ -261,6 +268,9 @@ impl Instructions {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use radix_transactions::manifest::{
+        DropAuthZoneProofs, DropAuthZoneRegularProofs,
+    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Instructions;
@@ -354,9 +364,11 @@ mod tests {
     #[test]
     fn from_scrypto() {
         let network_id = NetworkID::Mainnet;
-        let instructions: &[ScryptoInstruction] = &[
-            ScryptoInstruction::DropAuthZoneProofs,
-            ScryptoInstruction::DropAuthZoneRegularProofs,
+        let instructions: &Vec<ScryptoInstruction> = &vec![
+            ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
+            ScryptoInstruction::DropAuthZoneRegularProofs(
+                DropAuthZoneRegularProofs,
+            ),
         ];
         assert_eq!(
             SUT {

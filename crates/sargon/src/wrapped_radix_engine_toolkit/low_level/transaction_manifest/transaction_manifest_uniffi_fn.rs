@@ -30,7 +30,7 @@ pub fn transaction_manifest_instructions_string(
 #[uniffi::export]
 pub fn transaction_manifest_summary(
     manifest: &TransactionManifest,
-) -> ManifestSummary {
+) -> Option<ManifestSummary> {
     manifest.summary()
 }
 
@@ -197,6 +197,7 @@ mod tests {
     fn test_manifest_summary() {
         assert_eq!(
             transaction_manifest_summary(&SUT::sample())
+                .unwrap()
                 .addresses_of_accounts_withdrawn_from,
             vec![AccountAddress::sample_mainnet()]
         );

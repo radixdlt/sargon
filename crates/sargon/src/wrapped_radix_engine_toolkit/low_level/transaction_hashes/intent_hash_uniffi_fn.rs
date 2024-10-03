@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[uniffi::export]
-pub fn new_intent_hash_sample() -> IntentHash {
-    IntentHash::sample()
+pub fn new_intent_hash_sample() -> TransactionIntentHash {
+    TransactionIntentHash::sample()
 }
 
 #[uniffi::export]
-pub fn new_intent_hash_sample_other() -> IntentHash {
-    IntentHash::sample_other()
+pub fn new_intent_hash_sample_other() -> TransactionIntentHash {
+    TransactionIntentHash::sample_other()
 }
 
 #[cfg(test)]
@@ -15,7 +15,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = IntentHash;
+    type SUT = TransactionIntentHash;
 
     #[test]
     fn hash_of_samples() {

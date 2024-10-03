@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 #if DEBUG
-extension SignedIntentHash {
+extension SignedTransactionIntentHash {
     public static let sample: Self = newSignedIntentHashSample()
     public static let sampleOther: Self = newSignedIntentHashSampleOther()
 }

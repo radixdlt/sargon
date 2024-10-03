@@ -36,12 +36,12 @@ impl TransactionIntent {
         self.manifest.blobs()
     }
 
-    pub fn intent_hash(&self) -> IntentHash {
+    pub fn transaction_intent_hash(&self) -> TransactionIntentHash {
         let hash = ret_hash_intent(&ScryptoIntent::from(self.clone()))
           .expect("Should never fail to hash an intent. Sargon should only produce valid Intents");
 
-        IntentHash::from_scrypto(
-            ScryptoIntentHash(hash.hash),
+        TransactionIntentHash::from_scrypto(
+            ScryptoTransactionIntentHash(hash.hash),
             self.header.network_id,
         )
     }
@@ -65,7 +65,9 @@ fn into_scrypto(
 ) -> ScryptoIntent {
     ScryptoIntent {
         header: (*header).into(),
-        instructions: ScryptoInstructions(manifest.instructions().clone()),
+        instructions: ScryptoInstructions(
+            manifest.instructions().clone().into(),
+        ),
         blobs: manifest.blobs().clone().into(),
         message: message.clone().into(),
     }
@@ -179,7 +181,7 @@ mod tests {
 
     #[test]
     fn intent_hash() {
-        let hash = SUT::sample().intent_hash();
+        let hash = SUT::sample().transaction_intent_hash();
         assert_eq!(hash.to_string(), "txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz")
     }
 
@@ -207,7 +209,7 @@ mod tests {
             SUT::test_with_sbor_depth(SUT::MAX_SBOR_DEPTH, NetworkID::Stokenet)
                 .unwrap();
         println!("{}", &sut.manifest);
-        assert_eq!(sut.intent_hash().to_string(), "txid_rdx1uwcfczupvvrrtxwxx6p5jugaxvu3j83tj5nz9pnrr44jyxccg2cqhuvzhy")
+        assert_eq!(sut.transaction_intent_hash().to_string(), "txid_rdx1uwcfczupvvrrtxwxx6p5jugaxvu3j83tj5nz9pnrr44jyxccg2cqhuvzhy")
     }
 
     #[test]

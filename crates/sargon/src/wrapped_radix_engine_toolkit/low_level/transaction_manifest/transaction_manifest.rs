@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use radix_common::prelude::ManifestBucket;
+use radix_transactions::manifest::KnownManifestObjectNames;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
 #[display("{}", self.instructions_string())] // TODO add blobs to Display
@@ -59,6 +61,18 @@ impl TransactionManifest {
         ScryptoTransactionManifest {
             instructions: self.instructions().clone(),
             blobs: self.secret_magic.blobs.clone().into(),
+            object_names: ScryptoManifestObjectNames::Known(
+                KnownManifestObjectNames {
+                    bucket_names: IndexMap::from([(
+                        ManifestBucket(0),
+                        "bucket_0".to_string(),
+                    )]),
+                    proof_names: Default::default(),
+                    address_reservation_names: Default::default(),
+                    address_names: Default::default(),
+                    intent_names: Default::default(),
+                },
+            ), // FIXME: replace
         }
     }
 }
@@ -131,9 +145,9 @@ impl TransactionManifest {
         self.secret_magic.instructions.instructions_string()
     }
 
-    pub fn summary(&self) -> ManifestSummary {
-        let ret_summary = RET_summary(&self.scrypto_manifest());
-        ManifestSummary::from((ret_summary, self.network_id()))
+    pub fn summary(&self) -> Option<ManifestSummary> {
+        let static_analysis = RET_statically_analyze(&self.scrypto_manifest())?; // this line returns Option<StaticAnalysis>
+        Some(ManifestSummary::from((static_analysis, self.network_id())))
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -184,6 +198,9 @@ impl TransactionManifest {
 mod tests {
     use super::*;
     use crate::prelude::*;
+    use radix_common::prelude::ManifestBucket;
+    use radix_transactions::manifest::{DropAllProofs, DropAuthZoneProofs};
+    use radix_transactions::model::InstructionV1;
     use std::collections::BTreeMap;
 
     impl FromStr for TransactionManifest {
@@ -232,13 +249,26 @@ mod tests {
 
     #[test]
     fn scrypto_roundtrip() {
-        let ins = vec![
-            ScryptoInstruction::DropAllProofs,
-            ScryptoInstruction::DropAuthZoneProofs,
-        ];
+        let ins: Vec<InstructionV1> = vec![
+            ScryptoInstruction::DropAllProofs(DropAllProofs),
+            ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
+        ]
+        .into();
         let scrypto = ScryptoTransactionManifest {
             instructions: ins.clone(),
             blobs: Default::default(),
+            object_names: ScryptoManifestObjectNames::Known(
+                KnownManifestObjectNames {
+                    bucket_names: IndexMap::from([(
+                        ManifestBucket(0),
+                        "bucket_0".to_string(),
+                    )]),
+                    proof_names: Default::default(),
+                    address_reservation_names: Default::default(),
+                    address_names: Default::default(),
+                    intent_names: Default::default(),
+                },
+            ), // FIXME: replace
         };
 
         let sut = SUT::with_instructions_and_blobs(
@@ -280,7 +310,7 @@ BURN_RESOURCE
         )
         .unwrap();
         let summary = manifest.summary();
-        assert_eq!(summary.addresses_of_accounts_deposited_into, []);
+        assert_eq!(summary.unwrap().addresses_of_accounts_deposited_into, []);
     }
 
     #[test]
@@ -343,7 +373,7 @@ BURN_RESOURCE
     #[test]
     fn manifest_summary_simple() {
         let manifest = SUT::sample();
-        let summary = manifest.summary();
+        let summary = manifest.summary().unwrap();
         pretty_assertions::assert_eq!(
             summary,
             ManifestSummary::new(
@@ -360,7 +390,7 @@ BURN_RESOURCE
         let a = AccountAddress::from("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q");
 
         let manifest = SUT::sample_other();
-        let summary = manifest.summary();
+        let summary = manifest.summary().unwrap();
         pretty_assertions::assert_eq!(
             summary,
             ManifestSummary::new(
