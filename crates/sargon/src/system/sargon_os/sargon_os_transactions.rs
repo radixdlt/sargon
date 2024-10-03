@@ -6,7 +6,10 @@ use crate::prelude::*;
 #[uniffi::export]
 impl SargonOS {
     /// Submits a signed transaction payload to the network.
-    pub async fn submit_transaction(&self, notarized_transaction: NotarizedTransaction) -> Result<IntentHash> {
+    pub async fn submit_transaction(
+        &self,
+        notarized_transaction: NotarizedTransaction,
+    ) -> Result<IntentHash> {
         let network_id = self.current_network_id()?;
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -19,8 +22,9 @@ impl SargonOS {
     pub async fn submit_compiled_transaction(
         &self,
         intent_hash: IntentHash,
-        compiled_notarized_intent: CompiledNotarizedIntent
+        compiled_notarized_intent: CompiledNotarizedIntent,
     ) -> Result<IntentHash> {
         self.submit_transaction(compiled_notarized_intent.decompile())
+            .await
     }
 }
