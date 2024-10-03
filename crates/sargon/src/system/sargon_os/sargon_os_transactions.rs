@@ -5,7 +5,7 @@ use crate::prelude::*;
 // ==================
 #[uniffi::export]
 impl SargonOS {
-    /// Submits a signed transaction payload to the network.
+    /// Submits a notarized transaction payload to the network.
     pub async fn submit_transaction(
         &self,
         notarized_transaction: NotarizedTransaction,
@@ -15,13 +15,14 @@ impl SargonOS {
             self.clients.http_client.driver.clone(),
             network_id,
         );
-        gateway_client.submit_notarized_transaction(notarized_transaction)
+        gateway_client
+            .submit_notarized_transaction(notarized_transaction)
+            .await
     }
 
     /// Submits a compiled transaction payload to the network.
     pub async fn submit_compiled_transaction(
         &self,
-        intent_hash: IntentHash,
         compiled_notarized_intent: CompiledNotarizedIntent,
     ) -> Result<IntentHash> {
         self.submit_transaction(compiled_notarized_intent.decompile())
