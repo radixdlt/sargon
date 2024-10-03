@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::LogLevel as InternalLogLevel;
 
 #[derive(
     Clone,
@@ -36,6 +37,30 @@ pub enum LogLevel {
     ///
     /// Designates very low priority, often extremely verbose, information.
     Trace,
+}
+
+impl From<InternalLogLevel> for LogLevel {
+    fn from(value: InternalLogLevel) -> Self {
+        match value {
+            InternalLogLevel::Error => Self::Error,
+            InternalLogLevel::Warn => Self::Warn,
+            InternalLogLevel::Info => Self::Info,
+            InternalLogLevel::Debug => Self::Debug,
+            InternalLogLevel::Trace => Self::Trace,
+        }
+    }
+}
+
+impl Into<InternalLogLevel> for LogLevel {
+    fn into(self) -> InternalLogLevel {
+        match self {
+            LogLevel::Error => InternalLogLevel::Error,
+            LogLevel::Warn => InternalLogLevel::Warn,
+            LogLevel::Info => InternalLogLevel::Info,
+            LogLevel::Debug => InternalLogLevel::Debug,
+            LogLevel::Trace => InternalLogLevel::Trace,
+        }
+    }
 }
 
 #[derive(
