@@ -24,25 +24,31 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
         let (ret, network_id) = value;
 
         Self::new(
-            ret.resource_addresses
-                .into_iter()
-                .map(|r| {
-                    (ResourceAddress::from((r, network_id)), NewlyCreatedResource::empty())
-                })
+            ret.resource_addresses.into_iter().map(|r| {
+                let resource_address = ResourceAddress::from((r, network_id));
+                let global_address =
+                    ScryptoGlobalAddress::from(resource_address);
 
-            // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
-            // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
-            // and "filter out" (skip) any GlobalAddress that is not a ResourceAddress,
-            // why? Since Radix Wallets actually only use the ResourceAddress...
-            // ret.metadata
-            //     .into_iter()
-            //     .filter_map(|(k, v)| {
-            //         // We only care about `ResourceAddress`, and skip other address types.
-            //         TryInto::<ResourceAddress>::try_into((k, network_id))
-            //             .map(|a| (a, v))
-            //             .ok()
-            //     })
-            //     .map(|t| (t.0, NewlyCreatedResource::from(t.1))),
+                let newly_created_resource = ret
+                    .metadata
+                    .get(&global_address)
+                    .map(|m| NewlyCreatedResource::from(m.clone()))
+                    .unwrap_or_default();
+
+                (resource_address, newly_created_resource)
+            }), // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
+                // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
+                // and "filter out" (skip) any GlobalAddress that is not a ResourceAddress,
+                // why? Since Radix Wallets actually only use the ResourceAddress...
+                // ret.metadata
+                //     .into_iter()
+                //     .filter_map(|(k, v)| {
+                //         // We only care about `ResourceAddress`, and skip other address types.
+                //         TryInto::<ResourceAddress>::try_into((k, network_id))
+                //             .map(|a| (a, v))
+                //             .ok()
+                //     })
+                //     .map(|t| (t.0, NewlyCreatedResource::from(t.1))),
         )
     }
 }
