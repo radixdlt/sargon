@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use std::{borrow::Borrow, sync::RwLock};
+use sargon::ProfileState as InternalProfileState;
 
 #[derive(
     Debug, Clone, PartialEq, EnumAsInner, derive_more::Display, uniffi::Enum,
@@ -17,6 +18,12 @@ pub enum ProfileState {
     /// restored, or the user creates a new profile.
     #[display("Loaded: {}", _0.id())]
     Loaded(Profile),
+}
+
+impl From<InternalProfileState> for ProfileState {
+    fn from(value: InternalProfileState) -> Self {
+        unimplemented!()
+    }
 }
 
 #[derive(Debug, uniffi::Object)]
