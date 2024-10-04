@@ -142,14 +142,6 @@ pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
     ResourceAddress::xrd_on_network(network_id)
 }
 
-#[uniffi::export]
-pub fn debug_print_compiled_notarized_intent(
-    compiled: CompiledNotarizedIntent,
-) -> String {
-    let notarized = compiled.decompile();
-    format!("{:?}", notarized)
-}
-
 /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
 /// into `PerAssetTransfers`. We always use `PerAssetTransfers` when building the manifest
 /// since it is more efficient (allows a single withdraw per resource) => fewer instruction =>
