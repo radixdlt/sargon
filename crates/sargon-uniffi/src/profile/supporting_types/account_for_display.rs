@@ -75,7 +75,7 @@ impl From<Account> for AccountForDisplay {
     }
 }
 
-impl Identifiable for AccountForDisplay {
+impl sargon::Identifiable for AccountForDisplay {
     type ID = AccountAddress;
 
     fn id(&self) -> Self::ID {

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use radix_rust::prelude::IndexMap;
+use uniffi::deps::anyhow::Ok;
 use std::any::TypeId as StdTypeId;
 use uniffi::TypeId as UFTypeId;
 use uniffi::{
@@ -7,20 +8,19 @@ use uniffi::{
     deps::bytes::{Buf, BufMut},
     metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
 };
-
-use super::import_identified_vec_of_from;
+use sargon::IdentifiedVecOf as InternalIdentifiedVecOf;
 
 // We turn an `[Rust] IndexMap -> Array/List [FFI]``
 
-unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>> Lower<UT>
+unsafe impl<UT, V: Debug + Eq + Clone + sargon::Identifiable + Lower<UT>> Lower<UT>
     for IdentifiedVecOf<V>
 {
     type FfiType = RustBuffer;
 
     fn write(obj: Self, buf: &mut Vec<u8>) {
-        let len = i32::try_from(obj.len()).unwrap();
+        let len = i32::try_from(obj.0.len()).unwrap();
         buf.put_i32(len); // We limit arrays to i32::MAX items
-        for value in &obj {
+        for value in &obj.0 {
             <V as Lower<UT>>::write(value, buf);
         }
     }
@@ -30,7 +30,7 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>> Lower<UT>
     }
 }
 
-unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>>
+unsafe impl<UT, V: Debug + Eq + Clone + sargon::Identifiable + Lower<UT>>
     LowerReturn<UT> for IdentifiedVecOf<V>
 {
     type ReturnType = <Self as Lower<UT>>::FfiType;
@@ -39,7 +39,7 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>>
         Ok(<Self as Lower<UT>>::lower(obj))
     }
 }
-unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
+unsafe impl<UT, V: Debug + Eq + Clone + sargon::Identifiable + Lift<UT> + 'static>
     Lift<UT> for IdentifiedVecOf<V>
 {
     type FfiType = RustBuffer;
@@ -51,7 +51,9 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
         for _ in 0..len {
             vec.push(<V as Lift<UT>>::try_read(buf)?)
         }
-        import_identified_vec_of_from(vec).map_err(|e| e.into())
+
+        let internal = sargon::import_identified_vec_of_from(vec).map_err(|e| e.into())?;
+        Ok(IdentifiedVecOf(internal))
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
@@ -59,7 +61,7 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
     }
 }
 
-impl<UT, V: Debug + Eq + Clone + Identifiable + UFTypeId<UT>> UFTypeId<UT>
+impl<UT, V: Debug + Eq + Clone + sargon::Identifiable + UFTypeId<UT>> UFTypeId<UT>
     for IdentifiedVecOf<V>
 {
     const TYPE_ID_META: MetadataBuffer =
@@ -68,9 +70,45 @@ impl<UT, V: Debug + Eq + Clone + Identifiable + UFTypeId<UT>> UFTypeId<UT>
 }
 
 #[cfg(test)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
+)]
+#[debug("({}: {})", id, name)]
+#[display("{}", name)]
+pub(super) struct User {
+    pub(super) id: u8,
+    pub(super) name: String,
+}
+
+#[cfg(test)]
+impl User {
+    pub(super) fn new(id: u8, name: impl AsRef<str>) -> Self {
+        Self {
+            id,
+            name: name.as_ref().to_owned(),
+        }
+    }
+}
+
+#[cfg(test)]
+impl Identifiable for User {
+    type ID = u8;
+    fn id(&self) -> Self::ID {
+        self.id
+    }
+}
+
+#[cfg(test)]
 mod tests {
 
-    use super::super::super::User;
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

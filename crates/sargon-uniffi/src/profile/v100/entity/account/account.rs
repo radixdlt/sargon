@@ -124,7 +124,7 @@ impl Account {
     }
 }
 
-impl Identifiable for Account {
+impl sargon::Identifiable for Account {
     type ID = AccountAddress;
 
     fn id(&self) -> Self::ID {
