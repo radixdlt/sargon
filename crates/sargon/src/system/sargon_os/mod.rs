@@ -5,6 +5,7 @@ mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_profile;
 mod sargon_os_security_structures;
+mod sargon_os_transaction;
 
 pub use profile_state_holder::*;
 pub use sargon_os::*;

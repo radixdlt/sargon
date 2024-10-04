@@ -14,4 +14,5 @@ pub struct TransactionPreviewResponse {
     pub radix_engine_toolkit_receipt:
         ScryptoSerializableToolkitTransactionReceipt,
     pub logs: Vec<TransactionPreviewResponseLogsInner>,
+    pub receipt: TransactionReceipt,
 }
