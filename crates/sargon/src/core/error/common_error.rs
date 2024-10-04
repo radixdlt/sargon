@@ -662,6 +662,12 @@ pub enum CommonError {
 
     #[error("Failed transaction preview with status: {error_message}")]
     FailedTransactionPreview { error_message: String } = 10185,
+
+    #[error("Failed to extract radix engine toolkit receipt bytes")]
+    FailedToExtractTransactionReceiptBytes = 10186,
+
+    #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
+    ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } = 10187,
 }
 
 #[uniffi::export]

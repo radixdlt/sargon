@@ -6,26 +6,34 @@ impl TransactionManifest {
     /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt` data.
     ///
     /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
-    /// The field will be a JSON that host apps should parse into a .
+    /// The field will be a JSON that host apps should parse into a transaction preview.
     pub fn execution_summary(
         &self,
         engine_toolkit_receipt: impl AsRef<str>,
     ) -> Result<ExecutionSummary> {
-        let network_definition = self.network_id().network_definition();
-        let receipt = serde_json::from_str::<
+        let deserialized_receipt = serde_json::from_str::<
             ScryptoSerializableToolkitTransactionReceipt,
         >(&engine_toolkit_receipt.as_ref())
-        .ok()
-        .and_then(|receipt| {
-            receipt
-                .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
-                    &network_definition,
-                ))
-                .ok()
-        })
-        .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+            .ok()
+            .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+        self.execution_summary_with_engine_toolkit_receipt(deserialized_receipt)
+    }
 
-        self.execution_summary_with_receipt(receipt)
+    /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt`.
+    ///
+    /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
+    pub fn execution_summary_with_engine_toolkit_receipt(
+        &self,
+        engine_toolkit_receipt: ScryptoSerializableToolkitTransactionReceipt,
+    ) -> Result<ExecutionSummary> {
+        let network_definition = self.network_id().network_definition();
+        let runtime_receipt = engine_toolkit_receipt
+            .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
+                &network_definition,
+            ))
+            .ok()
+            .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+        self.execution_summary_with_receipt(runtime_receipt)
     }
 
     fn execution_summary_with_receipt(

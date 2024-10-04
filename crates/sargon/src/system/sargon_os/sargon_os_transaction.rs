@@ -7,10 +7,11 @@ impl SargonOS {
     pub async fn analyse_transaction_preview(
         &self,
         instructions: String,
-        network_id: NetworkID,
         blobs: Blobs,
         message: Message,
+        is_wallet_transaction: bool,
     ) -> Result<()> {
+        let network_id = self.profile_state_holder.current_network_id()?;
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
             network_id,
@@ -21,6 +22,7 @@ impl SargonOS {
             network_id,
             blobs,
             message,
+            is_wallet_transaction,
         )
         .await
     }
@@ -34,21 +36,41 @@ impl SargonOS {
         network_id: NetworkID,
         blobs: Blobs,
         message: Message,
+        is_wallet_transaction: bool,
     ) -> Result<()> {
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
+
+        // Get all transaction signers
         let signers = self
             .extract_transaction_signers(transaction_manifest.summary())
             .await?;
+
+        // Get the transaction preview
         let transaction_preview = self
             .get_transaction_preview(
                 gateway_client,
-                transaction_manifest,
+                transaction_manifest.clone(),
                 network_id,
                 message,
                 signers,
             )
             .await?;
+        let engine_toolkit_receipt = transaction_preview
+            .radix_engine_toolkit_receipt
+            .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
+
+        // Analyze the manifest
+        let execution_summary = transaction_manifest.execution_summary_with_engine_toolkit_receipt(engine_toolkit_receipt)?;
+
+        // Transactions created outside of the Wallet are not allowed to use reserved instructions
+        if !is_wallet_transaction && !execution_summary.reserved_instructions.is_empty() {
+            return Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions: execution_summary.reserved_instructions.iter().map(|i| i.to_string()).collect(),
+            });
+        }
+
+        // Get all of the expected signing factors
 
         Ok(())
     }

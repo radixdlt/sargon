@@ -160,7 +160,7 @@ mod tests {
             sut.virtual_hierarchical_deterministic_factor_instances();
         assert_eq!(factor_instances.len(), 1);
         assert_eq!(
-            factor_instances.iter().next().unwrap(),
+            factor_instances.iter().next().unwrap().clone(),
             HierarchicalDeterministicFactorInstance::sample()
         );
     }
