@@ -166,6 +166,9 @@ aes-gcm = { git = "https://github.com/RustCrypto/AEADs", rev = "7e82b01cd4901f6a
   "zeroize",
 ] }
 
+# tokio = 1.40.0
+tokio = { version = "1.40.0", features = ["full"] }
+
 # hkdf = "0.12.4"
 hkdf = { git = "https://github.com/RustCrypto/KDFs/", rev = "1ac16e8b9d4ee7a67613c9396c6cc1327652eaba" }
 
