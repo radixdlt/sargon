@@ -44,4 +44,16 @@ impl GatewayClient {
     ) -> Result<TransactionSubmitResponse> {
         self.post("transaction/submit", request, res_id).await
     }
+
+    /// Observes the status of a transaction.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionStatus
+    pub(crate) async fn transaction_status(
+        &self,
+        request: TransactionStatusRequest,
+    ) -> Result<TransactionStatusResponse> {
+        self.post("transaction/status", request, res_id).await
+    }
 }
