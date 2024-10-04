@@ -20,6 +20,13 @@ where
     result.map_err(CommonError::into).map(|opt| opt.map(T::into))
 }
 
+pub fn map_result_from_internal<T, InternalT>(result: InternalResult<InternalT>) -> Result<T>
+where
+    T: From<InternalT>,
+{
+    result.map_err(CommonError::from).map(T::from)
+}
+
 
 impl From<InternalCommonError> for CommonError {
     fn from(value: InternalCommonError) -> Self {
