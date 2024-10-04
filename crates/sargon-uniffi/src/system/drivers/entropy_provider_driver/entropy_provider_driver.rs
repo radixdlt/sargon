@@ -8,11 +8,11 @@ pub trait EntropyProviderDriver: Send + Sync + std::fmt::Debug {
 }
 
 #[derive(Debug)]
-pub struct EntropyProviderAdapter {
+pub struct EntropyProviderDriverAdapter {
     pub wrapped: Arc<dyn EntropyProviderDriver>,
 }
 
-impl InternalEntropyProviderDriver for EntropyProviderAdapter {
+impl InternalEntropyProviderDriver for EntropyProviderDriverAdapter {
     fn generate_secure_random_bytes(&self) -> InternalEntropy32Bytes {
         self.wrapped.generate_secure_random_bytes().into()
     }
