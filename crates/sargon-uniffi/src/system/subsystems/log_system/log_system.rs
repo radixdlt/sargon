@@ -42,14 +42,6 @@ pub(crate) fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
     debug!("Finished installing logger");
 }
 
-/// Do not call this when you are using the SargonOS, it will have installed
-/// a logger already. This is useful in tests which are NOT SargonOS tests,
-/// or BIOS tests.
-#[uniffi::export]
-pub fn rust_logger_init() {
-    install_logger(RustLoggingDriver::new())
-}
-
 #[uniffi::export]
 pub fn rust_logger_set_level(level: LogFilter) {
     let log_level = log::LevelFilter::from(level);
@@ -84,40 +76,4 @@ pub fn rust_logger_log_at_every_level() {
     info!("Rust test: 'info'");
     debug!("Rust test: 'debug'");
     trace!("Rust test: 'trace'");
-}
-
-#[cfg(test)]
-mod tests {
-
-    use log::Log;
-
-    use super::*;
-
-    #[test]
-    fn install_rust_logger_change_level() {
-        install_logger(RustLoggingDriver::new());
-        let new = LogFilter::Warn;
-        rust_logger_set_level(new);
-        assert_eq!(rust_logger_get_level(), new)
-    }
-
-    #[test]
-    fn test_flush() {
-        let driver = RustLoggingDriver::new();
-        install_logger(driver);
-        LOG.flush();
-    }
-
-    #[test]
-    fn test_rust_logger_init() {
-        rust_logger_init()
-    }
-
-    #[test]
-    fn test_rust_logger_get_all_levels() {
-        assert_eq!(
-            rust_logger_get_all_levels(),
-            all::<LogLevel>().collect_vec()
-        );
-    }
 }
