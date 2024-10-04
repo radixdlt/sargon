@@ -656,6 +656,9 @@ pub enum CommonError {
 
     #[error("The network {network_id} does not exist in profile")]
     NoNetworkInProfile { network_id: NetworkID } = 10183,
+
+    #[error("Empty FactorSources list")]
+    FactorSourcesOfKindEmptyFactors = 10184,
 }
 
 #[uniffi::export]
