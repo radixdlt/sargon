@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::NetworkRequest as InternalNetworkRequest;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct NetworkRequest {
@@ -7,6 +8,12 @@ pub struct NetworkRequest {
     pub headers: HashMap<String, String>,
 
     pub body: BagOfBytes,
+}
+
+impl From<InternalNetworkRequest> for NetworkRequest {
+    fn from(value: InternalNetworkRequest) -> Self {
+        unimplemented!()
+    }
 }
 
 impl NetworkRequest {

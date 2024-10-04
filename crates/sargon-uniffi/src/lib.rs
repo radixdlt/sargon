@@ -5,7 +5,6 @@
 #![allow(internal_features)]
 
 mod core;
-mod gateway_api;
 mod hierarchical_deterministic;
 mod home_cards;
 mod profile;
@@ -17,7 +16,6 @@ mod wrapped_radix_engine_toolkit;
 pub mod prelude {
 
     pub use crate::core::*;
-    pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
     pub use crate::profile::*;

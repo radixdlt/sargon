@@ -39,14 +39,7 @@ impl HomeCardsManager {
         cards_storage: Arc<dyn HomeCardsStorage>,
         observer: Arc<dyn HomeCardsObserver>,
     ) -> Self {
-        Self::init(
-            Arc::new(Parser::new(GatewayClient::new(
-                networking_driver,
-                network_id,
-            ))),
-            cards_storage,
-            observer,
-        )
+        unimplemented!()
     }
 }
 

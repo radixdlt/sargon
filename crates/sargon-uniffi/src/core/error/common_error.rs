@@ -1,9 +1,25 @@
 use crate::prelude::*;
 use sargon::CommonError as InternalCommonError;
+use sargon::Result as InternalResult;
 
 use thiserror::Error as ThisError;
 
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
+
+pub fn map_result_to_internal<T, InternalT>(result: Result<T>) -> InternalResult<InternalT>
+where
+    T: Into<InternalT>,
+{
+    result.map_err(CommonError::into).map(T::into)
+}
+
+pub fn map_result_to_internal_optional<T, InternalT>(result: Result<Option<T>>) -> InternalResult<Option<InternalT>>
+where
+    T: Into<InternalT>,
+{
+    result.map_err(CommonError::into).map(|opt| opt.map(T::into))
+}
+
 
 impl From<InternalCommonError> for CommonError {
     fn from(value: InternalCommonError) -> Self {

@@ -1,4 +1,8 @@
 use crate::prelude::*;
+use sargon::NetworkingDriver as InternalNetworkingDriver;
+use sargon::NetworkRequest as InternalNetworkRequest;
+use sargon::NetworkResponse as InternalNetworkResponse;
+use sargon::Result as InternalResult;
 
 /// Trait for executing network requests, to be implemented by hosts, so that
 /// Sargon can make network requests with some HTTP client.
@@ -14,3 +18,19 @@ pub trait NetworkingDriver: Send + Sync + std::fmt::Debug {
         request: NetworkRequest,
     ) -> Result<NetworkResponse, CommonError>;
 }
+
+#[derive(Debug)]
+pub struct NetworkingDriverAdapter{
+    pub wrapped: Arc<dyn NetworkingDriver>,
+}
+
+#[async_trait::async_trait]
+impl InternalNetworkingDriver for NetworkingDriverAdapter {
+    async fn execute_network_request(
+        &self,
+        request: InternalNetworkRequest,
+    ) -> InternalResult<InternalNetworkResponse> {
+        map_result_to_internal(self.wrapped.execute_network_request(request.into()).await)
+    }
+}
+
