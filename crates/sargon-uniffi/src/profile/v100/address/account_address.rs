@@ -1,4 +1,5 @@
 pub use crate::prelude::*;
+use sargon::AccountAddress as InternalAccountAddress;
 
 decl_ret_wrapped_address!(
     /// Human readable address of an account. Always starts with `"account_"``, for example:
@@ -40,6 +41,18 @@ impl AccountAddress {
     /// imported from the legacy Olympia desktop application.
     pub fn is_legacy_address(&self) -> bool {
         self.entity_type() == ScryptoEntityType::GlobalVirtualSecp256k1Account
+    }
+}
+
+impl From<InternalAccountAddress> for AccountAddress {
+    fn from(value: InternalAccountAddress) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalAccountAddress> for AccountAddress {
+    fn into(self) -> InternalAccountAddress {
+        unimplemented!()
     }
 }
 

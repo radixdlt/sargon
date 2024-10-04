@@ -33,7 +33,7 @@ impl SargonOS {
         profile: &Profile,
         bdfs_skipped: bool,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.import_wallet(profile.clone(), bdfs_skipped).await)
+        map_result_from_internal(self.wrapped.import_wallet(&profile.to_owned().into(), bdfs_skipped).await)
     }
 
     pub async fn new_wallet_with_derived_bdfs(
@@ -41,7 +41,7 @@ impl SargonOS {
         hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
         accounts: Accounts,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source, accounts))
+        map_result_from_internal(self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into(), accounts.into()).await)
     }
 
     pub async fn delete_wallet(&self) -> Result<()> {
@@ -53,6 +53,6 @@ impl SargonOS {
     }
 
     pub async fn resolve_host_info(&self) -> HostInfo {
-        map_result_from_internal(self.wrapped.resolve_host_info().await)
+        self.wrapped.resolve_host_info().await.into()
     }
 }

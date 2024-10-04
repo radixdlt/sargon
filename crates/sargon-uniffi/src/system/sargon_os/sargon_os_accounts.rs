@@ -10,15 +10,15 @@ impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Result<Accounts> {
-        self.wrapped.accounts_on_current_network()
+        map_result_from_internal(self.wrapped.accounts_on_current_network())
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,
     ) -> Result<AccountsForDisplay> {
-        self.wrapped
-            .accounts_for_display_on_current_network()
+        map_result_from_internal(self.wrapped
+            .accounts_for_display_on_current_network())
     }
 
     /// Looks up the account by account address, returns Err if the account is
@@ -27,7 +27,7 @@ impl SargonOS {
         &self,
         address: AccountAddress,
     ) -> Result<Account> {
-        self.wrapped.account_by_address(address)
+        map_result_from_internal(self.wrapped.account_by_address(address.into()))
     }
 
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
@@ -38,7 +38,7 @@ impl SargonOS {
     pub async fn create_unsaved_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
-        self.wrapped.create_unsaved_unnamed_mainnet_account().await
+        map_result_from_internal(self.wrapped.create_unsaved_unnamed_mainnet_account().await)
     }
 
     /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
@@ -46,7 +46,7 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_unsaved_account(NetworkID::Mainnet, name).await
+        map_result_from_internal(self.wrapped.create_unsaved_mainnet_account(name.into()).await)
     }
 
     /// Creates a new non securified account **WITHOUT** adding it to Profile,
@@ -66,7 +66,7 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        self.wrapped.create_unsaved_account(network_id, name).await
+        map_result_from_internal(self.wrapped.create_unsaved_account(network_id.into(), name.into()).await)
     }
 
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
@@ -76,8 +76,8 @@ impl SargonOS {
     pub async fn create_and_save_new_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
-        self.create_and_save_new_unnamed_mainnet_account()
-            .await
+        map_result_from_internal(self.wrapped.create_and_save_new_unnamed_mainnet_account()
+            .await)
     }
 
     /// Create a new mainnet Account and adds it to the active Profile.
@@ -88,9 +88,9 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.wrapped
-            .create_and_save_new_mainnet_account(name)
-            .await
+        map_result_from_internal(self.wrapped
+            .create_and_save_new_mainnet_account(name.into())
+            .await)
     }
 
     /// Create a new Account and adds it to the active Profile.
@@ -102,9 +102,9 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        self.wrapped
-            .create_and_save_new_account(network_id, name)
-            .await
+        map_result_from_internal(self.wrapped
+            .create_and_save_new_account(network_id.into(), name.into())
+            .await)
     }
 
     /// The account names will be `<name_prefix> <index>`
@@ -120,11 +120,11 @@ impl SargonOS {
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<()> {
-        self.wrapped.batch_create_many_accounts_then_save_once(
+        map_result_from_internal(self.wrapped.batch_create_many_accounts_then_save_once(
             count,
-            network_id,
+            network_id.into(),
             name_prefix,
-        )
+        ).await)
     }
 
     /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"
@@ -141,11 +141,11 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
-        self.wrapped.batch_create_unsaved_accounts(
-            network_id,
+        map_result_from_internal(self.wrapped.batch_create_unsaved_accounts(
+            network_id.into(),
             count,
             name_prefix,
-        )
+        ).await)
     }
 }
 
@@ -167,7 +167,7 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_account(&self, account: Account) -> Result<()> {
-        self.wrap_add_account(account).await
+        map_result_from_internal(self.wrapped.add_account(account.into()).await)
     }
 
     /// Adds the `accounts` to active profile and **saves** the updated profile to
@@ -183,7 +183,7 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
-        self.wrapped.add_accounts(accounts).await
+        map_result_from_internal(self.wrapped.add_accounts(accounts.into()).await)
     }
 }
 
@@ -199,6 +199,6 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountUpdated { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
-        self.wrapped.update_account(updated).await
+        map_result_from_internal(self.wrapped.update_account(updated.into()).await)
     }
 }

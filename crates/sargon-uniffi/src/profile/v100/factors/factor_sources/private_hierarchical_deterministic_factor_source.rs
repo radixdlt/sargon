@@ -1,10 +1,23 @@
 use crate::prelude::*;
+use sargon::PrivateHierarchicalDeterministicFactorSource as InternalPrivateHierarchicalDeterministicFactorSource;
 
 #[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
     #[zeroize(skip)]
     pub factor_source: DeviceFactorSource,
+}
+
+impl From<InternalPrivateHierarchicalDeterministicFactorSource> for PrivateHierarchicalDeterministicFactorSource {
+    fn from(value: InternalPrivateHierarchicalDeterministicFactorSource) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalPrivateHierarchicalDeterministicFactorSource> for PrivateHierarchicalDeterministicFactorSource {
+    fn into(self) -> InternalPrivateHierarchicalDeterministicFactorSource {
+        unimplemented!()
+    }
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {

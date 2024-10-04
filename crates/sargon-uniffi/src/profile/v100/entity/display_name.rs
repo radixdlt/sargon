@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DisplayName as InternalDisplayName;
 
 /// A max 30 chars long string used for display purposes, e.g.
 /// the name of an Account or Persona.
@@ -38,6 +39,22 @@ use crate::prelude::*;
 #[display("{value}")]
 pub struct DisplayName {
     pub value: String,
+}
+
+impl From<InternalDisplayName> for DisplayName {
+    fn from(value: InternalDisplayName) -> Self {
+        Self {
+            value: value.value,
+        }
+    }
+}
+
+impl Into<InternalDisplayName> for DisplayName {
+    fn into(self) -> InternalDisplayName {
+        InternalDisplayName {
+            value: self.value,
+        }
+    }
 }
 
 impl DisplayName {

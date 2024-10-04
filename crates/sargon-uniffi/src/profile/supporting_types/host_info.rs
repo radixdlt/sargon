@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::HostInfo as InternalHostInfo;
 
 #[derive(
     Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
@@ -15,6 +16,18 @@ pub struct HostInfo {
 
     /// The **current** version of the host app, for example the Radix iOS Wallet version - e.g. "1.6.1"
     pub host_app_version: String,
+}
+
+impl From<InternalHostInfo> for HostInfo {
+    fn from(value: InternalHostInfo) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalHostInfo> for HostInfo {
+    fn into(self) -> InternalHostInfo {
+        unimplemented!()
+    }
 }
 
 impl HostInfo {

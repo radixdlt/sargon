@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Account as InternalAccount;
 
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
@@ -71,6 +72,18 @@ pub struct Account {
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
     pub on_ledger_settings: OnLedgerSettings,
+}
+
+impl From<InternalAccount> for Account {
+    fn from(value: InternalAccount) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalAccount> for Account {
+    fn into(self) -> InternalAccount {
+        unimplemented!()
+    }
 }
 
 impl IsEntity for Account {

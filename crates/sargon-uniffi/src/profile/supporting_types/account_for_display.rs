@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AccountForDisplay as InternalAccountForDisplay;
 
 /// A minimal version of an [`Account`] meant for
 /// display purposes within wallet
@@ -22,6 +23,18 @@ pub struct AccountForDisplay {
 
     #[serde(rename = "appearanceID")]
     pub appearance_id: AppearanceID,
+}
+
+impl From<InternalAccountForDisplay> for AccountForDisplay {
+    fn from(value: InternalAccountForDisplay) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalAccountForDisplay> for AccountForDisplay {
+    fn into(self) -> InternalAccountForDisplay {
+        unimplemented!()
+    }
 }
 
 impl AccountForDisplay {

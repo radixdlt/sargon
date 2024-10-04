@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Profile as InternalProfile;
 
 /// The canonical representation of a users accounts, personas,
 /// authorized dapps, security factors, settings and more.
@@ -46,6 +47,18 @@ pub struct Profile {
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
     pub networks: ProfileNetworks,
+}
+
+impl From<InternalProfile> for Profile {
+	fn from(value: InternalProfile) -> Self {
+		unimplemented!()
+	}
+}
+
+impl Into<InternalProfile> for Profile {
+	fn into(self) -> InternalProfile {
+		unimplemented!()
+	}
 }
 
 impl Profile {

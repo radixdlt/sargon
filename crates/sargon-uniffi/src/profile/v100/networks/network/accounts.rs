@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Accounts as InternalAccounts;
 
 decl_identified_vec_of!(
     /// An ordered set of [`Account`]s on a specific network, most commonly
@@ -6,6 +7,18 @@ decl_identified_vec_of!(
     /// Account.
     Account
 );
+
+impl From<InternalAccounts> for Accounts {
+	fn from(value: InternalAccounts) -> Self {
+		unimplemented!()
+	}
+}
+
+impl Into<InternalAccounts> for Accounts {
+	fn into(self) -> InternalAccounts {
+		unimplemented!()
+	}
+}
 
 impl OnSameNetworkValidating for Accounts {
     type Element = Account;

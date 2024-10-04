@@ -5,28 +5,11 @@ use crate::prelude::*;
 // ===============
 impl<V> Display for IdentifiedVecOf<V>
 where
-    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
+    V: Debug + PartialEq + Eq + Clone + sargon::Identifiable + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.description())?;
+        write!(f, "{}", self.0.description())?;
         Ok(())
-    }
-}
-
-impl<V> IdentifiedVecOf<V>
-where
-    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
-{
-    fn description(&self) -> String {
-        [
-            "[".to_owned(),
-            self.clone()
-                .into_iter()
-                .map(|e| format!("{}", e))
-                .join(", "),
-            "]".to_owned(),
-        ]
-        .join("")
     }
 }
 

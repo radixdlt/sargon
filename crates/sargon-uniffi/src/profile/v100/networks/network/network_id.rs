@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::NetworkID as InternalNetworkID;
 
 #[derive(
     Serialize_repr,
@@ -76,6 +77,44 @@ pub enum NetworkID {
 
     /// Simulator (0xf2 / 0d242)
     Simulator = 242,
+}
+
+impl From<InternalNetworkID> for NetworkID {
+    fn from(value: InternalNetworkID) -> Self {
+        match value {
+            InternalNetworkID::Mainnet => NetworkID::Mainnet,
+            InternalNetworkID::Stokenet => NetworkID::Stokenet,
+            InternalNetworkID::Adapanet => NetworkID::Adapanet,
+            InternalNetworkID::Nebunet => NetworkID::Nebunet,
+            InternalNetworkID::Kisharnet => NetworkID::Kisharnet,
+            InternalNetworkID::Ansharnet => NetworkID::Ansharnet,
+            InternalNetworkID::Zabanet => NetworkID::Zabanet,
+            InternalNetworkID::Enkinet => NetworkID::Enkinet,
+            InternalNetworkID::Hammunet => NetworkID::Hammunet,
+            InternalNetworkID::Nergalnet => NetworkID::Nergalnet,
+            InternalNetworkID::Mardunet => NetworkID::Mardunet,
+            InternalNetworkID::Simulator => NetworkID::Simulator,
+        }
+    }
+}
+
+impl Into<InternalNetworkID> for NetworkID {
+    fn into(self) -> InternalNetworkID {
+        match self {
+            NetworkID::Mainnet => InternalNetworkID::Mainnet,
+            NetworkID::Stokenet => InternalNetworkID::Stokenet,
+            NetworkID::Adapanet => InternalNetworkID::Adapanet,
+            NetworkID::Nebunet => InternalNetworkID::Nebunet,
+            NetworkID::Kisharnet => InternalNetworkID::Kisharnet,
+            NetworkID::Ansharnet => InternalNetworkID::Ansharnet,
+            NetworkID::Zabanet => InternalNetworkID::Zabanet,
+            NetworkID::Enkinet => InternalNetworkID::Enkinet,
+            NetworkID::Hammunet => InternalNetworkID::Hammunet,
+            NetworkID::Nergalnet => InternalNetworkID::Nergalnet,
+            NetworkID::Mardunet => InternalNetworkID::Mardunet,
+            NetworkID::Simulator => InternalNetworkID::Simulator,
+        }
+    }
 }
 
 impl Default for NetworkID {

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::HostId as InternalHostId;
 
 #[derive(
     Serialize,
@@ -22,6 +23,18 @@ pub struct HostId {
     /// be equal to when the app was first ever launched on the
     /// device.
     pub generated_at: Timestamp,
+}
+
+impl From<InternalHostId> for HostId {
+    fn from(value: InternalHostId) -> Self {
+        unimplemented!()
+    }
+}
+
+impl Into<InternalHostId> for HostId {
+    fn into(self) -> InternalHostId {
+        unimplemented!()
+    }
 }
 
 impl HostId {
