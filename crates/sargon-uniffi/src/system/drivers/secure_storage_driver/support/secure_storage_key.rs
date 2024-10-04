@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use std::hash::{Hash, Hasher};
+use sargon::SecureStorageKey as InternalSecureStorageKey;
 
 #[derive(Debug, Clone, Eq, uniffi::Enum)]
 pub enum SecureStorageKey {
@@ -14,6 +15,12 @@ pub enum SecureStorageKey {
         // while Android Host stores only one profile in the secure storage.
         profile_id: ProfileID,
     },
+}
+
+impl From<InternalSecureStorageKey> for SecureStorageKey {
+    fn from(value: InternalSecureStorageKey) -> Self {
+        unimplemented!()
+    }
 }
 
 impl PartialEq<SecureStorageKey> for SecureStorageKey {
