@@ -26,14 +26,14 @@ pub enum ProfileFileContents {
     NotProfile,
 }
 
-impl HasSampleValues for ProfileFileContents {
-    fn sample() -> Self {
-        Self::PlaintextProfile(Profile::sample())
-    }
+#[uniffi::export]
+pub(crate) fn new_profile_file_contents_sample() -> ProfileFileContents {
+    ProfileFileContents::sample()
+}
 
-    fn sample_other() -> Self {
-        Self::EncryptedProfile
-    }
+#[uniffi::export]
+pub(crate) fn new_profile_file_contents_sample_other() -> ProfileFileContents {
+    ProfileFileContents::sample_other()
 }
 
 #[cfg(test)]
@@ -44,30 +44,17 @@ mod tests {
     type SUT = ProfileFileContents;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
     fn hash_of_samples() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
-                SUT::sample(),
-                SUT::sample_other(),
-                SUT::NotProfile,
+                new_profile_file_contents_sample(),
+                new_profile_file_contents_sample_other(),
                 // duplicates should get removed
-                SUT::sample(),
-                SUT::sample_other(),
-                SUT::NotProfile,
+                new_profile_file_contents_sample(),
+                new_profile_file_contents_sample_other(),
             ])
             .len(),
-            3
+            2
         );
     }
 }

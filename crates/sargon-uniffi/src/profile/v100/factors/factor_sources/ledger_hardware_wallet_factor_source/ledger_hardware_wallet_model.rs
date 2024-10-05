@@ -3,8 +3,6 @@ use crate::prelude::*;
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
 /// *Ledger Nano S+*.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Copy,
     Debug,
@@ -15,104 +13,66 @@ use crate::prelude::*;
     Ord,
     uniffi::Enum,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum LedgerHardwareWalletModel {
     NanoS,
-
-    #[serde(rename = "nanoS+")]
     NanoSPlus,
     NanoX,
-}
-
-impl FromStr for LedgerHardwareWalletModel {
-    type Err = CommonError;
-    fn from_str(s: &str) -> Result<Self> {
-        Self::new_from_json_string(s).map_err(|_| {
-            CommonError::InvalidLedgerHardwareWalletModel {
-                bad_value: s.to_owned(),
-            }
-        })
-    }
-}
-
-impl std::fmt::Display for LedgerHardwareWalletModel {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_json_string())
-    }
 }
 
 impl JsonStringSerializing for LedgerHardwareWalletModel {} // to raw String
 impl JsonStringDeserializing for LedgerHardwareWalletModel {} // from raw String
 
-impl HasSampleValues for LedgerHardwareWalletModel {
-    fn sample() -> Self {
-        Self::NanoSPlus
-    }
+#[uniffi::export]
+pub fn ledger_hw_wallet_model_to_string(
+    model: LedgerHardwareWalletModel,
+) -> String {
+    model.to_string()
+}
 
-    fn sample_other() -> Self {
-        Self::NanoX
-    }
+#[uniffi::export]
+pub fn new_ledger_hw_wallet_model_from_string(
+    string: String,
+) -> Result<LedgerHardwareWalletModel> {
+    LedgerHardwareWalletModel::from_str(&string)
+}
+
+#[uniffi::export]
+pub fn new_ledger_hw_wallet_model_sample() -> LedgerHardwareWalletModel {
+    LedgerHardwareWalletModel::sample()
+}
+
+#[uniffi::export]
+pub fn new_ledger_hw_wallet_model_sample_other() -> LedgerHardwareWalletModel {
+    LedgerHardwareWalletModel::sample_other()
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = LedgerHardwareWalletModel;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_ledger_hw_wallet_model_sample(),
+                new_ledger_hw_wallet_model_sample_other(),
+                // duplicates should get removed
+                new_ledger_hw_wallet_model_sample(),
+                new_ledger_hw_wallet_model_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 
     #[test]
     fn string_roundtrip() {
-        use LedgerHardwareWalletModel::*;
-        let eq = |f: SUT, s| {
-            assert_eq!(f.to_string(), s);
-            assert_eq!(SUT::from_str(s).unwrap(), f);
-        };
-
-        eq(NanoSPlus, "nanoS+");
-        eq(NanoX, "nanoX");
-        eq(NanoS, "nanoS");
-    }
-
-    #[test]
-    fn from_str_err() {
-        let s = "invalid ledger hardware model kind!";
-        assert_eq!(
-            SUT::from_str(s),
-            Err(CommonError::InvalidLedgerHardwareWalletModel {
-                bad_value: s.to_owned(),
-            })
-        );
-    }
-
-    #[test]
-    fn hash() {
-        assert_eq!(
-            BTreeSet::from_iter([SUT::NanoS, SUT::NanoS].into_iter()).len(),
-            1
-        );
-    }
-
-    #[test]
-    fn ord() {
-        assert!(SUT::NanoS < SUT::NanoX);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&SUT::NanoS, json!("nanoS"));
-        assert_json_value_eq_after_roundtrip(&SUT::NanoSPlus, json!("nanoS+"));
-        assert_json_value_eq_after_roundtrip(&SUT::NanoX, json!("nanoX"));
+        let sut = SUT::sample();
+        let str = ledger_hw_wallet_model_to_string(sut);
+        let from_str = new_ledger_hw_wallet_model_from_string(str).unwrap();
+        assert_eq!(sut, from_str);
     }
 }

@@ -2,8 +2,6 @@ use crate::prelude::*;
 use sargon::HostId as InternalHostId;
 
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Copy,
     Debug,
@@ -37,29 +35,16 @@ impl Into<InternalHostId> for HostId {
     }
 }
 
-impl HostId {
-    pub fn generate_new() -> Self {
-        Self {
-            id: DeviceID::generate_new(),
-            generated_at: now(),
-        }
-    }
+json_data_convertible!(HostId);
+
+#[uniffi::export]
+pub fn new_host_id_sample() -> HostId {
+    HostId::sample()
 }
 
-impl HasSampleValues for HostId {
-    fn sample() -> Self {
-        Self {
-            id: DeviceID::sample(),
-            generated_at: Timestamp::sample(),
-        }
-    }
-
-    fn sample_other() -> Self {
-        Self {
-            id: DeviceID::sample_other(),
-            generated_at: Timestamp::sample_other(),
-        }
-    }
+#[uniffi::export]
+pub fn new_host_id_sample_other() -> HostId {
+    HostId::sample_other()
 }
 
 #[cfg(test)]
@@ -70,30 +55,17 @@ mod tests {
     type SUT = HostId;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_uniqueness() {
-        let host_infos: Vec<HostId> =
-            (0..100).map(|_| SUT::generate_new()).collect();
-
-        assert_eq!(HashSet::from_iter(host_infos.iter().cloned()).len(), 100);
-    }
-
-    #[test]
-    fn test_to_string() {
-        let info = SUT::sample();
+    fn hash_of_samples() {
         assert_eq!(
-            "ID ffffffff-ffff-ffff-ffff-ffffffffffff at 2023-09-11T16:05:56.000Z",
-            info.to_string()
-        )
+            HashSet::<SUT>::from_iter([
+                new_host_id_sample(),
+                new_host_id_sample_other(),
+                // duplicates should get removed
+                new_host_id_sample(),
+                new_host_id_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

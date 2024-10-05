@@ -17,142 +17,61 @@ decl_ret_wrapped_address!(
     locker
 );
 
-impl HasSampleValues for LockerAddress {
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
-
-    fn sample_other() -> Self {
-        Self::sample_mainnet_other()
-    }
+#[uniffi::export]
+pub fn new_locker_address_sample_mainnet() -> LockerAddress {
+    LockerAddress::sample_mainnet()
 }
 
-impl LockerAddress {
-    pub fn sample_mainnet() -> Self {
-        "locker_rdx1dqeryv3jxgeryv3jxgeryv3jxgeryv3jxgeryv3jxgeryv3jjs0l6p"
-            .parse()
-            .expect("Valid sample")
-    }
+#[uniffi::export]
+pub fn new_locker_address_sample_mainnet_other() -> LockerAddress {
+    LockerAddress::sample_mainnet_other()
+}
 
-    pub fn sample_mainnet_other() -> Self {
-        "locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz"
-            .parse()
-            .expect("Valid sample other")
-    }
+#[uniffi::export]
+pub fn new_locker_address_sample_stokenet() -> LockerAddress {
+    LockerAddress::sample_stokenet()
+}
 
-    pub fn sample_stokenet() -> Self {
-        "locker_tdx_2_1dzjfnkukmlwzz7m9lcjnxdz8ux8d7mlzfddfggzrwmqqwx7qjqx7zc"
-            .parse()
-            .expect("Valid sample")
-    }
-
-    pub fn sample_stokenet_other() -> Self {
-        "locker_tdx_2_1dpcz90djy4vlrcs5hjdyk0h5mxddxn038mamcep96s2va667gulfcv"
-            .parse()
-            .expect("Valid sample")
-    }
+#[uniffi::export]
+pub fn new_locker_address_sample_stokenet_other() -> LockerAddress {
+    LockerAddress::sample_stokenet_other()
 }
 
 #[cfg(test)]
-mod tests {
+mod uniffi_tests {
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = LockerAddress;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-
-        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
-        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 =
+            "locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz";
+        let address = new_locker_address(b32.to_owned()).unwrap();
+        assert_eq!(SUT::try_from_bech32(b32).unwrap(), address);
+        assert_eq!(locker_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(locker_address_bech32_address(&address), b32);
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-        assert_ne!(SUT::sample(), SUT::sample_stokenet());
-    }
+    fn sample() {
+        assert_eq!(new_locker_address_sample_mainnet(), SUT::sample_mainnet());
 
-    #[test]
-    fn display() {
-        let s =
-            "locker_rdx1dzr6rzjaffmmm46dhe4xvq698ee2rguf68waach0532gx4wf8u4mcd";
-        let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{}", a), s);
-    }
-
-    #[test]
-    fn debug() {
-        let s =
-            "locker_rdx1drfk4x75hlrx68ac9s43swx2xlhf65yhkj8747dapd99q28f9pp4hg";
-        let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{:?}", a), s);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let a: SUT =
-            "locker_rdx1dzr6rzjaffmmm46dhe4xvq698ee2rguf68waach0532gx4wf8u4mcd"
-                .parse()
-                .unwrap();
-
-        assert_json_value_eq_after_roundtrip(
-            &a,
-            json!("locker_rdx1dzr6rzjaffmmm46dhe4xvq698ee2rguf68waach0532gx4wf8u4mcd"),
+        assert_eq!(
+            new_locker_address_sample_mainnet_other(),
+            SUT::sample_mainnet_other()
         );
-        assert_json_roundtrip(&a);
-        assert_json_value_ne_after_roundtrip(
-            &a,
-            json!("locker_rdx1drfk4x75hlrx68ac9s43swx2xlhf65yhkj8747dapd99q28f9pp4hg"),
+
+        assert_eq!(
+            new_locker_address_sample_stokenet(),
+            SUT::sample_stokenet()
         );
-    }
 
-    #[test]
-    fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<SUT>(json!(
-            "locker_rdx1drfk4x75hlrx68ac9s4a123mxlhf65yhkj8747dapd99q28f9pp4hg"
-        ));
-        assert_json_value_fails::<SUT>(
-            json!("account_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77ff")
+        assert_eq!(
+            new_locker_address_sample_stokenet_other(),
+            SUT::sample_stokenet_other()
         );
-        assert_json_value_fails::<SUT>(json!("super invalid"));
-    }
-
-    #[test]
-    fn network_id_stokenet() {
-        let a: SUT =
-            "locker_tdx_2_1dz38jrn7k59ja40cmx9e4at23jf03wwyxypalca7dfaem2a4hta6la"
-                .parse()
-                .unwrap();
-        assert_eq!(a.network_id(), NetworkID::Stokenet);
-    }
-
-    #[test]
-    fn network_id_mainnet() {
-        let a: SUT =
-            "locker_rdx1dzh2jw7nh83ftxgkkzznjt3fksp2tdcq2qga3spfypwnjsnlw5v9sk"
-                .parse()
-                .unwrap();
-        assert_eq!(a.network_id(), NetworkID::Mainnet);
     }
 }

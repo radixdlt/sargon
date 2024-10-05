@@ -8,8 +8,6 @@ use crate::prelude::*;
 #[derive(
     Debug,
     Default,
-    Deserialize,
-    Serialize,
     PartialEq,
     Eq,
     Clone,
@@ -17,7 +15,6 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 #[display("{}", self.description())]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
@@ -33,161 +30,53 @@ pub struct AppPreferences {
     pub transaction: TransactionPreferences,
 }
 
-impl AppPreferences {
-    pub fn description(&self) -> String {
-        format!(
-            r#"
-        display: {}
-        gateways: {}
-        security: {}
-        transaction: {}
-        "#,
-            self.display, self.gateways, self.security, self.transaction
-        )
-    }
+#[uniffi::export]
+pub fn new_app_preferences_sample() -> AppPreferences {
+    AppPreferences::sample()
 }
 
-impl AppPreferences {
-    pub fn new(
-        display: AppDisplay,
-        gateways: SavedGateways,
-        security: Security,
-        transaction: TransactionPreferences,
-    ) -> Self {
-        Self {
-            display,
-            gateways,
-            security,
-            transaction,
-        }
-    }
+#[uniffi::export]
+pub fn new_app_preferences_sample_other() -> AppPreferences {
+    AppPreferences::sample_other()
 }
 
-impl HasSampleValues for AppPreferences {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::new(
-            AppDisplay::sample(),
-            SavedGateways::sample(),
-            Security::sample(),
-            TransactionPreferences::sample(),
-        )
-    }
-
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::new(
-            AppDisplay::sample_other(),
-            SavedGateways::sample_other(),
-            Security::sample_other(),
-            TransactionPreferences::sample_other(),
-        )
-    }
+#[uniffi::export]
+pub fn new_app_preferences_default() -> AppPreferences {
+    AppPreferences::default()
 }
 
-impl AppPreferences {
-    pub fn has_gateway_with_url(&self, url: Url) -> bool {
-        self.gateways.all().into_iter().any(|g| g.id() == url)
-    }
+#[uniffi::export]
+pub fn app_preferences_has_gateway_with_url(
+    app_preferences: AppPreferences,
+    url: &FfiUrl,
+) -> bool {
+    app_preferences.has_gateway_with_url(url.url.clone())
 }
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = AppPreferences;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn equality_samples() {
+        assert_eq!(SUT::sample(), new_app_preferences_sample());
+        assert_eq!(SUT::sample_other(), new_app_preferences_sample_other());
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn test_default() {
+        assert_eq!(new_app_preferences_default(), AppPreferences::default());
     }
 
     #[test]
-    fn get_display() {
-        assert_eq!(SUT::sample().display, AppDisplay::sample())
-    }
-
-    #[test]
-    fn get_gateways() {
-        assert_eq!(SUT::sample().gateways, SavedGateways::sample())
-    }
-
-    #[test]
-    fn get_security() {
-        assert_eq!(SUT::sample().security, Security::sample())
-    }
-
-    #[test]
-    fn get_transaction() {
-        assert_eq!(SUT::sample().transaction, TransactionPreferences::sample())
-    }
-
-    #[test]
-    fn test_has_gateway_with_url() {
-        let sut = SUT::sample();
-        // Test without the "/" at the end
-        let mut url = Url::parse("https://mainnet.radixdlt.com").unwrap();
-        assert!(sut.has_gateway_with_url(url));
-
-        // Test with the "/" at the end
-        url = Url::parse("https://mainnet.radixdlt.com/").unwrap();
-        assert!(sut.has_gateway_with_url(url));
-
-        // Test with a Url that isn't present
-        url = Url::parse("https://radixdlt.com/").unwrap();
-        assert!(!sut.has_gateway_with_url(url));
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let sut = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "display": {
-                    "isCurrencyAmountVisible": true,
-                    "fiatCurrencyPriceTarget": "usd"
-                },
-                "gateways": {
-                    "current": "https://mainnet.radixdlt.com/",
-                    "saved": [
-                        {
-                            "network": {
-                            "name": "mainnet",
-                            "id": 1,
-                            "displayDescription": "Mainnet"
-                            },
-                            "url": "https://mainnet.radixdlt.com/"
-                        },
-                        {
-                            "network": {
-                            "name": "stokenet",
-                            "id": 2,
-                            "displayDescription": "Stokenet"
-                            },
-                            "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                        }
-                    ]
-                },
-                "security": {
-                    "isCloudProfileSyncEnabled": true,
-                    "isDeveloperModeEnabled": false,
-                    "isAdvancedLockEnabled": false,
-                    "securityStructuresOfFactorSourceIDs": []
-                },
-                "transaction": {
-                    "defaultDepositGuarantee": "0.975"
-                }
-            }               
-            "#,
-        )
+    fn test_app_preferences_has_gateway_with_url() {
+        assert!(app_preferences_has_gateway_with_url(
+            SUT::sample(),
+            &FfiUrl::from_str("https://mainnet.radixdlt.com").unwrap()
+        ));
     }
 }

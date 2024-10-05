@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::StakeClaim as InternalStakeClaim;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct StakeClaim {
@@ -9,63 +10,57 @@ pub struct StakeClaim {
     pub amount: Decimal192,
 }
 
-impl StakeClaim {
-    pub fn new<I>(
-        validator_address: ValidatorAddress,
-        resource_address: NonFungibleResourceAddress,
-        ids: I,
-        amount: impl Into<Decimal192>,
-    ) -> Self
-    where
-        I: IntoIterator<Item = NonFungibleLocalId>,
-    {
+impl From<InternalStakeClaim> for StakeClaim {
+    fn from(value: InternalStakeClaim) -> Self {
         Self {
-            validator_address,
-            resource_address,
-            ids: ids.into_iter().collect_vec(),
-            amount: amount.into(),
+            validator_address: value.validator_address.into(),
+            resource_address: value.resource_address.into(),
+            ids: value.ids.into_iter().map(Into::into).collect(),
+            amount: value.amount.into(),
         }
     }
 }
 
-impl HasSampleValues for StakeClaim {
-    fn sample() -> Self {
-        Self::new(
-            ValidatorAddress::sample(),
-            NonFungibleResourceAddress::sample(),
-            [
-                NonFungibleLocalId::sample(),
-                NonFungibleLocalId::sample_other(),
-            ],
-            1337,
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            ValidatorAddress::sample_other(),
-            NonFungibleResourceAddress::sample_other(),
-            [NonFungibleLocalId::sample_other()],
-            237,
-        )
+impl Into<InternalStakeClaim> for StakeClaim {
+    fn into(self) -> InternalStakeClaim {
+        InternalStakeClaim {
+            validator_address: self.validator_address.into(),
+            resource_address: self.resource_address.into(),
+            ids: self.ids.into_iter().map(Into::into).collect(),
+            amount: self.amount.into(),
+        }
     }
 }
 
+#[uniffi::export]
+pub fn new_stake_claim_sample() -> StakeClaim {
+    InternalStakeClaim::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_stake_claim_sample_other() -> StakeClaim {
+    InternalStakeClaim::sample_other().into()
+}
+
 #[cfg(test)]
-mod tests {
+mod uniffi_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = StakeClaim;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn hash_of_sample_values() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_stake_claim_sample(),
+                new_stake_claim_sample_other(),
+                // duplicates should be removed
+                new_stake_claim_sample(),
+                new_stake_claim_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

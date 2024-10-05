@@ -1,6 +1,7 @@
 use radix_rust::prelude::IndexMap;
 
 use crate::prelude::*;
+use sargon::ExecutionSummary as InternalExecutionSummary;
 
 /// A summary of the execution of the manifest and the information that helps
 /// wallets present the contents of a transaction.
@@ -53,108 +54,112 @@ pub struct ExecutionSummary {
     pub fee_summary: FeeSummary,
 }
 
-impl ExecutionSummary {
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        addresses_of_accounts_withdrawn_from: impl Into<
-            HashMap<AccountAddress, Vec<ResourceIndicator>>,
-        >,
-        addresses_of_accounts_deposited_into: impl Into<
-            HashMap<AccountAddress, Vec<ResourceIndicator>>,
-        >,
-        addresses_of_accounts_requiring_auth: impl IntoIterator<
-            Item = AccountAddress,
-        >,
-        addresses_of_identities_requiring_auth: impl IntoIterator<
-            Item = IdentityAddress,
-        >,
-        newly_created_non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
-        reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
-        presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
-        encountered_addresses: impl IntoIterator<
-            Item = ManifestEncounteredComponentAddress,
-        >,
-        detailed_classification: impl IntoIterator<Item = DetailedManifestClass>,
-        fee_locks: impl Into<FeeLocks>,
-        fee_summary: impl Into<FeeSummary>,
-        new_entities: impl Into<NewEntities>,
-    ) -> Self {
+impl From<InternalExecutionSummary> for ExecutionSummary {
+    fn from(value: InternalExecutionSummary) -> Self {
         Self {
-            withdrawals: addresses_of_accounts_withdrawn_from.into(),
-            deposits: addresses_of_accounts_deposited_into.into(),
-            addresses_of_accounts_requiring_auth:
-                addresses_of_accounts_requiring_auth
-                    .into_iter()
-                    .collect_vec(),
-            addresses_of_identities_requiring_auth:
-                addresses_of_identities_requiring_auth
-                    .into_iter()
-                    .collect_vec(),
-            newly_created_non_fungibles: newly_created_non_fungibles
+            withdrawals: value
+                .withdrawals
                 .into_iter()
-                .collect_vec(),
-            reserved_instructions: reserved_instructions
+                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .collect(),
+            deposits: value
+                .deposits
                 .into_iter()
-                .collect_vec(),
-            presented_proofs: presented_proofs.into_iter().collect_vec(),
-            encountered_addresses: encountered_addresses
+                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .collect(),
+            addresses_of_accounts_requiring_auth: value
+                .addresses_of_accounts_requiring_auth
                 .into_iter()
-                .collect_vec(),
-            detailed_classification: detailed_classification
+                .map(|x| x.into())
+                .collect(),
+            addresses_of_identities_requiring_auth: value
+                .addresses_of_identities_requiring_auth
                 .into_iter()
-                .collect_vec(),
-            fee_locks: fee_locks.into(),
-            fee_summary: fee_summary.into(),
-            new_entities: new_entities.into(),
+                .map(|x| x.into())
+                .collect(),
+            new_entities: value.new_entities.into(),
+            detailed_classification: value
+                .detailed_classification
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            newly_created_non_fungibles: value
+                .newly_created_non_fungibles
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            reserved_instructions: value
+                .reserved_instructions
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            presented_proofs: value
+                .presented_proofs
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            encountered_addresses: value
+                .encountered_addresses
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            fee_locks: value.fee_locks.into(),
+            fee_summary: value.fee_summary.into(),
         }
     }
 }
 
-fn addresses_of_accounts_from_ret(
-    ret: IndexMap<ScryptoComponentAddress, Vec<RetResourceIndicator>>,
-    network_id: NetworkID,
-) -> HashMap<AccountAddress, Vec<ResourceIndicator>> {
-    ret.into_iter()
-        .map(|p| {
-            (
-                AccountAddress::from((p.0, network_id)),
-                p.1.into_iter()
-                    .map(|i| (i, network_id))
-                    .map(ResourceIndicator::from)
-                    .collect_vec(),
-            )
-        })
-        .collect::<HashMap<_, _>>()
-}
-
-impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
-    fn from(value: (RetExecutionSummary, NetworkID)) -> Self {
-        let (ret, n) = value;
-
-        let mut newly_created_non_fungibles =
-            to_vec_network_aware(ret.newly_created_non_fungibles, n);
-        newly_created_non_fungibles.sort();
-
-        Self::new(
-            addresses_of_accounts_from_ret(ret.account_withdraws, n),
-            addresses_of_accounts_from_ret(ret.account_deposits, n),
-            to_vec_network_aware(ret.accounts_requiring_auth, n),
-            to_vec_network_aware(ret.identities_requiring_auth, n),
-            newly_created_non_fungibles,
-            ret.reserved_instructions
+impl Into<InternalExecutionSummary> for ExecutionSummary {
+    fn into(self) -> InternalExecutionSummary {
+        InternalExecutionSummary {
+            withdrawals: self
+                .withdrawals
                 .into_iter()
-                .map(ReservedInstruction::from),
-            ret.presented_proofs
-                .values()
-                .cloned()
-                .flat_map(|vec| filter_try_to_vec_network_aware(vec, n)),
-            filter_try_to_vec_network_aware(ret.encountered_entities, n),
-            ret.detailed_classification
+                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .collect(),
+            deposits: self
+                .deposits
                 .into_iter()
-                .map(|d| DetailedManifestClass::from((d, n))),
-            ret.fee_locks,
-            ret.fee_summary,
-            (ret.new_entities, n),
-        )
+                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .collect(),
+            addresses_of_accounts_requiring_auth: self
+                .addresses_of_accounts_requiring_auth
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            addresses_of_identities_requiring_auth: self
+                .addresses_of_identities_requiring_auth
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            new_entities: self.new_entities.into(),
+            detailed_classification: self
+                .detailed_classification
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            newly_created_non_fungibles: self
+                .newly_created_non_fungibles
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            reserved_instructions: self
+                .reserved_instructions
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            presented_proofs: self
+                .presented_proofs
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            encountered_addresses: self
+                .encountered_addresses
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+            fee_locks: self.fee_locks.into(),
+            fee_summary: self.fee_summary.into(),
+        }
     }
 }

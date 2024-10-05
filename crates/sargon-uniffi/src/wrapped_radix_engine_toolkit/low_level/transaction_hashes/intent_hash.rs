@@ -1,56 +1,44 @@
 use crate::prelude::*;
+use sargon::IntentHash as InternalIntentHash;
 
-impl HasSampleValues for IntentHash {
-    fn sample() -> Self {
-        IntentHash::new(Hash::sample(), NetworkID::Mainnet)
-    }
+decl_tx_hash!(
+    /// `IntentHash` used to identify transactions.
+    /// Representation is bech32 encoded string starting with `txid_` e.g.:
+    /// `"txid_rdx19rpveua6xuhvz0axu0mwpqk8fywr83atv8mkrugchvw6uuslgppqh9cnj4"`
+    Intent,
+    "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd",
+    "txid...zm3ltd",
+);
 
-    fn sample_other() -> Self {
-        let intent = TransactionIntent::sample_other();
-        intent.intent_hash()
-    }
+#[uniffi::export]
+pub fn new_intent_hash_sample() -> IntentHash {
+    InternalIntentHash::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_intent_hash_sample_other() -> IntentHash {
+    InternalIntentHash::sample_other().into()
 }
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IntentHash;
 
     #[test]
-    fn from_hash() {
-        let hash: Hash =
-            "60e5617d670e6c8a42ba5f3749f4ff1079f66221f282554ecdda9ad385ecb195"
-                .parse()
-                .unwrap();
-        assert_eq!(SUT::new(hash, NetworkID::Simulator), SUT::sample_other())
-    }
-
-    #[test]
-    fn into_hash() {
+    fn hash_of_samples() {
         assert_eq!(
-            Hash::from(SUT::sample_other()),
-            "60e5617d670e6c8a42ba5f3749f4ff1079f66221f282554ecdda9ad385ecb195"
-                .parse::<Hash>()
-                .unwrap()
+            HashSet::<SUT>::from_iter([
+                new_intent_hash_sample(),
+                new_intent_hash_sample_other(),
+                // duplicates should get removed
+                new_intent_hash_sample(),
+                new_intent_hash_sample_other(),
+            ])
+            .len(),
+            2
         );
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(
-            format!("{}", SUT::sample()),
-            SUT::sample().bech32_encoded_tx_id
-        );
-        assert_eq!(format!("{}", SUT::sample()), "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd");
-        assert_eq!(format!("{}", SUT::sample_other()), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", SUT::sample()), "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd");
     }
 }

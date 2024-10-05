@@ -17,15 +17,48 @@ use sargon::IdentifiedVecOf as InternalIdentifiedVecOf;
 ///
 /// The implementation is
 #[derive(Clone, PartialEq, Eq)]
-pub struct IdentifiedVecOf<V: Debug + PartialEq + Eq + Clone + sargon::Identifiable>(
+pub struct IdentifiedVecOf<V: Debug + PartialEq + Eq + Clone + Identifiable>(
     pub(super) InternalIdentifiedVecOf<V>,
 );
 
-impl<V: Debug + PartialEq + Eq + Clone + sargon::Identifiable> Default
-    for IdentifiedVecOf<V>
+impl<V> Display for IdentifiedVecOf<V>
+where
+    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
 {
-    fn default() -> Self {
-        Self::new()
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.description())?;
+        Ok(())
+    }
+}
+
+// ===============
+// where V: Debug
+// ===============
+impl<V> Debug for IdentifiedVecOf<V>
+where
+    V: Debug + PartialEq + Eq + Clone + Identifiable,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.debug_description())?;
+        Ok(())
+    }
+}
+
+impl<InternalElement: Debug + PartialEq + Eq + Clone + Identifiable, Element: Debug + PartialEq + Eq + Clone + Identifiable> From<InternalIdentifiedVecOf<InternalElement>> for IdentifiedVecOf<Element>
+where
+    Element: From<InternalElement>,
+{
+    fn from(value: InternalIdentifiedVecOf<InternalElement>) -> Self {
+        Self(value.into_iter().map(Element::from).collect())
+    }
+}
+
+impl<InternalElement: Debug + PartialEq + Eq + Clone + Identifiable, Element: Debug + PartialEq + Eq + Clone + Identifiable> Into<InternalIdentifiedVecOf<InternalElement>> for IdentifiedVecOf<Element>
+where
+    Element: Into<InternalElement>,
+{
+    fn into(self) -> InternalIdentifiedVecOf<InternalElement> {
+        self.0.into_iter().map(Into::into).collect()
     }
 }
 
@@ -52,7 +85,7 @@ impl<V: Debug + PartialEq + Eq + Clone + sargon::Identifiable>
     From<IndexMap<<V as sargon::Identifiable>::ID, V>> for IdentifiedVecOf<V>
 {
     fn from(value: IndexMap<<V as sargon::Identifiable>::ID, V>) -> Self {
-        Self(InternalIden)
+        Self(InternalIdentifiedVecOf::from(value))
     }
 }
 

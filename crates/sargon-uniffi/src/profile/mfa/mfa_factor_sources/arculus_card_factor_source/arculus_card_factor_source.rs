@@ -5,8 +5,6 @@ use crate::prelude::*;
 /// which users interact with by placing it near their host device, which
 /// communicates with the card over NFC.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
@@ -15,7 +13,6 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 #[display("{hint} : {id}")]
 pub struct ArculusCardFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
@@ -32,83 +29,24 @@ pub struct ArculusCardFactorSource {
     pub hint: ArculusCardHint,
 }
 
-impl From<ArculusCardFactorSource> for FactorSource {
-    fn from(value: ArculusCardFactorSource) -> Self {
-        FactorSource::ArculusCard { value }
-    }
+#[uniffi::export]
+pub fn new_arculus_card_factor_source_sample() -> ArculusCardFactorSource {
+    ArculusCardFactorSource::sample()
 }
 
-fn new_arculus_with_mwp(
+#[uniffi::export]
+pub fn new_arculus_card_factor_source_sample_other() -> ArculusCardFactorSource
+{
+    ArculusCardFactorSource::sample_other()
+}
+
+#[uniffi::export]
+fn new_arculus_card_factor_source_from_mnemonic_with_passphrase(
     mwp: MnemonicWithPassphrase,
     hint: ArculusCardHint,
 ) -> ArculusCardFactorSource {
     let id = FactorSourceIDFromHash::new_for_arculus(&mwp);
-    let mut source = ArculusCardFactorSource::new(id, hint);
-    source.common.last_used_on = Timestamp::sample();
-    source.common.added_on = Timestamp::sample();
-    source
-}
-
-impl ArculusCardFactorSource {
-    /// Instantiates a new `ArculusCardFactorSource`
-    pub fn new(id: FactorSourceIDFromHash, hint: ArculusCardHint) -> Self {
-        Self {
-            id,
-            common: FactorSourceCommon::new_bdfs(false),
-            hint,
-        }
-    }
-}
-
-impl HasSampleValues for ArculusCardFactorSource {
-    fn sample() -> Self {
-        new_arculus_with_mwp(
-            MnemonicWithPassphrase::sample_arculus(),
-            ArculusCardHint::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        new_arculus_with_mwp(
-            MnemonicWithPassphrase::sample_arculus_other(),
-            ArculusCardHint::sample_other(),
-        )
-    }
-}
-
-impl TryFrom<FactorSource> for ArculusCardFactorSource {
-    type Error = CommonError;
-
-    fn try_from(value: FactorSource) -> Result<Self> {
-        match value {
-            FactorSource::ArculusCard { value } => Ok(value),
-            _ => Err(
-                Self::Error::ExpectedArculusCardFactorSourceGotSomethingElse,
-            ),
-        }
-    }
-}
-impl IsFactorSource for ArculusCardFactorSource {
-    fn kind() -> FactorSourceKind {
-        FactorSourceKind::ArculusCard
-    }
-}
-impl BaseIsFactorSource for ArculusCardFactorSource {
-    fn common_properties(&self) -> FactorSourceCommon {
-        self.common.clone()
-    }
-
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
-    }
-
-    fn factor_source_id(&self) -> FactorSourceID {
-        self.clone().id.into()
-    }
-
-    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
-        self.common = updated
-    }
+    ArculusCardFactorSource::new(id, hint)
 }
 
 #[cfg(test)]
@@ -119,74 +57,29 @@ mod tests {
     type SUT = ArculusCardFactorSource;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let model = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"            
-            {
-                "id": {
-                    "kind": "arculusCard",
-                    "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
-                },
-                "common": {
-                    "addedOn": "2023-09-11T16:05:56.000Z",
-                    "cryptoParameters": {
-                        "supportedCurves": ["curve25519"],
-                        "supportedDerivationPathSchemes": ["cap26"]
-                    },
-                    "flags": [],
-                    "lastUsedOn": "2023-09-11T16:05:56.000Z"
-                },
-                "hint": {
-                    "name": "Silver",
-                    "model": "arculusColdStorageWallet"
-                }
-            }
-            "#,
-        );
-    }
-
-    #[test]
-    fn from_factor_source() {
-        let sut = SUT::sample();
-        let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(SUT::try_from(factor_source), Ok(sut));
-    }
-
-    #[test]
-    fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::ArculusCard);
-    }
-
-    #[test]
-    fn from_factor_source_invalid_got_device() {
-        let wrong = DeviceFactorSource::sample();
-        let factor_source: FactorSource = wrong.clone().into();
+    fn hash_of_samples() {
         assert_eq!(
-            SUT::try_from(factor_source),
-            Err(CommonError::ExpectedArculusCardFactorSourceGotSomethingElse)
+            HashSet::<SUT>::from_iter([
+                new_arculus_card_factor_source_sample(),
+                new_arculus_card_factor_source_sample_other(),
+                // duplicates should get removed
+                new_arculus_card_factor_source_sample(),
+                new_arculus_card_factor_source_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn factor_source_id() {
-        assert_eq!(SUT::sample().factor_source_id(), SUT::sample().id.into());
-    }
-
-    #[test]
-    fn factor_source_kind() {
-        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+    fn test_new_arculus_card_factor_source_from_mnemonic_with_passphrase() {
+        assert_eq!(
+            new_arculus_card_factor_source_from_mnemonic_with_passphrase(
+                MnemonicWithPassphrase::sample_arculus(),
+                ArculusCardHint::sample()
+            )
+            .factor_source_id(),
+            SUT::sample().factor_source_id()
+        );
     }
 }

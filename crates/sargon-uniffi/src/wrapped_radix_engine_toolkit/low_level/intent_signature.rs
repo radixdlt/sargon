@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::IntentSignature as InternalIntentSignature;
 
 #[derive(
     Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash, uniffi::Record,
@@ -7,60 +8,45 @@ pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,
 }
 
-impl IntentSignature {
-    pub fn signature(&self) -> Signature {
-        self.secret_magic.clone().signature()
-    }
-
-    pub fn public_key(&self) -> PublicKey {
-        self.secret_magic.clone().public_key()
-    }
-
-    pub fn validate(&self, hash: impl Into<Hash>) -> bool {
-        let hash = hash.into();
-        self.secret_magic.is_valid_for_hash(&hash)
-    }
-}
-
-impl From<IntentSignature> for Signature {
-    fn from(value: IntentSignature) -> Self {
-        value.signature()
-    }
-}
-
-impl TryFrom<(ScryptoIntentSignature, Hash)> for IntentSignature {
-    type Error = crate::CommonError;
-
-    fn try_from(
-        value: (ScryptoIntentSignature, Hash),
-    ) -> Result<Self, Self::Error> {
-        TryInto::<SignatureWithPublicKey>::try_into((value.0 .0, value.1))
-            .map(Self::from)
-    }
-}
-
-impl From<SignatureWithPublicKey> for IntentSignature {
-    fn from(value: SignatureWithPublicKey) -> Self {
+impl From<InternalIntentSignature> for IntentSignature {
+    fn from(value: InternalIntentSignature) -> Self {
         Self {
-            secret_magic: value,
+            secret_magic: value.secret_magic.into(),
         }
     }
 }
 
-impl From<IntentSignature> for ScryptoIntentSignature {
-    fn from(value: IntentSignature) -> Self {
-        ScryptoIntentSignature(value.secret_magic.into())
+impl Into<InternalIntentSignature> for IntentSignature {
+    fn into(self) -> InternalIntentSignature {
+        InternalIntentSignature {
+            secret_magic: self.secret_magic.into(),
+        }
     }
 }
 
-impl HasSampleValues for IntentSignature {
-    fn sample() -> Self {
-        SignatureWithPublicKey::sample().into()
-    }
+#[uniffi::export]
+pub fn new_intent_signature_from_signature_with_public_key(
+    signature_with_public_key: SignatureWithPublicKey,
+) -> IntentSignature {
+    InternalIntentSignature::from(signature_with_public_key.into())
+        .into()
+}
 
-    fn sample_other() -> Self {
-        SignatureWithPublicKey::sample_other().into()
-    }
+#[uniffi::export]
+pub fn intent_signature_get_signature_with_public_key(
+    intent_signature: &IntentSignature,
+) -> SignatureWithPublicKey {
+    intent_signature.secret_magic
+}
+
+#[uniffi::export]
+pub fn new_intent_signature_sample() -> IntentSignature {
+    InternalIntentSignature::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_intent_signature_sample_other() -> IntentSignature {
+    InternalIntentSignature::sample_other().into()
 }
 
 #[cfg(test)]
@@ -71,42 +57,35 @@ mod tests {
     type SUT = IntentSignature;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn into_signature_for_ed25519() {
-        assert_eq!(Signature::from(SUT::sample()), Signature::sample());
-    }
-
-    #[test]
-    fn into_signature_for_secp256k1() {
+    fn test_intent_signature_get_signature_with_public_key() {
         assert_eq!(
-            Signature::from(SUT::sample_other()),
-            Signature::sample_other()
-        );
-    }
-
-    #[test]
-    fn into_scrypto() {
-        let scrypto: ScryptoIntentSignature = SUT::sample_other().into();
-        assert_eq!(
-            scrypto.0.signature(),
-            SUT::sample_other().signature().into()
+            intent_signature_get_signature_with_public_key(&SUT::sample()),
+            SignatureWithPublicKey::sample()
         )
     }
 
     #[test]
-    fn try_from_scrypto_valid() {
-        let scrypto =
-            ScryptoIntentSignature(SignatureWithPublicKey::sample().into());
-        assert!(SUT::try_from((scrypto, Hash::sample())).is_ok());
+    fn test_new_intent_signature_from_signature_with_public_key() {
+        assert_eq!(
+            new_intent_signature_from_signature_with_public_key(
+                SignatureWithPublicKey::sample()
+            ),
+            SUT::sample()
+        )
+    }
+
+    #[test]
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_intent_signature_sample(),
+                new_intent_signature_sample_other(),
+                // duplicates should get removed
+                new_intent_signature_sample(),
+                new_intent_signature_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

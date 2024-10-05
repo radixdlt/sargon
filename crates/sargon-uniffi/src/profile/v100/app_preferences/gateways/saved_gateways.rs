@@ -24,354 +24,90 @@ pub struct SavedGateways {
     pub other: Gateways,
 }
 
-impl SavedGateways {
-    pub fn len(&self) -> usize {
-        self.other.len() + 1
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-
-    pub fn all(&self) -> Vec<Gateway> {
-        let mut all = Vec::new();
-        all.push(self.current.clone());
-        all.append(&mut self.other.items());
-        all
-    }
+/// Constructs `Gateways` with `current` set as active Gateway.
+#[uniffi::export]
+pub fn new_saved_gateways(current: Gateway) -> SavedGateways {
+    SavedGateways::new(current)
 }
 
-impl Serialize for SavedGateways {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(
-        &self,
-        serializer: S,
-    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Gateways", 2)?;
-        state.serialize_field("current", self.current.url.as_str())?;
-        state.serialize_field("saved", &self.all())?;
-        state.end()
-    }
+/// Constructs `Gateways` with default preset values.
+#[uniffi::export]
+pub fn new_saved_gateways_default() -> SavedGateways {
+    SavedGateways::default()
 }
 
-impl<'de> Deserialize<'de> for SavedGateways {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<SavedGateways, D::Error> {
-        #[derive(Deserialize, Serialize)]
-        struct Wrapper {
-            #[serde(rename = "current")]
-            url: Url,
-            saved: Vec<Gateway>,
-        }
-        let wrapped = Wrapper::deserialize(deserializer)?;
-        let current = wrapped
-            .saved
-            .iter()
-            .find(|g| g.id() == wrapped.url)
-            .ok_or({
-                CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
-            })
-            .map_err(de::Error::custom)?;
-
-        let saved = wrapped.saved.clone();
-        let mut other = IdentifiedVecOf::<Gateway>::new();
-        for item in saved {
-            if let Err(e) = other.try_insert_unique(item.clone()) {
-                error!(
-                    "Failed to insert unique Gateway {}, error: {:?}",
-                    item,
-                    e.clone()
-                )
-            };
-        }
-
-        other.remove_id(&current.id());
-
-        SavedGateways::new_with_other(current.clone(), other.items())
-            .map_err(de::Error::custom)
-    }
+/// A sample value useful for tests and previews.
+#[uniffi::export]
+pub fn new_saved_gateways_sample() -> SavedGateways {
+    SavedGateways::sample()
 }
 
-impl SavedGateways {
-    pub fn new(current: Gateway) -> Self {
-        Self {
-            current,
-            other: Gateways::default(),
-        }
-    }
-
-    pub fn new_with_other<I>(current: Gateway, other: I) -> Result<Self>
-    where
-        I: IntoIterator<Item = Gateway>,
-    {
-        let other = Gateways::from_iter(other);
-        if other.contains_by_id(&current) {
-            return Err(
-                CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
-            );
-        }
-        Ok(Self { current, other })
-    }
+/// A sample value useful for tests and previews.
+#[uniffi::export]
+pub fn new_saved_gateways_sample_other() -> SavedGateways {
+    SavedGateways::sample_other()
 }
 
-impl Default for SavedGateways {
-    fn default() -> Self {
-        Self::new_with_other(Gateway::mainnet(), [Gateway::stokenet()])
-            .expect("Stokenet and Mainnet should have different NetworkIDs.")
-    }
+/// Returns the current and the other gateways of `gateways`.
+#[uniffi::export]
+pub fn saved_gateways_get_all_elements(
+    gateways: &SavedGateways,
+) -> Vec<Gateway> {
+    gateways.all()
 }
 
-impl HasSampleValues for SavedGateways {
-    fn sample() -> Self {
-        SavedGateways::default()
-    }
-
-    fn sample_other() -> Self {
-        Self::new_with_other(Gateway::stokenet(), [Gateway::mainnet()])
-            .expect("Stokenet and Mainnet should have different NetworkIDs.")
-    }
-}
-
-impl HasSampleValues for Gateways {
-    fn sample() -> Self {
-        Self::from_iter([Gateway::stokenet()])
-    }
-
-    fn sample_other() -> Self {
-        Self::from_iter([Gateway::stokenet(), Gateway::hammunet()])
-    }
+#[uniffi::export]
+pub fn new_saved_gateways_changing_current(
+    to: Gateway,
+    gateways: &SavedGateways,
+) -> Result<SavedGateways> {
+    let mut gateways = gateways.clone();
+    let _ = gateways.change_current(to);
+    Ok(gateways)
 }
 
 #[cfg(test)]
-mod tests {
+mod uniffi_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SavedGateways;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn equality_samples() {
+        assert_eq!(SUT::sample(), new_saved_gateways_sample());
+        assert_eq!(SUT::sample_other(), new_saved_gateways_sample_other());
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn append() {
-        let mut sut = SUT::sample();
-        assert!(!sut.append(Gateway::mainnet()));
-        assert!(!sut.append(Gateway::stokenet()));
-        assert_eq!(sut, SUT::sample());
-        assert!(sut.append(Gateway::kisharnet()));
+    fn new_with_current() {
         assert_eq!(
-            sut,
-            SUT::new_with_other(
-                Gateway::mainnet(),
-                [Gateway::stokenet(), Gateway::kisharnet()]
-            )
-            .unwrap()
+            new_saved_gateways(Gateway::mardunet()).all(),
+            [Gateway::mardunet()]
         );
     }
 
     #[test]
-    fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
+    fn test_default() {
+        assert_eq!(new_saved_gateways_default(), SUT::default(),)
+    }
+
+    #[test]
+    fn test_saved_gateways_get_all_elements() {
         assert_eq!(
-            SUT::new_with_other(Gateway::mainnet(), vec![Gateway::mainnet()]),
-            Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
-        );
-    }
-
-    #[test]
-    fn change_current_to_current() {
-        let mut sut = SUT::default();
-        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
-        assert_eq!(
-            sut.change_current(Gateway::mainnet()),
-            ChangeGatewayOutcome::NoChange
-        );
-        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
-    }
-
-    #[test]
-    fn len() {
-        let sut = SUT::new_with_other(
-            Gateway::mainnet(),                         // 1
-            [Gateway::stokenet(), Gateway::mardunet()], // + 2
-        )
-        .unwrap();
-        assert_eq!(sut.clone().len(), 1 + 2);
-        assert!(!sut.is_empty());
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let sut = SUT::sample();
-
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "current": "https://mainnet.radixdlt.com/",
-                "saved": [
-                    {
-                        "network":
-                        {
-                            "name": "mainnet",
-                            "id": 1,
-                            "displayDescription": "Mainnet"
-                        },
-                        "url": "https://mainnet.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "stokenet",
-                            "id": 2,
-                            "displayDescription": "Stokenet"
-                        },
-                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                    }
-                ]
-            }
-            "#,
+            saved_gateways_get_all_elements(&SUT::sample()),
+            SUT::sample().all(),
         )
     }
 
     #[test]
-    fn deserialize_from_json_ignore_repetitions() {
-        let json = r#"
-        {
-                "current": "https://rcnet-v3.radixdlt.com/",
-                "saved": [
-                    {
-                        "network":
-                        {
-                            "name": "zabanet",
-                            "id": 14,
-                            "displayDescription": "RCnet-V3 (Test Network)"
-                        },
-                        "url": "https://rcnet-v3.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "mainnet",
-                            "id": 1,
-                            "displayDescription": "Mainnet"
-                        },
-                        "url": "https://mainnet.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "stokenet",
-                            "id": 2,
-                            "displayDescription": "Stokenet"
-                        },
-                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "different",
-                            "id": 11,
-                            "displayDescription": "All differs but Url is the same than stokenet"
-                        },
-                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                    }
-                ]
-            }
-        "#;
-
-        let sut = serde_json::from_str::<SUT>(json).unwrap();
-
-        let mut expected = SUT::new(Gateway::rcnet());
-        expected.append(Gateway::mainnet());
-        expected.append(Gateway::stokenet());
-
-        assert_eq!(sut, expected);
-    }
-
-    #[test]
-    fn deserialize_from_json_with_different_description_treats_both_gateways_as_wellknown(
-    ) {
-        let json = r#"
-        {
-            "current": "https://mainnet.radixdlt.com/",
-            "saved": [
-                {
-                    "network": {
-                        "name": "mainnet",
-                        "id": 1,
-                        "displayDescription": "Mainnet Gateway"
-                    },
-                    "url": "https://mainnet.radixdlt.com/"
-                },
-                {
-                    "network": {
-                        "name": "stokenet",
-                        "id": 2,
-                        "displayDescription": "Stokenet (testnet) Gateway"
-                    },
-                    "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                }
-            ]
-        }
-        "#;
-
-        let sut = serde_json::from_str::<SUT>(json).unwrap();
-        let is_wellknown_vec = sut
-            .all()
-            .iter()
-            .map(|gateway| gateway.is_wellknown())
-            .collect_vec();
-
-        assert_eq!(vec![true, true], is_wellknown_vec)
-    }
-
-    #[test]
-    fn test_gateways_identification() {
-        let mainnet = Gateway::new(
-            String::from("https://mainnet.radixdlt.com/"),
-            NetworkID::Mainnet,
-        )
-        .unwrap();
-
-        let mainnet_no_slash = Gateway::new(
-            String::from("https://mainnet.radixdlt.com"),
-            NetworkID::Mainnet,
-        )
-        .unwrap();
-
-        let other_mainnet = Gateway::new(
-            String::from("https://other-mainnet.radixdlt.com"),
-            NetworkID::Mainnet,
-        )
-        .unwrap();
-
-        let other_mainnet_http = Gateway::new(
-            String::from("http://other-mainnet.radixdlt.com"),
-            NetworkID::Mainnet,
-        )
-        .unwrap();
-
-        let gateways_vec =
-            vec![mainnet, mainnet_no_slash, other_mainnet, other_mainnet_http];
-
-        let identified_gateways =
-            Gateways::from_iter(gateways_vec.iter().cloned());
-
-        // Expecting only 3 unique Gateways, since the two mainnet ones differ in only a slash which is
-        // considered as the same URL
-        assert_eq!(3, identified_gateways.len())
+    fn test_new_saved_gateways_changing_current() {
+        let sut =
+            SUT::new_with_other(Gateway::stokenet(), [Gateway::mainnet()])
+                .unwrap();
+        let changed =
+            new_saved_gateways_changing_current(Gateway::mainnet(), &sut)
+                .unwrap();
+        assert_eq!(changed, SUT::default());
     }
 }

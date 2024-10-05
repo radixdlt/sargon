@@ -7,7 +7,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
@@ -24,622 +23,223 @@ pub struct Mnemonic {
     pub language: BIP39Language,
 }
 
-impl Serialize for Mnemonic {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.phrase().serialize(serializer)
-    }
-}
-impl Mnemonic {
-    pub fn partially_obfuscated_string(&self) -> String {
-        format!(
-            "{} ({}...{})",
-            self.word_count,
-            self.words.first().unwrap().word,
-            self.words.last().unwrap().word
-        )
-    }
-}
-impl SafeToLog for Mnemonic {
-    /// Logs the word count and FactorSourceID o
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        self.partially_obfuscated_string()
-    }
+#[uniffi::export]
+pub fn new_mnemonic_generate_with_entropy(
+    entropy: BIP39Entropy,
+    language: BIP39Language,
+) -> Mnemonic {
+    Mnemonic::from_entropy_in(entropy, language)
 }
 
-impl Mnemonic {
-    pub fn to_obfuscated_string(&self) -> String {
-        format!("Mnemonic in {} obfuscated.", self.language)
-    }
-
-    pub(crate) fn from_internal(internal: bip39::Mnemonic) -> Self {
-        use k256::elliptic_curve::zeroize::Zeroize;
-
-        let language = internal.language();
-
-        let words = internal
-            .word_iter()
-            .map(|w| BIP39Word::new(w, language.into()))
-            .collect::<Result<Vec<BIP39Word>, CommonError>>()
-            .expect("Crate bip39 generated words unknown to us.");
-
-        let word_count = BIP39WordCount::from_count(internal.word_count())
-            .expect(
-            "Crate bip39 generated a BIP39 standard incompatible word count.",
-        );
-
-        drop(internal);
-
-        Self {
-            words,
-            word_count,
-            language: language.into(),
-        }
-    }
-
-    fn internal(&self) -> bip39::Mnemonic {
-        bip39::Mnemonic::from_str(&self.phrase()).unwrap()
-    }
-
-    pub fn phrase(&self) -> String {
-        self.words.iter().map(|w| w.word.to_string()).join(" ")
-    }
-
-    pub fn from(phrase: &str, language: BIP39Language) -> Result<Self> {
-        bip39::Mnemonic::parse_in(language.into(), phrase)
-            .map_err(|_| CommonError::InvalidMnemonicPhrase)
-            .map(Self::from_internal)
-    }
-
-    pub fn from_32bytes_entropy(entropy: Exactly32Bytes) -> Self {
-        let internal: bip39::Mnemonic = bip39::Mnemonic::from_entropy(
-            entropy.as_ref(),
-        )
-        .expect("Should always be able to create Mnemonic from 32 bytes");
-        Self::from_internal(internal)
-    }
-
-    pub fn from_words(words: Vec<BIP39Word>) -> Result<Self> {
-        if words.is_empty() {
-            return Err(CommonError::InvalidMnemonicPhrase);
-        }
-
-        let language = words.first().unwrap().language;
-
-        if words.iter().any(|w| w.language != language) {
-            return Err(CommonError::InvalidMnemonicPhrase);
-        }
-
-        let phrase = words.iter().map(|w| w.word.to_string()).join(" ");
-        Self::from_phrase(&phrase)
-    }
-
-    pub fn from_phrase(phrase: &str) -> Result<Self> {
-        bip39::Mnemonic::from_str(phrase)
-            .map_err(|_| CommonError::InvalidMnemonicPhrase)
-            .map(Self::from_internal)
-    }
-
-    pub fn to_entropy(&self) -> NonEmptyMax32Bytes {
-        let entropy = self.internal().to_entropy();
-        NonEmptyMax32Bytes::try_from(entropy)
-            .expect("Entropy should never be empty and always max 32 bytes")
-    }
-
-    pub fn to_seed(&self, passphrase: &str) -> BIP39Seed {
-        BIP39Seed::new(self.internal().to_seed(passphrase))
-    }
+/// Returns new mnemonic from a string of words
+#[uniffi::export]
+pub fn new_mnemonic_from_phrase(phrase: String) -> Result<Mnemonic> {
+    Mnemonic::from_phrase(&phrase)
 }
 
-impl FromStr for Mnemonic {
-    type Err = CommonError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Mnemonic::from_phrase(s)
-    }
+#[uniffi::export]
+pub fn new_mnemonic_from_phrase_language(
+    phrase: String,
+    language: BIP39Language,
+) -> Result<Mnemonic> {
+    Mnemonic::from(&phrase, language)
 }
 
-impl HasSampleValues for Mnemonic {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
-    }
+#[uniffi::export]
+pub fn new_mnemonic_from_words(words: Vec<BIP39Word>) -> Result<Mnemonic> {
+    Mnemonic::from_words(words)
+}
 
-    fn sample_other() -> Self {
-        Self::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
-            .expect("Valid mnemonic")
-    }
+/// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+#[uniffi::export]
+pub fn mnemonic_phrase(from: &Mnemonic) -> String {
+    from.phrase()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample() -> Mnemonic {
+    Mnemonic::sample()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_other() -> Mnemonic {
+    Mnemonic::sample_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device() -> Mnemonic {
+    Mnemonic::sample_device()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device_other() -> Mnemonic {
+    Mnemonic::sample_device_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device_12_words() -> Mnemonic {
+    Mnemonic::sample_device_12_words()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_device_12_words_other() -> Mnemonic {
+    Mnemonic::sample_device_12_words_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_ledger() -> Mnemonic {
+    Mnemonic::sample_ledger()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_ledger_other() -> Mnemonic {
+    Mnemonic::sample_ledger_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_off_device() -> Mnemonic {
+    Mnemonic::sample_off_device()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_off_device_other() -> Mnemonic {
+    Mnemonic::sample_off_device_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_security_questions() -> Mnemonic {
+    Mnemonic::sample_security_questions()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_security_questions_other() -> Mnemonic {
+    Mnemonic::sample_security_questions_other()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_arculus() -> Mnemonic {
+    Mnemonic::sample_arculus()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
+    Mnemonic::sample_arculus_other()
 }
 
 #[cfg(test)]
-pub(super) fn calculate_last_mnemonic_word_from_words(
-    words: impl IntoIterator<Item = String>,
-) -> Vec<Mnemonic> {
-    let words = words
-        .into_iter()
-        .map(|x| BIP39Word::new(x.clone(), BIP39Language::English).unwrap())
-        .collect_vec();
-    let count = words.len();
-    assert!(count == 11 || count == 23, "wrong word count");
-
-    let mut mnemonics = Vec::new();
-    for word in bip39_language_wordlist(&BIP39Language::English).iter() {
-        let mut all_words = words.clone();
-        all_words.push(word.clone());
-        match Mnemonic::from_words(all_words) {
-            Ok(mnemonic) => mnemonics.push(mnemonic),
-            Err(_) => continue,
-        };
-    }
-    assert!(!mnemonics.is_empty(), "should find at least one!");
-    mnemonics
-}
-
-#[cfg(test)]
-pub(super) fn calculate_last_mnemonic_word_from_phrase(
-    phrase: impl AsRef<str>,
-) -> Vec<Mnemonic> {
-    calculate_last_mnemonic_word_from_words(
-        phrase.as_ref().split(' ').map(|x| x.to_owned()),
-    )
-}
-
-impl Mnemonic {
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * athlete
-    /// * excite
-    /// * jar
-    /// * open
-    /// * planet
-    /// * swim
-    /// * wrap
-    pub(crate) fn sample_device() -> Self {
-        Self::from_phrase("device phone sign source sample device sample device sample device sample device sample device sample device sample device phone sign source sample device swim")
-        .expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * absurd
-    /// * circle
-    /// * expire
-    /// * illness
-    /// * paddle
-    /// * rabbit
-    /// * sniff
-    /// * winner
-    pub(crate) fn sample_device_other() -> Self {
-        Self::from_phrase("device phone sign source sample other device sample other device sample other device sample other device sample other device sample other device other paddle").expect("Valid mnemonic")
-    }
-
-    pub(crate) fn sample_device_12_words() -> Self {
-        Self::from_phrase("device twelve phone sign source sample device twelve sample device twelve original").expect("Valid mnemonic")
-    }
-
-    pub(crate) fn sample_device_12_words_other() -> Self {
-        Self::from_phrase("device twelve phone sign source sample other device twelve sample other derive").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * assault
-    /// * cactus
-    /// * exile
-    /// * legal
-    /// * million
-    /// * result
-    /// * spy
-    /// * version
-    pub(crate) fn sample_ledger() -> Self {
-        Self::from_phrase("pledge rely stick hard snow ice sign source sample pledge rely sample pledge rely sample pledge rely sample pledge rely sample stick sample cactus").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * basic
-    /// * couch
-    /// * elbow
-    /// * head
-    /// * ozone
-    /// * popular
-    /// * shaft
-    /// * tunnel
-    pub(crate) fn sample_ledger_other() -> Self {
-        Self::from_phrase("pledge rely stick hard snow ice sign source sample other pledge rely sample other pledge rely sample other pledge rely stick sample other shaft").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * begin
-    /// * cream
-    /// * excite
-    /// * insect
-    /// * lizard
-    /// * payment
-    /// * state
-    /// * wide
-    pub(crate) fn sample_off_device() -> Self {
-        Self::from_phrase("off device sign source sample off sample off sample off sample off sample off sample off sample off sample off sample off sample lizard").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * boss
-    /// * coral
-    /// * fruit
-    /// * identify
-    /// * local
-    /// * pulse
-    /// * talent
-    /// * then
-    pub(crate) fn sample_off_device_other() -> Self {
-        Self::from_phrase("off device sign source sample other off sample other off sample other off sample other off sample other off device sample other off fruit").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * amateur
-    /// * combine
-    /// * fold
-    /// * include
-    /// * neutral
-    /// * ritual
-    /// * science
-    /// * unveil
-    pub(crate) fn sample_security_questions() -> Self {
-        Self::from_phrase("security question sign source sample security question sample security question sample security question sample security question sample security question sample security question sample unveil").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * arrow
-    /// * chief
-    /// * ensure
-    /// * impulse
-    /// * loop
-    /// * problem
-    /// * sword
-    /// * total
-    pub(crate) fn sample_security_questions_other() -> Self {
-        Self::from_phrase("security question sign source sample other security question sample other security question sample other security question sample other security question sample other question loop").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * bargain
-    /// * discover
-    /// * essay
-    /// * govern
-    /// * mix
-    /// * power
-    /// * silent
-    /// * tobacco
-    pub(crate) fn sample_arculus() -> Self {
-        Self::from_phrase("arch card helmet sign source sample arch card sample arch card sample arch card sample arch card sample arch card sample arch card mix").expect("Valid mnemonic")
-    }
-
-    /// Alternative valid mnemonics, with last (checksum) words changed only are:
-    /// * bomb
-    /// * cream
-    /// * dragon
-    /// * gather
-    /// * lock
-    /// * prevent
-    /// * soccer
-    /// * update
-    pub(crate) fn sample_arculus_other() -> Self {
-        Self::from_phrase("arch card helmet sign source sample other arch card sample other arch card sample other arch card sample other arch card sample other lock").expect("Valid mnemonic")
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
+mod uniffi_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Mnemonic;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn find_device_sample() {
-        let s = "device phone sign source sample device sample device sample device sample device sample device sample device sample device phone sign source sample device";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_device()));
-    }
-
-    #[test]
-    fn find_device_sample_other() {
-        let s = "device phone sign source sample other device sample other device sample other device sample other device sample other device sample other device other";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_device_other()));
-    }
-
-    #[test]
-    fn find_device_sample_12_words() {
-        let s = "device twelve phone sign source sample device twelve sample device twelve";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_device_12_words()));
-    }
-
-    #[test]
-    fn find_device_sample_12_words_other() {
-        let s = "device twelve phone sign source sample other device twelve sample other";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics
-            .iter()
-            .contains(&SUT::sample_device_12_words_other()));
-    }
-
-    #[test]
-    fn find_ledger_sample() {
-        let s = "pledge rely stick hard snow ice sign source sample pledge rely sample pledge rely sample pledge rely sample pledge rely sample stick sample";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_ledger()));
-    }
-
-    #[test]
-    fn find_ledger_sample_other() {
-        let s = "pledge rely stick hard snow ice sign source sample other pledge rely sample other pledge rely sample other pledge rely stick sample other";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_ledger_other()));
-    }
-
-    #[test]
-    fn find_off_device_sample() {
-        let s = "off device sign source sample off sample off sample off sample off sample off sample off sample off sample off sample off sample";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_off_device()));
-    }
-
-    #[test]
-    fn find_off_device_sample_other() {
-        let s = "off device sign source sample other off sample other off sample other off sample other off sample other off device sample other off";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        for mnemonic in mnemonics.iter() {
-            println!("{}", mnemonic.words.iter().last().unwrap().word);
-        }
-        assert!(mnemonics.iter().contains(&SUT::sample_off_device_other()));
-    }
-
-    #[test]
-    fn find_security_questions_sample() {
-        let s = "security question sign source sample security question sample security question sample security question sample security question sample security question sample security question sample";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_security_questions()));
-    }
-
-    #[test]
-    fn find_security_questions_sample_other() {
-        let s = "security question sign source sample other security question sample other security question sample other security question sample other security question sample other question";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics
-            .iter()
-            .contains(&SUT::sample_security_questions_other()));
-    }
-
-    #[test]
-    fn find_arculus() {
-        let s = "arch card helmet sign source sample arch card sample arch card sample arch card sample arch card sample arch card sample arch card";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_arculus()));
-    }
-
-    #[test]
-    fn find_arculus_other() {
-        let s = "arch card helmet sign source sample other arch card sample other arch card sample other arch card sample other arch card sample other";
-        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        assert!(mnemonics.iter().contains(&SUT::sample_arculus_other()));
-    }
-
-    #[test]
-    fn debug() {
-        let mnemonic = SUT::sample();
+    fn hash_of_sample() {
         assert_eq!(
-            format!("{:?}", mnemonic),
-            format!("{:?}", "24 words (bright...mandate)")
+            HashSet::<SUT>::from_iter([
+                new_mnemonic_sample(),
+                new_mnemonic_sample_other(),
+                // duplicates should be removed
+                new_mnemonic_sample(),
+                new_mnemonic_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn display() {
-        let mnemonic = SUT::sample();
-        assert_eq!(format!("{}", mnemonic), "Mnemonic in English obfuscated.")
-    }
-
-    #[test]
-    fn non_sensitive() {
-        let mnemonic = SUT::sample();
+    fn hash_of_sample_specific() {
         assert_eq!(
-            format!("{:?}", mnemonic.non_sensitive()),
-            format!("{:?}", "24 words (bright...mandate)")
+            HashSet::<SUT>::from_iter([
+                new_mnemonic_sample_device(),
+                new_mnemonic_sample_device_other(),
+                new_mnemonic_sample_device_12_words(),
+                new_mnemonic_sample_device_12_words_other(),
+                new_mnemonic_sample_ledger(),
+                new_mnemonic_sample_ledger_other(),
+                new_mnemonic_sample_off_device(),
+                new_mnemonic_sample_off_device_other(),
+                new_mnemonic_sample_security_questions(),
+                new_mnemonic_sample_security_questions_other(),
+                new_mnemonic_sample_arculus(),
+                new_mnemonic_sample_arculus_other(),
+                // duplicates should be removed
+                new_mnemonic_sample_device(),
+                new_mnemonic_sample_device_other(),
+                new_mnemonic_sample_device_12_words(),
+                new_mnemonic_sample_device_12_words_other(),
+                new_mnemonic_sample_ledger(),
+                new_mnemonic_sample_ledger_other(),
+                new_mnemonic_sample_off_device(),
+                new_mnemonic_sample_off_device_other(),
+                new_mnemonic_sample_security_questions(),
+                new_mnemonic_sample_security_questions_other(),
+                new_mnemonic_sample_arculus(),
+                new_mnemonic_sample_arculus_other(),
+            ])
+            .len(),
+            12
         );
     }
 
     #[test]
-    fn language() {
-        let mnemonic: SUT =
-            "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
-                .parse()
-                .unwrap();
-        assert_eq!(mnemonic.language, BIP39Language::English);
-        mnemonic
-            .words
-            .into_iter()
-            .for_each(|w| assert_eq!(w.language, BIP39Language::English));
+    fn test_mnemonic_phrase() {
+        let str = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong";
+        let sut: SUT = str.parse().unwrap();
+        assert_eq!(mnemonic_phrase(&sut), str);
     }
 
     #[test]
-    fn word_count() {
-        assert_eq!( SUT::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").unwrap().word_count, BIP39WordCount::TwentyFour);
+    fn test_new_mnemonic_generate_with_entropy_16_bytes() {
+        let sut = new_mnemonic_generate_with_entropy(
+            BIP39Entropy::EntropyOf16Bytes(Entropy16Bytes::new([0xff; 16])),
+            BIP39Language::English,
+        );
         assert_eq!(
-            SUT::from_phrase(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-            )
-            .unwrap()
-            .word_count,
-            BIP39WordCount::Twelve
+            sut.phrase(),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
         );
     }
 
     #[test]
-    fn words() {
-        let mnemonic = SUT::sample();
-        assert_eq!(mnemonic.words[0].word, "bright");
-        assert_eq!(mnemonic.words[1].word, "club");
-        assert_eq!(mnemonic.words[2].word, "bacon");
-        assert_eq!(mnemonic.words[12].word, "humble");
-        assert_eq!(mnemonic.words[22].word, "goose");
-        assert_eq!(mnemonic.words[23].word, "mandate");
-    }
-
-    #[test]
-    fn words_index() {
-        let zoo: SUT = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-            .parse()
-            .unwrap();
-        assert_eq!(zoo.words[0].index.inner, 2047);
-        assert_eq!(zoo.words[1].index.inner, 2047);
-        assert_eq!(zoo.words[10].index.inner, 2047);
-        assert_eq!(zoo.words[11].index.inner, 2037);
-
-        let abandon: SUT = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
-            .parse()
-            .unwrap();
-        assert_eq!(abandon.words[0].index.inner, 0);
-        assert_eq!(abandon.words[1].index.inner, 0);
-        assert_eq!(abandon.words[10].index.inner, 0);
-        assert_eq!(abandon.words[11].index.inner, 3);
-    }
-
-    #[test]
-    fn phrase_str_roundtrip() {
-        let phrase = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate";
-        let mnemonic = SUT::from_phrase(phrase).unwrap();
-        assert_eq!(mnemonic.phrase(), phrase);
-    }
-
-    #[test]
-    fn from_phrase_invalid() {
-        assert_eq!(
-            SUT::from_phrase(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
-            ),
-            Err(CommonError::InvalidMnemonicPhrase)
+    fn test_new_mnemonic_generate_with_entropy_32_bytes() {
+        let sut = new_mnemonic_generate_with_entropy(
+            BIP39Entropy::EntropyOf32Bytes(Entropy32Bytes::new([0xff; 32])),
+            BIP39Language::English,
         );
+        assert_eq!(sut.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote",
+    );
     }
 
     #[test]
-    fn from_phrase_language() {
-        assert_eq!(
-            SUT::from(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
-                BIP39Language::English
-            ),
-            SUT::from_phrase(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-            )
-        );
+    fn test_new_mnemonic_from_phrase() {
+        let str =
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong".to_string();
+        let mnemonic = new_mnemonic_from_phrase(str.clone()).unwrap();
+        assert_eq!(mnemonic_phrase(&mnemonic), str)
     }
 
     #[test]
-    fn from_wrong_phrase_language() {
-        assert_eq!(
-            SUT::from(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon",
-                BIP39Language::English
-            ),
-            Err(CommonError::InvalidMnemonicPhrase)
-        );
+    fn test_new_mnemonic_from_phrase_language() {
+        let str =
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong".to_string();
+        let mnemonic = new_mnemonic_from_phrase_language(
+            str.clone(),
+            BIP39Language::English,
+        )
+        .unwrap();
+        assert_eq!(mnemonic_phrase(&mnemonic), str)
     }
 
     #[test]
-    fn from_words() {
-        assert_eq!(
-            SUT::from_words(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-                    .split(' ')
-                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
-                    .collect_vec()
-            ),
-            SUT::from_phrase(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-            )
-        );
-    }
-
-    #[test]
-    fn from_words_empty_phrase() {
-        assert_eq!(
-            SUT::from_words(vec![]),
-            Err(CommonError::InvalidMnemonicPhrase)
-        );
-    }
-
-    #[test]
-    fn from_words_wrong_phrase() {
-        assert_eq!(
-            SUT::from_words(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
-                    .split(' ')
-                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
-                    .collect_vec()
-            ),
-            Err(CommonError::InvalidMnemonicPhrase)
-        );
-    }
-
-    #[test]
-    fn from_words_wrong_words_count() {
-        assert_eq!(
-            SUT::from_words(
-                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo"
-                    .split(' ')
-                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
-                    .collect_vec()
-            ),
-            Err(CommonError::InvalidMnemonicPhrase)
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_success() {
-        let a: SUT = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
-            .parse()
-            .unwrap();
-
-        assert_json_value_eq_after_roundtrip(
-            &a,
-            json!("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"),
-        );
-        assert_json_roundtrip(&a);
-        assert_json_value_ne_after_roundtrip(
-            &a,
-            json!("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"),
-        );
-    }
-
-    #[test]
-    fn json_fails() {
-        assert_json_value_fails::<SUT>(json!("invalid"));
-        assert_json_value_fails::<SUT>(json!(
-            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
-        )); // not checksummed
-        assert_json_value_fails::<SUT>(json!(
-            "hej jag zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
-        )); // invalid words
-    }
-
-    #[test]
-    fn zeroize() {
-        let mut sut = SUT::sample_other();
-
-        sut.zeroize();
-
-        assert_eq!(sut.words.len(), 0);
+    fn test_new_mnemonic_from_words() {
+        let str = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong";
+        let words = str
+            .split(' ')
+            .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+            .collect_vec();
+        let mnemonic = new_mnemonic_from_words(words).unwrap();
+        assert_eq!(mnemonic_phrase(&mnemonic), str)
     }
 }

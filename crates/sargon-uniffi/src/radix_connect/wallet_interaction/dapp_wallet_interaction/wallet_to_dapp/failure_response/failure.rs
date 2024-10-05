@@ -1,71 +1,29 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionFailureResponse as InternalWalletToDappInteractionFailureResponse;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionFailureResponse {
     pub interaction_id: WalletInteractionId,
     pub error: DappWalletInteractionErrorType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-impl WalletToDappInteractionFailureResponse {
-    pub fn new(
-        interaction_id: WalletInteractionId,
-        error: DappWalletInteractionErrorType,
-        message: impl Into<Option<String>>,
-    ) -> Self {
+impl From<InternalWalletToDappInteractionFailureResponse> for WalletToDappInteractionFailureResponse {
+    fn from(value: InternalWalletToDappInteractionFailureResponse) -> Self {
         Self {
-            interaction_id,
-            error,
-            message: message.into(),
+            interaction_id: value.interaction_id.into(),
+            error: value.error.into(),
+            message: value.message,
         }
     }
 }
 
-impl HasSampleValues for WalletToDappInteractionFailureResponse {
-    fn sample() -> Self {
-        Self::new(
-            WalletInteractionId::sample(),
-            DappWalletInteractionErrorType::sample(),
-            "sample1".to_owned(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            WalletInteractionId::sample_other(),
-            DappWalletInteractionErrorType::sample_other(),
-            "sample2".to_owned(),
-        )
-    }
-}
-
-impl WalletToDappInteractionFailureResponse {
-    pub fn sample_with_id(interaction_id: WalletInteractionId) -> Self {
-        Self::new(
-            interaction_id,
-            DappWalletInteractionErrorType::sample(),
-            "sample1".to_owned(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionFailureResponse;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionFailureResponse> for WalletToDappInteractionFailureResponse {
+    fn into(self) -> InternalWalletToDappInteractionFailureResponse {
+        InternalWalletToDappInteractionFailureResponse {
+            interaction_id: self.interaction_id.into(),
+            error: self.error.into(),
+            message: self.message,
+        }
     }
 }

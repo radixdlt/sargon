@@ -1,55 +1,26 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionAccountProof as InternalWalletToDappInteractionAccountProof;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionAccountProof {
     pub account_address: AccountAddress,
     pub proof: WalletToDappInteractionAuthProof,
 }
 
-impl WalletToDappInteractionAccountProof {
-    pub fn new(
-        account_address: impl Into<AccountAddress>,
-        proof: WalletToDappInteractionAuthProof,
-    ) -> Self {
+impl From<InternalWalletToDappInteractionAccountProof> for WalletToDappInteractionAccountProof {
+    fn from(value: InternalWalletToDappInteractionAccountProof) -> Self {
         Self {
-            account_address: account_address.into(),
-            proof,
+            account_address: value.account_address.into(),
+            proof: value.proof.into(),
         }
     }
 }
 
-impl HasSampleValues for WalletToDappInteractionAccountProof {
-    fn sample() -> Self {
-        Self::new(
-            AccountAddress::sample(),
-            WalletToDappInteractionAuthProof::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            AccountAddress::sample_other(),
-            WalletToDappInteractionAuthProof::sample_other(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionAccountProof;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionAccountProof> for WalletToDappInteractionAccountProof {
+    fn into(self) -> InternalWalletToDappInteractionAccountProof {
+        InternalWalletToDappInteractionAccountProof {
+            account_address: self.account_address.into(),
+            proof: self.proof.into(),
+        }
     }
 }

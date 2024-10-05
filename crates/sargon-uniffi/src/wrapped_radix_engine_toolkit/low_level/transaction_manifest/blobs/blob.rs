@@ -1,84 +1,39 @@
 use crate::prelude::*;
+use sargon::Blob as InternalBlob;
+use sargon::BagOfBytes as InternalBagOfBytes;
 
 /// Blob is a wrapper a bag of bytes
 #[derive(
     Clone,
     PartialEq,
     Eq,
-    DeserializeFromStr,
-    SerializeDisplay,
     uniffi::Record,
     derive_more::Display,
     derive_more::Debug,
-    derive_more::FromStr,
 )]
-#[display("{}", self.to_hex())]
-#[debug("{}", self.to_hex())]
 pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,
 }
 
-impl Blob {
-    pub fn to_hex(&self) -> String {
-        self.secret_magic.to_hex()
-    }
-
-    pub fn from_hex(s: &str) -> Result<Self> {
-        Self::from_str(s)
-    }
-}
-
-impl From<BagOfBytes> for Blob {
-    fn from(value: BagOfBytes) -> Self {
+impl From<InternalBlob> for Blob {
+    fn from(value: InternalBlob) -> Self {
         Self {
-            secret_magic: value,
+            secret_magic: value.secret_magic.into(),
         }
     }
 }
 
-impl From<Blob> for BagOfBytes {
-    fn from(value: Blob) -> BagOfBytes {
-        value.secret_magic
-    }
-}
-
-impl From<ScryptoBlob> for Blob {
-    fn from(value: ScryptoBlob) -> Self {
-        Self {
-            secret_magic: value.0.into(),
+impl Into<InternalBlob> for Blob {
+    fn into(self) -> InternalBlob {
+        InternalBlob {
+            secret_magic: self.secret_magic.into(),
         }
-    }
-}
-
-impl From<Blob> for ScryptoBlob {
-    fn from(value: Blob) -> Self {
-        ScryptoBlob(value.secret_magic.to_vec())
-    }
-}
-
-impl From<&Vec<u8>> for Blob {
-    fn from(value: &Vec<u8>) -> Self {
-        Self {
-            secret_magic: value.clone().into(),
-        }
-    }
-}
-
-impl HasSampleValues for Blob {
-    fn sample() -> Self {
-        BagOfBytes::sample_aced().into()
-    }
-
-    fn sample_other() -> Self {
-        BagOfBytes::from_hex(&"deadbeefabbafadecafe".repeat(100))
-            .unwrap()
-            .into()
     }
 }
 
 #[uniffi::export]
 pub fn new_blob_from_bytes(bytes: BagOfBytes) -> Blob {
-    bytes.into()
+    bytes.into::<InternalBagOfBytes>().into::<InternalBlob>().into()
 }
 
 #[uniffi::export]

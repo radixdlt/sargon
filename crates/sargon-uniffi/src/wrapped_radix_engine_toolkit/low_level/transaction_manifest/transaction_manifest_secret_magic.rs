@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::TransactionManifestSecretMagic as InternalTransactionManifestSecretMagic;
 
 /// An internal representation of a TransactionManifest,
 /// which intentions is to allow the `struct TransactionManifest`
@@ -11,55 +12,20 @@ pub struct TransactionManifestSecretMagic {
     pub blobs: Blobs,
 }
 
-impl TransactionManifestSecretMagic {
-    pub fn new(instructions: Instructions, blobs: impl Into<Blobs>) -> Self {
+impl From<InternalTransactionManifestSecretMagic> for TransactionManifestSecretMagic {
+    fn from(value: InternalTransactionManifestSecretMagic) -> Self {
         Self {
-            instructions,
-            blobs: blobs.into(),
+            instructions: value.instructions.into(),
+            blobs: value.blobs.into(),
         }
     }
-
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
-        self.instructions.instructions()
-    }
 }
 
-impl HasSampleValues for TransactionManifestSecretMagic {
-    fn sample() -> Self {
-        Self::new(Instructions::sample_mainnet(), Blobs::default())
-    }
-
-    fn sample_other() -> Self {
-        Self::new(Instructions::sample_simulator_other(), Blobs::default())
-    }
-}
-
-#[allow(unused)]
-impl TransactionManifestSecretMagic {
-    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
-        Self::new(
-            Instructions::sample_mainnet_without_lock_fee(),
-            Blobs::default(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = TransactionManifestSecretMagic;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalTransactionManifestSecretMagic> for TransactionManifestSecretMagic {
+    fn into(self) -> InternalTransactionManifestSecretMagic {
+        InternalTransactionManifestSecretMagic {
+            instructions: self.instructions.into(),
+            blobs: self.blobs.into(),
+        }
     }
 }

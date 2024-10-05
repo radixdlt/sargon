@@ -5,8 +5,6 @@ use crate::prelude::*;
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
 #[derive(
-    Serialize,
-    Deserialize,
     Debug,
     Clone,
     PartialEq,
@@ -15,7 +13,6 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 #[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]
 pub struct Header {
     /// A versioning number that is increased when breaking
@@ -38,37 +35,6 @@ pub struct Header {
     pub content_hint: ContentHint,
 }
 
-impl Header {
-    /// Instantiates a new `Header` using the default snapshot version and
-    /// the specified values, most prominently a creating device (`DeviceInfo`).
-    pub fn with_values(
-        id: ProfileID,
-        creating_device: DeviceInfo,
-        content_hint: ContentHint,
-        last_modified: Timestamp,
-    ) -> Self {
-        Self {
-            snapshot_version: ProfileSnapshotVersion::default(),
-            id,
-            creating_device: creating_device.clone(),
-            last_used_on_device: creating_device,
-            last_modified,
-            content_hint,
-        }
-    }
-
-    /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
-    /// "Unknown device" as description, and empty content hint
-    pub fn new(creating_device: DeviceInfo) -> Self {
-        Self::with_values(
-            profile_id(),
-            creating_device,
-            ContentHint::new(),
-            now(),
-        )
-    }
-}
-
 impl Identifiable for Header {
     type ID = ProfileID;
 
@@ -77,111 +43,53 @@ impl Identifiable for Header {
     }
 }
 
-impl HasSampleValues for Header {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        let device_info = DeviceInfo::sample();
-        Header::with_values(
-            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
-                .unwrap(),
-            device_info.clone(),
-            ContentHint::with_counters(4, 0, 2),
-            device_info.date,
-        )
-    }
+json_data_convertible!(Header);
 
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        let device_info = DeviceInfo::sample_other();
-        Header::with_values(
-            ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba")
-                .unwrap(),
-            device_info.clone(),
-            ContentHint::new(),
-            device_info.date,
-        )
-    }
+#[uniffi::export]
+pub fn new_header_sample() -> Header {
+    Header::sample()
+}
+
+#[uniffi::export]
+pub fn new_header_sample_other() -> Header {
+    Header::sample_other()
+}
+
+/// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
+/// "Unknown device" as description, and empty content hint
+#[uniffi::export]
+pub fn new_header_with_creating_device(creating_device: DeviceInfo) -> Header {
+    Header::new(creating_device)
 }
 
 #[cfg(test)]
-pub mod tests {
+mod uniffi_test {
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Header;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn json_roundtrip_sample() {
-        let sut = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "snapshotVersion": 100,
-                "id": "12345678-bbbb-cccc-dddd-abcd12345678",
-                "creatingDevice": {
-                    "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                    "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone (iPhone)"
-                },
-                "lastUsedOnDevice": {
-                    "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                    "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone (iPhone)"
-                },
-                "lastModified": "2023-09-11T16:05:56.000Z",
-                "contentHint": {
-                    "numberOfAccountsOnAllNetworksInTotal": 4,
-                    "numberOfPersonasOnAllNetworksInTotal": 0,
-                    "numberOfNetworks": 2
-                }
-            }
-            "#,
+    fn test_new_with_device() {
+        assert_ne!(
+            new_header_with_creating_device(DeviceInfo::sample()),
+            SUT::sample()
         );
     }
 
     #[test]
-    fn display() {
-        let sut = SUT::sample();
-        pretty_assertions::assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 2, #accounts: 4, #personas: 0");
-    }
-
-    #[test]
-    fn snapshot_version() {
-        let value = ProfileSnapshotVersion::default();
-        let sut = SUT::sample();
-        assert_eq!(sut.snapshot_version, value)
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Header;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(SUT::sample(), new_header_sample());
-        assert_eq!(SUT::sample_other(), new_header_sample_other());
-    }
-
-    #[test]
-    fn header_identifiable() {
-        let sut = SUT::sample();
-        assert_eq!(&sut.id(), &sut.id);
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_header_sample(),
+                new_header_sample_other(),
+                // duplicates should get removed
+                new_header_sample(),
+                new_header_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

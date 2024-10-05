@@ -1,47 +1,43 @@
 use crate::prelude::*;
+use sargon::DappToWalletInteractionAuthRequestItem as InternalDappToWalletInteractionAuthRequestItem;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
-#[serde(tag = "discriminator")]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum DappToWalletInteractionAuthRequestItem {
-    #[serde(rename = "loginWithChallenge")]
     LoginWithChallenge(
         DappToWalletInteractionAuthLoginWithChallengeRequestItem,
     ),
-    #[serde(rename = "loginWithoutChallenge")]
     LoginWithoutChallenge,
-    #[serde(rename = "usePersona")]
     UsePersona(DappToWalletInteractionAuthUsePersonaRequestItem),
 }
 
-impl HasSampleValues for DappToWalletInteractionAuthRequestItem {
-    fn sample() -> Self {
-        Self::LoginWithChallenge(
-            DappToWalletInteractionAuthLoginWithChallengeRequestItem::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::UsePersona(
-            DappToWalletInteractionAuthUsePersonaRequestItem::sample(),
-        )
+impl From<InternalDappToWalletInteractionAuthRequestItem> for DappToWalletInteractionAuthRequestItem {
+    fn from(value: InternalDappToWalletInteractionAuthRequestItem) -> Self {
+        match value {
+            InternalDappToWalletInteractionAuthRequestItem::LoginWithChallenge(value) => {
+                DappToWalletInteractionAuthRequestItem::LoginWithChallenge(value.into())
+            }
+            InternalDappToWalletInteractionAuthRequestItem::LoginWithoutChallenge => {
+                DappToWalletInteractionAuthRequestItem::LoginWithoutChallenge
+            }
+            InternalDappToWalletInteractionAuthRequestItem::UsePersona(value) => {
+                DappToWalletInteractionAuthRequestItem::UsePersona(value.into())
+            }
+        }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionAuthRequestItem;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalDappToWalletInteractionAuthRequestItem> for DappToWalletInteractionAuthRequestItem {
+    fn into(self) -> InternalDappToWalletInteractionAuthRequestItem {
+        match self {
+            DappToWalletInteractionAuthRequestItem::LoginWithChallenge(value) => {
+                InternalDappToWalletInteractionAuthRequestItem::LoginWithChallenge(value.into())
+            }
+            DappToWalletInteractionAuthRequestItem::LoginWithoutChallenge => {
+                InternalDappToWalletInteractionAuthRequestItem::LoginWithoutChallenge
+            }
+            DappToWalletInteractionAuthRequestItem::UsePersona(value) => {
+                InternalDappToWalletInteractionAuthRequestItem::UsePersona(value.into())
+            }
+        }
     }
 }

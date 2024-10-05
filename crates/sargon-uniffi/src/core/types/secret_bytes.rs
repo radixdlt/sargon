@@ -52,23 +52,7 @@ macro_rules! decl_secret_bytes {
                 [< $struct_name SecretMagic >]::try_from(bytes)
                     .map(|secret_magic| $struct_name { secret_magic })
             }
-
-           impl $struct_name {
-                pub fn to_bytes(&self) -> &[u8] {
-                    &self.secret_magic.0.as_slice()
-                }
-           }
-
-            impl HasSampleValues for $struct_name {
-                fn sample() -> Self {
-                    Self { secret_magic: [< $struct_name SecretMagic >](Box::new([0xab; $byte_count])) }
-                }
-
-                fn sample_other() -> Self {
-                    Self { secret_magic: [< $struct_name SecretMagic >](Box::new([0xde; $byte_count])) }
-                }
-            }
-
+            
             #[uniffi::export]
             pub fn [< new_ $struct_name:snake _sample >]() -> $struct_name {
                 $struct_name::sample()
@@ -82,21 +66,6 @@ macro_rules! decl_secret_bytes {
             #[uniffi::export]
             pub fn [< $struct_name:snake _to_bytes >](bytes: &$struct_name) -> BagOfBytes {
                 BagOfBytes::from(bytes.to_bytes())
-            }
-
-            impl $struct_name {
-                pub const LENGTH: usize = $byte_count;
-
-                pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
-                    Self {
-                        secret_magic: [< $struct_name SecretMagic >](Box::new(bytes))
-                    }
-                }
-
-                #[allow(unused)]
-                pub(crate) fn is_zeroized(&self) -> bool {
-                    *self.secret_magic.0 == [0; Self::LENGTH]
-                }
             }
 
             #[cfg(test)]

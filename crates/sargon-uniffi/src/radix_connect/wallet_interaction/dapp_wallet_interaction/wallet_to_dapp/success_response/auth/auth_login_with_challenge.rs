@@ -1,61 +1,29 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem as InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
     pub challenge: DappToWalletInteractionAuthChallengeNonce,
     pub proof: WalletToDappInteractionAuthProof,
 }
 
-impl WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
-    pub fn new(
-        persona: DappWalletInteractionPersona,
-        challenge: impl Into<DappToWalletInteractionAuthChallengeNonce>,
-        proof: WalletToDappInteractionAuthProof,
-    ) -> Self {
+impl From<InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem> for WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
+    fn from(value: InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem) -> Self {
         Self {
-            persona,
-            challenge: challenge.into(),
-            proof,
+            persona: value.persona.into(),
+            challenge: value.challenge.into(),
+            proof: value.proof.into(),
         }
     }
 }
 
-impl HasSampleValues
-    for WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem
-{
-    fn sample() -> Self {
-        Self::new(
-            DappWalletInteractionPersona::sample(),
-            DappToWalletInteractionAuthChallengeNonce::sample(),
-            WalletToDappInteractionAuthProof::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            DappWalletInteractionPersona::sample_other(),
-            DappToWalletInteractionAuthChallengeNonce::sample_other(),
-            WalletToDappInteractionAuthProof::sample_other(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem> for WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
+    fn into(self) -> InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
+        InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
+            persona: self.persona.into(),
+            challenge: self.challenge.into(),
+            proof: self.proof.into(),
+        }
     }
 }

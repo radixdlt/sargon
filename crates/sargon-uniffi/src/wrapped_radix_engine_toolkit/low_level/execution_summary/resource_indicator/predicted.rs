@@ -15,7 +15,7 @@ macro_rules! decl_predicted {
         $wrapped_type: ty,
         $mod_test_name: ident
     ) => {
-
+        use sargon::$struct_name as Internal$struct_name;
 
         $(
             #[doc = $expr]
@@ -25,38 +25,22 @@ macro_rules! decl_predicted {
             pub value: $wrapped_type,
             pub instruction_index: u64,
         }
-        impl $struct_name {
-            pub fn new(value: impl Into<$wrapped_type>, instruction_index: u64) -> Self {
+
+        impl From<Internal$struct_name> for $struct_name {
+            fn from(value: Internal$struct_name) -> Self {
                 Self {
-                    value: value.into(),
-                    instruction_index
+                    value: value.value.into(),
+                    instruction_index: value.instruction_index,
                 }
-            }
-            pub fn from_ret<T>(ret_predicted: RetPredicted<T>) -> Self where T: Into<$wrapped_type> {
-                Self::new(
-                    ret_predicted.value,
-                    ret_predicted.instruction_index as u64
-                )
             }
         }
 
-
-        #[cfg(test)]
-        mod $mod_test_name {
-            use super::*;
-
-            #[allow(clippy::upper_case_acronyms)]
-            type SUT = $struct_name;
-
-            #[test]
-            fn equality() {
-                assert_eq!(SUT::sample(), SUT::sample());
-                assert_eq!(SUT::sample_other(), SUT::sample_other());
-            }
-
-            #[test]
-            fn inequality() {
-                assert_ne!(SUT::sample(), SUT::sample_other());
+        impl Into<Internal$struct_name> for $struct_name {
+            fn into(self) -> Internal$struct_name {
+                Internal$struct_name {
+                    value: self.value.into(),
+                    instruction_index: self.instruction_index,
+                }
             }
         }
     };
@@ -93,45 +77,3 @@ decl_predicted!(
     Vec<NonFungibleLocalId>,
     tests_predicted_non_fungible_local_ids
 );
-
-type ScryptoNonFungibleLocalIds = IndexSet<ScryptoNonFungibleLocalId>;
-type RetPredictedNonFungibleLocalIds = RetPredicted<ScryptoNonFungibleLocalIds>;
-
-impl From<RetPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
-    fn from(value: RetPredictedNonFungibleLocalIds) -> Self {
-        Self::new(
-            value
-                .value
-                .into_iter()
-                .map(NonFungibleLocalId::from)
-                .collect_vec(),
-            value.instruction_index as u64,
-        )
-    }
-}
-
-impl HasSampleValues for PredictedDecimal {
-    fn sample() -> Self {
-        Self::new(Decimal::one(), 0)
-    }
-
-    fn sample_other() -> Self {
-        Self::new(Decimal::three(), 1)
-    }
-}
-
-impl HasSampleValues for PredictedNonFungibleLocalIds {
-    fn sample() -> Self {
-        Self::new(
-            vec![
-                NonFungibleLocalId::sample(),
-                NonFungibleLocalId::sample_other(),
-            ],
-            0,
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(vec![NonFungibleLocalId::sample_other()], 1)
-    }
-}

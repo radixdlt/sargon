@@ -1,69 +1,52 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionResponse as InternalWalletToDappInteractionResponse;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
-#[serde(tag = "discriminator")]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponse {
-    #[serde(rename = "success")]
     Success(WalletToDappInteractionSuccessResponse),
-    #[serde(rename = "failure")]
     Failure(WalletToDappInteractionFailureResponse),
 }
 
-impl HasSampleValues for WalletToDappInteractionResponse {
-    fn sample() -> Self {
-        WalletToDappInteractionResponse::Success(
-            WalletToDappInteractionSuccessResponse::sample(),
-        )
-    }
-    fn sample_other() -> Self {
-        WalletToDappInteractionResponse::Failure(
-            WalletToDappInteractionFailureResponse::sample(),
-        )
+impl From<InternalWalletToDappInteractionResponse> for WalletToDappInteractionResponse {
+    fn from(value: InternalWalletToDappInteractionResponse) -> Self {
+        match value {
+            InternalWalletToDappInteractionResponse::Success(value) => WalletToDappInteractionResponse::Success(value.into()),
+            InternalWalletToDappInteractionResponse::Failure(value) => WalletToDappInteractionResponse::Failure(value.into()),
+        }
     }
 }
 
-impl WalletToDappInteractionResponse {
-    pub fn is_success(&self) -> bool {
+impl Into<InternalWalletToDappInteractionResponse> for WalletToDappInteractionResponse {
+    fn into(self) -> InternalWalletToDappInteractionResponse {
         match self {
-            WalletToDappInteractionResponse::Success(_) => true,
-            WalletToDappInteractionResponse::Failure(_) => false,
+            WalletToDappInteractionResponse::Success(value) => InternalWalletToDappInteractionResponse::Success(value.into()),
+            WalletToDappInteractionResponse::Failure(value) => InternalWalletToDappInteractionResponse::Failure(value.into()),
         }
     }
+}
 
-    pub fn interaction_id(&self) -> WalletInteractionId {
-        match self {
-            WalletToDappInteractionResponse::Success(response) => {
-                response.interaction_id.clone()
-            }
-            WalletToDappInteractionResponse::Failure(response) => {
-                response.interaction_id.clone()
-            }
-        }
-    }
+#[uniffi::export]
+pub(crate) fn new_wallet_to_dapp_interaction_response_sample(
+) -> WalletToDappInteractionResponse {
+    InternalWalletToDappInteractionResponse::sample().into()
+}
+
+#[uniffi::export]
+pub(crate) fn new_wallet_to_dapp_interaction_response_sample_other(
+) -> WalletToDappInteractionResponse {
+    InternalWalletToDappInteractionResponse::sample_other().into()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionResponse;
-
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn is_success() {
-        assert!(SUT::sample().is_success());
-        assert!(!SUT::sample_other().is_success());
+    fn inequality_of_samples() {
+        assert_ne!(
+            new_wallet_to_dapp_interaction_response_sample(),
+            new_wallet_to_dapp_interaction_response_sample_other()
+        );
     }
 }

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::NewEntities as InternalNewEntities;
 
 /// Information on the global entities created in the transaction.
 #[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
@@ -6,98 +7,26 @@ pub struct NewEntities {
     pub metadata: HashMap<ResourceAddress, NewlyCreatedResource>,
 }
 
-impl NewEntities {
-    pub fn new<I>(resources: I) -> Self
-    where
-        I: IntoIterator<Item = (ResourceAddress, NewlyCreatedResource)>,
-    {
+impl From<InternalNewEntities> for NewEntities {
+    fn from(value: InternalNewEntities) -> Self {
         Self {
-            metadata: resources
+            metadata: value
+                .metadata
                 .into_iter()
-                .collect::<HashMap<ResourceAddress, NewlyCreatedResource>>(),
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
         }
     }
 }
 
-impl From<(RetNewEntities, NetworkID)> for NewEntities {
-    fn from(value: (RetNewEntities, NetworkID)) -> Self {
-        let (ret, network_id) = value;
-
-        Self::new(
-            // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
-            // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
-            // and "filter out" (skip) any GlobalAddress that is not a ResourceAddress,
-            // why? Since Radix Wallets actually only use the ResourceAddress...
-            ret.metadata
+impl Into<InternalNewEntities> for NewEntities {
+    fn into(self) -> InternalNewEntities {
+        InternalNewEntities {
+            metadata: self
+                .metadata
                 .into_iter()
-                .filter_map(|(k, v)| {
-                    // We only care about `ResourceAddress`, and skip other address types.
-                    TryInto::<ResourceAddress>::try_into((k, network_id))
-                        .map(|a| (a, v))
-                        .ok()
-                })
-                .map(|t| (t.0, NewlyCreatedResource::from(t.1))),
-        )
-    }
-}
-
-impl HasSampleValues for NewEntities {
-    fn sample() -> Self {
-        Self::new([
-            (
-                ResourceAddress::sample_mainnet_xrd(),
-                NewlyCreatedResource::sample_mainnet_xrd(),
-            ),
-            (
-                ResourceAddress::sample_mainnet_candy(),
-                NewlyCreatedResource::sample_mainnet_candy(),
-            ),
-        ])
-    }
-
-    fn sample_other() -> Self {
-        Self::new([
-            (
-                ResourceAddress::sample_stokenet_gc_tokens(),
-                NewlyCreatedResource::sample_stokenet_gc(),
-            ),
-            (
-                ResourceAddress::sample_stokenet_gum(),
-                NewlyCreatedResource::sample_stokenet_gum(),
-            ),
-        ])
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NewEntities;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn resource_can_be_lookup_by_address() {
-        assert_eq!(
-            SUT::sample().metadata[&ResourceAddress::sample_mainnet_candy()],
-            NewlyCreatedResource::sample_mainnet_candy()
-        );
-
-        assert_eq!(
-            SUT::sample_other().metadata
-                [&ResourceAddress::sample_stokenet_gum()],
-            NewlyCreatedResource::sample_stokenet_gum()
-        );
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
+        }
     }
 }

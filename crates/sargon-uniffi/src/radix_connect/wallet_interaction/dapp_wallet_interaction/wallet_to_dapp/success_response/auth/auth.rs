@@ -1,51 +1,33 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionAuthRequestResponseItem as InternalWalletToDappInteractionAuthRequestResponseItem;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
-#[serde(tag = "discriminator")]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum WalletToDappInteractionAuthRequestResponseItem {
-    #[serde(rename = "usePersona")]
     UsePersona(WalletToDappInteractionAuthUsePersonaRequestResponseItem),
-
-    #[serde(rename = "loginWithoutChallenge")]
     LoginWithoutChallenge(
         WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem,
     ),
-
-    #[serde(rename = "loginWithChallenge")]
     LoginWithChallenge(
         WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem,
     ),
 }
 
-impl HasSampleValues for WalletToDappInteractionAuthRequestResponseItem {
-    fn sample() -> Self {
-        WalletToDappInteractionAuthRequestResponseItem::UsePersona(
-            WalletToDappInteractionAuthUsePersonaRequestResponseItem::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(
-            WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem::sample_other(),
-        )
+impl From<InternalWalletToDappInteractionAuthRequestResponseItem> for WalletToDappInteractionAuthRequestResponseItem {
+    fn from(value: InternalWalletToDappInteractionAuthRequestResponseItem) -> Self {
+        match value {
+            InternalWalletToDappInteractionAuthRequestResponseItem::UsePersona(value) => WalletToDappInteractionAuthRequestResponseItem::UsePersona(value.into()),
+            InternalWalletToDappInteractionAuthRequestResponseItem::LoginWithoutChallenge(value) => WalletToDappInteractionAuthRequestResponseItem::LoginWithoutChallenge(value.into()),
+            InternalWalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(value) => WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(value.into()),
+        }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionAuthRequestResponseItem;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionAuthRequestResponseItem> for WalletToDappInteractionAuthRequestResponseItem {
+    fn into(self) -> InternalWalletToDappInteractionAuthRequestResponseItem {
+        match self {
+            WalletToDappInteractionAuthRequestResponseItem::UsePersona(value) => InternalWalletToDappInteractionAuthRequestResponseItem::UsePersona(value.into()),
+            WalletToDappInteractionAuthRequestResponseItem::LoginWithoutChallenge(value) => InternalWalletToDappInteractionAuthRequestResponseItem::LoginWithoutChallenge(value.into()),
+            WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(value) => InternalWalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(value.into()),
+        }
     }
 }

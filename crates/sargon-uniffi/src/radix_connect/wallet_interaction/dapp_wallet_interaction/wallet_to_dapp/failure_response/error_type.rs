@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use sargon::DappWalletInteractionErrorType as InternalDappWalletInteractionErrorType;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
     WrongNetwork,
@@ -26,31 +26,58 @@ pub enum DappWalletInteractionErrorType {
     FailedToSignAuthChallenge,
 }
 
-impl HasSampleValues for DappWalletInteractionErrorType {
-    fn sample() -> Self {
-        DappWalletInteractionErrorType::FailedToPrepareTransaction
-    }
-
-    fn sample_other() -> Self {
-        DappWalletInteractionErrorType::FailedToCompileTransaction
+impl From<InternalDappWalletInteractionErrorType> for DappWalletInteractionErrorType {
+    fn from(value: InternalDappWalletInteractionErrorType) -> Self {
+        match value {
+            InternalDappWalletInteractionErrorType::RejectedByUser => Self::RejectedByUser,
+            InternalDappWalletInteractionErrorType::WrongNetwork => Self::WrongNetwork,
+            InternalDappWalletInteractionErrorType::FailedToPrepareTransaction => Self::FailedToPrepareTransaction,
+            InternalDappWalletInteractionErrorType::FailedToCompileTransaction => Self::FailedToCompileTransaction,
+            InternalDappWalletInteractionErrorType::FailedToSignTransaction => Self::FailedToSignTransaction,
+            InternalDappWalletInteractionErrorType::FailedToSubmitTransaction => Self::FailedToSubmitTransaction,
+            InternalDappWalletInteractionErrorType::FailedToPollSubmittedTransaction => Self::FailedToPollSubmittedTransaction,
+            InternalDappWalletInteractionErrorType::FailedToFindAccountWithEnoughFundsToLockFee => Self::FailedToFindAccountWithEnoughFundsToLockFee,
+            InternalDappWalletInteractionErrorType::SubmittedTransactionWasDuplicate => Self::SubmittedTransactionWasDuplicate,
+            InternalDappWalletInteractionErrorType::SubmittedTransactionHasFailedTransactionStatus => Self::SubmittedTransactionHasFailedTransactionStatus,
+            InternalDappWalletInteractionErrorType::SubmittedTransactionHasRejectedTransactionStatus => Self::SubmittedTransactionHasRejectedTransactionStatus,
+            InternalDappWalletInteractionErrorType::WrongAccountType => Self::WrongAccountType,
+            InternalDappWalletInteractionErrorType::UnknownWebsite => Self::UnknownWebsite,
+            InternalDappWalletInteractionErrorType::InvalidOriginURL => Self::InvalidOriginURL,
+            InternalDappWalletInteractionErrorType::RadixJsonNotFound => Self::RadixJsonNotFound,
+            InternalDappWalletInteractionErrorType::RadixJsonUnknownFileFormat => Self::RadixJsonUnknownFileFormat,
+            InternalDappWalletInteractionErrorType::UnknownDappDefinitionAddress => Self::UnknownDappDefinitionAddress,
+            InternalDappWalletInteractionErrorType::InvalidPersona => Self::InvalidPersona,
+            InternalDappWalletInteractionErrorType::InvalidRequest => Self::InvalidRequest,
+            InternalDappWalletInteractionErrorType::IncompatibleVersion => Self::IncompatibleVersion,
+            InternalDappWalletInteractionErrorType::FailedToSignAuthChallenge => Self::FailedToSignAuthChallenge,
+        }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappWalletInteractionErrorType;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalDappWalletInteractionErrorType> for DappWalletInteractionErrorType {
+    fn into(self) -> InternalDappWalletInteractionErrorType {
+        match self {
+            Self::RejectedByUser => InternalDappWalletInteractionErrorType::RejectedByUser,
+            Self::WrongNetwork => InternalDappWalletInteractionErrorType::WrongNetwork,
+            Self::FailedToPrepareTransaction => InternalDappWalletInteractionErrorType::FailedToPrepareTransaction,
+            Self::FailedToCompileTransaction => InternalDappWalletInteractionErrorType::FailedToCompileTransaction,
+            Self::FailedToSignTransaction => InternalDappWalletInteractionErrorType::FailedToSignTransaction,
+            Self::FailedToSubmitTransaction => InternalDappWalletInteractionErrorType::FailedToSubmitTransaction,
+            Self::FailedToPollSubmittedTransaction => InternalDappWalletInteractionErrorType::FailedToPollSubmittedTransaction,
+            Self::FailedToFindAccountWithEnoughFundsToLockFee => InternalDappWalletInteractionErrorType::FailedToFindAccountWithEnoughFundsToLockFee,
+            Self::SubmittedTransactionWasDuplicate => InternalDappWalletInteractionErrorType::SubmittedTransactionWasDuplicate,
+            Self::SubmittedTransactionHasFailedTransactionStatus => InternalDappWalletInteractionErrorType::SubmittedTransactionHasFailedTransactionStatus,
+            Self::SubmittedTransactionHasRejectedTransactionStatus => InternalDappWalletInteractionErrorType::SubmittedTransactionHasRejectedTransactionStatus,
+            Self::WrongAccountType => InternalDappWalletInteractionErrorType::WrongAccountType,
+            Self::UnknownWebsite => InternalDappWalletInteractionErrorType::UnknownWebsite,
+            Self::InvalidOriginURL => InternalDappWalletInteractionErrorType::InvalidOriginURL,
+            Self::RadixJsonNotFound => InternalDappWalletInteractionErrorType::RadixJsonNotFound,
+            Self::RadixJsonUnknownFileFormat => InternalDappWalletInteractionErrorType::RadixJsonUnknownFileFormat,
+            Self::UnknownDappDefinitionAddress => InternalDappWalletInteractionErrorType::UnknownDappDefinitionAddress,
+            Self::InvalidPersona => InternalDappWalletInteractionErrorType::InvalidPersona,
+            Self::InvalidRequest => InternalDappWalletInteractionErrorType::InvalidRequest,
+            Self::IncompatibleVersion => InternalDappWalletInteractionErrorType::IncompatibleVersion,
+            Self::FailedToSignAuthChallenge => InternalDappWalletInteractionErrorType::FailedToSignAuthChallenge,
+        }
     }
 }

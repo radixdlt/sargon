@@ -1,34 +1,19 @@
 use crate::prelude::*;
+use sargon::SignedIntentHash as InternalSignedIntentHash;
 
-impl HasSampleValues for SignedIntentHash {
-    fn sample() -> Self {
-        Self::new(Hash::sample(), NetworkID::Mainnet)
-    }
+decl_tx_hash!(
+    /// A Signed Intent Hash is a bech32 encoded string starting with `"signedintent_"
+    SignedIntent,
+    "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl",
+    "sign...xsk6nl",
+);
 
-    fn sample_other() -> Self {
-        Self::new(Hash::sample_other(), NetworkID::Simulator)
-    }
+#[uniffi::export]
+pub fn new_signed_intent_hash_sample() -> SignedIntentHash {
+    InternalSignedIntentHash::sample().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = SignedIntentHash;
-
-    #[test]
-    fn display() {
-        assert_eq!(
-            format!("{}", SUT::sample()),
-            SUT::sample().bech32_encoded_tx_id
-        );
-        assert_eq!(format!("{}", SUT::sample()), "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl");
-        assert_eq!(format!("{}", SUT::sample_other()), "signedintent_sim1v7wlh0dpd5lev6w6s4f2kev562cygmgrm9kqw6swe8w92r4yr7ks7uynkj");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", SUT::sample()), "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl");
-    }
+#[uniffi::export]
+pub fn new_signed_intent_hash_sample_other() -> SignedIntentHash {
+    InternalSignedIntentHash::sample_other().into()
 }

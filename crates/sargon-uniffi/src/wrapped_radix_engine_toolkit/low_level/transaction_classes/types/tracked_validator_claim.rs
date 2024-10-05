@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::TrackedValidatorClaim as InternalTrackedValidatorClaim;
 
 /// A validator claim observed in the transaction
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
@@ -13,31 +14,24 @@ pub struct TrackedValidatorClaim {
     pub xrd_amount: Decimal192,
 }
 
-impl TrackedValidatorClaim {
-    pub fn new(
-        validator_address: impl Into<ValidatorAddress>,
-        claim_nft_address: impl Into<ResourceAddress>,
-        claim_nft_ids: impl IntoIterator<Item = NonFungibleLocalId>,
-        xrd_amount: impl Into<Decimal>,
-    ) -> Self {
+impl From<InternalTrackedValidatorClaim> for TrackedValidatorClaim {
+    fn from(value: InternalTrackedValidatorClaim) -> Self {
         Self {
-            validator_address: validator_address.into(),
-            claim_nft_address: claim_nft_address.into(),
-            claim_nft_ids: claim_nft_ids.into_iter().collect(),
-            xrd_amount: xrd_amount.into(),
+            validator_address: value.validator_address.into(),
+            claim_nft_address: value.claim_nft_address.into(),
+            claim_nft_ids: value.claim_nft_ids.into_iter().map(Into::into).collect(),
+            xrd_amount: value.xrd_amount.into(),
         }
     }
 }
 
-impl From<(RetTrackedValidatorClaim, NetworkID)> for TrackedValidatorClaim {
-    fn from(value: (RetTrackedValidatorClaim, NetworkID)) -> Self {
-        let (ret, n) = value;
-
-        Self::new(
-            (ret.validator_address, n),
-            (ret.claim_nft_address, n),
-            ret.claim_nft_ids.into_iter().map(NonFungibleLocalId::from),
-            ret.xrd_amount,
-        )
+impl Into<InternalTrackedValidatorClaim> for TrackedValidatorClaim {
+    fn into(self) -> InternalTrackedValidatorClaim {
+        InternalTrackedValidatorClaim {
+            validator_address: self.validator_address.into(),
+            claim_nft_address: self.claim_nft_address.into(),
+            claim_nft_ids: self.claim_nft_ids.into_iter().map(Into::into).collect(),
+            xrd_amount: self.xrd_amount.into(),
+        }
     }
 }

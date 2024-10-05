@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Debug,
     PartialEq,
@@ -31,46 +29,6 @@ pub struct AuthorizedPersonaDetailed {
     pub has_authentication_signing_key: bool,
 }
 
-impl AuthorizedPersonaDetailed {
-    pub fn new(
-        identity_address: impl Into<IdentityAddress>,
-        display_name: impl Into<DisplayName>,
-        simple_accounts: impl Into<Option<AccountsForDisplay>>,
-        shared_persona_data: PersonaData,
-        has_authentication_signing_key: bool,
-    ) -> Self {
-        Self {
-            identity_address: identity_address.into(),
-            display_name: display_name.into(),
-            simple_accounts: simple_accounts.into(),
-            shared_persona_data,
-            has_authentication_signing_key,
-        }
-    }
-}
-
-impl HasSampleValues for AuthorizedPersonaDetailed {
-    fn sample() -> Self {
-        Self::new(
-            IdentityAddress::sample(),
-            DisplayName::sample(),
-            AccountsForDisplay::sample(),
-            PersonaData::sample(),
-            false,
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            IdentityAddress::sample_other(),
-            DisplayName::sample_other(),
-            AccountsForDisplay::sample_other(),
-            PersonaData::sample_other(),
-            true,
-        )
-    }
-}
-
 impl Identifiable for AuthorizedPersonaDetailed {
     type ID = IdentityAddress;
 
@@ -79,10 +37,15 @@ impl Identifiable for AuthorizedPersonaDetailed {
     }
 }
 
-impl IsNetworkAware for AuthorizedPersonaDetailed {
-    fn network_id(&self) -> NetworkID {
-        self.identity_address.network_id()
-    }
+#[uniffi::export]
+pub fn new_authorized_persona_detailed_sample() -> AuthorizedPersonaDetailed {
+    AuthorizedPersonaDetailed::sample()
+}
+
+#[uniffi::export]
+pub fn new_authorized_persona_detailed_sample_other(
+) -> AuthorizedPersonaDetailed {
+    AuthorizedPersonaDetailed::sample_other()
 }
 
 #[cfg(test)]
@@ -93,18 +56,17 @@ mod tests {
     type SUT = AuthorizedPersonaDetailed;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_is_network_aware() {
-        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_authorized_persona_detailed_sample(),
+                new_authorized_persona_detailed_sample_other(),
+                // duplicates should get removed
+                new_authorized_persona_detailed_sample(),
+                new_authorized_persona_detailed_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

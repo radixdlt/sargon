@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::TrackedValidatorStake as InternalTrackedValidatorStake;
 
 /// A validator stake observed in the transaction
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
@@ -13,30 +14,24 @@ pub struct TrackedValidatorStake {
     pub liquid_stake_unit_amount: Decimal,
 }
 
-impl TrackedValidatorStake {
-    pub fn new(
-        validator_address: impl Into<ValidatorAddress>,
-        xrd_amount: impl Into<Decimal>,
-        liquid_stake_unit_address: impl Into<ResourceAddress>,
-        liquid_stake_unit_amount: impl Into<Decimal192>,
-    ) -> Self {
+impl From<InternalTrackedValidatorStake> for TrackedValidatorStake {
+    fn from(value: InternalTrackedValidatorStake) -> Self {
         Self {
-            validator_address: validator_address.into(),
-            xrd_amount: xrd_amount.into(),
-            liquid_stake_unit_address: liquid_stake_unit_address.into(),
-            liquid_stake_unit_amount: liquid_stake_unit_amount.into(),
+            validator_address: value.validator_address.into(),
+            xrd_amount: value.xrd_amount.into(),
+            liquid_stake_unit_address: value.liquid_stake_unit_address.into(),
+            liquid_stake_unit_amount: value.liquid_stake_unit_amount.into(),
         }
     }
 }
 
-impl From<(RetTrackedValidatorStake, NetworkID)> for TrackedValidatorStake {
-    fn from(value: (RetTrackedValidatorStake, NetworkID)) -> Self {
-        let (ret, n) = value;
-        Self::new(
-            (ret.validator_address, n),
-            ret.xrd_amount,
-            (ret.liquid_stake_unit_address, n),
-            ret.liquid_stake_unit_amount,
-        )
+impl Into<InternalTrackedValidatorStake> for TrackedValidatorStake {
+    fn into(self) -> InternalTrackedValidatorStake {
+        InternalTrackedValidatorStake {
+            validator_address: self.validator_address.into(),
+            xrd_amount: self.xrd_amount.into(),
+            liquid_stake_unit_address: self.liquid_stake_unit_address.into(),
+            liquid_stake_unit_amount: self.liquid_stake_unit_amount.into(),
+        }
     }
 }

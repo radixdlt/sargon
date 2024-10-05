@@ -23,8 +23,6 @@ macro_rules! declare_identified_entry {
             #[doc = $expr]
         )*
         #[derive(
-            Serialize,
-            Deserialize,
             Clone,
             PartialEq,
             Hash,
@@ -39,49 +37,11 @@ macro_rules! declare_identified_entry {
             pub id: PersonaDataEntryID,
             pub value: $value_type,
         }
-        impl From<$value_type> for $struct_name {
-            fn from(value: $value_type) -> Self {
-                Self::new(value)
-            }
-        }
-        impl PersonaDataEntryValue for $struct_name {
-            type Value = $value_type;
-        }
+        
         impl Identifiable for $struct_name {
             type ID = PersonaDataEntryID;
             fn id(&self) -> Self::ID {
                 self.id.clone()
-            }
-        }
-        impl $struct_name {
-            pub(crate) fn with_id(
-                id: PersonaDataEntryID,
-                value: $value_type,
-            ) -> Self {
-                Self { id, value }
-            }
-            pub fn new(value: $value_type) -> Self {
-                Self::with_id(PersonaDataEntryID::generate(), value)
-            }
-        }
-        impl std::ops::Deref for $struct_name {
-            type Target = $value_type;
-            fn deref(&self) -> &Self::Target {
-                &self.value
-            }
-        }
-        impl HasSampleValues for $struct_name {
-            fn sample() -> Self {
-                $struct_name::with_id(
-                    PersonaDataEntryID::sample(),
-                    <$value_type>::sample(),
-                )
-            }
-            fn sample_other() -> Self {
-                $struct_name::with_id(
-                    PersonaDataEntryID::sample_other(),
-                    <$value_type>::sample_other(),
-                )
             }
         }
 
@@ -117,68 +77,6 @@ macro_rules! declare_identified_entry {
                         2
                     );
                 }
-            }
-        }
-
-
-        #[cfg(test)]
-        mod $mod_test_name {
-            use super::*;
-            #[allow(clippy::upper_case_acronyms)]
-            type SUT = $struct_name;
-            type V = $value_type;
-            #[test]
-            fn equality() {
-                assert_eq!(SUT::sample(), SUT::sample());
-                assert_eq!(SUT::sample_other(), SUT::sample_other());
-            }
-            #[test]
-            fn inequality() {
-                assert_ne!(SUT::sample(), SUT::sample_other());
-                assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
-            }
-            #[test]
-            fn hash() {
-                let n = 100;
-                let set = (0..n)
-                    .map(|_| {
-                        SUT::new(V::sample()) // generates a new ID
-                    })
-                    .collect::<HashSet<_>>();
-                assert_eq!(set.len(), n);
-            }
-            #[test]
-            fn deref() {
-                assert_eq!(*SUT::sample(), V::sample());
-            }
-            #[test]
-            fn new() {
-                let value = V::sample_other();
-                let sut = SUT::with_id(PersonaDataEntryID::sample_one(), value.clone());
-                assert_eq!(
-                    sut.id,
-                    "00000000-0000-0000-0000-000000000001".parse().unwrap()
-                );
-                assert_eq!(sut.value, value)
-            }
-            #[test]
-            fn debug() {
-                assert_eq!(
-                    format!("{:?}", SUT::sample()),
-                    $expected_sample_debug
-                );
-            }
-            #[test]
-            fn display() {
-                assert_eq!(format!("{}", SUT::sample()), $expected_sample_display);
-            }
-            #[test]
-            fn json_roundtrip_sample() {
-                let model = SUT::sample();
-                assert_eq_after_json_roundtrip(
-                    &model,
-                    $expected_sample_json
-                )
             }
         }
     };

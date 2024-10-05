@@ -1,64 +1,26 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionSuccessResponse as InternalWalletToDappInteractionSuccessResponse;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionSuccessResponse {
     pub interaction_id: WalletInteractionId,
     pub items: WalletToDappInteractionResponseItems,
 }
 
-impl WalletToDappInteractionSuccessResponse {
-    pub fn new(
-        interaction_id: WalletInteractionId,
-        items: WalletToDappInteractionResponseItems,
-    ) -> Self {
+impl From<InternalWalletToDappInteractionSuccessResponse> for WalletToDappInteractionSuccessResponse {
+    fn from(value: InternalWalletToDappInteractionSuccessResponse) -> Self {
         Self {
-            interaction_id,
-            items,
+            interaction_id: value.interaction_id.into(),
+            items: value.items.into(),
         }
     }
 }
 
-impl HasSampleValues for WalletToDappInteractionSuccessResponse {
-    fn sample() -> Self {
-        Self::new(
-            WalletInteractionId::sample(),
-            WalletToDappInteractionResponseItems::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            WalletInteractionId::sample_other(),
-            WalletToDappInteractionResponseItems::sample_other(),
-        )
-    }
-}
-
-impl WalletToDappInteractionSuccessResponse {
-    pub fn sample_with_id(interaction_id: WalletInteractionId) -> Self {
-        Self::new(
-            interaction_id,
-            WalletToDappInteractionResponseItems::sample(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionSuccessResponse;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionSuccessResponse> for WalletToDappInteractionSuccessResponse {
+    fn into(self) -> InternalWalletToDappInteractionSuccessResponse {
+        InternalWalletToDappInteractionSuccessResponse {
+            interaction_id: self.interaction_id.into(),
+            items: self.items.into(),
+        }
     }
 }

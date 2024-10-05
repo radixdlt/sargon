@@ -2,8 +2,6 @@ use crate::prelude::*;
 
 /// Hints about the trusted contact.
 #[derive(
-    Serialize,
-    Deserialize,
     Debug,
     Clone,
     PartialEq,
@@ -12,7 +10,6 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 #[display("{name} {email_address}")]
 pub struct TrustedContactFactorSourceContact {
     /// The email address of the contact that the user trusts
@@ -21,25 +18,16 @@ pub struct TrustedContactFactorSourceContact {
     pub name: DisplayName,
 }
 
-impl TrustedContactFactorSourceContact {
-    pub fn new(
-        email_address: impl Into<EmailAddress>,
-        name: impl Into<DisplayName>,
-    ) -> Self {
-        Self {
-            email_address: email_address.into(),
-            name: name.into(),
-        }
-    }
+#[uniffi::export]
+pub fn new_trusted_contact_factor_source_contact_sample(
+) -> TrustedContactFactorSourceContact {
+    TrustedContactFactorSourceContact::sample()
 }
 
-impl HasSampleValues for TrustedContactFactorSourceContact {
-    fn sample() -> Self {
-        Self::new(EmailAddress::sample(), DisplayName::sample())
-    }
-    fn sample_other() -> Self {
-        Self::new(EmailAddress::sample_other(), DisplayName::sample_other())
-    }
+#[uniffi::export]
+pub fn new_trusted_contact_factor_source_contact_sample_other(
+) -> TrustedContactFactorSourceContact {
+    TrustedContactFactorSourceContact::sample_other()
 }
 
 #[cfg(test)]
@@ -50,13 +38,17 @@ mod tests {
     type SUT = TrustedContactFactorSourceContact;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_trusted_contact_factor_source_contact_sample(),
+                new_trusted_contact_factor_source_contact_sample_other(),
+                // duplicates should get removed
+                new_trusted_contact_factor_source_contact_sample(),
+                new_trusted_contact_factor_source_contact_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

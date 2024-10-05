@@ -53,7 +53,7 @@ unsafe impl<UT, V: Debug + Eq + Clone + sargon::Identifiable + Lift<UT> + 'stati
         }
 
         let internal = sargon::import_identified_vec_of_from(vec).map_err(|e| e.into())?;
-        Ok(IdentifiedVecOf(internal))
+        Ok(IdentifiedVecOf { 0: internal })
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {

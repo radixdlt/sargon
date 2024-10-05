@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
@@ -11,7 +9,6 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 #[display("{hint} : {id}")]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
@@ -27,78 +24,26 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
-fn new_ledger_with_mwp(
+#[uniffi::export]
+pub fn new_ledger_hardware_wallet_factor_source_sample(
+) -> LedgerHardwareWalletFactorSource {
+    LedgerHardwareWalletFactorSource::sample()
+}
+
+#[uniffi::export]
+pub fn new_ledger_hardware_wallet_factor_source_sample_other(
+) -> LedgerHardwareWalletFactorSource {
+    LedgerHardwareWalletFactorSource::sample_other()
+}
+
+#[uniffi::export]
+fn new_ledger_hardware_wallet_from_mnemonic_with_passphrase(
     mwp: MnemonicWithPassphrase,
     hint: LedgerHardwareWalletHint,
     common: FactorSourceCommon,
 ) -> LedgerHardwareWalletFactorSource {
     let id = FactorSourceIDFromHash::new_for_ledger(&mwp);
-    let mut source = LedgerHardwareWalletFactorSource::new(id, common, hint);
-    source.common.last_used_on = Timestamp::sample();
-    source.common.added_on = Timestamp::sample();
-    source
-}
-
-impl LedgerHardwareWalletFactorSource {
-    /// Instantiates a new `LedgerHardwareWalletFactorSource`
-    pub fn new(
-        id: FactorSourceIDFromHash,
-        common: FactorSourceCommon,
-        hint: LedgerHardwareWalletHint,
-    ) -> Self {
-        Self { id, common, hint }
-    }
-}
-
-impl HasSampleValues for LedgerHardwareWalletFactorSource {
-    fn sample() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger(),
-            LedgerHardwareWalletHint::sample(),
-            FactorSourceCommon::new_bdfs(false),
-        )
-    }
-
-    fn sample_other() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger_other(),
-            LedgerHardwareWalletHint::sample_other(),
-            FactorSourceCommon::new_olympia(),
-        )
-    }
-}
-
-impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
-    type Error = CommonError;
-
-    fn try_from(value: FactorSource) -> Result<Self> {
-        match value {
-            FactorSource::Ledger { value: factor } => Ok(factor),
-            _ =>  Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
-        }
-    }
-}
-impl IsFactorSource for LedgerHardwareWalletFactorSource {
-    fn kind() -> FactorSourceKind {
-        FactorSourceKind::LedgerHQHardwareWallet
-    }
-}
-impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
-    fn common_properties(&self) -> FactorSourceCommon {
-        self.common.clone()
-    }
-
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
-    }
-
-    fn factor_source_id(&self) -> FactorSourceID {
-        self.clone().id.into()
-    }
-
-    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
-        self.common = updated
-    }
+    LedgerHardwareWalletFactorSource::new(id, common, hint)
 }
 
 #[cfg(test)]
@@ -109,74 +54,30 @@ mod tests {
     type SUT = LedgerHardwareWalletFactorSource;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::LedgerHQHardwareWallet);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let model = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"            
-            {
-                "id": {
-                    "kind": "ledgerHQHardwareWallet",
-                    "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
-                },
-                "common": {
-                    "addedOn": "2023-09-11T16:05:56.000Z",
-                    "cryptoParameters": {
-                        "supportedCurves": ["curve25519"],
-                        "supportedDerivationPathSchemes": ["cap26"]
-                    },
-                    "flags": [],
-                    "lastUsedOn": "2023-09-11T16:05:56.000Z"
-                },
-                "hint": {
-                    "name": "Orange, scratched",
-                    "model": "nanoS+"
-                }
-            }
-            "#,
-        );
-    }
-
-    #[test]
-    fn from_factor_source() {
-        let sut = SUT::sample();
-        let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(SUT::try_from(factor_source), Ok(sut));
-    }
-
-    #[test]
-    fn from_factor_source_invalid_got_device() {
-        let wrong = DeviceFactorSource::sample();
-        let factor_source: FactorSource = wrong.clone().into();
+    fn hash_of_samples() {
         assert_eq!(
-            SUT::try_from(factor_source),
-            Err(CommonError::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+            HashSet::<SUT>::from_iter([
+                new_ledger_hardware_wallet_factor_source_sample(),
+                new_ledger_hardware_wallet_factor_source_sample_other(),
+                // duplicates should get removed
+                new_ledger_hardware_wallet_factor_source_sample(),
+                new_ledger_hardware_wallet_factor_source_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn factor_source_id() {
-        assert_eq!(SUT::sample().factor_source_id(), SUT::sample().id.into());
-    }
-
-    #[test]
-    fn factor_source_kind() {
-        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+    fn test_new_ledger_hardware_wallet_from_mnemonic_with_passphrase() {
+        assert_eq!(
+            new_ledger_hardware_wallet_from_mnemonic_with_passphrase(
+                MnemonicWithPassphrase::sample_ledger(),
+                LedgerHardwareWalletHint::sample(),
+                FactorSourceCommon::sample()
+            )
+            .factor_source_id(),
+            SUT::sample().factor_source_id()
+        );
     }
 }

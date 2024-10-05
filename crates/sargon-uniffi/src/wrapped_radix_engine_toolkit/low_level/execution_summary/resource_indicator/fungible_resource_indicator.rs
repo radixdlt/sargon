@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::FungibleResourceIndicator as InternalFungibleResourceIndicator;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum FungibleResourceIndicator {
@@ -6,103 +7,63 @@ pub enum FungibleResourceIndicator {
     Predicted { predicted_decimal: PredictedDecimal },
 }
 
-impl FungibleResourceIndicator {
-    pub fn guaranteed(decimal: impl Into<Decimal>) -> Self {
-        Self::Guaranteed {
-            decimal: decimal.into(),
-        }
-    }
-    pub fn predicted(
-        decimal: impl Into<Decimal>,
-        instruction_index: u64,
-    ) -> Self {
-        Self::Predicted {
-            predicted_decimal: PredictedDecimal::new(
-                decimal,
-                instruction_index,
-            ),
-        }
-    }
-}
-
-impl FungibleResourceIndicator {
-    pub fn get_amount(&self) -> Decimal192 {
-        match self {
-            FungibleResourceIndicator::Guaranteed { decimal } => *decimal,
-            FungibleResourceIndicator::Predicted { predicted_decimal } => {
-                predicted_decimal.value
-            }
-        }
-    }
-}
-
-impl From<RetFungibleResourceIndicator> for FungibleResourceIndicator {
-    fn from(value: RetFungibleResourceIndicator) -> Self {
+impl From<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
+    fn from(value: InternalFungibleResourceIndicator) -> Self {
         match value {
-            RetFungibleResourceIndicator::Guaranteed(decimal) => {
-                Self::Guaranteed {
-                    decimal: decimal.into(),
-                }
-            }
-            RetFungibleResourceIndicator::Predicted(predicted_decimal) => {
-                Self::Predicted {
-                    predicted_decimal: PredictedDecimal::from_ret(
-                        predicted_decimal,
-                    ),
-                }
-            }
+            InternalFungibleResourceIndicator::Guaranteed { decimal } => FungibleResourceIndicator::Guaranteed { decimal: decimal.into() },
+            InternalFungibleResourceIndicator::Predicted { predicted_decimal } => FungibleResourceIndicator::Predicted { predicted_decimal: predicted_decimal.into() },
         }
     }
 }
 
-impl HasSampleValues for FungibleResourceIndicator {
-    fn sample() -> Self {
-        Self::guaranteed(1)
+impl Into<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
+    fn into(self) -> InternalFungibleResourceIndicator {
+        match self {
+            FungibleResourceIndicator::Guaranteed { decimal } => InternalFungibleResourceIndicator::Guaranteed { decimal: decimal.into() },
+            FungibleResourceIndicator::Predicted { predicted_decimal } => InternalFungibleResourceIndicator::Predicted { predicted_decimal: predicted_decimal.into() },
+        }
     }
+}
 
-    fn sample_other() -> Self {
-        Self::predicted(2, 0)
-    }
+#[uniffi::export]
+pub fn new_fungible_resource_indicator_sample() -> FungibleResourceIndicator {
+    InternalFungibleResourceIndicator::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_fungible_resource_indicator_sample_other(
+) -> FungibleResourceIndicator {
+    InternalFungibleResourceIndicator::sample_other().into()
+}
+
+#[uniffi::export]
+pub fn fungible_resource_indicator_get_amount(
+    indicator: &FungibleResourceIndicator,
+) -> Decimal192 {
+    indicator.into::<InternalFungibleResourceIndicator>.get_amount().into()
 }
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_toolkit::transaction_types::Predicted;
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FungibleResourceIndicator;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
     fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_ret_guaranteed() {
-        let ret = RetFungibleResourceIndicator::Guaranteed(1.into());
-        assert_eq!(SUT::from(ret), SUT::sample())
+        assert_ne!(
+            new_fungible_resource_indicator_sample(),
+            new_fungible_resource_indicator_sample_other()
+        );
     }
 
     #[test]
     fn get_amount() {
-        assert_eq!(SUT::sample().get_amount(), Decimal192::from(1));
-        assert_eq!(SUT::sample_other().get_amount(), Decimal192::from(2));
-    }
-
-    #[test]
-    fn from_ret_predicted() {
-        let ret = RetFungibleResourceIndicator::Predicted(Predicted {
-            value: 2.into(),
-            instruction_index: 0,
-        });
-        assert_eq!(SUT::from(ret), SUT::sample_other())
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.get_amount(),
+            fungible_resource_indicator_get_amount(&sut)
+        );
     }
 }

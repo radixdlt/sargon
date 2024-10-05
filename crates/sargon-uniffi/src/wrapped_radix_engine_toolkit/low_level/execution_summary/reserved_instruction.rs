@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::ReservedInstruction as InternalReservedInstruction;
+
 
 /// The set of instructions that is only allowed in manifests created by the
 /// wallet itself.
@@ -11,67 +13,26 @@ pub enum ReservedInstruction {
     AccountUpdateSettings,
 }
 
-impl From<RetReservedInstruction> for ReservedInstruction {
-    fn from(value: RetReservedInstruction) -> Self {
+impl From<InternalReservedInstruction> for ReservedInstruction {
+    fn from(value: InternalReservedInstruction) -> Self {
         match value {
-            RetReservedInstruction::AccountLockFee => Self::AccountLockFee,
-            RetReservedInstruction::AccountSecurify => Self::AccountSecurify,
-            RetReservedInstruction::IdentitySecurify => Self::IdentitySecurify,
-            RetReservedInstruction::AccessControllerMethod => {
-                Self::AccessControllerMethod
-            }
-            RetReservedInstruction::AccountUpdateSettings => {
-                Self::AccountUpdateSettings
-            }
+            InternalReservedInstruction::AccountLockFee => ReservedInstruction::AccountLockFee,
+            InternalReservedInstruction::AccountSecurify => ReservedInstruction::AccountSecurify,
+            InternalReservedInstruction::IdentitySecurify => ReservedInstruction::IdentitySecurify,
+            InternalReservedInstruction::AccessControllerMethod => ReservedInstruction::AccessControllerMethod,
+            InternalReservedInstruction::AccountUpdateSettings => ReservedInstruction::AccountUpdateSettings,
         }
     }
 }
 
-impl HasSampleValues for ReservedInstruction {
-    fn sample() -> Self {
-        Self::AccountLockFee
-    }
-
-    fn sample_other() -> Self {
-        Self::AccountSecurify
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ReservedInstruction;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_ret() {
-        assert_eq!(
-            SUT::from(RetReservedInstruction::AccessControllerMethod),
-            SUT::AccessControllerMethod
-        );
-        assert_eq!(
-            SUT::from(RetReservedInstruction::AccountLockFee),
-            SUT::AccountLockFee
-        );
-        assert_eq!(
-            SUT::from(RetReservedInstruction::AccountSecurify),
-            SUT::AccountSecurify
-        );
-        assert_eq!(
-            SUT::from(RetReservedInstruction::IdentitySecurify),
-            SUT::IdentitySecurify
-        );
+impl Into<InternalReservedInstruction> for ReservedInstruction {
+    fn into(self) -> InternalReservedInstruction {
+        match self {
+            ReservedInstruction::AccountLockFee => InternalReservedInstruction::AccountLockFee,
+            ReservedInstruction::AccountSecurify => InternalReservedInstruction::AccountSecurify,
+            ReservedInstruction::IdentitySecurify => InternalReservedInstruction::IdentitySecurify,
+            ReservedInstruction::AccessControllerMethod => InternalReservedInstruction::AccessControllerMethod,
+            ReservedInstruction::AccountUpdateSettings => InternalReservedInstruction::AccountUpdateSettings,
+        }
     }
 }

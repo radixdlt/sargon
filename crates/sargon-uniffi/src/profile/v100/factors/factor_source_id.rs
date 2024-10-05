@@ -1,12 +1,11 @@
 use crate::prelude::*;
+use sargon::FactorSourceID as InternalFactorSourceID;
 
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
 #[derive(
-    Serialize,
-    Deserialize,
     EnumAsInner,
     Clone,
     Copy,
@@ -17,169 +16,75 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Enum,
 )]
-#[serde(untagged, remote = "Self")]
 pub enum FactorSourceID {
     /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
     /// for a certain `FactorSourceKind`
     Hash {
-        #[serde(rename = "fromHash")]
         #[display("{}", value)]
         value: FactorSourceIDFromHash,
     },
 
     /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
     Address {
-        #[serde(rename = "fromAddress")]
         #[display("{}", value)]
         value: FactorSourceIDFromAddress,
     },
 }
 
-impl From<FactorSourceIDFromHash> for FactorSourceID {
-    fn from(val: FactorSourceIDFromHash) -> Self {
-        FactorSourceID::Hash { value: val }
+impl From<InternalFactorSourceID> for FactorSourceID {
+    fn from(value: InternalFactorSourceID) -> Self {
+        unimplemented!()
     }
 }
 
-impl From<FactorSourceIDFromAddress> for FactorSourceID {
-    fn from(val: FactorSourceIDFromAddress) -> Self {
-        FactorSourceID::Address { value: val }
+impl Into<InternalFactorSourceID> for FactorSourceID {
+    fn into(self) -> InternalFactorSourceID {
+        unimplemented!()
     }
 }
 
-impl<'de> Deserialize<'de> for FactorSourceID {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
-        #[derive(Deserialize, Serialize)]
-        struct Wrapper {
-            #[serde(flatten, with = "FactorSourceID")]
-            value: FactorSourceID,
-        }
-        Wrapper::deserialize(deserializer).map(|w| w.value)
-    }
+#[uniffi::export]
+pub fn factor_source_id_to_string(factor_source_id: &FactorSourceID) -> String {
+    factor_source_id.to_string()
 }
 
-impl Serialize for FactorSourceID {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("FactorSourceID", 2)?;
-        match self {
-            FactorSourceID::Hash { value } => {
-                let discriminant = "fromHash";
-                state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, value)?;
-            }
-            FactorSourceID::Address { value } => {
-                let discriminant = "fromAddress";
-                state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, value)?;
-            }
-        }
-        state.end()
-    }
+#[uniffi::export]
+pub fn new_factor_source_id_sample() -> FactorSourceID {
+    FactorSourceID::sample()
 }
 
-impl HasSampleValues for FactorSourceID {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        FactorSourceID::Hash {
-            value: FactorSourceIDFromHash::sample(),
-        }
-    }
-
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        FactorSourceID::Hash {
-            value: FactorSourceIDFromHash::sample_other(),
-        }
-    }
+#[uniffi::export]
+pub fn new_factor_source_id_sample_other() -> FactorSourceID {
+    FactorSourceID::sample_other()
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSourceID;
 
     #[test]
-    fn equality() {
-        assert_eq!(FactorSourceID::sample(), FactorSourceID::sample());
+    fn test_factor_source_id_to_string() {
         assert_eq!(
-            FactorSourceID::sample_other(),
-            FactorSourceID::sample_other()
+            factor_source_id_to_string(&SUT::sample()),
+            SUT::sample().to_string()
         );
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(FactorSourceID::sample(), FactorSourceID::sample_other());
-    }
-
-    #[test]
-    fn json_roundtrip_from_hash() {
-        let model = FactorSourceID::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "fromHash": {
-                    "kind": "device",
-                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
-                },
-                "discriminator" : "fromHash"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn json_roundtrip_from_address() {
-        let model = FactorSourceID::Address {
-            value: FactorSourceIDFromAddress::sample(),
-        };
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "fromAddress": {
-                    "kind": "trustedContact",
-                    "body": "account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank"
-                },
-                "discriminator" : "fromAddress"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn hash_into_as_roundtrip() {
-        let from_hash = FactorSourceIDFromHash::sample();
-        let id: FactorSourceID = from_hash.into(); // test `into()`
-        assert_eq!(id.as_hash().unwrap(), &from_hash);
-    }
-
-    #[test]
-    fn hash_into_as_wrong_fails() {
-        let from_hash = FactorSourceIDFromHash::sample();
-        let id: FactorSourceID = from_hash.into(); // test `into()`
-        assert!(id.as_address().is_none());
-    }
-
-    #[test]
-    fn address_into_as_roundtrip() {
-        let from_address = FactorSourceIDFromAddress::sample();
-        let id: FactorSourceID = from_address.into(); // test `into()`
-        assert_eq!(id.as_address().unwrap(), &from_address);
-    }
-
-    #[test]
-    fn address_into_as_wrong_fails() {
-        let from_address = FactorSourceIDFromAddress::sample();
-        let id: FactorSourceID = from_address.into(); // test `into()`
-        assert!(id.as_hash().is_none());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_factor_source_id_sample(),
+                new_factor_source_id_sample_other(),
+                // duplicates should get removed
+                new_factor_source_id_sample(),
+                new_factor_source_id_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

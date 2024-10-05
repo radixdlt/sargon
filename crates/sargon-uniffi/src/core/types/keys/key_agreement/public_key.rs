@@ -10,109 +10,54 @@ use crypto::keys::x25519::PublicKey as X25519PublicKey;
     PartialEq,
     Eq,
     Hash,
-    SerializeDisplay,
-    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
 )]
-#[display("{}", self.to_hex())]
-#[debug("{}", self.to_hex())]
 pub struct KeyAgreementPublicKey {
     pub secret_magic: X25519PublicKey,
 }
 
-impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {
-    fn from(value: KeyAgreementPrivateKey) -> Self {
-        value.public_key()
-    }
+#[uniffi::export]
+pub fn new_key_agreement_public_key_from_hex(
+    hex: String,
+) -> Result<KeyAgreementPublicKey> {
+    hex.parse()
 }
 
-impl From<X25519PublicKey> for KeyAgreementPublicKey {
-    fn from(value: X25519PublicKey) -> Self {
-        Self {
-            secret_magic: value,
-        }
-    }
+/// Creates a Secp256k1PublicKey from either compressed form (33 bytes) or
+/// from uncompressed form (65 bytes).
+#[uniffi::export]
+pub fn new_key_agreement_public_key_from_bytes(
+    bytes: BagOfBytes,
+) -> Result<KeyAgreementPublicKey> {
+    KeyAgreementPublicKey::try_from(bytes.to_vec())
 }
 
-impl FromStr for KeyAgreementPublicKey {
-    type Err = crate::CommonError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_hex(s.to_owned())
-    }
+/// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
+/// `"033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"`
+#[uniffi::export]
+pub fn key_agreement_public_key_to_hex(
+    public_key: &KeyAgreementPublicKey,
+) -> String {
+    public_key.to_hex()
 }
 
-impl TryFrom<Vec<u8>> for KeyAgreementPublicKey {
-    type Error = CommonError;
-
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        value.as_slice().try_into()
-    }
+/// Returns the public key on **compressed** form (33 bytes)
+#[uniffi::export]
+pub fn key_agreement_public_key_to_bytes(
+    public_key: &KeyAgreementPublicKey,
+) -> BagOfBytes {
+    BagOfBytes::from(public_key.to_bytes())
 }
 
-impl TryFrom<&[u8]> for KeyAgreementPublicKey {
-    type Error = crate::CommonError;
-
-    fn try_from(slice: &[u8]) -> Result<Self> {
-        X25519PublicKey::try_from_slice(slice)
-            .map_err(|_| CommonError::InvalidKeyAgreementPublicKeyFromBytes {
-                bad_value: slice.to_vec().into(),
-            })
-            .map(|k| k.into())
-    }
+#[uniffi::export]
+pub fn new_key_agreement_public_key_sample() -> KeyAgreementPublicKey {
+    KeyAgreementPublicKey::sample()
 }
 
-impl KeyAgreementPublicKey {
-    pub fn from_hex(hex: String) -> Result<Self> {
-        Exactly32Bytes::from_str(hex.as_str())
-            .map_err(|_| CommonError::InvalidKeyAgreementPublicKeyFromHex {
-                bad_value: hex,
-            })
-            .and_then(|b| b.to_vec().try_into())
-    }
-
-    pub fn to_hex(&self) -> String {
-        hex_encode(self.to_bytes())
-    }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        self.secret_magic.to_bytes().to_vec()
-    }
-}
-
-impl HasSampleValues for KeyAgreementPublicKey {
-    fn sample() -> Self {
-        Self::sample_alice()
-    }
-
-    fn sample_other() -> Self {
-        Self::sample_bob()
-    }
-}
-
-impl KeyAgreementPublicKey {
-    /// A sample used to facilitate unit tests.
-    ///
-    /// `8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10`
-    pub fn sample_alice() -> Self {
-        Self::from_hex(
-            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
-                .to_owned(),
-        )
-        .unwrap()
-    }
-
-    /// A sample used to facilitate unit tests.
-    ///
-    /// `c0f0d9d1b1f9c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9`
-    pub fn sample_bob() -> Self {
-        Self::from_hex(
-            "c0f0d9d1b1f9c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9"
-                .to_owned(),
-        )
-        .unwrap()
-    }
+#[uniffi::export]
+pub fn new_key_agreement_public_key_sample_other() -> KeyAgreementPublicKey {
+    KeyAgreementPublicKey::sample_other()
 }
 
 #[cfg(test)]
@@ -123,116 +68,68 @@ mod tests {
     type SUT = KeyAgreementPublicKey;
 
     #[test]
-    fn equality() {
-        pretty_assertions::assert_eq!(SUT::sample(), SUT::sample());
-        pretty_assertions::assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_hex() {
-        pretty_assertions::assert_eq!(
-            SUT::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned()),
-            Ok(SUT::sample())
+    fn sample_values() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_key_agreement_public_key_sample(),
+                new_key_agreement_public_key_sample_other(),
+                // duplicates should get removed
+                new_key_agreement_public_key_sample(),
+                new_key_agreement_public_key_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn to_hex() {
-        pretty_assertions::assert_eq!(
-            SUT::sample().to_hex(),
-            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
+    fn test_new_key_agreement_public_key_from_hex_valid() {
+        let valid_hex = "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8".to_string();
+        assert_eq!(
+            new_key_agreement_public_key_from_hex(valid_hex.clone()),
+            valid_hex.parse()
         );
     }
 
     #[test]
-    fn to_bytes() {
-        pretty_assertions::assert_eq!(
-            hex_encode(SUT::sample().to_bytes()),
-            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
-                .to_string()
+    fn test_new_key_agreement_public_key_from_hex_invalid() {
+        let invalid_hex = "invalid_hex_string".to_string();
+        assert_eq!(
+            new_key_agreement_public_key_from_hex(invalid_hex.clone()),
+            invalid_hex.parse()
         );
     }
 
     #[test]
-    fn from_str() {
-        pretty_assertions::assert_eq!(
-            SUT::from_str("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"),
-            Ok(SUT::sample())
+    fn test_new_key_agreement_public_key_from_bytes() {
+        let valid_bytes = BagOfBytes::sample();
+        assert_eq!(
+            new_key_agreement_public_key_from_bytes(valid_bytes.clone()),
+            SUT::try_from(valid_bytes.to_vec())
         );
     }
 
     #[test]
-    fn try_from_vec() {
-        pretty_assertions::assert_eq!(
-            SUT::try_from(hex_decode(SUT::sample().to_hex()).unwrap()),
-            Ok(SUT::sample())
+    fn test_new_key_agreement_public_key_from_bytes_invalid() {
+        let invalid_bytes: BagOfBytes = vec![0, 1, 2].into();
+        assert_eq!(
+            new_key_agreement_public_key_from_bytes(invalid_bytes.clone()),
+            SUT::try_from(invalid_bytes.to_vec())
         );
     }
 
     #[test]
-    fn from_key_agreement_private_key() {
-        pretty_assertions::assert_eq!(
-            SUT::from(KeyAgreementPrivateKey::sample()),
-            SUT::sample()
-        );
+    fn test_key_agreement_public_key_to_hex() {
+        let sut = SUT::sample();
+        assert_eq!(key_agreement_public_key_to_hex(&sut), sut.to_hex());
     }
 
     #[test]
-    fn sample() {
-        pretty_assertions::assert_eq!(
-            SUT::sample().to_hex(),
-            "8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10"
-        );
-    }
-
-    #[test]
-    fn sample_other() {
-        pretty_assertions::assert_eq!(
-            SUT::sample_other().to_hex(),
-            "c0f0d9d1b1f9c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9f9b9d1f0c9f0c8c9"
-        );
-    }
-
-    #[test]
-    fn from_invalid_hex() {
-        pretty_assertions::assert_eq!(
-            SUT::from_hex("bad".to_owned()),
-            Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
-                bad_value: "bad".to_owned()
-            })
-        );
-    }
-
-    #[test]
-    fn from_invalid_bytes() {
-        pretty_assertions::assert_eq!(
-            SUT::try_from(vec![0]),
-            Err(CommonError::InvalidKeyAgreementPublicKeyFromBytes {
-                bad_value: vec![0].into()
-            })
-        );
-    }
-
-    #[test]
-    fn from_invalid_str() {
-        pretty_assertions::assert_eq!(
-            "bad".parse::<SUT>(),
-            Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
-                bad_value: "bad".to_owned()
-            })
-        );
-    }
-
-    #[test]
-    fn json_roundrip() {
-        assert_json_value_eq_after_roundtrip(
-            &SUT::sample(),
-            json!("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10")
+    fn test_key_agreement_public_key_to_bytes() {
+        let sut = SUT::sample();
+        assert_eq!(
+            key_agreement_public_key_to_bytes(&sut),
+            BagOfBytes::from(sut.to_bytes())
         );
     }
 }

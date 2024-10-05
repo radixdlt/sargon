@@ -1,85 +1,77 @@
 use crate::prelude::*;
+use sargon::UnvalidatedTransactionManifest as InternalUnvalidatedTransactionManifest;
 
 #[derive(
-    Clone, PartialEq, Eq, Serialize, Deserialize, Debug, uniffi::Record,
+    Clone, PartialEq, Eq, Debug, uniffi::Record,
 )]
 pub struct UnvalidatedTransactionManifest {
-    #[serde(rename = "transactionManifest")]
     pub transaction_manifest_string: String,
-
-    #[serde(default)]
     pub blobs: Blobs,
 }
 
-impl UnvalidatedTransactionManifest {
-    pub fn new(
-        transaction_manifest_string: impl AsRef<str>,
-        blobs: impl Into<Blobs>,
-    ) -> Self {
+impl From<InternalUnvalidatedTransactionManifest> for UnvalidatedTransactionManifest {
+    fn from(value: InternalUnvalidatedTransactionManifest) -> Self {
         Self {
-            transaction_manifest_string: transaction_manifest_string
-                .as_ref()
-                .to_owned(),
-            blobs: blobs.into(),
+            transaction_manifest_string: value.transaction_manifest_string,
+            blobs: value.blobs.into(),
         }
     }
 }
 
-impl From<TransactionManifest> for UnvalidatedTransactionManifest {
-    fn from(transaction_manifest: TransactionManifest) -> Self {
-        Self {
-            transaction_manifest_string: transaction_manifest
-                .instructions_string(),
-            blobs: transaction_manifest.blobs().clone(),
+impl Into<InternalUnvalidatedTransactionManifest> for UnvalidatedTransactionManifest {
+    fn into(self) -> InternalUnvalidatedTransactionManifest {
+        InternalUnvalidatedTransactionManifest {
+            transaction_manifest_string: self.transaction_manifest_string,
+            blobs: self.blobs.into(),
         }
     }
 }
 
-impl HasSampleValues for UnvalidatedTransactionManifest {
-    fn sample() -> Self {
-        Self::new(
-            TransactionManifest::sample().instructions_string(),
-            Blobs::default(),
-        )
-    }
+#[uniffi::export]
+pub fn new_unvalidated_transaction_manifest_from_transaction_manifest(
+    transaction_manifest: TransactionManifest,
+) -> UnvalidatedTransactionManifest {
+    InternalUnvalidatedTransactionManifest::from(transaction_manifest.into()).into()
+}
 
-    fn sample_other() -> Self {
-        Self::new(
-            TransactionManifest::sample_other().instructions_string(),
-            Blobs::sample_other(),
-        )
-    }
+#[uniffi::export]
+pub fn new_unvalidated_transaction_manifest_sample(
+) -> UnvalidatedTransactionManifest {
+    InternalUnvalidatedTransactionManifest::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_unvalidated_transaction_manifest_sample_other(
+) -> UnvalidatedTransactionManifest {
+    InternalUnvalidatedTransactionManifest::sample_other().into()
 }
 
 #[cfg(test)]
-mod tests {
+mod uniffi_tests {
     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = UnvalidatedTransactionManifest;
-
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn sample_values() {
+        assert_ne!(
+            new_unvalidated_transaction_manifest_sample(),
+            new_unvalidated_transaction_manifest_sample_other(),
+        );
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn transaction_manifest() {
-        let transaction_manifest =
-            TransactionManifest::try_from((SUT::sample(), NetworkID::Mainnet));
+    fn test_new_unvalidated_transaction_manifest_from_transaction_manifest() {
+        let transaction_manifest = TransactionManifest::sample();
+        let sut =
+            new_unvalidated_transaction_manifest_from_transaction_manifest(
+                transaction_manifest.clone(),
+            );
         pretty_assertions::assert_eq!(
-            transaction_manifest,
-            TransactionManifest::new(
-                TransactionManifest::sample().instructions_string(),
-                NetworkID::Mainnet,
-                Blobs::default()
-            )
+            sut.transaction_manifest_string,
+            transaction_manifest.instructions_string()
+        );
+        pretty_assertions::assert_eq!(
+            sut.blobs,
+            transaction_manifest.blobs().clone()
         );
     }
 }

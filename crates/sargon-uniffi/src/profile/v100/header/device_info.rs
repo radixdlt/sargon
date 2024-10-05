@@ -3,8 +3,6 @@ use crate::prelude::*;
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Debug,
     PartialEq,
@@ -62,86 +60,24 @@ pub struct DeviceInfo {
     pub host_vendor: Option<String>,
 }
 
-impl DeviceInfo {
-    /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
-    pub fn new(
-        id: DeviceID,
-        date: Timestamp,
-        description: DeviceInfoDescription,
-        system_version: impl AsRef<str>,
-        host_app_version: impl AsRef<str>,
-        host_vendor: impl AsRef<str>,
-    ) -> Self {
-        Self {
-            id,
-            date,
-            description: description.to_string(),
-            system_version: Some(system_version.as_ref().to_owned()),
-            host_app_version: Some(host_app_version.as_ref().to_owned()),
-            host_vendor: Some(host_vendor.as_ref().to_owned()),
-        }
-    }
+json_data_convertible!(DeviceInfo);
 
-    /// Instantiates a new `DeviceInfo` with information retrieved from host
-    /// like `host_id` and `host_info`
-    pub fn new_from_info(host_id: &HostId, host_info: &HostInfo) -> Self {
-        Self::new(
-            host_id.id,
-            host_id.generated_at,
-            host_info.description.clone(),
-            host_info.host_os.version(),
-            host_info.host_app_version.clone(),
-            host_info.host_os.vendor().clone(),
-        )
-    }
+#[uniffi::export]
+pub fn new_device_info_sample() -> DeviceInfo {
+    DeviceInfo::sample()
 }
 
-#[cfg(test)]
-impl DeviceInfo {
-    fn new_unknown() -> Self {
-        Self::new(
-            DeviceID::generate_new(),
-            now(),
-            DeviceInfoDescription::new("Unknown", "Unknown"),
-            "Unknown",
-            "Unknown",
-            "Unknown",
-        )
-    }
+#[uniffi::export]
+pub fn new_device_info_sample_other() -> DeviceInfo {
+    DeviceInfo::sample_other()
 }
 
-impl HasSampleValues for DeviceInfo {
-    fn sample() -> Self {
-        Self {
-            id: DeviceID::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74")
-                .unwrap(),
-            date: Timestamp::sample(),
-            description: DeviceInfoDescription {
-                name: "iPhone".to_owned(),
-                model: "iPhone".to_owned(),
-            }
-            .to_string(),
-            system_version: None,
-            host_app_version: None,
-            host_vendor: None,
-        }
-    }
-
-    fn sample_other() -> Self {
-        Self {
-            id: DeviceID::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd")
-                .unwrap(),
-            date: Timestamp::sample_other(),
-            description: DeviceInfoDescription {
-                name: "Android".to_owned(),
-                model: "Android".to_owned(),
-            }
-            .to_string(),
-            system_version: None,
-            host_app_version: None,
-            host_vendor: None,
-        }
-    }
+#[uniffi::export]
+pub fn new_device_info_from_host_info(
+    host_id: &HostId,
+    host_info: &HostInfo,
+) -> DeviceInfo {
+    DeviceInfo::new_from_info(host_id, host_info)
 }
 
 #[cfg(test)]
@@ -152,192 +88,28 @@ mod tests {
     type SUT = DeviceInfo;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn display() {
-        let id_str = "12345678-bbbb-cccc-dddd-abcd12345678";
-        let id = DeviceID::from_str(id_str).unwrap();
-        let sut = SUT::new(
-            id,
-            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            DeviceInfoDescription::new("Foo", "Unknown"),
-            "Unknown",
-            "Unknown",
-            "Unknown",
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_device_info_sample(),
+                new_device_info_sample_other(),
+                // duplicates should get removed
+                new_device_info_sample(),
+                new_device_info_sample_other(),
+            ])
+            .len(),
+            2
         );
-        pretty_assertions::assert_eq!(
-            format!("{sut}"),
-            format!("Foo (Unknown) | created: 2023-09-11 | #{}", id_str)
-        )
     }
 
     #[test]
-    fn id_is_unique() {
-        let n = 20;
-        let ids = (0..n)
-            .map(|_| SUT::new_unknown())
-            .map(|d| d.id)
-            .collect::<HashSet<DeviceID>>();
-        assert_eq!(ids.len(), n);
-    }
-
-    #[test]
-    fn date_is_now() {
-        assert!(SUT::new_unknown().date.year() >= 2023);
-    }
-
-    #[test]
-    fn test_new_from_info() {
+    fn test_new_from_host_info() {
         let host_id = HostId::sample();
         let host_info = HostInfo::sample();
 
         assert_eq!(
-            DeviceInfo::new_from_info(&host_id, &host_info),
-            DeviceInfo::new(
-                host_id.id,
-                host_id.generated_at,
-                host_info.description,
-                host_info.host_os.version(),
-                host_info.host_app_version,
-                host_info.host_os.vendor()
-            )
+            new_device_info_from_host_info(&host_id, &host_info),
+            DeviceInfo::new_from_info(&host_id, &host_info)
         )
-    }
-
-    #[test]
-    fn can_parse_iso8601_json_without_milliseconds_precision() {
-        let str = r#"
-            {
-                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                "date": "2023-09-11T16:05:56Z",
-                "description": "iPhone (iPhone)"
-            }
-            "#;
-        let model = serde_json::from_str::<SUT>(str).unwrap();
-        assert_eq!(model.date.day(), 11);
-        let json = serde_json::to_string(&model).unwrap();
-        assert!(json.contains("56.000Z"));
-    }
-
-    #[test]
-    fn json_nanoseconds_precision() {
-        assert_json_roundtrip(&SUT::new_unknown());
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let model = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            // The JSON string literal below contains `.000` ISO8601
-            // milliseconds which is not set on the sample
-            r#"
-            {
-                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                "date": "2023-09-11T16:05:56.000Z",
-                "description": "iPhone (iPhone)"
-            }
-            "#,
-        );
-        assert_json_roundtrip(&model);
-        assert_ne_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "date": "1970-01-01T12:34:56Z",
-                "description": "Nokia 3310 (lur)"
-            }
-            "#,
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_with_system_and_app_version() {
-        let sut = SUT::new(
-            DeviceID::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
-            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            DeviceInfoDescription::new("My nice iPhone", "iPhone 15 Pro"),
-            "17.4.1",
-            "1.6.0",
-            "Apple",
-        );
-        assert_eq_after_json_roundtrip(
-            &sut,
-            // The JSON string literal below contains `.000` ISO8601
-            // milliseconds which is not set on the sample
-            r#"
-            {
-                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                "date": "2023-09-11T16:05:56.000Z",
-                "description": "My nice iPhone (iPhone 15 Pro)", 
-                "system_version": "17.4.1",
-                "host_app_version": "1.6.0",
-                "host_vendor": "Apple"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn invalid_json() {
-        assert_json_fails::<SUT>(
-            r#"
-            {
-                "id": "invalid-uuid",
-                "date": "1970-01-01T12:34:56.000Z",
-                "description": "iPhone (iPhone)"
-            }
-            "#,
-        );
-
-        assert_json_fails::<SUT>(
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "date": "invalid-date",
-                "description": "iPhone (iPhone)"
-            }
-            "#,
-        );
-
-        assert_json_fails::<SUT>(
-            r#"
-            {
-                "missing_key": "id",
-                "date": "1970-01-01T12:34:56.000Z",
-                "description": "iPhone (iPhone)"
-            }
-            "#,
-        );
-
-        assert_json_fails::<SUT>(
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "missing_key": "date",
-                "description": "iPhone (iPhone)"
-            }
-            "#,
-        );
-
-        assert_json_fails::<SUT>(
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "date": "1970-01-01T12:34:56.000Z",
-                "missing_key": "description"
-            }
-            "#,
-        );
     }
 }

@@ -1,63 +1,29 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionPersonaDataRequestResponseItem as InternalWalletToDappInteractionPersonaDataRequestResponseItem;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, PartialEq, Clone, uniffi::Record)]
 pub struct WalletToDappInteractionPersonaDataRequestResponseItem {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<PersonaDataEntryName>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub email_addresses: Option<Vec<PersonaDataEntryEmailAddress>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub phone_numbers: Option<Vec<PersonaDataEntryPhoneNumber>>,
 }
 
-impl WalletToDappInteractionPersonaDataRequestResponseItem {
-    pub fn new(
-        name: impl Into<Option<PersonaDataEntryName>>,
-        email_addresses: impl Into<Option<Vec<PersonaDataEntryEmailAddress>>>,
-        phone_numbers: impl Into<Option<Vec<PersonaDataEntryPhoneNumber>>>,
-    ) -> Self {
+impl From<InternalWalletToDappInteractionPersonaDataRequestResponseItem> for WalletToDappInteractionPersonaDataRequestResponseItem {
+    fn from(value: InternalWalletToDappInteractionPersonaDataRequestResponseItem) -> Self {
         Self {
-            name: name.into(),
-            email_addresses: email_addresses.into(),
-            phone_numbers: phone_numbers.into(),
+            name: value.name.map(|v| v.into()),
+            email_addresses: value.email_addresses.map(|v| v.into_iter().map(|v| v.into()).collect()),
+            phone_numbers: value.phone_numbers.map(|v| v.into_iter().map(|v| v.into()).collect()),
         }
     }
 }
 
-impl HasSampleValues for WalletToDappInteractionPersonaDataRequestResponseItem {
-    fn sample() -> Self {
-        Self::new(
-            PersonaDataEntryName::sample(),
-            vec![PersonaDataEntryEmailAddress::sample()],
-            vec![PersonaDataEntryPhoneNumber::sample()],
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            PersonaDataEntryName::sample_other(),
-            vec![PersonaDataEntryEmailAddress::sample_other()],
-            vec![PersonaDataEntryPhoneNumber::sample_other()],
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionPersonaDataRequestResponseItem;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionPersonaDataRequestResponseItem> for WalletToDappInteractionPersonaDataRequestResponseItem {
+    fn into(self) -> InternalWalletToDappInteractionPersonaDataRequestResponseItem {
+        InternalWalletToDappInteractionPersonaDataRequestResponseItem {
+            name: self.name.map(|v| v.into()),
+            email_addresses: self.email_addresses.map(|v| v.into_iter().map(|v| v.into()).collect()),
+            phone_numbers: self.phone_numbers.map(|v| v.into_iter().map(|v| v.into()).collect()),
+        }
     }
 }

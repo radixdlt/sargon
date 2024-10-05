@@ -1,43 +1,61 @@
 use crate::prelude::*;
+use sargon::DappToWalletInteraction as InternalDappToWalletInteraction;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteraction {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,
     pub metadata: DappToWalletInteractionMetadata,
 }
 
-impl DappToWalletInteraction {
-    pub fn new(
-        interaction_id: WalletInteractionId,
-        items: DappToWalletInteractionItems,
-        metadata: DappToWalletInteractionMetadata,
-    ) -> Self {
+impl From<InternalDappToWalletInteraction> for DappToWalletInteraction {
+    fn from(value: InternalDappToWalletInteraction) -> Self {
         Self {
-            interaction_id,
-            items,
-            metadata,
+            interaction_id: value.interaction_id.into(),
+            items: value.items.into(),
+            metadata: value.metadata.into(),
         }
     }
 }
 
-impl HasSampleValues for DappToWalletInteraction {
-    fn sample() -> Self {
-        Self::new(
-            WalletInteractionId::sample(),
-            DappToWalletInteractionItems::sample(),
-            DappToWalletInteractionMetadata::sample(),
-        )
+impl Into<InternalDappToWalletInteraction> for DappToWalletInteraction {
+    fn into(self) -> InternalDappToWalletInteraction {
+        InternalDappToWalletInteraction {
+            interaction_id: self.interaction_id.into(),
+            items: self.items.into(),
+            metadata: self.metadata.into(),
+        }
     }
+}
 
-    fn sample_other() -> Self {
-        Self::new(
-            WalletInteractionId::sample_other(),
-            DappToWalletInteractionItems::sample_other(),
-            DappToWalletInteractionMetadata::sample_other(),
-        )
-    }
+json_data_convertible!(DappToWalletInteractionUnvalidated);
+json_data_convertible!(WalletToDappInteractionResponse);
+
+#[uniffi::export]
+pub fn new_dapp_to_wallet_interaction_unvalidated_from_json_string(
+    json_str: String,
+) -> Result<DappToWalletInteractionUnvalidated> {
+    map_result_from_internal(InternalDappToWalletInteraction::new_from_json_string(json_str))
+}
+
+#[uniffi::export]
+pub fn dapp_to_wallet_interaction_unvalidated_to_json_string(
+    interaction_unvalidated: &DappToWalletInteractionUnvalidated,
+    pretty_printed: bool,
+) -> String {
+    interaction_unvalidated.into::<InternalDappToWalletInteraction>().to_json_string(pretty_printed)
+}
+
+#[uniffi::export]
+pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample(
+) -> DappToWalletInteractionUnvalidated {
+    InternalDappToWalletInteraction::sample().into()
+}
+
+#[uniffi::export]
+pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
+) -> DappToWalletInteractionUnvalidated {
+    InternalDappToWalletInteraction::sample_other().into()
 }
 
 #[cfg(test)]
@@ -45,16 +63,50 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteraction;
+    type SUT = DappToWalletInteractionUnvalidated;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn inequality_of_samples() {
+        assert_ne!(
+            new_dapp_to_wallet_interaction_unvalidated_sample(),
+            new_dapp_to_wallet_interaction_unvalidated_sample_other()
+        );
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn json_string_roundtrip() {
+        let sut = SUT::sample();
+        let pretty_string =
+            dapp_to_wallet_interaction_unvalidated_to_json_string(&sut, true);
+        let from_str =
+            new_dapp_to_wallet_interaction_unvalidated_from_json_string(
+                pretty_string.clone(),
+            )
+            .unwrap();
+        assert_eq!(from_str, sut);
+        let ugly_string =
+            dapp_to_wallet_interaction_unvalidated_to_json_string(&sut, false);
+        let from_str =
+            new_dapp_to_wallet_interaction_unvalidated_from_json_string(
+                ugly_string.clone(),
+            )
+            .unwrap();
+        assert_eq!(from_str, sut);
+        assert_ne!(pretty_string, ugly_string);
+    }
+
+    #[test]
+    fn from_invalid_json_string_throws() {
+        assert_eq!(
+            new_dapp_to_wallet_interaction_unvalidated_from_json_string(
+                "".to_owned()
+            ),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 0,
+                type_name: "DappToWalletInteractionUnvalidated".to_owned(),
+                serde_message: "EOF while parsing a value at line 1 column 0"
+                    .to_string()
+            })
+        )
     }
 }

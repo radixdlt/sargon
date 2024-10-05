@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Message as InternalMessage;
 
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
 pub enum Message {
@@ -6,126 +7,66 @@ pub enum Message {
     None,
 }
 
-impl Message {
-    pub fn plain_text(message: impl AsRef<str>) -> Self {
-        Self::PlainText {
-            plaintext: PlaintextMessage::new(message),
+impl From<InternalMessage> for Message {
+    fn from(value: InternalMessage) -> Self {
+        match value {
+            InternalMessage::PlainText { plaintext } => Message::PlainText {
+                plaintext: plaintext.into(),
+            },
+            InternalMessage::None => Message::None,
         }
     }
 }
 
-impl Message {
-    pub fn as_plaintext(&self) -> Option<String> {
+impl Into<InternalMessage> for Message {
+    fn into(self) -> InternalMessage {
         match self {
-            Message::PlainText { plaintext } => plaintext.as_string(),
-            Message::None => None,
+            Message::PlainText { plaintext } => InternalMessage::PlainText {
+                plaintext: plaintext.into(),
+            },
+            Message::None => InternalMessage::None,
         }
     }
 }
 
-impl From<Message> for ScryptoMessage {
-    fn from(value: Message) -> Self {
-        match value {
-            Message::PlainText { plaintext } => {
-                ScryptoMessage::Plaintext(plaintext.into())
-            }
-            Message::None => ScryptoMessage::None,
-        }
-    }
+#[uniffi::export]
+pub fn new_message_plaintext_sample() -> Message {
+    InternalMessage::sample().into()
 }
 
-impl TryFrom<ScryptoMessage> for Message {
-    type Error = crate::CommonError;
-
-    fn try_from(value: ScryptoMessage) -> Result<Self, Self::Error> {
-        match value {
-            ScryptoMessage::None => Ok(Self::None),
-            ScryptoMessage::Plaintext(p) => Ok(Self::PlainText {
-                plaintext: p.into(),
-            }),
-            ScryptoMessage::Encrypted(_) => {
-                Err(CommonError::EncryptedMessagesAreNotYetSupported)
-            }
-        }
-    }
+#[uniffi::export]
+pub fn new_message_plaintext_sample_other() -> Message {
+    InternalMessage::sample_other().into()
 }
 
-impl HasSampleValues for Message {
-    fn sample() -> Self {
-        Self::plain_text("Hello Radix!")
-    }
+#[uniffi::export]
+pub fn new_message_plaintext_string(string: String) -> Message {
+    InternalMessage::plain_text(string).into()
+}
 
-    fn sample_other() -> Self {
-        Self::plain_text("Lorem ipsum!!")
-    }
+#[uniffi::export]
+pub fn message_as_plaintext(message: &Message) -> Option<String> {
+    message.into::<InternalMessage>().as_plaintext()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use radix_transactions::model::EncryptedMessageV1;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Message;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
     #[test]
     fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn to_from_scrypto() {
-        let roundtrip =
-            |s: SUT| SUT::try_from(ScryptoMessage::from(s)).unwrap();
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
-    }
-
-    #[test]
-    fn as_string() {
-        assert_eq!(
-            SUT::sample().as_plaintext(),
-            Some("Hello Radix!".to_owned())
-        );
-        assert_eq!(
-            SUT::PlainText {
-                plaintext: PlaintextMessage::sample_binary()
-            }
-            .as_plaintext(),
-            None
-        );
-        assert_eq!(SUT::None.as_plaintext(), None);
-    }
-
-    #[test]
-    fn into_scrypto() {
-        assert_eq!(
-            ScryptoMessage::from(SUT::sample()),
-            ScryptoMessage::Plaintext(ScryptoPlaintextMessage {
-                message: ScryptoMessageContents::String(
-                    "Hello Radix!".to_owned()
-                ),
-                mime_type: "text/plain".to_owned(),
-            })
+        assert_ne!(
+            new_message_plaintext_sample(),
+            new_message_plaintext_sample_other()
         );
     }
 
     #[test]
-    fn encrypted_msg_are_not_yet_supported() {
-        let dummy = EncryptedMessageV1 {
-            encrypted: radix_transactions::prelude::AesGcmPayload(vec![]),
-            decryptors_by_curve: [].into(),
-        };
+    fn new_message_plaintext_string_then_as_plaintext() {
+        let text = "Hello Unit Test".to_owned();
         assert_eq!(
-            TryInto::<SUT>::try_into(ScryptoMessage::Encrypted(dummy)),
-            Err(CommonError::EncryptedMessagesAreNotYetSupported)
+            message_as_plaintext(&new_message_plaintext_string(text.clone())),
+            Some(text)
         );
     }
 }

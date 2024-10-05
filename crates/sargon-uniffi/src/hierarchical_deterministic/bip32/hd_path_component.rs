@@ -22,130 +22,23 @@ pub struct HDPathComponent {
     pub value: HDPathValue,
 }
 
-impl From<HDPathValue> for HDPathComponent {
-    fn from(value: HDPathValue) -> Self {
-        Self { value }
-    }
-}
-
-impl HDPathComponent {
-    pub(crate) fn index(&self) -> HDPathValue {
-        if self.is_hardened() {
-            self.value - BIP32_HARDENED
-        } else {
-            self.value
-        }
-    }
-
-    pub(crate) fn is_hardened(&self) -> bool {
-        self.value >= BIP32_HARDENED
-    }
-
-    pub(crate) fn try_from_str(s: &str) -> Option<Self> {
-        let is_hardened = s.ends_with('H') || s.ends_with('\'');
-        let mut component_str = s;
-        if is_hardened {
-            component_str = component_str.remove_last()
-        }
-        component_str.parse::<HDPathValue>().ok().map(|v| {
-            if is_hardened {
-                Self::harden(v)
-            } else {
-                Self::non_hardened(v)
-            }
-        })
-    }
-
-    pub(crate) fn non_hardened(value: HDPathValue) -> Self {
-        assert!(
-            value < BIP32_HARDENED,
-            "Passed value was hardened, expected it to not be."
-        );
-        Self { value }
-    }
-
-    pub(crate) fn harden(value: HDPathValue) -> Self {
-        assert!(
-            value < BIP32_HARDENED,
-            "Passed value was already hardened, expected it to not be."
-        );
-        Self {
-            value: value + BIP32_HARDENED,
-        }
-    }
-}
-
-impl HDPathComponent {
-    fn bip32_string(&self) -> String {
-        let h_or_empty = if self.is_hardened() { "H" } else { "" };
-        format!("{}{}", self.index(), h_or_empty)
-    }
+#[uniffi::export]
+pub fn hd_path_component_get_non_hardened_value(
+    component: HDPathComponent,
+) -> HDPathValue {
+    component.index()
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
-    use super::BIP32_HARDENED;
-
-    #[test]
-    fn harden() {
-        assert!(HDPathComponent::harden(0).is_hardened())
-    }
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = HDPathComponent;
 
     #[test]
-    fn hardened_value() {
-        assert_eq!(HDPathComponent::harden(3).index(), 3)
-    }
-
-    #[test]
-    fn non_hardened_value() {
-        assert_eq!(HDPathComponent::non_hardened(3).index(), 3)
-    }
-
-    #[test]
-    fn non_hardened_value_is_not_hardened() {
-        assert!(!HDPathComponent::non_hardened(3).is_hardened())
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", HDPathComponent::harden(5)), "5H");
-        assert_eq!(format!("{}", HDPathComponent::non_hardened(5)), "5");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", HDPathComponent::harden(5)), "5H");
-        assert_eq!(format!("{:?}", HDPathComponent::non_hardened(5)), "5");
-    }
-
-    #[should_panic(
-        expected = "Passed value was hardened, expected it to not be."
-    )]
-    #[test]
-    fn non_hardened_already_hardened_panics() {
-        _ = HDPathComponent::non_hardened(7 + BIP32_HARDENED);
-    }
-
-    #[should_panic(
-        expected = "Passed value was already hardened, expected it to not be."
-    )]
-    #[test]
-    fn harden_already_hardened_panics() {
-        _ = HDPathComponent::harden(7 + BIP32_HARDENED);
-    }
-
-    #[test]
-    fn from_hdpath_value() {
-        assert_eq!(
-            <HDPathComponent as From<HDPathValue>>::from(5).to_string(),
-            "5"
-        );
-        assert_eq!(
-            <HDPathComponent as From<HDPathValue>>::from(2147483650)
-                .to_string(),
-            "2H"
-        );
+    fn test_hd_path_component_get_non_hardened_value() {
+        let sut = SUT::harden(5);
+        assert_eq!(hd_path_component_get_non_hardened_value(sut), 5);
     }
 }

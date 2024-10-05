@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::TransactionManifest as InternalTransactionManifest;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
 #[display("{}", self.instructions_string())] // TODO add blobs to Display
@@ -6,398 +7,227 @@ pub struct TransactionManifest {
     secret_magic: TransactionManifestSecretMagic,
 }
 
-impl TransactionManifest {
-    pub fn new(
-        instructions_string: impl AsRef<str>,
-        network_id: NetworkID,
-        blobs: Blobs,
-    ) -> Result<Self> {
-        Instructions::new(instructions_string, network_id).map(|instructions| {
-            Self {
-                secret_magic: TransactionManifestSecretMagic {
-                    instructions,
-                    blobs,
-                },
-            }
-        })
-    }
-
-    pub fn with_instructions_and_blobs(
-        instructions: Instructions,
-        blobs: Blobs,
-    ) -> Self {
+impl From<InternalTransactionManifest> for TransactionManifest {
+    fn from(value: InternalTransactionManifest) -> Self {
         Self {
-            secret_magic: TransactionManifestSecretMagic::new(
-                instructions,
-                blobs,
-            ),
+            secret_magic: value.secret_magic.into(),
         }
     }
 }
 
-impl TransactionManifest {
-    pub(crate) fn empty(network_id: NetworkID) -> Self {
-        Self {
-            secret_magic: TransactionManifestSecretMagic {
-                instructions: Instructions::empty(network_id),
-                blobs: Blobs::default(),
-            },
+impl Into<InternalTransactionManifest> for TransactionManifest {
+    fn into(self) -> InternalTransactionManifest {
+        InternalTransactionManifest {
+            secret_magic: self.secret_magic.into(),
         }
     }
 }
 
-impl From<TransactionManifestSecretMagic> for TransactionManifest {
-    fn from(value: TransactionManifestSecretMagic) -> Self {
-        Self {
-            secret_magic: value,
-        }
-    }
+use crate::prelude::*;
+
+#[uniffi::export]
+pub fn new_transaction_manifest_from_instructions_string_and_blobs(
+    instructions_string: String,
+    network_id: NetworkID,
+    blobs: Blobs,
+) -> Result<TransactionManifest> {
+    map_result_from_internal(InternalTransactionManifest::new(instructions_string, network_id.into(), blobs.into()))
 }
 
-impl TransactionManifest {
-    pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
-        ScryptoTransactionManifest {
-            instructions: self.instructions().clone(),
-            blobs: self.secret_magic.blobs.clone().into(),
-        }
-    }
+#[uniffi::export]
+pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
+    unvalidated_transaction_manifest: UnvalidatedTransactionManifest,
+    network_id: NetworkID,
+) -> Result<TransactionManifest> {
+    map_result_from_internal(
+    InternalTransactionManifest::try_from((
+        unvalidated_transaction_manifest.into(),
+        network_id.into(),
+    ))
+)
 }
 
-impl From<TransactionManifest> for ScryptoTransactionManifest {
-    fn from(value: TransactionManifest) -> Self {
-        value.scrypto_manifest()
-    }
+#[uniffi::export]
+pub fn transaction_manifest_instructions_string(
+    manifest: &TransactionManifest,
+) -> String {
+    manifest.into::<InternalTransactionManifest>().instructions_string()
 }
 
-impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
-    type Error = CommonError;
-    fn try_from(
-        value: (ScryptoTransactionManifest, NetworkID),
-    ) -> Result<Self> {
-        let scrypto_manifest = value.0;
-        let network_id = value.1;
-        let instructions = Instructions::try_from((
-            scrypto_manifest.clone().instructions.as_ref(),
-            network_id,
-        ))?;
-        let value = Self {
-            secret_magic: TransactionManifestSecretMagic::new(
-                instructions,
-                scrypto_manifest.blobs.clone(),
-            ),
-        };
-        assert_eq!(value.scrypto_manifest(), scrypto_manifest);
-        Ok(value)
-    }
+#[uniffi::export]
+pub fn transaction_manifest_summary(
+    manifest: &TransactionManifest,
+) -> ManifestSummary {
+    manifest.into::<InternalTransactionManifest>().summary().into()
 }
 
-impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
-    for TransactionManifest
-{
-    type Error = CommonError;
-    fn try_from(
-        value: (UnvalidatedTransactionManifest, NetworkID),
-    ) -> Result<TransactionManifest> {
-        TransactionManifest::new(
-            value.0.transaction_manifest_string.clone(),
-            value.1,
-            value.0.blobs.clone(),
-        )
-    }
+#[uniffi::export]
+pub fn transaction_manifest_involved_resource_addresses(
+    manifest: &TransactionManifest,
+) -> Vec<ResourceAddress> {
+    manifest.into::<InternalTransactionManifest>().involved_resource_addresses().into_iter().map(|x| x.into()).collect()
 }
 
-impl TransactionManifest {
-    pub fn sargon_built(
-        builder: ScryptoManifestBuilder,
-        network_id: NetworkID,
-    ) -> Self {
-        let scrypto_manifest = builder.build();
-        Self::try_from((scrypto_manifest, network_id)).expect(
-            "Sargon should not build manifest with too nested SBOR depth.",
-        )
-    }
+#[uniffi::export]
+pub fn transaction_manifest_involved_pool_addresses(
+    manifest: &TransactionManifest,
+) -> Vec<PoolAddress> {
+    manifest.into::<InternalTransactionManifest>().involved_pool_addresses().into_iter().map(|x| x.into()).collect()
 }
 
-impl TransactionManifest {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
-        self.secret_magic.instructions()
-    }
-
-    pub(crate) fn blobs(&self) -> &Blobs {
-        &self.secret_magic.blobs
-    }
-
-    pub fn instructions_string(&self) -> String {
-        self.secret_magic.instructions.instructions_string()
-    }
-
-    pub fn summary(&self) -> ManifestSummary {
-        let ret_summary = RET_summary(&self.scrypto_manifest());
-        ManifestSummary::from((ret_summary, self.network_id()))
-    }
-
-    pub fn network_id(&self) -> NetworkID {
-        self.secret_magic.instructions.network_id
-    }
-
-    pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
-        let (addresses, _) = RET_ins_extract_addresses(
-            self.secret_magic.instructions.secret_magic.0.as_slice(),
-        );
-        addresses
-            .into_iter()
-            .filter_map(|a| {
-                ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
-            })
-            .collect_vec()
-    }
-
-    pub fn involved_pool_addresses(&self) -> Vec<PoolAddress> {
-        let (addresses, _) = RET_ins_extract_addresses(self.instructions());
-        addresses
-            .into_iter()
-            .filter_map(|a| {
-                PoolAddress::new(*a.as_node_id(), self.network_id()).ok()
-            })
-            .collect_vec()
-    }
+#[uniffi::export]
+pub fn transaction_manifest_execution_summary(
+    manifest: &TransactionManifest,
+    engine_toolkit_receipt: String,
+) -> Result<ExecutionSummary> {
+    map_result_from_internal(
+    manifest.into::<InternalTransactionManifest>().execution_summary(engine_toolkit_receipt)
+    )
 }
 
-impl HasSampleValues for TransactionManifest {
-    fn sample() -> Self {
-        TransactionManifestSecretMagic::sample().into()
-    }
-
-    fn sample_other() -> Self {
-        TransactionManifestSecretMagic::sample_other().into()
-    }
+#[uniffi::export]
+pub fn transaction_manifest_network_id(
+    manifest: &TransactionManifest,
+) -> NetworkID {
+    manifest.into::<InternalTransactionManifest>().network_id().into()
 }
 
-#[allow(unused)]
-impl TransactionManifest {
-    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
-        TransactionManifestSecretMagic::sample_mainnet_without_lock_fee().into()
-    }
+#[uniffi::export]
+pub fn transaction_manifest_blobs(manifest: &TransactionManifest) -> Blobs {
+    manifest.into::<InternalTransactionManifest>().blobs().clone().into()
+}
+
+#[uniffi::export]
+pub fn new_transaction_manifest_sample() -> TransactionManifest {
+    InternalTransactionManifest::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_transaction_manifest_sample_other() -> TransactionManifest {
+    InternalTransactionManifest::sample_other().into()
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::prelude::*;
-    use std::collections::BTreeMap;
-
-    impl FromStr for TransactionManifest {
-        type Err = crate::CommonError;
-
-        fn from_str(s: &str) -> Result<Self> {
-            Self::new(s, NetworkID::Simulator, Blobs::default())
-        }
-    }
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn sample_string_roundtrip() {
-        let sut = SUT::sample();
-        assert_eq!(sut.clone(), sut.clone());
-        instructions_eq(
-            sut.clone().secret_magic.instructions,
-            Instructions::sample_mainnet_instructions_string(),
+    fn samples() {
+        assert_eq!(new_transaction_manifest_sample(), SUT::sample());
+        assert_eq!(
+            new_transaction_manifest_sample_other(),
+            SUT::sample_other()
         );
-        assert_eq!(sut.instructions().len(), 4);
     }
 
     #[test]
-    fn sample_other_string_roundtrip() {
-        let sut = SUT::sample_other();
-        assert_eq!(sut.clone(), sut.clone());
-        instructions_eq(
-            sut.clone().secret_magic.instructions,
-            Instructions::sample_other_simulator_instructions_string(),
+    fn test_new_transaction_manifest_from_instructions_string_and_blobs() {
+        let s = new_transaction_manifest_sample().instructions_string();
+
+        assert_eq!(
+            new_transaction_manifest_from_instructions_string_and_blobs(
+                s.clone(),
+                NetworkID::Mainnet,
+                Blobs::default()
+            )
+            .unwrap()
+            .instructions_string(),
+            s
         );
-        assert_eq!(sut.instructions().len(), 8);
     }
 
     #[test]
-    fn scrypto_roundtrip() {
-        let ins = vec![
-            ScryptoInstruction::DropAllProofs,
-            ScryptoInstruction::DropAuthZoneProofs,
-        ];
-        let scrypto = ScryptoTransactionManifest {
-            instructions: ins.clone(),
-            blobs: Default::default(),
-        };
-
-        let sut = SUT::with_instructions_and_blobs(
-            Instructions::new_unchecked(ins, NetworkID::Mainnet),
-            Blobs::default(),
-        );
-        assert_eq!(scrypto.clone(), sut.clone().into());
-        assert_eq!(sut.scrypto_manifest(), scrypto);
-    }
-
-    #[test]
-    fn non_sensical_manifest_does_not_crash() {
-        // We are passing in an account address instead of resource address as argument
-        // to "withdraw", which does not make any sense. In an earlier version of RET
-        // this caused `summary` call to crash. But the PR adding this test bumps RET to
-        // a version which does not crash. Does not hurt to keep this unit test around.
-        let non_sensical = r#"
-CALL_METHOD
-  Address("account_tdx_2_1c90qdw5e3t3tjyd8axt3zg9zezhhhymt2mr8y4l0k2285mfwhczhdt")
-  "withdraw"
-  Address("account_tdx_2_12y0errvzu4caktegxc5v0ug93u5yat9d90k4zdqkcy6n55pt7wlgmq")
-  Decimal("0.01")
-;
-TAKE_FROM_WORKTOP
-  Address("resource_tdx_2_1thqru9whuem5sjltshg4q7vj3e22xfh27u6s9xvwecz4fallqjny90")
-  Decimal("0.01")
-  Bucket("burn")
-;
-
-BURN_RESOURCE
-  Bucket("burn")
-;
-        "#;
-
-        let manifest = TransactionManifest::new(
-            non_sensical,
-            NetworkID::Stokenet,
-            Blobs::default(),
+    fn test_new_transaction_manifest_from_unvalidated_transaction_manifest() {
+        let unvalidated_transaction_manifest =
+            UnvalidatedTransactionManifest::sample();
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            new_transaction_manifest_from_unvalidated_transaction_manifest(
+                unvalidated_transaction_manifest.clone(),
+                network_id
+            ),
+            SUT::try_from((unvalidated_transaction_manifest, network_id))
         )
-        .unwrap();
-        let summary = manifest.summary();
-        assert_eq!(summary.addresses_of_accounts_deposited_into, []);
     }
 
     #[test]
-    fn new_from_instructions_string() {
-        let instructions_str = r#"CALL_METHOD
-        Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
-        "lock_fee"
-        Decimal("500");
-                "#;
-
+    fn test_instructions_string() {
         assert_eq!(
-            SUT::new(instructions_str, NetworkID::Simulator, Blobs::default())
-                .unwrap()
-                .instructions()
-                .len(),
-            1
+            transaction_manifest_instructions_string(&SUT::sample()),
+            SUT::sample().instructions_string()
         );
     }
 
     #[test]
-    fn new_from_instructions_string_wrong_network_id_sim_main() {
-        let instructions_str = r#"CALL_METHOD
-        Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
-        "lock_fee"
-        Decimal("500");
-                "#;
-
+    fn test_network_id() {
         assert_eq!(
-            SUT::new(instructions_str, NetworkID::Mainnet, Blobs::default()),
-            Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Simulator,
-                specified_to_instructions_ctor: NetworkID::Mainnet
-            })
+            transaction_manifest_network_id(&SUT::sample()),
+            SUT::sample().network_id()
         );
     }
 
     #[test]
-    fn new_from_instructions_string_wrong_network_id_main_sim() {
-        let instructions_str = r#"CALL_METHOD
-        Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
-        "lock_fee"
-        Decimal("500");
-                "#;
-
+    fn test_blobs() {
         assert_eq!(
-            SUT::new(instructions_str, NetworkID::Stokenet, Blobs::default()),
-            Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
-                specified_to_instructions_ctor: NetworkID::Stokenet
-            })
+            transaction_manifest_blobs(&SUT::sample()),
+            SUT::sample().blobs().clone()
         );
     }
 
     #[test]
-    fn network_id() {
-        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
-        assert_eq!(SUT::sample_other().network_id(), NetworkID::Simulator);
-    }
+    fn test_execution_summary() {
+        let receipt = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "unstake_partially_from_one_validator.dat"
+        ));
 
-    #[test]
-    fn manifest_summary_simple() {
-        let manifest = SUT::sample();
-        let summary = manifest.summary();
-        pretty_assertions::assert_eq!(
-            summary,
-            ManifestSummary::new(
-                [AccountAddress::sample()],
-                [AccountAddress::sample_other()],
-                [AccountAddress::sample()],
-                [],
-            )
-        );
-    }
-
-    #[test]
-    fn manifest_summary_multi_account_resources_transfer() {
-        let a = AccountAddress::from("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q");
-
-        let manifest = SUT::sample_other();
-        let summary = manifest.summary();
-        pretty_assertions::assert_eq!(
-            summary,
-            ManifestSummary::new(
-                [
-                    a
-                ],
-                [
-                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz"),
-                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
-                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
-                ],
-                [a],
-                []
-            )
-        );
-    }
-
-    #[test]
-    fn involved_resource_addresses() {
-        let manifest = SUT::sample();
-        let resources = manifest.involved_resource_addresses();
-        assert_eq!(resources[0].address(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
-    }
-
-    #[test]
-    fn involved_pool_addresses() {
         let instructions_string = include_str!(concat!(
             env!("FIXTURES_TX"),
-            "redeem_from_bi_pool.rtm"
+            "unstake_partially_from_one_validator.rtm"
         ));
-        let sut = SUT::new(
+
+        let transaction_manifest = TransactionManifest::new(
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
         )
         .unwrap();
-        let pool_addresses = sut.involved_pool_addresses();
-        assert_eq!(pool_addresses, ["pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830"].into_iter().map(PoolAddress::from).collect_vec());
+
+        let sut = transaction_manifest_execution_summary(
+            &transaction_manifest,
+            receipt.to_owned(),
+        )
+        .unwrap();
+
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
+        assert_eq!(sut.addresses_of_accounts_requiring_auth, vec![acc_gk])
+    }
+
+    #[test]
+    fn test_involved_pool_addresses() {
+        assert_eq!(
+            transaction_manifest_involved_pool_addresses(&SUT::sample()),
+            Vec::new()
+        );
+    }
+
+    #[test]
+    fn test_involved_resource_addresses() {
+        assert_eq!(
+            transaction_manifest_involved_resource_addresses(&SUT::sample()),
+            vec![ResourceAddress::sample_mainnet_xrd()]
+        );
+    }
+
+    #[test]
+    fn test_manifest_summary() {
+        assert_eq!(
+            transaction_manifest_summary(&SUT::sample())
+                .addresses_of_accounts_withdrawn_from,
+            vec![AccountAddress::sample_mainnet()]
+        );
     }
 }

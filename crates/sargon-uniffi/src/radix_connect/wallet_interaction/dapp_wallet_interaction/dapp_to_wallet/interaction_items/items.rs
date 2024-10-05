@@ -1,45 +1,41 @@
 use crate::prelude::*;
+use sargon::DappToWalletInteractionItems as InternalDappToWalletInteractionItems;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
-#[serde(tag = "discriminator")]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum DappToWalletInteractionItems {
-    #[serde(rename = "unauthorizedRequest")]
     UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems),
-
-    #[serde(rename = "authorizedRequest")]
     AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems),
-
-    #[serde(rename = "transaction")]
     Transaction(DappToWalletInteractionTransactionItems),
 }
 
-impl HasSampleValues for DappToWalletInteractionItems {
-    fn sample() -> Self {
-        Self::UnauthorizedRequest(
-            DappToWalletInteractionUnauthorizedRequestItems::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::Transaction(DappToWalletInteractionTransactionItems::sample())
+impl From<InternalDappToWalletInteractionItems> for DappToWalletInteractionItems {
+    fn from(value: InternalDappToWalletInteractionItems) -> Self {
+        match value {
+            InternalDappToWalletInteractionItems::UnauthorizedRequest(value) => {
+                DappToWalletInteractionItems::UnauthorizedRequest(value.into())
+            }
+            InternalDappToWalletInteractionItems::AuthorizedRequest(value) => {
+                DappToWalletInteractionItems::AuthorizedRequest(value.into())
+            }
+            InternalDappToWalletInteractionItems::Transaction(value) => {
+                DappToWalletInteractionItems::Transaction(value.into())
+            }
+        }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionItems;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalDappToWalletInteractionItems> for DappToWalletInteractionItems {
+    fn into(self) -> InternalDappToWalletInteractionItems {
+        match self {
+            DappToWalletInteractionItems::UnauthorizedRequest(value) => {
+                InternalDappToWalletInteractionItems::UnauthorizedRequest(value.into())
+            }
+            DappToWalletInteractionItems::AuthorizedRequest(value) => {
+                InternalDappToWalletInteractionItems::AuthorizedRequest(value.into())
+            }
+            DappToWalletInteractionItems::Transaction(value) => {
+                InternalDappToWalletInteractionItems::Transaction(value.into())
+            }
+        }
     }
 }

@@ -31,7 +31,7 @@ pub enum SLIP10Curve {
     Secp256k1,
 }
 
-impl sargon::Identifiable for SLIP10Curve {
+impl Identifiable for SLIP10Curve {
     type ID = String;
 
     fn id(&self) -> Self::ID {

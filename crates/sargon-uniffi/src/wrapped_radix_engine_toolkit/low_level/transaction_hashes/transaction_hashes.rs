@@ -16,6 +16,8 @@ macro_rules! decl_tx_hash {
         $expected_sample_str_formatted: literal
     ) => {
 
+        use sargon::$struct_name as Internal$struct_name;
+
         $(
             #[doc = $expr]
         )*
@@ -33,15 +35,35 @@ macro_rules! decl_tx_hash {
             pub bech32_encoded_tx_id: String,
         }
 
+        impl From<Internal$struct_name> for $struct_name {
+            fn from(value: Internal$struct_name) -> Self {
+                Self {
+                    network_id: value.network_id.into(),
+                    hash: value.hash.into(),
+                    bech32_encoded_tx_id: value.bech32_encoded_tx_id,
+                }
+            }
+        }
+
+        impl Into<Internal$struct_name> for $struct_name {
+            fn into(self) -> Internal$struct_name {
+                Internal$struct_name {
+                    network_id: self.network_id.into(),
+                    hash: self.hash.into(),
+                    bech32_encoded_tx_id: self.bech32_encoded_tx_id,
+                }
+            }
+        }
+
         paste! {
             #[uniffi::export]
             pub fn [< new_$struct_name:snake _from_string>](string: String) -> Result<$struct_name> {
-                $struct_name::from_str(&string)
+                map_result_from_internal(Internal$struct_name::from_str(&string))
             }
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _formatted>](address: &$struct_name, format: AddressFormat) -> String {
-                address.formatted(format)
+                address.into::<Internal$struct_name>.formatted(format)
             }
 
             #[cfg(test)]
@@ -63,94 +85,6 @@ macro_rules! decl_tx_hash {
                     assert_eq!(sut.formatted(AddressFormat::Raw), [< $struct_name:snake _formatted>](&sut, AddressFormat::Raw));
                     assert_eq!(sut.formatted(AddressFormat::Full), [< $struct_name:snake _formatted>](&sut, AddressFormat::Full));
                 }
-            }
-        }
-
-        impl $struct_name {
-            pub(crate) fn from_scrypto(
-                scrypto: $scrypto_struct_name,
-                network_id: NetworkID,
-            ) -> Self {
-                let bech32_encoder = ScryptoTransactionHashBech32Encoder::new(
-                    &network_id.network_definition(),
-                );
-                let bech32_encoded_tx_id = bech32_encoder
-                    .encode(&scrypto)
-                    .expect("should never fail");
-                let scrypto_hash: ScryptoHash = *scrypto.as_hash();
-                Self {
-                    network_id,
-                    hash: scrypto_hash.into(),
-                    bech32_encoded_tx_id,
-                }
-            }
-            pub fn new(hash: Hash, network_id: NetworkID) -> Self {
-                let scrypto_hash: ScryptoHash = hash.clone().into_hash();
-                Self::from_scrypto(
-                    $scrypto_struct_name::from_hash(scrypto_hash),
-                    network_id,
-                )
-            }
-            pub fn from_bech32(s: &str) -> Result<Self> {
-                validate_and_decode_hash::<$scrypto_struct_name>(s)
-                    .map(|t| Self::from_scrypto(t.0, t.1))
-            }
-
-            pub fn formatted(&self, format: AddressFormat) -> String {
-                match format {
-                    AddressFormat::Default => format_string(self.bech32_encoded_tx_id.to_string(), 4, 6),
-                    AddressFormat::Full | AddressFormat::Raw => self.bech32_encoded_tx_id.to_string(),
-                }
-            }
-        }
-
-        impl FromStr for $struct_name {
-            type Err = crate::CommonError;
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Self::from_bech32(s)
-            }
-        }
-
-        impl From<$struct_name> for Hash {
-            fn from(value: $struct_name) -> Hash {
-                value.hash.clone()
-            }
-        }
-
-        #[cfg(test)]
-        mod $mod_test_name {
-            use super::*;
-
-            #[allow(clippy::upper_case_acronyms)]
-            type SUT = $struct_name;
-
-            #[test]
-            fn equality() {
-                assert_eq!(SUT::sample(), SUT::sample());
-                assert_eq!(SUT::sample_other(), SUT::sample_other());
-            }
-
-            #[test]
-            fn inequality() {
-                assert_ne!(SUT::sample(), SUT::sample_other());
-            }
-
-            #[test]
-            fn to_string() {
-                assert_eq!(SUT::sample().to_string(), $expected_sample_str);
-            }
-
-            #[test]
-            fn from_str() {
-                assert_eq!(SUT::sample(), $expected_sample_str.parse::<SUT>().unwrap());
-            }
-
-            #[test]
-            fn formatted() {
-                let sut = $expected_sample_str.parse::<SUT>().unwrap();
-                assert_eq!($expected_sample_str_formatted, sut.formatted(AddressFormat::Default));
-                assert_eq!($expected_sample_str, sut.formatted(AddressFormat::Raw));
-                assert_eq!($expected_sample_str, sut.formatted(AddressFormat::Full));
             }
         }
     };
@@ -177,19 +111,3 @@ macro_rules! decl_tx_hash {
         }
     };
 }
-
-decl_tx_hash!(
-    /// `IntentHash` used to identify transactions.
-    /// Representation is bech32 encoded string starting with `txid_` e.g.:
-    /// `"txid_rdx19rpveua6xuhvz0axu0mwpqk8fywr83atv8mkrugchvw6uuslgppqh9cnj4"`
-    Intent,
-    "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd",
-    "txid...zm3ltd",
-);
-
-decl_tx_hash!(
-    /// A Signed Intent Hash is a bech32 encoded string starting with `"signedintent_"
-    SignedIntent,
-    "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl",
-    "sign...xsk6nl",
-);

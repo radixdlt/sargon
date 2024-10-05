@@ -5,8 +5,6 @@ use crate::prelude::*;
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Debug,
     PartialEq,
@@ -36,61 +34,5 @@ impl Identifiable for DerivationPathScheme {
             Self::Cap26 => "cap26".to_string(),
             Self::Bip44Olympia => "bip44Olympia".to_string(),
         }
-    }
-}
-
-impl DerivationPathScheme {
-    /// The curve used for each derivation path scheme.
-    ///
-    /// We always use `curve25519` for non Olympia factor instances,
-    /// given that the scheme is `cap26` it means it is a non Olympia factor
-    /// instance => thus OK to always use `curve25519`
-    ///  
-    /// Bip44 is only used with `secp256k1` and `secp256k1` is only used for `bip44`
-    /// scheme, thus OK to return `secp256k1`.
-    pub fn curve(&self) -> SLIP10Curve {
-        match self {
-            Self::Cap26 => SLIP10Curve::Curve25519,
-            Self::Bip44Olympia => SLIP10Curve::Secp256k1,
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn curve_from_scheme() {
-        assert_eq!(
-            DerivationPathScheme::Cap26.curve(),
-            SLIP10Curve::Curve25519
-        );
-        assert_eq!(
-            DerivationPathScheme::Bip44Olympia.curve(),
-            SLIP10Curve::Secp256k1
-        );
-    }
-
-    #[test]
-    fn id() {
-        assert_eq!(DerivationPathScheme::Bip44Olympia.id(), "bip44Olympia");
-        assert_eq!(DerivationPathScheme::Cap26.id(), "cap26");
-    }
-
-    #[test]
-    fn json_roundtrip_bip44() {
-        let model = DerivationPathScheme::Bip44Olympia;
-        assert_json_value_eq_after_roundtrip(&model, json!("bip44Olympia"));
-        assert_json_value_ne_after_roundtrip(&model, json!("cap26"));
-        assert_json_roundtrip(&model);
-    }
-
-    #[test]
-    fn json_roundtrip_cap26() {
-        let model = DerivationPathScheme::Cap26;
-        assert_json_value_eq_after_roundtrip(&model, json!("cap26"));
-        assert_json_value_ne_after_roundtrip(&model, json!("bip44Olympia"));
-        assert_json_roundtrip(&model);
     }
 }

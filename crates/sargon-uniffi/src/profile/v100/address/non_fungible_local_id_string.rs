@@ -12,11 +12,7 @@ use crate::prelude::*;
     Clone,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
-    SerializeDisplay,
-    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
@@ -34,35 +30,6 @@ pub fn new_non_fungible_local_id_string_from_str(
     string.parse()
 }
 
-impl FromStr for NonFungibleLocalIdString {
-    type Err = crate::CommonError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        scrypto_string_non_fungible_local_id(s).map(|i| i.into())
-    }
-}
-
-impl From<ScryptoStringNonFungibleLocalId> for NonFungibleLocalIdString {
-    fn from(value: ScryptoStringNonFungibleLocalId) -> Self {
-        Self {
-            secret_magic: value,
-        }
-    }
-}
-impl From<NonFungibleLocalIdString> for ScryptoStringNonFungibleLocalId {
-    fn from(value: NonFungibleLocalIdString) -> Self {
-        value.secret_magic
-    }
-}
-
-fn scrypto_string_non_fungible_local_id(
-    string: impl AsRef<str>,
-) -> Result<ScryptoStringNonFungibleLocalId> {
-    ScryptoStringNonFungibleLocalId::new(string).map_err(|e| {
-        error!("{:?}", e);
-        CommonError::InvalidNonFungibleLocalIDString
-    })
-}
 
 uniffi::custom_type!(ScryptoStringNonFungibleLocalId, String);
 
@@ -77,98 +44,5 @@ impl crate::UniffiCustomTypeConverter for ScryptoStringNonFungibleLocalId {
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn from_custom(obj: Self) -> Self::Builtin {
         obj.value().to_owned()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NonFungibleLocalIdString;
-
-    #[test]
-    fn from_str() {
-        let s = "foo";
-        let sut: SUT = s.parse().unwrap();
-        assert_eq!(sut.to_string(), s.to_owned());
-    }
-
-    #[test]
-    fn invalid_forbidden_chars() {
-        let s = "<foo>";
-        assert_eq!(
-            s.parse::<SUT>(),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-
-    #[test]
-    fn invalid_empty() {
-        let s = "";
-        assert_eq!(
-            s.parse::<SUT>(),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-
-    #[test]
-    fn invalid_too_long() {
-        let s = "a".repeat(64 + 1);
-        assert_eq!(
-            s.parse::<SUT>(),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NonFungibleLocalIdString;
-
-    #[test]
-    fn from_str() {
-        let s = "foo";
-        let sut: SUT =
-            new_non_fungible_local_id_string_from_str(s.to_owned()).unwrap();
-        assert_eq!(sut.to_string(), s.to_owned());
-    }
-
-    #[test]
-    fn underscore_is_allowed() {
-        let s = "Member_237";
-        let sut: SUT =
-            new_non_fungible_local_id_string_from_str(s.to_owned()).unwrap();
-        assert_eq!(sut.to_string(), s.to_owned());
-    }
-
-    #[test]
-    fn invalid_forbidden_chars() {
-        let s = "<foo>";
-        assert_eq!(
-            new_non_fungible_local_id_string(s.to_owned()),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-
-    #[test]
-    fn invalid_empty() {
-        let s = "";
-        assert_eq!(
-            new_non_fungible_local_id_string(s.to_owned()),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-
-    #[test]
-    fn invalid_too_long() {
-        let s = "a".repeat(64 + 1);
-        assert_eq!(
-            new_non_fungible_local_id_string(s.to_owned()),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
     }
 }

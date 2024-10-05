@@ -1,88 +1,45 @@
 use crate::prelude::*;
+use sargon::WalletToDappInteractionAuthorizedRequestResponseItems as InternalWalletToDappInteractionAuthorizedRequestResponseItems;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
     pub auth: WalletToDappInteractionAuthRequestResponseItem,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ongoing_accounts:
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ongoing_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_accounts:
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
 }
 
-impl WalletToDappInteractionAuthorizedRequestResponseItems {
-    pub fn new(
-        auth: WalletToDappInteractionAuthRequestResponseItem,
-        ongoing_accounts: impl Into<
-            Option<WalletToDappInteractionAccountsRequestResponseItem>,
-        >,
-        ongoing_persona_data: impl Into<
-            Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
-        >,
-        one_time_accounts: impl Into<
-            Option<WalletToDappInteractionAccountsRequestResponseItem>,
-        >,
-        one_time_persona_data: impl Into<
-            Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
-        >,
+impl From<InternalWalletToDappInteractionAuthorizedRequestResponseItems>
+    for WalletToDappInteractionAuthorizedRequestResponseItems
+{
+    fn from(
+        value: InternalWalletToDappInteractionAuthorizedRequestResponseItems,
     ) -> Self {
         Self {
-            auth,
-            ongoing_accounts: ongoing_accounts.into(),
-            ongoing_persona_data: ongoing_persona_data.into(),
-            one_time_accounts: one_time_accounts.into(),
-            one_time_persona_data: one_time_persona_data.into(),
+            auth: value.auth.into(),
+            ongoing_accounts: value.ongoing_accounts.map(Into::into),
+            ongoing_persona_data: value.ongoing_persona_data.map(Into::into),
+            one_time_accounts: value.one_time_accounts.map(Into::into),
+            one_time_persona_data: value.one_time_persona_data.map(Into::into),
         }
     }
 }
 
-impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
-    fn sample() -> Self {
-        Self::new(
-            WalletToDappInteractionAuthRequestResponseItem::sample(),
-            WalletToDappInteractionAccountsRequestResponseItem::sample(),
-            WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-            WalletToDappInteractionAccountsRequestResponseItem::sample(),
-            WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            WalletToDappInteractionAuthRequestResponseItem::sample_other(),
-            WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
-            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
-            ),
-            WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
-            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
-            ),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletToDappInteractionAuthorizedRequestResponseItems;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalWalletToDappInteractionAuthorizedRequestResponseItems>
+    for WalletToDappInteractionAuthorizedRequestResponseItems
+{
+    fn into(self) -> InternalWalletToDappInteractionAuthorizedRequestResponseItems {
+        InternalWalletToDappInteractionAuthorizedRequestResponseItems {
+            auth: self.auth.into(),
+            ongoing_accounts: self.ongoing_accounts.map(Into::into),
+            ongoing_persona_data: self.ongoing_persona_data.map(Into::into),
+            one_time_accounts: self.one_time_accounts.map(Into::into),
+            one_time_persona_data: self.one_time_persona_data.map(Into::into),
+        }
     }
 }

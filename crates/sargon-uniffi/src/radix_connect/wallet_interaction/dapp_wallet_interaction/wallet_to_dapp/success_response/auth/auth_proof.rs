@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionAuthProof {
     #[serde_as(as = "DisplayFromStr")]

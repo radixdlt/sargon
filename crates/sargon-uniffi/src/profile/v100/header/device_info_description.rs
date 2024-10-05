@@ -5,7 +5,6 @@ use crate::prelude::*;
 /// This used to be a String only in Pre 1.6.0 wallets, so
 /// we have a custom Deserialize impl of it.
 #[derive(
-    Serialize,
     Clone,
     Debug,
     PartialEq,
@@ -23,130 +22,49 @@ pub struct DeviceInfoDescription {
     pub model: String,
 }
 
-impl DeviceInfoDescription {
-    pub fn new(name: impl AsRef<str>, model: impl AsRef<str>) -> Self {
-        Self {
-            name: name.as_ref().to_owned(),
-            model: model.as_ref().to_owned(),
-        }
-    }
+#[uniffi::export]
+pub fn new_device_info_description_sample() -> DeviceInfoDescription {
+    DeviceInfoDescription::sample()
 }
 
-impl<'de> Deserialize<'de> for DeviceInfoDescription {
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        #[derive(Deserialize, Serialize)]
-        struct NewFormat {
-            pub name: String,
-            pub model: String,
-        }
-
-        #[derive(Deserialize, Serialize)]
-        #[serde(untagged)]
-        enum Wrapper {
-            NewFormat(NewFormat),
-            OldFormat(String),
-        }
-
-        match Wrapper::deserialize(deserializer)? {
-            Wrapper::NewFormat(new_format) => Ok(Self {
-                name: new_format.name,
-                model: new_format.model,
-            }),
-            Wrapper::OldFormat(description) => {
-                Ok(Self::from(description.as_ref()))
-            }
-        }
-    }
+#[uniffi::export]
+pub fn new_device_info_description_sample_other() -> DeviceInfoDescription {
+    DeviceInfoDescription::sample_other()
 }
 
-impl From<&str> for DeviceInfoDescription {
-    fn from(description: &str) -> Self {
-        // Swift used: "\(model) (\(name))"
-        let swift_name_suffix = " (iPhone)";
-        if description.ends_with(swift_name_suffix) {
-            let model = description.split(swift_name_suffix).next().unwrap();
-            return Self::new("iPhone", model);
-        }
-        // FIXME: Android
-        Self::new(description, description)
-    }
-}
-
-impl HasSampleValues for DeviceInfoDescription {
-    fn sample() -> Self {
-        Self::new("My precious", "iPhone 15 Pro")
-    }
-
-    fn sample_other() -> Self {
-        Self::new("R2", "OnePlus Open")
-    }
+#[uniffi::export]
+pub fn device_info_description_to_string(
+    device_info_description: &DeviceInfoDescription,
+) -> String {
+    device_info_description.to_string()
 }
 
 #[cfg(test)]
-mod test_device_info_description {
+mod test {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DeviceInfoDescription;
 
     #[test]
-    fn json_new_format() {
+    fn test_to_string() {
         let sut = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "name": "My precious",
-                "model": "iPhone 15 Pro"
-            }
-            "#,
-        )
+
+        assert_eq!(sut.to_string(), device_info_description_to_string(&sut))
     }
 
     #[test]
-    fn json_old_format_iphone_iphone() {
-        let json = json!("iPhone (iPhone)");
-        let sut = serde_json::from_value::<SUT>(json).unwrap();
-        assert_eq!(sut.clone(), SUT::new("iPhone", "iPhone"));
-
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "name": "iPhone",
-                "model": "iPhone"
-            }
-            "#,
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_device_info_description_sample(),
+                new_device_info_description_sample_other(),
+                // duplicates should get removed
+                new_device_info_description_sample(),
+                new_device_info_description_sample_other(),
+            ])
+            .len(),
+            2
         );
-    }
-
-    #[test]
-    fn json_old_format_iphone15_pro_max_iphone() {
-        let json = json!("iPhone 15 Pro Max (iPhone)");
-        let sut = serde_json::from_value::<SUT>(json).unwrap();
-        assert_eq!(sut.clone(), SUT::new("iPhone", "iPhone 15 Pro Max"));
-
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "name": "iPhone",
-                "model": "iPhone 15 Pro Max"
-            }
-            "#,
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

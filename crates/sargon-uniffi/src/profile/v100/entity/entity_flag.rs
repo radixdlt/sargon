@@ -3,9 +3,6 @@ use crate::prelude::*;
 /// Flags used to mark state of an Account or Persona such as whether
 /// user has marked it as deleted or not.
 #[derive(
-    Serialize,
-    Deserialize,
-    FromRepr,
     Clone,
     Copy,
     Debug,
@@ -27,14 +24,14 @@ pub enum EntityFlag {
     PlaceholderSampleValueFlag,
 }
 
-impl HasSampleValues for EntityFlag {
-    fn sample() -> Self {
-        Self::DeletedByUser
-    }
+#[uniffi::export]
+pub fn new_entity_flag_sample() -> EntityFlag {
+    EntityFlag::sample()
+}
 
-    fn sample_other() -> Self {
-        Self::PlaceholderSampleValueFlag
-    }
+#[uniffi::export]
+pub fn new_entity_flag_sample_other() -> EntityFlag {
+    EntityFlag::sample_other()
 }
 
 #[cfg(test)]
@@ -45,32 +42,17 @@ mod tests {
     type SUT = EntityFlag;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(
-            &SUT::DeletedByUser,
-            json!("deletedByUser"),
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_entity_flag_sample(),
+                new_entity_flag_sample_other(),
+                // duplicates should get removed
+                new_entity_flag_sample(),
+                new_entity_flag_sample_other(),
+            ])
+            .len(),
+            2
         );
-        assert_json_roundtrip(&SUT::DeletedByUser);
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::DeletedByUser), "DeletedByUser");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", SUT::DeletedByUser), "DeletedByUser");
     }
 }

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DetailedManifestClass as InternalDetailedManifestClass;
 
 /// The execution summary process not only determines the class of the manifest,
 /// but also includes additional information about this class that the wallet
@@ -88,135 +89,116 @@ pub enum DetailedManifestClass {
     },
 }
 
-impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
-    fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
-        let n = value.1;
-        match value.0 {
-            RetDetailedManifestClass::General => Self::General,
-
-            RetDetailedManifestClass::Transfer { is_one_to_one } => {
-                Self::Transfer { is_one_to_one }
+impl From<InternalDetailedManifestClass> for DetailedManifestClass {
+    fn from(value: InternalDetailedManifestClass) -> Self {
+        match value {
+            InternalDetailedManifestClass::General => DetailedManifestClass::General,
+            InternalDetailedManifestClass::Transfer { is_one_to_one } => {
+                DetailedManifestClass::Transfer { is_one_to_one }
             }
-
-            RetDetailedManifestClass::PoolContribution {
-                pool_addresses,
-                pool_contributions,
-            } => {
-                let pool_contributions =
-                    to_vec_network_aware(pool_contributions, n);
-                let pool_addresses = to_vec_network_aware(pool_addresses, n);
-
-                Self::PoolContribution {
-                    pool_addresses,
-                    pool_contributions,
-                }
-            }
-
-            RetDetailedManifestClass::PoolRedemption {
-                pool_addresses,
-                pool_redemptions,
-            } => Self::PoolRedemption {
-                pool_addresses: to_vec_network_aware(pool_addresses, n),
-                pool_redemptions: to_vec_network_aware(pool_redemptions, n),
-            },
-
-            RetDetailedManifestClass::ValidatorStake {
-                validator_addresses,
-                validator_stakes,
-            } => Self::ValidatorStake {
-                validator_addresses: to_vec_network_aware(
-                    validator_addresses,
-                    n,
-                ),
-                validator_stakes: to_vec_network_aware(validator_stakes, n),
-            },
-
-            RetDetailedManifestClass::ValidatorUnstake {
-                validator_addresses,
-                validator_unstakes: _,
-                claims_non_fungible_data,
-            } => Self::ValidatorUnstake {
-                validator_addresses: to_vec_network_aware(
-                    validator_addresses,
-                    n,
-                ),
-                claims_non_fungible_data: claims_non_fungible_data
-                    .into_iter()
-                    .map(|(k, v)| {
-                        (
-                            NonFungibleGlobalId::from((k, n)),
-                            UnstakeData::from(v),
-                        )
-                    })
-                    .collect::<HashMap<_, _>>(),
-            },
-
-            RetDetailedManifestClass::ValidatorClaim {
+            InternalDetailedManifestClass::ValidatorClaim {
                 validator_addresses,
                 validator_claims,
-            } => Self::ValidatorClaim {
-                validator_addresses: to_vec_network_aware(
-                    validator_addresses,
-                    n,
-                ),
-                validator_claims: to_vec_network_aware(validator_claims, n),
+            } => DetailedManifestClass::ValidatorClaim {
+                validator_addresses: validator_addresses.into(),
+                validator_claims: validator_claims.into(),
             },
-
-            RetDetailedManifestClass::AccountDepositSettingsUpdate {
+            InternalDetailedManifestClass::ValidatorStake {
+                validator_addresses,
+                validator_stakes,
+            } => DetailedManifestClass::ValidatorStake {
+                validator_addresses: validator_addresses.into(),
+                validator_stakes: validator_stakes.into(),
+            },
+            InternalDetailedManifestClass::ValidatorUnstake {
+                validator_addresses,
+                claims_non_fungible_data,
+            } => DetailedManifestClass::ValidatorUnstake {
+                validator_addresses: validator_addresses.into(),
+                claims_non_fungible_data: claims_non_fungible_data.into(),
+            },
+            InternalDetailedManifestClass::AccountDepositSettingsUpdate {
                 resource_preferences_updates,
                 deposit_mode_updates,
-                authorized_depositors_updates,
-            } => {
-                let deposit_mode_updates: HashMap<AccountAddress, DepositRule> =
-                    to_hashmap_network_aware_key(deposit_mode_updates, n);
+                authorized_depositors_added,
+                authorized_depositors_removed,
+            } => DetailedManifestClass::AccountDepositSettingsUpdate {
+                resource_preferences_updates: resource_preferences_updates.into(),
+                deposit_mode_updates: deposit_mode_updates.into(),
+                authorized_depositors_added: authorized_depositors_added.into(),
+                authorized_depositors_removed: authorized_depositors_removed.into(),
+            },
+            InternalDetailedManifestClass::PoolContribution {
+                pool_addresses,
+                pool_contributions,
+            } => DetailedManifestClass::PoolContribution {
+                pool_addresses: pool_addresses.into(),
+                pool_contributions: pool_contributions.into(),
+            },
+            InternalDetailedManifestClass::PoolRedemption {
+                pool_addresses,
+                pool_redemptions,
+            } => DetailedManifestClass::PoolRedemption {
+                pool_addresses: pool_addresses.into(),
+                pool_redemptions: pool_redemptions.into(),
+            },
+        }
+    }
+}
 
-                let resource_preferences_updates = resource_preferences_updates
-                    .into_iter()
-                    .map(|(k, v)| {
-                        (
-                            AccountAddress::from((k, n)),
-                            v.into_iter()
-                                .map(|(k, v)| {
-                                    (
-                                        ResourceAddress::from((k, n)),
-                                        ResourcePreferenceUpdate::from(v),
-                                    )
-                                })
-                                .collect::<HashMap<
-                                    ResourceAddress,
-                                    ResourcePreferenceUpdate,
-                                >>(),
-                        )
-                    })
-                    .collect::<HashMap<
-                        AccountAddress,
-                        HashMap<ResourceAddress, ResourcePreferenceUpdate>,
-                    >>();
-
-                let split_map_auth_dep = |o: RetOperation| {
-                    authorized_depositors_updates.clone().into_iter().map(|(k, v)| {
-                            (
-                                AccountAddress::from((k, n)),
-                                v.into_iter().filter(|x| x.1 == o).map(|x| (x.0, n)).map(ResourceOrNonFungible::from).collect_vec()
-                            )
-                        }).collect::<HashMap<
-                        AccountAddress,
-                        Vec<ResourceOrNonFungible>,
-                    >>()
-                };
-
-                let authorized_depositors_added =
-                    split_map_auth_dep(RetOperation::Added);
-                let authorized_depositors_removed =
-                    split_map_auth_dep(RetOperation::Removed);
-
-                Self::AccountDepositSettingsUpdate {
-                    resource_preferences_updates,
-                    deposit_mode_updates,
-                    authorized_depositors_added,
-                    authorized_depositors_removed,
-                }
+impl Into<InternalDetailedManifestClass> for DetailedManifestClass {
+    fn into(self) -> InternalDetailedManifestClass {
+        match self {
+            DetailedManifestClass::General => InternalDetailedManifestClass::General,
+            DetailedManifestClass::Transfer { is_one_to_one } => {
+                InternalDetailedManifestClass::Transfer { is_one_to_one }
             }
+            DetailedManifestClass::ValidatorClaim {
+                validator_addresses,
+                validator_claims,
+            } => InternalDetailedManifestClass::ValidatorClaim {
+                validator_addresses: validator_addresses.into(),
+                validator_claims: validator_claims.into(),
+            },
+            DetailedManifestClass::ValidatorStake {
+                validator_addresses,
+                validator_stakes,
+            } => InternalDetailedManifestClass::ValidatorStake {
+                validator_addresses: validator_addresses.into(),
+                validator_stakes: validator_stakes.into(),
+            },
+            DetailedManifestClass::ValidatorUnstake {
+                validator_addresses,
+                claims_non_fungible_data,
+            } => InternalDetailedManifestClass::ValidatorUnstake {
+                validator_addresses: validator_addresses.into(),
+                claims_non_fungible_data: claims_non_fungible_data.into(),
+            },
+            DetailedManifestClass::AccountDepositSettingsUpdate {
+                resource_preferences_updates,
+                deposit_mode_updates,
+                authorized_depositors_added,
+                authorized_depositors_removed,
+            } => InternalDetailedManifestClass::AccountDepositSettingsUpdate {
+                resource_preferences_updates: resource_preferences_updates.into(),
+                deposit_mode_updates: deposit_mode_updates.into(),
+                authorized_depositors_added: authorized_depositors_added.into(),
+                authorized_depositors_removed: authorized_depositors_removed.into(),
+            },
+            DetailedManifestClass::PoolContribution {
+                pool_addresses,
+                pool_contributions,
+            } => InternalDetailedManifestClass::PoolContribution {
+                pool_addresses: pool_addresses.into(),
+                pool_contributions: pool_contributions.into(),
+            },
+            DetailedManifestClass::PoolRedemption {
+                pool_addresses,
+                pool_redemptions,
+            } => InternalDetailedManifestClass::PoolRedemption {
+                pool_addresses: pool_addresses.into(),
+                pool_redemptions: pool_redemptions.into(),
+            },
         }
     }
 }

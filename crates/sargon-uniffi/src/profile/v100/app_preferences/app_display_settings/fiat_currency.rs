@@ -2,8 +2,6 @@ use crate::prelude::*;
 
 /// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Copy,
     Debug,
@@ -16,29 +14,22 @@ use crate::prelude::*;
 )]
 pub enum FiatCurrency {
     /// American dollars.
-    #[serde(rename = "usd")]
     USD,
 
     /// Swedish krona.
-    #[serde(rename = "sek")]
     SEK,
 }
 
-impl Default for FiatCurrency {
-    /// American dollars.
-    fn default() -> Self {
-        Self::USD
-    }
+json_string_convertible!(FiatCurrency, "super invalid json string");
+
+#[uniffi::export]
+pub fn new_fiat_currency_sample() -> FiatCurrency {
+    FiatCurrency::sample()
 }
 
-impl HasSampleValues for FiatCurrency {
-    fn sample() -> Self {
-        Self::USD
-    }
-
-    fn sample_other() -> Self {
-        Self::SEK
-    }
+#[uniffi::export]
+pub fn new_fiat_currency_sample_other() -> FiatCurrency {
+    FiatCurrency::sample_other()
 }
 
 #[cfg(test)]
@@ -49,23 +40,17 @@ mod tests {
     type SUT = FiatCurrency;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn usd_is_default() {
-        assert_eq!(AppDisplay::default().fiat_currency_price_target, SUT::USD);
-    }
-
-    #[test]
-    fn from_json_str() {
-        assert_eq!(SUT::new_from_json_string("usd").unwrap(), SUT::USD);
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_fiat_currency_sample(),
+                new_fiat_currency_sample_other(),
+                // duplicates should get removed
+                new_fiat_currency_sample(),
+                new_fiat_currency_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

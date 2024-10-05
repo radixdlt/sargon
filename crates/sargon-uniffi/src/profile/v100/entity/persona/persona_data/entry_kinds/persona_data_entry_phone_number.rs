@@ -6,8 +6,6 @@ use crate::prelude::*;
 /// Current implementation does not validate the phone number other than it
 /// cannot be empty, since telephone number validation is tricky.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Hash,
@@ -18,7 +16,6 @@ use crate::prelude::*;
 )]
 #[display("{number}")]
 #[debug("{number}")]
-#[serde(transparent)]
 pub struct PersonaDataEntryPhoneNumber {
     pub number: String,
 }
@@ -31,100 +28,39 @@ impl Identifiable for PersonaDataEntryPhoneNumber {
     }
 }
 
-impl FromStr for PersonaDataEntryPhoneNumber {
-    type Err = CommonError;
+json_string_convertible!(PersonaDataEntryPhoneNumber);
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::new(s)
-    }
+#[uniffi::export]
+pub fn new_persona_data_entry_phone_number_sample(
+) -> PersonaDataEntryPhoneNumber {
+    PersonaDataEntryPhoneNumber::sample()
 }
 
-impl PersonaDataEntryPhoneNumber {
-    pub fn new(number: impl AsRef<str>) -> Result<Self> {
-        let number = number.as_ref().to_owned();
-        if number.is_empty() {
-            return Err(CommonError::PersonaDataInvalidPhoneNumberEmpty);
-        }
-        Ok(Self { number })
-    }
-}
-
-impl HasSampleValues for PersonaDataEntryPhoneNumber {
-    fn sample() -> Self {
-        PersonaDataEntryPhoneNumber::new("+46123456789").expect("Valid sample.")
-    }
-
-    fn sample_other() -> Self {
-        PersonaDataEntryPhoneNumber::new("+44987654321").expect("Valid sample.")
-    }
+#[uniffi::export]
+pub fn new_persona_data_entry_phone_number_sample_other(
+) -> PersonaDataEntryPhoneNumber {
+    PersonaDataEntryPhoneNumber::sample_other()
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PersonaDataEntryPhoneNumber;
 
     #[test]
-    fn equality() {
+    fn hash_of_samples() {
         assert_eq!(
-            PersonaDataEntryPhoneNumber::sample(),
-            PersonaDataEntryPhoneNumber::sample()
+            HashSet::<SUT>::from_iter([
+                new_persona_data_entry_phone_number_sample(),
+                new_persona_data_entry_phone_number_sample_other(),
+                // duplicates should get removed
+                new_persona_data_entry_phone_number_sample(),
+                new_persona_data_entry_phone_number_sample_other(),
+            ])
+            .len(),
+            2
         );
-        assert_eq!(
-            PersonaDataEntryPhoneNumber::sample_other(),
-            PersonaDataEntryPhoneNumber::sample_other()
-        );
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            PersonaDataEntryPhoneNumber::sample(),
-            PersonaDataEntryPhoneNumber::sample_other()
-        );
-    }
-
-    #[test]
-    fn invalid_empty() {
-        assert_eq!(
-            PersonaDataEntryPhoneNumber::new(""),
-            Err(CommonError::PersonaDataInvalidPhoneNumberEmpty)
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_sample() {
-        let model = PersonaDataEntryPhoneNumber::sample();
-        assert_json_value_eq_after_roundtrip(&model, json!("+46123456789"));
-    }
-
-    #[test]
-    fn id_is_number() {
-        assert_eq!(
-            PersonaDataEntryPhoneNumber::sample().id(),
-            PersonaDataEntryPhoneNumber::sample().number
-        );
-    }
-
-    #[test]
-    fn new_from_string() {
-        assert_eq!(
-            PersonaDataEntryPhoneNumber::new("+46123456789").unwrap(),
-            PersonaDataEntryPhoneNumber::sample()
-        );
-    }
-
-    #[test]
-    fn new_from_str() {
-        assert_eq!(
-            PersonaDataEntryPhoneNumber::new("+46123456789").unwrap(),
-            PersonaDataEntryPhoneNumber::sample()
-        );
-    }
-
-    #[test]
-    fn new_with_fromstr() {
-        let phone: PersonaDataEntryPhoneNumber =
-            "+46123456789".parse().unwrap();
-        assert_eq!(phone, PersonaDataEntryPhoneNumber::sample());
     }
 }

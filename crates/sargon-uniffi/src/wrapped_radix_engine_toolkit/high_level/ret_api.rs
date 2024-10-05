@@ -1,23 +1,25 @@
 use crate::prelude::*;
+use sargon::TransactionManifest as InternalTransactionManifest;
+use sargon::SargonBuildInformation as InternalSargonBuildInformation;
 
 #[uniffi::export]
 pub fn manifest_for_faucet(
     include_lock_fee_instruction: bool,
     address_of_receiving_account: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::faucet(
+    InternalTransactionManifest::faucet(
         include_lock_fee_instruction,
-        address_of_receiving_account,
-    )
+        &address_of_receiving_account.into(),
+    ).into()
 }
 
 #[uniffi::export]
 pub fn manifest_marking_account_as_dapp_definition_type(
     account_address: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::marking_account_as_dapp_definition_type(
-        account_address,
-    )
+    InternalTransactionManifest::marking_account_as_dapp_definition_type(
+        &account_address.into(),
+    ).into()
 }
 
 #[uniffi::export]
@@ -25,10 +27,10 @@ pub fn manifest_set_owner_keys_hashes(
     address_of_account_or_persona: &AddressOfAccountOrPersona,
     owner_key_hashes: Vec<PublicKeyHash>,
 ) -> TransactionManifest {
-    TransactionManifest::set_owner_keys_hashes(
-        address_of_account_or_persona,
-        owner_key_hashes,
-    )
+    InternalTransactionManifest::set_owner_keys_hashes(
+        &address_of_account_or_persona.into(),
+        owner_key_hashes.into_iter().map(Into::into).collect(),
+    ).into()
 }
 
 #[uniffi::export]
@@ -37,18 +39,18 @@ pub fn manifest_create_fungible_token_with_metadata(
     initial_supply: Decimal192,
     metadata: TokenDefinitionMetadata,
 ) -> TransactionManifest {
-    TransactionManifest::create_fungible_token_with_metadata(
-        address_of_owner,
-        initial_supply,
-        metadata,
-    )
+    InternalTransactionManifest::create_fungible_token_with_metadata(
+        &address_of_owner.into(),
+        initial_supply.into(),
+        metadata.into(),
+    ).into()
 }
 
 #[uniffi::export]
 pub fn manifest_create_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::create_fungible_token(address_of_owner)
+    InternalTransactionManifest::create_fungible_token(&address_of_owner.into()).into()
 }
 
 /// Creates many fungible tokens, with initial supply, to be owned by `address_of_owner`.
@@ -61,10 +63,10 @@ pub fn manifest_create_multiple_fungible_tokens(
     address_of_owner: &AccountAddress,
     count: Option<u8>,
 ) -> TransactionManifest {
-    TransactionManifest::create_multiple_fungible_tokens(
-        address_of_owner,
+    InternalTransactionManifest::create_multiple_fungible_tokens(
+        &address_of_owner.into(),
         count,
-    )
+    ).into()
 }
 
 #[uniffi::export]
@@ -72,10 +74,10 @@ pub fn manifest_create_non_fungible_token(
     address_of_owner: &AccountAddress,
     nfts_per_collection: Option<u8>,
 ) -> TransactionManifest {
-    TransactionManifest::create_single_nft_collection(
-        address_of_owner,
+    InternalTransactionManifest::create_single_nft_collection(
+        &address_of_owner.into(),
         nfts_per_collection.map(|n| n as u64).unwrap_or(20),
-    )
+    ).into()
 }
 
 #[uniffi::export]
@@ -84,11 +86,11 @@ pub fn manifest_create_multiple_non_fungible_tokens(
     collection_count: Option<u8>,
     nfts_per_collection: Option<u8>,
 ) -> TransactionManifest {
-    TransactionManifest::create_multiple_nft_collections(
-        address_of_owner,
+    InternalTransactionManifest::create_multiple_nft_collections(
+        &address_of_owner.into(),
         collection_count.map(|n| n as u16).unwrap_or(15),
         nfts_per_collection.map(|n| n as u64).unwrap_or(10),
-    )
+    ).into()
 }
 
 #[uniffi::export]
@@ -96,7 +98,10 @@ pub fn manifest_stakes_claim(
     account_address: &AccountAddress,
     stake_claims: Vec<StakeClaim>,
 ) -> TransactionManifest {
-    TransactionManifest::stake_claims(account_address, stake_claims)
+    InternalTransactionManifest::stake_claims(
+        &account_address.into(),
+        stake_claims.into_iter().map(Into::into).collect(),
+        ).into()
 }
 
 #[uniffi::export]
@@ -105,7 +110,7 @@ pub fn manifest_third_party_deposit_update(
     from: ThirdPartyDeposits,
     to: ThirdPartyDeposits,
 ) -> TransactionManifest {
-    TransactionManifest::third_party_deposit_update(account_address, from, to)
+    InternalTransactionManifest::third_party_deposit_update(&account_address.into(), from.into(), to.into()).into()
 }
 
 #[uniffi::export]
@@ -114,7 +119,13 @@ pub fn modify_manifest_lock_fee(
     address_of_fee_payer: &AccountAddress,
     fee: Option<Decimal192>,
 ) -> TransactionManifest {
-    manifest.modify_add_lock_fee(address_of_fee_payer, fee)
+    manifest
+    .into::<InternalTransactionManifest>()
+    .modify_add_lock_fee(
+        &address_of_fee_payer.into(), 
+        fee.map(Into::into)
+    ).into()
+
 }
 
 /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
@@ -124,29 +135,29 @@ pub fn modify_manifest_add_guarantees(
     manifest: TransactionManifest,
     guarantees: Vec<TransactionGuarantee>,
 ) -> Result<TransactionManifest> {
-    manifest.modify_add_guarantees(guarantees)
+   map_result_from_internal(manifest.into::<InternalTransactionManifest>().modify_add_guarantees(guarantees.into_iter().map(Into::into).collect()))
 }
 
 #[uniffi::export]
 pub fn build_information() -> SargonBuildInformation {
-    SargonBuildInformation::get()
+    InternalSargonBuildInformation::get().into()
 }
 
 #[uniffi::export]
 pub fn hash(data: BagOfBytes) -> Hash {
-    hash_of::<Vec<u8>>(data.to_vec())
+    sargom::hash_of::<Vec<u8>>(data.into::<InternalBagOfBytes>.to_vec()).into()
 }
 
 #[uniffi::export]
 pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
-    ResourceAddress::xrd_on_network(network_id)
+    InternalResourceAddress::xrd_on_network(network_id.into()).into()
 }
 
 #[uniffi::export]
 pub fn debug_print_compiled_notarized_intent(
     compiled: CompiledNotarizedIntent,
 ) -> String {
-    let notarized = compiled.decompile();
+    let notarized = compiled.into::<InternalCompiledNotarizedIntent>.decompile().into();
     format!("{:?}", notarized)
 }
 
@@ -158,14 +169,14 @@ pub fn debug_print_compiled_notarized_intent(
 pub fn manifest_per_recipient_transfers(
     transfers: PerRecipientAssetTransfers,
 ) -> TransactionManifest {
-    TransactionManifest::per_recipient_transfers(transfers)
+    InternalTransactionManifest::per_recipient_transfers(transfers.into()).into()
 }
 
 #[uniffi::export]
 pub fn manifest_per_asset_transfers(
     transfers: PerAssetTransfers,
 ) -> TransactionManifest {
-    TransactionManifest::per_asset_transfers(transfers)
+    InternalTransactionManifest::per_asset_transfers(transfers.into()).into()
 }
 
 #[uniffi::export]
@@ -174,11 +185,11 @@ pub fn manifest_account_locker_claim(
     claimant: &AccountAddress,
     claimable_resources: Vec<AccountLockerClaimableResource>,
 ) -> TransactionManifest {
-    TransactionManifest::account_locker_claim(
-        locker_address,
-        claimant,
-        claimable_resources,
-    )
+    InternalTransactionManifest::account_locker_claim(
+        &locker_address.into(),
+        &claimant.into(),
+        claimable_resources.into_iter().map(Into::into).collect(),
+    ).into()
 }
 
 #[cfg(test)]

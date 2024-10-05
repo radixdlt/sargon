@@ -1,44 +1,24 @@
 use crate::prelude::*;
+use sargon::DappToWalletInteractionAuthUsePersonaRequestItem as InternalDappToWalletInteractionAuthUsePersonaRequestItem;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionAuthUsePersonaRequestItem {
     pub identity_address: IdentityAddress,
 }
 
-impl DappToWalletInteractionAuthUsePersonaRequestItem {
-    pub fn new(identity_address: impl Into<IdentityAddress>) -> Self {
+impl From<InternalDappToWalletInteractionAuthUsePersonaRequestItem> for DappToWalletInteractionAuthUsePersonaRequestItem {
+    fn from(value: InternalDappToWalletInteractionAuthUsePersonaRequestItem) -> Self {
         Self {
-            identity_address: identity_address.into(),
+            identity_address: value.identity_address.into(),
         }
     }
 }
 
-impl HasSampleValues for DappToWalletInteractionAuthUsePersonaRequestItem {
-    fn sample() -> Self {
-        Self::new(IdentityAddress::sample())
-    }
-
-    fn sample_other() -> Self {
-        Self::new(IdentityAddress::sample_other())
+impl Into<InternalDappToWalletInteractionAuthUsePersonaRequestItem> for DappToWalletInteractionAuthUsePersonaRequestItem {
+    fn into(self) -> InternalDappToWalletInteractionAuthUsePersonaRequestItem {
+        InternalDappToWalletInteractionAuthUsePersonaRequestItem {
+            identity_address: self.identity_address.into(),
+        }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionAuthUsePersonaRequestItem;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-}

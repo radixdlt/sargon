@@ -1,21 +1,19 @@
 use crate::prelude::*;
+use sargon::TXVersion as InternalTXVersion;
 
 uniffi::custom_newtype!(TXVersion, u64);
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TXVersion(u64);
 
-impl From<u64> for TXVersion {
-    fn from(value: u64) -> Self {
-        Self(value)
+impl From<InternalTXVersion> for TXVersion {
+    fn from(value: InternalTXVersion) -> Self {
+        Self(value.0)
     }
 }
 
-impl HasSampleValues for TXVersion {
-    fn sample() -> Self {
-        Self(1)
-    }
-
-    fn sample_other() -> Self {
-        Self(2)
+impl Into<InternalTXVersion> for TXVersion {
+    fn into(self) -> InternalTXVersion {
+        InternalTXVersion(self.0)
     }
 }
+

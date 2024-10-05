@@ -24,52 +24,19 @@ pub enum BIP39Language {
     French,
 }
 
-impl Default for BIP39Language {
-    fn default() -> Self {
-        Self::English
-    }
+#[uniffi::export]
+pub fn new_bip39_language_sample() -> BIP39Language {
+    BIP39Language::sample()
 }
 
-impl HasSampleValues for BIP39Language {
-    fn sample() -> Self {
-        Self::English
-    }
-
-    fn sample_other() -> Self {
-        Self::French
-    }
+#[uniffi::export]
+pub fn new_bip39_language_sample_other() -> BIP39Language {
+    BIP39Language::sample_other()
 }
 
-impl BIP39Language {
-    pub fn wordlist(&self) -> Vec<BIP39Word> {
-        let language: bip39::Language = (*self).into();
-        let word_list = language.word_list();
-
-        word_list
-            .iter()
-            .map(|w| BIP39Word::new(w, *self))
-            .collect::<Result<Vec<BIP39Word>, CommonError>>()
-            .expect("Crate bip39 generated words unknown to us.")
-    }
-}
-
-impl From<bip39::Language> for BIP39Language {
-    fn from(value: bip39::Language) -> Self {
-        use bip39::Language::*;
-        match value {
-            English => Self::English,
-            French => Self::French,
-        }
-    }
-}
-impl From<BIP39Language> for bip39::Language {
-    fn from(value: BIP39Language) -> Self {
-        use bip39::Language::*;
-        match value {
-            BIP39Language::English => English,
-            BIP39Language::French => French,
-        }
-    }
+#[uniffi::export]
+pub fn bip39_language_wordlist(language: &BIP39Language) -> Vec<BIP39Word> {
+    language.wordlist()
 }
 
 #[cfg(test)]
@@ -80,50 +47,25 @@ mod tests {
     type SUT = BIP39Language;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn default_is_english() {
-        assert_eq!(SUT::default(), SUT::English);
-    }
-
-    #[test]
-    fn test_wordlist_english() {
-        let wordlist = SUT::English.wordlist();
-        assert_eq!(wordlist.into_iter().last().unwrap().word, "zoo");
-    }
-
-    #[test]
-    fn test_wordlist_french() {
-        let wordlist = SUT::French.wordlist();
-        assert_eq!(wordlist.into_iter().last().unwrap().word, "zoologie");
-    }
-
-    #[test]
-    fn to_from_bip39_english() {
-        assert_eq!(SUT::English, bip39::Language::English.into());
+    fn hash_of_samples() {
         assert_eq!(
-            bip39::Language::from(SUT::English),
-            bip39::Language::English
+            HashSet::<SUT>::from_iter([
+                new_bip39_language_sample(),
+                new_bip39_language_sample_other(),
+                // duplicates should get removed
+                new_bip39_language_sample(),
+                new_bip39_language_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn to_from_bip39_french() {
-        assert_eq!(SUT::French, bip39::Language::French.into());
-        assert_eq!(bip39::Language::from(SUT::French), bip39::Language::French);
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::English), "English");
+    fn test_word_list() {
+        assert_eq!(
+            bip39_language_wordlist(&SUT::sample()),
+            SUT::sample().wordlist()
+        )
     }
 }

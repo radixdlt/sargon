@@ -1,72 +1,29 @@
 use crate::prelude::*;
+use sargon::DappToWalletInteractionUnvalidated as InternalDappToWalletInteractionUnvalidated;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionUnvalidated {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,
     pub metadata: DappToWalletInteractionMetadataUnvalidated,
 }
 
-impl DappToWalletInteractionUnvalidated {
-    pub fn new(
-        interaction_id: WalletInteractionId,
-        items: DappToWalletInteractionItems,
-        metadata: DappToWalletInteractionMetadataUnvalidated,
-    ) -> Self {
+impl From<InternalDappToWalletInteractionUnvalidated> for DappToWalletInteractionUnvalidated {
+    fn from(value: InternalDappToWalletInteractionUnvalidated) -> Self {
         Self {
-            interaction_id,
-            items,
-            metadata,
+            interaction_id: value.interaction_id.into(),
+            items: value.items.into(),
+            metadata: value.metadata.into(),
         }
     }
 }
 
-impl HasSampleValues for DappToWalletInteractionUnvalidated {
-    fn sample() -> Self {
-        Self::new(
-            WalletInteractionId::sample(),
-            DappToWalletInteractionItems::sample(),
-            DappToWalletInteractionMetadataUnvalidated::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            WalletInteractionId::sample_other(),
-            DappToWalletInteractionItems::sample_other(),
-            DappToWalletInteractionMetadataUnvalidated::sample_other(),
-        )
-    }
-}
-
-impl DappToWalletInteractionUnvalidated {
-    pub fn sample_with_interaction_id(
-        interaction_id: WalletInteractionId,
-    ) -> Self {
-        Self::new(
-            interaction_id,
-            DappToWalletInteractionItems::sample_other(),
-            DappToWalletInteractionMetadataUnvalidated::sample_other(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionUnvalidated;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalDappToWalletInteractionUnvalidated> for DappToWalletInteractionUnvalidated {
+    fn into(self) -> InternalDappToWalletInteractionUnvalidated {
+        InternalDappToWalletInteractionUnvalidated {
+            interaction_id: self.interaction_id.into(),
+            items: self.items.into(),
+            metadata: self.metadata.into(),
+        }
     }
 }

@@ -20,8 +20,6 @@ use crate::prelude::*;
 /// respond back to dApp with the PersonaData, but user will have to re-authorize the request for ongoing
 /// access for the requested PersonaData entries.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Default,
     PartialEq,
@@ -33,7 +31,6 @@ use crate::prelude::*;
 )]
 #[display("{}", self.string_representation(false))]
 #[debug("{}", self.string_representation(true))]
-#[serde(rename_all = "camelCase")]
 pub struct PersonaData {
     /// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,
     /// or `"Jun-fan 'Bruce' Lee"` using Eastern name variant (family name comes before given name(s)).
@@ -55,206 +52,35 @@ pub struct PersonaData {
     pub email_addresses: CollectionOfEmailAddresses,
 }
 
-impl PersonaData {
-    pub fn new(
-        name: impl Into<Option<PersonaDataIdentifiedName>>,
-        phone_numbers: CollectionOfPhoneNumbers,
-        email_addresses: CollectionOfEmailAddresses,
-    ) -> Self {
-        Self {
-            name: name.into(),
-            phone_numbers,
-            email_addresses,
-        }
-    }
+#[uniffi::export]
+pub fn new_persona_data_sample() -> PersonaData {
+    PersonaData::sample()
 }
 
-/// Private trait giving syntax sugar `dbg_string()` of
-/// `std::fmt::Debug` types, exactly like `to_string()` of
-/// for `std::fmt::Display
-trait DebugString {
-    fn dbg_string(&self) -> String;
-}
-impl<U> DebugString for U
-where
-    U: std::fmt::Debug,
-{
-    fn dbg_string(&self) -> String {
-        format!("{:?}", self)
-    }
-}
-
-impl PersonaData {
-    /// A textual representation of all present entries of this PersonaData,
-    /// optionally their IDs are included if `include_id` is `true`.
-    pub fn string_representation(&self, include_id: bool) -> String {
-        let name = self
-            .name
-            .as_deref()
-            .map(|v| {
-                if include_id {
-                    v.dbg_string()
-                } else {
-                    v.to_string()
-                }
-            })
-            .map(|v| format!("name: {v}"));
-
-        let phones = self
-            .phone_numbers
-            .iter()
-            .map(|v| {
-                if include_id {
-                    v.dbg_string()
-                } else {
-                    v.to_string()
-                }
-            })
-            .map(|v| format!("phone: {v}"))
-            .join("\n");
-
-        let emails = self
-            .email_addresses
-            .iter()
-            .map(|v| {
-                if include_id {
-                    v.dbg_string()
-                } else {
-                    v.to_string()
-                }
-            })
-            .map(|v| format!("email: {v}"))
-            .join("\n");
-
-        [name.unwrap_or_default(), phones, emails]
-            .into_iter()
-            .join("\n")
-    }
-}
-
-impl HasSampleValues for PersonaData {
-    fn sample() -> Self {
-        Self::new(
-            PersonaDataIdentifiedName::sample(),
-            CollectionOfPhoneNumbers::sample(),
-            CollectionOfEmailAddresses::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            PersonaDataIdentifiedName::sample_other(),
-            CollectionOfPhoneNumbers::sample_other(),
-            CollectionOfEmailAddresses::sample_other(),
-        )
-    }
+#[uniffi::export]
+pub fn new_persona_data_sample_other() -> PersonaData {
+    PersonaData::sample_other()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn equality() {
-        assert_eq!(PersonaData::sample(), PersonaData::sample());
-        assert_eq!(PersonaData::sample_other(), PersonaData::sample_other());
-    }
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PersonaData;
 
     #[test]
-    fn inequality() {
-        assert_ne!(PersonaData::sample(), PersonaData::sample_other());
-    }
-
-    #[test]
-    fn new_persona_data() {
-        let name = PersonaDataEntryName::new(
-            PersonaDataNameVariant::Western,
-            "Skywalker",
-            "Anakin",
-            "Darth Vader",
-        )
-        .unwrap();
-
-        let persona_data = PersonaData {
-            name: Some(PersonaDataIdentifiedName::with_id(
-                PersonaDataEntryID::sample_one(),
-                name.clone(),
-            )),
-            ..Default::default()
-        };
-
+    fn test_samples() {
         assert_eq!(
-            persona_data.name,
-            Some(PersonaDataIdentifiedName::with_id(
-                "00000000-0000-0000-0000-000000000001".parse().unwrap(),
-                name
-            ))
+            HashSet::<SUT>::from_iter([
+                new_persona_data_sample(),
+                new_persona_data_sample_other(),
+                // duplicates should get removed
+                new_persona_data_sample(),
+                new_persona_data_sample_other(),
+            ])
+            .len(),
+            2
         );
-    }
-
-    #[test]
-    fn sample() {
-        let persona_data = PersonaData::sample();
-        let identified_entry = PersonaDataIdentifiedName::sample();
-        assert_eq!(persona_data.name, Some(identified_entry));
-    }
-
-    #[test]
-    fn sample_other() {
-        assert_eq!(
-            PersonaData::sample_other().name,
-            Some(PersonaDataIdentifiedName::sample_other())
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_sample() {
-        let model = PersonaData::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "name": {
-                    "id": "00000000-0000-0000-0000-000000000001",
-                    "value": {
-                        "variant": "western",
-                        "familyName": "Wayne",
-                        "givenNames": "Bruce",
-                        "nickname": "Batman"
-                    }
-                },
-                "phoneNumbers": [
-                    {
-                        "id": "00000000-0000-0000-0000-000000000001",
-                        "value": "+46123456789"
-                    },
-                    {
-                        "id": "00000000-0000-0000-0000-000000000002",
-                        "value": "+44987654321"
-                    }
-                ],
-                "emailAddresses": [
-                    {
-                        "id": "00000000-0000-0000-0000-000000000001",
-                        "value": "alan@turing.hero"
-                    },
-                    {
-                        "id": "00000000-0000-0000-0000-000000000002",
-                        "value": "satoshi@nakamoto.btc"
-                    }
-                ]
-            }
-            "#,
-        );
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", PersonaData::sample()), "name: Bruce Batman Wayne\nphone: +46123456789\nphone: +44987654321\nemail: alan@turing.hero\nemail: satoshi@nakamoto.btc");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", PersonaData::sample()), "name: Bruce Batman Wayne\nphone: +46123456789 - 00000000-0000-0000-0000-000000000001\nphone: +44987654321 - 00000000-0000-0000-0000-000000000002\nemail: alan@turing.hero - 00000000-0000-0000-0000-000000000001\nemail: satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002");
     }
 }

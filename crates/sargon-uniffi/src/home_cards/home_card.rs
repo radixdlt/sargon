@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use std::cmp::Ordering;
+use sargon::HomeCard as InternalHomeCard;
 
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     EnumAsInner,
     Debug,
@@ -35,72 +34,32 @@ pub enum HomeCard {
     Connector,
 }
 
+impl From<InternalHomeCard> for HomeCard {
+    fn from(value: InternalHomeCard) -> Self {
+        match value {
+            InternalHomeCard::StartRadQuest => HomeCard::StartRadQuest,
+            InternalHomeCard::ContinueRadQuest => HomeCard::ContinueRadQuest,
+            InternalHomeCard::Dapp { icon_url } => HomeCard::Dapp { icon_url },
+            InternalHomeCard::Connector => HomeCard::Connector,
+        }
+    }
+}
+
+impl Into<InternalHomeCard> for HomeCard {
+    fn into(self) -> InternalHomeCard {
+        match self {
+            HomeCard::StartRadQuest => InternalHomeCard::StartRadQuest,
+            HomeCard::ContinueRadQuest => InternalHomeCard::ContinueRadQuest,
+            HomeCard::Dapp { icon_url } => InternalHomeCard::Dapp { icon_url },
+            HomeCard::Connector => InternalHomeCard::Connector,
+        }
+    }
+}
+
 impl Identifiable for HomeCard {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
         self.clone()
-    }
-}
-
-impl HasSampleValues for HomeCard {
-    fn sample() -> Self {
-        Self::StartRadQuest
-    }
-
-    fn sample_other() -> Self {
-        Self::ContinueRadQuest
-    }
-}
-
-impl Ord for HomeCard {
-    fn cmp(&self, other: &Self) -> Ordering {
-        fn order_value(card: &HomeCard) -> usize {
-            use HomeCard::*;
-
-            match card {
-                StartRadQuest => 0,
-                ContinueRadQuest => 1,
-                Dapp { .. } => 2,
-                Connector => 3,
-            }
-        }
-
-        order_value(self).cmp(&order_value(other))
-    }
-}
-
-impl PartialOrd for HomeCard {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = HomeCard;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn identifiable() {
-        assert_eq!(SUT::sample().id(), SUT::sample());
-    }
-
-    #[test]
-    fn compare() {
-        assert!(SUT::sample() < SUT::sample_other());
     }
 }

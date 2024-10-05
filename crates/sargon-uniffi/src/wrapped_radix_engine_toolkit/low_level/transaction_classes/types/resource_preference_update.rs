@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::ResourcePreference as InternalResourcePreference;
+use sargon::ResourcePreferenceUpdate as InternalResourcePreferenceUpdate;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ResourcePreference {
@@ -12,77 +14,42 @@ pub enum ResourcePreferenceUpdate {
     Remove,
 }
 
-impl From<ScryptoResourcePreference> for ResourcePreference {
-    fn from(value: ScryptoResourcePreference) -> Self {
+impl From<InternalResourcePreference> for ResourcePreference {
+    fn from(value: InternalResourcePreference) -> Self {
         match value {
-            ScryptoResourcePreference::Allowed => Self::Allowed,
-            ScryptoResourcePreference::Disallowed => Self::Disallowed,
+            InternalResourcePreference::Allowed => ResourcePreference::Allowed,
+            InternalResourcePreference::Disallowed => ResourcePreference::Disallowed,
         }
     }
 }
 
-impl From<RetUpdate<ScryptoResourcePreference>> for ResourcePreferenceUpdate {
-    fn from(value: RetUpdate<ScryptoResourcePreference>) -> Self {
+impl Into<InternalResourcePreference> for ResourcePreference {
+    fn into(self) -> InternalResourcePreference {
+        match self {
+            ResourcePreference::Allowed => InternalResourcePreference::Allowed,
+            ResourcePreference::Disallowed => InternalResourcePreference::Disallowed,
+        }
+    }
+}
+
+impl From<InternalResourcePreferenceUpdate> for ResourcePreferenceUpdate {
+    fn from(value: InternalResourcePreferenceUpdate) -> Self {
         match value {
-            RetUpdate::Set(preference) => Self::Set {
-                value: preference.into(),
+            InternalResourcePreferenceUpdate::Set { value } => ResourcePreferenceUpdate::Set {
+                value: value.into(),
             },
-            RetUpdate::Remove => Self::Remove,
+            InternalResourcePreferenceUpdate::Remove => ResourcePreferenceUpdate::Remove,
         }
     }
 }
 
-impl HasSampleValues for ResourcePreferenceUpdate {
-    fn sample() -> Self {
-        Self::Set {
-            value: ResourcePreference::Allowed,
+impl Into<InternalResourcePreferenceUpdate> for ResourcePreferenceUpdate {
+    fn into(self) -> InternalResourcePreferenceUpdate {
+        match self {
+            ResourcePreferenceUpdate::Set { value } => InternalResourcePreferenceUpdate::Set {
+                value: value.into(),
+            },
+            ResourcePreferenceUpdate::Remove => InternalResourcePreferenceUpdate::Remove,
         }
-    }
-
-    fn sample_other() -> Self {
-        Self::Remove
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ResourcePreferenceUpdate;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_ret() {
-        assert_eq!(
-            SUT::from(RetUpdate::<ScryptoResourcePreference>::Set(
-                ScryptoResourcePreference::Allowed
-            )),
-            SUT::sample()
-        );
-
-        assert_eq!(
-            SUT::from(RetUpdate::<ScryptoResourcePreference>::Set(
-                ScryptoResourcePreference::Disallowed
-            )),
-            SUT::Set {
-                value: ResourcePreference::Disallowed
-            }
-        );
-
-        assert_eq!(
-            SUT::from(RetUpdate::<ScryptoResourcePreference>::Remove),
-            SUT::sample_other()
-        );
     }
 }

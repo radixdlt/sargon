@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::InstructionsSecretMagic as InternalInstructionsSecretMagic;
 
 /// An internal representation of a collection of Instructions,
 /// which intentions is to allow the `struct Instructions`
@@ -9,12 +10,15 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InstructionsSecretMagic(pub Vec<ScryptoInstruction>);
 
-impl InstructionsSecretMagic {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
-        &self.0
+impl From<InternalInstructionsSecretMagic> for InstructionsSecretMagic {
+    fn from(value: InternalInstructionsSecretMagic) -> Self {
+        Self(value.0)
     }
-    pub(crate) fn new(instructions: Vec<ScryptoInstruction>) -> Self {
-        Self(instructions)
+}
+
+impl Into<InternalInstructionsSecretMagic> for InstructionsSecretMagic {
+    fn into(self) -> InternalInstructionsSecretMagic {
+        InternalInstructionsSecretMagic(self.0)
     }
 }
 
@@ -39,82 +43,5 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
         RET_compile_instructions(&obj.0)
             .map(|b| b.into())
             .expect("to never fail")
-    }
-}
-
-impl From<ScryptoInstructions> for InstructionsSecretMagic {
-    fn from(value: ScryptoInstructions) -> Self {
-        Self(value.0)
-    }
-}
-
-impl HasSampleValues for InstructionsSecretMagic {
-    fn sample() -> Self {
-        Self(vec![
-            ScryptoInstruction::DropAuthZoneProofs, // sbor: 0x12
-            ScryptoInstruction::DropAuthZoneRegularProofs, // sbor: 0x13
-        ])
-    }
-
-    fn sample_other() -> Self {
-        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs]) // sbor: 0x17
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = InstructionsSecretMagic;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_scrypto() {
-        assert_eq!(
-            SUT::sample(),
-            ScryptoInstructions(vec![
-                ScryptoInstruction::DropAuthZoneProofs,
-                ScryptoInstruction::DropAuthZoneRegularProofs,
-            ])
-            .into()
-        );
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion_successful() {
-        let sut = SUT::sample();
-        let builtin = BagOfBytes::from_hex("4d20220212001300").unwrap();
-
-        let ffi_side =
-            <SUT as crate::UniffiCustomTypeConverter>::from_custom(sut.clone());
-
-        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
-
-        let from_ffi_side =
-            <SUT as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
-                .unwrap();
-
-        assert_eq!(sut, from_ffi_side);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion_fail() {
-        let builtin = BagOfBytes::from_hex("deadbeef").unwrap();
-        assert!(<SUT as crate::UniffiCustomTypeConverter>::into_custom(
-            builtin
-        )
-        .is_err());
     }
 }

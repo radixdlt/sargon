@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PublicKeyHash as InternalPublicKeyHash;
 
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
 #[derive(
@@ -18,52 +19,66 @@ pub enum PublicKeyHash {
     Secp256k1 { value: Exactly29Bytes },
 }
 
-impl PublicKeyHash {
-    pub fn hash(key: impl Into<PublicKey>) -> Self {
-        Self::hash_scrypto(key.into())
-    }
-
-    fn hash_scrypto(key: impl Into<ScryptoPublicKey>) -> Self {
-        ScryptoPublicKeyHash::new_from_public_key(&key.into()).into()
-    }
-}
-
-impl From<ScryptoPublicKeyHash> for PublicKeyHash {
-    fn from(value: ScryptoPublicKeyHash) -> Self {
+impl From<InternalPublicKeyHash> for PublicKeyHash {
+    fn from(value: InternalPublicKeyHash) -> Self {
         match value {
-            ScryptoPublicKeyHash::Secp256k1(ScryptoSecp256k1PublicKeyHash(
-                bytes,
-            )) => Self::Secp256k1 {
-                value: Exactly29Bytes::from(&bytes),
-            },
-            ScryptoPublicKeyHash::Ed25519(ScryptoEd25519PublicKeyHash(
-                bytes,
-            )) => Self::Ed25519 {
-                value: Exactly29Bytes::from(&bytes),
-            },
+            InternalPublicKeyHash::Ed25519 { value } => Self::Ed25519 { value },
+            InternalPublicKeyHash::Secp256k1 { value } => Self::Secp256k1 { value },
         }
     }
 }
 
-impl From<PublicKeyHash> for ScryptoPublicKeyHash {
-    fn from(value: PublicKeyHash) -> Self {
-        match value {
-            PublicKeyHash::Ed25519 { value } => {
-                ScryptoEd25519PublicKeyHash(*value.bytes()).into()
-            }
-            PublicKeyHash::Secp256k1 { value } => {
-                ScryptoSecp256k1PublicKeyHash(*value.bytes()).into()
-            }
+impl Into<InternalPublicKeyHash> for PublicKeyHash {
+    fn into(self) -> InternalPublicKeyHash {
+        match self {
+            PublicKeyHash::Ed25519 { value } => InternalPublicKeyHash::Ed25519 { value },
+            PublicKeyHash::Secp256k1 { value } => InternalPublicKeyHash::Secp256k1 { value },
         }
     }
 }
 
-impl HasSampleValues for PublicKeyHash {
-    fn sample() -> Self {
-        Self::hash(Ed25519PublicKey::sample())
+#[uniffi::export]
+pub fn new_public_key_hash_of_key(public_key: PublicKey) -> PublicKeyHash {
+    InternalPublicKeyHash::hash(public_key.into()).into()
+}
+
+#[uniffi::export]
+pub fn new_public_key_hash_sample() -> PublicKeyHash {
+    InternalPublicKeyHash::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_public_key_hash_sample_other() -> PublicKeyHash {
+    InternalPublicKeyHash::sample_other().into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PublicKeyHash;
+
+    #[test]
+    fn hash_of_key() {
+        assert_eq!(
+            new_public_key_hash_of_key(PublicKey::sample()),
+            SUT::sample()
+        );
     }
 
-    fn sample_other() -> Self {
-        Self::hash(Secp256k1PublicKey::sample())
+    #[test]
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_public_key_hash_sample(),
+                new_public_key_hash_sample_other(),
+                // duplicates should get removed
+                new_public_key_hash_sample(),
+                new_public_key_hash_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

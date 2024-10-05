@@ -22,6 +22,7 @@ pub mod prelude {
     pub use crate::radix_connect::*;
     pub use crate::system::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
+    pub use sargon::Identifiable;
 
     pub(crate) use radix_rust::prelude::{
         BTreeSet, HashMap, HashSet, IndexMap, IndexSet,

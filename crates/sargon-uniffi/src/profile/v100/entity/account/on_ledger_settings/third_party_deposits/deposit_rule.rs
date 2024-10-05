@@ -2,9 +2,6 @@ use crate::prelude::*;
 
 /// The general deposit rule to apply
 #[derive(
-    Serialize,
-    Deserialize,
-    FromRepr,
     Clone,
     Copy,
     Debug,
@@ -17,7 +14,6 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Enum,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum DepositRule {
     /// The account accepts **all** assets by default, except for exceptions (if any) which might not deposit/be deposited into this account.
     AcceptKnown,
@@ -27,43 +23,18 @@ pub enum DepositRule {
     DenyAll,
 }
 
-impl Default for DepositRule {
-    /// By default an account accepts all.
-    fn default() -> Self {
-        Self::AcceptAll
-    }
+use crate::prelude::*;
+
+json_string_convertible!(DepositRule, "super invalid json string");
+
+#[uniffi::export]
+pub fn new_deposit_rule_sample() -> DepositRule {
+    DepositRule::sample()
 }
 
-impl HasSampleValues for DepositRule {
-    fn sample() -> Self {
-        Self::AcceptKnown
-    }
-
-    fn sample_other() -> Self {
-        Self::AcceptAll
-    }
-}
-
-impl From<DepositRule> for ScryptoDefaultDepositRule {
-    fn from(value: DepositRule) -> Self {
-        match value {
-            DepositRule::AcceptKnown => {
-                ScryptoDefaultDepositRule::AllowExisting
-            }
-            DepositRule::AcceptAll => ScryptoDefaultDepositRule::Accept,
-            DepositRule::DenyAll => ScryptoDefaultDepositRule::Reject,
-        }
-    }
-}
-
-impl From<ScryptoDefaultDepositRule> for DepositRule {
-    fn from(value: ScryptoDefaultDepositRule) -> Self {
-        match value {
-            ScryptoDefaultDepositRule::Accept => Self::AcceptAll,
-            ScryptoDefaultDepositRule::Reject => Self::DenyAll,
-            ScryptoDefaultDepositRule::AllowExisting => Self::AcceptKnown,
-        }
-    }
+#[uniffi::export]
+pub fn new_deposit_rule_sample_other() -> DepositRule {
+    DepositRule::sample_other()
 }
 
 #[cfg(test)]
@@ -74,59 +45,17 @@ mod tests {
     type SUT = DepositRule;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn json_roundtrip_accept_all() {
-        assert_json_value_eq_after_roundtrip(
-            &SUT::AcceptAll,
-            json!("acceptAll"),
-        );
-        assert_json_roundtrip(&SUT::AcceptAll);
-    }
-
-    #[test]
-    fn from_json_str() {
+    fn hash_of_samples() {
         assert_eq!(
-            SUT::new_from_json_string("acceptAll").unwrap(),
-            SUT::AcceptAll
+            HashSet::<SUT>::from_iter([
+                new_deposit_rule_sample(),
+                new_deposit_rule_sample_other(),
+                // duplicates should get removed
+                new_deposit_rule_sample(),
+                new_deposit_rule_sample_other(),
+            ])
+            .len(),
+            2
         );
-        assert_eq!(SUT::new_from_json_string("denyAll").unwrap(), SUT::DenyAll);
-        assert_eq!(
-            SUT::new_from_json_string("acceptKnown").unwrap(),
-            SUT::AcceptKnown
-        )
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::AcceptAll), "AcceptAll");
-        assert_eq!(format!("{}", SUT::AcceptKnown), "AcceptKnown");
-        assert_eq!(format!("{}", SUT::DenyAll), "DenyAll");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", SUT::AcceptAll), "AcceptAll");
-        assert_eq!(format!("{:?}", SUT::AcceptKnown), "AcceptKnown");
-        assert_eq!(format!("{:?}", SUT::DenyAll), "DenyAll");
-    }
-
-    #[test]
-    fn scrypto_roundtrip() {
-        let roundtrip = |s: SUT| {
-            assert_eq!(SUT::from(ScryptoDefaultDepositRule::from(s)), s)
-        };
-        roundtrip(SUT::AcceptKnown);
-        roundtrip(SUT::AcceptAll);
-        roundtrip(SUT::DenyAll);
     }
 }

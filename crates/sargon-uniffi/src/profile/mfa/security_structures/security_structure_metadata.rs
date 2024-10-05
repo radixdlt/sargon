@@ -1,9 +1,8 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 pub struct SecurityStructureMetadata {
     pub id: SecurityStructureID,
     pub display_name: DisplayName,
@@ -19,47 +18,22 @@ impl Identifiable for SecurityStructureMetadata {
     }
 }
 
-impl SecurityStructureMetadata {
-    pub fn with_details(
-        id: SecurityStructureID,
-        display_name: DisplayName,
-        created_on: Timestamp,
-        last_updated_on: Timestamp,
-    ) -> Self {
-        Self {
-            id,
-            display_name,
-            created_on,
-            last_updated_on,
-        }
-    }
-
-    pub fn new(display_name: DisplayName) -> Self {
-        Self::with_details(
-            SecurityStructureID::from(Uuid::new_v4()),
-            display_name,
-            now(),
-            now(),
-        )
-    }
+#[uniffi::export]
+pub fn new_security_structure_metadata_sample() -> SecurityStructureMetadata {
+    SecurityStructureMetadata::sample()
 }
-impl HasSampleValues for SecurityStructureMetadata {
-    fn sample() -> Self {
-        Self::with_details(
-            SecurityStructureID::sample(),
-            DisplayName::sample(),
-            Timestamp::sample(),
-            Timestamp::sample(),
-        )
-    }
-    fn sample_other() -> Self {
-        Self::with_details(
-            SecurityStructureID::sample_other(),
-            DisplayName::sample_other(),
-            Timestamp::sample_other(),
-            Timestamp::sample_other(),
-        )
-    }
+
+#[uniffi::export]
+pub fn new_security_structure_metadata_sample_other(
+) -> SecurityStructureMetadata {
+    SecurityStructureMetadata::sample_other()
+}
+
+#[uniffi::export]
+pub fn new_security_structure_metadata_named(
+    name: &DisplayName,
+) -> SecurityStructureMetadata {
+    SecurityStructureMetadata::new(name.clone())
 }
 
 #[cfg(test)]
@@ -70,13 +44,26 @@ mod tests {
     type SUT = SecurityStructureMetadata;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn test_new() {
+        let name = &DisplayName::sample();
+        assert_ne!(
+            new_security_structure_metadata_named(name),
+            new_security_structure_metadata_named(name)
+        )
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_security_structure_metadata_sample(),
+                new_security_structure_metadata_sample_other(),
+                // duplicates should get removed
+                new_security_structure_metadata_sample(),
+                new_security_structure_metadata_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

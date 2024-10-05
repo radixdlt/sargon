@@ -117,8 +117,6 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 /// [itertools]: https://docs.rs/itertools/latest/itertools/trait.Itertools.html#method.combinations
 ///
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
@@ -127,7 +125,6 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
     derive_more::Display,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 #[display("{id}")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {

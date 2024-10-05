@@ -30,42 +30,14 @@ impl Into<InternalHostInfo> for HostInfo {
     }
 }
 
-impl HostInfo {
-    pub fn new(
-        description: DeviceInfoDescription,
-        host_os: HostOS,
-        host_app_version: impl AsRef<str>,
-    ) -> Self {
-        Self {
-            description,
-            host_os,
-            host_app_version: host_app_version.as_ref().to_owned(),
-        }
-    }
+#[uniffi::export]
+pub fn new_host_info_sample() -> HostInfo {
+    HostInfo::sample()
 }
 
-impl HasSampleValues for HostInfo {
-    fn sample() -> Self {
-        Self {
-            description: DeviceInfoDescription {
-                name: "My precious".to_owned(),
-                model: "iPhone SE 2nd gen".to_owned(),
-            },
-            host_os: HostOS::sample(),
-            host_app_version: "1.6.4".to_string(),
-        }
-    }
-
-    fn sample_other() -> Self {
-        Self {
-            description: DeviceInfoDescription {
-                name: "My Pixel".to_owned(),
-                model: "Pixel 8 Pro".to_owned(),
-            },
-            host_os: HostOS::sample_other(),
-            host_app_version: "1.6.4".to_string(),
-        }
-    }
+#[uniffi::export]
+pub fn new_host_info_sample_other() -> HostInfo {
+    HostInfo::sample_other()
 }
 
 #[cfg(test)]
@@ -76,22 +48,17 @@ mod tests {
     type SUT = HostInfo;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_to_string() {
-        let info = HostInfo::sample();
+    fn hash_of_samples() {
         assert_eq!(
-            "Host 'My precious iPhone SE 2nd gen' running on iOS 17.4.1, firmware: 1.6.4",
-            info.to_string()
-        )
+            HashSet::<SUT>::from_iter([
+                new_host_info_sample(),
+                new_host_info_sample_other(),
+                // duplicates should get removed
+                new_host_info_sample(),
+                new_host_info_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

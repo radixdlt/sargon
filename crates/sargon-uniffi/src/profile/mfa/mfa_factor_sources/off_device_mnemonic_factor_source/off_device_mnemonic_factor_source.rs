@@ -30,85 +30,25 @@ pub struct OffDeviceMnemonicFactorSource {
     pub hint: OffDeviceMnemonicHint,
 }
 
-impl From<OffDeviceMnemonicFactorSource> for FactorSource {
-    fn from(value: OffDeviceMnemonicFactorSource) -> Self {
-        FactorSource::OffDeviceMnemonic { value }
-    }
+#[uniffi::export]
+pub fn new_off_device_mnemonic_factor_source_sample(
+) -> OffDeviceMnemonicFactorSource {
+    OffDeviceMnemonicFactorSource::sample()
 }
 
-fn new_off_device_with_mwp(
+#[uniffi::export]
+pub fn new_off_device_mnemonic_factor_source_sample_other(
+) -> OffDeviceMnemonicFactorSource {
+    OffDeviceMnemonicFactorSource::sample_other()
+}
+
+#[uniffi::export]
+fn new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
     mwp: MnemonicWithPassphrase,
     hint: OffDeviceMnemonicHint,
 ) -> OffDeviceMnemonicFactorSource {
     let id = FactorSourceIDFromHash::new_for_off_device(&mwp);
-    let mut source = OffDeviceMnemonicFactorSource::new(id, hint);
-    source.common.last_used_on = Timestamp::sample();
-    source.common.added_on = Timestamp::sample();
-    source
-}
-
-impl OffDeviceMnemonicFactorSource {
-    /// Instantiates a new `OffDeviceMnemonicFactorSource`
-    pub fn new(
-        id: FactorSourceIDFromHash,
-        hint: OffDeviceMnemonicHint,
-    ) -> Self {
-        Self {
-            id,
-            common: FactorSourceCommon::new_bdfs(false),
-            hint,
-        }
-    }
-}
-
-impl HasSampleValues for OffDeviceMnemonicFactorSource {
-    fn sample() -> Self {
-        new_off_device_with_mwp(
-            MnemonicWithPassphrase::sample_off_device(),
-            OffDeviceMnemonicHint::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        new_off_device_with_mwp(
-            MnemonicWithPassphrase::sample_off_device_other(),
-            OffDeviceMnemonicHint::sample_other(),
-        )
-    }
-}
-
-impl TryFrom<FactorSource> for OffDeviceMnemonicFactorSource {
-    type Error = CommonError;
-
-    fn try_from(value: FactorSource) -> Result<Self> {
-        value.clone().into_off_device_mnemonic().map_err(|_| {
-            CommonError::InvalidFactorSourceKind {
-                bad_value: value.factor_source_kind().to_string(),
-            }
-        })
-    }
-}
-impl IsFactorSource for OffDeviceMnemonicFactorSource {
-    fn kind() -> FactorSourceKind {
-        FactorSourceKind::OffDeviceMnemonic
-    }
-}
-impl BaseIsFactorSource for OffDeviceMnemonicFactorSource {
-    fn common_properties(&self) -> FactorSourceCommon {
-        self.common.clone()
-    }
-
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
-    }
-
-    fn factor_source_id(&self) -> FactorSourceID {
-        self.clone().id.into()
-    }
-
-    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
-        self.common = updated
-    }
+    OffDeviceMnemonicFactorSource::new(id, hint)
 }
 
 #[cfg(test)]
@@ -119,37 +59,30 @@ mod tests {
     type SUT = OffDeviceMnemonicFactorSource;
 
     #[test]
-    fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::OffDeviceMnemonic);
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_factor_source() {
-        let sut = SUT::sample();
-        let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(SUT::try_from(factor_source), Ok(sut));
-    }
-
-    #[test]
-    fn from_factor_source_invalid_got_device() {
-        let wrong = DeviceFactorSource::sample();
-        let factor_source: FactorSource = wrong.clone().into();
+    fn hash_of_samples() {
         assert_eq!(
-            SUT::try_from(factor_source),
-            Err(CommonError::InvalidFactorSourceKind {
-                bad_value: "device".to_owned()
-            })
+            HashSet::<SUT>::from_iter([
+                new_off_device_mnemonic_factor_source_sample(),
+                new_off_device_mnemonic_factor_source_sample_other(),
+                // duplicates should get removed
+                new_off_device_mnemonic_factor_source_sample(),
+                new_off_device_mnemonic_factor_source_sample_other(),
+            ])
+            .len(),
+            2
+        );
+    }
+
+    #[test]
+    fn test_new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
+    ) {
+        assert_eq!(
+            new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
+                MnemonicWithPassphrase::sample_off_device(),
+                OffDeviceMnemonicHint::sample()
+            )
+            .factor_source_id(),
+            SUT::sample().factor_source_id()
         );
     }
 }

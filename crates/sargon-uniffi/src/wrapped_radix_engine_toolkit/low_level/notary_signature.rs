@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::NotarySignature as InternalNotarySignature;
 
 #[derive(
     Debug,
@@ -10,55 +11,64 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     derive_more::Display,
-    derive_more::FromStr,
     uniffi::Record,
 )]
 pub struct NotarySignature {
     pub(crate) secret_magic: Signature,
 }
 
-impl From<ScryptoNotarySignature> for NotarySignature {
-    fn from(value: ScryptoNotarySignature) -> Self {
+impl From<InternalNotarySignature> for NotarySignature {
+    fn from(value: InternalNotarySignature) -> Self {
         Self {
-            secret_magic: value.0.into(),
+            secret_magic: value.secret_magic.into(),
         }
     }
 }
 
-impl From<NotarySignature> for ScryptoNotarySignature {
-    fn from(value: NotarySignature) -> Self {
-        ScryptoNotarySignature(value.secret_magic.into())
-    }
-}
-
-impl From<Signature> for NotarySignature {
-    fn from(value: Signature) -> Self {
-        Self {
-            secret_magic: value,
+impl Into<InternalNotarySignature> for NotarySignature {
+    fn into(self) -> InternalNotarySignature {
+        InternalNotarySignature {
+            secret_magic: self.secret_magic.into(),
         }
     }
 }
 
-impl From<Secp256k1Signature> for NotarySignature {
-    fn from(value: Secp256k1Signature) -> Self {
-        Signature::from(value).into()
-    }
+#[uniffi::export]
+pub fn new_notary_signature_sample() -> NotarySignature {
+    InternalNotarySignature::sample().into()
 }
 
-impl From<Ed25519Signature> for NotarySignature {
-    fn from(value: Ed25519Signature) -> Self {
-        Signature::from(value).into()
-    }
+#[uniffi::export]
+pub fn new_notary_signature_sample_other() -> NotarySignature {
+    InternalNotarySignature::sample_other().into()
 }
 
-impl HasSampleValues for NotarySignature {
-    fn sample() -> Self {
-        Signature::sample().into()
-    }
+#[uniffi::export]
+pub fn new_notary_signature(signature: Signature) -> NotarySignature {
+    InternalNotarySignature::from(signature).into()
+}
 
-    fn sample_other() -> Self {
-        Signature::sample_other().into()
-    }
+#[uniffi::export]
+pub fn notary_signature_get_signature(
+    notary_signature: &NotarySignature,
+) -> Signature {
+    notary_signature.into::<InternalNotarySignature>().secret_magic.into()
+}
+
+#[uniffi::export]
+pub fn android_notarize_hash_with_private_key_bytes(
+    private_key_bytes: Exactly32Bytes,
+    signed_intent_hash: &SignedIntentHash,
+) -> Result<NotarySignature> {
+    unimplemented!("Should be moved as actual func in  internal Sargon")
+}
+
+#[uniffi::export]
+pub fn android_sign_hash_with_private_key_bytes(
+    private_key_bytes: Exactly32Bytes,
+    hash: &Hash,
+) -> Result<Ed25519Signature> {
+    unimplemented!("Should be moved as actual func in  internal Sargon")
 }
 
 #[cfg(test)]
@@ -69,64 +79,54 @@ mod tests {
     type SUT = NotarySignature;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn to_from_scrypto() {
-        let roundtrip = |s: SUT| SUT::from(s);
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
-    }
-
-    #[test]
-    fn parse_bad_str() {
+    fn hash_of_samples() {
         assert_eq!(
-            "foobar".parse::<SUT>(),
-            Err(CommonError::FailedToParseSignatureFromString {
-                bad_value: "foobar".to_owned()
-            })
+            HashSet::<SUT>::from_iter([
+                new_notary_signature_sample(),
+                new_notary_signature_sample_other(),
+                // duplicates should get removed
+                new_notary_signature_sample(),
+                new_notary_signature_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn parse_ed25519() {
+    fn signature_roundtrip() {
+        let sut = SUT::sample();
         assert_eq!(
-            "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103".parse::<SUT>().unwrap(), SUT::sample());
+            new_notary_signature(notary_signature_get_signature(&sut)),
+            sut
+        )
     }
 
     #[test]
-    fn parse_secp256k1() {
+    fn test_android_notarize_hash_with_private_key_bytes() {
+        let sut = android_notarize_hash_with_private_key_bytes(
+            Exactly32Bytes::sample(),
+            &SignedIntentHash::sample(),
+        )
+        .unwrap();
+
         assert_eq!(
-            "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12".parse::<SUT>().unwrap(), SUT::sample_other());
+            "1a30347a04bc5d746b35a568330ba69c9b6ac60ef72d0a28cb63e25680e64908557d85a0e864c423ce782b5f43da3002c301045c6385b40cb013374045392404",
+            sut.to_string()
+        )
     }
 
     #[test]
-    fn from_scrypto_notary() {
-        let sig: radix_common::crypto::Ed25519Signature = "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103".parse().unwrap();
-        let scrypto_notary = ScryptoNotarySignature(
-            radix_transactions::model::SignatureV1::Ed25519(sig),
-        );
-        assert_eq!(SUT::from(scrypto_notary), SUT::sample());
-    }
+    fn test_android_sign_hash_with_private_key_bytes() {
+        let sut = android_sign_hash_with_private_key_bytes(
+            Exactly32Bytes::sample(),
+            &Hash::sample(),
+        )
+        .unwrap();
 
-    #[test]
-    fn from_ed25519() {
-        assert_eq!(SUT::from(Ed25519Signature::sample()), SUT::sample());
-    }
-
-    #[test]
-    fn from_secp256k1() {
         assert_eq!(
-            SUT::from(Secp256k1Signature::sample()),
-            SUT::sample_other()
-        );
+            "1a30347a04bc5d746b35a568330ba69c9b6ac60ef72d0a28cb63e25680e64908557d85a0e864c423ce782b5f43da3002c301045c6385b40cb013374045392404",
+            sut.to_string()
+        )
     }
 }

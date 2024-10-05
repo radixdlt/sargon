@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::RadixConnectMobileWalletResponse as InternalRadixConnectMobileWalletResponse;
 
 #[derive(Debug, PartialEq, Clone, uniffi::Record)]
 pub struct RadixConnectMobileWalletResponse {
@@ -6,49 +7,20 @@ pub struct RadixConnectMobileWalletResponse {
     pub response: WalletToDappInteractionResponse,
 }
 
-impl RadixConnectMobileWalletResponse {
-    pub fn new(
-        session_id: impl Into<SessionID>,
-        response: WalletToDappInteractionResponse,
-    ) -> Self {
+impl From<InternalRadixConnectMobileWalletResponse> for RadixConnectMobileWalletResponse {
+    fn from(value: InternalRadixConnectMobileWalletResponse) -> Self {
         Self {
-            session_id: session_id.into(),
-            response,
+            session_id: value.session_id.into(),
+            response: value.response.into(),
         }
     }
 }
 
-impl HasSampleValues for RadixConnectMobileWalletResponse {
-    fn sample() -> Self {
-        Self::new(
-            SessionID::sample(),
-            WalletToDappInteractionResponse::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            SessionID::sample_other(),
-            WalletToDappInteractionResponse::sample_other(),
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = RadixConnectMobileWalletResponse;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalRadixConnectMobileWalletResponse> for RadixConnectMobileWalletResponse {
+    fn into(self) -> InternalRadixConnectMobileWalletResponse {
+        InternalRadixConnectMobileWalletResponse {
+            session_id: self.session_id.into(),
+            response: self.response.into(),
+        }
     }
 }

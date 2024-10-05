@@ -1,4 +1,3 @@
-use crate::HasSampleValues;
 use std::fmt::{Display, Formatter, Pointer};
 use sargon::HostOS as InternalHostOS;
 
@@ -49,118 +48,112 @@ impl From<InternalHostOS> for HostOS {
     }
 }
 
-impl HostOS {
-    /// Creates an iOS kind with version
-    pub fn ios(version: impl AsRef<str>) -> Self {
-        Self::IOS {
-            version: version.as_ref().to_string(),
-        }
-    }
-
-    /// Creates an Android kind with version
-    pub fn android(vendor: impl AsRef<str>, version: impl AsRef<str>) -> Self {
-        Self::Android {
-            vendor: vendor.as_ref().to_string(),
-            version: version.as_ref().to_string(),
-        }
-    }
-
-    /// Creates an Other kind with a custom name and version
-    pub fn other(
-        name: impl AsRef<str>,
-        vendor: impl AsRef<str>,
-        version: impl AsRef<str>,
-    ) -> Self {
-        Self::Other {
-            name: name.as_ref().to_string(),
-            vendor: vendor.as_ref().to_string(),
-            version: version.as_ref().to_string(),
-        }
-    }
-
-    /// Returns the name of the host's os
-    pub fn name(&self) -> String {
-        match self {
-            HostOS::IOS { .. } => "iOS".to_owned(),
-            HostOS::Android { .. } => "Android".to_owned(),
-            HostOS::Other {
-                name,
-                vendor: _vendor,
-                version: _,
-            } => name.clone(),
-        }
-    }
-
-    /// Returns the version name of the host's os.
-    pub fn version(&self) -> String {
-        let version = match self {
-            HostOS::IOS { version } => version,
-            HostOS::Android { vendor: _, version } => version,
-            HostOS::Other {
-                name: _,
-                vendor: _,
-                version,
-            } => version,
-        };
-
-        format!("{} {}", self.name(), version)
-    }
-
-    /// Returns the vendor of this host's os.
-    pub fn vendor(&self) -> String {
-        match self {
-            HostOS::IOS { .. } => "Apple".to_owned(),
-            HostOS::Android { vendor, version: _ } => vendor.to_owned(),
-            HostOS::Other {
-                name: _name,
-                vendor,
-                version: _,
-            } => vendor.to_owned(),
-        }
-    }
+#[uniffi::export]
+pub fn new_host_os_ios(version: String) -> HostOS {
+    HostOS::ios(version)
 }
 
-impl Display for HostOS {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.version())
-    }
+#[uniffi::export]
+pub fn new_host_os_android(vendor: String, version: String) -> HostOS {
+    HostOS::android(vendor, version)
 }
 
-impl HasSampleValues for HostOS {
-    fn sample() -> Self {
-        HostOS::ios("17.4.1")
-    }
+#[uniffi::export]
+pub fn new_host_os_other(
+    name: String,
+    vendor: String,
+    version: String,
+) -> HostOS {
+    HostOS::other(name, vendor, version)
+}
 
-    fn sample_other() -> Self {
-        HostOS::android("Google", "14 (API 34)")
-    }
+#[uniffi::export]
+pub fn host_os_get_name(host_os: &HostOS) -> String {
+    host_os.name()
+}
+
+#[uniffi::export]
+pub fn host_os_get_vendor(host_os: &HostOS) -> String {
+    host_os.vendor()
+}
+
+#[uniffi::export]
+pub fn host_os_get_version(host_os: &HostOS) -> String {
+    host_os.version()
+}
+
+#[uniffi::export]
+pub fn new_host_os_sample() -> HostOS {
+    HostOS::sample()
+}
+
+#[uniffi::export]
+pub fn new_host_os_sample_other() -> HostOS {
+    HostOS::sample_other()
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = HostOS;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_display() {
-        assert_eq!(SUT::sample().to_string(), "iOS 17.4.1");
-        assert_eq!(SUT::sample_other().to_string(), "Android 14 (API 34)");
+    fn hash_of_samples() {
         assert_eq!(
-            SUT::other("Custom", "Unknown", "1.0.0").to_string(),
-            "Custom 1.0.0"
+            HashSet::<SUT>::from_iter([
+                new_host_os_sample(),
+                new_host_os_sample_other(),
+                // duplicates should get removed
+                new_host_os_sample(),
+                new_host_os_sample_other(),
+            ])
+            .len(),
+            2
         );
+    }
+
+    #[test]
+    fn test_new_ios() {
+        assert_eq!(new_host_os_ios("17.4.1".to_owned()), HostOS::ios("17.4.1"));
+    }
+
+    #[test]
+    fn test_new_android() {
+        assert_eq!(
+            new_host_os_android("Google".to_owned(), "14 (API 34)".to_owned()),
+            HostOS::android("Google", "14 (API 34)")
+        );
+    }
+
+    #[test]
+    fn test_new_other() {
+        assert_eq!(
+            new_host_os_other(
+                "macos".to_owned(),
+                "Apple".to_owned(),
+                "14.5".to_owned()
+            ),
+            HostOS::other("macos", "Apple", "14.5")
+        );
+    }
+
+    #[test]
+    fn test_get_name() {
+        let sut = SUT::sample();
+        assert_eq!(host_os_get_name(&sut), sut.name());
+    }
+
+    #[test]
+    fn test_get_vendor() {
+        let sut = SUT::sample();
+        assert_eq!(host_os_get_vendor(&sut), sut.vendor());
+    }
+
+    #[test]
+    fn test_get_version() {
+        let sut = SUT::sample();
+        assert_eq!(host_os_get_version(&sut), sut.version());
     }
 }

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::ResourceIndicator as InternalResourceIndicator;
 
 #[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, uniffi::Enum)]
 pub enum ResourceIndicator {
@@ -12,149 +13,84 @@ pub enum ResourceIndicator {
     },
 }
 
-impl ResourceIndicator {
-    pub fn get_address(&self) -> ResourceAddress {
+impl From<InternalResourceIndicator> for ResourceIndicator {
+    fn from(value: InternalResourceIndicator) -> Self {
+        match value {
+            InternalResourceIndicator::Fungible {
+                resource_address,
+                indicator,
+            } => ResourceIndicator::Fungible {
+                resource_address: resource_address.into(),
+                indicator: indicator.into(),
+            },
+            InternalResourceIndicator::NonFungible {
+                resource_address,
+                indicator,
+            } => ResourceIndicator::NonFungible {
+                resource_address: resource_address.into(),
+                indicator: indicator.into(),
+            },
+        }
+    }
+}
+
+impl Into<InternalResourceIndicator> for ResourceIndicator {
+    fn into(self) -> InternalResourceIndicator {
         match self {
             ResourceIndicator::Fungible {
                 resource_address,
-                indicator: _,
-            } => *resource_address,
+                indicator,
+            } => InternalResourceIndicator::Fungible {
+                resource_address: resource_address.into(),
+                indicator: indicator.into(),
+            },
             ResourceIndicator::NonFungible {
                 resource_address,
-                indicator: _,
-            } => *resource_address,
+                indicator,
+            } => InternalResourceIndicator::NonFungible {
+                resource_address: resource_address.into(),
+                indicator: indicator.into(),
+            },
         }
     }
 }
 
-impl ResourceIndicator {
-    pub fn fungible(
-        resource_address: impl Into<ResourceAddress>,
-        indicator: impl Into<FungibleResourceIndicator>,
-    ) -> Self {
-        Self::Fungible {
-            resource_address: resource_address.into(),
-            indicator: indicator.into(),
-        }
-    }
-    pub fn non_fungible(
-        resource_address: impl Into<ResourceAddress>,
-        indicator: impl Into<NonFungibleResourceIndicator>,
-    ) -> Self {
-        Self::NonFungible {
-            resource_address: resource_address.into(),
-            indicator: indicator.into(),
-        }
-    }
+#[uniffi::export]
+pub fn new_resource_indicator_sample() -> ResourceIndicator {
+    InternalResourceIndicator::sample().into()
 }
 
-impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
-    fn from(value: (RetResourceIndicator, NetworkID)) -> Self {
-        let (ret, network_id) = value;
-        match ret {
-            RetResourceIndicator::Fungible(
-                resource_address,
-                fungible_indicator,
-            ) => Self::fungible(
-                (resource_address, network_id),
-                fungible_indicator,
-            ),
-            RetResourceIndicator::NonFungible(
-                resource_address,
-                non_fungible_indicator,
-            ) => Self::non_fungible(
-                (resource_address, network_id),
-                non_fungible_indicator,
-            ),
-        }
-    }
+#[uniffi::export]
+pub fn new_resource_indicator_sample_other() -> ResourceIndicator {
+    InternalResourceIndicator::sample_other().into()
 }
 
-impl HasSampleValues for ResourceIndicator {
-    fn sample() -> Self {
-        Self::fungible(
-            ResourceAddress::sample(),
-            FungibleResourceIndicator::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::non_fungible(
-            NonFungibleResourceAddress::sample_other(),
-            NonFungibleResourceIndicator::sample_other(),
-        )
-    }
+#[uniffi::export]
+pub fn resource_indicator_get_address(
+    indicator: &ResourceIndicator,
+) -> ResourceAddress {
+    indicator.into::<InternalResourceIndicator>().get_address().into()
 }
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceIndicator;
 
     #[test]
-    fn get_address() {
-        assert_eq!(SUT::sample().get_address(), ResourceAddress::sample());
-        assert_eq!(
-            SUT::sample_other().get_address(),
-            ResourceAddress::sample_mainnet_nft_other()
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
     fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(
+            new_resource_indicator_sample(),
+            new_resource_indicator_sample_other()
+        );
     }
 
     #[test]
-    fn from_ret_fungible() {
-        let resource_address = ResourceAddress::sample();
-        let ret = RetResourceIndicator::Fungible(
-            resource_address.into(),
-            RetFungibleResourceIndicator::Guaranteed(1.into()),
-        );
-
-        assert_eq!(SUT::from((ret.clone(), NetworkID::Mainnet)), SUT::sample());
-
-        // Not equals for wrong network
-        assert_ne!(SUT::from((ret, NetworkID::Stokenet)), SUT::sample());
-    }
-
-    #[test]
-    fn from_ret_non_fungible() {
-        let resource_address = NonFungibleResourceAddress::sample_other();
-
-        let ret = RetResourceIndicator::NonFungible(
-            ResourceAddress::from(resource_address).into(),
-            RetNonFungibleResourceIndicator::ByAll {
-                predicted_amount: RetPredicted {
-                    value: 1.into(),
-                    instruction_index: 0,
-                },
-                predicted_ids: RetPredicted {
-                    value: [NonFungibleLocalId::sample_other()]
-                        .into_iter()
-                        .map(ScryptoNonFungibleLocalId::from)
-                        .collect(),
-                    instruction_index: 1,
-                },
-            },
-        );
-
-        assert_eq!(
-            SUT::from((ret.clone(), NetworkID::Mainnet)),
-            SUT::sample_other()
-        );
-
-        // Not equals for wrong network
-        assert_ne!(SUT::from((ret, NetworkID::Stokenet)), SUT::sample_other());
+    fn get_address() {
+        let sut = SUT::sample();
+        assert_eq!(sut.get_address(), resource_indicator_get_address(&sut));
     }
 }
+

@@ -1,60 +1,57 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+use sargon::WalletInteractionWalletAccount as InternalWalletInteractionWalletAccount;
+
+#[derive(Debug, PartialEq, Clone, uniffi::Record)]
 pub struct WalletInteractionWalletAccount {
     pub address: AccountAddress,
     pub label: DisplayName,
     pub appearance_id: AppearanceID,
 }
 
-impl WalletInteractionWalletAccount {
-    pub fn new(
-        address: impl Into<AccountAddress>,
-        label: impl Into<DisplayName>,
-        appearance_id: impl Into<AppearanceID>,
-    ) -> Self {
+impl From<InternalWalletInteractionWalletAccount> for WalletInteractionWalletAccount {
+    fn from(value: InternalWalletInteractionWalletAccount) -> Self {
         Self {
-            address: address.into(),
-            label: label.into(),
-            appearance_id: appearance_id.into(),
+            address: value.address.into(),
+            label: value.label.into(),
+            appearance_id: value.appearance_id.into(),
         }
     }
 }
 
-impl HasSampleValues for WalletInteractionWalletAccount {
-    fn sample() -> Self {
-        Self::new(
-            AccountAddress::sample(),
-            DisplayName::sample(),
-            AppearanceID::sample(),
-        )
-    }
-
-    fn sample_other() -> Self {
-        Self::new(
-            AccountAddress::sample_other(),
-            DisplayName::sample_other(),
-            AppearanceID::sample_other(),
-        )
+impl Into<InternalWalletInteractionWalletAccount> for WalletInteractionWalletAccount {
+    fn into(self) -> InternalWalletInteractionWalletAccount {
+        InternalWalletInteractionWalletAccount {
+            address: self.address.into(),
+            label: self.label.into(),
+            appearance_id: self.appearance_id.into(),
+        }
     }
 }
 
+json_data_convertible!(WalletInteractionWalletAccount);
+
+#[uniffi::export]
+pub fn new_wallet_interaction_wallet_account_sample(
+) -> WalletInteractionWalletAccount {
+    InternalWalletInteractionWalletAccount::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_wallet_interaction_wallet_account_sample_other(
+) -> WalletInteractionWalletAccount {
+    InternalWalletInteractionWalletAccount::sample_other().into()
+}
+
 #[cfg(test)]
-mod tests {
+mod uniffi_tests {
     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletInteractionWalletAccount;
-
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn sample_values() {
+        assert_ne!(
+            new_wallet_interaction_wallet_account_sample(),
+            new_wallet_interaction_wallet_account_sample_other(),
+        );
     }
 }

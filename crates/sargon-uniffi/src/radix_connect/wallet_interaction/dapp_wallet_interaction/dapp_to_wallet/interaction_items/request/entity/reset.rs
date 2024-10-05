@@ -1,46 +1,26 @@
 use crate::prelude::*;
+use sargon::DappToWalletInteractionResetRequestItem as InternalDappToWalletInteractionResetRequestItem;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionResetRequestItem {
     pub accounts: bool,
     pub persona_data: bool,
 }
 
-impl DappToWalletInteractionResetRequestItem {
-    pub fn new(accounts: bool, persona_data: bool) -> Self {
+impl From<InternalDappToWalletInteractionResetRequestItem> for DappToWalletInteractionResetRequestItem {
+    fn from(value: InternalDappToWalletInteractionResetRequestItem) -> Self {
         Self {
-            accounts,
-            persona_data,
+            accounts: value.accounts,
+            persona_data: value.persona_data,
         }
     }
 }
 
-impl HasSampleValues for DappToWalletInteractionResetRequestItem {
-    fn sample() -> Self {
-        Self::new(true, true)
-    }
-
-    fn sample_other() -> Self {
-        Self::new(false, false)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionResetRequestItem;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalDappToWalletInteractionResetRequestItem> for DappToWalletInteractionResetRequestItem {
+    fn into(self) -> InternalDappToWalletInteractionResetRequestItem {
+        InternalDappToWalletInteractionResetRequestItem {
+            accounts: self.accounts,
+            persona_data: self.persona_data,
+        }
     }
 }

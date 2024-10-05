@@ -9,21 +9,3 @@ decl_identified_vec_of!(
     ReferencesToAuthorizedPersonas,
     AuthorizedPersonaSimple
 );
-
-impl HasSampleValues for ReferencesToAuthorizedPersonas {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::from_iter([
-            AuthorizedPersonaSimple::sample_mainnet(),
-            AuthorizedPersonaSimple::sample_mainnet_other(),
-        ])
-    }
-
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::from_iter([
-            AuthorizedPersonaSimple::sample_stokenet(),
-            AuthorizedPersonaSimple::sample_stokenet_other(),
-        ])
-    }
-}

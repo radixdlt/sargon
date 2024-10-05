@@ -12,8 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    SerializeDisplay,
-    DeserializeFromStr,
     derive_more::Display,
     uniffi::Enum,
 )]
@@ -26,194 +24,75 @@ pub enum CAP26Path {
     Identity { value: IdentityPath },
 }
 
-impl TryFrom<&HDPath> for CAP26Path {
-    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self> {
-        if let Ok(get_id) = GetIDPath::try_from(value) {
-            return Ok(get_id.into());
-        }
-        if let Ok(identity_path) = IdentityPath::try_from(value) {
-            return Ok(identity_path.into());
-        }
-        AccountPath::try_from(value).map(|p| p.into())
-    }
+use crate::prelude::*;
+
+#[uniffi::export]
+pub fn new_cap26_path_from_string(
+    string: String,
+) -> Result<CAP26Path, CommonError> {
+    CAP26Path::from_str(&string)
 }
 
-impl FromStr for CAP26Path {
-    type Err = CommonError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        s.parse::<HDPath>().and_then(|p| Self::try_from(&p))
-    }
+#[uniffi::export]
+pub fn default_get_id_path() -> GetIDPath {
+    GetIDPath::default()
 }
 
-impl Derivation for CAP26Path {
-    fn hd_path(&self) -> &HDPath {
-        match self {
-            CAP26Path::Account { value } => value.hd_path(),
-            CAP26Path::Identity { value } => value.hd_path(),
-            CAP26Path::GetID { value } => value.hd_path(),
-        }
-    }
-
-    fn curve(&self) -> SLIP10Curve {
-        self.scheme().curve()
-    }
-
-    fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::CAP26 {
-            value: self.clone(),
-        }
-    }
-}
-
-impl CAP26Path {
-    pub fn scheme(&self) -> DerivationPathScheme {
-        DerivationPathScheme::Cap26
-    }
-}
-
-impl From<AccountPath> for CAP26Path {
-    fn from(value: AccountPath) -> Self {
-        Self::Account { value }
-    }
-}
-
-impl From<IdentityPath> for CAP26Path {
-    fn from(value: IdentityPath) -> Self {
-        Self::Identity { value }
-    }
-}
-
-impl From<GetIDPath> for CAP26Path {
-    fn from(value: GetIDPath) -> Self {
-        Self::GetID { value }
-    }
-}
-
-impl HasSampleValues for CAP26Path {
-    fn sample() -> Self {
-        Self::sample_account()
-    }
-
-    fn sample_other() -> Self {
-        Self::sample_identity()
-    }
-}
-
-impl CAP26Path {
-    pub fn sample_account() -> Self {
-        Self::Account {
-            value: AccountPath::sample(),
-        }
-    }
-
-    pub fn sample_identity() -> Self {
-        Self::Identity {
-            value: IdentityPath::sample(),
-        }
-    }
+#[uniffi::export]
+pub fn cap26_path_to_string(path: &CAP26Path) -> String {
+    path.to_string()
 }
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = CAP26Path;
-
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn scheme_account_path() {
-        assert_eq!(SUT::sample_account().scheme(), DerivationPathScheme::Cap26);
-    }
-
-    #[test]
-    fn scheme_identity_path() {
+    fn test_account_path() {
+        let path = CAP26Path::sample_account();
         assert_eq!(
-            SUT::sample_identity().scheme(),
-            DerivationPathScheme::Cap26
+            path,
+            new_cap26_path_from_string(cap26_path_to_string(&path)).unwrap()
         );
     }
 
     #[test]
-    fn curve() {
-        assert_eq!(SUT::sample().curve(), SLIP10Curve::Curve25519)
-    }
-
-    #[test]
-    fn scheme_getid_path() {
+    fn test_identity_path() {
+        let path = CAP26Path::sample_identity();
         assert_eq!(
-            SUT::GetID {
-                value: GetIDPath::default()
-            }
-            .scheme(),
-            DerivationPathScheme::Cap26
+            path,
+            new_cap26_path_from_string(cap26_path_to_string(&path)).unwrap()
         );
     }
 
     #[test]
-    fn hdpath_account_path() {
+    fn test_get_id_path() {
+        let path = CAP26Path::from(default_get_id_path());
         assert_eq!(
-            SUT::sample_account().hd_path(),
-            AccountPath::sample().hd_path()
+            path,
+            new_cap26_path_from_string(String::from("m/44H/1022H/365H"))
+                .unwrap()
         );
     }
 
     #[test]
-    fn hdpath_getid_path() {
-        assert_eq!(
-            SUT::GetID {
-                value: GetIDPath::default()
-            }
-            .hd_path(),
-            GetIDPath::default().hd_path()
+    fn test_new_account_path() {
+        let path = new_account_path(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
         );
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]
-    fn into_from_account_path() {
-        assert_eq!(
-            SUT::Account {
-                value: AccountPath::sample()
-            },
-            AccountPath::sample().into()
+    fn test_new_identity_path() {
+        let path = new_identity_path(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
         );
-    }
-
-    #[test]
-    fn into_from_getid_path() {
-        assert_eq!(
-            SUT::GetID {
-                value: GetIDPath::default()
-            },
-            GetIDPath::default().into()
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_getid() {
-        let model: SUT = GetIDPath::default().into();
-        assert_json_value_eq_after_roundtrip(&model, json!("m/44H/1022H/365H"));
-    }
-
-    #[test]
-    fn json_roundtrip_account() {
-        let model: SUT = AccountPath::sample().into();
-        assert_json_value_eq_after_roundtrip(
-            &model,
-            json!("m/44H/1022H/1H/525H/1460H/0H"),
-        );
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/618H/1460H/0H")
     }
 }

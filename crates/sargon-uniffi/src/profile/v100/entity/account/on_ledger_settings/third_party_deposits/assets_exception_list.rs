@@ -5,16 +5,3 @@ decl_identified_vec_of!(
     AssetsExceptionList,
     AssetException
 );
-
-impl HasSampleValues for AssetsExceptionList {
-    fn sample() -> Self {
-        Self::from_iter([
-            AssetException::sample(),
-            AssetException::sample_other(),
-        ])
-    }
-
-    fn sample_other() -> Self {
-        Self::from_iter([AssetException::sample_other()])
-    }
-}

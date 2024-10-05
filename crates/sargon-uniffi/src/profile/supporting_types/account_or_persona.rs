@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Either an `Account` or a `Persona`.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
+    Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
 )]
 pub enum AccountOrPersona {
     /// An `Account`
@@ -21,36 +21,6 @@ pub enum AccountOrPersona {
     PersonaEntity(Persona),
 }
 
-impl IsNetworkAware for AccountOrPersona {
-    fn network_id(&self) -> NetworkID {
-        match self {
-            Self::AccountEntity(account) => account.network_id,
-            Self::PersonaEntity(persona) => persona.network_id,
-        }
-    }
-}
-
-impl From<Account> for AccountOrPersona {
-    fn from(value: Account) -> Self {
-        Self::AccountEntity(value)
-    }
-}
-
-impl From<Persona> for AccountOrPersona {
-    fn from(value: Persona) -> Self {
-        Self::PersonaEntity(value)
-    }
-}
-
-impl std::fmt::Display for AccountOrPersona {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AccountEntity(value) => write!(f, "{}", value),
-            Self::PersonaEntity(value) => write!(f, "{}", value),
-        }
-    }
-}
-
 impl Identifiable for AccountOrPersona {
     type ID = AddressOfAccountOrPersona;
 
@@ -66,40 +36,41 @@ impl Identifiable for AccountOrPersona {
     }
 }
 
-impl HasSampleValues for AccountOrPersona {
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
-
-    fn sample_other() -> Self {
-        Self::sample_mainnet_other()
-    }
+#[uniffi::export]
+pub fn new_account_or_persona_sample_mainnet() -> AccountOrPersona {
+    AccountOrPersona::sample_mainnet()
 }
 
-impl AccountOrPersona {
-    pub(crate) fn sample_mainnet() -> Self {
-        Self::from(Account::sample_mainnet())
-    }
+#[uniffi::export]
+pub fn new_account_or_persona_sample_mainnet_other() -> AccountOrPersona {
+    AccountOrPersona::sample_mainnet_other()
+}
 
-    pub(crate) fn sample_mainnet_other() -> Self {
-        Self::from(Persona::sample_mainnet_other())
-    }
+#[uniffi::export]
+pub fn new_account_or_persona_sample_mainnet_third() -> AccountOrPersona {
+    AccountOrPersona::sample_mainnet_third()
+}
 
-    pub(crate) fn sample_mainnet_third() -> Self {
-        Self::from(Account::sample_mainnet_third())
-    }
+#[uniffi::export]
+pub fn new_account_or_persona_sample_stokenet() -> AccountOrPersona {
+    AccountOrPersona::sample_stokenet()
+}
 
-    pub(crate) fn sample_stokenet() -> Self {
-        Self::from(Account::sample_stokenet())
-    }
+#[uniffi::export]
+pub fn new_account_or_persona_sample_stokenet_other() -> AccountOrPersona {
+    AccountOrPersona::sample_stokenet_other()
+}
 
-    pub(crate) fn sample_stokenet_other() -> Self {
-        Self::from(Persona::sample_stokenet_other())
-    }
+#[uniffi::export]
+pub fn new_account_or_persona_sample_stokenet_third() -> AccountOrPersona {
+    AccountOrPersona::sample_stokenet_third()
+}
 
-    pub(crate) fn sample_stokenet_third() -> Self {
-        Self::from(Account::sample_stokenet_third())
-    }
+#[uniffi::export]
+pub fn account_or_persona_get_id(
+    entity: &AccountOrPersona,
+) -> <AccountOrPersona as Identifiable>::ID {
+    entity.id()
 }
 
 #[cfg(test)]
@@ -110,37 +81,31 @@ mod tests {
     type SUT = AccountOrPersona;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_is_network_aware() {
-        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
-        assert_eq!(SUT::sample_other().network_id(), NetworkID::Mainnet);
-    }
-
-    #[test]
-    fn test_id() {
-        assert_eq!(SUT::sample().id(), Account::sample().address.into());
+    fn hash_of_sample_values() {
         assert_eq!(
-            SUT::sample_other().id(),
-            Persona::sample_mainnet_other().address.into()
-        );
+            HashSet::<SUT>::from_iter([
+                new_account_or_persona_sample_mainnet(),
+                new_account_or_persona_sample_mainnet_other(),
+                new_account_or_persona_sample_mainnet_third(),
+                new_account_or_persona_sample_stokenet(),
+                new_account_or_persona_sample_stokenet_other(),
+                new_account_or_persona_sample_stokenet_third(),
+                // duplicates should be removed
+                new_account_or_persona_sample_mainnet(),
+                new_account_or_persona_sample_mainnet_other(),
+                new_account_or_persona_sample_mainnet_third(),
+                new_account_or_persona_sample_stokenet(),
+                new_account_or_persona_sample_stokenet_other(),
+                new_account_or_persona_sample_stokenet_third(),
+            ])
+            .len(),
+            6
+        )
     }
 
     #[test]
-    fn test_display() {
-        assert_eq!(format!("{}", SUT::sample()), "Alice | account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87");
-        assert_eq!(
-            format!("{}", SUT::sample_other()),
-            "Batman | identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw"
-        );
+    fn test_get_id() {
+        let sut = SUT::sample();
+        assert_eq!(sut.id(), account_or_persona_get_id(&sut));
     }
 }
