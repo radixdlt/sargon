@@ -10,7 +10,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 pub enum EventKind {
     /* Sort lexicographically */

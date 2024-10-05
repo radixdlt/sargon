@@ -10,7 +10,6 @@ use crate::prelude::*;
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.to_obfuscated_string())]
 #[debug("{:?}", self.partially_obfuscated_string())]

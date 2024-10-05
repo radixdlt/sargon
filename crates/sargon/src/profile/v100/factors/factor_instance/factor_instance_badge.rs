@@ -12,7 +12,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Enum,
 )]
 #[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadge {

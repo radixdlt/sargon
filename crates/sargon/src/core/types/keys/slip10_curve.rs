@@ -19,7 +19,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {

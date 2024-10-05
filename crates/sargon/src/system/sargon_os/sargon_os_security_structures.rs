@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-#[uniffi::export]
 impl SargonOS {
     /// Returns all the SecurityStructuresOfFactorSources,
     /// by trying to map FactorSourceID level -> FactorSource Level

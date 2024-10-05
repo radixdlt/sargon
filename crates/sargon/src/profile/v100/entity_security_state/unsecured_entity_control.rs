@@ -5,7 +5,7 @@ use crate::prelude::*;
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct UnsecuredEntityControl {

@@ -12,7 +12,6 @@ use crate::prelude::*;
 /// async streams in that implementing type.
 ///
 /// See Swifts EventBus implementation for more details.
-#[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
 pub trait EventBusDriver: Send + Sync + std::fmt::Debug {
     /// Asynchronously *handles* event notifications

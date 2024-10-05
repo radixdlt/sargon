@@ -37,7 +37,6 @@ use crate::prelude::*;
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{}", self.bip32_string())]
 pub struct BIP44LikePath {

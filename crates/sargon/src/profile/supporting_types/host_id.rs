@@ -10,7 +10,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("ID {} at {}", id, generated_at)]
 pub struct HostId {

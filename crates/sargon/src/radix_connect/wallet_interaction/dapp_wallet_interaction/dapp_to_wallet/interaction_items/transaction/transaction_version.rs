@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(TXVersion, u64);
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct TXVersion(u64);
 

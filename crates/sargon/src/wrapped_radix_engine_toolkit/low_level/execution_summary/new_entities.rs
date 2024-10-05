@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Information on the global entities created in the transaction.
-#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct NewEntities {
     pub metadata: HashMap<ResourceAddress, NewlyCreatedResource>,
 }
@@ -24,19 +24,13 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
         let (ret, network_id) = value;
 
         Self::new(
-            // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
-            // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
-            // and "filter out" (skip) any GlobalAddress that is not a ResourceAddress,
-            // why? Since Radix Wallets actually only use the ResourceAddress...
-            ret.metadata
-                .into_iter()
-                .filter_map(|(k, v)| {
-                    // We only care about `ResourceAddress`, and skip other address types.
-                    TryInto::<ResourceAddress>::try_into((k, network_id))
-                        .map(|a| (a, v))
-                        .ok()
-                })
-                .map(|t| (t.0, NewlyCreatedResource::from(t.1))),
+            ret.resource_addresses
+            .into_iter()
+            .map(|res| 
+                let x = ScryptoGlobalAddress::from(res);
+                ret.metadata()
+                (TryInto::<ResourceAddress>::try_into((res, network_id)).unwrap(), NewlyCreatedResource::default())
+            )
         )
     }
 }

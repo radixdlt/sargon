@@ -16,7 +16,6 @@ use crate::prelude::*;
     Ord,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Enum,
 )]
 #[repr(u32)]
 pub enum CAP26EntityKind {

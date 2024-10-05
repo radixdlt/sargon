@@ -28,19 +28,11 @@ macro_rules! decl_non_empty_max_n_bytes {
                 DeserializeFromStr,
                 derive_more::Display,
                 derive_more::Debug,
-                uniffi::Record,
             )]
             #[display("{}", self.to_hex())]
             #[debug("{}", self.to_hex())]
             pub struct [< NonEmptyMax $byte_count Bytes  >] {
                 bag_of_bytes: BagOfBytes,
-            }
-
-            #[uniffi::export]
-            pub fn [<new_non_empty_max_ $byte_count _bytes>](
-                bag_of_bytes: BagOfBytes,
-            ) -> Result<[< NonEmptyMax $byte_count Bytes  >]> {
-                [< NonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes)
             }
 
             impl TryFrom<BagOfBytes> for [< NonEmptyMax $byte_count Bytes  >] {
@@ -377,28 +369,5 @@ mod tests_non_empty_max_64_bytes {
             set.insert(bytes.to_vec());
         }
         assert_eq!(set.len(), n);
-    }
-}
-
-#[cfg(test)]
-mod non_empty_max_64_uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn new_from_bag_of_bytes() {
-        let bytes = generate_bytes::<13>();
-        assert_eq!(
-            new_non_empty_max_64_bytes(bytes.clone().into())
-                .unwrap()
-                .to_vec(),
-            bytes
-        );
-    }
-
-    #[test]
-    fn new_fail() {
-        assert!(
-            new_non_empty_max_64_bytes(generate_bytes::<65>().into()).is_err()
-        );
     }
 }

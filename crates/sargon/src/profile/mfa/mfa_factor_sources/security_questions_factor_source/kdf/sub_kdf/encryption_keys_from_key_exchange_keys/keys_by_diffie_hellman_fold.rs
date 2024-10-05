@@ -19,7 +19,7 @@ impl From<X25519PublicKey> for EncryptionKey {
 /// Key Exchange Key in a Set, by "folding" from left to right.
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]

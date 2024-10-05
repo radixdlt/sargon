@@ -18,7 +18,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct OnLedgerSettings {

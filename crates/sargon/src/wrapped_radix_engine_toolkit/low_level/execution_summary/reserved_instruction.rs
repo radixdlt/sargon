@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// The set of instructions that is only allowed in manifests created by the
 /// wallet itself.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ReservedInstruction {
     AccountLockFee,
     AccountSecurify,

@@ -17,8 +17,7 @@ use crypto::keys::x25519::PublicKey as X25519PublicKey;
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct KeyAgreementPublicKey {
-    pub secret_magic: X25519PublicKey,
+pub struct KeyAgreementPublicKey(X25519PublicKey)
 }
 
 impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {
@@ -29,9 +28,7 @@ impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {
 
 impl From<X25519PublicKey> for KeyAgreementPublicKey {
     fn from(value: X25519PublicKey) -> Self {
-        Self {
-            secret_magic: value,
-        }
+        Self(value)
     }
 }
 
@@ -77,7 +74,7 @@ impl KeyAgreementPublicKey {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.secret_magic.to_bytes().to_vec()
+        self.0.to_bytes().to_vec()
     }
 }
 

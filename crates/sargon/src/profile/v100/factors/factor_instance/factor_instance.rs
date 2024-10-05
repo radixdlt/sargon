@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
 )]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this

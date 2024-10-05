@@ -15,36 +15,11 @@ json_string_convertible!(RadixConnectPassword);
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[serde(transparent)]
 #[debug("{value}")]
 pub struct RadixConnectPassword {
     pub value: Exactly32Bytes,
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_password(
-    bytes: Exactly32Bytes,
-) -> RadixConnectPassword {
-    RadixConnectPassword::new(bytes)
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_password_sample() -> RadixConnectPassword {
-    RadixConnectPassword::sample()
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_password_sample_other() -> RadixConnectPassword {
-    RadixConnectPassword::sample_other()
-}
-
-#[uniffi::export]
-pub fn radix_connect_password_message_hash(
-    password: &RadixConnectPassword,
-) -> Hash {
-    password.message_hash()
 }
 
 impl RadixConnectPassword {
@@ -192,38 +167,6 @@ mod tests {
         assert_eq!(
             RadixConnectPassword::sample().message_hash(),
             Exactly32Bytes::from_str("479ae13d3983de8ab520e519cfba01a25fafbbc1e7438ba52e5ed4a40cd2f56a").map(Hash::from).unwrap()
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn new() {
-        let bytes = Exactly32Bytes::generate();
-        assert_eq!(new_radix_connect_password(bytes).value, bytes);
-    }
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_radix_connect_password_sample(),
-            RadixConnectPassword::sample()
-        );
-        assert_eq!(
-            new_radix_connect_password_sample_other(),
-            RadixConnectPassword::sample_other()
-        );
-    }
-
-    #[test]
-    fn message_hash() {
-        let sut = RadixConnectPassword::sample();
-        assert_eq!(
-            radix_connect_password_message_hash(&sut),
-            sut.message_hash()
         );
     }
 }

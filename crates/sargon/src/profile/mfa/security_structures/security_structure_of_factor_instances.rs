@@ -6,7 +6,7 @@ decl_matrix_of_factors!(
 );
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityStructureOfFactorInstances {

@@ -17,7 +17,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     strum::Display,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum RequestedNumberQuantifier {

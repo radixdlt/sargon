@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Eq, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct NotarizedTransaction {
     signed_intent: SignedIntent,
     pub notary_signature: NotarySignature,

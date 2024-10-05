@@ -16,7 +16,6 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 #[repr(u16)] // most likely we will not do more than 65536 iterations.
 pub enum ProfileSnapshotVersion {

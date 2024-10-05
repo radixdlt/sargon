@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(tag = "discriminator")]
 pub enum ResourceOrNonFungible {

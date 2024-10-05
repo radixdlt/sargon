@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
 /// it `is_manual_cancellation`.
-#[derive(Clone, Debug, PartialEq, strum::EnumIter, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, strum::EnumIter)]
 pub enum SecureStorageAccessErrorKind {
     /// The hardware is unavailable. Try again later.
     HardwareUnavailable,

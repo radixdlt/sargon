@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use radix_rust::prelude::IndexMap;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PerRecipientAssetTransfers {
     pub address_of_sender: AccountAddress,
     pub transfers: Vec<PerRecipientAssetTransfer>,

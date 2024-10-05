@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,

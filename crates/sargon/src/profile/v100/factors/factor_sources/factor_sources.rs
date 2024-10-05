@@ -65,19 +65,6 @@ mod tests {
     }
 
     #[test]
-    fn manual_uniffi_conversion_fails_if_factor_sources_is_empty() {
-        // This is some advanced techniques...
-        let mut bad_value_from_ffi_vec = Vec::new();
-        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
-        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
-        let res =
-            <IdentifiedVecOf<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
-                bad_value_from_ffi,
-            );
-        assert!(res.is_err());
-    }
-
-    #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
             SUT::from_iter(

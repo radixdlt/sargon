@@ -11,7 +11,7 @@ decl_identified_vec_of!(
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {

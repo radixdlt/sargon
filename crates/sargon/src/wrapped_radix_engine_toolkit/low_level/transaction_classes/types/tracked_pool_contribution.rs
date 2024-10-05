@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A contribution to a pool observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TrackedPoolContribution {
     pub pool_address: PoolAddress,
 

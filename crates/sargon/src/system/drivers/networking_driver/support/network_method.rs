@@ -9,7 +9,6 @@ use crate::prelude::*;
     Hash,
     strum::EnumString,
     strum::Display,
-    uniffi::Enum,
 )]
 #[strum(serialize_all = "UPPERCASE")]
 pub enum NetworkMethod {

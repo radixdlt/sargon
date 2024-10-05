@@ -8,7 +8,7 @@ use crate::prelude::*;
 /// during app launch, enabling the  Sargon "Operating System" to e.g read/write
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
-#[derive(Debug, uniffi::Object)]
+#[derive(Debug)]
 pub struct SargonOS {
     pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
@@ -24,9 +24,7 @@ impl Deref for SargonOS {
     }
 }
 
-#[uniffi::export]
 impl SargonOS {
-    #[uniffi::constructor]
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
         let clients = Clients::new(bios);
 

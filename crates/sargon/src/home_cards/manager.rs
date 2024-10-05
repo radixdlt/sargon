@@ -3,7 +3,6 @@ use std::sync::{RwLock, RwLockWriteGuard};
 
 /// Manages the home cards by handling storage, parsing, and updating operations.
 /// Call `bootstrap` before invoking any other public functions.
-#[derive(uniffi::Object)]
 pub struct HomeCardsManager {
     /// Parser for handling deferred deep links.
     parser: Arc<dyn DeferredDeepLinkParser>,
@@ -30,9 +29,7 @@ impl HomeCardsManager {
     }
 }
 
-#[uniffi::export]
 impl HomeCardsManager {
-    #[uniffi::constructor]
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
         network_id: NetworkID,
@@ -50,12 +47,10 @@ impl HomeCardsManager {
     }
 }
 
-#[uniffi::export]
 impl HomeCardsManager {
     /// Initializes `HomeCards` by loading from storage.
     /// This function should be called before invoking any other public functions.
     /// Notifies `HomeCardsObserver`.
-    #[uniffi::method]
     pub async fn bootstrap(&self) -> Result<()> {
         let stored_cars = self.load_cards().await?;
         self.update_cards(|write_guard| {
@@ -84,7 +79,6 @@ impl HomeCardsManager {
     /// Handles a deferred deep link by parsing it and saving the generated `HomeCards` to `HomeCardsStorage`.
     /// `HomeCard::ContinueRadQuest` if found in the link parsing result, replaces `HomeCard::StartRadQuest`.
     /// Notifies `HomeCardsObserver`.
-    #[uniffi::method]
     pub async fn deferred_deep_link_received(
         &self,
         encoded_value: String,
@@ -101,7 +95,6 @@ impl HomeCardsManager {
     /// Marks the wallet restoration.
     /// Ensures only the expected `HomeCards` remain in `HomeCardsStorage` - currently none.
     /// Notifies `HomeCardsObserver`.
-    #[uniffi::method]
     pub async fn wallet_restored(&self) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {
@@ -113,7 +106,6 @@ impl HomeCardsManager {
 
     /// Dismisses a specified `HomeCard` by removing it from `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
-    #[uniffi::method]
     pub async fn card_dismissed(&self, card: HomeCard) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {
@@ -125,7 +117,6 @@ impl HomeCardsManager {
 
     /// Clears the home cards from the `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
-    #[uniffi::method]
     pub async fn wallet_reset(&self) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {

@@ -12,7 +12,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     EnumAsInner,
-    uniffi::Enum,
 )]
 #[serde(untagged, remote = "Self")]
 pub enum EntitySecurityState {

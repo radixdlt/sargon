@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WalletToDappInteractionTransactionResponseItems {
     pub send: WalletToDappInteractionSendTransactionResponseItem,
 }
@@ -15,7 +15,7 @@ impl WalletToDappInteractionTransactionResponseItems {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
     transaction_intent_hash: IntentHash,
 }

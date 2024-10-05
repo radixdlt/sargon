@@ -7,7 +7,7 @@ use crate::prelude::*;
 /// to encrypt Profile part of manual file export.
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Enum,
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
@@ -47,7 +47,7 @@ impl IsSecurityQuestionsKDFScheme
 /// questions and answers, using two "sub-KDFs".
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]

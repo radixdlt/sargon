@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// A specification of expected format for an answer to a security question.
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
@@ -76,7 +76,7 @@ impl HasSampleValues
 /// A security question
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]

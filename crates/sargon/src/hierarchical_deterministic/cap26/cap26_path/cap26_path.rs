@@ -15,7 +15,6 @@ use crate::prelude::*;
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Enum,
 )]
 pub enum CAP26Path {
     #[display("{value}")]

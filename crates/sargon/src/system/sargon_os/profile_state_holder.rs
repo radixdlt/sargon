@@ -2,7 +2,7 @@ use crate::prelude::*;
 use std::{borrow::Borrow, sync::RwLock};
 
 #[derive(
-    Debug, Clone, PartialEq, EnumAsInner, derive_more::Display, uniffi::Enum,
+    Debug, Clone, PartialEq, EnumAsInner, derive_more::Display
 )]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {
@@ -19,7 +19,7 @@ pub enum ProfileState {
     Loaded(Profile),
 }
 
-#[derive(Debug, uniffi::Object)]
+#[derive(Debug)]
 #[allow(dead_code)]
 pub struct ProfileStateHolder {
     // This is pub(crate) for testing purposes only, i.e. causing the RwLock to be poisoned.

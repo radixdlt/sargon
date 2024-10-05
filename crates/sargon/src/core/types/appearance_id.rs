@@ -12,7 +12,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     Hash,
-    uniffi::Record,
 )]
 #[serde(try_from = "u8")]
 #[serde(into = "u8")]

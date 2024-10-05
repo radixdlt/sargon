@@ -8,7 +8,6 @@
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 pub enum AddressFormat {
     Full,

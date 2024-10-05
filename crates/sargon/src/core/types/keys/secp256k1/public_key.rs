@@ -16,33 +16,14 @@ use k256::ecdsa::VerifyingKey as K256PublicKey;
     DeserializeFromStr, // yes we could have #[serde(transparent)] since `ScryptoEd25519PublicKey` is Deserialize, but we wanna be in control.
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct Secp256k1PublicKey {
-    secret_magic: ScryptoSecp256k1PublicKey,
-}
+pub struct Secp256k1PublicKey(ScryptoSecp256k1PublicKey)
 
 impl From<Secp256k1PublicKey> for ScryptoSecp256k1PublicKey {
     fn from(value: Secp256k1PublicKey) -> Self {
-        value.secret_magic
-    }
-}
-
-uniffi::custom_type!(ScryptoSecp256k1PublicKey, BagOfBytes);
-
-impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from(val.as_slice()).map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec().into()
+        value.0
     }
 }
 
@@ -63,7 +44,7 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
 
 impl Secp256k1PublicKey {
     pub(crate) fn scrypto(&self) -> ScryptoSecp256k1PublicKey {
-        self.secret_magic
+        self.0
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -144,7 +125,7 @@ impl TryFrom<Secp256k1PublicKeyUncheckedBytes> for Secp256k1PublicKey {
                 )
                 .expect("Discrepancy: Scrypto's Secp256k1PublicKey library considers key invalid, but BIP32 crate considers it valid. We trust BIP32 crate.")
             })
-            .map(|secret_magic| Self { secret_magic })
+            .map(|value| Self(value))
     }
 }
 

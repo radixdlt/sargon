@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -438,48 +438,6 @@ mod tests {
                 hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
             ).unwrap()),
             "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NonFungibleLocalId;
-
-    #[test]
-    fn integer() {
-        assert_eq!(
-            new_non_fungible_local_id_int(1337),
-            SUT::Integer { value: 1337 }
-        );
-    }
-
-    #[test]
-    fn bytes() {
-        let s = "dead";
-        let b = NonEmptyMax64Bytes::from_hex(s).unwrap();
-        assert_eq!(
-            new_non_fungible_local_id_bytes(BagOfBytes::from_hex(s).unwrap())
-                .unwrap(),
-            SUT::Bytes { value: b }
-        );
-    }
-
-    #[test]
-    fn ruid() {
-        assert_eq!(new_non_fungible_local_id_ruid(BagOfBytes::sample_aced()).unwrap().to_string(), "{acedacedacedaced-acedacedacedaced-acedacedacedaced-acedacedacedaced}");
-    }
-
-    #[test]
-    fn string() {
-        assert_eq!(
-            new_non_fungible_local_id_string("foo".to_owned())
-                .unwrap()
-                .to_string(),
-            "<foo>"
         );
     }
 }

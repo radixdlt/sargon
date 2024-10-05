@@ -20,7 +20,7 @@ macro_rules! decl_tx_hash {
             #[doc = $expr]
         )*
         #[derive(
-            Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug, uniffi::Record,
+            Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
         )]
         #[display("{}", self.bech32_encoded_tx_id)]
         #[debug("{}", self.bech32_encoded_tx_id)]
@@ -31,39 +31,6 @@ macro_rules! decl_tx_hash {
             pub hash: Hash,
             /// Bech32 encoded TX id
             pub bech32_encoded_tx_id: String,
-        }
-
-        paste! {
-            #[uniffi::export]
-            pub fn [< new_$struct_name:snake _from_string>](string: String) -> Result<$struct_name> {
-                $struct_name::from_str(&string)
-            }
-
-            #[uniffi::export]
-            pub fn [< $struct_name:snake _formatted>](address: &$struct_name, format: AddressFormat) -> String {
-                address.formatted(format)
-            }
-
-            #[cfg(test)]
-            mod [< uniffi_ $struct_name:snake _tests>] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $struct_name;
-
-                #[test]
-                fn from_str() {
-                    assert_eq!(SUT::sample(), [< new_$struct_name:snake _from_string>]($expected_sample_str.to_owned()).unwrap());
-                }
-
-                #[test]
-                fn formatted() {
-                    let sut = SUT::sample();
-                    assert_eq!(sut.formatted(AddressFormat::Default), [< $struct_name:snake _formatted>](&sut, AddressFormat::Default));
-                    assert_eq!(sut.formatted(AddressFormat::Raw), [< $struct_name:snake _formatted>](&sut, AddressFormat::Raw));
-                    assert_eq!(sut.formatted(AddressFormat::Full), [< $struct_name:snake _formatted>](&sut, AddressFormat::Full));
-                }
-            }
         }
 
         impl $struct_name {

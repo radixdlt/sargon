@@ -11,7 +11,6 @@ use crate::prelude::*;
     EnumAsInner,
     Eq,
     Hash,
-    uniffi::Enum,
 )]
 pub enum PublicKeyHash {
     Ed25519 { value: Exactly29Bytes },

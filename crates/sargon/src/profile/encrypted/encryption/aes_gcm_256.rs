@@ -14,7 +14,6 @@ use aes_gcm::{
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 pub struct AesGcm256 {}
 

@@ -52,45 +52,6 @@ impl DerefMut for BagOfBytes {
     }
 }
 
-/// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
-/// use `sequence<u8>` because it results in:
-///
-/// /uniffi-rs-6f89edd2a1ffa4bd/fb8dd5c/uniffi_bindgen/src/interface/universe.rs:50:17:
-/// assertion `left == right` failed
-/// left: Custom { module_path: "profile", name: "BagOfBytes", builtin: Bytes }
-/// right: Custom { module_path: "profile", name: "BagOfBytes", builtin: Sequence { inner_type: UInt8 } }
-///
-/// So HACK HACK HACK we use `sequence<i8>` (`Vec<i8>`) instead as an intermediary `Builtin`.
-///
-/// However, in `uniffi.toml` we provide `from_custom`` / `into_custom`` for Kotlin and Swift
-/// which using two's complement maps back Vec<i8> -> Vec<u8>, meaning Kotlin and Swift actually
-/// never see the `i8`, and only works with u8.
-///
-/// So we translate:
-/// Kotlin: `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Kotlin]List<UByte>`
-/// Swift:  `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Swift]Foundation.Data`
-///
-impl crate::UniffiCustomTypeConverter for BagOfBytes {
-    type Builtin = Vec<i8>;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Ok(val
-            .into_iter()
-            .map(twos_complement_of_i8)
-            .collect_vec()
-            .into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec()
-            .into_iter()
-            .map(twos_complement_of_u8)
-            .collect_vec()
-    }
-}
-
 impl BagOfBytes {
     pub fn new() -> Self {
         Vec::new().into()

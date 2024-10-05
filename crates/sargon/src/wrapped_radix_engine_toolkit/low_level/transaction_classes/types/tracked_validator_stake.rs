@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A validator stake observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TrackedValidatorStake {
     pub validator_address: ValidatorAddress,
 

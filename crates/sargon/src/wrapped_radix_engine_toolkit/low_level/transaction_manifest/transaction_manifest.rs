@@ -1,9 +1,10 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())] // TODO add blobs to Display
 pub struct TransactionManifest {
-    secret_magic: TransactionManifestSecretMagic,
+    pub instructions: Instructions,
+    pub blobs: Blobs,
 }
 
 impl TransactionManifest {

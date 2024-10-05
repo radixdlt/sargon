@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
     #[zeroize(skip)]

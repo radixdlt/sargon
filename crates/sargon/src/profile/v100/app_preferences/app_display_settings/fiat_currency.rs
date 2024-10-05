@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 pub enum FiatCurrency {
     /// American dollars.

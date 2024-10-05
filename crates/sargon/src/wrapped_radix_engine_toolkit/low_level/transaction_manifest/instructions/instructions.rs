@@ -3,10 +3,10 @@ use crate::prelude::*;
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
 use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 
-#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
-    pub secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
+    pub instructions: Vec<ScryptoInstruction>,
     pub network_id: NetworkID,
 }
 
@@ -14,7 +14,7 @@ impl Deref for Instructions {
     type Target = Vec<ScryptoInstruction>;
 
     fn deref(&self) -> &Self::Target {
-        self.secret_magic.instructions()
+        self.instructions.as_ref()
     }
 }
 
@@ -26,7 +26,7 @@ impl Instructions {
         network_id: NetworkID,
     ) -> Self {
         Self {
-            secret_magic: InstructionsSecretMagic::new(instructions),
+            instructions: instructions,
             network_id,
         }
     }
@@ -51,7 +51,7 @@ impl TryFrom<(&[ScryptoInstruction], NetworkID)> for Instructions {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            secret_magic: InstructionsSecretMagic::from(ScryptoInstructions(
+            instructions: InstructionsSecretMagic::from(ScryptoInstructions(
                 scrypto.to_owned(),
             )),
             network_id,

@@ -6,7 +6,7 @@ use crate::prelude::*;
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {

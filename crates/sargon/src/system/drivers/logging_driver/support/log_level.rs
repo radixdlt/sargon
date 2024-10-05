@@ -8,7 +8,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum LogLevel {

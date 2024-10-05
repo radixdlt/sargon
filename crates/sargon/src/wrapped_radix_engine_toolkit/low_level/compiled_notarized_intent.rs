@@ -10,21 +10,16 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
     derive_more::FromStr,
-    uniffi::Record,
 )]
-pub struct CompiledNotarizedIntent {
-    secret_magic: BagOfBytes,
-}
+pub struct CompiledNotarizedIntent(pub BagOfBytes)
 
 impl CompiledNotarizedIntent {
     pub fn new(bytes: BagOfBytes) -> Self {
-        Self {
-            secret_magic: bytes,
-        }
+        Self(bytes)
     }
 
     pub fn bytes(&self) -> BagOfBytes {
-        self.secret_magic.clone()
+        self.0.clone()
     }
 
     pub fn decompile(&self) -> NotarizedTransaction {

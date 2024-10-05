@@ -14,7 +14,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.

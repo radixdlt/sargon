@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Default, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Hash)]
 pub struct IntentSignatures {
     pub signatures: Vec<IntentSignature>,
 }

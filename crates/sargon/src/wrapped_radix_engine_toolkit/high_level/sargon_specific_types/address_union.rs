@@ -26,96 +26,12 @@ macro_rules! address_union {
                 derive_more::Debug,
                 SerializeDisplay,
                 DeserializeFromStr,
-                uniffi::Enum,
             )]
             pub enum $union_name {
                 $(
                     $variant_name($variant_type),
                 )+
             }
-
-            #[uniffi::export]
-            pub fn [< new_ $union_name:snake _from_bech32 >](
-                string: String,
-            ) -> Result<$union_name> {
-                $union_name::new_from_bech32(&string)
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _to_string >](
-                address: &$union_name,
-            ) -> String {
-                address.to_string()
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _formatted>](address: &$union_name, format: AddressFormat) -> String {
-                address.formatted(format)
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _network_id >](
-                address: &$union_name,
-            ) -> NetworkID {
-                address.network_id()
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _map_to_network>](
-                address: &$union_name,
-                network_id: NetworkID,
-            ) -> $union_name {
-                address.map_to_network(network_id)
-            }
-
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _sample_values_all>]() -> Vec<$union_name> {
-                $union_name::sample_values_all()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_mainnet >]() -> $union_name {
-                $union_name::sample_mainnet()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_mainnet_other >]() -> $union_name {
-                $union_name::sample_mainnet_other()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_stokenet >]() -> $union_name {
-                $union_name::sample_stokenet()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_stokenet_other >]() -> $union_name {
-                $union_name::sample_stokenet_other()
-            }
-
-            $(
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _mainnet >]()
-                }
-
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet_other >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _mainnet_other >]()
-                }
-
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _stokenet >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _stokenet >]()
-                }
-
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _stokenet_other >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _stokenet_other >]()
-                }
-            )+
-
 
             #[cfg(test)]
             mod [< $union_name:snake _tests >] {

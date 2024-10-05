@@ -13,7 +13,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]

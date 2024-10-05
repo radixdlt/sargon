@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(SessionID, Uuid);
-
 #[derive(
     Debug,
     Serialize,

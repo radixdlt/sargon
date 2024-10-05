@@ -30,50 +30,14 @@ macro_rules! decl_specialized_address {
                 derive_more::FromStr,
                 SerializeDisplay,
                 DeserializeFromStr,
-                uniffi::Record,
             )]
-            #[debug("{:?}", self.secret_magic)]
-            pub struct $specialized_address_type {
-                secret_magic: $base_addr
-            }
-
-            /// Tries to bech32 decode the string into a specialized address.
-            #[uniffi::export]
-            pub fn [< new_ $specialized_address_type:snake >](bech32: String) -> Result<$specialized_address_type> {
-                $base_addr::try_from_bech32(&bech32).and_then(TryInto::<$specialized_address_type>::try_into)
-            }
-
-            /// Returns the base address of this specialized address.
-            #[uniffi::export]
-            pub fn [< $specialized_address_type:snake _as_ $base_addr:snake>](address: &$specialized_address_type) -> $base_addr {
-                address.secret_magic
-            }
-
-            /// Returns a new address, with the same node_id, but using `network_id` as
-            /// network.
-            #[uniffi::export]
-            pub fn [< $specialized_address_type:snake _map_to_network >](address: &$specialized_address_type, network_id: NetworkID) -> $specialized_address_type {
-                address.map_to_network(network_id)
-            }
-
-            /// Returns the bech32 encoding of this address
-            #[uniffi::export]
-            pub fn [< $specialized_address_type:snake _bech32_address >](address: &$specialized_address_type) -> String {
-                address.to_string()
-            }
-
-            /// Returns the network id this address
-            #[uniffi::export]
-            pub fn [< $specialized_address_type:snake _network_id >](address: &$specialized_address_type) -> NetworkID {
-                address.secret_magic.network_id()
-            }
+            #[debug("{:?}", self.0)]
+            pub struct $specialized_address_type($base_addr)
 
             impl $specialized_address_type {
                 pub fn new(address: $base_addr) -> Result<Self> {
                     if <$base_addr>::$validate(&address) {
-                        Ok(Self {
-                            secret_magic: address
-                        })
+                        Ok(Self(address))
                     } else {
                         Err(CommonError::$validation_err)
                     }
@@ -99,13 +63,13 @@ macro_rules! decl_specialized_address {
                 type Target = $base_addr;
 
                 fn deref(&self) -> &Self::Target {
-                    &self.secret_magic
+                    &self.0
                 }
             }
 
             impl From<$specialized_address_type> for $base_addr {
                 fn from(value: $specialized_address_type) -> Self {
-                    value.secret_magic
+                    value.0
                 }
             }
 
@@ -125,21 +89,6 @@ macro_rules! decl_specialized_address {
                     <$base_addr as AddressViaRet>::new(node_id, network_id).and_then(Self::new)
                 }
             }
-
-            #[cfg(test)]
-            mod [<uniffi_tests_of_ $specialized_address_type:snake>] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $specialized_address_type;
-
-                #[test]
-                fn map_to_network() {
-                    let sut = SUT::sample();
-                    assert_eq!([< $specialized_address_type:snake _map_to_network >](&sut, sut.network_id()), sut); // unchanged
-                }
-            }
-
         }
     };
 }

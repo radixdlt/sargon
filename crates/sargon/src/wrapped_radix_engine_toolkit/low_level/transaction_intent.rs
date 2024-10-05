@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.instructions_string())]
 pub struct TransactionIntent {
     pub header: TransactionHeader,

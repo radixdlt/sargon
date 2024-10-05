@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A validator claim observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TrackedValidatorClaim {
     pub validator_address: ValidatorAddress,
 

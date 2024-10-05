@@ -2,13 +2,12 @@ use crate::prelude::*;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum DeviceFactorSourceType {
     Babylon { is_main: bool },
     Olympia,
 }
 
-#[uniffi::export]
 impl SargonOS {
     /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
     /// a `DeviceFactorSource`.

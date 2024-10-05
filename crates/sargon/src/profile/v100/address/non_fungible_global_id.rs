@@ -11,7 +11,6 @@ use crate::prelude::*;
     PartialOrd,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{}", self.to_canonical_string())]
 pub struct NonFungibleGlobalId {

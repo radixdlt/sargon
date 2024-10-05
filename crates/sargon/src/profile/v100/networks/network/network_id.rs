@@ -13,7 +13,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum NetworkID {

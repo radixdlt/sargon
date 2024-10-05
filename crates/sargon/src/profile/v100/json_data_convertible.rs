@@ -50,33 +50,6 @@ macro_rules! json_data_convertible {
             impl JsonDataDeserializing for $type {}
             impl JsonDataSerializing for $type {}
 
-            #[uniffi::export]
-            pub fn [< new_ $type:snake _from_json_bytes >](
-                json_bytes: &BagOfBytes,
-            ) -> Result<$type> {
-                $type::new_from_json_bytes(json_bytes)
-            }
-
-            #[uniffi::export]
-            pub fn [< $type:snake _to_json_bytes >]([< $type:snake >]: &$type) -> BagOfBytes {
-                [< $type:snake >].to_json_bytes().into()
-            }
-
-            #[cfg(test)]
-            mod [< uniffi_test_json_as_data_ $type:snake >] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $type;
-
-                #[test]
-                fn json_bytes_roundtrip() {
-                    let sut = SUT::sample();
-                    let json_bytes = [< $type:snake _to_json_bytes >](&sut);
-                    assert_eq!(sut, [< new_ $type:snake _from_json_bytes >](&json_bytes).unwrap());
-                }
-            }
-
             #[cfg(test)]
             mod [< test_json_as_data_ $type:snake >] {
                 use super::*;
@@ -132,33 +105,6 @@ macro_rules! json_string_convertible {
 
             impl JsonStringDeserializing for $type {}
             impl JsonStringSerializing for $type {}
-
-            #[uniffi::export]
-            pub fn [< new_ $type:snake _from_json_string >](
-                json_string: String,
-            ) -> Result<$type> {
-                $type::new_from_json_string(json_string)
-            }
-
-            #[uniffi::export]
-            pub fn [< $type:snake _to_json_string >]([< $type:snake >]: &$type) -> String {
-                [< $type:snake >].to_json_string()
-            }
-
-            #[cfg(test)]
-            mod [< uniffi_test_json_as_string_ $type:snake >] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $type;
-
-                #[test]
-                fn json_string_roundtrip() {
-                    let sut = SUT::sample();
-                    let json = [< $type:snake _to_json_string >](&sut);
-                    assert_eq!(sut, [< new_ $type:snake _from_json_string >](json).unwrap())
-                }
-            }
 
             #[cfg(test)]
             mod [< test_json_as_string_ $type:snake >] {

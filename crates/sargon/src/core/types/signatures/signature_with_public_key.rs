@@ -11,7 +11,6 @@ use crate::prelude::*;
     Ord,
     Hash,
     EnumAsInner,
-    uniffi::Enum,
 )]
 pub enum SignatureWithPublicKey {
     // N.B. `radix_transactions::model::SignatureWithPublicKeyV1::Secp256k1` does

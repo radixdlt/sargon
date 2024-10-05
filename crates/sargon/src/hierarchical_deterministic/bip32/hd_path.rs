@@ -11,7 +11,6 @@ use crate::prelude::*;
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.bip32_string())]
 #[debug("{}", self.bip32_string())]

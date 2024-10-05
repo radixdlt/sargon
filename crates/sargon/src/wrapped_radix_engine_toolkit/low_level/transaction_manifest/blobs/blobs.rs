@@ -2,77 +2,51 @@ use crate::prelude::*;
 
 /// Vec of Blobs
 #[derive(
-    Clone, PartialEq, Eq, Debug, uniffi::Record, Serialize, Deserialize,
+    Clone, PartialEq, Eq, Debug, Serialize, Deserialize,
 )]
 #[serde(transparent)]
-pub struct Blobs {
-    pub(crate) secret_magic: BlobsSecretMagic,
-}
-
-impl From<BlobsSecretMagic> for Blobs {
-    fn from(value: BlobsSecretMagic) -> Self {
-        Self {
-            secret_magic: value,
-        }
-    }
-}
-
-#[uniffi::export]
-pub fn blobs_list_of_blobs(blobs: &Blobs) -> Vec<Blob> {
-    blobs.blobs()
-}
+pub struct Blobs(pub Vec<Blob>);
 
 impl Blobs {
     pub fn blobs(&self) -> Vec<Blob> {
-        self.secret_magic.blobs()
-    }
-
-    pub fn new<I>(blobs: I) -> Self
-    where
-        I: IntoIterator<Item = Blob>,
-    {
-        BlobsSecretMagic::new(blobs).into()
+        self.0
     }
 }
 
 impl Default for Blobs {
     /// Empty blobs
     fn default() -> Self {
-        Self {
-            secret_magic: BlobsSecretMagic {
-                secret_magic: Vec::new(),
-            },
-        }
+        Self(Vec::new())
     }
 }
 
 impl From<ScryptoBlobsMap> for Blobs {
     fn from(value: ScryptoBlobsMap) -> Self {
-        Blobs {
-            secret_magic: value.into(),
-        }
+        Blobs(value.values().map(Blob::from).collect_vec())
     }
 }
 
 impl From<Blobs> for ScryptoBlobsMap {
     fn from(value: Blobs) -> Self {
-        value
-            .secret_magic
-            .clone()
-            .secret_magic
+        ScryptoBlobs {
+            blobs: value
+        .0
             .into_iter()
             .map(|b| {
                 let bytes = b.secret_magic.to_vec();
                 (ScryptoHash::from(hash_of(bytes.clone())), bytes)
             })
             .collect()
+        }
     }
 }
 
 // To From `ScryptoBlobs` (via `BlobsSecretMagic`)
 impl From<Blobs> for ScryptoBlobs {
     fn from(value: Blobs) -> Self {
-        value.secret_magic.into()
+        value.0.into_iter()
+                .map(|b| b.into())
+                .collect_vec(),
     }
 }
 
@@ -92,21 +66,6 @@ impl HasSampleValues for Blobs {
     fn sample_other() -> Self {
         BlobsSecretMagic::sample_other().into()
     }
-}
-
-#[uniffi::export]
-pub fn new_blobs_from_blob_list(blobs: Vec<Blob>) -> Blobs {
-    Blobs::new(blobs)
-}
-
-#[uniffi::export]
-pub fn new_blobs_sample() -> Blobs {
-    Blobs::sample()
-}
-
-#[uniffi::export]
-pub fn new_blobs_sample_other() -> Blobs {
-    Blobs::sample_other()
 }
 
 #[cfg(test)]
@@ -177,40 +136,5 @@ mod tests {
     fn test_invalid_blobs_does_not_deserialize() {
         let json = "[1, 2]";
         let _: SUT = serde_json::from_str(json).unwrap();
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Blobs;
-
-    #[test]
-    fn sample() {
-        assert_eq!(new_blobs_sample(), SUT::sample());
-    }
-
-    #[test]
-    fn sample_other() {
-        assert_eq!(new_blobs_sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_blobs_list_of_blobs() {
-        assert_eq!(blobs_list_of_blobs(&new_blobs_sample()).len(), 4);
-    }
-
-    #[test]
-    fn test_new_blobs_from_blob_list() {
-        assert_eq!(
-            new_blobs_from_blob_list(vec![
-                Blob::sample(),
-                Blob::sample_other(),
-            ])
-            .blobs(),
-            [Blob::sample(), Blob::sample_other(),]
-        );
     }
 }

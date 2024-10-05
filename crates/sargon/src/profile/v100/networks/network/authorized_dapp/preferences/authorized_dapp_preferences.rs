@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
     Default,
-    uniffi::Record,
 )]
 pub struct AuthorizedDappPreferences {
     #[serde(default)]

@@ -16,7 +16,6 @@ use crate::prelude::*;
     PartialOrd,
     enum_iterator::Sequence,
     Ord,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum BIP39WordCount {

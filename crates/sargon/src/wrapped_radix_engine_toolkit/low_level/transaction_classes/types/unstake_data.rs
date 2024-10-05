@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// The data associated with the various validator claim NFTs
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UnstakeData {
     pub name: String,
 

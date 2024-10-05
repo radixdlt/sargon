@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ResourcePreference {
     Allowed,
     Disallowed,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ResourcePreferenceUpdate {
     Set { value: ResourcePreference },
     Remove,

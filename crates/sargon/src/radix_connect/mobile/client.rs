@@ -8,7 +8,6 @@ use hex::ToHex;
 use std::sync::RwLock;
 
 /// The Radix Connect Mobile client that handles the interaction with dApps on mobile through deepLinks.
-#[derive(uniffi::Object)]
 pub struct RadixConnectMobile {
     /// The transport to be used to send back the response for the WalletInteraction
     wallet_interactions_transport: Arc<dyn WalletInteractionTransport>,
@@ -38,9 +37,7 @@ impl RadixConnectMobile {
     }
 }
 
-#[uniffi::export]
 impl RadixConnectMobile {
-    #[uniffi::constructor]
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
         session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
@@ -54,11 +51,9 @@ impl RadixConnectMobile {
     }
 }
 
-#[uniffi::export]
 impl RadixConnectMobile {
     /// Try to parse the deep link and create a RadixConnectMobileDappRequest.
     /// This is a stateful operation as it will create an in flight session, that needs to be validated by the user.
-    #[uniffi::method]
     pub async fn handle_deep_link(
         &self,
         url: String,
@@ -94,7 +89,6 @@ impl RadixConnectMobile {
 
     /// Send the Host's response to the dApp.
     /// This is a stateful operation as it will save the session in the secure storage if the user validated the session.
-    #[uniffi::method]
     pub async fn send_dapp_interaction_response(
         &self,
         wallet_response: RadixConnectMobileWalletResponse,

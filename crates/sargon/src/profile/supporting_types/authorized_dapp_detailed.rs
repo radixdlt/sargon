@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
-    Clone, Debug, PartialEq, Hash, Eq, derive_more::Display, uniffi::Record,
+    Clone, Debug, PartialEq, Hash, Eq, derive_more::Display,
 )]
 #[display("{dapp_definition_address}")]
 pub struct AuthorizedDappDetailed {

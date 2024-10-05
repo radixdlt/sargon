@@ -12,7 +12,6 @@ use crate::prelude::*;
     derive_more::Display,
     Ord,
     Hash,
-    uniffi::Record,
 )]
 #[display("{inner}")]
 pub struct U11 {

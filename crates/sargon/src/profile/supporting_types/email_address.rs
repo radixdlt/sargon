@@ -13,7 +13,6 @@ use crate::prelude::*;
     Eq,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{email}")]
 #[debug("{email}")]

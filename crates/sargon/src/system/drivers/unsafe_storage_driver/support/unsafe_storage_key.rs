@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum UnsafeStorageKey {
     FactorSourceUserHasWrittenDown,
 }
@@ -15,11 +15,6 @@ impl UnsafeStorageKey {
             }
         )
     }
-}
-
-#[uniffi::export]
-pub fn unsafe_storage_key_identifier(key: &UnsafeStorageKey) -> String {
-    key.identifier()
 }
 
 #[cfg(test)]

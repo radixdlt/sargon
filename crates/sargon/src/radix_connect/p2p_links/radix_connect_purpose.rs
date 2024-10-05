@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-json_string_convertible!(RadixConnectPurpose);
-
 /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
 /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.
 /// The user needs to make a conscious decision about general purpose links (because it comes with security risk).
@@ -17,7 +15,6 @@ json_string_convertible!(RadixConnectPurpose);
     PartialOrd,
     Ord,
     Default,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "lowercase")]
 pub enum RadixConnectPurpose {
@@ -48,23 +45,6 @@ impl std::fmt::Display for RadixConnectPurpose {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_json_string())
     }
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_purpose_from_string(
-    string: String,
-) -> RadixConnectPurpose {
-    RadixConnectPurpose::from_str_default_value(&string)
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_purpose_sample() -> RadixConnectPurpose {
-    RadixConnectPurpose::sample()
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_purpose_sample_other() -> RadixConnectPurpose {
-    RadixConnectPurpose::sample_other()
 }
 
 impl HasSampleValues for RadixConnectPurpose {
@@ -125,30 +105,5 @@ mod tests {
     fn json_roundtrip() {
         assert_json_value_eq_after_roundtrip(&SUT::General, json!("general"));
         assert_json_value_eq_after_roundtrip(&SUT::Unknown, json!("unknown"));
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn new() {
-        assert_eq!(
-            new_radix_connect_purpose_from_string(String::from("general")),
-            RadixConnectPurpose::General
-        );
-    }
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_radix_connect_purpose_sample(),
-            RadixConnectPurpose::General
-        );
-        assert_eq!(
-            new_radix_connect_purpose_sample_other(),
-            RadixConnectPurpose::Unknown
-        );
     }
 }

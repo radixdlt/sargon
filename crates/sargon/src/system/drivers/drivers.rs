@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, uniffi::Object)]
+#[derive(Debug)]
 pub struct Drivers {
     pub networking: Arc<dyn NetworkingDriver>,
     pub secure_storage: Arc<dyn SecureStorageDriver>,
@@ -13,9 +13,7 @@ pub struct Drivers {
     pub profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
 }
 
-#[uniffi::export]
 impl Drivers {
-    #[uniffi::constructor]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         networking: Arc<dyn NetworkingDriver>,

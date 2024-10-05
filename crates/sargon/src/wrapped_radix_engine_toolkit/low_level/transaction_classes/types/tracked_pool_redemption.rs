@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A pool redemptions observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TrackedPoolRedemption {
     pub pool_address: PoolAddress,
 

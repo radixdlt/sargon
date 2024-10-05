@@ -39,7 +39,7 @@ impl PoolAddress {
 }
 
 /// The kind of the Pool, either One, Two or Multi resources.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of a single
     /// resource kind.
@@ -52,12 +52,6 @@ pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of many different
     /// resources
     MultiResources,
-}
-
-/// Returns the kind of pool, either 1, 2 or Multi resources.
-#[uniffi::export]
-pub fn pool_address_kind(address: &PoolAddress) -> PoolKind {
-    address.pool_address_kind()
 }
 
 impl PoolAddress {

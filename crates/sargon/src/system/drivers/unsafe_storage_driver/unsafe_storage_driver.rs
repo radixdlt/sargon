@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-#[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
 pub trait UnsafeStorageDriver: Send + Sync + std::fmt::Debug {
     async fn load_data(

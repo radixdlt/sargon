@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Clone, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, Eq)]
 pub enum SecureStorageKey {
     HostID,
     DeviceFactorSourceMnemonic {

@@ -11,7 +11,6 @@ use crate::prelude::*;
     Eq,
     enum_iterator::Sequence,
     strum::Display,
-    uniffi::Enum,
 )]
 pub enum RoundingMode {
     /// The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.

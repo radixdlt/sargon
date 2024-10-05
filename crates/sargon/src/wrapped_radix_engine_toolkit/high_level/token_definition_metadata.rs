@@ -5,7 +5,7 @@ use radix_common::types::GlobalAddress;
 use radix_engine_interface::prelude::UncheckedOrigin;
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash
 )]
 pub struct TokenDefinitionMetadata {
     pub name: String,
