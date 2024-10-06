@@ -73,10 +73,16 @@ macro_rules! decl_exactly_n_bytes {
 
 
             impl TryFrom<&[u8]> for [<Exactly $byte_count Bytes>] {
-                type Error = CommonError;
-
+                type Error = crate::CommonError;
                 fn try_from(value: &[u8]) -> Result<Self> {
-                    [<Exactly $byte_count Bytes SecretMagic>]::try_from(value).map(Self::from)
+                    if value.len() == $byte_count {
+                        Ok(Self(value.try_into().unwrap()))
+                    } else {
+                        Err(CommonError::InvalidByteCount {
+                            expected: $byte_count as u64,
+                            found: value.len() as u64,
+                        })
+                    }
                 }
             }
 
@@ -105,7 +111,7 @@ macro_rules! decl_exactly_n_bytes {
 
             impl From<&[u8; $byte_count]> for [<Exactly $byte_count Bytes>] {
                 fn from(value: &[u8; $byte_count]) -> Self {
-                    Self::from([<Exactly $byte_count Bytes SecretMagic>]::from(*value))
+                    Self(*value)
                 }
             }
 

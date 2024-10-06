@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn presets() {
-        let set = appearance_ids_all()
+        let set = AppearanceID::all()
             .into_iter()
             .map(|a| a.value)
             .collect::<HashSet<_>>();

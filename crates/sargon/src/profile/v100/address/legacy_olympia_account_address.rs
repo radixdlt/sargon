@@ -45,7 +45,7 @@ impl FromStr for LegacyOlympiaAccountAddress {
     }
 }
 
-impl LegacyOlympiaAccountAddressSecretMagic {
+impl LegacyOlympiaAccountAddress {
     pub fn bech32_address(&self) -> String {
         RET_olympia_account_address_from_public_key(
             &self.public_key.into(),

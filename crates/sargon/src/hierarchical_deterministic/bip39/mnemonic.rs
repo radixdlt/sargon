@@ -164,7 +164,7 @@ pub(super) fn calculate_last_mnemonic_word_from_words(
     assert!(count == 11 || count == 23, "wrong word count");
 
     let mut mnemonics = Vec::new();
-    for word in bip39_language_wordlist(&BIP39Language::English).iter() {
+    for word in BIP39Language::English.wordlist().iter() {
         let mut all_words = words.clone();
         all_words.push(word.clone());
         match Mnemonic::from_words(all_words) {

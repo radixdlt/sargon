@@ -45,10 +45,10 @@ impl From<Hash> for Exactly32Bytes {
 }
 
 impl TryFrom<String> for Hash {
-    type Error = Error;
+    type Error = CommonError;
 
     fn try_from(value: String) -> Result<Self> {
-        let bytes = Exactly32Bytes::from_str(&string)?;
+        let bytes = Exactly32Bytes::from_str(&value)?;
         Ok(Self::from(bytes))
     }
 }

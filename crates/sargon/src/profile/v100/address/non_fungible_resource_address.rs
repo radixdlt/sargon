@@ -214,9 +214,7 @@ mod tests {
     #[test]
     fn as_base() {
         assert_eq!(
-            non_fungible_resource_address_as_resource_address(
-                &SUT::sample_mainnet()
-            ),
+            SUT::sample_mainnet().0,
             ResourceAddress::sample_mainnet_nft_gc_membership()
         );
     }

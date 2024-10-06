@@ -256,10 +256,7 @@ mod tests {
 
         // UniFFI exported func
         assert_eq!(
-            resource_address_map_to_network(
-                &SUT::sample_mainnet_xrd(),
-                NetworkID::Stokenet
-            ),
+            SUT::sample_mainnet_xrd().map_to_network(NetworkID::Stokenet),
             SUT::sample_stokenet_xrd()
         );
     }

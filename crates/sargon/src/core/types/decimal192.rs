@@ -58,7 +58,7 @@ impl Decimal {
     }
 
     fn from_native(decimal: ScryptoDecimal192) -> Self {
-        Decimal(decimal)
+        decimal.into()
     }
 
     pub fn transaction_fee_preset() -> Self {

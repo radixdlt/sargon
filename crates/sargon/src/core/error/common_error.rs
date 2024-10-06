@@ -676,7 +676,7 @@ mod tests {
     fn error_message() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
         assert_eq!(
-            error_message_from_error(&sut),
+            sut.to_string(),
             "No network found with id: '0'"
         );
     }
@@ -684,7 +684,7 @@ mod tests {
     #[test]
     fn error_code() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert_eq!(error_code_from_error(&sut), 10049);
+        assert_eq!(sut.error_code(), 10049);
     }
 
     #[test]
@@ -694,12 +694,12 @@ mod tests {
             type_name: "TypeName".to_string(),
             serde_message: "message".to_string(),
         };
-        assert!(is_safe_to_show_error_message_from_error(&sut));
+        assert!(sut.is_safe_to_show_error_message());
     }
 
     #[test]
     fn is_not_safe_to_show_error_message() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert!(!is_safe_to_show_error_message_from_error(&sut));
+        assert!(!sut.is_safe_to_show_error_message());
     }
 }
