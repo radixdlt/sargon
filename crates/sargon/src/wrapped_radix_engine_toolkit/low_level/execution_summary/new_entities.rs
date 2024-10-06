@@ -23,11 +23,9 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
     fn from(value: (RetNewEntities, NetworkID)) -> Self {
         let (ret, network_id) = value;
 
-        Self::new(
-            ret.resource_addresses
-            .into_iter()
-            .map(|r| {
-                let resource_address = ResourceAddress::from((r, network_id));
+
+        Self::new(ret.resource_addresses.into_iter().map(|r| {
+            let resource_address = ResourceAddress::from((r, network_id));
             let global_address = ScryptoGlobalAddress::from(resource_address);
 
             let newly_created_resource = ret
@@ -37,9 +35,7 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
                 .unwrap_or_default();
 
             (resource_address, newly_created_resource)
-    }
-            )
-        )
+        }))
     }
 }
 
