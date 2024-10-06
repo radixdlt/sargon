@@ -360,7 +360,7 @@ mod tests {
         ];
         assert_eq!(
             SUT {
-                instrctions: instructions.to_owned(),
+                instructions: instructions.to_owned(),
                 network_id
             },
             SUT::try_from((instructions, network_id)).unwrap()

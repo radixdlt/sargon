@@ -9,7 +9,21 @@ pub struct Blobs(pub Vec<Blob>);
 
 impl Blobs {
     pub fn blobs(&self) -> Vec<Blob> {
-        self.0
+        self.0.clone()
+    }
+
+    pub fn new<I>(blobs: I) -> Self
+    where
+        I: IntoIterator<Item = Blob>,
+    {
+        Self(blobs.into_iter().collect_vec())
+    }
+
+    pub(crate) fn from_bags<I>(bags: I) -> Self
+    where
+        I: IntoIterator<Item = BagOfBytes>,
+    {
+        Self::new(bags.into_iter().map(Blob::from))
     }
 }
 
@@ -20,6 +34,8 @@ impl Default for Blobs {
     }
 }
 
+pub(crate) type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
+
 impl From<ScryptoBlobsMap> for Blobs {
     fn from(value: ScryptoBlobsMap) -> Self {
         Blobs(value.values().map(Blob::from).collect_vec())
@@ -28,41 +44,47 @@ impl From<ScryptoBlobsMap> for Blobs {
 
 impl From<Blobs> for ScryptoBlobsMap {
     fn from(value: Blobs) -> Self {
-        ScryptoBlobs {
-            blobs: value
-        .0
-            .into_iter()
-            .map(|b| {
-                let bytes = b.0.to_vec();
-                (ScryptoHash::from(hash_of(bytes.clone())), bytes)
-            })
-            .collect()
-        }
+        value
+        .blobs()
+        .into_iter()
+        .map(|b| {
+            let bytes = b.0.to_vec();
+            (ScryptoHash::from(hash_of(bytes.clone())), bytes)
+        })
+        .collect()
     }
 }
 
-// To From `ScryptoBlobs` (via `BlobsSecretMagic`)
 impl From<Blobs> for ScryptoBlobs {
     fn from(value: Blobs) -> Self {
-        value.0.into_iter()
+        ScryptoBlobs {
+            blobs: value
+                .blobs()
+                .into_iter()
                 .map(|b| b.into())
                 .collect_vec(),
+        }
     }
 }
 
 impl From<ScryptoBlobs> for Blobs {
     fn from(value: ScryptoBlobs) -> Self {
-        Self(value.into())
+        Self(value.blobs.into_iter().map(|b| b.into()).collect_vec())
     }
 }
 
 impl HasSampleValues for Blobs {
     fn sample() -> Self {
-        BlobsSecretMagic::sample().into()
+        Self::from_bags([
+            BagOfBytes::sample_aced(),
+            BagOfBytes::sample_babe(),
+            BagOfBytes::sample_cafe(),
+            BagOfBytes::sample_dead(),
+        ])
     }
 
     fn sample_other() -> Self {
-        BlobsSecretMagic::sample_other().into()
+        Self::new([Blob::sample_other()])
     }
 }
 

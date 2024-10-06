@@ -145,7 +145,7 @@ mod tests {
         expected = "Should never fail to decompile a 'CompiledNotarizedIntent' since we should not have been able to construct an invalid 'CompiledNotarizedIntent."
     )]
     fn decompile_fail() {
-        _ = SUT(BagOfBytes::sample_aced())
+        _ = CompiledNotarizedIntent(BagOfBytes::sample_aced())
         .decompile();
     }
 

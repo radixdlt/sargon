@@ -278,12 +278,11 @@ mod tests {
 
         let parsed_request = result.unwrap();
         let expected_interaction =
-            DappToWalletInteractionUnvalidated::new_from_json_bytes(
                 URL_SAFE_NO_PAD
                     .decode(request_params.request.unwrap())
-                    .unwrap(),
-            )
-            .unwrap();
+                    .unwrap()
+                    .deserialize()
+                    .unwrap();
         pretty_assertions::assert_eq!(
             parsed_request.interaction,
             expected_interaction

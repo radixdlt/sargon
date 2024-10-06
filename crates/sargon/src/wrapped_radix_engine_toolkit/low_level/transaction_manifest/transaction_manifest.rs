@@ -69,7 +69,7 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
         ))?;
         let value = Self {
                 instructions,
-               blobs: scrypto_manifest.blobs.clone(),
+               blobs: scrypto_manifest.blobs.clone().into(),
         };
         assert_eq!(value.scrypto_manifest(), scrypto_manifest);
         Ok(value)
@@ -161,6 +161,14 @@ impl HasSampleValues for TransactionManifest {
             Instructions::sample_other(),
             Blobs::default(),
         )
+    }
+}
+
+#[allow(unused)]
+impl TransactionManifest {
+    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
+        let instructions = Instructions::sample_mainnet_without_lock_fee();
+        Self::with_instructions_and_blobs(instructions, Blobs::default())
     }
 }
 

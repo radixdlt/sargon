@@ -26,10 +26,18 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
         Self::new(
             ret.resource_addresses
             .into_iter()
-            .map(|res| 
-                let x = ScryptoGlobalAddress::from(res);
-                ret.metadata()
-                (TryInto::<ResourceAddress>::try_into((res, network_id)).unwrap(), NewlyCreatedResource::default())
+            .map(|r| {
+                let resource_address = ResourceAddress::from((r, network_id));
+            let global_address = ScryptoGlobalAddress::from(resource_address);
+
+            let newly_created_resource = ret
+                .metadata
+                .get(&global_address)
+                .map(|m| NewlyCreatedResource::from(m.clone()))
+                .unwrap_or_default();
+
+            (resource_address, newly_created_resource)
+    }
             )
         )
     }

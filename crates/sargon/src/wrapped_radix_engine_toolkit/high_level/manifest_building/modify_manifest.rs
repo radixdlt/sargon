@@ -568,8 +568,7 @@ CALL_METHOD
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
-            modify_manifest_add_guarantees(
-                manifest,
+            manifest.modify_add_guarantees(
                 vec![TransactionGuarantee::new(
                     0,
                     0,
