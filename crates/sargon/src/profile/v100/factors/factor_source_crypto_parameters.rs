@@ -125,11 +125,6 @@ impl HasSampleValues for SupportedCurves {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use uniffi::{
-        check_remaining,
-        deps::bytes::{Buf, BufMut},
-        metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
-    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSourceCryptoParameters;
@@ -141,19 +136,6 @@ mod tests {
             SupportedCurves::sample_other(),
             SupportedCurves::sample_other()
         );
-    }
-
-    #[test]
-    fn manual_uniffi_conversion_fails_if_supported_curves_empty() {
-        // This is some advanced techniques...
-        let mut bad_value_from_ffi_vec = Vec::new();
-        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
-        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
-        let res =
-            <IdentifiedVecOf<SLIP10Curve> as Lift<crate::UniFfiTag>>::try_lift(
-                bad_value_from_ffi,
-            );
-        assert!(res.is_err());
     }
 
     #[test]

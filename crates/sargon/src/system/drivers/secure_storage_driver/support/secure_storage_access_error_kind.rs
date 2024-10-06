@@ -71,13 +71,6 @@ impl SecureStorageAccessErrorKind {
     }
 }
 
-#[uniffi::export]
-pub fn secure_storage_access_error_kind_is_manual_cancellation(
-    kind: SecureStorageAccessErrorKind,
-) -> bool {
-    kind.is_manual_cancellation()
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -115,20 +108,5 @@ mod tests {
             .is_manual_cancellation());
         assert!(!SecureStorageAccessErrorKind::NoDeviceCredential
             .is_manual_cancellation());
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn test() {
-        for kind in SecureStorageAccessErrorKind::iter() {
-            assert_eq!(
-                kind.is_manual_cancellation(),
-                secure_storage_access_error_kind_is_manual_cancellation(kind)
-            );
-        }
     }
 }

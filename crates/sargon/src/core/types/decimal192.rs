@@ -36,8 +36,7 @@ use radix_common::math::ParseDecimalError;
     derive_more::Display,
 )]
 #[display("{}", self.native())]
-pub struct Decimal192(ScryptoDecimal192)
-}
+pub struct Decimal192(ScryptoDecimal192);
 
 /// Internally (in Rust land) we would like to call `Decimal192` just `Decimal`.
 /// Reusing the naming convention set by Scrypto.
@@ -712,7 +711,6 @@ impl Decimal192 {
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub(crate) enum Multiplier {
@@ -790,7 +788,7 @@ impl Decimal192 {
 
     /// The digits of the number, without separators or sign. The scale is fixed at 18, meaning the last 18 digits correspond to the decimal part.
     pub fn digits(&self) -> String {
-        self.abs().secret_magic.0.to_string() // mantissa
+        self.abs().0.to_string() // mantissa
     }
 
     /// Rounds `self`` to `n` places, counting both the integer and decimal parts,

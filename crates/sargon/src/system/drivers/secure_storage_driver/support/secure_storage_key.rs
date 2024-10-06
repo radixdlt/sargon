@@ -85,11 +85,6 @@ impl SecureStorageKey {
     }
 }
 
-#[uniffi::export]
-pub fn secure_storage_key_identifier(key: &SecureStorageKey) -> String {
-    key.identifier()
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -106,20 +101,6 @@ mod tests {
         assert_eq!(
             SecureStorageKey::load_profile_snapshot().identifier(),
             "secure_storage_key_profile_snapshot"
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn identifier() {
-        let key = SecureStorageKey::load_profile_snapshot();
-        assert_eq!(
-            key.clone().identifier(),
-            secure_storage_key_identifier(&key)
         );
     }
 }

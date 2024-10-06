@@ -15,11 +15,11 @@ use crate::prelude::*;
     derive_more::Display,
     derive_more::FromStr,
 )]
-pub struct Hash(pub ScryptoHash)
+pub struct Hash(pub ScryptoHash);
 
 impl AsRef<ScryptoHash> for Hash {
     fn as_ref(&self) -> &ScryptoHash {
-        &self.9
+        &self.0
     }
 }
 
@@ -48,7 +48,7 @@ impl TryFrom<String> for Hash {
     type Error = Error;
 
     fn try_from(value: String) -> Result<Self> {
-        let bytes = Exactly32Bytes::from_str(&string)?
+        let bytes = Exactly32Bytes::from_str(&string)?;
         Ok(Self::from(bytes))
     }
 }
@@ -154,40 +154,6 @@ mod tests {
                 .parse::<SUT>()
                 .unwrap(),
             hash_of("Hello Radix".as_bytes())
-        );
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion_successful() {
-        let sut = SUT::sample().secret_magic;
-        let builtin = BagOfBytes::from_hex(
-            "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935",
-        )
-        .unwrap();
-
-        let ffi_side =
-            <HashSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
-                sut,
-            );
-
-        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
-
-        let from_ffi_side =
-            <HashSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-
-        assert_eq!(sut, from_ffi_side);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion_fail() {
-        assert!(
-            <HashSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
-                BagOfBytes::from_hex("deadbeef").unwrap(),
-            )
-            .is_err()
         );
     }
 }

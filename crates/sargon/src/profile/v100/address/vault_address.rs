@@ -19,11 +19,11 @@ decl_ret_wrapped_address!(
 
 impl VaultAddress {
     pub fn is_fungible(&self) -> bool {
-        self.secret_magic.is_fungible()
+        self.0.is_fungible()
     }
 
     pub fn is_non_fungible(&self) -> bool {
-        self.secret_magic.is_non_fungible()
+        self.0.is_non_fungible()
     }
 }
 
@@ -112,24 +112,6 @@ mod tests {
         let s = "internal_vault_rdx1nz8nsf78zrrxq7r2r059vzsnmleawr36470chegf84p06fhze6wq3d";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]

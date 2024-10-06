@@ -12,7 +12,7 @@ macro_rules! decl_secret_bytes {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Zeroize, derive_more::Debug, derive_more::Display, uniffi::Record)]
+            #[derive(Zeroize, derive_more::Debug, derive_more::Display)]
             #[debug("OBFUSCATED")]
             #[display("OBFUSCATED")]
             pub struct $struct_name(Box<[u8; $byte_count]>);

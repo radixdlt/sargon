@@ -45,7 +45,6 @@ pub enum LogLevel {
     Eq,
     Hash,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum LogFilter {

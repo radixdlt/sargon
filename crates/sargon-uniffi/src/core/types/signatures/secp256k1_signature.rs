@@ -11,11 +11,8 @@ use crate::prelude::*;
     Ord,
     derive_more::Display,
     derive_more::Debug,
-    derive_more::FromStr,
     uniffi::Record,
 )]
-#[display("{}", self.to_hex())]
-#[debug("{}", self.to_hex())]
 pub struct Secp256k1Signature {
     // recovery id + signature
     pub bytes: Exactly65Bytes,

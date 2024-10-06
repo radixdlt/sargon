@@ -5,7 +5,7 @@ use thiserror::Error as ThisError;
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
 #[repr(u32)]
-#[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
+#[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,
@@ -658,11 +658,6 @@ pub enum CommonError {
     NoNetworkInProfile { network_id: NetworkID } = 10183,
 }
 
-#[uniffi::export]
-pub fn error_message_from_error(error: &CommonError) -> String {
-    error.to_string()
-}
-
 impl CommonError {
     pub fn error_code(&self) -> u32 {
         core::intrinsics::discriminant_value(self)
@@ -671,16 +666,6 @@ impl CommonError {
     pub fn is_safe_to_show_error_message(&self) -> bool {
         matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
     }
-}
-
-#[uniffi::export]
-pub fn error_code_from_error(error: &CommonError) -> u32 {
-    error.error_code()
-}
-
-#[uniffi::export]
-pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
-    error.is_safe_to_show_error_message()
 }
 
 #[cfg(test)]

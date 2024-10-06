@@ -143,338 +143,75 @@ pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     pub sealed_mnemonic: SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic,
 }
 
-impl SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-    pub fn with_details(
-        id: FactorSourceIDFromHash,
-        common: FactorSourceCommon,
-        sealed_mnemonic: SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic,
-    ) -> Self {
-        Self {
-            id,
-            common,
-            sealed_mnemonic,
-        }
-    }
-
-    pub fn new_by_encrypting_with_schemes(
-        mnemonic: Mnemonic,
-        with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
-        kdf_scheme: SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme,
-        encryption_scheme: EncryptionScheme,
-    ) -> Result<Self> {
-        let questions_and_answers = with;
-        let id = FactorSourceIDFromHash::new_for_security_questions(
-            &MnemonicWithPassphrase::new(mnemonic.clone()),
-        );
-        let sealed_mnemonic = SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic::new_by_encrypting(mnemonic, questions_and_answers, kdf_scheme, encryption_scheme)?;
-        let common = FactorSourceCommon::new_babylon();
-
-        Ok(Self {
-            id,
-            sealed_mnemonic,
-            common,
-        })
-    }
-
-    pub fn new_by_encrypting(
-        mnemonic: Mnemonic,
-        with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
-    ) -> Result<Self> {
-        let questions_and_answers = with;
-        Self::new_by_encrypting_with_schemes(
-            mnemonic,
-            questions_and_answers,
-            SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::default(),
-            EncryptionScheme::default(),
-        )
-    }
-
-    pub fn decrypt(
-        &self,
-        with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
-    ) -> Result<Mnemonic> {
-        let questions_and_answers = with;
-        self.sealed_mnemonic.decrypt(questions_and_answers)
-    }
+#[uniffi::export]
+pub fn new_security_questions_factor_source_sample(
+) -> SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+    SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample()
 }
 
-impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-    fn sample() -> Self {
-        let json = include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "security_questions_factor_source_sample.json"
-        ));
-        let sut = serde_json::from_str::<Self>(json).unwrap();
-        let decrypted =
-            sut.decrypt(
-                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample(),
-            )
-            .unwrap();
-        assert_eq!(decrypted, Mnemonic::sample_security_questions());
-        sut
-    }
-
-    fn sample_other() -> Self {
-        let json = include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "security_questions_factor_source_sample_other.json"
-        ));
-        let sut = serde_json::from_str::<Self>(json).unwrap();
-        let decrypted = sut
-            .decrypt(
-                Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other(
-                ),
-            )
-            .unwrap();
-        assert_eq!(decrypted, Mnemonic::sample_security_questions_other());
-        sut
-    }
+#[uniffi::export]
+pub fn new_security_questions_factor_source_sample_other(
+) -> SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+    SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other()
 }
 
-impl From<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
-    for FactorSource
-{
-    fn from(
-        value: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
-    ) -> Self {
-        FactorSource::SecurityQuestions { value }
-    }
+#[uniffi::export]
+pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
+    mnemonic: Mnemonic,
+    with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+) -> Result<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource> {
+    SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
+        mnemonic, with,
+    )
 }
 
-impl TryFrom<FactorSource>
-    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
-{
-    type Error = CommonError;
-
-    fn try_from(value: FactorSource) -> Result<Self> {
-        value.clone().into_security_questions().map_err(|_| {
-            CommonError::InvalidFactorSourceKind {
-                bad_value: value.factor_source_kind().to_string(),
-            }
-        })
-    }
+#[uniffi::export]
+pub fn trim_security_questions_answer(answer: String) -> String {
+    let kdf = SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;
+    kdf.trim_answer(answer)
 }
-impl IsFactorSource for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-    fn kind() -> FactorSourceKind {
-        FactorSourceKind::SecurityQuestions
-    }
-}
-impl BaseIsFactorSource
-    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
-{
-    fn common_properties(&self) -> FactorSourceCommon {
-        self.common.clone()
-    }
 
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
-    }
-
-    fn factor_source_id(&self) -> FactorSourceID {
-        self.clone().id.into()
-    }
-
-    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
-        self.common = updated
-    }
+#[uniffi::export]
+pub fn security_questions_factor_source_decrypt(
+    factor_source: &SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+    with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+) -> Result<Mnemonic> {
+    factor_source.decrypt(with)
 }
 
 #[cfg(test)]
 mod tests {
-    use std::borrow::BorrowMut;
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityQuestions_NOT_PRODUCTION_READY_FactorSource;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn from_factor_source() {
-        let sut = SUT::sample();
-        let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(SUT::try_from(factor_source), Ok(sut));
-    }
-
-    #[test]
-    fn from_factor_source_invalid_got_device() {
-        let wrong = DeviceFactorSource::sample();
-        let factor_source: FactorSource = wrong.clone().into();
+    fn hash_of_samples() {
         assert_eq!(
-            SUT::try_from(factor_source),
-            Err(CommonError::InvalidFactorSourceKind {
-                bad_value: "device".to_owned()
-            })
+            HashSet::<SUT>::from_iter([
+                new_security_questions_factor_source_sample(),
+                new_security_questions_factor_source_sample_other(),
+                // duplicates should get removed
+                new_security_questions_factor_source_sample(),
+                new_security_questions_factor_source_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 
     #[test]
-    fn roundtrip_sample_all_answers_correct() {
-        let m = Mnemonic::sample_security_questions();
+    fn roundtrip() {
+        let mnemonic = Mnemonic::sample_security_questions();
         let qas = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    impl Security_NOT_PRODUCTION_READY_QuestionAndAnswer {
-        fn insert_bad_chars_to_answer(&mut self) {
-            let bad: String =
-                String::from_iter(SECURITY_QUESTIONS_TRIMMED_CHARS);
-            self.answer = format!("{}{}{}", bad, self.answer, bad);
-        }
-    }
-
-    #[test]
-    fn roundtrip_sample_one_incorrect_answer_is_ok() {
-        let m = Mnemonic::sample_security_questions();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Change to one wrong answer when decrypting
-        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn roundtrip_sample_two_incorrect_answer_is_ok() {
-        let m = Mnemonic::sample_security_questions();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Change to two wrong answers when decrypting
-        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
-        qas.update_with(3, |qa| qa.answer = "also wrong".to_owned());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn roundtrip_sample_case_does_not_matter() {
-        let m = Mnemonic::sample_security_questions();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Change all answers to uppercase before decrypting is ok
-        qas.update_with(0, |qa| qa.answer = qa.answer.to_uppercase());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn roundtrip_sample_bad_chars_are_trimmed() {
-        let m = Mnemonic::sample_security_questions();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Inserting bad chars into answer before decrypting.
-        qas.update_with(0, |qa| qa.insert_bad_chars_to_answer());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn roundtrip_sample_other_all_answers_correct() {
-        let m = Mnemonic::sample_security_questions_other();
-        let qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn roundtrip_sample_other_case_does_not_matter() {
-        let m = Mnemonic::sample_security_questions_other();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Change all answers to uppercase before decrypting is ok
-        qas.update_with(0, |qa| qa.answer = qa.answer.to_uppercase());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn roundtrip_sample_other_one_incorrect_answer_is_ok() {
-        let m = Mnemonic::sample_security_questions_other();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Change to two wrong answers when decrypting
-        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::SecurityQuestions);
-    }
-
-    #[test]
-    fn roundtrip_sample_other_two_incorrect_answer_is_ok() {
-        let m = Mnemonic::sample_security_questions_other();
-        let mut qas =
-            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
-        let sut = SUT::new_by_encrypting(m.clone(), qas.clone()).unwrap();
-
-        // Change to two wrong answers when decrypting
-        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
-        qas.update_with(3, |qa| qa.answer = "also wrong".to_owned());
-        let decrypted = sut.decrypt(qas).unwrap();
-        assert_eq!(m, decrypted);
-    }
-
-    #[test]
-    fn test_too_few_questions() {
-        let m = Mnemonic::sample();
-        type Q = Security_NOT_PRODUCTION_READY_Question;
-        let q0 = Q::drivings_instructor();
-        let a0 = "a";
-
-        let q1 = Q::child_middle_name();
-        let a1 = "d";
-
-        let q2 = Q::math_teacher_highschool();
-        let a2 = "b";
-
-        let q3 = Q::first_school();
-        let a3 = "c";
-
-        type QAS = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers;
-        type QA = Security_NOT_PRODUCTION_READY_QuestionAndAnswer;
-        let qas = QAS::from_iter([
-            QA::new(q0, a0),
-            QA::new(q1, a1),
-            QA::new(q2, a2),
-            QA::new(q3, a3),
-        ]);
-        let res = SUT::new_by_encrypting(m.clone(), qas.clone());
-
-        assert_eq!(
-            res,
-            Err(CommonError::InvalidQuestionsAndAnswersCount {
-                expected: 6,
-                found: 4
-            })
-        );
+        let sut = new_security_questions_factor_source_by_encrypting_mnemonic(
+            mnemonic.clone(),
+            qas.clone(),
+        )
+        .unwrap();
+        let decrypted =
+            security_questions_factor_source_decrypt(&sut, qas).unwrap();
+        assert_eq!(decrypted, mnemonic);
     }
 }

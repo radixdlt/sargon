@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(
     Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash
 )]
-pub struct IntentSignature(pub SignatureWithPublicKey)
+pub struct IntentSignature(pub SignatureWithPublicKey);
 
 impl IntentSignature {
     pub fn signature(&self) -> Signature {
@@ -45,7 +45,7 @@ impl From<SignatureWithPublicKey> for IntentSignature {
 
 impl From<IntentSignature> for ScryptoIntentSignature {
     fn from(value: IntentSignature) -> Self {
-        ScryptoIntentSignature(value.secret_magic.into())
+        ScryptoIntentSignature(value.0.into())
     }
 }
 

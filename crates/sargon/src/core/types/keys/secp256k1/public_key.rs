@@ -1,4 +1,4 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::prelude::*;
 
 use k256::ecdsa::VerifyingKey as K256PublicKey;
 
@@ -19,7 +19,7 @@ use k256::ecdsa::VerifyingKey as K256PublicKey;
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct Secp256k1PublicKey(ScryptoSecp256k1PublicKey)
+pub struct Secp256k1PublicKey(pub ScryptoSecp256k1PublicKey);
 
 impl From<Secp256k1PublicKey> for ScryptoSecp256k1PublicKey {
     fn from(value: Secp256k1PublicKey) -> Self {

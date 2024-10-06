@@ -96,7 +96,7 @@ impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
             FactorInstanceBadge::Physical { value } => {
                 ScryptoResourceOrNonFungible::Resource(
                     ScryptoResourceAddress::new_or_panic(
-                        value.secret_magic.node_id().0,
+                        value.0.node_id().0,
                     ),
                 )
             }

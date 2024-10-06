@@ -245,14 +245,6 @@ mod tests {
     }
 
     #[test]
-    fn uniffi_record() {
-        #[derive(uniffi::Record)]
-        struct UniffiRecordAssertCompilesHDPath {
-            inner: HDPath,
-        }
-    }
-
-    #[test]
     fn json_roundtrip_success() {
         let sut = HDPath::harden([44, 1022]);
         assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H"));

@@ -8,8 +8,6 @@ mod json_data_convertible;
 mod networks;
 mod profile;
 mod profile_file_contents;
-mod profile_file_contents_uniffi_fn;
-mod profile_uniffi_fn;
 mod proto_profile_maybe_with_legacy_p2p_links;
 
 pub use address::*;
@@ -22,6 +20,4 @@ pub use json_data_convertible::*;
 pub use networks::*;
 pub use profile::*;
 pub use profile_file_contents::*;
-pub use profile_file_contents_uniffi_fn::*;
-pub use profile_uniffi_fn::*;
 pub use proto_profile_maybe_with_legacy_p2p_links::*;

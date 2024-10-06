@@ -6,7 +6,6 @@ use crate::prelude::*;
 /// fetch the XRD balance of an account address or submit a signed transaction.
 ///
 /// [docs]: https://radix-babylon-gateway-api.redoc.ly/
-#[derive(uniffi::Object)]
 pub struct GatewayClient {
     /// The HTTP client that actually executes the network requests.
     pub http_client: HttpClient,
@@ -16,11 +15,9 @@ pub struct GatewayClient {
     pub gateway: Gateway,
 }
 
-#[uniffi::export]
 impl GatewayClient {
     /// Constructs a new `GatewayClient` with a NetworkingDriver for a specified
     /// `Gateway`.
-    #[uniffi::constructor]
     pub fn with_gateway(
         networking_driver: Arc<dyn NetworkingDriver>,
         gateway: Gateway,
@@ -39,7 +36,6 @@ impl GatewayClient {
     /// # Panics
     /// Panics if Radix DLT does not provide a Gateway for the specified
     /// `network_id` - e.g. will panic if you specify `NetworkID::Simulator` (duh).
-    #[uniffi::constructor]
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
         network_id: NetworkID,

@@ -34,11 +34,6 @@ impl HasSampleValues for FactorSources {
 mod tests {
 
     use super::*;
-    use uniffi::{
-        check_remaining,
-        deps::bytes::{Buf, BufMut},
-        metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
-    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSources;
@@ -145,19 +140,5 @@ mod tests {
             ]
             "#,
         )
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = FactorSources;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(SUT::sample(), new_factor_sources_sample());
-        assert_eq!(SUT::sample_other(), new_factor_sources_sample_other());
     }
 }

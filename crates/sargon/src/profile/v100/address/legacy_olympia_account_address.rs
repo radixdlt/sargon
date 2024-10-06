@@ -1,11 +1,10 @@
+use crate::prelude::*;
 use radix_engine_toolkit::functions::derive::{
     olympia_account_address_from_public_key as RET_olympia_account_address_from_public_key,
     public_key_from_olympia_account_address as RET_public_key_from_olympia_account_address,
 };
 
 use radix_engine_toolkit::functions::derive::OlympiaNetwork as ScryptoOlympiaNetwork;
-
-use crate::prelude::*;
 
 #[derive(
     Clone,
@@ -20,10 +19,11 @@ use crate::prelude::*;
 )]
 #[display("{}", self.bech32_address())]
 #[debug("{}", self.bech32_address())]
-pub struct LegacyOlympiaAccountAddressSecretMagic {
+pub struct LegacyOlympiaAccountAddress {
     public_key: Secp256k1PublicKey,
 }
-impl FromStr for LegacyOlympiaAccountAddressSecretMagic {
+
+impl FromStr for LegacyOlympiaAccountAddress {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -45,12 +45,6 @@ impl FromStr for LegacyOlympiaAccountAddressSecretMagic {
     }
 }
 
-impl From<Secp256k1PublicKey> for LegacyOlympiaAccountAddressSecretMagic {
-    fn from(value: Secp256k1PublicKey) -> Self {
-        Self { public_key: value }
-    }
-}
-
 impl LegacyOlympiaAccountAddressSecretMagic {
     pub fn bech32_address(&self) -> String {
         RET_olympia_account_address_from_public_key(
@@ -60,55 +54,16 @@ impl LegacyOlympiaAccountAddressSecretMagic {
     }
 }
 
-uniffi::custom_type!(
-    LegacyOlympiaAccountAddressSecretMagic,
-    Secp256k1PublicKey
-);
-
-/// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
-impl crate::UniffiCustomTypeConverter
-    for LegacyOlympiaAccountAddressSecretMagic
-{
-    type Builtin = Secp256k1PublicKey;
-
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Ok(Self::from(val))
-    }
-
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.public_key
-    }
-}
-
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::FromStr,
-    derive_more::Display,
-    derive_more::Debug,
-    SerializeDisplay,
-    DeserializeFromStr,
-    uniffi::Record,
-)]
-#[display("{secret_magic}")]
-#[debug("{secret_magic}")]
-pub struct LegacyOlympiaAccountAddress {
-    secret_magic: LegacyOlympiaAccountAddressSecretMagic,
-}
-
 impl LegacyOlympiaAccountAddress {
     pub fn to_babylon_account_address(self) -> AccountAddress {
-        AccountAddress::new(self.secret_magic.public_key, NetworkID::Mainnet)
+        AccountAddress::new(self.public_key, NetworkID::Mainnet)
     }
 }
 
 impl From<Secp256k1PublicKey> for LegacyOlympiaAccountAddress {
     fn from(value: Secp256k1PublicKey) -> Self {
         Self {
-            secret_magic: LegacyOlympiaAccountAddressSecretMagic::from(value),
+            public_key: value,
         }
     }
 }
@@ -133,7 +88,7 @@ impl AccountAddress {
         &self,
         address: &LegacyOlympiaAccountAddress,
     ) -> bool {
-        let olympia_hash = PublicKeyHash::hash(address.secret_magic.public_key);
+        let olympia_hash = PublicKeyHash::hash(address.public_key);
         self.node_id()
             .as_bytes()
             .ends_with(olympia_hash.as_secp256k1().unwrap().as_ref())
@@ -302,16 +257,6 @@ mod tests {
             // https://github.com/radixdlt/typescript-radix-engine-toolkit/blob/6b4d041fbffb0a42adb39b215b2f4c7381fdc77b/resources/fixtures/derive.json#L98C18-L98C83
             SUT::sample_other()
         );
-    }
-
-    #[test]
-    fn manual_uniffi_conversion() {
-        let sut = SUT::sample_other().secret_magic;
-
-        let ffi = <LegacyOlympiaAccountAddressSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(sut);
-        assert_eq!(ffi, sut.public_key);
-        let from_ffi = <LegacyOlympiaAccountAddressSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(ffi).unwrap();
-        assert_eq!(from_ffi, sut);
     }
 
     #[test]

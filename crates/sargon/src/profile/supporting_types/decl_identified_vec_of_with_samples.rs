@@ -27,6 +27,7 @@ macro_rules! decl_identified_vec_of {
                     assert_eq!(SUT::sample().ids().into_iter().cloned().collect_vec(), SUT::sample().get_all().into_iter().map(|i| i.id()).collect_vec());
                 }
             }
+        }
 	};
     (
         $(

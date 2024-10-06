@@ -12,11 +12,10 @@ pub use crate::prelude::*;
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.0)]
 #[debug("{}", self.0)]
-pub struct Nonce(pub u32)
+pub struct Nonce(pub u32);
 
 impl From<u32> for Nonce {
     fn from(value: u32) -> Self {

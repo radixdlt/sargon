@@ -32,17 +32,3 @@ impl InternalFileSystemDriver for FileSystemDriverAdapter {
         map_result_to_internal(self.wrapped.delete_file(path).await)
     }
 }
-
-fn map_result_to_internal<T, InternalT>(result: Result<T>) -> InternalResult<InternalT>
-where
-    T: Into<InternalT>,
-{
-    result.map_err(CommonError::into).map(T::into)
-}
-
-fn map_result_to_internal_optional<T, InternalT>(result: Result<Option<T>>) -> InternalResult<Option<InternalT>>
-where
-    T: Into<InternalT>,
-{
-    result.map_err(CommonError::into).map(|opt| opt.map(T::into))
-}

@@ -105,11 +105,6 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 # enum-as-inner = "0.6.0"
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-  "cli",
-] }
-
 # SLIP10 implementation
 # iota_crypto = "0.23.1"
 iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "47460d64fd0514af136ea1c2c6f3aa29ed89d1b8", features = [
@@ -184,19 +179,11 @@ security-framework-sys = "=2.10.0"
 
 
 [dev-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-  "bindgen-tests",
-] }
 
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
 
 [build-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-  "build",
-] }
 
 # cargo_toml = "0.15.3"
 cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }

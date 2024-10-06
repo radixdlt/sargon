@@ -7,7 +7,6 @@ use crate::prelude::*;
     Eq,
     DeserializeFromStr,
     SerializeDisplay,
-    uniffi::Record,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
@@ -15,7 +14,6 @@ use crate::prelude::*;
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Blob(pub BagOfBytes);
-}
 
 impl Blob {
     pub fn to_hex(&self) -> String {
@@ -128,7 +126,7 @@ mod tests {
     fn test_to_hex() {
         let sample_blob = SUT::sample();
         let hex = sample_blob.to_hex();
-        let expected_hex = sample_blob.secret_magic.to_hex();
+        let expected_hex = sample_blob.0.to_hex();
         assert_eq!(hex, expected_hex);
     }
 

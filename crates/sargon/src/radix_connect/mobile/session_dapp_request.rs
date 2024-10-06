@@ -71,20 +71,3 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_radix_connect_mobile_session_request_sample(),
-            RadixConnectMobileSessionRequest::sample()
-        );
-        assert_eq!(
-            new_radix_connect_mobile_session_request_sample_other(),
-            RadixConnectMobileSessionRequest::sample_other()
-        );
-    }
-}

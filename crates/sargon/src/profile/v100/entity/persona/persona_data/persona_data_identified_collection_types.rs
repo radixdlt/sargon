@@ -28,7 +28,6 @@ macro_rules! declare_collection_of_identified_entry {
             Eq,
             derive_more::Display,
             derive_more::Debug,
-            uniffi::Record,
         )]
         #[debug("{:?}", collection)]
         #[display("{}", self.display_string())]

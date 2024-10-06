@@ -18,7 +18,6 @@ use crate::prelude::*;
     Eq,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.full())]
 #[debug("{}", self.full())]
@@ -91,7 +90,7 @@ impl HasSampleValues for PersonaDataEntryName {
 }
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq
 )]
 #[serde(rename_all = "lowercase")]
 pub enum PersonaDataNameVariant {

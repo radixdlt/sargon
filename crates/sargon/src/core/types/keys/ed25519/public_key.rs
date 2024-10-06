@@ -1,4 +1,4 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::prelude::*;
 
 use crypto::signatures::ed25519 as IotaSlip10Ed25519;
 
@@ -19,7 +19,7 @@ use crypto::signatures::ed25519 as IotaSlip10Ed25519;
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct Ed25519PublicKey(ScryptoEd25519PublicKey)
+pub struct Ed25519PublicKey(ScryptoEd25519PublicKey);
 
 impl From<Ed25519PublicKey> for ScryptoEd25519PublicKey {
     fn from(value: Ed25519PublicKey) -> Self {

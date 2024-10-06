@@ -4,8 +4,6 @@ use std::ops::Deref;
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
@@ -34,116 +32,59 @@ impl Identifiable for Gateway {
     }
 }
 
-impl Default for Gateway {
-    fn default() -> Self {
-        Self::mainnet()
-    }
+use crate::prelude::*;
+
+#[uniffi::export]
+pub fn new_gateway_sample() -> Gateway {
+    Gateway::sample()
 }
 
-impl From<NetworkID> for Gateway {
-    fn from(value: NetworkID) -> Self {
-        match value {
-            NetworkID::Mainnet => Self::mainnet(),
-            NetworkID::Stokenet => Self::stokenet(),
-            NetworkID::Nebunet => Self::nebunet(),
-            NetworkID::Kisharnet => Self::kisharnet(),
-            NetworkID::Ansharnet => Self::ansharnet(),
-            NetworkID::Enkinet => Self::enkinet(),
-            NetworkID::Hammunet => Self::hammunet(),
-            NetworkID::Mardunet => Self::mardunet(),
-            NetworkID::Adapanet => panic!("No network exists for {}", value),
-            NetworkID::Zabanet => panic!("No network exists for {}", value),
-            NetworkID::Nergalnet => panic!("No network exists for {}", value),
-            NetworkID::Simulator => panic!("No network exists for {}", value),
-        }
-    }
+#[uniffi::export]
+pub fn new_gateway_sample_other() -> Gateway {
+    Gateway::sample_other()
 }
 
-impl Gateway {
-    pub fn new(url: String, id: NetworkID) -> Result<Self> {
-        let url = parse_url(url)?;
-        let network = NetworkDefinition::lookup_by_id(id)?;
-        Ok(Self { url, network })
-    }
+#[uniffi::export]
+pub fn new_gateway_for_network_id(network_id: NetworkID) -> Gateway {
+    Gateway::from(network_id)
 }
 
-impl Gateway {
-    pub(crate) fn declare(url: &str, id: NetworkID) -> Self {
-        Self::new(url.to_string(), id).expect("Valid").clone()
-    }
+#[uniffi::export]
+pub fn gateway_mainnet() -> Gateway {
+    Gateway::mainnet()
 }
 
-impl HasSampleValues for Gateway {
-    fn sample() -> Self {
-        Gateway::mainnet()
-    }
-
-    fn sample_other() -> Self {
-        Gateway::stokenet()
-    }
+#[uniffi::export]
+pub fn gateway_stokenet() -> Gateway {
+    Gateway::stokenet()
 }
 
-impl Gateway {
-    pub fn mainnet() -> Self {
-        Self::declare("https://mainnet.radixdlt.com/", NetworkID::Mainnet)
-    }
-
-    pub fn stokenet() -> Self {
-        Self::declare(
-            "https://babylon-stokenet-gateway.radixdlt.com/",
-            NetworkID::Stokenet,
-        )
-    }
-
-    pub fn rcnet() -> Self {
-        Self::declare("https://rcnet-v3.radixdlt.com/", NetworkID::Zabanet)
-    }
-
-    pub fn nebunet() -> Self {
-        Self::declare("https://betanet.radixdlt.com/", NetworkID::Nebunet)
-    }
-
-    pub fn kisharnet() -> Self {
-        Self::declare("https://rcnet.radixdlt.com/", NetworkID::Kisharnet)
-    }
-
-    pub fn ansharnet() -> Self {
-        Self::declare(
-            "https://ansharnet-gateway.radixdlt.com/",
-            NetworkID::Ansharnet,
-        )
-    }
-
-    pub fn hammunet() -> Self {
-        Self::declare(
-            "https://hammunet-gateway.radixdlt.com/",
-            NetworkID::Hammunet,
-        )
-    }
-
-    pub fn enkinet() -> Self {
-        Self::declare(
-            "https://enkinet-gateway.radixdlt.com/",
-            NetworkID::Enkinet,
-        )
-    }
-
-    pub fn mardunet() -> Self {
-        Self::declare(
-            "https://mardunet-gateway.radixdlt.com/",
-            NetworkID::Mardunet,
-        )
-    }
+#[uniffi::export]
+pub fn new_gateway_with_url_on_network(
+    url: String,
+    network_id: NetworkID,
+) -> Result<Gateway> {
+    Gateway::new(url, network_id)
 }
 
-impl Gateway {
-    pub fn wellknown() -> Gateways {
-        Gateways::from_iter([Self::mainnet(), Self::stokenet()])
-    }
+#[uniffi::export]
+pub fn gateway_wellknown_gateways() -> Gateways {
+    Gateway::wellknown()
+}
 
-    pub fn is_wellknown(&self) -> bool {
-        Self::wellknown().contains_by_id(self)
-    }
+#[uniffi::export]
+pub fn gateway_is_wellknown(gateway: &Gateway) -> bool {
+    gateway.is_wellknown()
+}
+
+#[uniffi::export]
+pub fn gateway_to_string(gateway: &Gateway) -> String {
+    gateway.to_string()
+}
+
+#[uniffi::export]
+pub fn gateway_id(gateway: &Gateway) -> Url {
+    gateway.id()
 }
 
 #[cfg(test)]
@@ -154,144 +95,69 @@ mod tests {
     type SUT = Gateway;
 
     #[test]
-    fn json_roundtrip_mainnet() {
-        let sut = SUT::mainnet();
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "network":
-                {
-                    "name": "mainnet",
-                    "id": 1,
-                    "displayDescription": "Mainnet"
-                },
-                "url": "https://mainnet.radixdlt.com/"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn json_roundtrip_stokenet() {
-        let sut = SUT::stokenet();
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-                "network":
-                {
-                    "name": "stokenet",
-                    "id": 2,
-                    "displayDescription": "Stokenet"
-                },
-                "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn display() {
+    fn hash_of_samples() {
         assert_eq!(
-            format!("{}", SUT::mainnet()),
-            "https://mainnet.radixdlt.com/"
-        );
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(
-            format!("{:?}", SUT::mainnet()),
-            "Mainnet: https://mainnet.radixdlt.com/"
-        );
-    }
-
-    #[test]
-    fn identifiable() {
-        assert_eq!(SUT::mainnet().id(), SUT::mainnet().url);
-    }
-
-    #[test]
-    fn mainnet_is_default() {
-        assert_eq!(SUT::default(), SUT::mainnet());
-    }
-
-    #[test]
-    fn mainnet_is_wellknown() {
-        assert!(SUT::mainnet().is_wellknown());
-    }
-
-    #[test]
-    fn stokenet_is_wellknown() {
-        assert!(SUT::stokenet().is_wellknown());
-    }
-
-    #[test]
-    fn hash() {
-        assert_eq!(
-            HashSet::<Gateway>::from_iter([
-                SUT::mainnet(),
-                SUT::stokenet(),
-                SUT::rcnet(),
-                SUT::nebunet(),
-                SUT::kisharnet(),
-                SUT::ansharnet(),
-                SUT::hammunet(),
-                SUT::enkinet(),
-                SUT::mardunet(),
-                // Twice
-                SUT::mainnet(),
-                SUT::stokenet(),
-                SUT::rcnet(),
-                SUT::nebunet(),
-                SUT::kisharnet(),
-                SUT::ansharnet(),
-                SUT::hammunet(),
-                SUT::enkinet(),
-                SUT::mardunet(),
+            HashSet::<SUT>::from_iter([
+                new_gateway_sample(),
+                new_gateway_sample_other(),
+                // duplicates should get removed
+                new_gateway_sample(),
+                new_gateway_sample_other(),
             ])
             .len(),
-            9
+            2
         );
     }
 
     #[test]
-    fn from_network_id() {
-        let ids = HashSet::<NetworkID>::from_iter(NetworkID::all());
-        let unsupported = HashSet::<NetworkID>::from_iter([
-            NetworkID::Adapanet,
-            NetworkID::Zabanet,
-            NetworkID::Nergalnet,
-            NetworkID::Simulator,
-        ]);
-        ids.difference(&unsupported).for_each(|n| {
-            let sut = SUT::from(*n);
-            assert_eq!(sut.network.id, *n);
-        })
+    fn test_to_string() {
+        let sut = SUT::sample();
+        assert_eq!(gateway_to_string(&sut), sut.to_string());
     }
 
     #[test]
-    #[should_panic(expected = "No network exists for adapanet")]
-    fn from_network_id_unsupported_adapanet() {
-        _ = SUT::from(NetworkID::Adapanet);
+    fn test_id() {
+        let sut = SUT::sample();
+        assert_eq!(gateway_id(&sut), sut.id());
     }
 
     #[test]
-    #[should_panic(expected = "No network exists for zabanet")]
-    fn from_network_id_unsupported_zabanet() {
-        _ = SUT::from(NetworkID::Zabanet);
+    fn test_gateway_mainnet() {
+        assert_eq!(gateway_mainnet(), SUT::mainnet());
     }
 
     #[test]
-    #[should_panic(expected = "No network exists for nergalnet")]
-    fn from_network_id_unsupported_nergalnet() {
-        _ = SUT::from(NetworkID::Nergalnet);
+    fn test_gateway_stokenet() {
+        assert_eq!(gateway_stokenet(), SUT::stokenet());
     }
 
     #[test]
-    #[should_panic(expected = "No network exists for simulator")]
-    fn from_network_id_unsupported_simulator() {
-        _ = SUT::from(NetworkID::Simulator);
+    fn test_new_gateway_with_url_on_network() {
+        assert_eq!(
+            new_gateway_with_url_on_network(
+                "https://mainnet.radixdlt.com/".to_owned(),
+                NetworkID::Mainnet
+            )
+            .unwrap(),
+            SUT::mainnet()
+        );
+    }
+
+    #[test]
+    fn test_gateway_wellknown_gateways() {
+        assert_eq!(gateway_wellknown_gateways(), SUT::wellknown())
+    }
+
+    #[test]
+    fn test_gateway_is_wellknown() {
+        assert!(gateway_is_wellknown(&SUT::sample()))
+    }
+
+    #[test]
+    fn test_new_gateway_for_network_id() {
+        assert_eq!(
+            new_gateway_for_network_id(NetworkID::Mainnet),
+            SUT::mainnet()
+        )
     }
 }

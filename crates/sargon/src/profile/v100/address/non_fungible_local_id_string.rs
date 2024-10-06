@@ -21,8 +21,8 @@ use crate::prelude::*;
     derive_more::Debug,
 )]
 #[debug("{}", self.to_string())]
-#[display("{}", self.secret_magic.value().to_owned())]
-pub struct NonFungibleLocalIdString(ScryptoStringNonFungibleLocalId)
+#[display("{}", self.0.value().to_owned())]
+pub struct NonFungibleLocalIdString(pub ScryptoStringNonFungibleLocalId);
 
 impl FromStr for NonFungibleLocalIdString {
     type Err = crate::CommonError;

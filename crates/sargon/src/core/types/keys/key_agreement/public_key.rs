@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::{prelude::*, UniffiCustomTypeConverter};
 use crypto::keys::x25519::PublicKey as X25519PublicKey;
 
 /// PublicKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPrivateKey`.
@@ -17,8 +16,7 @@ use crypto::keys::x25519::PublicKey as X25519PublicKey;
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct KeyAgreementPublicKey(X25519PublicKey)
-}
+pub struct KeyAgreementPublicKey(pub X25519PublicKey);
 
 impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {
     fn from(value: KeyAgreementPrivateKey) -> Self {

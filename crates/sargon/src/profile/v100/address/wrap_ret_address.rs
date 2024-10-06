@@ -64,9 +64,9 @@ macro_rules! decl_ret_wrapped_address {
                 SerializeDisplay,
                 DeserializeFromStr,
             )]
-            #[display("{0}")]
-            #[debug("{0}")]
-            pub struct [< $address_type:camel Address >](pub(crate) [< Ret $address_type:camel Address >])
+            #[display("{}", self.0)]
+            #[debug("{}", self.0)]
+            pub struct [< $address_type:camel Address >](pub(crate) [< Ret $address_type:camel Address >]);
 
             impl From<[< Ret $address_type:camel Address >]> for [< $address_type:camel Address >] {
                 fn from(value: [< Ret $address_type:camel Address >]) -> Self {
@@ -115,8 +115,6 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
-
-
             impl [< $address_type:camel Address >] {
 
                 pub fn random(network_id: NetworkID) -> Self {
@@ -145,7 +143,7 @@ macro_rules! decl_ret_wrapped_address {
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
                 }
                 pub(crate) fn node_id(&self) -> ScryptoNodeId {
-                    self.secret_magic.node_id()
+                    self.0.node_id()
                 }
 
                 /// Returns a new address, with the same node_id, but using `network_id` as
@@ -219,7 +217,7 @@ macro_rules! decl_ret_wrapped_address {
 
             impl IsNetworkAware for [< $address_type:camel Address >] {
                 fn network_id(&self) -> NetworkID {
-                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
+                    self.0.network_id().try_into().expect("Should have known all network ids")
                 }
             }
 

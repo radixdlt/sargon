@@ -2663,7 +2663,6 @@ dependencies = [
  "serde_with 3.4.0",
  "strum 0.26.1",
  "thiserror 1.0.50",
- "uniffi",
  "url",
  "uuid 1.6.1",
  "zeroize 1.7.0",

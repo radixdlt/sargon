@@ -16,7 +16,6 @@ use crate::prelude::*;
 )]
 #[serde(transparent)]
 pub struct SecurityStructureID(pub(crate) Uuid);
-uniffi::custom_newtype!(SecurityStructureID, Uuid);
 
 impl From<Uuid> for SecurityStructureID {
     fn from(value: Uuid) -> Self {

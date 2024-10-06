@@ -123,36 +123,6 @@ impl EventKind {
     }
 }
 
-#[uniffi::export]
-pub fn event_kind_affects_current_accounts(event_kind: EventKind) -> bool {
-    event_kind.affects_current_accounts()
-}
-
-#[uniffi::export]
-pub fn event_kind_affects_current_network(event_kind: EventKind) -> bool {
-    event_kind.affects_current_network()
-}
-
-#[uniffi::export]
-pub fn event_kind_affects_saved_gateways(event_kind: EventKind) -> bool {
-    event_kind.affects_saved_gateways()
-}
-
-#[uniffi::export]
-pub fn event_kind_affects_factor_sources(event_kind: EventKind) -> bool {
-    event_kind.affects_factor_sources()
-}
-
-#[uniffi::export]
-pub fn event_kind_affects_security_structures(event_kind: EventKind) -> bool {
-    event_kind.affects_security_structures()
-}
-
-#[uniffi::export]
-pub fn event_kind_all() -> Vec<EventKind> {
-    EventKind::all()
-}
-
 impl HasSampleValues for EventKind {
     fn sample() -> Self {
         Self::Booted
@@ -294,44 +264,5 @@ mod tests {
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
             })
-    }
-}
-
-mod uniffi_tests {
-
-    use super::*;
-    use crate::EventKind::{
-        AccountAdded, AccountUpdated, AccountsAdded, Booted, ProfileImported,
-        ProfileSaved,
-    };
-
-    #[test]
-    fn test_event_kind_all() {
-        assert!(event_kind_all().into_iter().contains(&Booted));
-    }
-
-    #[test]
-    fn test_event_kind_affects_current_accounts() {
-        assert!(event_kind_affects_current_accounts(Booted));
-    }
-
-    #[test]
-    fn test_event_kind_affects_current_network() {
-        assert!(event_kind_affects_current_network(Booted));
-    }
-
-    #[test]
-    fn test_event_kind_affects_saved_gateways() {
-        assert!(event_kind_affects_saved_gateways(Booted));
-    }
-
-    #[test]
-    fn test_event_kind_affects_security_structures() {
-        assert!(event_kind_affects_security_structures(Booted));
-    }
-
-    #[test]
-    fn test_event_kind_affects_factor_sources() {
-        assert!(event_kind_affects_factor_sources(Booted));
     }
 }

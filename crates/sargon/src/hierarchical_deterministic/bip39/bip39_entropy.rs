@@ -1,4 +1,4 @@
-use crate::{decl_secret_bytes, prelude::*, UniffiCustomTypeConverter};
+use crate::{decl_secret_bytes, prelude::*};
 
 macro_rules! entropy_with_byte_counts {
     (
@@ -43,7 +43,7 @@ macro_rules! entropy_with_byte_counts {
 
                 impl From<[< Entropy $byte_count Bytes >]> for NonEmptyMax32Bytes {
                     fn from(value: [< Entropy $byte_count Bytes >]) -> Self {
-                        let bytes: &[u8] = value.secret_magic.0.as_ref();
+                        let bytes: &[u8] = value.0.as_ref();
                         assert!(bytes.len() <= 32);
                         NonEmptyMax32Bytes::try_from(bytes).unwrap()
                     }
@@ -73,7 +73,7 @@ macro_rules! entropy_with_byte_counts {
                 fn into_bytes(&self) -> Vec<u8> {
                     match self {
                         $(
-                            Self::[< EntropyOf $byte_count Bytes >](bytes) => Vec::from_iter(*bytes.secret_magic.0),
+                            Self::[< EntropyOf $byte_count Bytes >](bytes) => Vec::from_iter(*bytes.0),
                         )+
                     }
                 }
