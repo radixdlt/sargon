@@ -20,59 +20,47 @@ pub enum DependencyInformation {
     Rev(String),
 }
 
-impl DependencyInformation {
-    pub(crate) fn with_value(version: &str) -> Self {
-        let mut split = version.split('=');
-        let identifier = split.next().expect("Should never fail").trim();
-        let value = split.next().expect("Should never fail").trim();
-
-        match identifier {
-            "version" => Self::Version(value.into()),
-            "tag" => Self::Tag(value.into()),
-            "branch" => Self::Branch(value.into()),
-            "rev" => Self::Rev(value.into()),
-            _ => {
-                unreachable!("Unknown identifier encountered: '{}'", identifier)
-            }
-        }
-    }
+#[uniffi::export]
+pub fn new_dependency_information_sample() -> DependencyInformation {
+    DependencyInformation::sample()
 }
 
-impl HasSampleValues for DependencyInformation {
-    fn sample() -> Self {
-        Self::Branch("main".to_owned())
-    }
+#[uniffi::export]
+pub fn new_dependency_information_sample_other() -> DependencyInformation {
+    DependencyInformation::sample_other()
+}
 
-    fn sample_other() -> Self {
-        Self::Tag("2.3.7".to_owned())
-    }
+#[uniffi::export]
+pub fn dependency_information_to_string(
+    info: &DependencyInformation,
+) -> String {
+    info.to_string()
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DependencyInformation;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_dependency_information_sample(),
+                new_dependency_information_sample_other(),
+                // duplicates should get removed
+                new_dependency_information_sample(),
+                new_dependency_information_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::sample()), "main");
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(format!("{:?}", SUT::sample_other()), "Tag(\"2.3.7\")");
+    fn to_string() {
+        assert_eq!(dependency_information_to_string(&SUT::sample()), "main");
     }
 }

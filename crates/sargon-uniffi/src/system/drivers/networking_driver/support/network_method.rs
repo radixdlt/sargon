@@ -18,14 +18,19 @@ pub enum NetworkMethod {
     Head,
 }
 
-impl HasSampleValues for NetworkMethod {
-    fn sample() -> Self {
-        NetworkMethod::Post
-    }
+#[uniffi::export]
+pub fn new_network_method_sample() -> NetworkMethod {
+    NetworkMethod::sample()
+}
 
-    fn sample_other() -> Self {
-        NetworkMethod::Get
-    }
+#[uniffi::export]
+pub fn new_network_method_sample_other() -> NetworkMethod {
+    NetworkMethod::sample_other()
+}
+
+#[uniffi::export]
+pub fn network_method_to_string(method: &NetworkMethod) -> String {
+    method.to_string()
 }
 
 #[cfg(test)]
@@ -36,25 +41,23 @@ mod tests {
     type SUT = NetworkMethod;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_network_method_sample(),
+                new_network_method_sample_other(),
+                // duplicates should get removed
+                new_network_method_sample(),
+                new_network_method_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn str_roundtrip() {
-        let test = |m: SUT, s: &str| {
-            assert_eq!(SUT::from_str(s).unwrap(), m);
-            assert_eq!(m.to_string(), s);
-            assert_eq!(SUT::from_str(&m.to_string()).unwrap(), m);
-        };
-        test(SUT::Post, "POST");
-        test(SUT::Get, "GET");
-        test(SUT::Head, "HEAD");
+    fn test_network_method_to_string() {
+        let sut = SUT::Post;
+        assert_eq!(network_method_to_string(&sut), sut.to_string());
     }
 }

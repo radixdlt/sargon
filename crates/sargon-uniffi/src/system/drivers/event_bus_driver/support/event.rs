@@ -29,43 +29,9 @@ pub enum Event {
     ProfileUsedOnOtherDevice(DeviceInfo),
 }
 
-impl Event {
-    pub fn profile_modified(change: EventProfileModified) -> Self {
-        Self::ProfileModified { change }
-    }
-
-    pub fn profile_used_on_other_device(device: DeviceInfo) -> Self {
-        Self::ProfileUsedOnOtherDevice(device)
-    }
-}
-
-impl HasEventKind for Event {
-    fn kind(&self) -> EventKind {
-        match self {
-            Self::Booted => EventKind::Booted,
-            Self::GatewayChangedCurrent { to: _, is_new: _ } => {
-                EventKind::GatewayChangedCurrent
-            }
-            Self::ProfileModified { change } => change.kind(),
-            Self::ProfileUsedOnOtherDevice(_) => {
-                EventKind::ProfileUsedOnOtherDevice
-            }
-            Self::ProfileImported { id: _ } => EventKind::ProfileImported,
-            Self::ProfileSaved => EventKind::ProfileSaved,
-        }
-    }
-}
-
-impl HasSampleValues for Event {
-    fn sample() -> Self {
-        Self::Booted
-    }
-
-    fn sample_other() -> Self {
-        Self::ProfileModified {
-            change: EventProfileModified::sample_other(),
-        }
-    }
+#[uniffi::export]
+pub fn event_kind(event: &Event) -> EventKind {
+    event.kind()
 }
 
 #[cfg(test)]
@@ -76,50 +42,7 @@ mod tests {
     type SUT = Event;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn last_used_on_other_device() {
-        let device = DeviceInfo::sample();
-        let sut = SUT::profile_used_on_other_device(device.clone());
-        assert_eq!(sut, SUT::ProfileUsedOnOtherDevice(device))
-    }
-
-    #[test]
     fn test_kind() {
-        let test = |s: SUT, exp: EventKind| {
-            assert_eq!(s.kind(), exp);
-        };
-        test(
-            SUT::ProfileImported {
-                id: ProfileID::sample(),
-            },
-            EventKind::ProfileImported,
-        );
-        test(SUT::ProfileSaved, EventKind::ProfileSaved);
-        test(
-            SUT::GatewayChangedCurrent {
-                to: Gateway::sample(),
-                is_new: false,
-            },
-            EventKind::GatewayChangedCurrent,
-        );
-        let change = EventProfileModified::AccountAdded {
-            address: AccountAddress::sample(),
-        };
-        test(
-            SUT::ProfileModified {
-                change: change.clone(),
-            },
-            change.kind(),
-        );
+        assert_eq!(event_kind(&SUT::Booted), EventKind::Booted);
     }
 }

@@ -6,31 +6,14 @@ pub struct SargonBuildInformation {
     pub dependencies: SargonDependencies,
 }
 
-impl SargonBuildInformation {
-    pub fn get() -> Self {
-        let sargon_version = env!("CARGO_PKG_VERSION").into();
-
-        Self {
-            sargon_version,
-            dependencies: SargonDependencies::get(),
-        }
-    }
+#[uniffi::export]
+pub fn new_sargon_build_information_sample() -> SargonBuildInformation {
+    SargonBuildInformation::sample()
 }
 
-impl HasSampleValues for SargonBuildInformation {
-    fn sample() -> Self {
-        Self {
-            sargon_version: "0.0.1".to_owned(),
-            dependencies: SargonDependencies::sample(),
-        }
-    }
-
-    fn sample_other() -> Self {
-        Self {
-            sargon_version: "0.1.0".to_owned(),
-            dependencies: SargonDependencies::sample_other(),
-        }
-    }
+#[uniffi::export]
+pub fn new_sargon_build_information_sample_other() -> SargonBuildInformation {
+    SargonBuildInformation::sample_other()
 }
 
 #[cfg(test)]
@@ -41,13 +24,17 @@ mod tests {
     type SUT = SargonBuildInformation;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_sargon_build_information_sample(),
+                new_sargon_build_information_sample_other(),
+                // duplicates should get removed
+                new_sargon_build_information_sample(),
+                new_sargon_build_information_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }

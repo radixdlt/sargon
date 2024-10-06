@@ -16,55 +16,16 @@ impl From<InternalNetworkRequest> for NetworkRequest {
     }
 }
 
-impl NetworkRequest {
-    pub fn new(
-        url: impl Into<Url>,
-        method: impl Into<NetworkMethod>,
-        headers: impl Into<HashMap<String, String>>,
-        body: impl Into<BagOfBytes>,
-    ) -> Self {
-        Self {
-            url: url.into(),
-            method: method.into(),
-            headers: headers.into(),
-            body: body.into(),
-        }
-    }
+use crate::prelude::*;
 
-    pub fn new_post(url: Url) -> Self {
-        Self::new(url, NetworkMethod::Post, [], vec![])
-    }
-
-    pub fn new_get(url: Url) -> Self {
-        Self::new(url, NetworkMethod::Get, [], vec![])
-    }
-
-    pub fn with_headers(mut self, headers: HashMap<String, String>) -> Self {
-        self.headers.extend(headers);
-        self
-    }
-
-    pub fn with_body(mut self, body: impl Into<BagOfBytes>) -> Self {
-        self.body = body.into();
-        self
-    }
-
-    pub fn with_serializing_body<T: Serialize>(self, body: T) -> Result<Self> {
-        let serialized = serde_json::to_vec(&body)
-            .map_err(|_| CommonError::FailedToSerializeToJSON)?;
-
-        Ok(self.with_body(serialized))
-    }
+#[uniffi::export]
+pub fn new_network_request_sample() -> NetworkRequest {
+    NetworkRequest::sample()
 }
 
-impl HasSampleValues for NetworkRequest {
-    fn sample() -> Self {
-        Self::new_post(Url::parse("https://example.com").unwrap())
-    }
-
-    fn sample_other() -> Self {
-        Self::new_post(Url::parse("https://example.org").unwrap())
-    }
+#[uniffi::export]
+pub fn new_network_request_sample_other() -> NetworkRequest {
+    NetworkRequest::sample_other()
 }
 
 #[cfg(test)]
@@ -75,49 +36,17 @@ mod tests {
     type SUT = NetworkRequest;
 
     #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn with_headers() {
-        let mut headers = HashMap::new();
-        headers.insert("key".to_owned(), "value".to_owned());
-
-        let sut = SUT::sample().with_headers(headers.clone());
-
-        assert_eq!(sut.headers, headers);
-    }
-
-    #[test]
-    fn with_body() {
-        let body = BagOfBytes::new();
-        let sut = SUT::sample().with_body(body.clone());
-
-        assert_eq!(sut.body, body);
-    }
-
-    #[test]
-    fn with_serializing_body() {
-        #[derive(Serialize)]
-        struct Body {
-            key: String,
-        }
-
-        let body = Body {
-            key: "value".to_owned(),
-        };
-
-        let serialized = serde_json::to_vec(&body).unwrap();
-
-        let sut = SUT::sample().with_serializing_body(body).unwrap();
-
-        assert_eq!(sut.body, serialized.into());
+    fn hash_of_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_network_request_sample(),
+                new_network_request_sample_other(),
+                // duplicates should get removed
+                new_network_request_sample(),
+                new_network_request_sample_other(),
+            ])
+            .len(),
+            2
+        );
     }
 }
