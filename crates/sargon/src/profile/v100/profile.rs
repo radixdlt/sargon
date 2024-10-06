@@ -352,9 +352,6 @@ impl Profile {
     }
 }
 
-impl JsonDataDeserializing for Profile {}
-impl JsonDataSerializing for Profile {}
-
 impl HasSampleValues for Profile {
     fn sample() -> Self {
         let networks = ProfileNetworks::sample();
@@ -683,8 +680,8 @@ mod tests {
     fn to_json_bytes_new_from_json_bytes() {
         let sut = SUT::sample();
 
-        let encoded = sut.to_json_bytes();
-        let profile_result = SUT::new_from_json_bytes(encoded).unwrap();
+        let encoded = sut.serialize_to_bytes().unwrap();
+        let profile_result: Profile = encoded.deserialize().unwrap();
         assert_eq!(profile_result, sut);
     }
 
@@ -693,7 +690,7 @@ mod tests {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
 
         assert_eq!(
-            SUT::new_from_json_bytes(malformed_profile_snapshot.clone()),
+            malformed_profile_snapshot.clone().deserialize::<Profile>(),
             Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: "Profile".to_string(),

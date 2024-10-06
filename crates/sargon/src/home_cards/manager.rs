@@ -175,12 +175,12 @@ impl HomeCardsManager {
             .load_cards()
             .await?
             .ok_or(CommonError::HomeCardsNotFound)?;
-        deserialize_from_slice(cards_bytes.as_slice())
+        cards_bytes.deserialize()
     }
 
     /// Saves the home cards to storage.
     async fn save_cards(&self, cards: HomeCards) -> Result<()> {
-        let bytes = serialize(&cards)?;
+        let bytes = cards.serialize_to_bytes()?;
         self.cards_storage
             .save_cards(bytes.into())
             .await
@@ -230,15 +230,14 @@ mod tests {
         }
 
         fn encode_cards(cards: HomeCards) -> Result<Option<BagOfBytes>> {
-            serialize(&cards).map(|cards| Some(cards.into()))
+            cards.serialize_to_bytes().map(|cards| Some(cards.into()))
         }
     }
 
     #[async_trait::async_trait]
     impl HomeCardsStorage for MockHomeCardsStorage {
         async fn save_cards(&self, encoded_cards: BagOfBytes) -> Result<()> {
-            let _: HomeCards =
-                deserialize_from_slice(encoded_cards.as_slice())?;
+            let _: HomeCards = encoded_cards.deserialize()?;
             self.stubbed_save_cards_result.clone()
         }
 

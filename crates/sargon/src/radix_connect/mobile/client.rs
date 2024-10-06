@@ -207,11 +207,11 @@ impl RadixConnectMobile {
             self.session_storage.load_session(session_id).await?.ok_or(
                 CommonError::RadixConnectMobileSessionNotFound { session_id },
             )?;
-        deserialize_from_slice(session_bytes.as_slice())
+            session_bytes.deserialize()
     }
 
     async fn save_session(&self, session: Session) -> Result<()> {
-        let bytes = serialize(&session)?;
+        let bytes = session.serialize_to_bytes()?;
         self.session_storage
             .save_session(session.id, bytes.into())
             .await
@@ -274,7 +274,7 @@ mod tests {
         ) -> Result<()> {
             self.sessions.lock().unwrap().insert(
                 session_id,
-                deserialize_from_slice(encoded_session.as_slice())?,
+                encoded_session.deserialize()?,
             );
             Ok(())
         }
@@ -288,7 +288,7 @@ mod tests {
                 .unwrap()
                 .get(&session_id)
                 .map(|session| {
-                    let encoded_session = serialize(session).unwrap();
+                    let encoded_session = session.serialize_to_bytes().unwrap();
                     Some(encoded_session.into())
                 })
                 .ok_or(CommonError::RadixConnectMobileSessionNotFound {

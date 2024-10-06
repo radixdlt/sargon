@@ -27,7 +27,7 @@ pub enum RadixConnectPurpose {
 impl FromStr for RadixConnectPurpose {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::new_from_json_string(s).map_err(|_| {
+        s.deserialize().map_err(|_| {
             CommonError::InvalidRadixConnectPurpose {
                 bad_value: s.to_owned(),
             }
@@ -43,7 +43,7 @@ impl RadixConnectPurpose {
 
 impl std::fmt::Display for RadixConnectPurpose {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_json_string())
+        write!(f, "{}", self.serialize_to_string())
     }
 }
 
