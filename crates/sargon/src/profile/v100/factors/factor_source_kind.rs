@@ -83,6 +83,11 @@ pub enum FactorSourceKind {
     /// [link]: https://www.getarculus.com/
     #[serde(rename = "arculusCard")]
     ArculusCard,
+
+    /// Input key material for mnemonic (and optional BIP39 passphrase).
+    /// TODO add explanation
+    #[serde(rename = "passphrase")]
+    Passphrase
 }
 
 impl FactorSourceKind {
@@ -145,6 +150,7 @@ mod tests {
         eq(OffDeviceMnemonic, "offDeviceMnemonic");
         eq(TrustedContact, "trustedContact");
         eq(SecurityQuestions, "securityQuestions");
+        eq(Passphrase, "passphrase");
     }
 
     #[test]
@@ -193,6 +199,7 @@ mod tests {
         assert_eq!(SUT::OffDeviceMnemonic.discriminant(), "offDeviceMnemonic");
 
         assert_eq!(SUT::TrustedContact.discriminant(), "trustedContact");
+        assert_eq!(SUT::Passphrase.discriminant(), "passphrase");
     }
 
     #[test]
@@ -214,6 +221,10 @@ mod tests {
             format!("{}", SUT::TrustedContact.discriminant()),
             "trustedContact"
         );
+        assert_eq!(
+            format!("{}", SUT::Passphrase.discriminant()),
+            "passphrase"
+        );
     }
 
     #[test]
@@ -234,6 +245,10 @@ mod tests {
         assert_json_value_eq_after_roundtrip(
             &SUT::OffDeviceMnemonic,
             json!("offDeviceMnemonic"),
+        );
+        assert_json_value_eq_after_roundtrip(
+            &SUT::Passphrase,
+            json!("passphrase"),
         );
         assert_json_roundtrip(&SUT::Device);
     }
