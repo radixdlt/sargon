@@ -89,6 +89,15 @@ impl FactorSourceIDFromHash {
             mnemonic_with_passphrase,
         )
     }
+
+    pub fn new_for_passphrase(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::Passphrase,
+            mnemonic_with_passphrase
+        )
+    }
 }
 
 impl FactorSourceIDFromHash {
@@ -110,16 +119,75 @@ impl HasSampleValues for FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
-    /// A sample used to facilitate unit tests.
     pub fn sample_device() -> Self {
-        DeviceFactorSource::sample().id
+        Self::new_for_device(&MnemonicWithPassphrase::sample_device())
     }
 
-    /// A sample used to facilitate unit tests.
+    pub fn sample_device_other() -> Self {
+        Self::new_for_device(&MnemonicWithPassphrase::sample_device_other())
+    }
+
     pub fn sample_ledger() -> Self {
-        LedgerHardwareWalletFactorSource::sample().id
+        Self::new_for_ledger(&MnemonicWithPassphrase::sample_ledger())
+    }
+
+    pub fn sample_ledger_other() -> Self {
+        Self::new_for_ledger(&MnemonicWithPassphrase::sample_ledger_other())
+    }
+
+    pub fn sample_arculus() -> Self {
+        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus())
+    }
+
+    pub fn sample_arculus_other() -> Self {
+        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus_other())
+    }
+
+    pub fn sample_off_device() -> Self {
+        Self::new_for_arculus(&MnemonicWithPassphrase::sample_off_device())
+    }
+
+    pub fn sample_off_device_other() -> Self {
+        Self::new_for_arculus(&MnemonicWithPassphrase::sample_off_device_other())
+    }
+
+    pub fn sample_security_questions() -> Self {
+        Self::new_for_security_questions(&MnemonicWithPassphrase::sample_security_questions())
+    }
+
+    pub fn sample_security_questions_other() -> Self {
+        Self::new_for_security_questions(&MnemonicWithPassphrase::sample_security_questions_other())
+    }
+
+    pub fn sample_passphrase() -> Self {
+        Self::new_for_passphrase(&MnemonicWithPassphrase::sample_passphrase())
+    }
+
+    pub fn sample_passphrase_other() -> Self {
+        Self::new_for_passphrase(&MnemonicWithPassphrase::sample_passphrase_other())
+    }
+
+    pub(crate) fn sample_at(index: usize) -> FactorSourceIDFromHash {
+        ALL_FACTOR_SOURCE_IDS_SAMPLES[index].clone()
     }
 }
+
+/// FactorSourceIDFromHash samples used in various tests, specifically in signature collector tests.
+pub(crate) static ALL_FACTOR_SOURCE_IDS_SAMPLES: Lazy<[FactorSourceIDFromHash; 11]> = Lazy::new(|| {
+    [
+        FactorSourceIDFromHash::sample_device(),
+        FactorSourceIDFromHash::sample_ledger(),
+        FactorSourceIDFromHash::sample_ledger_other(),
+        FactorSourceIDFromHash::sample_arculus(),
+        FactorSourceIDFromHash::sample_arculus_other(),
+        FactorSourceIDFromHash::sample_passphrase(),
+        FactorSourceIDFromHash::sample_passphrase_other(),
+        FactorSourceIDFromHash::sample_off_device(),
+        FactorSourceIDFromHash::sample_off_device_other(),
+        FactorSourceIDFromHash::sample_security_questions(),
+        FactorSourceIDFromHash::sample_device_other()
+    ]
+});
 
 #[cfg(test)]
 mod tests {
@@ -132,6 +200,8 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+
+        let s = SUT::sample_all()[0];
     }
 
     #[test]
