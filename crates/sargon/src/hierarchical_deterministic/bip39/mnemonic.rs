@@ -324,6 +324,58 @@ impl Mnemonic {
     pub(crate) fn sample_arculus_other() -> Self {
         Self::from_phrase("arch card helmet sign source sample other arch card sample other arch card sample other arch card sample other arch card sample other lock").expect("Valid mnemonic")
     }
+
+    #[allow(dead_code)]
+    /// Alternative valid mnemonics, with last (checksum) words changed only are:
+    /// * brass
+    /// * crater
+    /// * embrace
+    /// * invest
+    /// * music
+    /// * project
+    /// * uphold
+    pub(crate) fn sample_passphrase() -> Self {
+        Self::from_phrase("pass phrase sign source sample pass phrase sign source sample pass phrase sign source sample pass phrase sign source sample pass phrase sample soon").expect("Valid mnemonic")
+    }
+
+    #[allow(dead_code)]
+    /// Alternative valid mnemonics, with last (checksum) words changed only are:
+    /// * animal
+    /// * collect
+    /// * dragon
+    /// * gold
+    /// * once
+    /// * ripple
+    /// * summer
+    pub(crate) fn sample_passphrase_other() -> Self {
+        Self::from_phrase("pass phrase sign source sample other pass phrase sign source sample other pass phrase sign source sample other pass phrase source sample other usual").expect("Valid mnemonic")
+    }
+
+    #[allow(dead_code)]
+    /// Alternative valid mnemonics, with last (checksum) words changed only are:
+    /// * address
+    /// * chat
+    /// * doctor
+    /// * hat
+    /// * music
+    /// * stove
+    /// * thrive
+    pub(crate) fn sample_yubikey() -> Self {
+        Self::from_phrase("you bid key sign source sample you bid key sign source sample you bid key sign source sample you bid key sign sample rapid").expect("Valid mnemonic")
+    }
+
+    #[allow(dead_code)]
+    /// Alternative valid mnemonics, with last (checksum) words changed only are:
+    /// * addict
+    /// * camera
+    /// * else
+    /// * install
+    /// * neutral
+    /// * runway
+    /// * someone
+    pub(crate) fn sample_yubikey_other() -> Self {
+        Self::from_phrase("you bid key sign source sample other you bid key sign source sample other you bid key sign source sample other you other thing").expect("Valid mnemonic")
+    }
 }
 
 #[cfg(test)]
@@ -434,6 +486,34 @@ mod tests {
         let s = "arch card helmet sign source sample other arch card sample other arch card sample other arch card sample other arch card sample other";
         let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
         assert!(mnemonics.iter().contains(&SUT::sample_arculus_other()));
+    }
+
+    #[test]
+    fn find_sample_yubikey() {
+        let s = "you bid key sign source sample you bid key sign source sample you bid key sign source sample you bid key sign sample";
+        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
+        assert!(mnemonics.iter().contains(&SUT::sample_yubikey()));
+    }
+
+    #[test]
+    fn find_sample_yubikey_other() {
+        let s = "you bid key sign source sample other you bid key sign source sample other you bid key sign source sample other you other";
+        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
+        assert!(mnemonics.iter().contains(&SUT::sample_yubikey_other()));
+    }
+
+    #[test]
+    fn find_sample_passphrase() {
+        let s = "pass phrase sign source sample pass phrase sign source sample pass phrase sign source sample pass phrase sign source sample pass phrase sample";
+        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
+        assert!(mnemonics.iter().contains(&SUT::sample_passphrase()));
+    }
+
+    #[test]
+    fn find_sample_passphrase_other() {
+        let s = "pass phrase sign source sample other pass phrase sign source sample other pass phrase sign source sample other pass phrase source sample other";
+        let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
+        assert!(mnemonics.iter().contains(&SUT::sample_passphrase_other()));
     }
 
     #[test]
