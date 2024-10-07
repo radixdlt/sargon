@@ -659,6 +659,9 @@ pub enum CommonError {
 
     #[error("Empty FactorSources list")]
     FactorSourcesOfKindEmptyFactors = 10184,
+
+    #[error("Expected Passphrase factor source got something else")]
+    ExpectedPassphraseFactorSourceGotSomethingElse = 10185,
 }
 
 #[uniffi::export]
