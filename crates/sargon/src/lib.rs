@@ -51,6 +51,7 @@ pub mod prelude {
     pub(crate) use std::collections::BTreeMap;
     pub(crate) use std::fmt::{Debug, Display, Formatter};
     pub(crate) use std::fs;
+    pub(crate) use std::cell::RefCell;
     pub(crate) use std::hash::Hash as StdHash;
     pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;
