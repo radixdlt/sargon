@@ -45,6 +45,7 @@ pub mod prelude {
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use serde_with::*;
     pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
+    pub(crate) use once_cell::sync::Lazy;
 
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cmp::Ordering;
