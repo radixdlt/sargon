@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine_toolkit::models::canonical_address_types::NetworkId;
 
 /// A signature of `intent_hash` by `entity` using `factor_source_id` and `derivation_path`, with `public_key` used for verification.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
@@ -18,7 +17,7 @@ pub struct HDSignature {
 
 impl HDSignature {
     /// Constructs a HDSignature from an already produced `Signature`.
-    fn with_details(input: HDSignatureInput, signature: Signature) -> Self {
+    pub(crate) fn with_details(input: HDSignatureInput, signature: Signature) -> Self {
         Self { input, signature }
     }
 
@@ -46,93 +45,19 @@ impl HDSignature {
 
 impl HasSampleValues for HDSignature {
     fn sample() -> Self {
-        let mnemonic = MnemonicWithPassphrase::sample_device();
-        let device_factor_source =
-            DeviceFactorSource::babylon(true, &mnemonic, &HostInfo::sample());
-
-        let private_hd_fs = PrivateHierarchicalDeterministicFactorSource::new(
-            mnemonic,
-            device_factor_source,
-        );
-
-        let hd_factor_instance = private_hd_fs
-            .derive_entity_creation_factor_instance::<AccountPath>(
-                NetworkID::Mainnet,
-                HDPathValue::from(0u32),
-            );
-
-        let address = AccountAddress::from_public_key(
-            hd_factor_instance.public_key,
-            NetworkID::Mainnet,
-        );
-
-        let factor_instance = HierarchicalDeterministicFactorInstance::new(
-            hd_factor_instance.factor_source_id,
-            HierarchicalDeterministicPublicKey::new(
-                hd_factor_instance.public_key,
-                hd_factor_instance.path.derivation_path(),
-            ),
-        );
-
-        let owned_fs = OwnedFactorInstance::owned_factor_instance(
-            AddressOfAccountOrPersona::Account(address),
-            factor_instance,
-        );
-
-        let input = HDSignatureInput::new(IntentHash::sample(), owned_fs);
-
-        let signature_with_public_key =
-            private_hd_fs.mnemonic_with_passphrase.sign(
-                &input.intent_hash.hash,
-                &hd_factor_instance.path.derivation_path(),
-            );
-
-        HDSignature::with_details(input, signature_with_public_key.signature())
+        HDFactorSourceIdFromHash::sample_device()
+            .hd_signature(
+                IntentHash::sample(),
+                HDPathComponent::from(0),
+            )
     }
 
     fn sample_other() -> Self {
-        let mnemonic = MnemonicWithPassphrase::sample_device();
-        let device_factor_source =
-            DeviceFactorSource::babylon(true, &mnemonic, &HostInfo::sample());
-
-        let private_hd_fs = PrivateHierarchicalDeterministicFactorSource::new(
-            mnemonic,
-            device_factor_source,
-        );
-
-        let hd_factor_instance = private_hd_fs
-            .derive_entity_creation_factor_instance::<AccountPath>(
-                NetworkID::Mainnet,
-                HDPathValue::from(0u32),
-            );
-
-        let address = AccountAddress::from_public_key(
-            hd_factor_instance.public_key,
-            NetworkID::Mainnet,
-        );
-
-        let factor_instance = HierarchicalDeterministicFactorInstance::new(
-            hd_factor_instance.factor_source_id,
-            HierarchicalDeterministicPublicKey::new(
-                hd_factor_instance.public_key,
-                hd_factor_instance.path.derivation_path(),
-            ),
-        );
-
-        let owned_fs = OwnedFactorInstance::owned_factor_instance(
-            AddressOfAccountOrPersona::Account(address),
-            factor_instance,
-        );
-
-        let input = HDSignatureInput::new(IntentHash::sample_other(), owned_fs);
-
-        let signature_with_public_key =
-            private_hd_fs.mnemonic_with_passphrase.sign(
-                &input.intent_hash.hash,
-                &hd_factor_instance.path.derivation_path(),
-            );
-
-        HDSignature::with_details(input, signature_with_public_key.signature())
+        HDFactorSourceIdFromHash::sample_device()
+            .hd_signature(
+                IntentHash::sample_other(),
+                HDPathComponent::from(0),
+            )
     }
 }
 
@@ -162,7 +87,7 @@ mod tests {
                 Sut::sample(),
                 Sut::sample_other()
             ])
-            .len(),
+                .len(),
             2
         );
     }
