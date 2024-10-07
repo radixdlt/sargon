@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use tokio::time::sleep;
 use std::time::Duration;
 
 // ==================
@@ -64,7 +63,8 @@ impl SargonOS {
                         TransactionStatusResponsePayloadStatus::Unknown |
                         TransactionStatusResponsePayloadStatus::Pending |
                         TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => {
-                            sleep(sleep_duration).await;
+                            // TODO: Check if we can use any existent dependency for adding async sleeps
+                            async_std::task::sleep(sleep_duration).await;
                         }
                         TransactionStatusResponsePayloadStatus::CommittedSuccess => {
                             return Ok(TransactionStatus::Success);
@@ -81,7 +81,7 @@ impl SargonOS {
                     }
                 }
                 None => {
-                    sleep(sleep_duration).await;
+                    async_std::task::sleep(sleep_duration).await;
                 }
             }
         }
