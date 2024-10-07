@@ -49,6 +49,12 @@ pub enum FactorSource {
         #[display("TrustedContact({value})")]
         value: TrustedContactFactorSource,
     },
+
+    Passphrase {
+        #[serde(rename = "passphrase")]
+        #[display("Passphrase({value})")]
+        value: PassphraseFactorSource,
+    }
 }
 
 impl BaseIsFactorSource for FactorSource {
@@ -72,6 +78,9 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::TrustedContact { value } => {
                 value.set_common_properties(updated)
             }
+            FactorSource::Passphrase { value } => {
+                value.set_common_properties(updated)
+            }
         }
     }
 
@@ -87,6 +96,7 @@ impl BaseIsFactorSource for FactorSource {
                 value.common_properties()
             }
             FactorSource::TrustedContact { value } => value.common_properties(),
+            FactorSource::Passphrase { value } => value.common_properties()
         }
     }
 
@@ -104,6 +114,9 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::TrustedContact { value } => {
                 value.factor_source_kind()
             }
+            FactorSource::Passphrase { value } => {
+                value.factor_source_kind()
+            }
         }
     }
 
@@ -119,6 +132,7 @@ impl BaseIsFactorSource for FactorSource {
                 value.factor_source_id()
             }
             FactorSource::TrustedContact { value } => value.factor_source_id(),
+            FactorSource::Passphrase { value } => value.factor_source_id()
         }
     }
 }
@@ -208,6 +222,11 @@ impl Serialize for FactorSource {
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }
+            FactorSource::Passphrase { value } => {
+                let discriminant = "passphrase";
+                state.serialize_field(discriminator_key, discriminant)?;
+                state.serialize_field(discriminant, value)?;
+            }
         }
         state.end()
     }
@@ -247,6 +266,8 @@ impl FactorSource {
             Self::sample_trusted_contact_radix(),
             Self::sample_security_questions(),
             Self::sample_security_questions_other(),
+            Self::sample_passphrase(),
+            Self::sample_passphrase_other(),
         ]
     }
     pub fn sample_device() -> Self {
@@ -310,6 +331,18 @@ impl FactorSource {
     pub fn sample_security_questions_other() -> Self {
         Self::from(
             SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other(),
+        )
+    }
+
+    pub fn sample_passphrase() -> Self {
+        Self::from(
+            PassphraseFactorSource::sample(),
+        )
+    }
+
+    pub fn sample_passphrase_other() -> Self {
+        Self::from(
+            PassphraseFactorSource::sample_other(),
         )
     }
 }
@@ -419,6 +452,14 @@ mod tests {
         assert_eq!(
             SUT::sample_trusted_contact_frank().factor_source_kind(),
             FactorSourceKind::TrustedContact
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_passphrase() {
+        assert_eq!(
+            SUT::sample_passphrase().factor_source_kind(),
+            FactorSourceKind::Passphrase
         );
     }
 
