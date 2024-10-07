@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_common::crypto::{blake2b_256_hash, Hash};
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
@@ -166,28 +165,7 @@ impl FactorSourceIDFromHash {
     pub fn sample_passphrase_other() -> Self {
         Self::new_for_passphrase(&MnemonicWithPassphrase::sample_passphrase_other())
     }
-
-    pub(crate) fn sample_at(index: usize) -> FactorSourceIDFromHash {
-        ALL_FACTOR_SOURCE_IDS_SAMPLES[index].clone()
-    }
 }
-
-/// FactorSourceIDFromHash samples used in various tests, specifically in signature collector tests.
-pub(crate) static ALL_FACTOR_SOURCE_IDS_SAMPLES: Lazy<[FactorSourceIDFromHash; 11]> = Lazy::new(|| {
-    [
-        FactorSourceIDFromHash::sample_device(),
-        FactorSourceIDFromHash::sample_ledger(),
-        FactorSourceIDFromHash::sample_ledger_other(),
-        FactorSourceIDFromHash::sample_arculus(),
-        FactorSourceIDFromHash::sample_arculus_other(),
-        FactorSourceIDFromHash::sample_passphrase(),
-        FactorSourceIDFromHash::sample_passphrase_other(),
-        FactorSourceIDFromHash::sample_off_device(),
-        FactorSourceIDFromHash::sample_off_device_other(),
-        FactorSourceIDFromHash::sample_security_questions(),
-        FactorSourceIDFromHash::sample_device_other()
-    ]
-});
 
 #[cfg(test)]
 mod tests {
@@ -200,8 +178,6 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
-
-        let s = SUT::sample_all()[0];
     }
 
     #[test]
