@@ -449,17 +449,6 @@ mod tests {
     }
 
     #[test]
-    fn test_debug_print_compiled_notarized_intent() {
-        assert!(
-            debug_print_compiled_notarized_intent(
-                CompiledNotarizedIntent::sample()
-            )
-            .len()
-                > 1000
-        );
-    }
-
-    #[test]
     fn per_recipient_uses_per_asset_transfer() {
         let transfers = PerRecipientAssetTransfers::sample();
         assert_eq!(

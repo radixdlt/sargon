@@ -53,8 +53,6 @@ impl GatewayClient {
 
 impl GatewayClient {
     /// Returns the status of a transaction by its `IntentHash`.
-    ///
-    /// Defaults to `TransactionStatusResponsePayloadStatus::Unknown` if the status is not found.
     pub async fn get_transaction_status(
         &self,
         intent_hash: IntentHash,

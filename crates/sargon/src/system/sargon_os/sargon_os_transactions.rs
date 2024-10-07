@@ -57,7 +57,11 @@ impl SargonOS {
                 .get_transaction_status(intent_hash.clone())
                 .await?;
 
-            match response.known_payloads.first().and_then(|payload| payload.payload_status.clone()) {
+            match response
+                .known_payloads
+                .first()
+                .and_then(|payload| payload.payload_status.clone())
+            {
                 Some(status) => {
                     match status {
                         TransactionStatusResponsePayloadStatus::Unknown |
@@ -85,5 +89,38 @@ impl SargonOS {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_rt::time::timeout;
+    use std::{future::Future, time::Duration};
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn poll_status() {
+        let mock_driver = MockNetworkingDriver::with_response( TransactionStatusResponse {
+            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_committed_success()],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message: None,
+        });
+
+        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+
+        let os =
+            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+                .await
+                .unwrap()
+                .unwrap();
+
+        let result = os
+            .poll_transaction_status(IntentHash::sample())
+            .await
+            .unwrap();
+        assert_eq!(result, TransactionStatus::Success);
     }
 }

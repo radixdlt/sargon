@@ -235,4 +235,24 @@ mod integration_tests {
             )
         );
     }
+
+    #[actix_rt::test]
+    async fn get_transaction_status() {
+        let network_id = NetworkID::Stokenet;
+        let gateway_client = new_gateway_client(network_id);
+        let private_key = Ed25519PrivateKey::generate();
+        let (_, tx_id) =
+            submit_tx_use_faucet(private_key, network_id).await.unwrap();
+
+        // Sleep for 1 seconds to make sure the transaction is processed when we poll its status
+        async_std::task::sleep(Duration::from_secs(1)).await;
+
+        let status_response =
+            timeout(MAX, gateway_client.get_transaction_status(tx_id))
+                .await
+                .unwrap()
+                .unwrap();
+
+        assert_eq!(status_response.error_message, None);
+    }
 }
