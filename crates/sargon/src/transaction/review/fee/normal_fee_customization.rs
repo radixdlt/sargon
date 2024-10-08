@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Represents the customization for normal fee mode.
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct NormalFeeCustomization {
     pub network_fee: Decimal192,
@@ -8,6 +9,7 @@ pub struct NormalFeeCustomization {
 }
 
 impl NormalFeeCustomization {
+    /// Creates a new `NormalFeeCustomization` with the given network and royalty fees.
     pub fn new(network_fee: Decimal192, royalty_fee: Decimal192) -> Self {
         Self {
             network_fee,
@@ -16,6 +18,7 @@ impl NormalFeeCustomization {
         }
     }
 
+    /// Creates a new `NormalFeeCustomization` from a `FeeSummaryToReview` and `FeeLocks`.
     pub fn new_from_summary(
         fee_summary_to_review: FeeSummaryToReview,
         fee_locks: FeeLocks,

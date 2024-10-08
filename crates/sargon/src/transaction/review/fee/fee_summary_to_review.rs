@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Represents a summary of fees to review.
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct FeeSummaryToReview {
     pub summary: FeeSummary,
@@ -12,6 +13,7 @@ pub struct FeeSummaryToReview {
 }
 
 impl FeeSummaryToReview {
+    /// Creates a new `FeeSummaryToReview` from an `ExecutionSummary`.
     pub fn new_from_execution_summary(
         execution_summary: ExecutionSummary,
         signatures_count: usize,
@@ -20,9 +22,9 @@ impl FeeSummaryToReview {
     ) -> Self {
         Self {
             summary: execution_summary.fee_summary,
-            guarantees_cost: Self::guarantees_cost(
-                execution_summary.detailed_classification,
-                execution_summary.deposits,
+            guarantees_cost: Self::calculate_guarantees_cost(
+                &execution_summary.detailed_classification,
+                &execution_summary.deposits,
             ),
             lock_fee_cost: FeeConstants::lock_fee_cost(include_lock_fee),
             signatures_cost: FeeConstants::signatures_cost(signatures_count),
@@ -32,6 +34,7 @@ impl FeeSummaryToReview {
         }
     }
 
+    /// Calculates the total execution cost.
     pub fn total_execution_cost(&self) -> Decimal192 {
         self.summary.execution_cost
             + self.guarantees_cost
@@ -40,6 +43,7 @@ impl FeeSummaryToReview {
             + self.notarizing_cost
     }
 
+    /// Calculates the total cost.
     pub fn total(&self) -> Decimal192 {
         self.total_execution_cost()
             + self.summary.finalization_cost
@@ -47,9 +51,10 @@ impl FeeSummaryToReview {
             + self.summary.royalty_cost
     }
 
-    fn guarantees_cost(
-        detailed_classification: Vec<DetailedManifestClass>,
-        deposits: HashMap<AccountAddress, Vec<ResourceIndicator>>,
+    /// Calculates the guarantees cost based on transfer type and deposits.
+    fn calculate_guarantees_cost(
+        detailed_classification: &[DetailedManifestClass],
+        deposits: &HashMap<AccountAddress, Vec<ResourceIndicator>>,
     ) -> Decimal192 {
         match detailed_classification.first() {
             Some(DetailedManifestClass::General)

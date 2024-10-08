@@ -21,11 +21,11 @@ impl AdvancedFeeCustomization {
             * FeeConstants::network_fee_multiplier();
 
         Self {
-            padding_fee: padding_fee,
+            padding_fee,
             tip_percentage: 0,
             // non-contingent lock will pay for some of the fee.
             paid_by_dapps: -fee_locks.lock,
-            total_execution_cost: total_execution_cost,
+            total_execution_cost,
             fee_summary: fee_summary_to_review,
         }
     }
