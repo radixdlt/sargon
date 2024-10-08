@@ -17,4 +17,6 @@ pub use hd_signature::*;
 pub use hd_signature_input::*;
 pub use invalid_transaction_if_neglected::*;
 pub use owned_types::*;
+
+#[cfg(test)]
 pub(crate) use samples::*;

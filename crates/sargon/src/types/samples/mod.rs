@@ -1,3 +1,4 @@
-mod hd_factor_source_id_from_hash;
 
-pub use hd_factor_source_id_from_hash::*;
+mod factor_source_ids_with_mnemonics;
+
+pub use factor_source_ids_with_mnemonics::*;

@@ -130,28 +130,39 @@ mod tests {
 
         let intent_hash = IntentHash::sample();
 
-        let hd_factor_source_id = HDFactorSourceIdFromHash::sample_at(0);
+        let (id, mnemonic) = fs_id_mnemonic(0);
 
-        let hd_signature = hd_factor_source_id.hd_signature(
+        let hd_signature = hd_signature(
+            &id,
+            &mnemonic.clone(),
             intent_hash,
             HDPathComponent::from(0)
         );
 
         sut.add_signature(&hd_signature);
 
-        sut.test_neglect(&hd_factor_source_id.hd_factor_instance(0), false);
+        sut.test_neglect(
+            &hd_factor_instance(&id, &mnemonic, HDPathComponent::from(0)),
+            false
+        );
     }
 
     #[test]
     #[should_panic]
     fn signing_already_skipped_panics() {
         let sut = Sut::new();
-        let hd_factor_source_id = HDFactorSourceIdFromHash::sample_at(0);
 
-        sut.test_neglect(&hd_factor_source_id.hd_factor_instance(0), false);
+        let (id, mnemonic) = fs_id_mnemonic(0);
+
+        sut.test_neglect(
+            &hd_factor_instance(&id, &mnemonic, HDPathComponent::from(0)),
+            false
+        );
 
         let intent_hash = IntentHash::sample();
-        let hd_signature = hd_factor_source_id.hd_signature(
+        let hd_signature = hd_signature(
+            &id,
+            &mnemonic,
             intent_hash,
             HDPathComponent::from(0)
         );
