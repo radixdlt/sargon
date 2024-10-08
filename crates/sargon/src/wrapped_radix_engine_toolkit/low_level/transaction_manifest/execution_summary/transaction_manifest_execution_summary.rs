@@ -13,9 +13,9 @@ impl TransactionManifest {
     ) -> Result<ExecutionSummary> {
         let deserialized_receipt = serde_json::from_str::<
             ScryptoSerializableToolkitTransactionReceipt,
-        >(&engine_toolkit_receipt.as_ref())
-            .ok()
-            .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+        >(engine_toolkit_receipt.as_ref())
+        .ok()
+        .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
         self.execution_summary_with_engine_toolkit_receipt(deserialized_receipt)
     }
 

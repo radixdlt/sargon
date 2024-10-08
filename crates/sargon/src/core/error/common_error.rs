@@ -667,7 +667,8 @@ pub enum CommonError {
     FailedToExtractTransactionReceiptBytes = 10186,
 
     #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
-    ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } = 10187,
+    ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
+        10187,
 }
 
 #[uniffi::export]

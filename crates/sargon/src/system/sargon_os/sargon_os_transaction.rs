@@ -10,19 +10,14 @@ impl SargonOS {
         blobs: Blobs,
         message: Message,
         is_wallet_transaction: bool,
-    ) -> Result<()> {
-        let network_id = self.profile_state_holder.current_network_id()?;
-        let gateway_client = GatewayClient::new(
-            self.clients.http_client.driver.clone(),
-            network_id,
-        );
+        include_lock_fee: bool,
+    ) -> Result<TransactionToReview> {
         self.perform_transaction_preview_analysis(
-            gateway_client,
             instructions,
-            network_id,
             blobs,
             message,
             is_wallet_transaction,
+            include_lock_fee,
         )
         .await
     }
@@ -31,13 +26,17 @@ impl SargonOS {
 impl SargonOS {
     async fn perform_transaction_preview_analysis(
         &self,
-        gateway_client: GatewayClient,
         instructions: String,
-        network_id: NetworkID,
         blobs: Blobs,
         message: Message,
         is_wallet_transaction: bool,
-    ) -> Result<()> {
+        include_lock_fee: bool,
+    ) -> Result<TransactionToReview> {
+        let network_id = self.profile_state_holder.current_network_id()?;
+        let gateway_client = GatewayClient::new(
+            self.clients.http_client.driver.clone(),
+            network_id,
+        );
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
 
@@ -53,7 +52,7 @@ impl SargonOS {
                 transaction_manifest.clone(),
                 network_id,
                 message,
-                signers,
+                signers.clone(),
             )
             .await?;
         let engine_toolkit_receipt = transaction_preview
@@ -61,18 +60,45 @@ impl SargonOS {
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
         // Analyze the manifest
-        let execution_summary = transaction_manifest.execution_summary_with_engine_toolkit_receipt(engine_toolkit_receipt)?;
+        let execution_summary = transaction_manifest
+            .execution_summary_with_engine_toolkit_receipt(
+                engine_toolkit_receipt,
+            )?;
 
         // Transactions created outside of the Wallet are not allowed to use reserved instructions
-        if !is_wallet_transaction && !execution_summary.reserved_instructions.is_empty() {
-            return Err(CommonError::ReservedInstructionsNotAllowedInManifest {
-                reserved_instructions: execution_summary.reserved_instructions.iter().map(|i| i.to_string()).collect(),
-            });
+        if !is_wallet_transaction
+            && !execution_summary.reserved_instructions.is_empty()
+        {
+            return Err(
+                CommonError::ReservedInstructionsNotAllowedInManifest {
+                    reserved_instructions: execution_summary
+                        .reserved_instructions
+                        .iter()
+                        .map(|i| i.to_string())
+                        .collect(),
+                },
+            );
         }
 
-        // Get all of the expected signing factors
+        // Determine the transaction fee
+        let notary_is_signatory = signers.is_empty();
+        let transaction_fee = TransactionFee::new_from_execution_summary(
+            execution_summary.clone(),
+            if notary_is_signatory {
+                1
+            } else {
+                signers.clone().iter().count()
+            },
+            notary_is_signatory,
+            include_lock_fee,
+        );
 
-        Ok(())
+        Ok(TransactionToReview {
+            transaction_manifest,
+            execution_summary,
+            network_id,
+            transaction_fee,
+        })
     }
 
     async fn extract_transaction_signers(
