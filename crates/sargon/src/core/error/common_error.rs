@@ -656,6 +656,9 @@ pub enum CommonError {
 
     #[error("The network {network_id} does not exist in profile")]
     NoNetworkInProfile { network_id: NetworkID } = 10183,
+
+    #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
+    InvalidManifestFailedToDecompile { underlying: String } = 10184,
 }
 
 #[uniffi::export]

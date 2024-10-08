@@ -72,7 +72,7 @@ fn instructions_string_from(
     };
     let network_definition = network_id.network_definition();
     scrypto_decompile(&manifest, &network_definition).map_err(|e| {
-        CommonError::InvalidInstructionsFailedToDecompile {
+        CommonError::InvalidManifestFailedToDecompile {
             underlying: format!("{:?}", e),
         }
     })

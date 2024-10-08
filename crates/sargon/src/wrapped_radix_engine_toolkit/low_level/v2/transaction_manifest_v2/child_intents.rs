@@ -2,8 +2,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ChildIntents {
-    pub children: Vec<ChildSubintent>, // secret_magic?
-    pub network_id: NetworkID,         // do we need network_id here?
+    pub children: Vec<ChildSubintent>,
 }
 
 impl From<ChildIntents> for Vec<ScryptoChildSubintent> {
@@ -20,16 +19,14 @@ impl From<(Vec<ScryptoChildSubintent>, NetworkID)> for ChildIntents {
                 .into_iter()
                 .map(|c| (c, value.1).into())
                 .collect(),
-            network_id: value.1,
         }
     }
 }
 
 impl ChildIntents {
-    pub(crate) fn empty(network_id: NetworkID) -> Self {
+    pub(crate) fn empty() -> Self {
         Self {
             children: Vec::new(),
-            network_id,
         }
     }
 }
@@ -38,7 +35,6 @@ impl HasSampleValues for ChildIntents {
     fn sample() -> Self {
         Self {
             children: vec![ChildSubintent::sample()],
-            network_id: NetworkID::Mainnet,
         }
     }
 
@@ -48,7 +44,6 @@ impl HasSampleValues for ChildIntents {
                 ChildSubintent::sample(),
                 ChildSubintent::sample_other(),
             ],
-            network_id: NetworkID::Simulator,
         }
     }
 }

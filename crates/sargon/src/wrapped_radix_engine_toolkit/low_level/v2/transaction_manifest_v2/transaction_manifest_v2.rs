@@ -14,7 +14,7 @@ impl TransactionManifestV2 {
             secret_magic: TransactionManifestSecretMagicV2 {
                 instructions: InstructionsV2::empty(network_id),
                 blobs: Blobs::default(),
-                children: ChildIntents::empty(network_id),
+                children: ChildIntents::empty(),
                 object_names: ManifestObjectNames::default(),
             },
         }
