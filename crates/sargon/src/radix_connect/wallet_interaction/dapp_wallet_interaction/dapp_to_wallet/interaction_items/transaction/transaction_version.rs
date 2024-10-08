@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-pub struct TXVersion(u64);
+pub struct TXVersion(pub u64);
 
 impl From<u64> for TXVersion {
     fn from(value: u64) -> Self {

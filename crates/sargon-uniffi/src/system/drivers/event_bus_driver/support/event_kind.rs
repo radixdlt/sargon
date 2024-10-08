@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::EventKind as InternalEventKind;
 
 /// A discriminator identifying the kind of `Event`, this has no associated
 /// values and flattens the otherwise nested `Event` enum.
@@ -9,7 +10,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    enum_iterator::Sequence,
     uniffi::Enum,
 )]
 pub enum EventKind {
@@ -52,116 +52,72 @@ pub enum EventKind {
     SecurityStructureAdded,
 }
 
-impl EventKind {
-    /// Returns collection of all different EventKinds
-    pub fn all() -> Vec<Self> {
-        all::<Self>().collect()
+impl From<InternalEventKind> for EventKind {
+    fn from(value: InternalEventKind) -> Self {
+        match value {
+            InternalEventKind::AccountAdded => EventKind::AccountAdded,
+            InternalEventKind::AccountsAdded => EventKind::AccountsAdded,
+            InternalEventKind::AccountUpdated => EventKind::AccountUpdated,
+            InternalEventKind::Booted => EventKind::Booted,
+            InternalEventKind::GatewayChangedCurrent => EventKind::GatewayChangedCurrent,
+            InternalEventKind::ProfileSaved => EventKind::ProfileSaved,
+            InternalEventKind::ProfileImported => EventKind::ProfileImported,
+            InternalEventKind::ProfileUsedOnOtherDevice => EventKind::ProfileUsedOnOtherDevice,
+            InternalEventKind::FactorSourceAdded => EventKind::FactorSourceAdded,
+            InternalEventKind::FactorSourcesAdded => EventKind::FactorSourcesAdded,
+            InternalEventKind::FactorSourceUpdated => EventKind::FactorSourceUpdated,
+            InternalEventKind::SecurityStructureAdded => EventKind::SecurityStructureAdded,
+        }
     }
+}
 
-    /// If hosts should fetch account list due to an action which triggered the
-    /// event of this kind to be emitted.
-    ///
-    /// E.g. if an account was saved into Profile, an event with the kind
-    /// `EventKind::AccountAdded` will be emitted, which hosts SHOULD react to
-    /// and thus fetch the account list and possibly update UI.
-    pub fn affects_current_accounts(&self) -> bool {
-        use EventKind::*;
-        matches!(
-            *self,
-            Booted
-                | ProfileImported
-                | AccountAdded
-                | AccountsAdded
-                | AccountUpdated
-                | GatewayChangedCurrent
-        )
-    }
-
-    /// If hosts should check the current network due to an action which triggered the
-    /// event of this kind to be emitted.
-    ///
-    /// E.g. if the current gateway was changed by the user, an event with the kind
-    /// `EventKind::GatewayChangedCurrent` will be emitted, which hosts SHOULD react to
-    /// and check the network of the new gateway and possibly update UI.
-    pub fn affects_current_network(&self) -> bool {
-        use EventKind::*;
-        matches!(*self, Booted | ProfileImported | GatewayChangedCurrent)
-    }
-
-    /// If hosts should check saved gateways due to an action which triggered the
-    /// event of this kind to be emitted.
-    ///
-    /// E.g. if the current gateway was changed by the user, an event with the kind
-    /// `EventKind::GatewayChangedCurrent` will be emitted, which hosts SHOULD
-    /// react to and fetch saved gateways and possibly update UI.
-    pub fn affects_saved_gateways(&self) -> bool {
-        use EventKind::*;
-        matches!(*self, Booted | ProfileImported | GatewayChangedCurrent)
-    }
-
-    /// If security structures have changed
-    pub fn affects_security_structures(&self) -> bool {
-        use EventKind::*;
-        matches!(*self, Booted | ProfileImported | SecurityStructureAdded)
-    }
-
-    /// If hosts UI displaying factor sources (of any kind) should re-fetch
-    /// the list from SargonOS.
-    ///
-    /// E.g. if a new account is created using factor source `X` then `x.common.last_used`,
-    /// is updated and an event of kind `FactorSourceUpdated` is emitted, which does
-    /// affect factor sources shown by host.
-    pub fn affects_factor_sources(&self) -> bool {
-        use EventKind::*;
-        matches!(
-            *self,
-            Booted
-                | ProfileImported
-                | FactorSourceAdded
-                | FactorSourceUpdated
-                | FactorSourcesAdded
-        )
+impl Into<InternalEventKind> for EventKind {
+    fn into(self) -> InternalEventKind {
+        match self {
+            EventKind::AccountAdded => InternalEventKind::AccountAdded,
+            EventKind::AccountsAdded => InternalEventKind::AccountsAdded,
+            EventKind::AccountUpdated => InternalEventKind::AccountUpdated,
+            EventKind::Booted => InternalEventKind::Booted,
+            EventKind::GatewayChangedCurrent => InternalEventKind::GatewayChangedCurrent,
+            EventKind::ProfileSaved => InternalEventKind::ProfileSaved,
+            EventKind::ProfileImported => InternalEventKind::ProfileImported,
+            EventKind::ProfileUsedOnOtherDevice => InternalEventKind::ProfileUsedOnOtherDevice,
+            EventKind::FactorSourceAdded => InternalEventKind::FactorSourceAdded,
+            EventKind::FactorSourcesAdded => InternalEventKind::FactorSourcesAdded,
+            EventKind::FactorSourceUpdated => InternalEventKind::FactorSourceUpdated,
+            EventKind::SecurityStructureAdded => InternalEventKind::SecurityStructureAdded,
+        }
     }
 }
 
 #[uniffi::export]
 pub fn event_kind_affects_current_accounts(event_kind: EventKind) -> bool {
-    event_kind.affects_current_accounts()
+    event_kind.into_internal().affects_current_accounts()
 }
 
 #[uniffi::export]
 pub fn event_kind_affects_current_network(event_kind: EventKind) -> bool {
-    event_kind.affects_current_network()
+    event_kind.into_internal().affects_current_network()
 }
 
 #[uniffi::export]
 pub fn event_kind_affects_saved_gateways(event_kind: EventKind) -> bool {
-    event_kind.affects_saved_gateways()
+    event_kind.into_internal().affects_saved_gateways()
 }
 
 #[uniffi::export]
 pub fn event_kind_affects_factor_sources(event_kind: EventKind) -> bool {
-    event_kind.affects_factor_sources()
+    event_kind.into_internal().affects_factor_sources()
 }
 
 #[uniffi::export]
 pub fn event_kind_affects_security_structures(event_kind: EventKind) -> bool {
-    event_kind.affects_security_structures()
+    event_kind.into_internal().affects_security_structures()
 }
 
 #[uniffi::export]
 pub fn event_kind_all() -> Vec<EventKind> {
-    EventKind::all()
-}
-
-impl HasSampleValues for EventKind {
-    fn sample() -> Self {
-        Self::Booted
-    }
-
-    fn sample_other() -> Self {
-        Self::ProfileSaved
-    }
+    InternalEventKind::all().into_vec()
 }
 
 #[cfg(test)]

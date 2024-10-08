@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::WalletInteractionVersion as InternalWalletInteractionVersion;
 
 
-#[derive(Debug, PartialEq, Clone, uni_ffi::Record)]
+#[derive(Debug, PartialEq, Clone, uniffi::Record)]
 pub struct WalletInteractionVersion {
     pub value: u64,
 }

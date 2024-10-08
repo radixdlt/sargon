@@ -6,28 +6,26 @@ use sargon::Blobs as InternalBlobs;
     Clone, PartialEq, Eq, Debug, uniffi::Record,
 )]
 pub struct Blobs {
-    pub(crate) secret_magic: BlobsSecretMagic,
+    pub(crate) secret_magic: Vec<Blob>,
 }
 
 impl From<InternalBlobs> for Blobs {
     fn from(value: InternalBlobs) -> Self {
         Self {
-            secret_magic: value.secret_magic.into(),
+            secret_magic: value.0.into(),
         }
     }
 }
 
 impl Into<InternalBlobs> for Blobs {
     fn into(self) -> InternalBlobs {
-        InternalBlobs {
-            secret_magic: self.secret_magic.into(),
-        }
+        InternalBlobs(self.secret_magic.into())
     }
 }
 
 #[uniffi::export]
 pub fn blobs_list_of_blobs(blobs: &Blobs) -> Vec<Blob> {
-    blobs.into::<InternalBlobs>().blobs().map(Blob::from).collect()
+    blobs.into_internal().blobs().map(Blob::from).collect()
 }
 
 #[uniffi::export]

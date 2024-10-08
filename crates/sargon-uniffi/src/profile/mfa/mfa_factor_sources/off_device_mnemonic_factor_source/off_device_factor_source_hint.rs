@@ -8,7 +8,7 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
+    
     uniffi::Record,
 )]
 pub struct OffDeviceMnemonicHint {

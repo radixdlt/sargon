@@ -6,11 +6,3 @@ decl_security_structure_of!(
     /// into this structure from `SecurityStructureOfFactorSources`.
     FactorSourceID,
 );
-
-impl Identifiable for SecurityStructureOfFactorSourceIDs {
-    type ID = <SecurityStructureMetadata as Identifiable>::ID;
-
-    fn id(&self) -> Self::ID {
-        self.metadata.id()
-    }
-}

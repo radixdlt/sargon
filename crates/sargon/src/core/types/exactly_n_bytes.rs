@@ -36,7 +36,7 @@ macro_rules! decl_exactly_n_bytes {
             )]
             #[display("{}", self.to_hex())]
             #[debug("{}", self.to_hex())]
-            pub struct [<Exactly $byte_count Bytes>]([u8; $byte_count]);
+            pub struct [<Exactly $byte_count Bytes>](pub [u8; $byte_count]);
 
             impl FromStr for [<Exactly $byte_count Bytes>] {
                 type Err = crate::CommonError;

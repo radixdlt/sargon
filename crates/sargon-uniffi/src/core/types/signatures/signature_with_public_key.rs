@@ -7,8 +7,8 @@ use crate::prelude::*;
     Clone,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
+    
+    
     Hash,
     EnumAsInner,
     uniffi::Enum,

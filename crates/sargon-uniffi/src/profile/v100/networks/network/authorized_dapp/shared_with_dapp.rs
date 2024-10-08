@@ -15,7 +15,8 @@ macro_rules! declare_shared_with_dapp {
         $expected_sample_debug: literal,
         $expected_sample_json: literal
     ) => {
-        use sargon::$struct_name as Internal$struct_name;
+        paste! {
+        use sargon::$struct_name as [<Internal $struct_name>];
 
         $(
             #[doc = $expr]
@@ -36,8 +37,8 @@ macro_rules! declare_shared_with_dapp {
             pub ids: Vec<$id>,
         }
 
-        impl From<Internal$struct_name> for $struct_name {
-            fn from(value: Internal$struct_name) -> Self {
+        impl From<[<Internal $struct_name>]> for $struct_name {
+            fn from(value: [<Internal $struct_name>]) -> Self {
                 Self {
                     request: value.request.into(),
                     ids: value.ids.into_iter().map(Into::into).collect(),
@@ -45,14 +46,15 @@ macro_rules! declare_shared_with_dapp {
             }
         }
 
-        impl Into<Internal$struct_name> for $struct_name {
-            fn into(self) -> Internal$struct_name {
-                Internal$struct_name {
+        impl Into<[<Internal $struct_name>]> for $struct_name {
+            fn into(self) -> [<Internal $struct_name>] {
+                [<Internal $struct_name>] {
                     request: self.request.into(),
                     ids: self.ids.into_iter().map(Into::into).collect(),
                 }
             }
         }
+    }
     };
     (
         $(

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::SargonDependencies as InternalSargonDependencies;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct SargonDependencies {
@@ -6,30 +7,20 @@ pub struct SargonDependencies {
     pub scrypto_radix_engine: DependencyInformation,
 }
 
-impl SargonDependencies {
-    pub fn get() -> Self {
+impl From<InternalSargonDependencies> for SargonDependencies {
+    fn from(value: InternalSargonDependencies) -> Self {
         Self {
-            radix_engine_toolkit: DependencyInformation::with_value(env!(
-                "RADIX-ENGINE-TOOLKIT_DEPENDENCY"
-            )),
-            scrypto_radix_engine: DependencyInformation::with_value(env!(
-                "RADIX-ENGINE_DEPENDENCY"
-            )),
+            radix_engine_toolkit: value.radix_engine_toolkit.into(),
+            scrypto_radix_engine: value.scrypto_radix_engine.into(),
         }
     }
 }
 
-impl HasSampleValues for SargonDependencies {
-    fn sample() -> Self {
-        Self {
-            radix_engine_toolkit: DependencyInformation::sample(),
-            scrypto_radix_engine: DependencyInformation::sample_other(),
-        }
-    }
-    fn sample_other() -> Self {
-        Self {
-            radix_engine_toolkit: DependencyInformation::sample_other(),
-            scrypto_radix_engine: DependencyInformation::sample(),
+impl Into<InternalSargonDependencies> for SargonDependencies {
+    fn into(self) -> InternalSargonDependencies {
+        InternalSargonDependencies {
+            radix_engine_toolkit: self.radix_engine_toolkit.into(),
+            scrypto_radix_engine: self.scrypto_radix_engine.into(),
         }
     }
 }

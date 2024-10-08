@@ -9,10 +9,9 @@ use sargon::RequestedQuantity as InternalRequestedQuantity;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
+    
     uniffi::Record,
 )]
-#[display("{quantifier}: {quantity}")]
 pub struct RequestedQuantity {
     pub quantifier: RequestedNumberQuantifier,
     pub quantity: u16,

@@ -9,10 +9,10 @@ json_string_convertible!(Ed25519Signature);
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
+    
+    
     uniffi::Record,
 )]
 pub struct Ed25519Signature {

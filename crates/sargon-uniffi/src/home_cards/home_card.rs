@@ -23,7 +23,6 @@ pub enum HomeCard {
 
     /// Content: "You can now connect with your Radix Wallet. Tap to dismiss."
     /// Action: None.
-    #[display("Dapp {:?}", icon_url)]
     Dapp { icon_url: Option<Url> },
 
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"

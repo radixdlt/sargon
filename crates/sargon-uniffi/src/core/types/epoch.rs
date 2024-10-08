@@ -8,8 +8,8 @@ use sargon::Epoch as InternalEpoch;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
     uniffi::Record,
 )]
 pub struct Epoch {

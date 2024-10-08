@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::SecurityStructureOfFactorInstances as InternalSecurityStructureOfFactorInstances;
 
 decl_matrix_of_factors!(
     /// A matrix of FactorInstances
@@ -20,10 +21,20 @@ pub struct SecurityStructureOfFactorInstances {
     pub matrix_of_factors: MatrixOfFactorInstances,
 }
 
-impl Identifiable for SecurityStructureOfFactorInstances {
-    type ID = <SecurityStructureMetadata as Identifiable>::ID;
+impl From<InternalSecurityStructureOfFactorInstances> for SecurityStructureOfFactorInstances {
+    fn from(value: InternalSecurityStructureOfFactorInstances) -> Self {
+        Self {
+            security_structure_id: value.security_structure_id.into(),
+            matrix_of_factors: value.matrix_of_factors.into(),
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.security_structure_id
+impl Into<InternalSecurityStructureOfFactorInstances> for SecurityStructureOfFactorInstances {
+    fn into(self) -> InternalSecurityStructureOfFactorInstances {
+        InternalSecurityStructureOfFactorInstances {
+            security_structure_id: self.security_structure_id.into(),
+            matrix_of_factors: self.matrix_of_factors.into(),
+        }
     }
 }

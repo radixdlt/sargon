@@ -9,7 +9,7 @@ use sargon::KeyAgreementPublicKey as InternalKeyAgreementPublicKey;
     Eq,
     Hash,
     derive_more::Display,
-    derive_more::Debug,
+    
 )]
 pub struct KeyAgreementPublicKey {
     pub secret_magic: X25519PublicKey,

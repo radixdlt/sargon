@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PerAssetFungibleResource as InternalPerAssetFungibleResource;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PerAssetFungibleResource {
@@ -6,45 +7,24 @@ pub struct PerAssetFungibleResource {
     pub divisibility: Option<u8>,
 }
 
-impl PerAssetFungibleResource {
-    pub fn new(
-        resource_address: ResourceAddress,
-        divisibility: impl Into<Option<u8>>,
-    ) -> Self {
+impl From<InternalPerAssetFungibleResource> for PerAssetFungibleResource {
+    fn from(value: InternalPerAssetFungibleResource) -> Self {
         Self {
-            resource_address,
-            divisibility: divisibility.into(),
+            resource_address: value.resource_address.into(),
+            divisibility: value.divisibility,
         }
     }
 }
 
-impl PerAssetFungibleResource {
-    pub(crate) fn sample_mainnet() -> Self {
-        Self::new(ResourceAddress::sample_mainnet_xrd(), None)
-    }
-
-    pub(crate) fn sample_mainnet_other() -> Self {
-        Self::new(ResourceAddress::sample_mainnet_candy(), 4)
-    }
-
-    pub(crate) fn sample_stokenet() -> Self {
-        Self::new(ResourceAddress::sample_stokenet_xrd(), None)
-    }
-
-    pub(crate) fn sample_stokenet_other() -> Self {
-        Self::new(ResourceAddress::sample_stokenet_gum(), 6)
+impl Into<InternalPerAssetFungibleResource> for PerAssetFungibleResource {
+    fn into(self) -> InternalPerAssetFungibleResource {
+        InternalPerAssetFungibleResource {
+            resource_address: self.resource_address.into(),
+            divisibility: self.divisibility,
+        }
     }
 }
 
-impl HasSampleValues for PerAssetFungibleResource {
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
-
-    fn sample_other() -> Self {
-        Self::sample_stokenet_other()
-    }
-}
 
 #[cfg(test)]
 mod tests {

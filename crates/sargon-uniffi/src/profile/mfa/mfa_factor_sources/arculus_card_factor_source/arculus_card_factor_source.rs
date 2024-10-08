@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use crate::prelude::*;
+use sargon::ArculusCardFactorSource as InternalArculusCardFactorSource;
+use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 
 /// An Arculus card, a hierarchal deterministic wallet capable of CAP26 derivation
 /// which users interact with by placing it near their host device, which
@@ -10,10 +11,8 @@ use crate::prelude::*;
     Eq,
     Hash,
     Debug,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{hint} : {id}")]
 pub struct ArculusCardFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
@@ -29,15 +28,35 @@ pub struct ArculusCardFactorSource {
     pub hint: ArculusCardHint,
 }
 
+impl From<InternalArculusCardFactorSource> for ArculusCardFactorSource {
+    fn from(value: InternalArculusCardFactorSource) -> Self {
+        Self {
+            id: value.id.into(),
+            common: value.common.into(),
+            hint: value.hint.into(),
+        }
+    }
+}
+
+impl Into<InternalArculusCardFactorSource> for ArculusCardFactorSource {
+    fn into(self) -> InternalArculusCardFactorSource {
+        InternalArculusCardFactorSource {
+            id: self.id.into(),
+            common: self.common.into(),
+            hint: self.hint.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_arculus_card_factor_source_sample() -> ArculusCardFactorSource {
-    ArculusCardFactorSource::sample()
+    InternalArculusCardFactorSource::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_arculus_card_factor_source_sample_other() -> ArculusCardFactorSource
 {
-    ArculusCardFactorSource::sample_other()
+    InternalArculusCardFactorSource::sample_other().into()
 }
 
 #[uniffi::export]
@@ -45,8 +64,8 @@ fn new_arculus_card_factor_source_from_mnemonic_with_passphrase(
     mwp: MnemonicWithPassphrase,
     hint: ArculusCardHint,
 ) -> ArculusCardFactorSource {
-    let id = FactorSourceIDFromHash::new_for_arculus(&mwp);
-    ArculusCardFactorSource::new(id, hint)
+    let id = InternalFactorSourceIDFromHash::new_for_arculus(&mwp.into());
+    InternalArculusCardFactorSource::new(id, hint.into()).into()
 }
 
 #[cfg(test)]

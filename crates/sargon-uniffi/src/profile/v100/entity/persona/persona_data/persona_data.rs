@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PersonaData as InternalPersonaData;
 
 /// Personal information a user has associated with a certain Persona, of different kinds, such as name,
 /// email address(es) or phone number(s). This information is only ever stored in Profile and is never
@@ -25,12 +26,8 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.string_representation(false))]
-#[debug("{}", self.string_representation(true))]
 pub struct PersonaData {
     /// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,
     /// or `"Jun-fan 'Bruce' Lee"` using Eastern name variant (family name comes before given name(s)).
@@ -52,14 +49,34 @@ pub struct PersonaData {
     pub email_addresses: CollectionOfEmailAddresses,
 }
 
+impl From<InternalPersonaData> for PersonaData {
+    fn from(value: InternalPersonaData) -> Self {
+        Self {
+            name: value.name.map(Into::into),
+            phone_numbers: value.phone_numbers.into(),
+            email_addresses: value.email_addresses.into(),
+        }
+    }
+}
+
+impl Into<InternalPersonaData> for PersonaData {
+    fn into(self) -> InternalPersonaData {
+        InternalPersonaData {
+            name: self.name.map(Into::into),
+            phone_numbers: self.phone_numbers.into(),
+            email_addresses: self.email_addresses.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_persona_data_sample() -> PersonaData {
-    PersonaData::sample()
+    InternalPersonaData::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_data_sample_other() -> PersonaData {
-    PersonaData::sample_other()
+    InternalPersonaData::sample_other().into()
 }
 
 #[cfg(test)]

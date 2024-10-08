@@ -10,8 +10,8 @@ json_string_convertible!(Ed25519PublicKey);
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
     uniffi::Record,
 )]
 pub struct Ed25519PublicKey {

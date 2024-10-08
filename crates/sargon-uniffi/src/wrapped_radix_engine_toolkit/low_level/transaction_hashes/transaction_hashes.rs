@@ -1,7 +1,4 @@
 use crate::prelude::*;
-
-use crate::wrapped_radix_engine_toolkit::low_level::transaction_hashes::validate_and_decode_hash::validate_and_decode_hash;
-
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_tx_hash {
@@ -16,16 +13,14 @@ macro_rules! decl_tx_hash {
         $expected_sample_str_formatted: literal
     ) => {
 
-        use sargon::$struct_name as Internal$struct_name;
+        use sargon::$struct_name as InternalTxHash;
 
         $(
             #[doc = $expr]
         )*
         #[derive(
-            Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug, uniffi::Record,
+            Clone, PartialEq, Eq, Hash, uniffi::Record,
         )]
-        #[display("{}", self.bech32_encoded_tx_id)]
-        #[debug("{}", self.bech32_encoded_tx_id)]
         pub struct $struct_name {
             /// Which network this transaction hash is used on
             pub network_id: NetworkID,
@@ -35,8 +30,8 @@ macro_rules! decl_tx_hash {
             pub bech32_encoded_tx_id: String,
         }
 
-        impl From<Internal$struct_name> for $struct_name {
-            fn from(value: Internal$struct_name) -> Self {
+        impl From<InternalTxHash> for $struct_name {
+            fn from(value: InternalTxHash) -> Self {
                 Self {
                     network_id: value.network_id.into(),
                     hash: value.hash.into(),
@@ -45,9 +40,9 @@ macro_rules! decl_tx_hash {
             }
         }
 
-        impl Into<Internal$struct_name> for $struct_name {
-            fn into(self) -> Internal$struct_name {
-                Internal$struct_name {
+        impl Into<InternalTxHash> for $struct_name {
+            fn into(self) -> InternalTxHash {
+                InternalTxHash {
                     network_id: self.network_id.into(),
                     hash: self.hash.into(),
                     bech32_encoded_tx_id: self.bech32_encoded_tx_id,
@@ -58,12 +53,12 @@ macro_rules! decl_tx_hash {
         paste! {
             #[uniffi::export]
             pub fn [< new_$struct_name:snake _from_string>](string: String) -> Result<$struct_name> {
-                map_result_from_internal(Internal$struct_name::from_str(&string))
+                InternalTxHash::from_str(&string).map_result()
             }
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _formatted>](address: &$struct_name, format: AddressFormat) -> String {
-                address.into::<Internal$struct_name>.formatted(format)
+                address.into_internal().formatted(format)
             }
 
             #[cfg(test)]
@@ -111,3 +106,5 @@ macro_rules! decl_tx_hash {
         }
     };
 }
+
+pub(crate) use decl_tx_hash;

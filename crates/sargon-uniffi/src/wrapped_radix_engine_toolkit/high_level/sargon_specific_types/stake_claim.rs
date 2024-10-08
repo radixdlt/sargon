@@ -15,7 +15,7 @@ impl From<InternalStakeClaim> for StakeClaim {
         Self {
             validator_address: value.validator_address.into(),
             resource_address: value.resource_address.into(),
-            ids: value.ids.into_iter().map(Into::into).collect(),
+            ids: value.ids.into_vec(),
             amount: value.amount.into(),
         }
     }
@@ -26,7 +26,7 @@ impl Into<InternalStakeClaim> for StakeClaim {
         InternalStakeClaim {
             validator_address: self.validator_address.into(),
             resource_address: self.resource_address.into(),
-            ids: self.ids.into_iter().map(Into::into).collect(),
+            ids: self.ids.into_internal_vec(),
             amount: self.amount.into(),
         }
     }

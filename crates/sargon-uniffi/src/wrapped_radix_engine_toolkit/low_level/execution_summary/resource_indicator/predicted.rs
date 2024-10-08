@@ -1,5 +1,3 @@
-use radix_rust::prelude::{IndexMap, IndexSet};
-
 use crate::prelude::*;
 
 /// This macro exists since UniFFI does not support generics currently, when/if
@@ -15,7 +13,8 @@ macro_rules! decl_predicted {
         $wrapped_type: ty,
         $mod_test_name: ident
     ) => {
-        use sargon::$struct_name as Internal$struct_name;
+        paste! {
+        use sargon::$struct_name as [< Internal $struct_name >];
 
         $(
             #[doc = $expr]
@@ -26,8 +25,8 @@ macro_rules! decl_predicted {
             pub instruction_index: u64,
         }
 
-        impl From<Internal$struct_name> for $struct_name {
-            fn from(value: Internal$struct_name) -> Self {
+        impl From<[< Internal $struct_name >]> for $struct_name {
+            fn from(value: [< Internal $struct_name >]) -> Self {
                 Self {
                     value: value.value.into(),
                     instruction_index: value.instruction_index,
@@ -35,14 +34,15 @@ macro_rules! decl_predicted {
             }
         }
 
-        impl Into<Internal$struct_name> for $struct_name {
-            fn into(self) -> Internal$struct_name {
-                Internal$struct_name {
+        impl Into<[< Internal $struct_name >]> for $struct_name {
+            fn into(self) -> [< Internal $struct_name >] {
+                [< Internal $struct_name >]{
                     value: self.value.into(),
                     instruction_index: self.instruction_index,
                 }
             }
         }
+    }
     };
 
     (

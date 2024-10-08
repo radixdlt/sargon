@@ -34,7 +34,7 @@ macro_rules! decl_ret_wrapped_address {
             }
 
             impl Into<InternalAddress> for [< $address_type:camel Address >] {
-                fn into(self) -> [< Internal $address_type:camel Address >] {
+                fn into(self) -> InternalAddress {
                     self.secret_magic.parse().unwrap()
                 }
             }
@@ -47,7 +47,7 @@ macro_rules! decl_ret_wrapped_address {
 
             #[uniffi::export]
             pub fn [<new_ $address_type:snake _address>](bech32: String) -> Result<[< $address_type:camel Address >]> {
-                map_result_from_internal(InternalAddress::try_from_bech32(&bech32))
+                InternalAddress::try_from_bech32(&bech32).map_result()
             }
 
             /// Returns a new address, with the same node_id, but using `network_id` as

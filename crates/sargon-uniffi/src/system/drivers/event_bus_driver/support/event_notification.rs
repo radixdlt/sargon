@@ -12,61 +12,20 @@ pub struct EventNotification {
 
 impl From<InternalEventNotification> for EventNotification {
     fn from(value: InternalEventNotification) -> Self {
-        unimplemented!()
-    }
-}
-
-impl EventNotification {
-    pub fn new(event: Event) -> Self {
         Self {
-            id: id(),
-            event,
-            timestamp: now(),
-        }
-    }
-
-    pub fn profile_modified(change: EventProfileModified) -> Self {
-        Self::new(Event::profile_modified(change))
-    }
-
-    pub fn profile_used_on_other_device(other_device: DeviceInfo) -> Self {
-        Self::new(Event::profile_used_on_other_device(other_device))
-    }
-}
-
-impl HasSampleValues for EventNotification {
-    fn sample() -> Self {
-        Self {
-            id: Uuid::sample(),
-            event: Event::sample(),
-            timestamp: Timestamp::sample(),
-        }
-    }
-
-    fn sample_other() -> Self {
-        Self {
-            id: Uuid::sample_other(),
-            event: Event::sample_other(),
-            timestamp: Timestamp::sample_other(),
+            id: value.id.into(),
+            event: value.event.into(),
+            timestamp: value.timestamp.into(),
         }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = EventNotification;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+impl Into<InternalEventNotification> for EventNotification {
+    fn into(self) -> InternalEventNotification {
+        InternalEventNotification {
+            id: self.id.into(),
+            event: self.event.into(),
+            timestamp: self.timestamp.into(),
+        }
     }
 }

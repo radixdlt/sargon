@@ -27,13 +27,14 @@ use sargon::Decimal192 as InternalDecimal192;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
+    
     uniffi::Record,
 )]
-#[display("{}", self.native())]
 pub struct Decimal192 {
     value: String,
 }
+
+pub type Decimal = Decimal192;
 
 impl Decimal192 {
     fn into_internal(self) -> InternalDecimal192 {
@@ -61,7 +62,7 @@ impl Into<InternalDecimal192> for Decimal192 {
 /// if the `string` was not a valid Decimal192.
 #[uniffi::export]
 pub fn new_decimal_from_string(string: String) -> Result<Decimal192> {
-    map_result_from_internal(string.parse::<InternalDecimal192>())
+    string.parse::<InternalDecimal192>().map_result()
 }
 
 /// Tries to creates a new `Decimal192` from a formatted String for
@@ -71,7 +72,7 @@ pub fn new_decimal_from_formatted_string(
     formatted_string: String,
     locale: LocaleConfig,
 ) -> Result<Decimal192> {
-    map_result_from_internal(InternalDecimal192::new_with_formatted_string(formatted_string, locale.into()))
+    InternalDecimal192::new_with_formatted_string(formatted_string, locale.into()).map_result()
 }
 
 /// The standard transaction fee
@@ -155,7 +156,7 @@ pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f64(value: f64) -> Result<Decimal192> {
-    map_result_from_internal(value.try_into::<InternalDecimal192>())
+    value.try_into::<InternalDecimal192>().map_result()
 }
 
 /// The minimum possible value of `Decimal192`, being:

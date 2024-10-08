@@ -60,7 +60,7 @@ impl Into<InternalP2PLink> for P2PLink {
 json_data_convertible!(P2PLink);
 
 #[uniffi::export]
-pub fn p2p_link_id(link: &P2PLink) -> <InternalP2PLink as Identifiable>::ID {
+pub fn p2p_link_id(link: &P2PLink) -> <InternalP2PLink as sargon::Identifiable>::ID {
     link.into_internal().id()
 }
 

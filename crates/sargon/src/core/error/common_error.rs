@@ -347,9 +347,9 @@ pub enum CommonError {
     } = 10093,
 
     #[error(
-        "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
+        "Failed to decode bytes into Transaction Manifest Instructions"
     )]
-    FailedToUniFFIDecodeBytesToManifestInstructions = 10094,
+    FailedToDecodeBytesToManifestInstructions = 10094,
 
     #[error("Failed to decode Transaction Hash, value: {bad_value}")]
     FailedToDecodeTransactionHash { bad_value: String } = 10095,

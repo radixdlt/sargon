@@ -8,10 +8,10 @@ use crate::prelude::*;
     Eq,
     Hash,
     EnumAsInner,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
+    
+    
     uniffi::Enum,
 )]
 pub enum Signature {

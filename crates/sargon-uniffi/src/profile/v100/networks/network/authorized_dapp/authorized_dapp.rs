@@ -34,6 +34,8 @@ pub struct AuthorizedDapp {
     pub preferences: AuthorizedDappPreferences,
 }
 
+pub type DappDefinitionAddress = AccountAddress;
+
 impl From<InternalAuthorizedDapp> for AuthorizedDapp {
     fn from(value: InternalAuthorizedDapp) -> Self {
         Self {

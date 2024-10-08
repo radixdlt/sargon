@@ -19,15 +19,9 @@ pub enum ResourceIdentifier {
 impl From<InternalResourceIdentifier> for ResourceIdentifier {
     fn from(value: InternalResourceIdentifier) -> Self {
         match value {
-            InternalResourceIdentifier::Fungible { value } => ResourceIdentifier::Fungible {
-                value: value.into(),
-            },
-            InternalResourceIdentifier::NonFungible { value } => ResourceIdentifier::NonFungible {
-                value: value.into(),
-            },
-            InternalResourceIdentifier::PoolUnit { value } => ResourceIdentifier::PoolUnit {
-                value: value.into(),
-            },
+            InternalResourceIdentifier::Fungible(value) => ResourceIdentifier::Fungible(value.into()),
+            InternalResourceIdentifier::NonFungible(value) => ResourceIdentifier::NonFungible(value.into()),
+            InternalResourceIdentifier::PoolUnit(value) => ResourceIdentifier::PoolUnit(value.into()),
         }
     }
 }
@@ -35,15 +29,9 @@ impl From<InternalResourceIdentifier> for ResourceIdentifier {
 impl Into<InternalResourceIdentifier> for ResourceIdentifier {
     fn into(self) -> InternalResourceIdentifier {
         match self {
-            ResourceIdentifier::Fungible { value } => InternalResourceIdentifier::Fungible {
-                value: value.into(),
-            },
-            ResourceIdentifier::NonFungible { value } => InternalResourceIdentifier::NonFungible {
-                value: value.into(),
-            },
-            ResourceIdentifier::PoolUnit { value } => InternalResourceIdentifier::PoolUnit {
-                value: value.into(),
-            },
+            ResourceIdentifier::Fungible(value) => InternalResourceIdentifier::Fungible(value.into()),
+            ResourceIdentifier::NonFungible(value) => InternalResourceIdentifier::NonFungible(value.into()),
+            ResourceIdentifier::PoolUnit(value) => InternalResourceIdentifier::PoolUnit(value.into()),
         }
     }
 }

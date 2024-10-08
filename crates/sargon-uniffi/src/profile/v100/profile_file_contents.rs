@@ -30,7 +30,7 @@ pub enum ProfileFileContents {
 impl From<InternalProfileFileContents> for ProfileFileContents {
     fn from(value: InternalProfileFileContents) -> Self {
         match value {
-            InternalProfileFileContents::PlaintextProfile { value } => {
+            InternalProfileFileContents::PlaintextProfile(value) => {
                 ProfileFileContents::PlaintextProfile(value.into())
             }
             InternalProfileFileContents::EncryptedProfile => ProfileFileContents::EncryptedProfile,
@@ -42,8 +42,8 @@ impl From<InternalProfileFileContents> for ProfileFileContents {
 impl Into<InternalProfileFileContents> for ProfileFileContents {
     fn into(self) -> InternalProfileFileContents {
         match self {
-            ProfileFileContents::PlaintextProfile { value } => {
-                InternalProfileFileContents::PlaintextProfile { value: value.into() }
+            ProfileFileContents::PlaintextProfile(value) => {
+                InternalProfileFileContents::PlaintextProfile(value.into())
             }
             ProfileFileContents::EncryptedProfile => InternalProfileFileContents::EncryptedProfile,
             ProfileFileContents::NotProfile => InternalProfileFileContents::NotProfile,

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::sync::{RwLock, RwLockWriteGuard};
 
 use sargon::HomeCardsManager as InternalHomeCardsManager;
 
@@ -7,7 +6,7 @@ use sargon::HomeCardsManager as InternalHomeCardsManager;
 /// Call `bootstrap` before invoking any other public functions.
 #[derive(uniffi::Object)]
 pub struct HomeCardsManager {
-    pub wrapped: Arc<dyn InternalHomeCardsManager>,
+    pub wrapped: Arc<InternalHomeCardsManager>,
 }
 
 #[uniffi::export]

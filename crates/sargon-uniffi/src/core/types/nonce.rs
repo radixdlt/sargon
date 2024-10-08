@@ -7,8 +7,8 @@ use sargon::Nonce as InternalNonce;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
     uniffi::Record,
 )]
 pub struct Nonce {

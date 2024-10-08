@@ -7,10 +7,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
 pub struct Secp256k1Signature {

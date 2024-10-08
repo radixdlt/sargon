@@ -1,17 +1,14 @@
 use crate::prelude::*;
+use sargon::ArculusCardHint as InternalArculusCardHint;
 
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Debug,
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{name} {model}")]
 pub struct ArculusCardHint {
     /// E.g. "Black" or "Silver"
     pub name: String,
@@ -19,7 +16,25 @@ pub struct ArculusCardHint {
     pub model: ArculusCardModel,
 }
 
+impl From<InternalArculusCardHint> for ArculusCardHint {
+    fn from(value: InternalArculusCardHint) -> Self {
+        Self {
+            name: value.name,
+            model: value.model.into(),
+        }
+    }
+}
+
+impl Into<InternalArculusCardHint> for ArculusCardHint {
+    fn into(self) -> InternalArculusCardHint {
+        InternalArculusCardHint {
+            name: self.name,
+            model: self.model.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn arculus_card_model_to_string(model: ArculusCardModel) -> String {
-    model.to_string()
+    model.into_internal().to_string()
 }

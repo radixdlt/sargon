@@ -9,14 +9,6 @@ decl_security_structure_of!(
     FactorSource,
 );
 
-impl Identifiable for SecurityStructureOfFactorSources {
-    type ID = <SecurityStructureMetadata as Identifiable>::ID;
-
-    fn id(&self) -> Self::ID {
-        self.metadata.id()
-    }
-}
-
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample(
 ) -> SecurityStructureOfFactorSources {

@@ -7,7 +7,7 @@ use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
+    
     derive_more::FromStr,
     uniffi::Record,
 )]

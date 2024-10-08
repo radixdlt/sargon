@@ -7,8 +7,8 @@ use sargon::Gateway as InternalGateway;
     Clone,
     PartialEq,
     Eq,
-    Ord,
-    PartialOrd,
+    
+    
     Hash,
     uniffi::Record,
 )]

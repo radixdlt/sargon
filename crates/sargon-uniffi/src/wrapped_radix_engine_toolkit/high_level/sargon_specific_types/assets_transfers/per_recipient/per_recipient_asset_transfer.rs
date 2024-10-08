@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PerRecipientAssetTransfer as InternalPerRecipientAssetTransfer;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PerRecipientAssetTransfer {
@@ -7,74 +8,27 @@ pub struct PerRecipientAssetTransfer {
     pub non_fungibles: Vec<PerRecipientNonFungiblesTransfer>,
 }
 
-impl PerRecipientAssetTransfer {
-    pub fn new(
-        recipient: impl Into<AccountOrAddressOf>,
-        fungibles: impl IntoIterator<Item = PerRecipientFungibleTransfer>,
-        non_fungibles: impl IntoIterator<Item = PerRecipientNonFungiblesTransfer>,
-    ) -> Self {
+impl From<InternalPerRecipientAssetTransfer> for PerRecipientAssetTransfer {
+    fn from(per_recipient_asset_transfer: InternalPerRecipientAssetTransfer) -> Self {
         Self {
-            recipient: recipient.into(),
-            fungibles: fungibles.into_iter().collect_vec(),
-            non_fungibles: non_fungibles.into_iter().collect_vec(),
+            recipient: per_recipient_asset_transfer.recipient.into(),
+            fungibles: per_recipient_asset_transfer
+                .fungibles
+                .into_vec(),
+            non_fungibles: per_recipient_asset_transfer
+                .non_fungibles
+                .into_vec(),
         }
     }
 }
 
-#[allow(unused)]
-impl PerRecipientAssetTransfer {
-    pub(crate) fn sample_mainnet() -> Self {
-        Self::new(
-            AccountOrAddressOf::sample_mainnet(),
-            [
-                PerRecipientFungibleTransfer::sample_mainnet(),
-                PerRecipientFungibleTransfer::sample_mainnet_other(),
-            ],
-            [
-                PerRecipientNonFungiblesTransfer::sample_mainnet(),
-                PerRecipientNonFungiblesTransfer::sample_mainnet_other(),
-            ],
-        )
-    }
-
-    pub(crate) fn sample_mainnet_other() -> Self {
-        Self::new(
-            AccountOrAddressOf::sample_mainnet_other(),
-            [PerRecipientFungibleTransfer::sample_mainnet_other()],
-            [PerRecipientNonFungiblesTransfer::sample_mainnet_other()],
-        )
-    }
-
-    pub(crate) fn sample_stokenet() -> Self {
-        Self::new(
-            AccountOrAddressOf::sample_stokenet(),
-            [
-                PerRecipientFungibleTransfer::sample_stokenet(),
-                PerRecipientFungibleTransfer::sample_stokenet_other(),
-            ],
-            [
-                PerRecipientNonFungiblesTransfer::sample_stokenet(),
-                PerRecipientNonFungiblesTransfer::sample_stokenet_other(),
-            ],
-        )
-    }
-
-    pub(crate) fn sample_stokenet_other() -> Self {
-        Self::new(
-            AccountOrAddressOf::sample_stokenet_other(),
-            [PerRecipientFungibleTransfer::sample_stokenet_other()],
-            [PerRecipientNonFungiblesTransfer::sample_stokenet_other()],
-        )
-    }
-}
-
-impl HasSampleValues for PerRecipientAssetTransfer {
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
-
-    fn sample_other() -> Self {
-        Self::sample_stokenet_other()
+impl Into<InternalPerRecipientAssetTransfer> for PerRecipientAssetTransfer {
+    fn into(self) -> InternalPerRecipientAssetTransfer {
+        InternalPerRecipientAssetTransfer {
+            recipient: self.recipient.into(),
+            fungibles: self.fungibles.into_internal_vec(),
+            non_fungibles: self.non_fungibles.into_internal_vec(),
+        }
     }
 }
 

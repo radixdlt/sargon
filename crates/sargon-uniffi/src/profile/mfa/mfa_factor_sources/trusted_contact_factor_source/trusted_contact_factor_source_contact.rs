@@ -7,10 +7,9 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
+    
     uniffi::Record,
 )]
-#[display("{name} {email_address}")]
 pub struct TrustedContactFactorSourceContact {
     /// The email address of the contact that the user trusts
     pub email_address: EmailAddress,

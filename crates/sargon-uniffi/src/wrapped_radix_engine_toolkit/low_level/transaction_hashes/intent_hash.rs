@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::IntentHash as InternalIntentHash;
 
 decl_tx_hash!(
     /// `IntentHash` used to identify transactions.
@@ -12,12 +11,12 @@ decl_tx_hash!(
 
 #[uniffi::export]
 pub fn new_intent_hash_sample() -> IntentHash {
-    InternalIntentHash::sample().into()
+    InternalTxHash::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_intent_hash_sample_other() -> IntentHash {
-    InternalIntentHash::sample_other().into()
+    InternalTxHash::sample_other().into()
 }
 
 #[cfg(test)]

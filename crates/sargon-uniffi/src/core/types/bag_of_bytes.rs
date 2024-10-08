@@ -9,14 +9,11 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
 #[derive(
-    Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
     Clone,
     PartialEq,
     Eq,
     Default,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
 )]
 pub struct BagOfBytes {
     /// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
@@ -40,14 +37,17 @@ pub struct BagOfBytes {
     pub bytes: Vec<i8>,
 }
 
+impl From<Vec<u8>> for BagOfBytes {
+    fn from(value: Vec<u8>) -> Self {
+        Self {
+            bytes: value.into_iter().map(twos_complement_of_u8).collect(),
+        }
+    }
+}
+
 impl From<InternalBagOfBytes> for BagOfBytes {
     fn from(value: InternalBagOfBytes) -> Self {
-        Self {
-         bytes: value.to_vec()
-         .into_iter()
-         .map(twos_complement_of_u8)
-         .collect_vec()
-        }
+        value.to_vec().into()
     }
 }
 

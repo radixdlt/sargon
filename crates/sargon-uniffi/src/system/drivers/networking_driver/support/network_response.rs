@@ -18,40 +18,11 @@ impl Into<InternalNetworkResponse> for NetworkResponse {
     }
 }
 
-impl NetworkResponse {
-    pub fn new(status_code: u16, body: impl Into<BagOfBytes>) -> Self {
+impl From<InternalNetworkResponse> for NetworkResponse {
+    fn from(value: InternalNetworkResponse) -> Self {
         Self {
-            status_code,
-            body: body.into(),
+            status_code: value.status_code,
+            body: value.body.into(),
         }
-    }
-}
-
-impl HasSampleValues for NetworkResponse {
-    fn sample() -> Self {
-        Self::new(200, BagOfBytes::sample())
-    }
-
-    fn sample_other() -> Self {
-        Self::new(404, BagOfBytes::sample())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NetworkResponse;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

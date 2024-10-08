@@ -1,44 +1,5 @@
 use crate::prelude::*;
 
-macro_rules! decl_role_with_factors_additional_impl {
-    (
-        $role: ident,
-        FactorInstance
-    ) => {
-        paste! {
-            impl From<[< $role RoleWithFactorInstance s >]> for ScryptoAccessRule {
-                fn from(value: [< $role RoleWithFactorInstance s >]) -> Self {
-                    ScryptoAccessRule::Protected(ScryptoAccessRuleNode::AnyOf(vec![
-                        ScryptoAccessRuleNode::ProofRule(ScryptoProofRule::CountOf(
-                            value.threshold,
-                            value
-                                .threshold_factors
-                                .into_iter()
-                                .map(|instance| instance.badge)
-                                .map(ScryptoResourceOrNonFungible::from)
-                                .collect(),
-                        )),
-                        ScryptoAccessRuleNode::ProofRule(ScryptoProofRule::AnyOf(
-                            value
-                                .override_factors
-                                .into_iter()
-                                .map(|instance| instance.badge)
-                                .map(ScryptoResourceOrNonFungible::from)
-                                .collect(),
-                        )),
-                    ]))
-                }
-            }
-        }
-    };
-    (
-        $role: ident,
-        $factor: ident
-    ) => {}
-}
-
-pub(crate) use decl_role_with_factors_additional_impl;
-
 macro_rules! decl_role_with_factors {
     (
         $(
@@ -48,13 +9,14 @@ macro_rules! decl_role_with_factors {
         $factor: ident
     ) => {
         paste! {
+            use sargon::[< $role RoleWith $factor s >] as [< Internal $role RoleWith $factor s >];
+
             $(
                 #[doc = $expr]
             )*
             #[derive(
-                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+                Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
             )]
-            #[serde(rename_all = "camelCase")]
             pub struct [< $role RoleWith $factor s >] {
 
                 /// Factors which are used in combination with other instances, amounting to at
@@ -78,29 +40,25 @@ macro_rules! decl_role_with_factors {
                 pub override_factors: Vec<$factor>,
             }
 
-            impl [< $role RoleWith $factor s >] {
-                pub fn new(
-                    threshold_factors: impl IntoIterator<Item = $factor>,
-                    threshold: u8,
-                    override_factors: impl IntoIterator<Item = $factor>
-                ) -> Self {
-                    let _self = Self {
-                        threshold_factors: threshold_factors.into_iter().collect(),
-                        threshold,
-                        override_factors: override_factors.into_iter().collect(),
-                    };
-                    assert!(_self.threshold_factors.len() >= _self.threshold as usize);
-                    _self
-                }
-
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    let mut factors = HashSet::from_iter(self.threshold_factors.iter());
-                    factors.extend(self.override_factors.iter());
-                    factors
+            impl From<[< Internal $role RoleWith $factor s >]> for [< $role RoleWith $factor s >] {
+                fn from(value: [< Internal $role RoleWith $factor s >]) -> Self {
+                    Self {
+                        threshold_factors: value.threshold_factors.into_vec(),
+                        threshold: value.threshold,
+                        override_factors: value.override_factors.into_vec(),
+                    }
                 }
             }
 
-            decl_role_with_factors_additional_impl!($role, $factor);
+            impl Into<[< Internal $role RoleWith $factor s >]> for [< $role RoleWith $factor s >] {
+                fn into(self) -> [< Internal $role RoleWith $factor s >] {
+                    [< Internal $role RoleWith $factor s >] {
+                        threshold_factors: self.threshold_factors.into_internal_vec(),
+                        threshold: self.threshold,
+                        override_factors: self.override_factors.into_internal_vec(),
+                    }
+                }
+            }
         }
     };
 }
@@ -115,6 +73,7 @@ macro_rules! decl_matrix_of_factors {
         $factor: ident
     ) => {
         paste! {
+            use sargon::[< MatrixOf $factor s >] as [< InternalMatrixOf $factor s >];
 
             decl_role_with_factors!(
                 /// PrimaryRole is used for Signing Transactions.
@@ -138,9 +97,8 @@ macro_rules! decl_matrix_of_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+                Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
             )]
-            #[serde(rename_all = "camelCase")]
             pub struct [< MatrixOf $factor s >] {
                 /// Used for Signing transactions
                 pub primary_role: [< PrimaryRoleWith $factor s >],
@@ -153,25 +111,23 @@ macro_rules! decl_matrix_of_factors {
                 pub confirmation_role: [< ConfirmationRoleWith $factor s >],
             }
 
-            impl [< MatrixOf $factor s >] {
-                pub fn new(
-                    primary_role: [< PrimaryRoleWith $factor s >],
-                    recovery_role: [< RecoveryRoleWith $factor s >],
-                    confirmation_role: [< ConfirmationRoleWith $factor s >],
-                ) -> Self {
+            impl From<[< InternalMatrixOf $factor s >]> for [< MatrixOf $factor s >] {
+                fn from(value: [< InternalMatrixOf $factor s >]) -> Self {
                     Self {
-                        primary_role,
-                        recovery_role,
-                        confirmation_role,
+                        primary_role: value.primary_role.into(),
+                        recovery_role: value.recovery_role.into(),
+                        confirmation_role: value.confirmation_role.into(),
                     }
                 }
+            }
 
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    let mut factors = HashSet::new();
-                    factors.extend(self.primary_role.all_factors());
-                    factors.extend(self.recovery_role.all_factors());
-                    factors.extend(self.confirmation_role.all_factors());
-                    factors
+            impl Into<[< InternalMatrixOf $factor s >]> for [< MatrixOf $factor s >] {
+                fn into(self) -> [< InternalMatrixOf $factor s >] {
+                    [< InternalMatrixOf $factor s >] {
+                        primary_role: self.primary_role.into(),
+                        recovery_role: self.recovery_role.into(),
+                        confirmation_role: self.confirmation_role.into(),
+                    }
                 }
             }
         }
@@ -191,14 +147,14 @@ macro_rules! decl_security_structure_of {
         decl_matrix_of_factors!($factor);
 
         paste! {
+            use sargon::[< SecurityStructureOf $factor s >] as InternalSecurityStructureOfFactors;
 
             $(
                 #[doc = $expr]
             )*
             #[derive(
-                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+                Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
             )]
-            #[serde(rename_all = "camelCase")]
             pub struct [< SecurityStructureOf $factor s >] {
                 /// Metadata of this Security Structure, such as globally unique and
                 /// stable identifier, creation date and user chosen label (name).
@@ -214,17 +170,23 @@ macro_rules! decl_security_structure_of {
                 pub matrix_of_factors: [< MatrixOf $factor s >],
             }
 
-            impl [< SecurityStructureOf $factor s >] {
-                pub fn new(metadata: SecurityStructureMetadata, number_of_epochs_until_auto_confirmation: u64, matrix_of_factors: [< MatrixOf $factor s >]) -> Self {
+            impl From<InternalSecurityStructureOfFactors> for [< SecurityStructureOf $factor s >] {
+                fn from(value: InternalSecurityStructureOfFactors) -> Self {
                     Self {
-                        metadata,
-                        number_of_epochs_until_auto_confirmation,
-                        matrix_of_factors
+                        metadata: value.metadata.into(),
+                        number_of_epochs_until_auto_confirmation: value.number_of_epochs_until_auto_confirmation,
+                        matrix_of_factors: value.matrix_of_factors.into(),
                     }
                 }
+            }
 
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    self.matrix_of_factors.all_factors()
+            impl Into<InternalSecurityStructureOfFactors> for [< SecurityStructureOf $factor s >] {
+                fn into(self) -> InternalSecurityStructureOfFactors {
+                    InternalSecurityStructureOfFactors {
+                        metadata: self.metadata.into(),
+                        number_of_epochs_until_auto_confirmation: self.number_of_epochs_until_auto_confirmation,
+                        matrix_of_factors: self.matrix_of_factors.into(),
+                    }
                 }
             }
         }

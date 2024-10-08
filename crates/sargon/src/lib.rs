@@ -24,7 +24,7 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
-    pub(crate) use radix_rust::prelude::{
+    pub use radix_rust::prelude::{
         BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
     };
 

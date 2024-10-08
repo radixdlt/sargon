@@ -3,7 +3,7 @@ use std::{borrow::Borrow, sync::RwLock};
 use sargon::ProfileState as InternalProfileState;
 
 #[derive(
-    Debug, Clone, PartialEq, EnumAsInner, derive_more::Display, uniffi::Enum,
+    Debug, Clone, PartialEq, EnumAsInner,  uniffi::Enum,
 )]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {
@@ -16,7 +16,6 @@ pub enum ProfileState {
 
     /// When a valid 'Profile' exists. This can either happen when the os boots, or a profile is
     /// restored, or the user creates a new profile.
-    #[display("Loaded: {}", _0.id())]
     Loaded(Profile),
 }
 

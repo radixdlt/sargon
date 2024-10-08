@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use sargon::PublicKey as InternalPublicKey;
+use sargon::BagOfBytes as InternalBagOfBytes;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
@@ -8,10 +9,8 @@ use sargon::PublicKey as InternalPublicKey;
     Debug,
     Copy,
     PartialEq,
-    EnumAsInner,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Enum,
 )]
 pub enum PublicKey {
@@ -43,7 +42,7 @@ impl Into<InternalPublicKey> for PublicKey {
 /// Tries to create a PublicKey from the hex string
 #[uniffi::export]
 pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
-    InternalPublicKey::from_str(&hex)
+    InternalPublicKey::from_str(&hex).map_result()
 }
 
 /// Tries to create a PublicKey from the bytes
@@ -51,17 +50,17 @@ pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
 pub fn new_public_key_from_bytes(
     bag_of_bytes: BagOfBytes,
 ) -> Result<PublicKey> {
-    InternalPublicKey::try_from(bag_of_bytes.into())
+    InternalPublicKey::try_from(bag_of_bytes.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn public_key_to_hex(public_key: &PublicKey) -> String {
-    public_key.into::<InternalPublicKey>().to_hex()
+    public_key.into_internal().to_hex()
 }
 
 #[uniffi::export]
 pub fn public_key_to_bytes(public_key: &PublicKey) -> BagOfBytes {
-    InternalBagOfBytes::from(public_key.into::<InternalPublicKey>().to_bytes()).into()
+    public_key.into_internal().to_bytes().into()
 }
 
 #[uniffi::export]
@@ -81,7 +80,7 @@ pub fn public_key_is_valid_signature_for_hash(
     signature: Signature,
     hash: Hash,
 ) -> bool {
-    public_key.into::<InternalPublicKey>().is_valid_signature_for_hash(signature.into(), &hash.into())
+    public_key.into_internal().is_valid_signature_for_hash(signature.into(), &hash.into())
 }
 
 #[cfg(test)]

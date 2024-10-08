@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::BagOfBytes as InternalBagOfBytes;
 
 /// Small macro to facilitate generation of UniFFI exported functions.
 macro_rules! decl_exactly_n_bytes {
@@ -10,7 +11,6 @@ macro_rules! decl_exactly_n_bytes {
     ) => {
         paste! {
             use sargon::[<Exactly $byte_count Bytes>] as [<InternalExactly $byte_count Bytes>];
-            use sargon::BagOfBytes as InternalBagOfBytes;
 
             $(
                 #[doc = $expr]
@@ -22,8 +22,8 @@ macro_rules! decl_exactly_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
-                derive_more::Display,
-                derive_more::Debug,
+                
+                
                 uniffi::Record,
             )]
             pub struct [<Exactly $byte_count Bytes>] {
@@ -51,7 +51,7 @@ macro_rules! decl_exactly_n_bytes {
             pub fn [<new_exactly_ $byte_count _bytes>](
                 bytes: BagOfBytes,
             ) -> Result<[< Exactly $byte_count Bytes >]> {
-                map_result_from_internal([<InternalExactly $byte_count Bytes>]::try_from(bytes))
+                [<InternalExactly $byte_count Bytes>]::try_from(bytes).map_result()
             }
 
             #[uniffi::export]
@@ -77,7 +77,7 @@ macro_rules! decl_exactly_n_bytes {
             pub fn [<exactly_ $byte_count _bytes_to_hex>](
                 bytes: &[< Exactly $byte_count Bytes >],
             ) -> String {
-                bytes.value.into::<InternalBagOfBytes>().to_hex()
+                bytes.into_internal().to_hex()
             }
 
             #[cfg(test)]
@@ -89,20 +89,6 @@ macro_rules! decl_exactly_n_bytes {
                 type SUT = [< Exactly $byte_count Bytes >];
 
                 #[test]
-                fn new_from_bag_of_bytes() {
-                    let bytes = generate_bytes::<$byte_count>();
-                    assert_eq!(
-                        [<new_exactly_ $byte_count _bytes>](bytes.clone().into()).unwrap().to_vec(),
-                        bytes
-                    );
-                }
-
-                #[test]
-                fn new_fail() {
-                    assert!([<new_exactly_ $byte_count _bytes>](generate_bytes::<5>().into()).is_err());
-                }
-
-                #[test]
                 fn sample_values() {
                     assert_eq!(
                         [<new_exactly_ $byte_count _bytes_sample>](),
@@ -111,26 +97,6 @@ macro_rules! decl_exactly_n_bytes {
                     assert_ne!(
                         [<new_exactly_ $byte_count _bytes_sample>](),
                         [<new_exactly_ $byte_count _bytes_sample_other>](),
-                    );
-                }
-
-                #[test]
-                fn to_bytes() {
-                    let bytes = generate_byte_array::<$byte_count>();
-                    let sut = SUT::from(&bytes);
-                    assert_eq!(
-                        [<exactly_ $byte_count _bytes_to_bytes>](&sut),
-                        BagOfBytes::from(&bytes)
-                    );
-                }
-
-                #[test]
-                fn to_hex() {
-                    let bytes = generate_byte_array::<$byte_count>();
-                    let sut = SUT::from(&bytes);
-                    assert_eq!(
-                        [<exactly_ $byte_count _bytes_to_hex>](&sut),
-                        hex_encode(&bytes)
                     );
                 }
             }

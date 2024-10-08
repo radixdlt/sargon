@@ -1,20 +1,32 @@
 use crate::prelude::*;
+use sargon::SecurityStructureID as InternalSecurityStructureID;
 
 /// A stable and globally unique identifier of a `SecurityStructureOfFactorSources` the
 /// user has created. Also used in `SecurityStructureOfFactorSourceIDs` and in
 /// `SecurityStructureOfFactorInstances`.
 #[derive(
-    Serialize,
-    Deserialize,
     Debug,
     Copy,
-    derive_more::Display,
     Clone,
     PartialEq,
     Eq,
     Hash,
 )]
-#[serde(transparent)]
-pub struct SecurityStructureID(pub(crate) Uuid);
-uniffi::custom_newtype!(SecurityStructureID, Uuid);
+pub struct SecurityStructureID {
+    pub value: Uuid,
+}
+
+impl From<InternalSecurityStructureID> for SecurityStructureID {
+    fn from(value: InternalSecurityStructureID) -> Self {
+        SecurityStructureID {
+            value: value.0,
+        }
+    }
+}
+
+impl Into<InternalSecurityStructureID> for SecurityStructureID {
+    fn into(self) -> InternalSecurityStructureID {
+        InternalSecurityStructureID(self.value)
+    }
+}
 

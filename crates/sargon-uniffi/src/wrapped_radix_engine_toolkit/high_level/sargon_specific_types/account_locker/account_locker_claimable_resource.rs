@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::cmp::min;
+use sargon::AccountLockerClaimableResource as InternalAccountLockerClaimableResource;
 
 /// A claimable resource in an account locker.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
@@ -16,16 +16,58 @@ pub enum AccountLockerClaimableResource {
     },
 }
 
+impl From<InternalAccountLockerClaimableResource> for AccountLockerClaimableResource {
+    fn from(value: InternalAccountLockerClaimableResource) -> Self {
+        match value {
+            InternalAccountLockerClaimableResource::Fungible {
+                resource_address,
+                amount,
+            } => AccountLockerClaimableResource::Fungible {
+                resource_address: resource_address.into(),
+                amount: amount.into(),
+            },
+            InternalAccountLockerClaimableResource::NonFungible {
+                resource_address,
+                number_of_items,
+            } => AccountLockerClaimableResource::NonFungible {
+                resource_address: resource_address.into(),
+                number_of_items,
+            },
+        }
+    }
+}
+
+impl Into<InternalAccountLockerClaimableResource> for AccountLockerClaimableResource {
+    fn into(self) -> InternalAccountLockerClaimableResource {
+        match self {
+            AccountLockerClaimableResource::Fungible {
+                resource_address,
+                amount,
+            } => InternalAccountLockerClaimableResource::Fungible {
+                resource_address: resource_address.into(),
+                amount: amount.into(),
+            },
+            AccountLockerClaimableResource::NonFungible {
+                resource_address,
+                number_of_items,
+            } => InternalAccountLockerClaimableResource::NonFungible {
+                resource_address: resource_address.into(),
+                number_of_items,
+            },
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_account_locker_claimable_resource_sample(
 ) -> AccountLockerClaimableResource {
-    AccountLockerClaimableResource::sample()
+    InternalAccountLockerClaimableResource::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_account_locker_claimable_resource_sample_other(
 ) -> AccountLockerClaimableResource {
-    AccountLockerClaimableResource::sample_other()
+    InternalAccountLockerClaimableResource::sample_other().into()
 }
 
 #[cfg(test)]

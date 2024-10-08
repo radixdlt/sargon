@@ -1,14 +1,5 @@
 use crate::prelude::*;
-
-use aes_gcm::{
-    aead::{generic_array::sequence::Concat, Aead, AeadCore, KeyInit, OsRng},
-    Aes256Gcm, Key, Nonce,
-};
-use hkdf::Hkdf;
-use k256::sha2::Sha256;
-
-use crypto::keys::x25519::PublicKey as X25519PublicKey;
-use crypto::keys::x25519::SecretKey as X25519PrivateKey;
+use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource;
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A mnemonic "sealed" by "security questions" (personal questions).
@@ -122,11 +113,8 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
     Eq,
     Hash,
     Debug,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{id}")]
-#[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -143,16 +131,40 @@ pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     pub sealed_mnemonic: SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic,
 }
 
+impl From<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
+    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
+{
+    fn from(value: InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource) -> Self {
+        Self {
+            id: value.id.into(),
+            common: value.common.into(),
+            sealed_mnemonic: value.sealed_mnemonic.into(),
+        }
+    }
+}
+
+impl Into<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
+    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
+{
+    fn into(self) -> InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+        InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+            id: self.id.into(),
+            common: self.common.into(),
+            sealed_mnemonic: self.sealed_mnemonic.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_security_questions_factor_source_sample(
 ) -> SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-    SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample()
+    InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_security_questions_factor_source_sample_other(
 ) -> SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-    SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other()
+    InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other().into()
 }
 
 #[uniffi::export]
@@ -160,9 +172,9 @@ pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
     mnemonic: Mnemonic,
     with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
 ) -> Result<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource> {
-    SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
+    InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
         mnemonic, with,
-    )
+    ).map_result()
 }
 
 #[uniffi::export]

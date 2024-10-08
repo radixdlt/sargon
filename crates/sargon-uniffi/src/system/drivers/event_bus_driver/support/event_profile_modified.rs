@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::EventProfileModified as InternalEventProfileModified;
 
 /// The active profile has been modified (might not have been saved yet).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
@@ -25,112 +26,66 @@ pub enum EventProfileModified {
     SecurityStructureAdded { id: SecurityStructureID },
 }
 
-impl HasEventKind for EventProfileModified {
-    fn kind(&self) -> EventKind {
+impl From<InternalEventProfileModified> for EventProfileModified {
+    fn from(value: InternalEventProfileModified) -> Self {
+        match value {
+            InternalEventProfileModified::AccountAdded { address } => {
+                EventProfileModified::AccountAdded { address: address.into() }
+            }
+            InternalEventProfileModified::AccountsAdded { addresses } => {
+                EventProfileModified::AccountsAdded {
+                    addresses: addresses.into_iter().map(Into::into).collect(),
+                }
+            }
+            InternalEventProfileModified::AccountUpdated { address } => {
+                EventProfileModified::AccountUpdated { address: address.into() }
+            }
+            InternalEventProfileModified::FactorSourceAdded { id } => {
+                EventProfileModified::FactorSourceAdded { id: id.into() }
+            }
+            InternalEventProfileModified::FactorSourcesAdded { ids } => {
+                EventProfileModified::FactorSourcesAdded {
+                    ids: ids.into_iter().map(Into::into).collect(),
+                }
+            }
+            InternalEventProfileModified::FactorSourceUpdated { id } => {
+                EventProfileModified::FactorSourceUpdated { id: id.into() }
+            }
+            InternalEventProfileModified::SecurityStructureAdded { id } => {
+                EventProfileModified::SecurityStructureAdded { id: id.into() }
+            }
+        }
+    }
+}
+
+impl Into<InternalEventProfileModified> for EventProfileModified {
+    fn into(self) -> InternalEventProfileModified {
         match self {
-            Self::AccountUpdated { address: _ } => EventKind::AccountUpdated,
-            Self::AccountAdded { address: _ } => EventKind::AccountAdded,
-            Self::AccountsAdded { addresses: _ } => EventKind::AccountsAdded,
-            Self::FactorSourcesAdded { ids: _ } => {
-                EventKind::FactorSourcesAdded
+            EventProfileModified::AccountAdded { address } => {
+                InternalEventProfileModified::AccountAdded { address: address.into() }
             }
-            Self::FactorSourceAdded { id: _ } => EventKind::FactorSourceAdded,
-            Self::FactorSourceUpdated { id: _ } => {
-                EventKind::FactorSourceUpdated
+            EventProfileModified::AccountsAdded { addresses } => {
+                InternalEventProfileModified::AccountsAdded {
+                    addresses: addresses.into_iter().map(Into::into).collect(),
+                }
             }
-            Self::SecurityStructureAdded { id: _ } => {
-                EventKind::SecurityStructureAdded
+            EventProfileModified::AccountUpdated { address } => {
+                InternalEventProfileModified::AccountUpdated { address: address.into() }
+            }
+            EventProfileModified::FactorSourceAdded { id } => {
+                InternalEventProfileModified::FactorSourceAdded { id: id.into() }
+            }
+            EventProfileModified::FactorSourcesAdded { ids } => {
+                InternalEventProfileModified::FactorSourcesAdded {
+                    ids: ids.into_iter().map(Into::into).collect(),
+                }
+            }
+            EventProfileModified::FactorSourceUpdated { id } => {
+                InternalEventProfileModified::FactorSourceUpdated { id: id.into() }
+            }
+            EventProfileModified::SecurityStructureAdded { id } => {
+                InternalEventProfileModified::SecurityStructureAdded { id: id.into() }
             }
         }
-    }
-}
-
-impl HasSampleValues for EventProfileModified {
-    fn sample() -> Self {
-        Self::AccountAdded {
-            address: AccountAddress::sample(),
-        }
-    }
-
-    fn sample_other() -> Self {
-        Self::AccountsAdded {
-            addresses: vec![
-                AccountAddress::sample_mainnet_other(),
-                AccountAddress::sample_mainnet(),
-            ],
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = EventProfileModified;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_kind() {
-        let test = |s: SUT, exp: EventKind| {
-            assert_eq!(s.kind(), exp);
-        };
-        test(
-            SUT::AccountAdded {
-                address: AccountAddress::sample(),
-            },
-            EventKind::AccountAdded,
-        );
-
-        test(
-            SUT::AccountUpdated {
-                address: AccountAddress::sample(),
-            },
-            EventKind::AccountUpdated,
-        );
-        test(
-            SUT::AccountsAdded {
-                addresses: vec![AccountAddress::sample()],
-            },
-            EventKind::AccountsAdded,
-        );
-
-        test(
-            SUT::FactorSourcesAdded {
-                ids: vec![FactorSourceID::sample()],
-            },
-            EventKind::FactorSourcesAdded,
-        );
-
-        test(
-            SUT::FactorSourceAdded {
-                id: FactorSourceID::sample(),
-            },
-            EventKind::FactorSourceAdded,
-        );
-
-        test(
-            SUT::SecurityStructureAdded {
-                id: SecurityStructureID::sample(),
-            },
-            EventKind::SecurityStructureAdded,
-        );
-
-        test(
-            SUT::FactorSourceUpdated {
-                id: FactorSourceID::sample(),
-            },
-            EventKind::FactorSourceUpdated,
-        );
     }
 }

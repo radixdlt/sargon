@@ -13,7 +13,7 @@ use sargon::Exactly32Bytes as InternalExactly32Bytes;
     PartialEq,
     Copy,
     Eq,
-    derive_more::Display,
+    
     uniffi::Record,
 )]
 pub struct Hash {

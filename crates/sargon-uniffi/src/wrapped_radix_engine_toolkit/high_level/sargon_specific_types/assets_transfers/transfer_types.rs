@@ -49,25 +49,6 @@ macro_rules! decl_per_asset_transfer_of {
             /// The account or account address to send the tokens to.
             pub recipient: AccountOrAddressOf,
         );
-
-        paste! {
-            impl [< PerAsset $struct_name Transfer>] {
-
-                pub(crate) fn deposit_instruction(&self, builder: ScryptoManifestBuilder, bucket: &Bucket) -> ScryptoManifestBuilder {
-
-                    if self.use_try_deposit_or_abort {
-                        return builder.try_deposit_or_abort(
-                            self.recipient.account_address(),
-                            None,
-                            bucket,
-                        )
-                    } else {
-                        return builder
-                            .deposit(self.recipient.account_address(), bucket);
-                    }
-                }
-            }
-        }
     };
 }
 

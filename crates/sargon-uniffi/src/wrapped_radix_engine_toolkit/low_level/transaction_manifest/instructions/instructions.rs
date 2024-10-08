@@ -1,17 +1,16 @@
 use crate::prelude::*;
 use sargon::Instructions as InternalInstructions;
 
-#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
-#[display("{}", self.instructions_string())]
+#[derive(Clone, Debug, PartialEq, Eq,  uniffi::Record)]
 pub struct Instructions {
-    pub secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
+    pub secret_magic: BagOfBytes,
     pub network_id: NetworkID,
 }
 
 impl From<InternalInstructions> for Instructions {
     fn from(value: InternalInstructions) -> Self {
         Self {
-            secret_magic: value.secret_magic.into(),
+            secret_magic: value.instructions_as_bytes().into(),
             network_id: value.network_id.into(),
         }
     }
@@ -19,9 +18,6 @@ impl From<InternalInstructions> for Instructions {
 
 impl Into<InternalInstructions> for Instructions {
     fn into(self) -> InternalInstructions {
-        InternalInstructions {
-            secret_magic: self.secret_magic.into(),
-            network_id: self.network_id.into(),
-        }
+        InternalInstructions::new_from_byte_instructions(self.secret_magic.into_internal().bytes(), self.network_id.into()).unwrap()
     }
 }

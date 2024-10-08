@@ -13,11 +13,8 @@ use sargon::CAP26Path as InternalCAP26Path;
     uniffi::Enum,
 )]
 pub enum CAP26Path {
-    #[display("{value}")]
     GetID { value: GetIDPath },
-    #[display("{value}")]
     Account { value: AccountPath },
-    #[display("{value}")]
     Identity { value: IdentityPath },
 }
 

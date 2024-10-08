@@ -7,11 +7,10 @@ use sargon::AppearanceID as InternalAppearanceID;
     Debug,
     PartialEq,
     Eq,
-    derive_more::Display,
+    
     Hash,
     uniffi::Record,
 )]
-#[display("{value}")]
 pub struct AppearanceID {
     pub value: u8,
 }

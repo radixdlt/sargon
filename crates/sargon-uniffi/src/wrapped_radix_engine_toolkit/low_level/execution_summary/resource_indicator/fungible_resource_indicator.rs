@@ -40,7 +40,7 @@ pub fn new_fungible_resource_indicator_sample_other(
 pub fn fungible_resource_indicator_get_amount(
     indicator: &FungibleResourceIndicator,
 ) -> Decimal192 {
-    indicator.into::<InternalFungibleResourceIndicator>.get_amount().into()
+    indicator.into_internal().get_amount().into()
 }
 
 #[cfg(test)]

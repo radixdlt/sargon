@@ -18,13 +18,15 @@ pub struct EmailAddress {
 
 impl From<InternalEmailAddress> for EmailAddress {
     fn from(value: InternalEmailAddress) -> Self {
-        Self { email: value.0 }
+        Self { email: value.email }
     }
 }
 
 impl Into<InternalEmailAddress> for EmailAddress {
     fn into(self) -> InternalEmailAddress {
-        InternalEmailAddress(self.email)
+        InternalEmailAddress {
+            email: self.email,
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::IntentSignature as IntentSignature;
+use sargon::IntentSignature as InternalIntentSignatures;
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, Hash, uniffi::Record)]
 pub struct IntentSignatures {
@@ -9,7 +9,7 @@ pub struct IntentSignatures {
 impl From<InternalIntentSignatures> for IntentSignatures {
     fn from(value: InternalIntentSignatures) -> Self {
         Self {
-            signatures: value.signatures.into_iter().map(IntentSignature::from).collect(),
+            signatures: value.signatures.into_vec(),
         }
     }
 }
@@ -17,7 +17,7 @@ impl From<InternalIntentSignatures> for IntentSignatures {
 impl Into<InternalIntentSignatures> for IntentSignatures {
     fn into(self) -> InternalIntentSignatures {
         InternalIntentSignatures {
-            signatures: self.signatures.into_iter().map(Into::into).collect(),
+            signatures: self.signatures.into_internal_vec()
         }
     }
 }

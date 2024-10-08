@@ -54,7 +54,7 @@ pub fn new_mnemonic_generate_with_entropy(
 /// Returns new mnemonic from a string of words
 #[uniffi::export]
 pub fn new_mnemonic_from_phrase(phrase: String) -> Result<Mnemonic> {
-   map_result_from_internal(InternalMnemonic::from_phrase(&phrase))
+   InternalMnemonic::from_phrase(&phrase).map_result()
 }
 
 #[uniffi::export]
@@ -62,18 +62,18 @@ pub fn new_mnemonic_from_phrase_language(
     phrase: String,
     language: BIP39Language,
 ) -> Result<Mnemonic> {
-    map_result_from_internal(MnemInternalMnemoniconic::from(&phrase, language.into()))
+    InternalMnemonic::from(&phrase, language.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_from_words(words: Vec<BIP39Word>) -> Result<Mnemonic> {
-    map_result_from_internal(InternalMnemonic::from_words(words.into_iter().map(Into::into)))
+    InternalMnemonic::from_words(words.into_internal_vec()).map_result()
 }
 
 /// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
 #[uniffi::export]
 pub fn mnemonic_phrase(from: &Mnemonic) -> String {
-    from.into::<InternalMnemonic>().phrase()
+    from.into_internal().phrase()
 }
 
 #[uniffi::export]

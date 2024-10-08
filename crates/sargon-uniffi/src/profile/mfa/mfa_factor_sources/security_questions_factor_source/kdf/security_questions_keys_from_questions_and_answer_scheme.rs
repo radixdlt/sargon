@@ -7,10 +7,8 @@ use crate::prelude::*;
 /// to encrypt Profile part of manual file export.
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Clone, PartialEq, Eq, Hash, Debug, uniffi::Enum,
+    Clone, PartialEq, Eq, Hash, uniffi::Enum,
 )]
-#[serde(rename_all = "camelCase")]
-#[allow(non_camel_case_types)]
 pub enum SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// First iteration of KDF for SecurityQuestions

@@ -9,8 +9,8 @@ pub type HDPathValue = u32;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
     uniffi::Record,
 )]
 pub struct HDPathComponent {
@@ -19,13 +19,15 @@ pub struct HDPathComponent {
 
 impl From<InternalHDPathComponent> for HDPathComponent {
     fn from(value: InternalHDPathComponent) -> Self {
-        Self { value: value.0 }
+        Self { value: value.value }
     }
 }
 
 impl Into<InternalHDPathComponent> for HDPathComponent {
     fn into(self) -> InternalHDPathComponent {
-        InternalHDPathComponent(self.value)
+        InternalHDPathComponen {
+            value: self.value,
+        }
     }
 }
 

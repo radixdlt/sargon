@@ -9,8 +9,8 @@ use sargon::BagOfBytes as InternalBagOfBytes;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    
+    
     uniffi::Record,
 )]
 pub struct Secp256k1PublicKey {

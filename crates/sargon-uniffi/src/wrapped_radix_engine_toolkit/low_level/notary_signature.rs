@@ -8,9 +8,9 @@ use sargon::NotarySignature as InternalNotarySignature;
     Eq,
     Hash,
     PartialEq,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
+    
+    
+    
     uniffi::Record,
 )]
 pub struct NotarySignature {

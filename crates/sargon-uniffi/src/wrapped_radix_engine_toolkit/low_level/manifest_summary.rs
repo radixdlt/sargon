@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::ManifestSummary as InternalManifestSummary;
 
 /// A summary of the manifest
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
@@ -22,51 +23,54 @@ pub struct ManifestSummary {
     pub addresses_of_personas_requiring_auth: Vec<IdentityAddress>,
 }
 
-impl ManifestSummary {
-    pub fn new(
-        withdrawn_from: impl IntoIterator<Item = AccountAddress>,
-        deposited_into: impl IntoIterator<Item = AccountAddress>,
-        accounts_requiring_auth: impl IntoIterator<Item = AccountAddress>,
-        personas_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
-    ) -> Self {
+impl From<InternalManifestSummary> for ManifestSummary {
+    fn from(value: InternalManifestSummary) -> Self {
         Self {
-            addresses_of_accounts_withdrawn_from: withdrawn_from
-                .into_iter()
-                .collect(),
-            addresses_of_accounts_deposited_into: deposited_into
-                .into_iter()
-                .collect(),
-            addresses_of_accounts_requiring_auth: accounts_requiring_auth
-                .into_iter()
-                .collect(),
-            addresses_of_personas_requiring_auth: personas_requiring_auth
-                .into_iter()
-                .collect(),
+            addresses_of_accounts_withdrawn_from: value
+                .addresses_of_accounts_withdrawn_from
+                .into_vec(),
+            addresses_of_accounts_deposited_into: value.addresses_of_accounts_deposited_into.into_vec(),
+            addresses_of_accounts_requiring_auth: value.addresses_of_accounts_requiring_auth.into_vec(),
+            addresses_of_personas_requiring_auth: value.addresses_of_personas_requiring_auth.into_vec(),
         }
     }
 }
 
-impl From<(RetManifestSummary, NetworkID)> for ManifestSummary {
-    fn from(value: (RetManifestSummary, NetworkID)) -> Self {
-        let (ret, network_id) = value;
+impl Into<InternalManifestSummary> for ManifestSummary {
+    fn into(self) -> InternalManifestSummary {
+        InternalManifestSummary {
+            addresses_of_accounts_withdrawn_from: self.addresses_of_accounts_withdrawn_from.into(),
+            addresses_of_accounts_deposited_into: self.addresses_of_accounts_deposited_into.into(),
+            addresses_of_accounts_requiring_auth: self.addresses_of_accounts_requiring_auth.into(),
+            addresses_of_personas_requiring_auth: self.addresses_of_personas_requiring_auth.into(),
+        }
+    }
+}
 
-        let addresses_of_accounts_withdrawn_from =
-            to_vec_network_aware(ret.accounts_withdrawn_from, network_id);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        let addresses_of_accounts_deposited_into =
-            to_vec_network_aware(ret.accounts_deposited_into, network_id);
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ManifestSummary;
 
-        let addresses_of_accounts_requiring_auth =
-            to_vec_network_aware(ret.accounts_requiring_auth, network_id);
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
 
-        let addresses_of_personas_requiring_auth =
-            to_vec_network_aware(ret.identities_requiring_auth, network_id);
+    #[test]
+    fn into_internal() {
+        let sut = SUT::sample();
+        let internal: InternalManifestSummary = sut.clone().into();
+        assert_eq!(sut, internal.into());
+    }
 
-        Self::new(
-            addresses_of_accounts_withdrawn_from,
-            addresses_of_accounts_deposited_into,
-            addresses_of_accounts_requiring_auth,
-            addresses_of_personas_requiring_auth,
-        )
+    #[test]
+    fn from_internal() {
+        let internal = InternalManifestSummary::sample();
+        let sut: SUT = internal.clone().into();
+        assert_eq!(internal, sut.into());
     }
 }

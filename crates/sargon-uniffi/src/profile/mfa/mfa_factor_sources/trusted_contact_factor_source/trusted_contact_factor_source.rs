@@ -8,10 +8,9 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
+    
     uniffi::Record,
 )]
-#[display("{contact} {id}")]
 pub struct TrustedContactFactorSource {
     /// Unique and stable identifier of this factor source.
     pub id: FactorSourceIDFromAddress,
