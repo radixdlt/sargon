@@ -1,3 +1,6 @@
+#[allow(clippy::module_inception)]
+mod petition_for_factors;
+
 mod petition_for_factors_sub_state;
 mod petition_for_factors_state_snapshot;
 mod petition_for_factors_status;
@@ -9,4 +12,5 @@ use petition_for_factors_state::*;
 use petition_for_factors_state_snapshot::*;
 use petition_for_factors_input::*;
 
+pub(crate) use petition_for_factors::*;
 pub(crate) use petition_for_factors_status::*;
