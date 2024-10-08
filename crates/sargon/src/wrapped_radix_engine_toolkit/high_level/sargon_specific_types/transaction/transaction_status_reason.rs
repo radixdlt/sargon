@@ -33,8 +33,8 @@ impl HasSampleValues for TransactionStatusReason {
 }
 
 impl TransactionStatusReason {
-    pub fn from_raw_error(raw_error: Option<String>) -> Self {
-        match raw_error {
+    pub fn from_raw_error(raw_error: impl Into<Option<String>>) -> Self {
+        match raw_error.into() {
             Some(raw_error) => {
                 if raw_error.contains("AssertionFailed") {
                     Self::WorktopError
@@ -63,5 +63,17 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn from_error() {
+        let mut sut = SUT::from_raw_error(None);
+        assert_eq!(sut, SUT::Unknown);
+
+        sut = SUT::from_raw_error("whatever".to_string());
+        assert_eq!(sut, SUT::Unknown);
+
+        sut = SUT::from_raw_error("AssertionFailed".to_string());
+        assert_eq!(sut, SUT::WorktopError);
     }
 }

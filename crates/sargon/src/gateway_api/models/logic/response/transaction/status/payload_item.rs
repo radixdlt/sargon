@@ -11,6 +11,22 @@ impl HasSampleValues for TransactionStatusResponsePayloadItem {
 }
 
 impl TransactionStatusResponsePayloadItem {
+    pub fn sample_unknown() -> Self {
+        Self {
+            payload_status: Some(
+                TransactionStatusResponsePayloadStatus::Unknown,
+            ),
+        }
+    }
+
+    pub fn sample_commit_pending_outcome_unknown() -> Self {
+        Self {
+            payload_status: Some(
+                TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown,
+            ),
+        }
+    }
+
     pub fn sample_pending() -> Self {
         Self {
             payload_status: Some(
@@ -23,6 +39,30 @@ impl TransactionStatusResponsePayloadItem {
         Self {
             payload_status: Some(
                 TransactionStatusResponsePayloadStatus::CommittedSuccess,
+            ),
+        }
+    }
+
+    pub fn sample_committed_failure() -> Self {
+        Self {
+            payload_status: Some(
+                TransactionStatusResponsePayloadStatus::CommittedFailure,
+            ),
+        }
+    }
+
+    pub fn sample_committed_permanently_rejected() -> Self {
+        Self {
+            payload_status: Some(
+                TransactionStatusResponsePayloadStatus::PermanentlyRejected,
+            ),
+        }
+    }
+
+    pub fn sample_temporarily_rejected() -> Self {
+        Self {
+            payload_status: Some(
+                TransactionStatusResponsePayloadStatus::TemporarilyRejected,
             ),
         }
     }

@@ -47,10 +47,18 @@ impl SargonOS {
             network_id,
         );
 
-        let mut delay_duration = 1;
+        // The delay increment is set to 1 second in production, but 0 seconds in tests.
+        // This will make the tests run with 0s delay, while the production code will have a 2s delay on first call,
+        // a 3s delay on second call, 4s on third and so on.
+        #[cfg(test)]
+        const DELAY_INCREMENT: u64 = 0;
+        #[cfg(not(test))]
+        const DELAY_INCREMENT: u64 = 1;
+
+        let mut delay_duration = DELAY_INCREMENT;
         loop {
             // Increase delay by 1 second on subsequent calls
-            delay_duration += 1;
+            delay_duration += DELAY_INCREMENT;
             let sleep_duration = Duration::from_secs(delay_duration);
 
             let response = gateway_client
@@ -67,7 +75,6 @@ impl SargonOS {
                         TransactionStatusResponsePayloadStatus::Unknown |
                         TransactionStatusResponsePayloadStatus::Pending |
                         TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => {
-                            // TODO: Check if we can use any existent dependency for adding async sleeps
                             async_std::task::sleep(sleep_duration).await;
                         }
                         TransactionStatusResponsePayloadStatus::CommittedSuccess => {
@@ -93,7 +100,7 @@ impl SargonOS {
 }
 
 #[cfg(test)]
-mod tests {
+mod poll_status_tests {
     use super::*;
     use actix_rt::time::timeout;
     use std::{future::Future, time::Duration};
@@ -102,12 +109,72 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn poll_status() {
-        let mock_driver = MockNetworkingDriver::with_response( TransactionStatusResponse {
-            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_committed_success()],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        });
+    async fn poll_status_success() {
+        // This test will simulate the case where the first response is a `CommittedSuccess`
+        let result =
+            simulate_poll_status(vec![sample_committed_success()]).await;
+
+        assert_eq!(result, TransactionStatus::Success);
+    }
+
+    #[actix_rt::test]
+    async fn poll_status_empty_then_failure() {
+        // This test will simulate the case where the first response is empty (no payload status),
+        // while the second response is a `CommittedFailure`
+        let result = simulate_poll_status(vec![
+            sample_pending(),
+            sample_committed_failure(None),
+        ])
+        .await;
+
+        assert_eq!(
+            result,
+            TransactionStatus::Failed {
+                reason: TransactionStatusReason::Unknown
+            }
+        );
+    }
+
+    #[actix_rt::test]
+    async fn poll_status_unknown_then_permanently_rejected() {
+        // This test will simulate the case where the first response is `Unknown`,
+        // while the second response is a `PermanentlyRejected`
+        let result = simulate_poll_status(vec![
+            sample_unknown(),
+            sample_permanently_rejected(Some("AssertionFailed".to_owned())),
+        ])
+        .await;
+
+        assert_eq!(
+            result,
+            TransactionStatus::PermanentlyRejected {
+                reason: TransactionStatusReason::WorktopError
+            }
+        );
+    }
+
+    #[actix_rt::test]
+    async fn poll_status_commit_pending_outcome_unknown_then_temporarily_rejected(
+    ) {
+        // This test will simulate the case where the first response is `Unknown`,
+        // while the second response is a `PermanentlyRejected`
+        let result = simulate_poll_status(vec![
+            sample_commit_pending_outcome_unknown(),
+            sample_temporarily_rejected(),
+        ])
+        .await;
+
+        let current_epoch = Epoch::from(LedgerState::sample_stokenet().epoch);
+        assert_eq!(
+            result,
+            TransactionStatus::TemporarilyRejected { current_epoch }
+        );
+    }
+
+    #[actix_rt::test]
+    async fn poll_status_error() {
+        // This test will simulate the case where we fail to get a `TransactionStatusResponse` from gateway
+        let mock_driver = MockNetworkingDriver::new_always_failing();
 
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
 
@@ -117,10 +184,103 @@ mod tests {
                 .unwrap()
                 .unwrap();
 
-        let result = os
+        let res = os
             .poll_transaction_status(IntentHash::sample())
             .await
-            .unwrap();
-        assert_eq!(result, TransactionStatus::Success);
+            .expect_err("Expected an error");
+
+        assert_eq!(res, CommonError::NetworkResponseBadCode);
+    }
+
+    // Creates a `MockNetworkingDriver` that returns the given list of responses sequentially,
+    // and then call `poll_transaction_status` to get the result.
+    async fn simulate_poll_status(
+        responses: Vec<TransactionStatusResponse>,
+    ) -> TransactionStatus {
+        let mock_driver = MockNetworkingDriver::with_responses(responses);
+
+        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+
+        let os =
+            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+                .await
+                .unwrap()
+                .unwrap();
+
+        os.poll_transaction_status(IntentHash::sample())
+            .await
+            .unwrap()
+    }
+
+    // Helper functions to create sample responses
+
+    fn sample_unknown() -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![
+                TransactionStatusResponsePayloadItem::sample_unknown(),
+            ],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message: None,
+        }
+    }
+
+    fn sample_pending() -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![
+                TransactionStatusResponsePayloadItem::sample_pending(),
+            ],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message: None,
+        }
+    }
+
+    fn sample_commit_pending_outcome_unknown() -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_commit_pending_outcome_unknown()],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message: None,
+        }
+    }
+
+    fn sample_committed_success() -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![
+                TransactionStatusResponsePayloadItem::sample_committed_success(
+                ),
+            ],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message: None,
+        }
+    }
+
+    fn sample_committed_failure(
+        error_message: Option<String>,
+    ) -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![
+                TransactionStatusResponsePayloadItem::sample_committed_failure(
+                ),
+            ],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message,
+        }
+    }
+
+    fn sample_permanently_rejected(
+        error_message: Option<String>,
+    ) -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_committed_permanently_rejected()],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message,
+        }
+    }
+
+    fn sample_temporarily_rejected() -> TransactionStatusResponse {
+        TransactionStatusResponse {
+            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_temporarily_rejected()],
+            ledger_state: LedgerState::sample_stokenet(),
+            error_message: None,
+        }
     }
 }

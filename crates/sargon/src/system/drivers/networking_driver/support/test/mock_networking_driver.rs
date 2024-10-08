@@ -1,12 +1,13 @@
 #![cfg(test)]
 
 use crate::prelude::*;
+use std::sync::Mutex;
 
 /// A mocked network antenna, useful for testing.
 #[derive(Debug)]
 pub struct MockNetworkingDriver {
     hard_coded_status: u16,
-    hard_coded_body: BagOfBytes,
+    hard_coded_bodies: Mutex<Vec<BagOfBytes>>,
     spy: fn(NetworkRequest) -> (),
 }
 
@@ -19,7 +20,7 @@ impl MockNetworkingDriver {
     ) -> Self {
         Self {
             hard_coded_status: status,
-            hard_coded_body: body.into(),
+            hard_coded_bodies: Mutex::new(vec![body.into()]),
             spy,
         }
     }
@@ -39,6 +40,23 @@ impl MockNetworkingDriver {
         let body = serde_json::to_vec(&response).unwrap();
         Self::new(200, body)
     }
+
+    pub fn with_responses<T>(responses: Vec<T>) -> Self
+    where
+        T: Serialize,
+    {
+        let bodies = responses
+            .into_iter()
+            .map(|r| serde_json::to_vec(&r).unwrap())
+            .map(BagOfBytes::from)
+            .collect();
+
+        Self {
+            hard_coded_status: 200,
+            hard_coded_bodies: Mutex::new(bodies),
+            spy: |_| {},
+        }
+    }
 }
 
 #[async_trait::async_trait]
@@ -48,9 +66,14 @@ impl NetworkingDriver for MockNetworkingDriver {
         request: NetworkRequest,
     ) -> Result<NetworkResponse> {
         (self.spy)(request);
-        Ok(NetworkResponse {
-            status_code: self.hard_coded_status,
-            body: self.hard_coded_body.clone(),
-        })
+        let mut bodies = self.hard_coded_bodies.lock().unwrap();
+        if bodies.is_empty() {
+            Err(CommonError::Unknown)
+        } else {
+            Ok(NetworkResponse {
+                status_code: self.hard_coded_status,
+                body: bodies.remove(0),
+            })
+        }
     }
 }
