@@ -4,15 +4,7 @@ import com.radixdlt.sargon.LogLevel
 import com.radixdlt.sargon.LoggingDriver
 import timber.log.Timber
 
-class AndroidLoggingDriver(
-    isLoggingEnabled: Boolean
-): LoggingDriver {
-
-    init {
-        if (isLoggingEnabled) {
-            Timber.plant(Timber.DebugTree())
-        }
-    }
+class AndroidLoggingDriver: LoggingDriver {
 
     override fun log(level: LogLevel, msg: String) {
         val logger = Timber.tag("sargon")

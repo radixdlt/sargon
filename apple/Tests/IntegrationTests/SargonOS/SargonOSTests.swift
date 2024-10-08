@@ -13,7 +13,7 @@ final class SargonOSTests: OSTest {
 	}
 	
 	func test() async throws {
-		let _ = try await SUT.boot(
+		let _ = await SUT.boot(
 			bios: .init(
 				drivers: .test()
 			)

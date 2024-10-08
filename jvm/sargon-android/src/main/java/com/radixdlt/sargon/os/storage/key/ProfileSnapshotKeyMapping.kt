@@ -16,7 +16,6 @@ import kotlinx.coroutines.delay
 import java.io.IOException
 
 internal class ProfileSnapshotKeyMapping(
-    private val key: SecureStorageKey.ProfileSnapshot,
     private val encryptedStorage: DataStore<Preferences>
 ) : DatastoreKeyMapping {
 

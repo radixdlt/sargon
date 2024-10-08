@@ -23,7 +23,7 @@ class SecureStorageKeyTest {
 
         assertEquals(
             "secure_storage_key_profile_snapshot",
-            SecureStorageKey.ProfileSnapshot.identifier
+            SecureStorageKey.ProfileSnapshot(profileId = newProfileIdSample()).identifier
         )
     }
 

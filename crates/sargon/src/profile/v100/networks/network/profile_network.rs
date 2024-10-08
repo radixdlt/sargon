@@ -142,6 +142,21 @@ impl ProfileNetwork {
             ResourcePreferences::new(),
         )
     }
+
+    /// Instantiates a new `ProfileNetwork` from `network_id` and `accounts`, with all
+    /// the rest i.e. Personas, AuthorizedDapps all being empty.
+    pub fn new_with_accounts(
+        network_id: impl Into<NetworkID>,
+        accounts: impl Into<Accounts>,
+    ) -> Self {
+        Self::new(
+            network_id,
+            accounts,
+            Personas::new(),
+            AuthorizedDapps::new(),
+            ResourcePreferences::new(),
+        )
+    }
 }
 
 impl ProfileNetwork {
@@ -307,6 +322,20 @@ mod tests {
             ResourcePreferences::from_iter([
                 ResourceAppPreference::sample_non_fungible_stokenet(),
             ]),
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy, found an AuthorizedDapp on other network than mainnet"
+    )]
+    fn panic_when_network_id_mismatch_between_accounts_when_new_() {
+        SUT::new(
+            NetworkID::Mainnet,
+            Accounts::sample_mainnet(),
+            Personas::sample_mainnet(),
+            AuthorizedDapps::just(AuthorizedDapp::sample_stokenet()),
+            ResourcePreferences::default(),
         );
     }
 

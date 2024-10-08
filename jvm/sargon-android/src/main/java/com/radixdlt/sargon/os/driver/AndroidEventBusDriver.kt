@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-class AndroidEventBusDriver: EventBusDriver {
+object AndroidEventBusDriver: EventBusDriver {
 
     private val _events = MutableSharedFlow<EventNotification>()
     val events: Flow<EventNotification> = _events.asSharedFlow()

@@ -2,14 +2,40 @@ package com.radixdlt.sargon.os.storage
 
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.then
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.slot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.io.encoding.ExperimentalEncodingApi
+import android.util.Base64 as AndroidBase64
+import kotlin.io.encoding.Base64.Default.Mime as KotlinLikeAndroidBase64
 
 @OptIn(ExperimentalUnsignedTypes::class, ExperimentalStdlibApi::class)
 class EncryptionHelperWithEncryptionKeyTest {
+
+    @OptIn(ExperimentalEncodingApi::class)
+    @BeforeEach
+    fun before() {
+        val byteArrayInputSlot = slot<ByteArray>()
+        mockkStatic(AndroidBase64::class)
+        every {
+            AndroidBase64.encodeToString(capture(byteArrayInputSlot), AndroidBase64.DEFAULT)
+        } answers {
+            KotlinLikeAndroidBase64.encode(byteArrayInputSlot.captured)
+        }
+
+        val stringInputSlot = slot<String>()
+        every {
+            AndroidBase64.decode(capture(stringInputSlot), AndroidBase64.DEFAULT)
+        } answers {
+            KotlinLikeAndroidBase64.decode(stringInputSlot.captured)
+        }
+    }
 
     @Test
     fun `decrypt with AES GCM NoPadding`() {
