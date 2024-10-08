@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+/// This is the result of the transaction preview analysis.
+/// It contains all the information needed to compute and display the transaction details to the user.
+#[derive(uniffi::Record)]
 pub struct TransactionToReview {
     pub transaction_manifest: TransactionManifest,
     pub execution_summary: ExecutionSummary,

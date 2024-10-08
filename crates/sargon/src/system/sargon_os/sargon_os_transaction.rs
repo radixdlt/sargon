@@ -2,32 +2,15 @@ use std::sync::RwLockWriteGuard;
 
 use crate::prelude::*;
 
-#[uniffi::export]
 impl SargonOS {
-    pub async fn analyse_transaction_preview(
+    pub async fn perform_transaction_preview_analysis(
         &self,
         instructions: String,
         blobs: Blobs,
         message: Message,
         is_wallet_transaction: bool,
-    ) -> Result<TransactionToReview> {
-        self.perform_transaction_preview_analysis(
-            instructions,
-            blobs,
-            message,
-            is_wallet_transaction,
-        )
-        .await
-    }
-}
-
-impl SargonOS {
-    async fn perform_transaction_preview_analysis(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        message: Message,
-        is_wallet_transaction: bool,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
         let gateway_client = GatewayClient::new(
@@ -37,11 +20,6 @@ impl SargonOS {
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
 
-        // Get all transaction signers
-        let signers = self
-            .extract_transaction_signers(transaction_manifest.summary())
-            .await?;
-
         // Get the transaction preview
         let transaction_preview = self
             .get_transaction_preview(
@@ -49,7 +27,8 @@ impl SargonOS {
                 transaction_manifest.clone(),
                 network_id,
                 message,
-                signers.clone(),
+                nonce,
+                notary_public_key,
             )
             .await?;
         let engine_toolkit_receipt = transaction_preview
@@ -136,21 +115,20 @@ impl SargonOS {
         manifest: TransactionManifest,
         network_id: NetworkID,
         message: Message,
-        signer_public_keys: impl IntoIterator<Item = PublicKey>,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
     ) -> Result<TransactionPreviewResponse> {
-        let ephemeral_notary_private_key = Ed25519PrivateKey::from_bytes(
-            NonEmptyMax32Bytes::from(self.clients.entropy.bip39_entropy())
-                .bytes()
-                .as_ref(),
-        )?;//TODO
+        // Get all transaction signers
+        let signer_public_keys =
+            self.extract_transaction_signers(manifest.summary()).await?;
         let epoch = gateway_client.current_epoch().await?;
         let header = TransactionHeader::new(
             network_id,
             epoch,
             Epoch::from(epoch.0 + 10),
-            Nonce::random(), //TODO
-            ephemeral_notary_private_key.public_key(),
-            true, //TODO
+            nonce,
+            notary_public_key,
+            signer_public_keys.is_empty(),
             0,
         );
         let intent = TransactionIntent::new(header, manifest, message)?;
