@@ -82,7 +82,7 @@ fn compile_intent_with(
 }
 
 fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
-    RET_intent_compile(&scrypto_intent)
+    RET_intent_to_payload_bytes(&scrypto_intent)
         .map_err(|e| CommonError::InvalidIntentFailedToEncode {
             underlying: format!("{:?}", e),
         })
@@ -101,10 +101,12 @@ impl TryFrom<ScryptoIntent> for TransactionIntent {
             network_id,
         ))?;
         let blobs: Blobs = value.blobs.into();
-        let manifest = TransactionManifest::with_instructions_and_blobs(
-            instructions,
-            blobs,
-        );
+        let manifest =
+            TransactionManifest::with_instructions_and_blobs_and_object_names(
+                instructions,
+                blobs,
+                ManifestObjectNames::default(), // TODO: TBD
+            );
 
         Self::new(header, manifest, message)
     }
@@ -147,6 +149,7 @@ impl TransactionIntent {
                     instructions.instructions_string(),
                     network_id,
                     Blobs::default(),
+                    ManifestObjectNames::sample(), // TODO: TBD
                 )
             })
             .and_then(|manifest| {

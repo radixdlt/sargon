@@ -111,10 +111,13 @@ pub mod prelude {
             recover_secp256k1 as Scrypto_recover_secp256k1,
             FromPublicKey as ScryptoFromPublicKey,
             ManifestAddress as ScryptoManifestAddress,
+            ManifestAddressReservation as ScryptoManifestAddressReservation,
             ManifestBucket as ScryptoManifestBucket,
             ManifestCustomValue as ScryptoManifestCustomValue,
             ManifestCustomValueKind as ScryptoManifestCustomValueKind,
             ManifestEncode as ScryptoManifestEncode,
+            ManifestNamedAddress as ScryptoManifestNamedAddress,
+            ManifestProof as ScryptoManifestProof,
             ManifestValue as ScryptoManifestValue,
             NonFungibleData as ScryptoNonFungibleData,
             NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
@@ -162,26 +165,34 @@ pub mod prelude {
             ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
         manifest::{
-            compile as scrypto_compile, decompile as scrypto_decompile,
+            compile as scrypto_compile,
+            decompile as scrypto_decompile,
+            // compile_manifest as scrypto_compile_manifest,
             generator::{GeneratorError, GeneratorErrorKind},
             lexer::{LexerError, LexerErrorKind},
             token::{Position, Span},
             CompileError as ScryptoCompileError,
+            KnownManifestObjectNames as ScryptoKnownManifestObjectNames,
             ManifestObjectNames as ScryptoManifestObjectNames,
             MockBlobProvider as ScryptoMockBlobProvider,
         },
         model::{
             BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs,
+            ChildIntentsV2 as ScryptoChildIntents,
+            ChildSubintent as ScryptoChildSubintent,
             DynamicComponentAddress as ScryptoDynamicComponentAddress,
             DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
             DynamicResourceAddress as ScryptoDynamicResourceAddress,
             InstructionV1 as ScryptoInstruction,
+            InstructionV2 as ScryptoInstructionV2,
             InstructionsV1 as ScryptoInstructions,
+            InstructionsV2 as ScryptoInstructionsV2,
             IntentHash as ScryptoIntentHash,
             IntentSignatureV1 as ScryptoIntentSignature,
             IntentSignaturesV1 as ScryptoIntentSignatures,
             IntentV1 as ScryptoIntent,
             IsTransactionHashWithStaticHrp as ScryptoIsTransactionHashWithStaticHrp,
+            ManifestIntent as ScryptoManifestIntent,
             MessageContentsV1 as ScryptoMessageContents,
             MessageV1 as ScryptoMessage,
             NotarizedTransactionV1 as ScryptoNotarizedTransaction,
@@ -191,33 +202,56 @@ pub mod prelude {
             SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
             SignedIntentV1 as ScryptoSignedIntent,
             SignedTransactionIntentHash as ScryptoSignedTransactionIntentHash,
+            SubintentHash as ScryptoSubintentHash,
             TransactionHashBech32Decoder as ScryptoTransactionHashBech32Decoder,
             TransactionHashBech32Encoder as ScryptoTransactionHashBech32Encoder,
             TransactionHeaderV1 as ScryptoTransactionHeader,
             TransactionIntentHash as ScryptoTransactionIntentHash,
         },
         prelude::{
-            ManifestBuilder as ScryptoManifestBuilder,
+            ManifestV1Builder as ScryptoManifestBuilder,
+            ManifestV2Builder as ScryptoManifestV2Builder,
             TransactionManifestV1 as ScryptoTransactionManifest,
+            TransactionManifestV2 as ScryptoTransactionManifestV2,
         },
     };
 
     pub use radix_engine_toolkit::{
-        functions::transaction_v1::{
-            instructions::{
-                extract_addresses as RET_ins_extract_addresses,
-                from_payload_bytes as RET_decompile_instructions,
-                to_payload_bytes as RET_compile_instructions,
+        functions::{
+            transaction_v1::{
+                instructions::{
+                    extract_addresses as RET_ins_extract_addresses,
+                    from_payload_bytes as RET_from_payload_bytes_instructions,
+                    to_payload_bytes as RET_to_payload_bytes_instructions,
+                },
+                intent::{
+                    hash as ret_hash_intent,
+                    to_payload_bytes as RET_intent_to_payload_bytes,
+                },
+                manifest::statically_analyze as RET_statically_analyze,
+                notarized_transaction::{
+                    from_payload_bytes as RET_decompile_notarize_tx,
+                    to_payload_bytes as RET_compile_notarized_tx,
+                },
+                signed_intent::hash as RET_signed_intent_hash,
             },
-            intent::{
-                hash as ret_hash_intent, to_payload_bytes as RET_intent_compile,
+            transaction_v2::{
+                instructions::{
+                    extract_addresses as RET_ins_extract_addresses_v2,
+                    from_payload_bytes as RET_from_payload_bytes_instructions_v2,
+                    to_payload_bytes as RET_to_payload_bytes_instructions_v2,
+                },
+                intent_core::{
+                    hash as ret_hash_intent_v2,
+                    to_payload_bytes as RET_intent_to_payload_bytes_v2,
+                },
+                manifest::statically_analyze as RET_statically_analyze_v2,
+                notarized_transaction::{
+                    from_payload_bytes as RET_decompile_notarize_tx_v2,
+                    to_payload_bytes as RET_compile_notarized_tx_v2,
+                },
+                signed_transaction_intent::hash as RET_signed_intent_hash_v2,
             },
-            manifest::statically_analyze as RET_statically_analyze,
-            notarized_transaction::{
-                from_payload_bytes as RET_decompile_notarize_tx,
-                to_payload_bytes as RET_compile_notarized_tx,
-            },
-            signed_intent::hash as RET_signed_intent_hash,
         },
         models::{
             canonical_address_types::{

@@ -141,9 +141,10 @@ impl TransactionManifest {
             self.network_id(),
         )).expect("Should not have changed depth of SBOR value, thus inserting an instruction should never fail.");
 
-        TransactionManifest::with_instructions_and_blobs(
+        TransactionManifest::with_instructions_and_blobs_and_object_names(
             instructions,
             self.blobs().clone(),
+            self.object_names().clone(),
         )
     }
 }
@@ -210,6 +211,7 @@ CALL_METHOD
             instructions_string,
             NetworkID::Mainnet,
             Blobs::default(),
+            ManifestObjectNames::sample(),
         )
         .unwrap();
         manifest = manifest
@@ -266,6 +268,7 @@ CALL_METHOD
             instructions_string,
             NetworkID::Mainnet,
             Blobs::default(),
+            ManifestObjectNames::sample(),
         )
         .unwrap();
 

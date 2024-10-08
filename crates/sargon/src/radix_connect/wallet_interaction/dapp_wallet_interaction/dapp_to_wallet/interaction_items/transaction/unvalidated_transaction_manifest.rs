@@ -78,7 +78,8 @@ mod tests {
             TransactionManifest::new(
                 TransactionManifest::sample().instructions_string(),
                 NetworkID::Mainnet,
-                Blobs::default()
+                Blobs::default(),
+                ManifestObjectNames::sample()
             )
         );
     }

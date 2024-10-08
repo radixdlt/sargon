@@ -4,31 +4,31 @@ use radix_transactions::manifest::{
 };
 
 /// An internal representation of a collection of Instructions,
-/// which intentions is to allow the `struct Instructions`
+/// which intentions is to allow the `struct InstructionsV2`
 /// to have no public initializers in Swift/Kotlin land, since it
 /// can contain a field:
-/// `private let secretMagic: InstructionsSecretMagic`
+/// `private let secretMagic: InstructionsSecretMagicV2`
 /// And hide its initializers.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct InstructionsSecretMagic(pub Vec<ScryptoInstruction>);
+pub struct InstructionsSecretMagicV2(pub Vec<ScryptoInstructionV2>);
 
-impl InstructionsSecretMagic {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+impl InstructionsSecretMagicV2 {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
         &self.0
     }
-    pub(crate) fn new(instructions: Vec<ScryptoInstruction>) -> Self {
+    pub(crate) fn new(instructions: Vec<ScryptoInstructionV2>) -> Self {
         Self(instructions)
     }
 }
 
-uniffi::custom_type!(InstructionsSecretMagic, BagOfBytes);
+uniffi::custom_type!(InstructionsSecretMagicV2, BagOfBytes);
 
-impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
+impl crate::UniffiCustomTypeConverter for InstructionsSecretMagicV2 {
     type Builtin = BagOfBytes;
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         let bytes: &[u8] = val.bytes();
-        RET_from_payload_bytes_instructions(bytes)
+        RET_from_payload_bytes_instructions_v2(bytes)
             .map_err(|e| {
                 let err_msg = format!("{:?}", e);
                 error!("{}", err_msg);
@@ -39,30 +39,30 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
     }
 
     fn from_custom(obj: Self) -> Self::Builtin {
-        RET_to_payload_bytes_instructions(&obj.0)
+        RET_to_payload_bytes_instructions_v2(&obj.0)
             .map(|b| b.into())
             .expect("to never fail")
     }
 }
 
-impl From<ScryptoInstructions> for InstructionsSecretMagic {
-    fn from(value: ScryptoInstructions) -> Self {
+impl From<ScryptoInstructionsV2> for InstructionsSecretMagicV2 {
+    fn from(value: ScryptoInstructionsV2) -> Self {
         Self(value.0.to_vec())
     }
 }
 
-impl HasSampleValues for InstructionsSecretMagic {
+impl HasSampleValues for InstructionsSecretMagicV2 {
     fn sample() -> Self {
         Self(vec![
-            ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs), // sbor: 0x12
-            ScryptoInstruction::DropAuthZoneRegularProofs(
+            ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs), // sbor: 0x12
+            ScryptoInstructionV2::DropAuthZoneRegularProofs(
                 DropAuthZoneRegularProofs,
             ), // sbor: 0x13
         ])
     }
 
     fn sample_other() -> Self {
-        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs(
+        Self(vec![ScryptoInstructionV2::DropAuthZoneSignatureProofs(
             DropAuthZoneSignatureProofs,
         )]) // sbor: 0x17
     }
@@ -74,7 +74,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = InstructionsSecretMagic;
+    type SUT = InstructionsSecretMagicV2;
 
     #[test]
     fn equality() {
@@ -86,10 +86,12 @@ mod tests {
     fn from_scrypto() {
         assert_eq!(
             SUT::sample(),
-            ScryptoInstructions(
+            ScryptoInstructionsV2(
                 vec![
-                    ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
-                    ScryptoInstruction::DropAuthZoneRegularProofs(
+                    ScryptoInstructionV2::DropAuthZoneProofs(
+                        DropAuthZoneProofs
+                    ),
+                    ScryptoInstructionV2::DropAuthZoneRegularProofs(
                         DropAuthZoneRegularProofs
                     ),
                 ]
