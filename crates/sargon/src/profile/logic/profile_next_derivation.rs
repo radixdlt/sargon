@@ -86,6 +86,9 @@ impl Profile {
                             value.transaction_signing.factor_source_id
                                 == factor_source_id
                         }
+                        EntitySecurityState::Securified { value } => {
+                            panic!("TODO check that") // TODO check that
+                        }
                     })
                     .collect_vec()
                     .len()
