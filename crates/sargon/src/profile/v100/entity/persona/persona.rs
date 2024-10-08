@@ -383,6 +383,7 @@ impl Ord for Persona {
                 .derivation_path()
                 .last_component()
                 .cmp(r.transaction_signing.derivation_path().last_component()),
+            _ => Ordering::Equal // TODO check that
         }
     }
 }

@@ -100,6 +100,13 @@ impl AccountOrPersona {
     pub(crate) fn sample_stokenet_third() -> Self {
         Self::from(Account::sample_stokenet_third())
     }
+
+    pub fn entity_security_state(&self) -> EntitySecurityState {
+        match self {
+            AccountOrPersona::AccountEntity(account) => account.security_state.clone(),
+            AccountOrPersona::PersonaEntity(persona) => persona.security_state.clone()
+        }
+    }
 }
 
 #[cfg(test)]
