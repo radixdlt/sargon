@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadgeVirtualSource {
     HierarchicalDeterministic {

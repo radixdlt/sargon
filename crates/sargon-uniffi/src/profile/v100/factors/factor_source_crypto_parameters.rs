@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::FactorSourceCryptoParameters as InternalFactorSourceCryptoParameters;
 
 decl_identified_vec_of!(
     /// A collection of [`SLIP10Curve`]s that a factor source supports.
@@ -28,52 +29,69 @@ pub struct FactorSourceCryptoParameters {
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    pub supported_derivation_path_schemes:
-        IdentifiedVecOf<DerivationPathScheme>,
+    pub supported_derivation_path_schemes: Vec<DerivationPathScheme>,
+}
+
+impl From<InternalFactorSourceCryptoParameters> for FactorSourceCryptoParameters {
+    fn from(value: InternalFactorSourceCryptoParameters) -> Self {
+        Self {
+            supported_curves: value.supported_curves.into(),
+            supported_derivation_path_schemes: value.supported_derivation_path_schemes.into(),
+        }
+    }
+}
+
+impl Into<InternalFactorSourceCryptoParameters> for FactorSourceCryptoParameters {
+    fn into(self) -> InternalFactorSourceCryptoParameters {
+        InternalFactorSourceCryptoParameters {
+            supported_curves: self.supported_curves.into(),
+            supported_derivation_path_schemes: self.supported_derivation_path_schemes.into(),
+        }
+    }
 }
 
 #[uniffi::export]
 pub fn new_factor_source_crypto_parameters_sample(
 ) -> FactorSourceCryptoParameters {
-    FactorSourceCryptoParameters::sample()
+    InternalFactorSourceCryptoParameters::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_crypto_parameters_sample_other(
 ) -> FactorSourceCryptoParameters {
-    FactorSourceCryptoParameters::sample_other()
+    InternalFactorSourceCryptoParameters::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_crypto_parameters_preset_babylon_only(
 ) -> FactorSourceCryptoParameters {
-    FactorSourceCryptoParameters::babylon()
+    InternalFactorSourceCryptoParameters::babylon().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_crypto_parameters_preset_olympia_only(
 ) -> FactorSourceCryptoParameters {
-    FactorSourceCryptoParameters::olympia()
+    InternalFactorSourceCryptoParameters::olympia().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_crypto_parameters_preset_babylon_olympia_compatible(
 ) -> FactorSourceCryptoParameters {
-    FactorSourceCryptoParameters::babylon_olympia_compatible()
+    InternalFactorSourceCryptoParameters::babylon_olympia_compatible().into()
 }
 
 #[uniffi::export]
 pub fn factor_source_crypto_parameters_supports_olympia(
     parameters: &FactorSourceCryptoParameters,
 ) -> bool {
-    parameters.supports_olympia()
+    parameters.into_internal().supports_olympia()
 }
 
 #[uniffi::export]
 pub fn factor_source_crypto_parameters_supports_babylon(
     parameters: &FactorSourceCryptoParameters,
 ) -> bool {
-    parameters.supports_babylon()
+    parameters.into_internal().supports_babylon()
 }
 
 #[cfg(test)]

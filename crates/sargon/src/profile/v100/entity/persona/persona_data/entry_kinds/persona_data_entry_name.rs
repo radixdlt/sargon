@@ -89,9 +89,7 @@ impl HasSampleValues for PersonaDataEntryName {
     }
 }
 
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum PersonaDataNameVariant {
     Western,

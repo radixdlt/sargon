@@ -13,14 +13,8 @@ use sargon::P2PLink as InternalP2PLink;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Debug,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[debug(
-    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}', connection_purpose: '{connection_purpose}', public_key: '{public_key}' }}"
-)]
-#[display("{}", self.to_obfuscated_string())]
 pub struct P2PLink {
     /// The most important property of this struct, the `RadixConnectPassword`,
     /// is used to be able to re-establish the P2P connection
@@ -67,7 +61,7 @@ json_data_convertible!(P2PLink);
 
 #[uniffi::export]
 pub fn p2p_link_id(link: &P2PLink) -> <InternalP2PLink as Identifiable>::ID {
-    link.into::<InternalP2PLink>().id()
+    link.into_internal().id()
 }
 
 #[uniffi::export]

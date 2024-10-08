@@ -1,22 +1,27 @@
 use crate::prelude::*;
-
-// Generate the FfiConverter needed by UniFFI for newtype `BIP39Passphrase`.
-uniffi::custom_newtype!(BIP39Passphrase, String);
+use sargon::BIP39Passphrase as InternalBIP39Passphrase;
 
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
 #[derive(
     Zeroize,
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
-    derive_more::Display,
-    derive_more::Debug,
     Hash,
 )]
-#[serde(transparent)]
-#[display("<OBFUSCATED>")]
-#[debug("{:?}", self.partially_obfuscated_string())]
-pub struct BIP39Passphrase(pub String);
+pub struct BIP39Passphrase {
+    pub value: String
+}
+
+impl From<InternalBIP39Passphrase> for BIP39Passphrase {
+    fn from(value: InternalBIP39Passphrase) -> Self {
+        Self { value: value.0 }
+    }
+}
+
+impl Into<InternalBIP39Passphrase> for BIP39Passphrase {
+    fn into(self) -> InternalBIP39Passphrase {
+        InternalBIP39Passphrase(self.value)
+    }
+}

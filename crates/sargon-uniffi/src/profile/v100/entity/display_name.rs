@@ -28,13 +28,9 @@ use sargon::DisplayName as InternalDisplayName;
     Debug,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{value}")]
 pub struct DisplayName {
     pub value: String,
 }
@@ -59,17 +55,17 @@ json_string_convertible!(DisplayName);
 
 #[uniffi::export]
 pub fn new_display_name(name: String) -> Result<DisplayName> {
-    DisplayName::new(name.as_str())
+    InternalDisplayName::new(name.as_str()).map_result()
 }
 
 #[uniffi::export]
 pub fn new_display_name_sample() -> DisplayName {
-    DisplayName::sample()
+    InternalDisplayName::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_display_name_sample_other() -> DisplayName {
-    DisplayName::sample_other()
+    InternalDisplayName::sample_other().into()
 }
 
 #[cfg(test)]

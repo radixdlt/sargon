@@ -19,48 +19,48 @@ decl_ret_wrapped_address!(
 
 #[uniffi::export]
 pub fn resource_address_is_fungible(address: &ResourceAddress) -> bool {
-    address.is_fungible()
+    address.into_internal().is_fungible()
 }
 
 #[uniffi::export]
 pub fn resource_address_is_non_fungible(address: &ResourceAddress) -> bool {
-    address.is_non_fungible()
+    address.into_internal().is_non_fungible()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_mainnet_xrd() -> ResourceAddress {
-    ResourceAddress::sample_mainnet_xrd()
+    InternalAddress::sample_mainnet_xrd().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_mainnet_candy() -> ResourceAddress {
-    ResourceAddress::sample_mainnet_candy()
+    InternalAddress::sample_mainnet_candy().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_mainnet_nft_gc_membership() -> ResourceAddress
 {
-    ResourceAddress::sample_mainnet_nft_gc_membership()
+    InternalAddress::sample_mainnet_nft_gc_membership().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_xrd() -> ResourceAddress {
-    ResourceAddress::sample_stokenet_xrd()
+    InternalAddress::sample_stokenet_xrd().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_gum() -> ResourceAddress {
-    ResourceAddress::sample_stokenet_gum()
+    InternalAddress::sample_stokenet_gum().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_gc_tokens() -> ResourceAddress {
-    ResourceAddress::sample_stokenet_gc_tokens()
+    InternalAddress::sample_stokenet_gc_tokens().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_candy() -> ResourceAddress {
-    ResourceAddress::sample_stokenet_candy()
+    InternalAddress::sample_stokenet_candy().into()
 }
 
 #[cfg(test)]

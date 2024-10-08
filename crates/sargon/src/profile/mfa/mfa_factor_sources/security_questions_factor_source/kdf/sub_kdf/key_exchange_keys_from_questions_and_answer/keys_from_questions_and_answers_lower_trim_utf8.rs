@@ -18,9 +18,7 @@ impl From<Exactly32Bytes> for X25519PrivateKey {
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A Key Derivation Scheme which lowercases, trims and ut8f encodes answers.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;

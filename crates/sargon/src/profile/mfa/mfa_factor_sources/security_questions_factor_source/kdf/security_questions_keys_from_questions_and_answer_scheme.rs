@@ -6,9 +6,7 @@ use crate::prelude::*;
 /// N.B. Not to be confused with the much simpler password based Key Derivation used
 /// to encrypt Profile part of manual file export.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub enum SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
@@ -46,9 +44,7 @@ impl IsSecurityQuestionsKDFScheme
 /// Version1 of SecurityQuestions KDF, derives encryption keys from security
 /// questions and answers, using two "sub-KDFs".
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {

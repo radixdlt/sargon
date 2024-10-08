@@ -1,7 +1,5 @@
 pub use crate::prelude::*;
-
-// Generate the FfiConverter needed by UniFFI for newtype `Epoch`.
-uniffi::custom_newtype!(Epoch, u64);
+use sargon::Epoch as InternalEpoch;
 
 /// A type-safe consensus epoch number.
 #[derive(
@@ -10,9 +8,22 @@ uniffi::custom_newtype!(Epoch, u64);
     PartialEq,
     Eq,
     Hash,
-    Ord,
-    PartialOrd,
     derive_more::Display,
     derive_more::Debug,
+    uniffi::Record,
 )]
-pub struct Epoch(pub u64);
+pub struct Epoch {
+    pub value: u64,
+}
+
+impl From<InternalEpoch> for Epoch {
+    fn from(value: InternalEpoch) -> Self {
+        Self { value: value.0 }
+    }
+}
+
+impl Into<InternalEpoch> for Epoch {
+    fn into(self) -> InternalEpoch {
+        InternalEpoch(self.value)
+    }
+}

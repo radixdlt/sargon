@@ -26,8 +26,8 @@ impl TransactionManifest {
         blobs: Blobs,
     ) -> Self {
         Self {
-                instructions,
-                blobs,
+            instructions,
+            blobs,
         }
     }
 }
@@ -35,8 +35,8 @@ impl TransactionManifest {
 impl TransactionManifest {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-                instructions: Instructions::empty(network_id),
-                blobs: Blobs::default(),
+            instructions: Instructions::empty(network_id),
+            blobs: Blobs::default(),
         }
     }
 }
@@ -68,8 +68,8 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
             network_id,
         ))?;
         let value = Self {
-                instructions,
-               blobs: scrypto_manifest.blobs.clone().into(),
+            instructions,
+            blobs: scrypto_manifest.blobs.clone().into(),
         };
         assert_eq!(value.scrypto_manifest(), scrypto_manifest);
         Ok(value)
@@ -126,9 +126,8 @@ impl TransactionManifest {
     }
 
     pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
-        let (addresses, _) = RET_ins_extract_addresses(
-            self.instructions.as_slice(),
-        );
+        let (addresses, _) =
+            RET_ins_extract_addresses(self.instructions.as_slice());
         addresses
             .into_iter()
             .filter_map(|a| {

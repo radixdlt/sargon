@@ -18,22 +18,22 @@ decl_ret_wrapped_address!(
 
 #[uniffi::export]
 pub fn new_validator_address_sample_mainnet() -> ValidatorAddress {
-    ValidatorAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_validator_address_sample_mainnet_other() -> ValidatorAddress {
-    ValidatorAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_validator_address_sample_stokenet() -> ValidatorAddress {
-    ValidatorAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_validator_address_sample_stokenet_other() -> ValidatorAddress {
-    ValidatorAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

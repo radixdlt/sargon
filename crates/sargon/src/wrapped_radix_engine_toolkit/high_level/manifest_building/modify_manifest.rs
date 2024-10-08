@@ -568,15 +568,13 @@ CALL_METHOD
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
-            manifest.modify_add_guarantees(
-                vec![TransactionGuarantee::new(
-                    0,
-                    0,
-                    5,
-                    ResourceAddress::sample(),
-                    None
-                )]
-            ),
+            manifest.modify_add_guarantees(vec![TransactionGuarantee::new(
+                0,
+                0,
+                5,
+                ResourceAddress::sample(),
+                None
+            )]),
             Err(CommonError::TXGuaranteeIndexOutOfBounds {
                 index: 5,
                 count: 4

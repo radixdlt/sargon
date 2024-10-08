@@ -8,14 +8,8 @@ use sargon::LinkConnectionQRData as InternalLinkConnectionQRData;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[debug(
-    "LinkConnectionQRData {{ purpose: '{purpose}', password: '{password}', public_key_of_other_party: '{public_key_of_other_party}', signature: '{signature}' }}"
-)]
-#[display("{}", self.to_obfuscated_string())]
 pub struct LinkConnectionQRData {
     /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
     /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DeviceInfoDescription as InternalDeviceInfoDescription;
 
 /// A name and model of a host device.
 ///
@@ -10,10 +11,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{name} ({model})")]
 pub struct DeviceInfoDescription {
     /// Host device name, e.g. "My Precious"
     pub name: String,
@@ -22,21 +21,39 @@ pub struct DeviceInfoDescription {
     pub model: String,
 }
 
+impl From<InternalDeviceInfoDescription> for DeviceInfoDescription {
+    fn from(value: InternalDeviceInfoDescription) -> Self {
+        Self {
+            name: value.name,
+            model: value.model,
+        }
+    }
+}
+
+impl Into<InternalDeviceInfoDescription> for DeviceInfoDescription {
+    fn into(self) -> InternalDeviceInfoDescription {
+        InternalDeviceInfoDescription {
+            name: self.name,
+            model: self.model,
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_device_info_description_sample() -> DeviceInfoDescription {
-    DeviceInfoDescription::sample()
+    InternalDeviceInfoDescription::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_device_info_description_sample_other() -> DeviceInfoDescription {
-    DeviceInfoDescription::sample_other()
+    InternalDeviceInfoDescription::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn device_info_description_to_string(
     device_info_description: &DeviceInfoDescription,
 ) -> String {
-    device_info_description.to_string()
+    device_info_description.into_internal().to_string()
 }
 
 #[cfg(test)]

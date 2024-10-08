@@ -9,6 +9,7 @@ macro_rules! decl_secret_bytes {
         $byte_count: literal
     ) => {
         paste! {
+            use sargon::$struct_name as [< Internal $struct_name >];
 
             #[derive(Zeroize, ZeroizeOnDrop, derive_more::Debug, derive_more::Display)]
             #[debug("OBFUSCATED")]
@@ -44,7 +45,21 @@ macro_rules! decl_secret_bytes {
             #[debug("OBFUSCATED")]
             #[display("OBFUSCATED")]
             pub struct $struct_name {
-                secret_magic: [< $struct_name SecretMagic >]
+                secret_magic: BagOfBytes
+            }
+
+            impl From<[< Internal $struct_name >]> for $struct_name {
+                fn from(value: [< Internal $struct_name >]) -> Self {
+                    Self {
+                        secret_magic: value.into()
+                    }
+                }
+            }
+
+            impl Into<[< Internal $struct_name >]> for $struct_name {
+                fn into(self) -> [< Internal $struct_name >] {
+                    [< Internal $struct_name >].try_from(self.secret_magic.into::<InternalBagOfBytes>()).unwrap()
+                }
             }
 
             #[uniffi::export]

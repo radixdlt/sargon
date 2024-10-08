@@ -19,32 +19,32 @@ decl_ret_wrapped_address!(
 
 #[uniffi::export]
 pub fn vault_address_is_fungible(address: &VaultAddress) -> bool {
-    address.is_fungible()
+    address.into_internal().is_fungible()
 }
 
 #[uniffi::export]
 pub fn vault_address_is_non_fungible(address: &VaultAddress) -> bool {
-    address.is_non_fungible()
+    address.into_internal().is_non_fungible()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_mainnet_fungible() -> VaultAddress {
-    VaultAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_mainnet_non_fungible() -> VaultAddress {
-    VaultAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_stokenet_fungible() -> VaultAddress {
-    VaultAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_stokenet_non_fungible() -> VaultAddress {
-    VaultAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

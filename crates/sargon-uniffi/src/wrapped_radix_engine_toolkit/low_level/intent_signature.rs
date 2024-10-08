@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::IntentSignature as InternalIntentSignature;
 
 #[derive(
-    Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Copy, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
 pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,
@@ -11,16 +11,14 @@ pub struct IntentSignature {
 impl From<InternalIntentSignature> for IntentSignature {
     fn from(value: InternalIntentSignature) -> Self {
         Self {
-            secret_magic: value.secret_magic.into(),
+            secret_magic: value.0.into(),
         }
     }
 }
 
 impl Into<InternalIntentSignature> for IntentSignature {
     fn into(self) -> InternalIntentSignature {
-        InternalIntentSignature {
-            secret_magic: self.secret_magic.into(),
-        }
+        InternalIntentSignature(self.secret_magic.into())
     }
 }
 

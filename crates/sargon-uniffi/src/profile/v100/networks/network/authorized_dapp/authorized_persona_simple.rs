@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AuthorizedPersonaSimple as InternalAuthorizedPersonaSimple;
 
 /// Simple data representation of a Persona the user has shared with a Dapp.
 /// Simple meaning "the bare minimum amount of data" that enabled `Sargon` to
@@ -15,10 +16,8 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.description())]
 pub struct AuthorizedPersonaSimple {
     /// The globally unique identifier of a Persona is its address, used
     /// to lookup persona
@@ -34,36 +33,50 @@ pub struct AuthorizedPersonaSimple {
     pub shared_persona_data: SharedPersonaData,
 }
 
-impl Identifiable for AuthorizedPersonaSimple {
-    type ID = IdentityAddress;
+impl From<InternalAuthorizedPersonaSimple> for AuthorizedPersonaSimple {
+    fn from(value: InternalAuthorizedPersonaSimple) -> Self {
+        Self {
+            identity_address: value.identity_address.into(),
+            last_login: value.last_login.into(),
+            shared_accounts: value.shared_accounts.map(Into::into),
+            shared_persona_data: value.shared_persona_data.into(),
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.identity_address
+impl Into<InternalAuthorizedPersonaSimple> for AuthorizedPersonaSimple {
+    fn into(self) -> InternalAuthorizedPersonaSimple {
+        InternalAuthorizedPersonaSimple {
+            identity_address: self.identity_address.into(),
+            last_login: self.last_login.into(),
+            shared_accounts: self.shared_accounts.map(Into::into),
+            shared_persona_data: self.shared_persona_data.into(),
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_authorized_persona_simple_sample_mainnet() -> AuthorizedPersonaSimple
 {
-    AuthorizedPersonaSimple::sample_mainnet()
+    InternalAuthorizedPersonaSimple::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_persona_simple_sample_mainnet_other(
 ) -> AuthorizedPersonaSimple {
-    AuthorizedPersonaSimple::sample_mainnet_other()
+    InternalAuthorizedPersonaSimple::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_persona_simple_sample_stokenet() -> AuthorizedPersonaSimple
 {
-    AuthorizedPersonaSimple::sample_stokenet()
+    InternalAuthorizedPersonaSimple::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_persona_simple_sample_stokenet_other(
 ) -> AuthorizedPersonaSimple {
-    AuthorizedPersonaSimple::sample_stokenet_other()
+    InternalAuthorizedPersonaSimple::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

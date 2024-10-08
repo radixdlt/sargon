@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::HierarchicalDeterministicPublicKey as InternalHierarchicalDeterministicPublicKey;
 
 /// The **source** of a virtual hierarchical deterministic badge, contains a
 /// derivation path and public key, from which a private key is derived which
@@ -8,7 +9,6 @@ use crate::prelude::*;
 #[derive(
     Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
     pub public_key: PublicKey,
@@ -17,24 +17,44 @@ pub struct HierarchicalDeterministicPublicKey {
     pub derivation_path: DerivationPath,
 }
 
+impl From<InternalHierarchicalDeterministicPublicKey> for HierarchicalDeterministicPublicKey {
+    fn from(value: InternalHierarchicalDeterministicPublicKey) -> Self {
+        Self {
+            public_key: value.public_key.into(),
+            derivation_path: value.derivation_path.into(),
+        }
+    }
+}
+
+impl Into<InternalHierarchicalDeterministicPublicKey> for HierarchicalDeterministicPublicKey {
+    fn into(self) -> InternalHierarchicalDeterministicPublicKey {
+        InternalHierarchicalDeterministicPublicKey {
+            public_key: self.public_key.into(),
+            derivation_path: self.derivation_path.into(),
+        }
+    }
+}
+
+
 #[uniffi::export]
 pub fn new_hierarchical_deterministic_public_key_sample(
 ) -> HierarchicalDeterministicPublicKey {
-    HierarchicalDeterministicPublicKey::sample()
+    InternalHierarchicalDeterministicPublicKey::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_hierarchical_deterministic_public_key_sample_other(
 ) -> HierarchicalDeterministicPublicKey {
-    HierarchicalDeterministicPublicKey::sample_other()
+    InternalHierarchicalDeterministicPublicKey::sample_other().into()
 }
+
 #[uniffi::export]
 pub fn hierarchical_deterministic_public_key_is_valid_signature_for_hash(
     key: &HierarchicalDeterministicPublicKey,
     signature: Signature,
     hash: &Hash,
 ) -> bool {
-    key.is_valid_signature_for_hash(signature, hash)
+    key.into::<InternalHierarchicalDeterministicPublicKey>().is_valid_signature_for_hash(signature.into(), &hash.into())
 }
 
 #[cfg(test)]

@@ -37,27 +37,27 @@ pub fn new_identity_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
 ) -> IdentityAddress {
-    IdentityAddress::new(public_key, network_id)
+    InternalAddress::new(public_key.into(), network_id.into()).into()
 }
 
 #[uniffi::export]
 pub fn new_identity_address_sample_mainnet() -> IdentityAddress {
-    IdentityAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_identity_address_sample_mainnet_other() -> IdentityAddress {
-    IdentityAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_identity_address_sample_stokenet() -> IdentityAddress {
-    IdentityAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_identity_address_sample_stokenet_other() -> IdentityAddress {
-    IdentityAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

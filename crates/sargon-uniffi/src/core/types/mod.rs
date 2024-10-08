@@ -1,6 +1,5 @@
 mod appearance_id;
 mod bag_of_bytes;
-mod bool_type;
 mod collections;
 mod decimal192;
 mod entity_kind;
@@ -18,7 +17,6 @@ mod signatures;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
-pub use bool_type::*;
 pub use collections::*;
 pub use decimal192::*;
 pub use entity_kind::*;

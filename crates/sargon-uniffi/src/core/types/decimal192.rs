@@ -1,24 +1,5 @@
 use crate::prelude::*;
-use delegate::delegate;
-use enum_iterator::reverse_all;
-use radix_common::math::ParseDecimalError;
-
-uniffi::custom_type!(ScryptoDecimal192, String);
-
-/// UniFFI conversion for InnerDecimal using String as builtin.
-impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
-    type Builtin = String;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        val.parse::<Self>().map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
+use sargon::Decimal192 as InternalDecimal192;
 
 /// `Decimal192` represents a 192 bit representation of a fixed-scale decimal number.
 ///
@@ -45,26 +26,42 @@ impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
     Debug,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     derive_more::Display,
     uniffi::Record,
 )]
 #[display("{}", self.native())]
 pub struct Decimal192 {
-    secret_magic: ScryptoDecimal192, // Do NOT doc! breaks build script
+    value: String,
 }
 
-/// Internally (in Rust land) we would like to call `Decimal192` just `Decimal`.
-/// Reusing the naming convention set by Scrypto.
-pub type Decimal = Decimal192;
+impl Decimal192 {
+    fn into_internal(self) -> InternalDecimal192 {
+        // This is safe because the Decimal192 can be created only InternalDecimal192 which is already valid.
+        // Here the conversion back happens.
+        self.value.parse::<InternalDecimal192>().unwrap()
+    }
+}
+
+impl From<InternalDecimal192> for Decimal192 {
+    fn from(value: InternalDecimal192) -> Self {
+        Self {
+            value: value.to_string(),
+        }
+    }
+}
+
+impl Into<InternalDecimal192> for Decimal192 {
+    fn into(self) -> InternalDecimal192 {
+        self.into_internal()
+    }
+}
 
 /// Tries to creates a new `Decimal192` from a String, throws a `CommonError`
 /// if the `string` was not a valid Decimal192.
 #[uniffi::export]
 pub fn new_decimal_from_string(string: String) -> Result<Decimal192> {
-    Decimal192::new(string)
+    map_result_from_internal(string.parse::<InternalDecimal192>())
 }
 
 /// Tries to creates a new `Decimal192` from a formatted String for
@@ -74,37 +71,37 @@ pub fn new_decimal_from_formatted_string(
     formatted_string: String,
     locale: LocaleConfig,
 ) -> Result<Decimal192> {
-    Decimal192::new_with_formatted_string(formatted_string, locale)
+    map_result_from_internal(InternalDecimal192::new_with_formatted_string(formatted_string, locale.into()))
 }
 
 /// The standard transaction fee
 #[uniffi::export]
 pub fn transaction_fee_preset() -> Decimal192 {
-    Decimal192::transaction_fee_preset()
+    InternalDecimal192::transaction_fee_preset().into()
 }
 
 /// Creates a new `Decimal192` from a u32 integer.
 #[uniffi::export]
 pub fn new_decimal_from_u32(value: u32) -> Decimal192 {
-    value.into()
+    value.into::<InternalDecimal192>().into()
 }
 
 /// Creates a new `Decimal192` from a u64 integer.
 #[uniffi::export]
 pub fn new_decimal_from_u64(value: u64) -> Decimal192 {
-    value.into()
+    value.into::<InternalDecimal192>().into()
 }
 
 /// Creates a new `Decimal192` from a i32 integer.
 #[uniffi::export]
 pub fn new_decimal_from_i32(value: i32) -> Decimal192 {
-    value.into()
+    value.into::<InternalDecimal192>().into()
 }
 
 /// Creates a new `Decimal192` from a i64 integer.
 #[uniffi::export]
 pub fn new_decimal_from_i64(value: i64) -> Decimal192 {
-    value.into()
+    value.into::<InternalDecimal192>().into()
 }
 
 #[uniffi::export]
@@ -114,7 +111,7 @@ pub fn decimal_formatted(
     total_places: u8,
     use_grouping_separator: bool,
 ) -> String {
-    decimal.formatted(locale, total_places, use_grouping_separator)
+    decimal.into_internal().formatted(locale.into(), total_places, use_grouping_separator)
 }
 
 /// A human readable, locale respecting string. Does not perform any rounding or truncation.
@@ -124,7 +121,7 @@ pub fn decimal_formatted_plain(
     locale: LocaleConfig,
     use_grouping_separator: bool,
 ) -> String {
-    decimal.formatted_plain(locale, use_grouping_separator)
+    decimal.into_internal().formatted_plain(locale.into(), use_grouping_separator)
 }
 
 /// Creates a new `Decimal192` from a f32 float. Will
@@ -141,7 +138,7 @@ pub fn decimal_formatted_plain(
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
-    value.into()
+    value.into::<InternalDecimal192>().into()
 }
 
 /// Creates a new `Decimal192` from a f64 float. Will
@@ -158,51 +155,51 @@ pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f64(value: f64) -> Result<Decimal192> {
-    value.try_into()
+    map_result_from_internal(value.try_into::<InternalDecimal192>())
 }
 
 /// The minimum possible value of `Decimal192`, being:
 /// `-3138550867693340381917894711603833208051.177722232017256448`
 #[uniffi::export]
 pub fn decimal_min() -> Decimal192 {
-    Decimal192::min()
+    InternalDecimal192::min().into()
 }
 
 /// The maximum possible value of `Decimal192`, being:
 /// `3138550867693340381917894711603833208051.177722232017256447`
 #[uniffi::export]
 pub fn decimal_max() -> Decimal192 {
-    Decimal192::max()
+    InternalDecimal192::max().into()
 }
 
 /// Creates the Decimal192 `10^exponent`
 #[uniffi::export]
 pub fn new_decimal_exponent(exponent: u8) -> Decimal192 {
-    Decimal192::pow(exponent)
+    InternalDecimal192::pow(exponent).into()
 }
 
 /// `decimal.to_string()`
 #[uniffi::export]
 pub fn decimal_to_string(decimal: &Decimal192) -> String {
-    decimal.to_string()
+    decimal.into_internal().to_string()
 }
 
 /// `lhs < rhs`
 #[uniffi::export]
 pub fn decimal_less_than(lhs: &Decimal192, rhs: &Decimal192) -> bool {
-    lhs < rhs
+    lhs.into_internal() < rhs.into_internal()
 }
 
 /// `lhs <= rhs`
 #[uniffi::export]
 pub fn decimal_less_than_or_equal(lhs: &Decimal192, rhs: &Decimal192) -> bool {
-    lhs <= rhs
+    lhs.into_internal() <= rhs.into_internal()
 }
 
 /// `lhs > rhs`
 #[uniffi::export]
 pub fn decimal_greater_than(lhs: &Decimal192, rhs: &Decimal192) -> bool {
-    lhs > rhs
+    lhs.into_internal() > rhs.into_internal()
 }
 
 /// `lhs >= rhs`
@@ -211,67 +208,67 @@ pub fn decimal_greater_than_or_equal(
     lhs: &Decimal192,
     rhs: &Decimal192,
 ) -> bool {
-    lhs >= rhs
+    lhs.into_internal() >= rhs.into_internal()
 }
 
 /// Whether this decimal is zero.
 #[uniffi::export]
 pub fn decimal_is_zero(decimal: &Decimal192) -> bool {
-    decimal.is_zero()
+    decimal.into_internal().is_zero()
 }
 
 /// Whether this decimal is positive.
 #[uniffi::export]
 pub fn decimal_is_positive(decimal: &Decimal192) -> bool {
-    decimal.is_positive()
+    decimal.into_internal().is_positive()
 }
 
 /// Whether this decimal is negative.
 #[uniffi::export]
 pub fn decimal_is_negative(decimal: &Decimal192) -> bool {
-    decimal.is_negative()
+    decimal.into_internal().is_negative()
 }
 
 /// `lhs + rhs``
 #[uniffi::export]
 pub fn decimal_add(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
-    lhs + rhs
+    (lhs.into_internal() + rhs.into_internal()).into()
 }
 
 /// `lhs - rhs``
 #[uniffi::export]
 pub fn decimal_sub(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
-    lhs - rhs
+    (lhs.into_internal() - rhs.into_internal()).into()
 }
 
 /// `lhs * rhs``
 #[uniffi::export]
 pub fn decimal_mul(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
-    lhs * rhs
+    (lhs.into_internal() * rhs.into_internal()).into()
 }
 
 /// `lhs / rhs``
 #[uniffi::export]
 pub fn decimal_div(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
-    lhs / rhs
+    (lhs.into_internal() / rhs.into_internal()).into()
 }
 
 /// Negates the `decimal`
 #[uniffi::export]
 pub fn decimal_neg(decimal: &Decimal192) -> Decimal192 {
-    decimal.neg()
+    decimal.into_internal().neg().into()
 }
 
 /// Returns `decimal.abs()`, panics if `decimal` is `Decimal192::MIN`
 #[uniffi::export]
 pub fn decimal_abs(decimal: &Decimal192) -> Decimal192 {
-    decimal.abs()
+    decimal.into_internal().abs().into()
 }
 
 /// Clamps `decimal` to zero, i.e. `max(decimal, 0)`
 #[uniffi::export]
 pub fn decimal_clamped_to_zero(decimal: &Decimal192) -> Decimal192 {
-    decimal.clamped_to_zero()
+    decimal.into_internal().clamped_to_zero().into()
 }
 
 /// Rounds this number to the specified decimal places.
@@ -284,7 +281,7 @@ pub fn decimal_round(
     decimal_places: u8,
     rounding_mode: RoundingMode,
 ) -> Result<Decimal192> {
-    decimal.round_with_mode(decimal_places, rounding_mode)
+    map_result_from_internal(decimal.into_internal().round_with_mode(decimal_places, rounding_mode.into()))
 }
 
 #[cfg(test)]

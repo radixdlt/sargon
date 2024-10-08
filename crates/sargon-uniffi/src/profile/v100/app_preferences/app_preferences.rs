@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AppPreferences as InternalAppPreferences;
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
@@ -12,10 +13,8 @@ use crate::prelude::*;
     Eq,
     Clone,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.description())]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
     pub display: AppDisplay,
@@ -30,19 +29,41 @@ pub struct AppPreferences {
     pub transaction: TransactionPreferences,
 }
 
+impl From<InternalAppPreferences> for AppPreferences {
+    fn from(value: InternalAppPreferences) -> Self {
+        Self {
+            display: value.display.into(),
+            gateways: value.gateways.into(),
+            security: value.security.into(),
+            transaction: value.transaction.into(),
+        }
+    }
+}
+
+impl Into<InternalAppPreferences> for AppPreferences {
+    fn into(self) -> InternalAppPreferences {
+        InternalAppPreferences {
+            display: self.display.into(),
+            gateways: self.gateways.into(),
+            security: self.security.into(),
+            transaction: self.transaction.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_app_preferences_sample() -> AppPreferences {
-    AppPreferences::sample()
+    InternalAppPreferences::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_app_preferences_sample_other() -> AppPreferences {
-    AppPreferences::sample_other()
+    InternalAppPreferences::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_app_preferences_default() -> AppPreferences {
-    AppPreferences::default()
+    InternalAppPreferences::default().into()
 }
 
 #[uniffi::export]
@@ -50,7 +71,7 @@ pub fn app_preferences_has_gateway_with_url(
     app_preferences: AppPreferences,
     url: &FfiUrl,
 ) -> bool {
-    app_preferences.has_gateway_with_url(url.url.clone())
+    app_preferences.into_internal().has_gateway_with_url(url.url.clone())
 }
 
 #[cfg(test)]

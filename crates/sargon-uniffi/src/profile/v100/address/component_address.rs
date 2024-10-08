@@ -20,37 +20,37 @@ decl_ret_wrapped_address!(
 /// Returns `true` if the ComponentAddress is `global` (i.e. not `internal`)
 #[uniffi::export]
 pub fn component_address_is_global(address: &ComponentAddress) -> bool {
-    address.is_global()
+    address.into_internal().is_global()
 }
 
 /// Returns `true` if the ComponentAddress is `internal` (i.e. not `global`)
 #[uniffi::export]
 pub fn component_address_is_internal(address: &ComponentAddress) -> bool {
-    address.is_internal()
+    address.into_internal().is_internal()
 }
 
 /// Sample to a mainnet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample_mainnet_global() -> ComponentAddress {
-    ComponentAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 /// Sample to a mainnet ComponentAddress (internal)
 #[uniffi::export]
 pub fn new_component_address_sample_mainnet_internal() -> ComponentAddress {
-    ComponentAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 /// Sample to a stokenet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample_stokenet_global() -> ComponentAddress {
-    ComponentAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 /// Sample to a stokenet ComponentAddress (internal)
 #[uniffi::export]
 pub fn new_component_address_sample_stokenet_internal() -> ComponentAddress {
-    ComponentAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

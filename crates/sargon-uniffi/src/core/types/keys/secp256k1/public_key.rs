@@ -1,38 +1,33 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
-
-use k256::ecdsa::VerifyingKey as K256PublicKey;
+use sargon::Secp256k1PublicKey as InternalSecp256k1PublicKey;
+use sargon::BagOfBytes as InternalBagOfBytes;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
-#[serde_as]
 #[derive(
     Clone,
     Copy,
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
 )]
 pub struct Secp256k1PublicKey {
-    secret_magic: ScryptoSecp256k1PublicKey,
+    secret_magic: BagOfBytes,
 }
 
-uniffi::custom_type!(ScryptoSecp256k1PublicKey, BagOfBytes);
-
-impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from(val.as_slice()).map_err(|e| e.into())
+impl From<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
+    fn from(value: InternalSecp256k1PublicKey) -> Self {
+        Self {
+            secret_magic: value.to_bytes().into(),
+        }
     }
+}
 
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec().into()
+impl Into<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
+    fn into(self) -> InternalSecp256k1PublicKey {
+        InternalSecp256k1PublicKey::try_from(self.secret_magic.to_vec()).unwrap()
     }
 }
 
@@ -40,7 +35,7 @@ impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {
 pub fn new_secp256k1_public_key_from_hex(
     hex: String,
 ) -> Result<Secp256k1PublicKey> {
-    hex.parse()
+    map_result_from_internal(hex.parse::<InternalSecp256k1PublicKey>())
 }
 
 /// Creates a Secp256k1PublicKey from either compressed form (33 bytes) or
@@ -49,14 +44,14 @@ pub fn new_secp256k1_public_key_from_hex(
 pub fn new_secp256k1_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Secp256k1PublicKey> {
-    Secp256k1PublicKey::try_from(bytes.to_vec())
+    map_result_from_internal(InternalSecp256k1PublicKey::try_from(bytes.into::<InternalBagOfBytes>().to_vec()))
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
 /// `"033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"`
 #[uniffi::export]
 pub fn secp256k1_public_key_to_hex(public_key: &Secp256k1PublicKey) -> String {
-    public_key.to_hex()
+    public_key.into::<InternalSecp256k1PublicKey>().to_hex()
 }
 
 /// Returns the public key on **compressed** form (33 bytes)
@@ -64,7 +59,7 @@ pub fn secp256k1_public_key_to_hex(public_key: &Secp256k1PublicKey) -> String {
 pub fn secp256k1_public_key_to_bytes(
     public_key: &Secp256k1PublicKey,
 ) -> BagOfBytes {
-    BagOfBytes::from(public_key.to_bytes())
+    public_key.into::<InternalSecp256k1PublicKey>().to_bag_of_bytes().into()
 }
 
 /// Returns the public key on **uncompressed** form (65 bytes)
@@ -72,17 +67,17 @@ pub fn secp256k1_public_key_to_bytes(
 pub fn secp256k1_public_key_to_bytes_uncompressed(
     public_key: &Secp256k1PublicKey,
 ) -> BagOfBytes {
-    BagOfBytes::from(public_key.uncompressed())
+    InternalBagOfBytes::from(public_key.into::<InternalSecp256k1PublicKey>().uncompressed()).into()
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_sample() -> Secp256k1PublicKey {
-    Secp256k1PublicKey::sample()
+    InternalSecp256k1PublicKey::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_sample_other() -> Secp256k1PublicKey {
-    Secp256k1PublicKey::sample_other()
+    InternalSecp256k1PublicKey::sample_other().into()
 }
 
 #[cfg(test)]

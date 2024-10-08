@@ -1,15 +1,12 @@
 use crate::prelude::*;
-use std::cmp::Ordering;
 use sargon::HomeCard as InternalHomeCard;
 
 #[derive(
     Clone,
-    EnumAsInner,
     Debug,
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Enum,
 )]
 
@@ -53,13 +50,5 @@ impl Into<InternalHomeCard> for HomeCard {
             HomeCard::Dapp { icon_url } => InternalHomeCard::Dapp { icon_url },
             HomeCard::Connector => InternalHomeCard::Connector,
         }
-    }
-}
-
-impl Identifiable for HomeCard {
-    type ID = Self;
-
-    fn id(&self) -> Self::ID {
-        self.clone()
     }
 }

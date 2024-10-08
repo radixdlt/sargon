@@ -8,9 +8,6 @@ use sargon::NetworkID as InternalNetworkID;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    enum_iterator::Sequence,
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -116,22 +113,22 @@ impl Into<InternalNetworkID> for NetworkID {
 
 #[uniffi::export]
 pub fn new_network_id_from_discriminant(discriminant: u8) -> Result<NetworkID> {
-    NetworkID::try_from(discriminant)
+    InternalNetworkID::try_from(discriminant).map_result()
 }
 
 #[uniffi::export]
 pub fn network_id_to_string(id: NetworkID) -> String {
-    id.logical_name()
+    id.into_internal().logical_name()
 }
 
 #[uniffi::export]
 pub fn network_id_discriminant(id: NetworkID) -> u8 {
-    id.discriminant()
+    id.into_internal().discriminant()
 }
 
 #[uniffi::export]
 pub fn network_ids_all() -> Vec<NetworkID> {
-    NetworkID::all()
+    InternalNetworkID::all().iter().map(|id| id.into()).collect()
 }
 
 #[cfg(test)]

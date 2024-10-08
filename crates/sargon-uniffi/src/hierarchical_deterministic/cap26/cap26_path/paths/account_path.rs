@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AccountPath as InternalAccountPath;
 
 #[derive(
     Clone,
@@ -6,12 +7,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.bip32_string())]
 pub struct AccountPath {
     pub path: HDPath,
 
@@ -24,14 +21,39 @@ pub struct AccountPath {
     pub index: HDPathValue,
 }
 
+impl From<InternalAccountPath> for AccountPath {
+    fn from(value: InternalAccountPath) -> Self {
+        Self {
+            path: value.path.into(),
+            network_id: value.network_id.into(),
+            entity_kind: value.entity_kind.into(),
+            key_kind: value.key_kind.into(),
+            index: value.index.into(),
+        }
+    }
+}
+
+impl Into<InternalAccountPath> for AccountPath {
+    fn into(self) -> InternalAccountPath {
+        InternalAccountPath {
+            path: self.path.into(),
+            network_id: self.network_id.into(),
+            entity_kind: self.entity_kind.into(),
+            key_kind: self.key_kind.into(),
+            index: self.index.into(),
+        }
+    }
+}
+
+
 #[uniffi::export]
 pub fn new_account_path_sample() -> AccountPath {
-    AccountPath::sample()
+    InternalAccountPath::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_account_path_sample_other() -> AccountPath {
-    AccountPath::sample_other()
+    InternalAccountPath::sample_other().into()
 }
 
 #[uniffi::export]
@@ -40,7 +62,7 @@ pub fn new_account_path(
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 ) -> AccountPath {
-    AccountPath::new(network_id, key_kind, index)
+    InternalAccountPath::new(network_id.into(), key_kind.into(), index.into()).into()
 }
 
 #[cfg(test)]

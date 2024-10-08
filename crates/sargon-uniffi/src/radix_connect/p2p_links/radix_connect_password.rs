@@ -12,11 +12,8 @@ json_string_convertible!(RadixConnectPassword);
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[debug("{value}")]
 pub struct RadixConnectPassword {
     pub value: Exactly32Bytes,
 }
@@ -54,7 +51,7 @@ pub fn new_radix_connect_password_sample_other() -> RadixConnectPassword {
 pub fn radix_connect_password_message_hash(
     password: &RadixConnectPassword,
 ) -> Hash {
-    password.into::<InternalRadixConnectPassword>().message_hash().into()
+    password.into_internal().message_hash().into()
 }
 
 #[cfg(test)]

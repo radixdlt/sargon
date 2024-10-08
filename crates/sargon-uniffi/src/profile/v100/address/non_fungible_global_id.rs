@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::NonFungibleGlobalId as InternalNonFungibleGlobalId;
 
 #[derive(
     Clone,
@@ -6,10 +7,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.to_canonical_string())]
 pub struct NonFungibleGlobalId {
     // N.B. we WANT This to be a `NonFungibleResourceAddress` type, alas, it
     // cannot, since that validation does not happen part of Engine, so it is
@@ -23,28 +22,59 @@ pub struct NonFungibleGlobalId {
     pub(crate) non_fungible_local_id: NonFungibleLocalId,
 }
 
+impl From<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
+    fn from(value: InternalNonFungibleGlobalId) -> Self {
+        Self {
+            resource_address: value.resource_address.into(),
+            non_fungible_local_id: value.non_fungible_local_id.into(),
+        }
+    }
+}
+
+impl Into<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
+    fn into(self) -> InternalNonFungibleGlobalId {
+        InternalNonFungibleGlobalId {
+            resource_address: self.resource_address.into(),
+            non_fungible_local_id: self.non_fungible_local_id.into(),
+        }
+    }
+}
+
+pub trait IntoInternal<InternalType> {
+    fn into_internal(self) -> InternalType;
+}
+
+impl<InternalType, Type> IntoInternal<InternalType> for Type
+where
+    Type: Into<InternalType>,
+{
+    fn into_internal(self) -> InternalType {
+        self.into()
+    }
+}
+
 #[uniffi::export]
 pub fn new_non_fungible_global_id_from_string(
     string: String,
 ) -> Result<NonFungibleGlobalId> {
-    NonFungibleGlobalId::from_str(&string)
+    InternalNonFungibleGlobalId::from_str(&string).map_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_global_id_sample() -> NonFungibleGlobalId {
-    NonFungibleGlobalId::sample()
+    InternalNonFungibleGlobalId::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_global_id_sample_other() -> NonFungibleGlobalId {
-    NonFungibleGlobalId::sample_other()
+    InternalNonFungibleGlobalId::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn non_fungible_global_id_to_string(
     global_id: &NonFungibleGlobalId,
 ) -> String {
-    global_id.to_string()
+    global_id.into_internal().to_string()
 }
 
 #[uniffi::export]
@@ -52,7 +82,7 @@ pub fn non_fungible_global_id_formatted(
     global_id: &NonFungibleGlobalId,
     format: AddressFormat,
 ) -> String {
-    global_id.formatted(format)
+    global_id.into_internal().formatted(format)
 }
 
 #[cfg(test)]

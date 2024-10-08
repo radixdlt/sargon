@@ -39,7 +39,7 @@ pub fn new_notarized_transaction_sample_other() -> NotarizedTransaction {
 pub fn notarized_transaction_compile(
     notarized_transaction: &NotarizedTransaction,
 ) -> CompiledNotarizedIntent {
-    notarized_transaction.into::<InternalNotarizedTransaction>().compile().into()
+    notarized_transaction.into_internal().compile().into()
 }
 
 #[cfg(test)]

@@ -25,8 +25,7 @@ impl CompiledNotarizedIntent {
     pub fn decompile(&self) -> NotarizedTransaction {
         let err = "Should never fail to decompile a 'CompiledNotarizedIntent' since we should not have been able to construct an invalid 'CompiledNotarizedIntent.";
 
-        let notarized =
-            RET_decompile_notarize_tx(self.bytes()).expect(err);
+        let notarized = RET_decompile_notarize_tx(self.bytes()).expect(err);
 
         notarized.try_into().expect(err)
     }
@@ -145,8 +144,7 @@ mod tests {
         expected = "Should never fail to decompile a 'CompiledNotarizedIntent' since we should not have been able to construct an invalid 'CompiledNotarizedIntent."
     )]
     fn decompile_fail() {
-        _ = CompiledNotarizedIntent(BagOfBytes::sample_aced())
-        .decompile();
+        _ = CompiledNotarizedIntent(BagOfBytes::sample_aced()).decompile();
     }
 
     #[test]

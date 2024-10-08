@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::ThirdPartyDeposits as InternalThirdPartyDeposits;
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
@@ -21,19 +22,39 @@ pub struct ThirdPartyDeposits {
     pub depositors_allow_list: Option<DepositorsAllowList>,
 }
 
+impl From<InternalThirdPartyDeposits> for ThirdPartyDeposits {
+    fn from(value: InternalThirdPartyDeposits) -> Self {
+        Self {
+            deposit_rule: value.deposit_rule.into(),
+            assets_exception_list: value.assets_exception_list.map(Into::into),
+            depositors_allow_list: value.depositors_allow_list.map(Into::into),
+        }
+    }
+}
+
+impl Into<InternalThirdPartyDeposits> for ThirdPartyDeposits {
+    fn into(self) -> InternalThirdPartyDeposits {
+        InternalThirdPartyDeposits {
+            deposit_rule: self.deposit_rule.into(),
+            assets_exception_list: self.assets_exception_list.map(Into::into),
+            depositors_allow_list: self.depositors_allow_list.map(Into::into),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_third_party_deposits_sample() -> ThirdPartyDeposits {
-    ThirdPartyDeposits::sample()
+    InternalThirdPartyDeposits::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_third_party_deposits_sample_other() -> ThirdPartyDeposits {
-    ThirdPartyDeposits::sample_other()
+    InternalThirdPartyDeposits::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_third_party_deposits_default() -> ThirdPartyDeposits {
-    ThirdPartyDeposits::default()
+    InternalThirdPartyDeposits::default().into()
 }
 
 #[cfg(test)]

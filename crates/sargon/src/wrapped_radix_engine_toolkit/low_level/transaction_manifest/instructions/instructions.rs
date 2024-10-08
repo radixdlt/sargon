@@ -37,9 +37,7 @@ impl TryFrom<(&[ScryptoInstruction], NetworkID)> for Instructions {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            instructions: ScryptoInstructions(
-                scrypto.to_owned(),
-            ).0,
+            instructions: ScryptoInstructions(scrypto.to_owned()).0,
             network_id,
         })
     }

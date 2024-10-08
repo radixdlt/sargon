@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PublicKey as InternalPublicKey;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
@@ -10,8 +11,6 @@ use crate::prelude::*;
     EnumAsInner,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
     derive_more::Display,
     uniffi::Enum,
 )]
@@ -23,10 +22,28 @@ pub enum PublicKey {
     Secp256k1(Secp256k1PublicKey),
 }
 
+impl From<InternalPublicKey> for PublicKey {
+    fn from(value: InternalPublicKey) -> Self {
+        match value {
+            InternalPublicKey::Ed25519(value) => Self::Ed25519(value.into()),
+            InternalPublicKey::Secp256k1(value) => Self::Secp256k1(value.into()),
+        }
+    }
+}
+
+impl Into<InternalPublicKey> for PublicKey {
+    fn into(self) -> InternalPublicKey {
+        match self {
+            PublicKey::Ed25519(value) => InternalPublicKey::Ed25519(value.into()),
+            PublicKey::Secp256k1(value) => InternalPublicKey::Secp256k1(value.into()),
+        }
+    }
+}
+
 /// Tries to create a PublicKey from the hex string
 #[uniffi::export]
 pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
-    PublicKey::from_str(&hex)
+    InternalPublicKey::from_str(&hex)
 }
 
 /// Tries to create a PublicKey from the bytes
@@ -34,27 +51,27 @@ pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
 pub fn new_public_key_from_bytes(
     bag_of_bytes: BagOfBytes,
 ) -> Result<PublicKey> {
-    PublicKey::try_from(bag_of_bytes)
+    InternalPublicKey::try_from(bag_of_bytes.into())
 }
 
 #[uniffi::export]
 pub fn public_key_to_hex(public_key: &PublicKey) -> String {
-    public_key.to_hex()
+    public_key.into::<InternalPublicKey>().to_hex()
 }
 
 #[uniffi::export]
 pub fn public_key_to_bytes(public_key: &PublicKey) -> BagOfBytes {
-    BagOfBytes::from(public_key.to_bytes())
+    InternalBagOfBytes::from(public_key.into::<InternalPublicKey>().to_bytes()).into()
 }
 
 #[uniffi::export]
 pub fn new_public_key_sample() -> PublicKey {
-    PublicKey::sample()
+    InternalPublicKey::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_public_key_sample_other() -> PublicKey {
-    PublicKey::sample_other()
+    InternalPublicKey::sample_other().into()
 }
 
 /// Verifies an Elliptic Curve signature over either Curve25519 or Secp256k1
@@ -64,7 +81,7 @@ pub fn public_key_is_valid_signature_for_hash(
     signature: Signature,
     hash: Hash,
 ) -> bool {
-    public_key.is_valid_signature_for_hash(signature, &hash)
+    public_key.into::<InternalPublicKey>().is_valid_signature_for_hash(signature.into(), &hash.into())
 }
 
 #[cfg(test)]

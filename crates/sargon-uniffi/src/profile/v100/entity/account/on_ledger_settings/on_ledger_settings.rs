@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::OnLedgerSettings as InternalOnLedgerSettings;
 
 /// Account settings that user has set on the account component
 /// On-Ledger, that is set via a transaction mutating the state
@@ -23,19 +24,35 @@ pub struct OnLedgerSettings {
     pub third_party_deposits: ThirdPartyDeposits,
 }
 
+impl From<InternalOnLedgerSettings> for OnLedgerSettings {
+    fn from(value: InternalOnLedgerSettings) -> Self {
+        Self {
+            third_party_deposits: value.third_party_deposits.into(),
+        }
+    }
+}
+
+impl Into<InternalOnLedgerSettings> for OnLedgerSettings {
+    fn into(self) -> InternalOnLedgerSettings {
+        InternalOnLedgerSettings {
+            third_party_deposits: self.third_party_deposits.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_on_ledger_settings_sample() -> OnLedgerSettings {
-    OnLedgerSettings::sample()
+    InternalOnLedgerSettings::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_on_ledger_settings_sample_other() -> OnLedgerSettings {
-    OnLedgerSettings::sample_other()
+    InternalOnLedgerSettings::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_on_ledger_settings_default() -> OnLedgerSettings {
-    OnLedgerSettings::default()
+    InternalOnLedgerSettings::default().into()
 }
 
 #[cfg(test)]

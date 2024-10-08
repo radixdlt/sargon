@@ -16,6 +16,8 @@ macro_rules! declare_collection_of_identified_entry {
         $expected_sample_debug: literal,
         $expected_sample_json: literal
     ) => {
+        use sargon::$struct_name as InternalCollection;
+
         $(
             #[doc = $expr]
         )*
@@ -24,14 +26,30 @@ macro_rules! declare_collection_of_identified_entry {
             PartialEq,
             Hash,
             Eq,
-            derive_more::Display,
-            derive_more::Debug,
             uniffi::Record,
         )]
-        #[debug("{:?}", collection)]
-        #[display("{}", self.display_string())]
         pub struct $struct_name {
-            pub collection: IdentifiedVecOf<$id_ent_type>,
+            pub collection: Vec<$id_ent_type>,
+        }
+
+        impl From<InternalCollection>
+            for $struct_name
+        {
+            fn from(value: InternalCollection) -> Self {
+                Self {
+                    collection: value.collection.into_iter().map(|x| x.into()).collect(),
+                }
+            }
+        }
+
+        impl Into<InternalCollection>
+            for $struct_name
+        {
+            fn into(self) -> InternalCollection {
+                Self {
+                    collection: self.collection.into_iter().map(|x| x.into()).collect(),
+                }
+            }
         }
     };
     (

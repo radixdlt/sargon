@@ -21,19 +21,19 @@ decl_ret_wrapped_address!(
 );
 
 impl PoolAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_single_pool()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_bi_pool()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_single_pool()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_bi_pool()
     }
 }

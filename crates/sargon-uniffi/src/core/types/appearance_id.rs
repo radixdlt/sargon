@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AppearanceID as InternalAppearanceID;
 
 #[derive(
     Copy,
@@ -7,8 +8,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     derive_more::Display,
-    PartialOrd,
-    Ord,
     Hash,
     uniffi::Record,
 )]
@@ -17,31 +16,37 @@ pub struct AppearanceID {
     pub value: u8,
 }
 
+impl From<InternalAppearanceID> for AppearanceID {
+    fn from(value: InternalAppearanceID) -> Self {
+        Self { value: value.0 }
+    }
+}
+
 #[uniffi::export]
 pub fn new_appearance_id(validating: u8) -> Result<AppearanceID> {
-    AppearanceID::new(validating)
+    map_result_from_internal(InternalAppearanceID::new(validating))
 }
 
 #[uniffi::export]
 pub fn new_appearance_id_from_number_of_accounts_on_network(
     count: u64,
 ) -> AppearanceID {
-    AppearanceID::from_number_of_accounts_on_network(count as usize)
+    InternalAppearanceID::from_number_of_accounts_on_network(count as usize).into()
 }
 
 #[uniffi::export]
 pub fn new_appearance_id_sample() -> AppearanceID {
-    AppearanceID::sample()
+    InternalAppearanceID::sample()
 }
 
 #[uniffi::export]
 pub fn new_appearance_id_sample_other() -> AppearanceID {
-    AppearanceID::sample_other()
+    InternalAppearanceID::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn appearance_ids_all() -> Vec<AppearanceID> {
-    AppearanceID::all()
+    InternalAppearanceID::all().into_iter().map(|x| x.into()).collect()
 }
 
 #[cfg(test)]

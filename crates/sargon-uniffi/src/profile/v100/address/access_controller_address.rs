@@ -22,25 +22,25 @@ decl_ret_wrapped_address!(
 #[uniffi::export]
 pub fn new_access_controller_address_sample_mainnet() -> AccessControllerAddress
 {
-    AccessControllerAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_access_controller_address_sample_mainnet_other(
 ) -> AccessControllerAddress {
-    AccessControllerAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_access_controller_address_sample_stokenet() -> AccessControllerAddress
 {
-    AccessControllerAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_access_controller_address_sample_stokenet_other(
 ) -> AccessControllerAddress {
-    AccessControllerAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

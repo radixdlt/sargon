@@ -15,15 +15,15 @@ decl_ret_wrapped_address!(
 );
 
 impl PackageAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_faucet()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_royalty()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_gumball_club()
     }
 }

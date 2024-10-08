@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DerivationPath as InternalDerivationPath;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
 #[derive(
@@ -6,45 +7,62 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    EnumAsInner,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Enum,
 )]
 pub enum DerivationPath {
-    #[debug("{}", self.bip32_string())]
     CAP26 { value: CAP26Path },
-    #[debug("{}", self.bip32_string())]
     BIP44Like { value: BIP44LikePath },
+}
+
+impl From<InternalDerivationPath> for DerivationPath {
+    fn from(value: InternalDerivationPath) -> Self {
+        match value {
+            InternalDerivationPath::CAP26(value) => Self::CAP26 {
+                value: value.into(),
+            },
+            InternalDerivationPath::BIP44Like(value) => Self::BIP44Like {
+                value: value.into(),
+            },
+        }
+    }
+}
+
+impl Into<InternalDerivationPath> for DerivationPath {
+    fn into(self) -> InternalDerivationPath {
+        match self {
+            DerivationPath::CAP26 { value } => InternalDerivationPath::CAP26(value.into()),
+            DerivationPath::BIP44Like { value } => {
+                InternalDerivationPath::BIP44Like(value.into())
+            }
+        }
+    }
 }
 
 #[uniffi::export]
 pub fn new_derivation_path_sample() -> DerivationPath {
-    DerivationPath::sample()
+    InternalDerivationPath::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_derivation_path_sample_other() -> DerivationPath {
-    DerivationPath::sample_other()
+    InternalDerivationPath::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_derivation_path_from_string(
     string: String,
 ) -> Result<DerivationPath> {
-    DerivationPath::from_str(&string)
+    map_result_from_internal(InternalDerivationPath::from_str(&string))
 }
 
 #[uniffi::export]
 pub fn derivation_path_to_hd_path(path: &DerivationPath) -> HDPath {
-    path.hd_path().clone()
+    path.into::<InternalDerivationPath>().hd_path().clone().into()
 }
 
 #[uniffi::export]
 pub fn derivation_path_to_string(path: &DerivationPath) -> String {
-    path.to_string()
+    path.into::<InternalDerivationPath>().to_string()
 }
 
 #[cfg(test)]

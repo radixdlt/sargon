@@ -51,6 +51,10 @@ impl Secp256k1PublicKey {
         self.scrypto().to_vec()
     }
 
+    pub fn to_bag_of_bytes(&self) -> BagOfBytes {
+        self.to_bytes().into()
+    }
+
     pub fn to_hex(&self) -> String {
         hex_encode(self.to_bytes())
     }

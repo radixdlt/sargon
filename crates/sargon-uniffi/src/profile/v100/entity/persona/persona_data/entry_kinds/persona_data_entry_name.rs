@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::PersonaDataEntryName as InternalPersonaDataEntryName;
+use sargon::PersonaDataNameVariant as InternalPersonaDataNameVariant;
 
 /// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,
 /// or `"Jun-fan 'Bruce' Lee"` using Eastern name variant (family name comes before given name(s)).
@@ -14,12 +16,8 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.full())]
-#[debug("{}", self.full())]
 pub struct PersonaDataEntryName {
     pub variant: PersonaDataNameVariant,
     pub family_name: String,
@@ -30,8 +28,47 @@ pub struct PersonaDataEntryName {
 #[derive(
     Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
 )]
-#[serde(rename_all = "lowercase")]
 pub enum PersonaDataNameVariant {
     Western,
     Eastern,
+}
+
+impl From<InternalPersonaDataEntryName> for PersonaDataEntryName {
+    fn from(value: InternalPersonaDataEntryName) -> Self {
+        Self {
+            variant: value.variant.into(),
+            family_name: value.family_name,
+            given_names: value.given_names,
+            nickname: value.nickname,
+        }
+    }
+}
+
+impl Into<InternalPersonaDataEntryName> for PersonaDataEntryName {
+    fn into(self) -> InternalPersonaDataEntryName {
+        InternalPersonaDataEntryName {
+            variant: self.variant.into(),
+            family_name: self.family_name,
+            given_names: self.given_names,
+            nickname: self.nickname,
+        }
+    }
+}
+
+impl From<InternalPersonaDataNameVariant> for PersonaDataNameVariant {
+    fn from(value: InternalPersonaDataNameVariant) -> Self {
+        match value {
+            InternalPersonaDataNameVariant::Western => Self::Western,
+            InternalPersonaDataNameVariant::Eastern => Self::Eastern,
+        }
+    }
+}
+
+impl Into<InternalPersonaDataNameVariant> for PersonaDataNameVariant {
+    fn into(self) -> InternalPersonaDataNameVariant {
+        match self {
+            Self::Western => InternalPersonaDataNameVariant::Western,
+            Self::Eastern => InternalPersonaDataNameVariant::Eastern,
+        }
+    }
 }

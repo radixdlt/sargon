@@ -1,14 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 #[repr(u8)]
 pub enum LogLevel {
     /// The "error" level.
@@ -37,15 +29,7 @@ pub enum LogLevel {
     Trace,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 #[repr(u8)]
 pub enum LogFilter {
     /// Logging is turned off

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::RequestedQuantity as InternalRequestedQuantity;
 
 /// A quantifier of a quantity, either `atLeast` or `exactly`, as in
 /// "I want AT LEAST 3" or "I want EXACTLY 10".
@@ -12,8 +13,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
     strum::Display,
     uniffi::Enum,
 )]
@@ -25,6 +24,24 @@ pub enum RequestedNumberQuantifier {
     /// (Request access to) *at least* N many of something, where quantity `N` is
     /// not part of this enum, e.g. "I want AT LEAST 3 accounts"
     AtLeast,
+}
+
+impl From<InternalRequestedQuantity> for RequestedNumberQuantifier {
+    fn from(value: InternalRequestedQuantity) -> Self {
+        match value {
+            InternalRequestedQuantity::Exactly => Self::Exactly,
+            InternalRequestedQuantity::AtLeast => Self::AtLeast,
+        }
+    }
+}
+
+impl Into<InternalRequestedQuantity> for RequestedNumberQuantifier {
+    fn into(self) -> InternalRequestedQuantity {
+        match self {
+            RequestedNumberQuantifier::Exactly => InternalRequestedQuantity::Exactly,
+            RequestedNumberQuantifier::AtLeast => InternalRequestedQuantity::AtLeast,
+        }
+    }
 }
 
 json_data_convertible!(RequestedQuantity);

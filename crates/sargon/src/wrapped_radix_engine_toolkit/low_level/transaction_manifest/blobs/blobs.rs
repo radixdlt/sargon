@@ -1,9 +1,7 @@
 use crate::prelude::*;
 
 /// Vec of Blobs
-#[derive(
-    Clone, PartialEq, Eq, Debug, Serialize, Deserialize,
-)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Blobs(pub Vec<Blob>);
 
@@ -45,24 +43,20 @@ impl From<ScryptoBlobsMap> for Blobs {
 impl From<Blobs> for ScryptoBlobsMap {
     fn from(value: Blobs) -> Self {
         value
-        .blobs()
-        .into_iter()
-        .map(|b| {
-            let bytes = b.0.to_vec();
-            (ScryptoHash::from(hash_of(bytes.clone())), bytes)
-        })
-        .collect()
+            .blobs()
+            .into_iter()
+            .map(|b| {
+                let bytes = b.0.to_vec();
+                (ScryptoHash::from(hash_of(bytes.clone())), bytes)
+            })
+            .collect()
     }
 }
 
 impl From<Blobs> for ScryptoBlobs {
     fn from(value: Blobs) -> Self {
         ScryptoBlobs {
-            blobs: value
-                .blobs()
-                .into_iter()
-                .map(|b| b.into())
-                .collect_vec(),
+            blobs: value.blobs().into_iter().map(|b| b.into()).collect_vec(),
         }
     }
 }

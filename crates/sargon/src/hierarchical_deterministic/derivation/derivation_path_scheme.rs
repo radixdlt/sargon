@@ -5,15 +5,7 @@ use crate::prelude::*;
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord,
 )]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.

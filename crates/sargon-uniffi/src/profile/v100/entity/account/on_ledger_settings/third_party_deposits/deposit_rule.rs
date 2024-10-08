@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DepositRule as InternalDepositRule;
 
 /// The general deposit rule to apply
 #[derive(
@@ -8,10 +9,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    enum_iterator::Sequence,
-    derive_more::Display,
     uniffi::Enum,
 )]
 pub enum DepositRule {
@@ -23,18 +20,36 @@ pub enum DepositRule {
     DenyAll,
 }
 
-use crate::prelude::*;
+impl From<DepositRule> for InternalDepositRule {
+    fn from(value: DepositRule) -> Self {
+        match value {
+            DepositRule::AcceptKnown => InternalDepositRule::AcceptKnown,
+            DepositRule::AcceptAll => InternalDepositRule::AcceptAll,
+            DepositRule::DenyAll => InternalDepositRule::DenyAll,
+        }
+    }
+}
+
+impl Into<DepositRule> for InternalDepositRule {
+    fn into(self) -> DepositRule {
+        match self {
+            InternalDepositRule::AcceptKnown => DepositRule::AcceptKnown,
+            InternalDepositRule::AcceptAll => DepositRule::AcceptAll,
+            InternalDepositRule::DenyAll => DepositRule::DenyAll,
+        }
+    }
+}
 
 json_string_convertible!(DepositRule, "super invalid json string");
 
 #[uniffi::export]
 pub fn new_deposit_rule_sample() -> DepositRule {
-    DepositRule::sample()
+    InternalDepositRule::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_deposit_rule_sample_other() -> DepositRule {
-    DepositRule::sample_other()
+    InternalDepositRule::sample_other().into()
 }
 
 #[cfg(test)]

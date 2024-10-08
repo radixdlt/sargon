@@ -66,7 +66,6 @@ impl Profile {
     }
 }
 
-
 impl Profile {
     pub fn analyze_contents_of_file(
         json_string: impl AsRef<str>,

@@ -1,14 +1,8 @@
 use crate::prelude::*;
+use sargon::FactorSourceCommon as InternalFactorSourceCommon;
 
 /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-pub type FactorSourceFlags = IdentifiedVecOf<FactorSourceFlag>;
-impl Identifiable for FactorSourceFlag {
-    type ID = Self;
-
-    fn id(&self) -> Self::ID {
-        self.clone()
-    }
-}
+pub type FactorSourceFlags = Vec<FactorSourceFlag>;
 
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
@@ -39,29 +33,51 @@ pub struct FactorSourceCommon {
     pub flags: FactorSourceFlags,
 }
 
+impl From<InternalFactorSourceCommon> for FactorSourceCommon {
+    fn from(value: InternalFactorSourceCommon) -> Self {
+        Self {
+            crypto_parameters: value.crypto_parameters.into(),
+            added_on: value.added_on.into(),
+            last_used_on: value.last_used_on.into(),
+            flags: value.flags.into(),
+        }
+    }
+}
+
+impl Into<InternalFactorSourceCommon> for FactorSourceCommon {
+    fn into(self) -> InternalFactorSourceCommon {
+        InternalFactorSourceCommon {
+            crypto_parameters: self.crypto_parameters.into(),
+            added_on: self.added_on.into(),
+            last_used_on: self.last_used_on.into(),
+            flags: self.flags.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_factor_source_common_sample() -> FactorSourceCommon {
-    FactorSourceCommon::sample()
+    InternalFactorSourceCommon::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_common_sample_other() -> FactorSourceCommon {
-    FactorSourceCommon::sample_other()
+    InternalFactorSourceCommon::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_common_olympia() -> FactorSourceCommon {
-    FactorSourceCommon::new_olympia()
+    InternalFactorSourceCommon::new_olympia().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_common_babylon() -> FactorSourceCommon {
-    FactorSourceCommon::new_babylon()
+    InternalFactorSourceCommon::new_babylon().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_common_bdfs(is_main: bool) -> FactorSourceCommon {
-    FactorSourceCommon::new_bdfs(is_main)
+    InternalFactorSourceCommon::new_bdfs(is_main).into()
 }
 
 #[cfg(test)]

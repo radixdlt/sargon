@@ -27,6 +27,21 @@ where
     result.map_err(CommonError::from).map(T::from)
 }
 
+trait MapFromInternalResult<InternalType, Type> {
+    fn map_result(self) -> Result<Type>;
+}
+
+impl<InternalType, Type, E> MapFromInternalResult<InternalType, Type> for InternalResult<InternalType, E>
+where
+    Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalType`
+    E: Into<CommonError>,     // Allows flexible error conversion (or use a different error type)
+{
+    fn map_result(self) -> Result<Type> {
+        self.map(Type::from) // Converts Ok variant using From trait
+            .map_err(Into::into) // Converts Err variant using Into
+    }
+}
+
 
 impl From<InternalCommonError> for CommonError {
     fn from(value: InternalCommonError) -> Self {

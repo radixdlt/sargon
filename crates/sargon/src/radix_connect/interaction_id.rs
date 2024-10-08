@@ -14,7 +14,7 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
 )]
-pub struct WalletInteractionId(pub(crate) String);
+pub struct WalletInteractionId(pub String);
 
 impl FromStr for WalletInteractionId {
     type Err = CommonError;

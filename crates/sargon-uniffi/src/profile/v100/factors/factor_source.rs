@@ -3,89 +3,111 @@ use sargon::FactorSource as InternalFactorSource;
 
 #[derive(
     Clone,
-    EnumAsInner,
     Debug,
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Enum,
 )]
 pub enum FactorSource {
     Device {
-        #[display("DeviceFS({value})")]
         value: DeviceFactorSource,
     },
 
     Ledger {
-        #[display("LedgerHWFS({value})")]
         value: LedgerHardwareWalletFactorSource,
     },
 
     OffDeviceMnemonic {
-        #[display("OffDevice({value})")]
         value: OffDeviceMnemonicFactorSource,
     },
 
     ArculusCard {
-        #[display("ArculusCard({value})")]
         value: ArculusCardFactorSource,
     },
 
     SecurityQuestions {
-        #[display("SecurityQuestions({value})")]
         value: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
     },
 
     TrustedContact {
-        #[display("TrustedContact({value})")]
         value: TrustedContactFactorSource,
     },
 }
 
 impl From<InternalFactorSource> for FactorSource {
     fn from(value: InternalFactorSource) -> Self {
-       unimplemented!()
+        match value {
+            InternalFactorSource::Device { value } => FactorSource::Device {
+                value: value.into(),
+            },
+            InternalFactorSource::Ledger { value } => FactorSource::Ledger {
+                value: value.into(),
+            },
+            InternalFactorSource::OffDeviceMnemonic { value } => FactorSource::OffDeviceMnemonic {
+                value: value.into(),
+            },
+            InternalFactorSource::ArculusCard { value } => FactorSource::ArculusCard {
+                value: value.into(),
+            },
+            InternalFactorSource::SecurityQuestions { value } => FactorSource::SecurityQuestions {
+                value: value.into(),
+            },
+            InternalFactorSource::TrustedContact { value } => FactorSource::TrustedContact {
+                value: value.into(),
+            },
+        }
     }
 }
 
 impl Into<InternalFactorSource> for FactorSource {
     fn into(self) -> InternalFactorSource {
-        unimplemented!()
-    }
-}
-
-impl Identifiable for FactorSource {
-    type ID = FactorSourceID;
-
-    fn id(&self) -> Self::ID {
-        self.factor_source_id()
+        match self {
+            FactorSource::Device { value } => InternalFactorSource::Device {
+                value: value.into(),
+            },
+            FactorSource::Ledger { value } => InternalFactorSource::Ledger {
+                value: value.into(),
+            },
+            FactorSource::OffDeviceMnemonic { value } => InternalFactorSource::OffDeviceMnemonic {
+                value: value.into(),
+            },
+            FactorSource::ArculusCard { value } => InternalFactorSource::ArculusCard {
+                value: value.into(),
+            },
+            FactorSource::SecurityQuestions { value } => InternalFactorSource::SecurityQuestions {
+                value: value.into(),
+            },
+            FactorSource::TrustedContact { value } => InternalFactorSource::TrustedContact {
+                value: value.into(),
+            },
+        }
     }
 }
 
 #[uniffi::export]
 pub fn factor_source_to_string(factor_source: &FactorSource) -> String {
-    factor_source.to_string()
+    factor_source.into_internal().to_string()
 }
 
 #[uniffi::export]
 pub fn factor_source_supports_olympia(factor_source: &FactorSource) -> bool {
-    factor_source.supports_olympia()
+    factor_source.into_internal().supports_olympia()
 }
 
 #[uniffi::export]
 pub fn factor_source_supports_babylon(factor_source: &FactorSource) -> bool {
-    factor_source.supports_babylon()
+    factor_source.into_internal().supports_babylon()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_sample() -> FactorSource {
-    FactorSource::sample()
+    InternalFactorSource::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_sample_other() -> FactorSource {
-    FactorSource::sample_other()
+    InternalFactorSource::sample_other().into()
 }
 
 #[cfg(test)]

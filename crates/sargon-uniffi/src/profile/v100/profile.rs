@@ -45,27 +45,29 @@ pub struct Profile {
 
 impl From<InternalProfile> for Profile {
 	fn from(value: InternalProfile) -> Self {
-		unimplemented!()
+        Profile {
+            header: value.header.into(),
+            factor_sources: value.factor_sources.into(),
+            app_preferences: value.app_preferences.into(),
+            networks: value.networks.into(),
+        }
 	}
 }
 
 impl Into<InternalProfile> for Profile {
 	fn into(self) -> InternalProfile {
-		unimplemented!()
+        InternalProfile {
+            header: self.header.into(),
+            factor_sources: self.factor_sources.into(),
+            app_preferences: self.app_preferences.into(),
+            networks: self.networks.into(),
+        }
 	}
 }
 
 #[uniffi::export]
 pub fn new_profile_from_json_string(json_str: String) -> Result<Profile> {
-    Profile::new_from_json_string(json_str)
-}
-
-impl Profile {
-    pub fn new_from_json_string(json_str: impl AsRef<str>) -> Result<Profile> {
-        let json_str = json_str.as_ref();
-        serde_json::from_str(json_str)
-            .map_failed_to_deserialize_string::<Self>(json_str)
-    }
+    InternalProfile::new_from_json_string(json_str).map_result()
 }
 
 #[uniffi::export]
@@ -73,18 +75,7 @@ pub fn profile_to_json_string(
     profile: &Profile,
     pretty_printed: bool,
 ) -> String {
-    profile.to_json_string(pretty_printed)
-}
-
-impl Profile {
-    pub fn to_json_string(&self, pretty_printed: bool) -> String {
-        if pretty_printed {
-            serde_json::to_string_pretty(self)
-        } else {
-            serde_json::to_string(self)
-        }
-        .expect("Should always be able to JSON encode Profile.")
-    }
+    profile.into_internal().to_json_string(pretty_printed)
 }
 
 #[uniffi::export]
@@ -93,7 +84,7 @@ pub fn new_profile_with_mnemonic(
     host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    Profile::new(mnemonic, host_id, host_info)
+    InternalProfile::new(mnemonic.into(), host_id.into(), host_info.into()).into()
 }
 
 /// # Panics
@@ -104,32 +95,32 @@ pub fn new_profile(
     host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    Profile::from_device_factor_source(
-        device_factor_source,
-        host_id,
-        host_info,
+    InternalProfile::from_device_factor_source(
+        device_factor_source.into(),
+        host_id.into(),
+        host_info.into(),
         None::<Accounts>,
-    )
+    ).into()
 }
 
 #[uniffi::export]
 pub fn new_profile_sample() -> Profile {
-    Profile::sample()
+    InternalProfile::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_profile_sample_other() -> Profile {
-    Profile::sample_other()
+    InternalProfile::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn profile_to_string(profile: &Profile) -> String {
-    format!("{}", profile)
+    format!("{}", profile.into_internal())
 }
 
 #[uniffi::export]
 pub fn profile_to_debug_string(profile: &Profile) -> String {
-    format!("{:?}", profile)
+    format!("{:?}", profile.into_internal())
 }
 
 // ################

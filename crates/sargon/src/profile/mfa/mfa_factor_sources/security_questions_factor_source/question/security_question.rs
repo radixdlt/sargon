@@ -3,9 +3,7 @@ use crate::prelude::*;
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A specification of expected format for an answer to a security question.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
@@ -75,9 +73,7 @@ impl HasSampleValues
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A security question
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct Security_NOT_PRODUCTION_READY_Question {

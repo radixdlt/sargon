@@ -788,7 +788,7 @@ impl Decimal192 {
 
     /// The digits of the number, without separators or sign. The scale is fixed at 18, meaning the last 18 digits correspond to the decimal part.
     pub fn digits(&self) -> String {
-        self.abs().0.0.to_string() // mantissa
+        self.abs().0 .0.to_string() // mantissa
     }
 
     /// Rounds `self`` to `n` places, counting both the integer and decimal parts,

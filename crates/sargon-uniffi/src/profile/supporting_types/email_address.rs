@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::EmailAddress as InternalEmailAddress;
 
 /// An email address.
 ///
@@ -9,33 +10,32 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{email}")]
-#[debug("{email}")]
-#[serde(transparent)]
 pub struct EmailAddress {
     pub email: String,
 }
 
-impl Identifiable for EmailAddress {
-    type ID = String;
+impl From<InternalEmailAddress> for EmailAddress {
+    fn from(value: InternalEmailAddress) -> Self {
+        Self { email: value.0 }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.email.clone()
+impl Into<InternalEmailAddress> for EmailAddress {
+    fn into(self) -> InternalEmailAddress {
+        InternalEmailAddress(self.email)
     }
 }
 
 #[uniffi::export]
 pub fn new_email_address_sample() -> EmailAddress {
-    EmailAddress::sample()
+    InternalEmailAddress::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_email_address_sample_other() -> EmailAddress {
-    EmailAddress::sample_other()
+    InternalEmailAddress::sample_other().into()
 }
 
 #[cfg(test)]

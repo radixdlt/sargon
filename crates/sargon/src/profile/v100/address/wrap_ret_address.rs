@@ -142,6 +142,7 @@ macro_rules! decl_ret_wrapped_address {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
                 }
+
                 pub(crate) fn node_id(&self) -> ScryptoNodeId {
                     self.0.node_id()
                 }

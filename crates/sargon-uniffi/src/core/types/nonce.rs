@@ -1,36 +1,55 @@
 pub use crate::prelude::*;
-
-// Generate the FfiConverter needed by UniFFI for newtype `Nonce`.
-uniffi::custom_newtype!(NonceSecretMagic, u32);
+use sargon::Nonce as InternalNonce;
 
 #[derive(
-    Clone, Copy, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
 )]
-pub struct NonceSecretMagic(pub u32);
+pub struct Nonce {
+    value: u32,
+}
+
+impl From<InternalNonce> for Nonce {
+    fn from(value: InternalNonce) -> Self {
+        Self { value: value.0 }
+    }
+}
+
+impl Into<InternalNonce> for Nonce {
+    fn into(self) -> InternalNonce {
+        InternalNonce(self.value)
+    }
+}
 
 #[uniffi::export]
 pub fn new_nonce_random() -> Nonce {
-    Nonce::random()
+    InternalNonce::random().into()
 }
 
 #[uniffi::export]
 pub fn new_nonce_from_u32(value: u32) -> Nonce {
-    Nonce::from(value)
+    InternalNonce::from(value).into()
 }
 
 #[uniffi::export]
 pub fn new_nonce_sample() -> Nonce {
-    Nonce::sample()
+    InternalNonce::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_nonce_sample_other() -> Nonce {
-    Nonce::sample_other()
+    InternalNonce::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn nonce_get_value(nonce: Nonce) -> u32 {
-    u32::from(nonce)
+    u32::from(nonce.into())
 }
 
 #[cfg(test)]

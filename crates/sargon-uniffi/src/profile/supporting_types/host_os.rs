@@ -50,12 +50,12 @@ impl From<InternalHostOS> for HostOS {
 
 #[uniffi::export]
 pub fn new_host_os_ios(version: String) -> HostOS {
-    HostOS::ios(version)
+    InternalHostOS::ios(version).into()
 }
 
 #[uniffi::export]
 pub fn new_host_os_android(vendor: String, version: String) -> HostOS {
-    HostOS::android(vendor, version)
+    InternalHostOS::android(vendor, version).into()
 }
 
 #[uniffi::export]
@@ -64,32 +64,32 @@ pub fn new_host_os_other(
     vendor: String,
     version: String,
 ) -> HostOS {
-    HostOS::other(name, vendor, version)
+    InternalHostOS::other(name, vendor, version).into()
 }
 
 #[uniffi::export]
 pub fn host_os_get_name(host_os: &HostOS) -> String {
-    host_os.name()
+    host_os.into::<InternalHostOS>().name()
 }
 
 #[uniffi::export]
 pub fn host_os_get_vendor(host_os: &HostOS) -> String {
-    host_os.vendor()
+    host_os.into::<InternalHostOS>().vendor()
 }
 
 #[uniffi::export]
 pub fn host_os_get_version(host_os: &HostOS) -> String {
-    host_os.version()
+    host_os.into::<InternalHostOS>().version()
 }
 
 #[uniffi::export]
 pub fn new_host_os_sample() -> HostOS {
-    HostOS::sample()
+    InternalHostOS::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_host_os_sample_other() -> HostOS {
-    HostOS::sample_other()
+    InternalHostOS::sample_other().into()
 }
 
 #[cfg(test)]

@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone, PartialEq, Eq, Serialize, Deserialize, Debug,
-)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct UnvalidatedTransactionManifest {
     #[serde(rename = "transactionManifest")]
     pub transaction_manifest_string: String,

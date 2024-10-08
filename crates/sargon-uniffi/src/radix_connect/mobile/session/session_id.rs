@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use sargon::SessionID as InternalSessionID;
 
-uniffi::custom_newtype!(SessionID, Uuid);
-
 #[derive(
     Debug,
     Clone,
@@ -10,18 +8,21 @@ uniffi::custom_newtype!(SessionID, Uuid);
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
 )]
-pub struct SessionID(pub Uuid);
+pub struct SessionID {
+    pub value: Uuid,
+}
 
 impl From<InternalSessionID> for SessionID {
     fn from(value: InternalSessionID) -> Self {
-        Self(value.0)
+        Self {
+            value: value.0,
+        }
     }
 }
 
 impl Into<InternalSessionID> for SessionID {
     fn into(self) -> InternalSessionID {
-        InternalSessionID(self.0)
+        InternalSessionID(self.value)
     }
 }

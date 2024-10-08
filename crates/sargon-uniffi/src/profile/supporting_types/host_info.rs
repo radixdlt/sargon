@@ -2,9 +2,8 @@ use crate::prelude::*;
 use sargon::HostInfo as InternalHostInfo;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
-#[display("Host '{} {}' running on {}, firmware: {}", description.name, description.model, host_os, host_app_version)]
 pub struct HostInfo {
     /// A short description of the device. The host should
     /// read the device model and a given name from the device
@@ -20,24 +19,32 @@ pub struct HostInfo {
 
 impl From<InternalHostInfo> for HostInfo {
     fn from(value: InternalHostInfo) -> Self {
-        unimplemented!()
+        Self {
+            description: value.description.into(),
+            host_os: value.host_os.into(),
+            host_app_version: value.host_app_version,
+        }
     }
 }
 
 impl Into<InternalHostInfo> for HostInfo {
     fn into(self) -> InternalHostInfo {
-        unimplemented!()
+        InternalHostInfo {
+            description: self.description.into(),
+            host_os: self.host_os.into(),
+            host_app_version: self.host_app_version,
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_host_info_sample() -> HostInfo {
-    HostInfo::sample()
+    InternalHostInfo::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_host_info_sample_other() -> HostInfo {
-    HostInfo::sample_other()
+    InternalHostInfo::sample_other().into()
 }
 
 #[cfg(test)]

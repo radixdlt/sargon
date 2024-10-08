@@ -23,6 +23,14 @@ macro_rules! decl_secret_bytes {
                 }
            }
 
+           impl TryFrom<BagOfBytes> for $struct_name {
+            type Error = CommonError;
+            fn try_from(value: BagOfBytes) -> Result<Self> {
+                let fixed_size: &[u8; $byte_count] = value.as_ref().try_into().map_err(|_| CommonError::InvalidByteCount { expected: $byte_count as u64, found: value.len() as u64 })?;
+                Ok(Self(Box::new(*fixed_size)))
+            }
+        }
+
             impl HasSampleValues for $struct_name {
                 fn sample() -> Self {
                     Self (Box::new([0xab; $byte_count]))

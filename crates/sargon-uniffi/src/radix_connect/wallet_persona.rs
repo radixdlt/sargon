@@ -2,7 +2,6 @@ use crate::prelude::*;
 use sargon::DappWalletInteractionPersona as InternalDappWalletInteractionPersona;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
 pub struct DappWalletInteractionPersona {
     pub identity_address: IdentityAddress,
     pub label: String,

@@ -9,9 +9,7 @@ decl_identified_vec_of!(
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
-#[derive(
-    Debug, Clone, PartialEq, Eq, Hash, derive_more::Display,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
 #[display("current: {}, other: {}", current, other)]
 pub struct SavedGateways {
     /// The currently used Gateway, when a user query's asset balances of

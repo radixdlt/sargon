@@ -6,11 +6,3 @@ decl_identified_vec_of!(
     /// marked as hidden or not.
     EntityFlag
 );
-
-impl Identifiable for EntityFlag {
-    type ID = Self;
-
-    fn id(&self) -> Self::ID {
-        *self
-    }
-}

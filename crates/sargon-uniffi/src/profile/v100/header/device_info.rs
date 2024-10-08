@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DeviceInfo as InternalDeviceInfo;
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -8,10 +9,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{} | created: {} | #{}", description, self.date.date(), id.to_string())]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this
     /// device.
@@ -60,16 +59,42 @@ pub struct DeviceInfo {
     pub host_vendor: Option<String>,
 }
 
+impl From<InternalDeviceInfo> for DeviceInfo {
+    fn from(value: InternalDeviceInfo) -> Self {
+        Self {
+            id: value.id.into(),
+            date: value.date.into(),
+            description: value.description,
+            system_version: value.system_version,
+            host_app_version: value.host_app_version,
+            host_vendor: value.host_vendor,
+        }
+    }
+}
+
+impl Into<InternalDeviceInfo> for DeviceInfo {
+    fn into(self) -> InternalDeviceInfo {
+        InternalDeviceInfo {
+            id: self.id.into(),
+            date: self.date.into(),
+            description: self.description,
+            system_version: self.system_version,
+            host_app_version: self.host_app_version,
+            host_vendor: self.host_vendor,
+        }
+    }
+}
+
 json_data_convertible!(DeviceInfo);
 
 #[uniffi::export]
 pub fn new_device_info_sample() -> DeviceInfo {
-    DeviceInfo::sample()
+    InternalDeviceInfo::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_device_info_sample_other() -> DeviceInfo {
-    DeviceInfo::sample_other()
+    InternalDeviceInfo::sample_other().into()
 }
 
 #[uniffi::export]
@@ -77,7 +102,7 @@ pub fn new_device_info_from_host_info(
     host_id: &HostId,
     host_info: &HostInfo,
 ) -> DeviceInfo {
-    DeviceInfo::new_from_info(host_id, host_info)
+    InternalDeviceInfo::new_from_info(host_id.into(), host_info.into()).into()
 }
 
 #[cfg(test)]

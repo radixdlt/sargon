@@ -5,9 +5,7 @@ decl_matrix_of_factors!(
     FactorInstance
 );
 
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityStructureOfFactorInstances {
     /// The ID of the `SecurityStructureOfFactorSourceIDs` in

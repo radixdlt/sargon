@@ -1,9 +1,9 @@
 use crate::prelude::*;
+use sargon::AuthorizedDappDetailed as InternalAuthorizedDappDetailed;
 
 #[derive(
-    Clone, Debug, PartialEq, Hash, Eq, derive_more::Display, uniffi::Record,
+    Clone, Debug, PartialEq, Hash, Eq uniffi::Record,
 )]
-#[display("{dapp_definition_address}")]
 pub struct AuthorizedDappDetailed {
     pub network_id: NetworkID,
 
@@ -16,22 +16,38 @@ pub struct AuthorizedDappDetailed {
     pub preferences: AuthorizedDappPreferences,
 }
 
-impl Identifiable for AuthorizedDappDetailed {
-    type ID = AccountAddress;
+impl From<InternalAuthorizedDappDetailed> for AuthorizedDappDetailed {
+    fn from(value: InternalAuthorizedDappDetailed) -> Self {
+        Self {
+            network_id: value.network_id.into(),
+            dapp_definition_address: value.dapp_definition_address.into(),
+            display_name: value.display_name.map(Into::into),
+            detailed_authorized_personas: value.detailed_authorized_personas.into(),
+            preferences: value.preferences.into(),
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.dapp_definition_address
+impl Into<InternalAuthorizedDappDetailed> for AuthorizedDappDetailed {
+    fn into(self) -> InternalAuthorizedDappDetailed {
+        InternalAuthorizedDappDetailed {
+            network_id: self.network_id.into(),
+            dapp_definition_address: self.dapp_definition_address.into(),
+            display_name: self.display_name.map(Into::into),
+            detailed_authorized_personas: self.detailed_authorized_personas.into(),
+            preferences: self.preferences.into(),
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_authorized_dapp_detailed_sample() -> AuthorizedDappDetailed {
-    AuthorizedDappDetailed::sample()
+    InternalAuthorizedDappDetailed::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_dapp_detailed_sample_other() -> AuthorizedDappDetailed {
-    AuthorizedDappDetailed::sample_other()
+    InternalAuthorizedDappDetailed::sample_other().into()
 }
 
 #[cfg(test)]

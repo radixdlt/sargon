@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::ResourceAppPreference as InternalResourceAppPreference;
 
 /// A preference the user has configured off-ledger for a given resource.
 /// Allows users, for example, to hide a given resource on their accounts.
@@ -15,9 +16,20 @@ pub struct ResourceAppPreference {
     pub visibility: ResourceVisibility,
 }
 
-impl Identifiable for ResourceAppPreference {
-    type ID = ResourceIdentifier;
-    fn id(&self) -> Self::ID {
-        self.resource.clone()
+impl From<InternalResourceAppPreference> for ResourceAppPreference {
+    fn from(value: InternalResourceAppPreference) -> Self {
+        Self {
+            resource: value.resource.into(),
+            visibility: value.visibility.into(),
+        }
+    }
+}
+
+impl Into<InternalResourceAppPreference> for ResourceAppPreference {
+    fn into(self) -> InternalResourceAppPreference {
+        InternalResourceAppPreference {
+            resource: self.resource.into(),
+            visibility: self.visibility.into(),
+        }
     }
 }

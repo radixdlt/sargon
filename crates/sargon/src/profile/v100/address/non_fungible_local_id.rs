@@ -46,7 +46,7 @@ impl NonFungibleLocalId {
 }
 
 impl NonFungibleLocalId {
-    pub(crate) fn random() -> Self {
+    pub fn random() -> Self {
         Self::Bytes {
             value: NonEmptyMax64Bytes::generate(),
         }

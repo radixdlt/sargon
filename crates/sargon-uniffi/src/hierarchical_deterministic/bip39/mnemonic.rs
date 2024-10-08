@@ -1,18 +1,14 @@
 use crate::prelude::*;
+use sargon::Mnemonic as InternalMnemonic;
 
 #[derive(
     Zeroize,
     Clone,
-    /* NEVER COPY! We wanna require explicit copying */
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.to_obfuscated_string())]
-#[debug("{:?}", self.partially_obfuscated_string())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
 
@@ -23,18 +19,42 @@ pub struct Mnemonic {
     pub language: BIP39Language,
 }
 
+impl From<InternalMnemonic> for Mnemonic {
+    fn from(value: InternalMnemonic) -> Self {
+        Self {
+            words: value
+                .words
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            word_count: value.word_count.into(),
+            language: value.language.into(),
+        }
+    }
+}
+
+impl Into<InternalMnemonic> for Mnemonic {
+    fn into(self) -> InternalMnemonic {
+        InternalMnemonic {
+            words: self.words.into_iter().map(Into::into).collect(),
+            word_count: self.word_count.into(),
+            language: self.language.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_mnemonic_generate_with_entropy(
     entropy: BIP39Entropy,
     language: BIP39Language,
 ) -> Mnemonic {
-    Mnemonic::from_entropy_in(entropy, language)
+    InternalMnemonic::from_entropy_in(entropy.into(), language.into()).into()
 }
 
 /// Returns new mnemonic from a string of words
 #[uniffi::export]
 pub fn new_mnemonic_from_phrase(phrase: String) -> Result<Mnemonic> {
-    Mnemonic::from_phrase(&phrase)
+   map_result_from_internal(InternalMnemonic::from_phrase(&phrase))
 }
 
 #[uniffi::export]
@@ -42,88 +62,88 @@ pub fn new_mnemonic_from_phrase_language(
     phrase: String,
     language: BIP39Language,
 ) -> Result<Mnemonic> {
-    Mnemonic::from(&phrase, language)
+    map_result_from_internal(MnemInternalMnemoniconic::from(&phrase, language.into()))
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_from_words(words: Vec<BIP39Word>) -> Result<Mnemonic> {
-    Mnemonic::from_words(words)
+    map_result_from_internal(InternalMnemonic::from_words(words.into_iter().map(Into::into)))
 }
 
 /// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
 #[uniffi::export]
 pub fn mnemonic_phrase(from: &Mnemonic) -> String {
-    from.phrase()
+    from.into::<InternalMnemonic>().phrase()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample() -> Mnemonic {
-    Mnemonic::sample()
+    InternalMnemonic::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_other() -> Mnemonic {
-    Mnemonic::sample_other()
+    InternalMnemonic::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_device() -> Mnemonic {
-    Mnemonic::sample_device()
+    InternalMnemonic::sample_device().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_device_other() -> Mnemonic {
-    Mnemonic::sample_device_other()
+    InternalMnemonic::sample_device_other().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_device_12_words() -> Mnemonic {
-    Mnemonic::sample_device_12_words()
+    InternalMnemonic::sample_device_12_words().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_device_12_words_other() -> Mnemonic {
-    Mnemonic::sample_device_12_words_other()
+    InternalMnemonic::sample_device_12_words_other().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_ledger() -> Mnemonic {
-    Mnemonic::sample_ledger()
+    InternalMnemonic::sample_ledger().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_ledger_other() -> Mnemonic {
-    Mnemonic::sample_ledger_other()
+    InternalMnemonic::sample_ledger_other().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_off_device() -> Mnemonic {
-    Mnemonic::sample_off_device()
+    InternalMnemonic::sample_off_device().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_off_device_other() -> Mnemonic {
-    Mnemonic::sample_off_device_other()
+    InternalMnemonic::sample_off_device_other().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_security_questions() -> Mnemonic {
-    Mnemonic::sample_security_questions()
+    InternalMnemonic::sample_security_questions().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_security_questions_other() -> Mnemonic {
-    Mnemonic::sample_security_questions_other()
+    InternalMnemonic::sample_security_questions_other().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_arculus() -> Mnemonic {
-    Mnemonic::sample_arculus()
+    InternalMnemonic::sample_arculus().into()
 }
 
 #[uniffi::export]
 pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
-    Mnemonic::sample_arculus_other()
+    InternalMnemonic::sample_arculus_other().into()
 }
 
 #[cfg(test)]

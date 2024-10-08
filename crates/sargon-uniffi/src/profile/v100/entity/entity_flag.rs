@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::EntityFlag as InternalEntityFlag;
 
 /// Flags used to mark state of an Account or Persona such as whether
 /// user has marked it as deleted or not.
@@ -9,13 +10,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    enum_iterator::Sequence,
-    derive_more::Display,
     uniffi::Enum,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum EntityFlag {
     /// The entity is marked as deleted by user. Entity should still be kept in Profile
     DeletedByUser,
@@ -24,14 +20,32 @@ pub enum EntityFlag {
     PlaceholderSampleValueFlag,
 }
 
+impl From<InternalEntityFlag> for EntityFlag {
+    fn from(value: InternalEntityFlag) -> Self {
+        match value {
+            InternalEntityFlag::DeletedByUser => Self::DeletedByUser,
+            InternalEntityFlag::PlaceholderSampleValueFlag => Self::PlaceholderSampleValueFlag,
+        }
+    }
+}
+
+impl Into<InternalEntityFlag> for EntityFlag {
+    fn into(self) -> InternalEntityFlag {
+        match self {
+            EntityFlag::DeletedByUser => InternalEntityFlag::DeletedByUser,
+            EntityFlag::PlaceholderSampleValueFlag => InternalEntityFlag::PlaceholderSampleValueFlag,
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_entity_flag_sample() -> EntityFlag {
-    EntityFlag::sample()
+    InternalEntityFlag::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_entity_flag_sample_other() -> EntityFlag {
-    EntityFlag::sample_other()
+    InternalEntityFlag::sample_other().into()
 }
 
 #[cfg(test)]

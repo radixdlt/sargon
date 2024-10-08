@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Header as InternalHeader;
 
 /// The header of a Profile(Snapshot) contains crucial metadata
 /// about this Profile, such as which JSON data format it is
@@ -10,10 +11,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
@@ -35,11 +34,29 @@ pub struct Header {
     pub content_hint: ContentHint,
 }
 
-impl Identifiable for Header {
-    type ID = ProfileID;
+impl From<InternalHeader> for Header {
+    fn from(value: InternalHeader) -> Self {
+        Self {
+            snapshot_version: value.snapshot_version.into(),
+            id: value.id.into(),
+            creating_device: value.creating_device.into(),
+            last_used_on_device: value.last_used_on_device.into(),
+            last_modified: value.last_modified.into(),
+            content_hint: value.content_hint.into(),
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.id
+impl Into<InternalHeader> for Header {
+    fn into(self) -> InternalHeader {
+        InternalHeader {
+            snapshot_version: self.snapshot_version.into(),
+            id: self.id.into(),
+            creating_device: self.creating_device.into(),
+            last_used_on_device: self.last_used_on_device.into(),
+            last_modified: self.last_modified.into(),
+            content_hint: self.content_hint.into(),
+        }
     }
 }
 
@@ -47,19 +64,19 @@ json_data_convertible!(Header);
 
 #[uniffi::export]
 pub fn new_header_sample() -> Header {
-    Header::sample()
+    InternalHeader::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_header_sample_other() -> Header {
-    Header::sample_other()
+    InternalHeader::sample_other().into()
 }
 
 /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
 /// "Unknown device" as description, and empty content hint
 #[uniffi::export]
 pub fn new_header_with_creating_device(creating_device: DeviceInfo) -> Header {
-    Header::new(creating_device)
+    InternalHeader::new(creating_device.into()).into()
 }
 
 #[cfg(test)]

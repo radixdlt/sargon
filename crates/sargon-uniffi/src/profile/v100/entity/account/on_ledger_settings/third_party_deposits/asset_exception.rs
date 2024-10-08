@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AssetException as InternalAssetException;
 
 /// The specific Asset exception rule, which overrides the general
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
@@ -9,10 +10,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("rule: {}, address: {}", self.exception_rule, self.address)]
 pub struct AssetException {
     /// Address of an asset to either deny or allow, as an exception overriding the `ThirdPartyDeposits`'s general `deposit_rule`.
     pub address: ResourceAddress,
@@ -21,24 +20,32 @@ pub struct AssetException {
     pub exception_rule: DepositAddressExceptionRule,
 }
 
-impl Identifiable for AssetException {
-    type ID = ResourceAddress;
-
-    fn id(&self) -> Self::ID {
-        self.address
+impl From<InternalAssetException> for AssetException {
+    fn from(value: InternalAssetException) -> Self {
+        Self {
+            address: value.address.into(),
+            exception_rule: value.exception_rule.into(),
+        }
     }
 }
 
-use crate::prelude::*;
+impl Into<InternalAssetException> for AssetException {
+    fn into(self) -> InternalAssetException {
+        InternalAssetException {
+            address: self.address.into(),
+            exception_rule: self.exception_rule.into(),
+        }
+    }
+}
 
 #[uniffi::export]
 pub fn new_asset_exception_sample() -> AssetException {
-    AssetException::sample()
+    InternalAssetException::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_asset_exception_sample_other() -> AssetException {
-    AssetException::sample_other()
+    InternalAssetException::sample_other().into()
 }
 
 #[cfg(test)]

@@ -1,21 +1,17 @@
 use crate::prelude::*;
+use sargon::BIP39WordCount as InternalBIP39WordCount;
 
 /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
 /// standard, a multiple of 3, from 12 to 24 words. All "Babylon" `DeviceFactorSource`s
 /// use 24 words.
 #[derive(
-    Serialize_repr,
-    Deserialize_repr,
-    FromRepr,
     Clone,
     Copy,
     Debug,
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    enum_iterator::Sequence,
-    Ord,
+
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -36,9 +32,33 @@ pub enum BIP39WordCount {
     Twelve = 12,
 }
 
+impl From<InternalBIP39WordCount> for BIP39WordCount {
+    fn from(value: InternalBIP39WordCount) -> Self {
+        match value {
+            InternalBIP39WordCount::TwentyFour => BIP39WordCount::TwentyFour,
+            InternalBIP39WordCount::TwentyOne => BIP39WordCount::TwentyOne,
+            InternalBIP39WordCount::Eighteen => BIP39WordCount::Eighteen,
+            InternalBIP39WordCount::Fifteen => BIP39WordCount::Fifteen,
+            InternalBIP39WordCount::Twelve => BIP39WordCount::Twelve,
+        }
+    }
+}
+
+impl Into<InternalBIP39WordCount> for BIP39WordCount {
+    fn into(self) -> InternalBIP39WordCount {
+        match self {
+            BIP39WordCount::TwentyFour => InternalBIP39WordCount::TwentyFour,
+            BIP39WordCount::TwentyOne => InternalBIP39WordCount::TwentyOne,
+            BIP39WordCount::Eighteen => InternalBIP39WordCount::Eighteen,
+            BIP39WordCount::Fifteen => InternalBIP39WordCount::Fifteen,
+            BIP39WordCount::Twelve => InternalBIP39WordCount::Twelve,
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn bip39_word_count_all() -> Vec<BIP39WordCount> {
-    BIP39WordCount::all()
+    InternalBIP39WordCount::all().into_iter().map(Into::into).collect()
 }
 
 #[cfg(test)]

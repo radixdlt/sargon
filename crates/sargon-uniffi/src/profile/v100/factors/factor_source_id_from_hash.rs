@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_common::crypto::{blake2b_256_hash, Hash};
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
@@ -22,13 +21,19 @@ pub struct FactorSourceIDFromHash {
 
 impl From<InternalFactorSourceIDFromHash> for FactorSourceIDFromHash {
     fn from(value: InternalFactorSourceIDFromHash) -> Self {
-        unimplemented!()
+        Self {
+            kind: value.kind.into(),
+            body: value.body.into(),
+        }
     }
 }
 
 impl Into<InternalFactorSourceIDFromHash> for FactorSourceIDFromHash {
     fn into(self) -> InternalFactorSourceIDFromHash {
-        unimplemented!()
+        InternalFactorSourceIDFromHash {
+            kind: self.kind.into(),
+            body: self.body.into(),
+        }
     }
 }
 
@@ -38,7 +43,7 @@ json_data_convertible!(FactorSourceIDFromHash);
 pub fn factor_source_id_from_hash_to_string(
     factor_source_id: &FactorSourceIDFromHash,
 ) -> String {
-    factor_source_id.to_string()
+    factor_source_id.into_internal().to_string()
 }
 
 #[uniffi::export]
@@ -46,20 +51,20 @@ pub fn new_factor_source_id_from_hash_from_mnemonic_with_passphrase(
     factor_source_kind: FactorSourceKind,
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
 ) -> FactorSourceIDFromHash {
-    FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-        factor_source_kind,
-        mnemonic_with_passphrase,
-    )
+    InternalFactorSourceIDFromHash::from_mnemonic_with_passphrase(
+        factor_source_kind.into(),
+        &mnemonic_with_passphrase.into(),
+    ).into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_id_from_hash_sample() -> FactorSourceIDFromHash {
-    FactorSourceIDFromHash::sample()
+    InternalFactorSourceIDFromHash::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_id_from_hash_sample_other() -> FactorSourceIDFromHash {
-    FactorSourceIDFromHash::sample_other()
+    InternalFactorSourceIDFromHash::sample_other().into()
 }
 
 #[cfg(test)]

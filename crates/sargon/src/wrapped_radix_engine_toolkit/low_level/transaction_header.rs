@@ -1,14 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, derive_more::Display)]
 #[display("{} nonce: {}", network_id, nonce)]
 pub struct TransactionHeader {
     pub network_id: NetworkID,

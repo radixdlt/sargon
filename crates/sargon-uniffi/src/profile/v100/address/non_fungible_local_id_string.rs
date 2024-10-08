@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::NonFungibleLocalIdString as InternalNonFungibleLocalIdString;
 
 /// A string matching `[_0-9a-zA-Z]{1,64}`.
 ///
@@ -13,36 +14,29 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[debug("{}", self.to_string())]
-#[display("{}", self.secret_magic.value().to_owned())]
 pub struct NonFungibleLocalIdString {
-    secret_magic: ScryptoStringNonFungibleLocalId,
+    value: String,
+}
+
+impl From<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
+    fn from(value: InternalNonFungibleLocalIdString) -> Self {
+        Self { value: value.to_string() }
+    }
+}
+
+impl TryInto<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
+    type Error = CommonError;
+
+    fn try_into(self) -> Result<InternalNonFungibleLocalIdString> {
+        self.value.parse::<InternalNonFungibleLocalIdString>()
+    }
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_string_from_str(
     string: String,
 ) -> Result<NonFungibleLocalIdString> {
-    string.parse()
-}
-
-
-uniffi::custom_type!(ScryptoStringNonFungibleLocalId, String);
-
-impl crate::UniffiCustomTypeConverter for ScryptoStringNonFungibleLocalId {
-    type Builtin = String;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        scrypto_string_non_fungible_local_id(val).map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.value().to_owned()
-    }
+    NonFungibleLocalIdString { value: string }.try_into().map_result()
 }

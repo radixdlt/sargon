@@ -49,6 +49,17 @@ macro_rules! decl_specialized_address {
                     <Self as AddressViaRet>::new(self.node_id(), network_id).expect("Should always be able to map an address to a different network.")
                 }
 
+                pub fn new_from_bech32(bech32: String) -> Result<Self> {
+                    $base_addr::try_from_bech32(&bech32).and_then(TryInto::try_into)
+                }
+
+                pub fn network_id(&self) -> NetworkID {
+                    self.0.network_id()
+                }
+
+                pub fn bech32_address(&self) -> String {
+                    self.0.to_string()
+                }
             }
 
             impl TryFrom<$base_addr> for $specialized_address_type {

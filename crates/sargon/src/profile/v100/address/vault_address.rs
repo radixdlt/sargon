@@ -28,19 +28,19 @@ impl VaultAddress {
 }
 
 impl VaultAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_fungible()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_non_fungible()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_fungible()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_non_fungible()
     }
 }

@@ -10,9 +10,7 @@ decl_identified_vec_of!(
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a

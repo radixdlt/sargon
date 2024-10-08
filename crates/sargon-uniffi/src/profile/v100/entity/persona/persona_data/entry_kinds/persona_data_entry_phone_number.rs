@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PersonaDataEntryPhoneNumber as InternalPersonaDataEntryPhoneNumber;
 
 /// A persons telephone number they have chosen to associated with a Persona, e.g.
 /// `+46 987 654 321` (don't try calling this number, it does not exist).
@@ -10,21 +11,25 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{number}")]
-#[debug("{number}")]
 pub struct PersonaDataEntryPhoneNumber {
     pub number: String,
 }
 
-impl Identifiable for PersonaDataEntryPhoneNumber {
-    type ID = String;
+impl From<InternalPersonaDataEntryPhoneNumber> for PersonaDataEntryPhoneNumber {
+    fn from(value: InternalPersonaDataEntryPhoneNumber) -> Self {
+        Self {
+            number: value.number,
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.number.clone()
+impl Into<InternalPersonaDataEntryPhoneNumber> for PersonaDataEntryPhoneNumber {
+    fn into(self) -> InternalPersonaDataEntryPhoneNumber {
+        InternalPersonaDataEntryPhoneNumber {
+            number: self.number,
+        }
     }
 }
 
@@ -33,13 +38,13 @@ json_string_convertible!(PersonaDataEntryPhoneNumber);
 #[uniffi::export]
 pub fn new_persona_data_entry_phone_number_sample(
 ) -> PersonaDataEntryPhoneNumber {
-    PersonaDataEntryPhoneNumber::sample()
+    InternalPersonaDataEntryPhoneNumber::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_data_entry_phone_number_sample_other(
 ) -> PersonaDataEntryPhoneNumber {
-    PersonaDataEntryPhoneNumber::sample_other()
+    InternalPersonaDataEntryPhoneNumber::sample_other().into()
 }
 
 #[cfg(test)]

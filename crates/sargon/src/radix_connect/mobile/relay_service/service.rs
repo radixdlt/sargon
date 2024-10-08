@@ -133,7 +133,9 @@ mod tests {
             // Serialize the response
             let wallet_to_dapp_interaction_response =
                 WalletToDappInteractionResponse::sample();
-            let body = wallet_to_dapp_interaction_response.serialize_to_bytes().unwrap();
+            let body = wallet_to_dapp_interaction_response
+                .serialize_to_bytes()
+                .unwrap();
 
             // Encrypt the response
             let encrypted = EncryptionScheme::default()

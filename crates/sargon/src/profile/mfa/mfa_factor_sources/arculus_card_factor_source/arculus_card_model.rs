@@ -31,11 +31,10 @@ impl Default for ArculusCardModel {
 impl FromStr for ArculusCardModel {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        s.deserialize().map_err(|_| {
-            CommonError::InvalidArculusCardModel {
+        s.deserialize()
+            .map_err(|_| CommonError::InvalidArculusCardModel {
                 bad_value: s.to_owned(),
-            }
-        })
+            })
     }
 }
 

@@ -13,6 +13,8 @@ macro_rules! address_union {
         )+
     ) => {
         paste! {
+            use sargon::$union_name as InternalAddressUnion;
+
             $(
                 #[doc = $expr]
             )*
@@ -22,8 +24,6 @@ macro_rules! address_union {
                 PartialEq,
                 Eq,
                 Hash,
-                derive_more::Display,
-                derive_more::Debug,
                 uniffi::Enum,
             )]
             pub enum $union_name {
@@ -32,30 +32,56 @@ macro_rules! address_union {
                 )+
             }
 
+            impl From<InternalAddressUnion> for $union_name {
+                fn from(value: InternalAddressUnion) -> Self {
+                    match value {
+                        $(
+                            InternalAddressUnion::$variant_name(address) => Self::$variant_name(address.into()),
+                        )+
+                    }
+                }
+            }
+
+            impl Into<InternalAddressUnion> for $union_name {
+                fn into(self) -> InternalAddressUnion {
+                    match self {
+                        $(
+                            Self::$variant_name(address) => InternalAddressUnion::$variant_name(address.into()),
+                        )+
+                    }
+                }
+            }
+
+            impl $union_name {
+               fn into_internal(&self) -> InternalAddressUnion {
+                    self.into()
+                }
+            }
+
             #[uniffi::export]
             pub fn [< new_ $union_name:snake _from_bech32 >](
                 string: String,
             ) -> Result<$union_name> {
-                $union_name::new_from_bech32(&string)
+                InternalAddressUnion::new_from_bech32(&string)
             }
 
             #[uniffi::export]
             pub fn [< $union_name:snake _to_string >](
                 address: &$union_name,
             ) -> String {
-                address.to_string()
+                address.into_internal().to_string()
             }
 
             #[uniffi::export]
             pub fn [< $union_name:snake _formatted>](address: &$union_name, format: AddressFormat) -> String {
-                address.formatted(format)
+                address.into_internal().formatted(format.into())
             }
 
             #[uniffi::export]
             pub fn [< $union_name:snake _network_id >](
                 address: &$union_name,
             ) -> NetworkID {
-                address.network_id()
+                address.into_internal().network_id().into()
             }
 
             #[uniffi::export]
@@ -63,33 +89,33 @@ macro_rules! address_union {
                 address: &$union_name,
                 network_id: NetworkID,
             ) -> $union_name {
-                address.map_to_network(network_id)
+                address.into_internal().map_to_network(network_id.into()).into()
             }
 
 
             #[uniffi::export]
             pub fn [< $union_name:snake _sample_values_all>]() -> Vec<$union_name> {
-                $union_name::sample_values_all()
+                InternalAddressUnion::sample_values_all().into_iter().map(Into::into).collect()
             }
 
             #[uniffi::export]
             pub(crate) fn [< new_ $union_name:snake _sample_mainnet >]() -> $union_name {
-                $union_name::sample_mainnet()
+                InternalAddressUnion::sample_mainnet().into()
             }
 
             #[uniffi::export]
             pub(crate) fn [< new_ $union_name:snake _sample_mainnet_other >]() -> $union_name {
-                $union_name::sample_mainnet_other()
+                InternalAddressUnion::sample_mainnet_other().into()
             }
 
             #[uniffi::export]
             pub(crate) fn [< new_ $union_name:snake _sample_stokenet >]() -> $union_name {
-                $union_name::sample_stokenet()
+                InternalAddressUnion::sample_stokenet().into()
             }
 
             #[uniffi::export]
             pub(crate) fn [< new_ $union_name:snake _sample_stokenet_other >]() -> $union_name {
-                $union_name::sample_stokenet_other()
+                InternalAddressUnion::sample_stokenet_other().into()
             }
 
             $(

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::ops::Deref;
+use sargon::Gateway as InternalGateway;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
@@ -10,12 +10,8 @@ use std::ops::Deref;
     Ord,
     PartialOrd,
     Hash,
-    derive_more::Display,
-    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.url.to_string())]
-#[debug("{}: {}", self.network.display_description, self.url.to_string())]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     pub network: NetworkDefinition,
@@ -24,39 +20,47 @@ pub struct Gateway {
     pub url: Url,
 }
 
-impl Identifiable for Gateway {
-    type ID = Url;
-
-    fn id(&self) -> Self::ID {
-        self.url.clone()
+impl From<InternalGateway> for Gateway {
+    fn from(value: InternalGateway) -> Self {
+        Self {
+            network: value.network.into(),
+            url: value.url.into(),
+        }
     }
 }
 
-use crate::prelude::*;
+impl Into<InternalGateway> for Gateway {
+    fn into(self) -> InternalGateway {
+        InternalGateway {
+            network: self.network.into(),
+            url: self.url.into(),
+        }
+    }
+}
 
 #[uniffi::export]
 pub fn new_gateway_sample() -> Gateway {
-    Gateway::sample()
+    InternalGateway::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_gateway_sample_other() -> Gateway {
-    Gateway::sample_other()
+    InternalGateway::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_gateway_for_network_id(network_id: NetworkID) -> Gateway {
-    Gateway::from(network_id)
+    InternalGateway::from(network_id.into()).into()
 }
 
 #[uniffi::export]
 pub fn gateway_mainnet() -> Gateway {
-    Gateway::mainnet()
+    InternalGateway::mainnet().into()
 }
 
 #[uniffi::export]
 pub fn gateway_stokenet() -> Gateway {
-    Gateway::stokenet()
+    InternalGateway::stokenet().into()
 }
 
 #[uniffi::export]
@@ -64,27 +68,27 @@ pub fn new_gateway_with_url_on_network(
     url: String,
     network_id: NetworkID,
 ) -> Result<Gateway> {
-    Gateway::new(url, network_id)
+    InternalGateway::new(url, network_id.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn gateway_wellknown_gateways() -> Gateways {
-    Gateway::wellknown()
+    InternalGateway::wellknown().into()
 }
 
 #[uniffi::export]
 pub fn gateway_is_wellknown(gateway: &Gateway) -> bool {
-    gateway.is_wellknown()
+    gateway.into_internal().is_wellknown()
 }
 
 #[uniffi::export]
 pub fn gateway_to_string(gateway: &Gateway) -> String {
-    gateway.to_string()
+    gateway.into_internal().to_string()
 }
 
 #[uniffi::export]
 pub fn gateway_id(gateway: &Gateway) -> Url {
-    gateway.id()
+    gateway.into_internal().id()
 }
 
 #[cfg(test)]

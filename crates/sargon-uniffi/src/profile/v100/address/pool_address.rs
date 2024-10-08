@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::PoolKind as InternalPoolKind;
 
 decl_ret_wrapped_address!(
     /// Addresses identifying an OnLedger (OnNetwork) Liquidity Pool (LP) of tokens that users can contribute
@@ -36,46 +37,66 @@ pub enum PoolKind {
     MultiResources,
 }
 
+impl From<InternalPoolKind> for PoolKind {
+    fn from(kind: InternalPoolKind) -> Self {
+        match kind {
+            InternalPoolKind::OneResource => PoolKind::OneResource,
+            InternalPoolKind::TwoResources => PoolKind::TwoResources,
+            InternalPoolKind::MultiResources => PoolKind::MultiResources,
+        }
+    }
+}
+
+impl Into<InternalPoolKind> for PoolKind {
+    fn into(self) -> InternalPoolKind {
+        match self {
+            PoolKind::OneResource => InternalPoolKind::OneResource,
+            PoolKind::TwoResources => InternalPoolKind::TwoResources,
+            PoolKind::MultiResources => InternalPoolKind::MultiResources,
+        }
+    }
+}
+
 /// Returns the kind of pool, either 1, 2 or Multi resources.
 #[uniffi::export]
 pub fn pool_address_kind(address: &PoolAddress) -> PoolKind {
-    address.pool_address_kind()
+    address.into_internal().pool_address_kind().into()
 }
 
 /// Sample to a mainnet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_single() -> PoolAddress {
-    PoolAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 /// Sample to a mainnet PoolAddress with two resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_two() -> PoolAddress {
-    PoolAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 /// Sample to a mainnet PoolAddress with three resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_multi() -> PoolAddress {
-    PoolAddress::sample_mainnet_multi_pool()
+    InternalAddress::sample_mainnet_multi_pool().into()
 }
 
 /// Sample to a stokenet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_single() -> PoolAddress {
-    PoolAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 /// Sample to a stokenet PoolAddress with two resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_two() -> PoolAddress {
-    PoolAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 /// Sample to a stokenet PoolAddress with three resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_multi() -> PoolAddress {
-    PoolAddress::sample_stokenet_multi_pool()
+    InternalAddress::sample_stokenet_multi_pool().into()
 }
 
 #[cfg(test)]

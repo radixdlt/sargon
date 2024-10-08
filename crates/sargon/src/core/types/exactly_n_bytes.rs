@@ -74,7 +74,7 @@ macro_rules! decl_exactly_n_bytes {
 
             impl TryFrom<&[u8]> for [<Exactly $byte_count Bytes>] {
                 type Error = crate::CommonError;
-                
+
                 fn try_from(value: &[u8]) -> Result<Self> {
                     if value.len() == $byte_count {
                         Ok(Self(value.try_into().unwrap()))

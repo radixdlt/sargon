@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::SavedGateways as InternalSavedGateways;
 
 decl_identified_vec_of!(
     /// An ordered collection of unique [`Gateway`]s.
@@ -10,9 +11,8 @@ decl_identified_vec_of!(
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
 #[derive(
-    Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
 )]
-#[display("current: {}, other: {}", current, other)]
 pub struct SavedGateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.
@@ -24,28 +24,46 @@ pub struct SavedGateways {
     pub other: Gateways,
 }
 
+impl From<InternalSavedGateways> for SavedGateways {
+    fn from(value: InternalSavedGateways) -> Self {
+        Self {
+            current: value.current.into(),
+            other: value.other.into(),
+        }
+    }
+}
+
+impl Into<InternalSavedGateways> for SavedGateways {
+    fn into(self) -> InternalSavedGateways {
+        InternalSavedGateways {
+            current: self.current.into(),
+            other: self.other.into(),
+        }
+    }
+}
+
 /// Constructs `Gateways` with `current` set as active Gateway.
 #[uniffi::export]
 pub fn new_saved_gateways(current: Gateway) -> SavedGateways {
-    SavedGateways::new(current)
+    InternalSavedGateways::new(current.into()).into()
 }
 
 /// Constructs `Gateways` with default preset values.
 #[uniffi::export]
 pub fn new_saved_gateways_default() -> SavedGateways {
-    SavedGateways::default()
+    InternalSavedGateways::default().into()
 }
 
 /// A sample value useful for tests and previews.
 #[uniffi::export]
 pub fn new_saved_gateways_sample() -> SavedGateways {
-    SavedGateways::sample()
+    InternalSavedGateways::sample().into()
 }
 
 /// A sample value useful for tests and previews.
 #[uniffi::export]
 pub fn new_saved_gateways_sample_other() -> SavedGateways {
-    SavedGateways::sample_other()
+    InternalSavedGateways::sample_other().into()
 }
 
 /// Returns the current and the other gateways of `gateways`.
@@ -53,7 +71,7 @@ pub fn new_saved_gateways_sample_other() -> SavedGateways {
 pub fn saved_gateways_get_all_elements(
     gateways: &SavedGateways,
 ) -> Vec<Gateway> {
-    gateways.all()
+    gateways.into_internal().all().into_iter().map(|x| x.into()).collect()
 }
 
 #[uniffi::export]
@@ -61,9 +79,9 @@ pub fn new_saved_gateways_changing_current(
     to: Gateway,
     gateways: &SavedGateways,
 ) -> Result<SavedGateways> {
-    let mut gateways = gateways.clone();
-    let _ = gateways.change_current(to);
-    Ok(gateways)
+    let mut gateways = gateways.clone().into_internal();
+    let _ = gateways.change_current(to.into());
+    Ok(gateways.into())
 }
 
 #[cfg(test)]

@@ -12,7 +12,7 @@ use crate::prelude::*;
     Deserialize,
 )]
 #[serde(transparent)]
-pub struct DappOrigin(pub(crate) String);
+pub struct DappOrigin(pub String);
 
 impl DappOrigin {
     pub fn new(value: impl Into<String>) -> Self {

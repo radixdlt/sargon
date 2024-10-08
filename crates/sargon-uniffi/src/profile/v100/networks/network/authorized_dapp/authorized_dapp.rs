@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AuthorizedDapp as InternalAuthorizedDapp;
 
 /// A connection made between a Radix Dapp and the user.
 #[derive(
@@ -7,10 +8,8 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.description())]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.
     pub network_id: NetworkID,
@@ -35,42 +34,51 @@ pub struct AuthorizedDapp {
     pub preferences: AuthorizedDappPreferences,
 }
 
-impl Identifiable for AuthorizedDapp {
-    type ID = DappDefinitionAddress;
-
-    fn id(&self) -> Self::ID {
-        self.dapp_definition_address
+impl From<InternalAuthorizedDapp> for AuthorizedDapp {
+    fn from(value: InternalAuthorizedDapp) -> Self {
+        Self {
+            network_id: value.network_id.into(),
+            dapp_definition_address: value.dapp_definition_address.into(),
+            display_name: value.display_name,
+            references_to_authorized_personas: value.references_to_authorized_personas.into(),
+            preferences: value.preferences.into(),
+        }
     }
 }
 
-impl Identifiable for AccountAddress {
-    type ID = Self;
-
-    fn id(&self) -> Self::ID {
-        *self
+impl Into<InternalAuthorizedDapp> for AuthorizedDapp {
+    fn into(self) -> InternalAuthorizedDapp {
+        InternalAuthorizedDapp {
+            network_id: self.network_id.into(),
+            dapp_definition_address: self.dapp_definition_address.into(),
+            display_name: self.display_name,
+            references_to_authorized_personas: self.references_to_authorized_personas.into(),
+            preferences: self.preferences.into(),
+        }
     }
 }
+
 
 json_data_convertible!(AuthorizedDapp);
 
 #[uniffi::export]
 pub fn new_authorized_dapp_sample_mainnet_dashboard() -> AuthorizedDapp {
-    AuthorizedDapp::sample_mainnet_dashboard()
+    InternalAuthorizedDapp::sample_mainnet_dashboard().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_dapp_sample_mainnet_gumballclub() -> AuthorizedDapp {
-    AuthorizedDapp::sample_mainnet_gumballclub()
+    InternalAuthorizedDapp::sample_mainnet_gumballclub().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_dapp_sample_stokenet_devconsole() -> AuthorizedDapp {
-    AuthorizedDapp::sample_stokenet_devconsole()
+    InternalAuthorizedDapp::sample_stokenet_devconsole().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_dapp_sample_stokenet_sandbox() -> AuthorizedDapp {
-    AuthorizedDapp::sample_stokenet_sandbox()
+    InternalAuthorizedDapp::sample_stokenet_sandbox().into()
 }
 
 #[cfg(test)]

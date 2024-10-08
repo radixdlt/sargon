@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash
-)]
+#[derive(Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash)]
 pub struct IntentSignature(pub SignatureWithPublicKey);
 
 impl IntentSignature {

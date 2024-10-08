@@ -24,10 +24,8 @@ use sargon::Account as InternalAccount;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{display_name} | {address}")]
 pub struct Account {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -70,57 +68,65 @@ pub struct Account {
 
 impl From<InternalAccount> for Account {
     fn from(value: InternalAccount) -> Self {
-        unimplemented!()
+        Self {
+            network_id: value.network_id.into(),
+            address: value.address.into(),
+            display_name: value.display_name.into(),
+            security_state: value.security_state.into(),
+            appearance_id: value.appearance_id.into(),
+            flags: value.flags.into(),
+            on_ledger_settings: value.on_ledger_settings.into(),
+        }
     }
 }
 
 impl Into<InternalAccount> for Account {
     fn into(self) -> InternalAccount {
-        unimplemented!()
-    }
-}
-
-impl Identifiable for Account {
-    type ID = AccountAddress;
-
-    fn id(&self) -> Self::ID {
-        self.address
+        InternalAccount {
+            network_id: self.network_id.into(),
+            address: self.address.into(),
+            display_name: self.display_name.into(),
+            security_state: self.security_state.into(),
+            appearance_id: self.appearance_id.into(),
+            flags: self.flags.into(),
+            on_ledger_settings: self.on_ledger_settings.into(),
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_account_sample_mainnet_alice() -> Account {
-    Account::sample_mainnet_alice()
+    InternalAccount::sample_mainnet_alice().into()
 }
 
 #[uniffi::export]
 pub fn new_account_sample_mainnet_bob() -> Account {
-    Account::sample_mainnet_bob()
+    InternalAccount::sample_mainnet_bob().into()
 }
 
 #[uniffi::export]
 pub fn new_account_sample_mainnet_carol() -> Account {
-    Account::sample_mainnet_carol()
+    InternalAccount::sample_mainnet_carol().into()
 }
 
 #[uniffi::export]
 pub fn new_account_sample_mainnet_diana() -> Account {
-    Account::sample_mainnet_diana()
+    InternalAccount::sample_mainnet_diana().into()
 }
 
 #[uniffi::export]
 pub fn new_account_sample_stokenet_nadia() -> Account {
-    Account::sample_stokenet_nadia()
+    InternalAccount::sample_stokenet_nadia().into()
 }
 
 #[uniffi::export]
 pub fn new_account_sample_stokenet_olivia() -> Account {
-    Account::sample_stokenet_olivia()
+    InternalAccount::sample_stokenet_olivia().into()
 }
 
 #[uniffi::export]
 pub fn new_account_sample_stokenet_paige() -> Account {
-    Account::sample_stokenet_paige()
+    InternalAccount::sample_stokenet_paige().into()
 }
 
 #[cfg(test)]

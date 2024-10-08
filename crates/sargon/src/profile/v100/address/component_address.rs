@@ -19,30 +19,28 @@ decl_ret_wrapped_address!(
 
 impl ComponentAddress {
     pub fn is_global(&self) -> bool {
-        self.0.entity_type()
-            == ScryptoEntityType::GlobalGenericComponent
+        self.0.entity_type() == ScryptoEntityType::GlobalGenericComponent
     }
 
     pub fn is_internal(&self) -> bool {
-        self.0.entity_type()
-            == ScryptoEntityType::InternalGenericComponent
+        self.0.entity_type() == ScryptoEntityType::InternalGenericComponent
     }
 }
 
 impl ComponentAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_global()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_internal()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_global()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_internal()
     }
 }

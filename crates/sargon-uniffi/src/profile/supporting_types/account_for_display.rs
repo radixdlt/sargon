@@ -9,47 +9,51 @@ use sargon::AccountForDisplay as InternalAccountForDisplay;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{display_name} | {address}")]
 pub struct AccountForDisplay {
     pub address: AccountAddress,
 
-    #[serde(rename = "label")]
     pub display_name: DisplayName,
 
-    #[serde(rename = "appearanceID")]
     pub appearance_id: AppearanceID,
 }
 
 impl From<InternalAccountForDisplay> for AccountForDisplay {
     fn from(value: InternalAccountForDisplay) -> Self {
-        unimplemented!()
+        Self {
+            address: value.address.into(),
+            display_name: value.display_name.into(),
+            appearance_id: value.appearance_id.into(),
+        }
     }
 }
 
 impl Into<InternalAccountForDisplay> for AccountForDisplay {
     fn into(self) -> InternalAccountForDisplay {
-        unimplemented!()
+        InternalAccountForDisplay {
+            address: self.address.into(),
+            display_name: self.display_name.into(),
+            appearance_id: self.appearance_id.into(),
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_account_for_display_sample() -> AccountForDisplay {
-    AccountForDisplay::sample()
+    InternalAccountForDisplay::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_account_for_display_sample_other() -> AccountForDisplay {
-    AccountForDisplay::sample_other()
+    InternalAccountForDisplay::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_account_for_display_from_account(
     account: Account,
 ) -> AccountForDisplay {
-    AccountForDisplay::from(account)
+    InternalAccountForDisplay::from(account).into()
 }
 
 #[cfg(test)]

@@ -19,22 +19,22 @@ decl_ret_wrapped_address!(
 
 #[uniffi::export]
 pub fn new_locker_address_sample_mainnet() -> LockerAddress {
-    LockerAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_locker_address_sample_mainnet_other() -> LockerAddress {
-    LockerAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_locker_address_sample_stokenet() -> LockerAddress {
-    LockerAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_locker_address_sample_stokenet_other() -> LockerAddress {
-    LockerAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

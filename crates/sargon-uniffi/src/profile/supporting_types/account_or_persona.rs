@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AccountOrPersona as InternalAccountOrPersona;
 
 /// Either an `Account` or a `Persona`.
 #[derive(
@@ -21,16 +22,27 @@ pub enum AccountOrPersona {
     PersonaEntity(Persona),
 }
 
-impl Identifiable for AccountOrPersona {
-    type ID = AddressOfAccountOrPersona;
-
-    fn id(&self) -> Self::ID {
-        match self {
-            Self::AccountEntity(account) => {
-                AddressOfAccountOrPersona::Account(account.address)
+impl From<InternalAccountOrPersona> for AccountOrPersona {
+    fn from(value: InternalAccountOrPersona) -> Self {
+        match value {
+            InternalAccountOrPersona::AccountEntity(account) => {
+                AccountOrPersona::AccountEntity(account.into())
             }
-            Self::PersonaEntity(persona) => {
-                AddressOfAccountOrPersona::Identity(persona.address)
+            InternalAccountOrPersona::PersonaEntity(persona) => {
+                AccountOrPersona::PersonaEntity(persona.into())
+            }
+        }
+    }
+}
+
+impl Into<InternalAccountOrPersona> for AccountOrPersona {
+    fn into(self) -> InternalAccountOrPersona {
+        match self {
+            AccountOrPersona::AccountEntity(account) => {
+                InternalAccountOrPersona::AccountEntity(account.into())
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                InternalAccountOrPersona::PersonaEntity(persona.into())
             }
         }
     }
@@ -38,39 +50,39 @@ impl Identifiable for AccountOrPersona {
 
 #[uniffi::export]
 pub fn new_account_or_persona_sample_mainnet() -> AccountOrPersona {
-    AccountOrPersona::sample_mainnet()
+    InternalAccountOrPersona::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_account_or_persona_sample_mainnet_other() -> AccountOrPersona {
-    AccountOrPersona::sample_mainnet_other()
+    InternalAccountOrPersona::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_account_or_persona_sample_mainnet_third() -> AccountOrPersona {
-    AccountOrPersona::sample_mainnet_third()
+    InternalAccountOrPersona::sample_mainnet_third().into()
 }
 
 #[uniffi::export]
 pub fn new_account_or_persona_sample_stokenet() -> AccountOrPersona {
-    AccountOrPersona::sample_stokenet()
+    InternalAccountOrPersona::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_account_or_persona_sample_stokenet_other() -> AccountOrPersona {
-    AccountOrPersona::sample_stokenet_other()
+    InternalAccountOrPersona::sample_stokenet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_account_or_persona_sample_stokenet_third() -> AccountOrPersona {
-    AccountOrPersona::sample_stokenet_third()
+    InternalAccountOrPersona::sample_stokenet_third().into()
 }
 
 #[uniffi::export]
 pub fn account_or_persona_get_id(
     entity: &AccountOrPersona,
-) -> <AccountOrPersona as Identifiable>::ID {
-    entity.id()
+) -> AddressOfAccountOrPersona {
+    entity.into::<InternalAccountOrPersona>().id().into()
 }
 
 #[cfg(test)]

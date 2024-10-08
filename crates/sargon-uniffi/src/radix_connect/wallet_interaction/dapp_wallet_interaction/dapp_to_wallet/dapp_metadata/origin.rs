@@ -9,18 +9,22 @@ uniffi::custom_newtype!(DappOrigin, String);
     PartialEq,
     Eq,
     Debug,
-    derive_more::Display,
+    uniffi::Record,
 )]
-pub struct DappOrigin(pub(crate) String);
+pub struct DappOrigin {
+    pub value: String,
+}
 
 impl From<InternalDappOrigin> for DappOrigin {
     fn from(value: InternalDappOrigin) -> Self {
-        Self(value.0))
+        Self {
+            value: value.0,
+        }
     }
 }
 
 impl Into<InternalDappOrigin> for DappOrigin {
     fn into(self) -> InternalDappOrigin {
-        InternalDappOrigin(self.0)
+        InternalDappOrigin(self.value)
     }
 }

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::IdentityPath as InternalIdentityPath;
 
 #[derive(
     Clone,
@@ -6,12 +7,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.bip32_string())]
 pub struct IdentityPath {
     pub path: HDPath,
 
@@ -24,14 +21,38 @@ pub struct IdentityPath {
     pub index: HDPathValue,
 }
 
+impl From<InternalIdentityPath> for IdentityPath {
+    fn from(value: InternalIdentityPath) -> Self {
+        Self {
+            path: value.path.into(),
+            network_id: value.network_id.into(),
+            entity_kind: value.entity_kind.into(),
+            key_kind: value.key_kind.into(),
+            index: value.index.into(),
+        }
+    }
+}
+
+impl Into<InternalIdentityPath> for IdentityPath {
+    fn into(self) -> InternalIdentityPath {
+        InternalIdentityPath {
+            path: self.path.into(),
+            network_id: self.network_id.into(),
+            entity_kind: self.entity_kind.into(),
+            key_kind: self.key_kind.into(),
+            index: self.index.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_identity_path_sample() -> IdentityPath {
-    IdentityPath::sample()
+    InternalIdentityPath::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_identity_path_sample_other() -> IdentityPath {
-    IdentityPath::sample_other()
+    InternalIdentityPath::sample_other().into()
 }
 
 #[uniffi::export]
@@ -40,7 +61,7 @@ pub fn new_identity_path(
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 ) -> IdentityPath {
-    IdentityPath::new(network_id, key_kind, index)
+    InternalIdentityPath::new(network_id.into(), key_kind.into(), index.into()).into()
 }
 
 #[cfg(test)]

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::FactorSourceKind as InternalFactorSourceKind;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
 #[derive(
@@ -8,8 +9,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
     uniffi::Enum,
 )]
 pub enum FactorSourceKind {
@@ -77,26 +76,54 @@ pub enum FactorSourceKind {
     ArculusCard,
 }
 
+impl From<InternalFactorSourceKind> for FactorSourceKind {
+    fn from(kind: InternalFactorSourceKind) -> Self {
+        match kind {
+            InternalFactorSourceKind::Device => FactorSourceKind::Device,
+            InternalFactorSourceKind::LedgerHQHardwareWallet => {
+                FactorSourceKind::LedgerHQHardwareWallet
+            }
+            InternalFactorSourceKind::OffDeviceMnemonic => FactorSourceKind::OffDeviceMnemonic,
+            InternalFactorSourceKind::TrustedContact => FactorSourceKind::TrustedContact,
+            InternalFactorSourceKind::SecurityQuestions => FactorSourceKind::SecurityQuestions,
+            InternalFactorSourceKind::ArculusCard => FactorSourceKind::ArculusCard,
+        }
+    }
+}
+
+impl Into<InternalFactorSourceKind> for FactorSourceKind {
+    fn into(self) -> InternalFactorSourceKind {
+        match self {
+            FactorSourceKind::Device => InternalFactorSourceKind::Device,
+            FactorSourceKind::LedgerHQHardwareWallet => InternalFactorSourceKind::LedgerHQHardwareWallet,
+            FactorSourceKind::OffDeviceMnemonic => InternalFactorSourceKind::OffDeviceMnemonic,
+            FactorSourceKind::TrustedContact => InternalFactorSourceKind::TrustedContact,
+            FactorSourceKind::SecurityQuestions => InternalFactorSourceKind::SecurityQuestions,
+            FactorSourceKind::ArculusCard => InternalFactorSourceKind::ArculusCard,
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_factor_source_kind_sample() -> FactorSourceKind {
-    FactorSourceKind::sample()
+    InternalFactorSourceKind::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_kind_sample_other() -> FactorSourceKind {
-    FactorSourceKind::sample_other()
+    InternalFactorSourceKind::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_factor_source_kind_from_string(
     string: String,
 ) -> Result<FactorSourceKind> {
-    FactorSourceKind::from_str(&string)
+    InternalFactorSourceKind::from_str(&string).map_result()
 }
 
 #[uniffi::export]
 pub fn factor_source_kind_to_string(kind: FactorSourceKind) -> String {
-    kind.to_string()
+    kind.into_internal().to_string()
 }
 
 #[cfg(test)]

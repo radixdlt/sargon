@@ -1,6 +1,7 @@
 use crate::prelude::*;
+use sargon::NonFungibleLocalId as InternalNonFungibleLocalId;
 
-#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -23,23 +24,67 @@ pub enum NonFungibleLocalId {
     Ruid { value: Exactly32Bytes },
 }
 
+impl From<InternalNonFungibleLocalId> for NonFungibleLocalId {
+    fn from(value: InternalNonFungibleLocalId) -> Self {
+        match value {
+            InternalNonFungibleLocalId::Integer { value } => {
+                NonFungibleLocalId::Integer { value }
+            }
+            InternalNonFungibleLocalId::Str { value } => {
+                NonFungibleLocalId::Str {
+                    value: value.into(),
+                }
+            }
+            InternalNonFungibleLocalId::Bytes { value } => {
+                NonFungibleLocalId::Bytes {
+                    value: value.into(),
+                }
+            }
+            InternalNonFungibleLocalId::Ruid { value } => {
+                NonFungibleLocalId::Ruid {
+                    value: value.into(),
+                }
+            }
+        }
+    }
+}
+
+impl Into<InternalNonFungibleLocalId> for NonFungibleLocalId {
+    fn into(self) -> InternalNonFungibleLocalId {
+        match self {
+            NonFungibleLocalId::Integer { value } => {
+                InternalNonFungibleLocalId::Integer { value }
+            }
+            NonFungibleLocalId::Str { value } => {
+                InternalNonFungibleLocalId::Str { value: value.into() }
+            }
+            NonFungibleLocalId::Bytes { value } => {
+                InternalNonFungibleLocalId::Bytes { value: value.into() }
+            }
+            NonFungibleLocalId::Ruid { value } => {
+                InternalNonFungibleLocalId::Ruid { value: value.into() }
+            }
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_non_fungible_local_id_from_string(
     local_id: String,
 ) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::from_str(&local_id)
+    InternalNonFungibleLocalId::from_str(&local_id).map_result()
 }
 
 #[uniffi::export]
 pub fn non_fungible_local_id_as_str(id: NonFungibleLocalId) -> String {
-    id.to_string()
+    id.into_internal().to_string()
 }
 
 #[uniffi::export]
 pub fn non_fungible_local_id_to_user_facing_string(
     id: &NonFungibleLocalId,
 ) -> String {
-    id.to_user_facing_string()
+    id.into_internal().to_user_facing_string()
 }
 
 #[uniffi::export]
@@ -47,7 +92,7 @@ pub fn non_fungible_local_id_formatted(
     id: &NonFungibleLocalId,
     format: AddressFormat,
 ) -> String {
-    id.formatted(format)
+    id.into_internal().formatted(format.into())
 }
 
 #[uniffi::export]
@@ -59,36 +104,36 @@ pub fn new_non_fungible_local_id_int(value: u64) -> NonFungibleLocalId {
 pub fn new_non_fungible_local_id_string(
     string: String,
 ) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::string(string)
+    InternalNonFungibleLocalId::string(string).map_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_bytes(
     bytes: BagOfBytes,
 ) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::bytes(bytes)
+    InternalNonFungibleLocalId::bytes(bytes.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_ruid(
     bytes: BagOfBytes,
 ) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::ruid(bytes)
+    InternalNonFungibleLocalId::ruid(bytes.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_sample() -> NonFungibleLocalId {
-    NonFungibleLocalId::sample()
+    InternalNonFungibleLocalId::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_sample_other() -> NonFungibleLocalId {
-    NonFungibleLocalId::sample_other()
+    InternalNonFungibleLocalId::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_random() -> NonFungibleLocalId {
-    NonFungibleLocalId::random()
+    InternalNonFungibleLocalId::random().into()
 }
 
 #[cfg(test)]

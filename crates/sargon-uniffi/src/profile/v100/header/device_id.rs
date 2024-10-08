@@ -1,16 +1,30 @@
 use crate::prelude::*;
+use sargon::DeviceID as InternalDeviceID;
 
 /// A stable and globally unique identifier of a device,
 /// e.g. an Android phone.
 #[derive(
     Debug,
     Copy,
-    derive_more::Display,
     Clone,
     PartialEq,
     Eq,
     Hash,
 )]
+pub struct DeviceID {
+    value: Uuid,
+}
 
-pub struct DeviceID(pub(crate) Uuid);
-uniffi::custom_newtype!(DeviceID, Uuid);
+impl From<InternalDeviceID> for DeviceID {
+    fn from(value: InternalDeviceID) -> Self {
+        Self {
+            value: value.0,
+        }
+    }
+}
+
+impl Into<InternalDeviceID> for DeviceID {
+    fn into(self) -> InternalDeviceID {
+        InternalDeviceID(self.value)
+    }
+}

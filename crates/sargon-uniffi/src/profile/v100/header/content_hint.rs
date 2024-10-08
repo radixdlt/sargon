@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::ContentHint as InternalContentHint;
+
 /// A hint describing the contents of a Profile, acting as a
 /// summary of a Profile used by a ProfileSnapshot Header.
 ///
@@ -6,17 +8,14 @@ use crate::prelude::*;
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
 #[derive(
-    Default,
     Clone,
     Copy,
     Debug,
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("#networks: {number_of_networks}, #accounts: {number_of_accounts_on_all_networks_in_total}, #personas: {number_of_personas_on_all_networks_in_total}")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
     ///
@@ -41,4 +40,24 @@ pub struct ContentHint {
     /// The total number of networks that the user has used, i.e.
     /// on which she has any accounts or personas.
     pub number_of_networks: u16,
+}
+
+impl From<InternalContentHint> for ContentHint {
+    fn from(value: InternalContentHint) -> Self {
+        Self {
+            number_of_accounts_on_all_networks_in_total: value.number_of_accounts_on_all_networks_in_total,
+            number_of_personas_on_all_networks_in_total: value.number_of_personas_on_all_networks_in_total,
+            number_of_networks: value.number_of_networks,
+        }
+    }
+}
+
+impl Into<InternalContentHint> for ContentHint {
+    fn into(self) -> InternalContentHint {
+        InternalContentHint {
+            number_of_accounts_on_all_networks_in_total: self.number_of_accounts_on_all_networks_in_total,
+            number_of_personas_on_all_networks_in_total: self.number_of_personas_on_all_networks_in_total,
+            number_of_networks: self.number_of_networks,
+        }
+    }
 }

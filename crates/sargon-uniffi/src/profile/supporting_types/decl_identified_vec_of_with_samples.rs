@@ -13,7 +13,7 @@ macro_rules! decl_identified_vec_of {
                 #[doc = $expr]
             )*
             #[allow(non_camel_case_types)]
-			pub type $collection_type = IdentifiedVecOf<$element_type>;
+			pub type $collection_type = Vec<$element_type>;
 
             #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample >]() -> $collection_type {
@@ -58,19 +58,6 @@ macro_rules! decl_identified_vec_of {
                         .len(),
                         2
                     );
-                }
-
-                #[test]
-                fn manual_perform_uniffi_conversion_successful() {
-                    let test = |sut: SUT| {
-                        let ffi_side = <SUT as uniffi::Lower<crate::UniFfiTag>>::lower(sut.clone());
-                        let from_ffi =
-                            <SUT as uniffi::Lift<crate::UniFfiTag>>::try_lift(ffi_side).unwrap();
-                        assert_eq!(from_ffi, sut);
-                    };
-
-                    test(SUT::sample());
-                    test(SUT::sample_other());
                 }
             }
 		}

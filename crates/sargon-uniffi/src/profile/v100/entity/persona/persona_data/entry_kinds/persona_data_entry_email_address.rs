@@ -2,8 +2,6 @@ use crate::prelude::*;
 
 pub type PersonaDataEntryEmailAddress = EmailAddress;
 
-use crate::prelude::*;
-
 json_string_convertible!(PersonaDataEntryEmailAddress);
 
 #[uniffi::export]

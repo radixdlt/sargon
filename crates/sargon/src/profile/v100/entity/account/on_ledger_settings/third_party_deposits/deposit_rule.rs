@@ -98,7 +98,10 @@ mod tests {
             "acceptAll".deserialize::<DepositRule>().unwrap(),
             SUT::AcceptAll
         );
-        assert_eq!("denyAll".deserialize::<DepositRule>().unwrap(), SUT::DenyAll);
+        assert_eq!(
+            "denyAll".deserialize::<DepositRule>().unwrap(),
+            SUT::DenyAll
+        );
         assert_eq!(
             "acceptKnown".deserialize::<DepositRule>().unwrap(),
             SUT::AcceptKnown

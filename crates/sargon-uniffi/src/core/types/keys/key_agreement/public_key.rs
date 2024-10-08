@@ -1,9 +1,7 @@
 use crate::prelude::*;
-use crate::{prelude::*, UniffiCustomTypeConverter};
-use crypto::keys::x25519::PublicKey as X25519PublicKey;
+use sargon::KeyAgreementPublicKey as InternalKeyAgreementPublicKey;
 
 /// PublicKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPrivateKey`.
-#[serde_as]
 #[derive(
     Clone,
     Copy,

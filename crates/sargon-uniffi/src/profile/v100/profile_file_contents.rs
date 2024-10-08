@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::ProfileFileContents as InternalProfileFileContents;
 
 /// Result of analyzing a file (bytes), containing either a Profile
 /// which we were able to successfully JSON deserialize from the bytes,
@@ -26,14 +27,38 @@ pub enum ProfileFileContents {
     NotProfile,
 }
 
+impl From<InternalProfileFileContents> for ProfileFileContents {
+    fn from(value: InternalProfileFileContents) -> Self {
+        match value {
+            InternalProfileFileContents::PlaintextProfile { value } => {
+                ProfileFileContents::PlaintextProfile(value.into())
+            }
+            InternalProfileFileContents::EncryptedProfile => ProfileFileContents::EncryptedProfile,
+            InternalProfileFileContents::NotProfile => ProfileFileContents::NotProfile,
+        }
+    }
+}
+
+impl Into<InternalProfileFileContents> for ProfileFileContents {
+    fn into(self) -> InternalProfileFileContents {
+        match self {
+            ProfileFileContents::PlaintextProfile { value } => {
+                InternalProfileFileContents::PlaintextProfile { value: value.into() }
+            }
+            ProfileFileContents::EncryptedProfile => InternalProfileFileContents::EncryptedProfile,
+            ProfileFileContents::NotProfile => InternalProfileFileContents::NotProfile,
+        }
+    }
+}
+
 #[uniffi::export]
 pub(crate) fn new_profile_file_contents_sample() -> ProfileFileContents {
-    ProfileFileContents::sample()
+    InternalProfileFileContents::sample().into()
 }
 
 #[uniffi::export]
 pub(crate) fn new_profile_file_contents_sample_other() -> ProfileFileContents {
-    ProfileFileContents::sample_other()
+    InternalProfileFileContents::sample_other().into()
 }
 
 #[cfg(test)]

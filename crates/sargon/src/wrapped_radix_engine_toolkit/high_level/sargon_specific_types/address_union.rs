@@ -196,36 +196,36 @@ macro_rules! address_union {
             #[allow(unused)]
             impl $union_name {
                 $(
-                    pub(crate) fn [< sample_ $variant_name:snake _mainnet >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _mainnet >]() -> Self {
                         Self::from($variant_type::sample_mainnet())
                     }
 
-                    pub(crate) fn [< sample_ $variant_name:snake _mainnet_other >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _mainnet_other >]() -> Self {
                         Self::from($variant_type::sample_mainnet_other())
                     }
 
-                    pub(crate) fn [< sample_ $variant_name:snake _stokenet >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _stokenet >]() -> Self {
                         Self::from($variant_type::sample_stokenet())
                     }
 
-                    pub(crate) fn [< sample_ $variant_name:snake _stokenet_other >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _stokenet_other >]() -> Self {
                         Self::from($variant_type::sample_stokenet_other())
                     }
                 )+
 
-                pub(crate) fn sample_mainnet() -> Self {
+                pub fn sample_mainnet() -> Self {
                     Self::sample_values_mainnet().into_iter().next().unwrap()
                 }
 
-                pub(crate) fn sample_mainnet_other() -> Self {
+                pub fn sample_mainnet_other() -> Self {
                     Self::sample_values_mainnet().into_iter().rev().next().unwrap()
                 }
 
-                pub(crate) fn sample_stokenet() -> Self {
+                pub fn sample_stokenet() -> Self {
                     Self::sample_values_stokenet().into_iter().next().unwrap()
                 }
 
-                pub(crate) fn sample_stokenet_other() -> Self {
+                pub fn sample_stokenet_other() -> Self {
                     Self::sample_values_stokenet().into_iter().rev().next().unwrap()
                 }
 

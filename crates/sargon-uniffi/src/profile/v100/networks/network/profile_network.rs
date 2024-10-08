@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::ProfileNetwork as InternalProfileNetwork;
 
 /// [`Accounts`], [`Personas`] and [`AuthorizedDapps`] for some [`ProfileNetwork`]
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
@@ -9,10 +10,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.description())]
 pub struct ProfileNetwork {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -34,16 +33,38 @@ pub struct ProfileNetwork {
     pub resource_preferences: ResourcePreferences,
 }
 
-use crate::prelude::*;
+impl From<InternalProfileNetwork> for ProfileNetwork {
+    fn from(profile_network: InternalProfileNetwork) -> Self {
+        Self {
+            id: profile_network.id.into(),
+            accounts: profile_network.accounts.into(),
+            personas: profile_network.personas.into(),
+            authorized_dapps: profile_network.authorized_dapps.into(),
+            resource_preferences: profile_network.resource_preferences.into(),
+        }
+    }
+}
+
+impl Into<InternalProfileNetwork> for ProfileNetwork {
+    fn into(self) -> InternalProfileNetwork {
+        InternalProfileNetwork {
+            id: self.id.into(),
+            accounts: self.accounts.into(),
+            personas: self.personas.into(),
+            authorized_dapps: self.authorized_dapps.into(),
+            resource_preferences: self.resource_preferences.into(),
+        }
+    }
+}
 
 #[uniffi::export]
 pub fn new_profile_network_sample() -> ProfileNetwork {
-    ProfileNetwork::sample()
+    InternalProfileNetwork::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_profile_network_sample_other() -> ProfileNetwork {
-    ProfileNetwork::sample_other()
+    InternalProfileNetwork::sample_other().into()
 }
 
 #[cfg(test)]

@@ -3,9 +3,7 @@ use crate::prelude::*;
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A mnemonic encrypted by answers to security questions
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {

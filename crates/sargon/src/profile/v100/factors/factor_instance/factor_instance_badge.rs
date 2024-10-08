@@ -4,14 +4,7 @@ use crate::prelude::*;
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
 #[derive(
-    Serialize,
-    Deserialize,
-    EnumAsInner,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
+    Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadge {
@@ -95,9 +88,7 @@ impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
             ),
             FactorInstanceBadge::Physical { value } => {
                 ScryptoResourceOrNonFungible::Resource(
-                    ScryptoResourceAddress::new_or_panic(
-                        value.0.node_id().0,
-                    ),
+                    ScryptoResourceAddress::new_or_panic(value.0.node_id().0),
                 )
             }
         }

@@ -194,7 +194,7 @@ impl Mnemonic {
     /// * planet
     /// * swim
     /// * wrap
-    pub(crate) fn sample_device() -> Self {
+    pub fn sample_device() -> Self {
         Self::from_phrase("device phone sign source sample device sample device sample device sample device sample device sample device sample device phone sign source sample device swim")
         .expect("Valid mnemonic")
     }
@@ -208,15 +208,15 @@ impl Mnemonic {
     /// * rabbit
     /// * sniff
     /// * winner
-    pub(crate) fn sample_device_other() -> Self {
+    pub fn sample_device_other() -> Self {
         Self::from_phrase("device phone sign source sample other device sample other device sample other device sample other device sample other device sample other device other paddle").expect("Valid mnemonic")
     }
 
-    pub(crate) fn sample_device_12_words() -> Self {
+    pub fn sample_device_12_words() -> Self {
         Self::from_phrase("device twelve phone sign source sample device twelve sample device twelve original").expect("Valid mnemonic")
     }
 
-    pub(crate) fn sample_device_12_words_other() -> Self {
+    pub fn sample_device_12_words_other() -> Self {
         Self::from_phrase("device twelve phone sign source sample other device twelve sample other derive").expect("Valid mnemonic")
     }
 
@@ -229,7 +229,7 @@ impl Mnemonic {
     /// * result
     /// * spy
     /// * version
-    pub(crate) fn sample_ledger() -> Self {
+    pub fn sample_ledger() -> Self {
         Self::from_phrase("pledge rely stick hard snow ice sign source sample pledge rely sample pledge rely sample pledge rely sample pledge rely sample stick sample cactus").expect("Valid mnemonic")
     }
 
@@ -242,7 +242,7 @@ impl Mnemonic {
     /// * popular
     /// * shaft
     /// * tunnel
-    pub(crate) fn sample_ledger_other() -> Self {
+    pub fn sample_ledger_other() -> Self {
         Self::from_phrase("pledge rely stick hard snow ice sign source sample other pledge rely sample other pledge rely sample other pledge rely stick sample other shaft").expect("Valid mnemonic")
     }
 
@@ -255,7 +255,7 @@ impl Mnemonic {
     /// * payment
     /// * state
     /// * wide
-    pub(crate) fn sample_off_device() -> Self {
+    pub fn sample_off_device() -> Self {
         Self::from_phrase("off device sign source sample off sample off sample off sample off sample off sample off sample off sample off sample off sample lizard").expect("Valid mnemonic")
     }
 
@@ -268,7 +268,7 @@ impl Mnemonic {
     /// * pulse
     /// * talent
     /// * then
-    pub(crate) fn sample_off_device_other() -> Self {
+    pub fn sample_off_device_other() -> Self {
         Self::from_phrase("off device sign source sample other off sample other off sample other off sample other off sample other off device sample other off fruit").expect("Valid mnemonic")
     }
 
@@ -281,7 +281,7 @@ impl Mnemonic {
     /// * ritual
     /// * science
     /// * unveil
-    pub(crate) fn sample_security_questions() -> Self {
+    pub fn sample_security_questions() -> Self {
         Self::from_phrase("security question sign source sample security question sample security question sample security question sample security question sample security question sample security question sample unveil").expect("Valid mnemonic")
     }
 
@@ -294,7 +294,7 @@ impl Mnemonic {
     /// * problem
     /// * sword
     /// * total
-    pub(crate) fn sample_security_questions_other() -> Self {
+    pub fn sample_security_questions_other() -> Self {
         Self::from_phrase("security question sign source sample other security question sample other security question sample other security question sample other security question sample other question loop").expect("Valid mnemonic")
     }
 
@@ -307,7 +307,7 @@ impl Mnemonic {
     /// * power
     /// * silent
     /// * tobacco
-    pub(crate) fn sample_arculus() -> Self {
+    pub fn sample_arculus() -> Self {
         Self::from_phrase("arch card helmet sign source sample arch card sample arch card sample arch card sample arch card sample arch card sample arch card mix").expect("Valid mnemonic")
     }
 
@@ -320,7 +320,7 @@ impl Mnemonic {
     /// * prevent
     /// * soccer
     /// * update
-    pub(crate) fn sample_arculus_other() -> Self {
+    pub fn sample_arculus_other() -> Self {
         Self::from_phrase("arch card helmet sign source sample other arch card sample other arch card sample other arch card sample other arch card sample other lock").expect("Valid mnemonic")
     }
 }

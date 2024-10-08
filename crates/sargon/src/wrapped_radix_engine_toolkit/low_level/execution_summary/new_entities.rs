@@ -23,7 +23,6 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
     fn from(value: (RetNewEntities, NetworkID)) -> Self {
         let (ret, network_id) = value;
 
-
         Self::new(ret.resource_addresses.into_iter().map(|r| {
             let resource_address = ResourceAddress::from((r, network_id));
             let global_address = ScryptoGlobalAddress::from(resource_address);

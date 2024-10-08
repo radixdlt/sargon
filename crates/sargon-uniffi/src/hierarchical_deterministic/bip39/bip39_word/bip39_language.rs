@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::BIP39Language as InternalBIP39Language;
 
 /// Language to be used for the mnemonic phrase.
 ///
@@ -11,9 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
-    derive_more::Display,
     uniffi::Enum,
 )]
 pub enum BIP39Language {
@@ -24,19 +22,37 @@ pub enum BIP39Language {
     French,
 }
 
+impl From<InternalBIP39Language> for BIP39Language {
+    fn from(value: InternalBIP39Language) -> Self {
+        match value {
+            InternalBIP39Language::English => Self::English,
+            InternalBIP39Language::French => Self::French,
+        }
+    }
+}
+
+impl Into<InternalBIP39Language> for BIP39Language {
+    fn into(self) -> InternalBIP39Language {
+        match self {
+            Self::English => InternalBIP39Language::English,
+            Self::French => InternalBIP39Language::French,
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_bip39_language_sample() -> BIP39Language {
-    BIP39Language::sample()
+    InternalBIP39Language::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_bip39_language_sample_other() -> BIP39Language {
-    BIP39Language::sample_other()
+    InternalBIP39Language::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn bip39_language_wordlist(language: &BIP39Language) -> Vec<BIP39Word> {
-    language.wordlist()
+    language.into::<InternalBIP39Language>().wordlist().into_iter().map(Into::into).collect()
 }
 
 #[cfg(test)]

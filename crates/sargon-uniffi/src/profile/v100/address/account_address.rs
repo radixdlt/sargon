@@ -1,5 +1,4 @@
 pub use crate::prelude::*;
-use sargon::AccountAddress as InternalAccountAddress;
 
 decl_ret_wrapped_address!(
     /// Human readable address of an account. Always starts with `"account_"``, for example:
@@ -27,45 +26,32 @@ decl_ret_wrapped_address!(
     account
 );
 
-
-impl From<InternalAccountAddress> for AccountAddress {
-    fn from(value: InternalAccountAddress) -> Self {
-        unimplemented!()
-    }
-}
-
-impl Into<InternalAccountAddress> for AccountAddress {
-    fn into(self) -> InternalAccountAddress {
-        unimplemented!()
-    }
-}
-
 #[uniffi::export]
 pub fn new_account_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
 ) -> AccountAddress {
-    AccountAddress::new(public_key, network_id)
+    InternalAddress::new(public_key, network_id).into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_mainnet() -> AccountAddress {
-    AccountAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_mainnet_other() -> AccountAddress {
-    AccountAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_stokenet() -> AccountAddress {
-    AccountAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
-    AccountAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
@@ -74,7 +60,7 @@ pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
 /// imported from the legacy Olympia desktop application.
 #[uniffi::export]
 pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
-    address.is_legacy_address()
+    address.into_internal().is_legacy_address()
 }
 
 #[cfg(test)]

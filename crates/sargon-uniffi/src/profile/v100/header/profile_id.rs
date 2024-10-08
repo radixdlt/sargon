@@ -1,27 +1,41 @@
 use crate::prelude::*;
+use sargon::ProfileID as InternalProfileID;
 
 /// A stable and globally unique identifier of a Profile.
 #[derive(
     Debug,
     Copy,
-    derive_more::Display,
     Clone,
     PartialEq,
     Eq,
     Hash,
 )]
-pub struct ProfileID(pub(crate) Uuid);
+pub struct ProfileID {
+    value: Uuid,
+}
 
-uniffi::custom_newtype!(ProfileID, Uuid);
+impl From<InternalProfileID> for ProfileID {
+    fn from(value: InternalProfileID) -> Self {
+        Self {
+            value: value.0,
+        }
+    }
+}
+
+impl Into<InternalProfileID> for ProfileID {
+    fn into(self) -> InternalProfileID {
+        InternalProfileID(self.value)
+    }
+}
 
 #[uniffi::export]
 pub fn new_profile_id_sample() -> ProfileID {
-    ProfileID::sample()
+    InternalProfileID::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_profile_id_sample_other() -> ProfileID {
-    ProfileID::sample_other()
+    InternalProfileID::sample_other().into()
 }
 
 #[cfg(test)]

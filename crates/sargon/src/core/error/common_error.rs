@@ -675,10 +675,7 @@ mod tests {
     #[test]
     fn error_message() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert_eq!(
-            sut.to_string(),
-            "No network found with id: '0'"
-        );
+        assert_eq!(sut.to_string(), "No network found with id: '0'");
     }
 
     #[test]

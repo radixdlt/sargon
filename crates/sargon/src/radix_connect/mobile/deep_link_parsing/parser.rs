@@ -277,12 +277,11 @@ mod tests {
         pretty_assertions::assert_eq!(result, Ok(expected_request));
 
         let parsed_request = result.unwrap();
-        let expected_interaction =
-                URL_SAFE_NO_PAD
-                    .decode(request_params.request.unwrap())
-                    .unwrap()
-                    .deserialize()
-                    .unwrap();
+        let expected_interaction = URL_SAFE_NO_PAD
+            .decode(request_params.request.unwrap())
+            .unwrap()
+            .deserialize()
+            .unwrap();
         pretty_assertions::assert_eq!(
             parsed_request.interaction,
             expected_interaction

@@ -8,10 +8,8 @@ use sargon::HostId as InternalHostId;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("ID {} at {}", id, generated_at)]
 pub struct HostId {
     /// A best effort stable and unique identifier of this
     /// host's device.
@@ -25,13 +23,19 @@ pub struct HostId {
 
 impl From<InternalHostId> for HostId {
     fn from(value: InternalHostId) -> Self {
-        unimplemented!()
+        Self {
+            id: value.id.into(),
+            generated_at: value.generated_at.into(),
+        }
     }
 }
 
 impl Into<InternalHostId> for HostId {
     fn into(self) -> InternalHostId {
-        unimplemented!()
+        InternalHostId {
+            id: self.id.into(),
+            generated_at: self.generated_at.into(),
+        }
     }
 }
 
@@ -39,12 +43,12 @@ json_data_convertible!(HostId);
 
 #[uniffi::export]
 pub fn new_host_id_sample() -> HostId {
-    HostId::sample()
+    InternalHostId::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_host_id_sample_other() -> HostId {
-    HostId::sample_other()
+    InternalHostId::sample_other().into()
 }
 
 #[cfg(test)]

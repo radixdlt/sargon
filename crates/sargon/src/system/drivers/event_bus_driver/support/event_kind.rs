@@ -2,15 +2,7 @@ use crate::prelude::*;
 
 /// A discriminator identifying the kind of `Event`, this has no associated
 /// values and flattens the otherwise nested `Event` enum.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 pub enum EventKind {
     /* Sort lexicographically */
     /// Profile updated with a new account.

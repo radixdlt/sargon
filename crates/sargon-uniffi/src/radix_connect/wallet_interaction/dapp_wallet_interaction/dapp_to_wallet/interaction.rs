@@ -35,7 +35,7 @@ json_data_convertible!(WalletToDappInteractionResponse);
 pub fn new_dapp_to_wallet_interaction_unvalidated_from_json_string(
     json_str: String,
 ) -> Result<DappToWalletInteractionUnvalidated> {
-    map_result_from_internal(InternalDappToWalletInteraction::new_from_json_string(json_str))
+    InternalDappToWalletInteraction::new_from_json_string(json_str).map_result()
 }
 
 #[uniffi::export]
@@ -43,7 +43,7 @@ pub fn dapp_to_wallet_interaction_unvalidated_to_json_string(
     interaction_unvalidated: &DappToWalletInteractionUnvalidated,
     pretty_printed: bool,
 ) -> String {
-    interaction_unvalidated.into::<InternalDappToWalletInteraction>().to_json_string(pretty_printed)
+    interaction_unvalidated.into_internal().to_json_string(pretty_printed)
 }
 
 #[uniffi::export]

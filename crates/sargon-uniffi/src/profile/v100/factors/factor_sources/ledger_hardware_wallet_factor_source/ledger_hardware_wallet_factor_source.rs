@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::LedgerHardwareWalletFactorSource as InternalLedgerHardwareWalletFactorSource;
+use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 
 #[derive(
     Clone,
@@ -6,10 +8,8 @@ use crate::prelude::*;
     Eq,
     Hash,
     Debug,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{hint} : {id}")]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
@@ -24,16 +24,36 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
+impl From<InternalLedgerHardwareWalletFactorSource> for LedgerHardwareWalletFactorSource {
+    fn from(value: InternalLedgerHardwareWalletFactorSource) -> Self {
+        Self {
+            id: value.id.into(),
+            common: value.common.into(),
+            hint: value.hint.into(),
+        }
+    }
+}
+
+impl Into<InternalLedgerHardwareWalletFactorSource> for LedgerHardwareWalletFactorSource {
+    fn into(self) -> InternalLedgerHardwareWalletFactorSource {
+        InternalLedgerHardwareWalletFactorSource {
+            id: self.id.into(),
+            common: self.common.into(),
+            hint: self.hint.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_ledger_hardware_wallet_factor_source_sample(
 ) -> LedgerHardwareWalletFactorSource {
-    LedgerHardwareWalletFactorSource::sample()
+    InternalLedgerHardwareWalletFactorSource::sample()
 }
 
 #[uniffi::export]
 pub fn new_ledger_hardware_wallet_factor_source_sample_other(
 ) -> LedgerHardwareWalletFactorSource {
-    LedgerHardwareWalletFactorSource::sample_other()
+    InternalLedgerHardwareWalletFactorSource::sample_other()
 }
 
 #[uniffi::export]
@@ -42,8 +62,8 @@ fn new_ledger_hardware_wallet_from_mnemonic_with_passphrase(
     hint: LedgerHardwareWalletHint,
     common: FactorSourceCommon,
 ) -> LedgerHardwareWalletFactorSource {
-    let id = FactorSourceIDFromHash::new_for_ledger(&mwp);
-    LedgerHardwareWalletFactorSource::new(id, common, hint)
+    let id = InternalFactorSourceIDFromHash::new_for_ledger(&mwp.into());
+    InternalLedgerHardwareWalletFactorSource::new(id, common.into(), hint.into()).into()
 }
 
 #[cfg(test)]

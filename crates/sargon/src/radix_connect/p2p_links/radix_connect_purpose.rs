@@ -27,11 +27,10 @@ pub enum RadixConnectPurpose {
 impl FromStr for RadixConnectPurpose {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        s.deserialize().map_err(|_| {
-            CommonError::InvalidRadixConnectPurpose {
+        s.deserialize()
+            .map_err(|_| CommonError::InvalidRadixConnectPurpose {
                 bad_value: s.to_owned(),
-            }
-        })
+            })
     }
 }
 

@@ -16,22 +16,22 @@ decl_ret_wrapped_address!(
 
 #[uniffi::export]
 pub fn new_package_address_sample_mainnet() -> PackageAddress {
-    PackageAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_package_address_sample_mainnet_other() -> PackageAddress {
-    PackageAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_package_address_sample_stokenet() -> PackageAddress {
-    PackageAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_package_address_sample_stokenet_other() -> PackageAddress {
-    PackageAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 #[cfg(test)]

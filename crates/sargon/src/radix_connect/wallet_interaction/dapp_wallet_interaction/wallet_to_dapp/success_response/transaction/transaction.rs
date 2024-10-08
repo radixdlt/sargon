@@ -17,7 +17,7 @@ impl WalletToDappInteractionTransactionResponseItems {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
-    transaction_intent_hash: IntentHash,
+    pub transaction_intent_hash: IntentHash,
 }
 
 impl Serialize for WalletToDappInteractionSendTransactionResponseItem {

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AuthorizedPersonaDetailed as InternalAuthorizedPersonaDetailed;
 
 #[derive(
     Clone,
@@ -6,11 +7,8 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{identity_address} | {shared_persona_data}")]
-#[serde(rename_all = "camelCase")]
 pub struct AuthorizedPersonaDetailed {
     /// Address that globally and uniquely identifies this Persona.
     pub identity_address: IdentityAddress,
@@ -29,23 +27,39 @@ pub struct AuthorizedPersonaDetailed {
     pub has_authentication_signing_key: bool,
 }
 
-impl Identifiable for AuthorizedPersonaDetailed {
-    type ID = IdentityAddress;
+impl From<InternalAuthorizedPersonaDetailed> for AuthorizedPersonaDetailed {
+    fn from(value: InternalAuthorizedPersonaDetailed) -> Self {
+        Self {
+            identity_address: value.identity_address.into(),
+            display_name: value.display_name.into(),
+            simple_accounts: value.simple_accounts.map(Into::into),
+            shared_persona_data: value.shared_persona_data.into(),
+            has_authentication_signing_key: value.has_authentication_signing_key,
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.identity_address
+impl Into<InternalAuthorizedPersonaDetailed> for AuthorizedPersonaDetailed {
+    fn into(self) -> InternalAuthorizedPersonaDetailed {
+        InternalAuthorizedPersonaDetailed {
+            identity_address: self.identity_address.into(),
+            display_name: self.display_name.into(),
+            simple_accounts: self.simple_accounts.map(Into::into),
+            shared_persona_data: self.shared_persona_data.into(),
+            has_authentication_signing_key: self.has_authentication_signing_key,
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_authorized_persona_detailed_sample() -> AuthorizedPersonaDetailed {
-    AuthorizedPersonaDetailed::sample()
+    InternalAuthorizedPersonaDetailed::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_authorized_persona_detailed_sample_other(
 ) -> AuthorizedPersonaDetailed {
-    AuthorizedPersonaDetailed::sample_other()
+    InternalAuthorizedPersonaDetailed::sample_other().into()
 }
 
 #[cfg(test)]

@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityStructureMetadata {
     pub id: SecurityStructureID,

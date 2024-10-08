@@ -19,6 +19,8 @@ macro_rules! declare_identified_entry {
         $expected_sample_debug: literal,
         $expected_sample_json: literal
     ) => {
+        use sargon::$struct_name as [<Internal $struct_name>];
+
         $(
             #[doc = $expr]
         )*
@@ -27,33 +29,44 @@ macro_rules! declare_identified_entry {
             PartialEq,
             Hash,
             Eq,
-            derive_more::Display,
-            derive_more::Debug,
             uniffi::Record,
         )]
-        #[debug("{} - {}", value, id)]
-        #[display("{value}")]
         pub struct $struct_name {
             pub id: PersonaDataEntryID,
             pub value: $value_type,
         }
-        
-        impl Identifiable for $struct_name {
-            type ID = PersonaDataEntryID;
-            fn id(&self) -> Self::ID {
-                self.id.clone()
+
+        impl From<[<Internal $struct_name>]>
+            for $struct_name
+        {
+            fn from(value: [<Internal $struct_name>]) -> Self {
+                Self {
+                    id: value.id.into(),
+                    value: value.value.into(),
+                }
+            }
+        }
+
+        impl Into<[<Internal $struct_name>]>
+            for $struct_name
+        {
+            fn into(self) -> [<Internal $struct_name>] {
+                Self {
+                    id: self.id.into(),
+                    value: self.value.into(),
+                }
             }
         }
 
         paste! {
             #[uniffi::export]
             pub fn [< $struct_name:snake _sample >]() -> $struct_name {
-                $struct_name::sample()
+                [<Internal $struct_name>]::sample().into()
             }
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _sample_other >]() -> $struct_name {
-                $struct_name::sample_other()
+                [<Internal $struct_name>]::sample_other().into()
             }
 
             #[cfg(test)]

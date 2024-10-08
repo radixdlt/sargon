@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::UnsecuredEntityControl as InternalUnsecuredEntityControl;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
@@ -16,14 +17,32 @@ pub struct UnsecuredEntityControl {
     pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
 }
 
+impl From<InternalUnsecuredEntityControl> for UnsecuredEntityControl {
+    fn from(value: InternalUnsecuredEntityControl) -> Self {
+        Self {
+            transaction_signing: value.transaction_signing.into(),
+            authentication_signing: value.authentication_signing.map(Into::into),
+        }
+    }
+}
+
+impl Into<InternalUnsecuredEntityControl> for UnsecuredEntityControl {
+    fn into(self) -> InternalUnsecuredEntityControl {
+        InternalUnsecuredEntityControl {
+            transaction_signing: self.transaction_signing.into(),
+            authentication_signing: self.authentication_signing.map(Into::into),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_unsecured_entity_control_sample() -> UnsecuredEntityControl {
-    UnsecuredEntityControl::sample()
+    InternalUnsecuredEntityControl::sample()
 }
 
 #[uniffi::export]
 pub fn new_unsecured_entity_control_sample_other() -> UnsecuredEntityControl {
-    UnsecuredEntityControl::sample_other()
+    InternalUnsecuredEntityControl::sample_other()
 }
 
 #[cfg(test)]

@@ -14,6 +14,8 @@ macro_rules! decl_specialized_address {
     ) => {
 
         paste! {
+            use sargon::$specialized_address_type as InternalAddress;
+
             $(
                 #[doc = $expr]
             )*
@@ -23,19 +25,28 @@ macro_rules! decl_specialized_address {
                 PartialEq,
                 Eq,
                 Hash,
-                derive_more::Display,
-                derive_more::Debug,
                 uniffi::Record,
             )]
-            #[debug("{:?}", self.secret_magic)]
             pub struct $specialized_address_type {
                 secret_magic: $base_addr
+            }
+
+            impl From<InternalAddress> for $specialized_address_type {
+                fn from(value: InternalAddress) -> Self {
+                    Self { secret_magic: value.0.into() }
+                }
+            }
+
+            impl Into<InternalAddress> for $specialized_address_type {
+                fn into(self) -> InternalAddress {
+                    InternalAddress(self.secret_magic.into())
+                }
             }
 
             /// Tries to bech32 decode the string into a specialized address.
             #[uniffi::export]
             pub fn [< new_ $specialized_address_type:snake >](bech32: String) -> Result<$specialized_address_type> {
-                $base_addr::try_from_bech32(&bech32).and_then(TryInto::<$specialized_address_type>::try_into)
+                InternalAddress::new_from_bech32(bech32).map_result()
             }
 
             /// Returns the base address of this specialized address.
@@ -48,19 +59,19 @@ macro_rules! decl_specialized_address {
             /// network.
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _map_to_network >](address: &$specialized_address_type, network_id: NetworkID) -> $specialized_address_type {
-                address.map_to_network(network_id)
+                address.into_internal().map_to_network(network_id).into()
             }
 
             /// Returns the bech32 encoding of this address
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _bech32_address >](address: &$specialized_address_type) -> String {
-                address.to_string()
+                address.into_internal().bech32_address()
             }
 
             /// Returns the network id this address
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _network_id >](address: &$specialized_address_type) -> NetworkID {
-                address.secret_magic.network_id()
+                address.into_internal().network_id()
             }
 
 
@@ -108,25 +119,25 @@ decl_specialized_address!(
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_mainnet(
 ) -> NonFungibleResourceAddress {
-    NonFungibleResourceAddress::sample_mainnet()
+    InternalAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_mainnet_other(
 ) -> NonFungibleResourceAddress {
-    NonFungibleResourceAddress::sample_mainnet_other()
+    InternalAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_stokenet(
 ) -> NonFungibleResourceAddress {
-    NonFungibleResourceAddress::sample_stokenet()
+    InternalAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_stokenet_other(
 ) -> NonFungibleResourceAddress {
-    NonFungibleResourceAddress::sample_stokenet_other()
+    InternalAddress::sample_stokenet_other().into()
 }
 
 /// Returns a random address in `network_id` as Network
@@ -134,7 +145,7 @@ pub fn new_non_fungible_resource_address_sample_stokenet_other(
 pub fn new_non_fungible_resource_address_random(
     network_id: NetworkID,
 ) -> NonFungibleResourceAddress {
-    NonFungibleResourceAddress::random(network_id)
+    InternalAddress::random(network_id.into()).into()
 }
 
 #[cfg(test)]

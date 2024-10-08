@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use core::hash::Hash;
-use std::{hash::Hasher, ops::Index};
+use sargon::ResourcePreferences as InternalResourcePreferences;
 
 decl_identified_vec_of!(
     /// User off-ledger preferences regarding resources.
@@ -12,7 +11,7 @@ decl_identified_vec_of!(
 pub fn resource_preferences_get_hidden_resources(
     resource_preferences: ResourcePreferences,
 ) -> HiddenResources {
-    resource_preferences.get_hidden_resources()
+    resource_preferences.into_internal().get_hidden_resources().into()
 }
 
 #[uniffi::export]
@@ -20,9 +19,9 @@ pub fn resource_preferences_hide_resource(
     resource_preferences: ResourcePreferences,
     resource: ResourceIdentifier,
 ) -> ResourcePreferences {
-    let mut resource_preferences = resource_preferences.clone();
-    resource_preferences.hide_resource(resource);
-    resource_preferences
+    let mut resource_preferences: InternalResourcePreferences = resource_preferences.into_internal().clone();
+    resource_preferences.hide_resource(resource.into());
+    resource_preferences.into()
 }
 
 #[uniffi::export]
@@ -30,9 +29,9 @@ pub fn resource_preferences_unhide_resource(
     resource_preferences: ResourcePreferences,
     resource: ResourceIdentifier,
 ) -> ResourcePreferences {
-    let mut resource_preferences = resource_preferences.clone();
-    resource_preferences.unhide_resource(resource);
-    resource_preferences
+    let mut resource_preferences:InternalResourcePreferences = resource_preferences.into_internal().clone();
+    resource_preferences.unhide_resource(resource.into());
+    resource_preferences.into()
 }
 
 #[cfg(test)]

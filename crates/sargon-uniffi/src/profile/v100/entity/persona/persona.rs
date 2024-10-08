@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Persona as InternalPersona;
 
 /// A Persona is an identity a user chooses to login to a dApp with, using
 /// RadixConnect - Radix decentralized login solution. A persona is very
@@ -25,10 +26,8 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{} | {}", display_name, address)]
 pub struct Persona {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -58,58 +57,75 @@ pub struct Persona {
     pub persona_data: PersonaData,
 }
 
-/// Add conformance to Identifiable in order to use `IdentifiedVecOf`
-impl Identifiable for Persona {
-    type ID = IdentityAddress;
+impl From<InternalPersona> for Persona {
+    fn from(value: InternalPersona) -> Self {
+        Self {
+            network_id: value.network_id.into(),
+            address: value.address.into(),
+            display_name: value.display_name.into(),
+            security_state: value.security_state.into(),
+            flags: value.flags.into(),
+            persona_data: value.persona_data.into(),
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.address
+impl Into<InternalPersona> for Persona {
+    fn into(self) -> InternalPersona {
+        InternalPersona {
+            network_id: self.network_id.into(),
+            address: self.address.into(),
+            display_name: self.display_name.into(),
+            security_state: self.security_state.into(),
+            flags: self.flags.into(),
+            persona_data: self.persona_data.into(),
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_persona_sample() -> Persona {
-    Persona::sample()
+    InternalPersona::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_other() -> Persona {
-    Persona::sample_other()
+    InternalPersona::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_mainnet_batman() -> Persona {
-    Persona::sample_mainnet_batman()
+    InternalPersona::sample_mainnet_batman().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_mainnet_satoshi() -> Persona {
-    Persona::sample_mainnet_satoshi()
+    InternalPersona::sample_mainnet_satoshi().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_mainnet_ripley() -> Persona {
-    Persona::sample_mainnet_ripley()
+    InternalPersona::sample_mainnet_ripley().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_mainnet_turing() -> Persona {
-    Persona::sample_mainnet_turing()
+    InternalPersona::sample_mainnet_turing().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_stokenet_leia_skywalker() -> Persona {
-    Persona::sample_stokenet_leia_skywalker()
+    InternalPersona::sample_stokenet_leia_skywalker().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_stokenet_hermione() -> Persona {
-    Persona::sample_stokenet_hermione()
+    InternalPersona::sample_stokenet_hermione().into()
 }
 
 #[uniffi::export]
 pub fn new_persona_sample_stokenet_connor() -> Persona {
-    Persona::sample_stokenet_connor()
+    InternalPersona::sample_stokenet_connor().into()
 }
 
 #[cfg(test)]

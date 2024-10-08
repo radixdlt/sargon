@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::DeviceFactorSourceHint as InternalDeviceFactorSourceHint;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
@@ -8,10 +9,8 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{name} {model}")]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
     pub name: String,
@@ -50,104 +49,28 @@ pub struct DeviceFactorSourceHint {
     pub host_vendor: Option<String>,
 }
 
-#[uniffi::export]
-pub fn new_device_factor_source_sample() -> DeviceFactorSource {
-    DeviceFactorSource::sample()
-}
-
-#[uniffi::export]
-pub fn new_device_factor_source_sample_other() -> DeviceFactorSource {
-    DeviceFactorSource::sample_other()
-}
-
-#[uniffi::export]
-pub fn new_device_factor_source_babylon(
-    is_main: bool,
-    mnemonic_with_passphrase: &MnemonicWithPassphrase,
-    host_info: &HostInfo,
-) -> DeviceFactorSource {
-    DeviceFactorSource::babylon(is_main, mnemonic_with_passphrase, host_info)
-}
-
-#[uniffi::export]
-pub fn new_device_factor_source_olympia(
-    mnemonic_with_passphrase: &MnemonicWithPassphrase,
-    host_info: &HostInfo,
-) -> DeviceFactorSource {
-    DeviceFactorSource::olympia(mnemonic_with_passphrase, host_info)
-}
-
-#[uniffi::export]
-pub fn device_factor_source_is_main_bdfs(
-    device_factor_source: &DeviceFactorSource,
-) -> bool {
-    device_factor_source.is_main_bdfs()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeviceFactorSource;
-
-    #[test]
-    fn test_new_olympia() {
-        let olympia = new_device_factor_source_olympia(
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(factor_source_supports_olympia(&olympia.clone().into()));
-        assert!(!factor_source_supports_babylon(&olympia.into()));
+impl From<InternalDeviceFactorSourceHint> for DeviceFactorSourceHint {
+    fn from(value: InternalDeviceFactorSourceHint) -> Self {
+        Self {
+            name: value.name,
+            model: value.model,
+            mnemonic_word_count: value.mnemonic_word_count.into(),
+            system_version: value.system_version,
+            host_app_version: value.host_app_version,
+            host_vendor: value.host_vendor,
+        }
     }
+}
 
-    #[test]
-    fn test_new_babylon() {
-        let babylon = new_device_factor_source_babylon(
-            true,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(factor_source_supports_babylon(&babylon.clone().into()));
-        assert!(!factor_source_supports_olympia(&babylon.into()));
-    }
-
-    #[test]
-    fn test_new_babylon_not_main() {
-        let babylon = new_device_factor_source_babylon(
-            false,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(!device_factor_source_is_main_bdfs(&babylon));
-    }
-
-    #[test]
-    fn test_new_babylon_is_main() {
-        let babylon = new_device_factor_source_babylon(
-            true,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(device_factor_source_is_main_bdfs(&babylon));
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_device_factor_source_sample(),
-                new_device_factor_source_sample_other(),
-                // duplicates should get removed
-                new_device_factor_source_sample(),
-                new_device_factor_source_sample_other(),
-            ])
-            .len(),
-            2
-        );
+impl Into<InternalDeviceFactorSourceHint> for DeviceFactorSourceHint {
+    fn into(self) -> InternalDeviceFactorSourceHint {
+        InternalDeviceFactorSourceHint {
+            name: self.name,
+            model: self.model,
+            mnemonic_word_count: self.mnemonic_word_count.into(),
+            system_version: self.system_version,
+            host_app_version: self.host_app_version,
+            host_vendor: self.host_vendor,
+        }
     }
 }
