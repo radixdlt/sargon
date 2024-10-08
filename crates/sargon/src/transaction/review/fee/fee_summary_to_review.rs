@@ -4,21 +4,19 @@ use crate::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct FeeSummaryToReview {
     pub summary: FeeSummary,
+    pub fee_locks: FeeLocks,
     pub guarantees_cost: Decimal192,
     pub lock_fee_cost: Decimal192,
     pub signatures_cost: Decimal192,
     pub notarizing_cost: Decimal192,
-    pub non_contingent_lock: Decimal192,
-    pub contingent_lock: Decimal192,
 }
 
 impl FeeSummaryToReview {
     /// Creates a new `FeeSummaryToReview` from an `ExecutionSummary`.
     pub fn new_from_execution_summary(
         execution_summary: ExecutionSummary,
-        signatures_count: usize,
+        signatures_count: u16,
         notary_is_signatory: bool,
-        include_lock_fee: bool,
     ) -> Self {
         Self {
             summary: execution_summary.fee_summary,
@@ -26,11 +24,10 @@ impl FeeSummaryToReview {
                 &execution_summary.detailed_classification,
                 &execution_summary.deposits,
             ),
-            lock_fee_cost: FeeConstants::lock_fee_cost(include_lock_fee),
+            lock_fee_cost: FeeConstants::lock_fee_cost(false),
             signatures_cost: FeeConstants::signatures_cost(signatures_count),
             notarizing_cost: FeeConstants::notarizing_cost(notary_is_signatory),
-            non_contingent_lock: execution_summary.fee_locks.lock,
-            contingent_lock: execution_summary.fee_locks.contingent_lock,
+            fee_locks: execution_summary.fee_locks,
         }
     }
 

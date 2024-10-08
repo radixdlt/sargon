@@ -46,7 +46,7 @@ impl FeeConstants {
     }
 
     /// Returns the total signature cost based on the number of signatures.
-    pub fn signatures_cost(signature_count: usize) -> Decimal192 {
+    pub fn signatures_cost(signature_count: u16) -> Decimal192 {
         Decimal192::from(signature_count as i64)
             * Self::convert(Self::SIGNATURE_COST)
     }

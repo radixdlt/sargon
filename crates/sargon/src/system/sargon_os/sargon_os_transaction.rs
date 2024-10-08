@@ -10,14 +10,12 @@ impl SargonOS {
         blobs: Blobs,
         message: Message,
         is_wallet_transaction: bool,
-        include_lock_fee: bool,
     ) -> Result<TransactionToReview> {
         self.perform_transaction_preview_analysis(
             instructions,
             blobs,
             message,
             is_wallet_transaction,
-            include_lock_fee,
         )
         .await
     }
@@ -30,7 +28,6 @@ impl SargonOS {
         blobs: Blobs,
         message: Message,
         is_wallet_transaction: bool,
-        include_lock_fee: bool,
     ) -> Result<TransactionToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
         let gateway_client = GatewayClient::new(
@@ -80,24 +77,9 @@ impl SargonOS {
             );
         }
 
-        // Determine the transaction fee
-        let notary_is_signatory = signers.is_empty();
-        let transaction_fee = TransactionFee::new_from_execution_summary(
-            execution_summary.clone(),
-            if notary_is_signatory {
-                1
-            } else {
-                signers.clone().iter().count()
-            },
-            notary_is_signatory,
-            include_lock_fee,
-        );
-
         Ok(TransactionToReview {
             transaction_manifest,
             execution_summary,
-            network_id,
-            transaction_fee,
         })
     }
 
@@ -160,15 +142,15 @@ impl SargonOS {
             NonEmptyMax32Bytes::from(self.clients.entropy.bip39_entropy())
                 .bytes()
                 .as_ref(),
-        )?;
+        )?;//TODO
         let epoch = gateway_client.current_epoch().await?;
         let header = TransactionHeader::new(
             network_id,
             epoch,
             Epoch::from(epoch.0 + 10),
-            Nonce::random(),
+            Nonce::random(), //TODO
             ephemeral_notary_private_key.public_key(),
-            true,
+            true, //TODO
             0,
         );
         let intent = TransactionIntent::new(header, manifest, message)?;

@@ -4,6 +4,4 @@ use crate::prelude::*;
 pub struct TransactionToReview {
     pub transaction_manifest: TransactionManifest,
     pub execution_summary: ExecutionSummary,
-    pub network_id: NetworkID,
-    pub transaction_fee: TransactionFee,
 }
