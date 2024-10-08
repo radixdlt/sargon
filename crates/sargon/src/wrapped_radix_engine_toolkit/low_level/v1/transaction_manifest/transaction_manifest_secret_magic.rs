@@ -9,19 +9,16 @@ use crate::prelude::*;
 pub struct TransactionManifestSecretMagic {
     pub instructions: Instructions,
     pub blobs: Blobs,
-    pub object_names: ManifestObjectNames,
 }
 
 impl TransactionManifestSecretMagic {
     pub fn new(
         instructions: Instructions,
         blobs: impl Into<Blobs>,
-        object_names: ManifestObjectNames,
     ) -> Self {
         Self {
             instructions,
             blobs: blobs.into(),
-            object_names,
         }
     }
 
@@ -35,7 +32,6 @@ impl HasSampleValues for TransactionManifestSecretMagic {
         Self::new(
             Instructions::sample_mainnet(),
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
     }
 
@@ -43,7 +39,6 @@ impl HasSampleValues for TransactionManifestSecretMagic {
         Self::new(
             Instructions::sample_simulator_other(),
             Blobs::default(),
-            ManifestObjectNames::sample_other(),
         )
     }
 }
@@ -54,7 +49,6 @@ impl TransactionManifestSecretMagic {
         Self::new(
             Instructions::sample_mainnet_without_lock_fee(),
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
     }
 }

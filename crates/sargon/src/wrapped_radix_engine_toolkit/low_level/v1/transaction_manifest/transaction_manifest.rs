@@ -13,30 +13,25 @@ impl TransactionManifest {
         instructions_string: impl AsRef<str>,
         network_id: NetworkID,
         blobs: Blobs,
-        object_names: ManifestObjectNames,
     ) -> Result<Self> {
         Instructions::new(instructions_string, network_id).map(|instructions| {
             Self {
                 secret_magic: TransactionManifestSecretMagic {
                     instructions,
                     blobs,
-                    object_names,
                 },
             }
         })
     }
 
-    // TODO: rename?
-    pub fn with_instructions_and_blobs_and_object_names(
+    pub fn with_instructions_and_blobs(
         instructions: Instructions,
         blobs: Blobs,
-        object_names: ManifestObjectNames,
     ) -> Self {
         Self {
             secret_magic: TransactionManifestSecretMagic::new(
                 instructions,
                 blobs,
-                object_names,
             ),
         }
     }
@@ -48,7 +43,6 @@ impl TransactionManifest {
             secret_magic: TransactionManifestSecretMagic {
                 instructions: Instructions::empty(network_id),
                 blobs: Blobs::default(),
-                object_names: ManifestObjectNames::default(),
             },
         }
     }
@@ -67,7 +61,7 @@ impl TransactionManifest {
         ScryptoTransactionManifest {
             instructions: self.instructions().clone(),
             blobs: self.secret_magic.blobs.clone().into(),
-            object_names: self.secret_magic.object_names.clone().into(),
+            object_names: Default::default(),
         }
     }
 }
@@ -92,8 +86,7 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
         let value = Self {
             secret_magic: TransactionManifestSecretMagic::new(
                 instructions,
-                scrypto_manifest.blobs.clone(),
-                scrypto_manifest.object_names.clone().into(),
+                scrypto_manifest.blobs.clone()
             ),
         };
         assert_eq!(value.scrypto_manifest(), scrypto_manifest);
@@ -111,8 +104,7 @@ impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
         TransactionManifest::new(
             value.0.transaction_manifest_string.clone(),
             value.1,
-            value.0.blobs.clone(),
-            ManifestObjectNames::default(), // TODO: TBD
+            value.0.blobs.clone()
         )
     }
 }
@@ -136,10 +128,6 @@ impl TransactionManifest {
 
     pub(crate) fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
-    }
-
-    pub(crate) fn object_names(&self) -> &ManifestObjectNames {
-        &self.secret_magic.object_names
     }
 
     pub fn instructions_string(&self) -> String {
@@ -212,7 +200,6 @@ mod tests {
                 s,
                 NetworkID::Simulator,
                 Blobs::default(),
-                ManifestObjectNames::sample(),
             )
         }
     }
@@ -266,10 +253,9 @@ mod tests {
             object_names: Default::default(),
         };
 
-        let sut = SUT::with_instructions_and_blobs_and_object_names(
+        let sut = SUT::with_instructions_and_blobs(
             Instructions::new_unchecked(ins, NetworkID::Mainnet),
             Blobs::default(),
-            ManifestObjectNames::sample(),
         );
         assert_eq!(scrypto.clone(), sut.clone().into());
         assert_eq!(sut.scrypto_manifest(), scrypto);
@@ -303,7 +289,6 @@ BURN_RESOURCE
             non_sensical,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
         let summary = manifest.summary();
@@ -323,7 +308,6 @@ BURN_RESOURCE
                 instructions_str,
                 NetworkID::Simulator,
                 Blobs::default(),
-                ManifestObjectNames::sample()
             )
             .unwrap()
             .instructions()
@@ -345,7 +329,6 @@ BURN_RESOURCE
                 instructions_str,
                 NetworkID::Mainnet,
                 Blobs::default(),
-                ManifestObjectNames::sample()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Simulator,
@@ -367,7 +350,6 @@ BURN_RESOURCE
                 instructions_str,
                 NetworkID::Stokenet,
                 Blobs::default(),
-                ManifestObjectNames::sample()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Mainnet,
@@ -437,7 +419,6 @@ BURN_RESOURCE
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();

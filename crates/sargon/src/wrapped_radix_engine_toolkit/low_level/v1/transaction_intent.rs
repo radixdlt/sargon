@@ -102,10 +102,9 @@ impl TryFrom<ScryptoIntent> for TransactionIntent {
         ))?;
         let blobs: Blobs = value.blobs.into();
         let manifest =
-            TransactionManifest::with_instructions_and_blobs_and_object_names(
+            TransactionManifest::with_instructions_and_blobs(
                 instructions,
                 blobs,
-                ManifestObjectNames::default(), // TODO: TBD
             );
 
         Self::new(header, manifest, message)
@@ -149,7 +148,6 @@ impl TransactionIntent {
                     instructions.instructions_string(),
                     network_id,
                     Blobs::default(),
-                    ManifestObjectNames::sample(), // TODO: TBD
                 )
             })
             .and_then(|manifest| {

@@ -106,7 +106,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -215,7 +214,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -282,7 +280,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -334,7 +331,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -422,7 +418,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -496,7 +491,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -552,7 +546,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -595,7 +588,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
@@ -652,7 +644,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -732,7 +723,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -790,7 +780,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -872,7 +861,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 
@@ -950,7 +938,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::sample(),
         )
         .unwrap();
 

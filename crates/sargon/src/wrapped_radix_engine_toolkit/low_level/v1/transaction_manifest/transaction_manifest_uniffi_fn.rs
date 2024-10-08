@@ -1,18 +1,15 @@
 use crate::prelude::*;
 
-///TODO: rename fn?
 #[uniffi::export]
 pub fn new_transaction_manifest_from_instructions_string_and_blobs(
     instructions_string: String,
     network_id: NetworkID,
     blobs: Blobs,
-    object_names: ManifestObjectNames,
 ) -> Result<TransactionManifest> {
     TransactionManifest::new(
         instructions_string,
         network_id,
         blobs,
-        object_names,
     )
 }
 
@@ -110,7 +107,6 @@ mod tests {
                 s.clone(),
                 NetworkID::Mainnet,
                 Blobs::default(),
-                ManifestObjectNames::default(),
             )
             .unwrap()
             .instructions_string(),
@@ -172,7 +168,6 @@ mod tests {
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ManifestObjectNames::default(),
         )
         .unwrap();
 

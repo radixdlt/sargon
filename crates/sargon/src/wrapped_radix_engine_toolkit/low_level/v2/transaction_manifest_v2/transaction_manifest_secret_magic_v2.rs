@@ -10,7 +10,6 @@ pub struct TransactionManifestSecretMagicV2 {
     pub instructions: InstructionsV2,
     pub blobs: Blobs,
     pub children: ChildIntents,
-    pub object_names: ManifestObjectNames,
 }
 
 impl TransactionManifestSecretMagicV2 {
@@ -18,13 +17,11 @@ impl TransactionManifestSecretMagicV2 {
         instructions: InstructionsV2,
         blobs: impl Into<Blobs>,
         children: ChildIntents,
-        object_names: ManifestObjectNames,
     ) -> Self {
         Self {
             instructions,
             blobs: blobs.into(),
             children,
-            object_names,
         }
     }
 
@@ -39,7 +36,6 @@ impl HasSampleValues for TransactionManifestSecretMagicV2 {
             InstructionsV2::sample(),
             Blobs::default(),
             ChildIntents::sample(),
-            ManifestObjectNames::sample(),
         )
     }
 
@@ -48,7 +44,6 @@ impl HasSampleValues for TransactionManifestSecretMagicV2 {
             InstructionsV2::sample_other(),
             Blobs::default(),
             ChildIntents::sample_other(),
-            ManifestObjectNames::sample_other(),
         )
     }
 }

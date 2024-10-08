@@ -15,7 +15,6 @@ impl TransactionManifestV2 {
                 instructions: InstructionsV2::empty(network_id),
                 blobs: Blobs::default(),
                 children: ChildIntents::empty(),
-                object_names: ManifestObjectNames::default(),
             },
         }
     }
@@ -35,7 +34,7 @@ impl TransactionManifestV2 {
             instructions: self.instructions().clone(),
             blobs: self.secret_magic.blobs.clone().into(),
             children: self.secret_magic.children.clone().into(),
-            object_names: self.secret_magic.object_names.clone().into(),
+            object_names: Default::default(),
         }
     }
 }
@@ -64,7 +63,6 @@ impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
                 instructions,
                 scrypto_manifest.blobs.clone(),
                 (scrypto_manifest.children.clone(), network_id).into(),
-                scrypto_manifest.object_names.clone().into(),
             ),
         };
         assert_eq!(value.scrypto_manifest(), scrypto_manifest);
@@ -91,10 +89,6 @@ impl TransactionManifestV2 {
 
     pub(crate) fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
-    }
-
-    pub(crate) fn object_names(&self) -> &ManifestObjectNames {
-        &self.secret_magic.object_names
     }
 
     pub fn instructions_string(&self) -> String {
