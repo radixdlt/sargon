@@ -165,28 +165,25 @@ mod tests {
                             [],
                         ),
                         RecoveryRoleWithFactorInstances::new(
-                            [
-                                FactorInstance::new(
-                                    FactorSourceIDFromHash::sample_ledger().into(),
-                                    FactorInstanceBadge::sample(),
-                                )
-                            ],
+                            [FactorInstance::new(
+                                FactorSourceIDFromHash::sample_ledger().into(),
+                                FactorInstanceBadge::sample(),
+                            )],
                             1,
                             [],
                         ),
                         ConfirmationRoleWithFactorInstances::new(
-                            [
-                                FactorInstance::new(
-                                    FactorSourceIDFromHash::sample_passphrase().into(),
-                                    FactorInstanceBadge::sample(),
-                                )
-                            ],
+                            [FactorInstance::new(
+                                FactorSourceIDFromHash::sample_passphrase()
+                                    .into(),
+                                FactorInstanceBadge::sample(),
+                            )],
                             1,
                             [],
                         ),
                     ),
                 ),
-            }
+            },
         };
 
         assert_eq_after_json_roundtrip(
@@ -296,7 +293,7 @@ mod tests {
                 }
               }
             }
-            "#
+            "#,
         );
     }
 }

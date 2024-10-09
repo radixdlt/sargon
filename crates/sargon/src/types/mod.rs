@@ -4,9 +4,9 @@ mod hd_signature;
 mod hd_signature_input;
 mod invalid_transaction_if_neglected;
 mod owned_types;
+mod samples;
 mod vector_image_type;
 mod vector_image_type_uniffi_fn;
-mod samples;
 
 pub use ffi_url::*;
 pub use vector_image_type::*;

@@ -48,7 +48,10 @@ impl PetitionForEntity {
         Self::new(
             intent_hash,
             entity,
-            PetitionForFactors::new_threshold(matrix.threshold_factors, matrix.threshold as i8),
+            PetitionForFactors::new_threshold(
+                matrix.threshold_factors,
+                matrix.threshold as i8,
+            ),
             PetitionForFactors::new_override(matrix.override_factors),
         )
     }
@@ -70,31 +73,46 @@ impl PetitionForEntity {
     /// Returns `true` if signatures requirement has been fulfilled, either by
     /// override factors or by threshold factors
     pub(crate) fn has_signatures_requirement_been_fulfilled(&self) -> bool {
-        self.status() == PetitionForFactorsStatus::Finished(PetitionFactorsStatusFinished::Success)
+        self.status()
+            == PetitionForFactorsStatus::Finished(
+                PetitionFactorsStatusFinished::Success,
+            )
     }
 
     /// Returns `true` if the transaction of this petition already has failed due
     /// to too many factors neglected
     pub(crate) fn has_failed(&self) -> bool {
-        self.status() == PetitionForFactorsStatus::Finished(PetitionFactorsStatusFinished::Fail)
+        self.status()
+            == PetitionForFactorsStatus::Finished(
+                PetitionFactorsStatusFinished::Fail,
+            )
     }
 
     /// Returns the aggregate of **all** owned factor instances from both lists, either threshold or override.
     pub(crate) fn all_factor_instances(&self) -> IndexSet<OwnedFactorInstance> {
         self.access_both_list_then_form_union(|l| l.factor_instances())
             .into_iter()
-            .map(|f| OwnedFactorInstance::owned_factor_instance(self.entity.clone(), f.clone()))
+            .map(|f| {
+                OwnedFactorInstance::owned_factor_instance(
+                    self.entity.clone(),
+                    f.clone(),
+                )
+            })
             .collect::<IndexSet<_>>()
     }
 
     /// Returns the aggregate of all **neglected** factor instances from both lists, either threshold or override,
     /// that is, all factor instances but filtered out only those from FactorSources which have been neglected.
-    pub(crate) fn all_neglected_factor_instances(&self) -> IndexSet<NeglectedFactorInstance> {
+    pub(crate) fn all_neglected_factor_instances(
+        &self,
+    ) -> IndexSet<NeglectedFactorInstance> {
         self.access_both_list_then_form_union(|f| f.all_neglected())
     }
 
     /// Returns the aggregate of all **neglected** factor sources from both lists, either threshold or override.
-    pub(crate) fn all_neglected_factor_sources(&self) -> IndexSet<NeglectedFactor> {
+    pub(crate) fn all_neglected_factor_sources(
+        &self,
+    ) -> IndexSet<NeglectedFactor> {
         self.all_neglected_factor_instances()
             .into_iter()
             .map(|n| n.as_neglected_factor())
@@ -134,8 +152,12 @@ impl PetitionForEntity {
     ) -> bool {
         assert!(self.references_any_factor_source(&factor_source_ids));
         match self.status() {
-            PetitionForFactorsStatus::Finished(PetitionFactorsStatusFinished::Fail) => true,
-            PetitionForFactorsStatus::Finished(PetitionFactorsStatusFinished::Success) => false,
+            PetitionForFactorsStatus::Finished(
+                PetitionFactorsStatusFinished::Fail,
+            ) => true,
+            PetitionForFactorsStatus::Finished(
+                PetitionFactorsStatusFinished::Success,
+            ) => false,
             PetitionForFactorsStatus::InProgress => false,
         }
     }
@@ -146,12 +168,17 @@ impl PetitionForEntity {
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<AddressOfAccountOrPersona> {
-        let status_if_neglected = self.status_if_neglected_factors(factor_source_ids);
+        let status_if_neglected =
+            self.status_if_neglected_factors(factor_source_ids);
         match status_if_neglected {
-            PetitionForFactorsStatus::Finished(finished_reason) => match finished_reason {
-                PetitionFactorsStatusFinished::Fail => Some(self.entity.clone()),
-                PetitionFactorsStatusFinished::Success => None,
-            },
+            PetitionForFactorsStatus::Finished(finished_reason) => {
+                match finished_reason {
+                    PetitionFactorsStatusFinished::Fail => {
+                        Some(self.entity.clone())
+                    }
+                    PetitionFactorsStatusFinished::Success => None,
+                }
+            }
             PetitionForFactorsStatus::InProgress => None,
         }
     }
@@ -183,7 +210,10 @@ impl PetitionForEntity {
 
     /// Queries if this petition references the factor source with the given id, by
     /// checking both the threshold and override factors list.
-    pub(crate) fn references_factor_source_with_id(&self, id: &FactorSourceIDFromHash) -> bool {
+    pub(crate) fn references_factor_source_with_id(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> bool {
         self.access_both_list(
             |p| p.references_factor_source_with_id(id),
             |a, b| a.unwrap_or(false) || b.unwrap_or(false),
@@ -194,7 +224,10 @@ impl PetitionForEntity {
     /// or override factor, it will be neglected. If the factor is not known to any of the lists
     /// nothing happens.
     pub(crate) fn neglect_if_referenced(&self, neglected: NeglectedFactor) {
-        self.access_both_list(|p| p.neglect_if_referenced(neglected.clone()), |_, _| ());
+        self.access_both_list(
+            |p| p.neglect_if_referenced(neglected.clone()),
+            |_, _| (),
+        );
     }
 
     /// The "aggregated" status of this petition, i.e. the status of the threshold factors
@@ -251,9 +284,10 @@ impl PetitionForEntity {
         access: impl Fn(&PetitionForFactors) -> T,
         combine: impl Fn(Option<T>, Option<T>) -> U,
     ) -> U {
-        let access_list_if_exists = |list: &Option<RefCell<PetitionForFactors>>| {
-            list.as_ref().map(|refcell| access(&refcell.borrow()))
-        };
+        let access_list_if_exists =
+            |list: &Option<RefCell<PetitionForFactors>>| {
+                list.as_ref().map(|refcell| access(&refcell.borrow()))
+            };
         let t = access_list_if_exists(&self.threshold_factors);
         let o = access_list_if_exists(&self.override_factors);
         combine(t, o)
@@ -300,272 +334,314 @@ impl PetitionForEntity {
     }
 }
 
-// // === SAMPLE VALUES ===
-// impl PetitionForEntity {
-//     fn from_entity(entity: impl Into<AccountOrPersona>, intent_hash: IntentHash) -> Self {
-//         let entity = entity.into();
-//         match entity.entity_security_state() {
-//             EntitySecurityState::Securified(sec) => {
-//                 Self::new_securified(intent_hash, entity.address(), sec.matrix)
-//             }
-//             EntitySecurityState::Unsecured(factor) => {
-//                 Self::new_unsecurified(intent_hash, entity.address(), factor)
-//             }
-//         }
-//     }
-// }
-//
-// impl HasSampleValues for PetitionForEntity {
-//     fn sample() -> Self {
-//         Self::from_entity(Account::sample_securified(), IntentHash::sample())
-//     }
-//
-//     fn sample_other() -> Self {
-//         Self::from_entity(Account::sample_unsecurified(), IntentHash::sample_other())
-//     }
-// }
-//
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     type Sut = PetitionForEntity;
-//
-//     #[test]
-//     fn multiple_device_as_override_skipped_both_is_invalid() {
-//         let d0 = HDFactorSource::fs0();
-//         let d1 = HDFactorSource::fs10();
-//         assert_eq!(d0.factor_source_kind(), FactorSourceKind::Device);
-//         assert_eq!(d1.factor_source_kind(), FactorSourceKind::Device);
-//
-//         let matrix =
-//             MatrixOfFactorInstances::override_only([d0.clone(), d1.clone()].into_iter().map(|f| {
-//                 HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                     HDPathComponent::securifying_base_index(0),
-//                     f.factor_source_id(),
-//                 )
-//             }));
-//         let entity = AddressOfAccountOrPersona::Account(AccountAddress::sample());
-//         let tx = IntentHash::sample_third();
-//         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
-//         let invalid = sut
-//             .invalid_transaction_if_neglected_factors(IndexSet::from_iter([
-//                 d0.factor_source_id(),
-//                 d1.factor_source_id(),
-//             ]))
-//             .unwrap();
-//
-//         assert_eq!(invalid.clone(), entity);
-//     }
-//
-//     #[test]
-//     fn multiple_device_as_override_skipped_one_is_valid() {
-//         let d0 = HDFactorSource::fs0();
-//         let d1 = HDFactorSource::fs10();
-//         assert_eq!(d0.factor_source_kind(), FactorSourceKind::Device);
-//         assert_eq!(d1.factor_source_kind(), FactorSourceKind::Device);
-//
-//         let matrix =
-//             MatrixOfFactorInstances::override_only([d0.clone(), d1.clone()].into_iter().map(|f| {
-//                 HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                     HDPathComponent::securifying_base_index(0),
-//                     f.factor_source_id(),
-//                 )
-//             }));
-//         let entity = AddressOfAccountOrPersona::Account(AccountAddress::sample());
-//         let tx = IntentHash::sample_third();
-//         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
-//         let invalid =
-//             sut.invalid_transaction_if_neglected_factors(IndexSet::just(d0.factor_source_id()));
-//         assert!(invalid.is_none());
-//     }
-//
-//     #[test]
-//     fn multiple_device_as_threshold_skipped_both_is_invalid() {
-//         let d0 = HDFactorSource::fs0();
-//         let d1 = HDFactorSource::fs10();
-//         assert_eq!(d0.factor_source_kind(), FactorSourceKind::Device);
-//         assert_eq!(d1.factor_source_kind(), FactorSourceKind::Device);
-//
-//         let matrix = MatrixOfFactorInstances::threshold_only(
-//             [d0.clone(), d1.clone()].into_iter().map(|f| {
-//                 HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                     HDPathComponent::securifying_base_index(0),
-//                     f.factor_source_id(),
-//                 )
-//             }),
-//             2,
-//         );
-//
-//         let entity = AddressOfAccountOrPersona::Account(AccountAddress::sample());
-//         let tx = IntentHash::sample_third();
-//         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
-//         let invalid = sut
-//             .invalid_transaction_if_neglected_factors(IndexSet::from_iter([
-//                 d0.factor_source_id(),
-//                 d1.factor_source_id(),
-//             ]))
-//             .unwrap();
-//         assert_eq!(invalid, entity);
-//     }
-//
-//     #[test]
-//     fn two_device_as_threshold_of_2_skipped_one_is_invalid() {
-//         let d0 = HDFactorSource::fs0();
-//         let d1 = HDFactorSource::fs10();
-//         assert_eq!(d0.factor_source_kind(), FactorSourceKind::Device);
-//         assert_eq!(d1.factor_source_kind(), FactorSourceKind::Device);
-//
-//         let matrix = MatrixOfFactorInstances::threshold_only(
-//             [d0.clone(), d1.clone()].into_iter().map(|f| {
-//                 HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                     HDPathComponent::securifying_base_index(0),
-//                     f.factor_source_id(),
-//                 )
-//             }),
-//             2,
-//         );
-//
-//         let entity = AddressOfAccountOrPersona::Account(AccountAddress::sample());
-//         let tx = IntentHash::sample_third();
-//         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
-//
-//         let invalid = sut
-//             .invalid_transaction_if_neglected_factors(IndexSet::just(d1.factor_source_id()))
-//             .unwrap();
-//
-//         assert_eq!(invalid, entity);
-//     }
-//
-//     #[test]
-//     fn two_device_as_threshold_of_1_skipped_one_is_valid() {
-//         let d0 = HDFactorSource::fs0();
-//         let d1 = HDFactorSource::fs10();
-//         assert_eq!(d0.factor_source_kind(), FactorSourceKind::Device);
-//         assert_eq!(d1.factor_source_kind(), FactorSourceKind::Device);
-//
-//         let matrix = MatrixOfFactorInstances::threshold_only(
-//             [d0.clone(), d1.clone()].into_iter().map(|f| {
-//                 HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                     HDPathComponent::securifying_base_index(0),
-//                     f.factor_source_id(),
-//                 )
-//             }),
-//             1,
-//         );
-//
-//         let entity = AddressOfAccountOrPersona::Account(AccountAddress::sample());
-//         let tx = IntentHash::sample_third();
-//         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
-//
-//         let invalid =
-//             sut.invalid_transaction_if_neglected_factors(IndexSet::just(d1.factor_source_id()));
-//
-//         assert!(invalid.is_none());
-//     }
-//
-//     #[test]
-//     fn debug() {
-//         assert!(!format!("{:?}", Sut::sample()).is_empty());
-//     }
-//
-//     #[test]
-//     #[should_panic(expected = "Programmer error! Must have at least one factors list.")]
-//     fn invalid_empty_factors() {
-//         Sut::new(
-//             IntentHash::sample(),
-//             AddressOfAccountOrPersona::sample(),
-//             None,
-//             None,
-//         );
-//     }
-//
-//     #[test]
-//     #[should_panic(expected = "Factor source not found in any of the lists.")]
-//     fn cannot_add_unrelated_signature() {
-//         let sut = Sut::sample();
-//         sut.add_signature(HDSignature::sample());
-//     }
-//
-//     #[test]
-//     #[should_panic(expected = "A factor MUST NOT be present in both threshold AND override list.")]
-//     fn factor_should_not_be_used_in_both_lists() {
-//         Account::securified_mainnet("Alice", AccountAddress::sample(), || {
-//             let idx = HDPathComponent::securifying_base_index(0);
-//             let fi = HierarchicalDeterministicFactorInstance::f(CAP26EntityKind::Account, idx);
-//             MatrixOfFactorInstances::new(
-//                 [FactorSourceIDFromHash::fs0()].map(&fi),
-//                 1,
-//                 [FactorSourceIDFromHash::fs0()].map(&fi),
-//             )
-//         });
-//     }
-//
-//     #[test]
-//     #[should_panic]
-//     fn cannot_add_same_signature_twice() {
-//         let intent_hash = IntentHash::sample();
-//         let entity = Account::securified_mainnet("Alice", AccountAddress::sample(), || {
-//             let idx = HDPathComponent::securifying_base_index(0);
-//             let fi = HierarchicalDeterministicFactorInstance::f(CAP26EntityKind::Account, idx);
-//             MatrixOfFactorInstances::new(
-//                 [FactorSourceIDFromHash::fs0()].map(&fi),
-//                 1,
-//                 [FactorSourceIDFromHash::fs1()].map(&fi),
-//             )
-//         });
-//         let sut = Sut::from_entity(entity.clone(), intent_hash.clone());
-//         let sign_input = HDSignatureInput::new(
-//             intent_hash,
-//             OwnedFactorInstance::new(
-//                 entity.address(),
-//                 HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                     HDPathComponent::unsecurified_hardening_base_index(0),
-//                     FactorSourceIDFromHash::fs0(),
-//                 ),
-//             ),
-//         );
-//         let signature = HDSignature::produced_signing_with_input(sign_input);
-//
-//         sut.add_signature(signature.clone());
-//         sut.add_signature(signature.clone());
-//     }
-//
-//     #[test]
-//     fn invalid_transactions_if_neglected_success() {
-//         let sut = Sut::sample();
-//         sut.add_signature(HDSignature::produced_signing_with_input(
-//             HDSignatureInput::new(
-//                 sut.intent_hash.clone(),
-//                 OwnedFactorInstance::new(
-//                     sut.entity.clone(),
-//                     HierarchicalDeterministicFactorInstance::mainnet_tx_account(
-//                         HDPathComponent::securifying_base_index(6),
-//                         FactorSourceIDFromHash::fs1(),
-//                     ),
-//                 ),
-//             ),
-//         ));
-//         let can_skip = |f: FactorSourceIDFromHash| {
-//             assert!(sut
-//                 // Already signed with override factor `FactorSourceIDFromHash::fs1()`. Thus
-//                 // can skip
-//                 .invalid_transaction_if_neglected_factors(IndexSet::just(f))
-//                 .is_none())
-//         };
-//         can_skip(FactorSourceIDFromHash::fs0());
-//         can_skip(FactorSourceIDFromHash::fs3());
-//         can_skip(FactorSourceIDFromHash::fs4());
-//         can_skip(FactorSourceIDFromHash::fs5());
-//     }
-//
-//     #[test]
-//     fn inequality() {
-//         assert_ne!(Sut::sample(), Sut::sample_other())
-//     }
-//
-//     #[test]
-//     fn equality() {
-//         assert_eq!(Sut::sample(), Sut::sample());
-//         assert_eq!(Sut::sample_other(), Sut::sample_other());
-//     }
-// }
+// === SAMPLE VALUES ===
+impl PetitionForEntity {
+    fn from_entity_with_role_kind(
+        entity: impl Into<AccountOrPersona>,
+        intent_hash: IntentHash,
+        role_kind: RoleKind,
+    ) -> Self {
+        let entity = entity.into();
+        match entity.entity_security_state() {
+            EntitySecurityState::Unsecured { value } => {
+                Self::new_unsecurified(intent_hash, entity.address(), value.transaction_signing)
+            }
+            EntitySecurityState::Securified { value } => {
+                Self::new_securified(
+                    intent_hash,
+                    entity.address(),
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                        (value.security_structure.matrix_of_factors, role_kind)
+                    ).unwrap()
+                )
+            }
+        }
+    }
+}
+
+impl HasSampleValues for PetitionForEntity {
+    fn sample() -> Self {
+        Self::from_entity_with_role_kind(
+            Account::sample_securified_mainnet(
+                "Grace",
+                AccountAddress::sample_other(),
+                || {
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+                        CAP26EntityKind::Account,
+                        HDPathComponent::from(6)
+                    ))
+                },
+            ),
+            IntentHash::sample(),
+            RoleKind::Primary,
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::from_entity_with_role_kind(
+            Account::sample_unsecurified_mainnet(
+                "Sample Unsec",
+                HierarchicalDeterministicFactorInstance::sample_fi0(
+                    CAP26EntityKind::Account,
+                ),
+            ),
+            IntentHash::sample_other(),
+            RoleKind::Primary,
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    type Sut = PetitionForEntity;
+
+    #[test]
+    fn multiple_device_as_override_skipped_both_is_invalid() {
+        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
+            CAP26EntityKind::Account,
+        );
+        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
+            CAP26EntityKind::Account,
+        );
+        assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
+        assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
+
+        let matrix =
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]);
+        let entity =
+            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let invalid =
+            sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
+                [d0.factor_source_id(), d1.factor_source_id()],
+            ))
+            .unwrap();
+
+        assert_eq!(invalid.clone(), entity);
+    }
+
+    #[test]
+    fn multiple_device_as_override_skipped_one_is_valid() {
+        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
+            CAP26EntityKind::Account,
+        );
+        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
+            CAP26EntityKind::Account,
+        );
+        assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
+        assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
+
+        let matrix =
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
+                [d0.clone(), d1.clone()]
+            );
+        let entity =
+            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let invalid = sut.invalid_transaction_if_neglected_factors(
+            IndexSet::just(d0.factor_source_id()),
+        );
+        assert!(invalid.is_none());
+    }
+
+    #[test]
+    fn multiple_device_as_threshold_skipped_both_is_invalid() {
+        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
+            CAP26EntityKind::Account,
+        );
+        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
+            CAP26EntityKind::Account,
+        );
+        assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
+        assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
+
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+            [d0.clone(), d1.clone()],
+            2,
+        );
+
+        let entity =
+            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let invalid =
+            sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
+                [d0.factor_source_id(), d1.factor_source_id()],
+            ))
+            .unwrap();
+        assert_eq!(invalid, entity);
+    }
+
+    #[test]
+    fn two_device_as_threshold_of_2_skipped_one_is_invalid() {
+        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
+            CAP26EntityKind::Account,
+        );
+        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
+            CAP26EntityKind::Account,
+        );
+        assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
+        assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
+
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+            [d0.clone(), d1.clone()],
+            2,
+        );
+
+        let entity =
+            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+
+        let invalid = sut
+            .invalid_transaction_if_neglected_factors(IndexSet::just(
+                d1.factor_source_id(),
+            ))
+            .unwrap();
+
+        assert_eq!(invalid, entity);
+    }
+
+    #[test]
+    fn two_device_as_threshold_of_1_skipped_one_is_valid() {
+        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
+            CAP26EntityKind::Account,
+        );
+        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
+            CAP26EntityKind::Account,
+        );
+        assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
+        assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
+
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+            [d0.clone(), d1.clone()],
+            1,
+        );
+
+        let entity =
+            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+
+        let invalid = sut.invalid_transaction_if_neglected_factors(
+            IndexSet::just(d1.factor_source_id()),
+        );
+
+        assert!(invalid.is_none());
+    }
+
+    #[test]
+    fn debug() {
+        assert!(!format!("{:?}", Sut::sample()).is_empty());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Programmer error! Must have at least one factors list."
+    )]
+    fn invalid_empty_factors() {
+        Sut::new(
+            IntentHash::sample(),
+            AddressOfAccountOrPersona::sample(),
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Factor source not found in any of the lists.")]
+    fn cannot_add_unrelated_signature() {
+        let sut = Sut::sample();
+        sut.add_signature(HDSignature::sample());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "A factor MUST NOT be present in both threshold AND override list."
+    )]
+    fn factor_should_not_be_used_in_both_lists() {
+        Account::sample_securified_mainnet(
+            "Alice",
+            AccountAddress::sample(),
+            || {
+                let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+                CAP26EntityKind::Account,
+                HDPathComponent::from(0)
+            );
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                    [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+                    1,
+                    [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+                )
+            },
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn cannot_add_same_signature_twice() {
+        let intent_hash = IntentHash::sample();
+        let entity = Account::sample_securified_mainnet(
+            "Alice",
+            AccountAddress::sample(),
+            || {
+                let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+                CAP26EntityKind::Account,
+                HDPathComponent::from(0)
+            );
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                    [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+                    1,
+                    [FactorSourceIDFromHash::sample_at(1)].map(&fi),
+                )
+            },
+        );
+        let sut = Sut::from_entity_with_role_kind(
+            entity.clone(),
+            intent_hash.clone(),
+            RoleKind::Primary,
+        );
+
+        let signature = FactorSourceIDFromHash::sample_at(0)
+            .sample_tx_hd_signature(intent_hash, HDPathComponent::from(0));
+
+        sut.add_signature(signature.clone());
+        sut.add_signature(signature.clone());
+    }
+
+    #[test]
+    fn invalid_transactions_if_neglected_success() {
+        let sut = Sut::sample();
+        let signature = FactorSourceIDFromHash::sample_at(1)
+            .sample_tx_hd_signature(
+                sut.intent_hash.clone(),
+                HDPathComponent::from(6),
+            );
+        sut.add_signature(signature);
+        let can_skip = |f: FactorSourceIDFromHash| {
+            assert!(sut
+                // Already signed with override factor `FactorSourceIDFromHash::fs1()`. Thus
+                // can skip
+                .invalid_transaction_if_neglected_factors(IndexSet::just(f))
+                .is_none())
+        };
+        can_skip(FactorSourceIDFromHash::sample_at(0));
+        can_skip(FactorSourceIDFromHash::sample_at(3));
+        can_skip(FactorSourceIDFromHash::sample_at(4));
+        can_skip(FactorSourceIDFromHash::sample_at(5));
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Sut::sample(), Sut::sample_other())
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
+    }
+}

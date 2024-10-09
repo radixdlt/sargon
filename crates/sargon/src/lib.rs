@@ -37,6 +37,7 @@ pub mod prelude {
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
     pub(crate) use log::{debug, error, info, trace, warn};
+    pub(crate) use once_cell::sync::Lazy;
     pub(crate) use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
         Serializer,
@@ -45,14 +46,13 @@ pub mod prelude {
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use serde_with::*;
     pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
-    pub(crate) use once_cell::sync::Lazy;
 
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
+    pub(crate) use std::cell::RefCell;
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
     pub(crate) use std::fmt::{Debug, Display, Formatter};
     pub(crate) use std::fs;
-    pub(crate) use std::cell::RefCell;
     pub(crate) use std::hash::Hash as StdHash;
     pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;

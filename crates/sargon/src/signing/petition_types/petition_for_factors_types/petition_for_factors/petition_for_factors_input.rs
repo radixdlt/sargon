@@ -25,7 +25,9 @@ impl HasSampleValues for PetitionForFactorsInput {
 
     fn sample_other() -> Self {
         Self::new(
-            IndexSet::from_iter([HierarchicalDeterministicFactorInstance::sample_other()]),
+            IndexSet::from_iter([
+                HierarchicalDeterministicFactorInstance::sample_other(),
+            ]),
             1,
         )
     }
@@ -46,7 +48,9 @@ impl PetitionForFactorsInput {
         Self::new(factors, threshold)
     }
 
-    pub(super) fn new_override(factors: IndexSet<HierarchicalDeterministicFactorInstance>) -> Self {
+    pub(super) fn new_override(
+        factors: IndexSet<HierarchicalDeterministicFactorInstance>,
+    ) -> Self {
         Self::new(factors, 1) // we need just one, anyone, factor for threshold.
     }
 
@@ -63,21 +67,33 @@ impl PetitionForFactorsInput {
         self.factors.len() as i8
     }
 
-    fn remaining_factors_until_success(&self, snapshot: PetitionForFactorsStateSnapshot) -> i8 {
+    fn remaining_factors_until_success(
+        &self,
+        snapshot: PetitionForFactorsStateSnapshot,
+    ) -> i8 {
         self.required - snapshot.signed_count()
     }
 
-    pub(super) fn is_fulfilled_by(&self, snapshot: PetitionForFactorsStateSnapshot) -> bool {
+    pub(super) fn is_fulfilled_by(
+        &self,
+        snapshot: PetitionForFactorsStateSnapshot,
+    ) -> bool {
         self.remaining_factors_until_success(snapshot) <= 0
     }
 
-    fn factors_left_to_prompt(&self, snapshot: PetitionForFactorsStateSnapshot) -> i8 {
+    fn factors_left_to_prompt(
+        &self,
+        snapshot: PetitionForFactorsStateSnapshot,
+    ) -> i8 {
         self.factors_count() - snapshot.prompted_count()
     }
 
-    pub(super) fn is_failure_with(&self, snapshot: PetitionForFactorsStateSnapshot) -> bool {
-        let signed_or_pending =
-            self.factors_left_to_prompt(snapshot.clone()) + snapshot.signed_count();
+    pub(super) fn is_failure_with(
+        &self,
+        snapshot: PetitionForFactorsStateSnapshot,
+    ) -> bool {
+        let signed_or_pending = self.factors_left_to_prompt(snapshot.clone())
+            + snapshot.signed_count();
         let is_failure_with = signed_or_pending < self.required;
         trace!(
             "is_failure_with: {:?}, signed_or_pending: {:?}, required: {:?}",

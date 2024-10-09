@@ -26,7 +26,10 @@ impl HasSampleValues for PetitionForFactors {
 }
 
 impl PetitionForFactors {
-    pub(crate) fn new(factor_list_kind: FactorListKind, input: PetitionForFactorsInput) -> Self {
+    pub(crate) fn new(
+        factor_list_kind: FactorListKind,
+        input: PetitionForFactorsInput,
+    ) -> Self {
         Self {
             factor_list_kind,
             input,
@@ -34,7 +37,9 @@ impl PetitionForFactors {
         }
     }
 
-    pub(crate) fn factor_instances(&self) -> IndexSet<HierarchicalDeterministicFactorInstance> {
+    pub(crate) fn factor_instances(
+        &self,
+    ) -> IndexSet<HierarchicalDeterministicFactorInstance> {
         self.input.factors.clone()
     }
 
@@ -55,11 +60,16 @@ impl PetitionForFactors {
         }
         Some(Self::new(
             FactorListKind::Threshold,
-            PetitionForFactorsInput::new_threshold(IndexSet::from_iter(factors), threshold),
+            PetitionForFactorsInput::new_threshold(
+                IndexSet::from_iter(factors),
+                threshold,
+            ),
         ))
     }
 
-    pub(crate) fn new_unsecurified(factor: HierarchicalDeterministicFactorInstance) -> Self {
+    pub(crate) fn new_unsecurified(
+        factor: HierarchicalDeterministicFactorInstance,
+    ) -> Self {
         Self::new_threshold(vec![factor], 1).expect("Factors is not empty") // define as 1/1 threshold factor, which is a good definition.
     }
 
@@ -77,7 +87,9 @@ impl PetitionForFactors {
 
     pub(crate) fn neglect_if_referenced(&self, neglected: NeglectedFactor) {
         let factor_source_id = &neglected.factor_source_id();
-        if let Some(_x_) = self.reference_to_factor_source_with_id(factor_source_id) {
+        if let Some(_x_) =
+            self.reference_to_factor_source_with_id(factor_source_id)
+        {
             debug!(
                 "PetitionForFactors = kind {:?} neglect factor source with id: {}, reason: {}",
                 self.factor_list_kind, factor_source_id, neglected.reason
@@ -92,8 +104,9 @@ impl PetitionForFactors {
     }
 
     fn neglect(&self, neglected: NeglectedFactor) {
-        let factor_instance =
-            self.expect_reference_to_factor_source_with_id(&neglected.factor_source_id());
+        let factor_instance = self.expect_reference_to_factor_source_with_id(
+            &neglected.factor_source_id(),
+        );
         self.state
             .borrow_mut()
             .neglect(&NeglectedFactorInstance::new(
@@ -116,7 +129,10 @@ impl PetitionForFactors {
         self.input.factors.iter().any(|f| f == factor_instance)
     }
 
-    pub(crate) fn add_signature_if_relevant(&self, signature: &HDSignature) -> bool {
+    pub(crate) fn add_signature_if_relevant(
+        &self,
+        signature: &HDSignature,
+    ) -> bool {
         if self.has_owned_instance_with_id(signature.owned_factor_instance()) {
             self.add_signature(signature);
             true
@@ -165,7 +181,8 @@ impl PetitionForFactors {
 
     fn is_finished_with_fail(&self) -> bool {
         let snapshot = self.state_snapshot();
-        let is_finished_with_fail = self.input.is_failure_with(snapshot.clone());
+        let is_finished_with_fail =
+            self.input.is_failure_with(snapshot.clone());
         trace!(
             "is_finished_with_fail: {:?} from input: {:?}, snapshot: {:?}",
             is_finished_with_fail,

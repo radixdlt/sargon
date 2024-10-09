@@ -1,5 +1,5 @@
-use aes_gcm::aead::Payload;
 use crate::prelude::*;
+use aes_gcm::aead::Payload;
 
 /// A signature of `intent_hash` by `entity` using `factor_source_id` and `derivation_path`, with `public_key` used for verification.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
@@ -20,7 +20,10 @@ pub struct HDSignature {
 
 impl HDSignature {
     /// Constructs a HDSignature from an already produced `Signature`.
-    pub(crate) fn with_details(input: HDSignatureInput, signature: Signature) -> Self {
+    pub(crate) fn with_details(
+        input: HDSignatureInput,
+        signature: Signature,
+    ) -> Self {
         Self { input, signature }
     }
 
@@ -50,7 +53,7 @@ fn sample(
     payload: IntentHash,
     kind: FactorSourceKind,
     mnemonic_with_passphrase: MnemonicWithPassphrase,
-    index: HDPathComponent
+    index: HDPathComponent,
 ) -> HDSignature {
     let account_path = AccountPath::new(
         NetworkID::Mainnet,
@@ -58,10 +61,11 @@ fn sample(
         index.index(),
     );
 
-    let factor_source_id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-        kind,
-        &mnemonic_with_passphrase
-    );
+    let factor_source_id =
+        FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+            kind,
+            &mnemonic_with_passphrase,
+        );
 
     let seed = mnemonic_with_passphrase.to_seed();
     let hd_private_key = seed.derive_private_key(&account_path);
@@ -72,25 +76,26 @@ fn sample(
     );
 
     let factor_instance: HDFactorInstanceTransactionSigning<AccountPath> =
-        HDFactorInstanceTransactionSigning::new(hd_factor_instance.clone()).unwrap();
+        HDFactorInstanceTransactionSigning::new(hd_factor_instance.clone())
+            .unwrap();
 
-    let account_address = AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-        factor_instance.clone(),
-    );
+    let account_address =
+        AccountAddress::from_hd_factor_instance_virtual_entity_creation(
+            factor_instance.clone(),
+        );
 
     let signature_with_pub_key = mnemonic_with_passphrase.sign(
         &payload.hash,
-        &hd_factor_instance.public_key.derivation_path
+        &hd_factor_instance.public_key.derivation_path,
     );
 
     let hd_input = HDSignatureInput::new(
         payload,
         OwnedFactorInstance::new(
             AddressOfAccountOrPersona::Account(account_address),
-            hd_factor_instance
-        )
+            hd_factor_instance,
+        ),
     );
-
 
     HDSignature::with_details(hd_input, signature_with_pub_key.signature())
 }
@@ -101,7 +106,7 @@ impl HasSampleValues for HDSignature {
             IntentHash::sample(),
             FactorSourceKind::Device,
             MnemonicWithPassphrase::sample_device(),
-            HDPathComponent::from(0)
+            HDPathComponent::from(0),
         )
     }
 
@@ -110,7 +115,7 @@ impl HasSampleValues for HDSignature {
             IntentHash::sample_other(),
             FactorSourceKind::Device,
             MnemonicWithPassphrase::sample_device(),
-            HDPathComponent::from(0)
+            HDPathComponent::from(0),
         )
     }
 }
@@ -141,7 +146,7 @@ mod tests {
                 Sut::sample(),
                 Sut::sample_other()
             ])
-                .len(),
+            .len(),
             2
         );
     }

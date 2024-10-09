@@ -6,14 +6,13 @@ pub fn new_passphrase_factor_source_sample() -> PassphraseFactorSource {
 }
 
 #[uniffi::export]
-pub fn new_passphrase_factor_source_sample_other() -> PassphraseFactorSource
-{
+pub fn new_passphrase_factor_source_sample_other() -> PassphraseFactorSource {
     PassphraseFactorSource::sample_other()
 }
 
 #[uniffi::export]
 fn new_passphrase_factor_source_from_mnemonic_with_passphrase(
-    mwp: MnemonicWithPassphrase
+    mwp: MnemonicWithPassphrase,
 ) -> PassphraseFactorSource {
     let id = FactorSourceIDFromHash::new_for_passphrase(&mwp);
     PassphraseFactorSource::new(id)

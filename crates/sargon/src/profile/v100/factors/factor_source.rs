@@ -54,7 +54,7 @@ pub enum FactorSource {
         #[serde(rename = "passphrase")]
         #[display("Passphrase({value})")]
         value: PassphraseFactorSource,
-    }
+    },
 }
 
 impl BaseIsFactorSource for FactorSource {
@@ -96,7 +96,7 @@ impl BaseIsFactorSource for FactorSource {
                 value.common_properties()
             }
             FactorSource::TrustedContact { value } => value.common_properties(),
-            FactorSource::Passphrase { value } => value.common_properties()
+            FactorSource::Passphrase { value } => value.common_properties(),
         }
     }
 
@@ -114,9 +114,7 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::TrustedContact { value } => {
                 value.factor_source_kind()
             }
-            FactorSource::Passphrase { value } => {
-                value.factor_source_kind()
-            }
+            FactorSource::Passphrase { value } => value.factor_source_kind(),
         }
     }
 
@@ -132,7 +130,7 @@ impl BaseIsFactorSource for FactorSource {
                 value.factor_source_id()
             }
             FactorSource::TrustedContact { value } => value.factor_source_id(),
-            FactorSource::Passphrase { value } => value.factor_source_id()
+            FactorSource::Passphrase { value } => value.factor_source_id(),
         }
     }
 }
@@ -335,15 +333,11 @@ impl FactorSource {
     }
 
     pub fn sample_passphrase() -> Self {
-        Self::from(
-            PassphraseFactorSource::sample(),
-        )
+        Self::from(PassphraseFactorSource::sample())
     }
 
     pub fn sample_passphrase_other() -> Self {
-        Self::from(
-            PassphraseFactorSource::sample_other(),
-        )
+        Self::from(PassphraseFactorSource::sample_other())
     }
 }
 

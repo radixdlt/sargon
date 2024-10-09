@@ -54,7 +54,10 @@ impl PetitionForFactorsStateSnapshot {
 impl HasSampleValues for PetitionForFactorsStateSnapshot {
     fn sample() -> Self {
         Self::new(
-            IndexSet::from_iter([HDSignature::sample(), HDSignature::sample_other()]),
+            IndexSet::from_iter([
+                HDSignature::sample(),
+                HDSignature::sample_other(),
+            ]),
             IndexSet::from_iter([
                 NeglectedFactorInstance::sample(),
                 NeglectedFactorInstance::sample_other(),
