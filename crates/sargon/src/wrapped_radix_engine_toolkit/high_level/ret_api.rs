@@ -462,7 +462,7 @@ mod tests {
             debug_print_compiled_notarized_intent(
                 CompiledNotarizedIntent::sample()
             )
-                .len()
+            .len()
                 > 1000
         );
     }
