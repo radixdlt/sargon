@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record,)]
+#[derive(Clone, Debug, PartialEq, Eq,  uniffi::Record,)]
 pub struct TransactionManifest {
     pub instructions: Instructions,
     pub blobs: Blobs,

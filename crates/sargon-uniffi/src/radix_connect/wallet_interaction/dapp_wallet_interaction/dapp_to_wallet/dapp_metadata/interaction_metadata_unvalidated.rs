@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionMetadataUnvalidated as InternalDappToWalletInteractionMetadataUnvalidated;
 
-#[derive(Debug, PartialEq, uniffi::Record, Clone)]
+#[derive(Debug, PartialEq,  uniffi::Record, Clone)]
 pub struct DappToWalletInteractionMetadataUnvalidated {
     pub version: WalletInteractionVersion,
     pub network_id: NetworkID,

@@ -8,7 +8,7 @@ use sargon::NetworkDefinition as InternalNetworkDefinition;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct NetworkDefinition {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.

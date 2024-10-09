@@ -33,7 +33,7 @@ use sargon::BIP44LikePath as InternalBIP44LikePath;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct BIP44LikePath {
     pub path: HDPath,

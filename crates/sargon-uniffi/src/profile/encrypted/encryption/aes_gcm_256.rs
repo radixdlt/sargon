@@ -6,6 +6,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AesGcm256 {}

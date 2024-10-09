@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem as InternalWalletToDappInteractionAuthLoginWithChallengeRequestResponseItem;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
 pub struct WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
     pub challenge: DappToWalletInteractionAuthChallengeNonce,

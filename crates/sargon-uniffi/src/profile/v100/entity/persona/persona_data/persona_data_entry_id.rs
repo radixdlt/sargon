@@ -4,11 +4,11 @@ use sargon::PersonaDataEntryID as InternalPersonaDataEntryID;
 /// An ID of some PersonaData Entry a user has shared.
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct PersonaDataEntryID {
     pub value: Uuid,

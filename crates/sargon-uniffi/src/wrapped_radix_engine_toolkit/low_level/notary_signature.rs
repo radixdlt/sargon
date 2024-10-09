@@ -4,32 +4,28 @@ use sargon::NotarySignature as InternalNotarySignature;
 #[derive(
     Debug,
     Clone,
-    Copy,
+    
     Eq,
     Hash,
     PartialEq,
-    
-    
-    
-    uniffi::Record,
+    InternalConversion,
+     uniffi::Record,
 )]
 pub struct NotarySignature {
-    pub(crate) secret_magic: Signature,
+    pub(crate) value: Signature,
 }
 
 impl From<InternalNotarySignature> for NotarySignature {
     fn from(value: InternalNotarySignature) -> Self {
         Self {
-            secret_magic: value.secret_magic.into(),
+            value: value.0.into(),
         }
     }
 }
 
 impl Into<InternalNotarySignature> for NotarySignature {
     fn into(self) -> InternalNotarySignature {
-        InternalNotarySignature {
-            secret_magic: self.secret_magic.into(),
-        }
+        InternalNotarySignature(self.value.into())
     }
 }
 
@@ -52,7 +48,7 @@ pub fn new_notary_signature(signature: Signature) -> NotarySignature {
 pub fn notary_signature_get_signature(
     notary_signature: &NotarySignature,
 ) -> Signature {
-    notary_signature.into::<InternalNotarySignature>().secret_magic.into()
+    notary_signature.into_internal().secret_magic.into()
 }
 
 #[uniffi::export]

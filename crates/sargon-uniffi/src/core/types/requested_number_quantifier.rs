@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::RequestedQuantity as InternalRequestedQuantity;
+use sargon::RequestedNumberQuantifier as InternalRequestedNumberQuantifier;
 
 /// A quantifier of a quantity, either `atLeast` or `exactly`, as in
 /// "I want AT LEAST 3" or "I want EXACTLY 10".
@@ -8,12 +8,11 @@ use sargon::RequestedQuantity as InternalRequestedQuantity;
 /// or PersonaData.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
     Hash,
-    strum::Display,
     uniffi::Enum,
 )]
 pub enum RequestedNumberQuantifier {
@@ -26,86 +25,20 @@ pub enum RequestedNumberQuantifier {
     AtLeast,
 }
 
-impl From<InternalRequestedQuantity> for RequestedNumberQuantifier {
-    fn from(value: InternalRequestedQuantity) -> Self {
+impl From<InternalRequestedNumberQuantifier> for RequestedNumberQuantifier {
+    fn from(value: InternalRequestedNumberQuantifier) -> Self {
         match value {
-            InternalRequestedQuantity::Exactly => Self::Exactly,
-            InternalRequestedQuantity::AtLeast => Self::AtLeast,
+            InternalRequestedNumberQuantifier::Exactly => Self::Exactly,
+            InternalRequestedNumberQuantifier::AtLeast => Self::AtLeast,
         }
     }
 }
 
-impl Into<InternalRequestedQuantity> for RequestedNumberQuantifier {
-    fn into(self) -> InternalRequestedQuantity {
+impl Into<InternalRequestedNumberQuantifier> for RequestedNumberQuantifier {
+    fn into(self) -> InternalRequestedNumberQuantifier {
         match self {
-            RequestedNumberQuantifier::Exactly => InternalRequestedQuantity::Exactly,
-            RequestedNumberQuantifier::AtLeast => InternalRequestedQuantity::AtLeast,
+            RequestedNumberQuantifier::Exactly => InternalRequestedNumberQuantifier::Exactly,
+            RequestedNumberQuantifier::AtLeast => InternalRequestedNumberQuantifier::AtLeast,
         }
-    }
-}
-
-json_data_convertible!(RequestedQuantity);
-
-#[uniffi::export]
-pub fn new_requested_quantity_sample() -> RequestedQuantity {
-    RequestedQuantity::sample()
-}
-
-#[uniffi::export]
-pub fn new_requested_quantity_sample_other() -> RequestedQuantity {
-    RequestedQuantity::sample_other()
-}
-
-#[uniffi::export]
-pub fn requested_quantity_is_valid(
-    requested_quantity: RequestedQuantity,
-) -> bool {
-    requested_quantity.is_valid()
-}
-
-/// Checks `number_of_ids` can fulfill the [`RequestedQuantity`] (self), `number_of_ids` is
-/// considered to be fulfilling the requested quantity:
-/// * if: quantifier == ::Exactly && number_of_ids == quantity // ✅ fulfills
-/// * else if: quantifier == ::AtLeast && number_of_ids >= quantity // ✅ fulfills
-/// * else false // ❌ does NOT fulfill
-#[uniffi::export]
-pub fn requested_quantity_is_fulfilled_by_ids(
-    requested_quantity: RequestedQuantity,
-    number_of_ids: u64,
-) -> bool {
-    requested_quantity.is_fulfilled_by_ids(number_of_ids as usize)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = RequestedQuantity;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_requested_quantity_sample(),
-                new_requested_quantity_sample_other(),
-                // duplicates should get removed
-                new_requested_quantity_sample(),
-                new_requested_quantity_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_is_valid() {
-        assert!(requested_quantity_is_valid(SUT::sample()))
-    }
-
-    #[test]
-    fn test_is_fulfilled() {
-        assert!(requested_quantity_is_fulfilled_by_ids(SUT::sample(), 1));
-        assert!(!requested_quantity_is_fulfilled_by_ids(SUT::sample(), 2));
     }
 }

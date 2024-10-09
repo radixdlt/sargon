@@ -26,7 +26,7 @@ use sargon::PersonaData as InternalPersonaData;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct PersonaData {
     /// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,

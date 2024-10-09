@@ -14,7 +14,7 @@ use sargon::DeviceFactorSource as InternalDeviceFactorSource;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the

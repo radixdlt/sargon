@@ -9,7 +9,7 @@ use crate::prelude::*;
     Eq,
     Hash,
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct OffDeviceMnemonicHint {
     pub display_name: DisplayName,

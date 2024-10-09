@@ -9,7 +9,7 @@ use sargon::BIP39Passphrase as InternalBIP39Passphrase;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct BIP39Passphrase {
     pub value: String

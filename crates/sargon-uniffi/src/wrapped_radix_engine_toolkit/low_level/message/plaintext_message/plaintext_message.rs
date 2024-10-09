@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::PlaintextMessage as InternalPlaintextMessage;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct PlaintextMessage {
     pub mime_type: String,
     pub message: MessageContents,

@@ -2,12 +2,12 @@ use crate::prelude::*;
 use sargon::DappToWalletInteractionTransactionItems as InternalDappToWalletInteractionTransactionItems;
 use sargon::DappToWalletInteractionSendTransactionItem as InternalDappToWalletInteractionSendTransactionItem;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
 pub struct DappToWalletInteractionTransactionItems {
     pub send: DappToWalletInteractionSendTransactionItem,
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
 pub struct DappToWalletInteractionSendTransactionItem {
     pub unvalidated_manifest: UnvalidatedTransactionManifest,
     pub version: TXVersion,

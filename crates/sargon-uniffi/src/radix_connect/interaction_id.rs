@@ -9,11 +9,13 @@ use sargon::WalletInteractionId as InternalWalletInteractionId;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct WalletInteractionId {
     pub id: String,
 }
+
+delegate_display_debug_into!(WalletInteractionId, InternalWalletInteractionId);
 
 impl From<InternalWalletInteractionId> for WalletInteractionId {
     fn from(value: InternalWalletInteractionId) -> Self {

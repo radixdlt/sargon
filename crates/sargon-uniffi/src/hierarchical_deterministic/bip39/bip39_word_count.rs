@@ -6,7 +6,7 @@ use sargon::BIP39WordCount as InternalBIP39WordCount;
 /// use 24 words.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

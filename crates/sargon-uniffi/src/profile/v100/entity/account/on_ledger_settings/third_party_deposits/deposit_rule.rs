@@ -4,7 +4,7 @@ use sargon::DepositRule as InternalDepositRule;
 /// The general deposit rule to apply
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

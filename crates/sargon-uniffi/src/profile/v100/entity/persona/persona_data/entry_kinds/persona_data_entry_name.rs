@@ -16,7 +16,7 @@ use sargon::PersonaDataNameVariant as InternalPersonaDataNameVariant;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct PersonaDataEntryName {
     pub variant: PersonaDataNameVariant,

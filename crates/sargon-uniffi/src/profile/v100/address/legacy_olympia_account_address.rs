@@ -3,11 +3,11 @@ use sargon::LegacyOlympiaAccountAddress as InternalLegacyOlympiaAccountAddress;
 
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct LegacyOlympiaAccountAddress {
     secret_magic: Secp256k1PublicKey,

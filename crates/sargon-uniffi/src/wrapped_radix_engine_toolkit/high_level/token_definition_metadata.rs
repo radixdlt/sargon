@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TokenDefinitionMetadata as InternalTokenDefinitionMetadata;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct TokenDefinitionMetadata {
     pub name: String,

@@ -4,11 +4,11 @@ use sargon::FactorSourceIDFromAddress as InternalFactorSourceIDFromAddress;
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct FactorSourceIDFromAddress {
     /// The kind of the FactorSource this ID refers to, typically `trustedContact`.

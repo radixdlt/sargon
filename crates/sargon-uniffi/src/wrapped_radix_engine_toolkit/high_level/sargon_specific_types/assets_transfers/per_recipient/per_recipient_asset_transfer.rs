@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::PerRecipientAssetTransfer as InternalPerRecipientAssetTransfer;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct PerRecipientAssetTransfer {
     pub recipient: AccountOrAddressOf,
     pub fungibles: Vec<PerRecipientFungibleTransfer>,

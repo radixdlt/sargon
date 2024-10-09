@@ -6,12 +6,12 @@ use sargon::AppDisplay as InternalAppDisplay;
 /// **N.B. neither of these settings are in fact not yet used by clients.**
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency

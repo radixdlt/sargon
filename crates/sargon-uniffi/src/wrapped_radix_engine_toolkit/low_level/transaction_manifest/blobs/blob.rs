@@ -7,7 +7,7 @@ use sargon::BagOfBytes as InternalBagOfBytes;
     Clone,
     PartialEq,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
     
     
 )]

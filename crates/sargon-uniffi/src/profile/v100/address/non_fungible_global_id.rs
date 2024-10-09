@@ -7,7 +7,7 @@ use sargon::NonFungibleGlobalId as InternalNonFungibleGlobalId;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct NonFungibleGlobalId {
     // N.B. we WANT This to be a `NonFungibleResourceAddress` type, alas, it
@@ -37,19 +37,6 @@ impl Into<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
             resource_address: self.resource_address.into(),
             non_fungible_local_id: self.non_fungible_local_id.into(),
         }
-    }
-}
-
-pub trait IntoInternal<InternalType> {
-    fn into_internal(self) -> InternalType;
-}
-
-impl<InternalType, Type> IntoInternal<InternalType> for Type
-where
-    Type: Into<InternalType>,
-{
-    fn into_internal(self) -> InternalType {
-        self.into()
     }
 }
 

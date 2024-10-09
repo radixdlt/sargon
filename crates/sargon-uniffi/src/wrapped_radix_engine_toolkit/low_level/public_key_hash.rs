@@ -4,7 +4,7 @@ use sargon::PublicKeyHash as InternalPublicKeyHash;
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     EnumAsInner,

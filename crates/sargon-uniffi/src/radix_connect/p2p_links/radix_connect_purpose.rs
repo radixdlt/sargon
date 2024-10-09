@@ -8,7 +8,7 @@ json_string_convertible!(RadixConnectPurpose);
 /// The user needs to make a conscious decision about general purpose links (because it comes with security risk).
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

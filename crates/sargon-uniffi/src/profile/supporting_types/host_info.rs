@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::HostInfo as InternalHostInfo;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct HostInfo {
     /// A short description of the device. The host should

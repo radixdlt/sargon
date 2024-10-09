@@ -6,7 +6,7 @@ use sargon::UnsecuredEntityControl as InternalUnsecuredEntityControl;
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which

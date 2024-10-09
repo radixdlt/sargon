@@ -10,7 +10,7 @@ use sargon::HDPath as InternalHDPath;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct GetIDPath {
     pub path: HDPath,

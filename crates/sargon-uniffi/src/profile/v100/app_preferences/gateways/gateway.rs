@@ -10,7 +10,7 @@ use sargon::Gateway as InternalGateway;
     
     
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.

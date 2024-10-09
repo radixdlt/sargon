@@ -7,7 +7,7 @@ use sargon::HierarchicalDeterministicPublicKey as InternalHierarchicalDeterminis
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`

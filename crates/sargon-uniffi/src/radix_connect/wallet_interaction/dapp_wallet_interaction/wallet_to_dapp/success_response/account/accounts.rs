@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionAccountsRequestResponseItem as InternalWalletToDappInteractionAccountsRequestResponseItem;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
 pub struct WalletToDappInteractionAccountsRequestResponseItem {
     pub accounts: Vec<WalletInteractionWalletAccount>,
     pub challenge: Option<DappToWalletInteractionAuthChallengeNonce>,

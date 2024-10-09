@@ -46,37 +46,9 @@ where
 
 impl<InternalElement, Element> MapIntoInternalVec<InternalElement, Element> for Vec<Element>
 where
-    InternalElement: Into<Element>,
+    InternalElement: From<Element>,
 {
     fn into_internal_vec(self) -> Vec<InternalElement> {
-        self.into_iter().map(Into::into).collect()
+        self.into_iter().map(InternalElement::from).collect()
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-
-//     use super::super::super::User;
-//     use super::*;
-
-//     #[allow(clippy::upper_case_acronyms)]
-//     type SUT = IdentifiedVecOf<User>;
-
-//     #[test]
-//     fn equality() {
-//         assert_eq!(SUT::sample(), SUT::sample());
-//         assert_eq!(SUT::sample_other(), SUT::sample_other());
-//     }
-
-//     #[test]
-//     fn inequality() {
-//         assert_ne!(SUT::sample(), SUT::sample_other());
-//     }
-
-//     #[test]
-//     fn index() {
-//         let sut = SUT::sample();
-//         assert_eq!(sut[0], User::alice());
-//         assert_eq!(sut[1], User::carol());
-//     }
-// }

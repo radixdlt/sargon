@@ -4,12 +4,12 @@ use sargon::TransactionPreferences as InternalTransactionPreferences;
 /// User Preferences relating to submission of transactions.
 #[derive(
     Debug,
-    Copy,
+    
     PartialEq,
     Eq,
     Clone,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct TransactionPreferences {
     /// The deposit guarantee that will automatically be added for

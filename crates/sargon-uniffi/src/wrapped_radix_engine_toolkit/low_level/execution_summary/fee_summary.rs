@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FeeSummary as InternalFeeSummary;
 
 /// Detailed information on the amount of cost units consumed.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq,  uniffi::Record)]
 pub struct FeeSummary {
     pub execution_cost: Decimal192,
     pub finalization_cost: Decimal192,

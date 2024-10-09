@@ -7,7 +7,7 @@ use sargon::AuthorizedPersonaDetailed as InternalAuthorizedPersonaDetailed;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AuthorizedPersonaDetailed {
     /// Address that globally and uniquely identifies this Persona.

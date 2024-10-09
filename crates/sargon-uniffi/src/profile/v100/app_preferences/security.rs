@@ -10,7 +10,7 @@ use sargon::Security as InternalSecurity;
     Eq,
     Clone,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,

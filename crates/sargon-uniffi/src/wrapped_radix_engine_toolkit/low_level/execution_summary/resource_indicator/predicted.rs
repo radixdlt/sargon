@@ -19,7 +19,7 @@ macro_rules! decl_predicted {
         $(
             #[doc = $expr]
         )*
-        #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+        #[derive(Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
         pub struct $struct_name {
             pub value: $wrapped_type,
             pub instruction_index: u64,

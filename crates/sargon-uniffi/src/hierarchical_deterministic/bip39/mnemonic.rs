@@ -7,7 +7,7 @@ use sargon::Mnemonic as InternalMnemonic;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,

@@ -26,7 +26,7 @@ macro_rules! declare_identified_entry {
             PartialEq,
             Hash,
             Eq,
-            uniffi::Record,
+             uniffi::Record,
         )]
         pub struct $struct_name {
             pub id: PersonaDataEntryID,

@@ -17,7 +17,7 @@ use sargon::OnLedgerSettings as InternalOnLedgerSettings;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct OnLedgerSettings {
     /// Controls the ability of third-parties to deposit into this account

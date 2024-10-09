@@ -16,7 +16,7 @@ use sargon::AuthorizedPersonaSimple as InternalAuthorizedPersonaSimple;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AuthorizedPersonaSimple {
     /// The globally unique identifier of a Persona is its address, used

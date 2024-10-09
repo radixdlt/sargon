@@ -7,7 +7,7 @@ use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct CompiledNotarizedIntent {
     secret_magic: BagOfBytes,

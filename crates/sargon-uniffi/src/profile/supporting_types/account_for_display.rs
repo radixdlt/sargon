@@ -9,7 +9,7 @@ use sargon::AccountForDisplay as InternalAccountForDisplay;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AccountForDisplay {
     pub address: AccountAddress,

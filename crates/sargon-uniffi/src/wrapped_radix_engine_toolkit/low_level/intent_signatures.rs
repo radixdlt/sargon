@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::IntentSignature as InternalIntentSignatures;
 
-#[derive(Clone, Debug, PartialEq, Eq, Default, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Hash,  uniffi::Record)]
 pub struct IntentSignatures {
     pub signatures: Vec<IntentSignature>,
 }

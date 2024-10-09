@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::DappToWalletInteractionAuthChallengeNonce as InternalDappToWalletInteractionAuthChallengeNonce;
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+    Debug, Clone, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct DappToWalletInteractionAuthChallengeNonce {
     pub value: Exactly32Bytes,

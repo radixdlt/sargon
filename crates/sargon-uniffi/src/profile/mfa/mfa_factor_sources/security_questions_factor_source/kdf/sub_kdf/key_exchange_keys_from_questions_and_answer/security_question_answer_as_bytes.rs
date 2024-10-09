@@ -5,7 +5,7 @@ use crate::prelude::*;
 /// set of functions mapping answer -> bytes.
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-     Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
+     Clone, PartialEq, Eq, Hash, Debug,  uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]

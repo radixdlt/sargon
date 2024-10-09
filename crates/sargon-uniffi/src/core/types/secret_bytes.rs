@@ -14,7 +14,7 @@ macro_rules! decl_secret_bytes {
             $(
                 #[doc = $expr]
             )*
-            #[derive(uniffi::Record)]
+            #[derive( uniffi::Record)]
             pub struct $struct_name {
                 secret_magic: BagOfBytes
             }

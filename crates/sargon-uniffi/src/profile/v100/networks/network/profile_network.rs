@@ -10,7 +10,7 @@ use sargon::ProfileNetwork as InternalProfileNetwork;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct ProfileNetwork {
     /// The ID of the network that has been used to generate the `accounts` and `personas`

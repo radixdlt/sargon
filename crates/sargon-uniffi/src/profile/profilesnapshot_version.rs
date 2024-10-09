@@ -4,7 +4,7 @@ use sargon::ProfileSnapshotVersion as InternalProfileSnapshotVersion;
 /// The version of the Profile Snapshot data format (JSON).
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

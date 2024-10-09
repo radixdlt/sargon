@@ -4,12 +4,12 @@ use sargon::TransactionHeader as InternalTransactionHeader;
 #[derive(
     Debug,
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct TransactionHeader {
     pub network_id: NetworkID,

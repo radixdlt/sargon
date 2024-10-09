@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteraction as InternalDappToWalletInteraction;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
 pub struct DappToWalletInteraction {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,

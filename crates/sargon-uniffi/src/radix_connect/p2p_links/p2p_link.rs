@@ -13,7 +13,7 @@ use sargon::P2PLink as InternalP2PLink;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct P2PLink {
     /// The most important property of this struct, the `RadixConnectPassword`,

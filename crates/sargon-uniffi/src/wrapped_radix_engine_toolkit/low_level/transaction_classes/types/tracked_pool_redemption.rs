@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TrackedPoolRedemption as InternalTrackedPoolRedemption;
 
 /// A pool redemptions observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq,  uniffi::Record)]
 pub struct TrackedPoolRedemption {
     pub pool_address: PoolAddress,
 

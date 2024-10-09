@@ -4,15 +4,16 @@ use sargon::SessionID as InternalSessionID;
 #[derive(
     Debug,
     Clone,
-    Copy,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct SessionID {
     pub value: Uuid,
 }
+
+delegate_display_debug_into!(SessionID, InternalSessionID);
 
 impl From<InternalSessionID> for SessionID {
     fn from(value: InternalSessionID) -> Self {

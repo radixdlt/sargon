@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Represents any natively supported signature, including public key.
 #[derive(
     Debug,
-    Copy,
+    
     Clone,
     PartialEq,
     Eq,

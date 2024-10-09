@@ -7,7 +7,7 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct U11 {
     pub inner: u16,

@@ -6,7 +6,7 @@ use sargon::HDPath as InternalHDPath;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,

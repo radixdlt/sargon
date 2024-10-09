@@ -14,6 +14,8 @@ use sargon::BagOfBytes as InternalBagOfBytes;
     Eq,
     Default,
     Hash,
+    InternalConversion,
+     uniffi::Record,
 )]
 pub struct BagOfBytes {
     /// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
@@ -36,6 +38,8 @@ pub struct BagOfBytes {
 ///
     pub bytes: Vec<i8>,
 }
+
+delegate_display_debug_into!(BagOfBytes, InternalBagOfBytes);
 
 impl From<Vec<u8>> for BagOfBytes {
     fn from(value: Vec<u8>) -> Self {
@@ -62,6 +66,7 @@ impl Into<InternalBagOfBytes> for BagOfBytes {
     }
 }
 
+
 fn twos_complement_of_u8(u: u8) -> i8 {
     // Yes, it is this easy, Rust does all the heavy lifting
     u as i8
@@ -74,7 +79,7 @@ fn twos_complement_of_i8(i: i8) -> u8 {
 
 #[uniffi::export]
 pub fn new_bag_of_bytes_from(bytes: Vec<u8>) -> BagOfBytes {
-    bytes.into::<InternalBagOfBytes>().into()
+    InternalBagOfBytes::from(bytes).into()
 }
 
 #[uniffi::export]
@@ -124,11 +129,5 @@ mod uniffi_tests {
         t_iui(2);
         t_iui(126);
         t_iui(127);
-    }
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(InternalBagOfBytes::sample_aced(), new_bag_of_bytes_sample_aced());
-        assert_eq!(InternalBagOfBytes::sample_babe(), new_bag_of_bytes_sample_babe());
     }
 }

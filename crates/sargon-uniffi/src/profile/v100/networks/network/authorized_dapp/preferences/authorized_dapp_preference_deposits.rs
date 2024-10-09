@@ -4,7 +4,7 @@ use sargon::AuthorizedDappPreferenceDeposits as InternalAuthorizedDappPreference
 /// Indicates whether the Wallet should show direct deposit claims for the given Dapp.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

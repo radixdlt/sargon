@@ -4,7 +4,7 @@ use sargon::DepositAddressExceptionRule as InternalDepositAddressExceptionRule;
 /// The exception kind for deposit address
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

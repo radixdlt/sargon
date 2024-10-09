@@ -11,7 +11,7 @@ use sargon::PersonaDataEntryPhoneNumber as InternalPersonaDataEntryPhoneNumber;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct PersonaDataEntryPhoneNumber {
     pub number: String,

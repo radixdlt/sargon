@@ -5,11 +5,10 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 /// for a certain `FactorSourceKind`
 #[derive(
     Clone,
-    Copy,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
@@ -18,6 +17,8 @@ pub struct FactorSourceIDFromHash {
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
     pub body: Exactly32Bytes,
 }
+
+delegate_display_debug_into!(FactorSourceIDFromHash, InternalFactorSourceIDFromHash);
 
 impl From<InternalFactorSourceIDFromHash> for FactorSourceIDFromHash {
     fn from(value: InternalFactorSourceIDFromHash) -> Self {

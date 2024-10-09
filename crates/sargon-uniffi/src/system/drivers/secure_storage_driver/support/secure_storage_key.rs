@@ -1,8 +1,7 @@
 use crate::prelude::*;
-use std::hash::{Hash, Hasher};
 use sargon::SecureStorageKey as InternalSecureStorageKey;
 
-#[derive(Debug, Clone, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, Eq, PartialEq, uniffi::Enum)]
 pub enum SecureStorageKey {
     HostID,
     DeviceFactorSourceMnemonic {

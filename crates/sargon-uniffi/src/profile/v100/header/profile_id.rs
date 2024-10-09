@@ -3,17 +3,17 @@ use sargon::ProfileID as InternalProfileID;
 
 /// A stable and globally unique identifier of a Profile.
 #[derive(
-    Debug,
-    Copy,
     Clone,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct ProfileID {
     value: Uuid,
 }
+
+delegate_display_debug_into!(ProfileID, InternalProfileID);
 
 impl From<InternalProfileID> for ProfileID {
     fn from(value: InternalProfileID) -> Self {

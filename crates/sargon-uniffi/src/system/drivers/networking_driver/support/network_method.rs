@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

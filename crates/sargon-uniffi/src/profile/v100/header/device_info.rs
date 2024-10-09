@@ -9,7 +9,7 @@ use sargon::DeviceInfo as InternalDeviceInfo;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this

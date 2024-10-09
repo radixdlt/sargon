@@ -12,7 +12,7 @@ decl_identified_vec_of!(
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a

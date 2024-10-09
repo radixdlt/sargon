@@ -5,7 +5,7 @@ use sargon::LedgerHardwareWalletModel as InternalLedgerHardwareWalletModel;
 /// *Ledger Nano S+*.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

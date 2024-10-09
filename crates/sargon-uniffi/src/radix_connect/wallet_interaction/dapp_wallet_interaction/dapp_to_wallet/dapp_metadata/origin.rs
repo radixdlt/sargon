@@ -7,7 +7,7 @@ use sargon::DappOrigin as InternalDappOrigin;
     PartialEq,
     Eq,
     Debug,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct DappOrigin {
     pub value: String,

@@ -8,7 +8,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
     Eq,
     Hash,
     Debug,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the

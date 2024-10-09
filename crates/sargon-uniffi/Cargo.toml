@@ -18,6 +18,7 @@ required-features = ["build-binary"]
 [dependencies]
 
 sargon = { path = "../sargon" }
+sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" } 
 
 # zeroize = "1.7.0"
 zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [

@@ -9,7 +9,7 @@ use sargon::DeviceFactorSourceHint as InternalDeviceFactorSourceHint;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"

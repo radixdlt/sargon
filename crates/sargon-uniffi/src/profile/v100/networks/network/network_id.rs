@@ -3,8 +3,7 @@ use sargon::NetworkID as InternalNetworkID;
 
 #[derive(
     Clone,
-    Copy,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
@@ -72,6 +71,8 @@ pub enum NetworkID {
     /// Simulator (0xf2 / 0d242)
     Simulator = 242,
 }
+
+delegate_display_debug_into!(NetworkID, InternalNetworkID);
 
 impl From<InternalNetworkID> for NetworkID {
     fn from(value: InternalNetworkID) -> Self {

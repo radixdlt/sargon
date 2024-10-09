@@ -8,11 +8,11 @@ json_string_convertible!(RadixConnectPassword);
 /// the Signaling Server.
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct RadixConnectPassword {
     pub value: Exactly32Bytes,

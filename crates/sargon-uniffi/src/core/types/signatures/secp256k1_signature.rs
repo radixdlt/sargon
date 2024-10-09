@@ -3,11 +3,11 @@ use crate::prelude::*;
 /// Represents an Secp256k1 signature.
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Secp256k1Signature {
     // recovery id + signature

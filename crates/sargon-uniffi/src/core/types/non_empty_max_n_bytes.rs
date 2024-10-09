@@ -21,7 +21,7 @@ macro_rules! decl_non_empty_max_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
-                uniffi::Record,
+                 uniffi::Record,
             )]
             pub struct [< NonEmptyMax $byte_count Bytes  >] {
                 bag_of_bytes: BagOfBytes,
@@ -30,14 +30,14 @@ macro_rules! decl_non_empty_max_n_bytes {
             impl From<[< InternalNonEmptyMax $byte_count Bytes  >]> for [< NonEmptyMax $byte_count Bytes  >] {
                 fn from(value: [< InternalNonEmptyMax $byte_count Bytes  >]) -> Self {
                     Self {
-                        bag_of_bytes: value.into(),
+                        bag_of_bytes: value.bag_of_bytes.into(),
                     }
                 }
             }
 
             impl Into<[< InternalNonEmptyMax $byte_count Bytes  >]> for [< NonEmptyMax $byte_count Bytes  >] {
                 fn into(self) -> [< InternalNonEmptyMax $byte_count Bytes  >] {
-                    [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(self.bag_of_bytes).unwrap()
+                    [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(self.bag_of_bytes.into()).unwrap()
                 }
             }
 
@@ -45,7 +45,7 @@ macro_rules! decl_non_empty_max_n_bytes {
             pub fn [<new_non_empty_max_ $byte_count _bytes>](
                 bag_of_bytes: BagOfBytes,
             ) -> Result<[< NonEmptyMax $byte_count Bytes  >]> {
-                [< NonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes)
+                [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes.into()).map_result()
             }
         }
     };

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Instructions as InternalInstructions;
 
-#[derive(Clone, Debug, PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq,   uniffi::Record)]
 pub struct Instructions {
     pub secret_magic: BagOfBytes,
     pub network_id: NetworkID,

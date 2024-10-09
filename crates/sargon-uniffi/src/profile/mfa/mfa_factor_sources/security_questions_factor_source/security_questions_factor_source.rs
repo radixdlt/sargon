@@ -113,7 +113,7 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecur
     Eq,
     Hash,
     Debug,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     /// Unique and stable identifier of this factor source, stemming from the

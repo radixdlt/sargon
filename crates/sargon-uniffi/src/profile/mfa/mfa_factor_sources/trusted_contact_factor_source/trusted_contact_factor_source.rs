@@ -9,7 +9,7 @@ use crate::prelude::*;
     Eq,
     Hash,
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct TrustedContactFactorSource {
     /// Unique and stable identifier of this factor source.

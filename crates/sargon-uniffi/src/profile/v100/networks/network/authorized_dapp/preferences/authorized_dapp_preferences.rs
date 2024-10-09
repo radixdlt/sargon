@@ -9,7 +9,7 @@ use sargon::AuthorizedDappPreferences as InternalAuthorizedDappPreferences;
     Eq,
     Debug,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AuthorizedDappPreferences {
     pub deposits: AuthorizedDappPreferenceDeposits,

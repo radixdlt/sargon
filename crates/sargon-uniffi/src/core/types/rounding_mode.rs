@@ -6,7 +6,7 @@ use sargon::RoundingMode as InternalRoundingMode;
 /// Following the same naming convention as https://docs.rs/rust_decimal/latest/rust_decimal/enum.RoundingStrategy.html.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

@@ -21,11 +21,11 @@ macro_rules! decl_specialized_address {
             )*
             #[derive(
                 Clone,
-                Copy,
+                
                 PartialEq,
                 Eq,
                 Hash,
-                uniffi::Record,
+                 uniffi::Record,
             )]
             pub struct $specialized_address_type {
                 secret_magic: $base_addr

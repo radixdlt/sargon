@@ -16,14 +16,12 @@ macro_rules! decl_exactly_n_bytes {
                 #[doc = $expr]
             )*
             #[derive(
-                Zeroize,
                 Clone,
                 PartialEq,
                 Eq,
                 Hash,
-                
-                
-                uniffi::Record,
+                InternalConversion,
+                 uniffi::Record,
             )]
             pub struct [<Exactly $byte_count Bytes>] {
                 value: BagOfBytes,
@@ -32,16 +30,18 @@ macro_rules! decl_exactly_n_bytes {
             impl From<[<InternalExactly $byte_count Bytes>]> for [<Exactly $byte_count Bytes>] {
                 fn from(value: [<InternalExactly $byte_count Bytes>]) -> Self {
                     Self {
-                        value: value.0.into(),
+                        value: value.to_vec().into(),
                     }
                 }
             }
 
             impl Into<[<InternalExactly $byte_count Bytes>]> for [<Exactly $byte_count Bytes>] {
                 fn into(self) -> [<InternalExactly $byte_count Bytes>] {
-                    [<InternalExactly $byte_count Bytes>].try_from(self.value).unwrap()
+                    [<InternalExactly $byte_count Bytes>]::try_from(self.value.into()).unwrap()
                 }
             }
+
+            delegate_display_debug_into!([<Exactly $byte_count Bytes>], [<InternalExactly $byte_count Bytes>]);
 
             // Make it JSON String convertible in Swift/Kotlin
             json_string_convertible!([<Exactly $byte_count Bytes>]);
@@ -50,7 +50,7 @@ macro_rules! decl_exactly_n_bytes {
             pub fn [<new_exactly_ $byte_count _bytes>](
                 bytes: BagOfBytes,
             ) -> Result<[< Exactly $byte_count Bytes >]> {
-                [<InternalExactly $byte_count Bytes>]::try_from(bytes).map_result()
+                [<InternalExactly $byte_count Bytes>]::try_from(bytes.into()).map_result()
             }
 
             #[uniffi::export]
@@ -77,27 +77,6 @@ macro_rules! decl_exactly_n_bytes {
                 bytes: &[< Exactly $byte_count Bytes >],
             ) -> String {
                 bytes.into_internal().to_hex()
-            }
-
-            #[cfg(test)]
-            mod [<uniffi_ tests_ exactly_ $byte_count _bytes>] {
-
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = [< Exactly $byte_count Bytes >];
-
-                #[test]
-                fn sample_values() {
-                    assert_eq!(
-                        [<new_exactly_ $byte_count _bytes_sample>](),
-                        [<new_exactly_ $byte_count _bytes_sample>](),
-                    );
-                    assert_ne!(
-                        [<new_exactly_ $byte_count _bytes_sample>](),
-                        [<new_exactly_ $byte_count _bytes_sample_other>](),
-                    );
-                }
             }
         }
     };

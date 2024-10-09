@@ -14,7 +14,7 @@ use sargon::NonFungibleLocalIdString as InternalNonFungibleLocalIdString;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct NonFungibleLocalIdString {
     value: String,

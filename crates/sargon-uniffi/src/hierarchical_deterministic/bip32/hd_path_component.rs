@@ -5,13 +5,13 @@ pub type HDPathValue = u32;
 
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
     
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct HDPathComponent {
     pub value: HDPathValue,

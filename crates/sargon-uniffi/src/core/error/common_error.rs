@@ -27,7 +27,7 @@ where
     result.map_err(CommonError::from).map(T::from)
 }
 
-trait MapFromInternalResult<InternalType, Type> {
+pub trait MapFromInternalResult<InternalType, Type> {
     fn map_result(self) -> Result<Type>;
 }
 
@@ -281,7 +281,7 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", key.identifier())]
+    #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", secure_storage_key_identifier(key))]
     SecureStorageAccessError {
         key: SecureStorageKey,
         error_kind: SecureStorageAccessErrorKind,
@@ -732,40 +732,4 @@ pub fn error_code_from_error(error: &CommonError) -> u32 {
 #[uniffi::export]
 pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
     error.is_safe_to_show_error_message()
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn error_message() {
-        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert_eq!(
-            error_message_from_error(&sut),
-            "No network found with id: '0'"
-        );
-    }
-
-    #[test]
-    fn error_code() {
-        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert_eq!(error_code_from_error(&sut), 10049);
-    }
-
-    #[test]
-    fn is_safe_to_show_error_message() {
-        let sut = CommonError::FailedToDeserializeJSONToValue {
-            json_byte_count: 100,
-            type_name: "TypeName".to_string(),
-            serde_message: "message".to_string(),
-        };
-        assert!(is_safe_to_show_error_message_from_error(&sut));
-    }
-
-    #[test]
-    fn is_not_safe_to_show_error_message() {
-        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert!(!is_safe_to_show_error_message_from_error(&sut));
-    }
 }

@@ -7,7 +7,7 @@ use sargon::AccountPath as InternalAccountPath;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AccountPath {
     pub path: HDPath,

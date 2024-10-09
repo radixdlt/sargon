@@ -3,12 +3,12 @@ use sargon::HostId as InternalHostId;
 
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct HostId {
     /// A best effort stable and unique identifier of this

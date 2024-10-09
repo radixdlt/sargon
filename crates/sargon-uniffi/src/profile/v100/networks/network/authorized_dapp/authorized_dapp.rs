@@ -8,7 +8,7 @@ use sargon::AuthorizedDapp as InternalAuthorizedDapp;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.

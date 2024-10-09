@@ -7,7 +7,7 @@ use sargon::IdentityPath as InternalIdentityPath;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct IdentityPath {
     pub path: HDPath,

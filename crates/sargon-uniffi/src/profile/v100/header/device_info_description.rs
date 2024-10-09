@@ -11,7 +11,7 @@ use sargon::DeviceInfoDescription as InternalDeviceInfoDescription;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct DeviceInfoDescription {
     /// Host device name, e.g. "My Precious"

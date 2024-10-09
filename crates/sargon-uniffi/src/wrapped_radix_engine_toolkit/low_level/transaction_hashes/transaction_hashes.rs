@@ -19,7 +19,7 @@ macro_rules! decl_tx_hash {
             #[doc = $expr]
         )*
         #[derive(
-            Clone, PartialEq, Eq, Hash, uniffi::Record,
+            Clone, PartialEq, Eq, Hash,  uniffi::Record,
         )]
         pub struct $struct_name {
             /// Which network this transaction hash is used on

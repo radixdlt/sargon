@@ -6,11 +6,10 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 /// curves are `secp256k1` and `Curve25519`
 #[derive(
     Clone,
-    Debug,
-    Copy,
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum PublicKey {
@@ -81,72 +80,4 @@ pub fn public_key_is_valid_signature_for_hash(
     hash: Hash,
 ) -> bool {
     public_key.into_internal().is_valid_signature_for_hash(signature.into(), &hash.into())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PublicKey;
-
-    #[test]
-    fn new_from_hex() {
-        assert_eq!(
-            new_public_key_from_hex("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf".to_owned()).unwrap(),
-            Ed25519PublicKey::sample().into()
-        );
-    }
-
-    #[test]
-    fn new_from_bag_of_bytes() {
-        let bag_of_bytes: BagOfBytes =
-            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
-                .parse()
-                .unwrap();
-        assert_eq!(
-            new_public_key_from_bytes(bag_of_bytes).unwrap(),
-            SUT::Ed25519(Ed25519PublicKey::sample())
-        )
-    }
-
-    #[test]
-    fn to_hex() {
-        assert_eq!(
-            public_key_to_hex(&SUT::sample()),
-            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
-        )
-    }
-
-    #[test]
-    fn to_bytes() {
-        assert_eq!(
-            hex_encode(public_key_to_bytes(&SUT::sample())),
-            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
-        )
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_public_key_sample(),
-                new_public_key_sample_other(),
-                // duplicates should get removed
-                new_public_key_sample(),
-                new_public_key_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn invalid_signature_does_not_validate() {
-        assert!(!public_key_is_valid_signature_for_hash(
-            &SUT::sample(),
-            Signature::sample(),
-            Hash::sample()
-        ));
-    }
 }

@@ -9,7 +9,7 @@ use sargon::MnemonicWithPassphrase as InternalMnemonicWithPassphrase;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,

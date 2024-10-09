@@ -32,7 +32,7 @@ macro_rules! decl_non_empty_max_n_bytes {
             #[display("{}", self.to_hex())]
             #[debug("{}", self.to_hex())]
             pub struct [< NonEmptyMax $byte_count Bytes  >] {
-                bag_of_bytes: BagOfBytes,
+                pub bag_of_bytes: BagOfBytes,
             }
 
             impl TryFrom<BagOfBytes> for [< NonEmptyMax $byte_count Bytes  >] {

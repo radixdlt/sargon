@@ -11,7 +11,7 @@ use sargon::Header as InternalHeader;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Header {
     /// A versioning number that is increased when breaking

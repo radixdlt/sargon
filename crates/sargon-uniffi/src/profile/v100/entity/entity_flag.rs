@@ -5,7 +5,7 @@ use sargon::EntityFlag as InternalEntityFlag;
 /// user has marked it as deleted or not.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

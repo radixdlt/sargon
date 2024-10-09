@@ -20,7 +20,7 @@ use sargon::Profile as InternalProfile;
     Eq,
     Hash,
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata

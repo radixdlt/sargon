@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::UnstakeData as InternalUnstakeData;
 
 /// The data associated with the various validator claim NFTs
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct UnstakeData {
     pub name: String,
 

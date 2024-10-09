@@ -6,12 +6,12 @@ use sargon::SecurityStructureID as InternalSecurityStructureID;
 /// `SecurityStructureOfFactorInstances`.
 #[derive(
     Debug,
-    Copy,
+    
     Clone,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct SecurityStructureID {
     pub value: Uuid,

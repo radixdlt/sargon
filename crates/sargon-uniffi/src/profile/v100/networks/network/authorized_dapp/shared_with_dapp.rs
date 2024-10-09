@@ -26,7 +26,7 @@ macro_rules! declare_shared_with_dapp {
             PartialEq,
             Hash,
             Eq,
-            uniffi::Record,
+             uniffi::Record,
         )]
         pub struct $struct_name {
             /// The requested quantity to be shared by user, sent by a Dapp.

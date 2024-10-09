@@ -13,7 +13,7 @@ use sargon::AppPreferences as InternalAppPreferences;
     Eq,
     Clone,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.

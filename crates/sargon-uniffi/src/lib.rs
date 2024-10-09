@@ -23,7 +23,9 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
-    pub(crate) use sargon::prelude::{ HashMap, HashSet };
+    pub(crate) use sargon_uniffi_conversion_macros::*;
+
+    pub(crate) use sargon::prelude::{ HashMap, HashSet, HasSampleValues };
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;

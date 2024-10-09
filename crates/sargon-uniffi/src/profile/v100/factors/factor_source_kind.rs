@@ -4,8 +4,7 @@ use sargon::FactorSourceKind as InternalFactorSourceKind;
 /// The **kind** (or "type") of FactorSource describes how it is used.
 #[derive(
     Clone,
-    Copy,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
@@ -75,6 +74,8 @@ pub enum FactorSourceKind {
     /// [link]: https://www.getarculus.com/
     ArculusCard,
 }
+
+delegate_display_debug_into!(FactorSourceKind, InternalFactorSourceKind);
 
 impl From<InternalFactorSourceKind> for FactorSourceKind {
     fn from(kind: InternalFactorSourceKind) -> Self {

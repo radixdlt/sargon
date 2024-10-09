@@ -3,7 +3,7 @@ use sargon::LogLevel as InternalLogLevel;
 
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
@@ -65,7 +65,7 @@ impl Into<InternalLogLevel> for LogLevel {
 
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

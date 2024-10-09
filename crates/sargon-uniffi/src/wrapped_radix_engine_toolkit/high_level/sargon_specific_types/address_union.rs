@@ -20,7 +20,7 @@ macro_rules! address_union {
             )*
             #[derive(
                 Clone,
-                Copy,
+                
                 PartialEq,
                 Eq,
                 Hash,

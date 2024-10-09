@@ -26,7 +26,7 @@ macro_rules! declare_collection_of_identified_entry {
             PartialEq,
             Hash,
             Eq,
-            uniffi::Record,
+             uniffi::Record,
         )]
         pub struct $struct_name {
             pub collection: Vec<$id_ent_type>,

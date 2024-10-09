@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::SecurityStructureMetadata as InternalSecurityStructureMetadata;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct SecurityStructureMetadata {
     pub id: SecurityStructureID,

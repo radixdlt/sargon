@@ -7,7 +7,7 @@ use sargon::LedgerHardwareWalletHint as InternalLedgerHardwareWalletHint;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"

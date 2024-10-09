@@ -7,8 +7,6 @@ use sargon::FactorSourceID as InternalFactorSourceID;
 /// key derived near the root of it.
 #[derive(
     Clone,
-    Copy,
-    Debug,
     PartialEq,
     Eq,
     Hash,
@@ -26,6 +24,8 @@ pub enum FactorSourceID {
         value: FactorSourceIDFromAddress,
     },
 }
+
+delegate_display_debug_into!(FactorSourceID, InternalFactorSourceID);
 
 impl From<InternalFactorSourceID> for FactorSourceID {
     fn from(value: InternalFactorSourceID) -> Self {

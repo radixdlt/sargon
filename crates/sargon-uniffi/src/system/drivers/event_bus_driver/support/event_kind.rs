@@ -6,7 +6,7 @@ use sargon::EventKind as InternalEventKind;
 #[derive(
     Debug,
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,

@@ -24,7 +24,7 @@ use sargon::Account as InternalAccount;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Account {
     /// The ID of the network this account can be used with.

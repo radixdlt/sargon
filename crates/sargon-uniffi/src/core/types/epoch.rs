@@ -4,13 +4,13 @@ use sargon::Epoch as InternalEpoch;
 /// A type-safe consensus epoch number.
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
     
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Epoch {
     pub value: u64,

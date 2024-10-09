@@ -26,7 +26,7 @@ use sargon::Persona as InternalPersona;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Persona {
     /// The ID of the network this account can be used with.

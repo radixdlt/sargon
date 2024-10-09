@@ -9,7 +9,7 @@ use sargon::SLIP10Curve as InternalSLIP10Curve;
 /// For for information see [SLIP10 reference](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
@@ -54,9 +54,6 @@ pub fn new_slip10_curve_from_string(curve: String) -> Result<SLIP10Curve> {
 pub fn slip10_curve_to_string(curve: SLIP10Curve) -> String {
     curve.into_internal().to_string()
 }
-
-#[cfg(test)]
-mod tests {
     use super::*;
 
     #[test]

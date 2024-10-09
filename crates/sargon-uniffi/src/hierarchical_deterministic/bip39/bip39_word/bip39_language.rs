@@ -7,7 +7,7 @@ use sargon::BIP39Language as InternalBIP39Language;
 /// the compilation features.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     Hash,
     PartialEq,

@@ -3,13 +3,13 @@ use sargon::Nonce as InternalNonce;
 
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
     
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct Nonce {
     value: u32,

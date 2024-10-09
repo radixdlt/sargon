@@ -4,7 +4,7 @@ use sargon::ResourceVisibility as InternalResourceVisibility;
 /// Indicates the visibility of a resource.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

@@ -9,12 +9,12 @@ use sargon::ContentHint as InternalContentHint;
 /// are stored values which must be kept in sync.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct ContentHint {
     /// The total number of accounts on all networks.

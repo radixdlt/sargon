@@ -8,7 +8,7 @@ use crate::prelude::*;
     Eq,
     Hash,
     
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct TrustedContactFactorSourceContact {
     /// The email address of the contact that the user trusts

@@ -3,7 +3,7 @@ use sargon::Blobs as InternalBlobs;
 
 /// Vec of Blobs
 #[derive(
-    Clone, PartialEq, Eq, Debug, uniffi::Record,
+    Clone, PartialEq, Eq, Debug,  uniffi::Record,
 )]
 pub struct Blobs {
     pub(crate) secret_magic: Vec<Blob>,

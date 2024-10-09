@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionIntent as InternalTransactionIntent;
 
-#[derive(Clone, PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq,   uniffi::Record)]
 pub struct TransactionIntent {
     pub header: TransactionHeader,
     pub manifest: TransactionManifest,

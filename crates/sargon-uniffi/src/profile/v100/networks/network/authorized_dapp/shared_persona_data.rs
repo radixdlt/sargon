@@ -9,7 +9,7 @@ use sargon::SharedPersonaData as InternalSharedPersonaData;
     PartialEq,
     Hash,
     Eq,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct SharedPersonaData {
     /// ID of a `PersonaDataEntryName` the user has shared with some dApp on some network,

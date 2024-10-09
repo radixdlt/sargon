@@ -2,7 +2,8 @@
 resolver = "2"
 members = [
     "crates/sargon",
-    "crates/sargon-uniffi"
+    "crates/sargon-uniffi",
+    "crates/sargon-uniffi-conversion-macros",
 ]
 default-members = ["crates/sargon"]
 

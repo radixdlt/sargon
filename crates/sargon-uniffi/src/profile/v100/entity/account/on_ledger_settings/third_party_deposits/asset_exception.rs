@@ -5,12 +5,12 @@ use sargon::AssetException as InternalAssetException;
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct AssetException {
     /// Address of an asset to either deny or allow, as an exception overriding the `ThirdPartyDeposits`'s general `deposit_rule`.

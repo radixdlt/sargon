@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// meaning an MFA security structure (`SecurityStructureOfFactorSources`)
 /// which user has created has been applied to it.
 #[derive(
-     Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+     Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct SecuredEntityControl {
     /// The address of the access controller which controls this entity.

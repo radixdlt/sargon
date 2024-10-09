@@ -20,11 +20,13 @@ macro_rules! decl_ret_wrapped_address {
                 PartialEq,
                 Eq,
                 Hash,
-                uniffi::Record,
+                 uniffi::Record,
             )]
             pub struct [< $address_type:camel Address >] {
                 pub(crate) secret_magic: String,
             }
+
+            delegate_display_debug_into!([< $address_type:camel Address >], InternalAddress);
 
             impl From<InternalAddress> for [< $address_type:camel Address >] {
                 fn from(value: InternalAddress) -> Self {

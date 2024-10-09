@@ -1,17 +1,14 @@
 use crate::prelude::*;
+use sargon::Signature as InternalSignature;
 
 /// Either a Signature on `Curve25519` or `Secp256k1`
 #[derive(
     Clone,
-    Copy,
+    
     PartialEq,
     Eq,
     Hash,
-    EnumAsInner,
-    
-    
-    
-    
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum Signature {
@@ -19,29 +16,47 @@ pub enum Signature {
     Ed25519 { value: Ed25519Signature },
 }
 
+impl From<InternalSignature> for Signature {
+    fn from(value: InternalSignature) -> Self {
+        match value {
+            InternalSignature::Secp256k1 { value } => Signature::Secp256k1 { value: value.into() },
+            InternalSignature::Ed25519 { value } => Signature::Ed25519 { value: value.into() },
+        }
+    }
+}
+
+impl Into<InternalSignature> for Signature {
+    fn into(self) -> InternalSignature {
+        match self {
+            Signature::Secp256k1 { value } => InternalSignature::Secp256k1 { value: value.into() },
+            Signature::Ed25519 { value } => InternalSignature::Ed25519 { value value.into() },
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_signature_sample() -> Signature {
-    Signature::sample()
+    InternalSignature::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_signature_sample_other() -> Signature {
-    Signature::sample_other()
+    InternalSignature::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_signature_from_bytes(bytes: BagOfBytes) -> Result<Signature> {
-    Signature::try_from(bytes)
+    InternalSignature::try_from(bytes.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn signature_to_string(signature: &Signature) -> String {
-    signature.to_string()
+    signature.into_internal().to_string()
 }
 
 #[uniffi::export]
 pub fn signature_to_bytes(signature: &Signature) -> BagOfBytes {
-    BagOfBytes::from(signature.to_bytes())
+    signature.into_internal().to_bytes().into()
 }
 
 #[cfg(test)]

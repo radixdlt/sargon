@@ -7,7 +7,7 @@ use sargon::ArculusCardHint as InternalArculusCardHint;
     PartialEq,
     Eq,
     Hash,
-    uniffi::Record,
+     uniffi::Record,
 )]
 pub struct ArculusCardHint {
     /// E.g. "Black" or "Silver"

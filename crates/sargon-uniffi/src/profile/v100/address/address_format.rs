@@ -3,7 +3,7 @@ use sargon::AddressFormat as InternalAddressFormat;
 
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

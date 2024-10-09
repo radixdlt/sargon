@@ -4,7 +4,7 @@ use sargon::ArculusCardModel as InternalArculusCardModel;
 /// The model of a Arculus Card.
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,

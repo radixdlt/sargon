@@ -3,7 +3,7 @@ use sargon::CAP26KeyKind as InternalCAP26KeyKind;
 
 #[derive(
     Clone,
-    Copy,
+    
     Debug,
     PartialEq,
     Eq,
