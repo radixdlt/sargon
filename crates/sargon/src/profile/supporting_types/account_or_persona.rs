@@ -103,8 +103,23 @@ impl AccountOrPersona {
 
     pub fn entity_security_state(&self) -> EntitySecurityState {
         match self {
-            AccountOrPersona::AccountEntity(account) => account.security_state.clone(),
-            AccountOrPersona::PersonaEntity(persona) => persona.security_state.clone()
+            AccountOrPersona::AccountEntity(account) => {
+                account.security_state.clone()
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                persona.security_state.clone()
+            }
+        }
+    }
+
+    pub fn address(&self) -> AddressOfAccountOrPersona {
+        match self {
+            AccountOrPersona::AccountEntity(account) => {
+                AddressOfAccountOrPersona::Account(account.address)
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                AddressOfAccountOrPersona::Identity(persona.address)
+            }
         }
     }
 }

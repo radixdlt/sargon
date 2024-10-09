@@ -26,12 +26,16 @@ impl PetitionForFactorsState {
     }
 
     /// A reference to the neglected factors so far.
-    pub(super) fn neglected(&self) -> Ref<PetitionForFactorsSubState<NeglectedFactorInstance>> {
+    pub(super) fn neglected(
+        &self,
+    ) -> Ref<PetitionForFactorsSubState<NeglectedFactorInstance>> {
         self.neglected.borrow()
     }
 
     /// A reference to the factors which have been signed with so far.
-    pub(super) fn signed(&self) -> Ref<PetitionForFactorsSubState<HDSignature>> {
+    pub(super) fn signed(
+        &self,
+    ) -> Ref<PetitionForFactorsSubState<HDSignature>> {
         self.signed.borrow()
     }
 
@@ -47,7 +51,10 @@ impl PetitionForFactorsState {
 
     /// # Panics
     /// Panics if this factor source has already been neglected or signed with.
-    fn assert_not_referencing_factor_source(&self, factor_source_id: FactorSourceIDFromHash) {
+    fn assert_not_referencing_factor_source(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) {
         assert!(
             !self.references_factor_source_by_id(factor_source_id),
             "Programmer error! Factor source {:#?} already used, should only be referenced once.",
@@ -60,7 +67,9 @@ impl PetitionForFactorsState {
     /// this is not a simulation.
     pub(crate) fn neglect(&self, neglected: &NeglectedFactorInstance) {
         if neglected.reason != NeglectFactorReason::Simulation {
-            self.assert_not_referencing_factor_source(neglected.factor_source_id());
+            self.assert_not_referencing_factor_source(
+                neglected.factor_source_id(),
+            );
         }
         self.neglected.borrow_mut().insert(neglected);
     }
@@ -73,15 +82,21 @@ impl PetitionForFactorsState {
     }
 
     pub(super) fn snapshot(&self) -> PetitionForFactorsStateSnapshot {
-        PetitionForFactorsStateSnapshot::new(self.signed().snapshot(), self.neglected().snapshot())
+        PetitionForFactorsStateSnapshot::new(
+            self.signed().snapshot(),
+            self.neglected().snapshot(),
+        )
     }
 
-    fn references_factor_source_by_id(&self, factor_source_id: FactorSourceIDFromHash) -> bool {
+    fn references_factor_source_by_id(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> bool {
         self.signed()
             .references_factor_source_by_id(factor_source_id)
             || self
-            .neglected()
-            .references_factor_source_by_id(factor_source_id)
+                .neglected()
+                .references_factor_source_by_id(factor_source_id)
     }
 }
 
@@ -93,7 +108,11 @@ mod tests {
     type Sut = PetitionForFactorsState;
 
     impl PetitionForFactorsState {
-        fn test_neglect(&self, id: &HierarchicalDeterministicFactorInstance, simulated: bool) {
+        fn test_neglect(
+            &self,
+            id: &HierarchicalDeterministicFactorInstance,
+            simulated: bool,
+        ) {
             self.neglect(&NeglectedFactorInstance::new(
                 if simulated {
                     NeglectFactorReason::Simulation
@@ -130,20 +149,19 @@ mod tests {
 
         let intent_hash = IntentHash::sample();
 
-        let (id, mnemonic) = fs_id_mnemonic(0);
+        let id = FactorSourceIDFromHash::sample_at(0);
 
-        let hd_signature = hd_signature(
-            &id,
-            &mnemonic.clone(),
-            intent_hash,
-            HDPathComponent::from(0)
-        );
+        let hd_signature =
+            id.sample_tx_hd_signature(intent_hash, HDPathComponent::from(0));
 
         sut.add_signature(&hd_signature);
 
         sut.test_neglect(
-            &hd_factor_instance(&id, &mnemonic, HDPathComponent::from(0)),
-            false
+            &id.sample_tx_factor_instance(
+                HDPathComponent::from(0),
+                CAP26EntityKind::Account,
+            ),
+            false,
         );
     }
 
@@ -152,20 +170,19 @@ mod tests {
     fn signing_already_skipped_panics() {
         let sut = Sut::new();
 
-        let (id, mnemonic) = fs_id_mnemonic(0);
+        let id = FactorSourceIDFromHash::sample_at(0);
 
         sut.test_neglect(
-            &hd_factor_instance(&id, &mnemonic, HDPathComponent::from(0)),
-            false
+            &id.sample_tx_factor_instance(
+                HDPathComponent::from(0),
+                CAP26EntityKind::Account,
+            ),
+            false,
         );
 
         let intent_hash = IntentHash::sample();
-        let hd_signature = hd_signature(
-            &id,
-            &mnemonic,
-            intent_hash,
-            HDPathComponent::from(0)
-        );
+        let hd_signature =
+            id.sample_tx_hd_signature(intent_hash, HDPathComponent::from(0));
 
         sut.add_signature(&hd_signature);
     }

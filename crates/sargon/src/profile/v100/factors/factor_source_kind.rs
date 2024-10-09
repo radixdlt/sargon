@@ -87,7 +87,7 @@ pub enum FactorSourceKind {
     /// Input key material for mnemonic (and optional BIP39 passphrase).
     /// TODO add explanation
     #[serde(rename = "passphrase")]
-    Passphrase
+    Passphrase,
 }
 
 impl FactorSourceKind {
@@ -221,10 +221,7 @@ mod tests {
             format!("{}", SUT::TrustedContact.discriminant()),
             "trustedContact"
         );
-        assert_eq!(
-            format!("{}", SUT::Passphrase.discriminant()),
-            "passphrase"
-        );
+        assert_eq!(format!("{}", SUT::Passphrase.discriminant()), "passphrase");
     }
 
     #[test]

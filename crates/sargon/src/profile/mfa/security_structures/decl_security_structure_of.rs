@@ -79,18 +79,34 @@ macro_rules! decl_role_with_factors {
             }
 
             impl [< $role RoleWith $factor s >] {
+                // # Panics
+                /// Panics if threshold > threshold_factor.len()
+                ///
+                /// Panics if the same factor is present in both lists
                 pub fn new(
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Self {
-                    let _self = Self {
-                        threshold_factors: threshold_factors.into_iter().collect(),
+                    let threshold_factors = threshold_factors.into_iter().collect_vec();
+
+                    assert!(threshold_factors.len() >= threshold as usize);
+
+                    let override_factors = override_factors.into_iter().collect_vec();
+
+                    assert!(
+                        HashSet::<$factor>::from_iter(threshold_factors.clone())
+                            .intersection(&HashSet::<$factor>::from_iter(override_factors.clone()))
+                            .collect_vec()
+                            .is_empty(),
+                        "A factor MUST NOT be present in both threshold AND override list."
+                    );
+
+                    Self {
+                        threshold_factors,
                         threshold,
-                        override_factors: override_factors.into_iter().collect(),
-                    };
-                    assert!(_self.threshold_factors.len() >= _self.threshold as usize);
-                    _self
+                        override_factors,
+                    }
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {

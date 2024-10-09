@@ -37,7 +37,9 @@ impl PetitionForFactorsStatus {
         let are_all_valid = statuses.iter().all(|s| {
             matches!(
                 s,
-                PetitionForFactorsStatus::Finished(PetitionFactorsStatusFinished::Success)
+                PetitionForFactorsStatus::Finished(
+                    PetitionFactorsStatusFinished::Success
+                )
             )
         });
 
@@ -48,7 +50,9 @@ impl PetitionForFactorsStatus {
         let is_some_invalid = statuses.iter().any(|s| {
             matches!(
                 s,
-                PetitionForFactorsStatus::Finished(PetitionFactorsStatusFinished::Fail)
+                PetitionForFactorsStatus::Finished(
+                    PetitionFactorsStatusFinished::Fail
+                )
             )
         });
 

@@ -22,12 +22,19 @@ impl SignWithFactorsOutcome {
     }
 
     #[allow(unused)]
-    pub(crate) fn failure_with_factors(ids: IndexSet<FactorSourceIDFromHash>) -> Self {
-        Self::Neglected(NeglectedFactors::new(NeglectFactorReason::Failure, ids))
+    pub(crate) fn failure_with_factors(
+        ids: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self::Neglected(NeglectedFactors::new(
+            NeglectFactorReason::Failure,
+            ids,
+        ))
     }
 
     #[allow(unused)]
-    pub(crate) fn user_skipped_factors(ids: IndexSet<FactorSourceIDFromHash>) -> Self {
+    pub(crate) fn user_skipped_factors(
+        ids: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
         Self::Neglected(NeglectedFactors::new(
             NeglectFactorReason::UserExplicitlySkipped,
             ids,
@@ -39,14 +46,16 @@ impl SignWithFactorsOutcome {
         Self::user_skipped_factors(IndexSet::from_iter([id]))
     }
 
-    pub(crate) fn irrelevant(factor_sources_of_kind: &FactorSourcesOfKind) -> Self {
+    pub(crate) fn irrelevant(
+        factor_sources_of_kind: &FactorSourcesOfKind,
+    ) -> Self {
         Self::Neglected(NeglectedFactors::new(
             NeglectFactorReason::Irrelevant,
             factor_sources_of_kind
                 .factor_sources()
                 .into_iter()
                 .map(|f| f.factor_source_id().as_hash().unwrap().clone()) // TODO ask that
-                .collect()
+                .collect(),
         ))
     }
 }

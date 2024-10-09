@@ -122,7 +122,7 @@ impl AuthorizedPersonaSimple {
             EntitySecurityState::Unsecured { value: uec } => {
                 uec.authentication_signing.is_some()
             }
-            _ => false // TODO change that
+            _ => false, // TODO change that
         };
         Ok(AuthorizedPersonaDetailed::new(
             persona.address,

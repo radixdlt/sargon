@@ -9,11 +9,13 @@ pub struct PolyFactorSignRequest {
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.
-    pub per_factor_source: IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput>,
+    pub per_factor_source:
+        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput>,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
-    pub invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected>,
+    pub invalid_transactions_if_neglected:
+        IndexSet<InvalidTransactionIfNeglected>,
 }
 
 impl PolyFactorSignRequest {
@@ -23,8 +25,13 @@ impl PolyFactorSignRequest {
     /// Panics if not all factor sources are of the same kind
     pub(crate) fn new(
         factor_source_kind: FactorSourceKind,
-        per_factor_source: IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput>,
-        invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected>,
+        per_factor_source: IndexMap<
+            FactorSourceIDFromHash,
+            MonoFactorSignRequestInput,
+        >,
+        invalid_transactions_if_neglected: IndexSet<
+            InvalidTransactionIfNeglected,
+        >,
     ) -> Self {
         assert!(
             !per_factor_source.is_empty(),

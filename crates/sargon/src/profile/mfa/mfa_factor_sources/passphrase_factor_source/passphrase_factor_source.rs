@@ -25,12 +25,10 @@ pub struct PassphraseFactorSource {
 
 impl PassphraseFactorSource {
     /// Instantiates a new `PassphraseFactorSource`
-    pub fn new(
-        id: FactorSourceIDFromHash
-    ) -> Self {
+    pub fn new(id: FactorSourceIDFromHash) -> Self {
         Self {
             id,
-            common: FactorSourceCommon::new_bdfs(false)
+            common: FactorSourceCommon::new_bdfs(false),
         }
     }
 }
@@ -53,9 +51,7 @@ fn new_passphrase_with_mwp(
 
 impl HasSampleValues for PassphraseFactorSource {
     fn sample() -> Self {
-        new_passphrase_with_mwp(
-            MnemonicWithPassphrase::sample_passphrase(),
-        )
+        new_passphrase_with_mwp(MnemonicWithPassphrase::sample_passphrase())
     }
 
     fn sample_other() -> Self {
@@ -71,9 +67,9 @@ impl TryFrom<FactorSource> for PassphraseFactorSource {
     fn try_from(value: FactorSource) -> Result<Self> {
         match value {
             FactorSource::Passphrase { value } => Ok(value),
-            _ => Err(
-                Self::Error::ExpectedPassphraseFactorSourceGotSomethingElse,
-            ),
+            _ => {
+                Err(Self::Error::ExpectedPassphraseFactorSourceGotSomethingElse)
+            }
         }
     }
 }

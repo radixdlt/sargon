@@ -94,7 +94,7 @@ impl FactorSourceIDFromHash {
     ) -> Self {
         Self::from_mnemonic_with_passphrase(
             FactorSourceKind::Passphrase,
-            mnemonic_with_passphrase
+            mnemonic_with_passphrase,
         )
     }
 }
@@ -151,11 +151,15 @@ impl FactorSourceIDFromHash {
     }
 
     pub fn sample_security_questions() -> Self {
-        Self::new_for_security_questions(&MnemonicWithPassphrase::sample_security_questions())
+        Self::new_for_security_questions(
+            &MnemonicWithPassphrase::sample_security_questions(),
+        )
     }
 
     pub fn sample_security_questions_other() -> Self {
-        Self::new_for_security_questions(&MnemonicWithPassphrase::sample_security_questions_other())
+        Self::new_for_security_questions(
+            &MnemonicWithPassphrase::sample_security_questions_other(),
+        )
     }
 
     pub fn sample_passphrase() -> Self {
@@ -163,7 +167,9 @@ impl FactorSourceIDFromHash {
     }
 
     pub fn sample_passphrase_other() -> Self {
-        Self::new_for_passphrase(&MnemonicWithPassphrase::sample_passphrase_other())
+        Self::new_for_passphrase(
+            &MnemonicWithPassphrase::sample_passphrase_other(),
+        )
     }
 }
 

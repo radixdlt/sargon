@@ -136,7 +136,7 @@ impl Ord for Account {
                 .derivation_path()
                 .last_component()
                 .cmp(r.transaction_signing.derivation_path().last_component()),
-            _ => Ordering::Equal // TODO check that
+            _ => Ordering::Equal, // TODO check that
         }
     }
 }
