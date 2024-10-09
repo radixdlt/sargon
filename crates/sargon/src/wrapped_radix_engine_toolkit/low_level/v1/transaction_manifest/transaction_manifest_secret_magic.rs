@@ -12,10 +12,7 @@ pub struct TransactionManifestSecretMagic {
 }
 
 impl TransactionManifestSecretMagic {
-    pub fn new(
-        instructions: Instructions,
-        blobs: impl Into<Blobs>,
-    ) -> Self {
+    pub fn new(instructions: Instructions, blobs: impl Into<Blobs>) -> Self {
         Self {
             instructions,
             blobs: blobs.into(),
@@ -29,17 +26,11 @@ impl TransactionManifestSecretMagic {
 
 impl HasSampleValues for TransactionManifestSecretMagic {
     fn sample() -> Self {
-        Self::new(
-            Instructions::sample_mainnet(),
-            Blobs::default(),
-        )
+        Self::new(Instructions::sample_mainnet(), Blobs::default())
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            Instructions::sample_simulator_other(),
-            Blobs::default(),
-        )
+        Self::new(Instructions::sample_simulator_other(), Blobs::default())
     }
 }
 

@@ -98,7 +98,7 @@ mod tests {
             SUT::PlainText {
                 plaintext: PlaintextMessage::sample_binary()
             }
-                .as_plaintext(),
+            .as_plaintext(),
             None
         );
         assert_eq!(SUT::None.as_plaintext(), None);

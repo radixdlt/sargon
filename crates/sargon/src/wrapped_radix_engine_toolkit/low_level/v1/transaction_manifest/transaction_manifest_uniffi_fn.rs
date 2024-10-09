@@ -6,11 +6,7 @@ pub fn new_transaction_manifest_from_instructions_string_and_blobs(
     network_id: NetworkID,
     blobs: Blobs,
 ) -> Result<TransactionManifest> {
-    TransactionManifest::new(
-        instructions_string,
-        network_id,
-        blobs,
-    )
+    TransactionManifest::new(instructions_string, network_id, blobs)
 }
 
 #[uniffi::export]
@@ -24,6 +20,7 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
     ))
 }
 
+// TODO: consider exposing manifest_string()
 #[uniffi::export]
 pub fn transaction_manifest_instructions_string(
     manifest: &TransactionManifest,
@@ -100,7 +97,7 @@ mod tests {
 
     #[test]
     fn test_new_transaction_manifest_from_instructions_string_and_blobs() {
-        let s = new_transaction_manifest_sample().instructions_string();
+        let s = new_transaction_manifest_sample().manifest_string();
 
         assert_eq!(
             new_transaction_manifest_from_instructions_string_and_blobs(
@@ -109,7 +106,7 @@ mod tests {
                 Blobs::default(),
             )
             .unwrap()
-            .instructions_string(),
+            .manifest_string(),
             s
         );
     }

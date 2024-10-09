@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
-#[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.instructions_string())]
+#[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]
 pub struct TransactionIntent {
     pub header: TransactionHeader,
     manifest: TransactionManifest,
@@ -29,7 +29,7 @@ impl TransactionIntent {
     }
 
     pub fn manifest_string(&self) -> String {
-        self.manifest.instructions_string()
+        self.manifest.manifest_string()
     }
 
     pub fn blobs(&self) -> &Blobs {
@@ -101,11 +101,10 @@ impl TryFrom<ScryptoIntent> for TransactionIntent {
             network_id,
         ))?;
         let blobs: Blobs = value.blobs.into();
-        let manifest =
-            TransactionManifest::with_instructions_and_blobs(
-                instructions,
-                blobs,
-            );
+        let manifest = TransactionManifest::with_instructions_and_blobs(
+            instructions,
+            blobs,
+        );
 
         Self::new(header, manifest, message)
     }

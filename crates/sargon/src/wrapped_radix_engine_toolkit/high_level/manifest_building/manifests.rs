@@ -306,7 +306,7 @@ mod tests {
         // since the account address is on stokenet!
         assert_eq!(
             manifest
-                .instructions_string()
+                .manifest_string()
                 .contains(&validator_address.address()),
             false
         );
@@ -314,7 +314,7 @@ mod tests {
         // However, if we map the validator_address -> same network as owner
         // THAT address should indeed be present!
         assert_eq!(
-            manifest.instructions_string().contains(
+            manifest.manifest_string().contains(
                 &validator_address
                     .map_to_network(owner_address.network_id())
                     .address()

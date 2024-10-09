@@ -64,19 +64,13 @@ fn instructions_string_from(
     scrypto_instructions: &Vec<ScryptoInstructionV2>,
     network_id: NetworkID,
 ) -> Result<String, CommonError> {
-    // FIXME: refactor instructions_string_from?
-    let manifest = ScryptoTransactionManifestV2 {
+    let scrypto_manifest = ScryptoTransactionManifestV2 {
         instructions: scrypto_instructions.clone(),
         blobs: Default::default(),
         children: Default::default(),
         object_names: Default::default(),
     };
-    let network_definition = network_id.network_definition();
-    scrypto_decompile(&manifest, &network_definition).map_err(|e| {
-        CommonError::InvalidInstructionsFailedToDecompile {
-            underlying: format!("{:?}", e),
-        }
-    })
+    manifest_v2_string_from(scrypto_manifest, network_id)
 }
 
 impl InstructionsV2 {

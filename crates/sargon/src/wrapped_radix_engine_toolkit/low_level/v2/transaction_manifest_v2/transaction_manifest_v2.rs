@@ -3,7 +3,7 @@ use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
-#[display("{}", self.instructions_string())] // TODO: add blobs, children, object_names to Display
+#[display("{}", self.manifest_string())]
 pub struct TransactionManifestV2 {
     secret_magic: TransactionManifestSecretMagicV2,
 }
@@ -65,9 +65,33 @@ impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
                 (scrypto_manifest.children.clone(), network_id).into(),
             ),
         };
-        assert_eq!(value.scrypto_manifest(), scrypto_manifest);
+
+        // Verify that the manifest can be decompiled and that the instructions are from a validated notarized transaction
+        _ = manifest_v2_string_from(scrypto_manifest.clone(), network_id)?;
+
+        assert_eq!(
+            value.scrypto_manifest().instructions,
+            scrypto_manifest.instructions
+        );
+        assert_eq!(value.scrypto_manifest().blobs, scrypto_manifest.blobs);
+        assert_eq!(
+            value.scrypto_manifest().children,
+            scrypto_manifest.children
+        );
         Ok(value)
     }
+}
+
+pub fn manifest_v2_string_from(
+    scrypto_manifest: ScryptoTransactionManifestV2,
+    network_id: NetworkID,
+) -> Result<String, CommonError> {
+    let network_definition = network_id.network_definition();
+    scrypto_decompile(&scrypto_manifest, &network_definition).map_err(|e| {
+        CommonError::InvalidManifestFailedToDecompile {
+            underlying: format!("{:?}", e),
+        }
+    })
 }
 
 impl TransactionManifestV2 {
@@ -89,6 +113,10 @@ impl TransactionManifestV2 {
 
     pub(crate) fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
+    }
+
+    pub fn manifest_string(&self) -> String {
+        manifest_v2_string_from(self.scrypto_manifest(), self.secret_magic.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
 
     pub fn instructions_string(&self) -> String {

@@ -3,7 +3,7 @@ use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
-#[display("{}", self.instructions_string())] // TODO add blobs to Display
+#[display("{}", self.manifest_string())]
 pub struct TransactionManifest {
     secret_magic: TransactionManifestSecretMagic,
 }
@@ -86,12 +86,32 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
         let value = Self {
             secret_magic: TransactionManifestSecretMagic::new(
                 instructions,
-                scrypto_manifest.blobs.clone()
+                scrypto_manifest.blobs.clone(),
             ),
         };
-        assert_eq!(value.scrypto_manifest(), scrypto_manifest);
+
+        // Verify that the manifest can be decompiled and that the instructions are from a validated notarized transaction
+        _ = manifest_string_from(scrypto_manifest.clone(), network_id)?;
+
+        assert_eq!(
+            value.scrypto_manifest().instructions,
+            scrypto_manifest.instructions
+        );
+        assert_eq!(value.scrypto_manifest().blobs, scrypto_manifest.blobs);
         Ok(value)
     }
+}
+
+pub fn manifest_string_from(
+    scrypto_manifest: ScryptoTransactionManifest,
+    network_id: NetworkID,
+) -> Result<String, CommonError> {
+    let network_definition = network_id.network_definition();
+    scrypto_decompile(&scrypto_manifest, &network_definition).map_err(|e| {
+        CommonError::InvalidManifestFailedToDecompile {
+            underlying: format!("{:?}", e),
+        }
+    })
 }
 
 impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
@@ -104,7 +124,7 @@ impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
         TransactionManifest::new(
             value.0.transaction_manifest_string.clone(),
             value.1,
-            value.0.blobs.clone()
+            value.0.blobs.clone(),
         )
     }
 }
@@ -128,6 +148,10 @@ impl TransactionManifest {
 
     pub(crate) fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
+    }
+
+    pub fn manifest_string(&self) -> String {
+        manifest_string_from(self.scrypto_manifest(), self.secret_magic.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
 
     pub fn instructions_string(&self) -> String {
@@ -196,11 +220,7 @@ mod tests {
         type Err = crate::CommonError;
 
         fn from_str(s: &str) -> Result<Self> {
-            Self::new(
-                s,
-                NetworkID::Simulator,
-                Blobs::default(),
-            )
+            Self::new(s, NetworkID::Simulator, Blobs::default())
         }
     }
 
@@ -304,14 +324,10 @@ BURN_RESOURCE
                 "#;
 
         assert_eq!(
-            SUT::new(
-                instructions_str,
-                NetworkID::Simulator,
-                Blobs::default(),
-            )
-            .unwrap()
-            .instructions()
-            .len(),
+            SUT::new(instructions_str, NetworkID::Simulator, Blobs::default(),)
+                .unwrap()
+                .instructions()
+                .len(),
             1
         );
     }
@@ -325,11 +341,7 @@ BURN_RESOURCE
                 "#;
 
         assert_eq!(
-            SUT::new(
-                instructions_str,
-                NetworkID::Mainnet,
-                Blobs::default(),
-            ),
+            SUT::new(instructions_str, NetworkID::Mainnet, Blobs::default(),),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Simulator,
                 specified_to_instructions_ctor: NetworkID::Mainnet
@@ -346,11 +358,7 @@ BURN_RESOURCE
                 "#;
 
         assert_eq!(
-            SUT::new(
-                instructions_str,
-                NetworkID::Stokenet,
-                Blobs::default(),
-            ),
+            SUT::new(instructions_str, NetworkID::Stokenet, Blobs::default(),),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Mainnet,
                 specified_to_instructions_ctor: NetworkID::Stokenet
