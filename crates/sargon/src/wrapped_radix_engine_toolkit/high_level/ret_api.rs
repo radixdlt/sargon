@@ -142,6 +142,14 @@ pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
     ResourceAddress::xrd_on_network(network_id)
 }
 
+#[uniffi::export]
+pub fn debug_print_compiled_notarized_intent(
+    compiled: CompiledNotarizedIntent,
+) -> String {
+    let notarized = compiled.decompile();
+    format!("{:?}", notarized)
+}
+
 /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
 /// into `PerAssetTransfers`. We always use `PerAssetTransfers` when building the manifest
 /// since it is more efficient (allows a single withdraw per resource) => fewer instruction =>
@@ -446,6 +454,17 @@ mod tests {
     #[test]
     fn xrd_address_of_network_stokenet() {
         assert_eq!(xrd_address_of_network(NetworkID::Stokenet).to_string(), "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc");
+    }
+
+    #[test]
+    fn test_debug_print_compiled_notarized_intent() {
+        assert!(
+            debug_print_compiled_notarized_intent(
+                CompiledNotarizedIntent::sample()
+            )
+                .len()
+                > 1000
+        );
     }
 
     #[test]
