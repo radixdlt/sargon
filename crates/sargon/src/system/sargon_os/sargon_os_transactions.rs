@@ -20,15 +20,6 @@ impl SargonOS {
             .submit_notarized_transaction(notarized_transaction)
             .await
     }
-
-    /// Submits a compiled transaction payload to the network.
-    pub async fn submit_compiled_transaction(
-        &self,
-        compiled_notarized_intent: CompiledNotarizedIntent,
-    ) -> Result<IntentHash> {
-        self.submit_transaction(compiled_notarized_intent.decompile())
-            .await
-    }
 }
 
 // ==================
@@ -159,39 +150,6 @@ mod submit_transaction_tests {
             .expect_err("Expected an error");
 
         assert_eq!(result, CommonError::NetworkResponseBadCode);
-    }
-
-    #[actix_rt::test]
-    async fn submit_compiled_transaction() {
-        let compiled_notarized_intent = CompiledNotarizedIntent::sample();
-        let response = TransactionSubmitResponse {
-            duplicate: false,
-        };
-        let body = serde_json::to_vec(&response).unwrap();
-
-        let mock_driver = MockNetworkingDriver::with_spy(200, body, |request| {
-            // Verify the body sent matches the expected one
-            let sent_request = TransactionSubmitRequest::new(CompiledNotarizedIntent::sample().decompile());
-            let sent_body = serde_json::to_vec(&sent_request).unwrap();
-
-            assert_eq!(request.body.bytes, sent_body);
-        });
-
-        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
-
-        let os =
-            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
-                .await
-                .unwrap()
-                .unwrap();
-
-        let result = os.submit_compiled_transaction(compiled_notarized_intent.clone())
-            .await
-            .unwrap();
-
-        let expected_result = compiled_notarized_intent.decompile().signed_intent().intent().intent_hash();
-
-        assert_eq!(result, expected_result);
     }
 }
 
