@@ -49,6 +49,6 @@ impl SargonOS {
         &self,
         to: Gateway,
     ) -> Result<ChangeGatewayOutcome> {
-        self.wrapped.change_current_gateway(to).await
+        self.wrapped.change_current_gateway(to.into()).await.map_result()
     }
 }

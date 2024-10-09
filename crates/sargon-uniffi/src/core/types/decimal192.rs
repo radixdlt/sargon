@@ -22,12 +22,10 @@ use sargon::Decimal192 as InternalDecimal192;
 /// [scrypto]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/math/decimal.rs#L42
 #[derive(
     Clone,
-    Copy,
     Debug,
     PartialEq,
     Eq,
     Hash,
-    
     uniffi::Record,
 )]
 pub struct Decimal192 {

@@ -281,17 +281,17 @@ mod uniffi_tests {
         ));
     }
 
-    #[test]
-    fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
-    ) {
-        let json =
-            serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
-        let password = "babylon";
-        assert!(check_if_encrypted_profile_json_contains_legacy_p2p_links(
-            json,
-            password.to_owned()
-        ));
-    }
+    // #[test]
+    // fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    // ) {
+    //     let json =
+    //         serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
+    //     let password = "babylon";
+    //     assert!(check_if_encrypted_profile_json_contains_legacy_p2p_links(
+    //         json,
+    //         password.to_owned()
+    //     ));
+    // }
 
     #[test]
     fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_empty_json(

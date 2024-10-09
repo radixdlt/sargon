@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionResponse as InternalWalletToDappInteractionResponse;
 
+json_data_convertible!(WalletToDappInteractionResponse);
+
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponse {

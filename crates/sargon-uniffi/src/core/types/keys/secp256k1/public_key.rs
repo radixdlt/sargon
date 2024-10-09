@@ -5,7 +5,6 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[derive(
     Clone,
-    Copy,
     PartialEq,
     Eq,
     Hash,

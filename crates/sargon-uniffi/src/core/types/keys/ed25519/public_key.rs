@@ -6,7 +6,6 @@ json_string_convertible!(Ed25519PublicKey);
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[derive(
     Clone,
-    Copy,
     PartialEq,
     Eq,
     Hash,

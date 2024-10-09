@@ -81,13 +81,13 @@ impl SargonOS {
         &self,
         factor_sources: FactorSources,
     ) -> Result<Vec<FactorSourceID>> {
-        map_result_from_internal(self.wrapped.add_factor_sources(factor_sources.into()).await)
+        self.wrapped.add_factor_sources(factor_sources.into_internal_vec()).await.map_result()
     }
 
     pub async fn debug_add_all_sample_factors(
         &self,
     ) -> Result<Vec<FactorSourceID>> {
-        map_result_from_internal(self.wrapped.debug_add_all_sample_factors().await)
+        self.wrapped.debug_add_all_sample_factors().await.map_result()
     }
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
@@ -97,10 +97,10 @@ impl SargonOS {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
     ) -> Result<DeviceFactorSource> {
-        map_result_from_internal(self.wrapped.create_device_factor_source(
+        self.wrapped.create_device_factor_source(
             mnemonic_with_passphrase.into(),
             factor_type.into(),
-        ).await)
+        ).await.map_result()
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -116,6 +116,6 @@ impl SargonOS {
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        map_result_from_internal(self.wrapped.load_private_device_factor_source_by_id(&id.into()).await)
+        self.wrapped.load_private_device_factor_source_by_id(id.into()).await.map_result()
     }
 }

@@ -141,11 +141,11 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
-        map_result_from_internal(self.wrapped.batch_create_unsaved_accounts(
+        self.wrapped.batch_create_unsaved_accounts(
             network_id.into(),
             count,
             name_prefix,
-        ).await)
+        ).await.map_result()
     }
 }
 
@@ -167,7 +167,7 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_account(&self, account: Account) -> Result<()> {
-        map_result_from_internal(self.wrapped.add_account(account.into()).await)
+        self.wrapped.add_account(account.into()).await.map_result()
     }
 
     /// Adds the `accounts` to active profile and **saves** the updated profile to
@@ -183,7 +183,7 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
-        map_result_from_internal(self.wrapped.add_accounts(accounts.into()).await)
+        self.wrapped.add_accounts(accounts.into_internal_vec()).await.map_result()
     }
 }
 
@@ -199,6 +199,6 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountUpdated { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
-        map_result_from_internal(self.wrapped.update_account(updated.into()).await)
+        self.wrapped.update_account(updated.into()).await.map_result()
     }
 }

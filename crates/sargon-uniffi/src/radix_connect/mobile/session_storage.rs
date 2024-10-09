@@ -33,14 +33,14 @@ impl InternalRadixConnectMobileSessionStorage for RadixConnectMobileSessionStora
         &self,
         session_id: InternalSessionID,
         encoded_session: InternalBagOfBytes,
-    ) -> InternalResult<()> {
+    ) -> Result<()> {
         map_result_to_internal(self.wrapped.save_session(session_id.into(), encoded_session.into()).await)
     }
 
     async fn load_session(
         &self,
         session_id: InternalSessionID,
-    ) -> InternalResult<Option<InternalBagOfBytes>> {
+    ) -> Result<Option<InternalBagOfBytes>> {
         map_result_to_internal_optional(self.wrapped.load_session(session_id.into()).await)
     }
 }

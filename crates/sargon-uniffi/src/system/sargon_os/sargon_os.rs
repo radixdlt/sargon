@@ -25,7 +25,7 @@ impl SargonOS {
     }
 
     pub async fn new_wallet(&self) -> Result<()> {
-        map_result_from_internal(self.wrapped.new_wallet().await)
+        self.wrapped.new_wallet().await.map_result()
     }
 
     pub async fn import_wallet(
@@ -33,7 +33,7 @@ impl SargonOS {
         profile: &Profile,
         bdfs_skipped: bool,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.import_wallet(&profile.to_owned().into(), bdfs_skipped).await)
+        self.wrapped.import_wallet(&profile.to_owned().into(), bdfs_skipped).await.map_result()
     }
 
     pub async fn new_wallet_with_derived_bdfs(
@@ -41,15 +41,15 @@ impl SargonOS {
         hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
         accounts: Accounts,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into(), accounts.into()).await)
+        self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into(), accounts.into_internal_vec()).await.map_result()
     }
 
     pub async fn delete_wallet(&self) -> Result<()> {
-        map_result_from_internal(self.wrapped.delete_wallet().await)
+        self.wrapped.delete_wallet().await.map_result()
     }
 
     pub async fn resolve_host_id(&self) -> Result<HostId> {
-        map_result_from_internal(self.wrapped.resolve_host_id().await)
+        self.wrapped.resolve_host_id().await.map_result()
     }
 
     pub async fn resolve_host_info(&self) -> HostInfo {

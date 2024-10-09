@@ -17,7 +17,6 @@ macro_rules! decl_ret_wrapped_address {
             )*
             #[derive(
                 Clone,
-                Copy,
                 PartialEq,
                 Eq,
                 Hash,

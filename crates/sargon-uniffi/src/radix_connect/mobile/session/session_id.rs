@@ -8,6 +8,7 @@ use sargon::SessionID as InternalSessionID;
     PartialEq,
     Eq,
     Hash,
+    uniffi::Record,
 )]
 pub struct SessionID {
     pub value: Uuid,

@@ -8,8 +8,7 @@ use sargon::KeyAgreementPublicKey as InternalKeyAgreementPublicKey;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
-    
+    uniffi::Record,
 )]
 pub struct KeyAgreementPublicKey {
     pub secret_magic: X25519PublicKey,

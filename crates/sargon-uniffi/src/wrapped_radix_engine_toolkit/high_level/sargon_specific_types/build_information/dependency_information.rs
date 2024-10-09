@@ -19,7 +19,7 @@ pub enum DependencyInformation {
 }
 
 impl From<InternalDependencyInformation> for DependencyInformation {
-    fn from(value: DependencyInformation) -> Self {
+    fn from(value: InternalDependencyInformation) -> Self {
         match value {
             InternalDependencyInformation::Version(value) => DependencyInformation::Version(value),
             InternalDependencyInformation::Tag(value) => DependencyInformation::Tag(value),

@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionUnvalidated as InternalDappToWalletInteractionUnvalidated;
 
+json_data_convertible!(DappToWalletInteractionUnvalidated);
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionUnvalidated {
     pub interaction_id: WalletInteractionId,

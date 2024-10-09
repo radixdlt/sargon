@@ -7,8 +7,6 @@ use sargon::PublicKeyHash as InternalPublicKeyHash;
     Copy,
     Debug,
     PartialEq,
-    
-    
     EnumAsInner,
     Eq,
     Hash,

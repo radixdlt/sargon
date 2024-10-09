@@ -11,9 +11,7 @@ use sargon::Exactly32Bytes as InternalExactly32Bytes;
     Clone,
     Debug,
     PartialEq,
-    Copy,
     Eq,
-    
     uniffi::Record,
 )]
 pub struct Hash {

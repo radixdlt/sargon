@@ -28,9 +28,6 @@ impl Into<InternalDappToWalletInteraction> for DappToWalletInteraction {
     }
 }
 
-json_data_convertible!(DappToWalletInteractionUnvalidated);
-json_data_convertible!(WalletToDappInteractionResponse);
-
 #[uniffi::export]
 pub fn new_dapp_to_wallet_interaction_unvalidated_from_json_string(
     json_str: String,

@@ -21,11 +21,11 @@ pub struct HomeCardsStorageAdapter {
 
 #[async_trait::async_trait]
 impl InternalHomeCardsStorage for HomeCardsStorageAdapter {
-    async fn save_cards(&self, encoded_cards: InternalBagOfBytes) -> InternalResult<()> {
+    async fn save_cards(&self, encoded_cards: InternalBagOfBytes) -> Result<()> {
         map_result_to_internal(self.wrapped.save_cards(encoded_cards.into()).await)
     }
 
-    async fn load_cards(&self) -> InternalResult<Option<InternalBagOfBytes>> {
+    async fn load_cards(&self) -> Result<Option<InternalBagOfBytes>> {
         map_result_to_internal_optional(self.wrapped.load_cards().await)
     }
 }

@@ -19,102 +19,43 @@ pub enum SecureStorageKey {
 
 impl From<InternalSecureStorageKey> for SecureStorageKey {
     fn from(value: InternalSecureStorageKey) -> Self {
-        unimplemented!()
-    }
-}
-
-impl PartialEq<SecureStorageKey> for SecureStorageKey {
-    fn eq(&self, other: &SecureStorageKey) -> bool {
-        match (self, other) {
-            (SecureStorageKey::HostID, SecureStorageKey::HostID) => true,
-            (
+        match value {
+            InternalSecureStorageKey::HostID => SecureStorageKey::HostID,
+            InternalSecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id } => {
                 SecureStorageKey::DeviceFactorSourceMnemonic {
-                    factor_source_id: a,
-                },
-                SecureStorageKey::DeviceFactorSourceMnemonic {
-                    factor_source_id: b,
-                },
-            ) => a == b,
-            (
-                SecureStorageKey::ProfileSnapshot { .. },
-                SecureStorageKey::ProfileSnapshot { .. },
-            ) => true, // Note: `profile_id` is not used for comparison, as it is only forwarded as additional payload to the iOS Host.
-            _ => false,
+                    factor_source_id: factor_source_id.into(),
+                }
+            }
+            InternalSecureStorageKey::ProfileSnapshot { profile_id } => {
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile_id.into(),
+                }
+            }
         }
     }
 }
 
-impl Hash for SecureStorageKey {
-    fn hash<H: Hasher>(&self, state: &mut H) {
+impl Into<InternalSecureStorageKey> for SecureStorageKey {
+    fn into(self) -> InternalSecureStorageKey {
         match self {
-            SecureStorageKey::HostID => {
-                "host_id".hash(state);
+            SecureStorageKey::HostID => InternalSecureStorageKey::HostID,
+            SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id } => {
+                InternalSecureStorageKey::DeviceFactorSourceMnemonic {
+                    factor_source_id: factor_source_id.into(),
+                }
             }
-            SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id,
-            } => {
-                "device_factor_source".hash(state);
-                factor_source_id.hash(state);
+            SecureStorageKey::ProfileSnapshot { profile_id } => {
+                InternalSecureStorageKey::ProfileSnapshot {
+                    profile_id: profile_id.into(),
+                }
             }
-            // Note: `profile_id` is not used for computing the hash, as it is only forwarded as additional payload to the iOS Host.
-            SecureStorageKey::ProfileSnapshot { .. } => {
-                "profile_snapshot".hash(state);
-            }
-        }
-    }
-}
-
-impl SecureStorageKey {
-    #[cfg(not(tarpaulin_include))] // false negative
-    pub fn identifier(&self) -> String {
-        format!(
-            "secure_storage_key_{}",
-            match self {
-                SecureStorageKey::HostID => "host_id".to_owned(),
-                SecureStorageKey::DeviceFactorSourceMnemonic {
-                    factor_source_id,
-                } => format!("device_factor_source_{}", factor_source_id),
-                SecureStorageKey::ProfileSnapshot { .. } =>
-                    "profile_snapshot".to_owned(),
-            }
-        )
-    }
-}
-
-impl SecureStorageKey {
-    pub fn load_profile_snapshot() -> Self {
-        // This id will not be used to load the profile snapshot.
-        // It is only a stub to conform to the SecureStorageKey definition.
-        let dummy_id = ProfileID(Uuid::from_bytes([0x00; 16]));
-        SecureStorageKey::ProfileSnapshot {
-            profile_id: dummy_id,
         }
     }
 }
 
 #[uniffi::export]
 pub fn secure_storage_key_identifier(key: &SecureStorageKey) -> String {
-    key.identifier()
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn identifier() {
-        assert_eq!(
-            SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: FactorSourceIDFromHash::sample()
-            }
-            .identifier(),
-            "secure_storage_key_device_factor_source_device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
-        );
-        assert_eq!(
-            SecureStorageKey::load_profile_snapshot().identifier(),
-            "secure_storage_key_profile_snapshot"
-        );
-    }
+    key.into_internal().identifier()
 }
 
 #[cfg(test)]

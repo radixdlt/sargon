@@ -10,6 +10,7 @@ use sargon::DeviceID as InternalDeviceID;
     PartialEq,
     Eq,
     Hash,
+    uniffi::Record,
 )]
 pub struct DeviceID {
     value: Uuid,

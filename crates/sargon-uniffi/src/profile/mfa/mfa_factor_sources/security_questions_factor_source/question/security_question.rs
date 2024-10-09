@@ -22,13 +22,3 @@ pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     /// if the answer is in `["Teddy", "Peter Rabbit", "Winnie (the Poh)"]`
     pub unsafe_answers: Vec<String>,
 }
-
-impl Identifiable for Security_NOT_PRODUCTION_READY_Question {
-    type ID = u16; // FIXME: newtype
-
-    /// Return `Element`'s globally unique and stable ID, used to uniquely identify
-    /// the `Element` in the `IdentifiedVecOf` collection of elements.
-    fn id(&self) -> Self::ID {
-        self.id
-    }
-}

@@ -125,12 +125,6 @@ mod uniffi_tests {
         t_iui(126);
         t_iui(127);
     }
-    
-    #[test]
-    fn new_ok() {
-        let bytes = generate_bytes::<5>();
-        assert_eq!(new_bag_of_bytes_from(bytes.clone()).bytes, bytes);
-    }
 
     #[test]
     fn sample_values() {

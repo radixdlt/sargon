@@ -18,7 +18,6 @@ macro_rules! decl_exactly_n_bytes {
             #[derive(
                 Zeroize,
                 Clone,
-                Copy,
                 PartialEq,
                 Eq,
                 Hash,

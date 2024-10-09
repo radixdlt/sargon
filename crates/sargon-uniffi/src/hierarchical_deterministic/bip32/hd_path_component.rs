@@ -25,7 +25,7 @@ impl From<InternalHDPathComponent> for HDPathComponent {
 
 impl Into<InternalHDPathComponent> for HDPathComponent {
     fn into(self) -> InternalHDPathComponent {
-        InternalHDPathComponen {
+        InternalHDPathComponent {
             value: self.value,
         }
     }

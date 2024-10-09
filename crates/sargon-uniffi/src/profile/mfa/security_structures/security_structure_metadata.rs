@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::SecurityStructureMetadata as InternalSecurityStructureMetadata;
 
 #[derive(
     Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
@@ -10,30 +11,44 @@ pub struct SecurityStructureMetadata {
     pub last_updated_on: Timestamp,
 }
 
-impl Identifiable for SecurityStructureMetadata {
-    type ID = SecurityStructureID;
+impl From<InternalSecurityStructureMetadata> for SecurityStructureMetadata {
+    fn from(value: InternalSecurityStructureMetadata) -> Self {
+        Self {
+            id: value.id.into(),
+            display_name: value.display_name.into(),
+            created_on: value.created_on.into(),
+            last_updated_on: value.last_updated_on.into(),
+        }
+    }
+}
 
-    fn id(&self) -> Self::ID {
-        self.id
+impl Into<InternalSecurityStructureMetadata> for SecurityStructureMetadata {
+    fn into(self) -> InternalSecurityStructureMetadata {
+        InternalSecurityStructureMetadata {
+            id: self.id.into(),
+            display_name: self.display_name.into(),
+            created_on: self.created_on.into(),
+            last_updated_on: self.last_updated_on.into(),
+        }
     }
 }
 
 #[uniffi::export]
 pub fn new_security_structure_metadata_sample() -> SecurityStructureMetadata {
-    SecurityStructureMetadata::sample()
+    InternalSecurityStructureMetadata::sample()
 }
 
 #[uniffi::export]
 pub fn new_security_structure_metadata_sample_other(
 ) -> SecurityStructureMetadata {
-    SecurityStructureMetadata::sample_other()
+    InternalSecurityStructureMetadata::sample_other()
 }
 
 #[uniffi::export]
 pub fn new_security_structure_metadata_named(
     name: &DisplayName,
 ) -> SecurityStructureMetadata {
-    SecurityStructureMetadata::new(name.clone())
+    InternalSecurityStructureMetadata::new(name.into())
 }
 
 #[cfg(test)]

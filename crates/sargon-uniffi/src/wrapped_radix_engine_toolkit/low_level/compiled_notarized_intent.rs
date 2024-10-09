@@ -7,8 +7,6 @@ use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
     PartialEq,
     Eq,
     Hash,
-    
-    derive_more::FromStr,
     uniffi::Record,
 )]
 pub struct CompiledNotarizedIntent {
@@ -25,9 +23,7 @@ impl From<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
 
 impl Into<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
     fn into(self) -> InternalCompiledNotarizedIntent {
-        InternalCompiledNotarizedIntent {
-            secret_magic: self.secret_magic.into(),
-        }
+        InternalCompiledNotarizedIntent(self.secret_magic.into())
     }
 }
 
