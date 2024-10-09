@@ -69,7 +69,9 @@ impl SignaturesOutcome {
         self.failed_transactions.is_empty()
     }
 
-    pub fn signatures_of_successful_transactions(&self) -> IndexSet<HDSignature> {
+    pub fn signatures_of_successful_transactions(
+        &self,
+    ) -> IndexSet<HDSignature> {
         self.successful_transactions.all_signatures()
     }
 
@@ -98,7 +100,9 @@ impl SignaturesOutcome {
     }
 
     #[allow(unused)]
-    pub fn ids_of_neglected_factor_sources(&self) -> IndexSet<FactorSourceIDFromHash> {
+    pub fn ids_of_neglected_factor_sources(
+        &self,
+    ) -> IndexSet<FactorSourceIDFromHash> {
         self.ids_of_neglected_factor_sources_filter(|_| true)
     }
 
@@ -115,7 +119,9 @@ impl SignaturesOutcome {
     pub(crate) fn ids_of_neglected_factor_sources_failed(
         &self,
     ) -> IndexSet<FactorSourceIDFromHash> {
-        self.ids_of_neglected_factor_sources_filter(|nf| nf.reason == NeglectFactorReason::Failure)
+        self.ids_of_neglected_factor_sources_filter(|nf| {
+            nf.reason == NeglectFactorReason::Failure
+        })
     }
 
     #[allow(unused)]
@@ -128,7 +134,9 @@ impl SignaturesOutcome {
     }
 
     #[allow(unused)]
-    pub(crate) fn signatures_of_failed_transactions(&self) -> IndexSet<HDSignature> {
+    pub(crate) fn signatures_of_failed_transactions(
+        &self,
+    ) -> IndexSet<HDSignature> {
         self.failed_transactions.all_signatures()
     }
 

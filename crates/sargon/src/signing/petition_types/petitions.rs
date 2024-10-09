@@ -21,12 +21,16 @@ pub(crate) struct Petitions {
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
-    pub(crate) txid_to_petition: RefCell<IndexMap<IntentHash, PetitionForTransaction>>,
+    pub(crate) txid_to_petition:
+        RefCell<IndexMap<IntentHash, PetitionForTransaction>>,
 }
 
 impl Petitions {
     pub(crate) fn new(
-        factor_source_to_intent_hashes: HashMap<FactorSourceIDFromHash, IndexSet<IntentHash>>,
+        factor_source_to_intent_hashes: HashMap<
+            FactorSourceIDFromHash,
+            IndexSet<IntentHash>,
+        >,
         txid_to_petition: IndexMap<IntentHash, PetitionForTransaction>,
     ) -> Self {
         Self {
@@ -40,7 +44,9 @@ impl Petitions {
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
         let mut neglected_factor_sources = IndexSet::<NeglectedFactor>::new();
-        for (intent_hash, petition_of_transaction) in txid_to_petition.into_iter() {
+        for (intent_hash, petition_of_transaction) in
+            txid_to_petition.into_iter()
+        {
             let outcome = petition_of_transaction.outcome();
             let signatures = outcome.signatures;
 
@@ -88,7 +94,11 @@ impl Petitions {
     ) -> IndexSet<InvalidTransactionIfNeglected> {
         self.each_petition(
             factor_source_ids.clone(),
-            |p| p.invalid_transaction_if_neglected_factors(factor_source_ids.clone()),
+            |p| {
+                p.invalid_transaction_if_neglected_factors(
+                    factor_source_ids.clone(),
+                )
+            },
             |i| i.into_iter().flatten().collect(),
         )
     }
@@ -162,7 +172,10 @@ impl Petitions {
         )
     }
 
-    pub(crate) fn process_batch_response(&self, response: SignWithFactorsOutcome) {
+    pub(crate) fn process_batch_response(
+        &self,
+        response: SignWithFactorsOutcome,
+    ) {
         match response {
             SignWithFactorsOutcome::Signed {
                 produced_signatures,
@@ -178,7 +191,9 @@ impl Petitions {
             }
             SignWithFactorsOutcome::Neglected(neglected_factors) => {
                 let reason = neglected_factors.reason;
-                for neglected_factor_source_id in neglected_factors.content.iter() {
+                for neglected_factor_source_id in
+                    neglected_factors.content.iter()
+                {
                     info!("Neglected {}", neglected_factor_source_id);
                     self.neglect_factor_source_with_id(NeglectedFactor::new(
                         reason,

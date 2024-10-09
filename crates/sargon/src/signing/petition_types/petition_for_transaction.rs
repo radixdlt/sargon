@@ -8,7 +8,8 @@ pub(crate) struct PetitionForTransaction {
     /// Hash of transaction to sign
     pub(crate) intent_hash: IntentHash,
 
-    pub(crate) for_entities: RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity>>,
+    pub(crate) for_entities:
+        RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity>>,
 }
 
 impl PetitionForTransaction {
@@ -80,7 +81,10 @@ impl PetitionForTransaction {
                     debug!("OMITTING petition since it HAS failed: {:?}", p);
                     false
                 } else {
-                    debug!("INCLUDING petition since it has NOT failed: {:?}", p);
+                    debug!(
+                        "INCLUDING petition since it has NOT failed: {:?}",
+                        p
+                    );
                     true
                 }
             })
@@ -109,7 +113,9 @@ impl PetitionForTransaction {
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> TransactionSignRequestInput {
-        assert!(!self.should_neglect_factors_due_to_irrelevant(IndexSet::just(*factor_source_id)));
+        assert!(!self.should_neglect_factors_due_to_irrelevant(
+            IndexSet::just(*factor_source_id)
+        ));
         assert!(!self.has_tx_failed());
         TransactionSignRequestInput::new(
             self.intent_hash.clone(),
@@ -118,7 +124,9 @@ impl PetitionForTransaction {
         )
     }
 
-    pub(crate) fn status_of_each_petition_for_entity(&self) -> Vec<PetitionForFactorsStatus> {
+    pub(crate) fn status_of_each_petition_for_entity(
+        &self,
+    ) -> Vec<PetitionForFactorsStatus> {
         self.for_entities
             .borrow()
             .values()
@@ -139,7 +147,9 @@ impl PetitionForTransaction {
             .borrow()
             .iter()
             .filter_map(|(_, petition)| {
-                petition.invalid_transaction_if_neglected_factors(factor_source_ids.clone())
+                petition.invalid_transaction_if_neglected_factors(
+                    factor_source_ids.clone(),
+                )
             })
             .collect_vec();
 
@@ -163,7 +173,9 @@ impl PetitionForTransaction {
             .filter(|&p| p.references_any_factor_source(&factor_source_ids))
             .cloned()
             .all(|petition| {
-                petition.should_neglect_factors_due_to_irrelevant(factor_source_ids.clone())
+                petition.should_neglect_factors_due_to_irrelevant(
+                    factor_source_ids.clone(),
+                )
             })
     }
 
@@ -186,12 +198,14 @@ impl HasSampleValues for PetitionForTransaction {
         let entity = Account::sample_securified_mainnet(
             "Grace",
             AccountAddress::sample_other(),
-            || GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(
+            || {
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(
                 HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Account,
                     HDPathComponent::from(6)
                 )
             )
+            },
         );
         Self::new(
             intent_hash.clone(),
@@ -257,18 +271,26 @@ mod tests {
 
         let account = Account::a5();
         let matrix = match account.security_state {
-            EntitySecurityState::Securified { value } => value.security_structure.matrix_of_factors.clone(),
+            EntitySecurityState::Securified { value } => {
+                value.security_structure.matrix_of_factors.clone()
+            }
             _ => panic!(),
         };
         let petition = PetitionForEntity::new_securified(
             intent_hash.clone(),
             AddressOfAccountOrPersona::Account(account.address),
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from((matrix, RoleKind::Primary)).unwrap()
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                (matrix, RoleKind::Primary),
+            )
+            .unwrap(),
         );
 
         let sut = Sut::new(
             IntentHash::sample(),
-            HashMap::just((AddressOfAccountOrPersona::Account(account.address), petition)),
+            HashMap::just((
+                AddressOfAccountOrPersona::Account(account.address),
+                petition,
+            )),
         );
         sut.neglect_factor_source(NeglectedFactor::new(
             NeglectFactorReason::Failure,
@@ -276,8 +298,10 @@ mod tests {
         ));
 
         assert_eq!(
-            sut.all_relevant_factor_instances_of_source(&FactorSourceIDFromHash::sample_at(4))
-                .len(),
+            sut.all_relevant_factor_instances_of_source(
+                &FactorSourceIDFromHash::sample_at(4)
+            )
+            .len(),
             1
         );
     }
@@ -289,18 +313,26 @@ mod tests {
 
         let account = Account::a5();
         let matrix = match account.security_state {
-            EntitySecurityState::Securified { value } => value.security_structure.matrix_of_factors.clone(),
+            EntitySecurityState::Securified { value } => {
+                value.security_structure.matrix_of_factors.clone()
+            }
             _ => panic!(),
         };
         let petition = PetitionForEntity::new_securified(
             intent_hash.clone(),
             AddressOfAccountOrPersona::Account(account.address),
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from((matrix, RoleKind::Primary)).unwrap()
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                (matrix, RoleKind::Primary),
+            )
+            .unwrap(),
         );
 
         let sut = Sut::new(
             IntentHash::sample(),
-            HashMap::just((AddressOfAccountOrPersona::Account(account.address), petition)),
+            HashMap::just((
+                AddressOfAccountOrPersona::Account(account.address),
+                petition,
+            )),
         );
         sut.neglect_factor_source(NeglectedFactor::new(
             NeglectFactorReason::Failure,
@@ -310,6 +342,8 @@ mod tests {
             NeglectFactorReason::Failure,
             FactorSourceIDFromHash::sample_at(4),
         ));
-        let _ = sut.all_relevant_factor_instances_of_source(&FactorSourceIDFromHash::sample_at(4));
+        let _ = sut.all_relevant_factor_instances_of_source(
+            &FactorSourceIDFromHash::sample_at(4),
+        );
     }
 }

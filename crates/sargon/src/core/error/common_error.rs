@@ -662,6 +662,9 @@ pub enum CommonError {
 
     #[error("Expected Passphrase factor source got something else")]
     ExpectedPassphraseFactorSourceGotSomethingElse = 10185,
+
+    #[error("Unknown persona.")]
+    UnknownPersona = 10186,
 }
 
 #[uniffi::export]

@@ -2,6 +2,9 @@ mod collector;
 mod host_interaction;
 mod petition_types;
 mod signatures_outecome_types;
+mod tx_to_sign;
+
+pub(crate) use tx_to_sign::*;
 
 pub use collector::*;
 pub use host_interaction::*;
