@@ -8,8 +8,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    Ord,
-    PartialOrd,
     derive_more::Display,
     uniffi::Enum,
 )]

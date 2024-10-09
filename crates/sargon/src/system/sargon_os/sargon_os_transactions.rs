@@ -102,18 +102,19 @@ mod submit_transaction_tests {
     #[actix_rt::test]
     async fn submit_transaction_success() {
         let notarized_transaction = NotarizedTransaction::sample();
-        let response = TransactionSubmitResponse {
-            duplicate: false,
-        };
+        let response = TransactionSubmitResponse { duplicate: false };
         let body = serde_json::to_vec(&response).unwrap();
 
-        let mock_driver = MockNetworkingDriver::with_spy(200, body, |request| {
-            // Verify the body sent matches the expected one
-            let sent_request = TransactionSubmitRequest::new(NotarizedTransaction::sample());
-            let sent_body = serde_json::to_vec(&sent_request).unwrap();
+        let mock_driver =
+            MockNetworkingDriver::with_spy(200, body, |request| {
+                // Verify the body sent matches the expected one
+                let sent_request = TransactionSubmitRequest::new(
+                    NotarizedTransaction::sample(),
+                );
+                let sent_body = serde_json::to_vec(&sent_request).unwrap();
 
-            assert_eq!(request.body.bytes, sent_body);
-        });
+                assert_eq!(request.body.bytes, sent_body);
+            });
 
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
 
@@ -123,11 +124,13 @@ mod submit_transaction_tests {
                 .unwrap()
                 .unwrap();
 
-        let result = os.submit_transaction(notarized_transaction.clone())
+        let result = os
+            .submit_transaction(notarized_transaction.clone())
             .await
             .unwrap();
 
-        let expected_result = notarized_transaction.signed_intent().intent().intent_hash();
+        let expected_result =
+            notarized_transaction.signed_intent().intent().intent_hash();
 
         assert_eq!(result, expected_result);
     }
@@ -145,7 +148,8 @@ mod submit_transaction_tests {
                 .unwrap()
                 .unwrap();
 
-        let result = os.submit_transaction(notarized_transaction)
+        let result = os
+            .submit_transaction(notarized_transaction)
             .await
             .expect_err("Expected an error");
 
