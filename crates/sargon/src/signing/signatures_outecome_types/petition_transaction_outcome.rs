@@ -42,7 +42,9 @@ mod tests {
     type Sut = PetitionTransactionOutcome;
 
     #[test]
-    #[should_panic(expected = "Discprenacy! Mismatching intent hash found in a signature.")]
+    #[should_panic(
+        expected = "Discprenacy! Mismatching intent hash found in a signature."
+    )]
     fn panic() {
         Sut::new(
             true,

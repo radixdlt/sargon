@@ -14,7 +14,10 @@ pub struct SignedTransaction {
     pub(crate) signatures: IndexSet<HDSignature>,
 }
 impl SignedTransaction {
-    pub(crate) fn new(intent_hash: IntentHash, signatures: IndexSet<HDSignature>) -> Self {
+    pub(crate) fn new(
+        intent_hash: IntentHash,
+        signatures: IndexSet<HDSignature>,
+    ) -> Self {
         Self {
             intent_hash,
             signatures,
@@ -121,68 +124,44 @@ impl HasSampleValues for MaybeSignedTransactions {
         let tx_a = IntentHash::sample();
 
         let tx_a_sig_x = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(
-                tx_a.clone(),
-                HDPathComponent::from(0)
-            );
+            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(0));
 
         let tx_a_sig_y = FactorSourceIDFromHash::sample_at(1)
-            .sample_tx_hd_signature(
-                tx_a.clone(),
-                HDPathComponent::from(0)
-            );
+            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(0));
 
         let tx_b = IntentHash::sample_other();
         let tx_b_sig_x = FactorSourceIDFromHash::sample_at(3)
-            .sample_tx_hd_signature(
-                tx_b.clone(),
-                HDPathComponent::from(2)
-            );
+            .sample_tx_hd_signature(tx_b.clone(), HDPathComponent::from(2));
         let tx_b_sig_y = FactorSourceIDFromHash::sample_at(4)
-            .sample_tx_hd_signature(
-                tx_b.clone(),
-                HDPathComponent::from(3)
-            );
+            .sample_tx_hd_signature(tx_b.clone(), HDPathComponent::from(3));
 
         Self::new(
             [
                 (tx_a, IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y])),
                 (tx_b, IndexSet::from_iter([tx_b_sig_x, tx_b_sig_y])),
             ]
-                .into_iter()
-                .collect::<IndexMap<IntentHash, IndexSet<HDSignature>>>(),
+            .into_iter()
+            .collect::<IndexMap<IntentHash, IndexSet<HDSignature>>>(),
         )
     }
 
     fn sample_other() -> Self {
-        let tx_a = IntentHash::new(
-            Hash::sample_third(),
-            NetworkID::Mainnet
-        );
+        let tx_a = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
 
         let tx_a_sig_x = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(
-                tx_a.clone(),
-                HDPathComponent::from(10)
-            );
+            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(10));
         let tx_a_sig_y = FactorSourceIDFromHash::sample_at(1)
-            .sample_tx_hd_signature(
-                tx_a.clone(),
-                HDPathComponent::from(11)
-            );
+            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(11));
         let tx_a_sig_z = FactorSourceIDFromHash::sample_at(2)
-            .sample_tx_hd_signature(
-                tx_a.clone(),
-                HDPathComponent::from(12)
-            );
+            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(12));
 
         Self::new(
             [(
                 tx_a,
                 IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y, tx_a_sig_z]),
             )]
-                .into_iter()
-                .collect::<IndexMap<IntentHash, IndexSet<HDSignature>>>(),
+            .into_iter()
+            .collect::<IndexMap<IntentHash, IndexSet<HDSignature>>>(),
         )
     }
 }
@@ -212,31 +191,32 @@ mod tests {
         let mut sut = Sut::sample();
         let tx = IntentHash::sample();
         let signature = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(
-                tx.clone(),
-                HDPathComponent::from(0)
-            );
+            .sample_tx_hd_signature(tx.clone(), HDPathComponent::from(0));
 
         sut.add_signatures(tx, IndexSet::from_iter([signature]));
     }
 
     #[test]
-    #[should_panic(expected = "Discrepancy between intent hash and signature intent hash.")]
+    #[should_panic(
+        expected = "Discrepancy between intent hash and signature intent hash."
+    )]
     fn panics_when_intent_hash_key_does_not_match_signature() {
         let mut sut = Sut::sample();
         let tx = IntentHash::sample();
 
         let signature = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(
-                tx.clone(),
-                HDPathComponent::from(0)
-            );
+            .sample_tx_hd_signature(tx.clone(), HDPathComponent::from(0));
 
-        sut.add_signatures(IntentHash::sample_other(), IndexSet::from_iter([signature]));
+        sut.add_signatures(
+            IntentHash::sample_other(),
+            IndexSet::from_iter([signature]),
+        );
     }
 
     #[test]
-    #[should_panic(expected = "Discrepancy, the same signer has been used twice.")]
+    #[should_panic(
+        expected = "Discrepancy, the same signer has been used twice."
+    )]
     fn panics_when_same_signer_used_twice() {
         let mut sut = Sut::empty();
         let factor_instance = OwnedFactorInstance::sample();

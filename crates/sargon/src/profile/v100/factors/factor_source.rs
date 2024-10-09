@@ -165,6 +165,29 @@ impl FactorSource {
     }
 }
 
+impl PartialOrd for FactorSource {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for FactorSource {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.factor_source_kind().cmp(&other.factor_source_kind()) {
+            Ordering::Equal => {}
+            ord => return ord,
+        }
+
+        let self_last_used = self.common_properties().last_used_on;
+        let other_last_used = &other.common_properties().last_used_on;
+        match self_last_used.cmp(other_last_used) {
+            Ordering::Equal => {}
+            ord => return ord,
+        }
+
+        Ordering::Equal
+    }
+}
+
 impl<'de> Deserialize<'de> for FactorSource {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(

@@ -26,7 +26,9 @@ impl PetitionsStatus {
         matches!(self, Self::SomeIsInvalid)
     }
 
-    pub(crate) fn reducing(statuses: impl IntoIterator<Item = PetitionForFactorsStatus>) -> Self {
+    pub(crate) fn reducing(
+        statuses: impl IntoIterator<Item = PetitionForFactorsStatus>,
+    ) -> Self {
         PetitionForFactorsStatus::aggregate(
             statuses.into_iter().collect_vec(),
             Self::AllAreValid,
