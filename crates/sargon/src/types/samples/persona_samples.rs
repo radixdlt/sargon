@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl Persona {
-    fn sample_unsecurified_mainnet(
+    pub(crate) fn sample_unsecurified_mainnet(
         name: impl AsRef<str>,
         genesis_factor_instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
@@ -23,7 +23,7 @@ impl Persona {
         }
     }
 
-    fn sample_securified_mainnet(
+    pub(crate) fn sample_securified_mainnet(
         name: impl AsRef<str>,
         address: IdentityAddress,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
