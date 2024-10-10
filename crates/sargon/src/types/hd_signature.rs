@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use aes_gcm::aead::Payload;
 
 /// A signature of `intent_hash` by `entity` using `factor_source_id` and `derivation_path`, with `public_key` used for verification.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
@@ -49,74 +48,36 @@ impl HDSignature {
     }
 }
 
-fn sample(
-    payload: IntentHash,
-    kind: FactorSourceKind,
-    mnemonic_with_passphrase: MnemonicWithPassphrase,
-    index: HDPathComponent,
-) -> HDSignature {
-    let account_path = AccountPath::new(
-        NetworkID::Mainnet,
-        CAP26KeyKind::TransactionSigning,
-        index.index(),
-    );
-
-    let factor_source_id =
-        FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-            kind,
-            &mnemonic_with_passphrase,
-        );
-
-    let seed = mnemonic_with_passphrase.to_seed();
-    let hd_private_key = seed.derive_private_key(&account_path);
-
-    let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
-        factor_source_id,
-        hd_private_key.public_key(),
-    );
-
-    let factor_instance: HDFactorInstanceTransactionSigning<AccountPath> =
-        HDFactorInstanceTransactionSigning::new(hd_factor_instance.clone())
-            .unwrap();
-
-    let account_address =
-        AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-            factor_instance.clone(),
-        );
-
-    let signature_with_pub_key = mnemonic_with_passphrase.sign(
-        &payload.hash,
-        &hd_factor_instance.public_key.derivation_path,
-    );
-
-    let hd_input = HDSignatureInput::new(
-        payload,
-        OwnedFactorInstance::new(
-            AddressOfAccountOrPersona::Account(account_address),
-            hd_factor_instance,
-        ),
-    );
-
-    HDSignature::with_details(hd_input, signature_with_pub_key.signature())
-}
-
 impl HasSampleValues for HDSignature {
     fn sample() -> Self {
-        sample(
-            IntentHash::sample(),
-            FactorSourceKind::Device,
-            MnemonicWithPassphrase::sample_device(),
-            HDPathComponent::from(0),
-        )
+        Self::sample_from_input(HDSignatureInput::sample())
     }
 
     fn sample_other() -> Self {
-        sample(
-            IntentHash::sample_other(),
-            FactorSourceKind::Device,
-            MnemonicWithPassphrase::sample_device(),
-            HDPathComponent::from(0),
-        )
+        Self::sample_from_input(HDSignatureInput::sample_other())
+    }
+}
+
+impl HDSignature {
+    // Signs with predefined mnemonics associated to the input's factor source id
+    pub(crate) fn sample_from_input(input: HDSignatureInput) -> Self {
+        let id = input.owned_factor_instance.factor_source_id();
+
+        let mnemonic_with_passphrase = id.sample_associated_mnemonic();
+
+        let signature = mnemonic_with_passphrase.sign(
+            &input.intent_hash.hash,
+            &input.owned_factor_instance.value.public_key.derivation_path,
+        );
+
+        HDSignature::with_details(input, signature.signature())
+    }
+}
+
+#[cfg(test)]
+impl HDSignature {
+    pub fn produced_signing_with_input(input: HDSignatureInput) -> Self {
+        Self::sample_from_input(input)
     }
 }
 

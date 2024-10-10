@@ -149,20 +149,23 @@ mod tests {
 
         let intent_hash = IntentHash::sample();
 
-        let id = FactorSourceIDFromHash::sample_at(0);
-
-        let hd_signature =
-            id.sample_tx_hd_signature(intent_hash, HDPathComponent::from(0));
-
-        sut.add_signature(&hd_signature);
-
-        sut.test_neglect(
-            &id.sample_tx_factor_instance(
+        let factor_instance =
+            HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                 HDPathComponent::from(0),
-                CAP26EntityKind::Account,
+                FactorSourceIDFromHash::sample_at(0),
+            );
+        let sign_input = HDSignatureInput::new(
+            intent_hash,
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                factor_instance.clone(),
             ),
-            false,
         );
+        let signature = HDSignature::produced_signing_with_input(sign_input);
+
+        sut.add_signature(&signature);
+
+        sut.test_neglect(&factor_instance, false);
     }
 
     #[test]
@@ -170,20 +173,25 @@ mod tests {
     fn signing_already_skipped_panics() {
         let sut = Sut::new();
 
-        let id = FactorSourceIDFromHash::sample_at(0);
-
-        sut.test_neglect(
-            &id.sample_tx_factor_instance(
+        let intent_hash = IntentHash::sample();
+        let factor_instance =
+            HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                 HDPathComponent::from(0),
-                CAP26EntityKind::Account,
+                FactorSourceIDFromHash::sample_at(0),
+            );
+
+        sut.test_neglect(&factor_instance, false);
+
+        let sign_input = HDSignatureInput::new(
+            intent_hash,
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                factor_instance.clone(),
             ),
-            false,
         );
 
-        let intent_hash = IntentHash::sample();
-        let hd_signature =
-            id.sample_tx_hd_signature(intent_hash, HDPathComponent::from(0));
+        let signature = HDSignature::produced_signing_with_input(sign_input);
 
-        sut.add_signature(&hd_signature);
+        sut.add_signature(&signature);
     }
 }

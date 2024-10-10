@@ -605,8 +605,17 @@ mod tests {
             RoleKind::Primary,
         );
 
-        let signature = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(intent_hash, HDPathComponent::from(0));
+        let sign_input = HDSignatureInput::new(
+            intent_hash,
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::Account(entity.address),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(0),
+                    FactorSourceIDFromHash::sample_at(0),
+                ),
+            ),
+        );
+        let signature = HDSignature::produced_signing_with_input(sign_input);
 
         sut.add_signature(signature.clone());
         sut.add_signature(signature.clone());
@@ -615,11 +624,18 @@ mod tests {
     #[test]
     fn invalid_transactions_if_neglected_success() {
         let sut = Sut::sample();
-        let signature = FactorSourceIDFromHash::sample_at(1)
-            .sample_tx_hd_signature(
+        let signature = HDSignature::produced_signing_with_input(
+            HDSignatureInput::new(
                 sut.intent_hash.clone(),
-                HDPathComponent::from(6),
-            );
+                OwnedFactorInstance::new(
+                    sut.entity.clone(),
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                        HDPathComponent::from(6),
+                        FactorSourceIDFromHash::sample_at(1),
+                    ),
+                ),
+            )
+        );
         sut.add_signature(signature);
         let can_skip = |f: FactorSourceIDFromHash| {
             assert!(sut
