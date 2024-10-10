@@ -123,17 +123,53 @@ impl HasSampleValues for MaybeSignedTransactions {
     fn sample() -> Self {
         let tx_a = IntentHash::sample();
 
-        let tx_a_sig_x = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(0));
-
-        let tx_a_sig_y = FactorSourceIDFromHash::sample_at(1)
-            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(0));
+        let tx_a_input_x = HDSignatureInput::new(
+            tx_a.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(0),
+                    FactorSourceIDFromHash::sample(),
+                ),
+            ),
+        );
+        let tx_a_input_y = HDSignatureInput::new(
+            tx_a.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(1),
+                    FactorSourceIDFromHash::sample_other(),
+                ),
+            ),
+        );
+        let tx_a_sig_x = HDSignature::sample_from_input(tx_a_input_x);
+        let tx_a_sig_y = HDSignature::sample_from_input(tx_a_input_y);
 
         let tx_b = IntentHash::sample_other();
-        let tx_b_sig_x = FactorSourceIDFromHash::sample_at(3)
-            .sample_tx_hd_signature(tx_b.clone(), HDPathComponent::from(2));
-        let tx_b_sig_y = FactorSourceIDFromHash::sample_at(4)
-            .sample_tx_hd_signature(tx_b.clone(), HDPathComponent::from(3));
+        let tx_b_input_x = HDSignatureInput::new(
+            tx_b.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(2),
+                    FactorSourceIDFromHash::sample_at(3),
+                ),
+            ),
+        );
+        let tx_b_input_y = HDSignatureInput::new(
+            tx_b.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(3),
+                    FactorSourceIDFromHash::sample_at(4),
+                ),
+            ),
+        );
+
+        let tx_b_sig_x = HDSignature::sample_from_input(tx_b_input_x);
+        let tx_b_sig_y = HDSignature::sample_from_input(tx_b_input_y);
 
         Self::new(
             [
@@ -148,12 +184,39 @@ impl HasSampleValues for MaybeSignedTransactions {
     fn sample_other() -> Self {
         let tx_a = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
 
-        let tx_a_sig_x = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(10));
-        let tx_a_sig_y = FactorSourceIDFromHash::sample_at(1)
-            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(11));
-        let tx_a_sig_z = FactorSourceIDFromHash::sample_at(2)
-            .sample_tx_hd_signature(tx_a.clone(), HDPathComponent::from(12));
+        let tx_a_input_x = HDSignatureInput::new(
+            tx_a.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(10),
+                    FactorSourceIDFromHash::sample(),
+                ),
+            ),
+        );
+        let tx_a_input_y = HDSignatureInput::new(
+            tx_a.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(11),
+                    FactorSourceIDFromHash::sample_other(),
+                ),
+            ),
+        );
+        let tx_a_input_z = HDSignatureInput::new(
+            tx_a.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(12),
+                    FactorSourceIDFromHash::sample_at(3),
+                ),
+            ),
+        );
+        let tx_a_sig_x = HDSignature::sample_from_input(tx_a_input_x);
+        let tx_a_sig_y = HDSignature::sample_from_input(tx_a_input_y);
+        let tx_a_sig_z = HDSignature::sample_from_input(tx_a_input_z);
 
         Self::new(
             [(
@@ -190,8 +253,17 @@ mod tests {
     fn panics_when_adding_same_signature() {
         let mut sut = Sut::sample();
         let tx = IntentHash::sample();
-        let signature = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(tx.clone(), HDPathComponent::from(0));
+        let input = HDSignatureInput::new(
+            tx.clone(),
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(0),
+                    FactorSourceIDFromHash::sample(),
+                ),
+            ),
+        );
+        let signature = HDSignature::produced_signing_with_input(input);
 
         sut.add_signatures(tx, IndexSet::from_iter([signature]));
     }
@@ -204,8 +276,17 @@ mod tests {
         let mut sut = Sut::sample();
         let tx = IntentHash::sample();
 
-        let signature = FactorSourceIDFromHash::sample_at(0)
-            .sample_tx_hd_signature(tx.clone(), HDPathComponent::from(0));
+        let input = HDSignatureInput::new(
+            tx,
+            OwnedFactorInstance::new(
+                AddressOfAccountOrPersona::sample(),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                    HDPathComponent::from(0),
+                    FactorSourceIDFromHash::sample(),
+                ),
+            ),
+        );
+        let signature = HDSignature::produced_signing_with_input(input);
 
         sut.add_signatures(
             IntentHash::sample_other(),

@@ -15,7 +15,28 @@ impl HierarchicalDeterministicFactorInstance {
         index: HDPathComponent,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Self {
-        factor_source_id.sample_tx_factor_instance(index, entity_kind)
+        let derivation_path: DerivationPath = match entity_kind {
+            CAP26EntityKind::Account => AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                index.index(),
+            )
+            .into(),
+            CAP26EntityKind::Identity => IdentityPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                index.index(),
+            )
+            .into(),
+        };
+
+        let seed = factor_source_id.sample_associated_mnemonic().to_seed();
+        let hd_private_key = seed.derive_private_key(&derivation_path);
+
+        HierarchicalDeterministicFactorInstance::new(
+            factor_source_id,
+            hd_private_key.public_key(),
+        )
     }
 
     pub fn sample_mainnet_tx_account(
