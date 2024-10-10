@@ -36,9 +36,13 @@ fn default_fee() -> Decimal192 {
 /// on it, thus creating just a single instruction.
 fn single<F>(by: F) -> ScryptoInstruction
 where
-    F: Fn(ScryptoManifestBuilder) -> ScryptoManifestBuilder,
+    F: Fn(
+        ScryptoTransactionManifestBuilder,
+    ) -> ScryptoTransactionManifestBuilder,
 {
-    let instruction = by(ScryptoManifestBuilder::new()).build().instructions;
+    let instruction = by(ScryptoTransactionManifestBuilder::new())
+        .build()
+        .instructions;
 
     // This might be a silly assertion since it seems that ScryptoManifestBuilder
     // in fact always adds just a single instruction

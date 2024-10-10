@@ -131,7 +131,7 @@ impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
 
 impl TransactionManifest {
     pub fn sargon_built(
-        builder: ScryptoManifestBuilder,
+        builder: ScryptoTransactionManifestBuilder,
         network_id: NetworkID,
     ) -> Self {
         let scrypto_manifest = builder.build();

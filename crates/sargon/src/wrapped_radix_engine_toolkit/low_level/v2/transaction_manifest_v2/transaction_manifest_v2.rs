@@ -9,6 +9,39 @@ pub struct TransactionManifestV2 {
 }
 
 impl TransactionManifestV2 {
+    pub fn new(
+        instructions_string: impl AsRef<str>,
+        network_id: NetworkID,
+        blobs: Blobs,
+        children: ChildIntents,
+    ) -> Result<Self> {
+        InstructionsV2::new(instructions_string, network_id).map(
+            |instructions| Self {
+                secret_magic: TransactionManifestSecretMagicV2 {
+                    instructions,
+                    blobs,
+                    children,
+                },
+            },
+        )
+    }
+
+    pub fn with_instructions_and_blobs_and_children(
+        instructions: InstructionsV2,
+        blobs: Blobs,
+        children: ChildIntents,
+    ) -> Self {
+        Self {
+            secret_magic: TransactionManifestSecretMagicV2::new(
+                instructions,
+                blobs,
+                children,
+            ),
+        }
+    }
+}
+
+impl TransactionManifestV2 {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             secret_magic: TransactionManifestSecretMagicV2 {
@@ -96,7 +129,7 @@ pub fn manifest_v2_string_from(
 
 impl TransactionManifestV2 {
     pub fn sargon_built(
-        builder: ScryptoManifestV2Builder,
+        builder: ScryptoTransactionManifestV2Builder,
         network_id: NetworkID,
     ) -> Self {
         let scrypto_manifest = builder.build();
@@ -113,6 +146,10 @@ impl TransactionManifestV2 {
 
     pub(crate) fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
+    }
+
+    pub(crate) fn children(&self) -> &ChildIntents {
+        &self.secret_magic.children
     }
 
     pub fn manifest_string(&self) -> String {

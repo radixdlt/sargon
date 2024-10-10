@@ -90,6 +90,7 @@ impl InstructionsV2 {
             secret_magic: InstructionsSecretMagicV2::sample(),
             network_id: NetworkID::Mainnet,
         })
+        // scrypto_compile_manifest()
         // scrypto_compile(
         //     instructions_string.as_ref(),
         //     &network_definition,

@@ -11,6 +11,14 @@ impl From<ChildIntents> for Vec<ScryptoChildSubintent> {
     }
 }
 
+impl From<ChildIntents> for ScryptoChildIntents {
+    fn from(value: ChildIntents) -> Self {
+        ScryptoChildIntents {
+            children: value.into(),
+        }
+    }
+}
+
 impl From<(Vec<ScryptoChildSubintent>, NetworkID)> for ChildIntents {
     fn from(value: (Vec<ScryptoChildSubintent>, NetworkID)) -> Self {
         Self {

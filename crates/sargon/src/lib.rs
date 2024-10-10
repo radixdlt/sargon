@@ -66,7 +66,6 @@ pub mod prelude {
         transaction::{
             FeeLocks as ScryptoFeeLocks,
             TransactionReceiptV1 as ScryptoTransactionReceipt,
-            VersionedTransactionReceipt as ScryptoVersionedTransactionReceipt,
         },
     };
     pub(crate) use radix_engine_toolkit_common::receipt::RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt;
@@ -109,7 +108,7 @@ pub mod prelude {
         network::NetworkDefinition as ScryptoNetworkDefinition,
         prelude::{
             recover_secp256k1 as Scrypto_recover_secp256k1,
-            FromPublicKey as ScryptoFromPublicKey,
+            FromPublicKey as ScryptoFromPublicKey, Instant as ScryptoInstant,
             ManifestAddress as ScryptoManifestAddress,
             ManifestAddressReservation as ScryptoManifestAddressReservation,
             ManifestBucket as ScryptoManifestBucket,
@@ -166,8 +165,8 @@ pub mod prelude {
         },
         manifest::{
             compile as scrypto_compile,
+            compile_manifest as scrypto_compile_manifest,
             decompile as scrypto_decompile,
-            // compile_manifest as scrypto_compile_manifest,
             generator::{GeneratorError, GeneratorErrorKind},
             lexer::{LexerError, LexerErrorKind},
             token::{Position, Span},
@@ -189,11 +188,11 @@ pub mod prelude {
             InstructionsV2 as ScryptoInstructionsV2,
             IntentCoreV2 as ScryptoIntentCoreV2,
             IntentHash as ScryptoIntentHash,
+            IntentHeaderV2 as ScryptoIntentHeaderV2,
             IntentSignatureV1 as ScryptoIntentSignature,
             IntentSignaturesV1 as ScryptoIntentSignatures,
             IntentV1 as ScryptoIntent,
             IsTransactionHashWithStaticHrp as ScryptoIsTransactionHashWithStaticHrp,
-            ManifestIntent as ScryptoManifestIntent,
             MessageContentsV1 as ScryptoMessageContents,
             MessageV1 as ScryptoMessage, MessageV2 as ScryptoMessageV2,
             NotarizedTransactionV1 as ScryptoNotarizedTransaction,
@@ -204,16 +203,17 @@ pub mod prelude {
             SignedIntentV1 as ScryptoSignedIntent,
             SignedTransactionIntentHash as ScryptoSignedTransactionIntentHash,
             SubintentHash as ScryptoSubintentHash,
+            SubintentV2 as ScryptoSubintent,
             TransactionHashBech32Decoder as ScryptoTransactionHashBech32Decoder,
             TransactionHashBech32Encoder as ScryptoTransactionHashBech32Encoder,
             TransactionHeaderV1 as ScryptoTransactionHeader,
             TransactionIntentHash as ScryptoTransactionIntentHash,
         },
         prelude::{
-            ManifestV1Builder as ScryptoManifestBuilder,
-            ManifestV2Builder as ScryptoManifestV2Builder,
             TransactionManifestV1 as ScryptoTransactionManifest,
+            TransactionManifestV1Builder as ScryptoTransactionManifestBuilder,
             TransactionManifestV2 as ScryptoTransactionManifestV2,
+            TransactionManifestV2Builder as ScryptoTransactionManifestV2Builder,
         },
     };
 
@@ -243,7 +243,7 @@ pub mod prelude {
                     to_payload_bytes as RET_to_payload_bytes_instructions_v2,
                 },
                 intent_core::{
-                    hash as ret_hash_intent_v2,
+                    hash as ret_hash_intent_core_v2,
                     to_payload_bytes as RET_intent_to_payload_bytes_v2,
                 },
                 manifest::statically_analyze as RET_statically_analyze_v2,
