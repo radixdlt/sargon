@@ -210,10 +210,10 @@ impl HasSampleValues for PetitionForTransaction {
         Self::new(
             intent_hash.clone(),
             HashMap::just((
-                AddressOfAccountOrPersona::Account(entity.address),
+                AddressOfAccountOrPersona::from(entity.address),
                 PetitionForEntity::new(
                     intent_hash.clone(),
-                    AddressOfAccountOrPersona::Account(entity.address),
+                    AddressOfAccountOrPersona::from(entity.address),
                     PetitionForFactors::sample(),
                     PetitionForFactors::sample_other(),
                 ),
@@ -278,7 +278,7 @@ mod tests {
         };
         let petition = PetitionForEntity::new_securified(
             intent_hash.clone(),
-            AddressOfAccountOrPersona::Account(account.address),
+            AddressOfAccountOrPersona::from(account.address),
             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                 (matrix, RoleKind::Primary),
             )
@@ -288,7 +288,7 @@ mod tests {
         let sut = Sut::new(
             IntentHash::sample(),
             HashMap::just((
-                AddressOfAccountOrPersona::Account(account.address),
+                AddressOfAccountOrPersona::from(account.address),
                 petition,
             )),
         );
@@ -320,7 +320,7 @@ mod tests {
         };
         let petition = PetitionForEntity::new_securified(
             intent_hash.clone(),
-            AddressOfAccountOrPersona::Account(account.address),
+            AddressOfAccountOrPersona::from(account.address),
             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                 (matrix, RoleKind::Primary),
             )
@@ -330,7 +330,7 @@ mod tests {
         let sut = Sut::new(
             IntentHash::sample(),
             HashMap::just((
-                AddressOfAccountOrPersona::Account(account.address),
+                AddressOfAccountOrPersona::from(account.address),
                 petition,
             )),
         );

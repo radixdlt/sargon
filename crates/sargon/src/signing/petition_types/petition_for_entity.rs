@@ -409,8 +409,7 @@ mod tests {
 
         let matrix =
             GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]);
-        let entity =
-            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
         let invalid =
@@ -437,8 +436,7 @@ mod tests {
             GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                 [d0.clone(), d1.clone()]
             );
-        let entity =
-            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
@@ -463,8 +461,7 @@ mod tests {
             2,
         );
 
-        let entity =
-            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
         let invalid =
@@ -491,8 +488,7 @@ mod tests {
             2,
         );
 
-        let entity =
-            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
 
@@ -521,8 +517,7 @@ mod tests {
             1,
         );
 
-        let entity =
-            AddressOfAccountOrPersona::Account(AccountAddress::sample());
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
         let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
 
@@ -608,7 +603,7 @@ mod tests {
         let sign_input = HDSignatureInput::new(
             intent_hash,
             OwnedFactorInstance::new(
-                AddressOfAccountOrPersona::Account(entity.address),
+                AddressOfAccountOrPersona::from(entity.address),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                     HDPathComponent::from(0),
                     FactorSourceIDFromHash::sample_at(0),
