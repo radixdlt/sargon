@@ -31,7 +31,7 @@ impl SargonOS {
     pub async fn poll_transaction_status(
         &self,
         intent_hash: IntentHash,
-    ) -> Result<TransactionReceiptStatus> {
+    ) -> Result<TransactionStatus> {
         let (status, _) = self
             .poll_transaction_status_with_delays(intent_hash)
             .await?;
@@ -50,7 +50,7 @@ impl SargonOS {
     async fn poll_transaction_status_with_delays(
         &self,
         intent_hash: IntentHash,
-    ) -> Result<(TransactionReceiptStatus, Vec<u64>)> {
+    ) -> Result<(TransactionStatus, Vec<u64>)> {
         let network_id = self.current_network_id()?;
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -91,16 +91,16 @@ impl SargonOS {
                             async_std::task::sleep(sleep_duration).await;
                         }
                         TransactionStatusResponsePayloadStatus::CommittedSuccess => {
-                            return Ok((TransactionReceiptStatus::Success, delays));
+                            return Ok((TransactionStatus::Success, delays));
                         }
                         TransactionStatusResponsePayloadStatus::CommittedFailure => {
-                            return Ok((TransactionReceiptStatus::Failed { reason: TransactionStatusReason::from_raw_error(response.error_message) }, delays));
+                            return Ok((TransactionStatus::Failed { reason: TransactionStatusReason::from_raw_error(response.error_message) }, delays));
                         }
                         TransactionStatusResponsePayloadStatus::PermanentlyRejected => {
-                            return Ok((TransactionReceiptStatus::PermanentlyRejected { reason: TransactionStatusReason::from_raw_error(response.error_message) }, delays));
+                            return Ok((TransactionStatus::PermanentlyRejected { reason: TransactionStatusReason::from_raw_error(response.error_message) }, delays));
                         }
                         TransactionStatusResponsePayloadStatus::TemporarilyRejected => {
-                            return Ok((TransactionReceiptStatus::TemporarilyRejected { current_epoch: Epoch::from(response.ledger_state.epoch) }, delays));
+                            return Ok((TransactionStatus::TemporarilyRejected { current_epoch: Epoch::from(response.ledger_state.epoch) }, delays));
                         }
                     }
                 }
@@ -196,7 +196,7 @@ mod poll_status_tests {
             simulate_poll_status(vec![sample_committed_success()]).await;
 
         // Result should be `Success`
-        assert_eq!(result.0, TransactionReceiptStatus::Success);
+        assert_eq!(result.0, TransactionStatus::Success);
         // and there shouldn't be any delays
         assert!(result.1.is_empty());
     }
@@ -215,7 +215,7 @@ mod poll_status_tests {
         // Result should be `Failed`
         assert_eq!(
             result.0,
-            TransactionReceiptStatus::Failed {
+            TransactionStatus::Failed {
                 reason: TransactionStatusReason::Unknown
             }
         );
@@ -236,7 +236,7 @@ mod poll_status_tests {
         // Result should be `PermanentlyRejected`
         assert_eq!(
             result.0,
-            TransactionReceiptStatus::PermanentlyRejected {
+            TransactionStatus::PermanentlyRejected {
                 reason: TransactionStatusReason::WorktopError
             }
         );
@@ -259,7 +259,7 @@ mod poll_status_tests {
         // Result should be `TemporarilyRejected`
         assert_eq!(
             result.0,
-            TransactionReceiptStatus::TemporarilyRejected { current_epoch }
+            TransactionStatus::TemporarilyRejected { current_epoch }
         );
         // and there should have been a delay of 2s after first call
         assert_eq!(result.1, vec![2]);
@@ -290,7 +290,7 @@ mod poll_status_tests {
     // and then call `poll_transaction_status` to get the result.
     async fn simulate_poll_status(
         responses: Vec<TransactionStatusResponse>,
-    ) -> (TransactionReceiptStatus, Vec<u64>) {
+    ) -> (TransactionStatus, Vec<u64>) {
         let mock_driver = MockNetworkingDriver::with_responses(responses);
 
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));

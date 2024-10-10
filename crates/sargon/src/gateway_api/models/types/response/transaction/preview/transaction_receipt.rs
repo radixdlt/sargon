@@ -12,6 +12,6 @@ use crate::prelude::*;
 )]
 #[display("{status}")]
 pub struct TransactionReceipt {
-    pub status: TransactionStatus,
+    pub status: TransactionReceiptStatus,
     pub error_message: Option<String>,
 }

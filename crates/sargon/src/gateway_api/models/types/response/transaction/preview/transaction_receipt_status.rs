@@ -10,7 +10,7 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Enum,
 )]
-pub enum TransactionStatus {
+pub enum TransactionReceiptStatus {
     Succeeded,
     Failed,
     Rejected,

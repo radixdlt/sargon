@@ -21,7 +21,7 @@ impl SargonOS {
             nonce,
             notary_public_key,
         )
-            .await
+        .await
     }
 }
 

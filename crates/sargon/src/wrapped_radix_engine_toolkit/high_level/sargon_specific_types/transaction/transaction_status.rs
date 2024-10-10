@@ -43,7 +43,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = TransactionStatus;
+    type SUT = TransactionReceiptStatus;
 
     #[test]
     fn equality() {

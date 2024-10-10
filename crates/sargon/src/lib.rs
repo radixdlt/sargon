@@ -11,7 +11,6 @@ mod home_cards;
 mod profile;
 mod radix_connect;
 mod system;
-mod transaction;
 mod types;
 mod wrapped_radix_engine_toolkit;
 
@@ -24,7 +23,6 @@ pub mod prelude {
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::system::*;
-    pub use crate::transaction::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use radix_rust::prelude::{
