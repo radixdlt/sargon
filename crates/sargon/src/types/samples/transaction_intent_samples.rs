@@ -1,7 +1,17 @@
 use crate::prelude::*;
 use radix_engine_toolkit::models::canonical_address_types::NetworkId;
+use reqwest::Identity;
 
 impl TransactionIntent {
+    pub(crate) fn entities_requiring_auth<'a, 'p>(
+        accounts_requiring_auth: impl IntoIterator<Item = &'a Account>,
+        personas_requiring_auth: impl IntoIterator<Item = &'p Persona>,
+    ) -> TransactionIntent {
+        Self::new_requiring_auth(
+            accounts_requiring_auth.into_iter().map(|a| a.address),
+            personas_requiring_auth.into_iter().map(|p| p.address),
+        )
+    }
     pub(crate) fn new_requiring_auth(
         account_addresses_requiring_auth: impl IntoIterator<Item = AccountAddress>,
         identity_addresses_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
@@ -10,7 +20,7 @@ impl TransactionIntent {
 
         let all_addresses = account_addresses_requiring_auth
             .into_iter()
-            .map(|addresses| AddressOfAccountOrPersona::Account(addresses))
+            .map(|addresses| AddressOfAccountOrPersona::from(addresses))
             .chain(identity_addresses_requiring_auth.into_iter().map(
                 |addresses| AddressOfAccountOrPersona::Identity(addresses),
             ))

@@ -143,11 +143,13 @@ impl FactorSourceIDFromHash {
     }
 
     pub fn sample_off_device() -> Self {
-        Self::new_for_arculus(&MnemonicWithPassphrase::sample_off_device())
+        Self::new_for_off_device(&MnemonicWithPassphrase::sample_off_device())
     }
 
     pub fn sample_off_device_other() -> Self {
-        Self::new_for_arculus(&MnemonicWithPassphrase::sample_off_device_other())
+        Self::new_for_off_device(
+            &MnemonicWithPassphrase::sample_off_device_other(),
+        )
     }
 
     pub fn sample_security_questions() -> Self {
