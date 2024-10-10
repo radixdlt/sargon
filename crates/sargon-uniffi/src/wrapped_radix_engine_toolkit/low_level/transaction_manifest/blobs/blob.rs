@@ -7,9 +7,8 @@ use sargon::BagOfBytes as InternalBagOfBytes;
     Clone,
     PartialEq,
     Eq,
+    InternalConersion,
      uniffi::Record,
-    
-    
 )]
 pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,

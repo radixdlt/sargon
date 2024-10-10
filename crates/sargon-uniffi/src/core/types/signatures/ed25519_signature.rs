@@ -10,6 +10,7 @@ json_string_convertible!(Ed25519Signature);
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Ed25519Signature {
@@ -19,7 +20,7 @@ pub struct Ed25519Signature {
 impl From<InternalEd25519Signature> for Ed25519Signature {
     fn from(value: InternalEd25519Signature) -> Self {
         Self {
-            bytes: value.bytes,
+            bytes: value.bytes.into(),
         }
     }
 }
@@ -27,7 +28,7 @@ impl From<InternalEd25519Signature> for Ed25519Signature {
 impl Into<InternalEd25519Signature> for Ed25519Signature {
     fn into(self) -> InternalEd25519Signature {
         InternalEd25519Signature {
-            bytes: self.bytes,
+            bytes: self.bytes.into(),
         }
     }
 }

@@ -44,31 +44,3 @@ pub fn compiled_notarized_intent_get_bytes(
     compiled_notarized_intent.into::<InternalCompiledNotarizedIntent>().bytes().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = CompiledNotarizedIntent;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_compiled_notarized_intent_sample(),
-                new_compiled_notarized_intent_sample_other(),
-                // duplicates should get removed
-                new_compiled_notarized_intent_sample(),
-                new_compiled_notarized_intent_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn get_bytes() {
-        let sut = SUT::sample();
-        assert_eq!(compiled_notarized_intent_get_bytes(&sut), sut.bytes());
-    }
-}

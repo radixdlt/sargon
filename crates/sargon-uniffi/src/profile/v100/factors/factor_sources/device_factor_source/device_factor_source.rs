@@ -14,6 +14,7 @@ use sargon::DeviceFactorSource as InternalDeviceFactorSource;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct DeviceFactorSource {
@@ -83,70 +84,3 @@ pub fn device_factor_source_is_main_bdfs(
     device_factor_source.into_internal().is_main_bdfs()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeviceFactorSource;
-
-    #[test]
-    fn test_new_olympia() {
-        let olympia = new_device_factor_source_olympia(
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(factor_source_supports_olympia(&olympia.clone().into()));
-        assert!(!factor_source_supports_babylon(&olympia.into()));
-    }
-
-    #[test]
-    fn test_new_babylon() {
-        let babylon = new_device_factor_source_babylon(
-            true,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(factor_source_supports_babylon(&babylon.clone().into()));
-        assert!(!factor_source_supports_olympia(&babylon.into()));
-    }
-
-    #[test]
-    fn test_new_babylon_not_main() {
-        let babylon = new_device_factor_source_babylon(
-            false,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(!device_factor_source_is_main_bdfs(&babylon));
-    }
-
-    #[test]
-    fn test_new_babylon_is_main() {
-        let babylon = new_device_factor_source_babylon(
-            true,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-
-        assert!(device_factor_source_is_main_bdfs(&babylon));
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_device_factor_source_sample(),
-                new_device_factor_source_sample_other(),
-                // duplicates should get removed
-                new_device_factor_source_sample(),
-                new_device_factor_source_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

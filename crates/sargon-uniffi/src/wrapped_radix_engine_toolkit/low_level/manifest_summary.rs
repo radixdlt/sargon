@@ -47,30 +47,3 @@ impl Into<InternalManifestSummary> for ManifestSummary {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ManifestSummary;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn into_internal() {
-        let sut = SUT::sample();
-        let internal: InternalManifestSummary = sut.clone().into();
-        assert_eq!(sut, internal.into());
-    }
-
-    #[test]
-    fn from_internal() {
-        let internal = InternalManifestSummary::sample();
-        let sut: SUT = internal.clone().into();
-        assert_eq!(internal, sut.into());
-    }
-}

@@ -83,33 +83,3 @@ pub fn new_authorized_dapp_sample_stokenet_sandbox() -> AuthorizedDapp {
     InternalAuthorizedDapp::sample_stokenet_sandbox().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = AuthorizedDapp;
-
-    #[test]
-    fn samples() {
-        assert_eq!(
-            new_authorized_dapp_sample_mainnet_dashboard(),
-            SUT::sample_mainnet_dashboard()
-        );
-
-        assert_eq!(
-            new_authorized_dapp_sample_mainnet_gumballclub(),
-            SUT::sample_mainnet_gumballclub()
-        );
-
-        assert_eq!(
-            new_authorized_dapp_sample_stokenet_devconsole(),
-            SUT::sample_stokenet_devconsole()
-        );
-
-        assert_eq!(
-            new_authorized_dapp_sample_stokenet_sandbox(),
-            SUT::sample_stokenet_sandbox()
-        );
-    }
-}

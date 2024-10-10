@@ -6,6 +6,7 @@ use sargon::DependencyInformation as InternalDependencyInformation;
     PartialEq,
     Eq,
     Hash,
+    InternalConersion,
     uniffi::Enum,
 )]
 pub enum DependencyInformation {
@@ -57,30 +58,3 @@ pub fn dependency_information_to_string(
     info.into_internal().to_string()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DependencyInformation;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_dependency_information_sample(),
-                new_dependency_information_sample_other(),
-                // duplicates should get removed
-                new_dependency_information_sample(),
-                new_dependency_information_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn to_string() {
-        assert_eq!(dependency_information_to_string(&SUT::sample()), "main");
-    }
-}

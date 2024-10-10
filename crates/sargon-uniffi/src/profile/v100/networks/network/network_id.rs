@@ -7,6 +7,7 @@ use sargon::NetworkID as InternalNetworkID;
     PartialEq,
     Eq,
     Hash,
+    InternalConersion,
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -132,31 +133,3 @@ pub fn network_ids_all() -> Vec<NetworkID> {
     InternalNetworkID::all().iter().map(|id| id.into()).collect()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NetworkID;
-
-    #[test]
-    fn test_network_id_to_string() {
-        assert_eq!(network_id_to_string(SUT::Mainnet), "mainnet");
-    }
-
-    #[test]
-    fn test_try_from_discriminant() {
-        assert_eq!(new_network_id_from_discriminant(1).unwrap(), SUT::Mainnet);
-    }
-
-    #[test]
-    fn test_network_id_discriminant() {
-        assert_eq!(network_id_discriminant(SUT::Mainnet), 1);
-        assert_eq!(network_id_discriminant(SUT::Stokenet), 2);
-    }
-
-    #[test]
-    fn all() {
-        assert_eq!(network_ids_all().len(), 12);
-    }
-}

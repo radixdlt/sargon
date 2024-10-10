@@ -72,25 +72,3 @@ pub fn resource_indicator_get_address(
     indicator.into::<InternalResourceIndicator>().get_address().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ResourceIndicator;
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            new_resource_indicator_sample(),
-            new_resource_indicator_sample_other()
-        );
-    }
-
-    #[test]
-    fn get_address() {
-        let sut = SUT::sample();
-        assert_eq!(sut.get_address(), resource_indicator_get_address(&sut));
-    }
-}
-

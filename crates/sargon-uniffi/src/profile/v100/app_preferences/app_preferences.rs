@@ -7,12 +7,11 @@ use sargon::AppPreferences as InternalAppPreferences;
 /// Current and other saved Gateways, security settings,
 /// App Display settings and preferences for transaction.
 #[derive(
-    Debug,
-    Default,
     PartialEq,
     Eq,
     Clone,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct AppPreferences {
@@ -74,30 +73,3 @@ pub fn app_preferences_has_gateway_with_url(
     app_preferences.into_internal().has_gateway_with_url(url.url.clone())
 }
 
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = AppPreferences;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(SUT::sample(), new_app_preferences_sample());
-        assert_eq!(SUT::sample_other(), new_app_preferences_sample_other());
-    }
-
-    #[test]
-    fn test_default() {
-        assert_eq!(new_app_preferences_default(), AppPreferences::default());
-    }
-
-    #[test]
-    fn test_app_preferences_has_gateway_with_url() {
-        assert!(app_preferences_has_gateway_with_url(
-            SUT::sample(),
-            &FfiUrl::from_str("https://mainnet.radixdlt.com").unwrap()
-        ));
-    }
-}

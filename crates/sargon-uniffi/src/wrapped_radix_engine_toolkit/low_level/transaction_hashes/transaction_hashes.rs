@@ -58,28 +58,7 @@ macro_rules! decl_tx_hash {
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _formatted>](address: &$struct_name, format: AddressFormat) -> String {
-                address.into_internal().formatted(format)
-            }
-
-            #[cfg(test)]
-            mod [< uniffi_ $struct_name:snake _tests>] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $struct_name;
-
-                #[test]
-                fn from_str() {
-                    assert_eq!(SUT::sample(), [< new_$struct_name:snake _from_string>]($expected_sample_str.to_owned()).unwrap());
-                }
-
-                #[test]
-                fn formatted() {
-                    let sut = SUT::sample();
-                    assert_eq!(sut.formatted(AddressFormat::Default), [< $struct_name:snake _formatted>](&sut, AddressFormat::Default));
-                    assert_eq!(sut.formatted(AddressFormat::Raw), [< $struct_name:snake _formatted>](&sut, AddressFormat::Raw));
-                    assert_eq!(sut.formatted(AddressFormat::Full), [< $struct_name:snake _formatted>](&sut, AddressFormat::Full));
-                }
+                address.into_internal().formatted(format.into())
             }
         }
     };

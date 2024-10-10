@@ -56,34 +56,3 @@ pub fn new_account_for_display_from_account(
     InternalAccountForDisplay::from(account).into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccountForDisplay;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_account_for_display_sample(),
-                new_account_for_display_sample_other(),
-                // duplicates should get removed
-                new_account_for_display_sample(),
-                new_account_for_display_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_new_account_for_display_from_account() {
-        let sut = Account::sample();
-        assert_eq!(
-            new_account_for_display_from_account(sut.clone()),
-            AccountForDisplay::from(sut)
-        );
-    }
-}

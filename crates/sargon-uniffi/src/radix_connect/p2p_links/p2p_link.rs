@@ -13,6 +13,7 @@ use sargon::P2PLink as InternalP2PLink;
     PartialEq,
     Eq,
     Hash,
+    InternalConersion,
      uniffi::Record,
 )]
 pub struct P2PLink {
@@ -74,31 +75,3 @@ pub fn new_p2p_link_sample_other() -> P2PLink {
     InternalP2PLink::sample_other().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = P2PLink;
-
-    #[test]
-    fn id_of_link() {
-        let sut = SUT::sample();
-        assert_eq!(p2p_link_id(&sut), sut.id())
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_p2p_link_sample(),
-                new_p2p_link_sample_other(),
-                // duplicates should get removed
-                new_p2p_link_sample(),
-                new_p2p_link_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

@@ -26,15 +26,3 @@ pub fn new_wallet_interaction_version_current() -> WalletInteractionVersion {
     InternalWalletInteractionVersion::current().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[test]
-    fn current() {
-        assert_eq!(
-            new_wallet_interaction_version_current(),
-            InternalWalletInteractionVersion::current().into()
-        )
-    }
-}

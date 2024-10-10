@@ -54,19 +54,3 @@ pub fn new_radix_connect_mobile_session_request_sample_other(
     InternalRadixConnectMobileSessionRequest::sample_other().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    // #[test]
-    // fn sample_values() {
-    //     assert_eq!(
-    //         new_radix_connect_mobile_session_request_sample(),
-    //         InternalRadixConnectMobileSessionRequest::sample().into()
-    //     );
-    //     assert_eq!(
-    //         new_radix_connect_mobile_session_request_sample_other(),
-    //         InternalRadixConnectMobileSessionRequest::sample_other().into()
-    //     );
-    // }
-}

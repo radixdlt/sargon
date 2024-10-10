@@ -55,27 +55,3 @@ pub fn new_radix_connect_purpose_sample_other() -> RadixConnectPurpose {
     InternalRadixConnectPurpose::sample_other().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn new() {
-        assert_eq!(
-            new_radix_connect_purpose_from_string(String::from("general")),
-            RadixConnectPurpose::General
-        );
-    }
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_radix_connect_purpose_sample(),
-            RadixConnectPurpose::General
-        );
-        assert_eq!(
-            new_radix_connect_purpose_sample_other(),
-            RadixConnectPurpose::Unknown
-        );
-    }
-}

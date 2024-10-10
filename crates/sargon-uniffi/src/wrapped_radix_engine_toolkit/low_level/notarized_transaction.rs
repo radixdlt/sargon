@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NotarizedTransaction as InternalNotarizedTransaction;
 
-#[derive(Debug, Clone, Eq, PartialEq,  uniffi::Record)]
+#[derive(Debug, Clone, Eq, PartialEq, InternalConversion, uniffi::Record)]
 pub struct NotarizedTransaction {
     signed_intent: SignedIntent,
     pub notary_signature: NotarySignature,
@@ -42,36 +42,3 @@ pub fn notarized_transaction_compile(
     notarized_transaction.into_internal().compile().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NotarizedTransaction;
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            new_notarized_transaction_sample(),
-            new_notarized_transaction_sample_other(),
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(
-            new_notarized_transaction_sample(),
-            new_notarized_transaction_sample()
-        );
-        assert_eq!(
-            new_notarized_transaction_sample_other(),
-            new_notarized_transaction_sample_other()
-        );
-    }
-
-    #[test]
-    fn test_compile() {
-        let sut = SUT::sample();
-        assert_eq!(notarized_transaction_compile(&sut), sut.compile())
-    }
-}

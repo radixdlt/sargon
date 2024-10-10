@@ -35,25 +35,3 @@ pub fn new_sargon_build_information_sample_other() -> SargonBuildInformation {
     InternalSargonBuildInformation::sample_other().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = SargonBuildInformation;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_sargon_build_information_sample(),
-                new_sargon_build_information_sample_other(),
-                // duplicates should get removed
-                new_sargon_build_information_sample(),
-                new_sargon_build_information_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

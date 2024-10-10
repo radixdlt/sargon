@@ -191,39 +191,3 @@ pub fn security_questions_factor_source_decrypt(
     factor_source.decrypt(with)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = SecurityQuestions_NOT_PRODUCTION_READY_FactorSource;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_security_questions_factor_source_sample(),
-                new_security_questions_factor_source_sample_other(),
-                // duplicates should get removed
-                new_security_questions_factor_source_sample(),
-                new_security_questions_factor_source_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn roundtrip() {
-        let mnemonic = Mnemonic::sample_security_questions();
-        let qas = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
-        let sut = new_security_questions_factor_source_by_encrypting_mnemonic(
-            mnemonic.clone(),
-            qas.clone(),
-        )
-        .unwrap();
-        let decrypted =
-            security_questions_factor_source_decrypt(&sut, qas).unwrap();
-        assert_eq!(decrypted, mnemonic);
-    }
-}

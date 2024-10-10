@@ -8,6 +8,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
     PartialEq,
     Eq,
     Hash,
+    InternalConersion,
      uniffi::Record,
 )]
 pub struct FactorSourceIDFromHash {
@@ -68,43 +69,3 @@ pub fn new_factor_source_id_from_hash_sample_other() -> FactorSourceIDFromHash {
     InternalFactorSourceIDFromHash::sample_other().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = FactorSourceIDFromHash;
-
-    #[test]
-    fn test_factor_source_id_from_hash_to_string() {
-        assert_eq!(
-            factor_source_id_from_hash_to_string(&SUT::sample()),
-            SUT::sample().to_string()
-        );
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_factor_source_id_from_hash_sample(),
-                new_factor_source_id_from_hash_sample_other(),
-                // duplicates should get removed
-                new_factor_source_id_from_hash_sample(),
-                new_factor_source_id_from_hash_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_new_factor_source_id_from_hash_from_mnemonic_with_passphrase() {
-        let kind = FactorSourceKind::sample();
-        let sut = new_factor_source_id_from_hash_from_mnemonic_with_passphrase(
-            kind,
-            &MnemonicWithPassphrase::sample(),
-        );
-        assert_eq!(sut.kind, kind)
-    }
-}

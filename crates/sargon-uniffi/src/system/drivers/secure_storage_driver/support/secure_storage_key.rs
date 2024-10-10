@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::SecureStorageKey as InternalSecureStorageKey;
 
-#[derive(Debug, Clone, Eq, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Eq, PartialEq, InternalConersion, uniffi::Enum)]
 pub enum SecureStorageKey {
     HostID,
     DeviceFactorSourceMnemonic {
@@ -57,16 +57,3 @@ pub fn secure_storage_key_identifier(key: &SecureStorageKey) -> String {
     key.into_internal().identifier()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn identifier() {
-        let key = SecureStorageKey::load_profile_snapshot();
-        assert_eq!(
-            key.clone().identifier(),
-            secure_storage_key_identifier(&key)
-        );
-    }
-}

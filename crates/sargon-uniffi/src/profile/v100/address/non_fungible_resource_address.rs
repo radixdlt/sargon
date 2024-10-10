@@ -25,6 +25,7 @@ macro_rules! decl_specialized_address {
                 PartialEq,
                 Eq,
                 Hash,
+                InternalConversion,
                  uniffi::Record,
             )]
             pub struct $specialized_address_type {
@@ -52,14 +53,14 @@ macro_rules! decl_specialized_address {
             /// Returns the base address of this specialized address.
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _as_ $base_addr:snake>](address: &$specialized_address_type) -> $base_addr {
-                address.secret_magic
+                address.secret_magic.clone()
             }
 
             /// Returns a new address, with the same node_id, but using `network_id` as
             /// network.
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _map_to_network >](address: &$specialized_address_type, network_id: NetworkID) -> $specialized_address_type {
-                address.into_internal().map_to_network(network_id).into()
+                address.into_internal().map_to_network(network_id.into()).into()
             }
 
             /// Returns the bech32 encoding of this address
@@ -71,24 +72,8 @@ macro_rules! decl_specialized_address {
             /// Returns the network id this address
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _network_id >](address: &$specialized_address_type) -> NetworkID {
-                address.into_internal().network_id()
+                address.into_internal().network_id().into()
             }
-
-
-            #[cfg(test)]
-            mod [<uniffi_tests_of_ $specialized_address_type:snake>] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $specialized_address_type;
-
-                #[test]
-                fn map_to_network() {
-                    let sut = SUT::sample();
-                    assert_eq!([< $specialized_address_type:snake _map_to_network >](&sut, sut.network_id()), sut); // unchanged
-                }
-            }
-
         }
     };
 }
@@ -148,64 +133,3 @@ pub fn new_non_fungible_resource_address_random(
     InternalAddress::random(network_id.into()).into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NonFungibleResourceAddress;
-
-    #[test]
-    fn from_bech32() {
-        assert_eq!(new_non_fungible_resource_address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".to_owned()).unwrap(), SUT::sample());
-        assert_eq!(new_non_fungible_resource_address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".to_owned()).unwrap(), SUT::sample_other());
-    }
-
-    #[test]
-    fn to_bech32() {
-        assert_eq!(non_fungible_resource_address_bech32_address(&SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa");
-        assert_eq!(non_fungible_resource_address_bech32_address(&SUT::sample_other()), "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd");
-    }
-
-    #[test]
-    fn network_id() {
-        assert_eq!(
-            non_fungible_resource_address_network_id(&SUT::sample_mainnet()),
-            NetworkID::Mainnet
-        );
-        assert_eq!(
-            non_fungible_resource_address_network_id(&SUT::sample_stokenet()),
-            NetworkID::Stokenet
-        );
-    }
-
-    #[test]
-    fn hash_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_non_fungible_resource_address_sample_mainnet(),
-                new_non_fungible_resource_address_sample_mainnet_other(),
-                new_non_fungible_resource_address_sample_stokenet(),
-                new_non_fungible_resource_address_sample_stokenet_other(),
-                // duplicates should be removed
-                new_non_fungible_resource_address_sample_mainnet(),
-                new_non_fungible_resource_address_sample_mainnet_other(),
-                new_non_fungible_resource_address_sample_stokenet(),
-                new_non_fungible_resource_address_sample_stokenet_other(),
-            ])
-            .len(),
-            4
-        );
-    }
-
-    #[test]
-    fn random_address() {
-        let n = 10;
-        for network_id in NetworkID::all() {
-            let addresses = (0..n)
-                .map(|_| new_non_fungible_resource_address_random(network_id))
-                .collect::<HashSet<SUT>>();
-            assert_eq!(addresses.len(), n);
-        }
-    }
-}

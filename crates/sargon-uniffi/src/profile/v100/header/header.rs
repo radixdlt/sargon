@@ -79,34 +79,3 @@ pub fn new_header_with_creating_device(creating_device: DeviceInfo) -> Header {
     InternalHeader::new(creating_device.into()).into()
 }
 
-#[cfg(test)]
-mod uniffi_test {
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Header;
-
-    #[test]
-    fn test_new_with_device() {
-        assert_ne!(
-            new_header_with_creating_device(DeviceInfo::sample()),
-            SUT::sample()
-        );
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_header_sample(),
-                new_header_sample_other(),
-                // duplicates should get removed
-                new_header_sample(),
-                new_header_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

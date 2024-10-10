@@ -16,26 +16,26 @@ macro_rules! decl_secret_bytes {
             )*
             #[derive( uniffi::Record)]
             pub struct $struct_name {
-                secret_magic: BagOfBytes
+                value: BagOfBytes
             }
 
             impl From<[< Internal $struct_name >]> for $struct_name {
                 fn from(value: [< Internal $struct_name >]) -> Self {
                     Self {
-                        secret_magic: value.into()
+                        value: value.to_vec().into()
                     }
                 }
             }
 
             impl Into<[< Internal $struct_name >]> for $struct_name {
                 fn into(self) -> [< Internal $struct_name >] {
-                    [< Internal $struct_name >]::try_from(self.secret_magic.into()).unwrap()
+                    [< Internal $struct_name >]::try_from(self.value.into()).unwrap()
                 }
             }
 
             #[uniffi::export]
             pub fn [< new_ $struct_name:snake _from_bytes >](bytes: BagOfBytes) -> Result<$struct_name> {
-                [< Internal $struct_name >]::try_from(bytes).map_result()
+                [< Internal $struct_name >]::try_from(bytes.into()).map_result()
             }
             
             #[uniffi::export]
@@ -50,7 +50,7 @@ macro_rules! decl_secret_bytes {
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _to_bytes >](bytes: &$struct_name) -> BagOfBytes {
-                bytes.to_bytes()
+                bytes.value.clone()
             }
         }
     };

@@ -20,6 +20,7 @@ macro_rules! decl_ret_wrapped_address {
                 PartialEq,
                 Eq,
                 Hash,
+                InternalConversion,
                  uniffi::Record,
             )]
             pub struct [< $address_type:camel Address >] {
@@ -40,12 +41,6 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
-            impl [< $address_type:camel Address >] {
-                pub fn into_internal(&self) -> InternalAddress {
-                    self.into()
-                }
-            }
-
             #[uniffi::export]
             pub fn [<new_ $address_type:snake _address>](bech32: String) -> Result<[< $address_type:camel Address >]> {
                 InternalAddress::try_from_bech32(&bech32).map_result()
@@ -55,7 +50,7 @@ macro_rules! decl_ret_wrapped_address {
             /// network.
             #[uniffi::export]
             pub fn [<$address_type:snake _address_map_to_network>](address: &[< $address_type:camel Address >], network_id: NetworkID) -> [< $address_type:camel Address >] {
-                address.into_internal().map_to_network(network_id).into()
+                address.into_internal().map_to_network(network_id.into()).into()
             }
 
             #[uniffi::export]
@@ -70,7 +65,7 @@ macro_rules! decl_ret_wrapped_address {
 
             #[uniffi::export]
             pub fn [<$address_type:snake _address_formatted>](address: &[< $address_type:camel Address >], format: AddressFormat) -> String {
-                address.into_internal().formatted(format)
+                address.into_internal().formatted(format.into())
             }
 
             /// Returns a random address in `network_id` as Network

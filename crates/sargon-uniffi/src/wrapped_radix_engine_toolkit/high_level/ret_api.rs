@@ -136,7 +136,7 @@ pub fn modify_manifest_add_guarantees(
     manifest: TransactionManifest,
     guarantees: Vec<TransactionGuarantee>,
 ) -> Result<TransactionManifest> {
-   map_result_from_internal(manifest.into::<InternalTransactionManifest>().modify_add_guarantees(guarantees.into_iter().map(Into::into).collect()))
+   map_result_from_internal(manifest.into_internal().modify_add_guarantees(guarantees.into_iter().map(Into::into).collect()))
 }
 
 #[uniffi::export]

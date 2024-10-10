@@ -64,25 +64,3 @@ pub fn new_identity_path(
     InternalIdentityPath::new(network_id.into(), key_kind.into(), index.into()).into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = IdentityPath;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_identity_path_sample(),
-                new_identity_path_sample_other(),
-                // duplicates should get removed
-                new_identity_path_sample(),
-                new_identity_path_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

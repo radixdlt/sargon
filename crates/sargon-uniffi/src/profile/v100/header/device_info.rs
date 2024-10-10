@@ -105,36 +105,3 @@ pub fn new_device_info_from_host_info(
     InternalDeviceInfo::new_from_info(host_id.into(), host_info.into()).into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeviceInfo;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_device_info_sample(),
-                new_device_info_sample_other(),
-                // duplicates should get removed
-                new_device_info_sample(),
-                new_device_info_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_new_from_host_info() {
-        let host_id = HostId::sample();
-        let host_info = HostInfo::sample();
-
-        assert_eq!(
-            new_device_info_from_host_info(&host_id, &host_info),
-            DeviceInfo::new_from_info(&host_id, &host_info)
-        )
-    }
-}

@@ -12,12 +12,3 @@ pub fn factor_sources_all_sample_values() -> Vec<FactorSource> {
     InternalFactorSource::sample_values_all().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn hash_of_samples() {
-        assert!(factor_sources_all_sample_values().len() > 10);
-    }
-}

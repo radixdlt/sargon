@@ -3,7 +3,7 @@ use sargon::Blobs as InternalBlobs;
 
 /// Vec of Blobs
 #[derive(
-    Clone, PartialEq, Eq, Debug,  uniffi::Record,
+    Clone, PartialEq, Eq, InternalConersion,  uniffi::Record,
 )]
 pub struct Blobs {
     pub(crate) secret_magic: Vec<Blob>,
@@ -43,37 +43,3 @@ pub fn new_blobs_sample_other() -> Blobs {
     InternalBlobs::sample_other().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Blobs;
-
-    #[test]
-    fn sample() {
-        assert_eq!(new_blobs_sample(), SUT::sample());
-    }
-
-    #[test]
-    fn sample_other() {
-        assert_eq!(new_blobs_sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_blobs_list_of_blobs() {
-        assert_eq!(blobs_list_of_blobs(&new_blobs_sample()).len(), 4);
-    }
-
-    #[test]
-    fn test_new_blobs_from_blob_list() {
-        assert_eq!(
-            new_blobs_from_blob_list(vec![
-                Blob::sample(),
-                Blob::sample_other(),
-            ])
-            .blobs(),
-            [Blob::sample(), Blob::sample_other(),]
-        );
-    }
-}

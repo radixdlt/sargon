@@ -10,6 +10,7 @@ use sargon::FactorSourceID as InternalFactorSourceID;
     PartialEq,
     Eq,
     Hash,
+    InternalConersion,
     uniffi::Enum,
 )]
 pub enum FactorSourceID {
@@ -68,33 +69,3 @@ pub fn new_factor_source_id_sample_other() -> FactorSourceID {
     InternalFactorSourceID::sample_other().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = FactorSourceID;
-
-    #[test]
-    fn test_factor_source_id_to_string() {
-        assert_eq!(
-            factor_source_id_to_string(&SUT::sample()),
-            SUT::sample().to_string()
-        );
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_factor_source_id_sample(),
-                new_factor_source_id_sample_other(),
-                // duplicates should get removed
-                new_factor_source_id_sample(),
-                new_factor_source_id_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

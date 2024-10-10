@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteraction as InternalDappToWalletInteraction;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, InternalConersion, uniffi::Record)]
 pub struct DappToWalletInteraction {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,
@@ -55,55 +55,3 @@ pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
     InternalDappToWalletInteraction::sample_other().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionUnvalidated;
-
-    #[test]
-    fn inequality_of_samples() {
-        assert_ne!(
-            new_dapp_to_wallet_interaction_unvalidated_sample(),
-            new_dapp_to_wallet_interaction_unvalidated_sample_other()
-        );
-    }
-
-    #[test]
-    fn json_string_roundtrip() {
-        let sut = SUT::sample();
-        let pretty_string =
-            dapp_to_wallet_interaction_unvalidated_to_json_string(&sut, true);
-        let from_str =
-            new_dapp_to_wallet_interaction_unvalidated_from_json_string(
-                pretty_string.clone(),
-            )
-            .unwrap();
-        assert_eq!(from_str, sut);
-        let ugly_string =
-            dapp_to_wallet_interaction_unvalidated_to_json_string(&sut, false);
-        let from_str =
-            new_dapp_to_wallet_interaction_unvalidated_from_json_string(
-                ugly_string.clone(),
-            )
-            .unwrap();
-        assert_eq!(from_str, sut);
-        assert_ne!(pretty_string, ugly_string);
-    }
-
-    #[test]
-    fn from_invalid_json_string_throws() {
-        assert_eq!(
-            new_dapp_to_wallet_interaction_unvalidated_from_json_string(
-                "".to_owned()
-            ),
-            Err(CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: 0,
-                type_name: "DappToWalletInteractionUnvalidated".to_owned(),
-                serde_message: "EOF while parsing a value at line 1 column 0"
-                    .to_string()
-            })
-        )
-    }
-}

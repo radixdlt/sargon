@@ -21,15 +21,19 @@ macro_rules! decl_secret_bytes {
                 pub fn to_bytes(&self) -> &[u8] {
                     &self.0.as_slice()
                 }
+
+                pub fn to_vec(&self) -> Vec<u8> {
+                    self.0.to_vec()
+                }
            }
 
            impl TryFrom<BagOfBytes> for $struct_name {
-            type Error = CommonError;
-            fn try_from(value: BagOfBytes) -> Result<Self> {
-                let fixed_size: &[u8; $byte_count] = value.as_ref().try_into().map_err(|_| CommonError::InvalidByteCount { expected: $byte_count as u64, found: value.len() as u64 })?;
-                Ok(Self(Box::new(*fixed_size)))
-            }
-        }
+                type Error = CommonError;
+                fn try_from(value: BagOfBytes) -> Result<Self> {
+                    let fixed_size: &[u8; $byte_count] = value.as_ref().try_into().map_err(|_| CommonError::InvalidByteCount { expected: $byte_count as u64, found: value.len() as u64 })?;
+                    Ok(Self(Box::new(*fixed_size)))
+                }
+            }   
 
             impl HasSampleValues for $struct_name {
                 fn sample() -> Self {

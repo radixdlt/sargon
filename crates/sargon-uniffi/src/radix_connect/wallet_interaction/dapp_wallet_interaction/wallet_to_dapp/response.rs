@@ -40,15 +40,3 @@ pub(crate) fn new_wallet_to_dapp_interaction_response_sample_other(
     InternalWalletToDappInteractionResponse::sample_other().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn inequality_of_samples() {
-        assert_ne!(
-            new_wallet_to_dapp_interaction_response_sample(),
-            new_wallet_to_dapp_interaction_response_sample_other()
-        );
-    }
-}

@@ -10,8 +10,8 @@ pub struct LocaleConfig {
 impl From<InternalLocaleConfig> for LocaleConfig {
     fn from(value: InternalLocaleConfig) -> Self {
         Self {
-            decimal_separator: value.decimal_separator.map(|s| s.0),
-            grouping_separator: value.grouping_separator.map(|s| s.0),
+            decimal_separator: value.decimal_separator,
+            grouping_separator: value.grouping_separator,
         }
     }
 }
@@ -19,8 +19,8 @@ impl From<InternalLocaleConfig> for LocaleConfig {
 impl Into<InternalLocaleConfig> for LocaleConfig {
     fn into(self) -> InternalLocaleConfig {
         InternalLocaleConfig {
-            decimal_separator: self.decimal_separator.map(|s| s.into()),
-            grouping_separator: self.grouping_separator.map(|s| s.into()),
+            decimal_separator: self.decimal_separator,
+            grouping_separator: self.grouping_separator,
         }
     }
 }

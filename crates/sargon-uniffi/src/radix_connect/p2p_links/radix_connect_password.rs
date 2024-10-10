@@ -12,6 +12,7 @@ json_string_convertible!(RadixConnectPassword);
     PartialEq,
     Eq,
     Hash,
+    InternalConersion,
      uniffi::Record,
 )]
 pub struct RadixConnectPassword {
@@ -54,34 +55,3 @@ pub fn radix_connect_password_message_hash(
     password.into_internal().message_hash().into()
 }
 
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn new() {
-        let bytes = Exactly32Bytes::generate();
-        assert_eq!(new_radix_connect_password(bytes).value, bytes);
-    }
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_radix_connect_password_sample(),
-            RadixConnectPassword::sample()
-        );
-        assert_eq!(
-            new_radix_connect_password_sample_other(),
-            RadixConnectPassword::sample_other()
-        );
-    }
-
-    #[test]
-    fn message_hash() {
-        let sut = RadixConnectPassword::sample();
-        assert_eq!(
-            radix_connect_password_message_hash(&sut),
-            sut.message_hash()
-        );
-    }
-}

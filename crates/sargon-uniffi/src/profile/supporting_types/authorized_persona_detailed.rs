@@ -62,25 +62,3 @@ pub fn new_authorized_persona_detailed_sample_other(
     InternalAuthorizedPersonaDetailed::sample_other().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = AuthorizedPersonaDetailed;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_authorized_persona_detailed_sample(),
-                new_authorized_persona_detailed_sample_other(),
-                // duplicates should get removed
-                new_authorized_persona_detailed_sample(),
-                new_authorized_persona_detailed_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-}

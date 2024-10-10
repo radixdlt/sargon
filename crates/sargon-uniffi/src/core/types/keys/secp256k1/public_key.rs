@@ -42,7 +42,7 @@ pub fn new_secp256k1_public_key_from_hex(
 pub fn new_secp256k1_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Secp256k1PublicKey> {
-    InternalSecp256k1PublicKey::try_from(bytes.into::<InternalBagOfBytes>().to_vec()).map_result()
+    InternalSecp256k1PublicKey::try_from(bytes.into_internal().to_vec()).map_result()
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
@@ -65,7 +65,7 @@ pub fn secp256k1_public_key_to_bytes(
 pub fn secp256k1_public_key_to_bytes_uncompressed(
     public_key: &Secp256k1PublicKey,
 ) -> BagOfBytes {
-    InternalBagOfBytes::from(public_key.into_internal()().uncompressed()).into()
+    InternalBagOfBytes::from(public_key.into_internal().uncompressed()).into()
 }
 
 #[uniffi::export]

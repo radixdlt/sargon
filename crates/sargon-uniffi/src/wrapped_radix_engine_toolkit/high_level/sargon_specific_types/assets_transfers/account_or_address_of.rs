@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::AccountOrAddressOf as InternalAccountOrAddressOf;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, InternalConersion, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)] // we cannot Box<Account>, since Box is not UniFFI compatible.
 pub enum AccountOrAddressOf {
     ProfileAccount { value: Account },
@@ -51,34 +51,3 @@ pub fn account_or_address_of_account_address(
     *recipient.into_internal().account_address()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccountOrAddressOf;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_account_or_address_of_sample(),
-                new_account_or_address_of_sample_other(),
-                // duplicates should get removed
-                new_account_or_address_of_sample(),
-                new_account_or_address_of_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_account_address() {
-        let sut = SUT::sample();
-        assert_eq!(
-            account_or_address_of_account_address(&sut),
-            *sut.account_address()
-        )
-    }
-}

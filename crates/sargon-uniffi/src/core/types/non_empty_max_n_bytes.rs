@@ -37,7 +37,7 @@ macro_rules! decl_non_empty_max_n_bytes {
 
             impl Into<[< InternalNonEmptyMax $byte_count Bytes  >]> for [< NonEmptyMax $byte_count Bytes  >] {
                 fn into(self) -> [< InternalNonEmptyMax $byte_count Bytes  >] {
-                    [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(self.bag_of_bytes.into()).unwrap()
+                    [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(self.bag_of_bytes.into()).unwrap().into()
                 }
             }
 

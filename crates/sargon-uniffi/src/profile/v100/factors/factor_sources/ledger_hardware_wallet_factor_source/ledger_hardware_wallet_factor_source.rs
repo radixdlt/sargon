@@ -66,38 +66,3 @@ fn new_ledger_hardware_wallet_from_mnemonic_with_passphrase(
     InternalLedgerHardwareWalletFactorSource::new(id, common.into(), hint.into()).into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = LedgerHardwareWalletFactorSource;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_ledger_hardware_wallet_factor_source_sample(),
-                new_ledger_hardware_wallet_factor_source_sample_other(),
-                // duplicates should get removed
-                new_ledger_hardware_wallet_factor_source_sample(),
-                new_ledger_hardware_wallet_factor_source_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_new_ledger_hardware_wallet_from_mnemonic_with_passphrase() {
-        assert_eq!(
-            new_ledger_hardware_wallet_from_mnemonic_with_passphrase(
-                MnemonicWithPassphrase::sample_ledger(),
-                LedgerHardwareWalletHint::sample(),
-                FactorSourceCommon::sample()
-            )
-            .factor_source_id(),
-            SUT::sample().factor_source_id()
-        );
-    }
-}

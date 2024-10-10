@@ -4,7 +4,7 @@ pub use radix_engine_toolkit::functions::signed_intent::compile as RET_signed_in
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SignedIntent {
-    intent: TransactionIntent,
+    pub intent: TransactionIntent,
     pub intent_signatures: IntentSignatures,
 }
 

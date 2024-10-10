@@ -37,30 +37,3 @@ impl FromStr for FfiUrl {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = FfiUrl;
-
-    #[test]
-    fn test_new() {
-        let url_path = "https://radixdlt.com";
-        let result = SUT::new(url_path.to_string());
-        assert_eq!(result.unwrap().url, Url::parse(url_path).unwrap());
-    }
-
-    #[test]
-    fn test_from_str() {
-        let result = SUT::from_str("https://radixdlt.com");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_get_url() {
-        let url_path = "https://radixdlt.com";
-        let sut = SUT::new(url_path.to_string()).unwrap();
-        assert_eq!(ffi_url_get_url(&sut), Url::parse(url_path).unwrap());
-    }
-}

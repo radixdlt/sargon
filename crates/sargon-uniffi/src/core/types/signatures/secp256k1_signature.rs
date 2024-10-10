@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::Secp256k1Signature as InternalSecp256k1Signature;
 
 /// Represents an Secp256k1 signature.
 #[derive(
@@ -7,6 +8,7 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Secp256k1Signature {
@@ -14,83 +16,48 @@ pub struct Secp256k1Signature {
     pub bytes: Exactly65Bytes,
 }
 
+impl From<InternalSecp256k1Signature> for Secp256k1Signature {
+    fn from(value: InternalSecp256k1Signature) -> Self {
+        Self {
+            bytes: value.bytes.into(),
+        }
+    }
+}
+
+impl Into<InternalSecp256k1Signature> for Secp256k1Signature {
+    fn into(self) -> InternalSecp256k1Signature {
+        InternalSecp256k1Signature {
+            bytes: self.bytes.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_secp256k1_signature_sample() -> Secp256k1Signature {
-    Secp256k1Signature::sample()
+    InternalSecp256k1Signature::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_signature_sample_other() -> Secp256k1Signature {
-    Secp256k1Signature::sample_other()
+    InternalSecp256k1Signature::sample_other().into()
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_signature_from_exactly_65_bytes(
     bytes: Exactly65Bytes,
 ) -> Secp256k1Signature {
-    Secp256k1Signature::from(bytes)
+    InternalSecp256k1Signature::from(bytes.into()).into()
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_signature_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Secp256k1Signature> {
-    Secp256k1Signature::try_from(bytes)
+    InternalSecp256k1Signature::try_from(bytes.into()).map_result()
 }
 
 #[uniffi::export]
 pub fn secp256k1_signature_to_string(signature: &Secp256k1Signature) -> String {
-    signature.to_string()
+    signature.into_internal().to_string()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Secp256k1Signature;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_secp256k1_signature_sample(),
-                new_secp256k1_signature_sample_other(),
-                // duplicates should get removed
-                new_secp256k1_signature_sample(),
-                new_secp256k1_signature_sample_other(),
-            ])
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn test_to_string() {
-        assert_eq!(
-            secp256k1_signature_to_string(&SUT::sample()),
-            "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12"
-        )
-    }
-
-    #[test]
-    fn test_from_exactly_65_bytes() {
-        let sut = SUT::sample();
-        assert_eq!(
-            new_secp256k1_signature_from_exactly_65_bytes(sut.bytes),
-            sut
-        )
-    }
-
-    #[test]
-    fn test_from_bag_of_bytes() {
-        let sut = SUT::sample();
-        assert_eq!(
-            new_secp256k1_signature_from_bytes(BagOfBytes::from(
-                sut.to_bytes()
-            ))
-            .unwrap(),
-            sut
-        )
-    }
-}

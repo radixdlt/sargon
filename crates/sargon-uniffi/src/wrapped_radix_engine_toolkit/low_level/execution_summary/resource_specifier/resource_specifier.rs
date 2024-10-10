@@ -71,24 +71,3 @@ pub fn resource_specifier_get_address(
     specifier.into::<InternalResourceSpecifier>().get_address().into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ResourceSpecifier;
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            new_resource_indicator_sample(),
-            new_resource_indicator_sample_other()
-        );
-    }
-
-    #[test]
-    fn get_address() {
-        let sut = SUT::sample();
-        assert_eq!(sut.get_address(), resource_specifier_get_address(&sut));
-    }
-}

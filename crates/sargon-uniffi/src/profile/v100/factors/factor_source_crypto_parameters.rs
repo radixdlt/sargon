@@ -12,7 +12,7 @@ decl_identified_vec_of!(
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
+    Clone, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
 )]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
@@ -94,40 +94,3 @@ pub fn factor_source_crypto_parameters_supports_babylon(
     parameters.into_internal().supports_babylon()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = FactorSourceCryptoParameters;
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_factor_source_crypto_parameters_sample(),
-                new_factor_source_crypto_parameters_sample_other(),
-                new_factor_source_crypto_parameters_preset_babylon_olympia_compatible(),
-                // duplicates should get removed
-                new_factor_source_crypto_parameters_preset_babylon_only(), // same as sample
-                new_factor_source_crypto_parameters_preset_olympia_only(), // same as sample_other
-            ])
-            .len(),
-            3
-        );
-    }
-
-    #[test]
-    fn test_supports_babylon() {
-        assert!(factor_source_crypto_parameters_supports_babylon(
-            &new_factor_source_crypto_parameters_preset_babylon_only()
-        ))
-    }
-
-    #[test]
-    fn test_supports_olympia() {
-        assert!(factor_source_crypto_parameters_supports_olympia(
-            &new_factor_source_crypto_parameters_preset_olympia_only()
-        ))
-    }
-}

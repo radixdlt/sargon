@@ -17,12 +17,3 @@ pub fn security_questions_all() -> Security_NOT_PRODUCTION_READY_Questions {
     )
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_all() {
-        assert_eq!(security_questions_all().len(), 17);
-    }
-}

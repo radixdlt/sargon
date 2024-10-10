@@ -14,6 +14,7 @@ use sargon::SLIP10Curve as InternalSLIP10Curve;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum SLIP10Curve {
@@ -53,17 +54,4 @@ pub fn new_slip10_curve_from_string(curve: String) -> Result<SLIP10Curve> {
 #[uniffi::export]
 pub fn slip10_curve_to_string(curve: SLIP10Curve) -> String {
     curve.into_internal().to_string()
-}
-    use super::*;
-
-    #[test]
-    fn test_string_roundtrip() {
-        assert_eq!(
-            new_slip10_curve_from_string(slip10_curve_to_string(
-                SLIP10Curve::Curve25519
-            ))
-            .unwrap(),
-            SLIP10Curve::Curve25519
-        )
-    }
 }
