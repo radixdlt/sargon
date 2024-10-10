@@ -25,8 +25,24 @@ impl MockNetworkingDriver {
         }
     }
 
+    pub fn with_spy_multiple_bodies(
+        status: u16,
+        bodies: Vec<BagOfBytes>,
+        spy: fn(NetworkRequest) -> (),
+    ) -> Self {
+        Self {
+            hard_coded_status: status,
+            hard_coded_bodies: Mutex::new(bodies),
+            spy,
+        }
+    }
+
     pub fn new(status: u16, body: impl Into<BagOfBytes>) -> Self {
         Self::with_spy(status, body, |_| {})
+    }
+
+    pub fn new_with_bodies(status: u16, bodies: Vec<BagOfBytes>) -> Self {
+        Self::with_spy_multiple_bodies(status, bodies, |_| {})
     }
 
     pub fn new_always_failing() -> Self {

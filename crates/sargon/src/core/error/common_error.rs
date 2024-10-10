@@ -656,6 +656,19 @@ pub enum CommonError {
 
     #[error("The network {network_id} does not exist in profile")]
     NoNetworkInProfile { network_id: NetworkID } = 10183,
+
+    #[error("One of the receiving accounts does not allow deposits")]
+    OneOfReceivingAccountsDoesNotAllowDeposits = 10184,
+
+    #[error("Failed transaction preview with status: {error_message}")]
+    FailedTransactionPreview { error_message: String } = 10185,
+
+    #[error("Failed to extract radix engine toolkit receipt bytes")]
+    FailedToExtractTransactionReceiptBytes = 10186,
+
+    #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
+    ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
+        10187,
 }
 
 #[uniffi::export]

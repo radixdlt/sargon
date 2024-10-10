@@ -42,6 +42,15 @@ impl From<Persona> for AccountOrPersona {
     }
 }
 
+impl HasEntitySecurityState for AccountOrPersona {
+    fn security_state(&self) -> EntitySecurityState {
+        match self {
+            Self::AccountEntity(account) => account.security_state.clone(),
+            Self::PersonaEntity(persona) => persona.security_state.clone(),
+        }
+    }
+}
+
 impl std::fmt::Display for AccountOrPersona {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -141,6 +150,35 @@ mod tests {
         assert_eq!(
             format!("{}", SUT::sample_other()),
             "Batman | identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw"
+        );
+    }
+
+    #[test]
+    fn test_virtual_hierarchical_deterministic_factor_instances() {
+        let mut sut = SUT::sample();
+        let mut factor_instances =
+            sut.virtual_hierarchical_deterministic_factor_instances();
+        assert_eq!(factor_instances.len(), 1);
+        assert_eq!(
+            factor_instances.iter().next().unwrap().clone(),
+            HierarchicalDeterministicFactorInstance::sample()
+        );
+
+        sut = SUT::sample_other();
+        factor_instances =
+            sut.virtual_hierarchical_deterministic_factor_instances();
+        let mwp = MnemonicWithPassphrase::sample();
+        let bdfs = DeviceFactorSource::babylon(true, &mwp, &HostInfo::sample());
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let factor_instance: HDFactorInstanceIdentityCreation =
+            private_hd_factor_source
+                .derive_entity_creation_factor_instance(NetworkID::Mainnet, 1);
+
+        assert_eq!(factor_instances.len(), 1);
+        assert_eq!(
+            factor_instances.iter().next().unwrap().clone(),
+            HierarchicalDeterministicFactorInstance::from(factor_instance)
         );
     }
 }

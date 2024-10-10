@@ -12,6 +12,7 @@ pub struct TransactionPreviewResponse {
     /** Hex-encoded binary blob. */
     pub encoded_receipt: String,
     pub radix_engine_toolkit_receipt:
-        ScryptoSerializableToolkitTransactionReceipt,
+        Option<ScryptoSerializableToolkitTransactionReceipt>,
     pub logs: Vec<TransactionPreviewResponseLogsInner>,
+    pub receipt: TransactionReceipt,
 }
