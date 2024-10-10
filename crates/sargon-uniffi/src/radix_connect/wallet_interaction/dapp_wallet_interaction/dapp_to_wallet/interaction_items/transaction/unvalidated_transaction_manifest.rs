@@ -31,7 +31,7 @@ impl Into<InternalUnvalidatedTransactionManifest> for UnvalidatedTransactionMani
 pub fn new_unvalidated_transaction_manifest_from_transaction_manifest(
     transaction_manifest: TransactionManifest,
 ) -> UnvalidatedTransactionManifest {
-    InternalUnvalidatedTransactionManifest::from(transaction_manifest.into()).into()
+    InternalUnvalidatedTransactionManifest::from(transaction_manifest.into_internal()).into()
 }
 
 #[uniffi::export]

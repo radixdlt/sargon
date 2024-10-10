@@ -9,6 +9,7 @@ use sargon::DeviceInfo as InternalDeviceInfo;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct DeviceInfo {
@@ -102,6 +103,6 @@ pub fn new_device_info_from_host_info(
     host_id: &HostId,
     host_info: &HostInfo,
 ) -> DeviceInfo {
-    InternalDeviceInfo::new_from_info(host_id.into(), host_info.into()).into()
+    InternalDeviceInfo::new_from_info(&host_id.into_internal(), &host_info.into_internal()).into()
 }
 

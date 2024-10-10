@@ -54,8 +54,8 @@ pub fn new_factor_source_id_from_hash_from_mnemonic_with_passphrase(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
 ) -> FactorSourceIDFromHash {
     InternalFactorSourceIDFromHash::from_mnemonic_with_passphrase(
-        factor_source_kind.into(),
-        &mnemonic_with_passphrase.into(),
+        factor_source_kind.into_internal(),
+        &mnemonic_with_passphrase.into_internal(),
     ).into()
 }
 

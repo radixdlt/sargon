@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::TrustedContactFactorSource as InternalTrustedContactFactorSource;
 
 /// A factor source representing a person, company, organization or otherwise
 /// entity that the user trusts to help her with recovery, if ever needed.
@@ -23,16 +24,36 @@ pub struct TrustedContactFactorSource {
     pub contact: TrustedContactFactorSourceContact,
 }
 
+impl From<InternalTrustedContactFactorSource> for TrustedContactFactorSource {
+    fn from(value: InternalTrustedContactFactorSource) -> Self {
+        Self {
+            id: value.id.into(),
+            common: value.common.into(),
+            contact: value.contact.into(),
+        }
+    }
+}
+
+impl Into<InternalTrustedContactFactorSource> for TrustedContactFactorSource {
+    fn into(self) -> InternalTrustedContactFactorSource {
+        InternalTrustedContactFactorSource {
+            id: self.id.into(),
+            common: self.common.into(),
+            contact: self.contact.into(),
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_trusted_contact_factor_source_sample() -> TrustedContactFactorSource
 {
-    TrustedContactFactorSource::sample()
+    InternalTrustedContactFactorSource::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_trusted_contact_factor_source_sample_other(
 ) -> TrustedContactFactorSource {
-    TrustedContactFactorSource::sample_other()
+    InternalTrustedContactFactorSource::sample_other().into()
 }
 
 #[uniffi::export]
@@ -40,6 +61,6 @@ fn new_trusted_contact_factor_source_from_address_and_contact(
     account_address: AccountAddress,
     contact: TrustedContactFactorSourceContact,
 ) -> TrustedContactFactorSource {
-    TrustedContactFactorSource::new(account_address, contact)
+    InternalTrustedContactFactorSource::new(account_address.into_internal(), contact.into_internal()).into()
 }
 

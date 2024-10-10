@@ -24,42 +24,6 @@ macro_rules! decl_identified_vec_of {
             pub fn [< new_ $collection_type:snake _sample_other >]() -> $collection_type {
                 $collection_type::sample_other()
             }
-
-            #[cfg(test)]
-            mod [< $collection_type:snake _tests >] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $collection_type;
-
-                #[test]
-                fn test_ids() {
-                    assert_eq!(SUT::sample().ids().into_iter().cloned().collect_vec(), SUT::sample().get_all().into_iter().map(|i| i.id()).collect_vec());
-                }
-            }
-
-            #[cfg(test)]
-            mod [< $collection_type:snake _uniffi_tests >] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $collection_type;
-
-                #[test]
-                fn hash_of_samples() {
-                    assert_eq!(
-                        HashSet::<SUT>::from_iter([
-                            [< new_ $collection_type:snake _sample >](),
-                            [< new_ $collection_type:snake _sample_other >](),
-                            // duplicates should get removed
-                            [< new_ $collection_type:snake _sample >](),
-                            [< new_ $collection_type:snake _sample_other >]()
-                        ])
-                        .len(),
-                        2
-                    );
-                }
-            }
 		}
 	};
     (

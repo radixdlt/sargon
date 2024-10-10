@@ -8,7 +8,6 @@ use sargon::LogLevel as InternalLogLevel;
     PartialEq,
     Eq,
     Hash,
-    enum_iterator::Sequence,
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -31,7 +30,7 @@ pub enum LogLevel {
     /// The "debug" level.
     ///
     /// Designates lower priority information.
-    
+    Debug,
 
     /// The "trace" level.
     ///
@@ -93,7 +92,7 @@ pub enum LogFilter {
     /// The "debug" level.
     ///
     /// Designates lower priority information.
-    
+    Debug,
 
     /// The "trace" level.
     ///

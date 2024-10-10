@@ -31,9 +31,9 @@ impl From<InternalDerivationPath> for DerivationPath {
 impl Into<InternalDerivationPath> for DerivationPath {
     fn into(self) -> InternalDerivationPath {
         match self {
-            DerivationPath::CAP26 { value } => InternalDerivationPath::CAP26 { alue.into() },
+            DerivationPath::CAP26 { value } => InternalDerivationPath::CAP26 { value: value.into() },
             DerivationPath::BIP44Like { value } => {
-                InternalDerivationPath::BIP44Like { value.into() }
+                InternalDerivationPath::BIP44Like { value: value.into() }
             }
         }
     }
@@ -58,7 +58,11 @@ pub fn new_derivation_path_from_string(
 
 #[uniffi::export]
 pub fn derivation_path_to_hd_path(path: &DerivationPath) -> HDPath {
-    path.into_internal().hd_path().clone().into()
+    match path {
+        DerivationPath::CAP26 { value } => value.path.clone().into(),
+        DerivationPath::BIP44Like { value } => value.path.clone().into(),
+        
+    }
 }
 
 #[uniffi::export]

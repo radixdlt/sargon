@@ -153,7 +153,7 @@ macro_rules! decl_security_structure_of {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone,  PartialEq, Eq, Hash,  uniffi::Record,
+                Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
             )]
             pub struct [< SecurityStructureOf $factor s >] {
                 /// Metadata of this Security Structure, such as globally unique and

@@ -24,6 +24,7 @@ use sargon::Account as InternalAccount;
     PartialEq,
     Hash,
     Eq,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Account {
@@ -74,7 +75,7 @@ impl From<InternalAccount> for Account {
             display_name: value.display_name.into(),
             security_state: value.security_state.into(),
             appearance_id: value.appearance_id.into(),
-            flags: value.flags.into(),
+            flags: value.flags.into_vec(),
             on_ledger_settings: value.on_ledger_settings.into(),
         }
     }
@@ -88,7 +89,7 @@ impl Into<InternalAccount> for Account {
             display_name: self.display_name.into(),
             security_state: self.security_state.into(),
             appearance_id: self.appearance_id.into(),
-            flags: self.flags.into(),
+            flags: self.flags.into_identified_vec(),
             on_ledger_settings: self.on_ledger_settings.into(),
         }
     }

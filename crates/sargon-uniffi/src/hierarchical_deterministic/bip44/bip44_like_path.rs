@@ -75,7 +75,7 @@ pub fn bip44_like_path_to_string(path: &BIP44LikePath) -> String {
 
 #[uniffi::export]
 pub fn bip44_like_path_get_address_index(path: &BIP44LikePath) -> HDPathValue {
-    path.into_internal().last_component().index()
+    path.into_internal().get_address_index()
 }
 
 #[uniffi::export]

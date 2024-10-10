@@ -32,7 +32,7 @@ impl From<InternalAuthorizedPersonaDetailed> for AuthorizedPersonaDetailed {
         Self {
             identity_address: value.identity_address.into(),
             display_name: value.display_name.into(),
-            simple_accounts: value.simple_accounts.map(Into::into),
+            simple_accounts: value.simple_accounts.map(|v| v.into_vec()),
             shared_persona_data: value.shared_persona_data.into(),
             has_authentication_signing_key: value.has_authentication_signing_key,
         }
@@ -44,7 +44,7 @@ impl Into<InternalAuthorizedPersonaDetailed> for AuthorizedPersonaDetailed {
         InternalAuthorizedPersonaDetailed {
             identity_address: self.identity_address.into(),
             display_name: self.display_name.into(),
-            simple_accounts: self.simple_accounts.map(Into::into),
+            simple_accounts: self.simple_accounts.map(|v| v.into_identified_vec()),
             shared_persona_data: self.shared_persona_data.into(),
             has_authentication_signing_key: self.has_authentication_signing_key,
         }

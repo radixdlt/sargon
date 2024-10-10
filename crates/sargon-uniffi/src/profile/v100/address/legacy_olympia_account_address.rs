@@ -46,7 +46,7 @@ pub fn new_legacy_olympia_account_address_sample_other(
 pub fn new_legacy_olympia_account_address_from_public_key(
     public_key: Secp256k1PublicKey,
 ) -> LegacyOlympiaAccountAddress {
-    InternalLegacyOlympiaAccountAddress::from(public_key.into()).into()
+    InternalLegacyOlympiaAccountAddress::from(public_key.into_internal()).into()
 }
 
 #[uniffi::export]
@@ -68,7 +68,7 @@ pub fn legacy_olympia_account_address_formatted(
     address: &LegacyOlympiaAccountAddress,
     format: AddressFormat,
 ) -> String {
-    address.into_internal().formatted(format.into())
+    address.into_internal().formatted(format.into_internal())
 }
 
 #[uniffi::export]
@@ -84,7 +84,7 @@ pub fn legacy_olympia_account_address_is_legacy_of_babylon(
     babylon_account_address: &AccountAddress,
 ) -> bool {
     babylon_account_address.into_internal().was_migrated_from_legacy_olympia_account_address(
-        legacy_olympia_address.into(),
+        &legacy_olympia_address.into_internal(),
     )
 }
 

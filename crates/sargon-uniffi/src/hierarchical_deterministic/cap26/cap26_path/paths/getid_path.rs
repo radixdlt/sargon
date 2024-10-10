@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::HDPath as InternalHDPath;
+use sargon::GetIDPath as InternalGetIDPath;
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
 /// which is used by all hierarchal deterministic factor sources to derive
@@ -16,16 +16,23 @@ pub struct GetIDPath {
     pub path: HDPath,
 }
 
-impl From<InternalHDPath> for GetIDPath {
-    fn from(value: InternalHDPath) -> Self {
+impl From<InternalGetIDPath> for GetIDPath {
+    fn from(value: InternalGetIDPath) -> Self {
         Self {
-            path: value.into(),
+            path: value.path.into(),
         }
     }
 }
 
-impl Into<InternalHDPath> for GetIDPath {
-    fn into(self) -> InternalHDPath {
-        self.path.into()
+impl Into<InternalGetIDPath> for GetIDPath {
+    fn into(self) -> InternalGetIDPath {
+        InternalGetIDPath {
+            path: self.path.into(),
+        }
     }
+}
+
+#[uniffi::export]
+pub fn default_get_id_path() -> GetIDPath {
+    InternalGetIDPath::default().into()
 }

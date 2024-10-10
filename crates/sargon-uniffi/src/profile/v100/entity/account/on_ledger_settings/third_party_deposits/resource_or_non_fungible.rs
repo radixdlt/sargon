@@ -11,20 +11,20 @@ pub enum ResourceOrNonFungible {
     NonFungible { value: NonFungibleGlobalId },
 }
 
-impl From<ResourceOrNonFungible> for InternalResourceOrNonFungible {
+impl From<InternalResourceOrNonFungible> for ResourceOrNonFungible {
     fn from(value: ResourceOrNonFungible) -> Self {
         match value {
-            ResourceOrNonFungible::Resource { value } => InternalResourceOrNonFungible::Resource(value.into()),
-            ResourceOrNonFungible::NonFungible { value } => InternalResourceOrNonFungible::NonFungible(value.into()),
+            InternalResourceOrNonFungible::Resource { value } => ResourceOrNonFungible::Resource { value: value.into() },
+            InternalResourceOrNonFungible::NonFungible { value } => ResourceOrNonFungible::NonFungible { value: value.into() },
         }
     }
 }
 
-impl Into<ResourceOrNonFungible> for InternalResourceOrNonFungible {
-    fn into(self) -> ResourceOrNonFungible {
+impl Into<InternalResourceOrNonFungible> for ResourceOrNonFungible {
+    fn into(self) -> InternalResourceOrNonFungible {
         match self {
-            InternalResourceOrNonFungible::Resource(value) => ResourceOrNonFungible::Resource { value: value.into() },
-            InternalResourceOrNonFungible::NonFungible(value) => ResourceOrNonFungible::NonFungible { value: value.into() },
+            ResourceOrNonFungible::Resource { value } => InternalResourceOrNonFungible::Resource { value: value.into() },
+            ResourceOrNonFungible::NonFungible { value } => InternalResourceOrNonFungible::NonFungible { value: value.into() },
         }
     }
 }

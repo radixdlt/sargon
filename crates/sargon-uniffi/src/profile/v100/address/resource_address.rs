@@ -29,37 +29,37 @@ pub fn resource_address_is_non_fungible(address: &ResourceAddress) -> bool {
 
 #[uniffi::export]
 pub fn new_resource_address_sample_mainnet_xrd() -> ResourceAddress {
-    InternalAddress::sample_mainnet_xrd().into()
+    InternalResourceAddress::sample_mainnet_xrd().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_mainnet_candy() -> ResourceAddress {
-    InternalAddress::sample_mainnet_candy().into()
+    InternalResourceAddress::sample_mainnet_candy().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_mainnet_nft_gc_membership() -> ResourceAddress
 {
-    InternalAddress::sample_mainnet_nft_gc_membership().into()
+    InternalResourceAddress::sample_mainnet_nft_gc_membership().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_xrd() -> ResourceAddress {
-    InternalAddress::sample_stokenet_xrd().into()
+    InternalResourceAddress::sample_stokenet_xrd().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_gum() -> ResourceAddress {
-    InternalAddress::sample_stokenet_gum().into()
+    InternalResourceAddress::sample_stokenet_gum().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_gc_tokens() -> ResourceAddress {
-    InternalAddress::sample_stokenet_gc_tokens().into()
+    InternalResourceAddress::sample_stokenet_gc_tokens().into()
 }
 
 #[uniffi::export]
 pub fn new_resource_address_sample_stokenet_candy() -> ResourceAddress {
-    InternalAddress::sample_stokenet_candy().into()
+    InternalResourceAddress::sample_stokenet_candy().into()
 }
 

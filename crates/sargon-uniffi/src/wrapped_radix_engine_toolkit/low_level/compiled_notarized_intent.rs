@@ -3,10 +3,10 @@ use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
 
 #[derive(
     Clone,
-    
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct CompiledNotarizedIntent {
@@ -16,7 +16,7 @@ pub struct CompiledNotarizedIntent {
 impl From<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
     fn from(value: InternalCompiledNotarizedIntent) -> Self {
         Self {
-            secret_magic: value.secret_magic.into(),
+            secret_magic: value.0.into(),
         }
     }
 }

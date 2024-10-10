@@ -66,7 +66,7 @@ pub fn new_device_factor_source_babylon(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     host_info: &HostInfo,
 ) -> DeviceFactorSource {
-    InternalDeviceFactorSource::babylon(is_main, mnemonic_with_passphrase.into(), host_info.into()).into()
+    InternalDeviceFactorSource::babylon(is_main, &mnemonic_with_passphrase.into_internal(), &host_info.into_internal()).into()
 }
 
 #[uniffi::export]
@@ -74,7 +74,7 @@ pub fn new_device_factor_source_olympia(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     host_info: &HostInfo,
 ) -> DeviceFactorSource {
-    InternalDeviceFactorSource::olympia(mnemonic_with_passphrase.into(), host_info.into()).into()
+    InternalDeviceFactorSource::olympia(&mnemonic_with_passphrase.into_internal(), &host_info.into_internal()).into()
 }
 
 #[uniffi::export]

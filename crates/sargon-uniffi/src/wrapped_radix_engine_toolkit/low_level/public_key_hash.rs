@@ -4,8 +4,6 @@ use sargon::PublicKeyHash as InternalPublicKeyHash;
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
 #[derive(
     Clone,
-    
-    
     PartialEq,
     EnumAsInner,
     Eq,
@@ -20,8 +18,8 @@ pub enum PublicKeyHash {
 impl From<InternalPublicKeyHash> for PublicKeyHash {
     fn from(value: InternalPublicKeyHash) -> Self {
         match value {
-            InternalPublicKeyHash::Ed25519 { value } => Self::Ed25519 { value },
-            InternalPublicKeyHash::Secp256k1 { value } => Self::Secp256k1 { value },
+            InternalPublicKeyHash::Ed25519 { value } => Self::Ed25519 { value: value.into() },
+            InternalPublicKeyHash::Secp256k1 { value } => Self::Secp256k1 { value: value.into() },
         }
     }
 }
@@ -29,15 +27,15 @@ impl From<InternalPublicKeyHash> for PublicKeyHash {
 impl Into<InternalPublicKeyHash> for PublicKeyHash {
     fn into(self) -> InternalPublicKeyHash {
         match self {
-            PublicKeyHash::Ed25519 { value } => InternalPublicKeyHash::Ed25519 { value },
-            PublicKeyHash::Secp256k1 { value } => InternalPublicKeyHash::Secp256k1 { value },
+            PublicKeyHash::Ed25519 { value } => InternalPublicKeyHash::Ed25519 { value: value.into() },
+            PublicKeyHash::Secp256k1 { value } => InternalPublicKeyHash::Secp256k1 { value: value.into() },
         }
     }
 }
 
 #[uniffi::export]
 pub fn new_public_key_hash_of_key(public_key: PublicKey) -> PublicKeyHash {
-    InternalPublicKeyHash::hash(public_key.into()).into()
+    InternalPublicKeyHash::hash(public_key.into_internal()).into()
 }
 
 #[uniffi::export]

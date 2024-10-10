@@ -15,7 +15,7 @@ use sargon::BagOfBytes as InternalBagOfBytes;
     Default,
     Hash,
     InternalConversion,
-     uniffi::Record,
+    uniffi::Record,
 )]
 pub struct BagOfBytes {
     /// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
@@ -52,6 +52,12 @@ impl From<Vec<u8>> for BagOfBytes {
 impl Into<Vec<u8>> for BagOfBytes {
     fn into(self) -> Vec<u8> {
         self.bytes.into_iter().map(twos_complement_of_i8).collect()
+    }
+}
+
+impl BagOfBytes {
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.bytes.iter().map(|&i| twos_complement_of_i8(i)).collect()
     }
 }
 

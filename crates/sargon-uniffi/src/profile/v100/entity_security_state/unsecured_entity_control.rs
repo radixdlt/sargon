@@ -37,11 +37,11 @@ impl Into<InternalUnsecuredEntityControl> for UnsecuredEntityControl {
 
 #[uniffi::export]
 pub fn new_unsecured_entity_control_sample() -> UnsecuredEntityControl {
-    InternalUnsecuredEntityControl::sample()
+    InternalUnsecuredEntityControl::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_unsecured_entity_control_sample_other() -> UnsecuredEntityControl {
-    InternalUnsecuredEntityControl::sample_other()
+    InternalUnsecuredEntityControl::sample_other().into()
 }
 

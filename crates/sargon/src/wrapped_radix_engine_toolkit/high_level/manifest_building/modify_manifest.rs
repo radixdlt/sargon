@@ -59,7 +59,7 @@ where
 impl TransactionManifest {
     /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
     /// term for `assert_worktop_contains`.
-    pub(crate) fn modify_add_guarantees<I>(
+    pub fn modify_add_guarantees<I>(
         self,
         guarantees: I,
     ) -> Result<TransactionManifest>
@@ -116,7 +116,7 @@ impl TransactionManifest {
         Ok(manifest)
     }
 
-    pub(crate) fn modify_add_lock_fee(
+    pub fn modify_add_lock_fee(
         self,
         address_of_fee_payer: &AccountAddress,
         fee: Option<Decimal192>,

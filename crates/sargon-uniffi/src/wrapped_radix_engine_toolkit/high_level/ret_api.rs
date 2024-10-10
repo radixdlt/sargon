@@ -10,7 +10,7 @@ pub fn manifest_for_faucet(
 ) -> TransactionManifest {
     InternalTransactionManifest::faucet(
         include_lock_fee_instruction,
-        &address_of_receiving_account.into(),
+        &address_of_receiving_account.into_internal(),
     ).into()
 }
 
@@ -19,7 +19,7 @@ pub fn manifest_marking_account_as_dapp_definition_type(
     account_address: &AccountAddress,
 ) -> TransactionManifest {
     InternalTransactionManifest::marking_account_as_dapp_definition_type(
-        &account_address.into(),
+        &account_address.into_internal(),
     ).into()
 }
 
@@ -29,8 +29,8 @@ pub fn manifest_set_owner_keys_hashes(
     owner_key_hashes: Vec<PublicKeyHash>,
 ) -> TransactionManifest {
     InternalTransactionManifest::set_owner_keys_hashes(
-        &address_of_account_or_persona.into(),
-        owner_key_hashes.into_iter().map(Into::into).collect(),
+        &address_of_account_or_persona.into_internal(),
+        owner_key_hashes.into_vec(),
     ).into()
 }
 
@@ -41,9 +41,9 @@ pub fn manifest_create_fungible_token_with_metadata(
     metadata: TokenDefinitionMetadata,
 ) -> TransactionManifest {
     InternalTransactionManifest::create_fungible_token_with_metadata(
-        &address_of_owner.into(),
-        initial_supply.into(),
-        metadata.into(),
+        &address_of_owner.into_internal(),
+        initial_supply.into_internal(),
+        metadata.into_internal(),
     ).into()
 }
 
@@ -51,7 +51,7 @@ pub fn manifest_create_fungible_token_with_metadata(
 pub fn manifest_create_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    InternalTransactionManifest::create_fungible_token(&address_of_owner.into()).into()
+    InternalTransactionManifest::create_fungible_token(&address_of_owner.into_internal()).into()
 }
 
 /// Creates many fungible tokens, with initial supply, to be owned by `address_of_owner`.
@@ -65,7 +65,7 @@ pub fn manifest_create_multiple_fungible_tokens(
     count: Option<u8>,
 ) -> TransactionManifest {
     InternalTransactionManifest::create_multiple_fungible_tokens(
-        &address_of_owner.into(),
+        &address_of_owner.into_internal(),
         count,
     ).into()
 }
@@ -76,7 +76,7 @@ pub fn manifest_create_non_fungible_token(
     nfts_per_collection: Option<u8>,
 ) -> TransactionManifest {
     InternalTransactionManifest::create_single_nft_collection(
-        &address_of_owner.into(),
+        &address_of_owner.into_internal(),
         nfts_per_collection.map(|n| n as u64).unwrap_or(20),
     ).into()
 }
@@ -88,7 +88,7 @@ pub fn manifest_create_multiple_non_fungible_tokens(
     nfts_per_collection: Option<u8>,
 ) -> TransactionManifest {
     InternalTransactionManifest::create_multiple_nft_collections(
-        &address_of_owner.into(),
+        &address_of_owner.into_internal(),
         collection_count.map(|n| n as u16).unwrap_or(15),
         nfts_per_collection.map(|n| n as u64).unwrap_or(10),
     ).into()
@@ -100,9 +100,9 @@ pub fn manifest_stakes_claim(
     stake_claims: Vec<StakeClaim>,
 ) -> TransactionManifest {
     InternalTransactionManifest::stake_claims(
-        &account_address.into(),
-        stake_claims.into_iter().map(Into::into).collect(),
-        ).into()
+        &account_address.into_internal(),
+        stake_claims.into_vec(),
+    ).into()
 }
 
 #[uniffi::export]
@@ -111,7 +111,7 @@ pub fn manifest_third_party_deposit_update(
     from: ThirdPartyDeposits,
     to: ThirdPartyDeposits,
 ) -> TransactionManifest {
-    InternalTransactionManifest::third_party_deposit_update(&account_address.into(), from.into(), to.into()).into()
+    InternalTransactionManifest::third_party_deposit_update(&account_address.into_internal(), from.into_internal(), to.into_internal()).into()
 }
 
 #[uniffi::export]
@@ -123,7 +123,7 @@ pub fn modify_manifest_lock_fee(
     manifest
     .into_internal()
     .modify_add_lock_fee(
-        &address_of_fee_payer.into(), 
+        &address_of_fee_payer.into_internal(), 
         fee.map(Into::into)
     ).into()
 }
@@ -135,7 +135,7 @@ pub fn modify_manifest_add_guarantees(
     manifest: TransactionManifest,
     guarantees: Vec<TransactionGuarantee>,
 ) -> Result<TransactionManifest> {
-   map_result_from_internal(manifest.into_internal().modify_add_guarantees(guarantees.into_iter().map(Into::into).collect()))
+   map_result_from_internal(manifest.into_internal().modify_add_guarantees(guarantees.into_internal_vec()))
 }
 
 #[uniffi::export]

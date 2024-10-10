@@ -92,7 +92,7 @@ pub fn non_fungible_local_id_formatted(
     id: &NonFungibleLocalId,
     format: AddressFormat,
 ) -> String {
-    id.into_internal().formatted(format.into())
+    id.into_internal().formatted(format.into_internal())
 }
 
 #[uniffi::export]
@@ -111,14 +111,14 @@ pub fn new_non_fungible_local_id_string(
 pub fn new_non_fungible_local_id_bytes(
     bytes: BagOfBytes,
 ) -> Result<NonFungibleLocalId> {
-    InternalNonFungibleLocalId::bytes(bytes.into()).map_result()
+    InternalNonFungibleLocalId::bytes(bytes.into_internal()).map_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_ruid(
     bytes: BagOfBytes,
 ) -> Result<NonFungibleLocalId> {
-    InternalNonFungibleLocalId::ruid(bytes.into()).map_result()
+    InternalNonFungibleLocalId::ruid(bytes.into_internal()).map_result()
 }
 
 #[uniffi::export]

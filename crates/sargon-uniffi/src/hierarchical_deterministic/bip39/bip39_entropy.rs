@@ -18,10 +18,12 @@ macro_rules! entropy_with_byte_counts {
                 );
             )+
 
+            use sargon::$enum_name as [< Internal $enum_name >];
+
             $(
                 #[doc = $expr]
             )*
-            #[derive(uniffi::Enum)]
+            #[derive(InternalConversion, uniffi::Enum)]
             pub enum $enum_name {
                 $(
                     [< EntropyOf $byte_count Bytes >]([< Entropy $byte_count Bytes >]),

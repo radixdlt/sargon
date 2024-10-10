@@ -35,8 +35,8 @@ pub struct FactorSourceCryptoParameters {
 impl From<InternalFactorSourceCryptoParameters> for FactorSourceCryptoParameters {
     fn from(value: InternalFactorSourceCryptoParameters) -> Self {
         Self {
-            supported_curves: value.supported_curves.into(),
-            supported_derivation_path_schemes: value.supported_derivation_path_schemes.into(),
+            supported_curves: value.supported_curves.into_vec(),
+            supported_derivation_path_schemes: value.supported_derivation_path_schemes.into_vec(),
         }
     }
 }
@@ -44,8 +44,8 @@ impl From<InternalFactorSourceCryptoParameters> for FactorSourceCryptoParameters
 impl Into<InternalFactorSourceCryptoParameters> for FactorSourceCryptoParameters {
     fn into(self) -> InternalFactorSourceCryptoParameters {
         InternalFactorSourceCryptoParameters {
-            supported_curves: self.supported_curves.into(),
-            supported_derivation_path_schemes: self.supported_derivation_path_schemes.into(),
+            supported_curves: self.supported_curves.into_identified_vec(),
+            supported_derivation_path_schemes: self.supported_derivation_path_schemes.into_identified_vec(),
         }
     }
 }

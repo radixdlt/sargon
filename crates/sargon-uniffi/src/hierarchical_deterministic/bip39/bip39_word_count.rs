@@ -6,12 +6,10 @@ use sargon::BIP39WordCount as InternalBIP39WordCount;
 /// use 24 words.
 #[derive(
     Clone,
-    
-    
     PartialEq,
     Eq,
     Hash,
-
+    InternalConversion,
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -58,6 +56,6 @@ impl Into<InternalBIP39WordCount> for BIP39WordCount {
 
 #[uniffi::export]
 pub fn bip39_word_count_all() -> Vec<BIP39WordCount> {
-    InternalBIP39WordCount::all().into_iter().map(Into::into).collect()
+    InternalBIP39WordCount::all().into_vec()
 }
 

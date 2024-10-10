@@ -9,8 +9,7 @@ pub type HDPathValue = u32;
     PartialEq,
     Eq,
     Hash,
-    
-    
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct HDPathComponent {
@@ -35,6 +34,6 @@ impl Into<InternalHDPathComponent> for HDPathComponent {
 pub fn hd_path_component_get_non_hardened_value(
     component: HDPathComponent,
 ) -> HDPathValue {
-    component.into_internal().index()
+    component.value
 }
 

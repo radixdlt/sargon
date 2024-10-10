@@ -6,6 +6,7 @@ use sargon::HDPath as InternalHDPath;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct HDPath {
@@ -15,7 +16,7 @@ pub struct HDPath {
 impl From<InternalHDPath> for HDPath {
     fn from(value: InternalHDPath) -> Self {
         Self {
-            components: value.components.into_iter().map(Into::into).collect(),
+            components: value.components.into_vec(),
         }
     }
 }
@@ -23,7 +24,7 @@ impl From<InternalHDPath> for HDPath {
 impl Into<InternalHDPath> for HDPath {
     fn into(self) -> InternalHDPath {
         InternalHDPath {
-            components: self.components.into_iter().map(Into::into).collect(),
+            components: self.components.into_internal_vec(),
         }
     }
 }

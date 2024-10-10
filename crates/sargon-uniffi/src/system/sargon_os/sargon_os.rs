@@ -41,7 +41,7 @@ impl SargonOS {
         hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
         accounts: Accounts,
     ) -> Result<()> {
-        self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into(), accounts.into_internal_vec()).await.map_result()
+        self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into(), accounts.into_identified_vec()).await.map_result()
     }
 
     pub async fn delete_wallet(&self) -> Result<()> {

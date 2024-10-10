@@ -47,9 +47,9 @@ impl From<InternalProfile> for Profile {
 	fn from(value: InternalProfile) -> Self {
         Profile {
             header: value.header.into(),
-            factor_sources: value.factor_sources.into(),
+            factor_sources: value.factor_sources.into_vec(),
             app_preferences: value.app_preferences.into(),
-            networks: value.networks.into(),
+            networks: value.networks.into_vec(),
         }
 	}
 }
@@ -58,9 +58,9 @@ impl Into<InternalProfile> for Profile {
 	fn into(self) -> InternalProfile {
         InternalProfile {
             header: self.header.into(),
-            factor_sources: self.factor_sources.into(),
+            factor_sources: self.factor_sources.into_identified_vec(),
             app_preferences: self.app_preferences.into(),
-            networks: self.networks.into(),
+            networks: self.networks.into_identified_vec(),
         }
 	}
 }
@@ -84,7 +84,7 @@ pub fn new_profile_with_mnemonic(
     host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    InternalProfile::new(mnemonic.into(), host_id.into(), host_info.into()).into()
+    InternalProfile::new(mnemonic.into_internal(), host_id.into_internal(), host_info.into_internal()).into()
 }
 
 /// # Panics
@@ -96,9 +96,9 @@ pub fn new_profile(
     host_info: HostInfo,
 ) -> Profile {
     InternalProfile::from_device_factor_source(
-        device_factor_source.into(),
-        host_id.into(),
-        host_info.into(),
+        device_factor_source.into_internal(),
+        host_id.into_internal(),
+        host_info.into_internal(),
         None::<Accounts>,
     ).into()
 }
@@ -132,10 +132,10 @@ pub fn new_profile_from_encryption_bytes(
     json_string: String,
     decryption_password: String,
 ) -> Result<Profile> {
-    Profile::new_from_encrypted_profile_json_string(
+    InternalProfile::new_from_encrypted_profile_json_string(
         json_string,
         decryption_password,
-    )
+    ).map_result()
 }
 
 #[uniffi::export]
@@ -143,7 +143,7 @@ pub fn profile_encrypt_with_password(
     profile: &Profile,
     encryption_password: String,
 ) -> String {
-    profile.to_encrypted_profile_json_str(encryption_password)
+    profile.into_internal().to_encrypted_profile_json_str(encryption_password)
 }
 
 // ################
@@ -153,14 +153,14 @@ pub fn profile_encrypt_with_password(
 pub fn profile_analyze_contents_of_file(
     contents: String,
 ) -> ProfileFileContents {
-    Profile::analyze_contents_of_file(contents)
+    InternalProfile::analyze_contents_of_file(contents).into()
 }
 
 #[uniffi::export]
 pub fn check_if_profile_json_contains_legacy_p2p_links(
     json_str: String,
 ) -> bool {
-    Profile::check_if_profile_json_contains_legacy_p2p_links(json_str)
+    InternalProfile::check_if_profile_json_contains_legacy_p2p_links(json_str)
 }
 
 #[uniffi::export]
@@ -168,7 +168,7 @@ pub fn check_if_encrypted_profile_json_contains_legacy_p2p_links(
     json_str: String,
     password: String,
 ) -> bool {
-    Profile::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+    InternalProfile::check_if_encrypted_profile_json_contains_legacy_p2p_links(
         json_str, password,
     )
 }

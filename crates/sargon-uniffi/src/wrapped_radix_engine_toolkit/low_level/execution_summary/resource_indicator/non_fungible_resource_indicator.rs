@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleResourceIndicator as InternalNonFungibleResourceIndicator;
 
-#[derive(Clone,  PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum NonFungibleResourceIndicator {
     ByAll {
         predicted_amount: PredictedDecimal,

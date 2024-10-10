@@ -66,36 +66,36 @@ pub fn pool_address_kind(address: &PoolAddress) -> PoolKind {
 /// Sample to a mainnet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_single() -> PoolAddress {
-    InternalAddress::sample_mainnet().into()
+    InternalPoolAddress::sample_mainnet().into()
 }
 
 /// Sample to a mainnet PoolAddress with two resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_two() -> PoolAddress {
-    InternalAddress::sample_mainnet_other().into()
+    InternalPoolAddress::sample_mainnet_other().into()
 }
 
 /// Sample to a mainnet PoolAddress with three resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_multi() -> PoolAddress {
-    InternalAddress::sample_mainnet_multi_pool().into()
+    InternalPoolAddress::sample_mainnet_multi_pool().into()
 }
 
 /// Sample to a stokenet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_single() -> PoolAddress {
-    InternalAddress::sample_stokenet().into()
+    InternalPoolAddress::sample_stokenet().into()
 }
 
 /// Sample to a stokenet PoolAddress with two resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_two() -> PoolAddress {
-    InternalAddress::sample_stokenet_other().into()
+    InternalPoolAddress::sample_stokenet_other().into()
 }
 
 /// Sample to a stokenet PoolAddress with three resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_multi() -> PoolAddress {
-    InternalAddress::sample_stokenet_multi_pool().into()
+    InternalPoolAddress::sample_stokenet_multi_pool().into()
 }
 

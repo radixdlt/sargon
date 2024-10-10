@@ -17,9 +17,3 @@ impl InternalEntropyProviderDriver for EntropyProviderDriverAdapter {
         self.wrapped.generate_secure_random_bytes().into()
     }
 }
-
-impl Into<InternalEntropy32Bytes> for Entropy32Bytes {
-    fn into(self) -> InternalEntropy32Bytes {
-        unimplemented!()
-    }
-}

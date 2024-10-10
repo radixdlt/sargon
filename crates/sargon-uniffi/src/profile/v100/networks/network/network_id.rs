@@ -130,6 +130,6 @@ pub fn network_id_discriminant(id: NetworkID) -> u8 {
 
 #[uniffi::export]
 pub fn network_ids_all() -> Vec<NetworkID> {
-    InternalNetworkID::all().iter().map(|id| id.into()).collect()
+    InternalNetworkID::all().into_vec()
 }
 

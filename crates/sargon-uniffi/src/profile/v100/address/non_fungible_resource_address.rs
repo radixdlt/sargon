@@ -14,7 +14,7 @@ macro_rules! decl_specialized_address {
     ) => {
 
         paste! {
-            use sargon::$specialized_address_type as InternalAddress;
+            use sargon::$specialized_address_type as [< Internal $specialized_address_type >];
 
             $(
                 #[doc = $expr]
@@ -32,22 +32,22 @@ macro_rules! decl_specialized_address {
                 secret_magic: $base_addr
             }
 
-            impl From<InternalAddress> for $specialized_address_type {
-                fn from(value: InternalAddress) -> Self {
+            impl From<[< Internal $specialized_address_type >]> for $specialized_address_type {
+                fn from(value: [< Internal $specialized_address_type >]) -> Self {
                     Self { secret_magic: value.0.into() }
                 }
             }
 
-            impl Into<InternalAddress> for $specialized_address_type {
-                fn into(self) -> InternalAddress {
-                    InternalAddress(self.secret_magic.into())
+            impl Into<[< Internal $specialized_address_type >]> for $specialized_address_type {
+                fn into(self) -> [< Internal $specialized_address_type >] {
+                    [< Internal $specialized_address_type >](self.secret_magic.into())
                 }
             }
 
             /// Tries to bech32 decode the string into a specialized address.
             #[uniffi::export]
             pub fn [< new_ $specialized_address_type:snake >](bech32: String) -> Result<$specialized_address_type> {
-                InternalAddress::new_from_bech32(bech32).map_result()
+                [< Internal $specialized_address_type >]::new_from_bech32(bech32).map_result()
             }
 
             /// Returns the base address of this specialized address.
@@ -104,25 +104,25 @@ decl_specialized_address!(
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_mainnet(
 ) -> NonFungibleResourceAddress {
-    InternalAddress::sample_mainnet().into()
+    InternalNonFungibleResourceAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_mainnet_other(
 ) -> NonFungibleResourceAddress {
-    InternalAddress::sample_mainnet_other().into()
+    InternalNonFungibleResourceAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_stokenet(
 ) -> NonFungibleResourceAddress {
-    InternalAddress::sample_stokenet().into()
+    InternalNonFungibleResourceAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_stokenet_other(
 ) -> NonFungibleResourceAddress {
-    InternalAddress::sample_stokenet_other().into()
+    InternalNonFungibleResourceAddress::sample_stokenet_other().into()
 }
 
 /// Returns a random address in `network_id` as Network
@@ -130,6 +130,6 @@ pub fn new_non_fungible_resource_address_sample_stokenet_other(
 pub fn new_non_fungible_resource_address_random(
     network_id: NetworkID,
 ) -> NonFungibleResourceAddress {
-    InternalAddress::random(network_id.into()).into()
+    InternalNonFungibleResourceAddress::random(network_id.into()).into()
 }
 

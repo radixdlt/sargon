@@ -31,7 +31,7 @@ impl SargonOS {
 
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<FactorSources> {
-        map_result_from_internal(self.wrapped.factor_sources())
+        self.wrapped.factor_sources().map_result()
     }
 
     /// Updates the factor source `updated` by mutating current profile and persisting
@@ -44,7 +44,7 @@ impl SargonOS {
         &self,
         updated: FactorSource,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.update_factor_source(updated.into()).await)
+        map_result_from_internal(self.wrapped.update_factor_source(updated.into_internal()).await)
     }
 
     /// Returns `Ok(false)` if the Profile already contained a factor source with the
@@ -63,7 +63,7 @@ impl SargonOS {
         &self,
         factor_source: FactorSource,
     ) -> Result<bool> {
-        map_result_from_internal(self.wrapped.add_factor_source(factor_source.into()).await)
+        map_result_from_internal(self.wrapped.add_factor_source(factor_source.into_internal()).await)
     }
 
     /// Adds all of the provided `factor_sources` to Profile in one single go.
@@ -81,7 +81,7 @@ impl SargonOS {
         &self,
         factor_sources: FactorSources,
     ) -> Result<Vec<FactorSourceID>> {
-        self.wrapped.add_factor_sources(factor_sources.into_internal_vec()).await.map_result()
+        self.wrapped.add_factor_sources(factor_sources.into_identified_vec()).await.map_result()
     }
 
     pub async fn debug_add_all_sample_factors(
@@ -98,8 +98,8 @@ impl SargonOS {
         factor_type: DeviceFactorSourceType,
     ) -> Result<DeviceFactorSource> {
         self.wrapped.create_device_factor_source(
-            mnemonic_with_passphrase.into(),
-            factor_type.into(),
+            mnemonic_with_passphrase.into_internal(),
+            factor_type.into_internal(),
         ).await.map_result()
     }
 
@@ -116,6 +116,6 @@ impl SargonOS {
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        self.wrapped.load_private_device_factor_source_by_id(id.into()).await.map_result()
+        self.wrapped.load_private_device_factor_source_by_id(&id.into_internal()).await.map_result()
     }
 }

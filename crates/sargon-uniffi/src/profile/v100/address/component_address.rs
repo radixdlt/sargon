@@ -32,24 +32,24 @@ pub fn component_address_is_internal(address: &ComponentAddress) -> bool {
 /// Sample to a mainnet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample_mainnet_global() -> ComponentAddress {
-    InternalAddress::sample_mainnet().into()
+    InternalComponentAddress::sample_mainnet().into()
 }
 
 /// Sample to a mainnet ComponentAddress (internal)
 #[uniffi::export]
 pub fn new_component_address_sample_mainnet_internal() -> ComponentAddress {
-    InternalAddress::sample_mainnet_other().into()
+    InternalComponentAddress::sample_mainnet_other().into()
 }
 
 /// Sample to a stokenet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample_stokenet_global() -> ComponentAddress {
-    InternalAddress::sample_stokenet().into()
+    InternalComponentAddress::sample_stokenet().into()
 }
 
 /// Sample to a stokenet ComponentAddress (internal)
 #[uniffi::export]
 pub fn new_component_address_sample_stokenet_internal() -> ComponentAddress {
-    InternalAddress::sample_stokenet_other().into()
+    InternalComponentAddress::sample_stokenet_other().into()
 }
 

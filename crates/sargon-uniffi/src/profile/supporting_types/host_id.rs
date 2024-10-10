@@ -8,6 +8,7 @@ use sargon::HostId as InternalHostId;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct HostId {

@@ -39,7 +39,7 @@ impl From<InternalFactorSourceCommon> for FactorSourceCommon {
             crypto_parameters: value.crypto_parameters.into(),
             added_on: value.added_on.into(),
             last_used_on: value.last_used_on.into(),
-            flags: value.flags.into(),
+            flags: value.flags.into_vec(),
         }
     }
 }
@@ -50,7 +50,7 @@ impl Into<InternalFactorSourceCommon> for FactorSourceCommon {
             crypto_parameters: self.crypto_parameters.into(),
             added_on: self.added_on.into(),
             last_used_on: self.last_used_on.into(),
-            flags: self.flags.into(),
+            flags: self.flags.into_identified_vec(),
         }
     }
 }

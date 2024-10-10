@@ -6,10 +6,10 @@ use sargon::CAP26Path as InternalCAP26Path;
 /// kind: sign transaction or sign auth.
 #[derive(
     Clone,
-    
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum CAP26Path {
@@ -43,11 +43,6 @@ pub fn new_cap26_path_from_string(
     string: String,
 ) -> Result<CAP26Path> {
     InternalCAP26Path::from_str(&string).map_result()
-}
-
-#[uniffi::export]
-pub fn default_get_id_path() -> GetIDPath {
-    GetIDPath.into_internal()::default().into()
 }
 
 #[uniffi::export]

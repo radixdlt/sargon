@@ -39,10 +39,10 @@ impl From<InternalManifestSummary> for ManifestSummary {
 impl Into<InternalManifestSummary> for ManifestSummary {
     fn into(self) -> InternalManifestSummary {
         InternalManifestSummary {
-            addresses_of_accounts_withdrawn_from: self.addresses_of_accounts_withdrawn_from.into(),
-            addresses_of_accounts_deposited_into: self.addresses_of_accounts_deposited_into.into(),
-            addresses_of_accounts_requiring_auth: self.addresses_of_accounts_requiring_auth.into(),
-            addresses_of_personas_requiring_auth: self.addresses_of_personas_requiring_auth.into(),
+            addresses_of_accounts_withdrawn_from: self.addresses_of_accounts_withdrawn_from.into_internal_vec(),
+            addresses_of_accounts_deposited_into: self.addresses_of_accounts_deposited_into.into_internal_vec(),
+            addresses_of_accounts_requiring_auth: self.addresses_of_accounts_requiring_auth.into_internal_vec(),
+            addresses_of_personas_requiring_auth: self.addresses_of_personas_requiring_auth.into_internal_vec(),
         }
     }
 }

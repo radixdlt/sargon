@@ -12,13 +12,13 @@ decl_security_structure_of!(
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample(
 ) -> SecurityStructureOfFactorSources {
-    SecurityStructureOfFactorSources::sample()
+    SecurityStructureOfFactorSources::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample_other(
 ) -> SecurityStructureOfFactorSources {
-    SecurityStructureOfFactorSources::sample_other()
+    SecurityStructureOfFactorSources::sample_other().into() 
 }
 
 #[uniffi::export]

@@ -16,6 +16,6 @@ pub struct HomeCardsObserverAdapter {
 
 impl InternalHomeCardsObserver for HomeCardsObserverAdapter {
     fn handle_cards_update(&self, cards: InternalHomeCards) {
-        self.wrapped.handle_cards_update(cards.into())
+        self.wrapped.handle_cards_update(cards.into_vec())
     }
 }

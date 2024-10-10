@@ -29,21 +29,21 @@ pub fn vault_address_is_non_fungible(address: &VaultAddress) -> bool {
 
 #[uniffi::export]
 pub fn new_vault_address_sample_mainnet_fungible() -> VaultAddress {
-    InternalAddress::sample_mainnet().into()
+    InternalVaultAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_mainnet_non_fungible() -> VaultAddress {
-    InternalAddress::sample_mainnet_other().into()
+    InternalVaultAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_stokenet_fungible() -> VaultAddress {
-    InternalAddress::sample_stokenet().into()
+    InternalVaultAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_stokenet_non_fungible() -> VaultAddress {
-    InternalAddress::sample_stokenet_other().into()
+    InternalVaultAddress::sample_stokenet_other().into()
 }
 

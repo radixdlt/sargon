@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use sargon::HomeCardsStorage as InternalHomeCardsStorage;
 use sargon::BagOfBytes as InternalBagOfBytes;
+use sargon::Result as InternalResult;
 
 /// A trait for storing and loading home cards.
 /// Defines asynchronous methods for saving and loading encoded home cards.
@@ -14,18 +15,17 @@ pub trait HomeCardsStorage: Send + Sync {
     async fn load_cards(&self) -> Result<Option<BagOfBytes>>;
 }
 
-#[derive(Debug)]
 pub struct HomeCardsStorageAdapter {
     pub wrapped: Arc<dyn HomeCardsStorage>,
 }
 
 #[async_trait::async_trait]
 impl InternalHomeCardsStorage for HomeCardsStorageAdapter {
-    async fn save_cards(&self, encoded_cards: InternalBagOfBytes) -> Result<()> {
+    async fn save_cards(&self, encoded_cards: InternalBagOfBytes) -> InternalResult<()> {
         map_result_to_internal(self.wrapped.save_cards(encoded_cards.into()).await)
     }
 
-    async fn load_cards(&self) -> Result<Option<InternalBagOfBytes>> {
+    async fn load_cards(&self) -> InternalResult<Option<InternalBagOfBytes>> {
         map_result_to_internal_optional(self.wrapped.load_cards().await)
     }
 }

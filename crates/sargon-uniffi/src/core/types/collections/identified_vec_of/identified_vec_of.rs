@@ -1,16 +1,16 @@
 use crate::prelude::*;
 
-use sargon::IdentifiedVecOf as InternalIdentifiedVecOf;
+use sargon::IdentifiedVecOf;
 
-pub trait InternalIdentifiedVecToVecConversion<InternalElement, Element> {
+pub trait MapFromInternalIdentifiedVecOf<InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable, Element> {
     fn into_vec(self) -> Vec<Element>;
 }
 
-pub trait InternalIdentifiedVecFromVecConversion<InternalElement, Element> {
-    fn from_vec(value: Vec<Element>) -> Self;
+pub trait MapToInternalIdentifiedVecOf<InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable, Element> {
+    fn into_identified_vec(self) -> IdentifiedVecOf<InternalElement>;
 }
 
-impl<InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable, Element> InternalIdentifiedVecToVecConversion<InternalElement, Element> for InternalIdentifiedVecOf<InternalElement>
+impl<InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable, Element> MapFromInternalIdentifiedVecOf<InternalElement, Element> for IdentifiedVecOf<InternalElement>
 where Element: From<InternalElement>
 {
     fn into_vec(self) -> Vec<Element> {
@@ -18,12 +18,11 @@ where Element: From<InternalElement>
     }
 }
 
-impl<InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable, Element> InternalIdentifiedVecFromVecConversion<InternalElement, Element> for InternalIdentifiedVecOf<InternalElement> 
-where
-    Element: Into<InternalElement>,
+impl<InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable, Element> MapToInternalIdentifiedVecOf<InternalElement, Element> for Vec<Element> 
+where Element: Into<InternalElement>,
 {
-    fn from_vec(value: Vec<Element>) -> Self {
-        value.into_iter().map(Element::into).collect()
+    fn into_identified_vec(self) -> IdentifiedVecOf<InternalElement> {
+        self.into_internal_vec().into()
     }
 }
 
@@ -46,9 +45,9 @@ where
 
 impl<InternalElement, Element> MapIntoInternalVec<InternalElement, Element> for Vec<Element>
 where
-    InternalElement: From<Element>,
+Element: Into<InternalElement>,
 {
     fn into_internal_vec(self) -> Vec<InternalElement> {
-        self.into_iter().map(InternalElement::from).collect()
+        self.into_iter().map(Into::into).collect()
     }
 }

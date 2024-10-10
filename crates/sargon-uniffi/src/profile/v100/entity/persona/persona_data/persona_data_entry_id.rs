@@ -8,6 +8,7 @@ use sargon::PersonaDataEntryID as InternalPersonaDataEntryID;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct PersonaDataEntryID {
@@ -24,6 +25,6 @@ impl From<InternalPersonaDataEntryID> for PersonaDataEntryID {
 
 impl Into<InternalPersonaDataEntryID> for PersonaDataEntryID {
     fn into(self) -> InternalPersonaDataEntryID {
-        Self(self.value)
+        InternalPersonaDataEntryID(self.value)
     }
 }

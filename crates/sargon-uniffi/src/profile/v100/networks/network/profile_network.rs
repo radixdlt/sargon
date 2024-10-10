@@ -5,7 +5,6 @@ use sargon::ProfileNetwork as InternalProfileNetwork;
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
 /// identified by `id` ([`NetworkID`]).
 #[derive(
-    
     Clone,
     PartialEq,
     Eq,
@@ -37,10 +36,10 @@ impl From<InternalProfileNetwork> for ProfileNetwork {
     fn from(profile_network: InternalProfileNetwork) -> Self {
         Self {
             id: profile_network.id.into(),
-            accounts: profile_network.accounts.into(),
-            personas: profile_network.personas.into(),
-            authorized_dapps: profile_network.authorized_dapps.into(),
-            resource_preferences: profile_network.resource_preferences.into(),
+            accounts: profile_network.accounts.into_vec(),
+            personas: profile_network.personas.into_vec(),
+            authorized_dapps: profile_network.authorized_dapps.into_vec(),
+            resource_preferences: profile_network.resource_preferences.into_vec(),
         }
     }
 }
@@ -49,10 +48,10 @@ impl Into<InternalProfileNetwork> for ProfileNetwork {
     fn into(self) -> InternalProfileNetwork {
         InternalProfileNetwork {
             id: self.id.into(),
-            accounts: self.accounts.into(),
-            personas: self.personas.into(),
-            authorized_dapps: self.authorized_dapps.into(),
-            resource_preferences: self.resource_preferences.into(),
+            accounts: self.accounts.into_identified_vec(),
+            personas: self.personas.into_identified_vec(),
+            authorized_dapps: self.authorized_dapps.into_identified_vec(),
+            resource_preferences: self.resource_preferences.into_identified_vec(),
         }
     }
 }

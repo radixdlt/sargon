@@ -70,6 +70,6 @@ pub fn non_fungible_global_id_formatted(
     global_id: &NonFungibleGlobalId,
     format: AddressFormat,
 ) -> String {
-    global_id.into_internal().formatted(format)
+    global_id.into_internal().formatted(format.into_internal())
 }
 

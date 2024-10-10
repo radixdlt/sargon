@@ -29,13 +29,13 @@ macro_rules! decl_secret_bytes {
 
             impl Into<[< Internal $struct_name >]> for $struct_name {
                 fn into(self) -> [< Internal $struct_name >] {
-                    [< Internal $struct_name >]::try_from(self.value.into()).unwrap()
+                    [< Internal $struct_name >]::try_from(self.value.into_internal()).unwrap()
                 }
             }
 
             #[uniffi::export]
             pub fn [< new_ $struct_name:snake _from_bytes >](bytes: BagOfBytes) -> Result<$struct_name> {
-                [< Internal $struct_name >]::try_from(bytes.into()).map_result()
+                [< Internal $struct_name >]::try_from(bytes.into_internal()).map_result()
             }
             
             #[uniffi::export]

@@ -53,6 +53,6 @@ pub fn new_account_for_display_sample_other() -> AccountForDisplay {
 pub fn new_account_for_display_from_account(
     account: Account,
 ) -> AccountForDisplay {
-    InternalAccountForDisplay::from(account).into()
+    InternalAccountForDisplay::from(account.into_internal()).into()
 }
 

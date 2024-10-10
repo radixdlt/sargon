@@ -39,14 +39,14 @@ pub fn new_notary_signature_sample_other() -> NotarySignature {
 
 #[uniffi::export]
 pub fn new_notary_signature(signature: Signature) -> NotarySignature {
-    InternalNotarySignature::from(signature).into()
+    NotarySignature { value: signature }
 }
 
 #[uniffi::export]
 pub fn notary_signature_get_signature(
     notary_signature: &NotarySignature,
 ) -> Signature {
-    notary_signature.into_internal().secret_magic.into()
+    notary_signature.value.clone()
 }
 
 #[uniffi::export]

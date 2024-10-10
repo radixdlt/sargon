@@ -47,13 +47,13 @@ impl Into<InternalLedgerHardwareWalletFactorSource> for LedgerHardwareWalletFact
 #[uniffi::export]
 pub fn new_ledger_hardware_wallet_factor_source_sample(
 ) -> LedgerHardwareWalletFactorSource {
-    InternalLedgerHardwareWalletFactorSource::sample()
+    InternalLedgerHardwareWalletFactorSource::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_ledger_hardware_wallet_factor_source_sample_other(
 ) -> LedgerHardwareWalletFactorSource {
-    InternalLedgerHardwareWalletFactorSource::sample_other()
+    InternalLedgerHardwareWalletFactorSource::sample_other().into()
 }
 
 #[uniffi::export]

@@ -31,27 +31,27 @@ pub fn new_account_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
 ) -> AccountAddress {
-    InternalAddress::new(public_key, network_id).into()
+    InternalAccountAddress::new(public_key.into_internal(), network_id.into_internal()).into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_mainnet() -> AccountAddress {
-    InternalAddress::sample_mainnet().into()
+    InternalAccountAddress::sample_mainnet().into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_mainnet_other() -> AccountAddress {
-    InternalAddress::sample_mainnet_other().into()
+    InternalAccountAddress::sample_mainnet_other().into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_stokenet() -> AccountAddress {
-    InternalAddress::sample_stokenet().into()
+    InternalAccountAddress::sample_stokenet().into()
 }
 
 #[uniffi::export]
 pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
-    InternalAddress::sample_stokenet_other().into()
+    InternalAccountAddress::sample_stokenet_other().into()
 }
 
 /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.

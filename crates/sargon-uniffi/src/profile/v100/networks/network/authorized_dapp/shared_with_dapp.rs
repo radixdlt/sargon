@@ -10,10 +10,6 @@ macro_rules! declare_shared_with_dapp {
         )*
         $struct_name: ident,
         $id: ty,
-        $mod_test_name: ident,
-        $expected_sample_display: literal,
-        $expected_sample_debug: literal,
-        $expected_sample_json: literal
     ) => {
         paste! {
         use sargon::$struct_name as [<Internal $struct_name>];
@@ -62,9 +58,6 @@ macro_rules! declare_shared_with_dapp {
         )*
         $struct_name: ident,
         $id: ty,
-        $expected_sample_display: literal,
-        $expected_sample_debug: literal,
-        $expected_sample_json: literal
     ) => {
         paste! {
             declare_shared_with_dapp!(
@@ -73,10 +66,6 @@ macro_rules! declare_shared_with_dapp {
                 )*
                 $struct_name,
                 $id,
-                [< tests_ $struct_name:snake >],
-                $expected_sample_display,
-                $expected_sample_
-                $expected_sample_json
             );
         }
     };

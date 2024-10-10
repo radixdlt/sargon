@@ -7,8 +7,7 @@ use sargon::Nonce as InternalNonce;
     PartialEq,
     Eq,
     Hash,
-    
-    
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Nonce {
@@ -49,6 +48,6 @@ pub fn new_nonce_sample_other() -> Nonce {
 
 #[uniffi::export]
 pub fn nonce_get_value(nonce: Nonce) -> u32 {
-    u32::from(nonce.into())
+    u32::from(nonce.into_internal())
 }
 

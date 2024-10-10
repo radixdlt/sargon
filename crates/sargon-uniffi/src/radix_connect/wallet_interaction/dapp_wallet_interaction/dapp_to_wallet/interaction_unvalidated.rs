@@ -3,7 +3,7 @@ use sargon::DappToWalletInteractionUnvalidated as InternalDappToWalletInteractio
 
 json_data_convertible!(DappToWalletInteractionUnvalidated);
 
-#[derive( Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  InternalConversion, uniffi::Record)]
 pub struct DappToWalletInteractionUnvalidated {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,

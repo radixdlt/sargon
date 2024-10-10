@@ -14,6 +14,7 @@ use sargon::NonFungibleLocalIdString as InternalNonFungibleLocalIdString;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct NonFungibleLocalIdString {
@@ -26,17 +27,16 @@ impl From<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
     }
 }
 
-impl TryInto<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<InternalNonFungibleLocalIdString> {
-        self.value.parse::<InternalNonFungibleLocalIdString>()
+impl Into<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
+    fn into(self) -> InternalNonFungibleLocalIdString {
+        self.value.parse::<InternalNonFungibleLocalIdString>().unwrap()
     }
+    
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_string_from_str(
     string: String,
 ) -> Result<NonFungibleLocalIdString> {
-    NonFungibleLocalIdString { value: string }.try_into().map_result()
+    string.parse::<InternalNonFungibleLocalIdString>().map_result()
 }

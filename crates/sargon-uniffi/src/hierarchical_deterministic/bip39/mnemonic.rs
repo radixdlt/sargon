@@ -25,9 +25,7 @@ impl From<InternalMnemonic> for Mnemonic {
         Self {
             words: value
                 .words
-                .into_iter()
-                .map(Into::into)
-                .collect(),
+                .into_vec(),
             word_count: value.word_count.into(),
             language: value.language.into(),
         }
@@ -37,9 +35,9 @@ impl From<InternalMnemonic> for Mnemonic {
 impl Into<InternalMnemonic> for Mnemonic {
     fn into(self) -> InternalMnemonic {
         InternalMnemonic {
-            words: self.words.into_iter().map(Into::into).collect(),
-            word_count: self.word_count.into(),
-            language: self.language.into(),
+            words: self.words.into_internal_vec(),
+            word_count: self.word_count.into_internal(),
+            language: self.language.into_internal(),
         }
     }
 }
@@ -49,7 +47,7 @@ pub fn new_mnemonic_generate_with_entropy(
     entropy: BIP39Entropy,
     language: BIP39Language,
 ) -> Mnemonic {
-    InternalMnemonic::from_entropy_in(entropy.into(), language.into()).into()
+    InternalMnemonic::from_entropy_in(entropy.into_internal(), language.into_internal()).into()
 }
 
 /// Returns new mnemonic from a string of words
@@ -63,7 +61,7 @@ pub fn new_mnemonic_from_phrase_language(
     phrase: String,
     language: BIP39Language,
 ) -> Result<Mnemonic> {
-    InternalMnemonic::from(&phrase, language.into()).map_result()
+    InternalMnemonic::from(&phrase, language.into_internal()).map_result()
 }
 
 #[uniffi::export]

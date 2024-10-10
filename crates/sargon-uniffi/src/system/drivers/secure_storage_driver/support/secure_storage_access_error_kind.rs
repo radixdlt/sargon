@@ -1,10 +1,11 @@
 use crate::prelude::*;
+use sargon::SecureStorageAccessErrorKind as InternalSecureStorageAccessErrorKind;
 
 /// An error kind that might be returned during access to secure storage driver. These errors are
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
 /// it `is_manual_cancellation`.
-#[derive(Clone,  PartialEq, uniffi::Enum)]
+#[derive(Clone,  PartialEq, InternalConversion, uniffi::Enum)]
 pub enum SecureStorageAccessErrorKind {
     /// The hardware is unavailable. Try again later.
     HardwareUnavailable,
@@ -70,6 +71,6 @@ delegate_display_debug_into!(SecureStorageAccessErrorKind, InternalSecureStorage
 pub fn secure_storage_access_error_kind_is_manual_cancellation(
     kind: SecureStorageAccessErrorKind,
 ) -> bool {
-    kind.is_manual_cancellation()
+    kind.into_internal().is_manual_cancellation()
 }
 

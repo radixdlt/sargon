@@ -15,26 +15,26 @@ use sargon::Exactly32Bytes as InternalExactly32Bytes;
      uniffi::Record,
 )]
 pub struct Hash {
-    pub(crate) value: BagOfBytes,
+    pub(crate) value: Exactly32Bytes,
 }
 
 impl From<InternalHash> for Hash {
     fn from(value: InternalHash) -> Self {
         Self {
-            value: value.0.into(),
+            value: InternalExactly32Bytes::from(value).into(),
         }
     }
 }
 
 impl Into<InternalHash> for Hash {
     fn into(self) -> InternalHash {
-        InternalHash::from(self.value.into())
+        InternalHash::from(self.value.into_internal())
     }
 }
 
 #[uniffi::export]
 pub fn hash_get_bytes(hash: &Hash) -> Exactly32Bytes {
-    InternalExactly32Bytes::from(*hash.into()).into()
+    InternalExactly32Bytes::from(hash.into_internal()).into()
 }
 
 #[uniffi::export]
@@ -49,7 +49,7 @@ pub fn new_hash_sample_other() -> Hash {
 
 #[uniffi::export]
 pub fn new_hash_from_bytes(bytes: Exactly32Bytes) -> Hash {
-    InternalHash::from(bytes.into()).into()
+    InternalHash::from(bytes.into_internal()).into()
 }
 
 #[uniffi::export]

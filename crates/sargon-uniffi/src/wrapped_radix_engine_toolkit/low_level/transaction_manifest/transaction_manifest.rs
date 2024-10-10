@@ -10,8 +10,8 @@ pub struct TransactionManifest {
 impl From<InternalTransactionManifest> for TransactionManifest {
     fn from(value: InternalTransactionManifest) -> Self {
         Self {
-            instructions: value.instructions().into(),
-            blobs: value.blobs().into(),
+            instructions: value.instructions.into(),
+            blobs: value.blobs.into(),
         }
     }
 }
@@ -40,7 +40,7 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
     network_id: NetworkID,
 ) -> Result<TransactionManifest> {
     InternalTransactionManifest::try_from(
-        unvalidated_transaction_manifest.into(),
+        unvalidated_transaction_manifest.into_internal(),
     ).map_result()
 }
 

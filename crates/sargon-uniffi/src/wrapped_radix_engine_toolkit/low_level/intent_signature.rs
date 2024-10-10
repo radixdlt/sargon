@@ -26,7 +26,7 @@ impl Into<InternalIntentSignature> for IntentSignature {
 pub fn new_intent_signature_from_signature_with_public_key(
     signature_with_public_key: SignatureWithPublicKey,
 ) -> IntentSignature {
-    InternalIntentSignature::from(signature_with_public_key.into())
+    InternalIntentSignature::from(signature_with_public_key.into_internal())
         .into()
 }
 
@@ -34,7 +34,7 @@ pub fn new_intent_signature_from_signature_with_public_key(
 pub fn intent_signature_get_signature_with_public_key(
     intent_signature: &IntentSignature,
 ) -> SignatureWithPublicKey {
-    intent_signature.secret_magic
+    intent_signature.secret_magic.clone()
 }
 
 #[uniffi::export]

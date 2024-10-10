@@ -49,7 +49,7 @@ pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
 pub fn new_public_key_from_bytes(
     bag_of_bytes: BagOfBytes,
 ) -> Result<PublicKey> {
-    InternalPublicKey::try_from(bag_of_bytes.into()).map_result()
+    InternalPublicKey::try_from(bag_of_bytes.to_vec()).map_result()
 }
 
 #[uniffi::export]
@@ -79,5 +79,5 @@ pub fn public_key_is_valid_signature_for_hash(
     signature: Signature,
     hash: Hash,
 ) -> bool {
-    public_key.into_internal().is_valid_signature_for_hash(signature.into(), &hash.into())
+    public_key.into_internal().is_valid_signature_for_hash(signature.into_internal(), &hash.into_internal())
 }

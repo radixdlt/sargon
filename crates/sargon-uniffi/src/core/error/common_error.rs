@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use sargon::CommonError as InternalCommonError;
 use sargon::Result as InternalResult;
+use sargon::IdentifiedVecOf;
 
 use thiserror::Error as ThisError;
 
@@ -41,6 +42,27 @@ where
             .map_err(Into::into) // Converts Err variant using Into
     }
 }
+
+impl<InternalType, Type> MapFromInternalResult<InternalType, Vec<Type>> for InternalResult<Vec<InternalType>>
+where
+Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalType`
+{
+    fn map_result(self) -> Result<Vec<Type>> {
+        self.map(|vec| vec.into_vec()) // Converts Ok variant using From trait
+            .map_err(Into::into) // Converts Err variant using Into
+    }
+}
+
+impl<InternalType:  Debug + PartialEq + Eq + Clone + sargon::Identifiable, Type> MapFromInternalResult<InternalType, Vec<Type>> for InternalResult<IdentifiedVecOf<InternalType>>
+where
+Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalType`
+{
+    fn map_result(self) -> Result<Vec<Type>> {
+        self.map(|vec| vec.into_vec()) // Converts Ok variant using From trait
+            .map_err(Into::into) // Converts Err variant using Into
+    }
+}
+
 
 
 impl From<InternalCommonError> for CommonError {

@@ -26,6 +26,7 @@ use sargon::Persona as InternalPersona;
     PartialEq,
     Hash,
     Eq,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Persona {
@@ -64,7 +65,7 @@ impl From<InternalPersona> for Persona {
             address: value.address.into(),
             display_name: value.display_name.into(),
             security_state: value.security_state.into(),
-            flags: value.flags.into(),
+            flags: value.flags.into_vec(),
             persona_data: value.persona_data.into(),
         }
     }
@@ -77,7 +78,7 @@ impl Into<InternalPersona> for Persona {
             address: self.address.into(),
             display_name: self.display_name.into(),
             security_state: self.security_state.into(),
-            flags: self.flags.into(),
+            flags: self.flags.into_identified_vec(),
             persona_data: self.persona_data.into(),
         }
     }

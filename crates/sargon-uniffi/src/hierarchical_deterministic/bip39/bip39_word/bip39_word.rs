@@ -1,11 +1,12 @@
 use crate::prelude::*;
 use sargon::BIP39Word as InternalBIP39Word;
+use sargon::U11 as InternalU11;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
 #[derive(Zeroize, Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct BIP39Word {
     pub word: String,
-    pub index: U11,
+    pub index: u16,
 
     #[zeroize(skip)]
     pub language: BIP39Language,
@@ -15,7 +16,7 @@ impl From<InternalBIP39Word> for BIP39Word {
     fn from(value: InternalBIP39Word) -> Self {
         Self {
             word: value.word,
-            index: value.index.into(),
+            index: value.index.inner,
             language: value.language.into(),
         }
     }
@@ -25,7 +26,7 @@ impl Into<InternalBIP39Word> for BIP39Word {
     fn into(self) -> InternalBIP39Word {
         InternalBIP39Word {
             word: self.word,
-            index: self.index.into(),
+            index: InternalU11 { inner: self.index },
             language: self.language.into(),
         }
     }

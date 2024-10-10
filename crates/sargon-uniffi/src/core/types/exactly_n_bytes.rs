@@ -37,7 +37,7 @@ macro_rules! decl_exactly_n_bytes {
 
             impl Into<[<InternalExactly $byte_count Bytes>]> for [<Exactly $byte_count Bytes>] {
                 fn into(self) -> [<InternalExactly $byte_count Bytes>] {
-                    [<InternalExactly $byte_count Bytes>]::try_from(self.value.into()).unwrap()
+                    [<InternalExactly $byte_count Bytes>]::try_from(self.value.into_internal()).unwrap()
                 }
             }
 
@@ -50,7 +50,7 @@ macro_rules! decl_exactly_n_bytes {
             pub fn [<new_exactly_ $byte_count _bytes>](
                 bytes: BagOfBytes,
             ) -> Result<[< Exactly $byte_count Bytes >]> {
-                [<InternalExactly $byte_count Bytes>]::try_from(bytes.into()).map_result()
+                [<InternalExactly $byte_count Bytes>]::try_from(bytes.into_internal()).map_result()
             }
 
             #[uniffi::export]

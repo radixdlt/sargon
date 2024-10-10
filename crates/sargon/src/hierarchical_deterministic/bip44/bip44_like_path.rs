@@ -65,6 +65,11 @@ impl BIP44LikePath {
     pub fn is_canonical(&self) -> bool {
         !self.path.components.last().unwrap().is_hardened()
     }
+
+    pub fn get_address_index(&self) -> HDPathValue {
+        self.last_component().index()
+    }
+
 }
 
 impl TryFrom<&HDPath> for BIP44LikePath {

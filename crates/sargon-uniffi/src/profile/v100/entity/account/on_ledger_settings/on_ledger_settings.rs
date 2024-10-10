@@ -11,12 +11,11 @@ use sargon::OnLedgerSettings as InternalOnLedgerSettings;
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
 #[derive(
-    Default,
     Clone,
-    
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct OnLedgerSettings {

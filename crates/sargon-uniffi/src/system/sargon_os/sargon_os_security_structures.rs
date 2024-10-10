@@ -45,6 +45,6 @@ impl SargonOS {
         &self,
         structure: &SecurityStructureOfFactorSources,
     ) -> Result<bool> {
-        self.wrapped.add_security_structure_of_factor_sources(structure.into()).await
+        self.wrapped.add_security_structure_of_factor_sources(&structure.into_internal()).await.map_result()
     }
 }

@@ -47,14 +47,14 @@ pub fn new_ed25519_signature_sample_other() -> Ed25519Signature {
 pub fn new_ed25519_signature_from_exactly_64_bytes(
     bytes: Exactly64Bytes,
 ) -> Ed25519Signature {
-    InternalEd25519Signature::from(bytes.into()).into()
+    InternalEd25519Signature::from(bytes.into_internal()).into()
 }
 
 #[uniffi::export]
 pub fn new_ed25519_signature_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Ed25519Signature> {
-    InternalEd25519Signature::try_from(bytes.into()).map_result()
+    InternalEd25519Signature::try_from(bytes.into_internal()).map_result()
 }
 
 #[uniffi::export]

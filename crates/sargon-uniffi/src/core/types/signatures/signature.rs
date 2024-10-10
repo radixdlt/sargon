@@ -46,7 +46,7 @@ pub fn new_signature_sample_other() -> Signature {
 
 #[uniffi::export]
 pub fn new_signature_from_bytes(bytes: BagOfBytes) -> Result<Signature> {
-    InternalSignature::try_from(bytes.into()).map_result()
+    InternalSignature::try_from(bytes.into_internal()).map_result()
 }
 
 #[uniffi::export]

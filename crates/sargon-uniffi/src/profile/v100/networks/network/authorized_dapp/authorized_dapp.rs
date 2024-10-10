@@ -42,7 +42,7 @@ impl From<InternalAuthorizedDapp> for AuthorizedDapp {
             network_id: value.network_id.into(),
             dapp_definition_address: value.dapp_definition_address.into(),
             display_name: value.display_name,
-            references_to_authorized_personas: value.references_to_authorized_personas.into(),
+            references_to_authorized_personas: value.references_to_authorized_personas.into_vec(),
             preferences: value.preferences.into(),
         }
     }
@@ -54,7 +54,7 @@ impl Into<InternalAuthorizedDapp> for AuthorizedDapp {
             network_id: self.network_id.into(),
             dapp_definition_address: self.dapp_definition_address.into(),
             display_name: self.display_name,
-            references_to_authorized_personas: self.references_to_authorized_personas.into(),
+            references_to_authorized_personas: self.references_to_authorized_personas.into_identified_vec(),
             preferences: self.preferences.into(),
         }
     }
