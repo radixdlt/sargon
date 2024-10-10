@@ -393,9 +393,6 @@ mod transaction_preview_analysis_tests {
             },
             TransactionPreviewResponse {
                 encoded_receipt: "".to_string(),
-                // radix_engine_toolkit_receipt: Some(ScryptoSerializableToolkitTransactionReceipt::Reject {
-                //     reason: "Test".to_string(),
-                // }),
                 radix_engine_toolkit_receipt: None,
                 logs: vec![],
                 receipt: TransactionReceipt {
@@ -407,10 +404,14 @@ mod transaction_preview_analysis_tests {
         let os =
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
+        let manifest = TransactionManifest::set_owner_keys_hashes(
+            &AccountAddress::sample().into(),
+            vec![PublicKeyHash::hash(Ed25519PublicKey::sample_alice())],
+        );
 
         let result = os
             .perform_transaction_preview_analysis(
-                TransactionManifest::sample().instructions_string(),
+                manifest.instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
                 false,
@@ -574,6 +575,7 @@ mod transaction_preview_analysis_tests {
         let os =
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
+        let acc: AccountAddress = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into();
 
         let result = os
             .analyse_transaction_preview(
@@ -585,7 +587,6 @@ mod transaction_preview_analysis_tests {
                 PublicKey::sample(),
             )
             .await;
-        let acc: AccountAddress = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into();
 
         assert_eq!(
             result,
