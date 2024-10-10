@@ -10,6 +10,8 @@ uniffi::custom_newtype!(Epoch, u64);
     PartialEq,
     Eq,
     Hash,
+    Serialize,
+    Deserialize,
     Ord,
     PartialOrd,
     derive_more::Display,

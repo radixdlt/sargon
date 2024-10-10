@@ -175,6 +175,10 @@ base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14
 reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
   "native-tls-vendored",
 ] }
+
+# async-std = "1.13.0"
+async-std = "1.13.0"
+
 # Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
 # This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS
 # The bug is fixed already but the fix is not released yet. https://github.com/kornelski/rust-security-framework/pull/204

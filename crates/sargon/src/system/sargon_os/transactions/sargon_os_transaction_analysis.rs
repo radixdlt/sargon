@@ -2,6 +2,29 @@ use std::sync::RwLockWriteGuard;
 
 use crate::prelude::*;
 
+#[uniffi::export]
+impl SargonOS {
+    pub async fn analyse_transaction_preview(
+        &self,
+        instructions: String,
+        blobs: Blobs,
+        message: Message,
+        is_wallet_transaction: bool,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
+    ) -> Result<TransactionToReview> {
+        self.perform_transaction_preview_analysis(
+            instructions,
+            blobs,
+            message,
+            is_wallet_transaction,
+            nonce,
+            notary_public_key,
+        )
+            .await
+    }
+}
+
 impl SargonOS {
     pub async fn perform_transaction_preview_analysis(
         &self,
@@ -90,7 +113,7 @@ impl SargonOS {
             TransactionPreviewRequestFlags::new(true, false, false),
         );
         let response = gateway_client.transaction_preview(request).await?;
-        if response.receipt.status != TransactionStatus::Succeeded {
+        if response.receipt.status != TransactionReceiptStatus::Succeeded {
             return Err(Self::map_failed_transaction_preview(response));
         };
         Ok(response)
@@ -270,7 +293,7 @@ mod transaction_preview_analysis_tests {
                 radix_engine_toolkit_receipt: None,
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Failed,
+                    status: TransactionReceiptStatus::Failed,
                     error_message: None,
                 },
             },
@@ -314,7 +337,7 @@ mod transaction_preview_analysis_tests {
                 radix_engine_toolkit_receipt: None,
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Failed,
+                    status: TransactionReceiptStatus::Failed,
                     error_message: Some(
                         "AccountError(DepositIsDisallowed".to_string(),
                     ),
@@ -334,7 +357,7 @@ mod transaction_preview_analysis_tests {
                 radix_engine_toolkit_receipt: None,
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Failed,
+                    status: TransactionReceiptStatus::Failed,
                     error_message: Some(
                         "AccountError(NotAllBucketsCouldBeDeposited"
                             .to_string(),
@@ -396,7 +419,7 @@ mod transaction_preview_analysis_tests {
                 radix_engine_toolkit_receipt: None,
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Succeeded,
+                    status: TransactionReceiptStatus::Succeeded,
                     error_message: None,
                 },
             },
@@ -449,7 +472,7 @@ mod transaction_preview_analysis_tests {
                 ),
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Succeeded,
+                    status: TransactionReceiptStatus::Succeeded,
                     error_message: None,
                 },
             },
@@ -510,7 +533,7 @@ mod transaction_preview_analysis_tests {
                 }),
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Succeeded,
+                    status: TransactionReceiptStatus::Succeeded,
                     error_message: None,
                 },
             },
@@ -571,7 +594,7 @@ mod transaction_preview_analysis_tests {
                 }),
                 logs: vec![],
                 receipt: TransactionReceipt {
-                    status: TransactionStatus::Succeeded,
+                    status: TransactionReceiptStatus::Succeeded,
                     error_message: None,
                 },
             },

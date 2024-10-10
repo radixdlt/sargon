@@ -1,7 +1,6 @@
 #![cfg(test)]
 
 use crate::prelude::*;
-use hex::ToHex;
 use std::sync::Mutex;
 
 /// A mocked network antenna, useful for testing.

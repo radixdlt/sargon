@@ -5,6 +5,7 @@ mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_profile;
 mod sargon_os_security_structures;
+mod sargon_os_transactions;
 mod sargon_os_transaction;
 mod sargon_os_transaction_uniffi;
 
@@ -15,3 +16,4 @@ pub use sargon_os_factors::*;
 pub use sargon_os_gateway::*;
 pub use sargon_os_profile::*;
 pub use sargon_os_security_structures::*;
+pub use sargon_os_transactions::*;
