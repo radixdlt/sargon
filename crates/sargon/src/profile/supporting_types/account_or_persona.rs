@@ -155,13 +155,30 @@ mod tests {
 
     #[test]
     fn test_virtual_hierarchical_deterministic_factor_instances() {
-        let sut = SUT::sample();
-        let factor_instances =
+        let mut sut = SUT::sample();
+        let mut factor_instances =
             sut.virtual_hierarchical_deterministic_factor_instances();
         assert_eq!(factor_instances.len(), 1);
         assert_eq!(
             factor_instances.iter().next().unwrap().clone(),
             HierarchicalDeterministicFactorInstance::sample()
+        );
+
+        sut = SUT::sample_other();
+        factor_instances =
+            sut.virtual_hierarchical_deterministic_factor_instances();
+        let mwp = MnemonicWithPassphrase::sample();
+        let bdfs = DeviceFactorSource::babylon(true, &mwp, &HostInfo::sample());
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let factor_instance: HDFactorInstanceIdentityCreation =
+            private_hd_factor_source
+                .derive_entity_creation_factor_instance(NetworkID::Mainnet, 1);
+
+        assert_eq!(factor_instances.len(), 1);
+        assert_eq!(
+            factor_instances.iter().next().unwrap().clone(),
+            HierarchicalDeterministicFactorInstance::from(factor_instance)
         );
     }
 }
