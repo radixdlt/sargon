@@ -5,7 +5,7 @@ use sargon::Security as InternalSecurity;
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
 #[derive(
-    Debug,
+    
     PartialEq,
     Eq,
     Clone,

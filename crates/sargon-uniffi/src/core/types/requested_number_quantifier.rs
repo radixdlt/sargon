@@ -9,7 +9,7 @@ use sargon::RequestedNumberQuantifier as InternalRequestedNumberQuantifier;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

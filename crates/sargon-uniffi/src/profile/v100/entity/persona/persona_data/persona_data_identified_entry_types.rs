@@ -108,7 +108,7 @@ macro_rules! declare_identified_entry {
                 [< PersonaDataEntry $type>],                        // "PhoneNumber" => "PersonaDataEntryPhoneNumber"
                 [< tests_persona_data_identified_ $type:snake >],   // "PhoneNumber" => "tests_persona_data_identified_phone_number"
                 $expected_sample_display,
-                $expected_sample_debug,
+                $expected_sample_
                 $expected_sample_json
             );
         }

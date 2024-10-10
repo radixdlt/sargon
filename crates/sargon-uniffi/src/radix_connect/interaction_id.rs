@@ -4,7 +4,7 @@ use sargon::WalletInteractionId as InternalWalletInteractionId;
 /// We ought to make `WalletInteractionId` a UUID.
 /// Temporarily, it will be a String because the iOS wallet has specific logic that uses custom IDs for wallet interactions.
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::FungibleResourceIndicator as InternalFungibleResourceIndicator;
 
-#[derive(Clone, Debug, PartialEq, Eq, InternalConersion, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum FungibleResourceIndicator {
     Guaranteed { decimal: Decimal },
     Predicted { predicted_decimal: PredictedDecimal },

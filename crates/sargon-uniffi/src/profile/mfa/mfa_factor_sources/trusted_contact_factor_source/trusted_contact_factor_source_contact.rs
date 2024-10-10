@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Hints about the trusted contact.
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

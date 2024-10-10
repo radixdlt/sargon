@@ -3,7 +3,7 @@ use sargon::IdentityPath as InternalIdentityPath;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

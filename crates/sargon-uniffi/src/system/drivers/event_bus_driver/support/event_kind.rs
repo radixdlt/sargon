@@ -4,13 +4,13 @@ use sargon::EventKind as InternalEventKind;
 /// A discriminator identifying the kind of `Event`, this has no associated
 /// values and flattens the otherwise nested `Event` enum.
 #[derive(
-    Debug,
+    
     Clone,
     
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum EventKind {

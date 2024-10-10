@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
-    Clone, PartialEq, Eq, Hash, Debug, uniffi::Enum,
+    Clone, PartialEq, Eq, Hash,  uniffi::Enum,
 )]
 pub enum SecurityQuestionKind {
     Freeform,

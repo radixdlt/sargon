@@ -6,10 +6,10 @@ use sargon::HDPath as InternalHDPath;
 /// the special root key which we hash to form the `FactorSourceIDFromHash`
 #[derive(
     Clone,
-    Debug,
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct GetIDPath {

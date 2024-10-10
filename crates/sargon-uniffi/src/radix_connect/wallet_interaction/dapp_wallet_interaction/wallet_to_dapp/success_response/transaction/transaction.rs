@@ -2,12 +2,12 @@ use crate::prelude::*;
 use sargon::WalletToDappInteractionTransactionResponseItems as InternalWalletToDappInteractionTransactionResponseItems;
 use sargon::WalletToDappInteractionSendTransactionResponseItem as InternalWalletToDappInteractionSendTransactionResponseItem;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct WalletToDappInteractionTransactionResponseItems {
     pub send: WalletToDappInteractionSendTransactionResponseItem,
 }
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
     transaction_intent_hash: IntentHash,
 }

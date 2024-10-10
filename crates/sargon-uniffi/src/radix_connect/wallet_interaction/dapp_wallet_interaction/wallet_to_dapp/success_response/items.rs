@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionResponseItems as InternalWalletToDappInteractionResponseItems;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive( Clone, PartialEq, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponseItems {
     AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems),

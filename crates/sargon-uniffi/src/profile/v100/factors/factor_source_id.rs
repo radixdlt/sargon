@@ -10,7 +10,7 @@ use sargon::FactorSourceID as InternalFactorSourceID;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum FactorSourceID {

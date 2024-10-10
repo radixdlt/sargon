@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionFailureResponse as InternalWalletToDappInteractionFailureResponse;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct WalletToDappInteractionFailureResponse {
     pub interaction_id: WalletInteractionId,
     pub error: DappWalletInteractionErrorType,

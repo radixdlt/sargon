@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// A pair of security question and answer
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Clone, PartialEq, Eq, Hash, Debug,  uniffi::Record,
+    Clone, PartialEq, Eq, Hash,   uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]

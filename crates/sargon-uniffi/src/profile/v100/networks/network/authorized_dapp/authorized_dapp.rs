@@ -4,7 +4,7 @@ use sargon::AuthorizedDapp as InternalAuthorizedDapp;
 /// A connection made between a Radix Dapp and the user.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

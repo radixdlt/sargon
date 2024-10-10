@@ -5,7 +5,7 @@ use sargon::FactorSourceFlag as InternalFactorSourceFlag;
 /// by DeviceFactorSource's to mark which "Babylon" FactorSource is the **main** one.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

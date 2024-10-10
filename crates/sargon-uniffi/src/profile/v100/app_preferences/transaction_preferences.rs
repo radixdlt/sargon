@@ -3,7 +3,7 @@ use sargon::TransactionPreferences as InternalTransactionPreferences;
 
 /// User Preferences relating to submission of transactions.
 #[derive(
-    Debug,
+    
     
     PartialEq,
     Eq,

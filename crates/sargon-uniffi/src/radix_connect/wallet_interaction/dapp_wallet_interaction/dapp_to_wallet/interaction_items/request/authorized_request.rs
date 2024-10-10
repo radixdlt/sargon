@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionAuthorizedRequestItems as InternalDappToWalletInteractionAuthorizedRequestItems;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct DappToWalletInteractionAuthorizedRequestItems {
     pub auth: DappToWalletInteractionAuthRequestItem,
     pub reset: Option<DappToWalletInteractionResetRequestItem>,

@@ -10,7 +10,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
     PartialEq,
     Eq,
     Hash,
-    Debug,
+    
      uniffi::Record,
 )]
 pub struct ArculusCardFactorSource {

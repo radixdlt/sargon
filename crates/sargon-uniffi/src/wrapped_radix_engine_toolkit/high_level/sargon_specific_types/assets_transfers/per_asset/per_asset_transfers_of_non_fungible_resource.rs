@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::PerAssetTransfersOfNonFungibleResource as InternalPerAssetTransfersOfNonFungibleResource;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct PerAssetTransfersOfNonFungibleResource {
     pub resource: ResourceAddress,
     pub transfers: Vec<PerAssetNonFungibleTransfer>,

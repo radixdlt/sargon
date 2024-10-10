@@ -7,7 +7,7 @@ use sargon::AppDisplay as InternalAppDisplay;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

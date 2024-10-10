@@ -9,9 +9,9 @@ use sargon::Exactly32Bytes as InternalExactly32Bytes;
 /// hidden secret magic.
 #[derive(
     Clone,
-    Debug,
     PartialEq,
     Eq,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Hash {
@@ -20,7 +20,9 @@ pub struct Hash {
 
 impl From<InternalHash> for Hash {
     fn from(value: InternalHash) -> Self {
-        unimplemented!()
+        Self {
+            value: value.0.into(),
+        }
     }
 }
 
@@ -52,5 +54,5 @@ pub fn new_hash_from_bytes(bytes: Exactly32Bytes) -> Hash {
 
 #[uniffi::export]
 pub fn new_hash_from_string(string: String) -> Result<Hash> {
-    map_result_from_internal(InternalHash::try_from(string))
+    InternalHash::try_from(string).map_result()
 }

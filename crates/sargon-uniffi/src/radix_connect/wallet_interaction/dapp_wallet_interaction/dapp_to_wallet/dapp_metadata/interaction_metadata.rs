@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionMetadata as InternalDappToWalletInteractionMetadata;
 
-#[derive(Debug, PartialEq,  uniffi::Record, Clone)]
+#[derive( PartialEq,  uniffi::Record, Clone)]
 pub struct DappToWalletInteractionMetadata {
     pub version: WalletInteractionVersion,
     pub network_id: NetworkID,

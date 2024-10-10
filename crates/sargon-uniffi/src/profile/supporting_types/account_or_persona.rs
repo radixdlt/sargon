@@ -3,7 +3,7 @@ use sargon::AccountOrPersona as InternalAccountOrPersona;
 
 /// Either an `Account` or a `Persona`.
 #[derive(
-    Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
+    Clone,  PartialEq, Hash, Eq, InternalConversion, uniffi::Enum,
 )]
 pub enum AccountOrPersona {
     /// An `Account`
@@ -82,6 +82,6 @@ pub fn new_account_or_persona_sample_stokenet_third() -> AccountOrPersona {
 pub fn account_or_persona_get_id(
     entity: &AccountOrPersona,
 ) -> AddressOfAccountOrPersona {
-    entity.into::<InternalAccountOrPersona>().id().into()
+    entity.into_internal().id().into()
 }
 

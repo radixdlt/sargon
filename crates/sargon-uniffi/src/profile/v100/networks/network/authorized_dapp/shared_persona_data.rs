@@ -5,7 +5,7 @@ use sargon::SharedPersonaData as InternalSharedPersonaData;
 #[derive(
     Clone,
     Default,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

@@ -9,7 +9,7 @@ use sargon::SargonOS as InternalSargonOS;
 /// during app launch, enabling the  Sargon "Operating System" to e.g read/write
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
-#[derive(Debug, uniffi::Object)]
+#[derive( uniffi::Object)]
 pub struct SargonOS {
     pub(crate) wrapped: Arc<InternalSargonOS>,
 }

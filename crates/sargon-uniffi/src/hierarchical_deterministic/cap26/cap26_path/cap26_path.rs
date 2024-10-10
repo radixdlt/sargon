@@ -6,7 +6,7 @@ use sargon::CAP26Path as InternalCAP26Path;
 /// kind: sign transaction or sign auth.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
@@ -21,15 +21,9 @@ pub enum CAP26Path {
 impl From<InternalCAP26Path> for CAP26Path {
     fn from(value: InternalCAP26Path) -> Self {
         match value {
-            InternalCAP26Path::GetID(value) => Self::GetID {
-                value: value.into(),
-            },
-            InternalCAP26Path::Account(value) => Self::Account {
-                value: value.into(),
-            },
-            InternalCAP26Path::Identity(value) => Self::Identity {
-                value: value.into(),
-            },
+            InternalCAP26Path::GetID { value } => CAP26Path::GetID { value: value.into() },
+            InternalCAP26Path::Account { value } => CAP26Path::Account { value: value.into() },
+            InternalCAP26Path::Identity { value } => CAP26Path::Identity { value: value.into() },
         }
     }
 }
@@ -37,9 +31,9 @@ impl From<InternalCAP26Path> for CAP26Path {
 impl Into<InternalCAP26Path> for CAP26Path {
     fn into(self) -> InternalCAP26Path {
         match self {
-            Self::GetID { value } => InternalCAP26Path::GetID(value.into()),
-            Self::Account { value } => InternalCAP26Path::Account(value.into()),
-            Self::Identity { value } => InternalCAP26Path::Identity(value.into()),
+            CAP26Path::GetID { value } => InternalCAP26Path::GetID { value: value.into() },
+            CAP26Path::Account { value } => InternalCAP26Path::Account { value: value.into() },
+            CAP26Path::Identity { value } => InternalCAP26Path::Identity { value: value.into() },
         }
     }
 }
@@ -48,16 +42,15 @@ impl Into<InternalCAP26Path> for CAP26Path {
 pub fn new_cap26_path_from_string(
     string: String,
 ) -> Result<CAP26Path> {
-    map_result_from_internal(InternalCAP26Path::from_str(&string))
+    InternalCAP26Path::from_str(&string).map_result()
 }
 
 #[uniffi::export]
 pub fn default_get_id_path() -> GetIDPath {
-    GetIDPath::default()
+    GetIDPath.into_internal()::default().into()
 }
 
 #[uniffi::export]
 pub fn cap26_path_to_string(path: &CAP26Path) -> String {
-    path.into::<InternalCAP26Path>().to_string()
+    path.into_internal().to_string()
 }
-

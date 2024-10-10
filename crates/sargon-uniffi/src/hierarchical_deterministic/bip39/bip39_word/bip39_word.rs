@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::BIP39Word as InternalBIP39Word;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
-#[derive(Zeroize, Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Zeroize, Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct BIP39Word {
     pub word: String,
     pub index: U11,

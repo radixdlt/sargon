@@ -5,7 +5,7 @@ use sargon::DeviceInfo as InternalDeviceInfo;
 /// on, typically an iPhone or an Android phone.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

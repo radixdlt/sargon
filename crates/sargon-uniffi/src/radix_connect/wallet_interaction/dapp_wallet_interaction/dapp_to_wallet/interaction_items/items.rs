@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionItems as InternalDappToWalletInteractionItems;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive( Clone, PartialEq, uniffi::Enum)]
 pub enum DappToWalletInteractionItems {
     UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems),
     AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems),

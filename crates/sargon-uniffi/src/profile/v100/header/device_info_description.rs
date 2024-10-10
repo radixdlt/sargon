@@ -7,11 +7,11 @@ use sargon::DeviceInfoDescription as InternalDeviceInfoDescription;
 /// we have a custom Deserialize impl of it.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct DeviceInfoDescription {

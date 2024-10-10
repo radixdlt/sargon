@@ -6,7 +6,7 @@ use sargon::AssetException as InternalAssetException;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

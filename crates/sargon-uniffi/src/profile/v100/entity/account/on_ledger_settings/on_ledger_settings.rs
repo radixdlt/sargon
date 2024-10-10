@@ -13,7 +13,7 @@ use sargon::OnLedgerSettings as InternalOnLedgerSettings;
 #[derive(
     Default,
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

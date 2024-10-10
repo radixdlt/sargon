@@ -10,7 +10,6 @@ pub trait HomeCardsObserver: Send + Sync {
     fn handle_cards_update(&self, cards: HomeCards);
 }
 
-#[derive(Debug)]
 pub struct HomeCardsObserverAdapter {
     pub wrapped: Arc<dyn HomeCardsObserver>,
 }

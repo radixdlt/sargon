@@ -29,10 +29,11 @@ use sargon::BIP44LikePath as InternalBIP44LikePath;
 /// ```
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct BIP44LikePath {
@@ -63,18 +64,18 @@ pub fn new_bip44_like_path_from_index(index: HDPathValue) -> BIP44LikePath {
 #[uniffi::export]
 pub fn new_bip44_like_path_from_string(
     string: String,
-) -> Result<BIP44LikePath, CommonError> {
-    map_result_from_internal(InternalBIP44LikePath::from_str(&string))
+) -> Result<BIP44LikePath> {
+    InternalBIP44LikePath::from_str(&string).map_result()
 }
 
 #[uniffi::export]
 pub fn bip44_like_path_to_string(path: &BIP44LikePath) -> String {
-    path.into::<InternalBIP44LikePath>().to_string()
+    path.into_internal().to_string()
 }
 
 #[uniffi::export]
 pub fn bip44_like_path_get_address_index(path: &BIP44LikePath) -> HDPathValue {
-    path.into::<InternalBIP44LikePath>().last_component().index()
+    path.into_internal().last_component().index()
 }
 
 #[uniffi::export]

@@ -3,7 +3,7 @@ use sargon::LedgerHardwareWalletHint as InternalLedgerHardwareWalletHint;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

@@ -12,7 +12,7 @@ json_string_convertible!(RadixConnectPassword);
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct RadixConnectPassword {

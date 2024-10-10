@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Bios as InternalBios;
 
-#[derive(Debug, uniffi::Object)]
+#[derive( uniffi::Object)]
 pub struct Bios {
     pub(crate) drivers: Arc<Drivers>,
 }

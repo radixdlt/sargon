@@ -9,7 +9,7 @@ json_string_convertible!(RadixConnectPurpose);
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

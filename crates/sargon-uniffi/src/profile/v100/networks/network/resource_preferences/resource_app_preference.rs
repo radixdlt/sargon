@@ -6,7 +6,7 @@ use sargon::ResourceAppPreference as InternalResourceAppPreference;
 ///
 /// Named like this to differ from RET's `ResourcePreference`.
 #[derive(
-    Clone, PartialEq, Eq, Debug, Hash,  uniffi::Record,
+    Clone, PartialEq, Eq,  Hash,  uniffi::Record,
 )]
 pub struct ResourceAppPreference {
     /// The resource for which the preference is set up.

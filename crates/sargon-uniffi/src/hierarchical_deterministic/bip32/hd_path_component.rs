@@ -35,6 +35,6 @@ impl Into<InternalHDPathComponent> for HDPathComponent {
 pub fn hd_path_component_get_non_hardened_value(
     component: HDPathComponent,
 ) -> HDPathValue {
-    component.into::<InternalHDPathComponent>().index()
+    component.into_internal().index()
 }
 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionAuthRequestResponseItem as InternalWalletToDappInteractionAuthRequestResponseItem;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive( Clone, PartialEq, uniffi::Enum)]
 pub enum WalletToDappInteractionAuthRequestResponseItem {
     UsePersona(WalletToDappInteractionAuthUsePersonaRequestResponseItem),
     LoginWithoutChallenge(

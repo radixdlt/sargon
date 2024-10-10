@@ -12,7 +12,7 @@ use sargon::AuthorizedPersonaSimple as InternalAuthorizedPersonaSimple;
 /// of mapping `AuthorizedPersonaSimple` -> `AuthorizedPersonaDetailed`.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

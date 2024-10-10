@@ -5,7 +5,7 @@ use sargon::FiatCurrency as InternalFiatCurrency;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

@@ -5,7 +5,7 @@ use sargon::AuthorizedDappPreferenceDeposits as InternalAuthorizedDappPreference
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

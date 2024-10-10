@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Drivers as InternalDrivers;
 
-#[derive(Debug, uniffi::Object)]
+#[derive( uniffi::Object)]
 pub struct Drivers {
     pub networking: Arc<dyn NetworkingDriver>,
     pub secure_storage: Arc<dyn SecureStorageDriver>,

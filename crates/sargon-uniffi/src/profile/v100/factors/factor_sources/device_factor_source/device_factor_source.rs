@@ -9,7 +9,7 @@ use sargon::DeviceFactorSource as InternalDeviceFactorSource;
 /// the host to access a mnemonic stored in secure storage on
 /// the device.
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

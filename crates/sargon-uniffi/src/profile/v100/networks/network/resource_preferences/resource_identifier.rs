@@ -4,7 +4,7 @@ use sargon::ResourceIdentifier as InternalResourceIdentifier;
 /// An enum representation of an resource for which the user can set up its preferences.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

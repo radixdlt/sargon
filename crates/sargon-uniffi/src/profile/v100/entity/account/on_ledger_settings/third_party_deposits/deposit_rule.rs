@@ -5,7 +5,7 @@ use sargon::DepositRule as InternalDepositRule;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

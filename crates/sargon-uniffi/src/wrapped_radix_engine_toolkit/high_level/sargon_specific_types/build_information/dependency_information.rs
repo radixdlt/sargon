@@ -6,7 +6,7 @@ use sargon::DependencyInformation as InternalDependencyInformation;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum DependencyInformation {

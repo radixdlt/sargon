@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::LocaleConfig as InternalLocaleConfig;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct LocaleConfig {
     pub decimal_separator: Option<String>,
     pub grouping_separator: Option<String>,

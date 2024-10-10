@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionResetRequestItem as InternalDappToWalletInteractionResetRequestItem;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct DappToWalletInteractionResetRequestItem {
     pub accounts: bool,
     pub persona_data: bool,

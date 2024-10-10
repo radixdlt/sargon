@@ -5,7 +5,7 @@ use sargon::PublicKeyHash as InternalPublicKeyHash;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     EnumAsInner,
     Eq,

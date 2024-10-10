@@ -4,7 +4,7 @@ use sargon::AppearanceID as InternalAppearanceID;
 #[derive(
     
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

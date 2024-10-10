@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleLocalId as InternalNonFungibleLocalId;
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone,  Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///

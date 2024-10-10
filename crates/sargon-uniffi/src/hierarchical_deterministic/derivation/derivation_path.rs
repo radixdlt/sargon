@@ -7,6 +7,7 @@ use sargon::DerivationPath as InternalDerivationPath;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum DerivationPath {
@@ -17,10 +18,10 @@ pub enum DerivationPath {
 impl From<InternalDerivationPath> for DerivationPath {
     fn from(value: InternalDerivationPath) -> Self {
         match value {
-            InternalDerivationPath::CAP26(value) => Self::CAP26 {
+            InternalDerivationPath::CAP26 { value } => Self::CAP26 {
                 value: value.into(),
             },
-            InternalDerivationPath::BIP44Like(value) => Self::BIP44Like {
+            InternalDerivationPath::BIP44Like { value } => Self::BIP44Like {
                 value: value.into(),
             },
         }
@@ -30,9 +31,9 @@ impl From<InternalDerivationPath> for DerivationPath {
 impl Into<InternalDerivationPath> for DerivationPath {
     fn into(self) -> InternalDerivationPath {
         match self {
-            DerivationPath::CAP26 { value } => InternalDerivationPath::CAP26(value.into()),
+            DerivationPath::CAP26 { value } => InternalDerivationPath::CAP26 { alue.into() },
             DerivationPath::BIP44Like { value } => {
-                InternalDerivationPath::BIP44Like(value.into())
+                InternalDerivationPath::BIP44Like { value.into() }
             }
         }
     }
@@ -52,16 +53,16 @@ pub fn new_derivation_path_sample_other() -> DerivationPath {
 pub fn new_derivation_path_from_string(
     string: String,
 ) -> Result<DerivationPath> {
-    map_result_from_internal(InternalDerivationPath::from_str(&string))
+    InternalDerivationPath::from_str(&string).map_result()
 }
 
 #[uniffi::export]
 pub fn derivation_path_to_hd_path(path: &DerivationPath) -> HDPath {
-    path.into::<InternalDerivationPath>().hd_path().clone().into()
+    path.into_internal().hd_path().clone().into()
 }
 
 #[uniffi::export]
 pub fn derivation_path_to_string(path: &DerivationPath) -> String {
-    path.into::<InternalDerivationPath>().to_string()
+    path.into_internal().to_string()
 }
 

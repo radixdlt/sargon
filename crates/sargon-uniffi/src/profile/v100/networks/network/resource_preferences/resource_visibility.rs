@@ -5,7 +5,7 @@ use sargon::ResourceVisibility as InternalResourceVisibility;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

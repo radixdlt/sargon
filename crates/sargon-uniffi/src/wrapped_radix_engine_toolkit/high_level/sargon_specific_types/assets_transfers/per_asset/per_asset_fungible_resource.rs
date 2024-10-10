@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::PerAssetFungibleResource as InternalPerAssetFungibleResource;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct PerAssetFungibleResource {
     pub resource_address: ResourceAddress,
     pub divisibility: Option<u8>,

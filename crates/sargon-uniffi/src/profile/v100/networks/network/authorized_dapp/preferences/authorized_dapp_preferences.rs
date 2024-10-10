@@ -7,7 +7,7 @@ use sargon::AuthorizedDappPreferences as InternalAuthorizedDappPreferences;
     Clone,
     PartialEq,
     Eq,
-    Debug,
+    
     Hash,
      uniffi::Record,
 )]

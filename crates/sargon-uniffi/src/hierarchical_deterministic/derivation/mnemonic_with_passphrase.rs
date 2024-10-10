@@ -9,6 +9,7 @@ use sargon::MnemonicWithPassphrase as InternalMnemonicWithPassphrase;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct MnemonicWithPassphrase {
@@ -53,7 +54,7 @@ pub fn mnemonic_with_passphrase_validate_public_keys(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     hd_keys: Vec<HierarchicalDeterministicPublicKey>,
 ) -> bool {
-    mnemonic_with_passphrase.into::<InternalMnemonicWithPassphrase>().validate_public_keys(hd_keys.into_iter().map(Into::into).collect())
+    mnemonic_with_passphrase.into_internal().validate_public_keys(hd_keys.into_internal_vec())
 }
 
 #[uniffi::export]
@@ -62,11 +63,9 @@ pub fn mnemonic_with_passphrase_derive_public_keys(
     derivation_paths: Vec<DerivationPath>,
 ) -> Vec<HierarchicalDeterministicPublicKey> {
     mnemonic_with_passphrase
-    .into::<InternalMnemonicWithPassphrase>()
-    .derive_public_keys(derivation_paths.into_iter().map(Into::into).collect())
-    .into_iter()
-    .map(Into::into)
-    .collect()
+    .into_internal()
+    .derive_public_keys(derivation_paths.into_internal_vec())
+    .into_vec()
 }
 
 #[uniffi::export]
@@ -75,6 +74,6 @@ pub fn mnemonic_with_passphrase_sign(
     derivation_path: &DerivationPath,
     hash_to_sign: &Hash,
 ) -> SignatureWithPublicKey {
-    mnemonic_with_passphrase.into::<InternalMnemonicWithPassphrase>().sign(&hash_to_sign.into(), &derivation_path.into()).into()
+    mnemonic_with_passphrase.into_internal().sign(&hash_to_sign.into_internal(), &derivation_path.into_internal()).into()
 }
 

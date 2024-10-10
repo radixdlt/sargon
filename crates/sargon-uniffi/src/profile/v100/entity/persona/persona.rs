@@ -22,7 +22,7 @@ use sargon::Persona as InternalPersona;
 /// never will, nor will the Radix Wallet.).
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

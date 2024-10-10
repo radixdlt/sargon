@@ -4,7 +4,7 @@ use sargon::HostId as InternalHostId;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

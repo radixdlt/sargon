@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::SessionID as InternalSessionID;
 
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

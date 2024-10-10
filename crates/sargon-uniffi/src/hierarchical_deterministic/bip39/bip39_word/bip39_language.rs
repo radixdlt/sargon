@@ -7,11 +7,10 @@ use sargon::BIP39Language as InternalBIP39Language;
 /// the compilation features.
 #[derive(
     Clone,
-    
-    Debug,
     Hash,
     PartialEq,
     Eq,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum BIP39Language {
@@ -52,6 +51,6 @@ pub fn new_bip39_language_sample_other() -> BIP39Language {
 
 #[uniffi::export]
 pub fn bip39_language_wordlist(language: &BIP39Language) -> Vec<BIP39Word> {
-    language.into::<InternalBIP39Language>().wordlist().into_iter().map(Into::into).collect()
+    language.into_internal().wordlist().into_vec()
 }
 

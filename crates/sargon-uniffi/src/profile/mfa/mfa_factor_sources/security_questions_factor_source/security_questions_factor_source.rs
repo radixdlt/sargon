@@ -112,7 +112,7 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecur
     PartialEq,
     Eq,
     Hash,
-    Debug,
+    
      uniffi::Record,
 )]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {

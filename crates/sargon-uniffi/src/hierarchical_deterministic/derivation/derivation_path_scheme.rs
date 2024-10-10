@@ -7,7 +7,7 @@ use sargon::DerivationPathScheme as InternalDerivationPathScheme;
 /// by Olympia.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

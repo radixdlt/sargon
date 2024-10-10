@@ -4,7 +4,7 @@ use sargon::HostOS as InternalHostOS;
 /// Describes the type of the Host machine and its version. Currently, as it stands at runtime
 /// the possible values will be IOS or Android. Other is in place to facilitate unit tests
 /// and to make sargon host agnostic.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive( Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum HostOS {
     IOS {
         version: String,
@@ -69,17 +69,17 @@ pub fn new_host_os_other(
 
 #[uniffi::export]
 pub fn host_os_get_name(host_os: &HostOS) -> String {
-    host_os.into::<InternalHostOS>().name()
+    host_os.into_internal().name()
 }
 
 #[uniffi::export]
 pub fn host_os_get_vendor(host_os: &HostOS) -> String {
-    host_os.into::<InternalHostOS>().vendor()
+    host_os.into_internal().vendor()
 }
 
 #[uniffi::export]
 pub fn host_os_get_version(host_os: &HostOS) -> String {
-    host_os.into::<InternalHostOS>().version()
+    host_os.into_internal().version()
 }
 
 #[uniffi::export]

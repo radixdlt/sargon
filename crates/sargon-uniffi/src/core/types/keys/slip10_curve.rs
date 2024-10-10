@@ -10,7 +10,7 @@ use sargon::SLIP10Curve as InternalSLIP10Curve;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

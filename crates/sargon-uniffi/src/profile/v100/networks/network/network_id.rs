@@ -7,7 +7,7 @@ use sargon::NetworkID as InternalNetworkID;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
     uniffi::Enum,
 )]
 #[repr(u8)]

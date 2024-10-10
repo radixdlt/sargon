@@ -3,7 +3,7 @@ use sargon::ArculusCardHint as InternalArculusCardHint;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

@@ -13,7 +13,7 @@ use sargon::P2PLink as InternalP2PLink;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct P2PLink {

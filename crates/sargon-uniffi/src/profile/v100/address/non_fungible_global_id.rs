@@ -3,7 +3,7 @@ use sargon::NonFungibleGlobalId as InternalNonFungibleGlobalId;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

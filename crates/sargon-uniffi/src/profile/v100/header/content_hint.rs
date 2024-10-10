@@ -10,7 +10,7 @@ use sargon::ContentHint as InternalContentHint;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

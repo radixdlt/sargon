@@ -7,7 +7,7 @@ pub type FactorSourceFlags = Vec<FactorSourceFlag>;
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
 #[derive(
-    Debug, Clone, PartialEq, Eq, Hash,  uniffi::Record,
+     Clone, PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.

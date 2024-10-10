@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::NewlyCreatedResource as InternalNewlyCreatedResource;
 
 /// Metadata about a newly created Resource
-#[derive(Clone, Debug, Default, PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone,  Default, PartialEq, Eq,  uniffi::Record)]
 pub struct NewlyCreatedResource {
     pub name: Option<String>,
     pub symbol: Option<String>,

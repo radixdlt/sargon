@@ -3,7 +3,6 @@ use sargon::AccountPath as InternalAccountPath;
 
 #[derive(
     Clone,
-    Debug,
     PartialEq,
     Eq,
     Hash,

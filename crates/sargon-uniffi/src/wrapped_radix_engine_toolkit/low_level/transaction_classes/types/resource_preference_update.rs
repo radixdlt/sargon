@@ -2,13 +2,13 @@ use crate::prelude::*;
 use sargon::ResourcePreference as InternalResourcePreference;
 use sargon::ResourcePreferenceUpdate as InternalResourcePreferenceUpdate;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ResourcePreference {
     Allowed,
     Disallowed,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ResourcePreferenceUpdate {
     Set { value: ResourcePreference },
     Remove,

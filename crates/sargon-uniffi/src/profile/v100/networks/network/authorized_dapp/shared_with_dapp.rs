@@ -75,7 +75,7 @@ macro_rules! declare_shared_with_dapp {
                 $id,
                 [< tests_ $struct_name:snake >],
                 $expected_sample_display,
-                $expected_sample_debug,
+                $expected_sample_
                 $expected_sample_json
             );
         }

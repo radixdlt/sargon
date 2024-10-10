@@ -6,7 +6,7 @@ use sargon::Header as InternalHeader;
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

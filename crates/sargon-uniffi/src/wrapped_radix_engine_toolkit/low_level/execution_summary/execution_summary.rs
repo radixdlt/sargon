@@ -3,7 +3,7 @@ use sargon::ExecutionSummary as InternalExecutionSummary;
 
 /// A summary of the execution of the manifest and the information that helps
 /// wallets present the contents of a transaction.
-#[derive(Clone, Debug, PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone,  PartialEq, Eq,  uniffi::Record)]
 pub struct ExecutionSummary {
     /// Per account, a list of all token balances that has been withdrawn from that account.
     pub withdrawals: HashMap<AccountAddress, Vec<ResourceIndicator>>,

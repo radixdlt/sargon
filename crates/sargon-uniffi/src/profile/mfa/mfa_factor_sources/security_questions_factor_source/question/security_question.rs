@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// A specification of expected format for an answer to a security question.
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Clone, PartialEq, Eq, Hash, Debug,  uniffi::Record,
+    Clone, PartialEq, Eq, Hash,   uniffi::Record,
 )]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {

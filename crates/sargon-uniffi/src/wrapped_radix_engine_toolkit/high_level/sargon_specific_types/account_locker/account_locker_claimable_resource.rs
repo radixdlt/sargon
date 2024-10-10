@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::AccountLockerClaimableResource as InternalAccountLockerClaimableResource;
 
 /// A claimable resource in an account locker.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive( Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum AccountLockerClaimableResource {
     /// A fungible resource with a specific claimable amount
     Fungible {

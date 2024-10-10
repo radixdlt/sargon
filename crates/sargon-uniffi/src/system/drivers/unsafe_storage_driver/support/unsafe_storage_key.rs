@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::UnsafeStorageKey as InternalUnsafeStorageKey;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive( Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum UnsafeStorageKey {
     FactorSourceUserHasWrittenDown,
 }

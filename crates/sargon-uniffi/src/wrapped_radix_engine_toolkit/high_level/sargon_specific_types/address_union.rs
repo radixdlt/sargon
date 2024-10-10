@@ -24,7 +24,7 @@ macro_rules! address_union {
                 PartialEq,
                 Eq,
                 Hash,
-                InternalConersion,
+                InternalConversion,
                 uniffi::Enum,
             )]
             pub enum $union_name {

@@ -7,7 +7,7 @@ use sargon::BIP39WordCount as InternalBIP39WordCount;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

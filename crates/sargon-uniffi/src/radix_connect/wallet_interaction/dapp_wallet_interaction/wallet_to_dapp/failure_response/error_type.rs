@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappWalletInteractionErrorType as InternalDappWalletInteractionErrorType;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive( Clone, PartialEq, uniffi::Enum)]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
     WrongNetwork,

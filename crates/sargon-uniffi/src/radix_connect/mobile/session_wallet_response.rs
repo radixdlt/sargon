@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::RadixConnectMobileWalletResponse as InternalRadixConnectMobileWalletResponse;
 
-#[derive(Debug, PartialEq, Clone,  uniffi::Record)]
+#[derive( PartialEq, Clone,  uniffi::Record)]
 pub struct RadixConnectMobileWalletResponse {
     pub session_id: SessionID,
     pub response: WalletToDappInteractionResponse,

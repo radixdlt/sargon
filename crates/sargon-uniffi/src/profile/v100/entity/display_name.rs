@@ -25,7 +25,7 @@ use sargon::DisplayName as InternalDisplayName;
 ///
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

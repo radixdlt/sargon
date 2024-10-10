@@ -4,7 +4,7 @@ use sargon::NetworkDefinition as InternalNetworkDefinition;
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

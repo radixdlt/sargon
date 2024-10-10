@@ -19,7 +19,7 @@ use sargon::Profile as InternalProfile;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Profile {

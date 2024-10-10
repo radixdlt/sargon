@@ -3,7 +3,7 @@ use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
@@ -41,6 +41,6 @@ pub fn new_compiled_notarized_intent_sample_other() -> CompiledNotarizedIntent {
 pub fn compiled_notarized_intent_get_bytes(
     compiled_notarized_intent: &CompiledNotarizedIntent,
 ) -> BagOfBytes {
-    compiled_notarized_intent.into::<InternalCompiledNotarizedIntent>().bytes().into()
+    compiled_notarized_intent.into_internal().bytes().into()
 }
 

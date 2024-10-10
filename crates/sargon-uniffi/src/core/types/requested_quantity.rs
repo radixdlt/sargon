@@ -4,7 +4,7 @@ use sargon::RequestedQuantity as InternalRequestedQuantity;
 /// A requested (by Dapp) quantity, e.g. "I want AT LEAST 3 account addresses" or
 /// "I want EXACTLY 2 email addresses".
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

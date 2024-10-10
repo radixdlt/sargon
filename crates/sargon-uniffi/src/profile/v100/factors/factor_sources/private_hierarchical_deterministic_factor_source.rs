@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::PrivateHierarchicalDeterministicFactorSource as InternalPrivateHierarchicalDeterministicFactorSource;
 use sargon::BIP39Entropy as InternalBIP39Entropy;
 
-#[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Zeroize,  Clone, PartialEq, Eq, Hash,  uniffi::Record)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
     #[zeroize(skip)]

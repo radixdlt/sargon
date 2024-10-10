@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionAuthUsePersonaRequestItem as InternalDappToWalletInteractionAuthUsePersonaRequestItem;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct DappToWalletInteractionAuthUsePersonaRequestItem {
     pub identity_address: IdentityAddress,
 }

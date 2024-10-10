@@ -7,7 +7,7 @@ use sargon::RoundingMode as InternalRoundingMode;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     strum::Display,

@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TransactionHeader as InternalTransactionHeader;
 
 #[derive(
-    Debug,
+    
     Clone,
     
     PartialEq,

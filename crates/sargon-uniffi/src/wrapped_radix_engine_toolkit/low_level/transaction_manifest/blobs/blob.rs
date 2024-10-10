@@ -7,7 +7,7 @@ use sargon::BagOfBytes as InternalBagOfBytes;
     Clone,
     PartialEq,
     Eq,
-    InternalConersion,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Blob {

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::SecureStorageKey as InternalSecureStorageKey;
 
-#[derive(Debug, Clone, Eq, PartialEq, InternalConersion, uniffi::Enum)]
+#[derive( Clone, Eq, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum SecureStorageKey {
     HostID,
     DeviceFactorSourceMnemonic {
@@ -15,6 +15,8 @@ pub enum SecureStorageKey {
         profile_id: ProfileID,
     },
 }
+
+delegate_display_debug_into!(SecureStorageKey, InternalSecureStorageKey);
 
 impl From<InternalSecureStorageKey> for SecureStorageKey {
     fn from(value: InternalSecureStorageKey) -> Self {

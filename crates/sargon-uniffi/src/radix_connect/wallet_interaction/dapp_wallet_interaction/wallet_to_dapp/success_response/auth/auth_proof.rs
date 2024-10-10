@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionAuthProof as InternalWalletToDappInteractionAuthProof;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct WalletToDappInteractionAuthProof {
     pub public_key: PublicKey,
     pub curve: SLIP10Curve,

@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::IntentSignature as InternalIntentSignature;
 
 #[derive(
-    Clone,  Debug, PartialEq, Eq, Hash,  uniffi::Record,
+    Clone,   PartialEq, Eq, Hash,  uniffi::Record,
 )]
 pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,

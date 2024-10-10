@@ -3,7 +3,7 @@ use sargon::HomeCard as InternalHomeCard;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

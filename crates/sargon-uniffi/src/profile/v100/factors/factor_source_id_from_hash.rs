@@ -8,7 +8,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct FactorSourceIDFromHash {

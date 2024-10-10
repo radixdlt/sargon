@@ -20,7 +20,7 @@ use sargon::Account as InternalAccount;
 /// have been imported from Olympia.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

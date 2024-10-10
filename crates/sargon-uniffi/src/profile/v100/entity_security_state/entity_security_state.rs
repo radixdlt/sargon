@@ -6,7 +6,7 @@ use sargon::EntitySecurityState as InternalEntitySecurityState;
 ///  or an `AccessController` with a potential Multi-Factor setup.
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

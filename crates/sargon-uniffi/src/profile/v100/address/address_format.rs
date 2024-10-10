@@ -4,7 +4,7 @@ use sargon::AddressFormat as InternalAddressFormat;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

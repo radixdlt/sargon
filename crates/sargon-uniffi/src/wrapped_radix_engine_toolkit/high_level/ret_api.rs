@@ -121,12 +121,11 @@ pub fn modify_manifest_lock_fee(
     fee: Option<Decimal192>,
 ) -> TransactionManifest {
     manifest
-    .into::<InternalTransactionManifest>()
+    .into_internal()
     .modify_add_lock_fee(
         &address_of_fee_payer.into(), 
         fee.map(Into::into)
     ).into()
-
 }
 
 /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet

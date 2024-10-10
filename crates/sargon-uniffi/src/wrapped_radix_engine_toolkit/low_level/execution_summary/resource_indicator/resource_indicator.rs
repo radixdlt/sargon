@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::ResourceIndicator as InternalResourceIndicator;
 
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, EnumAsInner, uniffi::Enum)]
 pub enum ResourceIndicator {
     Fungible {
         resource_address: ResourceAddress,
@@ -69,6 +69,6 @@ pub fn new_resource_indicator_sample_other() -> ResourceIndicator {
 pub fn resource_indicator_get_address(
     indicator: &ResourceIndicator,
 ) -> ResourceAddress {
-    indicator.into::<InternalResourceIndicator>().get_address().into()
+    indicator.into_internal().get_address().into()
 }
 

@@ -8,7 +8,7 @@ use sargon::FactorSourceKind as InternalFactorSourceKind;
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum FactorSourceKind {

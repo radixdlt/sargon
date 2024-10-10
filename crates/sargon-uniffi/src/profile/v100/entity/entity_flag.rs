@@ -6,7 +6,7 @@ use sargon::EntityFlag as InternalEntityFlag;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

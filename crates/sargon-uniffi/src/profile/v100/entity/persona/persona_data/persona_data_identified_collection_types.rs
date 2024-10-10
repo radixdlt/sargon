@@ -72,7 +72,7 @@ macro_rules! declare_collection_of_identified_entry {
                 [< CollectionOf $plural_form:camel>],               // "email_addresses" => "CollectionOfEmailAddresses"
                 [< tests_collection_of_ $plural_form >],
                 $expected_sample_display,
-                $expected_sample_debug,
+                $expected_sample_
                 $expected_sample_json
             );
         }

@@ -4,7 +4,7 @@ use sargon::DeviceFactorSourceHint as InternalDeviceFactorSourceHint;
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

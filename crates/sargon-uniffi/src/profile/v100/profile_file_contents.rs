@@ -9,7 +9,7 @@ use sargon::ProfileFileContents as InternalProfileFileContents;
 /// or if we failed to parse as Profile and `EncryptedProfileSnapshot`
 /// then `NotProfile` is used, indicating that the bytes is not at all
 /// a Profile.
-#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq,  Hash, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.

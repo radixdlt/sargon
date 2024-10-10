@@ -5,7 +5,7 @@ use sargon::AccountForDisplay as InternalAccountForDisplay;
 /// display purposes within wallet
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

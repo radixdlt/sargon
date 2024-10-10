@@ -7,7 +7,7 @@ use sargon::FactorInstanceBadge as InternalFactorInstanceBadge;
 #[derive(
     EnumAsInner,
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

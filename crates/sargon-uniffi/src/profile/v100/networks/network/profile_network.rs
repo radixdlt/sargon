@@ -5,7 +5,7 @@ use sargon::ProfileNetwork as InternalProfileNetwork;
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
 /// identified by `id` ([`NetworkID`]).
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

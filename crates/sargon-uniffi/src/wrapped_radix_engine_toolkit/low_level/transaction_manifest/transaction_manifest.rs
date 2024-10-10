@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
-#[derive(Clone, PartialEq, Eq, InternalConersion, uniffi::Record,)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record,)]
 pub struct TransactionManifest {
     pub instructions: Instructions,
     pub blobs: Blobs,
@@ -77,7 +77,7 @@ pub fn transaction_manifest_execution_summary(
     manifest: &TransactionManifest,
     engine_toolkit_receipt: String,
 ) -> Result<ExecutionSummary> {
-    manifest.into::<InternalTransactionManifest>().execution_summary(engine_toolkit_receipt).map_result()
+    manifest.into_internal().execution_summary(engine_toolkit_receipt).map_result()
 }
 
 #[uniffi::export]

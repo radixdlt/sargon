@@ -3,11 +3,11 @@ use sargon::FactorSource as InternalFactorSource;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,
-    InternalConersion,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum FactorSource {

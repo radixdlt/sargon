@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionAuthRequestItem as InternalDappToWalletInteractionAuthRequestItem;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive( Clone, PartialEq, uniffi::Enum)]
 pub enum DappToWalletInteractionAuthRequestItem {
     LoginWithChallenge(
         DappToWalletInteractionAuthLoginWithChallengeRequestItem,

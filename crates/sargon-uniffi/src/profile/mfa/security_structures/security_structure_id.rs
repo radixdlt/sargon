@@ -5,7 +5,7 @@ use sargon::SecurityStructureID as InternalSecurityStructureID;
 /// user has created. Also used in `SecurityStructureOfFactorSourceIDs` and in
 /// `SecurityStructureOfFactorInstances`.
 #[derive(
-    Debug,
+    
     
     Clone,
     PartialEq,

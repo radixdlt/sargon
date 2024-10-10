@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FactorInstanceBadgeVirtualSource as InternalFactorInstanceBadgeVirtualSource;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
+    Clone,  PartialEq, Eq, Hash, uniffi::Enum,
 )]
 pub enum FactorInstanceBadgeVirtualSource {
     HierarchicalDeterministic {

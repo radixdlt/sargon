@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::TXVersion as InternalTXVersion;
 
-#[derive(Debug, Clone, PartialEq,  uniffi::Record)]
+#[derive( Clone, PartialEq,  uniffi::Record)]
 pub struct TXVersion {
     pub value: u64,
 }

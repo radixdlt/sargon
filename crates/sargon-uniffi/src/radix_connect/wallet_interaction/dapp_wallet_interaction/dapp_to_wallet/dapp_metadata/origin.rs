@@ -6,7 +6,7 @@ use sargon::DappOrigin as InternalDappOrigin;
     Clone,
     PartialEq,
     Eq,
-    Debug,
+    
      uniffi::Record,
 )]
 pub struct DappOrigin {

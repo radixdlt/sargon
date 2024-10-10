@@ -40,11 +40,11 @@ pub fn new_transaction_intent_sample_other() -> TransactionIntent {
 
 #[uniffi::export]
 pub fn transaction_intent_hash(intent: &TransactionIntent) -> IntentHash {
-    intent.into::<InternalTransactionIntent>().intent_hash().into()
+    intent.into_internal().intent_hash().into()
 }
 
 #[uniffi::export]
 pub fn transaction_intent_compile(intent: &TransactionIntent) -> BagOfBytes {
-    intent.into::<InternalTransactionIntent>().compile().into()
+    intent.into_internal().compile().into()
 }
 

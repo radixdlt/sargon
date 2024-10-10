@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// A factor source representing a person, company, organization or otherwise
 /// entity that the user trusts to help her with recovery, if ever needed.
 #[derive(
-    Debug,
+    
     Clone,
     PartialEq,
     Eq,

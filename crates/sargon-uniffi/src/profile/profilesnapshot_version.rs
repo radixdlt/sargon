@@ -5,7 +5,7 @@ use sargon::ProfileSnapshotVersion as InternalProfileSnapshotVersion;
 #[derive(
     Clone,
     
-    Debug,
+    
     PartialEq,
     Eq,
     Hash,

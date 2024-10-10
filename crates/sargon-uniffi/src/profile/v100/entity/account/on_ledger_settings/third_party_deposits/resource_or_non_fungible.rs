@@ -3,7 +3,7 @@ use sargon::ResourceOrNonFungible as InternalResourceOrNonFungible;
 
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
+    Clone,  PartialEq, Eq, Hash, uniffi::Enum,
 )]
 pub enum ResourceOrNonFungible {
     Resource { value: ResourceAddress },

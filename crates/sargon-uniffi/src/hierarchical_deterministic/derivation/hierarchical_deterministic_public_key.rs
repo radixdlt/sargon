@@ -7,7 +7,7 @@ use sargon::HierarchicalDeterministicPublicKey as InternalHierarchicalDeterminis
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
+    Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
 )]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
@@ -54,6 +54,6 @@ pub fn hierarchical_deterministic_public_key_is_valid_signature_for_hash(
     signature: Signature,
     hash: &Hash,
 ) -> bool {
-    key.into::<InternalHierarchicalDeterministicPublicKey>().is_valid_signature_for_hash(signature.into(), &hash.into())
+    key.into_internal().is_valid_signature_for_hash(signature.into_internal(), &hash.into_internal())
 }
 

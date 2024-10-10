@@ -26,7 +26,7 @@ pub struct PersonaDataEntryName {
 }
 
 #[derive(
-    Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
+    Clone,  PartialEq, Hash, Eq, uniffi::Enum,
 )]
 pub enum PersonaDataNameVariant {
     Western,

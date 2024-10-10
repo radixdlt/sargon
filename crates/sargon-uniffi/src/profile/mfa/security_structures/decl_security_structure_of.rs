@@ -15,7 +15,7 @@ macro_rules! decl_role_with_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
+                Clone,  PartialEq, Eq, Hash,  uniffi::Record,
             )]
             pub struct [< $role RoleWith $factor s >] {
 
@@ -97,7 +97,7 @@ macro_rules! decl_matrix_of_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
+                Clone,  PartialEq, Eq, Hash,  uniffi::Record,
             )]
             pub struct [< MatrixOf $factor s >] {
                 /// Used for Signing transactions
@@ -153,7 +153,7 @@ macro_rules! decl_security_structure_of {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone, Debug, PartialEq, Eq, Hash,  uniffi::Record,
+                Clone,  PartialEq, Eq, Hash,  uniffi::Record,
             )]
             pub struct [< SecurityStructureOf $factor s >] {
                 /// Metadata of this Security Structure, such as globally unique and

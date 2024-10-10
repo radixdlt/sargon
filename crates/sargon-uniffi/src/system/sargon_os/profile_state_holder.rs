@@ -3,7 +3,7 @@ use std::{borrow::Borrow, sync::RwLock};
 use sargon::ProfileState as InternalProfileState;
 
 #[derive(
-    Debug, Clone, PartialEq, EnumAsInner,  uniffi::Enum,
+     Clone, PartialEq, EnumAsInner,  uniffi::Enum,
 )]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {

@@ -3,7 +3,7 @@ use sargon::AuthorizedPersonaDetailed as InternalAuthorizedPersonaDetailed;
 
 #[derive(
     Clone,
-    Debug,
+    
     PartialEq,
     Hash,
     Eq,

@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// A mnemonic encrypted by answers to security questions
 /// ❗️ NOT PRODUCTION READY YET ❗️
 #[derive(
-    Clone, PartialEq, Eq, Hash, Debug,  uniffi::Record,
+    Clone, PartialEq, Eq, Hash,   uniffi::Record,
 )]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {

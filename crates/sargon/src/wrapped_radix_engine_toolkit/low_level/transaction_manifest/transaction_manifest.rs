@@ -104,11 +104,11 @@ impl TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+    pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
         &self.instructions
     }
 
-    pub(crate) fn blobs(&self) -> &Blobs {
+    pub fn blobs(&self) -> &Blobs {
         &self.blobs
     }
 
