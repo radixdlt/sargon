@@ -405,8 +405,12 @@ mod transaction_preview_analysis_tests {
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
         let manifest = TransactionManifest::set_owner_keys_hashes(
-            &AccountAddress::sample().into(),
-            vec![PublicKeyHash::hash(Ed25519PublicKey::sample_alice())],
+            &IdentityAddress::sample().into(),
+            AccountOrPersona::sample_mainnet_other()
+                .virtual_hierarchical_deterministic_factor_instances()
+                .into_iter()
+                .map(|i| PublicKeyHash::hash(i.public_key.public_key))
+                .collect(),
         );
 
         let result = os
