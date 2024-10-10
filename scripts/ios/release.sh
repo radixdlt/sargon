@@ -51,13 +51,15 @@ GIT_ADD_CMD="git add --force Package.swift apple/Sources/UniFFI/Sargon.swift"
 echo "🚢  Staging (potentially) changed files with: $GIT_ADD_CMD"
 eval $GIT_ADD_CMD
 
-GIT_AUTHOR="Sargon Script <sargon@github.runner>"
+AUTHOR_NAME="Sargon Script"
+AUTHOR_EMAIL="sargon@github.runner"
+GIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
 
 GIT_COMMIT_CMD="git commit --author=\"$GIT_AUTHOR\" -m \"Release of '$NEXT_TAG' (updated Package.swift with new checksum and path to zip on Github, and maybe apple/Sources/UniFFI/Sargon.swift). This commit is not merged into main branch (and need not be).\" --no-verify"
 echo "🚢  Git commiting changes to Package.swift (and maybe Sargon.swift)"
 eval $GIT_COMMIT_CMD
 
-git tag --author=$GIT_AUTHOR $NEXT_TAG
+GIT_COMMITTER_NAME=$AUTHOR_NAME GIT_COMMITTER_EMAIL=$AUTHOR_EMAIL git tag $NEXT_TAG
 echo "🚢 🏷️ 📡 Pushing tag: $NEXT_TAG, but only tag, not commit."
 git push origin $NEXT_TAG
 
