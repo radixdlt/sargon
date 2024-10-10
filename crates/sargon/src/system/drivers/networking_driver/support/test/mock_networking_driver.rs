@@ -55,7 +55,6 @@ impl MockNetworkingDriver {
         T: Serialize,
     {
         let body = serde_json::to_vec(&response).unwrap();
-        println!("body: {:?}", String::from_utf8(body.clone()).unwrap());
         Self::new(200, body)
     }
 

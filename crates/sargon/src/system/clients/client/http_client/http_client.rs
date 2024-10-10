@@ -41,10 +41,6 @@ impl HttpClient {
     where
         U: for<'a> Deserialize<'a>,
     {
-        println!(
-            "Deserializaing: {:?}",
-            String::from_utf8(bytes.clone().bytes).unwrap()
-        );
         serde_json::from_slice::<U>(&bytes).map_err(|_| {
             CommonError::NetworkResponseJSONDeserialize {
                 into_type: type_name::<U>(),
