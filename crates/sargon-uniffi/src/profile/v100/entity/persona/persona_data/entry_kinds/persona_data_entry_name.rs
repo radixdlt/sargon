@@ -19,7 +19,7 @@ pub struct PersonaDataEntryName {
     pub nickname: String,
 }
 
-#[derive(Clone, PartialEq, Hash, Eq, uniffi::Enum)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Enum)]
 pub enum PersonaDataNameVariant {
     Western,
     Eastern,
@@ -43,24 +43,6 @@ impl Into<InternalPersonaDataEntryName> for PersonaDataEntryName {
             family_name: self.family_name,
             given_names: self.given_names,
             nickname: self.nickname,
-        }
-    }
-}
-
-impl From<InternalPersonaDataNameVariant> for PersonaDataNameVariant {
-    fn from(value: InternalPersonaDataNameVariant) -> Self {
-        match value {
-            InternalPersonaDataNameVariant::Western => Self::Western,
-            InternalPersonaDataNameVariant::Eastern => Self::Eastern,
-        }
-    }
-}
-
-impl Into<InternalPersonaDataNameVariant> for PersonaDataNameVariant {
-    fn into(self) -> InternalPersonaDataNameVariant {
-        match self {
-            Self::Western => InternalPersonaDataNameVariant::Western,
-            Self::Eastern => InternalPersonaDataNameVariant::Eastern,
         }
     }
 }

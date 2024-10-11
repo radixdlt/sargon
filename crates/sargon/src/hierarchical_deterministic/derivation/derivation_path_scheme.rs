@@ -47,6 +47,16 @@ impl DerivationPathScheme {
     }
 }
 
+impl HasSampleValues for DerivationPathScheme {
+    fn sample() -> Self {
+        Self::Cap26
+    }
+
+    fn sample_other() -> Self {
+        Self::Bip44Olympia
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

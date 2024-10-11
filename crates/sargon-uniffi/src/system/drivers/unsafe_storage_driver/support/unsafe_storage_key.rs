@@ -1,19 +1,9 @@
 use crate::prelude::*;
 use sargon::UnsafeStorageKey as InternalUnsafeStorageKey;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum UnsafeStorageKey {
     FactorSourceUserHasWrittenDown,
-}
-
-impl From<InternalUnsafeStorageKey> for UnsafeStorageKey {
-    fn from(value: InternalUnsafeStorageKey) -> Self {
-        match value {
-            InternalUnsafeStorageKey::FactorSourceUserHasWrittenDown => {
-                UnsafeStorageKey::FactorSourceUserHasWrittenDown
-            }
-        }
-    }
 }
 
 impl UnsafeStorageKey {

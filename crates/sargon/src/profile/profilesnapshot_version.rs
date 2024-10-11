@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use crate::prelude::*;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
@@ -39,6 +40,16 @@ impl ProfileSnapshotVersion {
 impl Display for ProfileSnapshotVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.discriminant())
+    }
+}
+
+impl HasSampleValues for ProfileSnapshotVersion {
+    fn sample() -> Self {
+        Self::V100
+    }
+
+    fn sample_other() -> Self {
+        Self::V100
     }
 }
 

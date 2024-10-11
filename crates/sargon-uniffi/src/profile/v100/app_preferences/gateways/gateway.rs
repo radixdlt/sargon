@@ -32,7 +32,7 @@ impl Into<InternalGateway> for Gateway {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum ChangeGatewayOutcome {
     /// If we did in fact change the gateway, and if the gateway was unknown
     /// or known before it was added, i.e. `is_new` will be true iff the gateway
@@ -45,30 +45,6 @@ pub enum ChangeGatewayOutcome {
 
     /// We tried to change to the current gateway.
     NoChange,
-}
-
-impl From<InternalChangeGatewayOutcome> for ChangeGatewayOutcome {
-    fn from(value: InternalChangeGatewayOutcome) -> Self {
-        match value {
-            InternalChangeGatewayOutcome::DidChange { is_new } => {
-                Self::DidChange { is_new }
-            }
-            InternalChangeGatewayOutcome::NoChange => Self::NoChange,
-        }
-    }
-}
-
-impl Into<InternalChangeGatewayOutcome> for ChangeGatewayOutcome {
-    fn into(self) -> InternalChangeGatewayOutcome {
-        match self {
-            ChangeGatewayOutcome::DidChange { is_new } => {
-                InternalChangeGatewayOutcome::DidChange { is_new }
-            }
-            ChangeGatewayOutcome::NoChange => {
-                InternalChangeGatewayOutcome::NoChange
-            }
-        }
-    }
 }
 
 #[uniffi::export]

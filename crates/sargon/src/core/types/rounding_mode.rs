@@ -77,6 +77,16 @@ impl From<ScryptoRoundingMode> for RoundingMode {
     }
 }
 
+impl HasSampleValues for RoundingMode {
+    fn sample() -> Self {
+        RoundingMode::ToPositiveInfinity
+    }
+
+    fn sample_other() -> Self {
+        RoundingMode::ToNegativeInfinity
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use enum_iterator::all;

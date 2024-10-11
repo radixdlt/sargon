@@ -666,6 +666,16 @@ impl CommonError {
     }
 }
 
+impl HasSampleValues for CommonError {
+    fn sample() -> Self {
+        CommonError::Unknown
+    }
+
+    fn sample_other() -> Self {
+        CommonError::Unknown
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

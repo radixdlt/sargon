@@ -35,3 +35,28 @@ impl From<ScryptoUnstakeData> for UnstakeData {
         }
     }
 }
+
+impl HasSampleValues for UnstakeData {
+    fn sample() -> Self {
+        Self::new(String::sample(), Epoch::sample(), Decimal192::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::new(String::sample_other(), Epoch::sample_other(), Decimal192::sample_other())
+    }
+}
+
+impl HasSampleValues for HashMap<NonFungibleGlobalId, UnstakeData> {
+    fn sample() -> Self {
+        let mut map = HashMap::new();
+        map.insert(NonFungibleGlobalId::sample(), UnstakeData::sample());
+        map
+    }
+
+    fn sample_other() -> Self {
+        let mut map = HashMap::new();
+        map.insert(NonFungibleGlobalId::sample_other(), UnstakeData::sample_other());
+        map
+    }
+}
+    

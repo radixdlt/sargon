@@ -24,6 +24,16 @@ pub enum DepositAddressExceptionRule {
     Deny,
 }
 
+impl HasSampleValues for DepositAddressExceptionRule {
+    fn sample() -> Self {
+        Self::Allow
+    }
+
+    fn sample_other() -> Self {
+        Self::Deny
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

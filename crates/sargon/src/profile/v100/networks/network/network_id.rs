@@ -77,6 +77,16 @@ pub enum NetworkID {
     Simulator = 242,
 }
 
+impl HasSampleValues for NetworkID {
+    fn sample() -> Self {
+        NetworkID::Mainnet
+    }
+
+    fn sample_other() -> Self {
+        NetworkID::Stokenet
+    }
+}
+
 impl Default for NetworkID {
     fn default() -> Self {
         Self::Mainnet

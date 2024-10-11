@@ -52,6 +52,22 @@ pub struct SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
     pub kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold,
 }
 
+impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
+    fn sample() -> Self {
+        Self {
+            kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8::sample(),
+            kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8::sample_other(),
+            kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold::sample_other(),
+        }
+    }
+}
+
 impl Default for SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
     fn default() -> Self {
         Self {
@@ -79,5 +95,15 @@ impl IsSecurityQuestionsKDFScheme
             .collect::<Result<_>>()?;
 
         Ok(kdf_enc.derive_encryption_keys_from(kek))
+    }
+}
+
+impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
+    fn sample() -> Self {
+        Self::Version1(SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::Version1(SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1::sample_other())
     }
 }

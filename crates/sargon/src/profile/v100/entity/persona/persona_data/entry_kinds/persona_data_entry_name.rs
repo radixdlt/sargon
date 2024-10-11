@@ -96,6 +96,16 @@ pub enum PersonaDataNameVariant {
     Eastern,
 }
 
+impl HasSampleValues for PersonaDataNameVariant {
+    fn sample() -> Self {
+        PersonaDataNameVariant::Western
+    }
+
+    fn sample_other() -> Self {
+        PersonaDataNameVariant::Eastern
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

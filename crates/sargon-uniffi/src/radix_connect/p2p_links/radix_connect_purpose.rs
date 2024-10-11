@@ -6,28 +6,10 @@ json_string_convertible!(RadixConnectPurpose);
 /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
 /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.
 /// The user needs to make a conscious decision about general purpose links (because it comes with security risk).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum RadixConnectPurpose {
     General,
     Unknown,
-}
-
-impl From<InternalRadixConnectPurpose> for RadixConnectPurpose {
-    fn from(value: InternalRadixConnectPurpose) -> Self {
-        match value {
-            InternalRadixConnectPurpose::General => Self::General,
-            InternalRadixConnectPurpose::Unknown => Self::Unknown,
-        }
-    }
-}
-
-impl Into<InternalRadixConnectPurpose> for RadixConnectPurpose {
-    fn into(self) -> InternalRadixConnectPurpose {
-        match self {
-            Self::General => InternalRadixConnectPurpose::General,
-            Self::Unknown => InternalRadixConnectPurpose::Unknown,
-        }
-    }
 }
 
 #[uniffi::export]

@@ -43,6 +43,20 @@ impl HasSampleValues for DepositRule {
     }
 }
 
+impl HasSampleValues for HashMap<AccountAddress, DepositRule> {
+    fn sample() -> Self {
+        let mut map = HashMap::new();
+        map.insert(AccountAddress::sample(), DepositRule::sample());
+        map
+    }
+
+    fn sample_other() -> Self {
+        let mut map = HashMap::new();
+        map.insert(AccountAddress::sample_other(), DepositRule::sample_other());
+        map
+    }
+}
+
 impl From<DepositRule> for ScryptoDefaultDepositRule {
     fn from(value: DepositRule) -> Self {
         match value {

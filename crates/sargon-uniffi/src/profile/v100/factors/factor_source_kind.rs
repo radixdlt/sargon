@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FactorSourceKind as InternalFactorSourceKind;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
     /// thus directly usable. This kind is used as the standard factor source for all new
@@ -69,52 +69,6 @@ pub enum FactorSourceKind {
 }
 
 delegate_display_debug_into!(FactorSourceKind, InternalFactorSourceKind);
-
-impl From<InternalFactorSourceKind> for FactorSourceKind {
-    fn from(kind: InternalFactorSourceKind) -> Self {
-        match kind {
-            InternalFactorSourceKind::Device => FactorSourceKind::Device,
-            InternalFactorSourceKind::LedgerHQHardwareWallet => {
-                FactorSourceKind::LedgerHQHardwareWallet
-            }
-            InternalFactorSourceKind::OffDeviceMnemonic => {
-                FactorSourceKind::OffDeviceMnemonic
-            }
-            InternalFactorSourceKind::TrustedContact => {
-                FactorSourceKind::TrustedContact
-            }
-            InternalFactorSourceKind::SecurityQuestions => {
-                FactorSourceKind::SecurityQuestions
-            }
-            InternalFactorSourceKind::ArculusCard => {
-                FactorSourceKind::ArculusCard
-            }
-        }
-    }
-}
-
-impl Into<InternalFactorSourceKind> for FactorSourceKind {
-    fn into(self) -> InternalFactorSourceKind {
-        match self {
-            FactorSourceKind::Device => InternalFactorSourceKind::Device,
-            FactorSourceKind::LedgerHQHardwareWallet => {
-                InternalFactorSourceKind::LedgerHQHardwareWallet
-            }
-            FactorSourceKind::OffDeviceMnemonic => {
-                InternalFactorSourceKind::OffDeviceMnemonic
-            }
-            FactorSourceKind::TrustedContact => {
-                InternalFactorSourceKind::TrustedContact
-            }
-            FactorSourceKind::SecurityQuestions => {
-                InternalFactorSourceKind::SecurityQuestions
-            }
-            FactorSourceKind::ArculusCard => {
-                InternalFactorSourceKind::ArculusCard
-            }
-        }
-    }
-}
 
 #[uniffi::export]
 pub fn new_factor_source_kind_sample() -> FactorSourceKind {

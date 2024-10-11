@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleLocalId as InternalNonFungibleLocalId;
 
-#[derive(Clone, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, Hash, PartialEq, Eq, InternalConversionV2, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -22,56 +22,6 @@ pub enum NonFungibleLocalId {
     ///
     /// Create using `NonFungibleLocalId::ruid(...).unwrap()`.
     Ruid { value: Exactly32Bytes },
-}
-
-impl From<InternalNonFungibleLocalId> for NonFungibleLocalId {
-    fn from(value: InternalNonFungibleLocalId) -> Self {
-        match value {
-            InternalNonFungibleLocalId::Integer { value } => {
-                NonFungibleLocalId::Integer { value }
-            }
-            InternalNonFungibleLocalId::Str { value } => {
-                NonFungibleLocalId::Str {
-                    value: value.into(),
-                }
-            }
-            InternalNonFungibleLocalId::Bytes { value } => {
-                NonFungibleLocalId::Bytes {
-                    value: value.into(),
-                }
-            }
-            InternalNonFungibleLocalId::Ruid { value } => {
-                NonFungibleLocalId::Ruid {
-                    value: value.into(),
-                }
-            }
-        }
-    }
-}
-
-impl Into<InternalNonFungibleLocalId> for NonFungibleLocalId {
-    fn into(self) -> InternalNonFungibleLocalId {
-        match self {
-            NonFungibleLocalId::Integer { value } => {
-                InternalNonFungibleLocalId::Integer { value }
-            }
-            NonFungibleLocalId::Str { value } => {
-                InternalNonFungibleLocalId::Str {
-                    value: value.into(),
-                }
-            }
-            NonFungibleLocalId::Bytes { value } => {
-                InternalNonFungibleLocalId::Bytes {
-                    value: value.into(),
-                }
-            }
-            NonFungibleLocalId::Ruid { value } => {
-                InternalNonFungibleLocalId::Ruid {
-                    value: value.into(),
-                }
-            }
-        }
-    }
 }
 
 #[uniffi::export]

@@ -85,6 +85,18 @@ impl SecureStorageKey {
     }
 }
 
+impl HasSampleValues for SecureStorageKey {
+    fn sample() -> Self {
+        SecureStorageKey::HostID
+    }
+
+    fn sample_other() -> Self {
+        SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: FactorSourceIDFromHash::sample_other(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

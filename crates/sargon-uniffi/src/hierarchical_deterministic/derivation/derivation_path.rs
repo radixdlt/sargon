@@ -3,38 +3,10 @@ use sargon::Derivation;
 use sargon::DerivationPath as InternalDerivationPath;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum DerivationPath {
     CAP26 { value: CAP26Path },
     BIP44Like { value: BIP44LikePath },
-}
-
-impl From<InternalDerivationPath> for DerivationPath {
-    fn from(value: InternalDerivationPath) -> Self {
-        match value {
-            InternalDerivationPath::CAP26 { value } => Self::CAP26 {
-                value: value.into(),
-            },
-            InternalDerivationPath::BIP44Like { value } => Self::BIP44Like {
-                value: value.into(),
-            },
-        }
-    }
-}
-
-impl Into<InternalDerivationPath> for DerivationPath {
-    fn into(self) -> InternalDerivationPath {
-        match self {
-            DerivationPath::CAP26 { value } => InternalDerivationPath::CAP26 {
-                value: value.into(),
-            },
-            DerivationPath::BIP44Like { value } => {
-                InternalDerivationPath::BIP44Like {
-                    value: value.into(),
-                }
-            }
-        }
-    }
 }
 
 #[uniffi::export]

@@ -40,3 +40,43 @@ impl From<(RetTrackedPoolContribution, NetworkID)> for TrackedPoolContribution {
         )
     }
 }
+
+impl HasSampleValues for TrackedPoolContribution {
+    fn sample() -> Self {
+        Self::new(
+            PoolAddress::sample(),
+            HashMap::<ResourceAddress, Decimal>::sample(),
+            ResourceAddress::sample(),
+            Decimal192::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            PoolAddress::sample_other(),
+            HashMap::<ResourceAddress, Decimal>::sample_other(),
+            ResourceAddress::sample_other(),
+            Decimal192::sample_other(),
+        )
+    }
+}
+
+impl HasSampleValues for HashMap<ResourceAddress, Decimal> {
+    fn sample() -> Self {
+        HashMap::from([(ResourceAddress::sample(), Decimal::sample())])
+    }
+
+    fn sample_other() -> Self {
+        HashMap::from([(ResourceAddress::sample_other(), Decimal::sample_other())])
+    }
+}
+
+impl HasSampleValues for Vec<TrackedPoolContribution> {
+    fn sample() -> Self {
+        vec![TrackedPoolContribution::sample()]
+    }
+
+    fn sample_other() -> Self {
+        vec![TrackedPoolContribution::sample_other()]
+    }
+}

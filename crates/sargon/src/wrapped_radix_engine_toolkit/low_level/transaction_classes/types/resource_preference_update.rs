@@ -44,6 +44,32 @@ impl HasSampleValues for ResourcePreferenceUpdate {
     }
 }
 
+impl HasSampleValues for HashMap<AccountAddress, HashMap<ResourceAddress, ResourcePreferenceUpdate>> {
+    fn sample() -> Self {
+        let mut map = HashMap::new();
+        map.insert(
+            AccountAddress::sample(),
+            [(ResourceAddress::sample(), ResourcePreferenceUpdate::sample())]
+                .iter()
+                .cloned()
+                .collect(),
+        );
+        map
+    }
+
+    fn sample_other() -> Self {
+        let mut map = HashMap::new();
+        map.insert(
+            AccountAddress::sample_other(),
+            [(ResourceAddress::sample_other(), ResourcePreferenceUpdate::sample_other())]
+                .iter()
+                .cloned()
+                .collect(),
+        );
+        map
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

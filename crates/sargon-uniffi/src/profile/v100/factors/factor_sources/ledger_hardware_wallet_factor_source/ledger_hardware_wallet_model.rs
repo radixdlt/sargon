@@ -3,43 +3,11 @@ use sargon::LedgerHardwareWalletModel as InternalLedgerHardwareWalletModel;
 
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
 /// *Ledger Nano S+*.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum LedgerHardwareWalletModel {
     NanoS,
     NanoSPlus,
     NanoX,
-}
-
-impl From<InternalLedgerHardwareWalletModel> for LedgerHardwareWalletModel {
-    fn from(value: InternalLedgerHardwareWalletModel) -> Self {
-        match value {
-            InternalLedgerHardwareWalletModel::NanoS => {
-                LedgerHardwareWalletModel::NanoS
-            }
-            InternalLedgerHardwareWalletModel::NanoSPlus => {
-                LedgerHardwareWalletModel::NanoSPlus
-            }
-            InternalLedgerHardwareWalletModel::NanoX => {
-                LedgerHardwareWalletModel::NanoX
-            }
-        }
-    }
-}
-
-impl Into<InternalLedgerHardwareWalletModel> for LedgerHardwareWalletModel {
-    fn into(self) -> InternalLedgerHardwareWalletModel {
-        match self {
-            LedgerHardwareWalletModel::NanoS => {
-                InternalLedgerHardwareWalletModel::NanoS
-            }
-            LedgerHardwareWalletModel::NanoSPlus => {
-                InternalLedgerHardwareWalletModel::NanoSPlus
-            }
-            LedgerHardwareWalletModel::NanoX => {
-                InternalLedgerHardwareWalletModel::NanoX
-            }
-        }
-    }
 }
 
 #[uniffi::export]

@@ -1,31 +1,11 @@
 use crate::prelude::*;
 use sargon::NetworkMethod as InternalNetworkMethod;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum NetworkMethod {
     Post,
     Get,
     Head,
-}
-
-impl From<InternalNetworkMethod> for NetworkMethod {
-    fn from(value: InternalNetworkMethod) -> Self {
-        match value {
-            InternalNetworkMethod::Post => NetworkMethod::Post,
-            InternalNetworkMethod::Get => NetworkMethod::Get,
-            InternalNetworkMethod::Head => NetworkMethod::Head,
-        }
-    }
-}
-
-impl Into<InternalNetworkMethod> for NetworkMethod {
-    fn into(self) -> InternalNetworkMethod {
-        match self {
-            NetworkMethod::Post => InternalNetworkMethod::Post,
-            NetworkMethod::Get => InternalNetworkMethod::Get,
-            NetworkMethod::Head => InternalNetworkMethod::Head,
-        }
-    }
 }
 
 #[uniffi::export]

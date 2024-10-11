@@ -6,6 +6,16 @@ pub enum EncryptionScheme {
     Version1(AesGcm256),
 }
 
+impl HasSampleValues for EncryptionScheme {
+    fn sample() -> Self {
+        Self::version1()
+    }
+
+    fn sample_other() -> Self {
+        Self::version1()
+    }
+}
+
 impl std::fmt::Display for EncryptionScheme {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(

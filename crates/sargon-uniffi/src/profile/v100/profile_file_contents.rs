@@ -9,7 +9,7 @@ use sargon::ProfileFileContents as InternalProfileFileContents;
 /// or if we failed to parse as Profile and `EncryptedProfileSnapshot`
 /// then `NotProfile` is used, indicating that the bytes is not at all
 /// a Profile.
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.
@@ -25,38 +25,6 @@ pub enum ProfileFileContents {
     /// contrary to the users beliefs (or the user accidentally selected
     /// a random file...)
     NotProfile,
-}
-
-impl From<InternalProfileFileContents> for ProfileFileContents {
-    fn from(value: InternalProfileFileContents) -> Self {
-        match value {
-            InternalProfileFileContents::PlaintextProfile(value) => {
-                ProfileFileContents::PlaintextProfile(value.into())
-            }
-            InternalProfileFileContents::EncryptedProfile => {
-                ProfileFileContents::EncryptedProfile
-            }
-            InternalProfileFileContents::NotProfile => {
-                ProfileFileContents::NotProfile
-            }
-        }
-    }
-}
-
-impl Into<InternalProfileFileContents> for ProfileFileContents {
-    fn into(self) -> InternalProfileFileContents {
-        match self {
-            ProfileFileContents::PlaintextProfile(value) => {
-                InternalProfileFileContents::PlaintextProfile(value.into())
-            }
-            ProfileFileContents::EncryptedProfile => {
-                InternalProfileFileContents::EncryptedProfile
-            }
-            ProfileFileContents::NotProfile => {
-                InternalProfileFileContents::NotProfile
-            }
-        }
-    }
 }
 
 #[uniffi::export]

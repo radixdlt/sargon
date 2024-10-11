@@ -35,6 +35,16 @@ impl CAP26EntityKind {
     }
 }
 
+impl HasSampleValues for CAP26EntityKind {
+    fn sample() -> Self {
+        CAP26EntityKind::Account
+    }
+
+    fn sample_other() -> Self {
+        CAP26EntityKind::Identity
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

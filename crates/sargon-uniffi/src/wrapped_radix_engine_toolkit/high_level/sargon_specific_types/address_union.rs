@@ -25,33 +25,13 @@ macro_rules! address_union {
                 PartialEq,
                 Eq,
                 Hash,
-                InternalConversion,
+                InternalConversionV2,
                 uniffi::Enum,
             )]
             pub enum $union_name {
                 $(
                     $variant_name($variant_type),
                 )+
-            }
-
-            impl From<[< Internal $union_name >]> for $union_name {
-                fn from(value: [< Internal $union_name >]) -> Self {
-                    match value {
-                        $(
-                            [< Internal $union_name >]::$variant_name(address) => Self::$variant_name(address.into()),
-                        )+
-                    }
-                }
-            }
-
-            impl Into<[< Internal $union_name >]> for $union_name {
-                fn into(self) -> [< Internal $union_name >] {
-                    match self {
-                        $(
-                            Self::$variant_name(address) => [< Internal $union_name >]::$variant_name(address.into()),
-                        )+
-                    }
-                }
             }
 
             #[uniffi::export]

@@ -41,3 +41,33 @@ impl From<(RetTrackedValidatorClaim, NetworkID)> for TrackedValidatorClaim {
         )
     }
 }
+
+impl HasSampleValues for TrackedValidatorClaim {
+    fn sample() -> Self {
+        Self::new(
+            ValidatorAddress::sample(),
+            ResourceAddress::sample(),
+            Vec::<NonFungibleLocalId>::sample(),
+            Decimal192::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            ValidatorAddress::sample_other(),
+            ResourceAddress::sample_other(),
+            Vec::<NonFungibleLocalId>::sample_other(),
+            Decimal192::sample_other(),
+        )
+    }
+}
+
+impl HasSampleValues for Vec<TrackedValidatorClaim> {
+    fn sample() -> Self {
+        vec![TrackedValidatorClaim::sample()]
+    }
+
+    fn sample_other() -> Self {
+        vec![TrackedValidatorClaim::sample_other()]
+    }
+}

@@ -64,6 +64,16 @@ pub enum SecureStorageAccessErrorKind {
     NoDeviceCredential,
 }
 
+impl HasSampleValues for SecureStorageAccessErrorKind {
+    fn sample() -> Self {
+        SecureStorageAccessErrorKind::HardwareUnavailable
+    }
+
+    fn sample_other() -> Self {
+        SecureStorageAccessErrorKind::UnableToProcess
+    }
+}
+
 impl SecureStorageAccessErrorKind {
     pub fn is_manual_cancellation(&self) -> bool {
         self == &SecureStorageAccessErrorKind::UserCancelled

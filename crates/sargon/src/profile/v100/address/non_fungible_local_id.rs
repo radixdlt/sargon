@@ -150,6 +150,16 @@ impl HasSampleValues for NonFungibleLocalId {
     }
 }
 
+impl HasSampleValues for Vec<NonFungibleLocalId> {
+    fn sample() -> Self {
+        vec![NonFungibleLocalId::sample()]
+    }
+
+    fn sample_other() -> Self {
+        vec![NonFungibleLocalId::sample_other()]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

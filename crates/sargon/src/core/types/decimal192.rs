@@ -644,6 +644,16 @@ impl Decimal {
     }
 }
 
+impl HasSampleValues for Decimal192 {
+    fn sample() -> Self {
+        "123.456".parse().unwrap()
+    }
+
+    fn sample_other() -> Self {
+        "789.012".parse().unwrap()
+    }
+}
+
 #[cfg(test)]
 impl From<&str> for Decimal192 {
     /// TEST ONLY

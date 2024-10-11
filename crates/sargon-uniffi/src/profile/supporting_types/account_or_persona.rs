@@ -3,7 +3,7 @@ use sargon::AccountOrPersona as InternalAccountOrPersona;
 use sargon::Identifiable;
 
 /// Either an `Account` or a `Persona`.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Enum)]
 pub enum AccountOrPersona {
     /// An `Account`
     ///
@@ -19,32 +19,6 @@ pub enum AccountOrPersona {
     /// `accountEntity` / `AccountEntity` which can not be named
     /// `account`/ `Account` due to Kotlin UniFFI limitation.
     PersonaEntity(Persona),
-}
-
-impl From<InternalAccountOrPersona> for AccountOrPersona {
-    fn from(value: InternalAccountOrPersona) -> Self {
-        match value {
-            InternalAccountOrPersona::AccountEntity(account) => {
-                AccountOrPersona::AccountEntity(account.into())
-            }
-            InternalAccountOrPersona::PersonaEntity(persona) => {
-                AccountOrPersona::PersonaEntity(persona.into())
-            }
-        }
-    }
-}
-
-impl Into<InternalAccountOrPersona> for AccountOrPersona {
-    fn into(self) -> InternalAccountOrPersona {
-        match self {
-            AccountOrPersona::AccountEntity(account) => {
-                InternalAccountOrPersona::AccountEntity(account.into())
-            }
-            AccountOrPersona::PersonaEntity(persona) => {
-                InternalAccountOrPersona::PersonaEntity(persona.into())
-            }
-        }
-    }
 }
 
 #[uniffi::export]

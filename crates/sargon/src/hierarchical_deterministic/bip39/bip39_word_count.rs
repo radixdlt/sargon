@@ -73,6 +73,16 @@ impl Default for BIP39WordCount {
     }
 }
 
+impl HasSampleValues for BIP39WordCount {
+    fn sample() -> Self {
+        Self::TwentyFour
+    }
+
+    fn sample_other() -> Self {
+        Self::Twelve
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

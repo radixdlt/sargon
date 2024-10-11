@@ -22,7 +22,7 @@ decl_ret_wrapped_address!(
 );
 
 /// The kind of the Pool, either One, Two or Multi resources.
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of a single
     /// resource kind.
@@ -35,26 +35,6 @@ pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of many different
     /// resources
     MultiResources,
-}
-
-impl From<InternalPoolKind> for PoolKind {
-    fn from(kind: InternalPoolKind) -> Self {
-        match kind {
-            InternalPoolKind::OneResource => PoolKind::OneResource,
-            InternalPoolKind::TwoResources => PoolKind::TwoResources,
-            InternalPoolKind::MultiResources => PoolKind::MultiResources,
-        }
-    }
-}
-
-impl Into<InternalPoolKind> for PoolKind {
-    fn into(self) -> InternalPoolKind {
-        match self {
-            PoolKind::OneResource => InternalPoolKind::OneResource,
-            PoolKind::TwoResources => InternalPoolKind::TwoResources,
-            PoolKind::MultiResources => InternalPoolKind::MultiResources,
-        }
-    }
 }
 
 /// Returns the kind of pool, either 1, 2 or Multi resources.

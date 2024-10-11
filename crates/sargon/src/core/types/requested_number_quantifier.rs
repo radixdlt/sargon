@@ -29,6 +29,16 @@ pub enum RequestedNumberQuantifier {
     AtLeast,
 }
 
+impl HasSampleValues for RequestedNumberQuantifier {
+    fn sample() -> Self {
+        RequestedNumberQuantifier::Exactly
+    }
+
+    fn sample_other() -> Self {
+        RequestedNumberQuantifier::AtLeast
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

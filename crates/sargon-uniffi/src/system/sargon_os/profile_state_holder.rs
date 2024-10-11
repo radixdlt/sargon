@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use sargon::ProfileState as InternalProfileState;
-use std::{borrow::Borrow, sync::RwLock};
 
-#[derive(Clone, PartialEq, EnumAsInner, uniffi::Enum)]
+#[derive(Clone, PartialEq, InternalConversionV2, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {
     /// When no profile exists in secure storage when OS is booted.
@@ -15,10 +14,4 @@ pub enum ProfileState {
     /// When a valid 'Profile' exists. This can either happen when the os boots, or a profile is
     /// restored, or the user creates a new profile.
     Loaded(Profile),
-}
-
-impl From<InternalProfileState> for ProfileState {
-    fn from(value: InternalProfileState) -> Self {
-        unimplemented!()
-    }
 }

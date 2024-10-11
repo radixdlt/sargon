@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::SignatureWithPublicKey as InternalSignatureWithPublicKey;
 
 /// Represents any natively supported signature, including public key.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum SignatureWithPublicKey {
     // N.B. `radix_transactions::model::SignatureWithPublicKeyV1::Secp256k1` does
     // NOT include the public key, it relies on ECDSA Signature supporting
@@ -22,48 +22,6 @@ pub enum SignatureWithPublicKey {
         public_key: Ed25519PublicKey,
         signature: Ed25519Signature,
     },
-}
-
-impl From<InternalSignatureWithPublicKey> for SignatureWithPublicKey {
-    fn from(value: InternalSignatureWithPublicKey) -> Self {
-        match value {
-            InternalSignatureWithPublicKey::Secp256k1 {
-                public_key,
-                signature,
-            } => Self::Secp256k1 {
-                public_key: public_key.into(),
-                signature: signature.into(),
-            },
-            InternalSignatureWithPublicKey::Ed25519 {
-                public_key,
-                signature,
-            } => Self::Ed25519 {
-                public_key: public_key.into(),
-                signature: signature.into(),
-            },
-        }
-    }
-}
-
-impl Into<InternalSignatureWithPublicKey> for SignatureWithPublicKey {
-    fn into(self) -> InternalSignatureWithPublicKey {
-        match self {
-            SignatureWithPublicKey::Secp256k1 {
-                public_key,
-                signature,
-            } => InternalSignatureWithPublicKey::Secp256k1 {
-                public_key: public_key.into(),
-                signature: signature.into(),
-            },
-            SignatureWithPublicKey::Ed25519 {
-                public_key,
-                signature,
-            } => InternalSignatureWithPublicKey::Ed25519 {
-                public_key: public_key.into(),
-                signature: signature.into(),
-            },
-        }
-    }
 }
 
 #[uniffi::export]

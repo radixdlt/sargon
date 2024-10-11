@@ -52,6 +52,16 @@ fn scrypto_string_non_fungible_local_id(
     })
 }
 
+impl HasSampleValues for NonFungibleLocalIdString {
+    fn sample() -> Self {
+        "foo".parse().unwrap()
+    }
+
+    fn sample_other() -> Self {
+        "bar".parse().unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

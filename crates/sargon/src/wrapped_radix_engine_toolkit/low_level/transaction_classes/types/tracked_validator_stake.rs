@@ -40,3 +40,33 @@ impl From<(RetTrackedValidatorStake, NetworkID)> for TrackedValidatorStake {
         )
     }
 }
+
+impl HasSampleValues for TrackedValidatorStake {
+    fn sample() -> Self {
+        Self::new(
+            ValidatorAddress::sample(),
+            Decimal192::sample(),
+            ResourceAddress::sample(),
+            Decimal192::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            ValidatorAddress::sample_other(),
+            Decimal192::sample_other(),
+            ResourceAddress::sample_other(),
+            Decimal192::sample_other(),
+        )
+    }
+}
+
+impl HasSampleValues for Vec<TrackedValidatorStake> {
+    fn sample() -> Self {
+        vec![TrackedValidatorStake::sample()]
+    }
+
+    fn sample_other() -> Self {
+        vec![TrackedValidatorStake::sample_other()]
+    }
+}

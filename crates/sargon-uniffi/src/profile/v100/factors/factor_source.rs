@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::BaseIsFactorSource;
 use sargon::FactorSource as InternalFactorSource;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum FactorSource {
     Device {
         value: DeviceFactorSource,
@@ -27,72 +27,6 @@ pub enum FactorSource {
     TrustedContact {
         value: TrustedContactFactorSource,
     },
-}
-
-impl From<InternalFactorSource> for FactorSource {
-    fn from(value: InternalFactorSource) -> Self {
-        match value {
-            InternalFactorSource::Device { value } => FactorSource::Device {
-                value: value.into(),
-            },
-            InternalFactorSource::Ledger { value } => FactorSource::Ledger {
-                value: value.into(),
-            },
-            InternalFactorSource::OffDeviceMnemonic { value } => {
-                FactorSource::OffDeviceMnemonic {
-                    value: value.into(),
-                }
-            }
-            InternalFactorSource::ArculusCard { value } => {
-                FactorSource::ArculusCard {
-                    value: value.into(),
-                }
-            }
-            InternalFactorSource::SecurityQuestions { value } => {
-                FactorSource::SecurityQuestions {
-                    value: value.into(),
-                }
-            }
-            InternalFactorSource::TrustedContact { value } => {
-                FactorSource::TrustedContact {
-                    value: value.into(),
-                }
-            }
-        }
-    }
-}
-
-impl Into<InternalFactorSource> for FactorSource {
-    fn into(self) -> InternalFactorSource {
-        match self {
-            FactorSource::Device { value } => InternalFactorSource::Device {
-                value: value.into(),
-            },
-            FactorSource::Ledger { value } => InternalFactorSource::Ledger {
-                value: value.into(),
-            },
-            FactorSource::OffDeviceMnemonic { value } => {
-                InternalFactorSource::OffDeviceMnemonic {
-                    value: value.into(),
-                }
-            }
-            FactorSource::ArculusCard { value } => {
-                InternalFactorSource::ArculusCard {
-                    value: value.into(),
-                }
-            }
-            FactorSource::SecurityQuestions { value } => {
-                InternalFactorSource::SecurityQuestions {
-                    value: value.into(),
-                }
-            }
-            FactorSource::TrustedContact { value } => {
-                InternalFactorSource::TrustedContact {
-                    value: value.into(),
-                }
-            }
-        }
-    }
 }
 
 #[uniffi::export]

@@ -23,6 +23,16 @@ impl From<Exactly32Bytes> for X25519PrivateKey {
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;
 
+impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8 {
+    fn sample() -> Self {
+        Self
+    }
+
+    fn sample_other() -> Self {
+        Self
+    }
+}
+
 impl Default
     for SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8
 {

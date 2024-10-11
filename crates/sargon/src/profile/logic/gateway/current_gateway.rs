@@ -46,6 +46,16 @@ pub enum ChangeGatewayOutcome {
     NoChange,
 }
 
+impl HasSampleValues for ChangeGatewayOutcome {
+    fn sample() -> Self {
+        ChangeGatewayOutcome::DidChange { is_new: true }
+    }
+
+    fn sample_other() -> Self {
+        ChangeGatewayOutcome::NoChange
+    }
+}
+
 impl SavedGateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already

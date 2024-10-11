@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::ResourcePreference as InternalResourcePreference;
 use sargon::ResourcePreferenceUpdate as InternalResourcePreferenceUpdate;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum ResourcePreference {
     Allowed,
     Disallowed,
@@ -12,28 +12,6 @@ pub enum ResourcePreference {
 pub enum ResourcePreferenceUpdate {
     Set { value: ResourcePreference },
     Remove,
-}
-
-impl From<InternalResourcePreference> for ResourcePreference {
-    fn from(value: InternalResourcePreference) -> Self {
-        match value {
-            InternalResourcePreference::Allowed => ResourcePreference::Allowed,
-            InternalResourcePreference::Disallowed => {
-                ResourcePreference::Disallowed
-            }
-        }
-    }
-}
-
-impl Into<InternalResourcePreference> for ResourcePreference {
-    fn into(self) -> InternalResourcePreference {
-        match self {
-            ResourcePreference::Allowed => InternalResourcePreference::Allowed,
-            ResourcePreference::Disallowed => {
-                InternalResourcePreference::Disallowed
-            }
-        }
-    }
 }
 
 impl From<InternalResourcePreferenceUpdate> for ResourcePreferenceUpdate {

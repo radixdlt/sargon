@@ -26,6 +26,16 @@ impl HasSampleValues for ValidatorAddress {
     }
 }
 
+impl HasSampleValues for Vec<ValidatorAddress> {
+    fn sample() -> Self {
+        vec![ValidatorAddress::sample()]
+    }
+
+    fn sample_other() -> Self {
+        vec![ValidatorAddress::sample_other()]
+    }
+}
+
 impl ValidatorAddress {
     pub fn sample_mainnet() -> Self {
         "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"

@@ -77,20 +77,22 @@ where
     }
 }
 
-impl From<InternalCommonError> for CommonError {
-    fn from(value: InternalCommonError) -> Self {
-        unimplemented!()
-    }
-}
+// impl From<InternalCommonError> for CommonError {
+//     fn from(value: InternalCommonError) -> Self {
+//         unimplemented!()
+//     }
+// }
 
-impl Into<InternalCommonError> for CommonError {
-    fn into(self) -> InternalCommonError {
-        unimplemented!()
-    }
-}
+// impl Into<InternalCommonError> for CommonError {
+//     fn into(self) -> InternalCommonError {
+//         unimplemented!()
+//     }
+// }
 
 #[repr(u32)]
-#[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
+#[derive(
+    Clone, Debug, ThisError, PartialEq, InternalConversionV2, uniffi::Error,
+)]
 pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,
@@ -434,7 +436,7 @@ pub enum CommonError {
     #[error(
         "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
     )]
-    FailedToUniFFIDecodeBytesToManifestInstructions = 10094,
+    FailedToDecodeBytesToManifestInstructions = 10094,
 
     #[error("Failed to decode Transaction Hash, value: {bad_value}")]
     FailedToDecodeTransactionHash { bad_value: String } = 10095,

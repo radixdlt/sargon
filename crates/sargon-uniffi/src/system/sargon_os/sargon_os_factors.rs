@@ -3,36 +3,10 @@ use sargon::DeviceFactorSourceType as InternalDeviceFactorSourceType;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum DeviceFactorSourceType {
     Babylon { is_main: bool },
     Olympia,
-}
-
-impl From<InternalDeviceFactorSourceType> for DeviceFactorSourceType {
-    fn from(value: InternalDeviceFactorSourceType) -> Self {
-        match value {
-            InternalDeviceFactorSourceType::Babylon { is_main } => {
-                DeviceFactorSourceType::Babylon { is_main }
-            }
-            InternalDeviceFactorSourceType::Olympia => {
-                DeviceFactorSourceType::Olympia
-            }
-        }
-    }
-}
-
-impl Into<InternalDeviceFactorSourceType> for DeviceFactorSourceType {
-    fn into(self) -> InternalDeviceFactorSourceType {
-        match self {
-            DeviceFactorSourceType::Babylon { is_main } => {
-                InternalDeviceFactorSourceType::Babylon { is_main }
-            }
-            DeviceFactorSourceType::Olympia => {
-                InternalDeviceFactorSourceType::Olympia
-            }
-        }
-    }
 }
 
 #[uniffi::export]

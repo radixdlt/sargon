@@ -38,6 +38,16 @@ impl From<ScryptoEpoch> for Epoch {
     }
 }
 
+impl HasSampleValues for Epoch {
+    fn sample() -> Self {
+        Self(0)
+    }
+
+    fn sample_other() -> Self {
+        Self(1)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

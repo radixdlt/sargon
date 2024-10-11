@@ -21,6 +21,16 @@ pub enum FactorSourceFlag {
     DeletedByUser,
 }
 
+impl HasSampleValues for FactorSourceFlag {
+    fn sample() -> Self {
+        Self::Main
+    }
+
+    fn sample_other() -> Self {
+        Self::DeletedByUser
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

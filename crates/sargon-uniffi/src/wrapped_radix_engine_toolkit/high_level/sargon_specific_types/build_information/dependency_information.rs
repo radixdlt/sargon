@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DependencyInformation as InternalDependencyInformation;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum DependencyInformation {
     // Crates.io
     Version(String),
@@ -10,44 +10,6 @@ pub enum DependencyInformation {
     Tag(String),
     Branch(String),
     Rev(String),
-}
-
-impl From<InternalDependencyInformation> for DependencyInformation {
-    fn from(value: InternalDependencyInformation) -> Self {
-        match value {
-            InternalDependencyInformation::Version(value) => {
-                DependencyInformation::Version(value)
-            }
-            InternalDependencyInformation::Tag(value) => {
-                DependencyInformation::Tag(value)
-            }
-            InternalDependencyInformation::Branch(value) => {
-                DependencyInformation::Branch(value)
-            }
-            InternalDependencyInformation::Rev(value) => {
-                DependencyInformation::Rev(value)
-            }
-        }
-    }
-}
-
-impl Into<InternalDependencyInformation> for DependencyInformation {
-    fn into(self) -> InternalDependencyInformation {
-        match self {
-            DependencyInformation::Version(value) => {
-                InternalDependencyInformation::Version(value)
-            }
-            DependencyInformation::Tag(value) => {
-                InternalDependencyInformation::Tag(value)
-            }
-            DependencyInformation::Branch(value) => {
-                InternalDependencyInformation::Branch(value)
-            }
-            DependencyInformation::Rev(value) => {
-                InternalDependencyInformation::Rev(value)
-            }
-        }
-    }
 }
 
 #[uniffi::export]

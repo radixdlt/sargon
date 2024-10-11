@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 #[derive(
     Clone,
     Copy,
@@ -13,4 +15,14 @@ pub enum AddressFormat {
     Full,
     Raw,
     Default,
+}
+
+impl HasSampleValues for AddressFormat {
+    fn sample() -> Self {
+        AddressFormat::Full
+    }
+
+    fn sample_other() -> Self {
+        AddressFormat::Raw
+    }
 }

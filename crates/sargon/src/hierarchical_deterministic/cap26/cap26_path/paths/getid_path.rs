@@ -98,6 +98,20 @@ impl FromStr for GetIDPath {
     }
 }
 
+impl HasSampleValues for GetIDPath {
+    fn sample() -> Self {
+        Self {
+            path: HDPath::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            path: HDPath::sample_other(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

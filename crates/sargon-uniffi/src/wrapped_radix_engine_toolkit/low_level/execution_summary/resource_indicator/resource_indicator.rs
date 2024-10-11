@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::ResourceIndicator as InternalResourceIndicator;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Enum)]
 pub enum ResourceIndicator {
     Fungible {
         resource_address: ResourceAddress,
@@ -11,48 +11,6 @@ pub enum ResourceIndicator {
         resource_address: ResourceAddress,
         indicator: NonFungibleResourceIndicator,
     },
-}
-
-impl From<InternalResourceIndicator> for ResourceIndicator {
-    fn from(value: InternalResourceIndicator) -> Self {
-        match value {
-            InternalResourceIndicator::Fungible {
-                resource_address,
-                indicator,
-            } => ResourceIndicator::Fungible {
-                resource_address: resource_address.into(),
-                indicator: indicator.into(),
-            },
-            InternalResourceIndicator::NonFungible {
-                resource_address,
-                indicator,
-            } => ResourceIndicator::NonFungible {
-                resource_address: resource_address.into(),
-                indicator: indicator.into(),
-            },
-        }
-    }
-}
-
-impl Into<InternalResourceIndicator> for ResourceIndicator {
-    fn into(self) -> InternalResourceIndicator {
-        match self {
-            ResourceIndicator::Fungible {
-                resource_address,
-                indicator,
-            } => InternalResourceIndicator::Fungible {
-                resource_address: resource_address.into(),
-                indicator: indicator.into(),
-            },
-            ResourceIndicator::NonFungible {
-                resource_address,
-                indicator,
-            } => InternalResourceIndicator::NonFungible {
-                resource_address: resource_address.into(),
-                indicator: indicator.into(),
-            },
-        }
-    }
 }
 
 #[uniffi::export]

@@ -44,6 +44,16 @@ impl std::fmt::Display for ArculusCardModel {
     }
 }
 
+impl HasSampleValues for ArculusCardModel {
+    fn sample() -> Self {
+        ArculusCardModel::ArculusColdStorageWallet
+    }
+
+    fn sample_other() -> Self {
+        ArculusCardModel::ArculusColdStorageWallet
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
