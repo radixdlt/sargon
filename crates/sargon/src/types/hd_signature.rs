@@ -60,7 +60,7 @@ impl HasSampleValues for HDSignature {
 
 impl HDSignature {
     // Signs with predefined mnemonics associated to the input's factor source id
-    pub(crate) fn sample_from_input(input: HDSignatureInput) -> Self {
+    pub fn sample_from_input(input: HDSignatureInput) -> Self {
         let id = input.owned_factor_instance.factor_source_id();
 
         let mnemonic_with_passphrase = id.sample_associated_mnemonic();

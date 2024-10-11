@@ -258,4 +258,213 @@ mod integration_tests {
             .unwrap();
         assert_eq!(status, TransactionStatusResponsePayloadStatus::Pending);
     }
+
+    mod signing {
+        use super::*;
+        use radix_common::prelude::indexmap::IndexSet;
+        use std::sync::Arc;
+
+        struct TestLazySignMinimumInteractors;
+        struct TestLazySignMinimumInteractor;
+
+        #[async_trait::async_trait]
+        impl PolyFactorSignInteractor for TestLazySignMinimumInteractor {
+            async fn sign(
+                &self,
+                request: PolyFactorSignRequest,
+            ) -> SignWithFactorsOutcome {
+                let mut signatures = IndexSet::<HDSignature>::new();
+                for (_, req) in request.per_factor_source.iter() {
+                    let resp = <Self as MonoFactorSignInteractor>::sign(
+                        self,
+                        MonoFactorSignRequest::new(
+                            req.clone(),
+                            request.invalid_transactions_if_neglected.clone(),
+                        ),
+                    )
+                    .await;
+
+                    match resp {
+                        SignWithFactorsOutcome::Signed {
+                            produced_signatures,
+                        } => {
+                            signatures.extend(
+                                produced_signatures
+                                    .signatures
+                                    .into_iter()
+                                    .flat_map(|(_, xs)| xs)
+                                    .collect::<IndexSet<_>>(),
+                            );
+                        }
+                        SignWithFactorsOutcome::Neglected(_) => {
+                            return SignWithFactorsOutcome::Neglected(
+                                NeglectedFactors::new(
+                                    NeglectFactorReason::UserExplicitlySkipped,
+                                    request.factor_source_ids(),
+                                ),
+                            );
+                        }
+                    }
+                }
+                SignWithFactorsOutcome::signed(SignResponse::with_signatures(
+                    signatures,
+                ))
+            }
+        }
+
+        #[async_trait::async_trait]
+        impl MonoFactorSignInteractor for TestLazySignMinimumInteractor {
+            async fn sign(
+                &self,
+                request: MonoFactorSignRequest,
+            ) -> SignWithFactorsOutcome {
+                if request.invalid_transactions_if_neglected.is_empty() {
+                    return SignWithFactorsOutcome::Neglected(
+                        NeglectedFactors::new(
+                            NeglectFactorReason::UserExplicitlySkipped,
+                            IndexSet::just(request.input.factor_source_id),
+                        ),
+                    );
+                }
+                let signatures = request
+                    .input
+                    .per_transaction
+                    .into_iter()
+                    .flat_map(|r| {
+                        r.signature_inputs()
+                            .iter()
+                            .map(|x| HDSignature::sample_from_input(x.clone()))
+                            .collect::<IndexSet<_>>()
+                    })
+                    .collect::<IndexSet<HDSignature>>();
+                SignWithFactorsOutcome::Signed {
+                    produced_signatures: SignResponse::with_signatures(
+                        signatures,
+                    ),
+                }
+            }
+        }
+
+        impl SignInteractors for TestLazySignMinimumInteractors {
+            fn interactor_for(&self, kind: FactorSourceKind) -> SignInteractor {
+                match kind {
+                    FactorSourceKind::Device => SignInteractor::mono(Arc::new(
+                        TestLazySignMinimumInteractor,
+                    )),
+                    _ => SignInteractor::poly(Arc::new(
+                        TestLazySignMinimumInteractor,
+                    )),
+                }
+            }
+        }
+
+        #[actix_rt::test]
+        async fn valid() {
+            type FI = HierarchicalDeterministicFactorInstance;
+
+            let f0 = FactorSource::sample_ledger();
+            let f1 = FactorSource::sample_device_babylon();
+            let f2 = FactorSource::sample_device_babylon_other();
+            let f3 = FactorSource::sample_arculus();
+            let f4 = FactorSource::sample_off_device();
+
+            let alice = Account::sample_securified_mainnet(
+                "Alice",
+                AccountAddress::sample_at(0),
+                || {
+                    let i = HDPathComponent::from(0);
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+                    [
+                        FI::sample_mainnet_tx_account(i, f0.factor_source_id().as_hash().unwrap().clone()), // SKIPPED
+                        FI::sample_mainnet_tx_account(i, f1.factor_source_id().as_hash().unwrap().clone()),
+                        FI::sample_mainnet_tx_account(i, f2.factor_source_id().as_hash().unwrap().clone()),
+                    ],
+                    2,
+                )
+                },
+            );
+
+            let bob = Account::sample_securified_mainnet(
+                "Bob",
+                AccountAddress::sample_at(1),
+                || {
+                    let i = HDPathComponent::from(1);
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
+                    FI::sample_mainnet_tx_account(
+                        i,
+                        f3.factor_source_id().as_hash().unwrap().clone(),
+                    )
+                ])
+                },
+            );
+
+            let carol = Account::sample_securified_mainnet(
+                "Carol",
+                AccountAddress::sample_at(2),
+                || {
+                    let i = HDPathComponent::from(2);
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                        [FI::sample_mainnet_tx_account(
+                            i,
+                            f2.factor_source_id().as_hash().unwrap().clone(),
+                        )],
+                        1,
+                        [FI::sample_mainnet_tx_account(
+                            i,
+                            f4.factor_source_id().as_hash().unwrap().clone(),
+                        )],
+                    )
+                },
+            );
+
+            let satoshi = Persona::sample_unsecurified_mainnet(
+                "Satoshi",
+                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_identity(
+                    HDPathComponent::from(0),
+                    f4.factor_source_id().as_hash().unwrap().clone(),
+                ),
+            );
+
+            let tx0 =
+                TransactionIntent::new_requiring_auth([alice.address], []);
+            let tx1 = TransactionIntent::new_requiring_auth(
+                [alice.address, bob.address, carol.address],
+                [satoshi.address],
+            );
+            let tx2 = TransactionIntent::new_requiring_auth(
+                [bob.address],
+                [satoshi.address],
+            );
+
+            let transactions = [tx0, tx1, tx2];
+
+            let profile = Profile::sample_from(
+                [f0.clone(), f1, f2, f3, f4],
+                [&alice, &bob, &carol],
+                [&satoshi],
+            );
+
+            let collector = SignaturesCollector::new(
+                SigningFinishEarlyStrategy::default(),
+                transactions,
+                Arc::new(TestLazySignMinimumInteractors),
+                &profile,
+            )
+            .unwrap();
+
+            let outcome = collector.collect_signatures().await;
+
+            assert!(outcome.successful());
+            assert_eq!(
+                outcome.signatures_of_successful_transactions().len(),
+                10
+            );
+            assert_eq!(
+                outcome.ids_of_neglected_factor_sources(),
+                IndexSet::<FactorSourceIDFromHash>::just(
+                    f0.factor_source_id().as_hash().unwrap().clone()
+                )
+            );
+        }
+    }
 }

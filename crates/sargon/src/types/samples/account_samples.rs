@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-static ALL_ACCOUNT_SAMPLES: Lazy<
-    [Account; 10],
-> = Lazy::new(|| {
+static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
     [
         // Alice | 0 | Unsecurified { Device }
         Account::sample_unsecurified_mainnet(
@@ -116,14 +114,12 @@ static ALL_ACCOUNT_SAMPLES: Lazy<
                     )
                 )
             },
-        )
+        ),
     ]
 });
 
 impl Account {
-
-
-    pub(crate) fn sample_unsecurified_mainnet(
+    pub fn sample_unsecurified_mainnet(
         name: impl AsRef<str>,
         genesis_factor_instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
@@ -135,9 +131,9 @@ impl Account {
             ),
             display_name: DisplayName::new(name).unwrap(),
             security_state:
-            UnsecuredEntityControl::with_transaction_signing_only(
-                genesis_factor_instance,
-            )
+                UnsecuredEntityControl::with_transaction_signing_only(
+                    genesis_factor_instance,
+                )
                 .unwrap()
                 .into(),
             appearance_id: Default::default(),
@@ -146,7 +142,7 @@ impl Account {
         }
     }
 
-    pub(crate) fn sample_securified_mainnet(
+    pub fn sample_securified_mainnet(
         name: impl AsRef<str>,
         address: AccountAddress,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
@@ -161,22 +157,22 @@ impl Account {
             display_name: DisplayName::new(name).unwrap(),
             security_state: SecuredEntityControl {
                 access_controller_address:
-                AccessControllerAddress::sample_from_account_address(
-                    address,
-                ),
+                    AccessControllerAddress::sample_from_account_address(
+                        address,
+                    ),
                 security_structure: SecurityStructureOfFactorInstances {
                     security_structure_id: SecurityStructureID::sample(),
                     matrix_of_factors: matrix,
                 },
             }
-                .into(),
+            .into(),
             appearance_id: Default::default(),
             flags: Default::default(),
             on_ledger_settings: Default::default(),
         }
     }
 
-    pub(crate) fn sample_at(index: usize) -> Self {
+    pub fn sample_at(index: usize) -> Self {
         ALL_ACCOUNT_SAMPLES[index].clone()
     }
 }

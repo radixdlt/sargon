@@ -17,7 +17,7 @@ pub(crate) static ALL_ACCOUNT_ADDRESSES_SAMPLES: Lazy<[AccountAddress; 10]> =
     });
 
 impl AccountAddress {
-    pub(crate) fn sample_at(index: usize) -> Self {
+    pub fn sample_at(index: usize) -> Self {
         ALL_ACCOUNT_ADDRESSES_SAMPLES[index].clone()
     }
 }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl Profile {
-    pub(crate) fn sample_from<'a, 'p>(
+    pub fn sample_from<'a, 'p>(
         factor_sources: impl IntoIterator<Item = FactorSource>,
         accounts: impl IntoIterator<Item = &'a Account>,
         personas: impl IntoIterator<Item = &'p Persona>,

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[allow(dead_code)]
 pub(crate) static ALL_FACTOR_SOURCE_SAMPLES: Lazy<[FactorSource; 11]> =
     Lazy::new(|| {
         crate::types::samples::ALL_FACTOR_SOURCE_ID_SAMPLES
@@ -10,6 +11,7 @@ pub(crate) static ALL_FACTOR_SOURCE_SAMPLES: Lazy<[FactorSource; 11]> =
             .unwrap()
     });
 
+#[allow(dead_code)]
 impl FactorSource {
     pub(crate) fn sample_at(index: usize) -> FactorSource {
         ALL_FACTOR_SOURCE_SAMPLES[index].clone()

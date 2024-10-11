@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
-    [Persona; 8],
-> = Lazy::new(|| {
+pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
     [
         // Satoshi | 0 | Unsecurified { Device }
         Persona::sample_unsecurified_mainnet(
@@ -14,7 +12,6 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
             "Batman",
             HierarchicalDeterministicFactorInstance::sample_fii1(),
         ),
-
         // Ziggy | 2 | Securified { Single Threshold only }
         Persona::sample_securified_mainnet(
             "Ziggy",
@@ -27,7 +24,6 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
                 ))
             },
         ),
-
         // Superman | 3 | Securified { Single Override only }
         Persona::sample_securified_mainnet(
             "Superman",
@@ -40,7 +36,6 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
                 ))
             },
         ),
-
         // Banksy | 4 | Securified { Threshold factors only #3 }
         Persona::sample_securified_mainnet(
             "Banksy",
@@ -53,7 +48,6 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
                 ))
             },
         ),
-
         // Voltaire | 5 | Securified { Override factors only #2 }
         Persona::sample_securified_mainnet(
             "Voltaire",
@@ -66,7 +60,6 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
                 ))
             },
         ),
-
         // Kasparov | 6 | Securified { Threshold #3 and Override factors #2  }
         Persona::sample_securified_mainnet(
             "Kasparov",
@@ -79,7 +72,6 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
                 ))
             },
         ),
-
         // Pelé | 7 | Securified { Threshold only # 5/5 }
         Persona::sample_securified_mainnet(
             "Pelé",
@@ -91,12 +83,12 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<
                     idx,
                 ))
             },
-        )
+        ),
     ]
 });
 
 impl Persona {
-    pub(crate) fn sample_unsecurified_mainnet(
+    pub fn sample_unsecurified_mainnet(
         name: impl AsRef<str>,
         genesis_factor_instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
@@ -118,7 +110,7 @@ impl Persona {
         }
     }
 
-    pub(crate) fn sample_securified_mainnet(
+    pub fn sample_securified_mainnet(
         name: impl AsRef<str>,
         address: IdentityAddress,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
@@ -147,7 +139,7 @@ impl Persona {
         }
     }
 
-    pub(crate) fn sample_at(index: usize) -> Self {
+    pub fn sample_at(index: usize) -> Self {
         ALL_PERSONA_SAMPLES[index].clone()
     }
 }

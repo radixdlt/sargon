@@ -774,11 +774,20 @@ mod tests {
             let p1 = Persona::sample_at(1);
             let p2 = Persona::sample_at(2);
 
-            let t0 = TransactionIntent::entities_requiring_auth([&a0, &a1], [&p0, &p1]);
-            let t1 = TransactionIntent::entities_requiring_auth([&a0, &a1, &a2], []);
-            let t2 = TransactionIntent::entities_requiring_auth([], [&p0, &p1, &p2]);
+            let t0 = TransactionIntent::entities_requiring_auth(
+                [&a0, &a1],
+                [&p0, &p1],
+            );
+            let t1 =
+                TransactionIntent::entities_requiring_auth([&a0, &a1, &a2], []);
+            let t2 =
+                TransactionIntent::entities_requiring_auth([], [&p0, &p1, &p2]);
 
-            let profile = Profile::sample_from(factor_sources.clone(), [&a0, &a1, &a2], [&p0, &p1, &p2]);
+            let profile = Profile::sample_from(
+                factor_sources.clone(),
+                [&a0, &a1, &a2],
+                [&p0, &p1, &p2],
+            );
 
             let collector = SignaturesCollector::new(
                 SigningFinishEarlyStrategy::default(),
@@ -786,12 +795,15 @@ mod tests {
                 Arc::new(TestSignatureCollectingInteractors::new(sim)),
                 &profile,
             )
-                .unwrap();
+            .unwrap();
 
             let outcome = collector.collect_signatures().await;
             assert!(outcome.successful());
             assert!(outcome.failed_transactions().is_empty());
-            assert_eq!(outcome.signatures_of_successful_transactions().len(), 10);
+            assert_eq!(
+                outcome.signatures_of_successful_transactions().len(),
+                10
+            );
             assert_eq!(
                 outcome
                     .successful_transactions()
@@ -899,26 +911,28 @@ mod tests {
             let p6 = &Persona::sample_at(6);
 
             let t0 = TransactionIntent::entities_requiring_auth([a5], [p5]);
-            let t1 = TransactionIntent::entities_requiring_auth([a4, a5, a6], []);
-            let t2 = TransactionIntent::entities_requiring_auth([a4, a6], [p4, p6]);
-            let t3 = TransactionIntent::entities_requiring_auth([], [p4, p5, p6]);
+            let t1 =
+                TransactionIntent::entities_requiring_auth([a4, a5, a6], []);
+            let t2 =
+                TransactionIntent::entities_requiring_auth([a4, a6], [p4, p6]);
+            let t3 =
+                TransactionIntent::entities_requiring_auth([], [p4, p5, p6]);
 
-            let profile = Profile::sample_from(factor_sources.clone(), [a4, a5, a6], [p4, p5, p6]);
+            let profile = Profile::sample_from(
+                factor_sources.clone(),
+                [a4, a5, a6],
+                [p4, p5, p6],
+            );
 
             let collector = SignaturesCollector::new(
                 SigningFinishEarlyStrategy::default(),
-                [
-                    t0.clone(),
-                    t1.clone(),
-                    t2.clone(),
-                    t3.clone(),
-                ],
+                [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
                 Arc::new(TestSignatureCollectingInteractors::new(
                     vector.simulated_user,
                 )),
                 &profile,
             )
-                .unwrap();
+            .unwrap();
 
             let outcome = collector.collect_signatures().await;
 
@@ -967,21 +981,24 @@ mod tests {
             async fn multi_securified_entities() {
                 multi_securified_entities_with_sim_user(Vector {
                     simulated_user: SimulatedUser::prudent_with_failures(
-                        SimulatedFailures::with_simulated_failures([FactorSourceIDFromHash::sample_at(1)]),
+                        SimulatedFailures::with_simulated_failures([
+                            FactorSourceIDFromHash::sample_at(1),
+                        ]),
                     ),
                     expected: Expected {
                         successful_txs_signature_count: 24,
                         // We always end early
                         // `Device` FactorSourceKind never got used since it
                         // we are done after Passphrase.
-                        signed_factor_source_kinds: IndexSet::<FactorSourceKind>::from_iter([
-                            FactorSourceKind::ArculusCard,
-                            FactorSourceKind::Passphrase,
-                        ]),
+                        signed_factor_source_kinds:
+                            IndexSet::<FactorSourceKind>::from_iter([
+                                FactorSourceKind::ArculusCard,
+                                FactorSourceKind::Passphrase,
+                            ]),
                         expected_neglected_factor_source_count: 1,
                     },
                 })
-                    .await;
+                .await;
             }
 
             #[actix_rt::test]
@@ -992,7 +1009,8 @@ mod tests {
 
                 let all_transactions = [tx0.clone()];
 
-                let profile = Profile::sample_from(factor_sources.clone(), [a9], []);
+                let profile =
+                    Profile::sample_from(factor_sources.clone(), [a9], []);
 
                 let collector = SignaturesCollector::new(
                     SigningFinishEarlyStrategy::default(),
@@ -1006,7 +1024,7 @@ mod tests {
                     )),
                     &profile,
                 )
-                    .unwrap();
+                .unwrap();
 
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
@@ -1035,12 +1053,15 @@ mod tests {
                 let p3 = &Persona::sample_at(3);
                 let tx = TransactionIntent::entities_requiring_auth([], [p3]);
                 let failing_transactions = (0..100)
-                    .map(|_| TransactionIntent::entities_requiring_auth([a0], []))
+                    .map(|_| {
+                        TransactionIntent::entities_requiring_auth([a0], [])
+                    })
                     .collect::<Vec<_>>();
                 let mut all_transactions = failing_transactions.clone();
                 all_transactions.push(tx.clone());
 
-                let profile = Profile::sample_from(factor_sources.clone(), [a0], [p3]);
+                let profile =
+                    Profile::sample_from(factor_sources.clone(), [a0], [p3]);
 
                 let collector = SignaturesCollector::new(
                     SigningFinishEarlyStrategy::default(),
@@ -1054,7 +1075,7 @@ mod tests {
                     )),
                     &profile,
                 )
-                    .unwrap();
+                .unwrap();
 
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
@@ -1099,14 +1120,21 @@ mod tests {
                 let a7 = Account::sample_at(7);
                 let a0 = Account::sample_at(0);
 
-                let tx0 = TransactionIntent::entities_requiring_auth([&a7, &a0], []);
+                let tx0 =
+                    TransactionIntent::entities_requiring_auth([&a7, &a0], []);
                 let tx1 = TransactionIntent::entities_requiring_auth([&a0], []);
 
-                let profile = Profile::sample_from(factor_sources.clone(), [&a7, &a0], []);
+                let profile = Profile::sample_from(
+                    factor_sources.clone(),
+                    [&a7, &a0],
+                    [],
+                );
 
-                type Tuple = (FactorSourceKind, IndexSet<InvalidTransactionIfNeglected>);
+                type Tuple =
+                    (FactorSourceKind, IndexSet<InvalidTransactionIfNeglected>);
                 type Tuples = Vec<Tuple>;
-                let tuples = Rc::<RefCell<Tuples>>::new(RefCell::new(Tuples::default()));
+                let tuples =
+                    Rc::<RefCell<Tuples>>::new(RefCell::new(Tuples::default()));
                 let tuples_clone = tuples.clone();
                 let collector = SignaturesCollector::new(
                     SigningFinishEarlyStrategy::default(),
@@ -1126,7 +1154,7 @@ mod tests {
                     )),
                     &profile,
                 )
-                    .unwrap();
+                .unwrap();
 
                 let outcome = collector.collect_signatures().await;
 
@@ -1155,7 +1183,9 @@ mod tests {
                 assert!(!outcome.successful());
                 assert_eq!(
                     outcome.ids_of_neglected_factor_sources_failed(),
-                    IndexSet::<FactorSourceIDFromHash>::just(FactorSourceIDFromHash::sample_at(2))
+                    IndexSet::<FactorSourceIDFromHash>::just(
+                        FactorSourceIDFromHash::sample_at(2)
+                    )
                 );
                 assert_eq!(
                     outcome.ids_of_neglected_factor_sources_irrelevant(),
@@ -1198,13 +1228,11 @@ mod tests {
                         .into_iter()
                         .map(|s| s.derivation_path())
                         .collect_vec(),
-                    vec![DerivationPath::from(
-                        AccountPath::new(
-                            NetworkID::Mainnet,
-                            CAP26KeyKind::TransactionSigning,
-                            0
-                        )
-                    )]
+                    vec![DerivationPath::from(AccountPath::new(
+                        NetworkID::Mainnet,
+                        CAP26KeyKind::TransactionSigning,
+                        0
+                    ))]
                 )
             }
         }
@@ -1213,7 +1241,8 @@ mod tests {
             use super::*;
 
             #[actix_rt::test]
-            async fn multi_accounts_multi_personas_all_single_factor_controlled() {
+            async fn multi_accounts_multi_personas_all_single_factor_controlled(
+            ) {
                 multi_accounts_multi_personas_all_single_factor_controlled_with_sim_user(
                     SimulatedUser::prudent_no_fail(),
                 )
@@ -1235,15 +1264,16 @@ mod tests {
                         // We always end early
                         // `Device` FactorSourceKind never got used since it
                         // we are done after YubiKey.
-                        signed_factor_source_kinds: IndexSet::<FactorSourceKind>::from_iter([
-                            FactorSourceKind::LedgerHQHardwareWallet,
-                            FactorSourceKind::ArculusCard,
-                            FactorSourceKind::Passphrase,
-                        ]),
+                        signed_factor_source_kinds:
+                            IndexSet::<FactorSourceKind>::from_iter([
+                                FactorSourceKind::LedgerHQHardwareWallet,
+                                FactorSourceKind::ArculusCard,
+                                FactorSourceKind::Passphrase,
+                            ]),
                         expected_neglected_factor_source_count: 0,
                     },
                 })
-                    .await;
+                .await;
 
                 multi_securified_entities_with_sim_user(Vector {
                     simulated_user: SimulatedUser::lazy_sign_minimum([]),
@@ -1251,15 +1281,16 @@ mod tests {
                         successful_txs_signature_count: 24,
                         // We always end early, this lazy user was able to skip
                         // Ledger.
-                        signed_factor_source_kinds: IndexSet::<FactorSourceKind>::from_iter([
-                            FactorSourceKind::ArculusCard,
-                            FactorSourceKind::Passphrase,
-                            FactorSourceKind::Device,
-                        ]),
+                        signed_factor_source_kinds:
+                            IndexSet::<FactorSourceKind>::from_iter([
+                                FactorSourceKind::ArculusCard,
+                                FactorSourceKind::Passphrase,
+                                FactorSourceKind::Device,
+                            ]),
                         expected_neglected_factor_source_count: 2,
                     },
                 })
-                    .await;
+                .await;
             }
         }
     }
@@ -1312,17 +1343,19 @@ mod tests {
                             1
                         )),
                     ]
-                        .into_iter()
-                        .collect::<HashSet<_>>()
+                    .into_iter()
+                    .collect::<HashSet<_>>()
                 )
             }
 
             #[actix_rt::test]
-            async fn prudent_user_single_tx_two_accounts_different_factor_sources() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([
-                    Account::sample_at(0),
-                    Account::sample_at(1),
-                ])]);
+            async fn prudent_user_single_tx_two_accounts_different_factor_sources(
+            ) {
+                let collector =
+                    SignaturesCollector::test_prudent([TXToSign::sample([
+                        Account::sample_at(0),
+                        Account::sample_at(1),
+                    ])]);
 
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
@@ -1332,10 +1365,12 @@ mod tests {
         }
 
         mod single_entity {
-            use std::any::TypeId;
             use super::*;
+            use std::any::TypeId;
 
-            fn sample_at<E: IsEntity + 'static>(index: usize) -> AccountOrPersona {
+            fn sample_at<E: IsEntity + 'static>(
+                index: usize,
+            ) -> AccountOrPersona {
                 if TypeId::of::<Account>() == TypeId::of::<E>() {
                     AccountOrPersona::AccountEntity(Account::sample_at(index))
                 } else {
@@ -1363,18 +1398,29 @@ mod tests {
             }
 
             impl AccountOrPersona {
-                fn transaction_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+                fn transaction_signing_factor_instances(
+                    &self,
+                ) -> IndexSet<FactorInstance> {
                     let sec_state: EntitySecurityState = match self {
-                        AccountOrPersona::AccountEntity(account) => account.security_state.clone(),
-                        AccountOrPersona::PersonaEntity(persona) => persona.security_state.clone(),
+                        AccountOrPersona::AccountEntity(account) => {
+                            account.security_state.clone()
+                        }
+                        AccountOrPersona::PersonaEntity(persona) => {
+                            persona.security_state.clone()
+                        }
                     };
 
                     match sec_state {
                         EntitySecurityState::Unsecured { value } => {
-                            IndexSet::from_iter([value.transaction_signing.factor_instance()])
+                            IndexSet::from_iter([value
+                                .transaction_signing
+                                .factor_instance()])
                         }
                         EntitySecurityState::Securified { value } => {
-                            let matrix = value.security_structure.matrix_of_factors.clone();
+                            let matrix = value
+                                .security_structure
+                                .matrix_of_factors
+                                .clone();
                             let mut set = IndexSet::new();
                             set.extend(matrix.primary_role.threshold_factors);
                             set.extend(matrix.primary_role.override_factors);
@@ -1384,43 +1430,63 @@ mod tests {
                 }
             }
 
-
-
             async fn prudent_user_single_tx_e0<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(0)])]);
+                let collector = SignaturesCollector::test_prudent([
+                    TXToSign::sample([sample_at::<E>(0)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
             }
 
-            async fn prudent_user_single_tx_e0_assert_correct_intent_hash_is_signed<E: IsEntity + 'static>() {
+            async fn prudent_user_single_tx_e0_assert_correct_intent_hash_is_signed<
+                E: IsEntity + 'static,
+            >() {
                 let sample = sample_at::<E>(0);
                 let tx = TXToSign::sample([sample.clone()]);
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
-                let signature = &collector.collect_signatures().await.all_signatures()[0];
+                let signature =
+                    &collector.collect_signatures().await.all_signatures()[0];
                 assert_eq!(signature.intent_hash(), &tx.intent_hash);
 
                 if sample.is_account_entity() {
                     assert_eq!(
-                        signature.derivation_path().as_cap26().unwrap().as_account().unwrap().entity_kind,
+                        signature
+                            .derivation_path()
+                            .as_cap26()
+                            .unwrap()
+                            .as_account()
+                            .unwrap()
+                            .entity_kind,
                         CAP26EntityKind::Account
                     );
                 } else {
                     assert_eq!(
-                        signature.derivation_path().as_cap26().unwrap().as_identity().unwrap().entity_kind,
+                        signature
+                            .derivation_path()
+                            .as_cap26()
+                            .unwrap()
+                            .as_identity()
+                            .unwrap()
+                            .entity_kind,
                         CAP26EntityKind::Identity
                     );
                 }
-
             }
 
-            async fn prudent_user_single_tx_e0_assert_correct_owner_has_signed<E: IsEntity + 'static>() {
+            async fn prudent_user_single_tx_e0_assert_correct_owner_has_signed<
+                E: IsEntity + 'static,
+            >() {
                 let entity = sample_at::<E>(0);
                 let tx = TXToSign::sample([entity.clone()]);
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
-                let signature = &collector.collect_signatures().await.all_signatures()[0];
-                assert_eq!(signature.owned_factor_instance().owner, entity.address());
+                let signature =
+                    &collector.collect_signatures().await.all_signatures()[0];
+                assert_eq!(
+                    signature.owned_factor_instance().owner,
+                    entity.address()
+                );
             }
 
             async fn prudent_user_single_tx_e0_assert_correct_owner_factor_instance_signed<
@@ -1429,10 +1495,14 @@ mod tests {
                 let entity = sample_at::<E>(0);
                 let tx = TXToSign::sample([entity.clone()]);
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
-                let signature = &collector.collect_signatures().await.all_signatures()[0];
+                let signature =
+                    &collector.collect_signatures().await.all_signatures()[0];
 
                 assert_eq!(
-                    signature.owned_factor_instance().factor_instance().factor_instance(),
+                    signature
+                        .owned_factor_instance()
+                        .factor_instance()
+                        .factor_instance(),
                     entity
                         .transaction_signing_factor_instances()
                         .first()
@@ -1442,74 +1512,7 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e1<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(1)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 1);
-            }
-
-            async fn prudent_user_single_tx_e2<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(2)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 1);
-            }
-
-            async fn prudent_user_single_tx_e3<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(3)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 1);
-            }
-
-            async fn prudent_user_single_tx_e4<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(4)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 2);
-            }
-
-            async fn prudent_user_single_tx_e5<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(5)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 1);
-            }
-
-            async fn prudent_user_single_tx_e6<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(6)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 1);
-            }
-
-            async fn prudent_user_single_tx_e7<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([TXToSign::sample([sample_at::<E>(7)])]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-
-                assert_eq!(signatures.len(), 5);
-            }
-
-            async fn lazy_sign_minimum_user_single_tx_e0<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                    TXToSign::sample([sample_at::<E>(0)]),
-                ]);
-                let outcome = collector.collect_signatures().await;
-                assert!(outcome.successful());
-                let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 1);
-            }
-
-            async fn lazy_sign_minimum_user_single_tx_e1<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(1)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
@@ -1518,8 +1521,8 @@ mod tests {
                 assert_eq!(signatures.len(), 1);
             }
 
-            async fn lazy_sign_minimum_user_single_tx_e2<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+            async fn prudent_user_single_tx_e2<E: IsEntity + 'static>() {
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(2)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
@@ -1528,8 +1531,8 @@ mod tests {
                 assert_eq!(signatures.len(), 1);
             }
 
-            async fn lazy_sign_minimum_user_e3<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+            async fn prudent_user_single_tx_e3<E: IsEntity + 'static>() {
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(3)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
@@ -1538,8 +1541,8 @@ mod tests {
                 assert_eq!(signatures.len(), 1);
             }
 
-            async fn lazy_sign_minimum_user_e4<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+            async fn prudent_user_single_tx_e4<E: IsEntity + 'static>() {
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(4)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
@@ -1548,8 +1551,8 @@ mod tests {
                 assert_eq!(signatures.len(), 2);
             }
 
-            async fn lazy_sign_minimum_user_e5<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+            async fn prudent_user_single_tx_e5<E: IsEntity + 'static>() {
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(5)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
@@ -1558,19 +1561,18 @@ mod tests {
                 assert_eq!(signatures.len(), 1);
             }
 
-            async fn lazy_sign_minimum_user_e6<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+            async fn prudent_user_single_tx_e6<E: IsEntity + 'static>() {
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(6)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
-
-                assert_eq!(signatures.len(), 2);
+                assert_eq!(signatures.len(), 1);
             }
 
-            async fn lazy_sign_minimum_user_e7<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
+            async fn prudent_user_single_tx_e7<E: IsEntity + 'static>() {
+                let collector = SignaturesCollector::test_prudent([
                     TXToSign::sample([sample_at::<E>(7)]),
                 ]);
                 let outcome = collector.collect_signatures().await;
@@ -1580,11 +1582,110 @@ mod tests {
                 assert_eq!(signatures.len(), 5);
             }
 
-            async fn lazy_sign_minimum_user_e5_last_factor_used<E: IsEntity + 'static>() {
+            async fn lazy_sign_minimum_user_single_tx_e0<
+                E: IsEntity + 'static,
+            >() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(0)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+                assert_eq!(signatures.len(), 1);
+            }
+
+            async fn lazy_sign_minimum_user_single_tx_e1<
+                E: IsEntity + 'static,
+            >() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(1)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+                assert_eq!(signatures.len(), 1);
+            }
+
+            async fn lazy_sign_minimum_user_single_tx_e2<
+                E: IsEntity + 'static,
+            >() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(2)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+                assert_eq!(signatures.len(), 1);
+            }
+
+            async fn lazy_sign_minimum_user_e3<E: IsEntity + 'static>() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(3)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+                assert_eq!(signatures.len(), 1);
+            }
+
+            async fn lazy_sign_minimum_user_e4<E: IsEntity + 'static>() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(4)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+                assert_eq!(signatures.len(), 2);
+            }
+
+            async fn lazy_sign_minimum_user_e5<E: IsEntity + 'static>() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(5)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+                assert_eq!(signatures.len(), 1);
+            }
+
+            async fn lazy_sign_minimum_user_e6<E: IsEntity + 'static>() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(6)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+
+                assert_eq!(signatures.len(), 2);
+            }
+
+            async fn lazy_sign_minimum_user_e7<E: IsEntity + 'static>() {
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_at::<E>(7)]),
+                    ]);
+                let outcome = collector.collect_signatures().await;
+                assert!(outcome.successful());
+                let signatures = outcome.all_signatures();
+
+                assert_eq!(signatures.len(), 5);
+            }
+
+            async fn lazy_sign_minimum_user_e5_last_factor_used<
+                E: IsEntity + 'static,
+            >() {
                 let entity = sample_at::<E>(5);
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                    TXToSign::sample([entity.clone()]),
-                ]);
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([entity.clone()]),
+                    ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1609,9 +1710,12 @@ mod tests {
             async fn lazy_sign_minimum_all_known_factors_used_as_override_factors_signed_with_device_for_entity<
                 E: IsEntity + 'static,
             >() {
-                let collector = SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                    TXToSign::sample([sample_securified_mainnet::<E>("Alice", || {
-                        GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
+                let collector =
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
+                        TXToSign::sample([sample_securified_mainnet::<E>(
+                            "Alice",
+                            || {
+                                GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                             FactorSource::sample_all().into_iter().map(|f| {
                                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                                     HDPathComponent::from(0),
@@ -1619,8 +1723,9 @@ mod tests {
                                 )
                             }),
                         )
-                    })]),
-                ]);
+                            },
+                        )]),
+                    ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1628,12 +1733,16 @@ mod tests {
 
                 assert!(signatures
                     .into_iter()
-                    .all(|s| s.factor_source_id().kind == FactorSourceKind::Device));
+                    .all(|s| s.factor_source_id().kind
+                        == FactorSourceKind::Device));
             }
 
-            async fn lazy_always_skip_user_single_tx_e0<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(0)])]);
+            async fn lazy_always_skip_user_single_tx_e0<
+                E: IsEntity + 'static,
+            >() {
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(0)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1641,7 +1750,8 @@ mod tests {
             }
 
             async fn fail_get_neglected_e0<E: IsEntity + 'static>() {
-                let failing = IndexSet::<_>::just(FactorSourceIDFromHash::sample_at(0));
+                let failing =
+                    IndexSet::<_>::just(FactorSourceIDFromHash::sample_at(0));
                 let collector = SignaturesCollector::test_prudent_with_failures(
                     [TXToSign::sample([sample_at::<E>(0)])],
                     SimulatedFailures::with_simulated_failures(failing.clone()),
@@ -1652,18 +1762,24 @@ mod tests {
                 assert_eq!(neglected, failing);
             }
 
-            async fn lazy_always_skip_user_single_tx_e1<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(1)])]);
+            async fn lazy_always_skip_user_single_tx_e1<
+                E: IsEntity + 'static,
+            >() {
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(1)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
             }
 
-            async fn lazy_always_skip_user_single_tx_e2<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(2)])]);
+            async fn lazy_always_skip_user_single_tx_e2<
+                E: IsEntity + 'static,
+            >() {
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(2)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1671,8 +1787,9 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e3<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(3)])]);
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(3)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1680,8 +1797,9 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e4<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(4)])]);
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(4)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1689,8 +1807,9 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e5<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(5)])]);
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(5)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1698,8 +1817,9 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e6<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(6)])]);
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(6)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1707,8 +1827,9 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e7<E: IsEntity + 'static>() {
-                let collector =
-                    SignaturesCollector::test_lazy_always_skip([TXToSign::sample([sample_at::<E>(7)])]);
+                let collector = SignaturesCollector::test_lazy_always_skip([
+                    TXToSign::sample([sample_at::<E>(7)]),
+                ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1718,7 +1839,9 @@ mod tests {
             async fn failure_e0<E: IsEntity + 'static>() {
                 let collector = SignaturesCollector::test_prudent_with_failures(
                     [TXToSign::sample([sample_at::<E>(0)])],
-                    SimulatedFailures::with_simulated_failures([FactorSourceIDFromHash::sample_at(0)]),
+                    SimulatedFailures::with_simulated_failures([
+                        FactorSourceIDFromHash::sample_at(0),
+                    ]),
                 );
                 let outcome = collector.collect_signatures().await;
                 assert!(!outcome.successful());
@@ -1740,7 +1863,9 @@ mod tests {
                     FactorSource::sample_all(),
                     [TXToSign::sample([sample_at::<E>(5)])],
                     SimulatedUser::prudent_with_failures(
-                        SimulatedFailures::with_simulated_failures([FactorSourceIDFromHash::sample_at(4)]),
+                        SimulatedFailures::with_simulated_failures([
+                            FactorSourceIDFromHash::sample_at(4),
+                        ]),
                     ),
                 );
 
@@ -1763,7 +1888,9 @@ mod tests {
             >() {
                 let collector = SignaturesCollector::test_prudent_with_failures(
                     [TXToSign::sample([sample_at::<E>(4)])],
-                    SimulatedFailures::with_simulated_failures([FactorSourceIDFromHash::sample_at(3)]),
+                    SimulatedFailures::with_simulated_failures([
+                        FactorSourceIDFromHash::sample_at(3),
+                    ]),
                 );
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
@@ -1785,7 +1912,9 @@ mod tests {
             >() {
                 let collector = SignaturesCollector::test_prudent_with_failures(
                     [TXToSign::sample([sample_at::<E>(4)])],
-                    SimulatedFailures::with_simulated_failures([FactorSourceIDFromHash::sample_at(3)]),
+                    SimulatedFailures::with_simulated_failures([
+                        FactorSourceIDFromHash::sample_at(3),
+                    ]),
                 );
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
@@ -1805,17 +1934,20 @@ mod tests {
                 }
 
                 #[actix_rt::test]
-                async fn prudent_user_single_tx_a0_assert_correct_intent_hash_is_signed() {
+                async fn prudent_user_single_tx_a0_assert_correct_intent_hash_is_signed(
+                ) {
                     prudent_user_single_tx_e0_assert_correct_intent_hash_is_signed::<E>().await
                 }
 
                 #[actix_rt::test]
-                async fn prudent_user_single_tx_a0_assert_correct_owner_has_signed() {
+                async fn prudent_user_single_tx_a0_assert_correct_owner_has_signed(
+                ) {
                     prudent_user_single_tx_e0_assert_correct_owner_has_signed::<E>().await
                 }
 
                 #[actix_rt::test]
-                async fn prudent_user_single_tx_a0_assert_correct_owner_factor_instance_signed() {
+                async fn prudent_user_single_tx_a0_assert_correct_owner_factor_instance_signed(
+                ) {
                     prudent_user_single_tx_e0_assert_correct_owner_factor_instance_signed::<E>()
                         .await
                 }
@@ -1985,17 +2117,20 @@ mod tests {
                 }
 
                 #[actix_rt::test]
-                async fn prudent_user_single_tx_p0_assert_correct_intent_hash_is_signed() {
+                async fn prudent_user_single_tx_p0_assert_correct_intent_hash_is_signed(
+                ) {
                     prudent_user_single_tx_e0_assert_correct_intent_hash_is_signed::<E>().await
                 }
 
                 #[actix_rt::test]
-                async fn prudent_user_single_tx_p0_assert_correct_owner_has_signed() {
+                async fn prudent_user_single_tx_p0_assert_correct_owner_has_signed(
+                ) {
                     prudent_user_single_tx_e0_assert_correct_owner_has_signed::<E>().await
                 }
 
                 #[actix_rt::test]
-                async fn prudent_user_single_tx_p0_assert_correct_owner_factor_instance_signed() {
+                async fn prudent_user_single_tx_p0_assert_correct_owner_factor_instance_signed(
+                ) {
                     prudent_user_single_tx_e0_assert_correct_owner_factor_instance_signed::<E>()
                         .await
                 }
