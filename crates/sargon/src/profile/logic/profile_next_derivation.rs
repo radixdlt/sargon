@@ -87,7 +87,7 @@ impl Profile {
                                 == factor_source_id
                         }
                         EntitySecurityState::Securified { value: _ } => {
-                            panic!("TODO check that") // TODO check that
+                            panic!("Not implemented yet")
                         }
                     })
                     .collect_vec()

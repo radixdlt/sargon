@@ -110,7 +110,12 @@ impl Petitions {
         let ids = factor_sources_of_kind
             .factor_sources()
             .iter()
-            .map(|f| f.factor_source_id().as_hash().unwrap().clone()) // TODO change that
+            .map(|f| {
+                f.factor_source_id()
+                    .as_hash()
+                    .expect("Signature Collector only works with HD FactorSources.")
+                    .clone()
+            })
             .collect::<IndexSet<_>>();
         self.each_petition(
             ids.clone(),

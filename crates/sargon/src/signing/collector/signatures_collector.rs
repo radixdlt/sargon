@@ -222,7 +222,10 @@ impl SignaturesCollector {
                     // Prepare the request for the interactor
                     debug!("Creating mono request for interactor");
                     let request = self.request_for_serial_interactor(
-                        &factor_source.factor_source_id().as_hash().unwrap(), // TODO check that
+                        &factor_source
+                            .factor_source_id()
+                            .as_hash()
+                            .expect("Signature Collector only works with HD FactorSources.")
                     );
 
                     if !request.invalid_transactions_if_neglected.is_empty() {
@@ -303,7 +306,12 @@ impl SignaturesCollector {
         let factor_source_ids = factor_sources_of_kind
             .factor_sources()
             .iter()
-            .map(|f| f.factor_source_id().as_hash().unwrap().clone()) // TODO check that
+            .map(|f| {
+                f.factor_source_id()
+                    .as_hash()
+                    .expect("Signature Collector only works with HD FactorSources.")
+                    .clone()
+            }) // TODO check that
             .collect::<IndexSet<FactorSourceIDFromHash>>();
         let per_factor_source = factor_source_ids
             .clone()
