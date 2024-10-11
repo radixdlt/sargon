@@ -372,28 +372,6 @@ impl Persona {
     }
 }
 
-impl Ord for Persona {
-    fn cmp(&self, other: &Self) -> Ordering {
-        match (&self.security_state, &other.security_state) {
-            (
-                EntitySecurityState::Unsecured { value: l },
-                EntitySecurityState::Unsecured { value: r },
-            ) => l
-                .transaction_signing
-                .derivation_path()
-                .last_component()
-                .cmp(r.transaction_signing.derivation_path().last_component()),
-            _ => Ordering::Equal, // TODO check that
-        }
-    }
-}
-
-impl PartialOrd for Persona {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
 /// Add conformance to Identifiable in order to use `IdentifiedVecOf`
 impl Identifiable for Persona {
     type ID = IdentityAddress;
@@ -449,11 +427,6 @@ mod tests {
     #[test]
     fn test_is_network_aware() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
-    }
-
-    #[test]
-    fn compare() {
-        assert!(SUT::sample_mainnet_other() > SUT::sample_mainnet());
     }
 
     #[test]
