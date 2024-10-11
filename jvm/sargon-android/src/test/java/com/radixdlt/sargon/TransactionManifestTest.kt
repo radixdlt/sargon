@@ -7,12 +7,10 @@ import com.radixdlt.sargon.extensions.createFungibleTokenWithMetadata
 import com.radixdlt.sargon.extensions.createMultipleFungibleTokens
 import com.radixdlt.sargon.extensions.createMultipleNonFungibleTokens
 import com.radixdlt.sargon.extensions.createNonFungibleToken
-import com.radixdlt.sargon.extensions.executionSummary
 import com.radixdlt.sargon.extensions.faucet
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.instructionsString
-import com.radixdlt.sargon.extensions.intId
 import com.radixdlt.sargon.extensions.involvedPoolAddresses
 import com.radixdlt.sargon.extensions.involvedResourceAddresses
 import com.radixdlt.sargon.extensions.markingAccountAsDAppDefinitionType
@@ -24,7 +22,6 @@ import com.radixdlt.sargon.extensions.perRecipientTransfers
 import com.radixdlt.sargon.extensions.setOwnerKeysHashes
 import com.radixdlt.sargon.extensions.stakesClaim
 import com.radixdlt.sargon.extensions.string
-import com.radixdlt.sargon.extensions.stringId
 import com.radixdlt.sargon.extensions.summary
 import com.radixdlt.sargon.extensions.thirdPartyDepositUpdate
 import com.radixdlt.sargon.extensions.toDecimal192
@@ -33,12 +30,12 @@ import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import com.radixdlt.sargon.samples.sampleMainnet
 import com.radixdlt.sargon.samples.sampleStokenet
-import java.io.File
-import java.util.regex.Pattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.util.regex.Pattern
 
 class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
@@ -579,23 +576,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             TransactionManifest.sample()
                 .summary
                 .addressesOfAccountsWithdrawnFrom
-        )
-    }
-
-    @Test
-    fun test_execution_summary() {
-        val name = "third_party_deposits_update"
-        val receipt = engineToolkitReceipt(name)
-        val manifest = manifest(name)
-
-        val summary = manifest.executionSummary(engineToolkitReceipt = receipt)
-        assertEquals(
-            listOf(
-                AccountAddress.init(
-                    "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a"
-                )
-            ),
-            summary.addressesOfAccountsRequiringAuth
         )
     }
 
