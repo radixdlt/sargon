@@ -8,6 +8,7 @@ mod proof_of_ownership;
 mod success;
 mod transaction;
 mod unauthorized_request;
+mod pre_authorization;
 
 pub use account::*;
 pub use auth::*;
