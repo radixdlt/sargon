@@ -18,3 +18,79 @@ pub struct DappToWalletInteractionSubintentRequestItem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expiration: Option<DappToWalletInteractionSubintentExpiration>,
 }
+
+impl DappToWalletInteractionSubintentRequestItem {
+    pub fn new(
+        version: impl Into<SubintentVersion>,
+        unvalidated_manifest: impl Into<UnvalidatedTransactionManifest>,
+        message: impl Into<Option<String>>,
+        child_subintent_hashes: impl Into<Option<Vec<String>>>,
+        expiration: impl Into<Option<DappToWalletInteractionSubintentExpiration>>,
+    ) -> Self {
+        Self {
+            version: version.into(),
+            unvalidated_manifest: unvalidated_manifest.into(),
+            message: message.into(),
+            child_subintent_hashes: child_subintent_hashes.into(),
+            expiration: expiration.into(),
+        }
+    }
+}
+
+impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
+    fn sample() -> Self {
+        Self::new(
+            SubintentVersion::sample(),
+            UnvalidatedTransactionManifest::sample(),
+            "message".to_owned(),
+            vec!["subintent_hash_one".to_owned()],
+            DappToWalletInteractionSubintentExpiration::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            SubintentVersion::sample_other(),
+            UnvalidatedTransactionManifest::sample_other(),
+            "message_other".to_owned(),
+            vec!["subintent_hash_two".to_owned()],
+            DappToWalletInteractionSubintentExpiration::sample_other(),
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DappToWalletInteractionSubintentRequestItem;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        assert_eq_after_json_roundtrip(&SUT::sample(), r#"
+           {
+                "version" : 1,
+                "transactionManifest" : "CALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n",
+                "blobs" : [],
+                "message" : "message",
+                "child_subintent_hashes" : ["subintent_hash_one"],
+                "expiration": {
+                    "discriminator": "expireAtTime",
+                    "value": "2023-09-11T16:05:56.000Z"
+                }
+            }
+            "#,);
+    }
+}
