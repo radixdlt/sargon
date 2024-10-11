@@ -4,37 +4,13 @@ use sargon::PublicKey as InternalPublicKey;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
     Ed25519(Ed25519PublicKey),
 
     /// A secp256k1 public key used to verify cryptographic signatures (ECDSA signatures).
     Secp256k1(Secp256k1PublicKey),
-}
-
-impl From<InternalPublicKey> for PublicKey {
-    fn from(value: InternalPublicKey) -> Self {
-        match value {
-            InternalPublicKey::Ed25519(value) => Self::Ed25519(value.into()),
-            InternalPublicKey::Secp256k1(value) => {
-                Self::Secp256k1(value.into())
-            }
-        }
-    }
-}
-
-impl Into<InternalPublicKey> for PublicKey {
-    fn into(self) -> InternalPublicKey {
-        match self {
-            PublicKey::Ed25519(value) => {
-                InternalPublicKey::Ed25519(value.into())
-            }
-            PublicKey::Secp256k1(value) => {
-                InternalPublicKey::Secp256k1(value.into())
-            }
-        }
-    }
 }
 
 /// Tries to create a PublicKey from the hex string

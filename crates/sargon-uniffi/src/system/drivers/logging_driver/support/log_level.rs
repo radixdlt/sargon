@@ -1,8 +1,15 @@
 use crate::prelude::*;
-use sargon::LogFilter as InternalLogFilter;
 use sargon::LogLevel as InternalLogLevel;
+use sargon::LogFilter as InternalLogFilter;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    InternalConversion,
+    uniffi::Enum,
+)]
 #[repr(u8)]
 pub enum LogLevel {
     /// The "error" level.
@@ -55,7 +62,14 @@ impl Into<InternalLogLevel> for LogLevel {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    InternalConversion,
+    uniffi::Enum,
+)]
 #[repr(u8)]
 pub enum LogFilter {
     /// Logging is turned off

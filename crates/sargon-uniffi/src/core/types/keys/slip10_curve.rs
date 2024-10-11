@@ -7,7 +7,7 @@ use sargon::SLIP10Curve as InternalSLIP10Curve;
 /// prefer using Curve25519 - which is incompatible with BIP32 (BIP44).
 ///
 /// For for information see [SLIP10 reference](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum SLIP10Curve {
     /// Curve25519 which we use for Ed25519 for EdDSA signatures.
     Curve25519,
@@ -15,24 +15,6 @@ pub enum SLIP10Curve {
     /// The bitcoin curve, used by Radix Olympia and still valid
     /// to support legacy accounts.
     Secp256k1,
-}
-
-impl From<InternalSLIP10Curve> for SLIP10Curve {
-    fn from(value: InternalSLIP10Curve) -> Self {
-        match value {
-            InternalSLIP10Curve::Curve25519 => SLIP10Curve::Curve25519,
-            InternalSLIP10Curve::Secp256k1 => SLIP10Curve::Secp256k1,
-        }
-    }
-}
-
-impl Into<InternalSLIP10Curve> for SLIP10Curve {
-    fn into(self) -> InternalSLIP10Curve {
-        match self {
-            SLIP10Curve::Curve25519 => InternalSLIP10Curve::Curve25519,
-            SLIP10Curve::Secp256k1 => InternalSLIP10Curve::Secp256k1,
-        }
-    }
 }
 
 json_string_convertible!(SLIP10Curve);
