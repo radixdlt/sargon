@@ -134,7 +134,7 @@ mod integration_tests {
     async fn submit_tx_use_faucet(
         private_key: impl Into<PrivateKey>,
         network_id: NetworkID,
-    ) -> Result<(AccountAddress, IntentHash)> {
+    ) -> Result<(AccountAddress, TransactionIntentHash)> {
         let private_key = private_key.into();
         // ARRANGE
         let gateway_client = new_gateway_client(network_id);
