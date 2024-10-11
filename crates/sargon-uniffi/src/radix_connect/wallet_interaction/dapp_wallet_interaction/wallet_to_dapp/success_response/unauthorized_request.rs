@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionUnauthorizedRequestResponseItems as InternalWalletToDappInteractionUnauthorizedRequestResponseItems;
 
-#[derive( Clone, PartialEq,  uniffi::Record)]
+#[derive(Clone, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionUnauthorizedRequestResponseItems {
     pub one_time_accounts:
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
@@ -25,7 +25,9 @@ impl From<InternalWalletToDappInteractionUnauthorizedRequestResponseItems>
 impl Into<InternalWalletToDappInteractionUnauthorizedRequestResponseItems>
     for WalletToDappInteractionUnauthorizedRequestResponseItems
 {
-    fn into(self) -> InternalWalletToDappInteractionUnauthorizedRequestResponseItems {
+    fn into(
+        self,
+    ) -> InternalWalletToDappInteractionUnauthorizedRequestResponseItems {
         InternalWalletToDappInteractionUnauthorizedRequestResponseItems {
             one_time_accounts: self.one_time_accounts.map(Into::into),
             one_time_persona_data: self.one_time_persona_data.map(Into::into),

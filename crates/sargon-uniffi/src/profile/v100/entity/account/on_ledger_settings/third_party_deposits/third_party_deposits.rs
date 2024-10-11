@@ -3,9 +3,7 @@ use sargon::ThirdPartyDeposits as InternalThirdPartyDeposits;
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(
-    Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
     pub deposit_rule: DepositRule,
@@ -26,8 +24,12 @@ impl From<InternalThirdPartyDeposits> for ThirdPartyDeposits {
     fn from(value: InternalThirdPartyDeposits) -> Self {
         Self {
             deposit_rule: value.deposit_rule.into(),
-            assets_exception_list: value.assets_exception_list.map(|v| v.into_vec()),
-            depositors_allow_list: value.depositors_allow_list.map(|v| v.into_vec()),
+            assets_exception_list: value
+                .assets_exception_list
+                .map(|v| v.into_vec()),
+            depositors_allow_list: value
+                .depositors_allow_list
+                .map(|v| v.into_vec()),
         }
     }
 }
@@ -36,8 +38,12 @@ impl Into<InternalThirdPartyDeposits> for ThirdPartyDeposits {
     fn into(self) -> InternalThirdPartyDeposits {
         InternalThirdPartyDeposits {
             deposit_rule: self.deposit_rule.into(),
-            assets_exception_list: self.assets_exception_list.map(|v| v.into_identified_vec()),
-            depositors_allow_list: self.depositors_allow_list.map(|v| v.into_identified_vec()),
+            assets_exception_list: self
+                .assets_exception_list
+                .map(|v| v.into_identified_vec()),
+            depositors_allow_list: self
+                .depositors_allow_list
+                .map(|v| v.into_identified_vec()),
         }
     }
 }
@@ -56,4 +62,3 @@ pub fn new_third_party_deposits_sample_other() -> ThirdPartyDeposits {
 pub fn new_third_party_deposits_default() -> ThirdPartyDeposits {
     InternalThirdPartyDeposits::default().into()
 }
-

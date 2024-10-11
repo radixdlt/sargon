@@ -3,7 +3,7 @@ use sargon::ExecutionSummary as InternalExecutionSummary;
 
 /// A summary of the execution of the manifest and the information that helps
 /// wallets present the contents of a transaction.
-#[derive(Clone,  PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
     /// Per account, a list of all token balances that has been withdrawn from that account.
     pub withdrawals: HashMap<AccountAddress, Vec<ResourceIndicator>>,
@@ -58,12 +58,16 @@ impl From<InternalExecutionSummary> for ExecutionSummary {
             withdrawals: value
                 .withdrawals
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .map(|(k, v)| {
+                    (k.into(), v.into_iter().map(|x| x.into()).collect())
+                })
                 .collect(),
             deposits: value
                 .deposits
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .map(|(k, v)| {
+                    (k.into(), v.into_iter().map(|x| x.into()).collect())
+                })
                 .collect(),
             addresses_of_accounts_requiring_auth: value
                 .addresses_of_accounts_requiring_auth
@@ -113,12 +117,16 @@ impl Into<InternalExecutionSummary> for ExecutionSummary {
             withdrawals: self
                 .withdrawals
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .map(|(k, v)| {
+                    (k.into(), v.into_iter().map(|x| x.into()).collect())
+                })
                 .collect(),
             deposits: self
                 .deposits
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into_iter().map(|x| x.into()).collect()))
+                .map(|(k, v)| {
+                    (k.into(), v.into_iter().map(|x| x.into()).collect())
+                })
                 .collect(),
             addresses_of_accounts_requiring_auth: self
                 .addresses_of_accounts_requiring_auth

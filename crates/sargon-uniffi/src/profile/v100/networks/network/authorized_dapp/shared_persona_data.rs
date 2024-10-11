@@ -2,15 +2,7 @@ use crate::prelude::*;
 use sargon::SharedPersonaData as InternalSharedPersonaData;
 
 /// Identities for PersonaData entry values a user have shared with a dApp.
-#[derive(
-    Clone,
-    Default,
-    
-    PartialEq,
-    Hash,
-    Eq,
-     uniffi::Record,
-)]
+#[derive(Clone, Default, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct SharedPersonaData {
     /// ID of a `PersonaDataEntryName` the user has shared with some dApp on some network,
     /// can be `None`.
@@ -54,4 +46,3 @@ pub fn new_shared_persona_data_sample() -> SharedPersonaData {
 pub fn new_shared_persona_data_sample_other() -> SharedPersonaData {
     InternalSharedPersonaData::sample_other().into()
 }
-

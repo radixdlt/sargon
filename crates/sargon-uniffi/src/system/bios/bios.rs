@@ -17,11 +17,7 @@ impl Bios {
 impl Into<InternalBios> for Bios {
     fn into(self) -> InternalBios {
         InternalBios {
-            drivers: Arc::new(
-                Arc::try_unwrap(self.drivers)
-                .unwrap()
-                .into()
-            ),
+            drivers: Arc::new(Arc::try_unwrap(self.drivers).unwrap().into()),
         }
     }
 }

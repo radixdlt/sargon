@@ -31,7 +31,11 @@ pub fn new_account_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
 ) -> AccountAddress {
-    InternalAccountAddress::new(public_key.into_internal(), network_id.into_internal()).into()
+    InternalAccountAddress::new(
+        public_key.into_internal(),
+        network_id.into_internal(),
+    )
+    .into()
 }
 
 #[uniffi::export]
@@ -62,4 +66,3 @@ pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
 pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
     address.into_internal().is_legacy_address()
 }
-

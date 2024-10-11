@@ -2,15 +2,7 @@ use crate::prelude::*;
 use sargon::AuthorizedDapp as InternalAuthorizedDapp;
 
 /// A connection made between a Radix Dapp and the user.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Hash,
-    Eq,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.
     pub network_id: NetworkID,
@@ -43,7 +35,9 @@ impl From<InternalAuthorizedDapp> for AuthorizedDapp {
             network_id: value.network_id.into(),
             dapp_definition_address: value.dapp_definition_address.into(),
             display_name: value.display_name,
-            references_to_authorized_personas: value.references_to_authorized_personas.into_vec(),
+            references_to_authorized_personas: value
+                .references_to_authorized_personas
+                .into_vec(),
             preferences: value.preferences.into(),
         }
     }
@@ -55,12 +49,13 @@ impl Into<InternalAuthorizedDapp> for AuthorizedDapp {
             network_id: self.network_id.into(),
             dapp_definition_address: self.dapp_definition_address.into(),
             display_name: self.display_name,
-            references_to_authorized_personas: self.references_to_authorized_personas.into_identified_vec(),
+            references_to_authorized_personas: self
+                .references_to_authorized_personas
+                .into_identified_vec(),
             preferences: self.preferences.into(),
         }
     }
 }
-
 
 json_data_convertible!(AuthorizedDapp);
 
@@ -83,4 +78,3 @@ pub fn new_authorized_dapp_sample_stokenet_devconsole() -> AuthorizedDapp {
 pub fn new_authorized_dapp_sample_stokenet_sandbox() -> AuthorizedDapp {
     InternalAuthorizedDapp::sample_stokenet_sandbox().into()
 }
-

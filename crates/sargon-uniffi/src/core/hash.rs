@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::Hash as InternalHash;
 use sargon::Exactly32Bytes as InternalExactly32Bytes;
+use sargon::Hash as InternalHash;
 
 /// Represents a 32-byte hash digest.
 ///
@@ -8,12 +8,7 @@ use sargon::Exactly32Bytes as InternalExactly32Bytes;
 /// exposed in Swift/Kotlin as its own struct/data class, with
 /// hidden secret magic.
 #[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    std::hash::Hash,
-    InternalConversion,
-     uniffi::Record,
+    Clone, PartialEq, Eq, std::hash::Hash, InternalConversion, uniffi::Record,
 )]
 pub struct Hash {
     pub(crate) value: Exactly32Bytes,

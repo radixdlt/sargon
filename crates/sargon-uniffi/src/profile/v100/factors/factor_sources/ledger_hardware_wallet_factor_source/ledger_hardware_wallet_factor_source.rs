@@ -1,15 +1,8 @@
 use crate::prelude::*;
-use sargon::LedgerHardwareWalletFactorSource as InternalLedgerHardwareWalletFactorSource;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
+use sargon::LedgerHardwareWalletFactorSource as InternalLedgerHardwareWalletFactorSource;
 
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
@@ -24,7 +17,9 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
-impl From<InternalLedgerHardwareWalletFactorSource> for LedgerHardwareWalletFactorSource {
+impl From<InternalLedgerHardwareWalletFactorSource>
+    for LedgerHardwareWalletFactorSource
+{
     fn from(value: InternalLedgerHardwareWalletFactorSource) -> Self {
         Self {
             id: value.id.into(),
@@ -34,7 +29,9 @@ impl From<InternalLedgerHardwareWalletFactorSource> for LedgerHardwareWalletFact
     }
 }
 
-impl Into<InternalLedgerHardwareWalletFactorSource> for LedgerHardwareWalletFactorSource {
+impl Into<InternalLedgerHardwareWalletFactorSource>
+    for LedgerHardwareWalletFactorSource
+{
     fn into(self) -> InternalLedgerHardwareWalletFactorSource {
         InternalLedgerHardwareWalletFactorSource {
             id: self.id.into(),
@@ -63,6 +60,10 @@ fn new_ledger_hardware_wallet_from_mnemonic_with_passphrase(
     common: FactorSourceCommon,
 ) -> LedgerHardwareWalletFactorSource {
     let id = InternalFactorSourceIDFromHash::new_for_ledger(&mwp.into());
-    InternalLedgerHardwareWalletFactorSource::new(id, common.into(), hint.into()).into()
+    InternalLedgerHardwareWalletFactorSource::new(
+        id,
+        common.into(),
+        hint.into(),
+    )
+    .into()
 }
-

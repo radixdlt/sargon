@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use sargon::SecurityStructureMetadata as InternalSecurityStructureMetadata;
 
-#[derive(
-    Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureMetadata {
     pub id: SecurityStructureID,
     pub display_name: DisplayName,
@@ -50,4 +48,3 @@ pub fn new_security_structure_metadata_named(
 ) -> SecurityStructureMetadata {
     InternalSecurityStructureMetadata::new(name.into_internal()).into()
 }
-

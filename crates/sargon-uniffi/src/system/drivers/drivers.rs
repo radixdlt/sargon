@@ -46,15 +46,35 @@ impl Drivers {
 impl Into<InternalDrivers> for Drivers {
     fn into(self) -> InternalDrivers {
         InternalDrivers {
-            networking: Arc::new(NetworkingDriverAdapter { wrapped: self.networking }),
-            secure_storage: Arc::new(SecureStorageDriverAdapter { wrapped: self.secure_storage }),
-            entropy_provider: Arc::new(EntropyProviderDriverAdapter { wrapped: self.entropy_provider }),
-            host_info: Arc::new(HostInfoDriverAdapter { wrapped: self.host_info }),
-            logging: Arc::new(LoggingDriverAdapter { wrapped: self.logging }),
-            event_bus: Arc::new(EventBusDriverAdapter { wrapped: self.event_bus }),
-            file_system: Arc::new(FileSystemDriverAdapter { wrapped: self.file_system }),
-            unsafe_storage: Arc::new(UnsafeStorageDriverAdapter { wrapped: self.unsafe_storage }),
-            profile_state_change_driver: Arc::new(ProfileStateChangeDriverAdapter { wrapped: self.profile_state_change_driver }),
+            networking: Arc::new(NetworkingDriverAdapter {
+                wrapped: self.networking,
+            }),
+            secure_storage: Arc::new(SecureStorageDriverAdapter {
+                wrapped: self.secure_storage,
+            }),
+            entropy_provider: Arc::new(EntropyProviderDriverAdapter {
+                wrapped: self.entropy_provider,
+            }),
+            host_info: Arc::new(HostInfoDriverAdapter {
+                wrapped: self.host_info,
+            }),
+            logging: Arc::new(LoggingDriverAdapter {
+                wrapped: self.logging,
+            }),
+            event_bus: Arc::new(EventBusDriverAdapter {
+                wrapped: self.event_bus,
+            }),
+            file_system: Arc::new(FileSystemDriverAdapter {
+                wrapped: self.file_system,
+            }),
+            unsafe_storage: Arc::new(UnsafeStorageDriverAdapter {
+                wrapped: self.unsafe_storage,
+            }),
+            profile_state_change_driver: Arc::new(
+                ProfileStateChangeDriverAdapter {
+                    wrapped: self.profile_state_change_driver,
+                },
+            ),
         }
     }
 }

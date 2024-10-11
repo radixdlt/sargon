@@ -1,15 +1,8 @@
 use crate::prelude::*;
+use sargon::LogFilter as InternalLogFilter;
 use sargon::LogLevel as InternalLogLevel;
 
-#[derive(
-    Clone,
-    
-    
-    PartialEq,
-    Eq,
-    Hash,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 #[repr(u8)]
 pub enum LogLevel {
     /// The "error" level.
@@ -62,13 +55,7 @@ impl Into<InternalLogLevel> for LogLevel {
     }
 }
 
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 #[repr(u8)]
 pub enum LogFilter {
     /// Logging is turned off
@@ -100,53 +87,28 @@ pub enum LogFilter {
     Trace,
 }
 
-impl From<log::Level> for LogLevel {
-    fn from(value: log::Level) -> Self {
+impl From<InternalLogFilter> for LogFilter {
+    fn from(value: InternalLogFilter) -> Self {
         match value {
-            log::Level::Error => Self::Error,
-            log::Level::Warn => Self::Warn,
-            log::Level::Info => Self::Info,
-            log::Level::Debug => Self::Debug,
-            log::Level::Trace => Self::Trace,
+            InternalLogFilter::Off => Self::Off,
+            InternalLogFilter::Error => Self::Error,
+            InternalLogFilter::Warn => Self::Warn,
+            InternalLogFilter::Info => Self::Info,
+            InternalLogFilter::Debug => Self::Debug,
+            InternalLogFilter::Trace => Self::Trace,
         }
     }
 }
 
-impl From<LogLevel> for log::Level {
-    fn from(value: LogLevel) -> Self {
-        match value {
-            LogLevel::Error => Self::Error,
-            LogLevel::Warn => Self::Warn,
-            LogLevel::Info => Self::Info,
-            LogLevel::Debug => Self::Debug,
-            LogLevel::Trace => Self::Trace,
+impl Into<InternalLogFilter> for LogFilter {
+    fn into(self) -> InternalLogFilter {
+        match self {
+            LogFilter::Off => InternalLogFilter::Off,
+            LogFilter::Error => InternalLogFilter::Error,
+            LogFilter::Warn => InternalLogFilter::Warn,
+            LogFilter::Info => InternalLogFilter::Info,
+            LogFilter::Debug => InternalLogFilter::Debug,
+            LogFilter::Trace => InternalLogFilter::Trace,
         }
     }
 }
-
-impl From<LogFilter> for log::LevelFilter {
-    fn from(value: LogFilter) -> Self {
-        match value {
-            LogFilter::Off => Self::Off,
-            LogFilter::Error => Self::Error,
-            LogFilter::Warn => Self::Warn,
-            LogFilter::Info => Self::Info,
-            LogFilter::Debug => Self::Debug,
-            LogFilter::Trace => Self::Trace,
-        }
-    }
-}
-
-impl From<log::LevelFilter> for LogFilter {
-    fn from(value: log::LevelFilter) -> Self {
-        match value {
-            log::LevelFilter::Off => Self::Off,
-            log::LevelFilter::Error => Self::Error,
-            log::LevelFilter::Warn => Self::Warn,
-            log::LevelFilter::Info => Self::Info,
-            log::LevelFilter::Debug => Self::Debug,
-            log::LevelFilter::Trace => Self::Trace,
-        }
-    }
-}
-

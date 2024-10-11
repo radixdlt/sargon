@@ -1,4 +1,3 @@
-
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
@@ -68,8 +67,6 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 //     // Convert expanded code into TokenStream and return it
 //     TokenStream::from(expanded)
 // }
-
-
 
 #[proc_macro_derive(InternalConversion)]
 pub fn internal_conversion_derive(input: TokenStream) -> TokenStream {

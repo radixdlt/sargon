@@ -69,7 +69,6 @@ impl BIP44LikePath {
     pub fn get_address_index(&self) -> HDPathValue {
         self.last_component().index()
     }
-
 }
 
 impl TryFrom<&HDPath> for BIP44LikePath {

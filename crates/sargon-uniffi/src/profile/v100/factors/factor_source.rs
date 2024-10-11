@@ -1,16 +1,8 @@
 use crate::prelude::*;
-use sargon::FactorSource as InternalFactorSource;
 use sargon::BaseIsFactorSource;
+use sargon::FactorSource as InternalFactorSource;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FactorSource {
     Device {
         value: DeviceFactorSource,
@@ -46,18 +38,26 @@ impl From<InternalFactorSource> for FactorSource {
             InternalFactorSource::Ledger { value } => FactorSource::Ledger {
                 value: value.into(),
             },
-            InternalFactorSource::OffDeviceMnemonic { value } => FactorSource::OffDeviceMnemonic {
-                value: value.into(),
-            },
-            InternalFactorSource::ArculusCard { value } => FactorSource::ArculusCard {
-                value: value.into(),
-            },
-            InternalFactorSource::SecurityQuestions { value } => FactorSource::SecurityQuestions {
-                value: value.into(),
-            },
-            InternalFactorSource::TrustedContact { value } => FactorSource::TrustedContact {
-                value: value.into(),
-            },
+            InternalFactorSource::OffDeviceMnemonic { value } => {
+                FactorSource::OffDeviceMnemonic {
+                    value: value.into(),
+                }
+            }
+            InternalFactorSource::ArculusCard { value } => {
+                FactorSource::ArculusCard {
+                    value: value.into(),
+                }
+            }
+            InternalFactorSource::SecurityQuestions { value } => {
+                FactorSource::SecurityQuestions {
+                    value: value.into(),
+                }
+            }
+            InternalFactorSource::TrustedContact { value } => {
+                FactorSource::TrustedContact {
+                    value: value.into(),
+                }
+            }
         }
     }
 }
@@ -71,18 +71,26 @@ impl Into<InternalFactorSource> for FactorSource {
             FactorSource::Ledger { value } => InternalFactorSource::Ledger {
                 value: value.into(),
             },
-            FactorSource::OffDeviceMnemonic { value } => InternalFactorSource::OffDeviceMnemonic {
-                value: value.into(),
-            },
-            FactorSource::ArculusCard { value } => InternalFactorSource::ArculusCard {
-                value: value.into(),
-            },
-            FactorSource::SecurityQuestions { value } => InternalFactorSource::SecurityQuestions {
-                value: value.into(),
-            },
-            FactorSource::TrustedContact { value } => InternalFactorSource::TrustedContact {
-                value: value.into(),
-            },
+            FactorSource::OffDeviceMnemonic { value } => {
+                InternalFactorSource::OffDeviceMnemonic {
+                    value: value.into(),
+                }
+            }
+            FactorSource::ArculusCard { value } => {
+                InternalFactorSource::ArculusCard {
+                    value: value.into(),
+                }
+            }
+            FactorSource::SecurityQuestions { value } => {
+                InternalFactorSource::SecurityQuestions {
+                    value: value.into(),
+                }
+            }
+            FactorSource::TrustedContact { value } => {
+                InternalFactorSource::TrustedContact {
+                    value: value.into(),
+                }
+            }
         }
     }
 }
@@ -111,4 +119,3 @@ pub fn new_factor_source_sample() -> FactorSource {
 pub fn new_factor_source_sample_other() -> FactorSource {
     InternalFactorSource::sample_other().into()
 }
-

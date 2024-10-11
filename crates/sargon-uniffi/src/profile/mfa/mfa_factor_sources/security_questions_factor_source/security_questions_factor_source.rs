@@ -107,14 +107,7 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecur
 /// [choose]: https://en.wikipedia.org/wiki/Combination
 /// [itertools]: https://docs.rs/itertools/latest/itertools/trait.Itertools.html#method.combinations
 ///
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -134,7 +127,9 @@ pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
 impl From<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
     for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
 {
-    fn from(value: InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource) -> Self {
+    fn from(
+        value: InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+    ) -> Self {
         Self {
             id: value.id.into(),
             common: value.common.into(),
@@ -146,7 +141,9 @@ impl From<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
 impl Into<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
     for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
 {
-    fn into(self) -> InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+    fn into(
+        self,
+    ) -> InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
         InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
             id: self.id.into(),
             common: self.common.into(),
@@ -164,7 +161,8 @@ pub fn new_security_questions_factor_source_sample(
 #[uniffi::export]
 pub fn new_security_questions_factor_source_sample_other(
 ) -> SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-    InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other().into()
+    InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other()
+        .into()
 }
 
 #[uniffi::export]
@@ -188,6 +186,8 @@ pub fn security_questions_factor_source_decrypt(
     factor_source: &SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
     with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
 ) -> Result<Mnemonic> {
-    factor_source.into_internal().decrypt(with.into_identified_vec()).map_result()
+    factor_source
+        .into_internal()
+        .decrypt(with.into_identified_vec())
+        .map_result()
 }
-

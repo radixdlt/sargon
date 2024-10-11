@@ -33,4 +33,3 @@ pub fn new_package_address_sample_stokenet() -> PackageAddress {
 pub fn new_package_address_sample_stokenet_other() -> PackageAddress {
     InternalPackageAddress::sample_stokenet_other().into()
 }
-

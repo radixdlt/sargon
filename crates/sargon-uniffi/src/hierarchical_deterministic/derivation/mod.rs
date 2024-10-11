@@ -1,4 +1,3 @@
-
 mod derivation_path;
 mod derivation_path_scheme;
 mod hierarchical_deterministic_public_key;

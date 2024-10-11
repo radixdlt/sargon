@@ -9,33 +9,27 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
 #[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Default,
-    Hash,
-    InternalConversion,
-    uniffi::Record,
+    Clone, PartialEq, Eq, Default, Hash, InternalConversion, uniffi::Record,
 )]
 pub struct BagOfBytes {
     /// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
-/// use `sequence<u8>` because it results in:
-///
-/// /uniffi-rs-6f89edd2a1ffa4bd/fb8dd5c/uniffi_bindgen/src/interface/universe.rs:50:17:
-/// assertion `left == right` failed
-/// left: Custom { module_path: "profile", name: "BagOfBytes", builtin: Bytes }
-/// right: Custom { module_path: "profile", name: "BagOfBytes", builtin: Sequence { inner_type: UInt8 } }
-///
-/// So HACK HACK HACK we use `sequence<i8>` (`Vec<i8>`) instead as an intermediary `Builtin`.
-///
-/// However, in `uniffi.toml` we provide `from_custom`` / `into_custom`` for Kotlin and Swift
-/// which using two's complement maps back Vec<i8> -> Vec<u8>, meaning Kotlin and Swift actually
-/// never see the `i8`, and only works with u8.
-///
-/// So we translate:
-/// Kotlin: `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Kotlin]List<UByte>`
-/// Swift:  `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Swift]Foundation.Data`
-///
+    /// use `sequence<u8>` because it results in:
+    ///
+    /// /uniffi-rs-6f89edd2a1ffa4bd/fb8dd5c/uniffi_bindgen/src/interface/universe.rs:50:17:
+    /// assertion `left == right` failed
+    /// left: Custom { module_path: "profile", name: "BagOfBytes", builtin: Bytes }
+    /// right: Custom { module_path: "profile", name: "BagOfBytes", builtin: Sequence { inner_type: UInt8 } }
+    ///
+    /// So HACK HACK HACK we use `sequence<i8>` (`Vec<i8>`) instead as an intermediary `Builtin`.
+    ///
+    /// However, in `uniffi.toml` we provide `from_custom`` / `into_custom`` for Kotlin and Swift
+    /// which using two's complement maps back Vec<i8> -> Vec<u8>, meaning Kotlin and Swift actually
+    /// never see the `i8`, and only works with u8.
+    ///
+    /// So we translate:
+    /// Kotlin: `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Kotlin]List<UByte>`
+    /// Swift:  `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Swift]Foundation.Data`
+    ///
     pub bytes: Vec<i8>,
 }
 
@@ -57,7 +51,10 @@ impl Into<Vec<u8>> for BagOfBytes {
 
 impl BagOfBytes {
     pub fn to_vec(&self) -> Vec<u8> {
-        self.bytes.iter().map(|&i| twos_complement_of_i8(i)).collect()
+        self.bytes
+            .iter()
+            .map(|&i| twos_complement_of_i8(i))
+            .collect()
     }
 }
 
@@ -73,7 +70,6 @@ impl Into<InternalBagOfBytes> for BagOfBytes {
         vec.into()
     }
 }
-
 
 fn twos_complement_of_u8(u: u8) -> i8 {
     // Yes, it is this easy, Rust does all the heavy lifting
@@ -99,4 +95,3 @@ pub fn new_bag_of_bytes_sample_aced() -> BagOfBytes {
 pub fn new_bag_of_bytes_sample_babe() -> BagOfBytes {
     InternalBagOfBytes::sample_babe().into()
 }
-

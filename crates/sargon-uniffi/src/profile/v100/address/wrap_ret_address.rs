@@ -10,6 +10,7 @@ macro_rules! decl_ret_wrapped_address {
         $address_type: ident
     ) => {
         paste! {
+            use sargon::IsNetworkAware;
             use sargon::[< $address_type:camel Address >] as [< Internal $address_type:camel Address >];
 
             $(

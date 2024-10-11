@@ -32,7 +32,9 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     }
 }
 
-impl<V: Debug + PartialEq + Eq + Clone + Identifiable> From<Vec<V>> for IdentifiedVecOf<V> {
+impl<V: Debug + PartialEq + Eq + Clone + Identifiable> From<Vec<V>>
+    for IdentifiedVecOf<V>
+{
     fn from(value: Vec<V>) -> Self {
         Self::from_iter(value)
     }

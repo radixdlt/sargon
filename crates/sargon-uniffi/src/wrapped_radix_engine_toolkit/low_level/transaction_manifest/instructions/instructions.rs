@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Instructions as InternalInstructions;
 
-#[derive(Clone,  PartialEq, Eq,   uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Instructions {
     pub secret_magic: BagOfBytes,
     pub network_id: NetworkID,
@@ -18,6 +18,10 @@ impl From<InternalInstructions> for Instructions {
 
 impl Into<InternalInstructions> for Instructions {
     fn into(self) -> InternalInstructions {
-        InternalInstructions::new_from_byte_instructions(self.secret_magic.to_vec(), self.network_id.into_internal()).unwrap()
+        InternalInstructions::new_from_byte_instructions(
+            self.secret_magic.to_vec(),
+            self.network_id.into_internal(),
+        )
+        .unwrap()
     }
 }

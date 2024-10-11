@@ -3,15 +3,7 @@ use sargon::MnemonicWithPassphrase as InternalMnemonicWithPassphrase;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(
-    Zeroize,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
     pub passphrase: BIP39Passphrase,
@@ -54,7 +46,9 @@ pub fn mnemonic_with_passphrase_validate_public_keys(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     hd_keys: Vec<HierarchicalDeterministicPublicKey>,
 ) -> bool {
-    mnemonic_with_passphrase.into_internal().validate_public_keys(hd_keys.into_internal_vec())
+    mnemonic_with_passphrase
+        .into_internal()
+        .validate_public_keys(hd_keys.into_internal_vec())
 }
 
 #[uniffi::export]
@@ -63,9 +57,9 @@ pub fn mnemonic_with_passphrase_derive_public_keys(
     derivation_paths: Vec<DerivationPath>,
 ) -> Vec<HierarchicalDeterministicPublicKey> {
     mnemonic_with_passphrase
-    .into_internal()
-    .derive_public_keys(derivation_paths.into_internal_vec())
-    .into_vec()
+        .into_internal()
+        .derive_public_keys(derivation_paths.into_internal_vec())
+        .into_vec()
 }
 
 #[uniffi::export]
@@ -74,6 +68,11 @@ pub fn mnemonic_with_passphrase_sign(
     derivation_path: &DerivationPath,
     hash_to_sign: &Hash,
 ) -> SignatureWithPublicKey {
-    mnemonic_with_passphrase.into_internal().sign(&hash_to_sign.into_internal(), &derivation_path.into_internal()).into()
+    mnemonic_with_passphrase
+        .into_internal()
+        .sign(
+            &hash_to_sign.into_internal(),
+            &derivation_path.into_internal(),
+        )
+        .into()
 }
-

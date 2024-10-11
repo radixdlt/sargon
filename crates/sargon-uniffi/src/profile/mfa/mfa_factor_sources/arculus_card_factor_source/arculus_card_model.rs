@@ -2,14 +2,7 @@ use crate::prelude::*;
 use sargon::ArculusCardModel as InternalArculusCardModel;
 
 /// The model of a Arculus Card.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum ArculusCardModel {
     /// Arculus card model: "Arculus® Cold Storage Wallet",
     /// for more info [see][link].
@@ -21,7 +14,9 @@ pub enum ArculusCardModel {
 impl From<InternalArculusCardModel> for ArculusCardModel {
     fn from(value: InternalArculusCardModel) -> Self {
         match value {
-            InternalArculusCardModel::ArculusColdStorageWallet => ArculusCardModel::ArculusColdStorageWallet,
+            InternalArculusCardModel::ArculusColdStorageWallet => {
+                ArculusCardModel::ArculusColdStorageWallet
+            }
         }
     }
 }
@@ -29,7 +24,9 @@ impl From<InternalArculusCardModel> for ArculusCardModel {
 impl Into<InternalArculusCardModel> for ArculusCardModel {
     fn into(self) -> InternalArculusCardModel {
         match self {
-            ArculusCardModel::ArculusColdStorageWallet => InternalArculusCardModel::ArculusColdStorageWallet,
+            ArculusCardModel::ArculusColdStorageWallet => {
+                InternalArculusCardModel::ArculusColdStorageWallet
+            }
         }
     }
 }

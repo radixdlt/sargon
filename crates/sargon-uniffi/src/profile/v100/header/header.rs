@@ -5,15 +5,7 @@ use sargon::Header as InternalHeader;
 /// about this Profile, such as which JSON data format it is
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
@@ -79,4 +71,3 @@ pub fn new_header_sample_other() -> Header {
 pub fn new_header_with_creating_device(creating_device: DeviceInfo) -> Header {
     InternalHeader::new(creating_device.into()).into()
 }
-

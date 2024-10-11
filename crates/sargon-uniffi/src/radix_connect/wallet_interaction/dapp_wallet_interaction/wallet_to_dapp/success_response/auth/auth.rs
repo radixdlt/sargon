@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionAuthRequestResponseItem as InternalWalletToDappInteractionAuthRequestResponseItem;
 
-#[derive( Clone, PartialEq, uniffi::Enum)]
+#[derive(Clone, PartialEq, uniffi::Enum)]
 pub enum WalletToDappInteractionAuthRequestResponseItem {
     UsePersona(WalletToDappInteractionAuthUsePersonaRequestResponseItem),
     LoginWithoutChallenge(
@@ -12,8 +12,12 @@ pub enum WalletToDappInteractionAuthRequestResponseItem {
     ),
 }
 
-impl From<InternalWalletToDappInteractionAuthRequestResponseItem> for WalletToDappInteractionAuthRequestResponseItem {
-    fn from(value: InternalWalletToDappInteractionAuthRequestResponseItem) -> Self {
+impl From<InternalWalletToDappInteractionAuthRequestResponseItem>
+    for WalletToDappInteractionAuthRequestResponseItem
+{
+    fn from(
+        value: InternalWalletToDappInteractionAuthRequestResponseItem,
+    ) -> Self {
         match value {
             InternalWalletToDappInteractionAuthRequestResponseItem::UsePersona(value) => WalletToDappInteractionAuthRequestResponseItem::UsePersona(value.into()),
             InternalWalletToDappInteractionAuthRequestResponseItem::LoginWithoutChallenge(value) => WalletToDappInteractionAuthRequestResponseItem::LoginWithoutChallenge(value.into()),
@@ -22,7 +26,9 @@ impl From<InternalWalletToDappInteractionAuthRequestResponseItem> for WalletToDa
     }
 }
 
-impl Into<InternalWalletToDappInteractionAuthRequestResponseItem> for WalletToDappInteractionAuthRequestResponseItem {
+impl Into<InternalWalletToDappInteractionAuthRequestResponseItem>
+    for WalletToDappInteractionAuthRequestResponseItem
+{
     fn into(self) -> InternalWalletToDappInteractionAuthRequestResponseItem {
         match self {
             WalletToDappInteractionAuthRequestResponseItem::UsePersona(value) => InternalWalletToDappInteractionAuthRequestResponseItem::UsePersona(value.into()),

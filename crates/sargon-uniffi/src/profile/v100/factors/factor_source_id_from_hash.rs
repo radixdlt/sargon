@@ -3,14 +3,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
@@ -19,7 +12,10 @@ pub struct FactorSourceIDFromHash {
     pub body: Exactly32Bytes,
 }
 
-delegate_display_debug_into!(FactorSourceIDFromHash, InternalFactorSourceIDFromHash);
+delegate_display_debug_into!(
+    FactorSourceIDFromHash,
+    InternalFactorSourceIDFromHash
+);
 
 impl From<InternalFactorSourceIDFromHash> for FactorSourceIDFromHash {
     fn from(value: InternalFactorSourceIDFromHash) -> Self {
@@ -56,7 +52,8 @@ pub fn new_factor_source_id_from_hash_from_mnemonic_with_passphrase(
     InternalFactorSourceIDFromHash::from_mnemonic_with_passphrase(
         factor_source_kind.into_internal(),
         &mnemonic_with_passphrase.into_internal(),
-    ).into()
+    )
+    .into()
 }
 
 #[uniffi::export]
@@ -68,4 +65,3 @@ pub fn new_factor_source_id_from_hash_sample() -> FactorSourceIDFromHash {
 pub fn new_factor_source_id_from_hash_sample_other() -> FactorSourceIDFromHash {
     InternalFactorSourceIDFromHash::sample_other().into()
 }
-

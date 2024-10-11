@@ -35,4 +35,3 @@ pub fn new_validator_address_sample_stokenet() -> ValidatorAddress {
 pub fn new_validator_address_sample_stokenet_other() -> ValidatorAddress {
     InternalValidatorAddress::sample_stokenet_other().into()
 }
-

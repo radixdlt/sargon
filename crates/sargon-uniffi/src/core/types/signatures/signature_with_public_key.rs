@@ -2,14 +2,7 @@ use crate::prelude::*;
 use sargon::SignatureWithPublicKey as InternalSignatureWithPublicKey;
 
 /// Represents any natively supported signature, including public key.
-#[derive(    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum SignatureWithPublicKey {
     // N.B. `radix_transactions::model::SignatureWithPublicKeyV1::Secp256k1` does
     // NOT include the public key, it relies on ECDSA Signature supporting
@@ -34,18 +27,20 @@ pub enum SignatureWithPublicKey {
 impl From<InternalSignatureWithPublicKey> for SignatureWithPublicKey {
     fn from(value: InternalSignatureWithPublicKey) -> Self {
         match value {
-            InternalSignatureWithPublicKey::Secp256k1 { public_key, signature } => {
-                Self::Secp256k1 {
-                    public_key: public_key.into(),
-                    signature: signature.into(),
-                }
-            }
-            InternalSignatureWithPublicKey::Ed25519 { public_key, signature } => {
-                Self::Ed25519 {
-                    public_key: public_key.into(),
-                    signature: signature.into(),
-                }
-            }
+            InternalSignatureWithPublicKey::Secp256k1 {
+                public_key,
+                signature,
+            } => Self::Secp256k1 {
+                public_key: public_key.into(),
+                signature: signature.into(),
+            },
+            InternalSignatureWithPublicKey::Ed25519 {
+                public_key,
+                signature,
+            } => Self::Ed25519 {
+                public_key: public_key.into(),
+                signature: signature.into(),
+            },
         }
     }
 }
@@ -53,18 +48,20 @@ impl From<InternalSignatureWithPublicKey> for SignatureWithPublicKey {
 impl Into<InternalSignatureWithPublicKey> for SignatureWithPublicKey {
     fn into(self) -> InternalSignatureWithPublicKey {
         match self {
-            SignatureWithPublicKey::Secp256k1 { public_key, signature } => {
-                InternalSignatureWithPublicKey::Secp256k1 {
-                    public_key: public_key.into(),
-                    signature: signature.into(),
-                }
-            }
-            SignatureWithPublicKey::Ed25519 { public_key, signature } => {
-                InternalSignatureWithPublicKey::Ed25519 {
-                    public_key: public_key.into(),
-                    signature: signature.into(),
-                }
-            }
+            SignatureWithPublicKey::Secp256k1 {
+                public_key,
+                signature,
+            } => InternalSignatureWithPublicKey::Secp256k1 {
+                public_key: public_key.into(),
+                signature: signature.into(),
+            },
+            SignatureWithPublicKey::Ed25519 {
+                public_key,
+                signature,
+            } => InternalSignatureWithPublicKey::Ed25519 {
+                public_key: public_key.into(),
+                signature: signature.into(),
+            },
         }
     }
 }
@@ -83,7 +80,10 @@ pub fn new_signature_with_public_key_sample_other() -> SignatureWithPublicKey {
 pub fn signature_with_public_key_get_public_key(
     signature_with_public_key: &SignatureWithPublicKey,
 ) -> PublicKey {
-    signature_with_public_key.into_internal().public_key().into()
+    signature_with_public_key
+        .into_internal()
+        .public_key()
+        .into()
 }
 
 #[uniffi::export]
@@ -98,6 +98,8 @@ pub fn signature_with_public_key_is_valid(
     signature_with_public_key: &SignatureWithPublicKey,
     for_hash: &Hash,
 ) -> bool {
-    signature_with_public_key.into_internal().is_valid_for_hash(&for_hash.into_internal()).into()
+    signature_with_public_key
+        .into_internal()
+        .is_valid_for_hash(&for_hash.into_internal())
+        .into()
 }
-

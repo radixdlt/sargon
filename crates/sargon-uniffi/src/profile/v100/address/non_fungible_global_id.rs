@@ -1,15 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleGlobalId as InternalNonFungibleGlobalId;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct NonFungibleGlobalId {
     // N.B. we WANT This to be a `NonFungibleResourceAddress` type, alas, it
     // cannot, since that validation does not happen part of Engine, so it is
@@ -72,4 +64,3 @@ pub fn non_fungible_global_id_formatted(
 ) -> String {
     global_id.into_internal().formatted(format.into_internal())
 }
-

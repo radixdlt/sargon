@@ -1,15 +1,7 @@
 use crate::prelude::*;
 use sargon::SessionID as InternalSessionID;
 
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SessionID {
     pub value: Uuid,
 }
@@ -18,9 +10,7 @@ delegate_display_debug_into!(SessionID, InternalSessionID);
 
 impl From<InternalSessionID> for SessionID {
     fn from(value: InternalSessionID) -> Self {
-        Self {
-            value: value.0,
-        }
+        Self { value: value.0 }
     }
 }
 

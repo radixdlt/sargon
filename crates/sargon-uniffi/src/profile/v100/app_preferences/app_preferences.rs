@@ -6,14 +6,7 @@ use sargon::AppPreferences as InternalAppPreferences;
 ///
 /// Current and other saved Gateways, security settings,
 /// App Display settings and preferences for transaction.
-#[derive(
-    PartialEq,
-    Eq,
-    Clone,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(PartialEq, Eq, Clone, Hash, InternalConversion, uniffi::Record)]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
     pub display: AppDisplay,
@@ -70,6 +63,7 @@ pub fn app_preferences_has_gateway_with_url(
     app_preferences: AppPreferences,
     url: &FfiUrl,
 ) -> bool {
-    app_preferences.into_internal().has_gateway_with_url(url.url.clone())
+    app_preferences
+        .into_internal()
+        .has_gateway_with_url(url.url.clone())
 }
-

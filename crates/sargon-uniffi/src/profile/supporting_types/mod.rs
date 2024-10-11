@@ -11,7 +11,6 @@ mod host_id;
 mod host_info;
 mod host_os;
 
-
 pub use account_for_display::*;
 pub use account_or_persona::*;
 pub use accounts_for_display::*;

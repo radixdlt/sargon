@@ -1,15 +1,7 @@
 pub use crate::prelude::*;
 use sargon::Nonce as InternalNonce;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Nonce {
     value: u32,
 }
@@ -50,4 +42,3 @@ pub fn new_nonce_sample_other() -> Nonce {
 pub fn nonce_get_value(nonce: Nonce) -> u32 {
     u32::from(nonce.into_internal())
 }
-

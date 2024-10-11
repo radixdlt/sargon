@@ -1,10 +1,8 @@
 use crate::prelude::*;
-use std::{borrow::Borrow, sync::RwLock};
 use sargon::ProfileState as InternalProfileState;
+use std::{borrow::Borrow, sync::RwLock};
 
-#[derive(
-     Clone, PartialEq, EnumAsInner,  uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, EnumAsInner, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {
     /// When no profile exists in secure storage when OS is booted.

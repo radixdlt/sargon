@@ -19,9 +19,13 @@ impl HomeCardsManager {
         observer: Arc<dyn HomeCardsObserver>,
     ) -> Self {
         let wrapped = InternalHomeCardsManager::new(
-            Arc::new(NetworkingDriverAdapter { wrapped: networking_driver }),
+            Arc::new(NetworkingDriverAdapter {
+                wrapped: networking_driver,
+            }),
             network_id.into(),
-            Arc::new(HomeCardsStorageAdapter { wrapped: cards_storage }),
+            Arc::new(HomeCardsStorageAdapter {
+                wrapped: cards_storage,
+            }),
             Arc::new(HomeCardsObserverAdapter { wrapped: observer }),
         );
         Self {
@@ -55,7 +59,11 @@ impl HomeCardsManager {
         &self,
         encoded_value: String,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.deferred_deep_link_received(encoded_value).await)
+        map_result_from_internal(
+            self.wrapped
+                .deferred_deep_link_received(encoded_value)
+                .await,
+        )
     }
 
     /// Marks the wallet restoration.

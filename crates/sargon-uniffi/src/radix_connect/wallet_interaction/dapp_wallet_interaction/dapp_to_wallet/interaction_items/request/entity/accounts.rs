@@ -1,13 +1,15 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionAccountsRequestItem as InternalDappToWalletInteractionAccountsRequestItem;
 
-#[derive( Clone, PartialEq,  uniffi::Record)]
+#[derive(Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionAccountsRequestItem {
     pub number_of_accounts: RequestedQuantity,
     pub challenge: Option<DappToWalletInteractionAuthChallengeNonce>,
 }
 
-impl From<InternalDappToWalletInteractionAccountsRequestItem> for DappToWalletInteractionAccountsRequestItem {
+impl From<InternalDappToWalletInteractionAccountsRequestItem>
+    for DappToWalletInteractionAccountsRequestItem
+{
     fn from(value: InternalDappToWalletInteractionAccountsRequestItem) -> Self {
         Self {
             number_of_accounts: value.number_of_accounts.into(),
@@ -16,7 +18,9 @@ impl From<InternalDappToWalletInteractionAccountsRequestItem> for DappToWalletIn
     }
 }
 
-impl Into<InternalDappToWalletInteractionAccountsRequestItem> for DappToWalletInteractionAccountsRequestItem {
+impl Into<InternalDappToWalletInteractionAccountsRequestItem>
+    for DappToWalletInteractionAccountsRequestItem
+{
     fn into(self) -> InternalDappToWalletInteractionAccountsRequestItem {
         InternalDappToWalletInteractionAccountsRequestItem {
             number_of_accounts: self.number_of_accounts.into(),

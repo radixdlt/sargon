@@ -3,16 +3,7 @@ use sargon::EventKind as InternalEventKind;
 
 /// A discriminator identifying the kind of `Event`, this has no associated
 /// values and flattens the otherwise nested `Event` enum.
-#[derive(
-    
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum EventKind {
     /* Sort lexicographically */
     /// Profile updated with a new account.
@@ -60,14 +51,26 @@ impl From<InternalEventKind> for EventKind {
             InternalEventKind::AccountsAdded => EventKind::AccountsAdded,
             InternalEventKind::AccountUpdated => EventKind::AccountUpdated,
             InternalEventKind::Booted => EventKind::Booted,
-            InternalEventKind::GatewayChangedCurrent => EventKind::GatewayChangedCurrent,
+            InternalEventKind::GatewayChangedCurrent => {
+                EventKind::GatewayChangedCurrent
+            }
             InternalEventKind::ProfileSaved => EventKind::ProfileSaved,
             InternalEventKind::ProfileImported => EventKind::ProfileImported,
-            InternalEventKind::ProfileUsedOnOtherDevice => EventKind::ProfileUsedOnOtherDevice,
-            InternalEventKind::FactorSourceAdded => EventKind::FactorSourceAdded,
-            InternalEventKind::FactorSourcesAdded => EventKind::FactorSourcesAdded,
-            InternalEventKind::FactorSourceUpdated => EventKind::FactorSourceUpdated,
-            InternalEventKind::SecurityStructureAdded => EventKind::SecurityStructureAdded,
+            InternalEventKind::ProfileUsedOnOtherDevice => {
+                EventKind::ProfileUsedOnOtherDevice
+            }
+            InternalEventKind::FactorSourceAdded => {
+                EventKind::FactorSourceAdded
+            }
+            InternalEventKind::FactorSourcesAdded => {
+                EventKind::FactorSourcesAdded
+            }
+            InternalEventKind::FactorSourceUpdated => {
+                EventKind::FactorSourceUpdated
+            }
+            InternalEventKind::SecurityStructureAdded => {
+                EventKind::SecurityStructureAdded
+            }
         }
     }
 }
@@ -79,14 +82,26 @@ impl Into<InternalEventKind> for EventKind {
             EventKind::AccountsAdded => InternalEventKind::AccountsAdded,
             EventKind::AccountUpdated => InternalEventKind::AccountUpdated,
             EventKind::Booted => InternalEventKind::Booted,
-            EventKind::GatewayChangedCurrent => InternalEventKind::GatewayChangedCurrent,
+            EventKind::GatewayChangedCurrent => {
+                InternalEventKind::GatewayChangedCurrent
+            }
             EventKind::ProfileSaved => InternalEventKind::ProfileSaved,
             EventKind::ProfileImported => InternalEventKind::ProfileImported,
-            EventKind::ProfileUsedOnOtherDevice => InternalEventKind::ProfileUsedOnOtherDevice,
-            EventKind::FactorSourceAdded => InternalEventKind::FactorSourceAdded,
-            EventKind::FactorSourcesAdded => InternalEventKind::FactorSourcesAdded,
-            EventKind::FactorSourceUpdated => InternalEventKind::FactorSourceUpdated,
-            EventKind::SecurityStructureAdded => InternalEventKind::SecurityStructureAdded,
+            EventKind::ProfileUsedOnOtherDevice => {
+                InternalEventKind::ProfileUsedOnOtherDevice
+            }
+            EventKind::FactorSourceAdded => {
+                InternalEventKind::FactorSourceAdded
+            }
+            EventKind::FactorSourcesAdded => {
+                InternalEventKind::FactorSourcesAdded
+            }
+            EventKind::FactorSourceUpdated => {
+                InternalEventKind::FactorSourceUpdated
+            }
+            EventKind::SecurityStructureAdded => {
+                InternalEventKind::SecurityStructureAdded
+            }
         }
     }
 }
@@ -120,4 +135,3 @@ pub fn event_kind_affects_security_structures(event_kind: EventKind) -> bool {
 pub fn event_kind_all() -> Vec<EventKind> {
     InternalEventKind::all().into_vec()
 }
-

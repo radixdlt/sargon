@@ -1,16 +1,11 @@
 use crate::prelude::*;
+use sargon::ChangeGatewayOutcome as InternalChangeGatewayOutcome;
 use sargon::Gateway as InternalGateway;
+use sargon::Identifiable;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     pub network: NetworkDefinition,
@@ -37,6 +32,45 @@ impl Into<InternalGateway> for Gateway {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+pub enum ChangeGatewayOutcome {
+    /// If we did in fact change the gateway, and if the gateway was unknown
+    /// or known before it was added, i.e. `is_new` will be true iff the gateway
+    /// was unknown before changing to it.
+    DidChange {
+        /// If the Gateway we just switched to already was in the `other` list of
+        /// saved gateways in AppPreferences, or if it was entirely new.
+        is_new: bool,
+    },
+
+    /// We tried to change to the current gateway.
+    NoChange,
+}
+
+impl From<InternalChangeGatewayOutcome> for ChangeGatewayOutcome {
+    fn from(value: InternalChangeGatewayOutcome) -> Self {
+        match value {
+            InternalChangeGatewayOutcome::DidChange { is_new } => {
+                Self::DidChange { is_new }
+            }
+            InternalChangeGatewayOutcome::NoChange => Self::NoChange,
+        }
+    }
+}
+
+impl Into<InternalChangeGatewayOutcome> for ChangeGatewayOutcome {
+    fn into(self) -> InternalChangeGatewayOutcome {
+        match self {
+            ChangeGatewayOutcome::DidChange { is_new } => {
+                InternalChangeGatewayOutcome::DidChange { is_new }
+            }
+            ChangeGatewayOutcome::NoChange => {
+                InternalChangeGatewayOutcome::NoChange
+            }
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_gateway_sample() -> Gateway {
     InternalGateway::sample().into()
@@ -49,7 +83,7 @@ pub fn new_gateway_sample_other() -> Gateway {
 
 #[uniffi::export]
 pub fn new_gateway_for_network_id(network_id: NetworkID) -> Gateway {
-    InternalGateway::from(network_id.into()).into()
+    InternalGateway::from(network_id.into_internal()).into()
 }
 
 #[uniffi::export]
@@ -89,4 +123,3 @@ pub fn gateway_to_string(gateway: &Gateway) -> String {
 pub fn gateway_id(gateway: &Gateway) -> Url {
     gateway.into_internal().id()
 }
-

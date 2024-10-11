@@ -11,13 +11,7 @@ use sargon::PersonaDataNameVariant as InternalPersonaDataNameVariant;
 /// her Swedish name - is in full: "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter Långstrump", where her
 /// given names: "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter" are put in the `given_names` field, and
 /// "Långstrump" (Longstocking) is her family name.
-#[derive(
-    Clone,
-    PartialEq,
-    Hash,
-    Eq,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct PersonaDataEntryName {
     pub variant: PersonaDataNameVariant,
     pub family_name: String,
@@ -25,9 +19,7 @@ pub struct PersonaDataEntryName {
     pub nickname: String,
 }
 
-#[derive(
-    Clone,  PartialEq, Hash, Eq, uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Enum)]
 pub enum PersonaDataNameVariant {
     Western,
     Eastern,

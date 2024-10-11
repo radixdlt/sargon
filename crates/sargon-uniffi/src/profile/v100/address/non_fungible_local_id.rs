@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleLocalId as InternalNonFungibleLocalId;
 
-#[derive(Clone,  Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -56,13 +56,19 @@ impl Into<InternalNonFungibleLocalId> for NonFungibleLocalId {
                 InternalNonFungibleLocalId::Integer { value }
             }
             NonFungibleLocalId::Str { value } => {
-                InternalNonFungibleLocalId::Str { value: value.into() }
+                InternalNonFungibleLocalId::Str {
+                    value: value.into(),
+                }
             }
             NonFungibleLocalId::Bytes { value } => {
-                InternalNonFungibleLocalId::Bytes { value: value.into() }
+                InternalNonFungibleLocalId::Bytes {
+                    value: value.into(),
+                }
             }
             NonFungibleLocalId::Ruid { value } => {
-                InternalNonFungibleLocalId::Ruid { value: value.into() }
+                InternalNonFungibleLocalId::Ruid {
+                    value: value.into(),
+                }
             }
         }
     }
@@ -135,4 +141,3 @@ pub fn new_non_fungible_local_id_sample_other() -> NonFungibleLocalId {
 pub fn new_non_fungible_local_id_random() -> NonFungibleLocalId {
     InternalNonFungibleLocalId::random().into()
 }
-

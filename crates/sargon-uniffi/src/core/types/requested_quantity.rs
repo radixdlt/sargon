@@ -1,17 +1,9 @@
 use crate::prelude::*;
-use sargon::RequestedQuantity as InternalRequestedQuantity; 
+use sargon::RequestedQuantity as InternalRequestedQuantity;
 
 /// A requested (by Dapp) quantity, e.g. "I want AT LEAST 3 account addresses" or
 /// "I want EXACTLY 2 email addresses".
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct RequestedQuantity {
     pub quantifier: RequestedNumberQuantifier,
     pub quantity: u16,
@@ -64,6 +56,7 @@ pub fn requested_quantity_is_fulfilled_by_ids(
     requested_quantity: RequestedQuantity,
     number_of_ids: u64,
 ) -> bool {
-    requested_quantity.into_internal().is_fulfilled_by_ids(number_of_ids as usize)
+    requested_quantity
+        .into_internal()
+        .is_fulfilled_by_ids(number_of_ids as usize)
 }
-

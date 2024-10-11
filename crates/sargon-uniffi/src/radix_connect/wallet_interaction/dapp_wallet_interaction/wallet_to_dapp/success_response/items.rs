@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionResponseItems as InternalWalletToDappInteractionResponseItems;
 
-#[derive( Clone, PartialEq, uniffi::Enum)]
+#[derive(Clone, PartialEq, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponseItems {
     AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems),
@@ -11,7 +11,9 @@ pub enum WalletToDappInteractionResponseItems {
     Transaction(WalletToDappInteractionTransactionResponseItems),
 }
 
-impl From<InternalWalletToDappInteractionResponseItems> for WalletToDappInteractionResponseItems {
+impl From<InternalWalletToDappInteractionResponseItems>
+    for WalletToDappInteractionResponseItems
+{
     fn from(value: InternalWalletToDappInteractionResponseItems) -> Self {
         match value {
             InternalWalletToDappInteractionResponseItems::AuthorizedRequest(value) => WalletToDappInteractionResponseItems::AuthorizedRequest(value.into()),
@@ -21,7 +23,9 @@ impl From<InternalWalletToDappInteractionResponseItems> for WalletToDappInteract
     }
 }
 
-impl Into<InternalWalletToDappInteractionResponseItems> for WalletToDappInteractionResponseItems {
+impl Into<InternalWalletToDappInteractionResponseItems>
+    for WalletToDappInteractionResponseItems
+{
     fn into(self) -> InternalWalletToDappInteractionResponseItems {
         match self {
             WalletToDappInteractionResponseItems::AuthorizedRequest(value) => InternalWalletToDappInteractionResponseItems::AuthorizedRequest(value.into()),

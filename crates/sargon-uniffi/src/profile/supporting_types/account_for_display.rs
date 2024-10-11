@@ -3,14 +3,7 @@ use sargon::AccountForDisplay as InternalAccountForDisplay;
 
 /// A minimal version of an [`Account`] meant for
 /// display purposes within wallet
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Hash,
-    Eq,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct AccountForDisplay {
     pub address: AccountAddress,
 
@@ -55,4 +48,3 @@ pub fn new_account_for_display_from_account(
 ) -> AccountForDisplay {
     InternalAccountForDisplay::from(account.into_internal()).into()
 }
-

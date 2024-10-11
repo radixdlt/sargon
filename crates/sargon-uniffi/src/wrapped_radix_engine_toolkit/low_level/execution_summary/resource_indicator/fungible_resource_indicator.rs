@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::FungibleResourceIndicator as InternalFungibleResourceIndicator;
 
-#[derive(Clone,  PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum FungibleResourceIndicator {
     Guaranteed { decimal: Decimal },
     Predicted { predicted_decimal: PredictedDecimal },
@@ -10,8 +10,16 @@ pub enum FungibleResourceIndicator {
 impl From<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
     fn from(value: InternalFungibleResourceIndicator) -> Self {
         match value {
-            InternalFungibleResourceIndicator::Guaranteed { decimal } => FungibleResourceIndicator::Guaranteed { decimal: decimal.into() },
-            InternalFungibleResourceIndicator::Predicted { predicted_decimal } => FungibleResourceIndicator::Predicted { predicted_decimal: predicted_decimal.into() },
+            InternalFungibleResourceIndicator::Guaranteed { decimal } => {
+                FungibleResourceIndicator::Guaranteed {
+                    decimal: decimal.into(),
+                }
+            }
+            InternalFungibleResourceIndicator::Predicted {
+                predicted_decimal,
+            } => FungibleResourceIndicator::Predicted {
+                predicted_decimal: predicted_decimal.into(),
+            },
         }
     }
 }
@@ -19,8 +27,16 @@ impl From<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
 impl Into<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
     fn into(self) -> InternalFungibleResourceIndicator {
         match self {
-            FungibleResourceIndicator::Guaranteed { decimal } => InternalFungibleResourceIndicator::Guaranteed { decimal: decimal.into() },
-            FungibleResourceIndicator::Predicted { predicted_decimal } => InternalFungibleResourceIndicator::Predicted { predicted_decimal: predicted_decimal.into() },
+            FungibleResourceIndicator::Guaranteed { decimal } => {
+                InternalFungibleResourceIndicator::Guaranteed {
+                    decimal: decimal.into(),
+                }
+            }
+            FungibleResourceIndicator::Predicted { predicted_decimal } => {
+                InternalFungibleResourceIndicator::Predicted {
+                    predicted_decimal: predicted_decimal.into(),
+                }
+            }
         }
     }
 }
@@ -42,4 +58,3 @@ pub fn fungible_resource_indicator_get_amount(
 ) -> Decimal192 {
     indicator.into_internal().get_amount().into()
 }
-

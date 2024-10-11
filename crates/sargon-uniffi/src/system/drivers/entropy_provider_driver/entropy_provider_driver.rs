@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::EntropyProviderDriver as InternalEntropyProviderDriver;
 use sargon::Entropy32Bytes as InternalEntropy32Bytes;
+use sargon::EntropyProviderDriver as InternalEntropyProviderDriver;
 
 #[uniffi::export(with_foreign)]
 pub trait EntropyProviderDriver: Send + Sync + std::fmt::Debug {

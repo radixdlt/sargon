@@ -144,12 +144,16 @@ impl Into<InternalPerAssetNonFungibleTransfer> for PerAssetNonFungibleTransfer {
         InternalPerAssetNonFungibleTransfer {
             use_try_deposit_or_abort: self.use_try_deposit_or_abort,
             recipient: self.recipient.into(),
-            non_fungible_local_ids: self.non_fungible_local_ids.into_internal_vec(),
+            non_fungible_local_ids: self
+                .non_fungible_local_ids
+                .into_internal_vec(),
         }
     }
 }
 
-impl From<InternalPerRecipientFungibleTransfer> for PerRecipientFungibleTransfer {
+impl From<InternalPerRecipientFungibleTransfer>
+    for PerRecipientFungibleTransfer
+{
     fn from(value: InternalPerRecipientFungibleTransfer) -> Self {
         Self {
             use_try_deposit_or_abort: value.use_try_deposit_or_abort,
@@ -160,7 +164,9 @@ impl From<InternalPerRecipientFungibleTransfer> for PerRecipientFungibleTransfer
     }
 }
 
-impl Into<InternalPerRecipientFungibleTransfer> for PerRecipientFungibleTransfer {
+impl Into<InternalPerRecipientFungibleTransfer>
+    for PerRecipientFungibleTransfer
+{
     fn into(self) -> InternalPerRecipientFungibleTransfer {
         InternalPerRecipientFungibleTransfer {
             use_try_deposit_or_abort: self.use_try_deposit_or_abort,
@@ -171,7 +177,9 @@ impl Into<InternalPerRecipientFungibleTransfer> for PerRecipientFungibleTransfer
     }
 }
 
-impl From<InternalPerRecipientNonFungibleTransfer> for PerRecipientNonFungibleTransfer {
+impl From<InternalPerRecipientNonFungibleTransfer>
+    for PerRecipientNonFungibleTransfer
+{
     fn from(value: InternalPerRecipientNonFungibleTransfer) -> Self {
         Self {
             use_try_deposit_or_abort: value.use_try_deposit_or_abort,
@@ -181,7 +189,9 @@ impl From<InternalPerRecipientNonFungibleTransfer> for PerRecipientNonFungibleTr
     }
 }
 
-impl Into<InternalPerRecipientNonFungibleTransfer> for PerRecipientNonFungibleTransfer {
+impl Into<InternalPerRecipientNonFungibleTransfer>
+    for PerRecipientNonFungibleTransfer
+{
     fn into(self) -> InternalPerRecipientNonFungibleTransfer {
         InternalPerRecipientNonFungibleTransfer {
             use_try_deposit_or_abort: self.use_try_deposit_or_abort,

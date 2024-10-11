@@ -9,6 +9,8 @@ macro_rules! decl_identified_vec_of {
         $element_type: ident
     ) => {
         paste! {
+            use sargon::$collection_type as [< Internal $collection_type >];
+
             $(
                 #[doc = $expr]
             )*
@@ -17,12 +19,12 @@ macro_rules! decl_identified_vec_of {
 
             #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample >]() -> $collection_type {
-                $collection_type::sample()
+                [< Internal $collection_type >]::sample().into_vec()
             }
 
             #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample_other >]() -> $collection_type {
-                $collection_type::sample_other()
+                [< Internal $collection_type >]::sample_other().into_vec()
             }
 		}
 	};

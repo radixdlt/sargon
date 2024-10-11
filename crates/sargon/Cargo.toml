@@ -10,11 +10,6 @@ name = "vectors"
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
 
-[[bin]]
-name = "sargon-bindgen"
-path = "src/bindgen/bin.rs"
-required-features = ["build-binary"]
-
 [dependencies]
 
 # zeroize = "1.7.0"

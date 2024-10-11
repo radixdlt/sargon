@@ -4,25 +4,14 @@ use sargon::SecurityStructureID as InternalSecurityStructureID;
 /// A stable and globally unique identifier of a `SecurityStructureOfFactorSources` the
 /// user has created. Also used in `SecurityStructureOfFactorSourceIDs` and in
 /// `SecurityStructureOfFactorInstances`.
-#[derive(
-    
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureID {
     pub value: Uuid,
 }
 
 impl From<InternalSecurityStructureID> for SecurityStructureID {
     fn from(value: InternalSecurityStructureID) -> Self {
-        SecurityStructureID {
-            value: value.0,
-        }
+        SecurityStructureID { value: value.0 }
     }
 }
 
@@ -31,4 +20,3 @@ impl Into<InternalSecurityStructureID> for SecurityStructureID {
         InternalSecurityStructureID(self.value)
     }
 }
-

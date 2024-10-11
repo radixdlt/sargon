@@ -5,14 +5,7 @@ use sargon::BIP39Language as InternalBIP39Language;
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-#[derive(
-    Clone,
-    Hash,
-    PartialEq,
-    Eq,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum BIP39Language {
     /// The English language.
     English,
@@ -53,4 +46,3 @@ pub fn new_bip39_language_sample_other() -> BIP39Language {
 pub fn bip39_language_wordlist(language: &BIP39Language) -> Vec<BIP39Word> {
     language.into_internal().wordlist().into_vec()
 }
-

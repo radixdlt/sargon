@@ -23,11 +23,12 @@ impl Instructions {
         byte_instructions: Vec<u8>,
         network_id: NetworkID,
     ) -> Result<Self> {
-        let instructions = RET_decompile_instructions(&byte_instructions).map_err(|e| {
-            let err_msg = format!("{:?}", e);
-            error!("{}", err_msg);
-            CommonError::FailedToDecodeBytesToManifestInstructions.into()
-        })?;
+        let instructions = RET_decompile_instructions(&byte_instructions)
+            .map_err(|e| {
+                let err_msg = format!("{:?}", e);
+                error!("{}", err_msg);
+                CommonError::FailedToDecodeBytesToManifestInstructions.into()
+            })?;
         Ok(Self {
             instructions,
             network_id,
@@ -40,8 +41,8 @@ impl Instructions {
 
     pub fn instructions_as_bytes(&self) -> Vec<u8> {
         RET_compile_instructions(self.instructions())
-        .map(|b| b.into())
-        .expect("to never fail")
+            .map(|b| b.into())
+            .expect("to never fail")
     }
 }
 

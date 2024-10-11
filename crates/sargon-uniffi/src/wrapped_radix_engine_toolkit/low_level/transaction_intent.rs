@@ -47,4 +47,3 @@ pub fn transaction_intent_hash(intent: &TransactionIntent) -> IntentHash {
 pub fn transaction_intent_compile(intent: &TransactionIntent) -> BagOfBytes {
     intent.into_internal().compile().into()
 }
-

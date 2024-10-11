@@ -4,9 +4,7 @@ use sargon::SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic as InternalSec
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A mnemonic encrypted by answers to security questions
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Clone, PartialEq, Eq, Hash,   uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
     pub security_questions: Security_NOT_PRODUCTION_READY_Questions,
@@ -24,8 +22,12 @@ pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
     pub encryptions: Vec<Exactly60Bytes>, // FIXME: Set?
 }
 
-impl From<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic> for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
-    fn from(value: InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic) -> Self {
+impl From<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic>
+    for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic
+{
+    fn from(
+        value: InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic,
+    ) -> Self {
         Self {
             security_questions: value.security_questions.into_vec(),
             kdf_scheme: value.kdf_scheme.into(),
@@ -35,8 +37,12 @@ impl From<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic> for Sec
     }
 }
 
-impl Into<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic> for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
-    fn into(self) -> InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+impl Into<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic>
+    for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic
+{
+    fn into(
+        self,
+    ) -> InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
         InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
             security_questions: self.security_questions.into_identified_vec(),
             kdf_scheme: self.kdf_scheme.into(),

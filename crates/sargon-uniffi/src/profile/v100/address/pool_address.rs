@@ -22,7 +22,7 @@ decl_ret_wrapped_address!(
 );
 
 /// The kind of the Pool, either One, Two or Multi resources.
-#[derive(Clone,  PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of a single
     /// resource kind.
@@ -98,4 +98,3 @@ pub fn new_pool_address_sample_stokenet_two() -> PoolAddress {
 pub fn new_pool_address_sample_stokenet_multi() -> PoolAddress {
     InternalPoolAddress::sample_stokenet_multi_pool().into()
 }
-

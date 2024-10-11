@@ -13,6 +13,7 @@ macro_rules! address_union {
         )+
     ) => {
         paste! {
+            use sargon::IsNetworkAware;
             use sargon::$union_name as [< Internal $union_name >];
 
             $(
@@ -20,7 +21,7 @@ macro_rules! address_union {
             )*
             #[derive(
                 Clone,
-                
+
                 PartialEq,
                 Eq,
                 Hash,

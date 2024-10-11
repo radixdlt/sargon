@@ -2,14 +2,7 @@ use crate::prelude::*;
 use sargon::DepositRule as InternalDepositRule;
 
 /// The general deposit rule to apply
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum DepositRule {
     /// The account accepts **all** assets by default, except for exceptions (if any) which might not deposit/be deposited into this account.
     AcceptKnown,
@@ -39,7 +32,7 @@ impl Into<InternalDepositRule> for DepositRule {
     }
 }
 
-json_string_convertible!(DepositRule, "super invalid json string");
+json_string_convertible!(DepositRule);
 
 #[uniffi::export]
 pub fn new_deposit_rule_sample() -> DepositRule {
@@ -50,4 +43,3 @@ pub fn new_deposit_rule_sample() -> DepositRule {
 pub fn new_deposit_rule_sample_other() -> DepositRule {
     InternalDepositRule::sample_other().into()
 }
-

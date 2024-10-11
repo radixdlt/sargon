@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record,)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct TransactionManifest {
     pub instructions: Instructions,
     pub blobs: Blobs,
@@ -31,7 +31,12 @@ pub fn new_transaction_manifest_from_instructions_string_and_blobs(
     network_id: NetworkID,
     blobs: Blobs,
 ) -> Result<TransactionManifest> {
-    InternalTransactionManifest::new(instructions_string, network_id.into(), blobs.into()).map_result()
+    InternalTransactionManifest::new(
+        instructions_string,
+        network_id.into(),
+        blobs.into(),
+    )
+    .map_result()
 }
 
 #[uniffi::export]
@@ -39,10 +44,11 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
     unvalidated_transaction_manifest: UnvalidatedTransactionManifest,
     network_id: NetworkID,
 ) -> Result<TransactionManifest> {
-    InternalTransactionManifest::try_from(
-        (unvalidated_transaction_manifest.into_internal(),
-        network_id.into())
-    ).map_result()
+    InternalTransactionManifest::try_from((
+        unvalidated_transaction_manifest.into_internal(),
+        network_id.into(),
+    ))
+    .map_result()
 }
 
 #[uniffi::export]
@@ -63,14 +69,24 @@ pub fn transaction_manifest_summary(
 pub fn transaction_manifest_involved_resource_addresses(
     manifest: &TransactionManifest,
 ) -> Vec<ResourceAddress> {
-    manifest.into_internal().involved_resource_addresses().into_iter().map(|x| x.into()).collect()
+    manifest
+        .into_internal()
+        .involved_resource_addresses()
+        .into_iter()
+        .map(|x| x.into())
+        .collect()
 }
 
 #[uniffi::export]
 pub fn transaction_manifest_involved_pool_addresses(
     manifest: &TransactionManifest,
 ) -> Vec<PoolAddress> {
-    manifest.into_internal().involved_pool_addresses().into_iter().map(|x| x.into()).collect()
+    manifest
+        .into_internal()
+        .involved_pool_addresses()
+        .into_iter()
+        .map(|x| x.into())
+        .collect()
 }
 
 #[uniffi::export]
@@ -78,7 +94,10 @@ pub fn transaction_manifest_execution_summary(
     manifest: &TransactionManifest,
     engine_toolkit_receipt: String,
 ) -> Result<ExecutionSummary> {
-    manifest.into_internal().execution_summary(engine_toolkit_receipt).map_result()
+    manifest
+        .into_internal()
+        .execution_summary(engine_toolkit_receipt)
+        .map_result()
 }
 
 #[uniffi::export]
@@ -102,4 +121,3 @@ pub fn new_transaction_manifest_sample() -> TransactionManifest {
 pub fn new_transaction_manifest_sample_other() -> TransactionManifest {
     InternalTransactionManifest::sample_other().into()
 }
-

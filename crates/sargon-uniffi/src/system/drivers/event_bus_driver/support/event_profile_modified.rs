@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::EventProfileModified as InternalEventProfileModified;
 
 /// The active profile has been modified (might not have been saved yet).
-#[derive( Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum EventProfileModified {
     /// A new account with `address` was inserted into the active profile
     AccountAdded { address: AccountAddress },
@@ -30,7 +30,9 @@ impl From<InternalEventProfileModified> for EventProfileModified {
     fn from(value: InternalEventProfileModified) -> Self {
         match value {
             InternalEventProfileModified::AccountAdded { address } => {
-                EventProfileModified::AccountAdded { address: address.into() }
+                EventProfileModified::AccountAdded {
+                    address: address.into(),
+                }
             }
             InternalEventProfileModified::AccountsAdded { addresses } => {
                 EventProfileModified::AccountsAdded {
@@ -38,7 +40,9 @@ impl From<InternalEventProfileModified> for EventProfileModified {
                 }
             }
             InternalEventProfileModified::AccountUpdated { address } => {
-                EventProfileModified::AccountUpdated { address: address.into() }
+                EventProfileModified::AccountUpdated {
+                    address: address.into(),
+                }
             }
             InternalEventProfileModified::FactorSourceAdded { id } => {
                 EventProfileModified::FactorSourceAdded { id: id.into() }
@@ -62,7 +66,9 @@ impl Into<InternalEventProfileModified> for EventProfileModified {
     fn into(self) -> InternalEventProfileModified {
         match self {
             EventProfileModified::AccountAdded { address } => {
-                InternalEventProfileModified::AccountAdded { address: address.into() }
+                InternalEventProfileModified::AccountAdded {
+                    address: address.into(),
+                }
             }
             EventProfileModified::AccountsAdded { addresses } => {
                 InternalEventProfileModified::AccountsAdded {
@@ -70,10 +76,14 @@ impl Into<InternalEventProfileModified> for EventProfileModified {
                 }
             }
             EventProfileModified::AccountUpdated { address } => {
-                InternalEventProfileModified::AccountUpdated { address: address.into() }
+                InternalEventProfileModified::AccountUpdated {
+                    address: address.into(),
+                }
             }
             EventProfileModified::FactorSourceAdded { id } => {
-                InternalEventProfileModified::FactorSourceAdded { id: id.into() }
+                InternalEventProfileModified::FactorSourceAdded {
+                    id: id.into(),
+                }
             }
             EventProfileModified::FactorSourcesAdded { ids } => {
                 InternalEventProfileModified::FactorSourcesAdded {
@@ -81,10 +91,14 @@ impl Into<InternalEventProfileModified> for EventProfileModified {
                 }
             }
             EventProfileModified::FactorSourceUpdated { id } => {
-                InternalEventProfileModified::FactorSourceUpdated { id: id.into() }
+                InternalEventProfileModified::FactorSourceUpdated {
+                    id: id.into(),
+                }
             }
             EventProfileModified::SecurityStructureAdded { id } => {
-                InternalEventProfileModified::SecurityStructureAdded { id: id.into() }
+                InternalEventProfileModified::SecurityStructureAdded {
+                    id: id.into(),
+                }
             }
         }
     }

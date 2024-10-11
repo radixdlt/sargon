@@ -38,8 +38,8 @@ impl InternalEventBusDriver for EventBusDriverAdapter {
         &self,
         event_notification: InternalEventNotification,
     ) {
-            self.wrapped
-                .handle_event_notification(event_notification.into())
-                .await
+        self.wrapped
+            .handle_event_notification(event_notification.into())
+            .await
     }
 }

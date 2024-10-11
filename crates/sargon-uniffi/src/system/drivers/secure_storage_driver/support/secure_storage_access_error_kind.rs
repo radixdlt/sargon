@@ -5,7 +5,7 @@ use sargon::SecureStorageAccessErrorKind as InternalSecureStorageAccessErrorKind
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
 /// it `is_manual_cancellation`.
-#[derive(Clone,  PartialEq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum SecureStorageAccessErrorKind {
     /// The hardware is unavailable. Try again later.
     HardwareUnavailable,
@@ -65,7 +65,10 @@ pub enum SecureStorageAccessErrorKind {
     NoDeviceCredential,
 }
 
-delegate_display_debug_into!(SecureStorageAccessErrorKind, InternalSecureStorageAccessErrorKind);
+delegate_display_debug_into!(
+    SecureStorageAccessErrorKind,
+    InternalSecureStorageAccessErrorKind
+);
 
 #[uniffi::export]
 pub fn secure_storage_access_error_kind_is_manual_cancellation(
@@ -73,4 +76,3 @@ pub fn secure_storage_access_error_kind_is_manual_cancellation(
 ) -> bool {
     kind.into_internal().is_manual_cancellation()
 }
-

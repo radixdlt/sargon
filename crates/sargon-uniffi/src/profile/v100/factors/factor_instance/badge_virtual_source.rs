@@ -1,16 +1,16 @@
 use crate::prelude::*;
 use sargon::FactorInstanceBadgeVirtualSource as InternalFactorInstanceBadgeVirtualSource;
 
-#[derive(
-    Clone,  PartialEq, Eq, Hash, uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum FactorInstanceBadgeVirtualSource {
     HierarchicalDeterministic {
         value: HierarchicalDeterministicPublicKey,
     },
 }
 
-impl From<InternalFactorInstanceBadgeVirtualSource> for FactorInstanceBadgeVirtualSource {
+impl From<InternalFactorInstanceBadgeVirtualSource>
+    for FactorInstanceBadgeVirtualSource
+{
     fn from(value: InternalFactorInstanceBadgeVirtualSource) -> Self {
         match value {
             InternalFactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => {
@@ -22,7 +22,9 @@ impl From<InternalFactorInstanceBadgeVirtualSource> for FactorInstanceBadgeVirtu
     }
 }
 
-impl Into<InternalFactorInstanceBadgeVirtualSource> for FactorInstanceBadgeVirtualSource {
+impl Into<InternalFactorInstanceBadgeVirtualSource>
+    for FactorInstanceBadgeVirtualSource
+{
     fn into(self) -> InternalFactorInstanceBadgeVirtualSource {
         match self {
             FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => {

@@ -1,15 +1,7 @@
 use crate::prelude::*;
 use sargon::AppearanceID as InternalAppearanceID;
 
-#[derive(
-    
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct AppearanceID {
     pub value: u8,
 }
@@ -35,7 +27,8 @@ pub fn new_appearance_id(validating: u8) -> Result<AppearanceID> {
 pub fn new_appearance_id_from_number_of_accounts_on_network(
     count: u64,
 ) -> AppearanceID {
-    InternalAppearanceID::from_number_of_accounts_on_network(count as usize).into()
+    InternalAppearanceID::from_number_of_accounts_on_network(count as usize)
+        .into()
 }
 
 #[uniffi::export]

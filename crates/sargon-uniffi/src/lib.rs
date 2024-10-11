@@ -21,18 +21,21 @@ pub mod prelude {
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::system::*;
+    pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use sargon_uniffi_conversion_macros::*;
 
-    pub(crate) use sargon::prelude::{ HashMap, HashSet, HasSampleValues };
+    pub(crate) use sargon::prelude::{
+        DeserializeBytes, DeserializeStr, HasSampleValues, HashMap, HashSet,
+        SerializeToBytes, SerializeToString,
+    };
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
     pub(crate) use log::{debug, error, info, trace, warn};
-    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
@@ -49,8 +52,8 @@ pub mod prelude {
     pub(crate) use uuid::Uuid;
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use paste::*;
     pub(crate) use enum_iterator::all;
+    pub(crate) use paste::*;
 }
 
 pub use prelude::*;

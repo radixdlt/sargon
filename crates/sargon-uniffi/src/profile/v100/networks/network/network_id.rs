@@ -1,15 +1,7 @@
 use crate::prelude::*;
 use sargon::NetworkID as InternalNetworkID;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 #[repr(u8)]
 pub enum NetworkID {
     /// Mainnet (0x01 / 0d01)
@@ -132,4 +124,3 @@ pub fn network_id_discriminant(id: NetworkID) -> u8 {
 pub fn network_ids_all() -> Vec<NetworkID> {
     InternalNetworkID::all().into_vec()
 }
-

@@ -1,16 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionHeader as InternalTransactionHeader;
 
-#[derive(
-    
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct TransactionHeader {
     pub network_id: NetworkID,
     pub start_epoch_inclusive: Epoch,
@@ -58,4 +49,3 @@ pub fn new_transaction_header_sample() -> TransactionHeader {
 pub fn new_transaction_header_sample_other() -> TransactionHeader {
     InternalTransactionHeader::sample_other().into()
 }
-

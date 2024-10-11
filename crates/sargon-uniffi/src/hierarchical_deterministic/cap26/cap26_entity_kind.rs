@@ -3,15 +3,7 @@ use sargon::CAP26EntityKind as InternalCAP26EntityKind;
 
 /// Account or Identity (used by Personas) part of a CAP26 derivation
 /// path.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum CAP26EntityKind {
     /// An Account entity type
     Account = 525,

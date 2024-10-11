@@ -18,4 +18,3 @@ pub fn new_security_structure_of_factor_source_ids_sample_other(
 ) -> SecurityStructureOfFactorSourceIDs {
     InternalSecurityStructureOfFactorSourceIDs::sample_other().into()
 }
-

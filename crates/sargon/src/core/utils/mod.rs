@@ -1,9 +1,11 @@
 mod factory;
+mod image_url_utils;
 mod logged_panic;
 mod serialization;
 mod string_utils;
 
 pub use factory::*;
+pub use image_url_utils::*;
 pub use logged_panic::*;
 pub use serialization::*;
 pub use string_utils::*;

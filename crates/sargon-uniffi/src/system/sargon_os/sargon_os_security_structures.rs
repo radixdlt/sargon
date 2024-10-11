@@ -7,7 +7,9 @@ impl SargonOS {
     pub fn security_structures_of_factor_sources(
         &self,
     ) -> Result<SecurityStructuresOfFactorSources> {
-        self.wrapped.security_structures_of_factor_sources().map_result()
+        self.wrapped
+            .security_structures_of_factor_sources()
+            .map_result()
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
@@ -15,7 +17,9 @@ impl SargonOS {
     pub fn security_structures_of_factor_source_ids(
         &self,
     ) -> Result<SecurityStructuresOfFactorSourceIDs> {
-        self.wrapped.security_structures_of_factor_source_ids().map_result()
+        self.wrapped
+            .security_structures_of_factor_source_ids()
+            .map_result()
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
@@ -45,6 +49,11 @@ impl SargonOS {
         &self,
         structure: &SecurityStructureOfFactorSources,
     ) -> Result<bool> {
-        self.wrapped.add_security_structure_of_factor_sources(&structure.into_internal()).await.map_result()
+        self.wrapped
+            .add_security_structure_of_factor_sources(
+                &structure.into_internal(),
+            )
+            .await
+            .map_result()
     }
 }

@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use sargon::SecureStorageKey as InternalSecureStorageKey;
-use sargon::SecureStorageDriver as InternalSecureStorageDriver;
 use sargon::BagOfBytes as InternalBagOfBytes;
 use sargon::Result as InternalResult;
+use sargon::SecureStorageDriver as InternalSecureStorageDriver;
+use sargon::SecureStorageKey as InternalSecureStorageKey;
 
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
@@ -32,7 +32,9 @@ impl InternalSecureStorageDriver for SecureStorageDriverAdapter {
         &self,
         key: InternalSecureStorageKey,
     ) -> InternalResult<Option<InternalBagOfBytes>> {
-        map_result_to_internal_optional(self.wrapped.load_data(key.into()).await)
+        map_result_to_internal_optional(
+            self.wrapped.load_data(key.into()).await,
+        )
     }
 
     async fn save_data(
@@ -40,10 +42,17 @@ impl InternalSecureStorageDriver for SecureStorageDriverAdapter {
         key: InternalSecureStorageKey,
         data: InternalBagOfBytes,
     ) -> InternalResult<()> {
-        map_result_to_internal(self.wrapped.save_data(key.into(), data.into()).await)
+        map_result_to_internal(
+            self.wrapped.save_data(key.into(), data.into()).await,
+        )
     }
 
-    async fn delete_data_for_key(&self, key: InternalSecureStorageKey) -> InternalResult<()> {
-        map_result_to_internal(self.wrapped.delete_data_for_key(key.into()).await)
+    async fn delete_data_for_key(
+        &self,
+        key: InternalSecureStorageKey,
+    ) -> InternalResult<()> {
+        map_result_to_internal(
+            self.wrapped.delete_data_for_key(key.into()).await,
+        )
     }
 }

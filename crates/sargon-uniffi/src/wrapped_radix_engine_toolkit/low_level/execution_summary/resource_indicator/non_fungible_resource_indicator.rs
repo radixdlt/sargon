@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleResourceIndicator as InternalNonFungibleResourceIndicator;
 
-#[derive(Clone,  PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum NonFungibleResourceIndicator {
     ByAll {
         predicted_amount: PredictedDecimal,
@@ -16,7 +16,9 @@ pub enum NonFungibleResourceIndicator {
     },
 }
 
-impl From<InternalNonFungibleResourceIndicator> for NonFungibleResourceIndicator {
+impl From<InternalNonFungibleResourceIndicator>
+    for NonFungibleResourceIndicator
+{
     fn from(value: InternalNonFungibleResourceIndicator) -> Self {
         match value {
             InternalNonFungibleResourceIndicator::ByAll {
@@ -42,7 +44,9 @@ impl From<InternalNonFungibleResourceIndicator> for NonFungibleResourceIndicator
     }
 }
 
-impl Into<InternalNonFungibleResourceIndicator> for NonFungibleResourceIndicator {
+impl Into<InternalNonFungibleResourceIndicator>
+    for NonFungibleResourceIndicator
+{
     fn into(self) -> InternalNonFungibleResourceIndicator {
         match self {
             NonFungibleResourceIndicator::ByAll {
@@ -86,4 +90,3 @@ pub fn non_fungible_resource_indicator_get_ids(
 ) -> Vec<NonFungibleLocalId> {
     indicator.into_internal().ids().into_vec()
 }
-

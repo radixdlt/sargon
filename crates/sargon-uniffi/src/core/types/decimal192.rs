@@ -20,15 +20,7 @@ use sargon::Decimal192 as InternalDecimal192;
 /// type alias `Decimal = Decimal192` which we use in Rust land.
 ///
 /// [scrypto]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/math/decimal.rs#L42
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Decimal192 {
     value: String,
 }
@@ -45,7 +37,7 @@ impl From<InternalDecimal192> for Decimal192 {
 
 impl Into<InternalDecimal192> for Decimal192 {
     fn into(self) -> InternalDecimal192 {
-                // This is safe because the Decimal192 can be created only InternalDecimal192 which is already valid.
+        // This is safe because the Decimal192 can be created only InternalDecimal192 which is already valid.
         // Here the conversion back happens.
         self.value.parse::<InternalDecimal192>().unwrap()
     }
@@ -65,7 +57,11 @@ pub fn new_decimal_from_formatted_string(
     formatted_string: String,
     locale: LocaleConfig,
 ) -> Result<Decimal192> {
-    InternalDecimal192::new_with_formatted_string(formatted_string, locale.into()).map_result()
+    InternalDecimal192::new_with_formatted_string(
+        formatted_string,
+        locale.into(),
+    )
+    .map_result()
 }
 
 /// The standard transaction fee
@@ -105,7 +101,11 @@ pub fn decimal_formatted(
     total_places: u8,
     use_grouping_separator: bool,
 ) -> String {
-    decimal.into_internal().formatted(locale.into(), total_places, use_grouping_separator)
+    decimal.into_internal().formatted(
+        locale.into(),
+        total_places,
+        use_grouping_separator,
+    )
 }
 
 /// A human readable, locale respecting string. Does not perform any rounding or truncation.
@@ -115,7 +115,9 @@ pub fn decimal_formatted_plain(
     locale: LocaleConfig,
     use_grouping_separator: bool,
 ) -> String {
-    decimal.into_internal().formatted_plain(locale.into(), use_grouping_separator)
+    decimal
+        .into_internal()
+        .formatted_plain(locale.into(), use_grouping_separator)
 }
 
 /// Creates a new `Decimal192` from a f32 float. Will
@@ -275,5 +277,8 @@ pub fn decimal_round(
     decimal_places: u8,
     rounding_mode: RoundingMode,
 ) -> Result<Decimal192> {
-    decimal.into_internal().round_with_mode(decimal_places, rounding_mode.into()).map_result()
+    decimal
+        .into_internal()
+        .round_with_mode(decimal_places, rounding_mode.into())
+        .map_result()
 }

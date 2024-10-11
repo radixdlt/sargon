@@ -1,16 +1,19 @@
 use crate::prelude::*;
-use sargon::PrivateHierarchicalDeterministicFactorSource as InternalPrivateHierarchicalDeterministicFactorSource;
 use sargon::BIP39Entropy as InternalBIP39Entropy;
+use sargon::PrivateHierarchicalDeterministicFactorSource as InternalPrivateHierarchicalDeterministicFactorSource;
 
-#[derive(Zeroize,  Clone, PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
-    #[zeroize(skip)]
     pub factor_source: DeviceFactorSource,
 }
 
-impl From<InternalPrivateHierarchicalDeterministicFactorSource> for PrivateHierarchicalDeterministicFactorSource {
-    fn from(value: InternalPrivateHierarchicalDeterministicFactorSource) -> Self {
+impl From<InternalPrivateHierarchicalDeterministicFactorSource>
+    for PrivateHierarchicalDeterministicFactorSource
+{
+    fn from(
+        value: InternalPrivateHierarchicalDeterministicFactorSource,
+    ) -> Self {
         Self {
             mnemonic_with_passphrase: value.mnemonic_with_passphrase.into(),
             factor_source: value.factor_source.into(),
@@ -18,7 +21,9 @@ impl From<InternalPrivateHierarchicalDeterministicFactorSource> for PrivateHiera
     }
 }
 
-impl Into<InternalPrivateHierarchicalDeterministicFactorSource> for PrivateHierarchicalDeterministicFactorSource {
+impl Into<InternalPrivateHierarchicalDeterministicFactorSource>
+    for PrivateHierarchicalDeterministicFactorSource
+{
     fn into(self) -> InternalPrivateHierarchicalDeterministicFactorSource {
         InternalPrivateHierarchicalDeterministicFactorSource {
             mnemonic_with_passphrase: self.mnemonic_with_passphrase.into(),
@@ -68,4 +73,3 @@ pub fn new_private_hd_factor_source_sample_other(
 ) -> PrivateHierarchicalDeterministicFactorSource {
     InternalPrivateHierarchicalDeterministicFactorSource::sample_other().into()
 }
-

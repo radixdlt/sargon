@@ -33,7 +33,7 @@ macro_rules! decl_secret_bytes {
                     let fixed_size: &[u8; $byte_count] = value.as_ref().try_into().map_err(|_| CommonError::InvalidByteCount { expected: $byte_count as u64, found: value.len() as u64 })?;
                     Ok(Self(Box::new(*fixed_size)))
                 }
-            }   
+            }
 
             impl HasSampleValues for $struct_name {
                 fn sample() -> Self {

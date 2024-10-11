@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::P2PLink as InternalP2PLink;
 use sargon::Identifiable;
+use sargon::P2PLink as InternalP2PLink;
 
 /// A client the user have connected P2P with, typically a WebRTC connection with the dApp or Connector Extension.
 /// Each client generates a curve25119 keypair. The public key is used as an identifier for the client.
@@ -9,14 +9,7 @@ use sargon::Identifiable;
 /// Here are the [CAP-36][doc] requirements.
 ///
 /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct P2PLink {
     /// The most important property of this struct, the `RadixConnectPassword`,
     /// is used to be able to re-establish the P2P connection
@@ -58,7 +51,6 @@ impl Into<InternalP2PLink> for P2PLink {
     }
 }
 
-
 json_data_convertible!(P2PLink);
 
 #[uniffi::export]
@@ -75,4 +67,3 @@ pub fn new_p2p_link_sample() -> P2PLink {
 pub fn new_p2p_link_sample_other() -> P2PLink {
     InternalP2PLink::sample_other().into()
 }
-

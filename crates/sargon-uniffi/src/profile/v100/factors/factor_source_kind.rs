@@ -2,15 +2,7 @@ use crate::prelude::*;
 use sargon::FactorSourceKind as InternalFactorSourceKind;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
     /// thus directly usable. This kind is used as the standard factor source for all new
@@ -85,10 +77,18 @@ impl From<InternalFactorSourceKind> for FactorSourceKind {
             InternalFactorSourceKind::LedgerHQHardwareWallet => {
                 FactorSourceKind::LedgerHQHardwareWallet
             }
-            InternalFactorSourceKind::OffDeviceMnemonic => FactorSourceKind::OffDeviceMnemonic,
-            InternalFactorSourceKind::TrustedContact => FactorSourceKind::TrustedContact,
-            InternalFactorSourceKind::SecurityQuestions => FactorSourceKind::SecurityQuestions,
-            InternalFactorSourceKind::ArculusCard => FactorSourceKind::ArculusCard,
+            InternalFactorSourceKind::OffDeviceMnemonic => {
+                FactorSourceKind::OffDeviceMnemonic
+            }
+            InternalFactorSourceKind::TrustedContact => {
+                FactorSourceKind::TrustedContact
+            }
+            InternalFactorSourceKind::SecurityQuestions => {
+                FactorSourceKind::SecurityQuestions
+            }
+            InternalFactorSourceKind::ArculusCard => {
+                FactorSourceKind::ArculusCard
+            }
         }
     }
 }
@@ -97,11 +97,21 @@ impl Into<InternalFactorSourceKind> for FactorSourceKind {
     fn into(self) -> InternalFactorSourceKind {
         match self {
             FactorSourceKind::Device => InternalFactorSourceKind::Device,
-            FactorSourceKind::LedgerHQHardwareWallet => InternalFactorSourceKind::LedgerHQHardwareWallet,
-            FactorSourceKind::OffDeviceMnemonic => InternalFactorSourceKind::OffDeviceMnemonic,
-            FactorSourceKind::TrustedContact => InternalFactorSourceKind::TrustedContact,
-            FactorSourceKind::SecurityQuestions => InternalFactorSourceKind::SecurityQuestions,
-            FactorSourceKind::ArculusCard => InternalFactorSourceKind::ArculusCard,
+            FactorSourceKind::LedgerHQHardwareWallet => {
+                InternalFactorSourceKind::LedgerHQHardwareWallet
+            }
+            FactorSourceKind::OffDeviceMnemonic => {
+                InternalFactorSourceKind::OffDeviceMnemonic
+            }
+            FactorSourceKind::TrustedContact => {
+                InternalFactorSourceKind::TrustedContact
+            }
+            FactorSourceKind::SecurityQuestions => {
+                InternalFactorSourceKind::SecurityQuestions
+            }
+            FactorSourceKind::ArculusCard => {
+                InternalFactorSourceKind::ArculusCard
+            }
         }
     }
 }
@@ -127,4 +137,3 @@ pub fn new_factor_source_kind_from_string(
 pub fn factor_source_kind_to_string(kind: FactorSourceKind) -> String {
     kind.into_internal().to_string()
 }
-

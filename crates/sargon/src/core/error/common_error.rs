@@ -346,9 +346,7 @@ pub enum CommonError {
         specified_to_instructions_ctor: NetworkID,
     } = 10093,
 
-    #[error(
-        "Failed to decode bytes into Transaction Manifest Instructions"
-    )]
+    #[error("Failed to decode bytes into Transaction Manifest Instructions")]
     FailedToDecodeBytesToManifestInstructions = 10094,
 
     #[error("Failed to decode Transaction Hash, value: {bad_value}")]

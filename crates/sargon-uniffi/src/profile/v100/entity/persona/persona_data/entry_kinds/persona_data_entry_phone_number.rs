@@ -6,14 +6,7 @@ use sargon::PersonaDataEntryPhoneNumber as InternalPersonaDataEntryPhoneNumber;
 ///
 /// Current implementation does not validate the phone number other than it
 /// cannot be empty, since telephone number validation is tricky.
-#[derive(
-    Clone,
-    PartialEq,
-    Hash,
-    Eq,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct PersonaDataEntryPhoneNumber {
     pub number: String,
 }
@@ -47,4 +40,3 @@ pub fn new_persona_data_entry_phone_number_sample_other(
 ) -> PersonaDataEntryPhoneNumber {
     InternalPersonaDataEntryPhoneNumber::sample_other().into()
 }
-

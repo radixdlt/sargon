@@ -20,15 +20,7 @@ use sargon::Persona as InternalPersona;
 /// technically, nothing stops a user from building their own wallet and uploading
 /// personal information to the metadata of the Identity component... but `Sargon`
 /// never will, nor will the Radix Wallet.).
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Hash,
-    Eq,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct Persona {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -128,4 +120,3 @@ pub fn new_persona_sample_stokenet_hermione() -> Persona {
 pub fn new_persona_sample_stokenet_connor() -> Persona {
     InternalPersona::sample_stokenet_connor().into()
 }
-

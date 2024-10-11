@@ -21,7 +21,7 @@ macro_rules! decl_specialized_address {
             )*
             #[derive(
                 Clone,
-                
+
                 PartialEq,
                 Eq,
                 Hash,
@@ -100,7 +100,6 @@ decl_specialized_address!(
     FungibleResourceAddressNotAcceptedInNonFungibleContext
 );
 
-
 #[uniffi::export]
 pub fn new_non_fungible_resource_address_sample_mainnet(
 ) -> NonFungibleResourceAddress {
@@ -132,4 +131,3 @@ pub fn new_non_fungible_resource_address_random(
 ) -> NonFungibleResourceAddress {
     InternalNonFungibleResourceAddress::random(network_id.into()).into()
 }
-

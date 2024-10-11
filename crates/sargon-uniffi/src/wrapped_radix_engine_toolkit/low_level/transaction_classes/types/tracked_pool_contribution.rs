@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TrackedPoolContribution as InternalTrackedPoolContribution;
 
 /// A contribution to a pool observed in the transaction
-#[derive(Clone,  PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct TrackedPoolContribution {
     pub pool_address: PoolAddress,
 
@@ -23,7 +23,9 @@ impl From<InternalTrackedPoolContribution> for TrackedPoolContribution {
                 .into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
-            pool_units_resource_address: value.pool_units_resource_address.into(),
+            pool_units_resource_address: value
+                .pool_units_resource_address
+                .into(),
             pool_units_amount: value.pool_units_amount.into(),
         }
     }
@@ -38,7 +40,9 @@ impl Into<InternalTrackedPoolContribution> for TrackedPoolContribution {
                 .into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
-            pool_units_resource_address: self.pool_units_resource_address.into(),
+            pool_units_resource_address: self
+                .pool_units_resource_address
+                .into(),
             pool_units_amount: self.pool_units_amount.into(),
         }
     }

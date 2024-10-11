@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use sargon::NetworkingDriver as InternalNetworkingDriver;
 use sargon::NetworkRequest as InternalNetworkRequest;
 use sargon::NetworkResponse as InternalNetworkResponse;
+use sargon::NetworkingDriver as InternalNetworkingDriver;
 use sargon::Result as InternalResult;
 
 /// Trait for executing network requests, to be implemented by hosts, so that
@@ -20,7 +20,7 @@ pub trait NetworkingDriver: Send + Sync + std::fmt::Debug {
 }
 
 #[derive(Debug)]
-pub struct NetworkingDriverAdapter{
+pub struct NetworkingDriverAdapter {
     pub wrapped: Arc<dyn NetworkingDriver>,
 }
 
@@ -30,7 +30,8 @@ impl InternalNetworkingDriver for NetworkingDriverAdapter {
         &self,
         request: InternalNetworkRequest,
     ) -> InternalResult<InternalNetworkResponse> {
-        map_result_to_internal(self.wrapped.execute_network_request(request.into()).await)
+        map_result_to_internal(
+            self.wrapped.execute_network_request(request.into()).await,
+        )
     }
 }
-

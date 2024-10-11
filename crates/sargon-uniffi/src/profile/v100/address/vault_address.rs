@@ -46,4 +46,3 @@ pub fn new_vault_address_sample_stokenet_fungible() -> VaultAddress {
 pub fn new_vault_address_sample_stokenet_non_fungible() -> VaultAddress {
     InternalVaultAddress::sample_stokenet_other().into()
 }
-

@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::LoggingDriver as InternalLoggingDriver;
 use sargon::LogLevel as InternalLogLevel;
+use sargon::LoggingDriver as InternalLoggingDriver;
 
 /// * Trace
 /// * Debug

@@ -1,4 +1,3 @@
-
 use crate::prelude::*;
 use sargon::RadixConnectMobile as InternalRadixConnectMobile;
 
@@ -17,7 +16,9 @@ impl RadixConnectMobile {
     ) -> Self {
         Self {
             wrapped: Arc::new(InternalRadixConnectMobile::new(
-                Arc::new(NetworkingDriverAdapter { wrapped: networking_driver }),
+                Arc::new(NetworkingDriverAdapter {
+                    wrapped: networking_driver,
+                }),
                 Arc::new(RadixConnectMobileSessionStorageAdapter {
                     wrapped: session_storage,
                 }),
@@ -45,6 +46,10 @@ impl RadixConnectMobile {
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        map_result_from_internal(self.wrapped.send_dapp_interaction_response(wallet_response.into()).await)
+        map_result_from_internal(
+            self.wrapped
+                .send_dapp_interaction_response(wallet_response.into())
+                .await,
+        )
     }
 }

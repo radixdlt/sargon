@@ -2,16 +2,7 @@ pub use crate::prelude::*;
 use sargon::Epoch as InternalEpoch;
 
 /// A type-safe consensus epoch number.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    
-    
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Epoch {
     pub value: u64,
 }

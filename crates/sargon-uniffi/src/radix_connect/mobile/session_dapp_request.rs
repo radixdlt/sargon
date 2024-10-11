@@ -4,7 +4,7 @@ use sargon::RadixConnectMobileSessionRequest as InternalRadixConnectMobileSessio
 json_data_convertible!(RadixConnectMobileSessionRequest);
 
 /// The request received from the dApp that needs to be handled.
-#[derive( PartialEq, Clone, InternalConversion, uniffi::Record)]
+#[derive(PartialEq, Clone, InternalConversion, uniffi::Record)]
 pub struct RadixConnectMobileSessionRequest {
     /// The id of the session established with the dApp.
     /// Needs to be passed back by the Host as to know which session to respond to.
@@ -20,7 +20,9 @@ pub struct RadixConnectMobileSessionRequest {
     pub origin_requires_validation: bool,
 }
 
-impl From<InternalRadixConnectMobileSessionRequest> for RadixConnectMobileSessionRequest {
+impl From<InternalRadixConnectMobileSessionRequest>
+    for RadixConnectMobileSessionRequest
+{
     fn from(value: InternalRadixConnectMobileSessionRequest) -> Self {
         Self {
             session_id: value.session_id.into(),
@@ -31,7 +33,9 @@ impl From<InternalRadixConnectMobileSessionRequest> for RadixConnectMobileSessio
     }
 }
 
-impl Into<InternalRadixConnectMobileSessionRequest> for RadixConnectMobileSessionRequest {
+impl Into<InternalRadixConnectMobileSessionRequest>
+    for RadixConnectMobileSessionRequest
+{
     fn into(self) -> InternalRadixConnectMobileSessionRequest {
         InternalRadixConnectMobileSessionRequest {
             session_id: self.session_id.into(),
@@ -53,4 +57,3 @@ pub fn new_radix_connect_mobile_session_request_sample_other(
 ) -> RadixConnectMobileSessionRequest {
     InternalRadixConnectMobileSessionRequest::sample_other().into()
 }
-

@@ -1,14 +1,7 @@
 use crate::prelude::*;
 use sargon::NotarySignature as InternalNotarySignature;
 
-#[derive(
-    Clone,
-    Eq,
-    Hash,
-    PartialEq,
-    InternalConversion,
-    uniffi::Record,
-)]
+#[derive(Clone, Eq, Hash, PartialEq, InternalConversion, uniffi::Record)]
 pub struct NotarySignature {
     pub(crate) value: Signature,
 }
@@ -64,4 +57,3 @@ pub fn android_sign_hash_with_private_key_bytes(
 ) -> Result<Ed25519Signature> {
     unimplemented!("Should be moved as actual func in  internal Sargon")
 }
-

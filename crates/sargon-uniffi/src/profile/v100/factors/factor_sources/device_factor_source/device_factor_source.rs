@@ -8,15 +8,7 @@ use sargon::DeviceFactorSource as InternalDeviceFactorSource;
 /// all new Accounts and Personas. Users authenticate signing by authorizing
 /// the host to access a mnemonic stored in secure storage on
 /// the device.
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -66,7 +58,12 @@ pub fn new_device_factor_source_babylon(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     host_info: &HostInfo,
 ) -> DeviceFactorSource {
-    InternalDeviceFactorSource::babylon(is_main, &mnemonic_with_passphrase.into_internal(), &host_info.into_internal()).into()
+    InternalDeviceFactorSource::babylon(
+        is_main,
+        &mnemonic_with_passphrase.into_internal(),
+        &host_info.into_internal(),
+    )
+    .into()
 }
 
 #[uniffi::export]
@@ -74,7 +71,11 @@ pub fn new_device_factor_source_olympia(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     host_info: &HostInfo,
 ) -> DeviceFactorSource {
-    InternalDeviceFactorSource::olympia(&mnemonic_with_passphrase.into_internal(), &host_info.into_internal()).into()
+    InternalDeviceFactorSource::olympia(
+        &mnemonic_with_passphrase.into_internal(),
+        &host_info.into_internal(),
+    )
+    .into()
 }
 
 #[uniffi::export]
@@ -83,4 +84,3 @@ pub fn device_factor_source_is_main_bdfs(
 ) -> bool {
     device_factor_source.into_internal().is_main_bdfs()
 }
-

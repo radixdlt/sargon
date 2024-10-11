@@ -2,20 +2,15 @@ use crate::prelude::*;
 use sargon::KeyAgreementPublicKey as InternalKeyAgreementPublicKey;
 
 /// PublicKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPrivateKey`.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct KeyAgreementPublicKey {
     pub value: BagOfBytes,
 }
 
-delegate_display_debug_into!(KeyAgreementPublicKey, InternalKeyAgreementPublicKey);
+delegate_display_debug_into!(
+    KeyAgreementPublicKey,
+    InternalKeyAgreementPublicKey
+);
 
 impl From<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
     fn from(value: InternalKeyAgreementPublicKey) -> Self {
@@ -27,7 +22,10 @@ impl From<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
 
 impl Into<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
     fn into(self) -> InternalKeyAgreementPublicKey {
-        InternalKeyAgreementPublicKey::try_from(self.value.into_internal().to_vec()).unwrap()
+        InternalKeyAgreementPublicKey::try_from(
+            self.value.into_internal().to_vec(),
+        )
+        .unwrap()
     }
 }
 
@@ -44,7 +42,8 @@ pub fn new_key_agreement_public_key_from_hex(
 pub fn new_key_agreement_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<KeyAgreementPublicKey> {
-    InternalKeyAgreementPublicKey::try_from(bytes.into_internal().to_vec()).map_result()
+    InternalKeyAgreementPublicKey::try_from(bytes.into_internal().to_vec())
+        .map_result()
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.

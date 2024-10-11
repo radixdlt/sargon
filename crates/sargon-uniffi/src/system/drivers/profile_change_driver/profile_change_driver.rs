@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::ProfileStateChangeDriver as InternalProfileStateChangeDriver;
 use sargon::ProfileState as InternalProfileState;
+use sargon::ProfileStateChangeDriver as InternalProfileStateChangeDriver;
 
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
@@ -22,8 +22,8 @@ impl InternalProfileStateChangeDriver for ProfileStateChangeDriverAdapter {
         &self,
         changed_profile_state: InternalProfileState,
     ) {
-            self.wrapped
-                .handle_profile_state_change(changed_profile_state.into())
-                .await
+        self.wrapped
+            .handle_profile_state_change(changed_profile_state.into())
+            .await
     }
 }

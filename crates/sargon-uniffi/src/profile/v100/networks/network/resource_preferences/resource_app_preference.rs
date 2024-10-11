@@ -5,9 +5,7 @@ use sargon::ResourceAppPreference as InternalResourceAppPreference;
 /// Allows users, for example, to hide a given resource on their accounts.
 ///
 /// Named like this to differ from RET's `ResourcePreference`.
-#[derive(
-    Clone, PartialEq, Eq,  Hash,  uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct ResourceAppPreference {
     /// The resource for which the preference is set up.
     pub resource: ResourceIdentifier,

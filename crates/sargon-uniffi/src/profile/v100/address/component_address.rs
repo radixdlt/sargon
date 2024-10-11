@@ -52,4 +52,3 @@ pub fn new_component_address_sample_stokenet_global() -> ComponentAddress {
 pub fn new_component_address_sample_stokenet_internal() -> ComponentAddress {
     InternalComponentAddress::sample_stokenet_other().into()
 }
-

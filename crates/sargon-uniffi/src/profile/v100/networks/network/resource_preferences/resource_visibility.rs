@@ -2,15 +2,7 @@ use crate::prelude::*;
 use sargon::ResourceVisibility as InternalResourceVisibility;
 
 /// Indicates the visibility of a resource.
-#[derive(
-    Clone,
-    
-    
-    PartialEq,
-    Eq,
-    Hash,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ResourceVisibility {
     Hidden,
     Visible,

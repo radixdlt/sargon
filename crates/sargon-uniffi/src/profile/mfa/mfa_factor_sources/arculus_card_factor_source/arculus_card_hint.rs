@@ -1,14 +1,7 @@
 use crate::prelude::*;
 use sargon::ArculusCardHint as InternalArculusCardHint;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct ArculusCardHint {
     /// E.g. "Black" or "Silver"
     pub name: String,

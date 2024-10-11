@@ -6,9 +6,7 @@ pub type FactorSourceFlags = Vec<FactorSourceFlag>;
 
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
-#[derive(
-     Clone, PartialEq, Eq, Hash,  uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
     ///
@@ -79,4 +77,3 @@ pub fn new_factor_source_common_babylon() -> FactorSourceCommon {
 pub fn new_factor_source_common_bdfs(is_main: bool) -> FactorSourceCommon {
     InternalFactorSourceCommon::new_bdfs(is_main).into()
 }
-

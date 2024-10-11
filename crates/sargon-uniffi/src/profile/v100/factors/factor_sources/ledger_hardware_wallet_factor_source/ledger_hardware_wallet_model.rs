@@ -3,15 +3,7 @@ use sargon::LedgerHardwareWalletModel as InternalLedgerHardwareWalletModel;
 
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
 /// *Ledger Nano S+*.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum LedgerHardwareWalletModel {
     NanoS,
     NanoSPlus,
@@ -21,9 +13,15 @@ pub enum LedgerHardwareWalletModel {
 impl From<InternalLedgerHardwareWalletModel> for LedgerHardwareWalletModel {
     fn from(value: InternalLedgerHardwareWalletModel) -> Self {
         match value {
-            InternalLedgerHardwareWalletModel::NanoS => LedgerHardwareWalletModel::NanoS,
-            InternalLedgerHardwareWalletModel::NanoSPlus => LedgerHardwareWalletModel::NanoSPlus,
-            InternalLedgerHardwareWalletModel::NanoX => LedgerHardwareWalletModel::NanoX,
+            InternalLedgerHardwareWalletModel::NanoS => {
+                LedgerHardwareWalletModel::NanoS
+            }
+            InternalLedgerHardwareWalletModel::NanoSPlus => {
+                LedgerHardwareWalletModel::NanoSPlus
+            }
+            InternalLedgerHardwareWalletModel::NanoX => {
+                LedgerHardwareWalletModel::NanoX
+            }
         }
     }
 }
@@ -31,9 +29,15 @@ impl From<InternalLedgerHardwareWalletModel> for LedgerHardwareWalletModel {
 impl Into<InternalLedgerHardwareWalletModel> for LedgerHardwareWalletModel {
     fn into(self) -> InternalLedgerHardwareWalletModel {
         match self {
-            LedgerHardwareWalletModel::NanoS => InternalLedgerHardwareWalletModel::NanoS,
-            LedgerHardwareWalletModel::NanoSPlus => InternalLedgerHardwareWalletModel::NanoSPlus,
-            LedgerHardwareWalletModel::NanoX => InternalLedgerHardwareWalletModel::NanoX,
+            LedgerHardwareWalletModel::NanoS => {
+                InternalLedgerHardwareWalletModel::NanoS
+            }
+            LedgerHardwareWalletModel::NanoSPlus => {
+                InternalLedgerHardwareWalletModel::NanoSPlus
+            }
+            LedgerHardwareWalletModel::NanoX => {
+                InternalLedgerHardwareWalletModel::NanoX
+            }
         }
     }
 }
@@ -61,4 +65,3 @@ pub fn new_ledger_hw_wallet_model_sample() -> LedgerHardwareWalletModel {
 pub fn new_ledger_hw_wallet_model_sample_other() -> LedgerHardwareWalletModel {
     InternalLedgerHardwareWalletModel::sample_other().into()
 }
-

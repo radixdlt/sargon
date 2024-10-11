@@ -41,4 +41,3 @@ pub fn notarized_transaction_compile(
 ) -> CompiledNotarizedIntent {
     notarized_transaction.into_internal().compile().into()
 }
-

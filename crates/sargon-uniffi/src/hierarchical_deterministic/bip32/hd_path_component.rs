@@ -3,15 +3,7 @@ use sargon::HDPathComponent as InternalHDPathComponent;
 
 pub type HDPathValue = u32;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HDPathComponent {
     pub value: HDPathValue,
 }
@@ -24,9 +16,7 @@ impl From<InternalHDPathComponent> for HDPathComponent {
 
 impl Into<InternalHDPathComponent> for HDPathComponent {
     fn into(self) -> InternalHDPathComponent {
-        InternalHDPathComponent {
-            value: self.value,
-        }
+        InternalHDPathComponent { value: self.value }
     }
 }
 
@@ -36,4 +26,3 @@ pub fn hd_path_component_get_non_hardened_value(
 ) -> HDPathValue {
     component.value
 }
-

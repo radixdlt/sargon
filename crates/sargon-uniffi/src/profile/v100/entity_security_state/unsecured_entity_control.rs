@@ -5,9 +5,7 @@ use sargon::UnsecuredEntityControl as InternalUnsecuredEntityControl;
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
-#[derive(
-    Clone,  PartialEq, Eq, Hash,  uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which
     // /// also controls this entity and is used for signing transactions.
@@ -21,7 +19,9 @@ impl From<InternalUnsecuredEntityControl> for UnsecuredEntityControl {
     fn from(value: InternalUnsecuredEntityControl) -> Self {
         Self {
             transaction_signing: value.transaction_signing.into(),
-            authentication_signing: value.authentication_signing.map(Into::into),
+            authentication_signing: value
+                .authentication_signing
+                .map(Into::into),
         }
     }
 }
@@ -44,4 +44,3 @@ pub fn new_unsecured_entity_control_sample() -> UnsecuredEntityControl {
 pub fn new_unsecured_entity_control_sample_other() -> UnsecuredEntityControl {
     InternalUnsecuredEntityControl::sample_other().into()
 }
-

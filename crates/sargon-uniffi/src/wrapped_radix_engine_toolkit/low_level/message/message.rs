@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Message as InternalMessage;
 
-#[derive(Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum Message {
     PlainText { plaintext: PlaintextMessage },
     None,
@@ -48,4 +48,3 @@ pub fn new_message_plaintext_string(string: String) -> Message {
 pub fn message_as_plaintext(message: &Message) -> Option<String> {
     message.into_internal().as_plaintext()
 }
-

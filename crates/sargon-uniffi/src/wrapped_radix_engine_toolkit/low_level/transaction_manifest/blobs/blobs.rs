@@ -2,9 +2,7 @@ use crate::prelude::*;
 use sargon::Blobs as InternalBlobs;
 
 /// Vec of Blobs
-#[derive(
-    Clone, PartialEq, Eq, InternalConversion,  uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct Blobs {
     pub(crate) secret_magic: Vec<Blob>,
 }
@@ -44,4 +42,3 @@ pub fn new_blobs_sample() -> Blobs {
 pub fn new_blobs_sample_other() -> Blobs {
     InternalBlobs::sample_other().into()
 }
-

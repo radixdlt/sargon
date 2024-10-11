@@ -1,27 +1,35 @@
 use crate::prelude::*;
 use sargon::CommonError as InternalCommonError;
-use sargon::Result as InternalResult;
 use sargon::IdentifiedVecOf;
+use sargon::Result as InternalResult;
 
 use thiserror::Error as ThisError;
 
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
-pub fn map_result_to_internal<T, InternalT>(result: Result<T>) -> InternalResult<InternalT>
+pub fn map_result_to_internal<T, InternalT>(
+    result: Result<T>,
+) -> InternalResult<InternalT>
 where
     T: Into<InternalT>,
 {
     result.map_err(CommonError::into).map(T::into)
 }
 
-pub fn map_result_to_internal_optional<T, InternalT>(result: Result<Option<T>>) -> InternalResult<Option<InternalT>>
+pub fn map_result_to_internal_optional<T, InternalT>(
+    result: Result<Option<T>>,
+) -> InternalResult<Option<InternalT>>
 where
     T: Into<InternalT>,
 {
-    result.map_err(CommonError::into).map(|opt| opt.map(T::into))
+    result
+        .map_err(CommonError::into)
+        .map(|opt| opt.map(T::into))
 }
 
-pub fn map_result_from_internal<T, InternalT>(result: InternalResult<InternalT>) -> Result<T>
+pub fn map_result_from_internal<T, InternalT>(
+    result: InternalResult<InternalT>,
+) -> Result<T>
 where
     T: From<InternalT>,
 {
@@ -32,10 +40,11 @@ pub trait MapFromInternalResult<InternalType, Type> {
     fn map_result(self) -> Result<Type>;
 }
 
-impl<InternalType, Type, E> MapFromInternalResult<InternalType, Type> for InternalResult<InternalType, E>
+impl<InternalType, Type, E> MapFromInternalResult<InternalType, Type>
+    for InternalResult<InternalType, E>
 where
-    Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalType`
-    E: Into<CommonError>,     // Allows flexible error conversion (or use a different error type)
+    Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
+    E: Into<CommonError>, // Allows flexible error conversion (or use a different error type)
 {
     fn map_result(self) -> Result<Type> {
         self.map(Type::from) // Converts Ok variant using From trait
@@ -43,9 +52,10 @@ where
     }
 }
 
-impl<InternalType, Type> MapFromInternalResult<InternalType, Vec<Type>> for InternalResult<Vec<InternalType>>
+impl<InternalType, Type> MapFromInternalResult<InternalType, Vec<Type>>
+    for InternalResult<Vec<InternalType>>
 where
-Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalType`
+    Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
 {
     fn map_result(self) -> Result<Vec<Type>> {
         self.map(|vec| vec.into_vec()) // Converts Ok variant using From trait
@@ -53,17 +63,19 @@ Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalT
     }
 }
 
-impl<InternalType:  Debug + PartialEq + Eq + Clone + sargon::Identifiable, Type> MapFromInternalResult<InternalType, Vec<Type>> for InternalResult<IdentifiedVecOf<InternalType>>
+impl<
+        InternalType: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
+        Type,
+    > MapFromInternalResult<InternalType, Vec<Type>>
+    for InternalResult<IdentifiedVecOf<InternalType>>
 where
-Type: From<InternalType>,   // Ensures `Type` can be constructed from `InternalType`
+    Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
 {
     fn map_result(self) -> Result<Vec<Type>> {
         self.map(|vec| vec.into_vec()) // Converts Ok variant using From trait
             .map_err(Into::into) // Converts Err variant using Into
     }
 }
-
-
 
 impl From<InternalCommonError> for CommonError {
     fn from(value: InternalCommonError) -> Self {

@@ -1,15 +1,9 @@
 use crate::prelude::*;
-use sargon::Blob as InternalBlob;
 use sargon::BagOfBytes as InternalBagOfBytes;
+use sargon::Blob as InternalBlob;
 
 /// Blob is a wrapper a bag of bytes
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,
 }

@@ -18,7 +18,7 @@ pub fn new_security_structure_of_factor_sources_sample(
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample_other(
 ) -> SecurityStructureOfFactorSources {
-    InternalSecurityStructureOfFactorSources::sample_other().into() 
+    InternalSecurityStructureOfFactorSources::sample_other().into()
 }
 
 #[uniffi::export]
@@ -30,7 +30,7 @@ pub fn new_security_structure_of_factor_sources_auto_in_days(
     InternalSecurityStructureOfFactorSources::new_with_days(
         metadata.into_internal(),
         number_of_days_until_auto_confirmation,
-        matrix_of_factors.into_internal()
-    ).into()
+        matrix_of_factors.into_internal(),
+    )
+    .into()
 }
-

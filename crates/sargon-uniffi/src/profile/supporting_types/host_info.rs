@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use sargon::HostInfo as InternalHostInfo;
 
-#[derive(
-    Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HostInfo {
     /// A short description of the device. The host should
     /// read the device model and a given name from the device
@@ -46,4 +44,3 @@ pub fn new_host_info_sample() -> HostInfo {
 pub fn new_host_info_sample_other() -> HostInfo {
     InternalHostInfo::sample_other().into()
 }
-

@@ -18,15 +18,7 @@ use sargon::Account as InternalAccount;
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Hash,
-    Eq,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct Account {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -129,4 +121,3 @@ pub fn new_account_sample_stokenet_olivia() -> Account {
 pub fn new_account_sample_stokenet_paige() -> Account {
     InternalAccount::sample_stokenet_paige().into()
 }
-

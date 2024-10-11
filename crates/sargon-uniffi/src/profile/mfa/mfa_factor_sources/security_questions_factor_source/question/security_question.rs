@@ -5,9 +5,7 @@ use sargon::Security_NOT_PRODUCTION_READY_Question as InternalSecurity_NOT_PRODU
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A security question
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct Security_NOT_PRODUCTION_READY_Question {
     pub id: u16,     // FIXME: newtype
@@ -21,9 +19,7 @@ pub struct Security_NOT_PRODUCTION_READY_Question {
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A specification of expected format for an answer to a security question.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     /// E.g. `"<CITY>, <YEAR>"`
@@ -41,7 +37,9 @@ pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     pub unsafe_answers: Vec<String>,
 }
 
-impl From<InternalSecurity_NOT_PRODUCTION_READY_Question> for Security_NOT_PRODUCTION_READY_Question {
+impl From<InternalSecurity_NOT_PRODUCTION_READY_Question>
+    for Security_NOT_PRODUCTION_READY_Question
+{
     fn from(value: InternalSecurity_NOT_PRODUCTION_READY_Question) -> Self {
         Self {
             id: value.id,
@@ -53,7 +51,9 @@ impl From<InternalSecurity_NOT_PRODUCTION_READY_Question> for Security_NOT_PRODU
     }
 }
 
-impl Into<InternalSecurity_NOT_PRODUCTION_READY_Question> for Security_NOT_PRODUCTION_READY_Question {
+impl Into<InternalSecurity_NOT_PRODUCTION_READY_Question>
+    for Security_NOT_PRODUCTION_READY_Question
+{
     fn into(self) -> InternalSecurity_NOT_PRODUCTION_READY_Question {
         InternalSecurity_NOT_PRODUCTION_READY_Question {
             id: self.id,
@@ -65,8 +65,12 @@ impl Into<InternalSecurity_NOT_PRODUCTION_READY_Question> for Security_NOT_PRODU
     }
 }
 
-impl From<InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat> for SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
-    fn from(value: InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat) -> Self {
+impl From<InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat>
+    for SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat
+{
+    fn from(
+        value: InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat,
+    ) -> Self {
         Self {
             answer_structure: value.answer_structure,
             example_answer: value.example_answer,
@@ -75,8 +79,13 @@ impl From<InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat> fo
     }
 }
 
-impl Into<InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat> for SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
-    fn into(self) -> InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
+impl Into<InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat>
+    for SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat
+{
+    fn into(
+        self,
+    ) -> InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat
+    {
         InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
             answer_structure: self.answer_structure,
             example_answer: self.example_answer,

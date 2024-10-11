@@ -3,15 +3,7 @@ use sargon::TrustedContactFactorSource as InternalTrustedContactFactorSource;
 
 /// A factor source representing a person, company, organization or otherwise
 /// entity that the user trusts to help her with recovery, if ever needed.
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct TrustedContactFactorSource {
     /// Unique and stable identifier of this factor source.
     pub id: FactorSourceIDFromAddress,
@@ -61,6 +53,9 @@ fn new_trusted_contact_factor_source_from_address_and_contact(
     account_address: AccountAddress,
     contact: TrustedContactFactorSourceContact,
 ) -> TrustedContactFactorSource {
-    InternalTrustedContactFactorSource::new(account_address.into_internal(), contact.into_internal()).into()
+    InternalTrustedContactFactorSource::new(
+        account_address.into_internal(),
+        contact.into_internal(),
+    )
+    .into()
 }
-

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappWalletInteractionErrorType as InternalDappWalletInteractionErrorType;
 
-#[derive( Clone, PartialEq, uniffi::Enum)]
+#[derive(Clone, PartialEq, uniffi::Enum)]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
     WrongNetwork,
@@ -26,7 +26,9 @@ pub enum DappWalletInteractionErrorType {
     FailedToSignAuthChallenge,
 }
 
-impl From<InternalDappWalletInteractionErrorType> for DappWalletInteractionErrorType {
+impl From<InternalDappWalletInteractionErrorType>
+    for DappWalletInteractionErrorType
+{
     fn from(value: InternalDappWalletInteractionErrorType) -> Self {
         match value {
             InternalDappWalletInteractionErrorType::RejectedByUser => Self::RejectedByUser,
@@ -54,7 +56,9 @@ impl From<InternalDappWalletInteractionErrorType> for DappWalletInteractionError
     }
 }
 
-impl Into<InternalDappWalletInteractionErrorType> for DappWalletInteractionErrorType {
+impl Into<InternalDappWalletInteractionErrorType>
+    for DappWalletInteractionErrorType
+{
     fn into(self) -> InternalDappWalletInteractionErrorType {
         match self {
             Self::RejectedByUser => InternalDappWalletInteractionErrorType::RejectedByUser,

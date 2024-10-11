@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use sargon::RadixConnectMobileSessionStorage as InternalRadixConnectMobileSessionStorage;
-use sargon::SessionID as InternalSessionID;
 use sargon::BagOfBytes as InternalBagOfBytes;
+use sargon::RadixConnectMobileSessionStorage as InternalRadixConnectMobileSessionStorage;
 use sargon::Result as InternalResult;
+use sargon::SessionID as InternalSessionID;
 
 /// A trait for storing and loading Radix Connect Mobile sessions.
 #[uniffi::export(with_foreign)]
@@ -22,25 +22,32 @@ pub trait RadixConnectMobileSessionStorage: Send + Sync {
     ) -> Result<Option<BagOfBytes>>;
 }
 
-
 pub struct RadixConnectMobileSessionStorageAdapter {
     pub wrapped: Arc<dyn RadixConnectMobileSessionStorage>,
 }
 
 #[async_trait::async_trait]
-impl InternalRadixConnectMobileSessionStorage for RadixConnectMobileSessionStorageAdapter {
+impl InternalRadixConnectMobileSessionStorage
+    for RadixConnectMobileSessionStorageAdapter
+{
     async fn save_session(
         &self,
         session_id: InternalSessionID,
         encoded_session: InternalBagOfBytes,
     ) -> InternalResult<()> {
-        map_result_to_internal(self.wrapped.save_session(session_id.into(), encoded_session.into()).await)
+        map_result_to_internal(
+            self.wrapped
+                .save_session(session_id.into(), encoded_session.into())
+                .await,
+        )
     }
 
     async fn load_session(
         &self,
         session_id: InternalSessionID,
     ) -> InternalResult<Option<InternalBagOfBytes>> {
-        map_result_to_internal_optional(self.wrapped.load_session(session_id.into()).await)
+        map_result_to_internal_optional(
+            self.wrapped.load_session(session_id.into()).await,
+        )
     }
 }

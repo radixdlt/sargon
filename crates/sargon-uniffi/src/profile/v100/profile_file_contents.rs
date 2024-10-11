@@ -9,7 +9,7 @@ use sargon::ProfileFileContents as InternalProfileFileContents;
 /// or if we failed to parse as Profile and `EncryptedProfileSnapshot`
 /// then `NotProfile` is used, indicating that the bytes is not at all
 /// a Profile.
-#[derive(Clone, PartialEq, Eq,  Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.
@@ -33,8 +33,12 @@ impl From<InternalProfileFileContents> for ProfileFileContents {
             InternalProfileFileContents::PlaintextProfile(value) => {
                 ProfileFileContents::PlaintextProfile(value.into())
             }
-            InternalProfileFileContents::EncryptedProfile => ProfileFileContents::EncryptedProfile,
-            InternalProfileFileContents::NotProfile => ProfileFileContents::NotProfile,
+            InternalProfileFileContents::EncryptedProfile => {
+                ProfileFileContents::EncryptedProfile
+            }
+            InternalProfileFileContents::NotProfile => {
+                ProfileFileContents::NotProfile
+            }
         }
     }
 }
@@ -45,8 +49,12 @@ impl Into<InternalProfileFileContents> for ProfileFileContents {
             ProfileFileContents::PlaintextProfile(value) => {
                 InternalProfileFileContents::PlaintextProfile(value.into())
             }
-            ProfileFileContents::EncryptedProfile => InternalProfileFileContents::EncryptedProfile,
-            ProfileFileContents::NotProfile => InternalProfileFileContents::NotProfile,
+            ProfileFileContents::EncryptedProfile => {
+                InternalProfileFileContents::EncryptedProfile
+            }
+            ProfileFileContents::NotProfile => {
+                InternalProfileFileContents::NotProfile
+            }
         }
     }
 }
@@ -60,4 +68,3 @@ pub(crate) fn new_profile_file_contents_sample() -> ProfileFileContents {
 pub(crate) fn new_profile_file_contents_sample_other() -> ProfileFileContents {
     InternalProfileFileContents::sample_other().into()
 }
-

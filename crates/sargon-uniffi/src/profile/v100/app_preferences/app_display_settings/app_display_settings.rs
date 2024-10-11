@@ -4,15 +4,7 @@ use sargon::AppDisplay as InternalAppDisplay;
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(
-    Clone,
-    
-    
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
     /// of hide it.

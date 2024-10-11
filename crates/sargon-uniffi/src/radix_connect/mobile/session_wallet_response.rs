@@ -1,13 +1,15 @@
 use crate::prelude::*;
 use sargon::RadixConnectMobileWalletResponse as InternalRadixConnectMobileWalletResponse;
 
-#[derive( PartialEq, Clone,  uniffi::Record)]
+#[derive(PartialEq, Clone, uniffi::Record)]
 pub struct RadixConnectMobileWalletResponse {
     pub session_id: SessionID,
     pub response: WalletToDappInteractionResponse,
 }
 
-impl From<InternalRadixConnectMobileWalletResponse> for RadixConnectMobileWalletResponse {
+impl From<InternalRadixConnectMobileWalletResponse>
+    for RadixConnectMobileWalletResponse
+{
     fn from(value: InternalRadixConnectMobileWalletResponse) -> Self {
         Self {
             session_id: value.session_id.into(),
@@ -16,7 +18,9 @@ impl From<InternalRadixConnectMobileWalletResponse> for RadixConnectMobileWallet
     }
 }
 
-impl Into<InternalRadixConnectMobileWalletResponse> for RadixConnectMobileWalletResponse {
+impl Into<InternalRadixConnectMobileWalletResponse>
+    for RadixConnectMobileWalletResponse
+{
     fn into(self) -> InternalRadixConnectMobileWalletResponse {
         InternalRadixConnectMobileWalletResponse {
             session_id: self.session_id.into(),

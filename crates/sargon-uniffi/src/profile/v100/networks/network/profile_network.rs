@@ -4,13 +4,7 @@ use sargon::ProfileNetwork as InternalProfileNetwork;
 /// [`Accounts`], [`Personas`] and [`AuthorizedDapps`] for some [`ProfileNetwork`]
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
 /// identified by `id` ([`NetworkID`]).
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct ProfileNetwork {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -39,7 +33,9 @@ impl From<InternalProfileNetwork> for ProfileNetwork {
             accounts: profile_network.accounts.into_vec(),
             personas: profile_network.personas.into_vec(),
             authorized_dapps: profile_network.authorized_dapps.into_vec(),
-            resource_preferences: profile_network.resource_preferences.into_vec(),
+            resource_preferences: profile_network
+                .resource_preferences
+                .into_vec(),
         }
     }
 }
@@ -51,7 +47,9 @@ impl Into<InternalProfileNetwork> for ProfileNetwork {
             accounts: self.accounts.into_identified_vec(),
             personas: self.personas.into_identified_vec(),
             authorized_dapps: self.authorized_dapps.into_identified_vec(),
-            resource_preferences: self.resource_preferences.into_identified_vec(),
+            resource_preferences: self
+                .resource_preferences
+                .into_identified_vec(),
         }
     }
 }
@@ -65,4 +63,3 @@ pub fn new_profile_network_sample() -> ProfileNetwork {
 pub fn new_profile_network_sample_other() -> ProfileNetwork {
     InternalProfileNetwork::sample_other().into()
 }
-

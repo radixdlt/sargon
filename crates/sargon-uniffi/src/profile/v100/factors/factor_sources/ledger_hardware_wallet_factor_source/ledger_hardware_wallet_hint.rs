@@ -1,14 +1,7 @@
 use crate::prelude::*;
 use sargon::LedgerHardwareWalletHint as InternalLedgerHardwareWalletHint;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
     pub name: String,
@@ -34,4 +27,3 @@ impl Into<InternalLedgerHardwareWalletHint> for LedgerHardwareWalletHint {
         }
     }
 }
-

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use sargon::Security_NOT_PRODUCTION_READY_Question as InternalSecurity_NOT_PRODUCTION_READY_Question;
-use sargon::Security_NOT_PRODUCTION_READY_Questions as InternalSecurity_NOT_PRODUCTION_READY_Questions;
 
 decl_identified_vec_of!(
     /// ❗️ NOT PRODUCTION READY YET ❗️
@@ -15,7 +14,7 @@ decl_identified_vec_of!(
 #[uniffi::export]
 pub fn security_questions_all() -> Security_NOT_PRODUCTION_READY_Questions {
     InternalSecurity_NOT_PRODUCTION_READY_Questions::from_iter(
-        InternalSecurity_NOT_PRODUCTION_READY_Question::all()
-    ).into_vec()
+        InternalSecurity_NOT_PRODUCTION_READY_Question::all(),
+    )
+    .into_vec()
 }
-

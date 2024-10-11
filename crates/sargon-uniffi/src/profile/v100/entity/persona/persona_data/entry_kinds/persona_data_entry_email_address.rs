@@ -16,4 +16,3 @@ pub fn new_persona_data_entry_email_address_sample_other(
 ) -> PersonaDataEntryEmailAddress {
     InternalPersonaDataEntryEmailAddress::sample_other().into()
 }
-

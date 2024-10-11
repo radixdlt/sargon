@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::HomeCardsObserver as InternalHomeCardsObserver;
 use sargon::HomeCards as InternalHomeCards;
+use sargon::HomeCardsObserver as InternalHomeCardsObserver;
 
 /// Trait for observing home cards updates.
 /// Defines a method for handling updates to home cards.

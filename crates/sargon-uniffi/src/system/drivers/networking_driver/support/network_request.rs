@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NetworkRequest as InternalNetworkRequest;
 
-#[derive(Clone,  PartialEq, Eq,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct NetworkRequest {
     pub url: Url,
     pub method: NetworkMethod,
@@ -12,19 +12,32 @@ pub struct NetworkRequest {
 
 impl From<InternalNetworkRequest> for NetworkRequest {
     fn from(value: InternalNetworkRequest) -> Self {
-        unimplemented!()
+        Self {
+            url: value.url.into(),
+            method: value.method.into(),
+            headers: value.headers.into_hash_map(),
+            body: value.body.into(),
+        }
     }
 }
 
-use crate::prelude::*;
+impl Into<InternalNetworkRequest> for NetworkRequest {
+    fn into(self) -> InternalNetworkRequest {
+        InternalNetworkRequest {
+            url: self.url.into(),
+            method: self.method.into(),
+            headers: self.headers.into_internal_hash_map(),
+            body: self.body.into(),
+        }
+    }
+}
 
 #[uniffi::export]
 pub fn new_network_request_sample() -> NetworkRequest {
-    NetworkRequest::sample()
+    InternalNetworkRequest::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_network_request_sample_other() -> NetworkRequest {
-    NetworkRequest::sample_other()
+    InternalNetworkRequest::sample_other().into()
 }
-

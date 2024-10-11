@@ -1,18 +1,11 @@
 use crate::prelude::*;
-use sargon::OffDeviceMnemonicFactorSource as InternalOffDeviceMnemonicFactorSource;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
+use sargon::OffDeviceMnemonicFactorSource as InternalOffDeviceMnemonicFactorSource;
 
 /// A factor source representing a Mnemonic the user has to input every time
 /// the use the factor source, since it is not saved on the device, it is said
 /// to be "off device".
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct OffDeviceMnemonicFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -27,7 +20,9 @@ pub struct OffDeviceMnemonicFactorSource {
     pub hint: OffDeviceMnemonicHint,
 }
 
-impl From<InternalOffDeviceMnemonicFactorSource> for OffDeviceMnemonicFactorSource {
+impl From<InternalOffDeviceMnemonicFactorSource>
+    for OffDeviceMnemonicFactorSource
+{
     fn from(factor_source: InternalOffDeviceMnemonicFactorSource) -> Self {
         Self {
             id: factor_source.id.into(),
@@ -37,7 +32,9 @@ impl From<InternalOffDeviceMnemonicFactorSource> for OffDeviceMnemonicFactorSour
     }
 }
 
-impl Into<InternalOffDeviceMnemonicFactorSource> for OffDeviceMnemonicFactorSource {
+impl Into<InternalOffDeviceMnemonicFactorSource>
+    for OffDeviceMnemonicFactorSource
+{
     fn into(self) -> InternalOffDeviceMnemonicFactorSource {
         InternalOffDeviceMnemonicFactorSource {
             id: self.id.into(),
@@ -67,4 +64,3 @@ fn new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
     let id = InternalFactorSourceIDFromHash::new_for_off_device(&mwp.into());
     InternalOffDeviceMnemonicFactorSource::new(id, hint.into()).into()
 }
-

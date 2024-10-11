@@ -4,14 +4,7 @@ use sargon::Ed25519PublicKey as InternalEd25519PublicKey;
 json_string_convertible!(Ed25519PublicKey);
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Ed25519PublicKey {
     secret_magic: BagOfBytes,
 }
@@ -26,7 +19,10 @@ impl From<InternalEd25519PublicKey> for Ed25519PublicKey {
 
 impl Into<InternalEd25519PublicKey> for Ed25519PublicKey {
     fn into(self) -> InternalEd25519PublicKey {
-        InternalEd25519PublicKey::try_from(self.secret_magic.into_internal().to_vec()).unwrap()
+        InternalEd25519PublicKey::try_from(
+            self.secret_magic.into_internal().to_vec(),
+        )
+        .unwrap()
     }
 }
 
@@ -41,7 +37,8 @@ pub fn new_ed25519_public_key_from_hex(
 pub fn new_ed25519_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Ed25519PublicKey> {
-    InternalEd25519PublicKey::try_from(bytes.into_internal().to_vec()).map_result()
+    InternalEd25519PublicKey::try_from(bytes.into_internal().to_vec())
+        .map_result()
 }
 
 #[uniffi::export]
@@ -58,7 +55,8 @@ pub fn new_ed25519_public_key_sample_other() -> Ed25519PublicKey {
 pub fn android_secret_key_get_public_key_from_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
 ) -> Result<Ed25519PublicKey> {
-    InternalEd25519PublicKey::from_private_key_bytes(private_key_bytes.into()).map_result()
+    InternalEd25519PublicKey::from_private_key_bytes(private_key_bytes.into())
+        .map_result()
 }
 
 /// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.

@@ -1,16 +1,9 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
-use sargon::Secp256k1PublicKey as InternalSecp256k1PublicKey;
 use sargon::BagOfBytes as InternalBagOfBytes;
+use sargon::Secp256k1PublicKey as InternalSecp256k1PublicKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Secp256k1PublicKey {
     value: BagOfBytes,
 }
@@ -42,7 +35,8 @@ pub fn new_secp256k1_public_key_from_hex(
 pub fn new_secp256k1_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Secp256k1PublicKey> {
-    InternalSecp256k1PublicKey::try_from(bytes.into_internal().to_vec()).map_result()
+    InternalSecp256k1PublicKey::try_from(bytes.into_internal().to_vec())
+        .map_result()
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.

@@ -16,4 +16,3 @@ pub fn new_intent_hash_sample() -> IntentHash {
 pub fn new_intent_hash_sample_other() -> IntentHash {
     InternalIntentHash::sample_other().into()
 }
-

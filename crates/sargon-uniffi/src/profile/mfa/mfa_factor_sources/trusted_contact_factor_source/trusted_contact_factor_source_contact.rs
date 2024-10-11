@@ -2,14 +2,7 @@ use crate::prelude::*;
 use sargon::TrustedContactFactorSourceContact as InternalTrustedContactFactorSourceContact;
 
 /// Hints about the trusted contact.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct TrustedContactFactorSourceContact {
     /// The email address of the contact that the user trusts
     pub email_address: EmailAddress,
@@ -17,7 +10,9 @@ pub struct TrustedContactFactorSourceContact {
     pub name: DisplayName,
 }
 
-impl From<InternalTrustedContactFactorSourceContact> for TrustedContactFactorSourceContact {
+impl From<InternalTrustedContactFactorSourceContact>
+    for TrustedContactFactorSourceContact
+{
     fn from(value: InternalTrustedContactFactorSourceContact) -> Self {
         Self {
             email_address: value.email_address.into(),
@@ -26,7 +21,9 @@ impl From<InternalTrustedContactFactorSourceContact> for TrustedContactFactorSou
     }
 }
 
-impl Into<InternalTrustedContactFactorSourceContact> for TrustedContactFactorSourceContact {
+impl Into<InternalTrustedContactFactorSourceContact>
+    for TrustedContactFactorSourceContact
+{
     fn into(self) -> InternalTrustedContactFactorSourceContact {
         InternalTrustedContactFactorSourceContact {
             email_address: self.email_address.into(),
@@ -46,4 +43,3 @@ pub fn new_trusted_contact_factor_source_contact_sample_other(
 ) -> TrustedContactFactorSourceContact {
     InternalTrustedContactFactorSourceContact::sample_other().into()
 }
-

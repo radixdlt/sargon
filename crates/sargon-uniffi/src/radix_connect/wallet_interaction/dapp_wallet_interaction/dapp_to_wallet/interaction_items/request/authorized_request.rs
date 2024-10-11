@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionAuthorizedRequestItems as InternalDappToWalletInteractionAuthorizedRequestItems;
 
-#[derive( Clone, PartialEq,  uniffi::Record)]
+#[derive(Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionAuthorizedRequestItems {
     pub auth: DappToWalletInteractionAuthRequestItem,
     pub reset: Option<DappToWalletInteractionResetRequestItem>,
@@ -14,8 +14,12 @@ pub struct DappToWalletInteractionAuthorizedRequestItems {
         Option<DappToWalletInteractionPersonaDataRequestItem>,
 }
 
-impl From<InternalDappToWalletInteractionAuthorizedRequestItems> for DappToWalletInteractionAuthorizedRequestItems {
-    fn from(value: InternalDappToWalletInteractionAuthorizedRequestItems) -> Self {
+impl From<InternalDappToWalletInteractionAuthorizedRequestItems>
+    for DappToWalletInteractionAuthorizedRequestItems
+{
+    fn from(
+        value: InternalDappToWalletInteractionAuthorizedRequestItems,
+    ) -> Self {
         Self {
             auth: value.auth.into(),
             reset: value.reset.map(Into::into),
@@ -27,7 +31,9 @@ impl From<InternalDappToWalletInteractionAuthorizedRequestItems> for DappToWalle
     }
 }
 
-impl Into<InternalDappToWalletInteractionAuthorizedRequestItems> for DappToWalletInteractionAuthorizedRequestItems {
+impl Into<InternalDappToWalletInteractionAuthorizedRequestItems>
+    for DappToWalletInteractionAuthorizedRequestItems
+{
     fn into(self) -> InternalDappToWalletInteractionAuthorizedRequestItems {
         InternalDappToWalletInteractionAuthorizedRequestItems {
             auth: self.auth.into(),

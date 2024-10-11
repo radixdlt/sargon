@@ -5,25 +5,14 @@ use sargon::FactorSourceID as InternalFactorSourceID;
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FactorSourceID {
     /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
     /// for a certain `FactorSourceKind`
-    Hash {
-        value: FactorSourceIDFromHash,
-    },
+    Hash { value: FactorSourceIDFromHash },
 
     /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-    Address {
-        value: FactorSourceIDFromAddress,
-    },
+    Address { value: FactorSourceIDFromAddress },
 }
 
 delegate_display_debug_into!(FactorSourceID, InternalFactorSourceID);
@@ -34,9 +23,11 @@ impl From<InternalFactorSourceID> for FactorSourceID {
             InternalFactorSourceID::Hash { value } => FactorSourceID::Hash {
                 value: value.into(),
             },
-            InternalFactorSourceID::Address { value } => FactorSourceID::Address {
-                value: value.into(),
-            },
+            InternalFactorSourceID::Address { value } => {
+                FactorSourceID::Address {
+                    value: value.into(),
+                }
+            }
         }
     }
 }
@@ -47,9 +38,11 @@ impl Into<InternalFactorSourceID> for FactorSourceID {
             FactorSourceID::Hash { value } => InternalFactorSourceID::Hash {
                 value: value.into(),
             },
-            FactorSourceID::Address { value } => InternalFactorSourceID::Address {
-                value: value.into(),
-            },
+            FactorSourceID::Address { value } => {
+                InternalFactorSourceID::Address {
+                    value: value.into(),
+                }
+            }
         }
     }
 }
@@ -68,4 +61,3 @@ pub fn new_factor_source_id_sample() -> FactorSourceID {
 pub fn new_factor_source_id_sample_other() -> FactorSourceID {
     InternalFactorSourceID::sample_other().into()
 }
-

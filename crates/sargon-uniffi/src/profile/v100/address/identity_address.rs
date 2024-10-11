@@ -59,4 +59,3 @@ pub fn new_identity_address_sample_stokenet() -> IdentityAddress {
 pub fn new_identity_address_sample_stokenet_other() -> IdentityAddress {
     InternalIdentityAddress::sample_stokenet_other().into()
 }
-

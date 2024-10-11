@@ -42,4 +42,3 @@ pub fn new_access_controller_address_sample_stokenet_other(
 ) -> AccessControllerAddress {
     InternalAccessControllerAddress::sample_stokenet_other().into()
 }
-

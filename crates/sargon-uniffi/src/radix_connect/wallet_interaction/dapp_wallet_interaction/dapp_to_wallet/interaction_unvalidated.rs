@@ -3,14 +3,16 @@ use sargon::DappToWalletInteractionUnvalidated as InternalDappToWalletInteractio
 
 json_data_convertible!(DappToWalletInteractionUnvalidated);
 
-#[derive( Clone, PartialEq,  InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct DappToWalletInteractionUnvalidated {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,
     pub metadata: DappToWalletInteractionMetadataUnvalidated,
 }
 
-impl From<InternalDappToWalletInteractionUnvalidated> for DappToWalletInteractionUnvalidated {
+impl From<InternalDappToWalletInteractionUnvalidated>
+    for DappToWalletInteractionUnvalidated
+{
     fn from(value: InternalDappToWalletInteractionUnvalidated) -> Self {
         Self {
             interaction_id: value.interaction_id.into(),
@@ -20,7 +22,9 @@ impl From<InternalDappToWalletInteractionUnvalidated> for DappToWalletInteractio
     }
 }
 
-impl Into<InternalDappToWalletInteractionUnvalidated> for DappToWalletInteractionUnvalidated {
+impl Into<InternalDappToWalletInteractionUnvalidated>
+    for DappToWalletInteractionUnvalidated
+{
     fn into(self) -> InternalDappToWalletInteractionUnvalidated {
         InternalDappToWalletInteractionUnvalidated {
             interaction_id: self.interaction_id.into(),

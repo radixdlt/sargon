@@ -78,7 +78,9 @@ impl Into<InternalPredictedDecimal> for PredictedDecimal {
     }
 }
 
-impl From<InternalPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
+impl From<InternalPredictedNonFungibleLocalIds>
+    for PredictedNonFungibleLocalIds
+{
     fn from(value: InternalPredictedNonFungibleLocalIds) -> Self {
         Self {
             value: value.value.into_vec(),
@@ -87,7 +89,9 @@ impl From<InternalPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds
     }
 }
 
-impl Into<InternalPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
+impl Into<InternalPredictedNonFungibleLocalIds>
+    for PredictedNonFungibleLocalIds
+{
     fn into(self) -> InternalPredictedNonFungibleLocalIds {
         InternalPredictedNonFungibleLocalIds {
             value: self.value.into_internal_vec(),

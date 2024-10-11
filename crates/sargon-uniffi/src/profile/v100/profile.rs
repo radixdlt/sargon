@@ -14,14 +14,7 @@ use sargon::Profile as InternalProfile;
 ///
 /// assert_eq!(Profile::sample(), Profile::sample())
 /// ```
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is
@@ -44,25 +37,25 @@ pub struct Profile {
 }
 
 impl From<InternalProfile> for Profile {
-	fn from(value: InternalProfile) -> Self {
+    fn from(value: InternalProfile) -> Self {
         Profile {
             header: value.header.into(),
             factor_sources: value.factor_sources.into_vec(),
             app_preferences: value.app_preferences.into(),
             networks: value.networks.into_vec(),
         }
-	}
+    }
 }
 
 impl Into<InternalProfile> for Profile {
-	fn into(self) -> InternalProfile {
+    fn into(self) -> InternalProfile {
         InternalProfile {
             header: self.header.into(),
             factor_sources: self.factor_sources.into_identified_vec(),
             app_preferences: self.app_preferences.into(),
             networks: self.networks.into_identified_vec(),
         }
-	}
+    }
 }
 
 #[uniffi::export]
@@ -84,7 +77,12 @@ pub fn new_profile_with_mnemonic(
     host_id: HostId,
     host_info: HostInfo,
 ) -> Profile {
-    InternalProfile::new(mnemonic.into_internal(), host_id.into_internal(), host_info.into_internal()).into()
+    InternalProfile::new(
+        mnemonic.into_internal(),
+        host_id.into_internal(),
+        host_info.into_internal(),
+    )
+    .into()
 }
 
 /// # Panics
@@ -100,7 +98,8 @@ pub fn new_profile(
         host_id.into_internal(),
         host_info.into_internal(),
         None::<sargon::Accounts>,
-    ).into()
+    )
+    .into()
 }
 
 #[uniffi::export]
@@ -135,7 +134,8 @@ pub fn new_profile_from_encryption_bytes(
     InternalProfile::new_from_encrypted_profile_json_string(
         json_string,
         decryption_password,
-    ).map_result()
+    )
+    .map_result()
 }
 
 #[uniffi::export]
@@ -143,7 +143,9 @@ pub fn profile_encrypt_with_password(
     profile: &Profile,
     encryption_password: String,
 ) -> String {
-    profile.into_internal().to_encrypted_profile_json_str(encryption_password)
+    profile
+        .into_internal()
+        .to_encrypted_profile_json_str(encryption_password)
 }
 
 // ################
@@ -172,4 +174,3 @@ pub fn check_if_encrypted_profile_json_contains_legacy_p2p_links(
         json_str, password,
     )
 }
-

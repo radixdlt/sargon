@@ -9,8 +9,7 @@ use crate::prelude::*;
 /// Therefore, if a given Rust function expects a `Url` as param and is sent one from host side which is invalid,
 /// the code will panic. However, if we send the wrapper instead, we make sure the conversion is safely done on the
 /// host side, dealing with the failing conversion properly rather than panicking.
-#[derive( PartialEq, Eq, Hash, uniffi::Object)]
-#[uniffi::export( Display, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, uniffi::Object)]
 pub struct FfiUrl {
     pub url: Url,
 }
@@ -32,8 +31,7 @@ impl FromStr for FfiUrl {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url = parse_url(s)?;
+        let url = sargon::parse_url(s)?;
         Ok(Self { url })
     }
 }
-

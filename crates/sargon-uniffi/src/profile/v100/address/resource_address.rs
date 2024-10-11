@@ -62,4 +62,3 @@ pub fn new_resource_address_sample_stokenet_gc_tokens() -> ResourceAddress {
 pub fn new_resource_address_sample_stokenet_candy() -> ResourceAddress {
     InternalResourceAddress::sample_stokenet_candy().into()
 }
-

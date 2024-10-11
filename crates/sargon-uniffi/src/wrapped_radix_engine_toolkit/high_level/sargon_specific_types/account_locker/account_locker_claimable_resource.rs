@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::AccountLockerClaimableResource as InternalAccountLockerClaimableResource;
 
 /// A claimable resource in an account locker.
-#[derive( Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum AccountLockerClaimableResource {
     /// A fungible resource with a specific claimable amount
     Fungible {
@@ -16,7 +16,9 @@ pub enum AccountLockerClaimableResource {
     },
 }
 
-impl From<InternalAccountLockerClaimableResource> for AccountLockerClaimableResource {
+impl From<InternalAccountLockerClaimableResource>
+    for AccountLockerClaimableResource
+{
     fn from(value: InternalAccountLockerClaimableResource) -> Self {
         match value {
             InternalAccountLockerClaimableResource::Fungible {
@@ -37,7 +39,9 @@ impl From<InternalAccountLockerClaimableResource> for AccountLockerClaimableReso
     }
 }
 
-impl Into<InternalAccountLockerClaimableResource> for AccountLockerClaimableResource {
+impl Into<InternalAccountLockerClaimableResource>
+    for AccountLockerClaimableResource
+{
     fn into(self) -> InternalAccountLockerClaimableResource {
         match self {
             AccountLockerClaimableResource::Fungible {
@@ -69,4 +73,3 @@ pub fn new_account_locker_claimable_resource_sample_other(
 ) -> AccountLockerClaimableResource {
     InternalAccountLockerClaimableResource::sample_other().into()
 }
-

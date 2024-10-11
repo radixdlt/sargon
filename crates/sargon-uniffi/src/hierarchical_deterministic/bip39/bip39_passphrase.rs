@@ -3,16 +3,9 @@ use sargon::BIP39Passphrase as InternalBIP39Passphrase;
 
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
-#[derive(
-    Zeroize,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct BIP39Passphrase {
-    pub value: String
+    pub value: String,
 }
 
 impl From<InternalBIP39Passphrase> for BIP39Passphrase {

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::PerAssetTransfers as InternalPerAssetTransfers;
 
-#[derive(Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PerAssetTransfers {
     pub from_account: AccountAddress,
     pub fungible_resources: Vec<PerAssetTransfersOfFungibleResource>,
@@ -23,7 +23,9 @@ impl Into<InternalPerAssetTransfers> for PerAssetTransfers {
         InternalPerAssetTransfers {
             from_account: self.from_account.into(),
             fungible_resources: self.fungible_resources.into_internal_vec(),
-            non_fungible_resources: self.non_fungible_resources.into_internal_vec(),
+            non_fungible_resources: self
+                .non_fungible_resources
+                .into_internal_vec(),
         }
     }
 }
@@ -37,4 +39,3 @@ pub fn new_per_asset_transfers_sample() -> PerAssetTransfers {
 pub fn new_per_asset_transfers_sample_other() -> PerAssetTransfers {
     InternalPerAssetTransfers::sample_other().into()
 }
-

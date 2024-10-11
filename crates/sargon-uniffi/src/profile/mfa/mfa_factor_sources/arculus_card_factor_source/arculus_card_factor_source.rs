@@ -5,14 +5,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 /// An Arculus card, a hierarchal deterministic wallet capable of CAP26 derivation
 /// which users interact with by placing it near their host device, which
 /// communicates with the card over NFC.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct ArculusCardFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
@@ -67,4 +60,3 @@ fn new_arculus_card_factor_source_from_mnemonic_with_passphrase(
     let id = InternalFactorSourceIDFromHash::new_for_arculus(&mwp.into());
     InternalArculusCardFactorSource::new(id, hint.into()).into()
 }
-

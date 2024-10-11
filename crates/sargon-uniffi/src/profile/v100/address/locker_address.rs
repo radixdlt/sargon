@@ -36,4 +36,3 @@ pub fn new_locker_address_sample_stokenet() -> LockerAddress {
 pub fn new_locker_address_sample_stokenet_other() -> LockerAddress {
     InternalLockerAddress::sample_stokenet_other().into()
 }
-

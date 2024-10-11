@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use sargon::IntentSignature as InternalIntentSignature;
 
-#[derive(
-    Clone,   PartialEq, Eq, Hash,  uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,
 }
@@ -46,4 +44,3 @@ pub fn new_intent_signature_sample() -> IntentSignature {
 pub fn new_intent_signature_sample_other() -> IntentSignature {
     InternalIntentSignature::sample_other().into()
 }
-

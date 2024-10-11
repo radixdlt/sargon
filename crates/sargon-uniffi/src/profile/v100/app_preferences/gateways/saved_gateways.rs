@@ -10,9 +10,7 @@ decl_identified_vec_of!(
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
-#[derive(
-    Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SavedGateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.
@@ -83,4 +81,3 @@ pub fn new_saved_gateways_changing_current(
     let _ = gateways.change_current(to.into());
     Ok(gateways.into())
 }
-

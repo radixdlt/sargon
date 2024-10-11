@@ -4,15 +4,7 @@ use sargon::Ed25519Signature as InternalEd25519Signature;
 json_string_convertible!(Ed25519Signature);
 
 /// Represents an ED25519 signature.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Ed25519Signature {
     pub bytes: Exactly64Bytes,
 }

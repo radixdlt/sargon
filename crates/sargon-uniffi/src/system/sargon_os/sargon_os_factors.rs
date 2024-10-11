@@ -3,7 +3,7 @@ use sargon::DeviceFactorSourceType as InternalDeviceFactorSourceType;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
-#[derive( Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum DeviceFactorSourceType {
     Babylon { is_main: bool },
     Olympia,
@@ -12,8 +12,12 @@ pub enum DeviceFactorSourceType {
 impl From<InternalDeviceFactorSourceType> for DeviceFactorSourceType {
     fn from(value: InternalDeviceFactorSourceType) -> Self {
         match value {
-            InternalDeviceFactorSourceType::Babylon { is_main } => DeviceFactorSourceType::Babylon { is_main },
-            InternalDeviceFactorSourceType::Olympia => DeviceFactorSourceType::Olympia,
+            InternalDeviceFactorSourceType::Babylon { is_main } => {
+                DeviceFactorSourceType::Babylon { is_main }
+            }
+            InternalDeviceFactorSourceType::Olympia => {
+                DeviceFactorSourceType::Olympia
+            }
         }
     }
 }
@@ -21,8 +25,12 @@ impl From<InternalDeviceFactorSourceType> for DeviceFactorSourceType {
 impl Into<InternalDeviceFactorSourceType> for DeviceFactorSourceType {
     fn into(self) -> InternalDeviceFactorSourceType {
         match self {
-            DeviceFactorSourceType::Babylon { is_main } => InternalDeviceFactorSourceType::Babylon { is_main },
-            DeviceFactorSourceType::Olympia => InternalDeviceFactorSourceType::Olympia,
+            DeviceFactorSourceType::Babylon { is_main } => {
+                InternalDeviceFactorSourceType::Babylon { is_main }
+            }
+            DeviceFactorSourceType::Olympia => {
+                InternalDeviceFactorSourceType::Olympia
+            }
         }
     }
 }
@@ -50,7 +58,10 @@ impl SargonOS {
         &self,
         updated: FactorSource,
     ) -> Result<()> {
-        self.wrapped.update_factor_source(updated.into_internal()).await.map_result()
+        self.wrapped
+            .update_factor_source(updated.into_internal())
+            .await
+            .map_result()
     }
 
     /// Returns `Ok(false)` if the Profile already contained a factor source with the
@@ -69,7 +80,10 @@ impl SargonOS {
         &self,
         factor_source: FactorSource,
     ) -> Result<bool> {
-        self.wrapped.add_factor_source(factor_source.into_internal()).await.map_result()
+        self.wrapped
+            .add_factor_source(factor_source.into_internal())
+            .await
+            .map_result()
     }
 
     /// Adds all of the provided `factor_sources` to Profile in one single go.
@@ -87,13 +101,19 @@ impl SargonOS {
         &self,
         factor_sources: FactorSources,
     ) -> Result<Vec<FactorSourceID>> {
-        self.wrapped.add_factor_sources(factor_sources.into_identified_vec()).await.map_result()
+        self.wrapped
+            .add_factor_sources(factor_sources.into_identified_vec())
+            .await
+            .map_result()
     }
 
     pub async fn debug_add_all_sample_factors(
         &self,
     ) -> Result<Vec<FactorSourceID>> {
-        self.wrapped.debug_add_all_sample_factors().await.map_result()
+        self.wrapped
+            .debug_add_all_sample_factors()
+            .await
+            .map_result()
     }
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
@@ -103,10 +123,13 @@ impl SargonOS {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
     ) -> Result<DeviceFactorSource> {
-        self.wrapped.create_device_factor_source(
-            mnemonic_with_passphrase.into_internal(),
-            factor_type.into_internal(),
-        ).await.map_result()
+        self.wrapped
+            .create_device_factor_source(
+                mnemonic_with_passphrase.into_internal(),
+                factor_type.into_internal(),
+            )
+            .await
+            .map_result()
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -122,6 +145,9 @@ impl SargonOS {
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        self.wrapped.load_private_device_factor_source_by_id(&id.into_internal()).await.map_result()
+        self.wrapped
+            .load_private_device_factor_source_by_id(&id.into_internal())
+            .await
+            .map_result()
     }
 }

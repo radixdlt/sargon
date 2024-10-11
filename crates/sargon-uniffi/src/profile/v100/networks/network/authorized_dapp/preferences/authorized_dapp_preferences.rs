@@ -3,14 +3,7 @@ use sargon::AuthorizedDappPreferences as InternalAuthorizedDappPreferences;
 
 /// The preferences the user has configured off-ledger for a given `AuthorizedDapp`.
 /// Allows users, for example, to hide direct deposit claims for a given Dapp.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct AuthorizedDappPreferences {
     pub deposits: AuthorizedDappPreferenceDeposits,
 }

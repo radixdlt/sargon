@@ -10,7 +10,9 @@ pub enum EncryptionScheme {
 impl From<InternalEncryptionScheme> for EncryptionScheme {
     fn from(value: InternalEncryptionScheme) -> Self {
         match value {
-            InternalEncryptionScheme::Version1(value) => EncryptionScheme::Version1(value.into()),
+            InternalEncryptionScheme::Version1(value) => {
+                EncryptionScheme::Version1(value.into())
+            }
         }
     }
 }
@@ -18,7 +20,9 @@ impl From<InternalEncryptionScheme> for EncryptionScheme {
 impl Into<InternalEncryptionScheme> for EncryptionScheme {
     fn into(self) -> InternalEncryptionScheme {
         match self {
-            EncryptionScheme::Version1(value) => InternalEncryptionScheme::Version1(value.into()),
+            EncryptionScheme::Version1(value) => {
+                InternalEncryptionScheme::Version1(value.into())
+            }
         }
     }
 }

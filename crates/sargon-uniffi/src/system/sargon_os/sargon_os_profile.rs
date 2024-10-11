@@ -26,7 +26,10 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `EventNotification::new(Event::ProfileImported))` event if successful.
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
-        self.wrapped.import_profile(profile.into()).await.map_result()
+        self.wrapped
+            .import_profile(profile.into())
+            .await
+            .map_result()
     }
 
     pub fn profile(&self) -> Result<Profile> {

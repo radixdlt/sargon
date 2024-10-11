@@ -1,15 +1,7 @@
 use crate::prelude::*;
 use sargon::LegacyOlympiaAccountAddress as InternalLegacyOlympiaAccountAddress;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct LegacyOlympiaAccountAddress {
     secret_magic: Secp256k1PublicKey,
 }
@@ -83,8 +75,9 @@ pub fn legacy_olympia_account_address_is_legacy_of_babylon(
     legacy_olympia_address: &LegacyOlympiaAccountAddress,
     babylon_account_address: &AccountAddress,
 ) -> bool {
-    babylon_account_address.into_internal().was_migrated_from_legacy_olympia_account_address(
-        &legacy_olympia_address.into_internal(),
-    )
+    babylon_account_address
+        .into_internal()
+        .was_migrated_from_legacy_olympia_account_address(
+            &legacy_olympia_address.into_internal(),
+        )
 }
-

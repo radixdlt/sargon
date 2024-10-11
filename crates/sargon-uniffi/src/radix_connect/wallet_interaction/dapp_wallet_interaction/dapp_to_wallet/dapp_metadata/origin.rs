@@ -2,22 +2,14 @@ use crate::prelude::*;
 use sargon::DappOrigin as InternalDappOrigin;
 
 /// The origin of a dapp.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct DappOrigin {
     pub value: String,
 }
 
 impl From<InternalDappOrigin> for DappOrigin {
     fn from(value: InternalDappOrigin) -> Self {
-        Self {
-            value: value.0,
-        }
+        Self { value: value.0 }
     }
 }
 

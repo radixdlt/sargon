@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionAuthRequestItem as InternalDappToWalletInteractionAuthRequestItem;
 
-#[derive( Clone, PartialEq, uniffi::Enum)]
+#[derive(Clone, PartialEq, uniffi::Enum)]
 pub enum DappToWalletInteractionAuthRequestItem {
     LoginWithChallenge(
         DappToWalletInteractionAuthLoginWithChallengeRequestItem,
@@ -10,7 +10,9 @@ pub enum DappToWalletInteractionAuthRequestItem {
     UsePersona(DappToWalletInteractionAuthUsePersonaRequestItem),
 }
 
-impl From<InternalDappToWalletInteractionAuthRequestItem> for DappToWalletInteractionAuthRequestItem {
+impl From<InternalDappToWalletInteractionAuthRequestItem>
+    for DappToWalletInteractionAuthRequestItem
+{
     fn from(value: InternalDappToWalletInteractionAuthRequestItem) -> Self {
         match value {
             InternalDappToWalletInteractionAuthRequestItem::LoginWithChallenge(value) => {
@@ -26,7 +28,9 @@ impl From<InternalDappToWalletInteractionAuthRequestItem> for DappToWalletIntera
     }
 }
 
-impl Into<InternalDappToWalletInteractionAuthRequestItem> for DappToWalletInteractionAuthRequestItem {
+impl Into<InternalDappToWalletInteractionAuthRequestItem>
+    for DappToWalletInteractionAuthRequestItem
+{
     fn into(self) -> InternalDappToWalletInteractionAuthRequestItem {
         match self {
             DappToWalletInteractionAuthRequestItem::LoginWithChallenge(value) => {

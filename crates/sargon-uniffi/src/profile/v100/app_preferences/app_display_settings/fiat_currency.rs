@@ -2,14 +2,7 @@ use crate::prelude::*;
 use sargon::FiatCurrency as InternalFiatCurrency;
 
 /// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FiatCurrency {
     /// American dollars.
     USD,
@@ -36,7 +29,7 @@ impl Into<InternalFiatCurrency> for FiatCurrency {
     }
 }
 
-json_string_convertible!(FiatCurrency, "super invalid json string");
+json_string_convertible!(FiatCurrency);
 
 #[uniffi::export]
 pub fn new_fiat_currency_sample() -> FiatCurrency {
@@ -47,4 +40,3 @@ pub fn new_fiat_currency_sample() -> FiatCurrency {
 pub fn new_fiat_currency_sample_other() -> FiatCurrency {
     InternalFiatCurrency::sample_other().into()
 }
-

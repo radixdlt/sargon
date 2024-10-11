@@ -6,22 +6,16 @@ json_string_convertible!(RadixConnectPassword);
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct RadixConnectPassword {
     pub value: Exactly32Bytes,
 }
 
 impl From<InternalRadixConnectPassword> for RadixConnectPassword {
     fn from(value: InternalRadixConnectPassword) -> Self {
-        Self { value: value.value.into() }
+        Self {
+            value: value.value.into(),
+        }
     }
 }
 
@@ -54,4 +48,3 @@ pub fn radix_connect_password_message_hash(
 ) -> Hash {
     password.into_internal().message_hash().into()
 }
-

@@ -1,10 +1,9 @@
 use crate::prelude::*;
 use sargon::AccountOrPersona as InternalAccountOrPersona;
+use sargon::Identifiable;
 
 /// Either an `Account` or a `Persona`.
-#[derive(
-    Clone,  PartialEq, Hash, Eq, InternalConversion, uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Enum)]
 pub enum AccountOrPersona {
     /// An `Account`
     ///
@@ -84,4 +83,3 @@ pub fn account_or_persona_get_id(
 ) -> AddressOfAccountOrPersona {
     entity.into_internal().id().into()
 }
-

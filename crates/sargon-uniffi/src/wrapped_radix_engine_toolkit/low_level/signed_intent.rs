@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::SignedIntent as InternalSignedIntent;
 
-#[derive(Clone,  PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct SignedIntent {
     intent: TransactionIntent,
     pub intent_signatures: IntentSignatures,
@@ -39,4 +39,3 @@ pub fn new_signed_intent_sample() -> SignedIntent {
 pub fn new_signed_intent_sample_other() -> SignedIntent {
     InternalSignedIntent::sample_other().into()
 }
-

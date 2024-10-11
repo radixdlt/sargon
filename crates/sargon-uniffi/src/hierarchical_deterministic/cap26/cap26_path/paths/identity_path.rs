@@ -1,15 +1,8 @@
 use crate::prelude::*;
-use sargon::IdentityPath as InternalIdentityPath;
 use sargon::EntityCAP26Path;
+use sargon::IdentityPath as InternalIdentityPath;
 
-#[derive(
-    Clone,
-    
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct IdentityPath {
     pub path: HDPath,
 
@@ -62,6 +55,6 @@ pub fn new_identity_path(
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 ) -> IdentityPath {
-    InternalIdentityPath::new(network_id.into(), key_kind.into(), index.into()).into()
+    InternalIdentityPath::new(network_id.into(), key_kind.into(), index.into())
+        .into()
 }
-

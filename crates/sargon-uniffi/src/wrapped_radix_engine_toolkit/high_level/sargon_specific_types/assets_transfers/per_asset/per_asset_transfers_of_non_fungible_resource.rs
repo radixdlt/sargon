@@ -1,13 +1,15 @@
 use crate::prelude::*;
 use sargon::PerAssetTransfersOfNonFungibleResource as InternalPerAssetTransfersOfNonFungibleResource;
 
-#[derive(Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PerAssetTransfersOfNonFungibleResource {
     pub resource: ResourceAddress,
     pub transfers: Vec<PerAssetNonFungibleTransfer>,
 }
 
-impl From<InternalPerAssetTransfersOfNonFungibleResource> for PerAssetTransfersOfNonFungibleResource {
+impl From<InternalPerAssetTransfersOfNonFungibleResource>
+    for PerAssetTransfersOfNonFungibleResource
+{
     fn from(value: InternalPerAssetTransfersOfNonFungibleResource) -> Self {
         Self {
             resource: value.resource.into(),
@@ -16,7 +18,9 @@ impl From<InternalPerAssetTransfersOfNonFungibleResource> for PerAssetTransfersO
     }
 }
 
-impl Into<InternalPerAssetTransfersOfNonFungibleResource> for PerAssetTransfersOfNonFungibleResource {
+impl Into<InternalPerAssetTransfersOfNonFungibleResource>
+    for PerAssetTransfersOfNonFungibleResource
+{
     fn into(self) -> InternalPerAssetTransfersOfNonFungibleResource {
         InternalPerAssetTransfersOfNonFungibleResource {
             resource: self.resource.into(),
@@ -24,4 +28,3 @@ impl Into<InternalPerAssetTransfersOfNonFungibleResource> for PerAssetTransfersO
         }
     }
 }
-

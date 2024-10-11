@@ -1,31 +1,19 @@
 use crate::prelude::*;
 use sargon::Mnemonic as InternalMnemonic;
 
-#[derive(
-    Zeroize,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
 
-    #[zeroize(skip)]
     pub word_count: BIP39WordCount,
 
-    #[zeroize(skip)]
     pub language: BIP39Language,
 }
 
 impl From<InternalMnemonic> for Mnemonic {
     fn from(value: InternalMnemonic) -> Self {
         Self {
-            words: value
-                .words
-                .into_vec(),
+            words: value.words.into_vec(),
             word_count: value.word_count.into(),
             language: value.language.into(),
         }
@@ -47,13 +35,17 @@ pub fn new_mnemonic_generate_with_entropy(
     entropy: BIP39Entropy,
     language: BIP39Language,
 ) -> Mnemonic {
-    InternalMnemonic::from_entropy_in(entropy.into_internal(), language.into_internal()).into()
+    InternalMnemonic::from_entropy_in(
+        entropy.into_internal(),
+        language.into_internal(),
+    )
+    .into()
 }
 
 /// Returns new mnemonic from a string of words
 #[uniffi::export]
 pub fn new_mnemonic_from_phrase(phrase: String) -> Result<Mnemonic> {
-   InternalMnemonic::from_phrase(&phrase).map_result()
+    InternalMnemonic::from_phrase(&phrase).map_result()
 }
 
 #[uniffi::export]
@@ -144,4 +136,3 @@ pub fn new_mnemonic_sample_arculus() -> Mnemonic {
 pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
     InternalMnemonic::sample_arculus_other().into()
 }
-

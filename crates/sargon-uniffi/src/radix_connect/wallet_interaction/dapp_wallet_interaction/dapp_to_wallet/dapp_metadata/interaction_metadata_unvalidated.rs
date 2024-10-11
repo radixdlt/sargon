@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::DappToWalletInteractionMetadataUnvalidated as InternalDappToWalletInteractionMetadataUnvalidated;
 
-#[derive( PartialEq,  uniffi::Record, Clone)]
+#[derive(PartialEq, uniffi::Record, Clone)]
 pub struct DappToWalletInteractionMetadataUnvalidated {
     pub version: WalletInteractionVersion,
     pub network_id: NetworkID,
@@ -9,7 +9,9 @@ pub struct DappToWalletInteractionMetadataUnvalidated {
     pub dapp_definition_address: String,
 }
 
-impl From<InternalDappToWalletInteractionMetadataUnvalidated> for DappToWalletInteractionMetadataUnvalidated {
+impl From<InternalDappToWalletInteractionMetadataUnvalidated>
+    for DappToWalletInteractionMetadataUnvalidated
+{
     fn from(value: InternalDappToWalletInteractionMetadataUnvalidated) -> Self {
         Self {
             version: value.version.into(),
@@ -20,7 +22,9 @@ impl From<InternalDappToWalletInteractionMetadataUnvalidated> for DappToWalletIn
     }
 }
 
-impl Into<InternalDappToWalletInteractionMetadataUnvalidated> for DappToWalletInteractionMetadataUnvalidated {
+impl Into<InternalDappToWalletInteractionMetadataUnvalidated>
+    for DappToWalletInteractionMetadataUnvalidated
+{
     fn into(self) -> InternalDappToWalletInteractionMetadataUnvalidated {
         InternalDappToWalletInteractionMetadataUnvalidated {
             version: self.version.into(),

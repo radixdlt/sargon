@@ -5,14 +5,7 @@ use sargon::EmailAddress as InternalEmailAddress;
 ///
 /// Current implementation does not validate the email address other than it
 /// cannot be empty (in the future we might add some simple validation).
-#[derive(
-    Clone,
-    PartialEq,
-    Hash,
-    Eq,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct EmailAddress {
     pub email: String,
 }
@@ -25,9 +18,7 @@ impl From<InternalEmailAddress> for EmailAddress {
 
 impl Into<InternalEmailAddress> for EmailAddress {
     fn into(self) -> InternalEmailAddress {
-        InternalEmailAddress {
-            email: self.email,
-        }
+        InternalEmailAddress { email: self.email }
     }
 }
 
@@ -40,4 +31,3 @@ pub fn new_email_address_sample() -> EmailAddress {
 pub fn new_email_address_sample_other() -> EmailAddress {
     InternalEmailAddress::sample_other().into()
 }
-

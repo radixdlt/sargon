@@ -1,14 +1,7 @@
 use crate::prelude::*;
 use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
 
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct CompiledNotarizedIntent {
     secret_magic: BagOfBytes,
 }
@@ -43,4 +36,3 @@ pub fn compiled_notarized_intent_get_bytes(
 ) -> BagOfBytes {
     compiled_notarized_intent.into_internal().bytes().into()
 }
-

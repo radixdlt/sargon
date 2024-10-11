@@ -3,14 +3,7 @@ use sargon::DeviceFactorSourceHint as InternalDeviceFactorSourceHint;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(
-    
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
     pub name: String,

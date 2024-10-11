@@ -2,13 +2,7 @@ use crate::prelude::*;
 use sargon::AccountPath as InternalAccountPath;
 use sargon::EntityCAP26Path;
 
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct AccountPath {
     pub path: HDPath,
 
@@ -45,7 +39,6 @@ impl Into<InternalAccountPath> for AccountPath {
     }
 }
 
-
 #[uniffi::export]
 pub fn new_account_path_sample() -> AccountPath {
     InternalAccountPath::sample().into()
@@ -62,6 +55,6 @@ pub fn new_account_path(
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 ) -> AccountPath {
-    InternalAccountPath::new(network_id.into(), key_kind.into(), index.into()).into()
+    InternalAccountPath::new(network_id.into(), key_kind.into(), index.into())
+        .into()
 }
-

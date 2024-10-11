@@ -20,13 +20,7 @@ use sargon::PersonaData as InternalPersonaData;
 /// that the next time the user interacts with a previously authorized dApp the wallet cannot automatically
 /// respond back to dApp with the PersonaData, but user will have to re-authorize the request for ongoing
 /// access for the requested PersonaData entries.
-#[derive(
-    Clone,
-    PartialEq,
-    Hash,
-    Eq,
-     uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct PersonaData {
     /// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,
     /// or `"Jun-fan 'Bruce' Lee"` using Eastern name variant (family name comes before given name(s)).
@@ -77,4 +71,3 @@ pub fn new_persona_data_sample() -> PersonaData {
 pub fn new_persona_data_sample_other() -> PersonaData {
     InternalPersonaData::sample_other().into()
 }
-

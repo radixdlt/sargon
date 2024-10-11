@@ -1,20 +1,22 @@
 use crate::prelude::*;
-use sargon::DappToWalletInteractionTransactionItems as InternalDappToWalletInteractionTransactionItems;
 use sargon::DappToWalletInteractionSendTransactionItem as InternalDappToWalletInteractionSendTransactionItem;
+use sargon::DappToWalletInteractionTransactionItems as InternalDappToWalletInteractionTransactionItems;
 
-#[derive( Clone, PartialEq,  uniffi::Record)]
+#[derive(Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionTransactionItems {
     pub send: DappToWalletInteractionSendTransactionItem,
 }
 
-#[derive( Clone, PartialEq,  uniffi::Record)]
+#[derive(Clone, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionSendTransactionItem {
     pub unvalidated_manifest: UnvalidatedTransactionManifest,
     pub version: TXVersion,
     pub message: Option<String>,
 }
 
-impl From<InternalDappToWalletInteractionTransactionItems> for DappToWalletInteractionTransactionItems {
+impl From<InternalDappToWalletInteractionTransactionItems>
+    for DappToWalletInteractionTransactionItems
+{
     fn from(value: InternalDappToWalletInteractionTransactionItems) -> Self {
         Self {
             send: value.send.into(),
@@ -22,7 +24,9 @@ impl From<InternalDappToWalletInteractionTransactionItems> for DappToWalletInter
     }
 }
 
-impl Into<InternalDappToWalletInteractionTransactionItems> for DappToWalletInteractionTransactionItems {
+impl Into<InternalDappToWalletInteractionTransactionItems>
+    for DappToWalletInteractionTransactionItems
+{
     fn into(self) -> InternalDappToWalletInteractionTransactionItems {
         InternalDappToWalletInteractionTransactionItems {
             send: self.send.into(),
@@ -30,7 +34,9 @@ impl Into<InternalDappToWalletInteractionTransactionItems> for DappToWalletInter
     }
 }
 
-impl From<InternalDappToWalletInteractionSendTransactionItem> for DappToWalletInteractionSendTransactionItem {
+impl From<InternalDappToWalletInteractionSendTransactionItem>
+    for DappToWalletInteractionSendTransactionItem
+{
     fn from(value: InternalDappToWalletInteractionSendTransactionItem) -> Self {
         Self {
             unvalidated_manifest: value.unvalidated_manifest.into(),
@@ -40,7 +46,9 @@ impl From<InternalDappToWalletInteractionSendTransactionItem> for DappToWalletIn
     }
 }
 
-impl Into<InternalDappToWalletInteractionSendTransactionItem> for DappToWalletInteractionSendTransactionItem {
+impl Into<InternalDappToWalletInteractionSendTransactionItem>
+    for DappToWalletInteractionSendTransactionItem
+{
     fn into(self) -> InternalDappToWalletInteractionSendTransactionItem {
         InternalDappToWalletInteractionSendTransactionItem {
             unvalidated_manifest: self.unvalidated_manifest.into(),
