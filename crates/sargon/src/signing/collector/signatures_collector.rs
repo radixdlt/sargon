@@ -309,7 +309,9 @@ impl SignaturesCollector {
             .map(|f| {
                 f.factor_source_id()
                     .as_hash()
-                    .expect("Signature Collector only works with HD FactorSources.")
+                    .expect(
+                        "Signature Collector only works with HD FactorSources.",
+                    )
                     .clone()
             }) // TODO check that
             .collect::<IndexSet<FactorSourceIDFromHash>>();
