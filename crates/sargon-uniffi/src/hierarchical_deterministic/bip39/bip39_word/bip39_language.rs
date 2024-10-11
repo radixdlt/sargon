@@ -5,31 +5,13 @@ use sargon::BIP39Language as InternalBIP39Language;
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-#[derive(Clone, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+#[derive(Clone, Hash, PartialEq, Eq, InternalConversionV2, uniffi::Enum)]
 pub enum BIP39Language {
     /// The English language.
     English,
 
     /// The French language.
     French,
-}
-
-impl From<InternalBIP39Language> for BIP39Language {
-    fn from(value: InternalBIP39Language) -> Self {
-        match value {
-            InternalBIP39Language::English => Self::English,
-            InternalBIP39Language::French => Self::French,
-        }
-    }
-}
-
-impl Into<InternalBIP39Language> for BIP39Language {
-    fn into(self) -> InternalBIP39Language {
-        match self {
-            Self::English => InternalBIP39Language::English,
-            Self::French => InternalBIP39Language::French,
-        }
-    }
 }
 
 #[uniffi::export]

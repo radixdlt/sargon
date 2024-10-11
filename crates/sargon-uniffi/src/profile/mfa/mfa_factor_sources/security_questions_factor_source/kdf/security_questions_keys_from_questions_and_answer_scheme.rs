@@ -8,34 +8,12 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 as Internal
 /// N.B. Not to be confused with the much simpler password based Key Derivation used
 /// to encrypt Profile part of manual file export.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// First iteration of KDF for SecurityQuestions
     /// ❗️ NOT PRODUCTION READY YET ❗️
     Version1(SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1),
-}
-
-impl From<InternalSecurityQuestions_NOT_PRODUCTION_READY_KDFScheme>
-    for SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme
-{
-    fn from(
-        value: InternalSecurityQuestions_NOT_PRODUCTION_READY_KDFScheme,
-    ) -> Self {
-        match value {
-            InternalSecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::Version1(value) => SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::Version1(value.into()),
-        }
-    }
-}
-
-impl Into<InternalSecurityQuestions_NOT_PRODUCTION_READY_KDFScheme>
-    for SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme
-{
-    fn into(self) -> InternalSecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
-        match self {
-            SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::Version1(value) => InternalSecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::Version1(value.into()),
-        }
-    }
 }
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
