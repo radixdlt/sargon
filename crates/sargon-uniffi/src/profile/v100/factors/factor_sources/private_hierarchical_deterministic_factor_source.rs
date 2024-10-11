@@ -39,9 +39,9 @@ pub fn new_private_hd_factor_source_babylon(
     host_info: &HostInfo,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
     InternalPrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy_bytes(
-        is_main, 
-        entropy.into_internal(), 
-        &host_info.into_internal()
+        is_main,
+        entropy.into_internal(),
+        &host_info.into_internal(),
     ).map_result()
 }
 
