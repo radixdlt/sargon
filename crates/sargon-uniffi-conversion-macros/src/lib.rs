@@ -37,12 +37,21 @@ pub fn internal_conversion_derive_v2(input: TokenStream) -> TokenStream {
     // Get the name of the type the macro is applied to
     let name = input.ident;
 
-    let data = match input.data {
-        Data::Enum(data) => data,
+    let expanded = match input.data {
+        Data::Enum(data) => {
+            handle_enum(&name, data)
+        },
+        Data::Struct(data_struct) => {
+            unimplemented!("TODO")
+        }
         _ => panic!("FromInto can only be derived for enums"),
     };
 
-    // Construct the name of the internal type by prefixing with "Internal"
+    // Convert the generated code into a TokenStream and return it
+    TokenStream::from(expanded)
+}
+
+fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStream {
     let internal_name = quote::format_ident!("Internal{}", name);
     let test_mod_name = Ident::new(&format!("{}_tests", name.to_string().to_lowercase()), name.span());
 
@@ -199,7 +208,7 @@ pub fn internal_conversion_derive_v2(input: TokenStream) -> TokenStream {
     });
 
     // Generate the implementation of the `into_internal()` function
-    let expanded = quote! {
+    quote! {
         impl #name {
             pub fn into_internal(&self) -> #internal_name {
                 self.clone().into()
@@ -228,8 +237,5 @@ pub fn internal_conversion_derive_v2(input: TokenStream) -> TokenStream {
 
             #(#test_cases)*
         }
-    };
-
-    // Convert the generated code into a TokenStream and return it
-    TokenStream::from(expanded)
+    }
 }
