@@ -150,14 +150,13 @@ impl Profile {
             .collect_vec();
 
         main_factors.iter().for_each(|id| {
-            _ = profile.factor_sources.update_with(id, |f| {
-                _ = f
-                    .as_device_mut()
+            profile.factor_sources.update_with(id, |f| {
+                f.as_device_mut()
                     .unwrap()
                     .common
                     .flags
-                    .remove_id(&FactorSourceFlag::Main)
-            })
+                    .remove_id(&FactorSourceFlag::Main);
+            });
         });
 
         profile
@@ -267,7 +266,7 @@ mod tests {
     )]
     fn bdfs_fail_for_invalid_profile_without_device_factor_source() {
         let profile = Profile::sample_no_device_factor_source();
-        _ = profile.bdfs();
+        profile.bdfs();
     }
 
     #[test]
@@ -276,7 +275,7 @@ mod tests {
     )]
     fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
         let profile = Profile::sample_no_babylon_device_factor_source();
-        _ = profile.bdfs();
+        profile.bdfs();
     }
 
     #[test]
