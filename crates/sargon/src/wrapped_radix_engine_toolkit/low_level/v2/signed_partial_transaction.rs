@@ -41,8 +41,10 @@ impl TryFrom<ScryptoSignedPartialTransaction> for SignedPartialTransaction {
             value.partial_transaction.root_subintent.try_into()?;
         let non_root_subintents: NonRootSubintents =
             value.partial_transaction.non_root_subintents.try_into()?;
-        let partial_transaction =
-            PartialTransaction::new(root_subintent.clone(), non_root_subintents);
+        let partial_transaction = PartialTransaction::new(
+            root_subintent.clone(),
+            non_root_subintents,
+        );
         let root_subintent_signatures: IntentSignaturesV2 = (
             value.root_subintent_signatures,
             root_subintent.transaction_intent_hash().hash,
