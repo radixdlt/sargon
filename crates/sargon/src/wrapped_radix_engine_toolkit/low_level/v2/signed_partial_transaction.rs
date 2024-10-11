@@ -3,14 +3,14 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct SignedPartialTransaction {
     pub partial_transaction: PartialTransaction,
-    pub root_subintent_signatures: IntentSignatures,
+    pub root_subintent_signatures: IntentSignaturesV2,
     pub non_root_subintent_signatures: NonRootSubintentSignatures,
 }
 
 impl SignedPartialTransaction {
     pub fn new(
         partial_transaction: PartialTransaction,
-        root_subintent_signatures: IntentSignatures,
+        root_subintent_signatures: IntentSignaturesV2,
         non_root_subintent_signatures: NonRootSubintentSignatures,
     ) -> Self {
         Self {
@@ -26,29 +26,39 @@ impl From<SignedPartialTransaction> for ScryptoSignedPartialTransaction {
         Self {
             partial_transaction: value.partial_transaction.into(),
             root_subintent_signatures: value.root_subintent_signatures.into(),
-            non_root_subintent_signatures: value.non_root_subintent_signatures.into(),
+            non_root_subintent_signatures: value
+                .non_root_subintent_signatures
+                .into(),
         }
     }
 }
 
-// impl TryFrom<ScryptoSignedPartialTransaction> for SignedPartialTransaction {
-//     type Error = crate::CommonError;
-//
-//     fn try_from(value: ScryptoSignedPartialTransaction) -> Result<Self> {
-//         let hash = value.partial_transaction.root_subintent.subintent_hash();
-//         Ok(Self {
-//             partial_transaction: value.partial_transaction.try_into()?,
-//             root_subintent_signatures: value.root_subintent_signatures.try_into()?,
-//             non_root_subintent_signatures: value.non_root_subintent_signatures.try_into()?,
-//         })
-//     }
-// }
+impl TryFrom<ScryptoSignedPartialTransaction> for SignedPartialTransaction {
+    type Error = crate::CommonError;
+
+    fn try_from(value: ScryptoSignedPartialTransaction) -> Result<Self> {
+        let root_subintent: Subintent =
+            value.partial_transaction.root_subintent.try_into()?;
+        let partial_transaction =
+            PartialTransaction::with_root_subintent(root_subintent.clone());
+        let root_subintent_signatures: IntentSignaturesV2 = (
+            value.root_subintent_signatures,
+            root_subintent.transaction_intent_hash().hash,
+        )
+            .try_into()?;
+        Ok(Self {
+            partial_transaction,
+            root_subintent_signatures,
+            non_root_subintent_signatures: Default::default(),
+        })
+    }
+}
 
 impl HasSampleValues for SignedPartialTransaction {
     fn sample() -> Self {
         Self {
             partial_transaction: PartialTransaction::sample(),
-            root_subintent_signatures: IntentSignatures::sample(),
+            root_subintent_signatures: IntentSignaturesV2::sample(),
             non_root_subintent_signatures: NonRootSubintentSignatures::sample(),
         }
     }
@@ -56,8 +66,9 @@ impl HasSampleValues for SignedPartialTransaction {
     fn sample_other() -> Self {
         Self {
             partial_transaction: PartialTransaction::sample_other(),
-            root_subintent_signatures: IntentSignatures::sample_other(),
-            non_root_subintent_signatures: NonRootSubintentSignatures::sample_other(),
+            root_subintent_signatures: IntentSignaturesV2::sample_other(),
+            non_root_subintent_signatures:
+                NonRootSubintentSignatures::sample_other(),
         }
     }
 }
@@ -80,12 +91,12 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
-    // #[test]
-    // fn to_from_scrypto() {
-    //     let roundtrip = |s: SUT| {
-    //         SUT::try_from(ScryptoSignedPartialTransaction::from(s)).unwrap()
-    //     };
-    //     roundtrip(SUT::sample());
-    //     roundtrip(SUT::sample_other());
-    // }
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            SUT::try_from(ScryptoSignedPartialTransaction::from(s)).unwrap()
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
 }

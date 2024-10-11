@@ -54,10 +54,10 @@ impl GatewayClient {
 }
 
 impl GatewayClient {
-    /// Returns the status of a transaction by its `IntentHash`.
+    /// Returns the status of a transaction by its `TransactionIntentHash`.
     pub async fn get_transaction_status(
         &self,
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
     ) -> Result<TransactionStatusResponse> {
         let request = TransactionStatusRequest::new(intent_hash.to_string());
         self.transaction_status(request).await

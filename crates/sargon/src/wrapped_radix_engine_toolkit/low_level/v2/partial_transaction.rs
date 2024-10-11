@@ -16,6 +16,13 @@ impl PartialTransaction {
             non_root_subintents,
         }
     }
+
+    pub fn with_root_subintent(root_subintent: Subintent) -> Self {
+        Self {
+            root_subintent,
+            non_root_subintents: NonRootSubintents::default(),
+        }
+    }
 }
 
 impl From<PartialTransaction> for ScryptoPartialTransaction {

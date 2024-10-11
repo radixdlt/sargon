@@ -217,6 +217,7 @@ pub mod prelude {
             SignatureV1 as ScryptoSignature,
             SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
             SignedIntentV1 as ScryptoSignedIntent,
+            SignedPartialTransactionV2 as ScryptoSignedPartialTransaction,
             SignedTransactionIntentHash as ScryptoSignedTransactionIntentHash,
             SubintentHash as ScryptoSubintentHash,
             SubintentV2 as ScryptoSubintent,
@@ -224,7 +225,6 @@ pub mod prelude {
             TransactionHashBech32Encoder as ScryptoTransactionHashBech32Encoder,
             TransactionHeaderV1 as ScryptoTransactionHeader,
             TransactionIntentHash as ScryptoTransactionIntentHash,
-            SignedPartialTransactionV2 as ScryptoSignedPartialTransaction,
         },
         prelude::{
             TransactionManifestV1 as ScryptoTransactionManifest,
@@ -269,6 +269,7 @@ pub mod prelude {
                     to_payload_bytes as RET_compile_notarized_tx_v2,
                 },
                 signed_transaction_intent::hash as RET_signed_intent_hash_v2,
+                subintent::hash as ret_hash_subintent,
             },
         },
         models::{

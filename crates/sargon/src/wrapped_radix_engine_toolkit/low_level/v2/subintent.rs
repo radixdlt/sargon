@@ -5,6 +5,18 @@ pub struct Subintent {
     pub intent_core: IntentCoreV2,
 }
 
+impl Subintent {
+    pub fn transaction_intent_hash(&self) -> TransactionIntentHash {
+        let hash = ret_hash_subintent(&ScryptoSubintent::from(self.clone()))
+            .expect("Should never fail to hash an subintent. Sargon should only produce valid Subintents");
+
+        TransactionIntentHash::from_scrypto(
+            ScryptoTransactionIntentHash(hash.hash),
+            self.intent_core.header.network_id,
+        )
+    }
+}
+
 impl From<Subintent> for ScryptoSubintent {
     fn from(value: Subintent) -> Self {
         Self {

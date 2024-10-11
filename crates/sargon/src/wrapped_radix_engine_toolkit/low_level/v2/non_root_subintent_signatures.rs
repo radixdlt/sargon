@@ -2,13 +2,13 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, uniffi::Record)]
 pub struct NonRootSubintentSignatures {
-    pub by_subintent: Vec<IntentSignatures>,
+    pub by_subintent: Vec<IntentSignaturesV2>,
 }
 
 impl NonRootSubintentSignatures {
     pub fn new<I>(by_subintent: I) -> Self
     where
-        I: IntoIterator<Item = IntentSignatures>,
+        I: IntoIterator<Item = IntentSignaturesV2>,
     {
         Self {
             by_subintent: by_subintent.into_iter().collect(),
@@ -28,14 +28,6 @@ impl From<NonRootSubintentSignatures> for ScryptoNonRootSubintentSignatures {
     }
 }
 
-impl From<IntentSignatures> for ScryptoIntentSignaturesV2 {
-    fn from(value: IntentSignatures) -> Self {
-        Self {
-            signatures: value.signatures.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
 impl TryFrom<(ScryptoNonRootSubintentSignatures, Hash)>
     for NonRootSubintentSignatures
 {
@@ -49,27 +41,22 @@ impl TryFrom<(ScryptoNonRootSubintentSignatures, Hash)>
             .by_subintent
             .into_iter()
             .map(|s| {
-                TryInto::<IntentSignatures>::try_into((
-                    ScryptoIntentSignatures {
-                        signatures: s.signatures,
-                    },
-                    value.1.to_owned(),
-                ))
+                TryInto::<IntentSignaturesV2>::try_into((s, value.1.to_owned()))
             })
-            .collect::<Result<Vec<IntentSignatures>>>()
+            .collect::<Result<Vec<IntentSignaturesV2>>>()
             .map(Self::new)
     }
 }
 
 impl HasSampleValues for NonRootSubintentSignatures {
     fn sample() -> Self {
-        Self::new(vec![IntentSignatures::sample()])
+        Self::new(vec![IntentSignaturesV2::sample()])
     }
 
     fn sample_other() -> Self {
         Self::new(vec![
-            IntentSignatures::sample(),
-            IntentSignatures::sample_other(),
+            IntentSignaturesV2::sample(),
+            IntentSignaturesV2::sample_other(),
         ])
     }
 }
@@ -95,7 +82,11 @@ mod tests {
     #[test]
     fn to_from_scrypto() {
         let roundtrip = |s: SUT| {
-            SUT::try_from((ScryptoNonRootSubintentSignatures::from(s), Hash::sample())).unwrap()
+            SUT::try_from((
+                ScryptoNonRootSubintentSignatures::from(s),
+                Hash::sample(),
+            ))
+            .unwrap()
         };
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
