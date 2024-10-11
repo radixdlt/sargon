@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     PartialEq,
     Eq,
@@ -10,7 +9,11 @@ use crate::prelude::*;
     Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
 )]
 pub struct TransactionPreviewRequestFlags {
-    pub(crate) use_free_credit: bool,
-    pub(crate) assume_all_signature_proofs: bool,
-    pub(crate) skip_epoch_check: bool,
+    pub(crate) use_free_credit: UseFreeCredit,
+    pub(crate) assume_all_signature_proofs: AssumeAllSignatureProofs,
+    pub(crate) skip_epoch_check: SkipEpochCheck,
 }
+
+decl_bool_type!(UseFreeCredit, true);
+decl_bool_type!(AssumeAllSignatureProofs, false);
+decl_bool_type!(SkipEpochCheck, false);

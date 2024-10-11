@@ -3,26 +3,10 @@ use crate::prelude::*;
 use radix_engine_toolkit::functions::manifest::execution_summary as RET_execution_summary;
 
 impl TransactionManifest {
-    /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt` data.
-    ///
-    /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
-    /// The field will be a JSON that host apps should parse into a transaction preview.
-    pub fn execution_summary(
-        &self,
-        engine_toolkit_receipt: impl AsRef<str>,
-    ) -> Result<ExecutionSummary> {
-        let deserialized_receipt = serde_json::from_str::<
-            ScryptoSerializableToolkitTransactionReceipt,
-        >(engine_toolkit_receipt.as_ref())
-        .ok()
-        .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
-        self.execution_summary_with_engine_toolkit_receipt(deserialized_receipt)
-    }
-
     /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt`.
     ///
     /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
-    pub fn execution_summary_with_engine_toolkit_receipt(
+    pub fn execution_summary(
         &self,
         engine_toolkit_receipt: ScryptoSerializableToolkitTransactionReceipt,
     ) -> Result<ExecutionSummary> {
@@ -70,14 +54,6 @@ mod tests {
     type SUT = ExecutionSummary;
 
     #[test]
-    fn invalid_receipt() {
-        assert_eq!(
-            TransactionManifest::sample().execution_summary("dead"),
-            Err(CommonError::FailedToDecodeEngineToolkitReceipt)
-        );
-    }
-
-    #[test]
     fn failure_if_receipt_result_is_abort() {
         let wrong_receipt = ScryptoRuntimeToolkitTransactionReceipt::Abort {
             reason: "whatever".to_owned(),
@@ -104,10 +80,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "transfer_1to2_multiple_nf_and_f_tokens.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "transfer_1to2_multiple_nf_and_f_tokens.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -212,10 +188,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "third_party_deposits_update.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "third_party_deposits_update.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -278,10 +254,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "create_single_fungible.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "create_single_fungible.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -329,10 +305,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "create_nft_collection.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "create_nft_collection.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -416,10 +392,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "mint_nft_gumball_card.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "mint_nft_gumball_card.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -489,10 +465,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "present_proof_swap_candy.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "present_proof_swap_candy.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -546,8 +522,10 @@ mod tests {
         let instructions_string =
             include_str!(concat!(env!("FIXTURES_TX"), "create_pool.rtm"));
 
-        let receipt =
-            include_str!(concat!(env!("FIXTURES_TX"), "create_pool.dat"));
+        let receipt = deserialize_receipt(include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_pool.dat"
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -586,10 +564,10 @@ mod tests {
             "contribute_to_bi_pool.rtm"
         ));
 
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "contribute_to_bi_pool.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -642,10 +620,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "stake_to_three_validators.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "stake_to_three_validators.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -721,10 +699,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "redeem_from_bi_pool.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "redeem_from_bi_pool.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -778,10 +756,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "unstake_partially_from_one_validator.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "unstake_partially_from_one_validator.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -861,10 +839,10 @@ mod tests {
             env!("FIXTURES_TX"),
             "claim_two_stakes_from_one_validator.rtm"
         ));
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "claim_two_stakes_from_one_validator.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -938,10 +916,10 @@ mod tests {
             "account_locker_claim_fungibles_and_non_fungibles.rtm"
         ));
 
-        let receipt = include_str!(concat!(
+        let receipt = deserialize_receipt(include_str!(concat!(
             env!("FIXTURES_TX"),
             "account_locker_claim_fungibles_and_non_fungibles.dat"
-        ));
+        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -989,5 +967,14 @@ mod tests {
                 NewEntities::default()
             )
         );
+    }
+
+    fn deserialize_receipt(
+        value: impl AsRef<str>,
+    ) -> ScryptoSerializableToolkitTransactionReceipt {
+        serde_json::from_str::<ScryptoSerializableToolkitTransactionReceipt>(
+            &value.as_ref(),
+        )
+        .unwrap()
     }
 }

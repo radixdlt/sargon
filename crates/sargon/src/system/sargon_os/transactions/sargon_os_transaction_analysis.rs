@@ -4,6 +4,11 @@ use crate::prelude::*;
 
 #[uniffi::export]
 impl SargonOS {
+    /// Performs initial transaction analysis for a given raw manifest, including:
+    /// 1. Extracting the transaction signers.
+    /// 2. Executing the transaction preview GW request.
+    /// 3. Running the execution summary with the manifest and receipt.
+    /// Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_transaction_preview(
         &self,
         instructions: String,
@@ -25,13 +30,28 @@ impl SargonOS {
     }
 }
 
+/// Part of the error message indicating the deposits are denied for the account.
+const GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED: &'static str =
+    "AccountError(DepositIsDisallowed";
+/// Part of the error message indicating the deposits are denied for some of the accounts.
+const GW_ERR_NOT_ALL_COULD_BE_DEPOSITED: &'static str =
+    "AccountError(NotAllBucketsCouldBeDeposited";
+
 impl SargonOS {
+    /// Performs initial transaction analysis for a given raw manifest, including:
+    /// 1. Extracting the transaction signers.
+    /// 2. Executing the transaction preview GW request.
+    /// 3. Running the execution summary with the manifest and receipt.
+    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    /// This is the internal implementation of `analyse_transaction_preview`, which is the public API.
+    /// Returns `TransactionToReview`, which includes the manifest and the execution summary.
     pub async fn perform_transaction_preview_analysis(
         &self,
         instructions: String,
         blobs: Blobs,
         message: Message,
-        is_wallet_transaction: bool,
+        are_instructions_originating_from_host: bool,
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
@@ -59,13 +79,11 @@ impl SargonOS {
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
         // Analyze the manifest
-        let execution_summary = transaction_manifest
-            .execution_summary_with_engine_toolkit_receipt(
-                engine_toolkit_receipt,
-            )?;
+        let execution_summary =
+            transaction_manifest.execution_summary(engine_toolkit_receipt)?;
 
         // Transactions created outside of the Wallet are not allowed to use reserved instructions
-        if !is_wallet_transaction
+        if !are_instructions_originating_from_host
             && !execution_summary.reserved_instructions.is_empty()
         {
             return Err(
@@ -94,13 +112,14 @@ impl SargonOS {
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionPreviewResponse> {
-        let signer_public_keys =
-            self.extract_transaction_signers(manifest.summary()).await?;
+        let signer_public_keys = self
+            .extract_transaction_signer_public_keys(manifest.summary())
+            .await?;
         let epoch = gateway_client.current_epoch().await?;
         let header = TransactionHeader::new(
             network_id,
             epoch,
-            Epoch::from(epoch.0 + 10),
+            Epoch::window_end_from_start(epoch),
             nonce,
             notary_public_key,
             signer_public_keys.is_empty(),
@@ -110,7 +129,7 @@ impl SargonOS {
         let request = TransactionPreviewRequest::new(
             intent,
             signer_public_keys,
-            TransactionPreviewRequestFlags::new(true, false, false),
+            TransactionPreviewRequestFlags::default(),
         );
         let response = gateway_client.transaction_preview(request).await?;
         if response.receipt.status != TransactionReceiptStatus::Succeeded {
@@ -130,8 +149,8 @@ impl SargonOS {
         // Quite rudimentary, but it is not worth making something smarter,
         // as the GW will provide in the future strongly typed errors
         let is_failure_due_to_deposit_rules = message
-            .contains("AccountError(DepositIsDisallowed")
-            || message.contains("AccountError(NotAllBucketsCouldBeDeposited");
+            .contains(GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED)
+            || message.contains(GW_ERR_NOT_ALL_COULD_BE_DEPOSITED);
 
         if is_failure_due_to_deposit_rules {
             CommonError::OneOfReceivingAccountsDoesNotAllowDeposits
@@ -142,14 +161,18 @@ impl SargonOS {
         }
     }
 
-    async fn extract_transaction_signers(
+    async fn extract_transaction_signer_public_keys(
         &self,
         manifest_summary: ManifestSummary,
     ) -> Result<IndexSet<PublicKey>> {
         let signer_entities = self
             .extract_transaction_signer_entities(manifest_summary.clone())
             .await?;
-        Ok(self.extract_transaction_signers_public_keys(signer_entities))
+        Ok(self
+            .extract_transaction_signers_factor_instances(signer_entities)
+            .iter()
+            .map(|fi| fi.public_key)
+            .collect())
     }
 
     async fn extract_transaction_signer_entities(
@@ -161,48 +184,46 @@ impl SargonOS {
         let personas =
             self.profile_state_holder.personas_on_current_network()?;
 
-        let account_entities: IndexSet<_> = manifest_summary
+        let account_entities = manifest_summary
             .addresses_of_accounts_requiring_auth
             .iter()
-            .filter_map(|address| {
+            .map(|address| {
                 accounts
                     .iter()
                     .find(|account| account.address == *address)
                     .map(AccountOrPersona::AccountEntity)
+                    .ok_or(CommonError::EntityNotFound)
             })
-            .collect();
+            .collect::<Result<IndexSet<_>>>()?;
         let persona_entities: IndexSet<_> = manifest_summary
             .addresses_of_personas_requiring_auth
             .iter()
-            .filter_map(|address| {
+            .map(|address| {
                 personas
                     .iter()
                     .find(|persona| persona.address == *address)
                     .map(AccountOrPersona::PersonaEntity)
+                    .ok_or(CommonError::EntityNotFound)
             })
-            .collect();
+            .collect::<Result<IndexSet<_>>>()?;
         let mut signer_entities: IndexSet<AccountOrPersona> = IndexSet::new();
         signer_entities.extend(account_entities);
         signer_entities.extend(persona_entities);
         Ok(signer_entities)
     }
 
-    fn extract_transaction_signers_public_keys(
+    fn extract_transaction_signers_factor_instances(
         &self,
         signers: IndexSet<AccountOrPersona>,
-    ) -> IndexSet<PublicKey> {
+    ) -> IndexSet<HierarchicalDeterministicPublicKey> {
         signers
             .iter()
             .flat_map(|entity| {
-                let public_keys: IndexSet<PublicKey> = entity
-                    .virtual_hierarchical_deterministic_factor_instances()
-                    .iter()
-                    .map(|factor_instance| {
-                        factor_instance.public_key.public_key
-                    })
-                    .collect();
-                public_keys
+                entity.virtual_hierarchical_deterministic_factor_instances(
+                    CAP26KeyKind::TransactionSigning,
+                )
             })
+            .map(|fi| fi.public_key)
             .collect()
     }
 }
@@ -210,6 +231,7 @@ impl SargonOS {
 #[cfg(test)]
 mod transaction_preview_analysis_tests {
     use super::*;
+    use radix_common::prelude::Decimal;
     use std::sync::Mutex;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -266,7 +288,7 @@ mod transaction_preview_analysis_tests {
 
         let result = os
             .perform_transaction_preview_analysis(
-                TransactionManifest::sample().instructions_string(),
+                prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
                 false,
@@ -304,7 +326,7 @@ mod transaction_preview_analysis_tests {
 
         let result = os
             .perform_transaction_preview_analysis(
-                TransactionManifest::sample().instructions_string(),
+                prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
                 false,
@@ -370,10 +392,11 @@ mod transaction_preview_analysis_tests {
         let os =
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
+        let manifest = prepare_manifest_with_account_entity();
 
         let result = os
             .perform_transaction_preview_analysis(
-                TransactionManifest::sample().instructions_string(),
+                manifest.instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
                 false,
@@ -389,7 +412,7 @@ mod transaction_preview_analysis_tests {
 
         let result = os
             .perform_transaction_preview_analysis(
-                TransactionManifest::sample().instructions_string(),
+                manifest.instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
                 false,
@@ -430,7 +453,9 @@ mod transaction_preview_analysis_tests {
         let manifest = TransactionManifest::set_owner_keys_hashes(
             &IdentityAddress::sample().into(),
             AccountOrPersona::sample_mainnet_other()
-                .virtual_hierarchical_deterministic_factor_instances()
+                .virtual_hierarchical_deterministic_factor_instances(
+                    CAP26KeyKind::TransactionSigning,
+                )
                 .into_iter()
                 .map(|i| PublicKeyHash::hash(i.public_key.public_key))
                 .collect(),
@@ -454,7 +479,7 @@ mod transaction_preview_analysis_tests {
     }
 
     #[actix_rt::test]
-    async fn execution_summary_parse_error() {
+    async fn signer_entities_not_found() {
         let responses = prepare_responses(
             LedgerState {
                 network: "".to_string(),
@@ -492,6 +517,48 @@ mod transaction_preview_analysis_tests {
             )
             .await;
 
+        assert_eq!(result, Err(CommonError::EntityNotFound))
+    }
+
+    #[actix_rt::test]
+    async fn execution_summary_parse_error() {
+        let responses = prepare_responses(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
+            TransactionPreviewResponse {
+                encoded_receipt: "".to_string(),
+                radix_engine_toolkit_receipt: Some(
+                    ScryptoSerializableToolkitTransactionReceipt::Reject {
+                        reason: "Test".to_string(),
+                    },
+                ),
+                logs: vec![],
+                receipt: TransactionReceipt {
+                    status: TransactionReceiptStatus::Succeeded,
+                    error_message: None,
+                },
+            },
+        );
+        let os =
+            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
+                .await;
+
+        let result = os
+            .perform_transaction_preview_analysis(
+                prepare_manifest_with_account_entity().instructions_string(),
+                Blobs::sample(),
+                Message::sample(),
+                false,
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await;
+
         assert_eq!(
             result,
             Err(CommonError::ExecutionSummaryFail {
@@ -502,6 +569,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn execution_summary_reserved_instructions_error() {
+        let zero = ScryptoDecimal192::zero();
         let responses = prepare_responses(
             LedgerState {
                 network: "".to_string(),
@@ -521,14 +589,14 @@ mod transaction_preview_analysis_tests {
                     },
                     worktop_changes: IndexMap::new(),
                     fee_summary: native_radix_engine_toolkit::receipt::FeeSummary {
-                        execution_fees_in_xrd: ScryptoDecimal192::zero().into(),
-                        finalization_fees_in_xrd: ScryptoDecimal192::zero().into(),
-                        storage_fees_in_xrd: ScryptoDecimal192::zero().into(),
-                        royalty_fees_in_xrd: ScryptoDecimal192::zero().into(),
+                        execution_fees_in_xrd: zero.into(),
+                        finalization_fees_in_xrd: zero.into(),
+                        storage_fees_in_xrd: zero.into(),
+                        royalty_fees_in_xrd: zero.into(),
                     },
                     locked_fees: native_radix_engine_toolkit::receipt::LockedFees {
-                        contingent: ScryptoDecimal192::zero().into(),
-                        non_contingent: ScryptoDecimal192::zero().into(),
+                        contingent: zero.into(),
+                        non_contingent: zero.into(),
                     },
                 }),
                 logs: vec![],
@@ -544,7 +612,7 @@ mod transaction_preview_analysis_tests {
 
         let result = os
             .perform_transaction_preview_analysis(
-                Instructions::sample_mainnet().instructions_string(),
+                prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
                 false,
@@ -602,11 +670,12 @@ mod transaction_preview_analysis_tests {
         let os =
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
-        let acc: AccountAddress = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into();
+        let acc: AccountAddress = Account::sample().address;
+        let manifest = prepare_manifest_with_account_entity();
 
         let result = os
             .analyse_transaction_preview(
-                Instructions::sample_mainnet().instructions_string(),
+                manifest.instructions_string(),
                 Blobs::default(),
                 Message::sample(),
                 true,
@@ -617,54 +686,24 @@ mod transaction_preview_analysis_tests {
 
         assert_eq!(
             result,
-            Ok(
-                TransactionToReview {
-                    transaction_manifest: TransactionManifest::sample(),
-                    execution_summary: ExecutionSummary::new(
-                        [
-                            (
-                                acc,
-                                vec![
-                                    ResourceIndicator::fungible(
-                                        "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
-                                        FungibleResourceIndicator::guaranteed("1337")
-                                    ),
-                                ]
-                            )
-                        ], //withdrawals
-                        [
-                            (
-                                AccountAddress::from("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"),
-                                vec![
-                                    ResourceIndicator::fungible(
-                                        "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
-                                        FungibleResourceIndicator::guaranteed("1337")
-                                    ),
-                                ]
-                            ),
-                        ], //deposits
-                        [acc],
-                        [],
-                        [],
-                        [ReservedInstruction::AccountLockFee],
-                        [],
-                        [],
-                        [
-                            DetailedManifestClass::Transfer {
-                                is_one_to_one: true
-                            },
-                            DetailedManifestClass::General
-                        ],
-                        FeeLocks::default(),
-                        FeeSummary::new(
-                            "0",
-                            "0",
-                            "0",
-                            0,
-                        ),
-                        NewEntities::default()
-            )
-                }))
+            Ok(TransactionToReview {
+                transaction_manifest: manifest,
+                execution_summary: ExecutionSummary::new(
+                    [],
+                    [],
+                    [acc],
+                    [],
+                    [],
+                    [ReservedInstruction::AccountLockFee],
+                    [],
+                    [],
+                    [],
+                    FeeLocks::default(),
+                    FeeSummary::new("0", "0", "0", 0,),
+                    NewEntities::default()
+                )
+            })
+        )
     }
 
     async fn prepare_os(
@@ -684,6 +723,21 @@ mod transaction_preview_analysis_tests {
             })
             .unwrap();
         os
+    }
+
+    fn prepare_manifest_with_account_entity() -> TransactionManifest {
+        let account = Account::sample_mainnet();
+        TransactionManifest::set_owner_keys_hashes(
+            &account.address.into(),
+            AccountOrPersona::sample_mainnet()
+                .virtual_hierarchical_deterministic_factor_instances(
+                    CAP26KeyKind::TransactionSigning,
+                )
+                .into_iter()
+                .map(|i| PublicKeyHash::hash(i.public_key.public_key))
+                .collect(),
+        )
+        .modify_add_lock_fee(&account.address, Some(Decimal192::zero()))
     }
 
     fn prepare_responses(

@@ -156,8 +156,10 @@ mod tests {
     #[test]
     fn test_virtual_hierarchical_deterministic_factor_instances() {
         let mut sut = SUT::sample();
-        let mut factor_instances =
-            sut.virtual_hierarchical_deterministic_factor_instances();
+        let mut factor_instances = sut
+            .virtual_hierarchical_deterministic_factor_instances(
+                CAP26KeyKind::TransactionSigning,
+            );
         assert_eq!(factor_instances.len(), 1);
         assert_eq!(
             factor_instances.iter().next().unwrap().clone(),
@@ -165,8 +167,10 @@ mod tests {
         );
 
         sut = SUT::sample_other();
-        factor_instances =
-            sut.virtual_hierarchical_deterministic_factor_instances();
+        factor_instances = sut
+            .virtual_hierarchical_deterministic_factor_instances(
+                CAP26KeyKind::TransactionSigning,
+            );
         let mwp = MnemonicWithPassphrase::sample();
         let bdfs = DeviceFactorSource::babylon(true, &mwp, &HostInfo::sample());
         let private_hd_factor_source =

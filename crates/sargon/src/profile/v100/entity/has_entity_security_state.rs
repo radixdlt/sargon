@@ -5,6 +5,7 @@ pub trait HasEntitySecurityState {
 
     fn virtual_hierarchical_deterministic_factor_instances(
         &self,
+        filter_key_kind: impl Into<Option<CAP26KeyKind>>,
     ) -> IndexSet<HierarchicalDeterministicFactorInstance> {
         let mut factor_instances: IndexSet<
             HierarchicalDeterministicFactorInstance,
@@ -19,6 +20,12 @@ pub trait HasEntitySecurityState {
                 }
             }
         }
+        let Some(key_kind) = filter_key_kind.into() else {
+            return factor_instances;
+        };
         factor_instances
+            .into_iter()
+            .filter(|fi| fi.key_kind() == Some(key_kind))
+            .collect()
     }
 }

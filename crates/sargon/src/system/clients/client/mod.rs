@@ -6,6 +6,7 @@ mod http_client;
 mod profile_change_client;
 mod secure_storage_client;
 mod unsafe_storage_client;
+
 pub use entropy_client::*;
 pub use event_bus_client::*;
 pub use file_system_client::*;
