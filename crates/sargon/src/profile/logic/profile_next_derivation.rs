@@ -86,7 +86,7 @@ impl Profile {
                             value.transaction_signing.factor_source_id
                                 == factor_source_id
                         }
-                        EntitySecurityState::Securified { value } => {
+                        EntitySecurityState::Securified { value: _ } => {
                             panic!("TODO check that") // TODO check that
                         }
                     })

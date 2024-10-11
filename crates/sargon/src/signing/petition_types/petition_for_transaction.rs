@@ -269,7 +269,7 @@ mod tests {
     fn all_relevant_factor_instances_of_source_ok() {
         let intent_hash = IntentHash::sample();
 
-        let account = Account::a5();
+        let account = Account::sample_at(5);
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()
@@ -311,7 +311,7 @@ mod tests {
     fn all_relevant_factor_instances_of_source_panics_if_invalid() {
         let intent_hash = IntentHash::sample();
 
-        let account = Account::a5();
+        let account = Account::sample_at(5);
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()
