@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::UnvalidatedTransactionManifest as InternalUnvalidatedTransactionManifest;
 
 #[derive(
-    Clone, PartialEq, Eq,   uniffi::Record,
+    Clone, PartialEq, Eq, InternalConversion, uniffi::Record,
 )]
 pub struct UnvalidatedTransactionManifest {
     pub transaction_manifest_string: String,

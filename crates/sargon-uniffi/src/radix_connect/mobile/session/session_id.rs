@@ -7,6 +7,7 @@ use sargon::SessionID as InternalSessionID;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct SessionID {

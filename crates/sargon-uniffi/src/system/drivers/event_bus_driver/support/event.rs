@@ -31,11 +31,11 @@ impl From<InternalEvent> for Event {
     fn from(value: InternalEvent) -> Self {
         match value {
             InternalEvent::Booted => Event::Booted,
-            InternalEvent::GatewayChangedCurrent { to, is_new } => Event::GatewayChangedCurrent { to, is_new },
+            InternalEvent::GatewayChangedCurrent { to, is_new } => Event::GatewayChangedCurrent { to: to.into(), is_new: is_new },
             InternalEvent::ProfileSaved => Event::ProfileSaved,
-            InternalEvent::ProfileImported { id } => Event::ProfileImported { id },
-            InternalEvent::ProfileModified { change } => Event::ProfileModified { change },
-            InternalEvent::ProfileUsedOnOtherDevice(device_info) => Event::ProfileUsedOnOtherDevice(device_info),
+            InternalEvent::ProfileImported { id } => Event::ProfileImported { id: id.into() },
+            InternalEvent::ProfileModified { change } => Event::ProfileModified { change: change.into() },
+            InternalEvent::ProfileUsedOnOtherDevice(device_info) => Event::ProfileUsedOnOtherDevice(device_info.into()),
         }
     }
 }
@@ -44,17 +44,17 @@ impl Into<InternalEvent> for Event {
     fn into(self) -> InternalEvent {
         match self {
             Event::Booted => InternalEvent::Booted,
-            Event::GatewayChangedCurrent { to, is_new } => InternalEvent::GatewayChangedCurrent { to, is_new },
+            Event::GatewayChangedCurrent { to, is_new } => InternalEvent::GatewayChangedCurrent { to: to.into(), is_new },
             Event::ProfileSaved => InternalEvent::ProfileSaved,
-            Event::ProfileImported { id } => InternalEvent::ProfileImported { id },
-            Event::ProfileModified { change } => InternalEvent::ProfileModified { change },
-            Event::ProfileUsedOnOtherDevice(device_info) => InternalEvent::ProfileUsedOnOtherDevice(device_info),
+            Event::ProfileImported { id } => InternalEvent::ProfileImported { id: id.into() },
+            Event::ProfileModified { change } => InternalEvent::ProfileModified { change: change.into() },
+            Event::ProfileUsedOnOtherDevice(device_info) => InternalEvent::ProfileUsedOnOtherDevice(device_info.into()),
         }
     }
 }
 
 #[uniffi::export]
 pub fn event_kind(event: &Event) -> EventKind {
-    event.into_internal().kind()
+    event.into_internal().kind().into()
 }
 

@@ -24,7 +24,7 @@ impl SargonOS {
         &self,
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<SecurityStructureOfFactorSources> {
-        self.wrapped.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(structure_of_ids.into()).map_result()
+        self.wrapped.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&structure_of_ids.into_internal()).map_result()
     }
 
     /// Adds the security structureof factor sources to Profile if none with the

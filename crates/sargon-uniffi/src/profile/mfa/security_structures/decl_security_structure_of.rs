@@ -15,7 +15,7 @@ macro_rules! decl_role_with_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone,  PartialEq, Eq, Hash,  uniffi::Record,
+                Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
             )]
             pub struct [< $role RoleWith $factor s >] {
 
@@ -97,7 +97,7 @@ macro_rules! decl_matrix_of_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone,  PartialEq, Eq, Hash,  uniffi::Record,
+                Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
             )]
             pub struct [< MatrixOf $factor s >] {
                 /// Used for Signing transactions
@@ -147,7 +147,7 @@ macro_rules! decl_security_structure_of {
         decl_matrix_of_factors!($factor);
 
         paste! {
-            use sargon::[< SecurityStructureOf $factor s >] as InternalSecurityStructureOfFactors;
+            use sargon::[< SecurityStructureOf $factor s >] as [< InternalSecurityStructureOf $factor s >];
 
             $(
                 #[doc = $expr]
@@ -170,8 +170,8 @@ macro_rules! decl_security_structure_of {
                 pub matrix_of_factors: [< MatrixOf $factor s >],
             }
 
-            impl From<InternalSecurityStructureOfFactors> for [< SecurityStructureOf $factor s >] {
-                fn from(value: InternalSecurityStructureOfFactors) -> Self {
+            impl From<[< InternalSecurityStructureOf $factor s >]> for [< SecurityStructureOf $factor s >] {
+                fn from(value: [< InternalSecurityStructureOf $factor s >]) -> Self {
                     Self {
                         metadata: value.metadata.into(),
                         number_of_epochs_until_auto_confirmation: value.number_of_epochs_until_auto_confirmation,
@@ -180,9 +180,9 @@ macro_rules! decl_security_structure_of {
                 }
             }
 
-            impl Into<InternalSecurityStructureOfFactors> for [< SecurityStructureOf $factor s >] {
-                fn into(self) -> InternalSecurityStructureOfFactors {
-                    InternalSecurityStructureOfFactors {
+            impl Into<[< InternalSecurityStructureOf $factor s >]> for [< SecurityStructureOf $factor s >] {
+                fn into(self) -> [< InternalSecurityStructureOf $factor s >] {
+                    [< InternalSecurityStructureOf $factor s >] {
                         metadata: self.metadata.into(),
                         number_of_epochs_until_auto_confirmation: self.number_of_epochs_until_auto_confirmation,
                         matrix_of_factors: self.matrix_of_factors.into(),

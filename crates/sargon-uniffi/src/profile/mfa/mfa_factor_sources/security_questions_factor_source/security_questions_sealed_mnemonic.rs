@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic as InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic;
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A mnemonic encrypted by answers to security questions
@@ -21,4 +22,26 @@ pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
     /// The N many encryptions of the mnemonic, where N corresponds to the number of derived keys
     /// from the `keyDerivationScheme`
     pub encryptions: Vec<Exactly60Bytes>, // FIXME: Set?
+}
+
+impl From<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic> for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+    fn from(value: InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic) -> Self {
+        Self {
+            security_questions: value.security_questions.into_vec(),
+            kdf_scheme: value.kdf_scheme.into(),
+            encryption_scheme: value.encryption_scheme.into(),
+            encryptions: value.encryptions.into_vec(),
+        }
+    }
+}
+
+impl Into<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic> for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+    fn into(self) -> InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+        InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+            security_questions: self.security_questions.into_identified_vec(),
+            kdf_scheme: self.kdf_scheme.into(),
+            encryption_scheme: self.encryption_scheme.into(),
+            encryptions: self.encryptions.into_internal_vec(),
+        }
+    }
 }

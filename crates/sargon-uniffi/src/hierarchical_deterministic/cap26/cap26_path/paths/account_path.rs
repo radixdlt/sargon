@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use sargon::AccountPath as InternalAccountPath;
+use sargon::EntityCAP26Path;
 
 #[derive(
     Clone,

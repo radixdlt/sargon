@@ -11,6 +11,7 @@ use sargon::SecurityStructureID as InternalSecurityStructureID;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct SecurityStructureID {

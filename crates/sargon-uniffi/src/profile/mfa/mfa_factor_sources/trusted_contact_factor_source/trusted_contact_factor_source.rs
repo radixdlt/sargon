@@ -9,7 +9,7 @@ use sargon::TrustedContactFactorSource as InternalTrustedContactFactorSource;
     PartialEq,
     Eq,
     Hash,
-    
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct TrustedContactFactorSource {

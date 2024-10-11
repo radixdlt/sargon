@@ -18,7 +18,11 @@ pub struct SargonOS {
 impl SargonOS {
     #[uniffi::constructor]
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
-        let internal_sargon_os = InternalSargonOS::boot(bios.into()).await;
+        let internal_sargon_os = InternalSargonOS::boot(
+            Arc::new(
+                Arc::try_unwrap(bios).unwrap().into()
+            )
+        ).await;
         Arc::new(SargonOS {
             wrapped: internal_sargon_os,
         })
@@ -33,7 +37,7 @@ impl SargonOS {
         profile: &Profile,
         bdfs_skipped: bool,
     ) -> Result<()> {
-        self.wrapped.import_wallet(&profile.to_owned().into(), bdfs_skipped).await.map_result()
+        self.wrapped.import_wallet(&profile.into_internal(), bdfs_skipped).await.map_result()
     }
 
     pub async fn new_wallet_with_derived_bdfs(
@@ -41,7 +45,7 @@ impl SargonOS {
         hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
         accounts: Accounts,
     ) -> Result<()> {
-        self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into(), accounts.into_identified_vec()).await.map_result()
+        self.wrapped.new_wallet_with_derived_bdfs(hd_factor_source.into_internal(), accounts.into_identified_vec()).await.map_result()
     }
 
     pub async fn delete_wallet(&self) -> Result<()> {

@@ -21,6 +21,7 @@ macro_rules! decl_non_empty_max_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
+                InternalConversion,
                  uniffi::Record,
             )]
             pub struct [< NonEmptyMax $byte_count Bytes  >] {

@@ -8,6 +8,7 @@ use sargon::AuthorizedDapp as InternalAuthorizedDapp;
     PartialEq,
     Hash,
     Eq,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct AuthorizedDapp {

@@ -112,7 +112,7 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecur
     PartialEq,
     Eq,
     Hash,
-    
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
@@ -173,13 +173,13 @@ pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
     with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
 ) -> Result<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource> {
     InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
-        mnemonic, with,
+        mnemonic.into_internal(), with.into_identified_vec(),
     ).map_result()
 }
 
 #[uniffi::export]
 pub fn trim_security_questions_answer(answer: String) -> String {
-    let kdf = SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;
+    let kdf = SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8.into_internal();
     kdf.trim_answer(answer)
 }
 
@@ -188,6 +188,6 @@ pub fn security_questions_factor_source_decrypt(
     factor_source: &SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
     with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
 ) -> Result<Mnemonic> {
-    factor_source.decrypt(with)
+    factor_source.into_internal().decrypt(with.into_identified_vec()).map_result()
 }
 

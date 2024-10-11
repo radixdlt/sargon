@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::SecurityStructureMetadata as InternalSecurityStructureMetadata;
 
 #[derive(
-    Clone,  PartialEq, Eq, Hash,  uniffi::Record,
+    Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
 )]
 pub struct SecurityStructureMetadata {
     pub id: SecurityStructureID,
@@ -16,8 +16,8 @@ impl From<InternalSecurityStructureMetadata> for SecurityStructureMetadata {
         Self {
             id: value.id.into(),
             display_name: value.display_name.into(),
-            created_on: value.created_on.into(),
-            last_updated_on: value.last_updated_on.into(),
+            created_on: value.created_on,
+            last_updated_on: value.last_updated_on,
         }
     }
 }
@@ -25,10 +25,10 @@ impl From<InternalSecurityStructureMetadata> for SecurityStructureMetadata {
 impl Into<InternalSecurityStructureMetadata> for SecurityStructureMetadata {
     fn into(self) -> InternalSecurityStructureMetadata {
         InternalSecurityStructureMetadata {
-            id: self.id.into_internal(),
-            display_name: self.display_name.into_internal(),
-            created_on: self.created_on.into_internal(),
-            last_updated_on: self.last_updated_on.into_internal(),
+            id: self.id.into(),
+            display_name: self.display_name.into(),
+            created_on: self.created_on,
+            last_updated_on: self.last_updated_on,
         }
     }
 }
@@ -48,6 +48,6 @@ pub fn new_security_structure_metadata_sample_other(
 pub fn new_security_structure_metadata_named(
     name: &DisplayName,
 ) -> SecurityStructureMetadata {
-    InternalSecurityStructureMetadata::new(&name.into_internal()).into()
+    InternalSecurityStructureMetadata::new(name.into_internal()).into()
 }
 

@@ -12,25 +12,27 @@ pub struct Blobs {
 impl From<InternalBlobs> for Blobs {
     fn from(value: InternalBlobs) -> Self {
         Self {
-            secret_magic: value.0.into(),
+            secret_magic: value.0.into_vec(),
         }
     }
 }
 
 impl Into<InternalBlobs> for Blobs {
     fn into(self) -> InternalBlobs {
-        InternalBlobs(self.secret_magic.into())
+        InternalBlobs(self.secret_magic.into_internal_vec())
     }
 }
 
 #[uniffi::export]
 pub fn blobs_list_of_blobs(blobs: &Blobs) -> Vec<Blob> {
-    blobs.into_internal().blobs().map(Blob::from).collect()
+    blobs.secret_magic.clone()
 }
 
 #[uniffi::export]
 pub fn new_blobs_from_blob_list(blobs: Vec<Blob>) -> Blobs {
-    InternalBlobs::new(blobs.into_iter().map(Into::into).collect()).into()
+    Blobs {
+        secret_magic: blobs,
+    }
 }
 
 #[uniffi::export]

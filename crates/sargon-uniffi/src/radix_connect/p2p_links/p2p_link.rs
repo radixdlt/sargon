@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use sargon::P2PLink as InternalP2PLink;
+use sargon::Identifiable;
 
 /// A client the user have connected P2P with, typically a WebRTC connection with the dApp or Connector Extension.
 /// Each client generates a curve25119 keypair. The public key is used as an identifier for the client.

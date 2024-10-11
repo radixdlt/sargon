@@ -46,7 +46,7 @@ pub(crate) const SECURITY_QUESTIONS_TRIMMED_CHARS: &[char] = &[
 ];
 
 impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8 {
-    pub(crate) fn trim_answer(&self, answer: impl AsRef<str>) -> String {
+    pub fn trim_answer(&self, answer: impl AsRef<str>) -> String {
         let mut answer = answer.as_ref().to_lowercase();
         answer.retain(|c| !SECURITY_QUESTIONS_TRIMMED_CHARS.contains(&c));
         answer

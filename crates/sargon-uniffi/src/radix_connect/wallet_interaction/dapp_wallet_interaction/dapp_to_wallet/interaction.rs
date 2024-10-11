@@ -27,31 +27,3 @@ impl Into<InternalDappToWalletInteraction> for DappToWalletInteraction {
         }
     }
 }
-
-#[uniffi::export]
-pub fn new_dapp_to_wallet_interaction_unvalidated_from_json_string(
-    json_str: String,
-) -> Result<DappToWalletInteractionUnvalidated> {
-    InternalDappToWalletInteraction::new_from_json_string(json_str).map_result()
-}
-
-#[uniffi::export]
-pub fn dapp_to_wallet_interaction_unvalidated_to_json_string(
-    interaction_unvalidated: &DappToWalletInteractionUnvalidated,
-    pretty_printed: bool,
-) -> String {
-    interaction_unvalidated.into_internal().to_json_string(pretty_printed)
-}
-
-#[uniffi::export]
-pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample(
-) -> DappToWalletInteractionUnvalidated {
-    InternalDappToWalletInteraction::sample().into()
-}
-
-#[uniffi::export]
-pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
-) -> DappToWalletInteractionUnvalidated {
-    InternalDappToWalletInteraction::sample_other().into()
-}
-

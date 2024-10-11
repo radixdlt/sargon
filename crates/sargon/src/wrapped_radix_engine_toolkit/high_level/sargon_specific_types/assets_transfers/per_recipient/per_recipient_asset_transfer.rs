@@ -4,14 +4,14 @@ use crate::prelude::*;
 pub struct PerRecipientAssetTransfer {
     pub recipient: AccountOrAddressOf,
     pub fungibles: Vec<PerRecipientFungibleTransfer>,
-    pub non_fungibles: Vec<PerRecipientNonFungiblesTransfer>,
+    pub non_fungibles: Vec<PerRecipientNonFungibleTransfer>,
 }
 
 impl PerRecipientAssetTransfer {
     pub fn new(
         recipient: impl Into<AccountOrAddressOf>,
         fungibles: impl IntoIterator<Item = PerRecipientFungibleTransfer>,
-        non_fungibles: impl IntoIterator<Item = PerRecipientNonFungiblesTransfer>,
+        non_fungibles: impl IntoIterator<Item = PerRecipientNonFungibleTransfer>,
     ) -> Self {
         Self {
             recipient: recipient.into(),
@@ -31,8 +31,8 @@ impl PerRecipientAssetTransfer {
                 PerRecipientFungibleTransfer::sample_mainnet_other(),
             ],
             [
-                PerRecipientNonFungiblesTransfer::sample_mainnet(),
-                PerRecipientNonFungiblesTransfer::sample_mainnet_other(),
+                PerRecipientNonFungibleTransfer::sample_mainnet(),
+                PerRecipientNonFungibleTransfer::sample_mainnet_other(),
             ],
         )
     }
@@ -41,7 +41,7 @@ impl PerRecipientAssetTransfer {
         Self::new(
             AccountOrAddressOf::sample_mainnet_other(),
             [PerRecipientFungibleTransfer::sample_mainnet_other()],
-            [PerRecipientNonFungiblesTransfer::sample_mainnet_other()],
+            [PerRecipientNonFungibleTransfer::sample_mainnet_other()],
         )
     }
 
@@ -53,8 +53,8 @@ impl PerRecipientAssetTransfer {
                 PerRecipientFungibleTransfer::sample_stokenet_other(),
             ],
             [
-                PerRecipientNonFungiblesTransfer::sample_stokenet(),
-                PerRecipientNonFungiblesTransfer::sample_stokenet_other(),
+                PerRecipientNonFungibleTransfer::sample_stokenet(),
+                PerRecipientNonFungibleTransfer::sample_stokenet_other(),
             ],
         )
     }
@@ -63,7 +63,7 @@ impl PerRecipientAssetTransfer {
         Self::new(
             AccountOrAddressOf::sample_stokenet_other(),
             [PerRecipientFungibleTransfer::sample_stokenet_other()],
-            [PerRecipientNonFungiblesTransfer::sample_stokenet_other()],
+            [PerRecipientNonFungibleTransfer::sample_stokenet_other()],
         )
     }
 }

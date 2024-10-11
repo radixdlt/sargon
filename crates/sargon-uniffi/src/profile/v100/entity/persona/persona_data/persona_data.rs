@@ -22,7 +22,6 @@ use sargon::PersonaData as InternalPersonaData;
 /// access for the requested PersonaData entries.
 #[derive(
     Clone,
-    Default,
     PartialEq,
     Hash,
     Eq,

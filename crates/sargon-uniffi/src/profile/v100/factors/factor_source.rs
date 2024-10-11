@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use sargon::FactorSource as InternalFactorSource;
+use sargon::BaseIsFactorSource;
 
 #[derive(
     Clone,

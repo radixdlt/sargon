@@ -5,7 +5,7 @@ use sargon::PerRecipientAssetTransfer as InternalPerRecipientAssetTransfer;
 pub struct PerRecipientAssetTransfer {
     pub recipient: AccountOrAddressOf,
     pub fungibles: Vec<PerRecipientFungibleTransfer>,
-    pub non_fungibles: Vec<PerRecipientNonFungiblesTransfer>,
+    pub non_fungibles: Vec<PerRecipientNonFungibleTransfer>,
 }
 
 impl From<InternalPerRecipientAssetTransfer> for PerRecipientAssetTransfer {

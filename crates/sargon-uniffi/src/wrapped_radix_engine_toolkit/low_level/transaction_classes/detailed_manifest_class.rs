@@ -4,7 +4,7 @@ use sargon::DetailedManifestClass as InternalDetailedManifestClass;
 /// The execution summary process not only determines the class of the manifest,
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.
-#[derive(Clone,  PartialEq, Eq, EnumAsInner, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum DetailedManifestClass {
     /// A general manifest that involves any amount of arbitrary components
     /// and packages where nothing more concrete can be said about the manifest
@@ -100,22 +100,22 @@ impl From<InternalDetailedManifestClass> for DetailedManifestClass {
                 validator_addresses,
                 validator_claims,
             } => DetailedManifestClass::ValidatorClaim {
-                validator_addresses: validator_addresses.into(),
-                validator_claims: validator_claims.into(),
+                validator_addresses: validator_addresses.into_vec(),
+                validator_claims: validator_claims.into_vec(),
             },
             InternalDetailedManifestClass::ValidatorStake {
                 validator_addresses,
                 validator_stakes,
             } => DetailedManifestClass::ValidatorStake {
-                validator_addresses: validator_addresses.into(),
-                validator_stakes: validator_stakes.into(),
+                validator_addresses: validator_addresses.into_vec(),
+                validator_stakes: validator_stakes.into_vec(),
             },
             InternalDetailedManifestClass::ValidatorUnstake {
                 validator_addresses,
                 claims_non_fungible_data,
             } => DetailedManifestClass::ValidatorUnstake {
-                validator_addresses: validator_addresses.into(),
-                claims_non_fungible_data: claims_non_fungible_data.into(),
+                validator_addresses: validator_addresses.into_vec(),
+                claims_non_fungible_data: claims_non_fungible_data.into_hash_map(),
             },
             InternalDetailedManifestClass::AccountDepositSettingsUpdate {
                 resource_preferences_updates,
@@ -123,24 +123,24 @@ impl From<InternalDetailedManifestClass> for DetailedManifestClass {
                 authorized_depositors_added,
                 authorized_depositors_removed,
             } => DetailedManifestClass::AccountDepositSettingsUpdate {
-                resource_preferences_updates: resource_preferences_updates.into(),
-                deposit_mode_updates: deposit_mode_updates.into(),
-                authorized_depositors_added: authorized_depositors_added.into(),
-                authorized_depositors_removed: authorized_depositors_removed.into(),
+                resource_preferences_updates: resource_preferences_updates.into_hash_map(),
+                deposit_mode_updates: deposit_mode_updates.into_hash_map(),
+                authorized_depositors_added: authorized_depositors_added.into_hash_map(),
+                authorized_depositors_removed: authorized_depositors_removed.into_hash_map(),
             },
             InternalDetailedManifestClass::PoolContribution {
                 pool_addresses,
                 pool_contributions,
             } => DetailedManifestClass::PoolContribution {
-                pool_addresses: pool_addresses.into(),
-                pool_contributions: pool_contributions.into(),
+                pool_addresses: pool_addresses.into_vec(),
+                pool_contributions: pool_contributions.into_vec(),
             },
             InternalDetailedManifestClass::PoolRedemption {
                 pool_addresses,
                 pool_redemptions,
             } => DetailedManifestClass::PoolRedemption {
-                pool_addresses: pool_addresses.into(),
-                pool_redemptions: pool_redemptions.into(),
+                pool_addresses: pool_addresses.into_vec(),
+                pool_redemptions: pool_redemptions.into_vec(),
             },
         }
     }
@@ -157,22 +157,22 @@ impl Into<InternalDetailedManifestClass> for DetailedManifestClass {
                 validator_addresses,
                 validator_claims,
             } => InternalDetailedManifestClass::ValidatorClaim {
-                validator_addresses: validator_addresses.into(),
-                validator_claims: validator_claims.into(),
+                validator_addresses: validator_addresses.into_internal_vec(),
+                validator_claims: validator_claims.into_internal_vec(),
             },
             DetailedManifestClass::ValidatorStake {
                 validator_addresses,
                 validator_stakes,
             } => InternalDetailedManifestClass::ValidatorStake {
-                validator_addresses: validator_addresses.into(),
-                validator_stakes: validator_stakes.into(),
+                validator_addresses: validator_addresses.into_internal_vec(),
+                validator_stakes: validator_stakes.into_internal_vec(),
             },
             DetailedManifestClass::ValidatorUnstake {
                 validator_addresses,
                 claims_non_fungible_data,
             } => InternalDetailedManifestClass::ValidatorUnstake {
-                validator_addresses: validator_addresses.into(),
-                claims_non_fungible_data: claims_non_fungible_data.into(),
+                validator_addresses: validator_addresses.into_internal_vec(),
+                claims_non_fungible_data: claims_non_fungible_data.into_internal_hash_map(),
             },
             DetailedManifestClass::AccountDepositSettingsUpdate {
                 resource_preferences_updates,
@@ -180,24 +180,24 @@ impl Into<InternalDetailedManifestClass> for DetailedManifestClass {
                 authorized_depositors_added,
                 authorized_depositors_removed,
             } => InternalDetailedManifestClass::AccountDepositSettingsUpdate {
-                resource_preferences_updates: resource_preferences_updates.into(),
-                deposit_mode_updates: deposit_mode_updates.into(),
-                authorized_depositors_added: authorized_depositors_added.into(),
-                authorized_depositors_removed: authorized_depositors_removed.into(),
+                resource_preferences_updates: resource_preferences_updates.into_internal_hash_map(),
+                deposit_mode_updates: deposit_mode_updates.into_internal_hash_map(),
+                authorized_depositors_added: authorized_depositors_added.into_internal_hash_map(),
+                authorized_depositors_removed: authorized_depositors_removed.into_internal_hash_map(),
             },
             DetailedManifestClass::PoolContribution {
                 pool_addresses,
                 pool_contributions,
             } => InternalDetailedManifestClass::PoolContribution {
-                pool_addresses: pool_addresses.into(),
-                pool_contributions: pool_contributions.into(),
+                pool_addresses: pool_addresses.into_internal_vec(),
+                pool_contributions: pool_contributions.into_internal_vec(),
             },
             DetailedManifestClass::PoolRedemption {
                 pool_addresses,
                 pool_redemptions,
             } => InternalDetailedManifestClass::PoolRedemption {
-                pool_addresses: pool_addresses.into(),
-                pool_redemptions: pool_redemptions.into(),
+                pool_addresses: pool_addresses.into_internal_vec(),
+                pool_redemptions: pool_redemptions.into_internal_vec(),
             },
         }
     }

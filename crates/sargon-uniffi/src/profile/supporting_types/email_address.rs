@@ -10,6 +10,7 @@ use sargon::EmailAddress as InternalEmailAddress;
     PartialEq,
     Hash,
     Eq,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct EmailAddress {

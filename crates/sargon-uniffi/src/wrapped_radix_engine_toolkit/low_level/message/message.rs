@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Message as InternalMessage;
 
-#[derive(Clone,  PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
+#[derive(Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum Message {
     PlainText { plaintext: PlaintextMessage },
     None,

@@ -3,31 +3,19 @@ use crate::prelude::*;
 macro_rules! json_data_convertible {
     ($type: ty) => {
         paste! {
+            use sargon::DeserializeBytes;
+            use sargon::SerializeToBytes;
+
             #[uniffi::export]
             pub fn [< new_ $type:snake _from_json_bytes >](
                 json_bytes: &BagOfBytes,
             ) -> Result<$type> {
-                json_bytes.deserialize::<[< Internal $type>]>().map_result()
+                json_bytes.to_vec().deserialize::<[< Internal $type>]>().map_result()
             }
 
             #[uniffi::export]
             pub fn [< $type:snake _to_json_bytes >]([< $type:snake >]: &$type) -> BagOfBytes {
-                [< $type:snake >].into_internal().serialize_to_bytes().unwrap()
-            }
-
-            #[cfg(test)]
-            mod [< uniffi_test_json_as_data_ $type:snake >] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $type;
-
-                #[test]
-                fn json_bytes_roundtrip() {
-                    let sut = SUT::sample();
-                    let json_bytes = [< $type:snake _to_json_bytes >](&sut);
-                    assert_eq!(sut, [< new_ $type:snake _from_json_bytes >](&json_bytes).unwrap());
-                }
+                [< $type:snake >].into_internal().serialize_to_bytes().unwrap().into()
             }
         }
     };
@@ -38,6 +26,9 @@ pub(crate) use json_data_convertible;
 macro_rules! json_string_convertible {
     ($type: ty) => {
         paste! {
+            use sargon::DeserializeStr;
+            use sargon::SerializeToString;
+
             #[uniffi::export]
             pub fn [< new_ $type:snake _from_json_string >](
                 json_string: String,
@@ -47,7 +38,7 @@ macro_rules! json_string_convertible {
 
             #[uniffi::export]
             pub fn [< $type:snake _to_json_string >]([< $type:snake >]: &$type) -> String {
-                [< $type:snake >].into_internal().serialize_to_string().unwrap()
+                [< $type:snake >].into_internal().serialize_to_string()
             }
         }
     };

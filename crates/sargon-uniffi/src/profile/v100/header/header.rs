@@ -11,6 +11,7 @@ use sargon::Header as InternalHeader;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct Header {

@@ -30,7 +30,7 @@ pub fn manifest_set_owner_keys_hashes(
 ) -> TransactionManifest {
     InternalTransactionManifest::set_owner_keys_hashes(
         &address_of_account_or_persona.into_internal(),
-        owner_key_hashes.into_vec(),
+        owner_key_hashes.into_internal_vec(),
     ).into()
 }
 
@@ -101,7 +101,7 @@ pub fn manifest_stakes_claim(
 ) -> TransactionManifest {
     InternalTransactionManifest::stake_claims(
         &account_address.into_internal(),
-        stake_claims.into_vec(),
+        stake_claims.into_internal_vec(),
     ).into()
 }
 
@@ -157,7 +157,7 @@ pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
 pub fn debug_print_compiled_notarized_intent(
     compiled: CompiledNotarizedIntent,
 ) -> String {
-    let notarized = compiled.into_internal().decompile().into();
+    let notarized = compiled.into_internal().decompile();
     format!("{:?}", notarized)
 }
 
@@ -186,8 +186,8 @@ pub fn manifest_account_locker_claim(
     claimable_resources: Vec<AccountLockerClaimableResource>,
 ) -> TransactionManifest {
     InternalTransactionManifest::account_locker_claim(
-        &locker_address.into(),
-        &claimant.into(),
-        claimable_resources.into_iter().map(Into::into).collect(),
+        &locker_address.into_internal(),
+        &claimant.into_internal(),
+        claimable_resources.into_internal_vec(),
     ).into()
 }

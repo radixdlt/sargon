@@ -13,6 +13,7 @@ json_string_convertible!(RadixConnectPurpose);
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum RadixConnectPurpose {

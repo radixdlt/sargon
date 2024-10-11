@@ -11,6 +11,7 @@ use sargon::Exactly32Bytes as InternalExactly32Bytes;
     Clone,
     PartialEq,
     Eq,
+    std::hash::Hash,
     InternalConversion,
      uniffi::Record,
 )]

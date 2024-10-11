@@ -9,6 +9,7 @@ use sargon::WalletInteractionId as InternalWalletInteractionId;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct WalletInteractionId {

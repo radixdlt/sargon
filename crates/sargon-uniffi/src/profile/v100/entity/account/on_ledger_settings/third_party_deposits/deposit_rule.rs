@@ -4,11 +4,10 @@ use sargon::DepositRule as InternalDepositRule;
 /// The general deposit rule to apply
 #[derive(
     Clone,
-    
-    
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum DepositRule {
@@ -20,22 +19,22 @@ pub enum DepositRule {
     DenyAll,
 }
 
-impl From<DepositRule> for InternalDepositRule {
-    fn from(value: DepositRule) -> Self {
+impl From<InternalDepositRule> for DepositRule {
+    fn from(value: InternalDepositRule) -> Self {
         match value {
-            DepositRule::AcceptKnown => InternalDepositRule::AcceptKnown,
-            DepositRule::AcceptAll => InternalDepositRule::AcceptAll,
-            DepositRule::DenyAll => InternalDepositRule::DenyAll,
+            InternalDepositRule::AcceptKnown => DepositRule::AcceptKnown,
+            InternalDepositRule::AcceptAll => DepositRule::AcceptAll,
+            InternalDepositRule::DenyAll => DepositRule::DenyAll,
         }
     }
 }
 
-impl Into<DepositRule> for InternalDepositRule {
-    fn into(self) -> DepositRule {
+impl Into<InternalDepositRule> for DepositRule {
+    fn into(self) -> InternalDepositRule {
         match self {
-            InternalDepositRule::AcceptKnown => DepositRule::AcceptKnown,
-            InternalDepositRule::AcceptAll => DepositRule::AcceptAll,
-            InternalDepositRule::DenyAll => DepositRule::DenyAll,
+            DepositRule::AcceptKnown => InternalDepositRule::AcceptKnown,
+            DepositRule::AcceptAll => InternalDepositRule::AcceptAll,
+            DepositRule::DenyAll => InternalDepositRule::DenyAll,
         }
     }
 }

@@ -7,6 +7,7 @@ use sargon::ProfileID as InternalProfileID;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct ProfileID {

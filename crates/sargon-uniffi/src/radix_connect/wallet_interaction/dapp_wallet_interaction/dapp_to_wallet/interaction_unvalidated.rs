@@ -29,3 +29,17 @@ impl Into<InternalDappToWalletInteractionUnvalidated> for DappToWalletInteractio
         }
     }
 }
+
+json_string_convertible!(DappToWalletInteractionUnvalidated);
+
+#[uniffi::export]
+pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample(
+) -> DappToWalletInteractionUnvalidated {
+    InternalDappToWalletInteractionUnvalidated::sample().into()
+}
+
+#[uniffi::export]
+pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
+) -> DappToWalletInteractionUnvalidated {
+    InternalDappToWalletInteractionUnvalidated::sample_other().into()
+}

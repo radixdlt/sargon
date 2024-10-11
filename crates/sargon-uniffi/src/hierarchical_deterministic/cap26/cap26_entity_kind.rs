@@ -9,6 +9,7 @@ use sargon::CAP26EntityKind as InternalCAP26EntityKind;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum CAP26EntityKind {
@@ -23,14 +24,14 @@ macro_rules! delegate_display_debug_into {
     ($external_type:ty, $internal_type:ty) => {
         impl std::fmt::Display for $external_type {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                let internal: $internal_type = self.clone().into();
+                let internal = self.into_internal();
                 write!(f, "{}", internal)
             }
         }
 
         impl std::fmt::Debug for $external_type {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                let internal: $internal_type = self.clone().into();
+                let internal = self.into_internal();
                 write!(f, "{:?}", internal)
             }
         }

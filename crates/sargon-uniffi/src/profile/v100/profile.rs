@@ -99,7 +99,7 @@ pub fn new_profile(
         device_factor_source.into_internal(),
         host_id.into_internal(),
         host_info.into_internal(),
-        None::<Accounts>,
+        None::<sargon::Accounts>,
     ).into()
 }
 

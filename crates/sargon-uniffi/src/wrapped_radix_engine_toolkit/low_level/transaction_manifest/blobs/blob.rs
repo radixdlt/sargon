@@ -17,7 +17,7 @@ pub struct Blob {
 impl From<InternalBlob> for Blob {
     fn from(value: InternalBlob) -> Self {
         Self {
-            secret_magic: value.secret_magic.into(),
+            secret_magic: value.0.into(),
         }
     }
 }

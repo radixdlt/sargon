@@ -29,6 +29,7 @@ use sargon::DisplayName as InternalDisplayName;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct DisplayName {

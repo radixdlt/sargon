@@ -4,11 +4,10 @@ use sargon::ArculusCardModel as InternalArculusCardModel;
 /// The model of a Arculus Card.
 #[derive(
     Clone,
-    
-    
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum ArculusCardModel {

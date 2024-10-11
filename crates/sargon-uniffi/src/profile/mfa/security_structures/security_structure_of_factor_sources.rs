@@ -12,13 +12,13 @@ decl_security_structure_of!(
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample(
 ) -> SecurityStructureOfFactorSources {
-    SecurityStructureOfFactorSources::sample().into()
+    InternalSecurityStructureOfFactorSources::sample().into()
 }
 
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample_other(
 ) -> SecurityStructureOfFactorSources {
-    SecurityStructureOfFactorSources::sample_other().into() 
+    InternalSecurityStructureOfFactorSources::sample_other().into() 
 }
 
 #[uniffi::export]
@@ -27,10 +27,10 @@ pub fn new_security_structure_of_factor_sources_auto_in_days(
     number_of_days_until_auto_confirmation: u16,
     matrix_of_factors: MatrixOfFactorSources,
 ) -> SecurityStructureOfFactorSources {
-    SecurityStructureOfFactorSources::new_with_days(
-        metadata,
+    InternalSecurityStructureOfFactorSources::new_with_days(
+        metadata.into_internal(),
         number_of_days_until_auto_confirmation,
-        matrix_of_factors,
-    )
+        matrix_of_factors.into_internal()
+    ).into()
 }
 

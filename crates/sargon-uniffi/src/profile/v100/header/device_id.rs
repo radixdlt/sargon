@@ -8,6 +8,7 @@ use sargon::DeviceID as InternalDeviceID;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,    
      uniffi::Record,
 )]
 pub struct DeviceID {

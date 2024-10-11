@@ -19,28 +19,10 @@ macro_rules! decl_predicted {
         $(
             #[doc = $expr]
         )*
-        #[derive(Clone,  PartialEq, Eq, Hash,  uniffi::Record)]
+        #[derive(Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
         pub struct $struct_name {
             pub value: $wrapped_type,
             pub instruction_index: u64,
-        }
-
-        impl From<[< Internal $struct_name >]> for $struct_name {
-            fn from(value: [< Internal $struct_name >]) -> Self {
-                Self {
-                    value: value.value.into(),
-                    instruction_index: value.instruction_index,
-                }
-            }
-        }
-
-        impl Into<[< Internal $struct_name >]> for $struct_name {
-            fn into(self) -> [< Internal $struct_name >] {
-                [< Internal $struct_name >]{
-                    value: self.value.into(),
-                    instruction_index: self.instruction_index,
-                }
-            }
         }
     }
     };
@@ -77,3 +59,39 @@ decl_predicted!(
     Vec<NonFungibleLocalId>,
     tests_predicted_non_fungible_local_ids
 );
+
+impl From<InternalPredictedDecimal> for PredictedDecimal {
+    fn from(value: InternalPredictedDecimal) -> Self {
+        Self {
+            value: value.value.into(),
+            instruction_index: value.instruction_index,
+        }
+    }
+}
+
+impl Into<InternalPredictedDecimal> for PredictedDecimal {
+    fn into(self) -> InternalPredictedDecimal {
+        InternalPredictedDecimal {
+            value: self.value.into(),
+            instruction_index: self.instruction_index,
+        }
+    }
+}
+
+impl From<InternalPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
+    fn from(value: InternalPredictedNonFungibleLocalIds) -> Self {
+        Self {
+            value: value.value.into_vec(),
+            instruction_index: value.instruction_index,
+        }
+    }
+}
+
+impl Into<InternalPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
+    fn into(self) -> InternalPredictedNonFungibleLocalIds {
+        InternalPredictedNonFungibleLocalIds {
+            value: self.value.into_internal_vec(),
+            instruction_index: self.instruction_index,
+        }
+    }
+}

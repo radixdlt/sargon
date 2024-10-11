@@ -12,7 +12,7 @@ pub enum ResourceOrNonFungible {
 }
 
 impl From<InternalResourceOrNonFungible> for ResourceOrNonFungible {
-    fn from(value: ResourceOrNonFungible) -> Self {
+    fn from(value: InternalResourceOrNonFungible) -> Self {
         match value {
             InternalResourceOrNonFungible::Resource { value } => ResourceOrNonFungible::Resource { value: value.into() },
             InternalResourceOrNonFungible::NonFungible { value } => ResourceOrNonFungible::NonFungible { value: value.into() },

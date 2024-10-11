@@ -8,6 +8,7 @@ use sargon::LinkConnectionQRData as InternalLinkConnectionQRData;
     PartialEq,
     Eq,
     Hash,
+    InternalConversion,
      uniffi::Record,
 )]
 pub struct LinkConnectionQRData {

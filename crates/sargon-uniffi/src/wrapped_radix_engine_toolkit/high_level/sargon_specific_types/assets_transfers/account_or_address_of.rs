@@ -48,6 +48,6 @@ pub fn new_account_or_address_of_sample_other() -> AccountOrAddressOf {
 pub fn account_or_address_of_account_address(
     recipient: &AccountOrAddressOf,
 ) -> AccountAddress {
-    *recipient.into_internal().account_address()
+    recipient.into_internal().account_address().clone().into()
 }
 

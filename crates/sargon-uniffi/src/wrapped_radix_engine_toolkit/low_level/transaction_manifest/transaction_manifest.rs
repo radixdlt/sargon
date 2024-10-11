@@ -40,7 +40,8 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
     network_id: NetworkID,
 ) -> Result<TransactionManifest> {
     InternalTransactionManifest::try_from(
-        unvalidated_transaction_manifest.into_internal(),
+        (unvalidated_transaction_manifest.into_internal(),
+        network_id.into())
     ).map_result()
 }
 
