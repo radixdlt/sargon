@@ -8,6 +8,7 @@ mod build_information;
 mod manifest_encountered_component_address;
 mod stake_claim;
 mod stake_claim_uniffi_fn;
+mod transaction;
 mod transaction_guarantee;
 
 pub use address_of_account_or_persona::*;
@@ -22,3 +23,4 @@ pub use transaction_guarantee::*;
 
 pub use account_locker::*;
 pub use manifest_encountered_component_address::*;
+pub use transaction::*;
