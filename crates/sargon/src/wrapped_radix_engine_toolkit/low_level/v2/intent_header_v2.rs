@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// Represents the header of an intent in V2, containing network ID,
+/// epoch range, optional proposer timestamps, and an intent discriminator.
 #[derive(
     Debug,
     Clone,
@@ -40,6 +42,8 @@ impl IntentHeaderV2 {
             end_epoch_exclusive >= start_epoch_inclusive,
             "End epoch MUST be greater than or equal start epoch."
         );
+
+        // PR comment: should we add additional checks for the proposer timestamps?
         if let (Some(min_ts), Some(max_ts)) = (
             min_proposer_timestamp_inclusive,
             max_proposer_timestamp_exclusive,

@@ -159,8 +159,8 @@ impl TransactionManifest {
     }
 
     pub fn summary(&self) -> Option<ManifestSummary> {
-        let static_analysis = RET_statically_analyze(&self.scrypto_manifest())?;
-        Some(ManifestSummary::from((static_analysis, self.network_id())))
+        let summary = RET_statically_analyze(&self.scrypto_manifest())?;
+        Some(ManifestSummary::from((summary, self.network_id())))
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -212,6 +212,7 @@ mod tests {
     use super::*;
     use crate::prelude::*;
     use radix_common::prelude::ManifestBucket;
+    use radix_rust::hashmap;
     use radix_transactions::manifest::{DropAllProofs, DropAuthZoneProofs};
     use radix_transactions::model::InstructionV1;
     use std::collections::BTreeMap;
@@ -379,6 +380,12 @@ BURN_RESOURCE
         pretty_assertions::assert_eq!(
             summary,
             ManifestSummary::new(
+                hashmap!(
+                    AccountAddress::sample() => vec![AccountWithdraw::amount(ResourceAddress::sample(), 1337)],
+                ),
+                hashmap!(
+                    AccountAddress::sample_other() => vec![AccountDeposit::sample()],
+                ),
                 [AccountAddress::sample()],
                 [AccountAddress::sample_other()],
                 [AccountAddress::sample()],
@@ -396,6 +403,41 @@ BURN_RESOURCE
         pretty_assertions::assert_eq!(
             summary,
             ManifestSummary::new(
+                hashmap!(
+                    a => vec![AccountWithdraw::sample()],
+                ),
+                hashmap!(
+                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") => vec![
+                        AccountDeposit::new(
+                            vec![
+                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(150)))),
+                            ]
+                            .into_iter()
+                            .collect(),
+                            UnspecifiedResources::NonePresent,
+                        )
+                    ],
+                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") => vec![
+                        AccountDeposit::new(
+                            vec![
+                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(50)))),
+                            ]
+                            .into_iter()
+                            .collect(),
+                            UnspecifiedResources::NonePresent,
+                        )
+                    ],
+                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") => vec![
+                        AccountDeposit::new(
+                            vec![
+                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(130)))),
+                            ]
+                            .into_iter()
+                            .collect(),
+                            UnspecifiedResources::NonePresent,
+                        )
+                    ],
+                ),
                 [
                     a
                 ],

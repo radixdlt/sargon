@@ -1,3 +1,4 @@
+pub mod intent_signatures;
 mod message;
 mod transaction_header;
 mod transaction_header_uniffi_fn;
