@@ -313,7 +313,7 @@ impl SignaturesCollector {
                         "Signature Collector only works with HD FactorSources.",
                     )
                     .clone()
-            }) // TODO check that
+            })
             .collect::<IndexSet<FactorSourceIDFromHash>>();
         let per_factor_source = factor_source_ids
             .clone()
