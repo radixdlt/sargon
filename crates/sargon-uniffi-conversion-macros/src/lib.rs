@@ -42,8 +42,8 @@ pub fn internal_conversion_derive_v2(input: TokenStream) -> TokenStream {
             handle_enum(&name, data)
         },
         Data::Struct(data_struct) => {
-            unimplemented!("TODO")
-        }
+            handle_struct(&name, data_struct)
+        },
         _ => panic!("FromInto can only be derived for enums"),
     };
 
@@ -73,33 +73,7 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
             },
             Fields::Named(fields) => {
                 let field_names: Vec<_> = fields.named.iter().map(|f| &f.ident).collect();
-                let field_conversions: Vec<_> = fields.named.iter().map(|f| {
-                    let field_name = &f.ident;
-                    match &f.ty {
-                        Type::Path(type_path) => {
-                            // Check if it's a Vec<T> by looking at the type
-                            if let Some(segment) = type_path.path.segments.last() {
-                                if segment.ident == "Vec" {
-                                    // Call into_vec() for Vec types
-                                    return quote! {
-                                        #field_name: #field_name.into_vec()
-                                    };
-                                } else if segment.ident == "HashMap" {
-                                    // Call into_hash_map() for HashMap types
-                                    return quote! {
-                                        #field_name: #field_name.into_hash_map()
-                                    };
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
-                    // Default to calling .into() for non-Vec types
-                    quote! {
-                        #field_name: #field_name.into()
-                    }
-                }).collect::<Vec<_>>();
-
+                let field_conversions: Vec<_> = generate_field_conversions(&fields);
                 quote! {
                     #internal_name::#variant_name { #( #field_names ),* } => Self::#variant_name { #( #field_conversions ),* }
                 }
@@ -125,32 +99,7 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
             },
             Fields::Named(fields) => {
                 let field_names: Vec<_> = fields.named.iter().map(|f| &f.ident).collect();
-                let field_conversions: Vec<_> = fields.named.iter().map(|f| {
-                    let field_name = &f.ident;
-                    match &f.ty {
-                        Type::Path(type_path) => {
-                            // Check if it's a Vec<T> by looking at the type
-                            if let Some(segment) = type_path.path.segments.last() {
-                                if segment.ident == "Vec" {
-                                    // Call into_vec() for Vec types
-                                    return quote! {
-                                        #field_name: #field_name.into_internal_vec()
-                                    };
-                                } else if segment.ident == "HashMap" {
-                                    // Call into_hash_map() for HashMap types
-                                    return quote! {
-                                        #field_name: #field_name.into_internal_hash_map()
-                                    };
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
-                    // Default to calling .into() for non-Vec types
-                    quote! {
-                        #field_name: #field_name.into()
-                    }
-                }).collect::<Vec<_>>();
+                let field_conversions: Vec<_> = generate_internal_field_conversions(&fields);
                 quote! {
                     Self::#variant_name { #( #field_names ),* } => #internal_name::#variant_name  { #( #field_conversions ),* }
                 }
@@ -238,4 +187,199 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
             #(#test_cases)*
         }
     }
+}
+
+fn handle_struct(name: &syn::Ident, data: syn::DataStruct) -> proc_macro2::TokenStream {
+    let internal_name = quote::format_ident!("Internal{}", name);
+    let test_mod_name = Ident::new(&format!("{}_tests", name.to_string().to_lowercase()), name.span());
+    match data.fields {
+        // Named fields: e.g., struct Foo { x: i32, y: String }
+        Fields::Named(ref fields_named) => {
+            let field_names: Vec<_> = fields_named.named.iter().map(|f| &f.ident).collect();
+            let field_from_internal_conversions: Vec<_> = generate_struct_field_conversions(fields_named);
+            let field_into_internal_conversions: Vec<_> = generate_struct_internal_field_conversions(fields_named);
+
+            quote! {
+                impl #name {
+                    pub fn into_internal(&self) -> #internal_name {
+                        self.clone().into()
+                    }
+                }
+
+                impl From<#internal_name> for #name {
+                    fn from(value: #internal_name) -> Self {
+                        #name {
+                            #( #field_from_internal_conversions ),*
+                        }
+                    }
+                }
+
+                impl Into<#internal_name> for #name {
+                    fn into(self) -> #internal_name {
+                        #internal_name {
+                            #( #field_into_internal_conversions ),*
+                        }
+                    }
+                }
+            }
+        }
+        _ => panic!("FromInto macro supports only struct-style variants"),
+    }
+
+}
+
+fn generate_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
+    fields.named.iter().map(|f| {
+        let field_name = &f.ident;
+        match &f.ty {
+            Type::Path(type_path) => {
+                if let Some(segment) = type_path.path.segments.last() {
+                    if segment.ident == "Vec" {
+                        // Call into_vec() for Vec types
+                        quote! {
+                            #field_name: #field_name.into_vec()
+                        }
+                    } else if segment.ident == "HashMap" {
+                        // Call into_hash_map() for HashMap types
+                        quote! {
+                            #field_name: #field_name.into_hash_map()
+                        }
+                    } else {
+                        // Default to calling .into() for other types
+                        quote! {
+                            #field_name: #field_name.into()
+                        }
+                    }
+                } else {
+                    // Default case if segment is missing
+                    quote! {
+                        #field_name: #field_name.into()
+                    }
+                }
+            }
+            _ => {
+                // Default case for non-Path types
+                quote! {
+                    #field_name: #field_name.into()
+                }
+            }
+        }
+    }).collect()
+}
+
+fn generate_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
+    fields.named.iter().map(|f| {
+        let field_name = &f.ident;
+        match &f.ty {
+            Type::Path(type_path) => {
+                if let Some(segment) = type_path.path.segments.last() {
+                    if segment.ident == "Vec" {
+                        // Call into_vec() for Vec types
+                        quote! {
+                            #field_name: #field_name.into_internal_vec()
+                        }
+                    } else if segment.ident == "HashMap" {
+                        // Call into_hash_map() for HashMap types
+                        quote! {
+                            #field_name: #field_name.into_internal_hash_map()
+                        }
+                    } else {
+                        // Default to calling .into() for other types
+                        quote! {
+                            #field_name: #field_name.into()
+                        }
+                    }
+                } else {
+                    // Default case if segment is missing
+                    quote! {
+                        #field_name: #field_name.into()
+                    }
+                }
+            }
+            _ => {
+                // Default case for non-Path types
+                quote! {
+                    #field_name: #field_name.into()
+                }
+            }
+        }
+    }).collect()
+}
+
+fn generate_struct_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
+    fields.named.iter().map(|f| {
+        let field_name = &f.ident;
+        match &f.ty {
+            Type::Path(type_path) => {
+                if let Some(segment) = type_path.path.segments.last() {
+                    if segment.ident == "Vec" {
+                        // Call into_vec() for Vec types
+                        quote! {
+                            #field_name: value.#field_name.into_vec()
+                        }
+                    } else if segment.ident == "HashMap" {
+                        // Call into_hash_map() for HashMap types
+                        quote! {
+                            #field_name: value.#field_name.into_hash_map()
+                        }
+                    } else {
+                        // Default to calling .into() for other types
+                        quote! {
+                            #field_name: value.#field_name.into()
+                        }
+                    }
+                } else {
+                    // Default case if segment is missing
+                    quote! {
+                        #field_name: value.#field_name.into()
+                    }
+                }
+            }
+            _ => {
+                // Default case for non-Path types
+                quote! {
+                    #field_name: value.#field_name.into()
+                }
+            }
+        }
+    }).collect()
+}
+
+fn generate_struct_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
+    fields.named.iter().map(|f| {
+        let field_name = &f.ident;
+        match &f.ty {
+            Type::Path(type_path) => {
+                if let Some(segment) = type_path.path.segments.last() {
+                    if segment.ident == "Vec" {
+                        // Call into_vec() for Vec types
+                        quote! {
+                            #field_name: self.#field_name.into_internal_vec()
+                        }
+                    } else if segment.ident == "HashMap" {
+                        // Call into_hash_map() for HashMap types
+                        quote! {
+                            #field_name: self.#field_name.into_internal_hash_map()
+                        }
+                    } else {
+                        // Default to calling .into() for other types
+                        quote! {
+                            #field_name: self.#field_name.into()
+                        }
+                    }
+                } else {
+                    // Default case if segment is missing
+                    quote! {
+                        #field_name: self.#field_name.into()
+                    }
+                }
+            }
+            _ => {
+                // Default case for non-Path types
+                quote! {
+                    #field_name: self.#field_name.into()
+                }
+            }
+        }
+    }).collect()
 }
