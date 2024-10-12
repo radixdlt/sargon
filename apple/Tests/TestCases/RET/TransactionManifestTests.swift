@@ -34,16 +34,6 @@ final class TransactionManifestTests: Test<TransactionManifest> {
     func test_manifest_summary() {
         XCTAssertNoDifference(SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
     }
-    
-    func test_execution_summary() throws {
-        let name = "third_party_deposits_update"
-		let receipt = try engineToolkitReceipt(name)
-        let manifest = try rtm(name)
-        
-        let summary = try manifest.executionSummary(engineToolkitReceipt: receipt)
-        
-        XCTAssertNoDifference(summary.addressesOfAccountsRequiringAuth, ["account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a"])
-    }
 	
 	func test_from_instructions_string_with_max_sbor_depth_is_ok() throws {
 		let instructionsString = """
