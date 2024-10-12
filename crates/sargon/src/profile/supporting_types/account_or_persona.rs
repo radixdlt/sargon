@@ -166,7 +166,7 @@ mod tests {
             factor_instances.iter().next().unwrap().clone(),
             HierarchicalDeterministicFactorInstance::sample()
         );
-        
+
         // No factor instances
         sut = SUT::sample_other();
         factor_instances = sut
