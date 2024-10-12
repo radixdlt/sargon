@@ -3,20 +3,20 @@ use sargon::IntentSignature as InternalIntentSignature;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct IntentSignature {
-    pub(crate) secret_magic: SignatureWithPublicKey,
+    pub(crate) value: SignatureWithPublicKey,
 }
 
 impl From<InternalIntentSignature> for IntentSignature {
     fn from(value: InternalIntentSignature) -> Self {
         Self {
-            secret_magic: value.0.into(),
+            value: value.0.into(),
         }
     }
 }
 
 impl Into<InternalIntentSignature> for IntentSignature {
     fn into(self) -> InternalIntentSignature {
-        InternalIntentSignature(self.secret_magic.into())
+        InternalIntentSignature(self.value.into())
     }
 }
 
@@ -32,7 +32,7 @@ pub fn new_intent_signature_from_signature_with_public_key(
 pub fn intent_signature_get_signature_with_public_key(
     intent_signature: &IntentSignature,
 ) -> SignatureWithPublicKey {
-    intent_signature.secret_magic.clone()
+    intent_signature.value.clone()
 }
 
 #[uniffi::export]

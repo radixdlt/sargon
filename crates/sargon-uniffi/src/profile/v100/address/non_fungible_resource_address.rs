@@ -29,18 +29,18 @@ macro_rules! decl_specialized_address {
                  uniffi::Record,
             )]
             pub struct $specialized_address_type {
-                secret_magic: $base_addr
+                value: $base_addr
             }
 
             impl From<[< Internal $specialized_address_type >]> for $specialized_address_type {
                 fn from(value: [< Internal $specialized_address_type >]) -> Self {
-                    Self { secret_magic: value.0.into() }
+                    Self { value: value.0.into() }
                 }
             }
 
             impl Into<[< Internal $specialized_address_type >]> for $specialized_address_type {
                 fn into(self) -> [< Internal $specialized_address_type >] {
-                    [< Internal $specialized_address_type >](self.secret_magic.into())
+                    [< Internal $specialized_address_type >](self.value.into())
                 }
             }
 
@@ -53,7 +53,7 @@ macro_rules! decl_specialized_address {
             /// Returns the base address of this specialized address.
             #[uniffi::export]
             pub fn [< $specialized_address_type:snake _as_ $base_addr:snake>](address: &$specialized_address_type) -> $base_addr {
-                address.secret_magic.clone()
+                address.value.clone()
             }
 
             /// Returns a new address, with the same node_id, but using `network_id` as

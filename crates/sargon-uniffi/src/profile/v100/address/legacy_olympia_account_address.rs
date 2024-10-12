@@ -3,13 +3,13 @@ use sargon::LegacyOlympiaAccountAddress as InternalLegacyOlympiaAccountAddress;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct LegacyOlympiaAccountAddress {
-    secret_magic: Secp256k1PublicKey,
+    value: Secp256k1PublicKey,
 }
 
 impl From<InternalLegacyOlympiaAccountAddress> for LegacyOlympiaAccountAddress {
     fn from(value: InternalLegacyOlympiaAccountAddress) -> Self {
         Self {
-            secret_magic: value.public_key.into(),
+            value: value.public_key.into(),
         }
     }
 }
@@ -17,7 +17,7 @@ impl From<InternalLegacyOlympiaAccountAddress> for LegacyOlympiaAccountAddress {
 impl Into<InternalLegacyOlympiaAccountAddress> for LegacyOlympiaAccountAddress {
     fn into(self) -> InternalLegacyOlympiaAccountAddress {
         InternalLegacyOlympiaAccountAddress {
-            public_key: self.secret_magic.into(),
+            public_key: self.value.into(),
         }
     }
 }

@@ -4,25 +4,9 @@ use sargon::Ed25519Signature as InternalEd25519Signature;
 json_string_convertible!(Ed25519Signature);
 
 /// Represents an ED25519 signature.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct Ed25519Signature {
     pub bytes: Exactly64Bytes,
-}
-
-impl From<InternalEd25519Signature> for Ed25519Signature {
-    fn from(value: InternalEd25519Signature) -> Self {
-        Self {
-            bytes: value.bytes.into(),
-        }
-    }
-}
-
-impl Into<InternalEd25519Signature> for Ed25519Signature {
-    fn into(self) -> InternalEd25519Signature {
-        InternalEd25519Signature {
-            bytes: self.bytes.into(),
-        }
-    }
 }
 
 #[uniffi::export]
