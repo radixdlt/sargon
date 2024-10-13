@@ -3,22 +3,28 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 use sargon::Secp256k1PublicKey as InternalSecp256k1PublicKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Secp256k1PublicKey {
-    value: BagOfBytes,
+    secret_magic: BagOfBytes,
+}
+
+impl Secp256k1PublicKey {
+    pub fn into_internal(&self) -> InternalSecp256k1PublicKey {
+        self.clone().into()
+    }
 }
 
 impl From<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
     fn from(value: InternalSecp256k1PublicKey) -> Self {
         Self {
-            value: value.to_bag_of_bytes().into(),
+            secret_magic: value.to_bag_of_bytes().into(),
         }
     }
 }
 
 impl Into<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
     fn into(self) -> InternalSecp256k1PublicKey {
-        InternalSecp256k1PublicKey::try_from(self.value.to_vec()).unwrap()
+        InternalSecp256k1PublicKey::try_from(self.secret_magic.to_vec()).unwrap()
     }
 }
 
@@ -51,7 +57,7 @@ pub fn secp256k1_public_key_to_hex(public_key: &Secp256k1PublicKey) -> String {
 pub fn secp256k1_public_key_to_bytes(
     public_key: &Secp256k1PublicKey,
 ) -> BagOfBytes {
-    public_key.value.clone()
+    public_key.secret_magic.clone()
 }
 
 /// Returns the public key on **uncompressed** form (65 bytes)

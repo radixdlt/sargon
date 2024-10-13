@@ -4,25 +4,29 @@ use sargon::Ed25519PublicKey as InternalEd25519PublicKey;
 json_string_convertible!(Ed25519PublicKey);
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Ed25519PublicKey {
-    value: BagOfBytes,
+    secret_magic: BagOfBytes,
+}
+
+impl Ed25519PublicKey {
+    pub fn into_internal(&self) -> InternalEd25519PublicKey {
+        self.clone().into()
+    }
 }
 
 impl From<InternalEd25519PublicKey> for Ed25519PublicKey {
     fn from(value: InternalEd25519PublicKey) -> Self {
         Self {
-            value: value.to_bytes().into(),
+            secret_magic: value.to_bytes().into(),
         }
     }
 }
 
 impl Into<InternalEd25519PublicKey> for Ed25519PublicKey {
     fn into(self) -> InternalEd25519PublicKey {
-        InternalEd25519PublicKey::try_from(
-            self.value.into_internal().to_vec(),
-        )
-        .unwrap()
+        InternalEd25519PublicKey::try_from(self.secret_magic.to_vec())
+            .unwrap()
     }
 }
 

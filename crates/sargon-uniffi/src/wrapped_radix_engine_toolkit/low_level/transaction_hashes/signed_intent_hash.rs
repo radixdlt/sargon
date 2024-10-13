@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 decl_tx_hash!(
     /// A Signed Intent Hash is a bech32 encoded string starting with `"signedintent_"
-    SignedIntent,
+    SignedIntentHash,
 );
 
 #[uniffi::export]

@@ -26,6 +26,12 @@ pub struct ProfileNetwork {
     pub resource_preferences: ResourcePreferences,
 }
 
+impl ProfileNetwork {
+    pub fn into_internal(&self) -> InternalProfileNetwork {
+        self.clone().into()
+    }
+}
+
 impl From<InternalProfileNetwork> for ProfileNetwork {
     fn from(profile_network: InternalProfileNetwork) -> Self {
         Self {
@@ -62,4 +68,12 @@ pub fn new_profile_network_sample() -> ProfileNetwork {
 #[uniffi::export]
 pub fn new_profile_network_sample_other() -> ProfileNetwork {
     InternalProfileNetwork::sample_other().into()
+}
+
+#[uniffi::export]
+pub fn profile_network_details_for_authorized_dapp(
+    profile_network: &ProfileNetwork,
+    dapp: &AuthorizedDapp,
+) -> Result<AuthorizedDappDetailed> {
+    profile_network.into_internal().details_for_authorized_dapp(&dapp.into_internal()).map_result()
 }

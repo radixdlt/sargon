@@ -6,7 +6,7 @@ use sargon::U11 as InternalU11;
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct BIP39Word {
     pub word: String,
-    pub index: u16,
+    pub index: U11,
     pub language: BIP39Language,
 }
 
@@ -14,7 +14,7 @@ impl From<InternalBIP39Word> for BIP39Word {
     fn from(value: InternalBIP39Word) -> Self {
         Self {
             word: value.word,
-            index: value.index.inner,
+            index: value.index.into(),
             language: value.language.into(),
         }
     }
@@ -24,7 +24,7 @@ impl Into<InternalBIP39Word> for BIP39Word {
     fn into(self) -> InternalBIP39Word {
         InternalBIP39Word {
             word: self.word,
-            index: InternalU11 { inner: self.index },
+            index: self.index.into(),
             language: self.language.into(),
         }
     }

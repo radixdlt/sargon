@@ -3,7 +3,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
@@ -16,24 +16,6 @@ delegate_display_debug_into!(
     FactorSourceIDFromHash,
     InternalFactorSourceIDFromHash
 );
-
-impl From<InternalFactorSourceIDFromHash> for FactorSourceIDFromHash {
-    fn from(value: InternalFactorSourceIDFromHash) -> Self {
-        Self {
-            kind: value.kind.into(),
-            body: value.body.into(),
-        }
-    }
-}
-
-impl Into<InternalFactorSourceIDFromHash> for FactorSourceIDFromHash {
-    fn into(self) -> InternalFactorSourceIDFromHash {
-        InternalFactorSourceIDFromHash {
-            kind: self.kind.into(),
-            body: self.body.into(),
-        }
-    }
-}
 
 json_data_convertible!(FactorSourceIDFromHash);
 

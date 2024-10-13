@@ -21,8 +21,7 @@ macro_rules! decl_ret_wrapped_address {
                 PartialEq,
                 Eq,
                 Hash,
-                InternalConversion,
-                 uniffi::Record,
+                uniffi::Record,
             )]
             pub struct [< $address_type:camel Address >] {
                 pub(crate) secret_magic: String,
@@ -30,9 +29,17 @@ macro_rules! decl_ret_wrapped_address {
 
             delegate_display_debug_into!([< $address_type:camel Address >], [< Internal $address_type:camel Address >]);
 
+            impl [< $address_type:camel Address >] {
+                pub fn into_internal(&self) -> [< Internal $address_type:camel Address >] {
+                    self.clone().into()
+                }
+            }
+
             impl From<[< Internal $address_type:camel Address >]> for [< $address_type:camel Address >] {
-                fn from(value: [< Internal $address_type:camel Address >]) -> Self {
-                    Self { secret_magic: value.to_string() }
+                fn from(internal: [< Internal $address_type:camel Address >]) -> Self {
+                    Self {
+                        secret_magic: internal.to_string(),
+                    }
                 }
             }
 

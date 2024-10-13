@@ -5,31 +5,13 @@ use sargon::DeviceInfoDescription as InternalDeviceInfoDescription;
 ///
 /// This used to be a String only in Pre 1.6.0 wallets, so
 /// we have a custom Deserialize impl of it.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct DeviceInfoDescription {
     /// Host device name, e.g. "My Precious"
     pub name: String,
 
     /// Host device model, e.g. "iPhone 15 Pro"
     pub model: String,
-}
-
-impl From<InternalDeviceInfoDescription> for DeviceInfoDescription {
-    fn from(value: InternalDeviceInfoDescription) -> Self {
-        Self {
-            name: value.name,
-            model: value.model,
-        }
-    }
-}
-
-impl Into<InternalDeviceInfoDescription> for DeviceInfoDescription {
-    fn into(self) -> InternalDeviceInfoDescription {
-        InternalDeviceInfoDescription {
-            name: self.name,
-            model: self.model,
-        }
-    }
 }
 
 #[uniffi::export]

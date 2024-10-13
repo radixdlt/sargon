@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::HostInfo as InternalHostInfo;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct HostInfo {
     /// A short description of the device. The host should
     /// read the device model and a given name from the device
@@ -13,26 +13,6 @@ pub struct HostInfo {
 
     /// The **current** version of the host app, for example the Radix iOS Wallet version - e.g. "1.6.1"
     pub host_app_version: String,
-}
-
-impl From<InternalHostInfo> for HostInfo {
-    fn from(value: InternalHostInfo) -> Self {
-        Self {
-            description: value.description.into(),
-            host_os: value.host_os.into(),
-            host_app_version: value.host_app_version,
-        }
-    }
-}
-
-impl Into<InternalHostInfo> for HostInfo {
-    fn into(self) -> InternalHostInfo {
-        InternalHostInfo {
-            description: self.description.into(),
-            host_os: self.host_os.into(),
-            host_app_version: self.host_app_version,
-        }
-    }
 }
 
 #[uniffi::export]

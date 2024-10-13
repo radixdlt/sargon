@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::AuthorizedDapp as InternalAuthorizedDapp;
 
 /// A connection made between a Radix Dapp and the user.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.
     pub network_id: NetworkID,
@@ -28,6 +28,12 @@ pub struct AuthorizedDapp {
 }
 
 pub type DappDefinitionAddress = AccountAddress;
+
+impl AuthorizedDapp {
+    pub fn into_internal(&self) -> InternalAuthorizedDapp {
+        self.clone().into()
+    }
+}
 
 impl From<InternalAuthorizedDapp> for AuthorizedDapp {
     fn from(value: InternalAuthorizedDapp) -> Self {

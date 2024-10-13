@@ -9,22 +9,22 @@ use sargon::NonFungibleLocalIdString as InternalNonFungibleLocalIdString;
 /// Using this type instead of `String` directly in `NonFungibleLocalId::Str`,
 /// allows us to do impl `From<NonFungibleLocalId> for NonFungibleLocalId` instead
 /// of `TryFrom<NonFungibleLocalId>`.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct NonFungibleLocalIdString {
-    value: String,
+    secret_magic: String,
 }
 
 impl From<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
     fn from(value: InternalNonFungibleLocalIdString) -> Self {
         Self {
-            value: value.to_string(),
+            secret_magic: value.to_string(),
         }
     }
 }
 
 impl Into<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
     fn into(self) -> InternalNonFungibleLocalIdString {
-        self.value
+        self.secret_magic
             .parse::<InternalNonFungibleLocalIdString>()
             .unwrap()
     }

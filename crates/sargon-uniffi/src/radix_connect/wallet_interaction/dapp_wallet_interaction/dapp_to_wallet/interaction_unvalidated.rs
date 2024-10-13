@@ -3,35 +3,11 @@ use sargon::DappToWalletInteractionUnvalidated as InternalDappToWalletInteractio
 
 json_data_convertible!(DappToWalletInteractionUnvalidated);
 
-#[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, InternalConversionV2, uniffi::Record)]
 pub struct DappToWalletInteractionUnvalidated {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,
     pub metadata: DappToWalletInteractionMetadataUnvalidated,
-}
-
-impl From<InternalDappToWalletInteractionUnvalidated>
-    for DappToWalletInteractionUnvalidated
-{
-    fn from(value: InternalDappToWalletInteractionUnvalidated) -> Self {
-        Self {
-            interaction_id: value.interaction_id.into(),
-            items: value.items.into(),
-            metadata: value.metadata.into(),
-        }
-    }
-}
-
-impl Into<InternalDappToWalletInteractionUnvalidated>
-    for DappToWalletInteractionUnvalidated
-{
-    fn into(self) -> InternalDappToWalletInteractionUnvalidated {
-        InternalDappToWalletInteractionUnvalidated {
-            interaction_id: self.interaction_id.into(),
-            items: self.items.into(),
-            metadata: self.metadata.into(),
-        }
-    }
 }
 
 json_string_convertible!(DappToWalletInteractionUnvalidated);
@@ -46,4 +22,22 @@ pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample(
 pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
 ) -> DappToWalletInteractionUnvalidated {
     InternalDappToWalletInteractionUnvalidated::sample_other().into()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_dapp_to_wallet_interaction_unvalidated() {
+        // let dapp_to_wallet_interaction_unvalidated =
+        //     DappToWalletInteractionUnvalidated::sample();
+        // let json_string = dapp_to_wallet_interaction_unvalidated.to_json_string();
+        // let new_dapp_to_wallet_interaction_unvalidated =
+        //     DappToWalletInteractionUnvalidated::from_json_string(&json_string).unwrap();
+        // assert_eq!(
+        //     dapp_to_wallet_interaction_unvalidated,
+        //     new_dapp_to_wallet_interaction_unvalidated
+        // );
+    }
 }

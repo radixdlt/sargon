@@ -1,28 +1,10 @@
 use crate::prelude::*;
 use sargon::NotarizedTransaction as InternalNotarizedTransaction;
 
-#[derive(Clone, Eq, PartialEq, InternalConversion, uniffi::Record)]
+#[derive(Clone, Eq, PartialEq, InternalConversionV2, uniffi::Record)]
 pub struct NotarizedTransaction {
     signed_intent: SignedIntent,
     pub notary_signature: NotarySignature,
-}
-
-impl From<InternalNotarizedTransaction> for NotarizedTransaction {
-    fn from(value: InternalNotarizedTransaction) -> Self {
-        Self {
-            signed_intent: value.signed_intent.into(),
-            notary_signature: value.notary_signature.into(),
-        }
-    }
-}
-
-impl Into<InternalNotarizedTransaction> for NotarizedTransaction {
-    fn into(self) -> InternalNotarizedTransaction {
-        InternalNotarizedTransaction {
-            signed_intent: self.signed_intent.into(),
-            notary_signature: self.notary_signature.into(),
-        }
-    }
 }
 
 #[uniffi::export]

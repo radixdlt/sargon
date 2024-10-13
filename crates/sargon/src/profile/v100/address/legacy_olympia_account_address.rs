@@ -20,7 +20,7 @@ use radix_engine_toolkit::functions::derive::OlympiaNetwork as ScryptoOlympiaNet
 #[display("{}", self.bech32_address())]
 #[debug("{}", self.bech32_address())]
 pub struct LegacyOlympiaAccountAddress {
-    pub public_key: Secp256k1PublicKey,
+    pub value: Secp256k1PublicKey,
 }
 
 impl FromStr for LegacyOlympiaAccountAddress {
@@ -48,7 +48,7 @@ impl FromStr for LegacyOlympiaAccountAddress {
 impl LegacyOlympiaAccountAddress {
     pub fn bech32_address(&self) -> String {
         RET_olympia_account_address_from_public_key(
-            &self.public_key.into(),
+            &self.value.into(),
             ScryptoOlympiaNetwork::Mainnet,
         )
     }
@@ -56,13 +56,13 @@ impl LegacyOlympiaAccountAddress {
 
 impl LegacyOlympiaAccountAddress {
     pub fn to_babylon_account_address(self) -> AccountAddress {
-        AccountAddress::new(self.public_key, NetworkID::Mainnet)
+        AccountAddress::new(self.value, NetworkID::Mainnet)
     }
 }
 
 impl From<Secp256k1PublicKey> for LegacyOlympiaAccountAddress {
     fn from(value: Secp256k1PublicKey) -> Self {
-        Self { public_key: value }
+        Self { value: value }
     }
 }
 
@@ -86,7 +86,7 @@ impl AccountAddress {
         &self,
         address: &LegacyOlympiaAccountAddress,
     ) -> bool {
-        let olympia_hash = PublicKeyHash::hash(address.public_key);
+        let olympia_hash = PublicKeyHash::hash(address.value);
         self.node_id()
             .as_bytes()
             .ends_with(olympia_hash.as_secp256k1().unwrap().as_ref())

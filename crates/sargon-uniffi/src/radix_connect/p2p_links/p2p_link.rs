@@ -9,7 +9,7 @@ use sargon::P2PLink as InternalP2PLink;
 /// Here are the [CAP-36][doc] requirements.
 ///
 /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct P2PLink {
     /// The most important property of this struct, the `RadixConnectPassword`,
     /// is used to be able to re-establish the P2P connection
@@ -27,28 +27,6 @@ pub struct P2PLink {
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     pub display_name: String,
-}
-
-impl From<InternalP2PLink> for P2PLink {
-    fn from(value: InternalP2PLink) -> Self {
-        Self {
-            connection_password: value.connection_password.into(),
-            connection_purpose: value.connection_purpose.into(),
-            public_key: value.public_key.into(),
-            display_name: value.display_name,
-        }
-    }
-}
-
-impl Into<InternalP2PLink> for P2PLink {
-    fn into(self) -> InternalP2PLink {
-        InternalP2PLink {
-            connection_password: self.connection_password.into(),
-            connection_purpose: self.connection_purpose.into(),
-            public_key: self.public_key.into(),
-            display_name: self.display_name,
-        }
-    }
 }
 
 json_data_convertible!(P2PLink);

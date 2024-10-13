@@ -1,28 +1,10 @@
 use crate::prelude::*;
 use sargon::SignedIntent as InternalSignedIntent;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Record)]
 pub struct SignedIntent {
     intent: TransactionIntent,
     pub intent_signatures: IntentSignatures,
-}
-
-impl From<InternalSignedIntent> for SignedIntent {
-    fn from(value: InternalSignedIntent) -> Self {
-        Self {
-            intent: value.intent.into(),
-            intent_signatures: value.intent_signatures.into(),
-        }
-    }
-}
-
-impl Into<InternalSignedIntent> for SignedIntent {
-    fn into(self) -> InternalSignedIntent {
-        InternalSignedIntent {
-            intent: self.intent.into(),
-            intent_signatures: self.intent_signatures.into(),
-        }
-    }
 }
 
 #[uniffi::export]

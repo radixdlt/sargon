@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NonFungibleGlobalId as InternalNonFungibleGlobalId;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct NonFungibleGlobalId {
     // N.B. we WANT This to be a `NonFungibleResourceAddress` type, alas, it
     // cannot, since that validation does not happen part of Engine, so it is
@@ -13,24 +13,6 @@ pub struct NonFungibleGlobalId {
     // https://rdxworks.slack.com/archives/C01HK4QFXNY/p1709633826502809?thread_ts=1709633374.199459&channel=C01HK4QFXNY&message_ts=1709633826.502809
     pub(crate) resource_address: ResourceAddress,
     pub(crate) non_fungible_local_id: NonFungibleLocalId,
-}
-
-impl From<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
-    fn from(value: InternalNonFungibleGlobalId) -> Self {
-        Self {
-            resource_address: value.resource_address.into(),
-            non_fungible_local_id: value.non_fungible_local_id.into(),
-        }
-    }
-}
-
-impl Into<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
-    fn into(self) -> InternalNonFungibleGlobalId {
-        InternalNonFungibleGlobalId {
-            resource_address: self.resource_address.into(),
-            non_fungible_local_id: self.non_fungible_local_id.into(),
-        }
-    }
 }
 
 #[uniffi::export]

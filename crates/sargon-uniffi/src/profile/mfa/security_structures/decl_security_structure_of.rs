@@ -15,7 +15,7 @@ macro_rules! decl_role_with_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+                Clone,  PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record,
             )]
             pub struct [< $role RoleWith $factor s >] {
 
@@ -38,26 +38,6 @@ macro_rules! decl_role_with_factors {
                 /// single of these factor which can perform the function of this role,
                 /// disregarding of `threshold`.
                 pub override_factors: Vec<$factor>,
-            }
-
-            impl From<[< Internal $role RoleWith $factor s >]> for [< $role RoleWith $factor s >] {
-                fn from(value: [< Internal $role RoleWith $factor s >]) -> Self {
-                    Self {
-                        threshold_factors: value.threshold_factors.into_vec(),
-                        threshold: value.threshold,
-                        override_factors: value.override_factors.into_vec(),
-                    }
-                }
-            }
-
-            impl Into<[< Internal $role RoleWith $factor s >]> for [< $role RoleWith $factor s >] {
-                fn into(self) -> [< Internal $role RoleWith $factor s >] {
-                    [< Internal $role RoleWith $factor s >] {
-                        threshold_factors: self.threshold_factors.into_internal_vec(),
-                        threshold: self.threshold,
-                        override_factors: self.override_factors.into_internal_vec(),
-                    }
-                }
             }
         }
     };
@@ -97,7 +77,7 @@ macro_rules! decl_matrix_of_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+                Clone,  PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record,
             )]
             pub struct [< MatrixOf $factor s >] {
                 /// Used for Signing transactions
@@ -109,26 +89,6 @@ macro_rules! decl_matrix_of_factors {
 
                 /// To confirm recovery.
                 pub confirmation_role: [< ConfirmationRoleWith $factor s >],
-            }
-
-            impl From<[< InternalMatrixOf $factor s >]> for [< MatrixOf $factor s >] {
-                fn from(value: [< InternalMatrixOf $factor s >]) -> Self {
-                    Self {
-                        primary_role: value.primary_role.into(),
-                        recovery_role: value.recovery_role.into(),
-                        confirmation_role: value.confirmation_role.into(),
-                    }
-                }
-            }
-
-            impl Into<[< InternalMatrixOf $factor s >]> for [< MatrixOf $factor s >] {
-                fn into(self) -> [< InternalMatrixOf $factor s >] {
-                    [< InternalMatrixOf $factor s >] {
-                        primary_role: self.primary_role.into(),
-                        recovery_role: self.recovery_role.into(),
-                        confirmation_role: self.confirmation_role.into(),
-                    }
-                }
             }
         }
     };
@@ -153,7 +113,7 @@ macro_rules! decl_security_structure_of {
                 #[doc = $expr]
             )*
             #[derive(
-                Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+                Clone,  PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record,
             )]
             pub struct [< SecurityStructureOf $factor s >] {
                 /// Metadata of this Security Structure, such as globally unique and
@@ -168,26 +128,6 @@ macro_rules! decl_security_structure_of {
                 /// The structure of factors to use for certain roles, Primary, Recovery
                 /// and Confirmation role.
                 pub matrix_of_factors: [< MatrixOf $factor s >],
-            }
-
-            impl From<[< InternalSecurityStructureOf $factor s >]> for [< SecurityStructureOf $factor s >] {
-                fn from(value: [< InternalSecurityStructureOf $factor s >]) -> Self {
-                    Self {
-                        metadata: value.metadata.into(),
-                        number_of_epochs_until_auto_confirmation: value.number_of_epochs_until_auto_confirmation,
-                        matrix_of_factors: value.matrix_of_factors.into(),
-                    }
-                }
-            }
-
-            impl Into<[< InternalSecurityStructureOf $factor s >]> for [< SecurityStructureOf $factor s >] {
-                fn into(self) -> [< InternalSecurityStructureOf $factor s >] {
-                    [< InternalSecurityStructureOf $factor s >] {
-                        metadata: self.metadata.into(),
-                        number_of_epochs_until_auto_confirmation: self.number_of_epochs_until_auto_confirmation,
-                        matrix_of_factors: self.matrix_of_factors.into(),
-                    }
-                }
             }
         }
     };

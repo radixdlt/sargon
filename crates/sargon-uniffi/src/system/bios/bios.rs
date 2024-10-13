@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use sargon::Bios as InternalBios;
+use sargon::Drivers as InternalDrivers;
 
-#[derive(Debug, uniffi::Object)]
+#[derive(Debug, Clone, uniffi::Object)]
 pub struct Bios {
     pub(crate) drivers: Arc<Drivers>,
 }
@@ -14,10 +15,17 @@ impl Bios {
     }
 }
 
+impl Bios {
+    pub fn into_internal(&self) -> InternalBios {
+        self.clone().into()
+    }
+}
+
 impl Into<InternalBios> for Bios {
     fn into(self) -> InternalBios {
+        let internal_drivers: InternalDrivers = self.drivers.as_ref().clone().into();
         InternalBios {
-            drivers: Arc::new(Arc::try_unwrap(self.drivers).unwrap().into()),
+            drivers: Arc::new(internal_drivers),
         }
     }
 }

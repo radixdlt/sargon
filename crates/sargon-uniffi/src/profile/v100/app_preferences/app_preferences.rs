@@ -6,7 +6,7 @@ use sargon::AppPreferences as InternalAppPreferences;
 ///
 /// Current and other saved Gateways, security settings,
 /// App Display settings and preferences for transaction.
-#[derive(PartialEq, Eq, Clone, Hash, InternalConversion, uniffi::Record)]
+#[derive(PartialEq, Eq, Clone, Hash, InternalConversionV2, uniffi::Record)]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
     pub display: AppDisplay,
@@ -19,28 +19,6 @@ pub struct AppPreferences {
 
     /// Default config related to making of transactions
     pub transaction: TransactionPreferences,
-}
-
-impl From<InternalAppPreferences> for AppPreferences {
-    fn from(value: InternalAppPreferences) -> Self {
-        Self {
-            display: value.display.into(),
-            gateways: value.gateways.into(),
-            security: value.security.into(),
-            transaction: value.transaction.into(),
-        }
-    }
-}
-
-impl Into<InternalAppPreferences> for AppPreferences {
-    fn into(self) -> InternalAppPreferences {
-        InternalAppPreferences {
-            display: self.display.into(),
-            gateways: self.gateways.into(),
-            security: self.security.into(),
-            transaction: self.transaction.into(),
-        }
-    }
 }
 
 #[uniffi::export]

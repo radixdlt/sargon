@@ -1,22 +1,28 @@
 use crate::prelude::*;
 use sargon::CompiledNotarizedIntent as InternalCompiledNotarizedIntent;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct CompiledNotarizedIntent {
-    value: BagOfBytes,
+    secret_magic: BagOfBytes,
+}
+
+impl CompiledNotarizedIntent {
+    pub fn into_internal(&self) -> InternalCompiledNotarizedIntent {
+        self.clone().into()
+    }
 }
 
 impl From<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
-    fn from(value: InternalCompiledNotarizedIntent) -> Self {
+    fn from(internal: InternalCompiledNotarizedIntent) -> Self {
         Self {
-            value: value.0.into(),
+            secret_magic: internal.0.into(),
         }
     }
 }
 
 impl Into<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
     fn into(self) -> InternalCompiledNotarizedIntent {
-        InternalCompiledNotarizedIntent(self.value.into())
+        InternalCompiledNotarizedIntent::new(self.secret_magic.into())
     }
 }
 

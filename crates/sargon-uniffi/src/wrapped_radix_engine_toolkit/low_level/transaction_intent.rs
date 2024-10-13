@@ -1,31 +1,11 @@
 use crate::prelude::*;
 use sargon::TransactionIntent as InternalTransactionIntent;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Record)]
 pub struct TransactionIntent {
     pub header: TransactionHeader,
     pub manifest: TransactionManifest,
     pub message: Message,
-}
-
-impl From<InternalTransactionIntent> for TransactionIntent {
-    fn from(value: InternalTransactionIntent) -> Self {
-        Self {
-            header: value.header.into(),
-            manifest: value.manifest.into(),
-            message: value.message.into(),
-        }
-    }
-}
-
-impl Into<InternalTransactionIntent> for TransactionIntent {
-    fn into(self) -> InternalTransactionIntent {
-        InternalTransactionIntent {
-            header: self.header.into(),
-            manifest: self.manifest.into(),
-            message: self.message.into(),
-        }
-    }
 }
 
 #[uniffi::export]

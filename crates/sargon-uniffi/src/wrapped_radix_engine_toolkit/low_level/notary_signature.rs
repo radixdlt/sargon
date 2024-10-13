@@ -1,22 +1,28 @@
 use crate::prelude::*;
 use sargon::NotarySignature as InternalNotarySignature;
 
-#[derive(Clone, Eq, Hash, PartialEq, InternalConversion, uniffi::Record)]
+#[derive(Clone, Eq, Hash, PartialEq, uniffi::Record)]
 pub struct NotarySignature {
-    pub(crate) value: Signature,
+    pub(crate) secret_magic: Signature,
+}
+
+impl NotarySignature {
+    pub fn into_internal(&self) -> InternalNotarySignature {
+        self.clone().into()
+    }
 }
 
 impl From<InternalNotarySignature> for NotarySignature {
-    fn from(value: InternalNotarySignature) -> Self {
+    fn from(internal: InternalNotarySignature) -> Self {
         Self {
-            value: value.0.into(),
+            secret_magic: internal.0.into(),
         }
     }
 }
 
 impl Into<InternalNotarySignature> for NotarySignature {
     fn into(self) -> InternalNotarySignature {
-        InternalNotarySignature(self.value.into())
+        InternalNotarySignature(self.secret_magic.into())
     }
 }
 
@@ -32,14 +38,14 @@ pub fn new_notary_signature_sample_other() -> NotarySignature {
 
 #[uniffi::export]
 pub fn new_notary_signature(signature: Signature) -> NotarySignature {
-    NotarySignature { value: signature }
+    NotarySignature { secret_magic: signature }
 }
 
 #[uniffi::export]
 pub fn notary_signature_get_signature(
     notary_signature: &NotarySignature,
 ) -> Signature {
-    notary_signature.value.clone()
+    notary_signature.secret_magic.clone()
 }
 
 #[uniffi::export]

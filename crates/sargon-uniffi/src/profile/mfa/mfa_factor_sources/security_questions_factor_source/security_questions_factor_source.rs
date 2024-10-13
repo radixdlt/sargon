@@ -107,7 +107,7 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecur
 /// [choose]: https://en.wikipedia.org/wiki/Combination
 /// [itertools]: https://docs.rs/itertools/latest/itertools/trait.Itertools.html#method.combinations
 ///
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -122,34 +122,6 @@ pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     /// of questions and answers derived keys, allowing for only 4 out of 6 answers
     /// to be correct.
     pub sealed_mnemonic: SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic,
-}
-
-impl From<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
-    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
-{
-    fn from(
-        value: InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
-    ) -> Self {
-        Self {
-            id: value.id.into(),
-            common: value.common.into(),
-            sealed_mnemonic: value.sealed_mnemonic.into(),
-        }
-    }
-}
-
-impl Into<InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
-    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
-{
-    fn into(
-        self,
-    ) -> InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-        InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
-            id: self.id.into(),
-            common: self.common.into(),
-            sealed_mnemonic: self.sealed_mnemonic.into(),
-        }
-    }
 }
 
 #[uniffi::export]

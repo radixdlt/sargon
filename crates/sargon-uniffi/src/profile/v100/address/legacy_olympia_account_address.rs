@@ -1,25 +1,9 @@
 use crate::prelude::*;
 use sargon::LegacyOlympiaAccountAddress as InternalLegacyOlympiaAccountAddress;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct LegacyOlympiaAccountAddress {
     value: Secp256k1PublicKey,
-}
-
-impl From<InternalLegacyOlympiaAccountAddress> for LegacyOlympiaAccountAddress {
-    fn from(value: InternalLegacyOlympiaAccountAddress) -> Self {
-        Self {
-            value: value.public_key.into(),
-        }
-    }
-}
-
-impl Into<InternalLegacyOlympiaAccountAddress> for LegacyOlympiaAccountAddress {
-    fn into(self) -> InternalLegacyOlympiaAccountAddress {
-        InternalLegacyOlympiaAccountAddress {
-            public_key: self.value.into(),
-        }
-    }
 }
 
 #[uniffi::export]

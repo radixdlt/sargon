@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::LinkConnectionQRData as InternalLinkConnectionQRData;
 
 /// The QR code data scanned from the Connector Extension
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct LinkConnectionQRData {
     /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
     /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.
@@ -20,28 +20,6 @@ pub struct LinkConnectionQRData {
     /// Represents a signature produced by Connector Extension by signing the hash of the `password`
     /// with the private key of the `public_key_of_other_party`.
     pub signature: Ed25519Signature,
-}
-
-impl From<InternalLinkConnectionQRData> for LinkConnectionQRData {
-    fn from(value: InternalLinkConnectionQRData) -> Self {
-        Self {
-            purpose: value.purpose.into(),
-            password: value.password.into(),
-            public_key_of_other_party: value.public_key_of_other_party.into(),
-            signature: value.signature.into(),
-        }
-    }
-}
-
-impl Into<InternalLinkConnectionQRData> for LinkConnectionQRData {
-    fn into(self) -> InternalLinkConnectionQRData {
-        InternalLinkConnectionQRData {
-            purpose: self.purpose.into(),
-            password: self.password.into(),
-            public_key_of_other_party: self.public_key_of_other_party.into(),
-            signature: self.signature.into(),
-        }
-    }
 }
 
 json_data_convertible!(LinkConnectionQRData);

@@ -27,25 +27,9 @@ use sargon::BIP44LikePath as InternalBIP44LikePath;
 /// assert_eq!(parse("m/44'/1022'/0'/0'/0'"), Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened));
 /// assert_eq!(parse("m/44'/0'/0'/0/0'"), Err(CommonError::CoinTypeNotFound { bad_value: 0 }));
 /// ```
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct BIP44LikePath {
     pub path: HDPath,
-}
-
-impl From<InternalBIP44LikePath> for BIP44LikePath {
-    fn from(value: InternalBIP44LikePath) -> Self {
-        Self {
-            path: value.path.into(),
-        }
-    }
-}
-
-impl Into<InternalBIP44LikePath> for BIP44LikePath {
-    fn into(self) -> InternalBIP44LikePath {
-        InternalBIP44LikePath {
-            path: self.path.into(),
-        }
-    }
 }
 
 #[uniffi::export]

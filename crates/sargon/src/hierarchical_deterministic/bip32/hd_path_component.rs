@@ -28,7 +28,7 @@ impl From<HDPathValue> for HDPathComponent {
 }
 
 impl HDPathComponent {
-    pub(crate) fn index(&self) -> HDPathValue {
+    pub fn index(&self) -> HDPathValue {
         if self.is_hardened() {
             self.value - BIP32_HARDENED
         } else {
@@ -78,6 +78,16 @@ impl HDPathComponent {
     fn bip32_string(&self) -> String {
         let h_or_empty = if self.is_hardened() { "H" } else { "" };
         format!("{}{}", self.index(), h_or_empty)
+    }
+}
+
+impl HasSampleValues for HDPathComponent {
+    fn sample() -> Self {
+        Self::non_hardened(5)
+    }
+
+    fn sample_other() -> Self {
+        Self::harden(5)
     }
 }
 

@@ -1,33 +1,13 @@
 use crate::prelude::*;
 use sargon::Mnemonic as InternalMnemonic;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
 
     pub word_count: BIP39WordCount,
 
     pub language: BIP39Language,
-}
-
-impl From<InternalMnemonic> for Mnemonic {
-    fn from(value: InternalMnemonic) -> Self {
-        Self {
-            words: value.words.into_vec(),
-            word_count: value.word_count.into(),
-            language: value.language.into(),
-        }
-    }
-}
-
-impl Into<InternalMnemonic> for Mnemonic {
-    fn into(self) -> InternalMnemonic {
-        InternalMnemonic {
-            words: self.words.into_internal_vec(),
-            word_count: self.word_count.into_internal(),
-            language: self.language.into_internal(),
-        }
-    }
 }
 
 #[uniffi::export]

@@ -20,17 +20,23 @@ use sargon::Decimal192 as InternalDecimal192;
 /// type alias `Decimal = Decimal192` which we use in Rust land.
 ///
 /// [scrypto]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/math/decimal.rs#L42
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Decimal192 {
-    value: String,
+    secret_magic: String,
 }
 
 pub type Decimal = Decimal192;
 
+impl Decimal192 {
+    pub fn into_internal(&self) -> InternalDecimal192 {
+        self.clone().into()
+    }
+}
+
 impl From<InternalDecimal192> for Decimal192 {
     fn from(value: InternalDecimal192) -> Self {
         Self {
-            value: value.to_string(),
+            secret_magic: value.to_string(),
         }
     }
 }
@@ -39,7 +45,7 @@ impl Into<InternalDecimal192> for Decimal192 {
     fn into(self) -> InternalDecimal192 {
         // This is safe because the Decimal192 can be created only InternalDecimal192 which is already valid.
         // Here the conversion back happens.
-        self.value.parse::<InternalDecimal192>().unwrap()
+        self.secret_magic.parse::<InternalDecimal192>().unwrap()
     }
 }
 

@@ -3,28 +3,10 @@ use sargon::MnemonicWithPassphrase as InternalMnemonicWithPassphrase;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
     pub passphrase: BIP39Passphrase,
-}
-
-impl From<InternalMnemonicWithPassphrase> for MnemonicWithPassphrase {
-    fn from(value: InternalMnemonicWithPassphrase) -> Self {
-        Self {
-            mnemonic: value.mnemonic.into(),
-            passphrase: value.passphrase.into(),
-        }
-    }
-}
-
-impl Into<InternalMnemonicWithPassphrase> for MnemonicWithPassphrase {
-    fn into(self) -> InternalMnemonicWithPassphrase {
-        InternalMnemonicWithPassphrase {
-            mnemonic: self.mnemonic.into(),
-            passphrase: self.passphrase.into(),
-        }
-    }
 }
 
 json_data_convertible!(MnemonicWithPassphrase);

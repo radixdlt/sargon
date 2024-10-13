@@ -3,22 +3,28 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 use sargon::Blob as InternalBlob;
 
 /// Blob is a wrapper a bag of bytes
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Blob {
-    pub(crate) value: BagOfBytes,
+    pub secret_magic: BagOfBytes,
+}
+
+impl Blob {
+    pub fn into_internal(&self) -> InternalBlob {
+        self.clone().into()
+    }
 }
 
 impl From<InternalBlob> for Blob {
-    fn from(value: InternalBlob) -> Self {
+    fn from(internal: InternalBlob) -> Self {
         Self {
-            value: value.0.into(),
+            secret_magic: internal.0.into(),
         }
     }
 }
 
 impl Into<InternalBlob> for Blob {
     fn into(self) -> InternalBlob {
-        InternalBlob(self.value.into())
+        InternalBlob(self.secret_magic.into())
     }
 }
 
@@ -29,7 +35,7 @@ pub fn new_blob_from_bytes(bytes: BagOfBytes) -> Blob {
 
 #[uniffi::export]
 pub fn blob_to_bytes(blob: &Blob) -> BagOfBytes {
-    blob.value.clone()
+    blob.secret_magic.clone()
 }
 
 #[uniffi::export]

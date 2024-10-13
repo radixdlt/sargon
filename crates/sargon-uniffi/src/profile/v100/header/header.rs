@@ -5,7 +5,7 @@ use sargon::Header as InternalHeader;
 /// about this Profile, such as which JSON data format it is
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
@@ -25,32 +25,6 @@ pub struct Header {
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     pub content_hint: ContentHint,
-}
-
-impl From<InternalHeader> for Header {
-    fn from(value: InternalHeader) -> Self {
-        Self {
-            snapshot_version: value.snapshot_version.into(),
-            id: value.id.into(),
-            creating_device: value.creating_device.into(),
-            last_used_on_device: value.last_used_on_device.into(),
-            last_modified: value.last_modified.into(),
-            content_hint: value.content_hint.into(),
-        }
-    }
-}
-
-impl Into<InternalHeader> for Header {
-    fn into(self) -> InternalHeader {
-        InternalHeader {
-            snapshot_version: self.snapshot_version.into(),
-            id: self.id.into(),
-            creating_device: self.creating_device.into(),
-            last_used_on_device: self.last_used_on_device.into(),
-            last_modified: self.last_modified.into(),
-            content_hint: self.content_hint.into(),
-        }
-    }
 }
 
 json_data_convertible!(Header);

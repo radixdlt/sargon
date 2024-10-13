@@ -2,35 +2,39 @@ use crate::prelude::*;
 use sargon::Blobs as InternalBlobs;
 
 /// Vec of Blobs
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Blobs {
-    pub(crate) value: Vec<Blob>,
+    pub(crate) secret_magic: Vec<Blob>,
+}
+
+impl Blobs {
+    pub fn into_internal(&self) -> InternalBlobs {
+        self.clone().into()
+    }
 }
 
 impl From<InternalBlobs> for Blobs {
-    fn from(value: InternalBlobs) -> Self {
+    fn from(internal: InternalBlobs) -> Self {
         Self {
-            value: value.0.into_vec(),
+            secret_magic: internal.0.into_vec(),
         }
     }
 }
 
 impl Into<InternalBlobs> for Blobs {
     fn into(self) -> InternalBlobs {
-        InternalBlobs(self.value.into_internal_vec())
+        InternalBlobs::new(self.secret_magic.into_internal_vec())
     }
 }
 
 #[uniffi::export]
 pub fn blobs_list_of_blobs(blobs: &Blobs) -> Vec<Blob> {
-    blobs.value.clone()
+    blobs.secret_magic.clone()
 }
 
 #[uniffi::export]
 pub fn new_blobs_from_blob_list(blobs: Vec<Blob>) -> Blobs {
-    Blobs {
-        value: blobs,
-    }
+    Blobs { secret_magic: blobs }
 }
 
 #[uniffi::export]

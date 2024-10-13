@@ -1,20 +1,28 @@
 pub use crate::prelude::*;
 use sargon::Nonce as InternalNonce;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Nonce {
-    value: u32,
+    pub secret_magic: u32,
+}
+
+impl Nonce {
+    pub fn into_internal(&self) -> InternalNonce {
+        self.clone().into()
+    }
 }
 
 impl From<InternalNonce> for Nonce {
-    fn from(value: InternalNonce) -> Self {
-        Self { value: value.0 }
+    fn from(internal: InternalNonce) -> Self {
+        Self {
+            secret_magic: internal.0,
+        }
     }
 }
 
 impl Into<InternalNonce> for Nonce {
     fn into(self) -> InternalNonce {
-        InternalNonce(self.value)
+        InternalNonce(self.secret_magic)
     }
 }
 

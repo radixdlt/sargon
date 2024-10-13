@@ -11,7 +11,7 @@ use sargon::PersonaDataNameVariant as InternalPersonaDataNameVariant;
 /// her Swedish name - is in full: "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter Långstrump", where her
 /// given names: "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter" are put in the `given_names` field, and
 /// "Långstrump" (Longstocking) is her family name.
-#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
 pub struct PersonaDataEntryName {
     pub variant: PersonaDataNameVariant,
     pub family_name: String,
@@ -25,24 +25,14 @@ pub enum PersonaDataNameVariant {
     Eastern,
 }
 
-impl From<InternalPersonaDataEntryName> for PersonaDataEntryName {
-    fn from(value: InternalPersonaDataEntryName) -> Self {
-        Self {
-            variant: value.variant.into(),
-            family_name: value.family_name,
-            given_names: value.given_names,
-            nickname: value.nickname,
-        }
-    }
+json_data_convertible!(PersonaDataEntryName);
+
+#[uniffi::export]
+pub fn new_persona_data_entry_name_sample() -> PersonaDataEntryName {
+    InternalPersonaDataEntryName::sample().into()
 }
 
-impl Into<InternalPersonaDataEntryName> for PersonaDataEntryName {
-    fn into(self) -> InternalPersonaDataEntryName {
-        InternalPersonaDataEntryName {
-            variant: self.variant.into(),
-            family_name: self.family_name,
-            given_names: self.given_names,
-            nickname: self.nickname,
-        }
-    }
+#[uniffi::export]
+pub fn new_persona_data_entry_name_sample_other() -> PersonaDataEntryName {
+    InternalPersonaDataEntryName::sample_other().into()
 }

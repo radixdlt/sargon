@@ -13,7 +13,7 @@ macro_rules! decl_transfer_of {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+            #[derive(Clone,  PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
             pub struct [< $struct_prefix $struct_name Transfer >] {
 
                 /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
@@ -108,95 +108,3 @@ use sargon::PerAssetFungibleTransfer as InternalPerAssetFungibleTransfer;
 use sargon::PerAssetNonFungibleTransfer as InternalPerAssetNonFungibleTransfer;
 use sargon::PerRecipientFungibleTransfer as InternalPerRecipientFungibleTransfer;
 use sargon::PerRecipientNonFungibleTransfer as InternalPerRecipientNonFungibleTransfer;
-
-impl From<InternalPerAssetFungibleTransfer> for PerAssetFungibleTransfer {
-    fn from(value: InternalPerAssetFungibleTransfer) -> Self {
-        Self {
-            use_try_deposit_or_abort: value.use_try_deposit_or_abort,
-            recipient: value.recipient.into(),
-            amount: value.amount.into(),
-        }
-    }
-}
-
-impl Into<InternalPerAssetFungibleTransfer> for PerAssetFungibleTransfer {
-    fn into(self) -> InternalPerAssetFungibleTransfer {
-        InternalPerAssetFungibleTransfer {
-            use_try_deposit_or_abort: self.use_try_deposit_or_abort,
-            recipient: self.recipient.into(),
-            amount: self.amount.into(),
-        }
-    }
-}
-
-impl From<InternalPerAssetNonFungibleTransfer> for PerAssetNonFungibleTransfer {
-    fn from(value: InternalPerAssetNonFungibleTransfer) -> Self {
-        Self {
-            use_try_deposit_or_abort: value.use_try_deposit_or_abort,
-            recipient: value.recipient.into(),
-            non_fungible_local_ids: value.non_fungible_local_ids.into_vec(),
-        }
-    }
-}
-
-impl Into<InternalPerAssetNonFungibleTransfer> for PerAssetNonFungibleTransfer {
-    fn into(self) -> InternalPerAssetNonFungibleTransfer {
-        InternalPerAssetNonFungibleTransfer {
-            use_try_deposit_or_abort: self.use_try_deposit_or_abort,
-            recipient: self.recipient.into(),
-            non_fungible_local_ids: self
-                .non_fungible_local_ids
-                .into_internal_vec(),
-        }
-    }
-}
-
-impl From<InternalPerRecipientFungibleTransfer>
-    for PerRecipientFungibleTransfer
-{
-    fn from(value: InternalPerRecipientFungibleTransfer) -> Self {
-        Self {
-            use_try_deposit_or_abort: value.use_try_deposit_or_abort,
-            resource_address: value.resource_address.into(),
-            amount: value.amount.into(),
-            divisibility: value.divisibility,
-        }
-    }
-}
-
-impl Into<InternalPerRecipientFungibleTransfer>
-    for PerRecipientFungibleTransfer
-{
-    fn into(self) -> InternalPerRecipientFungibleTransfer {
-        InternalPerRecipientFungibleTransfer {
-            use_try_deposit_or_abort: self.use_try_deposit_or_abort,
-            resource_address: self.resource_address.into(),
-            amount: self.amount.into(),
-            divisibility: self.divisibility,
-        }
-    }
-}
-
-impl From<InternalPerRecipientNonFungibleTransfer>
-    for PerRecipientNonFungibleTransfer
-{
-    fn from(value: InternalPerRecipientNonFungibleTransfer) -> Self {
-        Self {
-            use_try_deposit_or_abort: value.use_try_deposit_or_abort,
-            resource_address: value.resource_address.into(),
-            local_ids: value.local_ids.into_vec(),
-        }
-    }
-}
-
-impl Into<InternalPerRecipientNonFungibleTransfer>
-    for PerRecipientNonFungibleTransfer
-{
-    fn into(self) -> InternalPerRecipientNonFungibleTransfer {
-        InternalPerRecipientNonFungibleTransfer {
-            use_try_deposit_or_abort: self.use_try_deposit_or_abort,
-            resource_address: self.resource_address.into(),
-            local_ids: self.local_ids.into_internal_vec(),
-        }
-    }
-}

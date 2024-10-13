@@ -5,31 +5,13 @@ use sargon::Identifiable;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     pub network: NetworkDefinition,
 
     /// The URL to the gateways API endpoint
     pub url: Url,
-}
-
-impl From<InternalGateway> for Gateway {
-    fn from(value: InternalGateway) -> Self {
-        Self {
-            network: value.network.into(),
-            url: value.url.into(),
-        }
-    }
-}
-
-impl Into<InternalGateway> for Gateway {
-    fn into(self) -> InternalGateway {
-        InternalGateway {
-            network: self.network.into(),
-            url: self.url.into(),
-        }
-    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]

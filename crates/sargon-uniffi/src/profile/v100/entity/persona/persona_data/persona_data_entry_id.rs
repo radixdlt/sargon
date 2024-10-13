@@ -1,20 +1,8 @@
 use crate::prelude::*;
 use sargon::PersonaDataEntryID as InternalPersonaDataEntryID;
 
+uniffi::custom_newtype!(PersonaDataEntryID, Uuid);
+
 /// An ID of some PersonaData Entry a user has shared.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
-pub struct PersonaDataEntryID {
-    pub value: Uuid,
-}
-
-impl From<InternalPersonaDataEntryID> for PersonaDataEntryID {
-    fn from(value: InternalPersonaDataEntryID) -> Self {
-        Self { value: value.0 }
-    }
-}
-
-impl Into<InternalPersonaDataEntryID> for PersonaDataEntryID {
-    fn into(self) -> InternalPersonaDataEntryID {
-        InternalPersonaDataEntryID(self.value)
-    }
-}
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2)]
+pub struct PersonaDataEntryID(pub Uuid);

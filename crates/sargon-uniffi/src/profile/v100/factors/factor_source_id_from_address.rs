@@ -2,31 +2,13 @@ use crate::prelude::*;
 use sargon::FactorSourceIDFromAddress as InternalFactorSourceIDFromAddress;
 
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct FactorSourceIDFromAddress {
     /// The kind of the FactorSource this ID refers to, typically `trustedContact`.
     pub kind: FactorSourceKind,
 
     /// An account address which the FactorSource this ID refers uses/needs.
     pub body: AccountAddress,
-}
-
-impl From<InternalFactorSourceIDFromAddress> for FactorSourceIDFromAddress {
-    fn from(factor_source_id: InternalFactorSourceIDFromAddress) -> Self {
-        Self {
-            kind: factor_source_id.kind.into(),
-            body: factor_source_id.body.into(),
-        }
-    }
-}
-
-impl Into<InternalFactorSourceIDFromAddress> for FactorSourceIDFromAddress {
-    fn into(self) -> InternalFactorSourceIDFromAddress {
-        InternalFactorSourceIDFromAddress {
-            kind: self.kind.into(),
-            body: self.body.into(),
-        }
-    }
 }
 
 json_data_convertible!(FactorSourceIDFromAddress);
