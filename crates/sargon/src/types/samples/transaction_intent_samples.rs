@@ -88,7 +88,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn account_addresses_and_persona_addresses_require_auth() {
+    fn account_addresses_and_identity_addresses_require_auth() {
         let accounts = AccountAddress::sample_all();
         let identities = IdentityAddress::sample_all();
 
