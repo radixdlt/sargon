@@ -48,10 +48,46 @@ impl HasSampleValues for ChildIntents {
 
     fn sample_other() -> Self {
         Self {
-            children: vec![
-                ChildSubintent::sample(),
-                ChildSubintent::sample_other(),
-            ],
+            children: vec![ChildSubintent::sample_other()],
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ChildIntents;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn empty() {
+        let empty = SUT::empty();
+        assert!(empty.children.is_empty());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT, network_id: NetworkID| {
+            let scrypto: ScryptoChildIntents = s.clone().into();
+            SUT::from((scrypto.children, network_id))
+        };
+        assert_eq!(SUT::sample(), roundtrip(SUT::sample(), NetworkID::Mainnet));
+        assert_eq!(
+            SUT::sample_other(),
+            roundtrip(SUT::sample_other(), NetworkID::Simulator)
+        );
     }
 }

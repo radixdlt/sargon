@@ -199,5 +199,5 @@ decl_tx_hash!(
     /// A Subintent Hash is a bech32 encoded string starting with `"subtxid_"
     Subintent,
     "subtxid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sy6hgte",
-    "subtxid...y6hgte",
+    "subt...y6hgte",
 );

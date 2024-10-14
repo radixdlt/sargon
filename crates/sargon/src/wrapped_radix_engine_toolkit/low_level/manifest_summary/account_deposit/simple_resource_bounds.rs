@@ -66,7 +66,9 @@ mod tests {
     #[test]
     fn from_scrypto_fungible() {
         let scrypto = ScryptoSimpleResourceBounds::Fungible(
-            ScryptoSimpleFungibleResourceBounds::Exact(Decimal::from(1).into()),
+            ScryptoSimpleFungibleResourceBounds::Exact(
+                Decimal::from(1337).into(),
+            ),
         );
         assert_eq!(SUT::from(scrypto), SUT::sample());
     }
@@ -75,7 +77,7 @@ mod tests {
     fn from_scrypto_non_fungible() {
         let scrypto = ScryptoSimpleResourceBounds::NonFungible(
             ScryptoSimpleNonFungibleResourceBounds::Exact {
-                amount: Decimal::from(1).into(),
+                amount: Decimal::from(150).into(),
                 certain_ids: vec![
                     NonFungibleLocalId::sample(),
                     NonFungibleLocalId::sample_other(),

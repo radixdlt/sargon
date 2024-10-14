@@ -29,6 +29,14 @@ impl From<(ScryptoSubintentHash, NetworkID)> for SubintentHash {
     }
 }
 
+impl From<SubintentHash> for ScryptoSubintentHash {
+    fn from(value: SubintentHash) -> Self {
+        Self {
+            0: value.hash.into(),
+        }
+    }
+}
+
 impl HasSampleValues for ChildSubintent {
     fn sample() -> Self {
         Self {
@@ -40,5 +48,38 @@ impl HasSampleValues for ChildSubintent {
         Self {
             hash: SubintentHash::sample_other(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ChildSubintent;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT, network_id: NetworkID| {
+            let scrypto: ScryptoChildSubintent = s.clone().into();
+            SUT::from((scrypto, network_id))
+        };
+        assert_eq!(SUT::sample(), roundtrip(SUT::sample(), NetworkID::Mainnet));
+        assert_eq!(
+            SUT::sample_other(),
+            roundtrip(SUT::sample_other(), NetworkID::Simulator)
+        );
     }
 }

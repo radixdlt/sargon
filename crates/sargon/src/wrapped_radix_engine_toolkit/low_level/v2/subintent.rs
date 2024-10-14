@@ -48,3 +48,38 @@ impl HasSampleValues for Subintent {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Subintent;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn transaction_intent_hash() {
+        let subintent = SUT::sample();
+        let hash = subintent.transaction_intent_hash();
+        assert_eq!(hash.to_string(), "txid_rdx1gelylz5h59uk4enfnxe9vyaq69vurpt67y94uduehh3y8y2e3xfsddsz03".to_string());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip =
+            |s: SUT| SUT::try_from(ScryptoSubintent::from(s)).unwrap();
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
+}

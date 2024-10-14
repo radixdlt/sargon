@@ -85,21 +85,15 @@ impl InstructionsV2 {
         let network_definition = network_id.network_definition();
         let blob_provider = ScryptoMockBlobProvider::new();
 
-        // FIXME: use v2 compile
-        Ok(Self {
-            secret_magic: InstructionsSecretMagicV2::sample(),
-            network_id: NetworkID::Mainnet,
+        scrypto_compile_manifest(
+            instructions_string.as_ref(),
+            &network_definition,
+            blob_provider,
+        )
+        .map_err(|e| extract_error_from_error(e, network_id))
+        .and_then(|manifest: ScryptoTransactionManifestV2| {
+            Self::try_from((manifest.instructions.as_ref(), network_id))
         })
-        // scrypto_compile_manifest()
-        // scrypto_compile(
-        //     instructions_string.as_ref(),
-        //     &network_definition,
-        //     blob_provider,
-        // )
-        //     .map_err(|e| extract_error_from_error(e, network_id))
-        //     .and_then(|manifest| {
-        //         Self::try_from((manifest.instructions.as_ref(), network_id))
-        //     })
     }
 }
 
@@ -316,6 +310,15 @@ mod tests {
                 specified_to_instructions_ctor: NetworkID::Stokenet
             })
         );
+    }
+
+    #[test]
+    fn new_from_instructions_string() {
+        assert!(SUT::new(
+            SUT::sample_mainnet_instructions_string(),
+            NetworkID::Mainnet
+        )
+        .is_ok());
     }
 
     #[test]
