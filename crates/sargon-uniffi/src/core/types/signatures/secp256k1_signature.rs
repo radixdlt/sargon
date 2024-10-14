@@ -45,7 +45,7 @@ pub fn new_secp256k1_signature_from_exactly_65_bytes(
 pub fn new_secp256k1_signature_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Secp256k1Signature> {
-    InternalSecp256k1Signature::try_from(bytes.into_internal()).map_result()
+    InternalSecp256k1Signature::try_from(bytes.into_internal()).into_result()
 }
 
 #[uniffi::export]

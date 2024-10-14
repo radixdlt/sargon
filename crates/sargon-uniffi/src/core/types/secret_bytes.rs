@@ -35,7 +35,7 @@ macro_rules! decl_secret_bytes {
 
             #[uniffi::export]
             pub fn [< new_ $struct_name:snake _from_bytes >](bytes: BagOfBytes) -> Result<$struct_name> {
-                [< Internal $struct_name >]::try_from(bytes.into_internal()).map_result()
+                [< Internal $struct_name >]::try_from(bytes.into_internal()).into_result()
             }
 
             #[uniffi::export]

@@ -30,8 +30,6 @@ impl InternalNetworkingDriver for NetworkingDriverAdapter {
         &self,
         request: InternalNetworkRequest,
     ) -> InternalResult<InternalNetworkResponse> {
-        map_result_to_internal(
-            self.wrapped.execute_network_request(request.into()).await,
-        )
+            self.wrapped.execute_network_request(request.into()).await.into_internal_result()
     }
 }

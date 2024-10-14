@@ -38,7 +38,7 @@ macro_rules! address_union {
             pub fn [< new_ $union_name:snake _from_bech32 >](
                 string: String,
             ) -> Result<$union_name> {
-                [< Internal $union_name >]::new_from_bech32(&string).map_result()
+                [< Internal $union_name >]::new_from_bech32(&string).into_result()
             }
 
             #[uniffi::export]

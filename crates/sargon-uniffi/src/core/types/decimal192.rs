@@ -53,7 +53,7 @@ impl Into<InternalDecimal192> for Decimal192 {
 /// if the `string` was not a valid Decimal192.
 #[uniffi::export]
 pub fn new_decimal_from_string(string: String) -> Result<Decimal192> {
-    string.parse::<InternalDecimal192>().map_result()
+    string.parse::<InternalDecimal192>().into_result()
 }
 
 /// Tries to creates a new `Decimal192` from a formatted String for
@@ -67,7 +67,7 @@ pub fn new_decimal_from_formatted_string(
         formatted_string,
         locale.into(),
     )
-    .map_result()
+    .into_result()
 }
 
 /// The standard transaction fee
@@ -157,7 +157,7 @@ pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f64(value: f64) -> Result<Decimal192> {
-    InternalDecimal192::try_from(value).map_result()
+    InternalDecimal192::try_from(value).into_result()
 }
 
 /// The minimum possible value of `Decimal192`, being:
@@ -286,5 +286,5 @@ pub fn decimal_round(
     decimal
         .into_internal()
         .round_with_mode(decimal_places, rounding_mode.into())
-        .map_result()
+        .into_result()
 }

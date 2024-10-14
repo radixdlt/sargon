@@ -29,7 +29,7 @@ pub fn new_legacy_olympia_account_address_from_public_key(
 pub fn new_legacy_olympia_account_address_from_string(
     string: String,
 ) -> Result<LegacyOlympiaAccountAddress> {
-    InternalLegacyOlympiaAccountAddress::from_str(&string).map_result()
+    InternalLegacyOlympiaAccountAddress::from_str(&string).into_result()
 }
 
 #[uniffi::export]

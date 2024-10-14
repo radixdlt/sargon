@@ -51,7 +51,7 @@ macro_rules! decl_ret_wrapped_address {
 
             #[uniffi::export]
             pub fn [<new_ $address_type:snake _address>](bech32: String) -> Result<[< $address_type:camel Address >]> {
-                [< Internal $address_type:camel Address >]::try_from_bech32(&bech32).map_result()
+                [< Internal $address_type:camel Address >]::try_from_bech32(&bech32).into_result()
             }
 
             /// Returns a new address, with the same node_id, but using `network_id` as

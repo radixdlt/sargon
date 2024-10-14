@@ -41,7 +41,7 @@ pub fn new_bip44_like_path_from_index(index: HDPathValue) -> BIP44LikePath {
 pub fn new_bip44_like_path_from_string(
     string: String,
 ) -> Result<BIP44LikePath> {
-    InternalBIP44LikePath::from_str(&string).map_result()
+    InternalBIP44LikePath::from_str(&string).into_result()
 }
 
 #[uniffi::export]

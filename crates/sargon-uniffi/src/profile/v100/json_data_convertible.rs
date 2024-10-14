@@ -7,7 +7,7 @@ macro_rules! json_data_convertible {
             pub fn [< new_ $type:snake _from_json_bytes >](
                 json_bytes: &BagOfBytes,
             ) -> Result<$type> {
-                json_bytes.to_vec().deserialize::<[< Internal $type>]>().map_result()
+                json_bytes.to_vec().deserialize::<[< Internal $type>]>().into_result()
             }
 
             #[uniffi::export]
@@ -27,7 +27,7 @@ macro_rules! json_string_convertible {
             pub fn [< new_ $type:snake _from_json_string >](
                 json_string: String,
             ) -> Result<$type> {
-                json_string.deserialize::<[< Internal $type>]>().map_result()
+                json_string.deserialize::<[< Internal $type>]>().into_result()
             }
 
             #[uniffi::export]

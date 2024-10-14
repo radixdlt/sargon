@@ -13,7 +13,7 @@ pub fn new_p2p_links_from_json_bytes(
     json_bytes
         .to_vec()
         .deserialize::<InternalP2PLinks>()
-        .map_result()
+        .into_result()
 }
 
 #[uniffi::export]

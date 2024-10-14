@@ -36,5 +36,5 @@ pub fn new_non_fungible_local_id_string_from_str(
 ) -> Result<NonFungibleLocalIdString> {
     string
         .parse::<InternalNonFungibleLocalIdString>()
-        .map_result()
+        .into_result()
 }

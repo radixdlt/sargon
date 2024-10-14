@@ -8,7 +8,7 @@ impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Result<Accounts> {
-        self.wrapped.accounts_on_current_network().map_result()
+        self.wrapped.accounts_on_current_network().into_result()
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
@@ -17,7 +17,7 @@ impl SargonOS {
     ) -> Result<AccountsForDisplay> {
         self.wrapped
             .accounts_for_display_on_current_network()
-            .map_result()
+            .into_result()
     }
 
     /// Looks up the account by account address, returns Err if the account is
@@ -28,7 +28,7 @@ impl SargonOS {
     ) -> Result<Account> {
         self.wrapped
             .account_by_address(address.into_internal())
-            .map_result()
+            .into_result()
     }
 
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
@@ -42,7 +42,7 @@ impl SargonOS {
         self.wrapped
             .create_unsaved_unnamed_mainnet_account()
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
@@ -53,7 +53,7 @@ impl SargonOS {
         self.wrapped
             .create_unsaved_mainnet_account(name.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Creates a new non securified account **WITHOUT** adding it to Profile,
@@ -79,7 +79,7 @@ impl SargonOS {
                 name.into_internal(),
             )
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
@@ -92,7 +92,7 @@ impl SargonOS {
         self.wrapped
             .create_and_save_new_unnamed_mainnet_account()
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Create a new mainnet Account and adds it to the active Profile.
@@ -106,7 +106,7 @@ impl SargonOS {
         self.wrapped
             .create_and_save_new_mainnet_account(name.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Create a new Account and adds it to the active Profile.
@@ -124,7 +124,7 @@ impl SargonOS {
                 name.into_internal(),
             )
             .await
-            .map_result()
+            .into_result()
     }
 
     /// The account names will be `<name_prefix> <index>`
@@ -147,7 +147,7 @@ impl SargonOS {
                 name_prefix,
             )
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"
@@ -171,7 +171,7 @@ impl SargonOS {
                 name_prefix,
             )
             .await
-            .map_result()
+            .into_result()
     }
 }
 
@@ -196,7 +196,7 @@ impl SargonOS {
         self.wrapped
             .add_account(account.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Adds the `accounts` to active profile and **saves** the updated profile to
@@ -215,7 +215,7 @@ impl SargonOS {
         self.wrapped
             .add_accounts(accounts.into_identified_vec())
             .await
-            .map_result()
+            .into_result()
     }
 }
 
@@ -234,6 +234,6 @@ impl SargonOS {
         self.wrapped
             .update_account(updated.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 }

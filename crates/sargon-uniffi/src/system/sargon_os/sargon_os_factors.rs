@@ -14,12 +14,12 @@ impl SargonOS {
     /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
     /// a `DeviceFactorSource`.
     pub fn bdfs(&self) -> Result<DeviceFactorSource> {
-        self.wrapped.bdfs().map_result()
+        self.wrapped.bdfs().into_result()
     }
 
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<FactorSources> {
-        self.wrapped.factor_sources().map_result()
+        self.wrapped.factor_sources().into_result()
     }
 
     /// Updates the factor source `updated` by mutating current profile and persisting
@@ -35,7 +35,7 @@ impl SargonOS {
         self.wrapped
             .update_factor_source(updated.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Returns `Ok(false)` if the Profile already contained a factor source with the
@@ -57,7 +57,7 @@ impl SargonOS {
         self.wrapped
             .add_factor_source(factor_source.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Adds all of the provided `factor_sources` to Profile in one single go.
@@ -78,7 +78,7 @@ impl SargonOS {
         self.wrapped
             .add_factor_sources(factor_sources.into_identified_vec())
             .await
-            .map_result()
+            .into_result()
     }
 
     pub async fn debug_add_all_sample_factors(
@@ -87,7 +87,7 @@ impl SargonOS {
         self.wrapped
             .debug_add_all_sample_factors()
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
@@ -103,7 +103,7 @@ impl SargonOS {
                 factor_type.into_internal(),
             )
             .await
-            .map_result()
+            .into_result()
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -122,6 +122,6 @@ impl SargonOS {
         self.wrapped
             .load_private_device_factor_source_by_id(&id.into_internal())
             .await
-            .map_result()
+            .into_result()
     }
 }

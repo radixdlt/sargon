@@ -33,7 +33,7 @@ impl Into<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
 pub fn new_key_agreement_public_key_from_hex(
     hex: String,
 ) -> Result<KeyAgreementPublicKey> {
-    hex.parse::<InternalKeyAgreementPublicKey>().map_result()
+    hex.parse::<InternalKeyAgreementPublicKey>().into_result()
 }
 
 /// Creates a Secp256k1PublicKey from either compressed form (33 bytes) or
@@ -43,7 +43,7 @@ pub fn new_key_agreement_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<KeyAgreementPublicKey> {
     InternalKeyAgreementPublicKey::try_from(bytes.into_internal().to_vec())
-        .map_result()
+        .into_result()
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.

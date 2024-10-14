@@ -20,7 +20,7 @@ impl Into<InternalAppearanceID> for AppearanceID {
 
 #[uniffi::export]
 pub fn new_appearance_id(validating: u8) -> Result<AppearanceID> {
-    InternalAppearanceID::new(validating).map_result()
+    InternalAppearanceID::new(validating).into_result()
 }
 
 #[uniffi::export]

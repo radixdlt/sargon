@@ -29,7 +29,7 @@ macro_rules! decl_tx_hash {
 
             #[uniffi::export]
             pub fn [< new_$struct_name:snake _from_string>](string: String) -> Result<$struct_name> {
-                [< Internal $struct_name>]::from_str(&string).map_result()
+                [< Internal $struct_name>]::from_str(&string).into_result()
             }
 
             #[uniffi::export]

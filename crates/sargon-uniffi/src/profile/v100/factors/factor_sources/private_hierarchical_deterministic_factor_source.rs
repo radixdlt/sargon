@@ -18,7 +18,7 @@ pub fn new_private_hd_factor_source_babylon(
         is_main,
         entropy.into_internal(),
         &host_info.into_internal(),
-    ).map_result()
+    ).into_result()
 }
 
 #[uniffi::export]

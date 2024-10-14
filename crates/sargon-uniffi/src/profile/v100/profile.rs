@@ -60,7 +60,7 @@ impl Into<InternalProfile> for Profile {
 
 #[uniffi::export]
 pub fn new_profile_from_json_string(json_str: String) -> Result<Profile> {
-    InternalProfile::new_from_json_string(json_str).map_result()
+    InternalProfile::new_from_json_string(json_str).into_result()
 }
 
 #[uniffi::export]
@@ -135,7 +135,7 @@ pub fn new_profile_from_encryption_bytes(
         json_string,
         decryption_password,
     )
-    .map_result()
+    .into_result()
 }
 
 #[uniffi::export]

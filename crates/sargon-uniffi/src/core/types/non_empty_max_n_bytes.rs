@@ -46,7 +46,7 @@ macro_rules! decl_non_empty_max_n_bytes {
             pub fn [<new_non_empty_max_ $byte_count _bytes>](
                 bag_of_bytes: BagOfBytes,
             ) -> Result<[< NonEmptyMax $byte_count Bytes  >]> {
-                [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes.into_internal()).map_result()
+                [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes.into_internal()).into_result()
             }
         }
     };

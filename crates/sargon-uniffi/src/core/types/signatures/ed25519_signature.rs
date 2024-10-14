@@ -30,7 +30,7 @@ pub fn new_ed25519_signature_from_exactly_64_bytes(
 pub fn new_ed25519_signature_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Ed25519Signature> {
-    InternalEd25519Signature::try_from(bytes.into_internal()).map_result()
+    InternalEd25519Signature::try_from(bytes.into_internal()).into_result()
 }
 
 #[uniffi::export]

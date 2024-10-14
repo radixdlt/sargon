@@ -69,7 +69,7 @@ delegate_display_debug_into!(NetworkID, InternalNetworkID);
 
 #[uniffi::export]
 pub fn new_network_id_from_discriminant(discriminant: u8) -> Result<NetworkID> {
-    InternalNetworkID::try_from(discriminant).map_result()
+    InternalNetworkID::try_from(discriminant).into_result()
 }
 
 #[uniffi::export]

@@ -47,7 +47,7 @@ macro_rules! decl_specialized_address {
             /// Tries to bech32 decode the string into a specialized address.
             #[uniffi::export]
             pub fn [< new_ $specialized_address_type:snake >](bech32: String) -> Result<$specialized_address_type> {
-                [< Internal $specialized_address_type >]::new_from_bech32(bech32).map_result()
+                [< Internal $specialized_address_type >]::new_from_bech32(bech32).into_result()
             }
 
             /// Returns the base address of this specialized address.

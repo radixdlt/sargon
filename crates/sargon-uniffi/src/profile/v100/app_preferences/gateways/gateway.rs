@@ -59,7 +59,7 @@ pub fn new_gateway_with_url_on_network(
     url: String,
     network_id: NetworkID,
 ) -> Result<Gateway> {
-    InternalGateway::new(url, network_id.into()).map_result()
+    InternalGateway::new(url, network_id.into()).into_result()
 }
 
 #[uniffi::export]

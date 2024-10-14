@@ -18,7 +18,7 @@ pub fn new_transaction_manifest_from_instructions_string_and_blobs(
         network_id.into(),
         blobs.into(),
     )
-    .map_result()
+    .into_result()
 }
 
 #[uniffi::export]
@@ -30,7 +30,7 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
         unvalidated_transaction_manifest.into_internal(),
         network_id.into(),
     ))
-    .map_result()
+    .into_result()
 }
 
 #[uniffi::export]
@@ -79,7 +79,7 @@ pub fn transaction_manifest_execution_summary(
     manifest
         .into_internal()
         .execution_summary(engine_toolkit_receipt)
-        .map_result()
+        .into_result()
 }
 
 #[uniffi::export]

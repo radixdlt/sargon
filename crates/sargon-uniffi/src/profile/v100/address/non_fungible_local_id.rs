@@ -28,7 +28,7 @@ pub enum NonFungibleLocalId {
 pub fn new_non_fungible_local_id_from_string(
     local_id: String,
 ) -> Result<NonFungibleLocalId> {
-    InternalNonFungibleLocalId::from_str(&local_id).map_result()
+    InternalNonFungibleLocalId::from_str(&local_id).into_result()
 }
 
 #[uniffi::export]
@@ -60,21 +60,21 @@ pub fn new_non_fungible_local_id_int(value: u64) -> NonFungibleLocalId {
 pub fn new_non_fungible_local_id_string(
     string: String,
 ) -> Result<NonFungibleLocalId> {
-    InternalNonFungibleLocalId::string(string).map_result()
+    InternalNonFungibleLocalId::string(string).into_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_bytes(
     bytes: BagOfBytes,
 ) -> Result<NonFungibleLocalId> {
-    InternalNonFungibleLocalId::bytes(bytes.into_internal()).map_result()
+    InternalNonFungibleLocalId::bytes(bytes.into_internal()).into_result()
 }
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_ruid(
     bytes: BagOfBytes,
 ) -> Result<NonFungibleLocalId> {
-    InternalNonFungibleLocalId::ruid(bytes.into_internal()).map_result()
+    InternalNonFungibleLocalId::ruid(bytes.into_internal()).into_result()
 }
 
 #[uniffi::export]

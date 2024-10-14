@@ -13,7 +13,7 @@ pub enum CAP26Path {
 
 #[uniffi::export]
 pub fn new_cap26_path_from_string(string: String) -> Result<CAP26Path> {
-    InternalCAP26Path::from_str(&string).map_result()
+    InternalCAP26Path::from_str(&string).into_result()
 }
 
 #[uniffi::export]

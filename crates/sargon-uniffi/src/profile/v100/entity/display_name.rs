@@ -32,7 +32,7 @@ json_string_convertible!(DisplayName);
 
 #[uniffi::export]
 pub fn new_display_name(name: String) -> Result<DisplayName> {
-    InternalDisplayName::new(name.as_str()).map_result()
+    InternalDisplayName::new(name.as_str()).into_result()
 }
 
 #[uniffi::export]

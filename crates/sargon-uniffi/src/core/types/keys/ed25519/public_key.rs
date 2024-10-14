@@ -34,7 +34,7 @@ impl Into<InternalEd25519PublicKey> for Ed25519PublicKey {
 pub fn new_ed25519_public_key_from_hex(
     hex: String,
 ) -> Result<Ed25519PublicKey> {
-    hex.parse::<InternalEd25519PublicKey>().map_result()
+    hex.parse::<InternalEd25519PublicKey>().into_result()
 }
 
 #[uniffi::export]
@@ -42,7 +42,7 @@ pub fn new_ed25519_public_key_from_bytes(
     bytes: BagOfBytes,
 ) -> Result<Ed25519PublicKey> {
     InternalEd25519PublicKey::try_from(bytes.into_internal().to_vec())
-        .map_result()
+        .into_result()
 }
 
 #[uniffi::export]
@@ -60,7 +60,7 @@ pub fn android_secret_key_get_public_key_from_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
 ) -> Result<Ed25519PublicKey> {
     InternalEd25519PublicKey::from_private_key_bytes(private_key_bytes.into())
-        .map_result()
+        .into_result()
 }
 
 /// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.

@@ -50,7 +50,7 @@ macro_rules! decl_exactly_n_bytes {
             pub fn [<new_exactly_ $byte_count _bytes>](
                 bytes: BagOfBytes,
             ) -> Result<[< Exactly $byte_count Bytes >]> {
-                [<InternalExactly $byte_count Bytes>]::try_from(bytes.into_internal()).map_result()
+                [<InternalExactly $byte_count Bytes>]::try_from(bytes.into_internal()).into_result()
             }
 
             #[uniffi::export]

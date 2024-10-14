@@ -50,5 +50,5 @@ pub fn new_hash_from_bytes(bytes: Exactly32Bytes) -> Hash {
 
 #[uniffi::export]
 pub fn new_hash_from_string(string: String) -> Result<Hash> {
-    InternalHash::try_from(string).map_result()
+    InternalHash::try_from(string).into_result()
 }

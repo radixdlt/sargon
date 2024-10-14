@@ -21,7 +21,7 @@ pub fn ledger_hw_wallet_model_to_string(
 pub fn new_ledger_hw_wallet_model_from_string(
     string: String,
 ) -> Result<LedgerHardwareWalletModel> {
-    InternalLedgerHardwareWalletModel::from_str(&string).map_result()
+    InternalLedgerHardwareWalletModel::from_str(&string).into_result()
 }
 
 #[uniffi::export]

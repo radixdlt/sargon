@@ -16,7 +16,7 @@ pub enum PublicKey {
 /// Tries to create a PublicKey from the hex string
 #[uniffi::export]
 pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
-    InternalPublicKey::from_str(&hex).map_result()
+    InternalPublicKey::from_str(&hex).into_result()
 }
 
 /// Tries to create a PublicKey from the bytes
@@ -24,7 +24,7 @@ pub fn new_public_key_from_hex(hex: String) -> Result<PublicKey> {
 pub fn new_public_key_from_bytes(
     bag_of_bytes: BagOfBytes,
 ) -> Result<PublicKey> {
-    InternalPublicKey::try_from(bag_of_bytes.to_vec()).map_result()
+    InternalPublicKey::try_from(bag_of_bytes.to_vec()).into_result()
 }
 
 #[uniffi::export]

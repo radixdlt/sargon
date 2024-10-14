@@ -23,7 +23,7 @@ pub fn new_derivation_path_sample_other() -> DerivationPath {
 pub fn new_derivation_path_from_string(
     string: String,
 ) -> Result<DerivationPath> {
-    InternalDerivationPath::from_str(&string).map_result()
+    InternalDerivationPath::from_str(&string).into_result()
 }
 
 #[uniffi::export]

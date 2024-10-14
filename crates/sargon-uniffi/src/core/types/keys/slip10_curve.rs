@@ -21,7 +21,7 @@ json_string_convertible!(SLIP10Curve);
 
 #[uniffi::export]
 pub fn new_slip10_curve_from_string(curve: String) -> Result<SLIP10Curve> {
-    InternalSLIP10Curve::from_str(&curve).map_result()
+    InternalSLIP10Curve::from_str(&curve).into_result()
 }
 
 #[uniffi::export]

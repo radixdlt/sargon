@@ -38,7 +38,7 @@ impl Into<InternalNetworkDefinition> for NetworkDefinition {
 pub fn new_network_definition_lookup_by_name(
     logical_name: String,
 ) -> Result<NetworkDefinition> {
-    InternalNetworkDefinition::lookup_by_name(&logical_name).map_result()
+    InternalNetworkDefinition::lookup_by_name(&logical_name).into_result()
 }
 
 #[uniffi::export]

@@ -32,9 +32,7 @@ impl InternalSecureStorageDriver for SecureStorageDriverAdapter {
         &self,
         key: InternalSecureStorageKey,
     ) -> InternalResult<Option<InternalBagOfBytes>> {
-        map_result_to_internal_optional(
-            self.wrapped.load_data(key.into()).await,
-        )
+            self.wrapped.load_data(key.into()).await.into_internal_result()
     }
 
     async fn save_data(
@@ -42,17 +40,13 @@ impl InternalSecureStorageDriver for SecureStorageDriverAdapter {
         key: InternalSecureStorageKey,
         data: InternalBagOfBytes,
     ) -> InternalResult<()> {
-        map_result_to_internal(
-            self.wrapped.save_data(key.into(), data.into()).await,
-        )
+            self.wrapped.save_data(key.into(), data.into()).await.into_internal_result()
     }
 
     async fn delete_data_for_key(
         &self,
         key: InternalSecureStorageKey,
     ) -> InternalResult<()> {
-        map_result_to_internal(
-            self.wrapped.delete_data_for_key(key.into()).await,
-        )
+            self.wrapped.delete_data_for_key(key.into()).await.into_internal_result()
     }
 }

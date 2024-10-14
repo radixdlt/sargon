@@ -84,7 +84,7 @@ pub fn new_factor_source_kind_sample_other() -> FactorSourceKind {
 pub fn new_factor_source_kind_from_string(
     string: String,
 ) -> Result<FactorSourceKind> {
-    InternalFactorSourceKind::from_str(&string).map_result()
+    InternalFactorSourceKind::from_str(&string).into_result()
 }
 
 #[uniffi::export]

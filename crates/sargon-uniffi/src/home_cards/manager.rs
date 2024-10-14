@@ -41,14 +41,14 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn bootstrap(&self) -> Result<()> {
-        map_result_from_internal(self.wrapped.bootstrap().await)
+        self.wrapped.bootstrap().await.into_result()
     }
 
     /// Initializes and saves to storage default `HomeCards`.
     /// Marks the wallet creation and populates the set of cards required for a new wallet.
     /// Notifies `HomeCardsObserver`.
     pub async fn wallet_created(&self) -> Result<()> {
-        map_result_from_internal(self.wrapped.wallet_created().await)
+        self.wrapped.wallet_created().await.into_result()
     }
 
     /// Handles a deferred deep link by parsing it and saving the generated `HomeCards` to `HomeCardsStorage`.
@@ -59,11 +59,10 @@ impl HomeCardsManager {
         &self,
         encoded_value: String,
     ) -> Result<()> {
-        map_result_from_internal(
+        
             self.wrapped
                 .deferred_deep_link_received(encoded_value)
-                .await,
-        )
+                .await.into_result()
     }
 
     /// Marks the wallet restoration.
@@ -71,20 +70,20 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn wallet_restored(&self) -> Result<()> {
-        map_result_from_internal(self.wrapped.wallet_restored().await)
+        self.wrapped.wallet_restored().await.into_result()
     }
 
     /// Dismisses a specified `HomeCard` by removing it from `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn card_dismissed(&self, card: HomeCard) -> Result<()> {
-        map_result_from_internal(self.wrapped.card_dismissed(card.into()).await)
+        self.wrapped.card_dismissed(card.into()).await.into_result()
     }
 
     /// Clears the home cards from the `HomeCardsStorage`.
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn wallet_reset(&self) -> Result<()> {
-        map_result_from_internal(self.wrapped.wallet_reset().await)
+        self.wrapped.wallet_reset().await.into_result()
     }
 }

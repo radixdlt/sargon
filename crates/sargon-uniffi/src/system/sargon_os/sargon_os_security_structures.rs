@@ -9,7 +9,7 @@ impl SargonOS {
     ) -> Result<SecurityStructuresOfFactorSources> {
         self.wrapped
             .security_structures_of_factor_sources()
-            .map_result()
+            .into_result()
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
@@ -19,7 +19,7 @@ impl SargonOS {
     ) -> Result<SecurityStructuresOfFactorSourceIDs> {
         self.wrapped
             .security_structures_of_factor_source_ids()
-            .map_result()
+            .into_result()
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
@@ -28,7 +28,7 @@ impl SargonOS {
         &self,
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<SecurityStructureOfFactorSources> {
-        self.wrapped.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&structure_of_ids.into_internal()).map_result()
+        self.wrapped.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&structure_of_ids.into_internal()).into_result()
     }
 
     /// Adds the security structureof factor sources to Profile if none with the
@@ -54,6 +54,6 @@ impl SargonOS {
                 &structure.into_internal(),
             )
             .await
-            .map_result()
+            .into_result()
     }
 }

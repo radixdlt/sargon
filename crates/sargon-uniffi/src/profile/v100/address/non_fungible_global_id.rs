@@ -19,7 +19,7 @@ pub struct NonFungibleGlobalId {
 pub fn new_non_fungible_global_id_from_string(
     string: String,
 ) -> Result<NonFungibleGlobalId> {
-    InternalNonFungibleGlobalId::from_str(&string).map_result()
+    InternalNonFungibleGlobalId::from_str(&string).into_result()
 }
 
 #[uniffi::export]

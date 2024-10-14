@@ -36,7 +36,7 @@ impl RadixConnectMobile {
         &self,
         url: String,
     ) -> Result<RadixConnectMobileSessionRequest> {
-        map_result_from_internal(self.wrapped.handle_deep_link(url).await)
+        self.wrapped.handle_deep_link(url).await.into_result()
     }
 
     /// Send the Host's response to the dApp.
@@ -46,10 +46,10 @@ impl RadixConnectMobile {
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        map_result_from_internal(
+        
             self.wrapped
                 .send_dapp_interaction_response(wallet_response.into())
-                .await,
-        )
+                .await
+                .into_result()
     }
 }
