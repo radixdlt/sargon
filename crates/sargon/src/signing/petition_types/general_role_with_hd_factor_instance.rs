@@ -12,10 +12,8 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
 {
     type Error = CommonError;
 
-    fn try_from(value: (MatrixOfFactorInstances, RoleKind)) -> Result<Self> {
-        let matrix = value.0;
-
-        let (threshold_factors, threshold, override_factors) = match value.1 {
+    fn try_from((matrix, role): (MatrixOfFactorInstances, RoleKind)) -> Result<Self> {
+        let (threshold_factors, threshold, override_factors) = match role {
             RoleKind::Primary => (
                 matrix.primary_role.threshold_factors,
                 matrix.primary_role.threshold,
