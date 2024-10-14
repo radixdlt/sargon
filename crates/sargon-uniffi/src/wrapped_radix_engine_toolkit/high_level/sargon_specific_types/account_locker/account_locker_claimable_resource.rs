@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::AccountLockerClaimableResource as InternalAccountLockerClaimableResource;
 
 /// A claimable resource in an account locker.
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum AccountLockerClaimableResource {
     /// A fungible resource with a specific claimable amount
     Fungible {
@@ -14,52 +14,6 @@ pub enum AccountLockerClaimableResource {
         resource_address: ResourceAddress,
         number_of_items: u64,
     },
-}
-
-impl From<InternalAccountLockerClaimableResource>
-    for AccountLockerClaimableResource
-{
-    fn from(value: InternalAccountLockerClaimableResource) -> Self {
-        match value {
-            InternalAccountLockerClaimableResource::Fungible {
-                resource_address,
-                amount,
-            } => AccountLockerClaimableResource::Fungible {
-                resource_address: resource_address.into(),
-                amount: amount.into(),
-            },
-            InternalAccountLockerClaimableResource::NonFungible {
-                resource_address,
-                number_of_items,
-            } => AccountLockerClaimableResource::NonFungible {
-                resource_address: resource_address.into(),
-                number_of_items,
-            },
-        }
-    }
-}
-
-impl Into<InternalAccountLockerClaimableResource>
-    for AccountLockerClaimableResource
-{
-    fn into(self) -> InternalAccountLockerClaimableResource {
-        match self {
-            AccountLockerClaimableResource::Fungible {
-                resource_address,
-                amount,
-            } => InternalAccountLockerClaimableResource::Fungible {
-                resource_address: resource_address.into(),
-                amount: amount.into(),
-            },
-            AccountLockerClaimableResource::NonFungible {
-                resource_address,
-                number_of_items,
-            } => InternalAccountLockerClaimableResource::NonFungible {
-                resource_address: resource_address.into(),
-                number_of_items,
-            },
-        }
-    }
 }
 
 #[uniffi::export]

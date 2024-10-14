@@ -37,7 +37,7 @@ macro_rules! declare_shared_with_dapp {
             fn from(value: [<Internal $struct_name>]) -> Self {
                 Self {
                     request: value.request.into(),
-                    ids: value.ids.into_iter().map(Into::into).collect(),
+                    ids: value.ids.into_vec(),
                 }
             }
         }
@@ -46,7 +46,7 @@ macro_rules! declare_shared_with_dapp {
             fn into(self) -> [<Internal $struct_name>] {
                 [<Internal $struct_name>] {
                     request: self.request.into(),
-                    ids: self.ids.into_iter().map(Into::into).collect(),
+                    ids: self.ids.into_identified_vec(),
                 }
             }
         }

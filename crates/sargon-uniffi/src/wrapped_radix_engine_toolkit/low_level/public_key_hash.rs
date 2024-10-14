@@ -2,40 +2,10 @@ use crate::prelude::*;
 use sargon::PublicKeyHash as InternalPublicKeyHash;
 
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
-#[derive(Clone, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
 pub enum PublicKeyHash {
     Ed25519 { value: Exactly29Bytes },
     Secp256k1 { value: Exactly29Bytes },
-}
-
-impl From<InternalPublicKeyHash> for PublicKeyHash {
-    fn from(value: InternalPublicKeyHash) -> Self {
-        match value {
-            InternalPublicKeyHash::Ed25519 { value } => Self::Ed25519 {
-                value: value.into(),
-            },
-            InternalPublicKeyHash::Secp256k1 { value } => Self::Secp256k1 {
-                value: value.into(),
-            },
-        }
-    }
-}
-
-impl Into<InternalPublicKeyHash> for PublicKeyHash {
-    fn into(self) -> InternalPublicKeyHash {
-        match self {
-            PublicKeyHash::Ed25519 { value } => {
-                InternalPublicKeyHash::Ed25519 {
-                    value: value.into(),
-                }
-            }
-            PublicKeyHash::Secp256k1 { value } => {
-                InternalPublicKeyHash::Secp256k1 {
-                    value: value.into(),
-                }
-            }
-        }
-    }
 }
 
 #[uniffi::export]

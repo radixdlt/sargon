@@ -293,7 +293,13 @@ fn generate_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::Tok
                         quote! {
                             #field_name: #field_name.into_hash_map()
                         }
-                    } else {
+                    } else if segment.ident == "Option" {
+                        // Call into_option() for Option types
+                        quote! {
+                            #field_name: #field_name.map(|v| v.into())
+                        }
+                    }
+                    else {
                         // Default to calling .into() for other types
                         quote! {
                             #field_name: #field_name.into()
@@ -332,7 +338,13 @@ fn generate_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_ma
                         quote! {
                             #field_name: #field_name.into_internal_hash_map()
                         }
-                    } else {
+                    } else if segment.ident == "Option" {
+                        // Call into_option() for Option types
+                        quote! {
+                            #field_name: #field_name.map(|v| v.into())
+                        }
+                    } 
+                    else {
                         // Default to calling .into() for other types
                         quote! {
                             #field_name: #field_name.into()
@@ -371,7 +383,13 @@ fn generate_struct_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macr
                         quote! {
                             #field_name: value.#field_name.into_hash_map()
                         }
-                    } else {
+                    } else if segment.ident == "Option" {
+                        // Call into_option() for Option types
+                        quote! {
+                            #field_name: value.#field_name.map(|v| v.into())
+                        }
+                    }
+                    else {
                         // Default to calling .into() for other types
                         quote! {
                             #field_name: value.#field_name.into()
@@ -410,7 +428,13 @@ fn generate_struct_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<
                         quote! {
                             #field_name: self.#field_name.into_internal_hash_map()
                         }
-                    } else {
+                    } else if segment.ident == "Option" {
+                        // Call into_option() for Option types
+                        quote! {
+                            #field_name: self.#field_name.map(|v| v.into())
+                        }
+                    }
+                    else {
                         // Default to calling .into() for other types
                         quote! {
                             #field_name: self.#field_name.into()

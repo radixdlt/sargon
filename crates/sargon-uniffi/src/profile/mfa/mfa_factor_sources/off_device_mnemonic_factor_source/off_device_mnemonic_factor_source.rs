@@ -5,7 +5,7 @@ use sargon::OffDeviceMnemonicFactorSource as InternalOffDeviceMnemonicFactorSour
 /// A factor source representing a Mnemonic the user has to input every time
 /// the use the factor source, since it is not saved on the device, it is said
 /// to be "off device".
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct OffDeviceMnemonicFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -18,30 +18,6 @@ pub struct OffDeviceMnemonicFactorSource {
     /// Properties describing a OffDeviceMnemonicFactorSource to help user
     /// disambiguate between it and another one.
     pub hint: OffDeviceMnemonicHint,
-}
-
-impl From<InternalOffDeviceMnemonicFactorSource>
-    for OffDeviceMnemonicFactorSource
-{
-    fn from(factor_source: InternalOffDeviceMnemonicFactorSource) -> Self {
-        Self {
-            id: factor_source.id.into(),
-            common: factor_source.common.into(),
-            hint: factor_source.hint.into(),
-        }
-    }
-}
-
-impl Into<InternalOffDeviceMnemonicFactorSource>
-    for OffDeviceMnemonicFactorSource
-{
-    fn into(self) -> InternalOffDeviceMnemonicFactorSource {
-        InternalOffDeviceMnemonicFactorSource {
-            id: self.id.into(),
-            common: self.common.into(),
-            hint: self.hint.into(),
-        }
-    }
 }
 
 #[uniffi::export]

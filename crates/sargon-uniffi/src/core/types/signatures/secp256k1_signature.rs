@@ -8,22 +8,6 @@ pub struct Secp256k1Signature {
     pub bytes: Exactly65Bytes,
 }
 
-// impl From<InternalSecp256k1Signature> for Secp256k1Signature {
-//     fn from(value: InternalSecp256k1Signature) -> Self {
-//         Self {
-//             bytes: value.bytes.into(),
-//         }
-//     }
-// }
-
-// impl Into<InternalSecp256k1Signature> for Secp256k1Signature {
-//     fn into(self) -> InternalSecp256k1Signature {
-//         InternalSecp256k1Signature {
-//             bytes: self.bytes.into(),
-//         }
-//     }
-// }
-
 #[uniffi::export]
 pub fn new_secp256k1_signature_sample() -> Secp256k1Signature {
     InternalSecp256k1Signature::sample().into()

@@ -76,16 +76,6 @@ impl HasSampleValues for PoolAddress {
     }
 }
 
-impl HasSampleValues for Vec<PoolAddress> {
-    fn sample() -> Self {
-        vec![PoolAddress::sample()]
-    }
-
-    fn sample_other() -> Self {
-        vec![PoolAddress::sample_other()]
-    }
-}
-
 impl HasSampleValues for PoolKind {
     fn sample() -> Self {
         Self::OneResource

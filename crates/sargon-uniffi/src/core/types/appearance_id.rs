@@ -1,21 +1,9 @@
 use crate::prelude::*;
 use sargon::AppearanceID as InternalAppearanceID;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct AppearanceID {
     pub value: u8,
-}
-
-impl From<InternalAppearanceID> for AppearanceID {
-    fn from(value: InternalAppearanceID) -> Self {
-        Self { value: value.value }
-    }
-}
-
-impl Into<InternalAppearanceID> for AppearanceID {
-    fn into(self) -> InternalAppearanceID {
-        InternalAppearanceID { value: self.value }
-    }
 }
 
 #[uniffi::export]

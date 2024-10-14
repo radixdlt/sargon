@@ -60,20 +60,6 @@ impl HasSampleValues for ResourceOrNonFungible {
     }
 }
 
-impl HasSampleValues for HashMap<AccountAddress, Vec<ResourceOrNonFungible>> {
-    fn sample() -> Self {
-        let mut map = HashMap::new();
-        map.insert(AccountAddress::sample(), vec![ResourceOrNonFungible::sample()]);
-        map
-    }
-
-    fn sample_other() -> Self {
-        let mut map = HashMap::new();
-        map.insert(AccountAddress::sample_other(), vec![ResourceOrNonFungible::sample_other()]);
-        map
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

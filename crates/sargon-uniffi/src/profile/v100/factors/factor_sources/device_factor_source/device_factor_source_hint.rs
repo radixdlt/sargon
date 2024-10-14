@@ -3,7 +3,7 @@ use sargon::DeviceFactorSourceHint as InternalDeviceFactorSourceHint;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
     pub name: String,
@@ -40,30 +40,4 @@ pub struct DeviceFactorSourceHint {
     /// MUST be optional since this was added on 2024-05-03 and
     /// was not present in earlier version of wallet (pre 1.6.0).
     pub host_vendor: Option<String>,
-}
-
-impl From<InternalDeviceFactorSourceHint> for DeviceFactorSourceHint {
-    fn from(value: InternalDeviceFactorSourceHint) -> Self {
-        Self {
-            name: value.name,
-            model: value.model,
-            mnemonic_word_count: value.mnemonic_word_count.into(),
-            system_version: value.system_version,
-            host_app_version: value.host_app_version,
-            host_vendor: value.host_vendor,
-        }
-    }
-}
-
-impl Into<InternalDeviceFactorSourceHint> for DeviceFactorSourceHint {
-    fn into(self) -> InternalDeviceFactorSourceHint {
-        InternalDeviceFactorSourceHint {
-            name: self.name,
-            model: self.model,
-            mnemonic_word_count: self.mnemonic_word_count.into(),
-            system_version: self.system_version,
-            host_app_version: self.host_app_version,
-            host_vendor: self.host_vendor,
-        }
-    }
 }

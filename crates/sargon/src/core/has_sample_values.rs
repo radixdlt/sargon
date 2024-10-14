@@ -75,3 +75,47 @@ impl HasSampleValues for Url {
         "http://example.org".parse().unwrap()
     }
 }
+
+impl<T> HasSampleValues for Vec<T>
+where
+    T: HasSampleValues,
+{
+    fn sample() -> Self {
+        vec![T::sample()]
+    }
+
+    fn sample_other() -> Self {
+        vec![T::sample_other()]
+    }
+}
+
+impl<T> HasSampleValues for Option<T>
+where
+    T: HasSampleValues,
+{
+    fn sample() -> Self {
+        Some(T::sample())
+    }
+
+    fn sample_other() -> Self {
+        Some(T::sample_other())
+    }
+}
+
+impl<Key, Value> HasSampleValues for HashMap<Key, Value>
+where
+    Key: HasSampleValues + Eq + std::hash::Hash,
+    Value: HasSampleValues,
+{
+    fn sample() -> Self {
+        let mut map = HashMap::new();
+        map.insert(Key::sample(), Value::sample());
+        map
+    }
+
+    fn sample_other() -> Self {
+        let mut map = HashMap::new();
+        map.insert(Key::sample_other(), Value::sample_other());
+        map
+    }
+}

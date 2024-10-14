@@ -1,28 +1,10 @@
 use crate::prelude::*;
 use sargon::SargonBuildInformation as InternalSargonBuildInformation;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct SargonBuildInformation {
     pub sargon_version: String,
     pub dependencies: SargonDependencies,
-}
-
-impl From<InternalSargonBuildInformation> for SargonBuildInformation {
-    fn from(value: InternalSargonBuildInformation) -> Self {
-        Self {
-            sargon_version: value.sargon_version,
-            dependencies: value.dependencies.into(),
-        }
-    }
-}
-
-impl Into<InternalSargonBuildInformation> for SargonBuildInformation {
-    fn into(self) -> InternalSargonBuildInformation {
-        InternalSargonBuildInformation {
-            sargon_version: self.sargon_version,
-            dependencies: self.dependencies.into(),
-        }
-    }
 }
 
 #[uniffi::export]

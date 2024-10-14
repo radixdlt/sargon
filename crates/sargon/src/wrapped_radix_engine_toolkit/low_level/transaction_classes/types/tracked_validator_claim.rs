@@ -61,13 +61,3 @@ impl HasSampleValues for TrackedValidatorClaim {
         )
     }
 }
-
-impl HasSampleValues for Vec<TrackedValidatorClaim> {
-    fn sample() -> Self {
-        vec![TrackedValidatorClaim::sample()]
-    }
-
-    fn sample_other() -> Self {
-        vec![TrackedValidatorClaim::sample_other()]
-    }
-}

@@ -60,13 +60,3 @@ impl HasSampleValues for TrackedPoolRedemption {
         )
     }
 }
-
-impl HasSampleValues for Vec<TrackedPoolRedemption> {
-    fn sample() -> Self {
-        vec![TrackedPoolRedemption::sample()]
-    }
-
-    fn sample_other() -> Self {
-        vec![TrackedPoolRedemption::sample_other()]
-    }
-}

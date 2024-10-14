@@ -60,13 +60,3 @@ impl HasSampleValues for TrackedValidatorStake {
         )
     }
 }
-
-impl HasSampleValues for Vec<TrackedValidatorStake> {
-    fn sample() -> Self {
-        vec![TrackedValidatorStake::sample()]
-    }
-
-    fn sample_other() -> Self {
-        vec![TrackedValidatorStake::sample_other()]
-    }
-}

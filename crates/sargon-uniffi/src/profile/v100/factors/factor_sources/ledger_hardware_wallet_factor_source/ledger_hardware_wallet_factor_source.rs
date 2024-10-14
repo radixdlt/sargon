@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 use sargon::LedgerHardwareWalletFactorSource as InternalLedgerHardwareWalletFactorSource;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
@@ -15,30 +15,6 @@ pub struct LedgerHardwareWalletFactorSource {
 
     /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
     pub hint: LedgerHardwareWalletHint,
-}
-
-impl From<InternalLedgerHardwareWalletFactorSource>
-    for LedgerHardwareWalletFactorSource
-{
-    fn from(value: InternalLedgerHardwareWalletFactorSource) -> Self {
-        Self {
-            id: value.id.into(),
-            common: value.common.into(),
-            hint: value.hint.into(),
-        }
-    }
-}
-
-impl Into<InternalLedgerHardwareWalletFactorSource>
-    for LedgerHardwareWalletFactorSource
-{
-    fn into(self) -> InternalLedgerHardwareWalletFactorSource {
-        InternalLedgerHardwareWalletFactorSource {
-            id: self.id.into(),
-            common: self.common.into(),
-            hint: self.hint.into(),
-        }
-    }
 }
 
 #[uniffi::export]

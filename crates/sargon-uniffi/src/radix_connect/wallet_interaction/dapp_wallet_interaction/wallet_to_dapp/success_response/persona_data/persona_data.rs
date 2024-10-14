@@ -18,10 +18,10 @@ impl From<InternalWalletToDappInteractionPersonaDataRequestResponseItem>
             name: value.name.map(|v| v.into()),
             email_addresses: value
                 .email_addresses
-                .map(|v| v.into_iter().map(|v| v.into()).collect()),
+                .map(|v| v.into_vec()),
             phone_numbers: value
                 .phone_numbers
-                .map(|v| v.into_iter().map(|v| v.into()).collect()),
+                .map(|v| v.into_vec()),
         }
     }
 }
@@ -36,10 +36,10 @@ impl Into<InternalWalletToDappInteractionPersonaDataRequestResponseItem>
             name: self.name.map(|v| v.into()),
             email_addresses: self
                 .email_addresses
-                .map(|v| v.into_iter().map(|v| v.into()).collect()),
+                .map(|v| v.into_internal_vec()),
             phone_numbers: self
                 .phone_numbers
-                .map(|v| v.into_iter().map(|v| v.into()).collect()),
+                .map(|v| v.into_internal_vec()),
         }
     }
 }

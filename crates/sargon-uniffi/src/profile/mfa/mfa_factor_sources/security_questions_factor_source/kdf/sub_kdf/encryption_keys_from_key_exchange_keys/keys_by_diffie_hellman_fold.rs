@@ -6,18 +6,6 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellman
 /// key exchange keys, by performing Diffie-Hellman key exchange on each
 /// Key Exchange Key in a Set, by "folding" from left to right.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold;
-
-impl From<InternalSecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold> for SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
-    fn from(_: InternalSecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold) -> Self {
-        Self
-    }
-}
-
-impl Into<InternalSecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold> for SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
-    fn into(self) -> InternalSecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
-        InternalSecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold
-    }
-}

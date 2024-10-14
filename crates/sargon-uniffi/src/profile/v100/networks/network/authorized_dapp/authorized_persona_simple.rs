@@ -10,7 +10,7 @@ use sargon::AuthorizedPersonaSimple as InternalAuthorizedPersonaSimple;
 /// `AuthorizedPersonaDetailed` since it is not JSON, but logic, and we have yet
 /// to migrate `Sargon` into iOS/Android clients, thus we will defer the work
 /// of mapping `AuthorizedPersonaSimple` -> `AuthorizedPersonaDetailed`.
-#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
 pub struct AuthorizedPersonaSimple {
     /// The globally unique identifier of a Persona is its address, used
     /// to lookup persona
@@ -24,28 +24,6 @@ pub struct AuthorizedPersonaSimple {
 
     /// ID to PersonaData entries to user has shared with a Dapp.
     pub shared_persona_data: SharedPersonaData,
-}
-
-impl From<InternalAuthorizedPersonaSimple> for AuthorizedPersonaSimple {
-    fn from(value: InternalAuthorizedPersonaSimple) -> Self {
-        Self {
-            identity_address: value.identity_address.into(),
-            last_login: value.last_login.into(),
-            shared_accounts: value.shared_accounts.map(Into::into),
-            shared_persona_data: value.shared_persona_data.into(),
-        }
-    }
-}
-
-impl Into<InternalAuthorizedPersonaSimple> for AuthorizedPersonaSimple {
-    fn into(self) -> InternalAuthorizedPersonaSimple {
-        InternalAuthorizedPersonaSimple {
-            identity_address: self.identity_address.into(),
-            last_login: self.last_login.into(),
-            shared_accounts: self.shared_accounts.map(Into::into),
-            shared_persona_data: self.shared_persona_data.into(),
-        }
-    }
 }
 
 #[uniffi::export]

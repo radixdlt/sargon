@@ -60,23 +60,3 @@ impl HasSampleValues for TrackedPoolContribution {
         )
     }
 }
-
-impl HasSampleValues for HashMap<ResourceAddress, Decimal> {
-    fn sample() -> Self {
-        HashMap::from([(ResourceAddress::sample(), Decimal::sample())])
-    }
-
-    fn sample_other() -> Self {
-        HashMap::from([(ResourceAddress::sample_other(), Decimal::sample_other())])
-    }
-}
-
-impl HasSampleValues for Vec<TrackedPoolContribution> {
-    fn sample() -> Self {
-        vec![TrackedPoolContribution::sample()]
-    }
-
-    fn sample_other() -> Self {
-        vec![TrackedPoolContribution::sample_other()]
-    }
-}
