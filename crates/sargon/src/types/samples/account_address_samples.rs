@@ -1,23 +1,11 @@
 use crate::prelude::*;
 
-pub(crate) static ALL_ACCOUNT_ADDRESSES_SAMPLES: Lazy<[AccountAddress; 10]> =
-    Lazy::new(|| {
-        [
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-            AccountAddress::random(NetworkID::Mainnet),
-        ]
-    });
-
 impl AccountAddress {
     pub fn sample_at(index: usize) -> Self {
-        ALL_ACCOUNT_ADDRESSES_SAMPLES[index].clone()
+        Account::sample_at(index).address
+    }
+
+    pub fn sample_all() -> Vec<Self> {
+        Account::sample_all().iter().map(|a| a.address).collect()
     }
 }

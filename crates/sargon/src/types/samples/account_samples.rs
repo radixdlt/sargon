@@ -15,7 +15,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Carla | 2 | Securified { Single Threshold only }
         Account::sample_securified_mainnet(
             "Carla",
-            AccountAddress::sample_at(2),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(2);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m2(
@@ -29,7 +29,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // David | 3 | Securified { Single Override only }
         Account::sample_securified_mainnet(
             "David",
-            AccountAddress::sample_at(3),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(3);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m3(
@@ -43,7 +43,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Emily | 4 | Securified { Threshold factors only #3 }
         Account::sample_securified_mainnet(
             "Emily",
-            AccountAddress::sample_at(4),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(4);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m4(
@@ -57,7 +57,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Frank | 5 | Securified { Override factors only #2 }
         Account::sample_securified_mainnet(
             "Frank",
-            AccountAddress::sample_at(5),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(5);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m5(
@@ -71,7 +71,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Grace | 6 | Securified { Threshold #3 and Override factors #2  }
         Account::sample_securified_mainnet(
             "Grace",
-            AccountAddress::sample_at(6),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(6);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(
@@ -85,7 +85,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Ida | 7 | Securified { Threshold only # 5/5 }
         Account::sample_securified_mainnet(
             "Ida",
-            AccountAddress::sample_at(7),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(7);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m7(
@@ -104,7 +104,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Klara | 9 |  Securified { Threshold 1/1 and Override factors #1  }
         Account::sample_securified_mainnet(
             "Klara",
-            AccountAddress::sample_at(9),
+            AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(9);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m8(
@@ -174,5 +174,9 @@ impl Account {
 
     pub fn sample_at(index: usize) -> Self {
         ALL_ACCOUNT_SAMPLES[index].clone()
+    }
+
+    pub fn sample_all() -> Vec<Account> {
+        ALL_ACCOUNT_SAMPLES.to_vec()
     }
 }

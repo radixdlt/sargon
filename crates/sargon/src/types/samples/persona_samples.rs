@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
+static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
     [
         // Satoshi | 0 | Unsecurified { Device }
         Persona::sample_unsecurified_mainnet(
@@ -15,7 +15,7 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Ziggy | 2 | Securified { Single Threshold only }
         Persona::sample_securified_mainnet(
             "Ziggy",
-            IdentityAddress::sample_at(2),
+            IdentityAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(2);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m2(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -27,7 +27,7 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Superman | 3 | Securified { Single Override only }
         Persona::sample_securified_mainnet(
             "Superman",
-            IdentityAddress::sample_at(3),
+            IdentityAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(3);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m3(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -39,7 +39,7 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Banksy | 4 | Securified { Threshold factors only #3 }
         Persona::sample_securified_mainnet(
             "Banksy",
-            IdentityAddress::sample_at(4),
+            IdentityAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(4);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m4(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -51,7 +51,7 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Voltaire | 5 | Securified { Override factors only #2 }
         Persona::sample_securified_mainnet(
             "Voltaire",
-            IdentityAddress::sample_at(5),
+            IdentityAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(5);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m5(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -63,7 +63,7 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Kasparov | 6 | Securified { Threshold #3 and Override factors #2  }
         Persona::sample_securified_mainnet(
             "Kasparov",
-            IdentityAddress::sample_at(6),
+            IdentityAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(6);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -75,7 +75,7 @@ pub(crate) static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Pelé | 7 | Securified { Threshold only # 5/5 }
         Persona::sample_securified_mainnet(
             "Pelé",
-            IdentityAddress::sample_at(7),
+            IdentityAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(7);
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::m7(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -141,5 +141,9 @@ impl Persona {
 
     pub fn sample_at(index: usize) -> Self {
         ALL_PERSONA_SAMPLES[index].clone()
+    }
+
+    pub fn sample_all() -> Vec<Self> {
+        ALL_PERSONA_SAMPLES.to_vec()
     }
 }
