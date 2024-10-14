@@ -168,7 +168,7 @@ mod uniffi_tests {
                 new_mnemonic_sample_passphrase_other()
             ])
             .len(),
-            12
+            14
         );
     }
 
