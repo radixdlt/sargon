@@ -54,8 +54,6 @@ impl SignaturesCollector {
 
 // === INTERNAL ===
 impl SignaturesCollector {
-    /// Used by our tests. But Sargon will typically wanna use `SignaturesCollector::new` and passing
-    /// it a
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
