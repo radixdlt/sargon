@@ -3,19 +3,30 @@ use radix_engine_toolkit::models::canonical_address_types::NetworkId;
 use reqwest::Identity;
 
 impl TransactionIntent {
+
+    /// Returns a sample intent that its transaction summary will involve all the
+    /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
+    /// This can be accomplished by building a manifest that constructs owner keys from these
+    /// entities
     pub fn entities_requiring_auth<'a, 'p>(
         accounts_requiring_auth: impl IntoIterator<Item = &'a Account>,
         personas_requiring_auth: impl IntoIterator<Item = &'p Persona>,
-    ) -> TransactionIntent {
+    ) -> Self {
         Self::new_requiring_auth(
             accounts_requiring_auth.into_iter().map(|a| a.address),
             personas_requiring_auth.into_iter().map(|p| p.address),
         )
     }
+
+    /// Returns a sample intent that its transaction summary will involve all the
+    /// `account_addresses_requiring_auth` and `identity_addresses_requiring_auth` in
+    /// entities requiring auth.
+    /// This can be accomplished by building a manifest that constructs owner keys from these
+    /// entity addresses.
     pub fn new_requiring_auth(
         account_addresses_requiring_auth: impl IntoIterator<Item = AccountAddress>,
         identity_addresses_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
-    ) -> TransactionIntent {
+    ) -> Self {
         let mut network_id: Option<NetworkID> = None;
 
         let all_addresses = account_addresses_requiring_auth
@@ -63,7 +74,7 @@ impl TransactionIntent {
 
         let manifest = TransactionManifest::sargon_built(builder, network_id);
 
-        TransactionIntent::new(
+        Self::new(
             TransactionHeader::sample(),
             manifest,
             Message::None,
