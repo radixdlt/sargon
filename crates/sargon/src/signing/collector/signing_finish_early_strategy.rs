@@ -1,5 +1,10 @@
 use crate::prelude::*;
 
+/// Describes what `SignaturesCollector` should do when all transactions are valid. It can either
+/// finish execution when `SignaturesCollectingContinuation::FinishEarly` or continue collecting
+/// signatures when it is of `SignaturesCollectingContinuation::Continue`.
+///
+/// The default behavior is to finish early when all needed signatures are provided.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct WhenAllTransactionsAreValid(pub SignaturesCollectingContinuation);
 
