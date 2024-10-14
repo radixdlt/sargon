@@ -43,16 +43,16 @@ impl PetitionForEntity {
     pub(crate) fn new_securified(
         intent_hash: IntentHash,
         entity: AddressOfAccountOrPersona,
-        matrix: GeneralRoleWithHierarchicalDeterministicFactorInstances,
+        role_with_factor_instances: GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
         Self::new(
             intent_hash,
             entity,
             PetitionForFactors::new_threshold(
-                matrix.threshold_factors,
-                matrix.threshold as i8,
+                role_with_factor_instances.threshold_factors,
+                role_with_factor_instances.threshold as i8,
             ),
-            PetitionForFactors::new_override(matrix.override_factors),
+            PetitionForFactors::new_override(role_with_factor_instances.override_factors),
         )
     }
 
