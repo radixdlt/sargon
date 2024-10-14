@@ -268,6 +268,10 @@ pub mod prelude {
                     from_payload_bytes as RET_decompile_notarize_tx_v2,
                     to_payload_bytes as RET_compile_notarized_tx_v2,
                 },
+                signed_partial_transaction::{
+                    from_payload_bytes as RET_decompile_signed_partial_tx,
+                    to_payload_bytes as RET_compile_signed_partial_tx,
+                },
                 signed_transaction_intent::hash as RET_signed_intent_hash_v2,
                 subintent::hash as ret_hash_subintent,
             },

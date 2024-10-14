@@ -1,10 +1,63 @@
 use crate::prelude::*;
+use serde::de::{self, Deserializer, Visitor};
+use serde::ser::{Serialize, Serializer};
+use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct SignedPartialTransaction {
     pub partial_transaction: PartialTransaction,
     pub root_subintent_signatures: IntentSignaturesV2,
     pub non_root_subintent_signatures: NonRootSubintentSignatures,
+}
+
+impl Serialize for SignedPartialTransaction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let bytes = RET_compile_signed_partial_tx(&self.clone().into())
+            .map_err(|_| {
+                serde::ser::Error::custom(
+                    CommonError::InvalidSignedPartialTransactionFailedToCompile,
+                )
+            })?;
+        serializer.serialize_bytes(&bytes)
+    }
+}
+
+impl<'de> Deserialize<'de> for SignedPartialTransaction {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct SignedPartialTransactionVisitor;
+
+        impl<'de> Visitor<'de> for SignedPartialTransactionVisitor {
+            type Value = SignedPartialTransaction;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str(
+                    "a byte array representing a SignedPartialTransaction",
+                )
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                RET_decompile_signed_partial_tx(v)
+                    .map_err(|_| {
+                        de::Error::custom(CommonError::InvalidSignedPartialTransactionFailedToDecompile)
+                    })
+                    .and_then(|scrypto| {
+                        SignedPartialTransaction::try_from(scrypto)
+                            .map_err(de::Error::custom)
+                    })
+            }
+        }
+
+        deserializer.deserialize_bytes(SignedPartialTransactionVisitor)
+    }
 }
 
 impl SignedPartialTransaction {
