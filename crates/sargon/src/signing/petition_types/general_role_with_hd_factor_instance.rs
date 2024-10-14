@@ -47,44 +47,6 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
     }
 }
 
-impl From<GeneralRoleWithHierarchicalDeterministicFactorInstances>
-    for MatrixOfFactorInstances
-{
-    fn from(
-        value: GeneralRoleWithHierarchicalDeterministicFactorInstances,
-    ) -> Self {
-        let threshold_factors = value
-            .threshold_factors
-            .iter()
-            .map(|hd| hd.factor_instance())
-            .collect::<Vec<FactorInstance>>();
-
-        let override_factors = value
-            .override_factors
-            .iter()
-            .map(|hd| hd.factor_instance())
-            .collect::<Vec<FactorInstance>>();
-
-        MatrixOfFactorInstances::new(
-            PrimaryRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                value.threshold,
-                override_factors.clone(),
-            ),
-            RecoveryRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                value.threshold,
-                override_factors.clone(),
-            ),
-            ConfirmationRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                value.threshold,
-                override_factors.clone(),
-            ),
-        )
-    }
-}
-
 impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     pub fn override_only(
         factors: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,

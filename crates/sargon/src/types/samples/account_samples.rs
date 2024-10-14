@@ -149,7 +149,35 @@ impl Account {
     ) -> Self {
         let role = make_role();
 
-        let matrix = MatrixOfFactorInstances::from(role);
+        let threshold_factors = role
+            .threshold_factors
+            .iter()
+            .map(|hd| hd.factor_instance())
+            .collect::<Vec<FactorInstance>>();
+
+        let override_factors = role
+            .override_factors
+            .iter()
+            .map(|hd| hd.factor_instance())
+            .collect::<Vec<FactorInstance>>();
+
+        let matrix = MatrixOfFactorInstances::new(
+            PrimaryRoleWithFactorInstances::new(
+                threshold_factors.clone(),
+                role.threshold,
+                override_factors.clone(),
+            ),
+            RecoveryRoleWithFactorInstances::new(
+                threshold_factors.clone(),
+                role.threshold,
+                override_factors.clone(),
+            ),
+            ConfirmationRoleWithFactorInstances::new(
+                threshold_factors.clone(),
+                role.threshold,
+                override_factors.clone(),
+            ),
+        );
 
         Self {
             network_id: NetworkID::Mainnet,
