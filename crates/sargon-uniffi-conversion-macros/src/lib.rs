@@ -5,6 +5,8 @@ use quote::quote;
 use syn::{parse_macro_input, DeriveInput, Data, Fields, Type, PathArguments};
 use proc_macro2::Ident;
 
+/// TODO: Clean up and document this code
+
 #[proc_macro_derive(InternalConversion)]
 pub fn internal_conversion_derive(input: TokenStream) -> TokenStream {
     // Parse the input into a syntax tree
