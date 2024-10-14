@@ -9,23 +9,19 @@ impl DappToWalletInteractionPreAuthorizationItems {
     pub fn new(
         subintent: Option<DappToWalletInteractionSubintentRequestItem>,
     ) -> Self {
-        Self {
-            subintent,
-        }
+        Self { subintent }
     }
 }
 
 impl HasSampleValues for DappToWalletInteractionPreAuthorizationItems {
     fn sample() -> Self {
-        Self::new(
-            Some(DappToWalletInteractionSubintentRequestItem::sample()),
-        )
+        Self::new(Some(DappToWalletInteractionSubintentRequestItem::sample()))
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            Some(DappToWalletInteractionSubintentRequestItem::sample_other()),
-        )
+        Self::new(Some(
+            DappToWalletInteractionSubintentRequestItem::sample_other(),
+        ))
     }
 }
 #[cfg(test)]

@@ -43,18 +43,24 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_eq_after_json_roundtrip(&SUT::sample(), r#"
+        assert_eq_after_json_roundtrip(
+            &SUT::sample(),
+            r#"
         {
             "discriminator": "expireAtTime",
             "value": "2023-09-11T16:05:56.000Z"
         }
-        "#,);
+        "#,
+        );
 
-        assert_eq_after_json_roundtrip(&SUT::sample_other(), r#"
+        assert_eq_after_json_roundtrip(
+            &SUT::sample_other(),
+            r#"
         {
             "discriminator": "expireAfterSignature",
             "value": 10
         }
-        "#,);
+        "#,
+        );
     }
 }
