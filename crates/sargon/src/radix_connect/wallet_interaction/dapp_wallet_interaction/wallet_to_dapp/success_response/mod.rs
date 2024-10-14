@@ -20,3 +20,4 @@ pub use proof_of_ownership::*;
 pub use success::*;
 pub use transaction::*;
 pub use unauthorized_request::*;
+pub use pre_authorization::*;
