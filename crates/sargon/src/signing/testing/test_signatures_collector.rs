@@ -4,8 +4,6 @@
 use crate::prelude::*;
 
 impl SignaturesCollector {
-    /// Used by our tests. But Sargon will typically wanna use `SignaturesCollector::new` and passing
-    /// it a
     pub(crate) fn new_test_with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
