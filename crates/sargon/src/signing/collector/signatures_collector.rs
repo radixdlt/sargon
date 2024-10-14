@@ -1314,18 +1314,18 @@ mod tests {
                 let collector = SignaturesCollector::test_prudent([TXToSign::sample([
                     Account::sample_unsecurified_mainnet(
                         "A0",
-                        HierarchicalDeterministicFactorInstance::sample_mainnet_tx(
+                        HierarchicalDeterministicFactorInstance::new_for_entity(
+                            FactorSourceIDFromHash::sample_at(0),
                             CAP26EntityKind::Account,
                             HDPathComponent::from(0),
-                            FactorSourceIDFromHash::sample_at(0),
                         ),
                     ),
                     Account::sample_unsecurified_mainnet(
                         "A1",
-                        HierarchicalDeterministicFactorInstance::sample_mainnet_tx(
+                        HierarchicalDeterministicFactorInstance::new_for_entity(
+                            FactorSourceIDFromHash::sample_at(0),
                             CAP26EntityKind::Account,
                             HDPathComponent::from(1),
-                            FactorSourceIDFromHash::sample_at(0),
                         ),
                     ),
                 ])]);
