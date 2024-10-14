@@ -5,7 +5,7 @@ pub(crate) static ALL_FACTOR_SOURCE_SAMPLES: Lazy<[FactorSource; 11]> =
     Lazy::new(|| {
         crate::types::samples::ALL_FACTOR_SOURCE_ID_SAMPLES
             .iter()
-            .map(|id| FactorSource::sample_from(id))
+            .map(FactorSource::sample_from)
             .collect::<Vec<FactorSource>>()
             .try_into()
             .unwrap()

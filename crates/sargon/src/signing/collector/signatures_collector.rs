@@ -225,7 +225,7 @@ impl SignaturesCollector {
                     // Prepare the request for the interactor
                     debug!("Creating mono request for interactor");
                     let request = self.request_for_serial_interactor(
-                        &factor_source
+                        factor_source
                             .factor_source_id()
                             .as_hash()
                             .expect("Signature Collector only works with HD FactorSources.")
@@ -310,12 +310,11 @@ impl SignaturesCollector {
             .factor_sources()
             .iter()
             .map(|f| {
-                f.factor_source_id()
+                *f.factor_source_id()
                     .as_hash()
                     .expect(
                         "Signature Collector only works with HD FactorSources.",
                     )
-                    .clone()
             })
             .collect::<IndexSet<FactorSourceIDFromHash>>();
         let per_factor_source = factor_source_ids
@@ -844,7 +843,7 @@ mod tests {
                 st0.signatures
                     .clone()
                     .into_iter()
-                    .map(|s| s.owned_factor_instance().owner.clone())
+                    .map(|s| s.owned_factor_instance().owner)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
                     AddressOfAccountOrPersona::from(a0.address),
@@ -864,7 +863,7 @@ mod tests {
                 st1.signatures
                     .clone()
                     .into_iter()
-                    .map(|s| s.owned_factor_instance().owner.clone())
+                    .map(|s| s.owned_factor_instance().owner)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
                     AddressOfAccountOrPersona::from(a0.address),
@@ -883,7 +882,7 @@ mod tests {
                 st2.signatures
                     .clone()
                     .into_iter()
-                    .map(|s| s.owned_factor_instance().owner.clone())
+                    .map(|s| s.owned_factor_instance().owner)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
                     AddressOfAccountOrPersona::from(p0.address),

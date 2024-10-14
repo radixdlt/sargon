@@ -89,7 +89,7 @@ mod tests {
             AddressOfAccountOrPersona::sample(),
             AddressOfAccountOrPersona::sample_other(),
         ];
-        let sut = Sut::new(IntentHash::sample(), entities.clone());
+        let sut = Sut::new(IntentHash::sample(), entities);
         assert_eq!(
             sut.entities_which_would_fail_auth(),
             IndexSet::<_>::from_iter(entities.into_iter())

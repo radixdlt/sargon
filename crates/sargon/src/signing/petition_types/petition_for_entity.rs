@@ -57,13 +57,13 @@ impl PetitionForEntity {
             EntitySecurityState::Securified { value } => {
                 let general_role =
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-                        (value.security_structure.matrix_of_factors, if_securified_select_role.clone())
+                        (value.security_structure.matrix_of_factors, if_securified_select_role)
                     ).unwrap();
 
                 PetitionForEntity::new_securified(
                     intent_hash,
                     entity.address(),
-                    general_role.into(),
+                    general_role,
                 )
             }
         }
@@ -126,7 +126,7 @@ impl PetitionForEntity {
             .into_iter()
             .map(|f| {
                 OwnedFactorInstance::owned_factor_instance(
-                    self.entity.clone(),
+                    self.entity,
                     f.clone(),
                 )
             })
@@ -206,7 +206,7 @@ impl PetitionForEntity {
             PetitionForFactorsStatus::Finished(finished_reason) => {
                 match finished_reason {
                     PetitionFactorsStatusFinished::Fail => {
-                        Some(self.entity.clone())
+                        Some(self.entity)
                     }
                     PetitionFactorsStatusFinished::Success => None,
                 }
@@ -443,7 +443,7 @@ mod tests {
             GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]);
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
-        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let sut = Sut::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -470,7 +470,7 @@ mod tests {
             );
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
-        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let sut = Sut::new_securified(tx.clone(), entity, matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d0.factor_source_id()),
         );
@@ -495,7 +495,7 @@ mod tests {
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
-        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let sut = Sut::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -522,7 +522,7 @@ mod tests {
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
-        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let sut = Sut::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut
             .invalid_transaction_if_neglected_factors(IndexSet::just(
@@ -551,7 +551,7 @@ mod tests {
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
-        let sut = Sut::new_securified(tx.clone(), entity.clone(), matrix);
+        let sut = Sut::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d1.factor_source_id()),
@@ -671,7 +671,7 @@ mod tests {
             HDSignatureInput::new(
                 sut.intent_hash.clone(),
                 OwnedFactorInstance::new(
-                    sut.entity.clone(),
+                    sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                         HDPathComponent::from(6),
                         FactorSourceIDFromHash::sample_at(1),

@@ -54,7 +54,7 @@ impl SignWithFactorsOutcome {
             factor_sources_of_kind
                 .factor_sources()
                 .into_iter()
-                .map(|f| f.factor_source_id().as_hash().unwrap().clone()) // TODO ask that
+                .map(|f| *f.factor_source_id().as_hash().unwrap()) // TODO ask that
                 .collect(),
         ))
     }

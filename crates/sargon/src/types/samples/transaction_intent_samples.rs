@@ -30,9 +30,9 @@ impl TransactionIntent {
 
         let all_addresses = account_addresses_requiring_auth
             .into_iter()
-            .map(|addresses| AddressOfAccountOrPersona::from(addresses))
+            .map(AddressOfAccountOrPersona::from)
             .chain(identity_addresses_requiring_auth.into_iter().map(
-                |addresses| AddressOfAccountOrPersona::Identity(addresses),
+                AddressOfAccountOrPersona::Identity,
             ))
             .collect::<Vec<_>>();
 
@@ -65,7 +65,7 @@ impl TransactionIntent {
                 ScryptoMetadataValue::PublicKeyHashArray(
                     public_key_hashes
                         .into_iter()
-                        .map(|h| h.clone().into())
+                        .map(|h| h.into())
                         .collect_vec(),
                 ),
             );

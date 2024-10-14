@@ -92,7 +92,7 @@ macro_rules! decl_role_with_factors {
 
                     if threshold_factors.len() < threshold as usize {
                         return Err(CommonError::InvalidSecurityStructureThresholdExceedsFactors {
-                            threshold: threshold,
+                            threshold,
                             factors: threshold_factors.len() as u8
                         })
                     }

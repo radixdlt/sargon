@@ -184,7 +184,7 @@ impl Account {
 
         Self {
             network_id: NetworkID::Mainnet,
-            address: address,
+            address,
             display_name: DisplayName::new(name).unwrap(),
             security_state: SecuredEntityControl {
                 access_controller_address:

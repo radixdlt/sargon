@@ -11,7 +11,6 @@ impl SignaturesCollector {
         interactors: Arc<dyn SignInteractors>,
         role_kind: RoleKind,
     ) -> Self {
-        // sensible_env_logger::safe_init!();
         Self::with(
             finish_early_strategy,
             all_factor_sources_in_profile,

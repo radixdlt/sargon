@@ -374,9 +374,9 @@ mod integration_tests {
                     let i = HDPathComponent::from(0);
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
                         [
-                            FI::sample_mainnet_tx_account(i, f0.factor_source_id().as_hash().unwrap().clone()), // SKIPPED
-                            FI::sample_mainnet_tx_account(i, f1.factor_source_id().as_hash().unwrap().clone()),
-                            FI::sample_mainnet_tx_account(i, f2.factor_source_id().as_hash().unwrap().clone()),
+                            FI::sample_mainnet_tx_account(i, *f0.factor_source_id().as_hash().unwrap()), // SKIPPED
+                            FI::sample_mainnet_tx_account(i, *f1.factor_source_id().as_hash().unwrap()),
+                            FI::sample_mainnet_tx_account(i, *f2.factor_source_id().as_hash().unwrap()),
                         ],
                         2,
                     ).unwrap()
@@ -391,7 +391,7 @@ mod integration_tests {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
                         FI::sample_mainnet_tx_account(
                             i,
-                            f3.factor_source_id().as_hash().unwrap().clone(),
+                            *f3.factor_source_id().as_hash().unwrap(),
                         )
                     ])
                 },
@@ -405,12 +405,12 @@ mod integration_tests {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                         [FI::sample_mainnet_tx_account(
                             i,
-                            f2.factor_source_id().as_hash().unwrap().clone(),
+                            *f2.factor_source_id().as_hash().unwrap(),
                         )],
                         1,
                         [FI::sample_mainnet_tx_account(
                             i,
-                            f4.factor_source_id().as_hash().unwrap().clone(),
+                            *f4.factor_source_id().as_hash().unwrap(),
                         )],
                     ).unwrap()
                 },
@@ -420,7 +420,7 @@ mod integration_tests {
                 "Satoshi",
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_identity(
                     HDPathComponent::from(0),
-                    f4.factor_source_id().as_hash().unwrap().clone(),
+                    *f4.factor_source_id().as_hash().unwrap(),
                 ),
             );
 
@@ -462,7 +462,7 @@ mod integration_tests {
             assert_eq!(
                 outcome.ids_of_neglected_factor_sources(),
                 IndexSet::<FactorSourceIDFromHash>::just(
-                    f0.factor_source_id().as_hash().unwrap().clone()
+                    *f0.factor_source_id().as_hash().unwrap()
                 )
             );
         }

@@ -85,7 +85,7 @@ impl SignaturesCollectorPreprocessor {
                 let petition = PetitionForEntity::new_from_entity(
                     transaction.intent_hash.clone(),
                     entity,
-                    role_kind.clone(),
+                    role_kind,
                 );
 
                 petition.all_factor_instances().iter().for_each(|f| {
@@ -94,7 +94,7 @@ impl SignaturesCollectorPreprocessor {
                         &transaction.intent_hash,
                     )
                 });
-                petitions_for_entities.insert(address.clone(), petition);
+                petitions_for_entities.insert(address, petition);
             }
 
             let petition_of_tx = PetitionForTransaction::new(

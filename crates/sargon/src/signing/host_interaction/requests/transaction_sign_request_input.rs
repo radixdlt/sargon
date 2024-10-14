@@ -58,7 +58,7 @@ impl HasSampleValues for TransactionSignRequestInput {
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
             IntentHash::sample(),
-            factor_source_id.clone(),
+            *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )
     }
@@ -68,7 +68,7 @@ impl HasSampleValues for TransactionSignRequestInput {
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
             IntentHash::sample_other(),
-            factor_source_id.clone(),
+            *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )
     }

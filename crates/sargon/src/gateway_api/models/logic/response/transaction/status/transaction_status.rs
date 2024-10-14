@@ -15,7 +15,7 @@ mod tests {
         )))
         .unwrap();
         assert_eq!(
-            pending.known_payloads.get(0).unwrap().payload_status,
+            pending.known_payloads.first().unwrap().payload_status,
             Some(TransactionStatusResponsePayloadStatus::Pending)
         );
 
@@ -26,8 +26,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             committed_success
-                .known_payloads
-                .get(0)
+                .known_payloads.first()
                 .unwrap()
                 .payload_status,
             Some(TransactionStatusResponsePayloadStatus::CommittedSuccess)

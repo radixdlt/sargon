@@ -20,7 +20,7 @@ pub(crate) static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
 
 impl FactorSourceIDFromHash {
     pub fn sample_at(index: usize) -> Self {
-        ALL_FACTOR_SOURCE_ID_SAMPLES[index].clone()
+        ALL_FACTOR_SOURCE_ID_SAMPLES[index]
     }
 
     pub fn sample_associated_mnemonic(&self) -> MnemonicWithPassphrase {
