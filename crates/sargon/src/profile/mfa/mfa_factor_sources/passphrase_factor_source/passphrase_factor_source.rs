@@ -1,5 +1,9 @@
 use crate::prelude::*;
 
+/// NOT IMPLEMENTED NOR USED YET
+///
+/// A passphrase based FactorSource is essentially a Input Key Material based Mnemonic,
+/// user needs to input the passphrase - key material - every time they use this factor source
 #[derive(
     Serialize,
     Deserialize,
