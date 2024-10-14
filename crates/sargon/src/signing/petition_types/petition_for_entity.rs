@@ -39,6 +39,36 @@ impl PetitionForEntity {
         }
     }
 
+    pub(crate) fn new_from_entity(
+        intent_hash: IntentHash,
+        entity: AccountOrPersona,
+        if_securified_select_role: RoleKind
+    ) -> Self {
+        match entity.entity_security_state() {
+            EntitySecurityState::Unsecured { value } => {
+                let factor_instance = value.transaction_signing;
+
+                Self::new_unsecurified(
+                    intent_hash,
+                    entity.address(),
+                    factor_instance,
+                )
+            },
+            EntitySecurityState::Securified { value } =>{
+                let general_role =
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                        (value.security_structure.matrix_of_factors, if_securified_select_role.clone())
+                    ).unwrap();
+
+                PetitionForEntity::new_securified(
+                    intent_hash,
+                    entity.address(),
+                    general_role.into(),
+                )
+            }
+        }
+    }
+
     /// Creates a new Petition from an entity which is securified, i.e. has a matrix of factors.
     pub(crate) fn new_securified(
         intent_hash: IntentHash,

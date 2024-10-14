@@ -82,53 +82,19 @@ impl SignaturesCollectorPreprocessor {
 
             for entity in transaction.entities_requiring_auth() {
                 let address = entity.address();
-                match entity.entity_security_state() {
-                    EntitySecurityState::Unsecured { value } => {
-                        let factor_instance = value.transaction_signing; // TODO should change according to payload
+                let petition = PetitionForEntity::new_from_entity(
+                    transaction.intent_hash.clone(),
+                    entity,
+                    role_kind.clone()
+                );
 
-                        let factor_source_id = factor_instance.factor_source_id;
-                        register_factor_in_tx(
-                            &factor_source_id,
-                            &transaction.intent_hash,
-                        );
-
-                        let petition = PetitionForEntity::new_unsecurified(
-                            transaction.intent_hash.clone(),
-                            address.clone(),
-                            factor_instance,
-                        );
-                        petitions_for_entities
-                            .insert(address.clone(), petition);
-                    }
-                    EntitySecurityState::Securified { value } => {
-                        let general_role =
-                            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-                                (value.security_structure.matrix_of_factors, role_kind.clone())
-                            ).unwrap();
-
-                        let mut add = |factors: Vec<
-                            HierarchicalDeterministicFactorInstance,
-                        >| {
-                            factors.into_iter().for_each(|f| {
-                                let factor_source_id = f.factor_source_id;
-                                register_factor_in_tx(
-                                    &factor_source_id,
-                                    &transaction.intent_hash,
-                                );
-                            })
-                        };
-
-                        add(general_role.override_factors.clone());
-                        add(general_role.threshold_factors.clone());
-                        let petition = PetitionForEntity::new_securified(
-                            transaction.intent_hash.clone(),
-                            address.clone(),
-                            general_role.into(),
-                        );
-                        petitions_for_entities
-                            .insert(address.clone(), petition);
-                    }
-                }
+                petition.all_factor_instances().iter().for_each(|f| {
+                    register_factor_in_tx(
+                        &f.factor_source_id(),
+                        &transaction.intent_hash,
+                    )
+                });
+                petitions_for_entities.insert(address.clone(), petition);
             }
 
             let petition_of_tx = PetitionForTransaction::new(
