@@ -46,22 +46,19 @@ impl HierarchicalDeterministicFactorInstance {
                 CAP26KeyKind::TransactionSigning,
                 index.index(),
             )
-                .into(),
+            .into(),
             CAP26EntityKind::Identity => IdentityPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::TransactionSigning,
                 index.index(),
             )
-                .into(),
+            .into(),
         };
 
         let seed = factor_source_id.sample_associated_mnemonic().to_seed();
         let hd_private_key = seed.derive_private_key(&derivation_path);
 
-        Self::new(
-            factor_source_id,
-            hd_private_key.public_key(),
-        )
+        Self::new(factor_source_id, hd_private_key.public_key())
     }
 
     pub fn try_from(

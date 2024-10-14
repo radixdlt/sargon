@@ -37,7 +37,7 @@ impl SignaturesCollectorPreprocessor {
     pub(super) fn preprocess(
         self,
         profile_factor_sources: IndexSet<FactorSource>,
-        role_kind: RoleKind
+        role_kind: RoleKind,
     ) -> (Petitions, IndexSet<FactorSourcesOfKind>) {
         let transactions = self.transactions;
         let mut petitions_for_all_transactions =
@@ -85,7 +85,7 @@ impl SignaturesCollectorPreprocessor {
                 let petition = PetitionForEntity::new_from_entity(
                     transaction.intent_hash.clone(),
                     entity,
-                    role_kind.clone()
+                    role_kind.clone(),
                 );
 
                 petition.all_factor_instances().iter().for_each(|f| {

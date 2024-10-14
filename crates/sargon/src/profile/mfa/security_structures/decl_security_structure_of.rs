@@ -87,26 +87,30 @@ macro_rules! decl_role_with_factors {
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
-                ) -> Self {
+                ) -> Result<Self> {
                     let threshold_factors = threshold_factors.into_iter().collect_vec();
 
-                    assert!(threshold_factors.len() >= threshold as usize);
+                    if threshold_factors.len() < threshold as usize {
+                        return Err(CommonError::InvalidSecurityStructureThresholdExceedsFactors {
+                            threshold: threshold,
+                            factors: threshold_factors.len() as u8
+                        })
+                    }
 
                     let override_factors = override_factors.into_iter().collect_vec();
 
-                    assert!(
-                        HashSet::<$factor>::from_iter(threshold_factors.clone())
+                    if !HashSet::<$factor>::from_iter(threshold_factors.clone())
                             .intersection(&HashSet::<$factor>::from_iter(override_factors.clone()))
                             .collect_vec()
-                            .is_empty(),
-                        "A factor MUST NOT be present in both threshold AND override list."
-                    );
+                            .is_empty() {
+                        return Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
+                    }
 
-                    Self {
+                    Ok(Self {
                         threshold_factors,
                         threshold,
                         override_factors,
-                    }
+                    })
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {

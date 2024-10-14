@@ -42,7 +42,7 @@ impl PetitionForEntity {
     pub(crate) fn new_from_entity(
         intent_hash: IntentHash,
         entity: AccountOrPersona,
-        if_securified_select_role: RoleKind
+        if_securified_select_role: RoleKind,
     ) -> Self {
         match entity.entity_security_state() {
             EntitySecurityState::Unsecured { value } => {
@@ -53,8 +53,8 @@ impl PetitionForEntity {
                     entity.address(),
                     factor_instance,
                 )
-            },
-            EntitySecurityState::Securified { value } =>{
+            }
+            EntitySecurityState::Securified { value } => {
                 let general_role =
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                         (value.security_structure.matrix_of_factors, if_securified_select_role.clone())
@@ -82,7 +82,9 @@ impl PetitionForEntity {
                 role_with_factor_instances.threshold_factors,
                 role_with_factor_instances.threshold as i8,
             ),
-            PetitionForFactors::new_override(role_with_factor_instances.override_factors),
+            PetitionForFactors::new_override(
+                role_with_factor_instances.override_factors,
+            ),
         )
     }
 
@@ -489,7 +491,7 @@ mod tests {
         let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
             [d0.clone(), d1.clone()],
             2,
-        );
+        ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
@@ -516,7 +518,7 @@ mod tests {
         let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
             [d0.clone(), d1.clone()],
             2,
-        );
+        ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
@@ -545,7 +547,7 @@ mod tests {
         let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
             [d0.clone(), d1.clone()],
             1,
-        );
+        ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
@@ -584,24 +586,39 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "A factor MUST NOT be present in both threshold AND override list."
-    )]
     fn factor_should_not_be_used_in_both_lists() {
-        Account::sample_securified_mainnet(
-            "Alice",
-            AccountAddress::sample(),
-            || {
-                let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-                CAP26EntityKind::Account,
-                HDPathComponent::from(0)
-            );
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
-                    [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                    1,
-                    [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                )
-            },
+        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+            CAP26EntityKind::Account,
+            HDPathComponent::from(0),
+        );
+        assert_eq!(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+                1,
+                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+            ),
+            Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
+        );
+    }
+
+    #[test]
+    fn threshold_should_not_be_bigger_than_threshold_factors() {
+        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+            CAP26EntityKind::Account,
+            HDPathComponent::from(0),
+        );
+        assert_eq!(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+                2,
+                [],
+            ),
+            Err(
+                CommonError::InvalidSecurityStructureThresholdExceedsFactors {
+                    threshold: 2,
+                    factors: 1,
+                }
+            )
         );
     }
 
@@ -622,6 +639,7 @@ mod tests {
                     1,
                     [FactorSourceIDFromHash::sample_at(1)].map(&fi),
                 )
+                .unwrap()
             },
         );
         let sut = Sut::from_entity_with_role_kind(

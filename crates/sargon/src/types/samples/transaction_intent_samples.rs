@@ -3,7 +3,6 @@ use radix_engine_toolkit::models::canonical_address_types::NetworkId;
 use reqwest::Identity;
 
 impl TransactionIntent {
-
     /// Returns a sample intent that its transaction summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
@@ -74,12 +73,7 @@ impl TransactionIntent {
 
         let manifest = TransactionManifest::sargon_built(builder, network_id);
 
-        Self::new(
-            TransactionHeader::sample(),
-            manifest,
-            Message::None,
-        )
-        .unwrap()
+        Self::new(TransactionHeader::sample(), manifest, Message::None).unwrap()
     }
 }
 
@@ -92,8 +86,10 @@ mod test {
         let accounts = AccountAddress::sample_all();
         let identities = IdentityAddress::sample_all();
 
-        let intent =
-            TransactionIntent::new_requiring_auth(accounts.clone(), identities.clone());
+        let intent = TransactionIntent::new_requiring_auth(
+            accounts.clone(),
+            identities.clone(),
+        );
 
         let summary = intent.manifest_summary();
 

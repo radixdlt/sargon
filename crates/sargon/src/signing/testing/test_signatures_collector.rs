@@ -9,7 +9,7 @@ impl SignaturesCollector {
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: IndexSet<TXToSign>,
         interactors: Arc<dyn SignInteractors>,
-        role_kind: RoleKind
+        role_kind: RoleKind,
     ) -> Self {
         // sensible_env_logger::safe_init!();
         Self::with(
@@ -17,7 +17,7 @@ impl SignaturesCollector {
             all_factor_sources_in_profile,
             transactions,
             interactors,
-            role_kind
+            role_kind,
         )
     }
     pub(crate) fn new_test(
@@ -25,7 +25,7 @@ impl SignaturesCollector {
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<Item = TXToSign>,
         simulated_user: SimulatedUser,
-        role_kind: RoleKind
+        role_kind: RoleKind,
     ) -> Self {
         Self::new_test_with(
             finish_early_strategy,
@@ -46,7 +46,7 @@ impl SignaturesCollector {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::prudent_no_fail(),
-            RoleKind::Primary
+            RoleKind::Primary,
         )
     }
 
@@ -79,7 +79,7 @@ impl SignaturesCollector {
             FactorSource::sample_all(),
             transactions,
             SimulatedUser::prudent_with_failures(simulated_failures),
-            RoleKind::Primary
+            RoleKind::Primary,
         )
     }
 
@@ -92,7 +92,7 @@ impl SignaturesCollector {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::lazy_sign_minimum([]),
-            RoleKind::Primary
+            RoleKind::Primary,
         )
     }
 
@@ -114,7 +114,7 @@ impl SignaturesCollector {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::lazy_always_skip_no_fail(),
-            RoleKind::Primary
+            RoleKind::Primary,
         )
     }
 

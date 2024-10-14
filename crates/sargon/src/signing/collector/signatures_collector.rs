@@ -32,7 +32,7 @@ impl SignaturesCollector {
         transactions: impl IntoIterator<Item = TransactionIntent>,
         interactors: Arc<dyn SignInteractors>,
         profile: &Profile,
-        role_kind: RoleKind
+        role_kind: RoleKind,
     ) -> Result<Self> {
         Self::with_signers_extraction(
             finish_early_strategy,
@@ -61,7 +61,7 @@ impl SignaturesCollector {
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IndexSet<TXToSign>,
         interactors: Arc<dyn SignInteractors>,
-        role_kind: RoleKind
+        role_kind: RoleKind,
     ) -> Self {
         debug!("Init SignaturesCollector");
         let preprocessor = SignaturesCollectorPreprocessor::new(transactions);
@@ -102,7 +102,7 @@ impl SignaturesCollector {
             all_factor_sources_in_profile,
             transactions,
             interactors,
-            role_kind
+            role_kind,
         );
 
         Ok(collector)
@@ -379,7 +379,6 @@ impl SignaturesCollector {
 }
 #[cfg(test)]
 mod tests {
-
     use std::iter;
 
     use super::*;
@@ -403,7 +402,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &Profile::sample_from(IndexSet::new(), [], []),
-            RoleKind::Primary
+            RoleKind::Primary,
         );
         assert!(matches!(res, Err(CommonError::UnknownAccount)));
     }
@@ -420,7 +419,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &Profile::sample_from(IndexSet::new(), [], []),
-            RoleKind::Primary
+            RoleKind::Primary,
         );
         assert!(matches!(res, Err(CommonError::UnknownPersona)));
     }
@@ -437,7 +436,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &Profile::sample_from(factors_sources, [], [&persona]),
-            RoleKind::Primary
+            RoleKind::Primary,
         )
         .unwrap();
         let outcome = collector.collect_signatures().await;
@@ -470,7 +469,7 @@ mod tests {
                 ),
             )),
             &profile,
-            RoleKind::Primary
+            RoleKind::Primary,
         )
         .unwrap();
 
@@ -502,7 +501,7 @@ mod tests {
                     SimulatedUser::prudent_no_fail(),
                 )),
                 &profile,
-                RoleKind::Primary
+                RoleKind::Primary,
             )
             .unwrap();
 
@@ -571,7 +570,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &profile,
-            RoleKind::Primary
+            RoleKind::Primary,
         )
         .unwrap();
 
@@ -778,7 +777,6 @@ mod tests {
     }
 
     mod multi_tx {
-
         use super::*;
 
         async fn multi_accounts_multi_personas_all_single_factor_controlled_with_sim_user(
@@ -813,7 +811,7 @@ mod tests {
                 [t0.clone(), t1.clone(), t2.clone()],
                 Arc::new(TestSignatureCollectingInteractors::new(sim)),
                 &profile,
-                RoleKind::Primary
+                RoleKind::Primary,
             )
             .unwrap();
 
@@ -951,7 +949,7 @@ mod tests {
                     vector.simulated_user,
                 )),
                 &profile,
-                RoleKind::Primary
+                RoleKind::Primary,
             )
             .unwrap();
 
@@ -1044,7 +1042,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary
+                    RoleKind::Primary,
                 )
                 .unwrap();
 
@@ -1096,7 +1094,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary
+                    RoleKind::Primary,
                 )
                 .unwrap();
 
@@ -1176,7 +1174,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary
+                    RoleKind::Primary,
                 )
                 .unwrap();
 
@@ -1740,13 +1738,13 @@ mod tests {
                             "Alice",
                             || {
                                 GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
-                            FactorSource::sample_all().into_iter().map(|f| {
-                                HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                                    HDPathComponent::from(0),
-                                    *f.factor_source_id().as_hash().unwrap(),
+                                    FactorSource::sample_all().into_iter().map(|f| {
+                                        HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
+                                            HDPathComponent::from(0),
+                                            *f.factor_source_id().as_hash().unwrap(),
+                                        )
+                                    }),
                                 )
-                            }),
-                        )
                             },
                         )]),
                     ]);
@@ -1891,7 +1889,7 @@ mod tests {
                             FactorSourceIDFromHash::sample_at(4),
                         ]),
                     ),
-                    RoleKind::Primary
+                    RoleKind::Primary,
                 );
 
                 let outcome = collector.collect_signatures().await;

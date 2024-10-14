@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod integration_tests {
-
     use std::time::Duration;
 
     use actix_rt::time::timeout;
@@ -103,11 +102,11 @@ mod integration_tests {
 
         let sut = gateway_client.dry_run_transaction(
             intent, vec![
-                    Ed25519PublicKey::from_hex(
-                        "48d24f09b43d50f3acd58cf8509a57c8f306d94b945bd9b7e6ebcf6691eed3b6".to_owned()
-                    ).unwrap().into()
-                ]
-            );
+                Ed25519PublicKey::from_hex(
+                    "48d24f09b43d50f3acd58cf8509a57c8f306d94b945bd9b7e6ebcf6691eed3b6".to_owned()
+                ).unwrap().into()
+            ],
+        );
 
         // ACT
         let engine_toolkit_receipt = timeout(MAX, sut).await.unwrap().unwrap();
@@ -219,7 +218,7 @@ mod integration_tests {
         let gumball_address = AccountAddress::try_from_bech32(
             "account_tdx_2_129nx5lgkk3fz9gqf3clppeljkezeyyymqqejzp97tpk0r8els7hg3j",
         )
-        .unwrap();
+            .unwrap();
         let gateway_client = new_gateway_client(NetworkID::Stokenet);
         let sut = gateway_client.fetch_dapp_metadata(gumball_address);
 
@@ -231,7 +230,7 @@ mod integration_tests {
                 Url::parse(
                     "https://stokenet-gumball-club.radixdlt.com/assets/gumball-club.png"
                 )
-                .unwrap()
+                    .unwrap()
             )
         );
     }
@@ -374,13 +373,13 @@ mod integration_tests {
                 || {
                     let i = HDPathComponent::from(0);
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
-                    [
-                        FI::sample_mainnet_tx_account(i, f0.factor_source_id().as_hash().unwrap().clone()), // SKIPPED
-                        FI::sample_mainnet_tx_account(i, f1.factor_source_id().as_hash().unwrap().clone()),
-                        FI::sample_mainnet_tx_account(i, f2.factor_source_id().as_hash().unwrap().clone()),
-                    ],
-                    2,
-                )
+                        [
+                            FI::sample_mainnet_tx_account(i, f0.factor_source_id().as_hash().unwrap().clone()), // SKIPPED
+                            FI::sample_mainnet_tx_account(i, f1.factor_source_id().as_hash().unwrap().clone()),
+                            FI::sample_mainnet_tx_account(i, f2.factor_source_id().as_hash().unwrap().clone()),
+                        ],
+                        2,
+                    ).unwrap()
                 },
             );
 
@@ -390,11 +389,11 @@ mod integration_tests {
                 || {
                     let i = HDPathComponent::from(1);
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
-                    FI::sample_mainnet_tx_account(
-                        i,
-                        f3.factor_source_id().as_hash().unwrap().clone(),
-                    )
-                ])
+                        FI::sample_mainnet_tx_account(
+                            i,
+                            f3.factor_source_id().as_hash().unwrap().clone(),
+                        )
+                    ])
                 },
             );
 
@@ -413,7 +412,7 @@ mod integration_tests {
                             i,
                             f4.factor_source_id().as_hash().unwrap().clone(),
                         )],
-                    )
+                    ).unwrap()
                 },
             );
 
@@ -449,7 +448,7 @@ mod integration_tests {
                 transactions,
                 Arc::new(TestLazySignMinimumInteractors),
                 &profile,
-                RoleKind::Primary
+                RoleKind::Primary,
             )
             .unwrap();
 

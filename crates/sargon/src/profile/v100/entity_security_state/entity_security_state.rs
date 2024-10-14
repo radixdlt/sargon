@@ -163,7 +163,8 @@ mod tests {
                             [FactorInstance::sample()],
                             1,
                             [],
-                        ),
+                        )
+                        .unwrap(),
                         RecoveryRoleWithFactorInstances::new(
                             [FactorInstance::new(
                                 FactorSourceIDFromHash::sample_ledger().into(),
@@ -171,7 +172,8 @@ mod tests {
                             )],
                             1,
                             [],
-                        ),
+                        )
+                        .unwrap(),
                         ConfirmationRoleWithFactorInstances::new(
                             [FactorInstance::new(
                                 FactorSourceIDFromHash::sample_passphrase()
@@ -180,7 +182,8 @@ mod tests {
                             )],
                             1,
                             [],
-                        ),
+                        )
+                        .unwrap(),
                     ),
                 ),
             },

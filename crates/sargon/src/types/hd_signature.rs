@@ -19,10 +19,7 @@ pub struct HDSignature {
 
 impl HDSignature {
     /// Constructs a HDSignature from an already produced `Signature`.
-    pub fn with_details(
-        input: HDSignatureInput,
-        signature: Signature,
-    ) -> Self {
+    pub fn with_details(input: HDSignatureInput, signature: Signature) -> Self {
         Self { input, signature }
     }
 
@@ -50,11 +47,15 @@ impl HDSignature {
 
 impl HasSampleValues for HDSignature {
     fn sample() -> Self {
-        Self::fake_sign_by_looking_up_mnemonic_amongst_samples(HDSignatureInput::sample())
+        Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
+            HDSignatureInput::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::fake_sign_by_looking_up_mnemonic_amongst_samples(HDSignatureInput::sample_other())
+        Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
+            HDSignatureInput::sample_other(),
+        )
     }
 }
 
@@ -62,7 +63,9 @@ impl HDSignature {
     /// WARNING: Should only be used in samples and unit tests
     ///
     /// Signs with predefined mnemonics associated to the input's factor source id
-    pub fn fake_sign_by_looking_up_mnemonic_amongst_samples(input: HDSignatureInput) -> Self {
+    pub fn fake_sign_by_looking_up_mnemonic_amongst_samples(
+        input: HDSignatureInput,
+    ) -> Self {
         let id = input.owned_factor_instance.factor_source_id();
 
         let mnemonic_with_passphrase = id.sample_associated_mnemonic();

@@ -12,7 +12,9 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
 {
     type Error = CommonError;
 
-    fn try_from((matrix, role): (MatrixOfFactorInstances, RoleKind)) -> Result<Self> {
+    fn try_from(
+        (matrix, role): (MatrixOfFactorInstances, RoleKind),
+    ) -> Result<Self> {
         let (threshold_factors, threshold, override_factors) = match role {
             RoleKind::Primary => (
                 matrix.primary_role.threshold_factors,
@@ -31,7 +33,7 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
             ),
         };
 
-        let general_role = GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+        GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
             threshold_factors
                 .iter()
                 .map(|f| HierarchicalDeterministicFactorInstance::try_from_factor_instance(f.clone()))
@@ -41,9 +43,7 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
                 .iter()
                 .map(|f| HierarchicalDeterministicFactorInstance::try_from_factor_instance(f.clone()))
                 .collect::<Result<Vec<HierarchicalDeterministicFactorInstance>>>()?,
-        );
-
-        Ok(general_role)
+        )
     }
 }
 
@@ -52,6 +52,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         factors: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
     ) -> Self {
         Self::new([], 0, factors)
+            .expect("Zero threshold with zero threshold factors and one override should not fail.")
     }
 
     pub fn single_override(
@@ -63,14 +64,16 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     pub fn threshold_only(
         factors: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
         threshold: u8,
-    ) -> Self {
+    ) -> Result<Self> {
         Self::new(factors, threshold, [])
     }
 
     pub fn single_threshold(
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
-        Self::threshold_only([factor], 1)
+        Self::threshold_only([factor], 1).expect(
+            "Single threshold with one threshold factor should not fail.",
+        )
     }
 }
 
@@ -91,7 +94,7 @@ mod test {
                 [HierarchicalDeterministicFactorInstance::try_from_factor_instance(FactorInstance::sample()).unwrap()],
                 1,
                 []
-            )
+            ).unwrap()
         )
     }
 
@@ -110,7 +113,7 @@ mod test {
                 ).unwrap()],
                 1,
                 []
-            )
+            ).unwrap()
         )
     }
 
@@ -129,7 +132,7 @@ mod test {
                 ).unwrap()],
                 1,
                 []
-            )
+            ).unwrap()
         )
     }
 
@@ -140,7 +143,8 @@ mod test {
                 [FactorInstance::sample_other()],
                 1,
                 [],
-            ),
+            )
+            .unwrap(),
             recovery_role(),
             confirmation_role(),
         );
@@ -163,6 +167,7 @@ mod test {
 
     fn primary_role() -> PrimaryRoleWithFactorInstances {
         PrimaryRoleWithFactorInstances::new([FactorInstance::sample()], 1, [])
+            .unwrap()
     }
 
     fn recovery_role() -> RecoveryRoleWithFactorInstances {
@@ -174,6 +179,7 @@ mod test {
             1,
             [],
         )
+        .unwrap()
     }
 
     fn confirmation_role() -> ConfirmationRoleWithFactorInstances {
@@ -185,5 +191,6 @@ mod test {
             1,
             [],
         )
+        .unwrap()
     }
 }

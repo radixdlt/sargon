@@ -33,6 +33,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             [F::sample_at(0), F::sample_at(3), F::sample_at(5)].map(fi),
             2,
         )
+        .unwrap()
     }
 
     /// Securified { Override factors only #2 }
@@ -59,6 +60,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             2,
             [F::sample_at(1), F::sample_at(4)].map(&fi),
         )
+        .unwrap()
     }
 
     /// Securified { Threshold only # 5/5 }
@@ -80,6 +82,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             .map(&fi),
             5,
         )
+        .unwrap()
     }
     /// Securified { Threshold 1/1 and Override factors #1  }
     pub(crate) fn r8<F>(fi: F) -> Self
@@ -90,5 +93,6 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     {
         type F = FactorSourceIDFromHash;
         Self::new([F::sample_at(1)].map(&fi), 1, [F::sample_at(8)].map(&fi))
+            .unwrap()
     }
 }

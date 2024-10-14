@@ -14,22 +14,14 @@ impl HierarchicalDeterministicFactorInstance {
         index: HDPathComponent,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Self {
-        Self::new_for_entity(
-            factor_source_id,
-            CAP26EntityKind::Account,
-            index,
-        )
+        Self::new_for_entity(factor_source_id, CAP26EntityKind::Account, index)
     }
 
     pub fn sample_mainnet_tx_identity(
         index: HDPathComponent,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Self {
-        Self::new_for_entity(
-            factor_source_id,
-            CAP26EntityKind::Identity,
-            index,
-        )
+        Self::new_for_entity(factor_source_id, CAP26EntityKind::Identity, index)
     }
 
     /// 0 | unsecurified | device

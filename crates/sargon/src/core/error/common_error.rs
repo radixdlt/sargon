@@ -665,6 +665,15 @@ pub enum CommonError {
 
     #[error("Unknown persona.")]
     UnknownPersona = 10186,
+
+    #[error("Invalid security structure. Threshold ({}) cannot exceed threshold factors ({}).", threshold, factors)]
+    InvalidSecurityStructureThresholdExceedsFactors {
+        threshold: u8,
+        factors: u8,
+    } = 10187,
+
+    #[error("Invalid security structure. A factor must not be present in both threshold and override list.")]
+    InvalidSecurityStructureFactorInBothThresholdAndOverride = 10188,
 }
 
 #[uniffi::export]

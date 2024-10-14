@@ -134,17 +134,20 @@ impl Persona {
                 threshold_factors.clone(),
                 role.threshold,
                 override_factors.clone(),
-            ),
+            )
+            .unwrap(),
             RecoveryRoleWithFactorInstances::new(
                 threshold_factors.clone(),
                 role.threshold,
                 override_factors.clone(),
-            ),
+            )
+            .unwrap(),
             ConfirmationRoleWithFactorInstances::new(
                 threshold_factors.clone(),
                 role.threshold,
                 override_factors.clone(),
-            ),
+            )
+            .unwrap(),
         );
 
         Self {

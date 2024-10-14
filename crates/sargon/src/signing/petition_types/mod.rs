@@ -13,6 +13,6 @@ pub(crate) use petition_for_transaction::*;
 pub(crate) use petition_status::*;
 pub(crate) use petitions::*;
 
-pub use role_kind::*;
 pub use general_role_with_hd_factor_instance::*;
 pub use petition_for_factors_types::*;
+pub use role_kind::*;

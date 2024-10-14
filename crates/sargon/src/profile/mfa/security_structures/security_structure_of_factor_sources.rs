@@ -69,11 +69,7 @@ impl TryFrom<(&PrimaryRoleWithFactorSourceIDs, &FactorSources)>
 
         let override_factors =
             factors_from(&id_level.override_factors, factor_sources)?;
-        Ok(Self::new(
-            threshold_factors,
-            id_level.threshold,
-            override_factors,
-        ))
+        Self::new(threshold_factors, id_level.threshold, override_factors)
     }
 }
 impl TryFrom<(&RecoveryRoleWithFactorSourceIDs, &FactorSources)>
@@ -90,11 +86,7 @@ impl TryFrom<(&RecoveryRoleWithFactorSourceIDs, &FactorSources)>
 
         let override_factors =
             factors_from(&id_level.override_factors, factor_sources)?;
-        Ok(Self::new(
-            threshold_factors,
-            id_level.threshold,
-            override_factors,
-        ))
+        Self::new(threshold_factors, id_level.threshold, override_factors)
     }
 }
 impl TryFrom<(&ConfirmationRoleWithFactorSourceIDs, &FactorSources)>
@@ -111,11 +103,7 @@ impl TryFrom<(&ConfirmationRoleWithFactorSourceIDs, &FactorSources)>
 
         let override_factors =
             factors_from(&id_level.override_factors, factor_sources)?;
-        Ok(Self::new(
-            threshold_factors,
-            id_level.threshold,
-            override_factors,
-        ))
+        Self::new(threshold_factors, id_level.threshold, override_factors)
     }
 }
 
@@ -177,6 +165,7 @@ impl HasSampleValues for PrimaryRoleWithFactorSources {
             2,
             [FactorSource::sample_ledger()],
         )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
@@ -188,6 +177,7 @@ impl HasSampleValues for PrimaryRoleWithFactorSources {
             2,
             [FactorSource::sample_ledger_other()],
         )
+        .unwrap()
     }
 }
 
@@ -202,6 +192,7 @@ impl HasSampleValues for RecoveryRoleWithFactorSources {
             2,
             [FactorSource::sample_ledger()],
         )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
@@ -213,6 +204,7 @@ impl HasSampleValues for RecoveryRoleWithFactorSources {
             2,
             [FactorSource::sample_ledger_other()],
         )
+        .unwrap()
     }
 }
 
@@ -226,6 +218,7 @@ impl HasSampleValues for ConfirmationRoleWithFactorSources {
                 FactorSource::sample_ledger(),
             ],
         )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
@@ -236,6 +229,7 @@ impl HasSampleValues for ConfirmationRoleWithFactorSources {
                 FactorSource::sample_ledger_other(),
             ],
         )
+        .unwrap()
     }
 }
 
