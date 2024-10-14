@@ -26,7 +26,8 @@ mod tests {
         .unwrap();
         assert_eq!(
             committed_success
-                .known_payloads.first()
+                .known_payloads
+                .first()
                 .unwrap()
                 .payload_status,
             Some(TransactionStatusResponsePayloadStatus::CommittedSuccess)

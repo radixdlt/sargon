@@ -205,9 +205,7 @@ impl PetitionForEntity {
         match status_if_neglected {
             PetitionForFactorsStatus::Finished(finished_reason) => {
                 match finished_reason {
-                    PetitionFactorsStatusFinished::Fail => {
-                        Some(self.entity)
-                    }
+                    PetitionFactorsStatusFinished::Fail => Some(self.entity),
                     PetitionFactorsStatusFinished::Success => None,
                 }
             }

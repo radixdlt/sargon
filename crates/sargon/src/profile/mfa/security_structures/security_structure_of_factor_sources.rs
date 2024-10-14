@@ -49,7 +49,8 @@ fn factors_from(
             from.get_id(*id)
                 .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
                     bad_value: *id,
-                }).cloned()
+                })
+                .cloned()
         })
         .collect::<Result<FactorSources>>()
 }

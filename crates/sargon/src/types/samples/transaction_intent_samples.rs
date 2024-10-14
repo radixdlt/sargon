@@ -31,9 +31,11 @@ impl TransactionIntent {
         let all_addresses = account_addresses_requiring_auth
             .into_iter()
             .map(AddressOfAccountOrPersona::from)
-            .chain(identity_addresses_requiring_auth.into_iter().map(
-                AddressOfAccountOrPersona::Identity,
-            ))
+            .chain(
+                identity_addresses_requiring_auth
+                    .into_iter()
+                    .map(AddressOfAccountOrPersona::Identity),
+            )
             .collect::<Vec<_>>();
 
         all_addresses.iter().for_each(|address| {

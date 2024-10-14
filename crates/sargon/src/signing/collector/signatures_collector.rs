@@ -310,11 +310,9 @@ impl SignaturesCollector {
             .factor_sources()
             .iter()
             .map(|f| {
-                *f.factor_source_id()
-                    .as_hash()
-                    .expect(
-                        "Signature Collector only works with HD FactorSources.",
-                    )
+                *f.factor_source_id().as_hash().expect(
+                    "Signature Collector only works with HD FactorSources.",
+                )
             })
             .collect::<IndexSet<FactorSourceIDFromHash>>();
         let per_factor_source = factor_source_ids
