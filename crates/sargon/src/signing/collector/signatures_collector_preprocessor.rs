@@ -37,6 +37,7 @@ impl SignaturesCollectorPreprocessor {
     pub(super) fn preprocess(
         self,
         profile_factor_sources: IndexSet<FactorSource>,
+        role_kind: RoleKind
     ) -> (Petitions, IndexSet<FactorSourcesOfKind>) {
         let transactions = self.transactions;
         let mut petitions_for_all_transactions =
@@ -102,7 +103,7 @@ impl SignaturesCollectorPreprocessor {
                     EntitySecurityState::Securified { value } => {
                         let general_role =
                             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-                                (value.security_structure.matrix_of_factors, RoleKind::Primary) // Should change according to kind
+                                (value.security_structure.matrix_of_factors, role_kind.clone())
                             ).unwrap();
 
                         let mut add = |factors: Vec<

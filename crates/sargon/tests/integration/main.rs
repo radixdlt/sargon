@@ -449,6 +449,7 @@ mod integration_tests {
                 transactions,
                 Arc::new(TestLazySignMinimumInteractors),
                 &profile,
+                RoleKind::Primary
             )
             .unwrap();
 

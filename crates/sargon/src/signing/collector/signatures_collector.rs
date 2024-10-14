@@ -32,12 +32,14 @@ impl SignaturesCollector {
         transactions: impl IntoIterator<Item = TransactionIntent>,
         interactors: Arc<dyn SignInteractors>,
         profile: &Profile,
+        role_kind: RoleKind
     ) -> Result<Self> {
         Self::with_signers_extraction(
             finish_early_strategy,
             IndexSet::from_iter(profile.factor_sources.iter()),
             transactions,
             interactors,
+            role_kind,
             |i| TXToSign::extracting_from_intent_and_profile(&i, profile),
         )
     }
@@ -59,11 +61,12 @@ impl SignaturesCollector {
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IndexSet<TXToSign>,
         interactors: Arc<dyn SignInteractors>,
+        role_kind: RoleKind
     ) -> Self {
         debug!("Init SignaturesCollector");
         let preprocessor = SignaturesCollectorPreprocessor::new(transactions);
         let (petitions, factors) =
-            preprocessor.preprocess(profile_factor_sources);
+            preprocessor.preprocess(profile_factor_sources, role_kind);
 
         let dependencies = SignaturesCollectorDependencies::new(
             finish_early_strategy,
@@ -83,6 +86,7 @@ impl SignaturesCollector {
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = TransactionIntent>,
         interactors: Arc<dyn SignInteractors>,
+        role_kind: RoleKind,
         extract_signers: F,
     ) -> Result<Self>
     where
@@ -98,6 +102,7 @@ impl SignaturesCollector {
             all_factor_sources_in_profile,
             transactions,
             interactors,
+            role_kind
         );
 
         Ok(collector)
@@ -398,6 +403,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &Profile::sample_from(IndexSet::new(), [], []),
+            RoleKind::Primary
         );
         assert!(matches!(res, Err(CommonError::UnknownAccount)));
     }
@@ -414,6 +420,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &Profile::sample_from(IndexSet::new(), [], []),
+            RoleKind::Primary
         );
         assert!(matches!(res, Err(CommonError::UnknownPersona)));
     }
@@ -430,6 +437,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &Profile::sample_from(factors_sources, [], [&persona]),
+            RoleKind::Primary
         )
         .unwrap();
         let outcome = collector.collect_signatures().await;
@@ -462,6 +470,7 @@ mod tests {
                 ),
             )),
             &profile,
+            RoleKind::Primary
         )
         .unwrap();
 
@@ -493,6 +502,7 @@ mod tests {
                     SimulatedUser::prudent_no_fail(),
                 )),
                 &profile,
+                RoleKind::Primary
             )
             .unwrap();
 
@@ -561,6 +571,7 @@ mod tests {
                 SimulatedUser::prudent_no_fail(),
             )),
             &profile,
+            RoleKind::Primary
         )
         .unwrap();
 
@@ -802,6 +813,7 @@ mod tests {
                 [t0.clone(), t1.clone(), t2.clone()],
                 Arc::new(TestSignatureCollectingInteractors::new(sim)),
                 &profile,
+                RoleKind::Primary
             )
             .unwrap();
 
@@ -939,6 +951,7 @@ mod tests {
                     vector.simulated_user,
                 )),
                 &profile,
+                RoleKind::Primary
             )
             .unwrap();
 
@@ -1031,6 +1044,7 @@ mod tests {
                         ),
                     )),
                     &profile,
+                    RoleKind::Primary
                 )
                 .unwrap();
 
@@ -1082,6 +1096,7 @@ mod tests {
                         ),
                     )),
                     &profile,
+                    RoleKind::Primary
                 )
                 .unwrap();
 
@@ -1161,6 +1176,7 @@ mod tests {
                         ),
                     )),
                     &profile,
+                    RoleKind::Primary
                 )
                 .unwrap();
 
@@ -1875,6 +1891,7 @@ mod tests {
                             FactorSourceIDFromHash::sample_at(4),
                         ]),
                     ),
+                    RoleKind::Primary
                 );
 
                 let outcome = collector.collect_signatures().await;
