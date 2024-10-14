@@ -1,22 +1,10 @@
 use crate::prelude::*;
 use sargon::WalletInteractionVersion as InternalWalletInteractionVersion;
 
-#[derive(PartialEq, Clone, uniffi::Record)]
-pub struct WalletInteractionVersion {
-    pub value: u64,
-}
+uniffi::custom_newtype!(WalletInteractionVersion, u64);
 
-impl From<InternalWalletInteractionVersion> for WalletInteractionVersion {
-    fn from(value: InternalWalletInteractionVersion) -> Self {
-        Self { value: value.0 }
-    }
-}
-
-impl Into<InternalWalletInteractionVersion> for WalletInteractionVersion {
-    fn into(self) -> InternalWalletInteractionVersion {
-        InternalWalletInteractionVersion(self.value)
-    }
-}
+#[derive(PartialEq, Clone, InternalConversionV2)]
+pub struct WalletInteractionVersion(pub u64);
 
 #[uniffi::export]
 pub fn new_wallet_interaction_version_current() -> WalletInteractionVersion {

@@ -1,20 +1,8 @@
 use crate::prelude::*;
 use sargon::DappOrigin as InternalDappOrigin;
 
+uniffi::custom_newtype!(DappOrigin, String);
+
 /// The origin of a dapp.
-#[derive(Clone, PartialEq, Eq, uniffi::Record)]
-pub struct DappOrigin {
-    pub value: String,
-}
-
-impl From<InternalDappOrigin> for DappOrigin {
-    fn from(value: InternalDappOrigin) -> Self {
-        Self { value: value.0 }
-    }
-}
-
-impl Into<InternalDappOrigin> for DappOrigin {
-    fn into(self) -> InternalDappOrigin {
-        InternalDappOrigin(self.value)
-    }
-}
+#[derive(Clone, PartialEq, Eq, InternalConversionV2)]
+pub struct DappOrigin(pub String);
