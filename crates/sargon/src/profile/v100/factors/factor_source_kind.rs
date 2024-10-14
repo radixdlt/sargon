@@ -43,7 +43,11 @@ pub enum FactorSourceKind {
     ArculusCard,
 
     /// Input key material for mnemonic (and optional BIP39 passphrase).
-    /// TODO add explanation
+    ///
+    /// Attributes:
+    ///  * Mine
+    ///  * Off device
+    ///  * Hierarchical deterministic (IKM -> HKDF -> Mnemonic)
     #[serde(rename = "passphrase")]
     Passphrase,
 
