@@ -143,8 +143,8 @@ impl HasSampleValues for MaybeSignedTransactions {
                 ),
             ),
         );
-        let tx_a_sig_x = HDSignature::sample_from_input(tx_a_input_x);
-        let tx_a_sig_y = HDSignature::sample_from_input(tx_a_input_y);
+        let tx_a_sig_x = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_a_input_x);
+        let tx_a_sig_y = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_a_input_y);
 
         let tx_b = IntentHash::sample_other();
         let tx_b_input_x = HDSignatureInput::new(
@@ -168,8 +168,8 @@ impl HasSampleValues for MaybeSignedTransactions {
             ),
         );
 
-        let tx_b_sig_x = HDSignature::sample_from_input(tx_b_input_x);
-        let tx_b_sig_y = HDSignature::sample_from_input(tx_b_input_y);
+        let tx_b_sig_x = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_b_input_x);
+        let tx_b_sig_y = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_b_input_y);
 
         Self::new(
             [
@@ -214,9 +214,9 @@ impl HasSampleValues for MaybeSignedTransactions {
                 ),
             ),
         );
-        let tx_a_sig_x = HDSignature::sample_from_input(tx_a_input_x);
-        let tx_a_sig_y = HDSignature::sample_from_input(tx_a_input_y);
-        let tx_a_sig_z = HDSignature::sample_from_input(tx_a_input_z);
+        let tx_a_sig_x = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_a_input_x);
+        let tx_a_sig_y = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_a_input_y);
+        let tx_a_sig_z = HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(tx_a_input_z);
 
         Self::new(
             [(

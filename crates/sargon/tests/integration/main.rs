@@ -333,7 +333,7 @@ mod integration_tests {
                     .flat_map(|r| {
                         r.signature_inputs()
                             .iter()
-                            .map(|x| HDSignature::sample_from_input(x.clone()))
+                            .map(|x| HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(x.clone()))
                             .collect::<IndexSet<_>>()
                     })
                     .collect::<IndexSet<HDSignature>>();
