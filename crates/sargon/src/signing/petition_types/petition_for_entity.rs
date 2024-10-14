@@ -366,7 +366,7 @@ impl HasSampleValues for PetitionForEntity {
                 "Grace",
                 AccountAddress::sample_other(),
                 || {
-                    GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         HDPathComponent::from(6)
                     ))

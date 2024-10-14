@@ -199,7 +199,7 @@ impl HasSampleValues for PetitionForTransaction {
             "Grace",
             AccountAddress::sample_other(),
             || {
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(
                 HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Account,
                     HDPathComponent::from(6)

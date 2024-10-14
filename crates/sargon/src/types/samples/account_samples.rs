@@ -18,7 +18,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(2);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m2(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r2(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
@@ -32,7 +32,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(3);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m3(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r3(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
@@ -46,7 +46,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(4);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m4(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r4(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
@@ -60,7 +60,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(5);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m5(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r5(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
@@ -74,7 +74,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(6);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m6(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
@@ -88,7 +88,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(7);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m7(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r7(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
@@ -107,7 +107,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             AccountAddress::random(NetworkID::Mainnet),
             || {
                 let idx = HDPathComponent::from(9);
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::m8(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r8(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
                         idx,
