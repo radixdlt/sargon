@@ -21,7 +21,8 @@ impl Serialize for SignedPartialTransaction {
                     CommonError::InvalidSignedPartialTransactionFailedToCompile,
                 )
             })?;
-        serializer.serialize_bytes(&bytes)
+        let bag_of_bytes: BagOfBytes = bytes.into();
+        serializer.serialize_str(&bag_of_bytes.to_hex())
     }
 }
 
