@@ -31,7 +31,22 @@ impl TXToSign {
         profile: &Profile,
     ) -> Result<Self> {
         let intent_hash = intent.intent_hash().clone();
-        let summary = intent.manifest_summary();
+        let entities_requiring_auth =
+            ExtractorOfEntitiesRequiringAuth::extract(
+                profile,
+                intent.manifest_summary().clone(),
+            )?;
+
+        Ok(Self::with(intent_hash, entities_requiring_auth))
+    }
+}
+
+pub struct ExtractorOfEntitiesRequiringAuth;
+impl ExtractorOfEntitiesRequiringAuth {
+    pub fn extract(
+        profile: &Profile,
+        summary: ManifestSummary,
+    ) -> Result<IndexSet<AccountOrPersona>> {
         let mut entities_requiring_auth: IndexSet<AccountOrPersona> =
             IndexSet::new();
 
@@ -60,8 +75,7 @@ impl TXToSign {
                 .map(AccountOrPersona::from)
                 .collect_vec(),
         );
-
-        Ok(Self::with(intent_hash, entities_requiring_auth))
+        Ok(entities_requiring_auth)
     }
 }
 

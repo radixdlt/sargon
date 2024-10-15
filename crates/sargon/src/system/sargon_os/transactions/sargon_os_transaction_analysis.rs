@@ -116,26 +116,49 @@ impl SargonOS {
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionPreviewResponse> {
-        let signer_public_keys = self
-            .extract_transaction_signer_public_keys(manifest.summary())
-            .await?;
+        // Getting the current ledger epoch
         let epoch = gateway_client.current_epoch().await?;
+
+        // Extracting the entities requiring auth to check if the notary is signatory
+        let profile = self.profile_state_holder.profile()?;
+        let entities_requiring_auth =
+            ExtractorOfEntitiesRequiringAuth::extract(
+                &profile,
+                manifest.summary(),
+            )?;
+
+        // Creating the transaction header and intent
         let header = TransactionHeader::new(
             network_id,
             epoch,
             Epoch::window_end_from_start(epoch),
             nonce,
             notary_public_key,
-            signer_public_keys.is_empty(),
+            entities_requiring_auth.is_empty(),
             0,
         );
         let intent = TransactionIntent::new(header, manifest, message)?;
+
+        // Extracting the signers public keys
+        let signer_public_keys =
+            ExtractorOfInstancesRequiredToSignTransactions::extract(
+                &self.profile_state_holder.profile()?,
+                vec![intent.clone()],
+                RoleKind::Primary,
+            )?
+            .iter()
+            .map(|i| i.public_key.public_key)
+            .collect::<IndexSet<PublicKey>>();
+
+        // Making the transaction preview Gateway request
         let request = TransactionPreviewRequest::new(
             intent,
             signer_public_keys,
             TransactionPreviewRequestFlags::default(),
         );
         let response = gateway_client.transaction_preview(request).await?;
+
+        // Checking the transaction receipt status and mapping the response
         if response.receipt.status != TransactionReceiptStatus::Succeeded {
             return Err(Self::map_failed_transaction_preview(response));
         };
@@ -164,78 +187,12 @@ impl SargonOS {
             }
         }
     }
-
-    async fn extract_transaction_signer_public_keys(
-        &self,
-        manifest_summary: ManifestSummary,
-    ) -> Result<IndexSet<PublicKey>> {
-        let signer_entities = self
-            .extract_transaction_signer_entities(manifest_summary.clone())
-            .await?;
-        Ok(self
-            .extract_transaction_signers_factor_instances(signer_entities)
-            .iter()
-            .map(|fi| fi.public_key)
-            .collect())
-    }
-
-    async fn extract_transaction_signer_entities(
-        &self,
-        manifest_summary: ManifestSummary,
-    ) -> Result<IndexSet<AccountOrPersona>> {
-        let accounts =
-            self.profile_state_holder.accounts_on_current_network()?;
-        let personas =
-            self.profile_state_holder.personas_on_current_network()?;
-
-        let account_entities = manifest_summary
-            .addresses_of_accounts_requiring_auth
-            .iter()
-            .map(|address| {
-                accounts
-                    .iter()
-                    .find(|account| account.address == *address)
-                    .map(AccountOrPersona::AccountEntity)
-                    .ok_or(CommonError::EntityNotFound)
-            })
-            .collect::<Result<IndexSet<_>>>()?;
-        let persona_entities: IndexSet<_> = manifest_summary
-            .addresses_of_personas_requiring_auth
-            .iter()
-            .map(|address| {
-                personas
-                    .iter()
-                    .find(|persona| persona.address == *address)
-                    .map(AccountOrPersona::PersonaEntity)
-                    .ok_or(CommonError::EntityNotFound)
-            })
-            .collect::<Result<IndexSet<_>>>()?;
-        let mut signer_entities: IndexSet<AccountOrPersona> = IndexSet::new();
-        signer_entities.extend(account_entities);
-        signer_entities.extend(persona_entities);
-        Ok(signer_entities)
-    }
-
-    fn extract_transaction_signers_factor_instances(
-        &self,
-        signers: IndexSet<AccountOrPersona>,
-    ) -> IndexSet<HierarchicalDeterministicPublicKey> {
-        signers
-            .iter()
-            .flat_map(|entity| {
-                entity.virtual_hierarchical_deterministic_factor_instances(
-                    CAP26KeyKind::TransactionSigning,
-                )
-            })
-            .map(|fi| fi.public_key)
-            .collect()
-    }
 }
 
 #[cfg(test)]
 mod transaction_preview_analysis_tests {
+    use super::*;
     use native_radix_engine_toolkit::receipt::AsStr;
-use super::*;
     use radix_common::prelude::Decimal;
     use std::sync::Mutex;
 
@@ -457,13 +414,7 @@ use super::*;
                 .await;
         let manifest = TransactionManifest::set_owner_keys_hashes(
             &IdentityAddress::sample().into(),
-            AccountOrPersona::sample_mainnet_other()
-                .virtual_hierarchical_deterministic_factor_instances(
-                    CAP26KeyKind::TransactionSigning,
-                )
-                .into_iter()
-                .map(|i| PublicKeyHash::hash(i.public_key.public_key))
-                .collect(),
+            vec![PublicKeyHash::sample()],
         );
 
         let result = os
@@ -522,7 +473,7 @@ use super::*;
             )
             .await;
 
-        assert_eq!(result, Err(CommonError::EntityNotFound))
+        assert_eq!(result, Err(CommonError::UnknownAccount))
     }
 
     #[actix_rt::test]
@@ -724,7 +675,9 @@ use super::*;
                 .unwrap();
         os.profile_state_holder
             .update_profile_with(|profile| {
-                Ok(profile.networks.insert(ProfileNetwork::sample_mainnet()))
+                profile.networks.insert(ProfileNetwork::sample_mainnet());
+                profile.factor_sources.insert(FactorSource::sample());
+                Ok(())
             })
             .unwrap();
         os
@@ -734,13 +687,7 @@ use super::*;
         let account = Account::sample_mainnet();
         TransactionManifest::set_owner_keys_hashes(
             &account.address.into(),
-            AccountOrPersona::sample_mainnet()
-                .virtual_hierarchical_deterministic_factor_instances(
-                    CAP26KeyKind::TransactionSigning,
-                )
-                .into_iter()
-                .map(|i| PublicKeyHash::hash(i.public_key.public_key))
-                .collect(),
+            vec![PublicKeyHash::sample()],
         )
         .modify_add_lock_fee(&account.address, Some(Decimal192::zero()))
     }

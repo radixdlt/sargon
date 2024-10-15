@@ -50,15 +50,6 @@ impl From<Persona> for AccountOrPersona {
     }
 }
 
-impl HasEntitySecurityState for AccountOrPersona {
-    fn security_state(&self) -> EntitySecurityState {
-        match self {
-            Self::AccountEntity(account) => account.security_state.clone(),
-            Self::PersonaEntity(persona) => persona.security_state.clone(),
-        }
-    }
-}
-
 impl std::fmt::Display for AccountOrPersona {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -181,28 +172,5 @@ mod tests {
             format!("{}", SUT::sample_other()),
             "Batman | identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw"
         );
-    }
-
-    #[test]
-    fn test_virtual_hierarchical_deterministic_factor_instances() {
-        // Transaction Signing factor instance
-        let mut sut = SUT::sample();
-        let mut factor_instances = sut
-            .virtual_hierarchical_deterministic_factor_instances(
-                CAP26KeyKind::TransactionSigning,
-            );
-        assert_eq!(factor_instances.len(), 1);
-        assert_eq!(
-            factor_instances.iter().next().unwrap().clone(),
-            HierarchicalDeterministicFactorInstance::sample()
-        );
-
-        // No factor instances
-        sut = SUT::sample_other();
-        factor_instances = sut
-            .virtual_hierarchical_deterministic_factor_instances(
-                CAP26KeyKind::AuthenticationSigning,
-            );
-        assert!(factor_instances.is_empty());
     }
 }
