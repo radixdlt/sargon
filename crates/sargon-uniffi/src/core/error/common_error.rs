@@ -1,21 +1,7 @@
 use crate::prelude::*;
 use sargon::CommonError as InternalCommonError;
-use sargon::IdentifiedVecOf;
-use sargon::Result as InternalResult;
 
 use thiserror::Error as ThisError;
-
-// impl From<InternalCommonError> for CommonError {
-//     fn from(value: InternalCommonError) -> Self {
-//         unimplemented!()
-//     }
-// }
-
-// impl Into<InternalCommonError> for CommonError {
-//     fn into(self) -> InternalCommonError {
-//         unimplemented!()
-//     }
-// }
 
 #[repr(u32)]
 #[derive(

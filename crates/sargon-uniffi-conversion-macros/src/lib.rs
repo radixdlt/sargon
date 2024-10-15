@@ -4,7 +4,7 @@ use core::panic;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Data, Fields, Type, PathArguments};
+use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, PathArguments, Type, TypePath};
 use proc_macro2::Ident;
 
 /// TODO: Clean up and document this code
@@ -56,23 +56,21 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
     let internal_name = quote::format_ident!("Internal{}", name);
     let test_mod_name = Ident::new(&format!("{}_tests", name.to_string().to_lowercase()), name.span());
 
+    // Build the match arms for the `From` implementation
     let from_match_arms = data.variants.iter().map(|variant| {
         let variant_name = &variant.ident;
 
         match &variant.fields {
-            // Tuple-style (unnamed fields) variant
             Fields::Unnamed(_) => {
                 quote! {
                     #internal_name::#variant_name(inner) => Self::#variant_name(inner.into())
                 }
             },
-            // Unit-style variant (no fields)
             Fields::Unit => {
                 quote! {
                     #internal_name::#variant_name => Self::#variant_name
                 }
             },
-
             Fields::Named(fields) => {
                 let field_names: Vec<_> = fields.named.iter().map(|f| &f.ident).collect();
                 let field_conversions: Vec<_> = generate_field_conversions(&fields);
@@ -83,17 +81,16 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
         }
     });
 
+    // Build the match arms for the `Into` implementation
     let into_match_arms = data.variants.iter().map(|variant| {
         let variant_name = &variant.ident;
 
         match &variant.fields {
-            // Tuple-style (unnamed fields) variant
             Fields::Unnamed(_) => {
                 quote! {
                     Self::#variant_name(inner) => #internal_name::#variant_name(inner.into())
                 }
             },
-            // Unit-style variant (no fields)
             Fields::Unit => {
                 quote! {
                     Self::#variant_name => #internal_name::#variant_name
@@ -110,6 +107,8 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
         }
     });
 
+    // Generate the test cases for the conversion functions.
+    // This will test each enum variant to ensure that it can be converted to the internal type and back.
     let test_cases = data.variants.iter().map(|variant| {
         let variant_name = &variant.ident;
         let test_func_name = Ident::new(&format!("test_roundtrip_conversion_for_{}", variant_name.to_string().to_lowercase()), variant_name.span());
@@ -158,7 +157,7 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
         }
     });
 
-    // Generate the implementation of the `into_internal()` function
+    // Generate the final implementation code
     quote! {
         impl #name {
             pub fn into_internal(&self) -> #internal_name {
@@ -294,6 +293,19 @@ fn generate_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::Tok
                             #field_name: #field_name.into_hash_map()
                         }
                     } else if segment.ident == "Option" {
+                        if let Some(inner_type) = extract_inner_type(type_path) {
+                            if let Type::Path(inner_type_path) = inner_type {
+                                if let Some(inner_segment) = inner_type_path.path.segments.last() {
+                                    if inner_segment.ident == "Vec" {
+                                        // Call into_vec() for Option<Vec<T>> types
+                                        return quote! {
+                                            #field_name: #field_name.map(|v| v.into_vec())
+                                        };
+                                    }
+                                }
+                            }
+                        }
+
                         // Call into_option() for Option types
                         quote! {
                             #field_name: #field_name.map(|v| v.into())
@@ -322,6 +334,18 @@ fn generate_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::Tok
     }).collect()
 }
 
+// Helper function to extract the inner type of an Option
+fn extract_inner_type(type_path: &TypePath) -> Option<&Type> {
+    if let Some(segment) = type_path.path.segments.last() {
+        if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
+            if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+                return Some(inner_type);
+            }
+        }
+    }
+    None
+}
+
 fn generate_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
     fields.named.iter().map(|f| {
         let field_name = &f.ident;
@@ -339,6 +363,18 @@ fn generate_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_ma
                             #field_name: #field_name.into_internal_hash_map()
                         }
                     } else if segment.ident == "Option" {
+                        if let Some(inner_type) = extract_inner_type(type_path) {
+                            if let Type::Path(inner_type_path) = inner_type {
+                                if let Some(inner_segment) = inner_type_path.path.segments.last() {
+                                    if inner_segment.ident == "Vec" {
+                                        // Call into_vec() for Option<Vec<T>> types
+                                        return quote! {
+                                            #field_name: #field_name.map(|v| v.into_internal_vec())
+                                        };
+                                    }
+                                }
+                            }
+                        }
                         // Call into_option() for Option types
                         quote! {
                             #field_name: #field_name.map(|v| v.into())
@@ -372,35 +408,7 @@ fn generate_struct_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macr
         let field_name = &f.ident;
         match &f.ty {
             Type::Path(type_path) => {
-                if let Some(segment) = type_path.path.segments.last() {
-                    if segment.ident == "Vec" {
-                        // Call into_vec() for Vec types
-                        quote! {
-                            #field_name: value.#field_name.into_vec()
-                        }
-                    } else if segment.ident == "HashMap" {
-                        // Call into_hash_map() for HashMap types
-                        quote! {
-                            #field_name: value.#field_name.into_hash_map()
-                        }
-                    } else if segment.ident == "Option" {
-                        // Call into_option() for Option types
-                        quote! {
-                            #field_name: value.#field_name.map(|v| v.into())
-                        }
-                    }
-                    else {
-                        // Default to calling .into() for other types
-                        quote! {
-                            #field_name: value.#field_name.into()
-                        }
-                    }
-                } else {
-                    // Default case if segment is missing
-                    quote! {
-                        #field_name: value.#field_name.into()
-                    }
-                }
+                generate_fields(type_path, field_name, false)
             }
             _ => {
                 // Default case for non-Path types
@@ -417,35 +425,7 @@ fn generate_struct_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<
         let field_name = &f.ident;
         match &f.ty {
             Type::Path(type_path) => {
-                if let Some(segment) = type_path.path.segments.last() {
-                    if segment.ident == "Vec" {
-                        // Call into_vec() for Vec types
-                        quote! {
-                            #field_name: self.#field_name.into_internal_vec()
-                        }
-                    } else if segment.ident == "HashMap" {
-                        // Call into_hash_map() for HashMap types
-                        quote! {
-                            #field_name: self.#field_name.into_internal_hash_map()
-                        }
-                    } else if segment.ident == "Option" {
-                        // Call into_option() for Option types
-                        quote! {
-                            #field_name: self.#field_name.map(|v| v.into())
-                        }
-                    }
-                    else {
-                        // Default to calling .into() for other types
-                        quote! {
-                            #field_name: self.#field_name.into()
-                        }
-                    }
-                } else {
-                    // Default case if segment is missing
-                    quote! {
-                        #field_name: self.#field_name.into()
-                    }
-                }
+                generate_fields(type_path, field_name, true)
             }
             _ => {
                 // Default case for non-Path types
@@ -508,7 +488,6 @@ fn generate_struct_unnamed_field_internal_conversions(fields: &syn::FieldsUnname
                             self.#index.into_internal_vec()
                         }
                     } else if segment.ident == "HashMap" {
-                        // Call into_hash_map() for HashMap types
                         quote! {
                             self.#index.into_inernal_hash_map()
                         }
@@ -533,4 +512,79 @@ fn generate_struct_unnamed_field_internal_conversions(fields: &syn::FieldsUnname
             }
         }
     }).collect()
+}
+
+fn generate_fields(type_path: &TypePath, field_name: &Option<Ident>, into_internal: bool) -> proc_macro2::TokenStream {
+    if let Some(segment) = type_path.path.segments.last() {
+        if segment.ident == "Vec" {
+            // Call into_vec() for Vec types
+            if into_internal {
+                return quote! {
+                    #field_name: self.#field_name.into_internal_vec()
+                }
+            } else {
+                return quote! {
+                    #field_name: value.#field_name.into_vec()
+                }
+            }
+        } else if segment.ident == "HashMap" {
+            if into_internal {
+                return quote! {
+                    #field_name: self.#field_name.into_internal_hash_map()
+                }
+            } else {
+                return quote! {
+                    #field_name: value.#field_name.into_hash_map()
+                }
+            }
+        } else if segment.ident == "Option" {
+            if let Some(inner_type) = extract_inner_type(type_path) {
+                if let Type::Path(inner_type_path) = inner_type {
+                    if let Some(inner_segment) = inner_type_path.path.segments.last() {
+                        if inner_segment.ident == "Vec" {
+                            if into_internal {
+                                return quote! {
+                                    #field_name: self.#field_name.map(|v| v.into_internal_vec())
+                                };
+                            } else {
+                                return quote! {
+                                    #field_name: value.#field_name.map(|v| v.into_vec())
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            if into_internal {
+                return quote! {
+                    #field_name: self.#field_name.map(|v| v.into())
+                }
+            } else {
+                return quote! {
+                    #field_name: value.#field_name.map(|v| v.into())
+                }
+            }
+        }
+        else {
+            if into_internal {
+                return quote! {
+                    #field_name: self.#field_name.into()
+                }
+            } else {
+                return quote! {
+                    #field_name: value.#field_name.into()
+                }
+            }
+        }
+    } else {
+        if into_internal {
+            return quote! {
+                #field_name: self.#field_name.into()
+            }
+        } else {
+            return quote! {
+                #field_name: value.#field_name.into()
+            }
+        }
+    }
 }

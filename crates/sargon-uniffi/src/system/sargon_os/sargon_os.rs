@@ -29,7 +29,7 @@ impl SargonOS {
         })
     }
 
-    pub async fn new_wallet(&self) -> Result<()> {
+    pub async fn new_wwallet(&self) -> Result<()> {
         self.wrapped.new_wallet().await.into_result()
     }
 
