@@ -188,6 +188,34 @@ impl MnemonicWithPassphrase {
             BIP39Passphrase::new("Leonidas"),
         )
     }
+
+    pub(crate) fn sample_security_questions() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_security_questions(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_security_questions_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_security_questions_other(),
+            BIP39Passphrase::new("Questions?"),
+        )
+    }
+
+    pub(crate) fn sample_passphrase() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_passphrase(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_passphrase_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_security_questions_other(),
+            BIP39Passphrase::new("Pass phrase"),
+        )
+    }
 }
 
 impl HasSampleValues for MnemonicWithPassphrase {

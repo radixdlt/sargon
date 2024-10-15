@@ -1,5 +1,7 @@
 extern crate proc_macro;
 
+use core::panic;
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput, Data, Fields, Type, PathArguments};
@@ -33,23 +35,20 @@ pub fn internal_conversion_derive(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(InternalConversionV2)]
 pub fn internal_conversion_derive_v2(input: TokenStream) -> TokenStream {
-    // Parse the input into a syntax tree
     let input = parse_macro_input!(input as DeriveInput);
-
-    // Get the name of the type the macro is applied to
     let name = input.ident;
 
     let expanded = match input.data {
         Data::Enum(data) => {
             handle_enum(&name, data)
         },
-        Data::Struct(data_struct) => {
-            handle_struct(&name, data_struct)
+        Data::Struct(data) => {
+            handle_struct(&name, data)
         },
-        _ => panic!("FromInto can only be derived for enums"),
+        _ => panic!("InternalConversion can only be derived for structs or enums"),
     };
 
-    // Convert the generated code into a TokenStream and return it
+
     TokenStream::from(expanded)
 }
 
@@ -73,6 +72,7 @@ fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStre
                     #internal_name::#variant_name => Self::#variant_name
                 }
             },
+
             Fields::Named(fields) => {
                 let field_names: Vec<_> = fields.named.iter().map(|f| &f.ident).collect();
                 let field_conversions: Vec<_> = generate_field_conversions(&fields);

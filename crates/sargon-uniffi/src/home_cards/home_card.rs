@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::HomeCard as InternalHomeCard;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 
 /// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.

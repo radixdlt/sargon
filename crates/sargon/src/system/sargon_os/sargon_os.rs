@@ -360,6 +360,33 @@ impl SargonOS {
             .unwrap()
             .unwrap()
     }
+
+    /// Boot the SargonOS with a mocked networking driver.
+    /// This is useful for testing the SargonOS without needing to connect to the internet.
+    pub async fn boot_test_with_networking_driver(
+        networking: Arc<dyn NetworkingDriver>,
+    ) -> Result<Arc<Self>> {
+        let drivers = Drivers::with_networking(networking);
+        let bios = Bios::new(drivers);
+        let os = Self::boot(bios).await;
+
+        let (mut profile, bdfs) = os.create_new_profile_with_bdfs(None).await?;
+
+        // Append Stokenet network since initial profile has no network
+        profile
+            .networks
+            .append(ProfileNetwork::new_empty_on(NetworkID::Stokenet));
+
+        os.secure_storage
+            .save_private_hd_factor_source(&bdfs)
+            .await?;
+        os.secure_storage.save_profile(&profile).await?;
+        os.profile_state_holder.replace_profile_state_with(
+            ProfileState::Loaded(profile.clone()),
+        )?;
+
+        Ok(os)
+    }
 }
 
 #[cfg(test)]

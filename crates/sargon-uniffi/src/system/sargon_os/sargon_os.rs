@@ -19,9 +19,9 @@ pub struct SargonOS {
 impl SargonOS {
     #[uniffi::constructor]
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
-        let internalBios: InternalBios = bios.as_ref().clone().into();
+        let internal_bios: InternalBios = bios.as_ref().clone().into();
         let internal_sargon_os = InternalSargonOS::boot(Arc::new(
-            internalBios,
+            internal_bios,
         ))
         .await;
         Arc::new(SargonOS {

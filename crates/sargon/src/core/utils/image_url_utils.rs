@@ -67,7 +67,7 @@ mod tests {
     fn test_is_vector_image_invalid_url() {
         let url = "invalid";
 
-        assert_eq!(is_vector_image(url, VectorImageType::sample()), false);
+        assert!(!is_vector_image(url, VectorImageType::sample()));
     }
 
     #[test]

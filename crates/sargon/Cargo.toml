@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.26"
+version = "1.1.29"
 edition = "2021"
 build = "build.rs"
 
@@ -43,6 +43,9 @@ serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e7539
 
 # serde_repr = "0.1.17"
 serde_repr = { git = "https://github.com/dtolnay/serde-repr/", rev = "94cce18a51bc169869f2cdcea6549b3ed81b3b2e" }
+
+# once_cell = "1.19.0"
+once_cell = { git = "https://github.com/matklad/once_cell/", rev = "c48d3c2c01de926228aea2ac1d03672b4ce160c1" }
 
 # thiserror = "1.0.50"
 thiserror = { git = "https://github.com/dtolnay/thiserror/", rev = "a7d220d7915fb888413aa7978efd70f7006bda9d" }
@@ -165,6 +168,10 @@ base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14
 reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
   "native-tls-vendored",
 ] }
+
+# async-std = "1.13.0"
+async-std = "1.13.0"
+
 # Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
 # This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS
 # The bug is fixed already but the fix is not released yet. https://github.com/kornelski/rust-security-framework/pull/204

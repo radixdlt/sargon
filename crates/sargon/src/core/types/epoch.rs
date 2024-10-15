@@ -7,6 +7,8 @@ pub use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
+    Serialize,
+    Deserialize,
     Ord,
     PartialOrd,
     derive_more::Display,

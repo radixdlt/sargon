@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::FactorInstance as InternalFactorInstance;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
     /// factor instance. We will lookup the `FactorSource` in the
@@ -13,22 +13,4 @@ pub struct FactorInstance {
     /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
     /// is derived which produces virtual badges (signatures).
     pub badge: FactorInstanceBadge,
-}
-
-impl From<InternalFactorInstance> for FactorInstance {
-    fn from(value: InternalFactorInstance) -> Self {
-        Self {
-            factor_source_id: value.factor_source_id.into(),
-            badge: value.badge.into(),
-        }
-    }
-}
-
-impl Into<InternalFactorInstance> for FactorInstance {
-    fn into(self) -> InternalFactorInstance {
-        InternalFactorInstance {
-            factor_source_id: self.factor_source_id.into(),
-            badge: self.badge.into(),
-        }
-    }
 }

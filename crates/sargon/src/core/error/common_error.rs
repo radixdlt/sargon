@@ -654,6 +654,24 @@ pub enum CommonError {
 
     #[error("The network {network_id} does not exist in profile")]
     NoNetworkInProfile { network_id: NetworkID } = 10183,
+
+    #[error("Empty FactorSources list")]
+    FactorSourcesOfKindEmptyFactors = 10184,
+
+    #[error("Expected Passphrase factor source got something else")]
+    ExpectedPassphraseFactorSourceGotSomethingElse = 10185,
+
+    #[error("Unknown persona.")]
+    UnknownPersona = 10186,
+
+    #[error("Invalid security structure. Threshold ({}) cannot exceed threshold factors ({}).", threshold, factors)]
+    InvalidSecurityStructureThresholdExceedsFactors {
+        threshold: u8,
+        factors: u8,
+    } = 10187,
+
+    #[error("Invalid security structure. A factor must not be present in both threshold and override list.")]
+    InvalidSecurityStructureFactorInBothThresholdAndOverride = 10188,
 }
 
 impl CommonError {

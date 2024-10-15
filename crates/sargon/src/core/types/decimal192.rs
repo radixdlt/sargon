@@ -1028,12 +1028,10 @@ mod test_decimal {
     )]
     #[test]
     fn engineering_for_abs_less_than_1_fails_pos() {
-        _ = SUT::try_from(0.9f32)
-            .unwrap()
-            .formatted_engineering_notation(
-                LocaleConfig::swedish_sweden(),
-                None,
-            );
+        _ = SUT::from(0.9f32).formatted_engineering_notation(
+            LocaleConfig::swedish_sweden(),
+            None,
+        );
     }
 
     #[should_panic(
@@ -1041,12 +1039,10 @@ mod test_decimal {
     )]
     #[test]
     fn engineering_for_abs_less_than_1_fails_neg() {
-        _ = SUT::try_from(-0.9f32)
-            .unwrap()
-            .formatted_engineering_notation(
-                LocaleConfig::swedish_sweden(),
-                None,
-            );
+        _ = SUT::from(-0.9f32).formatted_engineering_notation(
+            LocaleConfig::swedish_sweden(),
+            None,
+        );
     }
 
     #[test]
