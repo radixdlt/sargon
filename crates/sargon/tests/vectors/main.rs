@@ -700,6 +700,22 @@ mod dapp_to_wallet_interaction_tests {
             metadata.clone(),
         );
 
+        let pre_authorization_request_items =
+            DappToWalletInteractionItems::PreAuthorization(
+                DappToWalletInteractionPreAuthorizationItems::new(
+                    DappToWalletInteractionSubintentRequestItem::sample(),
+                ),
+            );
+
+        let pre_authorization_request = DappToWalletInteraction::new(
+            WalletInteractionId::from_str(
+                "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+            )
+            .unwrap(),
+            pre_authorization_request_items,
+            metadata.clone(),
+        );
+
         let interactions = vec![
             authorized_request_with_challenge,
             authorized_request_without_challenge,
@@ -708,6 +724,7 @@ mod dapp_to_wallet_interaction_tests {
             unauthorized_request_2,
             account_proof_request,
             accounts_and_persona_proof_request,
+            pre_authorization_request,
         ];
 
         for (fixture, expected) in
@@ -957,6 +974,23 @@ mod wallet_to_dapp_interaction_tests {
                 ),
             );
 
+        let pre_authorization_response_items = WalletToDappInteractionResponseItems::PreAuthorization(
+            WalletToDappInteractionPreAuthorizationResponseItems::new(
+                SignedPartialTransaction::sample(),
+            ),
+        );
+
+        let pre_authorization_response = WalletToDappInteractionResponse::Success(
+            WalletToDappInteractionSuccessResponse::new(
+                WalletInteractionId::from_str(
+                    "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+                )
+                .unwrap(),
+                pre_authorization_response_items,
+            ),
+        );
+
+
         let responses = vec![
             authorized_request_response,
             unauthorized_request_response,
@@ -964,6 +998,7 @@ mod wallet_to_dapp_interaction_tests {
             transaction_response,
             account_proof_response,
             accounts_and_persona_proof_response,
+            pre_authorization_response,
         ];
 
         let encoded = serde_json::to_string(&responses).unwrap();
