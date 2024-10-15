@@ -36,7 +36,7 @@ impl Epoch {
 
 impl From<u64> for Epoch {
     fn from(value: u64) -> Self {
-        Self(value)
+        Self::new(value)
     }
 }
 
@@ -54,7 +54,7 @@ impl From<Epoch> for ScryptoEpoch {
 
 impl From<ScryptoEpoch> for Epoch {
     fn from(value: ScryptoEpoch) -> Self {
-        Self(value.number())
+        Self::new(value.number())
     }
 }
 

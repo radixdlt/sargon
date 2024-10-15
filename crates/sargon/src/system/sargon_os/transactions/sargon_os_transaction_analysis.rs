@@ -30,10 +30,14 @@ impl SargonOS {
     }
 }
 
-/// Part of the error message indicating the deposits are denied for the account.
+/// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
+/// We use it part of logic below, matching against this String - we really should upgrade this code to be more
+/// structured - we MUST update this value if Gateway where to change this value.
 const GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED: &'static str =
     "AccountError(DepositIsDisallowed";
-/// Part of the error message indicating the deposits are denied for some of the accounts.
+/// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
+/// We use it part of logic below, matching against this String - we really should upgrade this code to be more
+/// structured - we MUST update this value if Gateway where to change this value.
 const GW_ERR_NOT_ALL_COULD_BE_DEPOSITED: &'static str =
     "AccountError(NotAllBucketsCouldBeDeposited";
 
@@ -230,7 +234,8 @@ impl SargonOS {
 
 #[cfg(test)]
 mod transaction_preview_analysis_tests {
-    use super::*;
+    use native_radix_engine_toolkit::receipt::AsStr;
+use super::*;
     use radix_common::prelude::Decimal;
     use std::sync::Mutex;
 
@@ -569,7 +574,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn execution_summary_reserved_instructions_error() {
-        let zero = ScryptoDecimal192::zero();
+        let ret_zero: AsStr<Decimal> = Decimal::ZERO.into();
         let responses = prepare_responses(
             LedgerState {
                 network: "".to_string(),
@@ -589,14 +594,14 @@ mod transaction_preview_analysis_tests {
                     },
                     worktop_changes: IndexMap::new(),
                     fee_summary: native_radix_engine_toolkit::receipt::FeeSummary {
-                        execution_fees_in_xrd: zero.into(),
-                        finalization_fees_in_xrd: zero.into(),
-                        storage_fees_in_xrd: zero.into(),
-                        royalty_fees_in_xrd: zero.into(),
+                        execution_fees_in_xrd: ret_zero,
+                        finalization_fees_in_xrd: ret_zero,
+                        storage_fees_in_xrd: ret_zero,
+                        royalty_fees_in_xrd: ret_zero,
                     },
                     locked_fees: native_radix_engine_toolkit::receipt::LockedFees {
-                        contingent: zero.into(),
-                        non_contingent: zero.into(),
+                        contingent: ret_zero,
+                        non_contingent: ret_zero,
                     },
                 }),
                 logs: vec![],
