@@ -15,7 +15,7 @@ pub enum WalletToDappInteractionResponseItems {
     #[serde(rename = "transaction")]
     Transaction(WalletToDappInteractionTransactionResponseItems),
 
-    #[serde(rename = "preAuthorization")]
+    #[serde(rename = "preAuthorizationRequest")]
     PreAuthorization(WalletToDappInteractionPreAuthorizationResponseItems),
 }
 
