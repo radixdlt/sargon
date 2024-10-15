@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionPreAuthorizationResponseItems {
     pub signed_partial_transaction: SignedPartialTransaction,
 }
