@@ -143,7 +143,7 @@ pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
     with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
 ) -> Result<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource> {
     InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
-        mnemonic.into_internal(), with.into_identified_vec(),
+        mnemonic.into_internal(), with.into_internal(),
     ).into_result()
 }
 
@@ -160,6 +160,6 @@ pub fn security_questions_factor_source_decrypt(
 ) -> Result<Mnemonic> {
     factor_source
         .into_internal()
-        .decrypt(with.into_identified_vec())
+        .decrypt(with.into_internal())
         .into_result()
 }

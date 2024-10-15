@@ -40,7 +40,7 @@ impl Into<InternalAuthorizedPersonaDetailed> for AuthorizedPersonaDetailed {
             display_name: self.display_name.into(),
             simple_accounts: self
                 .simple_accounts
-                .map(|v| v.into_identified_vec()),
+                .map(|v| v.into_internal()),
             shared_persona_data: self.shared_persona_data.into(),
             has_authentication_signing_key: self.has_authentication_signing_key,
         }

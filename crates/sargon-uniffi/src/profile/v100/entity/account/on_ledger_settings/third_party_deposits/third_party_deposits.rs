@@ -40,10 +40,10 @@ impl Into<InternalThirdPartyDeposits> for ThirdPartyDeposits {
             deposit_rule: self.deposit_rule.into(),
             assets_exception_list: self
                 .assets_exception_list
-                .map(|v| v.into_identified_vec()),
+                .map(|v| v.into_internal()),
             depositors_allow_list: self
                 .depositors_allow_list
-                .map(|v| v.into_identified_vec()),
+                .map(|v| v.into_internal()),
         }
     }
 }

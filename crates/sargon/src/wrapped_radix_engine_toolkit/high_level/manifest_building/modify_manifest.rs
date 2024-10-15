@@ -116,6 +116,13 @@ impl TransactionManifest {
         Ok(manifest)
     }
 
+    pub fn modify_add_guarantees_vec(
+        self,
+        guarantees: Vec<TransactionGuarantee>,
+    ) -> Result<TransactionManifest> {
+        self.modify_add_guarantees(guarantees)
+    }
+
     pub fn modify_add_lock_fee(
         self,
         address_of_fee_payer: &AccountAddress,

@@ -48,7 +48,7 @@ impl Into<InternalFactorSourceCommon> for FactorSourceCommon {
             crypto_parameters: self.crypto_parameters.into(),
             added_on: self.added_on.into(),
             last_used_on: self.last_used_on.into(),
-            flags: self.flags.into_identified_vec(),
+            flags: self.flags.into_internal(),
         }
     }
 }

@@ -94,7 +94,7 @@ impl Into<InternalPredictedNonFungibleLocalIds>
 {
     fn into(self) -> InternalPredictedNonFungibleLocalIds {
         InternalPredictedNonFungibleLocalIds {
-            value: self.value.into_internal_vec(),
+            value: self.value.into_internal(),
             instruction_index: self.instruction_index,
         }
     }

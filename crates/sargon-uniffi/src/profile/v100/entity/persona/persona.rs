@@ -70,7 +70,7 @@ impl Into<InternalPersona> for Persona {
             address: self.address.into(),
             display_name: self.display_name.into(),
             security_state: self.security_state.into(),
-            flags: self.flags.into_identified_vec(),
+            flags: self.flags.into_internal(),
             persona_data: self.persona_data.into(),
         }
     }

@@ -52,7 +52,7 @@ impl SargonOS {
         self.wrapped
             .new_wallet_with_derived_bdfs(
                 hd_factor_source.into_internal(),
-                accounts.into_identified_vec(),
+                accounts.into_internal(),
             )
             .await
             .into_result()

@@ -57,7 +57,7 @@ impl Into<InternalAuthorizedDapp> for AuthorizedDapp {
             display_name: self.display_name,
             references_to_authorized_personas: self
                 .references_to_authorized_personas
-                .into_identified_vec(),
+                .into_internal(),
             preferences: self.preferences.into(),
         }
     }

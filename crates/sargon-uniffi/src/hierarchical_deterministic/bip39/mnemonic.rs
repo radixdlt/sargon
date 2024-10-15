@@ -38,7 +38,7 @@ pub fn new_mnemonic_from_phrase_language(
 
 #[uniffi::export]
 pub fn new_mnemonic_from_words(words: Vec<BIP39Word>) -> Result<Mnemonic> {
-    InternalMnemonic::from_words(words.into_internal_vec()).into_result()
+    InternalMnemonic::from_words(words.into_internal()).into_result()
 }
 
 /// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"

@@ -76,7 +76,7 @@ impl SargonOS {
         factor_sources: FactorSources,
     ) -> Result<Vec<FactorSourceID>> {
         self.wrapped
-            .add_factor_sources(factor_sources.into_identified_vec())
+            .add_factor_sources(factor_sources.into_internal())
             .await
             .into_result()
     }

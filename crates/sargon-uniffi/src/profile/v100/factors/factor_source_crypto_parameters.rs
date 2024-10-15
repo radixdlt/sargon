@@ -48,10 +48,10 @@ impl Into<InternalFactorSourceCryptoParameters>
 {
     fn into(self) -> InternalFactorSourceCryptoParameters {
         InternalFactorSourceCryptoParameters {
-            supported_curves: self.supported_curves.into_identified_vec(),
+            supported_curves: self.supported_curves.into_internal(),
             supported_derivation_path_schemes: self
                 .supported_derivation_path_schemes
-                .into_identified_vec(),
+                .into_internal(),
         }
     }
 }

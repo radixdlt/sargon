@@ -36,7 +36,7 @@ impl Into<InternalAuthorizedDappDetailed> for AuthorizedDappDetailed {
             display_name: self.display_name.map(Into::into),
             detailed_authorized_personas: self
                 .detailed_authorized_personas
-                .into_identified_vec(),
+                .into_internal(),
             preferences: self.preferences.into(),
         }
     }

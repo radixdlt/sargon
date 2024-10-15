@@ -10,8 +10,8 @@ decl_identified_vec_of!(
 pub fn resource_preferences_get_hidden_resources(
     resource_preferences: ResourcePreferences,
 ) -> HiddenResources {
+    let resource_preferences: InternalResourcePreferences = resource_preferences.into_internal();
     resource_preferences
-        .into_identified_vec()
         .get_hidden_resources()
         .into_vec()
 }
@@ -22,7 +22,7 @@ pub fn resource_preferences_hide_resource(
     resource: ResourceIdentifier,
 ) -> ResourcePreferences {
     let mut resource_preferences: InternalResourcePreferences =
-        resource_preferences.into_identified_vec().clone();
+        resource_preferences.into_internal();
     resource_preferences.hide_resource(resource.into());
     resource_preferences.into_vec()
 }
@@ -33,7 +33,7 @@ pub fn resource_preferences_unhide_resource(
     resource: ResourceIdentifier,
 ) -> ResourcePreferences {
     let mut resource_preferences: InternalResourcePreferences =
-        resource_preferences.into_identified_vec().clone();
+        resource_preferences.into_internal();
     resource_preferences.unhide_resource(resource.into());
     resource_preferences.into_vec()
 }

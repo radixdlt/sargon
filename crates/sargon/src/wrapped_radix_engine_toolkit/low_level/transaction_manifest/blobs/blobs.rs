@@ -23,6 +23,10 @@ impl Blobs {
     {
         Self::new(bags.into_iter().map(Blob::from))
     }
+
+    pub fn from_vec(blobs: Vec<Blob>) -> Self {
+        Self(blobs)
+    }
 }
 
 impl Default for Blobs {

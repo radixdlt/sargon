@@ -32,7 +32,7 @@ pub fn manifest_set_owner_keys_hashes(
 ) -> TransactionManifest {
     InternalTransactionManifest::set_owner_keys_hashes(
         &address_of_account_or_persona.into_internal(),
-        owner_key_hashes.into_internal_vec(),
+        owner_key_hashes.into_internal(),
     )
     .into()
 }
@@ -111,7 +111,7 @@ pub fn manifest_stakes_claim(
 ) -> TransactionManifest {
     InternalTransactionManifest::stake_claims(
         &account_address.into_internal(),
-        stake_claims.into_internal_vec(),
+        stake_claims.into_internal(),
     )
     .into()
 }
@@ -154,7 +154,7 @@ pub fn modify_manifest_add_guarantees(
 ) -> Result<TransactionManifest> {
         manifest
             .into_internal()
-            .modify_add_guarantees(guarantees.into_internal_vec())
+            .modify_add_guarantees_vec(guarantees.into_internal())
             .into_result()
 }
 
@@ -209,7 +209,7 @@ pub fn manifest_account_locker_claim(
     InternalTransactionManifest::account_locker_claim(
         &locker_address.into_internal(),
         &claimant.into_internal(),
-        claimable_resources.into_internal_vec(),
+        claimable_resources.into_internal(),
     )
     .into()
 }

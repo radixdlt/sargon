@@ -213,7 +213,7 @@ impl SargonOS {
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
         self.wrapped
-            .add_accounts(accounts.into_identified_vec())
+            .add_accounts(accounts.into_internal())
             .await
             .into_result()
     }

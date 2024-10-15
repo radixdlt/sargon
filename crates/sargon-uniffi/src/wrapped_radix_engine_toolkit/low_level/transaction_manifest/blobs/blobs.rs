@@ -23,7 +23,7 @@ impl From<InternalBlobs> for Blobs {
 
 impl Into<InternalBlobs> for Blobs {
     fn into(self) -> InternalBlobs {
-        InternalBlobs::new(self.secret_magic.into_internal_vec())
+        InternalBlobs::from_vec(self.secret_magic.into_internal())
     }
 }
 

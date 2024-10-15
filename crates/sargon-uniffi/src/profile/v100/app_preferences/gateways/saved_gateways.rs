@@ -35,7 +35,7 @@ impl Into<InternalSavedGateways> for SavedGateways {
     fn into(self) -> InternalSavedGateways {
         InternalSavedGateways {
             current: self.current.into(),
-            other: self.other.into_identified_vec(),
+            other: self.other.into_internal(),
         }
     }
 }

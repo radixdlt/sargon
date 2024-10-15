@@ -47,7 +47,7 @@ impl Into<InternalSecurity> for Security {
             ),
             security_structures_of_factor_source_ids: self
                 .security_structures_of_factor_source_ids
-                .into_identified_vec(),
+                .into_internal(),
         }
     }
 }

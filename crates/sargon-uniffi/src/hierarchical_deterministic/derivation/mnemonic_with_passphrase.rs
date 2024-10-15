@@ -30,7 +30,7 @@ pub fn mnemonic_with_passphrase_validate_public_keys(
 ) -> bool {
     mnemonic_with_passphrase
         .into_internal()
-        .validate_public_keys(hd_keys.into_internal_vec())
+        .validate_public_keys_vec(hd_keys.into_internal())
 }
 
 #[uniffi::export]
@@ -40,7 +40,7 @@ pub fn mnemonic_with_passphrase_derive_public_keys(
 ) -> Vec<HierarchicalDeterministicPublicKey> {
     mnemonic_with_passphrase
         .into_internal()
-        .derive_public_keys(derivation_paths.into_internal_vec())
+        .derive_public_keys_vec(derivation_paths.into_internal())
         .into_vec()
 }
 

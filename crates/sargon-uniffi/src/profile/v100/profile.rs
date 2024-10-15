@@ -51,9 +51,9 @@ impl Into<InternalProfile> for Profile {
     fn into(self) -> InternalProfile {
         InternalProfile {
             header: self.header.into(),
-            factor_sources: self.factor_sources.into_identified_vec(),
+            factor_sources: self.factor_sources.into_internal(),
             app_preferences: self.app_preferences.into(),
-            networks: self.networks.into_identified_vec(),
+            networks: self.networks.into_internal(),
         }
     }
 }

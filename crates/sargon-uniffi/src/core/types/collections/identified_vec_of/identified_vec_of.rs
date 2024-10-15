@@ -12,14 +12,6 @@ pub trait FromIdentifiedVecOf<
     fn into_vec(self) -> Vec<Element>;
 }
 
-pub trait IntoIdentifiedVecOf<
-    InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-    Element,
->
-{
-    fn into_identified_vec(self) -> IdentifiedVecOf<InternalElement>;
-}
-
 impl<
         InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
         Element,
@@ -30,18 +22,6 @@ where
 {
     fn into_vec(self) -> Vec<Element> {
         self.into_iter().map(Element::from).collect()
-    }
-}
-
-impl<
-        InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-        Element,
-    > IntoIdentifiedVecOf<InternalElement, Element> for Vec<Element>
-where
-    Element: Into<InternalElement>,
-{
-    fn into_identified_vec(self) -> IdentifiedVecOf<InternalElement> {
-        self.into_internal_vec().into()
     }
 }
 
@@ -64,15 +44,15 @@ where
     }
 }
 
-impl<InternalElement, Element> IntoInternalVec<InternalElement, Element>
-    for Vec<Element>
-where
-    Element: Into<InternalElement>,
-{
-    fn into_internal_vec(self) -> Vec<InternalElement> {
-        self.into_iter().map(Into::into).collect()
-    }
-}
+// impl<InternalElement, Element> IntoInternalVec<InternalElement, Element>
+//     for Vec<Element>
+// where
+//     Element: Into<InternalElement>,
+// {
+//     fn into_internal_vec(self) -> Vec<InternalElement> {
+//         self.into_iter().map(Into::into).collect()
+//     }
+// }
 
 // impl<
 //         InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
@@ -192,7 +172,90 @@ where
         self,
     ) -> HashMap<InternalKey, Vec<InternalElement>> {
         self.into_iter()
-            .map(|(k, v)| (k.into(), v.into_internal_vec()))
+            .map(|(k, v)| (k.into(), v.into_internal()))
             .collect()
     }
 }
+
+pub trait FromInternal<Internal, External> {
+    fn into_type(self) -> External;
+}
+
+impl<InternalElement, Element> FromInternal<Vec<InternalElement>, Vec<Element>>
+    for Vec<InternalElement>
+where
+    Element: From<InternalElement>,
+{
+    fn into_type(self) -> Vec<Element> {
+        self.into_iter().map(Element::from).collect()
+    }
+}
+
+pub trait IntoInternal<External, Internal> {
+    fn into_internal(self) -> Internal;
+}
+
+impl<InternalElement, Element> IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
+    for Vec<Element>
+where
+    InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> IdentifiedVecOf<InternalElement> {
+        self.into_iter().map(Into::into).collect()
+    }
+}
+
+impl<InternalElement, Element> IntoInternal<Vec<Element>, Vec<InternalElement>>
+    for Vec<Element>
+where
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> Vec<InternalElement> {
+        self.into_iter().map(Into::into).collect()
+    }
+}
+
+impl<Key, Element, InternalKey, InternalElement> IntoInternal<HashMap<Key, Element>, HashMap<InternalKey, InternalElement>>
+    for HashMap<Key, Element>
+where
+    InternalKey: std::hash::Hash + Eq,
+    Key: Into<InternalKey>,
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> HashMap<InternalKey, InternalElement> {
+        self.into_iter()
+            .map(|(k, v)| (k.into(), v.into()))
+            .collect()
+    }
+}
+
+// impl<Key1, Key2, Element, InternalKey1, InternalKey2, InternalElement> IntoInternal<HashMap<Key1, HashMap<Key2, Element>>, HashMap<InternalKey1, HashMap<InternalKey2, InternalElement>>>
+//     for HashMap<Key1, HashMap<Key2, Element>>
+// where
+//     InternalKey1: std::hash::Hash + Eq,
+//     InternalKey2: std::hash::Hash + Eq,
+//     Key1: Into<InternalKey1>,
+//     Key2: Into<InternalKey2>,
+//     Element: Into<InternalElement>,
+// {
+//     fn into_internal(self) -> HashMap<InternalKey1, HashMap<InternalKey2, InternalElement>> {
+//         self.into_iter()
+//             .map(|(k, v)| (k.into(), v.into_internal()))
+//             .collect()
+//     }
+// }
+
+// impl<Key, Element, InternalKey, InternalElement> IntoInternal<HashMap<Key, Vec<Element>>, HashMap<InternalKey, Vec<InternalElement>>>
+//     for HashMap<Key, Vec<Element>>
+// where
+//     InternalKey: std::hash::Hash + Eq,
+//     Key: Into<InternalKey>,
+//     Element: Into<InternalElement>,
+// {
+//     fn into_internal(self) -> HashMap<InternalKey, Vec<InternalElement>> {
+//         self.into_iter()
+//             .map(|(k, v)| (k.into(), v.into_internal()))
+//             .collect()
+//     }
+// }

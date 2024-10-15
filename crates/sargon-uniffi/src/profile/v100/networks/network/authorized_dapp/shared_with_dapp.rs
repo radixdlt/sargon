@@ -46,7 +46,7 @@ macro_rules! declare_shared_with_dapp {
             fn into(self) -> [<Internal $struct_name>] {
                 [<Internal $struct_name>] {
                     request: self.request.into(),
-                    ids: self.ids.into_identified_vec(),
+                    ids: self.ids.into_internal(),
                 }
             }
         }

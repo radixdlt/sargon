@@ -81,7 +81,7 @@ impl Into<InternalAccount> for Account {
             display_name: self.display_name.into(),
             security_state: self.security_state.into(),
             appearance_id: self.appearance_id.into(),
-            flags: self.flags.into_identified_vec(),
+            flags: self.flags.into_internal(),
             on_ledger_settings: self.on_ledger_settings.into(),
         }
     }

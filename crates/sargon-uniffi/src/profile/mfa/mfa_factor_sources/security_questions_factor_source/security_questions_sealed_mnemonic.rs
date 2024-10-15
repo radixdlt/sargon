@@ -44,10 +44,10 @@ impl Into<InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic>
         self,
     ) -> InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
         InternalSecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
-            security_questions: self.security_questions.into_identified_vec(),
+            security_questions: self.security_questions.into_internal(),
             kdf_scheme: self.kdf_scheme.into(),
             encryption_scheme: self.encryption_scheme.into(),
-            encryptions: self.encryptions.into_internal_vec(),
+            encryptions: self.encryptions.into_internal(),
         }
     }
 }

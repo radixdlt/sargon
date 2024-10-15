@@ -43,7 +43,7 @@ macro_rules! declare_collection_of_identified_entry {
         {
             fn into(self) -> [< InternalCollectionOf $struct_name>] {
                 [< InternalCollectionOf $struct_name>] {
-                    collection: self.collection.into_identified_vec(),
+                    collection: self.collection.into_internal(),
                 }
             }
         }

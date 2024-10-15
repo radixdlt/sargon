@@ -50,12 +50,12 @@ impl Into<InternalProfileNetwork> for ProfileNetwork {
     fn into(self) -> InternalProfileNetwork {
         InternalProfileNetwork {
             id: self.id.into(),
-            accounts: self.accounts.into_identified_vec(),
-            personas: self.personas.into_identified_vec(),
-            authorized_dapps: self.authorized_dapps.into_identified_vec(),
+            accounts: self.accounts.into_internal(),
+            personas: self.personas.into_internal(),
+            authorized_dapps: self.authorized_dapps.into_internal(),
             resource_preferences: self
                 .resource_preferences
-                .into_identified_vec(),
+                .into_internal(),
         }
     }
 }

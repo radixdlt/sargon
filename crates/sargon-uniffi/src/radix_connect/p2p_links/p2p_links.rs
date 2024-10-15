@@ -18,7 +18,7 @@ pub fn new_p2p_links_from_json_bytes(
 
 #[uniffi::export]
 pub fn new_p2p_links_from_to_bytes(p2p_links: P2PLinks) -> BagOfBytes {
-    let internal: InternalP2PLinks = p2p_links.into_identified_vec();
+    let internal: InternalP2PLinks = p2p_links.into_internal();
     let bytes = internal.serialize_to_bytes().unwrap();
     bytes.into()
 }
