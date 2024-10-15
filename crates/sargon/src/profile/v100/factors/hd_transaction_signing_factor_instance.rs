@@ -16,8 +16,7 @@ impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
         value
             .derivation_path()
             .as_cap26()
-            .ok_or(CommonError::WrongEntityKindOfInFactorInstancesPath)
-            .map(|p| p.clone())
+            .ok_or(CommonError::WrongEntityKindOfInFactorInstancesPath).cloned()
             .and_then(|p| {
                 p.try_into()
                     .map_err(|_| CommonError::WrongEntityKindOfInFactorInstancesPath)

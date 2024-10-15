@@ -21,6 +21,11 @@ pub enum EntitySecurityState {
         #[serde(rename = "unsecuredEntityControl")]
         value: UnsecuredEntityControl,
     },
+    /// The account is controlled by multi-factor
+    Securified {
+        #[serde(rename = "securedEntityControl")]
+        value: SecuredEntityControl,
+    },
 }
 
 impl<'de> Deserialize<'de> for EntitySecurityState {
@@ -51,6 +56,10 @@ impl Serialize for EntitySecurityState {
                 state.serialize_field("discriminator", "unsecured")?;
                 state.serialize_field("unsecuredEntityControl", value)?;
             }
+            EntitySecurityState::Securified { value } => {
+                state.serialize_field("discriminator", "securified")?;
+                state.serialize_field("securedEntityControl", value)?;
+            }
         }
         state.end()
     }
@@ -59,6 +68,12 @@ impl Serialize for EntitySecurityState {
 impl From<UnsecuredEntityControl> for EntitySecurityState {
     fn from(value: UnsecuredEntityControl) -> Self {
         Self::Unsecured { value }
+    }
+}
+
+impl From<SecuredEntityControl> for EntitySecurityState {
+    fn from(value: SecuredEntityControl) -> Self {
+        Self::Securified { value }
     }
 }
 
@@ -131,6 +146,155 @@ mod tests {
                     }
                 },
                 "discriminator": "unsecured"
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn test() {
+        let model = EntitySecurityState::Securified {
+            value: SecuredEntityControl {
+                access_controller_address: AccessControllerAddress::sample(),
+                security_structure: SecurityStructureOfFactorInstances::new(
+                    SecurityStructureID::sample(),
+                    MatrixOfFactorInstances::new(
+                        PrimaryRoleWithFactorInstances::new(
+                            [FactorInstance::sample()],
+                            1,
+                            [],
+                        )
+                        .unwrap(),
+                        RecoveryRoleWithFactorInstances::new(
+                            [FactorInstance::new(
+                                FactorSourceIDFromHash::sample_ledger().into(),
+                                FactorInstanceBadge::sample(),
+                            )],
+                            1,
+                            [],
+                        )
+                        .unwrap(),
+                        ConfirmationRoleWithFactorInstances::new(
+                            [FactorInstance::new(
+                                FactorSourceIDFromHash::sample_passphrase()
+                                    .into(),
+                                FactorInstanceBadge::sample(),
+                            )],
+                            1,
+                            [],
+                        )
+                        .unwrap(),
+                    ),
+                ),
+            },
+        };
+
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+              "discriminator": "securified",
+              "securedEntityControl": {
+                "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
+                "securityStructure": {
+                  "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+                  "matrixOfFactors": {
+                    "primaryRole": {
+                      "thresholdFactors": [
+                        {
+                          "factorSourceID": {
+                            "discriminator": "fromHash",
+                            "fromHash": {
+                              "kind": "device",
+                              "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                            }
+                          },
+                          "badge": {
+                            "discriminator": "virtualSource",
+                            "virtualSource": {
+                              "discriminator": "hierarchicalDeterministicPublicKey",
+                              "hierarchicalDeterministicPublicKey": {
+                                "publicKey": {
+                                  "curve": "curve25519",
+                                  "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                },
+                                "derivationPath": {
+                                  "scheme": "cap26",
+                                  "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "threshold": 1,
+                      "overrideFactors": []
+                    },
+                    "recoveryRole": {
+                      "thresholdFactors": [
+                        {
+                          "factorSourceID": {
+                            "discriminator": "fromHash",
+                            "fromHash": {
+                              "kind": "ledgerHQHardwareWallet",
+                              "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                            }
+                          },
+                          "badge": {
+                            "discriminator": "virtualSource",
+                            "virtualSource": {
+                              "discriminator": "hierarchicalDeterministicPublicKey",
+                              "hierarchicalDeterministicPublicKey": {
+                                "publicKey": {
+                                  "curve": "curve25519",
+                                  "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                },
+                                "derivationPath": {
+                                  "scheme": "cap26",
+                                  "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "threshold": 1,
+                      "overrideFactors": []
+                    },
+                    "confirmationRole": {
+                      "thresholdFactors": [
+                        {
+                          "factorSourceID": {
+                            "discriminator": "fromHash",
+                            "fromHash": {
+                              "kind": "passphrase",
+                              "body": "181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9"
+                            }
+                          },
+                          "badge": {
+                            "discriminator": "virtualSource",
+                            "virtualSource": {
+                              "discriminator": "hierarchicalDeterministicPublicKey",
+                              "hierarchicalDeterministicPublicKey": {
+                                "publicKey": {
+                                  "curve": "curve25519",
+                                  "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                },
+                                "derivationPath": {
+                                  "scheme": "cap26",
+                                  "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "threshold": 1,
+                      "overrideFactors": []
+                    }
+                  }
+                }
+              }
             }
             "#,
         );

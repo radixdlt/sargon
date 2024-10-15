@@ -45,6 +45,8 @@ extension EntityBaseProtocol {
 				factorInstances.insert(authSigning)
 			}
 			return factorInstances
+		case .securified(value: let value):
+			return []
 		}
 	}
 	
@@ -52,6 +54,8 @@ extension EntityBaseProtocol {
 		switch securityState {
 		case let .unsecured(unsecuredEntityControl):
 			unsecuredEntityControl.authenticationSigning != nil
+		case .securified(value: let value):
+			false // TODO handle that in the future
 		}
 	}
 	
@@ -64,6 +68,8 @@ extension EntityBaseProtocol {
 			}
 			
 			return factorSourceID
+		case .securified(value: _):
+			return nil // TODO handle that in the future
 		}
 	}
 }

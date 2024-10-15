@@ -17,7 +17,9 @@ extension Mnemonic {
 	public static let sampleOffDeviceMnemonicOther: Self = newMnemonicSampleOffDeviceOther()
 	public static let sampleSecurityQuestions: Self = newMnemonicSampleSecurityQuestions()
 	public static let sampleSecurityQuestionsOther: Self = newMnemonicSampleSecurityQuestionsOther()
-	
+	public static let samplePassphrase: Self = newMnemonicSamplePassphrase()
+	public static let samplePassphraseOther: Self = newMnemonicSamplePassphraseOther()
+
     public static let sample24ZooVote: Self = try! Self(phrase: "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote")
 	
 	public static let sampleValues: [Self] = [
@@ -32,7 +34,9 @@ extension Mnemonic {
 		.sampleOffDeviceMnemonic,
 		.sampleOffDeviceMnemonicOther,
 		.sampleSecurityQuestions,
-		.sampleSecurityQuestionsOther
+		.sampleSecurityQuestionsOther,
+		.samplePassphrase,
+		.samplePassphraseOther
 	]
 }
 #endif // DEBUG
