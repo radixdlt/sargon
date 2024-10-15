@@ -48,7 +48,7 @@ mod tests {
     fn panic() {
         Sut::new(
             true,
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             IndexSet::just(HDSignature::sample_other()),
             IndexSet::new(),
         );

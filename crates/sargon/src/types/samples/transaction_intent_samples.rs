@@ -98,6 +98,8 @@ mod test {
         assert_eq!(
             accounts.iter().sorted().collect_vec(),
             summary
+                .clone()
+                .unwrap()
                 .addresses_of_accounts_requiring_auth
                 .iter()
                 .sorted()
@@ -107,6 +109,7 @@ mod test {
         assert_eq!(
             identities.iter().sorted().collect_vec(),
             summary
+                .unwrap()
                 .addresses_of_personas_requiring_auth
                 .iter()
                 .sorted()

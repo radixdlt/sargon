@@ -102,8 +102,8 @@ impl PetitionForFactorsState {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
+    use crate::DependencyInformation::Tag;
 
     type Sut = PetitionForFactorsState;
 
@@ -147,7 +147,7 @@ mod tests {
     fn skipping_already_signed_panics() {
         let sut = Sut::new();
 
-        let intent_hash = IntentHash::sample();
+        let intent_hash = TransactionIntentHash::sample();
 
         let factor_instance =
             HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
@@ -173,7 +173,7 @@ mod tests {
     fn signing_already_skipped_panics() {
         let sut = Sut::new();
 
-        let intent_hash = IntentHash::sample();
+        let intent_hash = TransactionIntentHash::sample();
         let factor_instance =
             HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                 HDPathComponent::from(0),

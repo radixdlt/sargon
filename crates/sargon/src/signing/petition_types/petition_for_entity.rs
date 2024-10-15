@@ -528,7 +528,10 @@ mod tests {
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
-        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
         let sut = Sut::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut

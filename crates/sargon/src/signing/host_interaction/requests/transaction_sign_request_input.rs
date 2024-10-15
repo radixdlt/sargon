@@ -97,7 +97,7 @@ mod tests_batch_req {
     )]
     fn panics_if_owned_factors_is_empty() {
         Sut::new(
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             FactorSourceIDFromHash::sample(),
             IndexSet::new(),
         );
@@ -109,7 +109,7 @@ mod tests_batch_req {
     )]
     fn panics_mismatch_factor_source_id() {
         Sut::new(
-            IntentHash::sample_other(),
+            TransactionIntentHash::sample_other(),
             FactorSourceIDFromHash::sample_other(),
             IndexSet::just(OwnedFactorInstance::sample_other()),
         );

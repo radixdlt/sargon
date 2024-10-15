@@ -66,7 +66,7 @@ mod tests {
         expected = "'entities_which_would_fail_auth' must not be empty, this type is not useful if it is empty."
     )]
     fn panics_if_empty() {
-        Sut::new(IntentHash::sample(), IndexSet::new());
+        Sut::new(TransactionIntentHash::sample(), IndexSet::new());
     }
 
     #[test]
@@ -75,7 +75,7 @@ mod tests {
     )]
     fn panics_if_duplicates() {
         Sut::new(
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             [
                 AddressOfAccountOrPersona::sample(),
                 AddressOfAccountOrPersona::sample(),
@@ -89,7 +89,7 @@ mod tests {
             AddressOfAccountOrPersona::sample(),
             AddressOfAccountOrPersona::sample_other(),
         ];
-        let sut = Sut::new(IntentHash::sample(), entities);
+        let sut = Sut::new(TransactionIntentHash::sample(), entities);
         assert_eq!(
             sut.entities_which_would_fail_auth(),
             IndexSet::<_>::from_iter(entities.into_iter())
