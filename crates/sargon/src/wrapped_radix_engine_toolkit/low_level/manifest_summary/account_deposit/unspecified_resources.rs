@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn from_scrypto_none_present() {
         let scrypto = ScryptoUnspecifiedResources::NonePresent;
-        assert_eq!(SUT::from(scrypto), SUT::sample());
+        assert_eq!(SUT::from(scrypto), SUT::none_present());
     }
 
     #[test]

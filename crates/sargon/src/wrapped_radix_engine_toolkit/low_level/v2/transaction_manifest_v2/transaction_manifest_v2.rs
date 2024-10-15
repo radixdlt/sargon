@@ -207,8 +207,11 @@ mod tests {
     use super::*;
     use crate::prelude::*;
     use radix_rust::hashmap;
-    use radix_transactions::manifest::{DropAllProofs, DropAuthZoneProofs};
+    use radix_transactions::manifest::{
+        CallMethod, DropAllProofs, DropAuthZoneProofs,
+    };
     use radix_transactions::model::InstructionV1;
+    use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifestV2;
@@ -275,6 +278,88 @@ mod tests {
         );
         assert_eq!(scrypto.clone(), sut.clone().into());
         assert_eq!(sut.scrypto_manifest(), scrypto);
+    }
+
+    #[test]
+    fn manifest_string() {
+        let ins: Vec<ScryptoInstructionV2> = vec![
+            ScryptoInstructionV2::DropAllProofs(DropAllProofs),
+            ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
+        ]
+        .into();
+        let children = vec![
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample().into(),
+            },
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample_other().into(),
+            },
+        ];
+        let scrypto = ScryptoTransactionManifestV2 {
+            instructions: ins.clone(),
+            blobs: Default::default(),
+            children,
+            object_names: Default::default(),
+        };
+        let network_id = NetworkID::Simulator;
+
+        let result = manifest_v2_string_from(scrypto, network_id);
+        pretty_assertions::assert_eq!(
+            result.unwrap(),
+            r#"USE_CHILD
+    NamedIntent("intent1")
+    Intent("subtxid_sim1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6svfetg7")
+;
+USE_CHILD
+    NamedIntent("intent2")
+    Intent("subtxid_sim1v7wlh0dpd5lev6w6s4f2kev562cygmgrm9kqw6swe8w92r4yr7ksuk9pw5")
+;
+DROP_ALL_PROOFS;
+DROP_AUTH_ZONE_PROOFS;
+"#
+        );
+    }
+
+    #[test]
+    fn manifest_v2_string_failure() {
+        let invalid_value = ScryptoManifestValue::Tuple {
+            fields: vec![ScryptoManifestValue::Array {
+                element_value_kind: ScryptoValueKind::U8,
+                elements: vec![
+                    ScryptoManifestValue::U8 { value: 1 },
+                    ScryptoManifestValue::U16 { value: 2 },
+                ],
+            }],
+        };
+        let dummy_address = ComponentAddress::with_node_id_bytes(
+            &[0xffu8; 29],
+            NetworkID::Stokenet,
+        );
+        let invalid_instruction =
+            ScryptoInstructionV2::CallMethod(CallMethod {
+                address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                    &dummy_address,
+                )
+                .unwrap()
+                .into(),
+                method_name: "dummy".to_owned(),
+                args: invalid_value,
+            });
+        let scrypto_manifest = ScryptoTransactionManifestV2 {
+            instructions: vec![invalid_instruction],
+            blobs: Default::default(),
+            children: Default::default(),
+            object_names: Default::default(),
+        };
+        let network_id = NetworkID::Mainnet;
+
+        let result = manifest_v2_string_from(scrypto_manifest, network_id);
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidManifestFailedToDecompile {
+                underlying: "FormattingError(Error)".to_string(),
+            })
+        )
     }
 
     #[test]

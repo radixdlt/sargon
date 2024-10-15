@@ -213,8 +213,11 @@ mod tests {
     use crate::prelude::*;
     use radix_common::prelude::ManifestBucket;
     use radix_rust::hashmap;
-    use radix_transactions::manifest::{DropAllProofs, DropAuthZoneProofs};
+    use radix_transactions::manifest::{
+        CallMethod, DropAllProofs, DropAuthZoneProofs,
+    };
     use radix_transactions::model::InstructionV1;
+    use sbor::ValueKind as ScryptoValueKind;
     use std::collections::BTreeMap;
 
     impl FromStr for TransactionManifest {
@@ -280,6 +283,69 @@ mod tests {
         );
         assert_eq!(scrypto.clone(), sut.clone().into());
         assert_eq!(sut.scrypto_manifest(), scrypto);
+    }
+
+    #[test]
+    fn manifest_string() {
+        let ins: Vec<ScryptoInstruction> = vec![
+            ScryptoInstruction::DropAllProofs(DropAllProofs),
+            ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
+        ]
+        .into();
+        let scrypto = ScryptoTransactionManifest {
+            instructions: ins.clone(),
+            blobs: Default::default(),
+            object_names: Default::default(),
+        };
+        let network_id = NetworkID::Simulator;
+
+        let result = manifest_string_from(scrypto, network_id);
+        pretty_assertions::assert_eq!(
+            result.unwrap(),
+            r#"DROP_ALL_PROOFS;
+DROP_AUTH_ZONE_PROOFS;
+"#
+        );
+    }
+
+    #[test]
+    fn manifest_string_failure() {
+        let invalid_value = ScryptoManifestValue::Tuple {
+            fields: vec![ScryptoManifestValue::Array {
+                element_value_kind: ScryptoValueKind::U8,
+                elements: vec![
+                    ScryptoManifestValue::U8 { value: 1 },
+                    ScryptoManifestValue::U16 { value: 2 },
+                ],
+            }],
+        };
+        let dummy_address = ComponentAddress::with_node_id_bytes(
+            &[0xffu8; 29],
+            NetworkID::Stokenet,
+        );
+        let invalid_instruction = ScryptoInstruction::CallMethod(CallMethod {
+            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                &dummy_address,
+            )
+            .unwrap()
+            .into(),
+            method_name: "dummy".to_owned(),
+            args: invalid_value,
+        });
+        let scrypto_manifest = ScryptoTransactionManifest {
+            instructions: vec![invalid_instruction],
+            blobs: Default::default(),
+            object_names: Default::default(),
+        };
+        let network_id = NetworkID::Mainnet;
+
+        let result = manifest_string_from(scrypto_manifest, network_id);
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidManifestFailedToDecompile {
+                underlying: "FormattingError(Error)".to_string(),
+            })
+        )
     }
 
     #[test]

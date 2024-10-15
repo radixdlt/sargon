@@ -64,6 +64,27 @@ impl From<(ScryptoAccountWithdraw, NetworkID)> for AccountWithdraw {
     }
 }
 
+impl From<AccountWithdraw> for ScryptoAccountWithdraw {
+    fn from(value: AccountWithdraw) -> Self {
+        match value {
+            AccountWithdraw::Amount {
+                resource_address,
+                amount,
+            } => ScryptoAccountWithdraw::Amount(
+                resource_address.into(),
+                amount.into(),
+            ),
+            AccountWithdraw::Ids {
+                resource_address,
+                ids,
+            } => ScryptoAccountWithdraw::Ids(
+                resource_address.into(),
+                ids.into_iter().map(Into::into).collect(),
+            ),
+        }
+    }
+}
+
 impl HasSampleValues for AccountWithdraw {
     fn sample() -> Self {
         Self::amount(ResourceAddress::sample_sim_xrd(), 330)
@@ -74,5 +95,46 @@ impl HasSampleValues for AccountWithdraw {
             ResourceAddress::sample_other(),
             vec![NonFungibleLocalId::sample_other()],
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AccountWithdraw;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn get_address_amount() {
+        let resource_address = ResourceAddress::sample_sim_xrd();
+        let withdraw = SUT::amount(resource_address, Decimal::from(100));
+        assert_eq!(withdraw.get_address(), resource_address);
+    }
+
+    #[test]
+    fn get_address_ids() {
+        let resource_address = ResourceAddress::sample_sim_xrd();
+        let withdraw =
+            SUT::ids(resource_address, vec![NonFungibleLocalId::sample()]);
+        assert_eq!(withdraw.get_address(), resource_address);
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let withdraw = SUT::sample();
+        let scrypto = ScryptoAccountWithdraw::from(withdraw.clone());
+        assert_eq!(withdraw, SUT::from((scrypto, NetworkID::Simulator)));
     }
 }
