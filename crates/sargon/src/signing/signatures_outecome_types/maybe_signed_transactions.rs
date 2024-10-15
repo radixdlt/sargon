@@ -3,19 +3,20 @@ use crate::prelude::*;
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct MaybeSignedTransactions {
     /// Collection of transactions which might be signed or not.
-    pub(super) transactions: IndexMap<IntentHash, IndexSet<HDSignature>>,
+    pub(super) transactions:
+        IndexMap<TransactionIntentHash, IndexSet<HDSignature>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SignedTransaction {
     /// The transaction intent hash.
-    pub(crate) intent_hash: IntentHash,
+    pub(crate) intent_hash: TransactionIntentHash,
     /// The signatures for this transaction.
     pub(crate) signatures: IndexSet<HDSignature>,
 }
 impl SignedTransaction {
     pub(crate) fn new(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         signatures: IndexSet<HDSignature>,
     ) -> Self {
         Self {
@@ -26,7 +27,9 @@ impl SignedTransaction {
 }
 
 impl MaybeSignedTransactions {
-    fn new(transactions: IndexMap<IntentHash, IndexSet<HDSignature>>) -> Self {
+    fn new(
+        transactions: IndexMap<TransactionIntentHash, IndexSet<HDSignature>>,
+    ) -> Self {
         Self { transactions }
     }
 
@@ -91,7 +94,7 @@ impl MaybeSignedTransactions {
     /// in `transactions`.
     pub(crate) fn add_signatures(
         &mut self,
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         signatures: IndexSet<HDSignature>,
     ) {
         if let Some(ref mut sigs) = self.transactions.get_mut(&intent_hash) {
@@ -121,7 +124,7 @@ impl MaybeSignedTransactions {
 
 impl HasSampleValues for MaybeSignedTransactions {
     fn sample() -> Self {
-        let tx_a = IntentHash::sample();
+        let tx_a = TransactionIntentHash::sample();
 
         let tx_a_input_x = HDSignatureInput::new(
             tx_a.clone(),
@@ -152,7 +155,7 @@ impl HasSampleValues for MaybeSignedTransactions {
                 tx_a_input_y,
             );
 
-        let tx_b = IntentHash::sample_other();
+        let tx_b = TransactionIntentHash::sample_other();
         let tx_b_input_x = HDSignatureInput::new(
             tx_b.clone(),
             OwnedFactorInstance::new(
@@ -189,12 +192,16 @@ impl HasSampleValues for MaybeSignedTransactions {
                 (tx_b, IndexSet::from_iter([tx_b_sig_x, tx_b_sig_y])),
             ]
             .into_iter()
-            .collect::<IndexMap<IntentHash, IndexSet<HDSignature>>>(),
+            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature>>>(
+            ),
         )
     }
 
     fn sample_other() -> Self {
-        let tx_a = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx_a = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
 
         let tx_a_input_x = HDSignatureInput::new(
             tx_a.clone(),
@@ -245,7 +252,8 @@ impl HasSampleValues for MaybeSignedTransactions {
                 IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y, tx_a_sig_z]),
             )]
             .into_iter()
-            .collect::<IndexMap<IntentHash, IndexSet<HDSignature>>>(),
+            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature>>>(
+            ),
         )
     }
 }
@@ -273,7 +281,7 @@ mod tests {
     )]
     fn panics_when_adding_same_signature() {
         let mut sut = Sut::sample();
-        let tx = IntentHash::sample();
+        let tx = TransactionIntentHash::sample();
         let input = HDSignatureInput::new(
             tx.clone(),
             OwnedFactorInstance::new(
@@ -295,7 +303,7 @@ mod tests {
     )]
     fn panics_when_intent_hash_key_does_not_match_signature() {
         let mut sut = Sut::sample();
-        let tx = IntentHash::sample();
+        let tx = TransactionIntentHash::sample();
 
         let input = HDSignatureInput::new(
             tx,
@@ -310,7 +318,7 @@ mod tests {
         let signature = HDSignature::produced_signing_with_input(input);
 
         sut.add_signatures(
-            IntentHash::sample_other(),
+            TransactionIntentHash::sample_other(),
             IndexSet::from_iter([signature]),
         );
     }
@@ -322,7 +330,7 @@ mod tests {
     fn panics_when_same_signer_used_twice() {
         let mut sut = Sut::empty();
         let factor_instance = OwnedFactorInstance::sample();
-        let tx = IntentHash::sample();
+        let tx = TransactionIntentHash::sample();
         let input = HDSignatureInput::new(tx.clone(), factor_instance.clone());
         let sig_a = HDSignature {
             input: input.clone(),

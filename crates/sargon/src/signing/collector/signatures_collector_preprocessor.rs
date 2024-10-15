@@ -41,7 +41,7 @@ impl SignaturesCollectorPreprocessor {
     ) -> (Petitions, IndexSet<FactorSourcesOfKind>) {
         let transactions = self.transactions;
         let mut petitions_for_all_transactions =
-            IndexMap::<IntentHash, PetitionForTransaction>::new();
+            IndexMap::<TransactionIntentHash, PetitionForTransaction>::new();
 
         // We care for only the factor sources which are HD based
         let mut all_factor_sources_in_profile =
@@ -52,13 +52,15 @@ impl SignaturesCollectorPreprocessor {
             }
         });
 
-        let mut factor_to_payloads =
-            HashMap::<FactorSourceIDFromHash, IndexSet<IntentHash>>::new();
+        let mut factor_to_payloads = HashMap::<
+            FactorSourceIDFromHash,
+            IndexSet<TransactionIntentHash>,
+        >::new();
 
         let mut used_factor_sources = HashSet::<FactorSource>::new();
 
         let mut register_factor_in_tx =
-            |id: &FactorSourceIDFromHash, txid: &IntentHash| {
+            |id: &FactorSourceIDFromHash, txid: &TransactionIntentHash| {
                 if let Some(ref mut txids) = factor_to_payloads.get_mut(id) {
                     txids.insert(txid.clone());
                 } else {

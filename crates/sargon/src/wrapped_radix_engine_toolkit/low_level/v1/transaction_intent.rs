@@ -46,7 +46,7 @@ impl TransactionIntent {
         )
     }
 
-    pub fn manifest_summary(&self) -> ManifestSummary {
+    pub fn manifest_summary(&self) -> Option<ManifestSummary> {
         self.manifest.summary()
     }
 

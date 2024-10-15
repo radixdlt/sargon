@@ -57,7 +57,7 @@ impl TransactionIntent {
                 }),
             );
 
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
         let network_id = network_id.unwrap_or_default();
 
         for (address, public_key_hashes) in metadata {

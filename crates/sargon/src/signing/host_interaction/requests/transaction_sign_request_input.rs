@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub struct TransactionSignRequestInput {
     /// Hash to sign
-    intent_hash: IntentHash,
+    intent_hash: TransactionIntentHash,
 
     /// ID of factor to use to sign
     pub(crate) factor_source_id: FactorSourceIDFromHash,
@@ -22,7 +22,7 @@ impl TransactionSignRequestInput {
     ///
     /// Panics if `owned_factor_instances` is empty.
     pub(crate) fn new(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         factor_source_id: FactorSourceIDFromHash,
         owned_factor_instances: IndexSet<OwnedFactorInstance>,
     ) -> Self {
@@ -57,7 +57,7 @@ impl HasSampleValues for TransactionSignRequestInput {
         let owned_factor_instance = OwnedFactorInstance::sample();
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )
@@ -67,7 +67,7 @@ impl HasSampleValues for TransactionSignRequestInput {
         let owned_factor_instance = OwnedFactorInstance::sample_other();
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
-            IntentHash::sample_other(),
+            TransactionIntentHash::sample_other(),
             *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )

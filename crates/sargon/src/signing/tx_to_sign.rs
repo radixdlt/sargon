@@ -2,13 +2,13 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub(crate) struct TXToSign {
-    pub(crate) intent_hash: IntentHash,
+    pub(crate) intent_hash: TransactionIntentHash,
     entities_requiring_auth: Vec<AccountOrPersona>, // should be a set but Sets are not `Hash`.
 }
 
 impl TXToSign {
     pub(crate) fn with(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         entities_requiring_auth: impl IntoIterator<
             Item = impl Into<AccountOrPersona>,
         >,
@@ -30,8 +30,10 @@ impl TXToSign {
         intent: &TransactionIntent,
         profile: &Profile,
     ) -> Result<Self> {
-        let intent_hash = intent.intent_hash().clone();
-        let summary = intent.manifest_summary();
+        let intent_hash = intent.transaction_intent_hash().clone();
+        let summary = intent
+            .manifest_summary()
+            .ok_or(CommonError::FailedToGenerateManifestSummary)?;
         let mut entities_requiring_auth: IndexSet<AccountOrPersona> =
             IndexSet::new();
 
@@ -74,7 +76,7 @@ impl TXToSign {
         >,
     ) -> Self {
         Self::with(
-            IntentHash::new(
+            TransactionIntentHash::new(
                 Hash::from(Exactly32Bytes::generate()),
                 NetworkID::Mainnet,
             ),
