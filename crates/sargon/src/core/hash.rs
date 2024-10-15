@@ -120,6 +120,15 @@ impl HasSampleValues for Hash {
     }
 }
 
+impl Hash {
+    pub fn sample_third() -> Self {
+        // "Just another hash".as_bytes()
+        "ba6af40c838cebdb29470bf6d2fae50a102197e368d3a62da9211a63e0043401"
+            .parse::<Self>()
+            .unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -132,6 +141,7 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+        assert_eq!(SUT::sample_third(), SUT::sample_third());
     }
 
     #[test]
@@ -155,6 +165,11 @@ mod tests {
         assert_eq!(
             hash_of("Radix... just imagine".as_bytes()).to_string(),
             "679dfbbda16d3f9669da8552ab6594d2b0446d03d96c076a0ec9dc550ea41fad"
+        );
+
+        assert_eq!(
+            hash_of("Just another hash".as_bytes()).to_string(),
+            "ba6af40c838cebdb29470bf6d2fae50a102197e368d3a62da9211a63e0043401"
         );
     }
 

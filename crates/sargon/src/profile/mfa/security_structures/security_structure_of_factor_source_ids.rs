@@ -22,6 +22,7 @@ impl From<PrimaryRoleWithFactorSources> for PrimaryRoleWithFactorSourceIDs {
             value.threshold,
             value.override_factors.iter().map(|x| x.factor_source_id()),
         )
+        .expect("PrimaryRoleWithFactorSources has already been validated.")
     }
 }
 
@@ -32,6 +33,7 @@ impl From<RecoveryRoleWithFactorSources> for RecoveryRoleWithFactorSourceIDs {
             value.threshold,
             value.override_factors.iter().map(|x| x.factor_source_id()),
         )
+        .expect("RecoveryRoleWithFactorSources has already been validated.")
     }
 }
 
@@ -44,6 +46,7 @@ impl From<ConfirmationRoleWithFactorSources>
             value.threshold,
             value.override_factors.iter().map(|x| x.factor_source_id()),
         )
+        .expect("ConfirmationRoleWithFactorSources has already been validated.")
     }
 }
 

@@ -31,7 +31,7 @@ mod tests {
 
         assert_eq!(
             is_vector_image(url, image_type),
-            image_url_utils_is_vector_image(&url, image_type)
+            image_url_utils_is_vector_image(url, image_type)
         )
     }
 

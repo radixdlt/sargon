@@ -657,14 +657,35 @@ pub enum CommonError {
     #[error("The network {network_id} does not exist in profile")]
     NoNetworkInProfile { network_id: NetworkID } = 10183,
 
+    #[error("Empty FactorSources list")]
+    FactorSourcesOfKindEmptyFactors = 10184,
+
+    #[error("Expected Passphrase factor source got something else")]
+    ExpectedPassphraseFactorSourceGotSomethingElse = 10185,
+
+    #[error("Unknown persona.")]
+    UnknownPersona = 10186,
+
+    #[error("Invalid security structure. Threshold ({}) cannot exceed threshold factors ({}).", threshold, factors)]
+    InvalidSecurityStructureThresholdExceedsFactors {
+        threshold: u8,
+        factors: u8,
+    } = 10187,
+
+    #[error("Invalid security structure. A factor must not be present in both threshold and override list.")]
+    InvalidSecurityStructureFactorInBothThresholdAndOverride = 10188,
+
     #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
-    InvalidManifestFailedToDecompile { underlying: String } = 10184,
+    InvalidManifestFailedToDecompile { underlying: String } = 10189,
 
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
-    InvalidSignedPartialTransactionFailedToCompile = 10185,
+    InvalidSignedPartialTransactionFailedToCompile = 10190,
 
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
-    InvalidSignedPartialTransactionFailedToDecompile = 10186,
+    InvalidSignedPartialTransactionFailedToDecompile = 10191,
+
+    #[error("Failed to generate manifest summary")]
+    FailedToGenerateManifestSummary = 10192,
 }
 
 #[uniffi::export]
