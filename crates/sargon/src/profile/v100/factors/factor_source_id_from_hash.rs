@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_common::crypto::{blake2b_256_hash, Hash};
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
@@ -89,6 +88,15 @@ impl FactorSourceIDFromHash {
             mnemonic_with_passphrase,
         )
     }
+
+    pub fn new_for_passphrase(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::Passphrase,
+            mnemonic_with_passphrase,
+        )
+    }
 }
 
 impl FactorSourceIDFromHash {
@@ -110,14 +118,60 @@ impl HasSampleValues for FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
-    /// A sample used to facilitate unit tests.
     pub fn sample_device() -> Self {
-        DeviceFactorSource::sample().id
+        Self::new_for_device(&MnemonicWithPassphrase::sample_device())
     }
 
-    /// A sample used to facilitate unit tests.
+    pub fn sample_device_other() -> Self {
+        Self::new_for_device(&MnemonicWithPassphrase::sample_device_other())
+    }
+
     pub fn sample_ledger() -> Self {
-        LedgerHardwareWalletFactorSource::sample().id
+        Self::new_for_ledger(&MnemonicWithPassphrase::sample_ledger())
+    }
+
+    pub fn sample_ledger_other() -> Self {
+        Self::new_for_ledger(&MnemonicWithPassphrase::sample_ledger_other())
+    }
+
+    pub fn sample_arculus() -> Self {
+        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus())
+    }
+
+    pub fn sample_arculus_other() -> Self {
+        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus_other())
+    }
+
+    pub fn sample_off_device() -> Self {
+        Self::new_for_off_device(&MnemonicWithPassphrase::sample_off_device())
+    }
+
+    pub fn sample_off_device_other() -> Self {
+        Self::new_for_off_device(
+            &MnemonicWithPassphrase::sample_off_device_other(),
+        )
+    }
+
+    pub fn sample_security_questions() -> Self {
+        Self::new_for_security_questions(
+            &MnemonicWithPassphrase::sample_security_questions(),
+        )
+    }
+
+    pub fn sample_security_questions_other() -> Self {
+        Self::new_for_security_questions(
+            &MnemonicWithPassphrase::sample_security_questions_other(),
+        )
+    }
+
+    pub fn sample_passphrase() -> Self {
+        Self::new_for_passphrase(&MnemonicWithPassphrase::sample_passphrase())
+    }
+
+    pub fn sample_passphrase_other() -> Self {
+        Self::new_for_passphrase(
+            &MnemonicWithPassphrase::sample_passphrase_other(),
+        )
     }
 }
 

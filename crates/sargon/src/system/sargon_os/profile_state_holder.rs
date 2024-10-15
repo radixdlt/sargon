@@ -53,7 +53,7 @@ impl ProfileStateHolder {
     }
 
     pub fn current_network(&self) -> Result<ProfileNetwork> {
-        self.try_access_profile_with(|p| p.current_network().map(|n| n.clone()))
+        self.try_access_profile_with(|p| p.current_network().cloned())
     }
 
     /// Returns the non-hidden accounts on the current network, empty if no accounts
@@ -345,7 +345,7 @@ mod tests {
                     profile.networks.try_update_with(
                         &NetworkID::Mainnet,
                         |network| {
-                            let _res = network
+                            network
                                 .accounts
                                 .try_insert_unique(
                                     Account::sample_mainnet_carol(),

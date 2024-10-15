@@ -17,6 +17,7 @@ impl TransactionManifest {
             ))
             .ok()
             .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+
         self.execution_summary_with_receipt(runtime_receipt)
     }
 

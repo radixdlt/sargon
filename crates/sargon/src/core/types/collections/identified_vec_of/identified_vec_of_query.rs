@@ -22,7 +22,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// Check if the `item` exists in this map by calculating the ID of the item
     /// and checking if any other item with the same ID exists.
     pub fn contains_by_id(&self, item: &V) -> bool {
-        self.contains_id(&item.id())
+        self.contains_id(item.id())
     }
 
     /// Return `true`` if an item with `id` exists in the collection.

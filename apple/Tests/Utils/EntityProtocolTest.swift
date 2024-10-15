@@ -69,6 +69,8 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 				case .ed25519: break // good
 				case .secp256k1: XCTFail("Wrong key kind")
 				}
+			case .securified(value: _):
+				XCTFail("Wrong security state")
 			}
 		}
 	}

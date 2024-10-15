@@ -657,18 +657,36 @@ pub enum CommonError {
     #[error("The network {network_id} does not exist in profile")]
     NoNetworkInProfile { network_id: NetworkID } = 10183,
 
+    #[error("Empty FactorSources list")]
+    FactorSourcesOfKindEmptyFactors = 10184,
+
+    #[error("Expected Passphrase factor source got something else")]
+    ExpectedPassphraseFactorSourceGotSomethingElse = 10185,
+
+    #[error("Unknown persona.")]
+    UnknownPersona = 10186,
+
+    #[error("Invalid security structure. Threshold ({}) cannot exceed threshold factors ({}).", threshold, factors)]
+    InvalidSecurityStructureThresholdExceedsFactors {
+        threshold: u8,
+        factors: u8,
+    } = 10187,
+
+    #[error("Invalid security structure. A factor must not be present in both threshold and override list.")]
+    InvalidSecurityStructureFactorInBothThresholdAndOverride = 10188,
+
     #[error("One of the receiving accounts does not allow deposits")]
-    OneOfReceivingAccountsDoesNotAllowDeposits = 10184,
+    OneOfReceivingAccountsDoesNotAllowDeposits = 10189,
 
     #[error("Failed transaction preview with status: {error_message}")]
-    FailedTransactionPreview { error_message: String } = 10185,
+    FailedTransactionPreview { error_message: String } = 10190,
 
     #[error("Failed to extract radix engine toolkit receipt bytes")]
-    FailedToExtractTransactionReceiptBytes = 10186,
+    FailedToExtractTransactionReceiptBytes = 10191,
 
     #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
-        10187,
+        10192,
 }
 
 #[uniffi::export]

@@ -79,7 +79,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
 dependencies = [
  "cfg-if",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "version_check",
  "zerocopy",
 ]
@@ -277,7 +277,7 @@ dependencies = [
  "async-lock",
  "blocking",
  "futures-lite",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -329,7 +329,7 @@ dependencies = [
  "kv-log-macro",
  "log",
  "memchr",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pin-project-lite",
  "pin-utils",
  "slab",
@@ -1808,7 +1808,7 @@ dependencies = [
  "cfg-if",
  "ecdsa",
  "elliptic-curve",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8",
  "signature 2.2.0",
 ]
@@ -1939,7 +1939,7 @@ dependencies = [
  "crossbeam-epoch",
  "crossbeam-utils",
  "num_cpus",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot",
  "rustc_version",
  "scheduled-thread-pool",
@@ -2038,6 +2038,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "once_cell"
+version = "1.19.0"
+source = "git+https://github.com/matklad/once_cell/?rev=c48d3c2c01de926228aea2ac1d03672b4ce160c1#c48d3c2c01de926228aea2ac1d03672b4ce160c1"
+
+[[package]]
 name = "opaque-debug"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2053,7 +2058,7 @@ dependencies = [
  "cfg-if",
  "foreign-types",
  "libc",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "openssl-macros",
  "openssl-sys",
 ]
@@ -2765,7 +2770,7 @@ dependencies = [
  "log",
  "mime",
  "native-tls",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "percent-encoding",
  "pin-project-lite",
  "rustls-pemfile",
@@ -2883,6 +2888,7 @@ dependencies = [
  "itertools 0.12.0",
  "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
  "log",
+ "once_cell 1.19.0 (git+https://github.com/matklad/once_cell/?rev=c48d3c2c01de926228aea2ac1d03672b4ce160c1)",
  "paste 1.0.14",
  "pretty_assertions",
  "pretty_env_logger",
@@ -3512,7 +3518,7 @@ checksum = "04cbcdd0c794ebb0d4cf35e88edd2f7d2c4c3e9a5a6dab322839b321c6a87a64"
 dependencies = [
  "cfg-if",
  "fastrand",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustix",
  "windows-sys 0.59.0",
 ]
@@ -3741,7 +3747,7 @@ version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -3854,7 +3860,7 @@ dependencies = [
  "glob",
  "goblin",
  "heck 0.5.0",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "paste 1.0.15",
  "serde",
  "textwrap",
@@ -3892,7 +3898,7 @@ dependencies = [
  "bytes",
  "camino 1.1.9",
  "log",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "paste 1.0.15",
  "static_assertions",
 ]
@@ -3905,7 +3911,7 @@ dependencies = [
  "bincode",
  "camino 1.1.9",
  "fs-err",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2",
  "quote",
  "serde",
@@ -3934,7 +3940,7 @@ dependencies = [
  "camino 1.1.9",
  "cargo_metadata 0.15.4",
  "fs-err",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -4051,7 +4057,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a82edfc16a6c469f5f44dc7b571814045d60404b55a0ee849f9bcfa2e63dd9b5"
 dependencies = [
  "cfg-if",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen-macro",
 ]
 
@@ -4063,7 +4069,7 @@ checksum = "9de396da306523044d3302746f1208fa71d7532227f15e347e2d93e4145dd77b"
 dependencies = [
  "bumpalo",
  "log",
- "once_cell",
+ "once_cell 1.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2",
  "quote",
  "syn 2.0.77",

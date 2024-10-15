@@ -2,7 +2,15 @@ use crate::prelude::*;
 
 /// Either an `Account` or a `Persona`.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    EnumAsInner,
+    uniffi::Enum,
 )]
 pub enum AccountOrPersona {
     /// An `Account`
@@ -108,6 +116,28 @@ impl AccountOrPersona {
 
     pub(crate) fn sample_stokenet_third() -> Self {
         Self::from(Account::sample_stokenet_third())
+    }
+
+    pub fn entity_security_state(&self) -> EntitySecurityState {
+        match self {
+            AccountOrPersona::AccountEntity(account) => {
+                account.security_state.clone()
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                persona.security_state.clone()
+            }
+        }
+    }
+
+    pub fn address(&self) -> AddressOfAccountOrPersona {
+        match self {
+            AccountOrPersona::AccountEntity(account) => {
+                AddressOfAccountOrPersona::Account(account.address)
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                AddressOfAccountOrPersona::Identity(persona.address)
+            }
+        }
     }
 }
 
