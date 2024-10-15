@@ -27,6 +27,10 @@ pub enum FactorSource {
     TrustedContact {
         value: TrustedContactFactorSource,
     },
+
+    Passphrase {
+        value: PassphraseFactorSource,
+    },
 }
 
 #[uniffi::export]

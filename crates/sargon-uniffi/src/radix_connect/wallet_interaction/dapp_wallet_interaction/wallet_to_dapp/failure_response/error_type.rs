@@ -24,4 +24,5 @@ pub enum DappWalletInteractionErrorType {
     InvalidRequest,
     IncompatibleVersion,
     FailedToSignAuthChallenge,
+    InvalidPersonaOrAccounts,
 }

@@ -66,6 +66,14 @@ pub enum FactorSourceKind {
     ///
     /// [link]: https://www.getarculus.com/
     ArculusCard,
+
+    /// Input key material for mnemonic (and optional BIP39 passphrase).
+    ///
+    /// Attributes:
+    ///  * Mine
+    ///  * Off device
+    ///  * Hierarchical deterministic (IKM -> HKDF -> Mnemonic)
+    Passphrase,
 }
 
 delegate_display_debug_into!(FactorSourceKind, InternalFactorSourceKind);

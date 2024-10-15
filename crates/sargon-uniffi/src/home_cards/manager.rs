@@ -77,7 +77,7 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn card_dismissed(&self, card: HomeCard) -> Result<()> {
-        self.wrapped.card_dismissed(card.into()).await.into_result()
+        self.wrapped.card_dismissed(card.into_internal()).await.into_result()
     }
 
     /// Clears the home cards from the `HomeCardsStorage`.
