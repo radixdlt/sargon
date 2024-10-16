@@ -38,7 +38,6 @@ impl<'de> Deserialize<'de> for SignedPartialTransaction {
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str(
-                    "a byte array representing a SignedPartialTransaction",
                     "a hex string representing a SignedPartialTransaction",
                 )
             }
