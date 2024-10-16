@@ -17,3 +17,5 @@ build_rs_cov.profraw
 cobertura.xml
 .swiftpm/*
 default.profraw
+
+flamegraph.*
