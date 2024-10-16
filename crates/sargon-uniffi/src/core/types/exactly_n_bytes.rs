@@ -20,11 +20,16 @@ macro_rules! decl_exactly_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
-                InternalConversion,
                  uniffi::Record,
             )]
             pub struct [<Exactly $byte_count Bytes>] {
                 value: BagOfBytes,
+            }
+
+            impl [<Exactly $byte_count Bytes>] {
+                pub fn into_internal(&self) -> [<InternalExactly $byte_count Bytes>] {
+                    self.clone().into()
+                }
             }
 
             impl From<[<InternalExactly $byte_count Bytes>]> for [<Exactly $byte_count Bytes>] {

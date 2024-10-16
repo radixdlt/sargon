@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::KeyAgreementPublicKey as InternalKeyAgreementPublicKey;
 
 /// PublicKey on Curve25519 used for key agreement (ECDH) with some `KeyAgreementPrivateKey`.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct KeyAgreementPublicKey {
     pub value: BagOfBytes,
 }
@@ -11,6 +11,12 @@ delegate_display_debug_into!(
     KeyAgreementPublicKey,
     InternalKeyAgreementPublicKey
 );
+
+impl KeyAgreementPublicKey {
+    pub fn into_internal(&self) -> InternalKeyAgreementPublicKey {
+        self.clone().into()
+    }
+}
 
 impl From<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
     fn from(value: InternalKeyAgreementPublicKey) -> Self {

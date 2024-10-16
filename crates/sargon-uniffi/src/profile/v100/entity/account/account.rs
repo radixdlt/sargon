@@ -18,7 +18,7 @@ use sargon::Account as InternalAccount;
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
 pub struct Account {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -57,34 +57,6 @@ pub struct Account {
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
     pub on_ledger_settings: OnLedgerSettings,
-}
-
-impl From<InternalAccount> for Account {
-    fn from(value: InternalAccount) -> Self {
-        Self {
-            network_id: value.network_id.into(),
-            address: value.address.into(),
-            display_name: value.display_name.into(),
-            security_state: value.security_state.into(),
-            appearance_id: value.appearance_id.into(),
-            flags: value.flags.into_type(),
-            on_ledger_settings: value.on_ledger_settings.into(),
-        }
-    }
-}
-
-impl Into<InternalAccount> for Account {
-    fn into(self) -> InternalAccount {
-        InternalAccount {
-            network_id: self.network_id.into(),
-            address: self.address.into(),
-            display_name: self.display_name.into(),
-            security_state: self.security_state.into(),
-            appearance_id: self.appearance_id.into(),
-            flags: self.flags.into_internal(),
-            on_ledger_settings: self.on_ledger_settings.into(),
-        }
-    }
 }
 
 #[uniffi::export]

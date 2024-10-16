@@ -8,10 +8,16 @@ use sargon::Hash as InternalHash;
 /// exposed in Swift/Kotlin as its own struct/data class, with
 /// hidden secret magic.
 #[derive(
-    Clone, PartialEq, Eq, std::hash::Hash, InternalConversion, uniffi::Record,
+    Clone, PartialEq, Eq, std::hash::Hash, uniffi::Record,
 )]
 pub struct Hash {
     pub(crate) value: Exactly32Bytes,
+}
+
+impl Hash {
+    pub fn into_internal(&self) -> InternalHash {
+        self.clone().into()
+    }
 }
 
 impl From<InternalHash> for Hash {

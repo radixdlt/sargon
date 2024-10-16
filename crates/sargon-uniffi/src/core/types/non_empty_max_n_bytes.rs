@@ -21,11 +21,16 @@ macro_rules! decl_non_empty_max_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
-                InternalConversion,
                  uniffi::Record,
             )]
             pub struct [< NonEmptyMax $byte_count Bytes  >] {
                 bag_of_bytes: BagOfBytes,
+            }
+
+            impl [< NonEmptyMax $byte_count Bytes  >] {
+                pub fn into_internal(&self) -> [< InternalNonEmptyMax $byte_count Bytes  >] {
+                    self.clone().into()
+                }
             }
 
             impl From<[< InternalNonEmptyMax $byte_count Bytes  >]> for [< NonEmptyMax $byte_count Bytes  >] {

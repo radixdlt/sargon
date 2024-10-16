@@ -25,11 +25,16 @@ macro_rules! decl_specialized_address {
                 PartialEq,
                 Eq,
                 Hash,
-                InternalConversion,
                  uniffi::Record,
             )]
             pub struct $specialized_address_type {
                 value: $base_addr
+            }
+
+            impl $specialized_address_type {
+                pub fn into_internal(&self) -> [< Internal $specialized_address_type >] {
+                    self.clone().into()
+                }
             }
 
             impl From<[< Internal $specialized_address_type >]> for $specialized_address_type {

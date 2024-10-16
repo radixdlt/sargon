@@ -7,7 +7,7 @@ use sargon::Security as InternalSecurity;
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
-#[derive(PartialEq, Eq, Clone, Hash, InternalConversion, uniffi::Record)]
+#[derive(PartialEq, Eq, Clone, Hash, uniffi::Record)]
 pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
     pub is_developer_mode_enabled: bool,
@@ -16,6 +16,12 @@ pub struct Security {
 
     pub security_structures_of_factor_source_ids:
         Vec<SecurityStructureOfFactorSourceIDs>,
+}
+
+impl Security {
+    pub fn into_internal(&self) -> InternalSecurity {
+        self.clone().into()
+    }
 }
 
 impl From<InternalSecurity> for Security {
