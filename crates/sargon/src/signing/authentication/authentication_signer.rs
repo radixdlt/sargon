@@ -1,19 +1,132 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
 pub struct AuthenticationSigner {
-    pub input: AuthenticationSigningInput,
+    input: AuthenticationSigningInput,
     interactor: Arc<dyn AuthenticationSigningInteractor>,
 }
 
 impl AuthenticationSigner {
 
-    pub async fn sign(self) -> Result<WalletToDappInteractionAuthProof> {
-        let response = self.interactor.sign(
-            self.input.clone().into()
-        ).await;
+    pub fn new(
+        interactor: Arc<dyn AuthenticationSigningInteractor>,
+        profile: &Profile,
+        address_of_entity: AddressOfAccountOrPersona,
+        challenge: DappToWalletInteractionAuthChallengeNonce,
+        metadata: DappToWalletInteractionMetadata,
+    ) -> Result<Self> {
+        let input = AuthenticationSigningInput::try_from_profile(
+            profile,
+            address_of_entity,
+            challenge,
+            metadata
+        )?;
 
-        WalletToDappInteractionAuthProof::try_from((response, self.input))
+        Ok(Self {
+            input,
+            interactor
+        })
     }
 
+    pub async fn sign(self) -> Result<WalletToDappInteractionAuthProof> {
+        self.interactor.sign(
+            self.input.clone().into()
+        ).await.map(|r| WalletToDappInteractionAuthProof::from(r))
+    }
+
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AuthenticationSigner;
+
+    #[actix_rt::test]
+    async fn test_with_account_in_profile() {
+        let factor_sources = FactorSource::sample_all();
+
+        let factor_instance = HierarchicalDeterministicFactorInstance::sample_fia0();
+        let account = Account::sample_unsecurified_mainnet(
+            "Unsecurified",
+            factor_instance.clone()
+        );
+        let sut = SUT::new(
+            Arc::new(TestAuthenticationInteractor::new_succeeding()),
+            &Profile::sample_from(factor_sources, [&account], []),
+            AddressOfAccountOrPersona::from(account.address),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        );
+
+        let result = sut.unwrap().sign().await.unwrap();
+
+        assert_eq!(
+            result,
+            WalletToDappInteractionAuthProof::new(
+                factor_instance.clone().public_key.public_key,
+                factor_instance.clone().public_key.public_key.curve(),
+                Signature::try_from(
+                    BagOfBytes::from_hex(
+                        "eaa9a0eb1c9061e1999afa309db7bc9eecd30ad008f09cbfb2c4cf202759e914f6dbe01f67a7b8b1f1149f02b0e2662982fff4c1a765ee0d4d77651f1b91100c"
+                    ).unwrap()
+                ).unwrap()
+            )
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_with_persona_in_profile() {
+        let factor_sources = FactorSource::sample_all();
+
+        let factor_instance = HierarchicalDeterministicFactorInstance::sample_fii0();
+        let persona = Persona::sample_unsecurified_mainnet(
+            "Alice",
+            factor_instance.clone()
+        );
+        let sut = SUT::new(
+            Arc::new(TestAuthenticationInteractor::new_succeeding()),
+            &Profile::sample_from(factor_sources, [], [&persona]),
+            AddressOfAccountOrPersona::from(persona.address),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        );
+
+        let result = sut.unwrap().sign().await.unwrap();
+
+        assert_eq!(
+            result,
+            WalletToDappInteractionAuthProof::new(
+                factor_instance.clone().public_key.public_key,
+                factor_instance.clone().public_key.public_key.curve(),
+                Signature::try_from(
+                    BagOfBytes::from_hex(
+                        "fb4f502e6a8bdbe3e66d365fe619270bafb9237e79a3c68dcf34448293f00840a0e5d48d1060eea49bf219cd3727c15cd6e305871956bc8d8ed8bcdc7fe97909"
+                    ).unwrap()
+                ).unwrap()
+            )
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_with_failing_interactor() {
+        let factor_sources = FactorSource::sample_all();
+
+        let factor_instance = HierarchicalDeterministicFactorInstance::sample_fii0();
+        let persona = Persona::sample_unsecurified_mainnet(
+            "Alice",
+            factor_instance.clone()
+        );
+        let sut = SUT::new(
+            Arc::new(TestAuthenticationInteractor::new_failing()),
+            &Profile::sample_from(factor_sources, [], [&persona]),
+            AddressOfAccountOrPersona::from(persona.address),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        );
+
+        let result = sut.unwrap().sign().await;
+
+        assert!(result.is_err());
+    }
 }
