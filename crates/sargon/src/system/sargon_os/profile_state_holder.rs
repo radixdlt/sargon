@@ -62,12 +62,6 @@ impl ProfileStateHolder {
         self.try_access_profile_with(|p| p.accounts_on_current_network())
     }
 
-    /// Returns the non-hidden personas on the current network, empty if no personas
-    /// on the network
-    pub fn personas_on_current_network(&self) -> Result<Personas> {
-        self.try_access_profile_with(|p| p.personas_on_current_network())
-    }
-
     /// Returns all the SecurityStructuresOfFactorSources,
     /// by trying to map FactorSourceID level -> FactorSource Level
     pub fn security_structures_of_factor_sources(

@@ -142,7 +142,7 @@ impl SargonOS {
         // Extracting the signers public keys
         let signer_public_keys =
             ExtractorOfInstancesRequiredToSignTransactions::extract(
-                &self.profile_state_holder.profile()?,
+                &profile,
                 vec![intent.clone()],
                 RoleKind::Primary,
             )?
