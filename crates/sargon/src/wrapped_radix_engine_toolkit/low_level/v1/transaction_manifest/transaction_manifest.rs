@@ -286,7 +286,47 @@ mod tests {
     }
 
     #[test]
-    fn manifest_string() {
+    fn try_from_scrypto_failure() {
+        let invalid_value = ScryptoManifestValue::Tuple {
+            fields: vec![ScryptoManifestValue::Array {
+                element_value_kind: ScryptoValueKind::U8,
+                elements: vec![
+                    ScryptoManifestValue::U8 { value: 1 },
+                    ScryptoManifestValue::U16 { value: 2 },
+                ],
+            }],
+        };
+        let dummy_address = ComponentAddress::with_node_id_bytes(
+            &[0xffu8; 29],
+            NetworkID::Stokenet,
+        );
+        let invalid_instruction = ScryptoInstruction::CallMethod(CallMethod {
+            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                &dummy_address,
+            )
+            .unwrap()
+            .into(),
+            method_name: "dummy".to_owned(),
+            args: invalid_value,
+        });
+        let insstructions = vec![invalid_instruction];
+        let scrypto = ScryptoTransactionManifest {
+            instructions: insstructions.clone(),
+            blobs: Default::default(),
+            object_names: Default::default(),
+        };
+
+        let result = SUT::try_from((scrypto.clone(), NetworkID::Mainnet));
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidManifestFailedToDecompile {
+                underlying: "FormattingError(Error)".to_string(),
+            })
+        );
+    }
+
+    #[test]
+    fn test_manifest_string_from() {
         let ins: Vec<ScryptoInstruction> = vec![
             ScryptoInstruction::DropAllProofs(DropAllProofs),
             ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),

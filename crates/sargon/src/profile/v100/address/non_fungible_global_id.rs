@@ -449,13 +449,13 @@ mod tests {
     }
 
     #[test]
-    fn from_str_invalid() {
-        let invalid_str = "invalid";
-        let result = invalid_str.parse::<NonFungibleGlobalId>();
+    fn from_str_invalid_non_fungible_global_id() {
+        let invalid = "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:invalid";
+        let result = NonFungibleGlobalId::from_str(invalid);
         assert_eq!(
             result,
             Err(CommonError::InvalidNonFungibleGlobalID {
-                bad_value: invalid_str.to_owned()
+                bad_value: invalid.to_owned()
             })
         );
     }

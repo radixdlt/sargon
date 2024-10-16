@@ -133,8 +133,10 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let withdraw = SUT::sample();
-        let scrypto = ScryptoAccountWithdraw::from(withdraw.clone());
-        assert_eq!(withdraw, SUT::from((scrypto, NetworkID::Simulator)));
+        let roundtrip = |sut: SUT, network_id: NetworkID| {
+            SUT::from((ScryptoAccountWithdraw::from(sut.clone()), network_id))
+        };
+        roundtrip(SUT::sample(), NetworkID::Simulator);
+        roundtrip(SUT::sample_other(), NetworkID::Mainnet);
     }
 }

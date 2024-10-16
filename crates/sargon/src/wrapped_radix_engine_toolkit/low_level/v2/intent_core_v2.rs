@@ -170,6 +170,8 @@ impl IntentCoreV2 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use radix_transactions::manifest::CallMethod;
+    use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IntentCoreV2;
@@ -183,6 +185,18 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn manifest_string() {
+        let manifest_string = SUT::sample().manifest_string();
+        assert_eq!(manifest_string, "USE_CHILD\n    NamedIntent(\"intent1\")\n    Intent(\"subtxid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sy6hgte\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n")
+    }
+
+    #[test]
+    fn blobs() {
+        let sut = SUT::sample();
+        assert_eq!(sut.blobs().clone(), Blobs::default());
     }
 
     #[test]
@@ -208,6 +222,51 @@ mod tests {
     #[test]
     fn compile() {
         assert_eq!(SUT::sample().compile().to_string(), "4d2105210607010a872c0100000000000a912c01000000000022010105008306670000000022010105e8860667000000000a15cd5b070000000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f20526164697821202001072048f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a9352022044103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c086c6f636b5f6665652101850000fda0c4277708000000000000000000000000000000004103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a480000000000000000000000000000004103800051ac224ee242c339b5ea5f1ae567f0520a6ffa24b52a10b8e6cd96a8347f0c147472795f6465706f7369745f6f725f61626f727421028100000000220000");
+    }
+
+    #[test]
+    fn compile_intent_failure() {
+        let invalid_value = ScryptoManifestValue::Tuple {
+            fields: vec![ScryptoManifestValue::Array {
+                element_value_kind: ScryptoValueKind::U8,
+                elements: vec![
+                    ScryptoManifestValue::U8 { value: 1 },
+                    ScryptoManifestValue::U16 { value: 2 },
+                ],
+            }],
+        };
+        let dummy_address = ComponentAddress::with_node_id_bytes(
+            &[0xffu8; 29],
+            NetworkID::Stokenet,
+        );
+        let invalid_instruction =
+            ScryptoInstructionV2::CallMethod(CallMethod {
+                address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                    &dummy_address,
+                )
+                .unwrap()
+                .into(),
+                method_name: "dummy".to_owned(),
+                args: invalid_value,
+            });
+        let invalid_scrypto_intent = ScryptoIntentCoreV2 {
+            header: IntentHeaderV2::sample().into(),
+            blobs: Blobs::default().into(),
+            message: MessageV2::sample().into(),
+            children: ChildIntents::empty().into(),
+            instructions: ScryptoInstructionsV2(
+                vec![invalid_instruction].into(),
+            ),
+        };
+        let network_id = NetworkID::Mainnet;
+
+        let result = compile_intent(invalid_scrypto_intent);
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidIntentFailedToEncode {
+                underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_string(),
+            })
+        )
     }
 
     #[test]

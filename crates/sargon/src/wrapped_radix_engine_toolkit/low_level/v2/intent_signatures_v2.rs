@@ -102,4 +102,16 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_validate() {
+        let valid_hash = SignatureWithPublicKey::sample_hash();
+        let invalid_hash = Hash::sample();
+        let valid_signature = IntentSignature::sample();
+        let valid_signatures =
+            IntentSignaturesV2::new(vec![valid_signature.clone()]);
+
+        assert!(valid_signatures.validate(valid_hash));
+        assert!(!valid_signatures.validate(invalid_hash));
+    }
 }
