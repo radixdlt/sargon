@@ -55,7 +55,7 @@ impl TryFrom<(ScryptoIntentSignaturesV2, Hash)> for IntentSignaturesV2 {
 
 impl HasSampleValues for IntentSignaturesV2 {
     fn sample() -> Self {
-        let intent = TransactionIntent::sample();
+        let intent = Subintent::sample();
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
