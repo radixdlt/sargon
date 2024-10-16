@@ -6,6 +6,7 @@
 #![feature(iter_repeat_n)]
 
 mod core;
+mod derivation;
 mod gateway_api;
 mod hierarchical_deterministic;
 mod home_cards;
@@ -19,6 +20,7 @@ mod wrapped_radix_engine_toolkit;
 pub mod prelude {
 
     pub use crate::core::*;
+    pub use crate::derivation::*;
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
@@ -26,8 +28,8 @@ pub mod prelude {
     pub use crate::radix_connect::*;
     pub use crate::signing::*;
     pub use crate::system::*;
-    pub use crate::wrapped_radix_engine_toolkit::*;
     pub use crate::types::*;
+    pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub use radix_rust::prelude::{
         BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
