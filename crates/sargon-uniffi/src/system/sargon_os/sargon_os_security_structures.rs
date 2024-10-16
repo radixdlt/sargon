@@ -16,7 +16,7 @@ impl SargonOS {
     /// in profile.
     pub fn security_structures_of_factor_source_ids(
         &self,
-    ) -> Result<SecurityStructuresOfFactorSourceIDs> {
+    ) -> Result<Vec<SecurityStructureOfFactorSourceIDs>> {
         self.wrapped
             .security_structures_of_factor_source_ids()
             .into_result()

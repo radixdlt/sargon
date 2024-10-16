@@ -512,6 +512,11 @@ fn generate_struct_unnamed_field_conversions(fields: &syn::FieldsUnnamed) -> Vec
 
 fn generate_struct_unnamed_field_internal_conversions(fields: &syn::FieldsUnnamed) -> Vec<proc_macro2::TokenStream> {
     fields.unnamed.iter().enumerate().map(|(i, f)| {
+    //     let index_str = i.to_string();
+    // // Create an Ident from the string
+    //     let ident = Ident::new(&index_str, proc_macro2::Span::call_site());
+
+
         let index = syn::Index::from(i);
         match &f.ty {
             Type::Path(type_path) => {
@@ -554,7 +559,6 @@ fn generate_fields(type_path: &TypePath, field_name: &Option<Ident>, into_intern
 
     let method_call: proc_macro2::TokenStream = if let Some(segment) = type_path.path.segments.last() {
         if segment.ident == "Vec" {
-        
             if into_internal {
                 quote! { into_internal() }
             } else {

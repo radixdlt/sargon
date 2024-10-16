@@ -31,5 +31,5 @@ pub fn new_appearance_id_sample_other() -> AppearanceID {
 
 #[uniffi::export]
 pub fn appearance_ids_all() -> Vec<AppearanceID> {
-    InternalAppearanceID::all().into_vec()
+    InternalAppearanceID::all().into_type()
 }

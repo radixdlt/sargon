@@ -15,7 +15,7 @@ pub struct Security {
     pub is_advanced_lock_enabled: bool,
 
     pub security_structures_of_factor_source_ids:
-        SecurityStructuresOfFactorSourceIDs,
+        Vec<SecurityStructureOfFactorSourceIDs>,
 }
 
 impl From<InternalSecurity> for Security {
