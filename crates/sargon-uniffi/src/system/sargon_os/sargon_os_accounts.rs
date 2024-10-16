@@ -14,7 +14,7 @@ impl SargonOS {
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,
-    ) -> Result<AccountsForDisplay> {
+    ) -> Result<Vec<AccountForDisplay>> {
         self.wrapped
             .accounts_for_display_on_current_network()
             .into_result()
