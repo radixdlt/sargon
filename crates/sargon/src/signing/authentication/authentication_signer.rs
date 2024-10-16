@@ -129,4 +129,19 @@ mod test {
 
         assert!(result.is_err());
     }
+
+    #[test]
+    #[should_panic(expected = "Authentication signing not yet implemented for securified entities.")]
+    fn test_with_multi_factor() {
+        let factor_sources = FactorSource::sample_all();
+
+        let securified_account = Account::sample_at(2);
+        _ = SUT::new(
+            Arc::new(TestAuthenticationInteractor::new_failing()),
+            &Profile::sample_from(factor_sources, [&securified_account], []),
+            AddressOfAccountOrPersona::from(securified_account.address),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        )
+    }
 }
