@@ -43,7 +43,7 @@ impl AuthenticationSigningInput {
                 value.authentication_signing.unwrap_or(value.transaction_signing)
             }
             EntitySecurityState::Securified { value: _ } => {
-                panic!("Not yet implemented.")
+                panic!("Authentication signing not yet implemented for securified entities.")
             }
         };
 
