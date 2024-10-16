@@ -281,6 +281,31 @@ mod tests {
     }
 
     #[test]
+    fn try_from_scrypto() {
+        let instructions = vec![
+            ScryptoInstructionV2::DropAllProofs(DropAllProofs),
+            ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
+        ];
+        let children = vec![
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample().into(),
+            },
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample_other().into(),
+            },
+        ];
+        let scrypto = ScryptoTransactionManifestV2 {
+            instructions: instructions.clone(),
+            blobs: Default::default(),
+            children,
+            object_names: Default::default(),
+        };
+
+        let result = SUT::try_from((scrypto.clone(), NetworkID::Mainnet));
+        assert!(result.is_ok());
+    }
+
+    #[test]
     fn manifest_string() {
         let ins: Vec<ScryptoInstructionV2> = vec![
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
@@ -364,11 +389,7 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn new_from_instructions_string() {
-        let instructions_str = r#"CALL_METHOD
-        Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
-        "lock_fee"
-        Decimal("500");
-                "#;
+        let instructions_str = "CALL_METHOD\n    Address(\"account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q\")\n    \"lock_fee\"\n    Decimal(\"500\")\n;\n";
 
         assert_eq!(
             SUT::new(
@@ -378,9 +399,8 @@ DROP_AUTH_ZONE_PROOFS;
                 ChildIntents::empty()
             )
             .unwrap()
-            .instructions()
-            .len(),
-            1
+            .instructions_string(),
+            instructions_str
         );
     }
 
@@ -535,5 +555,16 @@ DROP_AUTH_ZONE_PROOFS;
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();
         assert_eq!(pool_addresses, ["pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830"].into_iter().map(PoolAddress::from).collect_vec());
+    }
+
+    #[test]
+    fn sargon_built() {
+        let builder = ScryptoTransactionManifestV2Builder::new_v2()
+            .lock_fee_from_faucet();
+
+        assert_eq!(
+            SUT::sargon_built(builder, NetworkID::Mainnet,).manifest_string(),
+            "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\n",
+        )
     }
 }
