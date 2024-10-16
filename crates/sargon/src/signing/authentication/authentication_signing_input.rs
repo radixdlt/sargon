@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AuthenticationSigningInput {
     /// The account or identity address of the entity which signs the rola challenge,
     /// with expected public key and with derivation path to derive PrivateKey

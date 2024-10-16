@@ -4,6 +4,7 @@ const ROLA_PREFIX: u8 = 0x52;
 
 #[derive(
     Debug,
+    Clone,
     PartialEq,
     derive_more::Display,
 )]
