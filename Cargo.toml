@@ -11,3 +11,8 @@ default-members = ["crates/sargon"]
 incremental = false
 panic = 'unwind'
 codegen-units = 1
+debug = true
+
+[profile.profiling]
+inherits = "release"
+debug = true
