@@ -5,11 +5,11 @@ pub trait AuthenticationSigningInteractor {
     async fn sign(
         &self,
         request: AuthenticationSigningInteractorRequest,
-    ) -> AuthenticationSigningResponse;
+    ) -> Result<AuthenticationSigningResponse>;
 }
 
 pub struct AuthenticationSigningInteractorRequest {
-    input: AuthenticationSigningInput
+    pub input: AuthenticationSigningInput
 }
 
 impl AuthenticationSigningInteractorRequest {
@@ -25,19 +25,18 @@ impl From<AuthenticationSigningInput> for AuthenticationSigningInteractorRequest
 }
 
 pub struct AuthenticationSigningResponse {
-    signature: Result<Signature>
+    pub signature_with_public_key: SignatureWithPublicKey
 }
 
-impl TryFrom<(AuthenticationSigningResponse, AuthenticationSigningInput)> for WalletToDappInteractionAuthProof {
-    type Error = CommonError;
+impl From<AuthenticationSigningResponse> for WalletToDappInteractionAuthProof {
+    fn from(value: AuthenticationSigningResponse) -> Self {
+        let signature_with_public_key = value.signature_with_public_key;
 
-    fn try_from((response, input): (AuthenticationSigningResponse, AuthenticationSigningInput)) -> Result<Self, Self::Error> {
-        let signature = response.signature?;
-
-        Ok(WalletToDappInteractionAuthProof::new(
-            input.owned_factor_instance.value.public_key.public_key,
-            input.owned_factor_instance.value.public_key.public_key.curve(),
-            signature
-        ))
+        let public_key = signature_with_public_key.public_key();
+        WalletToDappInteractionAuthProof::new(
+            public_key,
+            public_key.curve(),
+            signature_with_public_key.signature()
+        )
     }
 }
