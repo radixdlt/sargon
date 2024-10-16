@@ -14,7 +14,7 @@ impl SargonOS {
         instructions: String,
         blobs: Blobs,
         message: Message,
-        is_wallet_transaction: bool,
+        are_instructions_originating_from_host: bool,
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
@@ -22,7 +22,7 @@ impl SargonOS {
             instructions,
             blobs,
             message,
-            is_wallet_transaction,
+            are_instructions_originating_from_host,
             nonce,
             notary_public_key,
         )
