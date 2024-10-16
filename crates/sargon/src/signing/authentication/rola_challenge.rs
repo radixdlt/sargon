@@ -2,8 +2,13 @@ use crate::prelude::*;
 
 const ROLA_PREFIX: u8 = 0x52;
 
-#[derive(Debug, PartialEq)]
-struct RolaChallenge {
+#[derive(
+    Debug,
+    PartialEq,
+    derive_more::Display,
+)]
+#[display("{}", self.payload.to_hex())]
+pub struct RolaChallenge {
     payload: BagOfBytes,
 }
 
@@ -13,13 +18,29 @@ impl RolaChallenge {
     }
 }
 
+impl HasSampleValues for RolaChallenge {
+    fn sample() -> Self {
+        Self::from_request(
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample()
+        ).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::from_request(
+            DappToWalletInteractionAuthChallengeNonce::sample_other(),
+            DappToWalletInteractionMetadata::sample_other()
+        ).unwrap()
+    }
+}
+
 impl RolaChallenge {
 
     /// Constructs a payload to sign in conjunction with the `challenge` received and
     /// the `metadata` of the dApp that sent the request.
     ///
     /// The logic of constructing the payload is as follows:
-    /// * Prefixes with constant `ROLA_PREFIX`
+    /// * Prefixes with constant `ROLA_PREFIX` (0x52)
     /// * Extends with the 32 raw bytes of the challenge
     /// * Pushes 1 byte which is the length of the bech32-encoded dapp-definition address
     /// * Extends with the bytes of the bech32-encoded dapp-definition address
@@ -139,7 +160,7 @@ mod tests {
 
         assert_eq!(
             expected_payload_hex,
-            challenge.payload.to_hex()
+            challenge_with_origin_with_slash.payload.to_hex()
         );
     }
 
