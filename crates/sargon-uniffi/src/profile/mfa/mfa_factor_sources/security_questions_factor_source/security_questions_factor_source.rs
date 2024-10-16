@@ -140,7 +140,7 @@ pub fn new_security_questions_factor_source_sample_other(
 #[uniffi::export]
 pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
     mnemonic: Mnemonic,
-    with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+    with: Vec<Security_NOT_PRODUCTION_READY_QuestionAndAnswer>,
 ) -> Result<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource> {
     InternalSecurityQuestions_NOT_PRODUCTION_READY_FactorSource::new_by_encrypting(
         mnemonic.into_internal(), with.into_internal(),
@@ -156,7 +156,7 @@ pub fn trim_security_questions_answer(answer: String) -> String {
 #[uniffi::export]
 pub fn security_questions_factor_source_decrypt(
     factor_source: &SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
-    with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+    with: Vec<Security_NOT_PRODUCTION_READY_QuestionAndAnswer>,
 ) -> Result<Mnemonic> {
     factor_source
         .into_internal()

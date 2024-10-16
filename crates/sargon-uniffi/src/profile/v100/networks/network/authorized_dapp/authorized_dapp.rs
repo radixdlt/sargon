@@ -43,7 +43,7 @@ impl From<InternalAuthorizedDapp> for AuthorizedDapp {
             display_name: value.display_name,
             references_to_authorized_personas: value
                 .references_to_authorized_personas
-                .into_vec(),
+                .into_type(),
             preferences: value.preferences.into(),
         }
     }

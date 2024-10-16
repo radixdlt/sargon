@@ -67,7 +67,7 @@ impl From<InternalAccount> for Account {
             display_name: value.display_name.into(),
             security_state: value.security_state.into(),
             appearance_id: value.appearance_id.into(),
-            flags: value.flags.into_vec(),
+            flags: value.flags.into_type(),
             on_ledger_settings: value.on_ledger_settings.into(),
         }
     }

@@ -28,7 +28,7 @@ impl From<InternalSecurity> for Security {
             is_advanced_lock_enabled: value.is_advanced_lock_enabled.0,
             security_structures_of_factor_source_ids: value
                 .security_structures_of_factor_source_ids
-                .into_vec(),
+                .into_type(),
         }
     }
 }

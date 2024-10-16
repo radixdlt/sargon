@@ -26,10 +26,10 @@ impl From<InternalThirdPartyDeposits> for ThirdPartyDeposits {
             deposit_rule: value.deposit_rule.into(),
             assets_exception_list: value
                 .assets_exception_list
-                .map(|v| v.into_vec()),
+                .map(|v| v.into_type()),
             depositors_allow_list: value
                 .depositors_allow_list
-                .map(|v| v.into_vec()),
+                .map(|v| v.into_type()),
         }
     }
 }

@@ -63,8 +63,8 @@ pub fn new_gateway_with_url_on_network(
 }
 
 #[uniffi::export]
-pub fn gateway_wellknown_gateways() -> Gateways {
-    InternalGateway::wellknown().into_vec()
+pub fn gateway_wellknown_gateways() -> Vec<Gateway> {
+    InternalGateway::wellknown().into_type()
 }
 
 #[uniffi::export]

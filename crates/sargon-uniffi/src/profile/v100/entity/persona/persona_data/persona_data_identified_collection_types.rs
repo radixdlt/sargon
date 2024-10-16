@@ -33,7 +33,7 @@ macro_rules! declare_collection_of_identified_entry {
         {
             fn from(value: [< InternalCollectionOf $struct_name>]) -> Self {
                 Self {
-                    collection: value.collection.into_vec(),
+                    collection: value.collection.into_type(),
                 }
             }
         }

@@ -16,7 +16,7 @@ impl Blobs {
 impl From<InternalBlobs> for Blobs {
     fn from(internal: InternalBlobs) -> Self {
         Self {
-            secret_magic: internal.0.into_vec(),
+            secret_magic: internal.0.into_type(),
         }
     }
 }

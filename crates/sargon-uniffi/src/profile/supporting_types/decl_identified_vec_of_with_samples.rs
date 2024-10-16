@@ -19,12 +19,12 @@ macro_rules! decl_identified_vec_of {
 
             #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample >]() -> $collection_type {
-                [< Internal $collection_type >]::sample().into_vec()
+                [< Internal $collection_type >]::sample().into_type()
             }
 
             #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample_other >]() -> $collection_type {
-                [< Internal $collection_type >]::sample_other().into_vec()
+                [< Internal $collection_type >]::sample_other().into_type()
             }
 		}
 	};

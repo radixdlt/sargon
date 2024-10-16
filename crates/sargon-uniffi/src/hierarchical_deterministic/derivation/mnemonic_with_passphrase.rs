@@ -41,7 +41,7 @@ pub fn mnemonic_with_passphrase_derive_public_keys(
     mnemonic_with_passphrase
         .into_internal()
         .derive_public_keys_vec(derivation_paths.into_internal())
-        .into_vec()
+        .into_type()
 }
 
 #[uniffi::export]

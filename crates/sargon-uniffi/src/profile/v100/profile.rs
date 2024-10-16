@@ -40,9 +40,9 @@ impl From<InternalProfile> for Profile {
     fn from(value: InternalProfile) -> Self {
         Profile {
             header: value.header.into(),
-            factor_sources: value.factor_sources.into_vec(),
+            factor_sources: value.factor_sources.into_type(),
             app_preferences: value.app_preferences.into(),
-            networks: value.networks.into_vec(),
+            networks: value.networks.into_type(),
         }
     }
 }

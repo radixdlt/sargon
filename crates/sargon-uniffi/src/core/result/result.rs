@@ -55,7 +55,7 @@ where
     Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
 {
     fn into_result(self) -> Result<Vec<Type>> {
-        self.map(|vec| vec.into_vec()) // Converts Ok variant using From trait
+        self.map(|vec| vec.into_type()) // Converts Ok variant using From trait
             .map_err(Into::into) // Converts Err variant using Into
     }
 }
@@ -70,7 +70,7 @@ where
     Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
 {
     fn into_result(self) -> Result<Vec<Type>> {
-        self.map(|vec| vec.into_vec()) // Converts Ok variant using From trait
+        self.map(|vec| vec.into_type()) // Converts Ok variant using From trait
             .map_err(Into::into) // Converts Err variant using Into
     }
 }

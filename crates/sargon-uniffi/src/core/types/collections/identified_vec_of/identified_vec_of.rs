@@ -191,6 +191,17 @@ where
     }
 }
 
+impl<InternalElement, Element> FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
+    for IdentifiedVecOf<InternalElement>
+where
+InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
+Element: From<InternalElement>,
+{
+    fn into_type(self) -> Vec<Element> {
+        self.into_iter().map(Element::from).collect()
+    }
+}
+
 pub trait IntoInternal<External, Internal> {
     fn into_internal(self) -> Internal;
 }

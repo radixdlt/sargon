@@ -57,7 +57,7 @@ impl From<InternalPersona> for Persona {
             address: value.address.into(),
             display_name: value.display_name.into(),
             security_state: value.security_state.into(),
-            flags: value.flags.into_vec(),
+            flags: value.flags.into_type(),
             persona_data: value.persona_data.into(),
         }
     }

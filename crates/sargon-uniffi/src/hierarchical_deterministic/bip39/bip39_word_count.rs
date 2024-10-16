@@ -25,5 +25,5 @@ pub enum BIP39WordCount {
 
 #[uniffi::export]
 pub fn bip39_word_count_all() -> Vec<BIP39WordCount> {
-    InternalBIP39WordCount::all().into_vec()
+    InternalBIP39WordCount::all().into_type()
 }

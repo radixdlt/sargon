@@ -22,7 +22,7 @@ impl From<InternalAuthorizedDappDetailed> for AuthorizedDappDetailed {
             display_name: value.display_name.map(Into::into),
             detailed_authorized_personas: value
                 .detailed_authorized_personas
-                .into_vec(),
+                .into_type(),
             preferences: value.preferences.into(),
         }
     }

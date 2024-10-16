@@ -71,5 +71,5 @@ pub fn event_kind_affects_security_structures(event_kind: EventKind) -> bool {
 
 #[uniffi::export]
 pub fn event_kind_all() -> Vec<EventKind> {
-    InternalEventKind::all().into_vec()
+    InternalEventKind::all().into_type()
 }

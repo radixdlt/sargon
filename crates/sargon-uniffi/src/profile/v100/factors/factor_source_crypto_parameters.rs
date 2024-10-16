@@ -35,10 +35,10 @@ impl From<InternalFactorSourceCryptoParameters>
 {
     fn from(value: InternalFactorSourceCryptoParameters) -> Self {
         Self {
-            supported_curves: value.supported_curves.into_vec(),
+            supported_curves: value.supported_curves.into_type(),
             supported_derivation_path_schemes: value
                 .supported_derivation_path_schemes
-                .into_vec(),
+                .into_type(),
         }
     }
 }

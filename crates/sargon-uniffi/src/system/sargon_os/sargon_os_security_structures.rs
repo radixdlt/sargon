@@ -6,7 +6,7 @@ impl SargonOS {
     /// by trying to map FactorSourceID level -> FactorSource Level
     pub fn security_structures_of_factor_sources(
         &self,
-    ) -> Result<SecurityStructuresOfFactorSources> {
+    ) -> Result<Vec<SecurityStructureOfFactorSources>> {
         self.wrapped
             .security_structures_of_factor_sources()
             .into_result()

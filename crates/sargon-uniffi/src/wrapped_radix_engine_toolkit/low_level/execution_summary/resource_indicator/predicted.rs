@@ -83,7 +83,7 @@ impl From<InternalPredictedNonFungibleLocalIds>
 {
     fn from(value: InternalPredictedNonFungibleLocalIds) -> Self {
         Self {
-            value: value.value.into_vec(),
+            value: value.value.into_type(),
             instruction_index: value.instruction_index,
         }
     }

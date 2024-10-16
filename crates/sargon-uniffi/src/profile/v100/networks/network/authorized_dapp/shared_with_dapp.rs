@@ -37,7 +37,7 @@ macro_rules! declare_shared_with_dapp {
             fn from(value: [<Internal $struct_name>]) -> Self {
                 Self {
                     request: value.request.into(),
-                    ids: value.ids.into_vec(),
+                    ids: value.ids.into_type(),
                 }
             }
         }

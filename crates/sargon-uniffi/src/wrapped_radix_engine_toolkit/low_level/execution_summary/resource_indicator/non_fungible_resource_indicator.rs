@@ -32,5 +32,5 @@ pub fn new_non_fungible_resource_indicator_sample_other(
 pub fn non_fungible_resource_indicator_get_ids(
     indicator: &NonFungibleResourceIndicator,
 ) -> Vec<NonFungibleLocalId> {
-    indicator.into_internal().ids().into_vec()
+    indicator.into_internal().ids().into_type()
 }

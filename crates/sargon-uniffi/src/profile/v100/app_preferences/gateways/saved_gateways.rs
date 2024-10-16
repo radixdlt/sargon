@@ -1,16 +1,9 @@
 use crate::prelude::*;
 use sargon::SavedGateways as InternalSavedGateways;
 
-decl_identified_vec_of!(
-    /// An ordered collection of unique [`Gateway`]s.
-    /// It might be Gateways with different URLs on the SAME network, or
-    /// other networks, the identifier of a Gateway is the URL.
-    Gateway
-);
-
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct SavedGateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.
@@ -19,26 +12,9 @@ pub struct SavedGateways {
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    pub other: Gateways,
+    pub other: Vec<Gateway>,
 }
 
-impl From<InternalSavedGateways> for SavedGateways {
-    fn from(value: InternalSavedGateways) -> Self {
-        Self {
-            current: value.current.into(),
-            other: value.other.into_vec(),
-        }
-    }
-}
-
-impl Into<InternalSavedGateways> for SavedGateways {
-    fn into(self) -> InternalSavedGateways {
-        InternalSavedGateways {
-            current: self.current.into(),
-            other: self.other.into_internal(),
-        }
-    }
-}
 
 /// Constructs `Gateways` with `current` set as active Gateway.
 #[uniffi::export]
@@ -69,7 +45,7 @@ pub fn new_saved_gateways_sample_other() -> SavedGateways {
 pub fn saved_gateways_get_all_elements(
     gateways: &SavedGateways,
 ) -> Vec<Gateway> {
-    gateways.into_internal().all().into_vec()
+    gateways.into_internal().all().into_type()
 }
 
 #[uniffi::export]

@@ -25,7 +25,7 @@ impl From<InternalAuthorizedPersonaDetailed> for AuthorizedPersonaDetailed {
         Self {
             identity_address: value.identity_address.into(),
             display_name: value.display_name.into(),
-            simple_accounts: value.simple_accounts.map(|v| v.into_vec()),
+            simple_accounts: value.simple_accounts.map(|v| v.into_type()),
             shared_persona_data: value.shared_persona_data.into(),
             has_authentication_signing_key: value
                 .has_authentication_signing_key,

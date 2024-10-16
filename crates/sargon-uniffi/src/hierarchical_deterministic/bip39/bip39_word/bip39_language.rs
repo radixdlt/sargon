@@ -26,5 +26,5 @@ pub fn new_bip39_language_sample_other() -> BIP39Language {
 
 #[uniffi::export]
 pub fn bip39_language_wordlist(language: &BIP39Language) -> Vec<BIP39Word> {
-    language.into_internal().wordlist().into_vec()
+    language.into_internal().wordlist().into_type()
 }

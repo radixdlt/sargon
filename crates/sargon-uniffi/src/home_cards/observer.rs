@@ -7,7 +7,7 @@ use sargon::HomeCardsObserver as InternalHomeCardsObserver;
 #[uniffi::export(with_foreign)]
 pub trait HomeCardsObserver: Send + Sync {
     /// Handles updates to the home cards.
-    fn handle_cards_update(&self, cards: HomeCards);
+    fn handle_cards_update(&self, cards: Vec<HomeCard>);
 }
 
 pub struct HomeCardsObserverAdapter {
@@ -16,6 +16,6 @@ pub struct HomeCardsObserverAdapter {
 
 impl InternalHomeCardsObserver for HomeCardsObserverAdapter {
     fn handle_cards_update(&self, cards: InternalHomeCards) {
-        self.wrapped.handle_cards_update(cards.into_vec())
+        self.wrapped.handle_cards_update(cards.into_type())
     }
 }

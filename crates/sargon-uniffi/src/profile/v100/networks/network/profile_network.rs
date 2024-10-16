@@ -36,12 +36,12 @@ impl From<InternalProfileNetwork> for ProfileNetwork {
     fn from(profile_network: InternalProfileNetwork) -> Self {
         Self {
             id: profile_network.id.into(),
-            accounts: profile_network.accounts.into_vec(),
-            personas: profile_network.personas.into_vec(),
-            authorized_dapps: profile_network.authorized_dapps.into_vec(),
+            accounts: profile_network.accounts.into_type(),
+            personas: profile_network.personas.into_type(),
+            authorized_dapps: profile_network.authorized_dapps.into_type(),
             resource_preferences: profile_network
                 .resource_preferences
-                .into_vec(),
+                .into_type(),
         }
     }
 }

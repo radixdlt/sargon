@@ -52,6 +52,25 @@ pub fn internal_conversion_derive_v2(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+#[proc_macro_derive(InternalConversionV3)]
+pub fn internal_conversion_derive_v3(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = input.ident;
+
+    let expanded = match input.data {
+        Data::Enum(data) => {
+            handle_enum(&name, data)
+        },
+        Data::Struct(data) => {
+            handle_struct(&name, data)
+        },
+        _ => panic!("InternalConversion can only be derived for structs or enums"),
+    };
+
+
+    TokenStream::from(expanded)
+}
+
 fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStream {
     let internal_name = quote::format_ident!("Internal{}", name);
     let test_mod_name = Ident::new(&format!("{}_tests", name.to_string().to_lowercase()), name.span());
@@ -532,8 +551,10 @@ fn generate_struct_unnamed_field_internal_conversions(fields: &syn::FieldsUnname
 fn generate_fields(type_path: &TypePath, field_name: &Option<Ident>, into_internal: bool) -> proc_macro2::TokenStream {
     let prefix_str= if into_internal { "self" } else { "value" };
     let prefix = Ident::new(prefix_str, proc_macro2::Span::call_site());
+
     let method_call: proc_macro2::TokenStream = if let Some(segment) = type_path.path.segments.last() {
         if segment.ident == "Vec" {
+        
             if into_internal {
                 quote! { into_internal() }
             } else {
