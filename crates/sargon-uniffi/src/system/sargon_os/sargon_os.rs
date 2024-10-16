@@ -47,7 +47,7 @@ impl SargonOS {
     pub async fn new_wallet_with_derived_bdfs(
         &self,
         hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
-        accounts: Accounts,
+        accounts: Vec<Account>,
     ) -> Result<()> {
         self.wrapped
             .new_wallet_with_derived_bdfs(

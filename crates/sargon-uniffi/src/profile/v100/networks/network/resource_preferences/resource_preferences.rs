@@ -1,15 +1,10 @@
 use crate::prelude::*;
-
-decl_identified_vec_of!(
-    /// User off-ledger preferences regarding resources.
-    ResourcePreferences,
-    ResourceAppPreference
-);
+use sargon::ResourcePreferences as InternalResourcePreferences;
 
 #[uniffi::export]
 pub fn resource_preferences_get_hidden_resources(
-    resource_preferences: ResourcePreferences,
-) -> HiddenResources {
+    resource_preferences: Vec<ResourceAppPreference>,
+) -> Vec<ResourceIdentifier> {
     let resource_preferences: InternalResourcePreferences = resource_preferences.into_internal();
     resource_preferences
         .get_hidden_resources()
@@ -18,9 +13,9 @@ pub fn resource_preferences_get_hidden_resources(
 
 #[uniffi::export]
 pub fn resource_preferences_hide_resource(
-    resource_preferences: ResourcePreferences,
+    resource_preferences: Vec<ResourceAppPreference>,
     resource: ResourceIdentifier,
-) -> ResourcePreferences {
+) -> Vec<ResourceAppPreference> {
     let mut resource_preferences: InternalResourcePreferences =
         resource_preferences.into_internal();
     resource_preferences.hide_resource(resource.into());
@@ -29,9 +24,9 @@ pub fn resource_preferences_hide_resource(
 
 #[uniffi::export]
 pub fn resource_preferences_unhide_resource(
-    resource_preferences: ResourcePreferences,
+    resource_preferences: Vec<ResourceAppPreference>,
     resource: ResourceIdentifier,
-) -> ResourcePreferences {
+) -> Vec<ResourceAppPreference> {
     let mut resource_preferences: InternalResourcePreferences =
         resource_preferences.into_internal();
     resource_preferences.unhide_resource(resource.into());

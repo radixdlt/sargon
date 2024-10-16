@@ -52,7 +52,7 @@ pub struct Account {
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
-    pub flags: EntityFlags,
+    pub flags: Vec<EntityFlag>,
 
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.

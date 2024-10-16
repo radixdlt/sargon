@@ -14,7 +14,7 @@ use sargon::Profile as InternalProfile;
 ///
 /// assert_eq!(Profile::sample(), Profile::sample())
 /// ```
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is
@@ -24,7 +24,7 @@ pub struct Profile {
 
     /// All sources of factors, used for authorization such as spending funds, contains no
     /// secrets.
-    pub factor_sources: FactorSources,
+    pub factor_sources: Vec<FactorSource>,
 
     /// Settings for this profile in the app, contains default security configs
     /// as well as display settings.
@@ -33,29 +33,7 @@ pub struct Profile {
     /// An ordered mapping of NetworkID -> `Profile.Network`, containing
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
-    pub networks: ProfileNetworks,
-}
-
-impl From<InternalProfile> for Profile {
-    fn from(value: InternalProfile) -> Self {
-        Profile {
-            header: value.header.into(),
-            factor_sources: value.factor_sources.into_type(),
-            app_preferences: value.app_preferences.into(),
-            networks: value.networks.into_type(),
-        }
-    }
-}
-
-impl Into<InternalProfile> for Profile {
-    fn into(self) -> InternalProfile {
-        InternalProfile {
-            header: self.header.into(),
-            factor_sources: self.factor_sources.into_internal(),
-            app_preferences: self.app_preferences.into(),
-            networks: self.networks.into_internal(),
-        }
-    }
+    pub networks: Vec<ProfileNetwork>,
 }
 
 #[uniffi::export]

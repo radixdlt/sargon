@@ -42,7 +42,7 @@ pub struct Persona {
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about this Persona, e.g. if it is marked as hidden or not.
-    pub flags: EntityFlags,
+    pub flags: Vec<EntityFlag>,
 
     /// Personal information a user has associated with a certain Persona, of different kinds, such as name,
     /// email address(es) or phone number(s). This information is only ever stored in Profile and is never

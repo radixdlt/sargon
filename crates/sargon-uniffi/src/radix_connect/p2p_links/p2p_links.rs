@@ -1,15 +1,10 @@
 use crate::prelude::*;
-
-decl_identified_vec_of!(
-    /// Collection of clients user have connected P2P with, typically these
-    /// are WebRTC connections with the dApp or Connector Extension
-    P2PLink
-);
+use sargon::P2PLinks as InternalP2PLinks;
 
 #[uniffi::export]
 pub fn new_p2p_links_from_json_bytes(
     json_bytes: &BagOfBytes,
-) -> Result<P2PLinks> {
+) -> Result<Vec<P2PLink>> {
     json_bytes
         .to_vec()
         .deserialize::<InternalP2PLinks>()
@@ -17,7 +12,7 @@ pub fn new_p2p_links_from_json_bytes(
 }
 
 #[uniffi::export]
-pub fn new_p2p_links_from_to_bytes(p2p_links: P2PLinks) -> BagOfBytes {
+pub fn new_p2p_links_from_to_bytes(p2p_links: Vec<P2PLink>) -> BagOfBytes {
     let internal: InternalP2PLinks = p2p_links.into_internal();
     let bytes = internal.serialize_to_bytes().unwrap();
     bytes.into()

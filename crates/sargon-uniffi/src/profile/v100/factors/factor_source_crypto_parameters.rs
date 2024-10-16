@@ -1,17 +1,10 @@
 use crate::prelude::*;
 use sargon::FactorSourceCryptoParameters as InternalFactorSourceCryptoParameters;
 
-decl_identified_vec_of!(
-    /// A collection of [`SLIP10Curve`]s that a factor source supports.
-    /// MUST never be empty.
-    SupportedCurves,
-    SLIP10Curve
-);
-
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
     /// "Babylon" `DeviceFactorSource` is not capable of deriving keys on the curve
@@ -20,7 +13,7 @@ pub struct FactorSourceCryptoParameters {
     /// Either `[curve25519]` or `[secp256k1, curve25519]`
     ///
     /// Must not be empty.
-    pub supported_curves: SupportedCurves,
+    pub supported_curves: Vec<SLIP10Curve>,
 
     /// If not empty: Describes which kind of Hierarchical Deterministic (HD)
     /// derivations a FactorSource is capable of doing - if empty: the
@@ -28,32 +21,6 @@ pub struct FactorSourceCryptoParameters {
     ///
     /// Either BIP44 or CAP26 (SLIP10)
     pub supported_derivation_path_schemes: Vec<DerivationPathScheme>,
-}
-
-impl From<InternalFactorSourceCryptoParameters>
-    for FactorSourceCryptoParameters
-{
-    fn from(value: InternalFactorSourceCryptoParameters) -> Self {
-        Self {
-            supported_curves: value.supported_curves.into_type(),
-            supported_derivation_path_schemes: value
-                .supported_derivation_path_schemes
-                .into_type(),
-        }
-    }
-}
-
-impl Into<InternalFactorSourceCryptoParameters>
-    for FactorSourceCryptoParameters
-{
-    fn into(self) -> InternalFactorSourceCryptoParameters {
-        InternalFactorSourceCryptoParameters {
-            supported_curves: self.supported_curves.into_internal(),
-            supported_derivation_path_schemes: self
-                .supported_derivation_path_schemes
-                .into_internal(),
-        }
-    }
 }
 
 #[uniffi::export]

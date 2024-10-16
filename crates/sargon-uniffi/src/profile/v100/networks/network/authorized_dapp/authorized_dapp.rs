@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::AuthorizedDapp as InternalAuthorizedDapp;
 
 /// A connection made between a Radix Dapp and the user.
-#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.
     pub network_id: NetworkID,
@@ -21,47 +21,13 @@ pub struct AuthorizedDapp {
     /// "references to", since the Personas are not stored in full, that would be
     /// bad duplication of data (which might go stale), instead we refer to the
     /// necessary data by IDs.
-    pub references_to_authorized_personas: ReferencesToAuthorizedPersonas,
+    pub references_to_authorized_personas: Vec<AuthorizedPersonaSimple>,
 
     /// The preferences the user has configured for this Dapp.
     pub preferences: AuthorizedDappPreferences,
 }
 
 pub type DappDefinitionAddress = AccountAddress;
-
-impl AuthorizedDapp {
-    pub fn into_internal(&self) -> InternalAuthorizedDapp {
-        self.clone().into()
-    }
-}
-
-impl From<InternalAuthorizedDapp> for AuthorizedDapp {
-    fn from(value: InternalAuthorizedDapp) -> Self {
-        Self {
-            network_id: value.network_id.into(),
-            dapp_definition_address: value.dapp_definition_address.into(),
-            display_name: value.display_name,
-            references_to_authorized_personas: value
-                .references_to_authorized_personas
-                .into_type(),
-            preferences: value.preferences.into(),
-        }
-    }
-}
-
-impl Into<InternalAuthorizedDapp> for AuthorizedDapp {
-    fn into(self) -> InternalAuthorizedDapp {
-        InternalAuthorizedDapp {
-            network_id: self.network_id.into(),
-            dapp_definition_address: self.dapp_definition_address.into(),
-            display_name: self.display_name,
-            references_to_authorized_personas: self
-                .references_to_authorized_personas
-                .into_internal(),
-            preferences: self.preferences.into(),
-        }
-    }
-}
 
 json_data_convertible!(AuthorizedDapp);
 

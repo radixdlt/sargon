@@ -18,7 +18,7 @@ impl SargonOS {
     }
 
     /// Returns all the factor sources
-    pub fn factor_sources(&self) -> Result<FactorSources> {
+    pub fn factor_sources(&self) -> Result<Vec<FactorSource>> {
         self.wrapped.factor_sources().into_result()
     }
 
@@ -73,7 +73,7 @@ impl SargonOS {
     /// of the active profile to secure storage.
     pub async fn add_factor_sources(
         &self,
-        factor_sources: FactorSources,
+        factor_sources: Vec<FactorSource>,
     ) -> Result<Vec<FactorSourceID>> {
         self.wrapped
             .add_factor_sources(factor_sources.into_internal())

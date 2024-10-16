@@ -7,7 +7,7 @@ use crate::prelude::*;
 impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
-    pub fn accounts_on_current_network(&self) -> Result<Accounts> {
+    pub fn accounts_on_current_network(&self) -> Result<Vec<Account>> {
         self.wrapped.accounts_on_current_network().into_result()
     }
 
@@ -163,7 +163,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<Accounts> {
+    ) -> Result<Vec<Account>> {
         self.wrapped
             .batch_create_unsaved_accounts(
                 network_id.into_internal(),
@@ -211,7 +211,7 @@ impl SargonOS {
     /// of the active profile to secure storage.
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
-    pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
+    pub async fn add_accounts(&self, accounts: Vec<Account>) -> Result<()> {
         self.wrapped
             .add_accounts(accounts.into_internal())
             .await
