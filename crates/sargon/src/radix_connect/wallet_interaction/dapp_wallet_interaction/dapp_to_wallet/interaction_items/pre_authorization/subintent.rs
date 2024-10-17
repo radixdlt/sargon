@@ -3,6 +3,7 @@ use crate::prelude::*;
 decl_version_type!(Subintent);
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSubintentRequestItem {
     pub version: SubintentVersion,
 
@@ -13,9 +14,6 @@ pub struct DappToWalletInteractionSubintentRequestItem {
     pub message: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub child_subintent_hashes: Option<Vec<String>>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expiration: Option<DappToWalletInteractionSubintentExpiration>,
 }
 
@@ -24,14 +22,12 @@ impl DappToWalletInteractionSubintentRequestItem {
         version: impl Into<SubintentVersion>,
         unvalidated_manifest: impl Into<UnvalidatedTransactionManifest>,
         message: impl Into<Option<String>>,
-        child_subintent_hashes: impl Into<Option<Vec<String>>>,
         expiration: impl Into<Option<DappToWalletInteractionSubintentExpiration>>,
     ) -> Self {
         Self {
             version: version.into(),
             unvalidated_manifest: unvalidated_manifest.into(),
             message: message.into(),
-            child_subintent_hashes: child_subintent_hashes.into(),
             expiration: expiration.into(),
         }
     }
@@ -43,7 +39,6 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
             SubintentVersion::sample(),
             UnvalidatedTransactionManifest::sample(),
             "message".to_owned(),
-            vec!["subintent_hash_one".to_owned()],
             DappToWalletInteractionSubintentExpiration::sample(),
         )
     }
@@ -53,7 +48,6 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
             SubintentVersion::sample_other(),
             UnvalidatedTransactionManifest::sample_other(),
             "message_other".to_owned(),
-            vec!["subintent_hash_two".to_owned()],
             DappToWalletInteractionSubintentExpiration::sample_other(),
         )
     }
@@ -87,7 +81,6 @@ mod tests {
                 "transactionManifest" : "CALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n",
                 "blobs" : [],
                 "message" : "message",
-                "child_subintent_hashes" : ["subintent_hash_one"],
                 "expiration": {
                     "discriminator": "expireAtTime",
                     "value": "2023-09-11T16:05:56.000Z"

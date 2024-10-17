@@ -974,22 +974,23 @@ mod wallet_to_dapp_interaction_tests {
                 ),
             );
 
-        let pre_authorization_response_items = WalletToDappInteractionResponseItems::PreAuthorization(
-            WalletToDappInteractionPreAuthorizationResponseItems::new(
-                SignedPartialTransaction::sample(),
-            ),
-        );
+        let pre_authorization_response_items =
+            WalletToDappInteractionResponseItems::PreAuthorization(
+                WalletToDappInteractionPreAuthorizationResponseItems::new(
+                    SignedPartialTransaction::sample(),
+                ),
+            );
 
-        let pre_authorization_response = WalletToDappInteractionResponse::Success(
-            WalletToDappInteractionSuccessResponse::new(
-                WalletInteractionId::from_str(
-                    "17d530f6-0cb6-4122-8540-64e46a2e0f84",
-                )
-                .unwrap(),
-                pre_authorization_response_items,
-            ),
-        );
-
+        let pre_authorization_response =
+            WalletToDappInteractionResponse::Success(
+                WalletToDappInteractionSuccessResponse::new(
+                    WalletInteractionId::from_str(
+                        "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+                    )
+                    .unwrap(),
+                    pre_authorization_response_items,
+                ),
+            );
 
         let responses = vec![
             authorized_request_response,
