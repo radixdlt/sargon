@@ -220,3 +220,15 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
         }
     }
 }
+
+impl HasSampleValues for DetailedManifestClass {
+    fn sample() -> Self {
+        Self::General
+    }
+
+    fn sample_other() -> Self {
+        Self::Transfer {
+            is_one_to_one: false,
+        }
+    }
+}

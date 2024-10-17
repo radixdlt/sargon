@@ -22,6 +22,7 @@ macro_rules! declare_shared_with_dapp {
             PartialEq,
             Hash,
             Eq,
+            InternalConversion,
              uniffi::Record,
         )]
         pub struct $struct_name {
@@ -33,23 +34,7 @@ macro_rules! declare_shared_with_dapp {
             pub ids: Vec<$id>,
         }
 
-        impl From<[<Internal $struct_name>]> for $struct_name {
-            fn from(value: [<Internal $struct_name>]) -> Self {
-                Self {
-                    request: value.request.into(),
-                    ids: value.ids.into_type(),
-                }
-            }
-        }
-
-        impl Into<[<Internal $struct_name>]> for $struct_name {
-            fn into(self) -> [<Internal $struct_name>] {
-                [<Internal $struct_name>] {
-                    request: self.request.into(),
-                    ids: self.ids.into_internal(),
-                }
-            }
-        }
+        decl_conversion_tests_for!($struct_name);
     }
     };
     (

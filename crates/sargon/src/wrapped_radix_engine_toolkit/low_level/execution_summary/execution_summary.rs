@@ -158,3 +158,66 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
         )
     }
 }
+
+impl HasSampleValues for ExecutionSummary {
+    fn sample() -> Self {
+        Self {
+            withdrawals: vec![
+                (
+                    AccountAddress::sample(),
+                    vec![ResourceIndicator::sample()],
+                )
+            ]
+            .into_iter()
+            .collect(),
+            deposits: vec![
+                (
+                    AccountAddress::sample(),
+                    vec![ResourceIndicator::sample()],
+                )
+            ]
+            .into_iter()
+            .collect(),
+            addresses_of_accounts_requiring_auth: vec![AccountAddress::sample()],
+            addresses_of_identities_requiring_auth: vec![IdentityAddress::sample()],
+            newly_created_non_fungibles: vec![NonFungibleGlobalId::sample()],
+            reserved_instructions: vec![ReservedInstruction::sample()],
+            presented_proofs: vec![ResourceSpecifier::sample()],
+            encountered_addresses: vec![ManifestEncounteredComponentAddress::sample()],
+            detailed_classification: vec![DetailedManifestClass::sample()],
+            fee_locks: FeeLocks::sample(),
+            fee_summary: FeeSummary::sample(),
+            new_entities: NewEntities::sample(),
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            withdrawals: vec![
+                (
+                    AccountAddress::sample_other(),
+                    vec![ResourceIndicator::sample_other()],
+                )
+            ]
+            .into_iter()
+            .collect(),
+            deposits: vec![
+                (
+                    AccountAddress::sample_other(),
+                    vec![ResourceIndicator::sample_other()],
+                )
+            ]
+            .into_iter()
+            .collect(),
+            addresses_of_accounts_requiring_auth: vec![AccountAddress::sample_other()],
+            addresses_of_identities_requiring_auth: vec![IdentityAddress::sample_other()],
+            newly_created_non_fungibles: vec![NonFungibleGlobalId::sample_other()],
+            reserved_instructions: vec![ReservedInstruction::sample_other()],
+            presented_proofs: vec![ResourceSpecifier::sample_other()],
+            encountered_addresses: vec![ManifestEncounteredComponentAddress::sample_other()],
+            detailed_classification: vec![DetailedManifestClass::sample_other()],
+            fee_locks: FeeLocks::sample_other(),
+            fee_summary: FeeSummary::sample_other(),
+            new_entities: NewEntities::sample_other(),
+        }
+    }
+}

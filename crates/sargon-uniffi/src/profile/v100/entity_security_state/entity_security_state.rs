@@ -19,7 +19,7 @@ impl From<InternalEntitySecurityState> for EntitySecurityState {
     fn from(value: InternalEntitySecurityState) -> Self {
         match value {
             InternalEntitySecurityState::Unsecured { value } => EntitySecurityState::Unsecured { value: value.into() },
-            InternalEntitySecurityState::Securified { value } => panic!("Securified state not yet supported in the Wallet"),
+            InternalEntitySecurityState::Securified { value: _ } => panic!("Securified state not yet supported in the Wallet"),
         }
     }
 }

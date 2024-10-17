@@ -6,6 +6,12 @@ pub struct IntentSignature {
     pub(crate) value: SignatureWithPublicKey,
 }
 
+impl IntentSignature {
+    pub fn into_internal(&self) -> InternalIntentSignature{
+        self.clone().into()
+    }
+}
+
 impl From<InternalIntentSignature> for IntentSignature {
     fn from(value: InternalIntentSignature) -> Self {
         Self {
@@ -44,3 +50,5 @@ pub fn new_intent_signature_sample() -> IntentSignature {
 pub fn new_intent_signature_sample_other() -> IntentSignature {
     InternalIntentSignature::sample_other().into()
 }
+
+decl_conversion_tests_for!(IntentSignature);

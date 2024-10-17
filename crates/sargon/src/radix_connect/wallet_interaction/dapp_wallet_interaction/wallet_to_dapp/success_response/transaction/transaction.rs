@@ -61,10 +61,27 @@ impl<'de> Deserialize<'de>
 
 impl HasSampleValues for WalletToDappInteractionTransactionResponseItems {
     fn sample() -> Self {
-        Self::new(IntentHash::sample())
+        Self {
+            send: WalletToDappInteractionSendTransactionResponseItem::sample(),
+        }
     }
     fn sample_other() -> Self {
-        Self::new(IntentHash::sample_other())
+        Self {
+            send: WalletToDappInteractionSendTransactionResponseItem::sample_other(),
+        }
+    }
+}
+
+impl HasSampleValues for WalletToDappInteractionSendTransactionResponseItem {
+    fn sample() -> Self {
+        Self {
+            transaction_intent_hash: IntentHash::sample(),
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            transaction_intent_hash: IntentHash::sample_other(),
+        }
     }
 }
 

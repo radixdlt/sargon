@@ -7,7 +7,30 @@ use proc_macro2::Ident;
 
 pub fn handle_struct(name: &syn::Ident, data: syn::DataStruct) -> proc_macro2::TokenStream {
     let internal_name = quote::format_ident!("Internal{}", name);
-    let test_mod_name = Ident::new(&format!("{}_tests", name.to_string().to_lowercase()), name.span());
+    let test_mod_name = Ident::new(&format!("{}_coversion_tests", name.to_string().to_lowercase()), name.span());
+    let common = quote! {
+        impl #name {
+            pub fn into_internal(&self) -> #internal_name {
+                self.clone().into()
+            }
+        }
+
+        #[cfg(test)]
+        mod #test_mod_name {
+            use super::*;
+
+                #[test]
+                fn test_conversion_roundtrip() {
+                    let internal = #internal_name::sample();
+                    let value = #name::from(internal.clone());
+                    let roundrip_converted: #internal_name = value.into_internal();
+
+                    assert_eq!(internal, roundrip_converted);
+                }
+        }
+    };
+    
+
     match data.fields {
         // Named fields: e.g., struct Foo { x: i32, y: String }
         Fields::Named(ref fields_named) => {
@@ -15,12 +38,6 @@ pub fn handle_struct(name: &syn::Ident, data: syn::DataStruct) -> proc_macro2::T
             let field_into_internal_conversions: Vec<_> = generate_struct_internal_field_conversions(fields_named);
 
             quote! {
-                impl #name {
-                    pub fn into_internal(&self) -> #internal_name {
-                        self.clone().into()
-                    }
-                }
-
                 impl From<#internal_name> for #name {
                     fn from(value: #internal_name) -> Self {
                         #name {
@@ -36,18 +53,14 @@ pub fn handle_struct(name: &syn::Ident, data: syn::DataStruct) -> proc_macro2::T
                         }
                     }
                 }
+
+                #common
             }
         },
         Fields::Unnamed(ref field_unnamed) => {
             let field_from_internal_conversions: Vec<_> = generate_struct_unnamed_field_conversions(field_unnamed);
             let field_into_internal_conversions: Vec<_> = generate_struct_unnamed_field_internal_conversions(field_unnamed);
             quote! {
-                impl #name {
-                    pub fn into_internal(&self) -> #internal_name {
-                        self.clone().into()
-                    }
-                }
-
                 impl From<#internal_name> for #name {
                     fn from(value: #internal_name) -> Self {
                         #name(
@@ -63,16 +76,12 @@ pub fn handle_struct(name: &syn::Ident, data: syn::DataStruct) -> proc_macro2::T
                         )
                     }
                 }
+
+                #common
             }
         },
         Fields::Unit => {
             quote! {
-                impl #name {
-                    pub fn into_internal(&self) -> #internal_name {
-                        self.clone().into()
-                    }
-                }
-
                 impl From<#internal_name> for #name {
                     fn from(_: #internal_name) -> Self {
                         #name
@@ -84,6 +93,8 @@ pub fn handle_struct(name: &syn::Ident, data: syn::DataStruct) -> proc_macro2::T
                         #internal_name
                     }
                 }
+
+                #common
             }
         },
     }

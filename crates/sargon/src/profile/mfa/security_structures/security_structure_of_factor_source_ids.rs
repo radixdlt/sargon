@@ -80,6 +80,74 @@ impl HasSampleValues for SecurityStructureOfFactorSourceIDs {
     }
 }
 
+impl HasSampleValues for MatrixOfFactorSourceIDs {
+    fn sample() -> Self {
+        Self {
+            primary_role: PrimaryRoleWithFactorSourceIDs::sample(),
+            recovery_role: RecoveryRoleWithFactorSourceIDs::sample(),
+            confirmation_role: ConfirmationRoleWithFactorSourceIDs::sample(),
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            primary_role: PrimaryRoleWithFactorSourceIDs::sample_other(),
+            recovery_role: RecoveryRoleWithFactorSourceIDs::sample_other(),
+            confirmation_role: ConfirmationRoleWithFactorSourceIDs::sample_other(),
+        }
+    }
+}
+
+impl HasSampleValues for PrimaryRoleWithFactorSourceIDs {
+    fn sample() -> Self {
+        Self {
+            threshold_factors: vec![FactorSourceID::sample()],
+            threshold: 1,
+            override_factors: vec![FactorSourceID::sample()],
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            threshold_factors: vec![FactorSourceID::sample_other()],
+            threshold: 2,
+            override_factors: vec![FactorSourceID::sample_other()],
+        }
+    }
+}
+
+impl HasSampleValues for RecoveryRoleWithFactorSourceIDs {
+    fn sample() -> Self {
+        Self {
+            threshold_factors: vec![FactorSourceID::sample()],
+            threshold: 1,
+            override_factors: vec![FactorSourceID::sample()],
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            threshold_factors: vec![FactorSourceID::sample_other()],
+            threshold: 2,
+            override_factors: vec![FactorSourceID::sample_other()],
+        }
+    }
+}
+
+impl HasSampleValues for ConfirmationRoleWithFactorSourceIDs {
+    fn sample() -> Self {
+        Self {
+            threshold_factors: vec![FactorSourceID::sample()],
+            threshold: 1,
+            override_factors: vec![FactorSourceID::sample()],
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            threshold_factors: vec![FactorSourceID::sample_other()],
+            threshold: 2,
+            override_factors: vec![FactorSourceID::sample_other()],
+        }
+    }
+}
+
 #[cfg(test)]
 mod test_schematic_of_security_shield {
     use super::*;

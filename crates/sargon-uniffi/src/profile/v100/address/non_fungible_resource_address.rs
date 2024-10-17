@@ -79,6 +79,8 @@ macro_rules! decl_specialized_address {
             pub fn [< $specialized_address_type:snake _network_id >](address: &$specialized_address_type) -> NetworkID {
                 address.into_internal().network_id().into()
             }
+
+            decl_conversion_tests_for!($specialized_address_type);
         }
     };
 }

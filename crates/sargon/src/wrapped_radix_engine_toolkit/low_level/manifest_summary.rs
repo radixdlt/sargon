@@ -70,3 +70,23 @@ impl From<(RetManifestSummary, NetworkID)> for ManifestSummary {
         )
     }
 }
+
+impl HasSampleValues for ManifestSummary {
+    fn sample() -> Self {
+        Self {
+            addresses_of_accounts_withdrawn_from: vec![AccountAddress::sample()],
+            addresses_of_accounts_deposited_into: vec![AccountAddress::sample()],
+            addresses_of_accounts_requiring_auth: vec![AccountAddress::sample()],
+            addresses_of_personas_requiring_auth: vec![IdentityAddress::sample()],
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            addresses_of_accounts_withdrawn_from: vec![AccountAddress::sample_other()],
+            addresses_of_accounts_deposited_into: vec![AccountAddress::sample_other()],
+            addresses_of_accounts_requiring_auth: vec![AccountAddress::sample_other()],
+            addresses_of_personas_requiring_auth: vec![IdentityAddress::sample_other()],
+        }
+    }
+}

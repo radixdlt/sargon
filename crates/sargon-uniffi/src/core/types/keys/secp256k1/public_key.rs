@@ -77,3 +77,5 @@ pub fn new_secp256k1_public_key_sample() -> Secp256k1PublicKey {
 pub fn new_secp256k1_public_key_sample_other() -> Secp256k1PublicKey {
     InternalSecp256k1PublicKey::sample_other().into()
 }
+
+decl_conversion_tests_for!(Secp256k1PublicKey);

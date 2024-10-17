@@ -119,7 +119,7 @@ macro_rules! decl_role_with_factors {
                     factors
                 }
             }
-
+            
             decl_role_with_factors_additional_impl!($role, $factor);
         }
     };

@@ -7,6 +7,12 @@ pub struct Instructions {
     pub network_id: NetworkID,
 }
 
+impl Instructions {
+    pub fn into_internal(&self) -> InternalInstructions {
+        self.clone().into()
+    }
+}
+
 impl From<InternalInstructions> for Instructions {
     fn from(value: InternalInstructions) -> Self {
         Self {
@@ -25,3 +31,5 @@ impl Into<InternalInstructions> for Instructions {
         .unwrap()
     }
 }
+
+decl_conversion_tests_for!(Instructions);

@@ -14,6 +14,12 @@ pub struct AssetException {
     pub exception_rule: DepositAddressExceptionRule,
 }
 
+impl AssetException {
+    pub fn into_internal(&self) -> InternalAssetException {
+        self.clone().into()
+    }
+}
+
 impl From<InternalAssetException> for AssetException {
     fn from(value: InternalAssetException) -> Self {
         Self {
@@ -41,3 +47,5 @@ pub fn new_asset_exception_sample() -> AssetException {
 pub fn new_asset_exception_sample_other() -> AssetException {
     InternalAssetException::sample_other().into()
 }
+
+decl_conversion_tests_for!(AssetException);

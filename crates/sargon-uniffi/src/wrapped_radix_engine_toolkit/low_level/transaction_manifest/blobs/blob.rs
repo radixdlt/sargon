@@ -42,3 +42,5 @@ pub fn blob_to_bytes(blob: &Blob) -> BagOfBytes {
 pub fn blob_to_string(blob: &Blob) -> String {
     blob.into_internal().to_string()
 }
+
+decl_conversion_tests_for!(Blob);

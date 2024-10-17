@@ -43,6 +43,16 @@ impl LocaleConfig {
     }
 }
 
+impl HasSampleValues for LocaleConfig {
+    fn sample() -> Self {
+        Self::swedish_sweden()
+    }
+
+    fn sample_other() -> Self {
+        Self::english_united_states()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

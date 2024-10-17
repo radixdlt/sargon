@@ -137,3 +137,4 @@ pub fn new_bag_of_bytes_sample_fade() -> BagOfBytes {
     InternalBagOfBytes::sample_fade().into()
 }
 
+decl_conversion_tests_for!(BagOfBytes);

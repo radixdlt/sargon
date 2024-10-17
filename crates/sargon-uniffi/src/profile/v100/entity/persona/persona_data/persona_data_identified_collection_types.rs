@@ -12,42 +12,25 @@ macro_rules! declare_collection_of_identified_entry {
         $struct_name: ident,
     ) => {
         paste! {
-        use sargon::[< CollectionOf $struct_name>] as [< InternalCollectionOf $struct_name>];
+            use sargon::[< CollectionOf $struct_name>] as [< InternalCollectionOf $struct_name>];
 
-        $(
-            #[doc = $expr]
-        )*
-        #[derive(
-            Clone,
-            PartialEq,
-            Hash,
-            Eq,
-             uniffi::Record,
-        )]
-        pub struct [< CollectionOf $struct_name>] {
-            pub collection: Vec<[< PersonaDataIdentified $id_ent_type >]>,
-        }
-
-        impl From<[< InternalCollectionOf $struct_name>]>
-            for [< CollectionOf $struct_name>]
-        {
-            fn from(value: [< InternalCollectionOf $struct_name>]) -> Self {
-                Self {
-                    collection: value.collection.into_type(),
-                }
+            $(
+                #[doc = $expr]
+            )*
+            #[derive(
+                Clone,
+                PartialEq,
+                Hash,
+                Eq,
+                InternalConversion,
+                uniffi::Record,
+            )]
+            pub struct [< CollectionOf $struct_name>] {
+                pub collection: Vec<[< PersonaDataIdentified $id_ent_type >]>,
             }
-        }
 
-        impl Into<[< InternalCollectionOf $struct_name>]>
-            for [< CollectionOf $struct_name>]
-        {
-            fn into(self) -> [< InternalCollectionOf $struct_name>] {
-                [< InternalCollectionOf $struct_name>] {
-                    collection: self.collection.into_internal(),
-                }
-            }
+            decl_conversion_tests_for!([< CollectionOf $struct_name>]);
         }
-    }
     };
 }
 

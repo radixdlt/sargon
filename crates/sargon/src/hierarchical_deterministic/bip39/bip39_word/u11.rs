@@ -28,6 +28,16 @@ impl U11 {
     }
 }
 
+impl HasSampleValues for U11 {
+    fn sample() -> Self {
+        Self::new(0).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(2047).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

@@ -288,3 +288,25 @@ pub fn decimal_round(
         .round_with_mode(decimal_places, rounding_mode.into())
         .into_result()
 }
+
+decl_conversion_tests_for!(Decimal192);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decimal_round() {
+        let decimal = new_decimal_from_f64(123.456).unwrap();
+        assert_eq!(
+            decimal_round(&decimal, 2, RoundingMode::HalfUp).unwrap(),
+            new_decimal_from_f64(123.46).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_decimal_round_invalid() {
+        let decimal = new_decimal_from_f64(123.456).unwrap();
+        assert!(decimal_round(&decimal, 19, RoundingMode::HalfUp).is_err());
+    }
+}

@@ -63,3 +63,5 @@ pub fn android_sign_hash_with_private_key_bytes(
 ) -> Result<Ed25519Signature> {
     unimplemented!("Should be moved as actual func in  internal Sargon")
 }
+
+decl_conversion_tests_for!(NotarySignature);

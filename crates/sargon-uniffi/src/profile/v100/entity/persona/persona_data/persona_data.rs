@@ -20,7 +20,7 @@ use sargon::PersonaData as InternalPersonaData;
 /// that the next time the user interacts with a previously authorized dApp the wallet cannot automatically
 /// respond back to dApp with the PersonaData, but user will have to re-authorize the request for ongoing
 /// access for the requested PersonaData entries.
-#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct PersonaData {
     /// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,
     /// or `"Jun-fan 'Bruce' Lee"` using Eastern name variant (family name comes before given name(s)).
@@ -42,26 +42,6 @@ pub struct PersonaData {
     pub email_addresses: CollectionOfEmailAddresses,
 }
 
-impl From<InternalPersonaData> for PersonaData {
-    fn from(value: InternalPersonaData) -> Self {
-        Self {
-            name: value.name.map(Into::into),
-            phone_numbers: value.phone_numbers.into(),
-            email_addresses: value.email_addresses.into(),
-        }
-    }
-}
-
-impl Into<InternalPersonaData> for PersonaData {
-    fn into(self) -> InternalPersonaData {
-        InternalPersonaData {
-            name: self.name.map(Into::into),
-            phone_numbers: self.phone_numbers.into(),
-            email_addresses: self.email_addresses.into(),
-        }
-    }
-}
-
 #[uniffi::export]
 pub fn new_persona_data_sample() -> PersonaData {
     InternalPersonaData::sample().into()
@@ -71,3 +51,5 @@ pub fn new_persona_data_sample() -> PersonaData {
 pub fn new_persona_data_sample_other() -> PersonaData {
     InternalPersonaData::sample_other().into()
 }
+
+decl_conversion_tests_for!(PersonaData);

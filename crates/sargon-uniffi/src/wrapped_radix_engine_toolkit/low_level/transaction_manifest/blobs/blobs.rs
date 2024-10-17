@@ -46,3 +46,5 @@ pub fn new_blobs_sample() -> Blobs {
 pub fn new_blobs_sample_other() -> Blobs {
     InternalBlobs::sample_other().into()
 }
+
+decl_conversion_tests_for!(Blobs);

@@ -19,6 +19,12 @@ macro_rules! decl_secret_bytes {
                 value: BagOfBytes
             }
 
+            impl $struct_name {
+                pub fn into_internal(&self) -> [< Internal $struct_name >] {
+                    self.clone().into()
+                }
+            }
+
             impl From<[< Internal $struct_name >]> for $struct_name {
                 fn from(value: [< Internal $struct_name >]) -> Self {
                     Self {
@@ -52,6 +58,8 @@ macro_rules! decl_secret_bytes {
             pub fn [< $struct_name:snake _to_bytes >](bytes: &$struct_name) -> BagOfBytes {
                 bytes.value.clone()
             }
+
+            decl_conversion_tests_for!($struct_name);
         }
     };
 }

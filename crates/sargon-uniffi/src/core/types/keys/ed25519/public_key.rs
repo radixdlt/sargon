@@ -76,3 +76,5 @@ pub fn ed25519_public_key_to_bytes(
 ) -> BagOfBytes {
     public_key.into_internal().to_bag_of_bytes().into()
 }
+
+decl_conversion_tests_for!(Ed25519PublicKey);

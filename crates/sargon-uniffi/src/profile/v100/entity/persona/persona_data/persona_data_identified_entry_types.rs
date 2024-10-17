@@ -14,42 +14,21 @@ macro_rules! declare_identified_entry {
         paste! {
         use sargon::$struct_name as [<Internal $struct_name>];
 
-        $(
-            #[doc = $expr]
-        )*
-        #[derive(
-            Clone,
-            PartialEq,
-            Hash,
-            Eq,
-             uniffi::Record,
-        )]
-        pub struct $struct_name {
-            pub id: PersonaDataEntryID,
-            pub value: $value_type,
-        }
-
-        impl From<[<Internal $struct_name>]>
-            for $struct_name
-        {
-            fn from(value: [<Internal $struct_name>]) -> Self {
-                Self {
-                    id: value.id.into(),
-                    value: value.value.into(),
-                }
+            $(
+                #[doc = $expr]
+            )*
+            #[derive(
+                Clone,
+                PartialEq,
+                Hash,
+                Eq,
+                InternalConversion,
+                uniffi::Record,
+            )]
+            pub struct $struct_name {
+                pub id: PersonaDataEntryID,
+                pub value: $value_type,
             }
-        }
-
-        impl Into<[<Internal $struct_name>]>
-            for $struct_name
-        {
-            fn into(self) -> [<Internal $struct_name>] {
-                [<Internal $struct_name>] {
-                    id: self.id.into(),
-                    value: self.value.into(),
-                }
-            }
-        }
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _sample >]() -> $struct_name {
@@ -60,6 +39,8 @@ macro_rules! declare_identified_entry {
             pub fn [< $struct_name:snake _sample_other >]() -> $struct_name {
                 [<Internal $struct_name>]::sample_other().into()
             }
+
+            decl_conversion_tests_for!($struct_name);
         }
     };
 

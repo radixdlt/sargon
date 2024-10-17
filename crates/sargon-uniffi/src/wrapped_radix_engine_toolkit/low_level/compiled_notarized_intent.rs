@@ -42,3 +42,5 @@ pub fn compiled_notarized_intent_get_bytes(
 ) -> BagOfBytes {
     compiled_notarized_intent.into_internal().bytes().into()
 }
+
+decl_conversion_tests_for!(CompiledNotarizedIntent);

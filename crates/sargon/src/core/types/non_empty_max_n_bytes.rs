@@ -208,6 +208,7 @@ macro_rules! decl_samples_for_max_n_bytes {
 
 // The impl of sample values require an max number of bytes
 decl_samples_for_max_n_bytes!(NonEmptyMax64Bytes, 64);
+decl_samples_for_max_n_bytes!(NonEmptyMax32Bytes, 32);
 
 #[cfg(test)]
 mod tests_non_empty_max_64_bytes {

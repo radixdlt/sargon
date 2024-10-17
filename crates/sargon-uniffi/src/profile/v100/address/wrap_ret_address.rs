@@ -81,6 +81,8 @@ macro_rules! decl_ret_wrapped_address {
             pub fn [<new_ $address_type:snake _address_random>](network_id: NetworkID) -> [<$address_type:camel Address >] {
                 [< Internal $address_type:camel Address >]::random(network_id.into()).into()
             }
+
+            decl_conversion_tests_for!([< $address_type:camel Address >]);
         }
     };
 }

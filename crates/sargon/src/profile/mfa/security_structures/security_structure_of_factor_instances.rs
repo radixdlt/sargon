@@ -38,3 +38,91 @@ impl Identifiable for SecurityStructureOfFactorInstances {
         self.security_structure_id
     }
 }
+
+impl HasSampleValues for SecurityStructureOfFactorInstances {
+    fn sample() -> Self {
+        Self {
+            security_structure_id: SecurityStructureID::sample(),
+            matrix_of_factors: MatrixOfFactorInstances::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            security_structure_id: SecurityStructureID::sample_other(),
+            matrix_of_factors: MatrixOfFactorInstances::sample_other(),
+        }
+    }
+}
+
+impl HasSampleValues for MatrixOfFactorInstances {
+    fn sample() -> Self {
+        Self {
+            primary_role: PrimaryRoleWithFactorInstances::sample(),
+            recovery_role: RecoveryRoleWithFactorInstances::sample(),
+            confirmation_role: ConfirmationRoleWithFactorInstances::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            primary_role: PrimaryRoleWithFactorInstances::sample_other(),
+            recovery_role: RecoveryRoleWithFactorInstances::sample_other(),
+            confirmation_role: ConfirmationRoleWithFactorInstances::sample_other(),
+        }
+    }
+}
+
+impl HasSampleValues for PrimaryRoleWithFactorInstances {
+    fn sample() -> Self {
+        Self {
+            threshold_factors: vec![FactorInstance::sample()],
+            threshold: 1,
+            override_factors: vec![FactorInstance::sample()],
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            threshold_factors: vec![FactorInstance::sample_other()],
+            threshold: 2,
+            override_factors: vec![FactorInstance::sample_other()],
+        }
+    }
+}
+
+impl HasSampleValues for RecoveryRoleWithFactorInstances {
+    fn sample() -> Self {
+        Self {
+            threshold_factors: vec![FactorInstance::sample()],
+            threshold: 1,
+            override_factors: vec![FactorInstance::sample()],
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            threshold_factors: vec![FactorInstance::sample_other()],
+            threshold: 2,
+            override_factors: vec![FactorInstance::sample_other()],
+        }
+    }
+}
+
+impl HasSampleValues for ConfirmationRoleWithFactorInstances {
+    fn sample() -> Self {
+        Self {
+            threshold_factors: vec![FactorInstance::sample()],
+            threshold: 1,
+            override_factors: vec![FactorInstance::sample()],
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            threshold_factors: vec![FactorInstance::sample_other()],
+            threshold: 2,
+            override_factors: vec![FactorInstance::sample_other()],
+        }
+    }
+}

@@ -53,6 +53,8 @@ macro_rules! decl_non_empty_max_n_bytes {
             ) -> Result<[< NonEmptyMax $byte_count Bytes  >]> {
                 [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes.into_internal()).into_result()
             }
+
+            decl_conversion_tests_for!([< NonEmptyMax $byte_count Bytes  >]);
         }
     };
 }

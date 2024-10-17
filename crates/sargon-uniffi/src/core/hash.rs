@@ -58,3 +58,5 @@ pub fn new_hash_from_bytes(bytes: Exactly32Bytes) -> Hash {
 pub fn new_hash_from_string(string: String) -> Result<Hash> {
     InternalHash::try_from(string).into_result()
 }
+
+decl_conversion_tests_for!(Hash);

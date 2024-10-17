@@ -22,10 +22,6 @@ extension TransactionManifest {
 	public var networkID: NetworkID {
 		transactionManifestNetworkId(manifest: self)
 	}
-
-//	public var blobs: Blobs {
-//		transactionManifestBlobs(manifest: self)
-//	}
     
     public var involvedPoolAddresses: [PoolAddress] {
         transactionManifestInvolvedPoolAddresses(manifest: self)

@@ -83,6 +83,8 @@ macro_rules! decl_exactly_n_bytes {
             ) -> String {
                 bytes.into_internal().to_hex()
             }
+
+            decl_conversion_tests_for!([<Exactly $byte_count Bytes>]);
         }
     };
 }

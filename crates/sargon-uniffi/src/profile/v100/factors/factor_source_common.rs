@@ -1,12 +1,9 @@
 use crate::prelude::*;
 use sargon::FactorSourceCommon as InternalFactorSourceCommon;
 
-/// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-pub type FactorSourceFlags = Vec<FactorSourceFlag>;
-
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
     ///
@@ -28,29 +25,7 @@ pub struct FactorSourceCommon {
     pub last_used_on: Timestamp,
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-    pub flags: FactorSourceFlags,
-}
-
-impl From<InternalFactorSourceCommon> for FactorSourceCommon {
-    fn from(value: InternalFactorSourceCommon) -> Self {
-        Self {
-            crypto_parameters: value.crypto_parameters.into(),
-            added_on: value.added_on.into(),
-            last_used_on: value.last_used_on.into(),
-            flags: value.flags.into_type(),
-        }
-    }
-}
-
-impl Into<InternalFactorSourceCommon> for FactorSourceCommon {
-    fn into(self) -> InternalFactorSourceCommon {
-        InternalFactorSourceCommon {
-            crypto_parameters: self.crypto_parameters.into(),
-            added_on: self.added_on.into(),
-            last_used_on: self.last_used_on.into(),
-            flags: self.flags.into_internal(),
-        }
-    }
+    pub flags: Vec<FactorSourceFlag>,
 }
 
 #[uniffi::export]
@@ -77,3 +52,5 @@ pub fn new_factor_source_common_babylon() -> FactorSourceCommon {
 pub fn new_factor_source_common_bdfs(is_main: bool) -> FactorSourceCommon {
     InternalFactorSourceCommon::new_bdfs(is_main).into()
 }
+
+decl_conversion_tests_for!(FactorSourceCommon);

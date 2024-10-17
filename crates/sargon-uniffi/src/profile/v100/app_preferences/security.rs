@@ -57,3 +57,5 @@ impl Into<InternalSecurity> for Security {
         }
     }
 }
+
+decl_conversion_tests_for!(Security);

@@ -14,6 +14,12 @@ pub struct NonFungibleLocalIdString {
     secret_magic: String,
 }
 
+impl NonFungibleLocalIdString {
+    pub fn into_internal(&self) -> InternalNonFungibleLocalIdString {
+        self.clone().into()
+    }
+}
+
 impl From<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
     fn from(value: InternalNonFungibleLocalIdString) -> Self {
         Self {
@@ -37,4 +43,8 @@ pub fn new_non_fungible_local_id_string_from_str(
     string
         .parse::<InternalNonFungibleLocalIdString>()
         .into_result()
+}
+
+decl_conversion_tests_for! {
+    NonFungibleLocalIdString
 }

@@ -78,3 +78,5 @@ pub fn new_key_agreement_public_key_sample() -> KeyAgreementPublicKey {
 pub fn new_key_agreement_public_key_sample_other() -> KeyAgreementPublicKey {
     InternalKeyAgreementPublicKey::sample_other().into()
 }
+
+decl_conversion_tests_for!(KeyAgreementPublicKey);
