@@ -165,6 +165,10 @@ impl TransactionManifestV2 {
         Some(ManifestSummary::from((summary, self.network_id())))
     }
 
+    pub fn is_enclosed(&self) -> bool {
+        RET_is_enclosed(&self.scrypto_manifest())
+    }
+
     pub fn network_id(&self) -> NetworkID {
         self.secret_magic.instructions.network_id
     }
@@ -566,5 +570,11 @@ DROP_AUTH_ZONE_PROOFS;
             SUT::sargon_built(builder, NetworkID::Mainnet,).manifest_string(),
             "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\n",
         )
+    }
+
+    #[test]
+    fn is_enclosed_false() {
+        let manifest = SUT::sample();
+        assert_eq!(manifest.is_enclosed(), false);
     }
 }

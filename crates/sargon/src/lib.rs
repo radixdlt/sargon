@@ -169,6 +169,7 @@ pub mod prelude {
             ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
             NewManifestBucket as ScryptoNewManifestBucket,
+            PartialTransactionV2Builder as ScryptoPartialTransactionV2Builder,
             ResolvableArguments as ScryptoResolvableArguments,
             ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
@@ -269,7 +270,11 @@ pub mod prelude {
                     hash as ret_hash_intent_core_v2,
                     to_payload_bytes as RET_intent_to_payload_bytes_v2,
                 },
-                manifest::statically_analyze as RET_statically_analyze_v2,
+                manifest::{
+                    dynamically_analyze as RET_dynamically_analyze_v2,
+                    is_enclosed as RET_is_enclosed,
+                    statically_analyze as RET_statically_analyze_v2,
+                },
                 notarized_transaction::{
                     from_payload_bytes as RET_decompile_notarize_tx_v2,
                     to_payload_bytes as RET_compile_notarized_tx_v2,

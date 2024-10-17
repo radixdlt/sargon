@@ -48,6 +48,16 @@ impl IntentCoreV2 {
         )
     }
 
+    pub fn transaction_intent_hash(&self) -> TransactionIntentHash {
+        let hash = ret_hash_subintent(&ScryptoSubintent{intent_core: self.clone().into()})
+            .expect("Should never fail to hash an subintent. Sargon should only produce valid Subintents");
+
+        TransactionIntentHash::from_scrypto(
+            ScryptoTransactionIntentHash(hash.hash),
+            self.header.network_id,
+        )
+    }
+
     pub fn compile(&self) -> BagOfBytes {
         compile_intent(ScryptoIntentCoreV2::from(self.clone()))
             .expect("Should always be able to compile an Intent")
@@ -206,6 +216,12 @@ mod tests {
     }
 
     #[test]
+    fn transaction_intent_hash() {
+        let hash = SUT::sample().transaction_intent_hash();
+        assert_eq!(hash.to_string(), "txid_rdx1gelylz5h59uk4enfnxe9vyaq69vurpt67y94uduehh3y8y2e3xfsddsz03")
+    }
+
+    #[test]
     fn network_id() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
         assert_eq!(SUT::sample_other().network_id(), NetworkID::Simulator);
@@ -258,7 +274,6 @@ mod tests {
                 vec![invalid_instruction].into(),
             ),
         };
-        let network_id = NetworkID::Mainnet;
 
         let result = compile_intent(invalid_scrypto_intent);
         assert_eq!(
