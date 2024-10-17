@@ -109,7 +109,8 @@ mod integration_tests {
         );
 
         // ACT
-        let engine_toolkit_receipt = timeout(MAX, sut).await.unwrap().unwrap();
+        let engine_toolkit_receipt =
+            timeout(MAX, sut).await.unwrap().unwrap().unwrap();
         let execution_summary =
             manifest.execution_summary(engine_toolkit_receipt).unwrap();
 
