@@ -1,26 +1,52 @@
 use crate::prelude::*;
+use radix_transactions::model::TransactionPayload;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
-#[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionPreAuthorizationResponseItems {
-    pub signed_partial_transaction: SignedPartialTransaction,
+    /// A hex encoded signed partial transaction.
+    #[serde(rename = "signedPartialTransaction")]
+    pub encoded_signed_partial_transaction: String,
 }
 
 impl WalletToDappInteractionPreAuthorizationResponseItems {
-    pub fn new(signed_partial_transaction: SignedPartialTransaction) -> Self {
-        Self {
-            signed_partial_transaction,
-        }
+    pub fn new(
+        signed_partial_transaction: ScryptoSignedPartialTransaction,
+    ) -> Result<Self> {
+        let bytes = signed_partial_transaction
+            .to_raw()
+            .map_err(|e| match e {
+                sbor::EncodeError::MaxDepthExceeded(max) => {
+                    CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                        max: max as u16,
+                    }
+                }
+                _ => {
+                    CommonError::InvalidSignedPartialTransactionFailedToEncode {
+                        underlying: format!("{:?}", e),
+                    }
+                }
+            })?
+            .to_vec();
+        let encoded_signed_partial_transaction = hex_encode(&bytes);
+        Ok(Self {
+            encoded_signed_partial_transaction,
+        })
     }
 }
 
 impl HasSampleValues for WalletToDappInteractionPreAuthorizationResponseItems {
     fn sample() -> Self {
-        Self::new(SignedPartialTransaction::sample())
+        Self {
+            encoded_signed_partial_transaction:
+                "replace_actual_encoded_string_here".to_owned(),
+        }
     }
 
     fn sample_other() -> Self {
-        Self::new(SignedPartialTransaction::sample_other())
+        Self {
+            encoded_signed_partial_transaction:
+                "replace_other_encoded_string_here".to_owned(),
+        }
     }
 }
 

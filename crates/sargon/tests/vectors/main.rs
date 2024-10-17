@@ -976,9 +976,7 @@ mod wallet_to_dapp_interaction_tests {
 
         let pre_authorization_response_items =
             WalletToDappInteractionResponseItems::PreAuthorization(
-                WalletToDappInteractionPreAuthorizationResponseItems::new(
-                    SignedPartialTransaction::sample(),
-                ),
+                WalletToDappInteractionPreAuthorizationResponseItems::sample(),
             );
 
         let pre_authorization_response =
