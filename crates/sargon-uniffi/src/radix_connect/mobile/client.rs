@@ -46,10 +46,9 @@ impl RadixConnectMobile {
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        
-            self.wrapped
-                .send_dapp_interaction_response(wallet_response.into())
-                .await
-                .into_result()
+        self.wrapped
+            .send_dapp_interaction_response(wallet_response.into())
+            .await
+            .into_result()
     }
 }

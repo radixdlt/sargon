@@ -92,7 +92,8 @@ impl HasSampleValues for MatrixOfFactorSourceIDs {
         Self {
             primary_role: PrimaryRoleWithFactorSourceIDs::sample_other(),
             recovery_role: RecoveryRoleWithFactorSourceIDs::sample_other(),
-            confirmation_role: ConfirmationRoleWithFactorSourceIDs::sample_other(),
+            confirmation_role:
+                ConfirmationRoleWithFactorSourceIDs::sample_other(),
         }
     }
 }

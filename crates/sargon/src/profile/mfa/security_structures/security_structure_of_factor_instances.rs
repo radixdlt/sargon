@@ -68,7 +68,8 @@ impl HasSampleValues for MatrixOfFactorInstances {
         Self {
             primary_role: PrimaryRoleWithFactorInstances::sample_other(),
             recovery_role: RecoveryRoleWithFactorInstances::sample_other(),
-            confirmation_role: ConfirmationRoleWithFactorInstances::sample_other(),
+            confirmation_role:
+                ConfirmationRoleWithFactorInstances::sample_other(),
         }
     }
 }

@@ -43,5 +43,8 @@ pub fn profile_network_details_for_authorized_dapp(
     profile_network: &ProfileNetwork,
     dapp: &AuthorizedDapp,
 ) -> Result<AuthorizedDappDetailed> {
-    profile_network.into_internal().details_for_authorized_dapp(&dapp.into_internal()).into_result()
+    profile_network
+        .into_internal()
+        .details_for_authorized_dapp(&dapp.into_internal())
+        .into_result()
 }

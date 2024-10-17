@@ -24,7 +24,10 @@ impl InternalFileSystemDriver for FileSystemDriverAdapter {
         &self,
         path: String,
     ) -> InternalResult<Option<InternalBagOfBytes>> {
-        self.wrapped.load_from_file(path).await.into_internal_result()
+        self.wrapped
+            .load_from_file(path)
+            .await
+            .into_internal_result()
     }
 
     async fn save_to_file(
@@ -32,7 +35,10 @@ impl InternalFileSystemDriver for FileSystemDriverAdapter {
         path: String,
         data: InternalBagOfBytes,
     ) -> InternalResult<()> {
-            self.wrapped.save_to_file(path, data.into()).await.into_internal_result()
+        self.wrapped
+            .save_to_file(path, data.into())
+            .await
+            .into_internal_result()
     }
 
     async fn delete_file(&self, path: String) -> InternalResult<()> {

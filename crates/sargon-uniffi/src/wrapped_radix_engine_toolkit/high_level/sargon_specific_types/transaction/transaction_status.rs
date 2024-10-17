@@ -1,14 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionStatus as InternalTransactionStatus;
 
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Enum,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum TransactionStatus {
     /// The transaction has been successfully processed and is now final.
     Success,

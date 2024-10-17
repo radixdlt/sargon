@@ -25,7 +25,10 @@ impl InternalHomeCardsStorage for HomeCardsStorageAdapter {
         &self,
         encoded_cards: InternalBagOfBytes,
     ) -> InternalResult<()> {
-            self.wrapped.save_cards(encoded_cards.into()).await.into_internal_result()
+        self.wrapped
+            .save_cards(encoded_cards.into())
+            .await
+            .into_internal_result()
     }
 
     async fn load_cards(&self) -> InternalResult<Option<InternalBagOfBytes>> {

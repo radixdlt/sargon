@@ -1,13 +1,18 @@
 use crate::common::*;
 
-use proc_macro::TokenStream;
-use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, PathArguments, Type, TypePath};
 use proc_macro2::Ident;
+use quote::quote;
+use syn::Fields;
 
-pub fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::TokenStream {
+pub fn handle_enum(
+    name: &syn::Ident,
+    data: syn::DataEnum,
+) -> proc_macro2::TokenStream {
     let internal_name = quote::format_ident!("Internal{}", name);
-    let test_mod_name = Ident::new(&format!("{}_tests", name.to_string().to_lowercase()), name.span());
+    let test_mod_name = Ident::new(
+        &format!("{}_tests", name.to_string().to_lowercase()),
+        name.span(),
+    );
 
     // Build the match arms for the `From` implementation
     let from_match_arms = data.variants.iter().map(|variant| {
@@ -56,7 +61,6 @@ pub fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::Token
                     Self::#variant_name { #( #field_names ),* } => #internal_name::#variant_name  { #( #field_conversions ),* }
                 }
             },
-            _ => panic!("FromInto macro supports only tuple-style or unit-style variants"),
         }
     });
 
@@ -106,7 +110,6 @@ pub fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::Token
                     }
                 }
             },
-            _ => panic!("FromInto macro supports only tuple-style, unit-style, or struct-style variants"),
         }
     });
 
@@ -143,22 +146,34 @@ pub fn handle_enum(name: &syn::Ident, data: syn::DataEnum) -> proc_macro2::Token
     }
 }
 
-fn generate_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
-    fields.named.iter().map(|f| {
-        let field_name = &f.ident;
-        let field_conversion = conversion_call(&f, false);
-        quote! {
-            #field_name: #field_name.#field_conversion
-        }
-    }).collect()
+fn generate_field_conversions(
+    fields: &syn::FieldsNamed,
+) -> Vec<proc_macro2::TokenStream> {
+    fields
+        .named
+        .iter()
+        .map(|f| {
+            let field_name = &f.ident;
+            let field_conversion = conversion_call(&f, false);
+            quote! {
+                #field_name: #field_name.#field_conversion
+            }
+        })
+        .collect()
 }
 
-fn generate_internal_field_conversions(fields: &syn::FieldsNamed) -> Vec<proc_macro2::TokenStream> {
-    fields.named.iter().map(|f| {
-        let field_name = &f.ident;
-        let field_conversion = conversion_call(&f, true);
-        quote! {
-            #field_name: #field_name.#field_conversion
-        }
-    }).collect()
+fn generate_internal_field_conversions(
+    fields: &syn::FieldsNamed,
+) -> Vec<proc_macro2::TokenStream> {
+    fields
+        .named
+        .iter()
+        .map(|f| {
+            let field_name = &f.ident;
+            let field_conversion = conversion_call(&f, true);
+            quote! {
+                #field_name: #field_name.#field_conversion
+            }
+        })
+        .collect()
 }

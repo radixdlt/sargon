@@ -5,7 +5,6 @@ pub trait HasSampleValues {
     fn sample_other() -> Self;
 }
 
-
 impl HasSampleValues for String {
     fn sample() -> Self {
         "sample".to_string()

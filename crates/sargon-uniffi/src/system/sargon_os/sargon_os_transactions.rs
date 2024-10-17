@@ -11,7 +11,10 @@ impl SargonOS {
         &self,
         notarized_transaction: NotarizedTransaction,
     ) -> Result<IntentHash> {
-        self.wrapped.submit_transaction(notarized_transaction.into_internal()).await.into_result()
+        self.wrapped
+            .submit_transaction(notarized_transaction.into_internal())
+            .await
+            .into_result()
     }
 }
 
@@ -25,6 +28,9 @@ impl SargonOS {
         &self,
         intent_hash: IntentHash,
     ) -> Result<TransactionStatus> {
-        self.wrapped.poll_transaction_status(intent_hash.into_internal()).await.into_result()
+        self.wrapped
+            .poll_transaction_status(intent_hash.into_internal())
+            .await
+            .into_result()
     }
 }

@@ -8,7 +8,8 @@ decl_security_structure_of!(
 );
 
 decl_vec_samples_for!(
-    SecurityStructuresOfFactorSourceIDs, SecurityStructureOfFactorSourceIDs
+    SecurityStructuresOfFactorSourceIDs,
+    SecurityStructureOfFactorSourceIDs
 );
 
 #[uniffi::export]

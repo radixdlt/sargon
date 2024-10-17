@@ -1,19 +1,12 @@
 use crate::prelude::*;
-use sargon::PassphraseFactorSource as InternalPassphraseFactorSource;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
+use sargon::PassphraseFactorSource as InternalPassphraseFactorSource;
 
 /// NOT IMPLEMENTED NOR USED YET
 ///
 /// A passphrase based FactorSource is essentially a Input Key Material based Mnemonic,
 /// user needs to input the passphrase - key material - every time they use this factor source
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct PassphraseFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -38,6 +31,8 @@ pub fn new_passphrase_factor_source_sample_other() -> PassphraseFactorSource {
 fn new_passphrase_factor_source_from_mnemonic_with_passphrase(
     mwp: MnemonicWithPassphrase,
 ) -> PassphraseFactorSource {
-    let id = InternalFactorSourceIDFromHash::new_for_passphrase(&mwp.into_internal());
+    let id = InternalFactorSourceIDFromHash::new_for_passphrase(
+        &mwp.into_internal(),
+    );
     InternalPassphraseFactorSource::new(id).into()
 }

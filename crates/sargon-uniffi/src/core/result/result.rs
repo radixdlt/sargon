@@ -8,14 +8,12 @@ pub trait IntoInternalResult<Type, InternalType> {
     fn into_internal_result(self) -> InternalResult<InternalType>;
 }
 
-impl<Type, InternalType> IntoInternalResult<Type, InternalType>
-    for Result<Type>
+impl<Type, InternalType> IntoInternalResult<Type, InternalType> for Result<Type>
 where
     Type: Into<InternalType>,
 {
-    fn into_internal_result(self) -> InternalResult<InternalType>{
-        self.map(Type::into) 
-            .map_err(Into::into)
+    fn into_internal_result(self) -> InternalResult<InternalType> {
+        self.map(Type::into).map_err(Into::into)
     }
 }
 
@@ -24,12 +22,10 @@ impl<Type, InternalType> IntoInternalResult<Type, Option<InternalType>>
 where
     Type: Into<InternalType>,
 {
-    fn into_internal_result(self) -> InternalResult<Option<InternalType>>{
-        self.map(|opt| opt.map(Type::into))
-            .map_err(Into::into)
+    fn into_internal_result(self) -> InternalResult<Option<InternalType>> {
+        self.map(|opt| opt.map(Type::into)).map_err(Into::into)
     }
 }
-
 
 /// Utility trait to map `InternalResult` to `Result`
 pub trait FromInternalResult<InternalType, Type> {
@@ -40,7 +36,7 @@ pub trait FromInternalResult<InternalType, Type> {
 impl<InternalType, Type> FromInternalResult<InternalType, Type>
     for InternalResult<InternalType>
 where
-    Type: From<InternalType>
+    Type: From<InternalType>,
 {
     fn into_result(self) -> Result<Type> {
         self.map(Type::from) // Converts Ok variant using From trait

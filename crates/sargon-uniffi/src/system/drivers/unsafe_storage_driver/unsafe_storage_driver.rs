@@ -32,7 +32,10 @@ impl InternalUnsafeStorageDriver for UnsafeStorageDriverAdapter {
         &self,
         key: InternalUnsafeStorageKey,
     ) -> InternalResult<Option<InternalBagOfBytes>> {
-            self.wrapped.load_data(key.into()).await.into_internal_result()
+        self.wrapped
+            .load_data(key.into())
+            .await
+            .into_internal_result()
     }
 
     async fn save_data(
@@ -40,13 +43,19 @@ impl InternalUnsafeStorageDriver for UnsafeStorageDriverAdapter {
         key: InternalUnsafeStorageKey,
         data: InternalBagOfBytes,
     ) -> InternalResult<()> {
-            self.wrapped.save_data(key.into(), data.into()).await.into_internal_result()
+        self.wrapped
+            .save_data(key.into(), data.into())
+            .await
+            .into_internal_result()
     }
 
     async fn delete_data_for_key(
         &self,
         key: InternalUnsafeStorageKey,
     ) -> InternalResult<()> {
-            self.wrapped.delete_data_for_key(key.into()).await.into_internal_result()
+        self.wrapped
+            .delete_data_for_key(key.into())
+            .await
+            .into_internal_result()
     }
 }

@@ -38,7 +38,9 @@ pub fn new_notary_signature_sample_other() -> NotarySignature {
 
 #[uniffi::export]
 pub fn new_notary_signature(signature: Signature) -> NotarySignature {
-    NotarySignature { secret_magic: signature }
+    NotarySignature {
+        secret_magic: signature,
+    }
 }
 
 #[uniffi::export]

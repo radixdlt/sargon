@@ -12,30 +12,30 @@ macro_rules! declare_shared_with_dapp {
         $id: ty,
     ) => {
         paste! {
-        use sargon::$struct_name as [<Internal $struct_name>];
+            use sargon::$struct_name as [<Internal $struct_name>];
 
-        $(
-            #[doc = $expr]
-        )*
-        #[derive(
-            Clone,
-            PartialEq,
-            Hash,
-            Eq,
-            InternalConversion,
-             uniffi::Record,
-        )]
-        pub struct $struct_name {
-            /// The requested quantity to be shared by user, sent by a Dapp.
-            pub request: RequestedQuantity,
+            $(
+                #[doc = $expr]
+            )*
+            #[derive(
+                Clone,
+                PartialEq,
+                Hash,
+                Eq,
+                InternalConversion,
+                uniffi::Record,
+            )]
+            pub struct $struct_name {
+                /// The requested quantity to be shared by user, sent by a Dapp.
+                pub request: RequestedQuantity,
 
-            /// The by user shared IDs of data identifiable data shared with the
-            /// Dapp.
-            pub ids: Vec<$id>,
+                /// The by user shared IDs of data identifiable data shared with the
+                /// Dapp.
+                pub ids: Vec<$id>,
+            }
+
+            decl_conversion_tests_for!($struct_name);
         }
-
-        decl_conversion_tests_for!($struct_name);
-    }
     };
     (
         $(

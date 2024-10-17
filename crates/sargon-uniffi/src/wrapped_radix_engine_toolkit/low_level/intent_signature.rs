@@ -7,7 +7,7 @@ pub struct IntentSignature {
 }
 
 impl IntentSignature {
-    pub fn into_internal(&self) -> InternalIntentSignature{
+    pub fn into_internal(&self) -> InternalIntentSignature {
         self.clone().into()
     }
 }

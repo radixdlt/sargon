@@ -56,7 +56,7 @@ impl HasSampleValues for TrackedPoolRedemption {
             PoolAddress::sample_other(),
             ResourceAddress::sample_other(),
             Decimal192::sample_other(),
-            HashMap::<ResourceAddress, Decimal192>::sample_other()
+            HashMap::<ResourceAddress, Decimal192>::sample_other(),
         )
     }
 }

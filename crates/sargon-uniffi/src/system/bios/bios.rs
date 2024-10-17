@@ -23,7 +23,8 @@ impl Bios {
 
 impl Into<InternalBios> for Bios {
     fn into(self) -> InternalBios {
-        let internal_drivers: InternalDrivers = self.drivers.as_ref().clone().into();
+        let internal_drivers: InternalDrivers =
+            self.drivers.as_ref().clone().into();
         InternalBios {
             drivers: Arc::new(internal_drivers),
         }

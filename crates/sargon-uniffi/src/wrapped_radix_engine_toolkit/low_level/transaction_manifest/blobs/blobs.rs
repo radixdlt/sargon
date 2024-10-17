@@ -34,7 +34,9 @@ pub fn blobs_list_of_blobs(blobs: &Blobs) -> Vec<Blob> {
 
 #[uniffi::export]
 pub fn new_blobs_from_blob_list(blobs: Vec<Blob>) -> Blobs {
-    Blobs { secret_magic: blobs }
+    Blobs {
+        secret_magic: blobs,
+    }
 }
 
 #[uniffi::export]

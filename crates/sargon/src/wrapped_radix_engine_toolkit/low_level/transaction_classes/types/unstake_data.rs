@@ -42,7 +42,10 @@ impl HasSampleValues for UnstakeData {
     }
 
     fn sample_other() -> Self {
-        Self::new(String::sample_other(), Epoch::sample_other(), Decimal192::sample_other())
+        Self::new(
+            String::sample_other(),
+            Epoch::sample_other(),
+            Decimal192::sample_other(),
+        )
     }
 }
-    

@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use crate::prelude::*;
+use std::fmt::Display;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;

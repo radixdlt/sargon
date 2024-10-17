@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use sargon::SavedGateways as InternalSavedGateways;
 
-decl_vec_samples_for!(
-    Gateways, Gateway
-);
+decl_vec_samples_for!(Gateways, Gateway);
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -18,7 +16,6 @@ pub struct SavedGateways {
     /// other networks, the identifier of a Gateway is the URL.
     pub other: Vec<Gateway>,
 }
-
 
 /// Constructs `Gateways` with `current` set as active Gateway.
 #[uniffi::export]

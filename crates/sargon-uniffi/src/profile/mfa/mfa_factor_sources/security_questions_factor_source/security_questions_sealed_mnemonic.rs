@@ -21,5 +21,3 @@ pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
     /// from the `keyDerivationScheme`
     pub encryptions: Vec<Exactly60Bytes>, // FIXME: Set?
 }
-
-

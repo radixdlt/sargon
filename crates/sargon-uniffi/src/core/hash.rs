@@ -7,9 +7,7 @@ use sargon::Hash as InternalHash;
 /// Made UniFFI convertible via HashSecretMagic,
 /// exposed in Swift/Kotlin as its own struct/data class, with
 /// hidden secret magic.
-#[derive(
-    Clone, PartialEq, Eq, std::hash::Hash, uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, std::hash::Hash, uniffi::Record)]
 pub struct Hash {
     pub(crate) value: Exactly32Bytes,
 }
@@ -36,7 +34,7 @@ impl Into<InternalHash> for Hash {
 
 #[uniffi::export]
 pub fn hash_get_bytes(hash: &Hash) -> Exactly32Bytes {
-    InternalExactly32Bytes::from(hash.into_internal()).into()
+    hash.value.clone()
 }
 
 #[uniffi::export]

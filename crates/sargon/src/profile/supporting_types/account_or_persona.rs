@@ -2,14 +2,7 @@ use crate::prelude::*;
 
 /// Either an `Account` or a `Persona`.
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Hash,
-    Eq,
-    EnumAsInner,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, EnumAsInner,
 )]
 pub enum AccountOrPersona {
     /// An `Account`

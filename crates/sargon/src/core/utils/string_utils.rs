@@ -1,6 +1,6 @@
+use crate::prelude::*;
 use url::form_urlencoded;
 use url::Url;
-use crate::prelude::*;
 
 /// Returns the last `n` chars of the &str `s`. If `s` is shorter than `n`
 /// we panic.

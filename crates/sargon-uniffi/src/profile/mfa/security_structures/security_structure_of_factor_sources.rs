@@ -35,7 +35,6 @@ pub fn new_security_structure_of_factor_sources_auto_in_days(
     .into()
 }
 
-
 #[uniffi::export]
 pub fn new_matrix_of_factor_sources_sample() -> MatrixOfFactorSources {
     InternalMatrixOfFactorSources::sample().into()
@@ -45,4 +44,3 @@ pub fn new_matrix_of_factor_sources_sample() -> MatrixOfFactorSources {
 pub fn new_matrix_of_factor_sources_sample_other() -> MatrixOfFactorSources {
     InternalMatrixOfFactorSources::sample_other().into()
 }
-

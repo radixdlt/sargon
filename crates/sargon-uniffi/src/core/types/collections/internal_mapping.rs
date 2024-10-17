@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 use sargon::IdentifiedVecOf;
 
-
 // From InternalType =================================================================================================
 
 pub trait FromInternal<InternalType, Type> {
@@ -19,11 +18,12 @@ where
     }
 }
 
-impl<InternalElement, Element> FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
+impl<InternalElement, Element>
+    FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
     for IdentifiedVecOf<InternalElement>
 where
-InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-Element: From<InternalElement>,
+    InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
+    Element: From<InternalElement>,
 {
     fn into_type(self) -> Vec<Element> {
         self.into_iter().map(Element::from).collect()
@@ -36,7 +36,8 @@ pub trait IntoInternal<Type, InternalType> {
     fn into_internal(self) -> InternalType;
 }
 
-impl<InternalElement, Element> IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
+impl<InternalElement, Element>
+    IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
     for Vec<Element>
 where
     InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
@@ -64,7 +65,7 @@ pub trait FromInternalHashMap<InternalKey, InternalElement, Key, Element> {
 }
 
 impl<InternalKey, InternalElement, Key, Element>
-FromInternalHashMap<InternalKey, InternalElement, Key, Element>
+    FromInternalHashMap<InternalKey, InternalElement, Key, Element>
     for HashMap<InternalKey, InternalElement>
 where
     Key: From<InternalKey> + std::hash::Hash + Eq,
@@ -78,7 +79,7 @@ where
 }
 
 impl<InternalKey1, InternalElement, InternalKey2, Key1, Key2, Element>
-FromInternalHashMap<
+    FromInternalHashMap<
         InternalKey1,
         InternalElement,
         Key1,
@@ -97,7 +98,7 @@ where
 }
 
 impl<InternalKey, InternalElement, Key, Element>
-FromInternalHashMap<InternalKey, InternalElement, Key, Vec<Element>>
+    FromInternalHashMap<InternalKey, InternalElement, Key, Vec<Element>>
     for HashMap<InternalKey, Vec<InternalElement>>
 where
     Key: From<InternalKey> + std::hash::Hash + Eq,
@@ -115,7 +116,7 @@ pub trait IntoInternalHashMap<Key, Element, InternalKey, InternalElement> {
 }
 
 impl<Key, Element, InternalKey, InternalElement>
-IntoInternalHashMap<Key, Element, InternalKey, InternalElement>
+    IntoInternalHashMap<Key, Element, InternalKey, InternalElement>
     for HashMap<Key, Element>
 where
     InternalKey: std::hash::Hash + Eq,
@@ -130,7 +131,7 @@ where
 }
 
 impl<Key1, Key2, Element, InternalKey1, InternalKey2, InternalElement>
-IntoInternalHashMap<
+    IntoInternalHashMap<
         Key1,
         Element,
         InternalKey1,
@@ -153,7 +154,7 @@ where
 }
 
 impl<Key, Element, InternalKey, InternalElement>
-IntoInternalHashMap<Key, Element, InternalKey, Vec<InternalElement>>
+    IntoInternalHashMap<Key, Element, InternalKey, Vec<InternalElement>>
     for HashMap<Key, Vec<Element>>
 where
     InternalKey: std::hash::Hash + Eq,

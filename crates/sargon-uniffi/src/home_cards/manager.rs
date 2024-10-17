@@ -59,10 +59,10 @@ impl HomeCardsManager {
         &self,
         encoded_value: String,
     ) -> Result<()> {
-        
-            self.wrapped
-                .deferred_deep_link_received(encoded_value)
-                .await.into_result()
+        self.wrapped
+            .deferred_deep_link_received(encoded_value)
+            .await
+            .into_result()
     }
 
     /// Marks the wallet restoration.
@@ -77,7 +77,10 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn card_dismissed(&self, card: HomeCard) -> Result<()> {
-        self.wrapped.card_dismissed(card.into_internal()).await.into_result()
+        self.wrapped
+            .card_dismissed(card.into_internal())
+            .await
+            .into_result()
     }
 
     /// Clears the home cards from the `HomeCardsStorage`.

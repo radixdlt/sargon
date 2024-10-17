@@ -1,11 +1,11 @@
 mod error;
 mod hash;
+mod result;
 mod types;
 mod utils;
-mod result;
 
 pub use error::*;
 pub use hash::*;
+pub use result::*;
 pub use types::*;
 pub use utils::*;
-pub use result::*;

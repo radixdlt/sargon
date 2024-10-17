@@ -5,10 +5,9 @@ use sargon::ResourcePreferences as InternalResourcePreferences;
 pub fn resource_preferences_get_hidden_resources(
     resource_preferences: Vec<ResourceAppPreference>,
 ) -> Vec<ResourceIdentifier> {
-    let resource_preferences: InternalResourcePreferences = resource_preferences.into_internal();
-    resource_preferences
-        .get_hidden_resources()
-        .into_type()
+    let resource_preferences: InternalResourcePreferences =
+        resource_preferences.into_internal();
+    resource_preferences.get_hidden_resources().into_type()
 }
 
 #[uniffi::export]

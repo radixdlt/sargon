@@ -1,8 +1,8 @@
 use std::sync::Once;
 
 use crate::prelude::*;
-use sargon::SargonOS as InternalSargonOS;
 use sargon::Bios as InternalBios;
+use sargon::SargonOS as InternalSargonOS;
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
 /// which holds an in-memory Profile and a collection of "clients" which are
@@ -20,10 +20,8 @@ impl SargonOS {
     #[uniffi::constructor]
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
         let internal_bios: InternalBios = bios.as_ref().clone().into();
-        let internal_sargon_os = InternalSargonOS::boot(Arc::new(
-            internal_bios,
-        ))
-        .await;
+        let internal_sargon_os =
+            InternalSargonOS::boot(Arc::new(internal_bios)).await;
         Arc::new(SargonOS {
             wrapped: internal_sargon_os,
         })

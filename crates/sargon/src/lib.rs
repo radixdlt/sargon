@@ -26,8 +26,8 @@ pub mod prelude {
     pub use crate::radix_connect::*;
     pub use crate::signing::*;
     pub use crate::system::*;
-    pub use crate::wrapped_radix_engine_toolkit::*;
     pub use crate::types::*;
+    pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub use radix_rust::prelude::{
         BTreeSet, HashMap, HashSet, IndexMap, IndexSet,

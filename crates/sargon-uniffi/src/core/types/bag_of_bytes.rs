@@ -8,9 +8,7 @@ use sargon::BagOfBytes as InternalBagOfBytes;
 ///
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
-#[derive(
-    Clone, PartialEq, Eq, Default, Hash,
-)]
+#[derive(Clone, PartialEq, Eq, Default, Hash)]
 pub struct BagOfBytes {
     /// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
     /// use `sequence<u8>` because it results in:
@@ -78,7 +76,6 @@ impl crate::UniffiCustomTypeConverter for BagOfBytes {
     }
 }
 
-
 impl From<InternalBagOfBytes> for BagOfBytes {
     fn from(value: InternalBagOfBytes) -> Self {
         value.to_vec().into()
@@ -135,6 +132,34 @@ pub fn new_bag_of_bytes_sample_ecad() -> BagOfBytes {
 #[uniffi::export]
 pub fn new_bag_of_bytes_sample_fade() -> BagOfBytes {
     InternalBagOfBytes::sample_fade().into()
+}
+
+#[uniffi::export]
+pub fn bag_of_bytes_prepend_deadbeef(in_front_of: &BagOfBytes) -> BagOfBytes {
+    in_front_of
+        .into_internal()
+        .prepending(vec![0xde, 0xad, 0xbe, 0xef])
+        .into()
+}
+
+#[uniffi::export]
+pub fn bag_of_bytes_append_deadbeef(to: &BagOfBytes) -> BagOfBytes {
+    to.into_internal()
+        .appending(vec![0xde, 0xad, 0xbe, 0xef])
+        .into()
+}
+
+#[uniffi::export]
+pub fn bag_of_bytes_prepend_cafe(in_front_of: &BagOfBytes) -> BagOfBytes {
+    in_front_of
+        .into_internal()
+        .prepending(vec![0xca, 0xfe])
+        .into()
+}
+
+#[uniffi::export]
+pub fn bag_of_bytes_append_cafe(to: &BagOfBytes) -> BagOfBytes {
+    to.into_internal().appending(vec![0xca, 0xfe]).into()
 }
 
 decl_conversion_tests_for!(BagOfBytes);
