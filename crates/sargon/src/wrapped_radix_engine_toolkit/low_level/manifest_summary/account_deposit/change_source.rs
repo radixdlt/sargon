@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// Created by the visitor, generally references a particular instruction,
+/// or maybe an initial YIELD_TO_PARENT.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum ChangeSource {
     InitialYieldFromParent,

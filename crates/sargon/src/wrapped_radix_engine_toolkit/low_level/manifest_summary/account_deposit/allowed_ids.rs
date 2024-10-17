@@ -1,5 +1,9 @@
 use crate::prelude::*;
 
+/// Represents which ids are possible in a non-fungible balance.
+///
+/// `Any` represents that any id is possible. `Allowlist` represents that
+/// any ids in the balance have to be in the allowlist.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum AllowedIds {
     Allowlist { ids: Vec<NonFungibleLocalId> },

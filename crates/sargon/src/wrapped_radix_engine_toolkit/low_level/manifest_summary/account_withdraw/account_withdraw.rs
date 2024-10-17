@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Represents a withdrawal from an account, either by amount or by specific IDs.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum AccountWithdraw {
     Amount {

@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
-/// Represents the core of an intent in version 2, including the header,
-/// manifest, and message. Used in both Subintent and TransactionIntent.
+/// Represents the core of an intent in V2, including the header, manifest, and message.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]
 pub struct IntentCoreV2 {

@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// Represents the bounds for a simple fungible resource, which can
+/// be exact, at most, at least, between, or unknown amount.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum SimpleFungibleResourceBounds {
     Exact {
