@@ -9,7 +9,7 @@ impl SargonOS {
     pub async fn submit_transaction(
         &self,
         notarized_transaction: NotarizedTransaction,
-    ) -> Result<IntentHash> {
+    ) -> Result<TransactionIntentHash> {
         let network_id = self.current_network_id()?;
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -60,8 +60,10 @@ mod tests {
             .await
             .unwrap();
 
-        let expected_result =
-            notarized_transaction.signed_intent().intent().intent_hash();
+        let expected_result = notarized_transaction
+            .signed_intent()
+            .intent()
+            .transaction_intent_hash();
 
         assert_eq!(result, expected_result);
     }

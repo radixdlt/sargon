@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use native_radix_engine_toolkit::receipt::SerializableToolkitTransactionReceipt;
+use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt;
 
 #[uniffi::export]
 impl GatewayClient {
