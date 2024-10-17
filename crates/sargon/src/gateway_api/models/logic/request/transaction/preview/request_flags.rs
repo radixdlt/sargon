@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 impl TransactionPreviewRequestFlags {
     pub fn new(
-        use_free_credit: bool,
-        assume_all_signature_proofs: bool,
-        skip_epoch_check: bool,
+        use_free_credit: UseFreeCredit,
+        assume_all_signature_proofs: AssumeAllSignatureProofs,
+        skip_epoch_check: SkipEpochCheck,
     ) -> Self {
         Self {
             use_free_credit,
@@ -16,7 +16,11 @@ impl TransactionPreviewRequestFlags {
 
 impl Default for TransactionPreviewRequestFlags {
     fn default() -> Self {
-        Self::new(true, false, false)
+        Self::new(
+            UseFreeCredit::default(),
+            AssumeAllSignatureProofs::default(),
+            SkipEpochCheck::default(),
+        )
     }
 }
 
@@ -28,10 +32,32 @@ mod tests {
     type SUT = TransactionPreviewRequestFlags;
 
     #[test]
-    fn default_value() {
+    fn default_is_use_free_credit() {
+        assert!(SUT::default().use_free_credit.0);
+    }
+
+    #[test]
+    fn default_assume_all_signature_proofs() {
+        assert!(!SUT::default().assume_all_signature_proofs.0);
+    }
+
+    #[test]
+    fn default_skip_epoch_check() {
+        assert!(!SUT::default().skip_epoch_check.0);
+    }
+
+    #[test]
+    fn json_roundtrip() {
         let sut = SUT::default();
-        assert!(sut.use_free_credit);
-        assert!(!sut.assume_all_signature_proofs);
-        assert!(!sut.skip_epoch_check);
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+                "use_free_credit": true,
+                "assume_all_signature_proofs": false,
+                "skip_epoch_check": false
+            }
+            "#,
+        )
     }
 }

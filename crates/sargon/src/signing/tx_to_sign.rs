@@ -31,35 +31,11 @@ impl TXToSign {
         profile: &Profile,
     ) -> Result<Self> {
         let intent_hash = intent.intent_hash().clone();
-        let summary = intent.manifest_summary();
-        let mut entities_requiring_auth: IndexSet<AccountOrPersona> =
-            IndexSet::new();
-
-        let accounts = summary
-            .addresses_of_accounts_requiring_auth
-            .iter()
-            .map(|a| profile.account_by_address(*a))
-            .collect::<Result<Vec<_>>>()?;
-
-        entities_requiring_auth.extend(
-            accounts
-                .into_iter()
-                .map(AccountOrPersona::from)
-                .collect_vec(),
-        );
-
-        let personas = summary
-            .addresses_of_personas_requiring_auth
-            .into_iter()
-            .map(|a| profile.persona_by_address(a))
-            .collect::<Result<Vec<_>>>()?;
-
-        entities_requiring_auth.extend(
-            personas
-                .into_iter()
-                .map(AccountOrPersona::from)
-                .collect_vec(),
-        );
+        let entities_requiring_auth =
+            ExtractorOfEntitiesRequiringAuth::extract(
+                profile,
+                intent.manifest_summary().clone(),
+            )?;
 
         Ok(Self::with(intent_hash, entities_requiring_auth))
     }

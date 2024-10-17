@@ -30,6 +30,18 @@ pub(crate) fn sort_group_factors(
 }
 
 impl SignaturesCollectorPreprocessor {
+    pub(super) fn analyzing_transaction_intents(
+        profile: &Profile,
+        transactions: Vec<TransactionIntent>,
+    ) -> Result<Self> {
+        let transactions = transactions
+            .into_iter()
+            .map(|i| TXToSign::extracting_from_intent_and_profile(&i, profile))
+            .collect::<Result<IndexSet<TXToSign>>>()?;
+
+        Ok(Self::new(transactions))
+    }
+
     pub(super) fn new(transactions: IndexSet<TXToSign>) -> Self {
         Self { transactions }
     }
