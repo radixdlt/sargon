@@ -43,7 +43,6 @@ impl IntentHeaderV2 {
             "End epoch MUST be greater than or equal start epoch."
         );
 
-        // PR comment: should we add additional checks for the proposer timestamps?
         if let (Some(min_ts), Some(max_ts)) = (
             min_proposer_timestamp_inclusive,
             max_proposer_timestamp_exclusive,
