@@ -70,7 +70,7 @@ impl HasSampleValues for IntentSignaturesV2 {
     }
 
     fn sample_other() -> Self {
-        let intent = TransactionIntent::sample_other();
+        let intent = IntentCoreV2::sample_other();
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
@@ -113,5 +113,27 @@ mod tests {
 
         assert!(valid_signatures.validate(valid_hash));
         assert!(!valid_signatures.validate(invalid_hash));
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT, hash: Hash| {
+            let scrypto: ScryptoIntentSignaturesV2 = s.clone().into();
+            SUT::try_from((scrypto, hash)).unwrap()
+        };
+        assert_eq!(
+            SUT::sample(),
+            roundtrip(
+                SUT::sample(),
+                IntentCoreV2::sample().transaction_intent_hash().hash
+            )
+        );
+        assert_eq!(
+            SUT::sample_other(),
+            roundtrip(
+                SUT::sample_other(),
+                IntentCoreV2::sample_other().transaction_intent_hash().hash
+            )
+        );
     }
 }

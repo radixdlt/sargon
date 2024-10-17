@@ -38,6 +38,7 @@ import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
 import com.radixdlt.sargon.transactionManifestBlobs
 import com.radixdlt.sargon.transactionManifestExecutionSummary
 import com.radixdlt.sargon.transactionManifestInstructionsString
+import com.radixdlt.sargon.transactionManifestString
 import com.radixdlt.sargon.transactionManifestInvolvedPoolAddresses
 import com.radixdlt.sargon.transactionManifestInvolvedResourceAddresses
 import com.radixdlt.sargon.transactionManifestNetworkId
@@ -170,6 +171,9 @@ fun TransactionManifest.modifyLockFee(
     addressOfFeePayer: AccountAddress,
     fee: Decimal192?
 ) = modifyManifestLockFee(manifest = this, addressOfFeePayer = addressOfFeePayer, fee = fee)
+
+val TransactionManifest.manifestString: String
+    get() = transactionManifestString(manifest = this)
 
 val TransactionManifest.instructionsString: String
     get() = transactionManifestInstructionsString(manifest = this)

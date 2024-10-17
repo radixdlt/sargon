@@ -15,6 +15,7 @@ import com.radixdlt.sargon.extensions.instructionsString
 import com.radixdlt.sargon.extensions.intId
 import com.radixdlt.sargon.extensions.involvedPoolAddresses
 import com.radixdlt.sargon.extensions.involvedResourceAddresses
+import com.radixdlt.sargon.extensions.manifestString
 import com.radixdlt.sargon.extensions.markingAccountAsDAppDefinitionType
 import com.radixdlt.sargon.extensions.modifyAddGuarantees
 import com.radixdlt.sargon.extensions.modifyLockFee
@@ -554,6 +555,12 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             assertTrue(contains("195"))
             assertTrue(contains(AccountAddress.sampleStokenet().string))
         }
+    }
+
+    @Test
+    fun test_manifest_string() {
+        val manifest = TransactionManifest.sample()
+        assertTrue(manifest.manifestString.contains("CALL_METHOD"))
     }
 
     @Test
