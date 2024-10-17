@@ -46,6 +46,10 @@ impl TransactionIntent {
         )
     }
 
+    pub fn manifest_summary(&self) -> Option<ManifestSummary> {
+        self.manifest.summary()
+    }
+
     pub fn compile(&self) -> BagOfBytes {
         compile_intent(ScryptoIntent::from(self.clone()))
             .expect("Should always be able to compile an Intent")

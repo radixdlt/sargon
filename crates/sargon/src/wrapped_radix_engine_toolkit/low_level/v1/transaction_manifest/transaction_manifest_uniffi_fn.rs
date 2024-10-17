@@ -20,7 +20,11 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
     ))
 }
 
-// TODO: consider exposing manifest_string()
+#[uniffi::export]
+pub fn transaction_manifest_string(manifest: &TransactionManifest) -> String {
+    manifest.manifest_string()
+}
+
 #[uniffi::export]
 pub fn transaction_manifest_instructions_string(
     manifest: &TransactionManifest,
@@ -123,6 +127,14 @@ mod tests {
             ),
             SUT::try_from((unvalidated_transaction_manifest, network_id))
         )
+    }
+
+    #[test]
+    fn test_manifest_string() {
+        assert_eq!(
+            transaction_manifest_string(&SUT::sample()),
+            SUT::sample().manifest_string()
+        );
     }
 
     #[test]

@@ -103,6 +103,16 @@ pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
     Mnemonic::sample_arculus_other()
 }
 
+#[uniffi::export]
+pub fn new_mnemonic_sample_passphrase() -> Mnemonic {
+    Mnemonic::sample_passphrase()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_passphrase_other() -> Mnemonic {
+    Mnemonic::sample_passphrase_other()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -154,9 +164,11 @@ mod uniffi_tests {
                 new_mnemonic_sample_security_questions_other(),
                 new_mnemonic_sample_arculus(),
                 new_mnemonic_sample_arculus_other(),
+                new_mnemonic_sample_passphrase(),
+                new_mnemonic_sample_passphrase_other()
             ])
             .len(),
-            12
+            14
         );
     }
 

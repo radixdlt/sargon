@@ -165,6 +165,10 @@ impl TransactionManifestV2 {
         Some(ManifestSummary::from((summary, self.network_id())))
     }
 
+    pub fn is_enclosed(&self) -> bool {
+        RET_is_enclosed(&self.scrypto_manifest())
+    }
+
     pub fn network_id(&self) -> NetworkID {
         self.secret_magic.instructions.network_id
     }
@@ -207,8 +211,11 @@ mod tests {
     use super::*;
     use crate::prelude::*;
     use radix_rust::hashmap;
-    use radix_transactions::manifest::{DropAllProofs, DropAuthZoneProofs};
+    use radix_transactions::manifest::{
+        CallMethod, DropAllProofs, DropAuthZoneProofs,
+    };
     use radix_transactions::model::InstructionV1;
+    use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifestV2;
@@ -278,12 +285,115 @@ mod tests {
     }
 
     #[test]
+    fn try_from_scrypto() {
+        let instructions = vec![
+            ScryptoInstructionV2::DropAllProofs(DropAllProofs),
+            ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
+        ];
+        let children = vec![
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample().into(),
+            },
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample_other().into(),
+            },
+        ];
+        let scrypto = ScryptoTransactionManifestV2 {
+            instructions: instructions.clone(),
+            blobs: Default::default(),
+            children,
+            object_names: Default::default(),
+        };
+
+        let result = SUT::try_from((scrypto.clone(), NetworkID::Mainnet));
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn manifest_string() {
+        let ins: Vec<ScryptoInstructionV2> = vec![
+            ScryptoInstructionV2::DropAllProofs(DropAllProofs),
+            ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
+        ]
+        .into();
+        let children = vec![
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample().into(),
+            },
+            ScryptoChildSubintent {
+                hash: SubintentHash::sample_other().into(),
+            },
+        ];
+        let scrypto = ScryptoTransactionManifestV2 {
+            instructions: ins.clone(),
+            blobs: Default::default(),
+            children,
+            object_names: Default::default(),
+        };
+        let network_id = NetworkID::Simulator;
+
+        let result = manifest_v2_string_from(scrypto, network_id);
+        pretty_assertions::assert_eq!(
+            result.unwrap(),
+            r#"USE_CHILD
+    NamedIntent("intent1")
+    Intent("subtxid_sim1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6svfetg7")
+;
+USE_CHILD
+    NamedIntent("intent2")
+    Intent("subtxid_sim1v7wlh0dpd5lev6w6s4f2kev562cygmgrm9kqw6swe8w92r4yr7ksuk9pw5")
+;
+DROP_ALL_PROOFS;
+DROP_AUTH_ZONE_PROOFS;
+"#
+        );
+    }
+
+    #[test]
+    fn manifest_v2_string_failure() {
+        let invalid_value = ScryptoManifestValue::Tuple {
+            fields: vec![ScryptoManifestValue::Array {
+                element_value_kind: ScryptoValueKind::U8,
+                elements: vec![
+                    ScryptoManifestValue::U8 { value: 1 },
+                    ScryptoManifestValue::U16 { value: 2 },
+                ],
+            }],
+        };
+        let dummy_address = ComponentAddress::with_node_id_bytes(
+            &[0xffu8; 29],
+            NetworkID::Stokenet,
+        );
+        let invalid_instruction =
+            ScryptoInstructionV2::CallMethod(CallMethod {
+                address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                    &dummy_address,
+                )
+                .unwrap()
+                .into(),
+                method_name: "dummy".to_owned(),
+                args: invalid_value,
+            });
+        let scrypto_manifest = ScryptoTransactionManifestV2 {
+            instructions: vec![invalid_instruction],
+            blobs: Default::default(),
+            children: Default::default(),
+            object_names: Default::default(),
+        };
+        let network_id = NetworkID::Mainnet;
+
+        let result = manifest_v2_string_from(scrypto_manifest, network_id);
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidManifestFailedToDecompile {
+                underlying: "FormattingError(Error)".to_string(),
+            })
+        )
+    }
+
+    #[test]
     fn new_from_instructions_string() {
-        let instructions_str = r#"CALL_METHOD
-        Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
-        "lock_fee"
-        Decimal("500");
-                "#;
+        let instructions_str = "CALL_METHOD\n    Address(\"account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q\")\n    \"lock_fee\"\n    Decimal(\"500\")\n;\n";
 
         assert_eq!(
             SUT::new(
@@ -293,9 +403,8 @@ mod tests {
                 ChildIntents::empty()
             )
             .unwrap()
-            .instructions()
-            .len(),
-            1
+            .instructions_string(),
+            instructions_str
         );
     }
 
@@ -450,5 +559,22 @@ mod tests {
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();
         assert_eq!(pool_addresses, ["pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830"].into_iter().map(PoolAddress::from).collect_vec());
+    }
+
+    #[test]
+    fn sargon_built() {
+        let builder = ScryptoTransactionManifestV2Builder::new_v2()
+            .lock_fee_from_faucet();
+
+        assert_eq!(
+            SUT::sargon_built(builder, NetworkID::Mainnet,).manifest_string(),
+            "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\n",
+        )
+    }
+
+    #[test]
+    fn is_enclosed_false() {
+        let manifest = SUT::sample();
+        assert_eq!(manifest.is_enclosed(), false);
     }
 }

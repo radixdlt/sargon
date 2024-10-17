@@ -14,7 +14,7 @@ impl TransactionManifest {
         let network_definition = self.network_id().network_definition();
         let receipt = serde_json::from_str::<
             ScryptoSerializableToolkitTransactionReceipt,
-        >(&engine_toolkit_receipt.as_ref())
+        >(engine_toolkit_receipt.as_ref())
         .ok()
         .and_then(|receipt| {
             receipt

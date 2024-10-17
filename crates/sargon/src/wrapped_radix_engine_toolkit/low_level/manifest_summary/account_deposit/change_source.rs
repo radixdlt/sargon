@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// Created by the visitor, generally references a particular instruction,
+/// or maybe an initial YIELD_TO_PARENT.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum ChangeSource {
     InitialYieldFromParent,
@@ -87,5 +89,21 @@ mod tests {
             instruction_index: 1,
         };
         assert_eq!(SUT::from(scrypto), SUT::sample_other());
+    }
+
+    #[test]
+    fn from_scrypto_new_bucket() {
+        let scrypto = ScryptoChangeSource::NewBucket {
+            instruction_index: 1,
+        };
+        assert_eq!(SUT::from(scrypto), SUT::new_bucket(1));
+    }
+
+    #[test]
+    fn from_scrypto_assertion() {
+        let scrypto = ScryptoChangeSource::Assertion {
+            instruction_index: 1,
+        };
+        assert_eq!(SUT::from(scrypto), SUT::assertion(1));
     }
 }

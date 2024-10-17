@@ -9,6 +9,7 @@ import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.OffDeviceMnemonicFactorSource
+import com.radixdlt.sargon.PassphraseFactorSource
 import com.radixdlt.sargon.SecurityQuestionsNotProductionReadyFactorSource
 import com.radixdlt.sargon.TrustedContactFactorSource
 import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
@@ -25,6 +26,7 @@ val FactorSource.id: FactorSourceId
         is FactorSource.OffDeviceMnemonic -> value.id.asGeneral()
         is FactorSource.SecurityQuestions -> value.id.asGeneral()
         is FactorSource.TrustedContact -> value.id.asGeneral()
+        is FactorSource.Passphrase -> value.id.asGeneral()
     }
 
 val FactorSource.kind: FactorSourceKind
@@ -35,6 +37,7 @@ val FactorSource.kind: FactorSourceKind
         is FactorSource.OffDeviceMnemonic -> value.kind
         is FactorSource.SecurityQuestions -> value.kind
         is FactorSource.TrustedContact -> value.kind
+        is FactorSource.Passphrase -> value.kind
     }
 
 fun DeviceFactorSource.asGeneral() = FactorSource.Device(value = this)
@@ -89,4 +92,7 @@ val SecurityQuestionsNotProductionReadyFactorSource.kind: FactorSourceKind
 
 val TrustedContactFactorSource.kind: FactorSourceKind
     get() = FactorSourceKind.TRUSTED_CONTACT
+
+val PassphraseFactorSource.kind: FactorSourceKind
+    get() = FactorSourceKind.PASSPHRASE
 

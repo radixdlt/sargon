@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Represents the bounds for a simple non-fungible resource, which can be either exact or not exact.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum SimpleNonFungibleResourceBounds {
     Exact {
@@ -152,5 +153,43 @@ mod tests {
             allowed_ids: ScryptoAllowedIds::Any,
         };
         assert_eq!(SUT::from(scrypto), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_certain_ids_exact() {
+        let exact = SUT::exact(
+            Decimal::from(100),
+            vec![
+                NonFungibleLocalId::sample(),
+                NonFungibleLocalId::sample_other(),
+            ],
+        );
+        assert_eq!(
+            exact.certain_ids(),
+            vec![
+                NonFungibleLocalId::sample(),
+                NonFungibleLocalId::sample_other()
+            ]
+        )
+    }
+
+    #[test]
+    fn test_certain_ids_not_exact() {
+        let not_exact = SUT::not_exact(
+            vec![
+                NonFungibleLocalId::sample(),
+                NonFungibleLocalId::sample_other(),
+            ],
+            LowerBound::sample(),
+            UpperBound::sample(),
+            AllowedIds::sample(),
+        );
+        assert_eq!(
+            not_exact.certain_ids(),
+            vec![
+                NonFungibleLocalId::sample(),
+                NonFungibleLocalId::sample_other()
+            ]
+        )
     }
 }

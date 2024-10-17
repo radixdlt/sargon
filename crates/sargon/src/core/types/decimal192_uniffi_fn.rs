@@ -476,10 +476,10 @@ mod uniffi_tests {
         let sut = new_decimal_from_f32(f);
         assert_eq!(sut.to_string(), "208050.17");
         assert_eq!(
-            SUT::try_from(f32::MAX).unwrap().to_string(),
+            SUT::from(f32::MAX).to_string(),
             "340282350000000000000000000000000000000"
         );
-        assert_eq!(SUT::try_from(f32::MIN_POSITIVE).unwrap().to_string(), "0");
+        assert_eq!(SUT::from(f32::MIN_POSITIVE).to_string(), "0");
     }
 
     #[test]

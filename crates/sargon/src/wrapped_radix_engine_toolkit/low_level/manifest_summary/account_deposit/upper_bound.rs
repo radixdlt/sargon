@@ -1,5 +1,10 @@
 use crate::prelude::*;
 
+/// Represents an upper bound on a non-negative decimal.
+///
+/// `Unbounded` represents an upper bound above any possible decimal, and is included for
+/// clarity of intention. Considering Decimal has a max size, it is effectively equivalent to
+/// an inclusive bound of Decimal::MAX.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum UpperBound {
     Inclusive { decimal: Decimal },

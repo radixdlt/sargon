@@ -436,4 +436,27 @@ mod tests {
             "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>".to_string()
         );
     }
+
+    #[test]
+    fn test_resource_address_to_scrypto() {
+        let resource_address = ResourceAddress::sample();
+        let scrypto: ScryptoResourceAddress = (&resource_address).into();
+        assert_eq!(
+            scrypto,
+            ScryptoResourceAddress::try_from(resource_address.node_id())
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn from_str_invalid_non_fungible_global_id() {
+        let invalid = "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:invalid";
+        let result = NonFungibleGlobalId::from_str(invalid);
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidNonFungibleGlobalID {
+                bad_value: invalid.to_owned()
+            })
+        );
+    }
 }

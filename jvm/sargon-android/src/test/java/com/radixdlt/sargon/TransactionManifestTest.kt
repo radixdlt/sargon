@@ -15,6 +15,7 @@ import com.radixdlt.sargon.extensions.instructionsString
 import com.radixdlt.sargon.extensions.intId
 import com.radixdlt.sargon.extensions.involvedPoolAddresses
 import com.radixdlt.sargon.extensions.involvedResourceAddresses
+import com.radixdlt.sargon.extensions.manifestString
 import com.radixdlt.sargon.extensions.markingAccountAsDAppDefinitionType
 import com.radixdlt.sargon.extensions.modifyAddGuarantees
 import com.radixdlt.sargon.extensions.modifyLockFee
@@ -557,6 +558,12 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     }
 
     @Test
+    fun test_manifest_string() {
+        val manifest = TransactionManifest.sample()
+        assertTrue(manifest.manifestString.contains("CALL_METHOD"))
+    }
+
+    @Test
     fun test_involved_resource_addresses() {
         assertEquals(
             listOf(ResourceAddress.sampleMainnet.xrd),
@@ -574,11 +581,10 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     @Test
     fun test_summary() {
+        val summary = TransactionManifest.sample().summary
         assertEquals(
             listOf(AccountAddress.sampleMainnet()),
-            TransactionManifest.sample()
-                .summary
-                .addressesOfAccountsWithdrawnFrom
+            summary?.addressesOfAccountsWithdrawnFrom
         )
     }
 

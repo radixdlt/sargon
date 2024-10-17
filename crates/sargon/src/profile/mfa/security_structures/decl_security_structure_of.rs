@@ -79,18 +79,38 @@ macro_rules! decl_role_with_factors {
             }
 
             impl [< $role RoleWith $factor s >] {
+                // # Panics
+                /// Panics if threshold > threshold_factor.len()
+                ///
+                /// Panics if the same factor is present in both lists
                 pub fn new(
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
-                ) -> Self {
-                    let _self = Self {
-                        threshold_factors: threshold_factors.into_iter().collect(),
+                ) -> Result<Self> {
+                    let threshold_factors = threshold_factors.into_iter().collect_vec();
+
+                    if threshold_factors.len() < threshold as usize {
+                        return Err(CommonError::InvalidSecurityStructureThresholdExceedsFactors {
+                            threshold,
+                            factors: threshold_factors.len() as u8
+                        })
+                    }
+
+                    let override_factors = override_factors.into_iter().collect_vec();
+
+                    if !HashSet::<$factor>::from_iter(threshold_factors.clone())
+                            .intersection(&HashSet::<$factor>::from_iter(override_factors.clone()))
+                            .collect_vec()
+                            .is_empty() {
+                        return Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
+                    }
+
+                    Ok(Self {
+                        threshold_factors,
                         threshold,
-                        override_factors: override_factors.into_iter().collect(),
-                    };
-                    assert!(_self.threshold_factors.len() >= _self.threshold as usize);
-                    _self
+                        override_factors,
+                    })
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {

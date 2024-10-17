@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.radixdlt.sargon.Profile
+import com.radixdlt.sargon.ProfileId
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.Uuid
@@ -51,7 +52,7 @@ class AndroidStorageDriverTest {
         val sut = sut(testContext, backgroundScope)
         val profile = Profile.sample()
         val jsonBytes = bagOfBytes(profile.toJson())
-        val key = SecureStorageKey.ProfileSnapshot
+        val key = SecureStorageKey.ProfileSnapshot(profileId = ProfileId.randomUUID())
         sut.saveData(key, jsonBytes)
 
         val receivedBytes = sut.loadData(key)
@@ -67,7 +68,7 @@ class AndroidStorageDriverTest {
         val sut = sut(testContext, backgroundScope)
         val profile = Profile.sample()
         val jsonBytes = bagOfBytes(profile.toJson())
-        val key = SecureStorageKey.ProfileSnapshot
+        val key = SecureStorageKey.ProfileSnapshot(profileId = ProfileId.randomUUID())
         sut.saveData(key, jsonBytes)
         assertEquals(
             profile,

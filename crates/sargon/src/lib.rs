@@ -3,6 +3,7 @@
 #![feature(core_intrinsics)]
 #![allow(unused_imports)]
 #![allow(internal_features)]
+#![feature(iter_repeat_n)]
 
 mod core;
 mod gateway_api;
@@ -10,6 +11,7 @@ mod hierarchical_deterministic;
 mod home_cards;
 mod profile;
 mod radix_connect;
+mod signing;
 mod system;
 mod types;
 mod wrapped_radix_engine_toolkit;
@@ -22,7 +24,9 @@ pub mod prelude {
     pub use crate::home_cards::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
+    pub use crate::signing::*;
     pub use crate::system::*;
+    pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use radix_rust::prelude::{
@@ -34,6 +38,7 @@ pub mod prelude {
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
     pub(crate) use log::{debug, error, info, trace, warn};
+    pub(crate) use once_cell::sync::Lazy;
     pub(crate) use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
         Serializer,
@@ -44,6 +49,7 @@ pub mod prelude {
     pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
+    pub(crate) use std::cell::RefCell;
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
     pub(crate) use std::fmt::{Debug, Display, Formatter};
@@ -163,6 +169,7 @@ pub mod prelude {
             ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
             NewManifestBucket as ScryptoNewManifestBucket,
+            PartialTransactionV2Builder as ScryptoPartialTransactionV2Builder,
             ResolvableArguments as ScryptoResolvableArguments,
             ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
@@ -263,7 +270,11 @@ pub mod prelude {
                     hash as ret_hash_intent_core_v2,
                     to_payload_bytes as RET_intent_to_payload_bytes_v2,
                 },
-                manifest::statically_analyze as RET_statically_analyze_v2,
+                manifest::{
+                    dynamically_analyze as RET_dynamically_analyze_v2,
+                    is_enclosed as RET_is_enclosed,
+                    statically_analyze as RET_statically_analyze_v2,
+                },
                 notarized_transaction::{
                     from_payload_bytes as RET_decompile_notarize_tx_v2,
                     to_payload_bytes as RET_compile_notarized_tx_v2,
