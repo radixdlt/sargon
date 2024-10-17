@@ -29,42 +29,8 @@ pub(crate) fn sort_group_factors(
         .collect::<IndexSet<_>>()
 }
 
-pub struct ExtractorOfInstancesRequiredToSignTransactions;
-impl ExtractorOfInstancesRequiredToSignTransactions {
-    pub fn extract(
-        profile: &Profile,
-        transactions: Vec<TransactionIntent>,
-        for_any_securified_entity_select_role: RoleKind,
-    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-        let preprocessor =
-            SignaturesCollectorPreprocessor::analyzing_transaction_intents(
-                profile,
-                transactions,
-            )?;
-        let (petitions, _) = preprocessor.preprocess(
-            IndexSet::from_iter(profile.factor_sources.iter()),
-            for_any_securified_entity_select_role,
-        );
-
-        let factor_instances = petitions
-            .txid_to_petition
-            .borrow()
-            .values()
-            .flat_map(|p| {
-                p.for_entities
-                    .borrow()
-                    .values()
-                    .flat_map(|p| p.all_factor_instances())
-                    .collect::<Vec<_>>()
-            })
-            .map(|p| p.factor_instance().clone())
-            .collect::<IndexSet<HierarchicalDeterministicFactorInstance>>();
-        Ok(factor_instances)
-    }
-}
-
 impl SignaturesCollectorPreprocessor {
-    fn analyzing_transaction_intents(
+    pub(super) fn analyzing_transaction_intents(
         profile: &Profile,
         transactions: Vec<TransactionIntent>,
     ) -> Result<Self> {
