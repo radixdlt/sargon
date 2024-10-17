@@ -11,13 +11,13 @@ impl AuthenticationSigner {
         interactor: Arc<dyn AuthenticationSigningInteractor>,
         profile: &Profile,
         address_of_entity: AddressOfAccountOrPersona,
-        challenge: DappToWalletInteractionAuthChallengeNonce,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
         metadata: DappToWalletInteractionMetadata,
     ) -> Result<Self> {
         let input = AuthenticationSigningInput::try_from_profile(
             profile,
             address_of_entity,
-            challenge,
+            challenge_nonce,
             metadata
         )?;
 
@@ -30,7 +30,7 @@ impl AuthenticationSigner {
     pub async fn sign(self) -> Result<WalletToDappInteractionAuthProof> {
         self.interactor.sign(
             self.input.clone().into()
-        ).await.map(|r| WalletToDappInteractionAuthProof::from(r))
+        ).await.map(WalletToDappInteractionAuthProof::from)
     }
 
 }
@@ -57,9 +57,9 @@ mod test {
             AddressOfAccountOrPersona::from(account.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-        );
+        ).unwrap();
 
-        let result = sut.unwrap().sign().await.unwrap();
+        let result = sut.sign().await.unwrap();
 
         assert_eq!(
             result,
@@ -90,9 +90,9 @@ mod test {
             AddressOfAccountOrPersona::from(persona.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-        );
+        ).unwrap();
 
-        let result = sut.unwrap().sign().await.unwrap();
+        let result = sut.sign().await.unwrap();
 
         assert_eq!(
             result,
@@ -123,9 +123,9 @@ mod test {
             AddressOfAccountOrPersona::from(persona.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-        );
+        ).unwrap();
 
-        let result = sut.unwrap().sign().await;
+        let result = sut.sign().await;
 
         assert!(result.is_err());
     }
