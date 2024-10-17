@@ -40,7 +40,7 @@ mod uniffi_tests {
             );
         pretty_assertions::assert_eq!(
             sut.transaction_manifest_string,
-            transaction_manifest.instructions_string()
+            transaction_manifest.manifest_string()
         );
         pretty_assertions::assert_eq!(
             sut.blobs,

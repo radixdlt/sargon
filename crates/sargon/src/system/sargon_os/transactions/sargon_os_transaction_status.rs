@@ -9,7 +9,7 @@ impl SargonOS {
     /// Polls the state of a Transaction until we can determine its `TransactionStatus`.
     pub async fn poll_transaction_status(
         &self,
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
     ) -> Result<TransactionStatus> {
         let (status, _) = self
             .poll_transaction_status_with_delays(intent_hash)
@@ -28,7 +28,7 @@ impl SargonOS {
     /// It returns the `TransactionStatus`, but also the list of delays between each poll.
     async fn poll_transaction_status_with_delays(
         &self,
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
     ) -> Result<(TransactionStatus, Vec<u64>)> {
         let network_id = self.current_network_id()?;
         let gateway_client = GatewayClient::new(
@@ -191,7 +191,7 @@ mod tests {
                 .unwrap();
 
         let result = os
-            .poll_transaction_status(IntentHash::sample())
+            .poll_transaction_status(TransactionIntentHash::sample())
             .await
             .expect_err("Expected an error");
 
@@ -213,7 +213,7 @@ mod tests {
                 .unwrap()
                 .unwrap();
 
-        os.poll_transaction_status_with_delays(IntentHash::sample())
+        os.poll_transaction_status_with_delays(TransactionIntentHash::sample())
             .await
             .unwrap()
     }

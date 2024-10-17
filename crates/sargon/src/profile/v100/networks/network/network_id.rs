@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::borrow::Cow;
 
 #[derive(
     Serialize_repr,
@@ -99,7 +100,7 @@ impl NetworkID {
     /// Name, most not be changed, i.e. cannot capitalized, is used
     /// by app to validate against Gateway
     pub fn logical_name(&self) -> String {
-        self.network_definition().logical_name
+        self.network_definition().logical_name.to_string()
     }
 
     /// Returns collection of all by Sargon known network ids.
@@ -140,23 +141,23 @@ impl NetworkID {
             Zabanet => ScryptoNetworkDefinition::zabanet(),
             Enkinet => ScryptoNetworkDefinition {
                 id: Enkinet.discriminant(),
-                logical_name: String::from("enkinet"),
-                hrp_suffix: String::from("tdx_21_"),
+                logical_name: Cow::Borrowed("enkinet"),
+                hrp_suffix: Cow::Borrowed("tdx_21_"),
             },
             Hammunet => ScryptoNetworkDefinition {
                 id: Hammunet.discriminant(),
-                logical_name: String::from("hammunet"),
-                hrp_suffix: String::from("tdx_22_"),
+                logical_name: Cow::Borrowed("hammunet"),
+                hrp_suffix: Cow::Borrowed("tdx_22_"),
             },
             Nergalnet => ScryptoNetworkDefinition {
                 id: Nebunet.discriminant(),
-                logical_name: String::from("nergalnet"),
-                hrp_suffix: String::from("tdx_24_"),
+                logical_name: Cow::Borrowed("nergalnet"),
+                hrp_suffix: Cow::Borrowed("tdx_24_"),
             },
             Mardunet => ScryptoNetworkDefinition {
                 id: Mardunet.discriminant(),
-                logical_name: String::from("mardunet"),
-                hrp_suffix: String::from("tdx_24_"),
+                logical_name: Cow::Borrowed("mardunet"),
+                hrp_suffix: Cow::Borrowed("tdx_24_"),
             },
             NetworkID::Simulator => ScryptoNetworkDefinition::simulator(),
         }

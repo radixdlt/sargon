@@ -10,7 +10,7 @@ pub(crate) struct PetitionForEntity {
     pub(crate) entity: AddressOfAccountOrPersona,
 
     /// Index and hash of transaction
-    pub(crate) intent_hash: IntentHash,
+    pub(crate) intent_hash: TransactionIntentHash,
 
     /// Petition with threshold factors
     pub(crate) threshold_factors: Option<RefCell<PetitionForFactors>>,
@@ -21,7 +21,7 @@ pub(crate) struct PetitionForEntity {
 
 impl PetitionForEntity {
     pub(super) fn new(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         entity: AddressOfAccountOrPersona,
         threshold_factors: impl Into<Option<PetitionForFactors>>,
         override_factors: impl Into<Option<PetitionForFactors>>,
@@ -40,7 +40,7 @@ impl PetitionForEntity {
     }
 
     pub(crate) fn new_from_entity(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         entity: AccountOrPersona,
         if_securified_select_role: RoleKind,
     ) -> Self {
@@ -71,7 +71,7 @@ impl PetitionForEntity {
 
     /// Creates a new Petition from an entity which is securified, i.e. has a matrix of factors.
     pub(crate) fn new_securified(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         entity: AddressOfAccountOrPersona,
         role_with_factor_instances: GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
@@ -90,7 +90,7 @@ impl PetitionForEntity {
 
     /// Creates a new Petition from an entity which is unsecurified, i.e. has a single factor.
     pub(crate) fn new_unsecurified(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         entity: AddressOfAccountOrPersona,
         instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
@@ -368,7 +368,7 @@ impl PetitionForEntity {
 impl PetitionForEntity {
     fn from_entity_with_role_kind(
         entity: impl Into<AccountOrPersona>,
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         role_kind: RoleKind,
     ) -> Self {
         let entity = entity.into();
@@ -402,7 +402,7 @@ impl HasSampleValues for PetitionForEntity {
                     ))
                 },
             ),
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             RoleKind::Primary,
         )
     }
@@ -415,7 +415,7 @@ impl HasSampleValues for PetitionForEntity {
                     CAP26EntityKind::Account,
                 ),
             ),
-            IntentHash::sample_other(),
+            TransactionIntentHash::sample_other(),
             RoleKind::Primary,
         )
     }
@@ -440,7 +440,10 @@ mod tests {
         let matrix =
             GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]);
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
-        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
         let sut = Sut::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
@@ -467,7 +470,10 @@ mod tests {
                 [d0.clone(), d1.clone()]
             );
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
-        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
         let sut = Sut::new_securified(tx.clone(), entity, matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d0.factor_source_id()),
@@ -492,7 +498,10 @@ mod tests {
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
-        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
         let sut = Sut::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
@@ -519,7 +528,10 @@ mod tests {
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
-        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
         let sut = Sut::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut
@@ -548,7 +560,10 @@ mod tests {
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
-        let tx = IntentHash::new(Hash::sample_third(), NetworkID::Mainnet);
+        let tx = TransactionIntentHash::new(
+            Hash::sample_third(),
+            NetworkID::Mainnet,
+        );
         let sut = Sut::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut.invalid_transaction_if_neglected_factors(
@@ -569,7 +584,7 @@ mod tests {
     )]
     fn invalid_empty_factors() {
         Sut::new(
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             AddressOfAccountOrPersona::sample(),
             None,
             None,
@@ -623,7 +638,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn cannot_add_same_signature_twice() {
-        let intent_hash = IntentHash::sample();
+        let intent_hash = TransactionIntentHash::sample();
         let entity = Account::sample_securified_mainnet(
             "Alice",
             AccountAddress::sample(),

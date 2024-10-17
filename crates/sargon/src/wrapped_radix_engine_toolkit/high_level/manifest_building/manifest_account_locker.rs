@@ -17,7 +17,7 @@ impl TransactionManifest {
         claimant: &AccountAddress,
         claimable_resources: Vec<AccountLockerClaimableResource>,
     ) -> Self {
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
         let claimant_arg: ScryptoComponentAddress = (*claimant).into();
         let claimable_resources =
@@ -87,7 +87,7 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use radix_transactions::manifest::ast::ValueKind::ResourceAddress;
+    use radix_common::prelude::ResourceAddress;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;

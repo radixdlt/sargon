@@ -876,7 +876,7 @@ mod wallet_to_dapp_interaction_tests {
                 WalletInteractionId::from_str("c42f8825-4bbb-4ce2-a646-776b529e2f51").unwrap(),
                 WalletToDappInteractionResponseItems::Transaction(
                     WalletToDappInteractionTransactionResponseItems::new(
-                    IntentHash::from_str("txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n")
+                    TransactionIntentHash::from_str("txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n")
                     .unwrap(),
                 ),
             )

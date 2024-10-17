@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// a set of neglected factors (might be empty).
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct PetitionTransactionOutcome {
-    intent_hash: IntentHash,
+    intent_hash: TransactionIntentHash,
     pub(crate) transaction_valid: bool,
     pub(crate) signatures: IndexSet<HDSignature>,
     pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
@@ -18,7 +18,7 @@ impl PetitionTransactionOutcome {
     /// match `intent_hash`
     pub(crate) fn new(
         transaction_valid: bool,
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         signatures: IndexSet<HDSignature>,
         neglected_factors: IndexSet<NeglectedFactor>,
     ) -> Self {
@@ -48,7 +48,7 @@ mod tests {
     fn panic() {
         Sut::new(
             true,
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             IndexSet::just(HDSignature::sample_other()),
             IndexSet::new(),
         );

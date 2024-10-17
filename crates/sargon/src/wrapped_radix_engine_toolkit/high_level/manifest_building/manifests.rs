@@ -5,7 +5,7 @@ impl TransactionManifest {
         include_lock_fee_instruction: bool,
         address_of_receiving_account: &AccountAddress,
     ) -> Self {
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
 
         if include_lock_fee_instruction {
             builder = builder.lock_fee_from_faucet()
@@ -48,11 +48,11 @@ impl TransactionManifest {
     }
 
     fn account_withdraw_non_fungibles(
-        builder: ScryptoManifestBuilder,
+        builder: ScryptoTransactionManifestBuilder,
         owner: &AccountAddress,
         resource_address: &ResourceAddress,
         non_fungible_local_ids: &[NonFungibleLocalId],
-    ) -> ScryptoManifestBuilder {
+    ) -> ScryptoTransactionManifestBuilder {
         builder.withdraw_non_fungibles_from_account(
             owner,
             resource_address,
@@ -79,7 +79,7 @@ impl TransactionManifest {
         }
         let xrd_address = &ResourceAddress::xrd_on_network(network_id);
 
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
 
         let bucket_factory = BucketFactory::default();
 
@@ -126,7 +126,7 @@ impl TransactionManifest {
     where
         A: IntoScryptoAddress,
     {
-        let builder = ScryptoManifestBuilder::new().set_metadata(
+        let builder = ScryptoTransactionManifestBuilder::new().set_metadata(
             address.scrypto(),
             key,
             value,
@@ -306,7 +306,7 @@ mod tests {
         // since the account address is on stokenet!
         assert_eq!(
             manifest
-                .instructions_string()
+                .manifest_string()
                 .contains(&validator_address.address()),
             false
         );
@@ -314,7 +314,7 @@ mod tests {
         // However, if we map the validator_address -> same network as owner
         // THAT address should indeed be present!
         assert_eq!(
-            manifest.instructions_string().contains(
+            manifest.manifest_string().contains(
                 &validator_address
                     .map_to_network(owner_address.network_id())
                     .address()
