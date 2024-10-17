@@ -50,9 +50,11 @@ impl TransactionIntent {
         self.manifest.summary()
     }
 
-    pub fn compile(&self) -> BagOfBytes {
-        compile_intent(ScryptoIntent::from(self.clone()))
-            .expect("Should always be able to compile an Intent")
+    pub fn compile(&self) -> CompiledTransactionIntent {
+        let bytes = compile_intent(ScryptoIntent::from(self.clone()))
+            .expect("Should always be able to compile an Intent");
+
+        CompiledTransactionIntent(bytes)
     }
 }
 

@@ -219,7 +219,11 @@ pub mod prelude {
                 decompile as RET_decompile_instructions,
                 extract_addresses as RET_ins_extract_addresses,
             },
-            intent::{compile as RET_intent_compile, hash as ret_hash_intent},
+            intent::{
+                compile as RET_intent_compile,
+                decompile as RET_decompile_intent,
+                hash as ret_hash_intent
+            },
             manifest::summary as RET_summary,
             notarized_transaction::{
                 compile as RET_compile_notarized_tx,
