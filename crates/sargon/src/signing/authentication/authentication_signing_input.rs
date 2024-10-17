@@ -26,7 +26,7 @@ impl AuthenticationSigningInput {
     pub fn try_from_profile(
         profile: &Profile,
         address_of_entity: AddressOfAccountOrPersona,
-        challenge: DappToWalletInteractionAuthChallengeNonce,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
         metadata: DappToWalletInteractionMetadata,
     ) -> Result<Self> {
         let security_state = match address_of_entity {
@@ -54,7 +54,7 @@ impl AuthenticationSigningInput {
         );
 
         let challenge = RolaChallenge::from_request(
-            challenge,
+            challenge_nonce,
             metadata
         )?;
 

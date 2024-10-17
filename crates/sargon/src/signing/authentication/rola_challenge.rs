@@ -37,7 +37,7 @@ impl HasSampleValues for RolaChallenge {
 
 impl RolaChallenge {
 
-    /// Constructs a payload to sign in conjunction with the `challenge` received and
+    /// Constructs a payload to sign in conjunction with the `challenge_nonce` received and
     /// the `metadata` of the dApp that sent the request.
     ///
     /// The logic of constructing the payload is as follows:
@@ -49,7 +49,7 @@ impl RolaChallenge {
     ///
     /// Fails if the `origin` Url is not a valid url
     pub fn from_request(
-        challenge: DappToWalletInteractionAuthChallengeNonce,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
         metadata: DappToWalletInteractionMetadata,
     ) -> Result<Self> {
         TryInto::<Url>::try_into(metadata.origin.clone())?;
@@ -60,7 +60,7 @@ impl RolaChallenge {
 
         let mut payload = Vec::<u8>::new();
         payload.push(ROLA_PREFIX);
-        payload.extend(challenge.0.bytes());
+        payload.extend(challenge_nonce.0.bytes());
         payload.push(metadata.dapp_definition_address.address().len() as u8);
         payload.extend(metadata.dapp_definition_address.address().bytes());
         payload.extend(origin_str.as_bytes());
