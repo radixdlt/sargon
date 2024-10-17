@@ -25,6 +25,7 @@ mod rounding_mode;
 mod safe_to_log;
 mod secret_bytes;
 mod signatures;
+mod version_type;
 
 pub use appearance_id::*;
 pub use appearance_id_uniffi_fn::*;
@@ -53,3 +54,4 @@ pub use rounding_mode::*;
 pub use safe_to_log::*;
 pub use secret_bytes::*;
 pub use signatures::*;
+pub use version_type::*;
