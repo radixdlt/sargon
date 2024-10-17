@@ -36,7 +36,9 @@ pub fn transaction_manifest_network_id_v2(
 }
 
 #[uniffi::export]
-pub fn transaction_manifest_blobs_v2(manifest: &TransactionManifestV2) -> Blobs {
+pub fn transaction_manifest_blobs_v2(
+    manifest: &TransactionManifestV2,
+) -> Blobs {
     manifest.blobs().clone()
 }
 
