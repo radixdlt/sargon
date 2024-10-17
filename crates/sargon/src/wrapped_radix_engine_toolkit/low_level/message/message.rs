@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash)]
 pub enum Message {
     PlainText { plaintext: PlaintextMessage },
     None,

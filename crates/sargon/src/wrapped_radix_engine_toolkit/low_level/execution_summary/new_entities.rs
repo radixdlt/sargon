@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Information on the global entities created in the transaction.
-#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct NewEntities {
     pub metadata: HashMap<ResourceAddress, NewlyCreatedResource>,
 }

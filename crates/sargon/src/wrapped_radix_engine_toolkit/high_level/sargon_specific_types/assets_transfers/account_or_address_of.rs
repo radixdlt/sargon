@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[allow(clippy::large_enum_variant)] // we cannot Box<Account>, since Box is not UniFFI compatible.
 pub enum AccountOrAddressOf {
     ProfileAccount { value: Account },

@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
-// Generate the FfiConverter needed by UniFFI for newtype `BIP39Passphrase`.
-uniffi::custom_newtype!(BIP39Passphrase, String);
-
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
 #[derive(
@@ -122,14 +119,6 @@ mod tests {
             format!("{:?}", SUT::default().non_sensitive()),
             format!("{:?}", "<EMPTY>")
         );
-    }
-
-    #[test]
-    fn uniffi_record() {
-        #[derive(uniffi::Record)]
-        struct UniffiRecordAssertCompilesBIP39Passphrase {
-            inner: SUT,
-        }
     }
 
     #[test]

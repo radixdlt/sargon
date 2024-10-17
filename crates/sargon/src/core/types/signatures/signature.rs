@@ -12,7 +12,6 @@ use crate::prelude::*;
     Ord,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Enum,
 )]
 pub enum Signature {
     Secp256k1 { value: Secp256k1Signature },

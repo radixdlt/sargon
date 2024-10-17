@@ -13,7 +13,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum NetworkID {
@@ -76,6 +75,16 @@ pub enum NetworkID {
 
     /// Simulator (0xf2 / 0d242)
     Simulator = 242,
+}
+
+impl HasSampleValues for NetworkID {
+    fn sample() -> Self {
+        NetworkID::Mainnet
+    }
+
+    fn sample_other() -> Self {
+        NetworkID::Stokenet
+    }
 }
 
 impl Default for NetworkID {

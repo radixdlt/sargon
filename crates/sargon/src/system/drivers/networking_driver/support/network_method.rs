@@ -1,15 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    strum::EnumString,
-    strum::Display,
-    uniffi::Enum,
+    Clone, Copy, Debug, PartialEq, Eq, Hash, strum::EnumString, strum::Display,
 )]
 #[strum(serialize_all = "UPPERCASE")]
 pub enum NetworkMethod {

@@ -3,7 +3,6 @@ use crate::prelude::*;
 // ==================
 // Get Current Gateway/Network
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Returns the id of the Network of the current Gateway set in AppPreferences
     /// of the active Profile. This is the canonical value of "current network",
@@ -35,7 +34,6 @@ impl SargonOS {
 // ==================
 // Change Current Gateway
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Changes the current Gateway to `to`, if it is not already the current.
     /// Returns the outcome of the change, if we did in fact switch (current != to),

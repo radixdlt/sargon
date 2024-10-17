@@ -16,7 +16,6 @@ use crate::prelude::*;
     Ord,
     enum_iterator::Sequence,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum EntityFlag {

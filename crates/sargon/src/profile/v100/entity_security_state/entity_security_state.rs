@@ -4,15 +4,7 @@ use crate::prelude::*;
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    EnumAsInner,
-    uniffi::Enum,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, EnumAsInner,
 )]
 #[serde(untagged, remote = "Self")]
 pub enum EntitySecurityState {

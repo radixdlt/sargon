@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlaintextMessage {
     pub mime_type: String,
     pub message: MessageContents,

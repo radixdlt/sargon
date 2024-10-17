@@ -11,7 +11,6 @@ use std::cmp::Ordering;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Enum,
 )]
 
 /// An enum describing the different cards that Wallet can display on home page.

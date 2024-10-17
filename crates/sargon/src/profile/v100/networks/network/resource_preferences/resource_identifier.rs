@@ -12,7 +12,6 @@ use crate::prelude::*;
     Ord,
     PartialOrd,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[serde(tag = "kind", content = "value")]
 #[serde(rename_all = "camelCase")]

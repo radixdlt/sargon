@@ -8,7 +8,6 @@ use crate::prelude::*;
     EnumAsInner,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Enum,
 )]
 pub enum DependencyInformation {
     // Crates.io

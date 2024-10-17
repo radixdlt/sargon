@@ -14,8 +14,7 @@ use crate::prelude::*;
     Hash,
 )]
 #[serde(transparent)]
-pub struct DeviceID(pub(crate) Uuid);
-uniffi::custom_newtype!(DeviceID, Uuid);
+pub struct DeviceID(pub Uuid);
 
 impl DeviceID {
     pub fn generate_new() -> Self {

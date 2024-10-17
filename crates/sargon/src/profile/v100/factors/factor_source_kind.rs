@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 pub enum FactorSourceKind {
     /// A user owned hardware wallet by vendor Ledger HQ, most commonly

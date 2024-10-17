@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A validator claim observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TrackedValidatorClaim {
     pub validator_address: ValidatorAddress,
 
@@ -38,6 +38,26 @@ impl From<(RetTrackedValidatorClaim, NetworkID)> for TrackedValidatorClaim {
             (ret.claim_nft_address, n),
             ret.claim_nft_ids.into_iter().map(NonFungibleLocalId::from),
             ret.xrd_amount,
+        )
+    }
+}
+
+impl HasSampleValues for TrackedValidatorClaim {
+    fn sample() -> Self {
+        Self::new(
+            ValidatorAddress::sample(),
+            ResourceAddress::sample(),
+            Vec::<NonFungibleLocalId>::sample(),
+            Decimal192::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            ValidatorAddress::sample_other(),
+            ResourceAddress::sample_other(),
+            Vec::<NonFungibleLocalId>::sample_other(),
+            Decimal192::sample_other(),
         )
     }
 }

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NetworkResponse {
     pub status_code: u16,
 

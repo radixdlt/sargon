@@ -5,7 +5,7 @@ use thiserror::Error as ThisError;
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
 #[repr(u32)]
-#[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
+#[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,
@@ -346,10 +346,8 @@ pub enum CommonError {
         specified_to_instructions_ctor: NetworkID,
     } = 10093,
 
-    #[error(
-        "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
-    )]
-    FailedToUniFFIDecodeBytesToManifestInstructions = 10094,
+    #[error("Failed to decode bytes into Transaction Manifest Instructions")]
+    FailedToDecodeBytesToManifestInstructions = 10094,
 
     #[error("Failed to decode Transaction Hash, value: {bad_value}")]
     FailedToDecodeTransactionHash { bad_value: String } = 10095,
@@ -689,11 +687,6 @@ pub enum CommonError {
         10192,
 }
 
-#[uniffi::export]
-pub fn error_message_from_error(error: &CommonError) -> String {
-    error.to_string()
-}
-
 impl CommonError {
     pub fn error_code(&self) -> u32 {
         core::intrinsics::discriminant_value(self)
@@ -704,14 +697,14 @@ impl CommonError {
     }
 }
 
-#[uniffi::export]
-pub fn error_code_from_error(error: &CommonError) -> u32 {
-    error.error_code()
-}
+impl HasSampleValues for CommonError {
+    fn sample() -> Self {
+        CommonError::Unknown
+    }
 
-#[uniffi::export]
-pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
-    error.is_safe_to_show_error_message()
+    fn sample_other() -> Self {
+        CommonError::Unknown
+    }
 }
 
 #[cfg(test)]
@@ -721,16 +714,13 @@ mod tests {
     #[test]
     fn error_message() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert_eq!(
-            error_message_from_error(&sut),
-            "No network found with id: '0'"
-        );
+        assert_eq!(sut.to_string(), "No network found with id: '0'");
     }
 
     #[test]
     fn error_code() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert_eq!(error_code_from_error(&sut), 10049);
+        assert_eq!(sut.error_code(), 10049);
     }
 
     #[test]
@@ -740,12 +730,12 @@ mod tests {
             type_name: "TypeName".to_string(),
             serde_message: "message".to_string(),
         };
-        assert!(is_safe_to_show_error_message_from_error(&sut));
+        assert!(sut.is_safe_to_show_error_message());
     }
 
     #[test]
     fn is_not_safe_to_show_error_message() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        assert!(!is_safe_to_show_error_message_from_error(&sut));
+        assert!(!sut.is_safe_to_show_error_message());
     }
 }

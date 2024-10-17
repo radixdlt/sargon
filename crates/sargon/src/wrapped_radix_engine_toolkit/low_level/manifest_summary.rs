@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A summary of the manifest
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ManifestSummary {
     /// Addresses of accounts withdrawn from in the manifest.
     pub addresses_of_accounts_withdrawn_from: Vec<AccountAddress>,
@@ -68,5 +68,35 @@ impl From<(RetManifestSummary, NetworkID)> for ManifestSummary {
             addresses_of_accounts_requiring_auth,
             addresses_of_personas_requiring_auth,
         )
+    }
+}
+
+impl HasSampleValues for ManifestSummary {
+    fn sample() -> Self {
+        Self {
+            addresses_of_accounts_withdrawn_from: vec![AccountAddress::sample()],
+            addresses_of_accounts_deposited_into: vec![AccountAddress::sample()],
+            addresses_of_accounts_requiring_auth: vec![AccountAddress::sample()],
+            addresses_of_personas_requiring_auth: vec![
+                IdentityAddress::sample(),
+            ],
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            addresses_of_accounts_withdrawn_from: vec![
+                AccountAddress::sample_other(),
+            ],
+            addresses_of_accounts_deposited_into: vec![
+                AccountAddress::sample_other(),
+            ],
+            addresses_of_accounts_requiring_auth: vec![
+                AccountAddress::sample_other(),
+            ],
+            addresses_of_personas_requiring_auth: vec![
+                IdentityAddress::sample_other(),
+            ],
+        }
     }
 }

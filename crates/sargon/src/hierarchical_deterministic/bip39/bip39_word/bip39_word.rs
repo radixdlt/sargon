@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
-#[derive(Zeroize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Zeroize, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct BIP39Word {
     pub word: String,
     pub index: U11,

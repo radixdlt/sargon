@@ -52,45 +52,6 @@ impl DerefMut for BagOfBytes {
     }
 }
 
-/// Expose `BagOfBytes` to Uniffi as `sequence<i8>`, unfortunately we cannot
-/// use `sequence<u8>` because it results in:
-///
-/// /uniffi-rs-6f89edd2a1ffa4bd/fb8dd5c/uniffi_bindgen/src/interface/universe.rs:50:17:
-/// assertion `left == right` failed
-/// left: Custom { module_path: "profile", name: "BagOfBytes", builtin: Bytes }
-/// right: Custom { module_path: "profile", name: "BagOfBytes", builtin: Sequence { inner_type: UInt8 } }
-///
-/// So HACK HACK HACK we use `sequence<i8>` (`Vec<i8>`) instead as an intermediary `Builtin`.
-///
-/// However, in `uniffi.toml` we provide `from_custom`` / `into_custom`` for Kotlin and Swift
-/// which using two's complement maps back Vec<i8> -> Vec<u8>, meaning Kotlin and Swift actually
-/// never see the `i8`, and only works with u8.
-///
-/// So we translate:
-/// Kotlin: `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Kotlin]List<UByte>`
-/// Swift:  `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Swift]Foundation.Data`
-///
-impl crate::UniffiCustomTypeConverter for BagOfBytes {
-    type Builtin = Vec<i8>;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Ok(val
-            .into_iter()
-            .map(twos_complement_of_i8)
-            .collect_vec()
-            .into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec()
-            .into_iter()
-            .map(twos_complement_of_u8)
-            .collect_vec()
-    }
-}
-
 impl BagOfBytes {
     pub fn new() -> Self {
         Vec::new().into()
@@ -237,16 +198,6 @@ impl BagOfBytes {
     }
 }
 
-fn twos_complement_of_u8(u: u8) -> i8 {
-    // Yes, it is this easy, Rust does all the heavy lifting
-    u as i8
-}
-
-fn twos_complement_of_i8(i: i8) -> u8 {
-    // Yes, it is this easy, Rust does all the heavy lifting
-    i as u8
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -254,38 +205,6 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = BagOfBytes;
-
-    #[test]
-    fn test_twos_complement() {
-        // basics
-        assert_eq!(twos_complement_of_u8(130), -126);
-
-        let uiu = |u: u8| twos_complement_of_i8(twos_complement_of_u8(u));
-        let t_uiu = |u: u8| assert_eq!(uiu(u), u);
-        t_uiu(0);
-        t_uiu(1);
-        t_uiu(2);
-        t_uiu(126);
-        t_uiu(127);
-        t_uiu(128);
-        t_uiu(129);
-        t_uiu(130);
-        t_uiu(254);
-        t_uiu(255);
-
-        let iui = |i: i8| twos_complement_of_u8(twos_complement_of_i8(i));
-        let t_iui = |i: i8| assert_eq!(iui(i), i);
-
-        t_iui(-128);
-        t_iui(-127);
-        t_iui(-2);
-        t_iui(-1);
-        t_iui(0);
-        t_iui(1);
-        t_iui(2);
-        t_iui(126);
-        t_iui(127);
-    }
 
     #[test]
     fn equality() {

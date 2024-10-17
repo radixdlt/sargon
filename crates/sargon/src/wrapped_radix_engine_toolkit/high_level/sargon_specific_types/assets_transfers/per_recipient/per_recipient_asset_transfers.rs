@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use radix_rust::prelude::IndexMap;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PerRecipientAssetTransfers {
     pub address_of_sender: AccountAddress,
     pub transfers: Vec<PerRecipientAssetTransfer>,
@@ -69,7 +69,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                     None,
                 )],
                 [
-                    PerRecipientNonFungiblesTransfer::new(NonFungibleResourceAddress::sample_mainnet(), true, [
+                    PerRecipientNonFungibleTransfer::new(NonFungibleResourceAddress::sample_mainnet(), true, [
                         NonFungibleLocalId::sample(),
                         NonFungibleLocalId::sample_other(),
                     ])
@@ -91,8 +91,8 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                 )
                 ],
                 [
-                    PerRecipientNonFungiblesTransfer::new(NonFungibleResourceAddress::sample_mainnet(), true, [NonFungibleLocalId::sample_other()]),
-                    PerRecipientNonFungiblesTransfer::new(NonFungibleResourceAddress::sample_mainnet_other(), true, [NonFungibleLocalId::sample_other()])
+                    PerRecipientNonFungibleTransfer::new(NonFungibleResourceAddress::sample_mainnet(), true, [NonFungibleLocalId::sample_other()]),
+                    PerRecipientNonFungibleTransfer::new(NonFungibleResourceAddress::sample_mainnet_other(), true, [NonFungibleLocalId::sample_other()])
                 ],
             )
             ],
@@ -121,7 +121,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                         PerRecipientFungibleTransfer::new(fung_1, 3, true, 18),
                     ],
                     [
-                        PerRecipientNonFungiblesTransfer::new(
+                        PerRecipientNonFungibleTransfer::new(
                             nft_c0,
                             true,
                             [
@@ -129,7 +129,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                                 NonFungibleLocalId::integer(48),
                             ],
                         ),
-                        PerRecipientNonFungiblesTransfer::new(
+                        PerRecipientNonFungibleTransfer::new(
                             nft_c1,
                             true,
                             [
@@ -146,7 +146,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                         PerRecipientFungibleTransfer::new(fung_1, 5, true, 18),
                     ],
                     [
-                        PerRecipientNonFungiblesTransfer::new(
+                        PerRecipientNonFungibleTransfer::new(
                             nft_c0,
                             true,
                             [
@@ -154,7 +154,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                                 NonFungibleLocalId::integer(22),
                             ],
                         ),
-                        PerRecipientNonFungiblesTransfer::new(
+                        PerRecipientNonFungibleTransfer::new(
                             nft_c1,
                             true,
                             [

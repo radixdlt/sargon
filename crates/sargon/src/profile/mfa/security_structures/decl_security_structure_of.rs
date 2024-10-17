@@ -52,7 +52,7 @@ macro_rules! decl_role_with_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< $role RoleWith $factor s >] {
@@ -158,7 +158,7 @@ macro_rules! decl_matrix_of_factors {
                 #[doc = $expr]
             )*
             #[derive(
-                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< MatrixOf $factor s >] {
@@ -216,7 +216,7 @@ macro_rules! decl_security_structure_of {
                 #[doc = $expr]
             )*
             #[derive(
-                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+                Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< SecurityStructureOf $factor s >] {

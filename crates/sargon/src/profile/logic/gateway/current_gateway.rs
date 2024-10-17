@@ -31,7 +31,7 @@ impl Profile {
 /// represents the outcome of switching, e.g. if they just switched to a "new"
 /// network, i.e. if the gateway was in `other` list in saved gateways, or if
 /// we just added it.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum ChangeGatewayOutcome {
     /// If we did in fact change the gateway, and if the gateway was unknown
     /// or known before it was added, i.e. `is_new` will be true iff the gateway
@@ -44,6 +44,16 @@ pub enum ChangeGatewayOutcome {
 
     /// We tried to change to the current gateway.
     NoChange,
+}
+
+impl HasSampleValues for ChangeGatewayOutcome {
+    fn sample() -> Self {
+        ChangeGatewayOutcome::DidChange { is_new: true }
+    }
+
+    fn sample_other() -> Self {
+        ChangeGatewayOutcome::NoChange
+    }
 }
 
 impl SavedGateways {

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-json_string_convertible!(Ed25519Signature);
-
 /// Represents an ED25519 signature.
 #[derive(
     Clone,
@@ -16,7 +14,6 @@ json_string_convertible!(Ed25519Signature);
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
-    uniffi::Record,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]

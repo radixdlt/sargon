@@ -22,7 +22,6 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{}", self.description())]
@@ -46,6 +45,25 @@ pub struct Profile {
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
     pub networks: ProfileNetworks,
+}
+
+impl Profile {
+    pub fn new_from_json_string(json_str: impl AsRef<str>) -> Result<Profile> {
+        let json_str = json_str.as_ref();
+        serde_json::from_str(json_str)
+            .map_failed_to_deserialize_string::<Self>(json_str)
+    }
+}
+
+impl Profile {
+    pub fn to_json_string(&self, pretty_printed: bool) -> String {
+        if pretty_printed {
+            serde_json::to_string_pretty(self)
+        } else {
+            serde_json::to_string(self)
+        }
+        .expect("Should always be able to JSON encode Profile.")
+    }
 }
 
 impl Profile {
@@ -332,9 +350,6 @@ impl Profile {
             )
     }
 }
-
-impl JsonDataDeserializing for Profile {}
-impl JsonDataSerializing for Profile {}
 
 impl HasSampleValues for Profile {
     fn sample() -> Self {
@@ -664,8 +679,8 @@ mod tests {
     fn to_json_bytes_new_from_json_bytes() {
         let sut = SUT::sample();
 
-        let encoded = sut.to_json_bytes();
-        let profile_result = SUT::new_from_json_bytes(encoded).unwrap();
+        let encoded = sut.serialize_to_bytes().unwrap();
+        let profile_result: Profile = encoded.deserialize().unwrap();
         assert_eq!(profile_result, sut);
     }
 
@@ -674,7 +689,7 @@ mod tests {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
 
         assert_eq!(
-            SUT::new_from_json_bytes(malformed_profile_snapshot.clone()),
+            malformed_profile_snapshot.clone().deserialize::<Profile>(),
             Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: "Profile".to_string(),

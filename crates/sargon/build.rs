@@ -60,7 +60,4 @@ pub fn main() {
 
     set_dep_env("radix-engine");
     set_dep_env("radix-engine-toolkit");
-
-    uniffi::generate_scaffolding("src/sargon.udl")
-        .expect("Should be able to build.");
 }

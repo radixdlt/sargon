@@ -14,7 +14,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[repr(u32)]
 pub enum CAP26KeyKind {

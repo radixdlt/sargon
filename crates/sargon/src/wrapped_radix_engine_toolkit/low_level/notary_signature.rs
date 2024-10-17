@@ -11,31 +11,24 @@ use crate::prelude::*;
     Ord,
     derive_more::Display,
     derive_more::FromStr,
-    uniffi::Record,
 )]
-pub struct NotarySignature {
-    pub(crate) secret_magic: Signature,
-}
+pub struct NotarySignature(pub Signature);
 
 impl From<ScryptoNotarySignature> for NotarySignature {
     fn from(value: ScryptoNotarySignature) -> Self {
-        Self {
-            secret_magic: value.0.into(),
-        }
+        Self(value.0.into())
     }
 }
 
 impl From<NotarySignature> for ScryptoNotarySignature {
     fn from(value: NotarySignature) -> Self {
-        ScryptoNotarySignature(value.secret_magic.into())
+        ScryptoNotarySignature(value.0.into())
     }
 }
 
 impl From<Signature> for NotarySignature {
     fn from(value: Signature) -> Self {
-        Self {
-            secret_magic: value,
-        }
+        Self(value)
     }
 }
 

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(EncryptionKey, Exactly32Bytes);
-
 #[derive(
     Zeroize,
     Clone,

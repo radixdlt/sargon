@@ -19,30 +19,28 @@ decl_ret_wrapped_address!(
 
 impl ComponentAddress {
     pub fn is_global(&self) -> bool {
-        self.secret_magic.entity_type()
-            == ScryptoEntityType::GlobalGenericComponent
+        self.0.entity_type() == ScryptoEntityType::GlobalGenericComponent
     }
 
     pub fn is_internal(&self) -> bool {
-        self.secret_magic.entity_type()
-            == ScryptoEntityType::InternalGenericComponent
+        self.0.entity_type() == ScryptoEntityType::InternalGenericComponent
     }
 }
 
 impl ComponentAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_global()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_internal()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_global()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_internal()
     }
 }
@@ -129,24 +127,6 @@ mod tests {
         assert!(SUT::sample_stokenet_global().is_global());
         assert!(!SUT::sample_stokenet_internal().is_global());
         assert!(!SUT::sample_mainnet_internal().is_global());
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]

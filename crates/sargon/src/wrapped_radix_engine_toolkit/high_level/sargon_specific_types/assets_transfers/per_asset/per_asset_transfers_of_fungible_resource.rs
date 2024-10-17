@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PerAssetTransfersOfFungibleResource {
     pub resource: PerAssetFungibleResource,
     pub transfers: Vec<PerAssetFungibleTransfer>,

@@ -17,7 +17,7 @@ impl<V> IdentifiedVecOf<V>
 where
     V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
 {
-    fn description(&self) -> String {
+    pub fn description(&self) -> String {
         [
             "[".to_owned(),
             self.clone()
@@ -47,7 +47,7 @@ impl<V> IdentifiedVecOf<V>
 where
     V: Debug + PartialEq + Eq + Clone + Identifiable,
 {
-    fn debug_description(&self) -> String {
+    pub fn debug_description(&self) -> String {
         [
             "[".to_owned(),
             self.clone()

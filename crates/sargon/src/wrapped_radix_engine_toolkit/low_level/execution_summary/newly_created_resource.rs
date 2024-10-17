@@ -3,7 +3,7 @@ use radix_rust::prelude::IndexMap;
 use crate::prelude::*;
 
 /// Metadata about a newly created Resource
-#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct NewlyCreatedResource {
     pub name: Option<String>,
     pub symbol: Option<String>,

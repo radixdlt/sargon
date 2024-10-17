@@ -2,7 +2,7 @@ use std::any::TypeId;
 
 use crate::prelude::*;
 
-pub(super) fn import_identified_vec_of_from<V>(
+pub fn import_identified_vec_of_from<V>(
     iter: impl IntoIterator<Item = V>,
 ) -> Result<IdentifiedVecOf<V>>
 where
@@ -18,7 +18,7 @@ where
     Ok(id_vec)
 }
 
-pub(super) fn export_identified_vec_of<V>(
+pub fn export_identified_vec_of<V>(
     id_vec: &IdentifiedVecOf<V>,
 ) -> Result<&IdentifiedVecOf<V>>
 where

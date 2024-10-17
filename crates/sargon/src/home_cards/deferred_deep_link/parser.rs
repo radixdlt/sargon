@@ -37,7 +37,7 @@ impl Parser {
                 bad_value: e.to_string(),
             })?;
 
-        deserialize_from_slice(decoded_value_json_bytes.as_slice())
+        decoded_value_json_bytes.deserialize()
     }
 }
 

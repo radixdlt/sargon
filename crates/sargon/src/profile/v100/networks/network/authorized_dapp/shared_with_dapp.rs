@@ -27,7 +27,6 @@ macro_rules! declare_shared_with_dapp {
             Eq,
             derive_more::Display,
             derive_more::Debug,
-            uniffi::Record,
         )]
         #[debug("{}", self.shared_ids_string())]
         #[display("{request} - #{} ids shared", self.ids.len())]

@@ -36,6 +36,8 @@ class CargoDesktopPlugin : Plugin<Project> {
                             val commands = listOf(
                                 "cargo",
                                 "build",
+                                "-p",
+                                "sargon-uniffi",
                                 if (buildType.isRelease()) "--release" else null,
                                 "--target",
                                 current.rustTargetTripleName

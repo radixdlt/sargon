@@ -9,7 +9,6 @@ use crate::prelude::*;
     Hash,
     Eq,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{identity_address} | {shared_persona_data}")]
 #[serde(rename_all = "camelCase")]

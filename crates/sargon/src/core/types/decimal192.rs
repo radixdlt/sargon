@@ -3,23 +3,6 @@ use delegate::delegate;
 use enum_iterator::reverse_all;
 use radix_common::math::ParseDecimalError;
 
-uniffi::custom_type!(ScryptoDecimal192, String);
-
-/// UniFFI conversion for InnerDecimal using String as builtin.
-impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
-    type Builtin = String;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        val.parse::<Self>().map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
-
 /// `Decimal192` represents a 192 bit representation of a fixed-scale decimal number.
 ///
 /// The finite set of values are of the form `m / 10^18`, where `m` is
@@ -51,12 +34,9 @@ impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{}", self.native())]
-pub struct Decimal192 {
-    secret_magic: ScryptoDecimal192, // Do NOT doc! breaks build script
-}
+pub struct Decimal192(ScryptoDecimal192);
 
 /// Internally (in Rust land) we would like to call `Decimal192` just `Decimal`.
 /// Reusing the naming convention set by Scrypto.
@@ -74,13 +54,11 @@ impl From<ScryptoDecimal192> for Decimal {
 }
 impl Decimal {
     fn native(&self) -> ScryptoDecimal192 {
-        self.secret_magic
+        self.0
     }
 
     fn from_native(decimal: ScryptoDecimal192) -> Self {
-        Decimal {
-            secret_magic: decimal,
-        }
+        Self(decimal)
     }
 
     pub fn transaction_fee_preset() -> Self {
@@ -666,6 +644,16 @@ impl Decimal {
     }
 }
 
+impl HasSampleValues for Decimal192 {
+    fn sample() -> Self {
+        "123.456".parse().unwrap()
+    }
+
+    fn sample_other() -> Self {
+        "789.012".parse().unwrap()
+    }
+}
+
 #[cfg(test)]
 impl From<&str> for Decimal192 {
     /// TEST ONLY
@@ -733,7 +721,6 @@ impl Decimal192 {
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub(crate) enum Multiplier {
@@ -811,7 +798,7 @@ impl Decimal192 {
 
     /// The digits of the number, without separators or sign. The scale is fixed at 18, meaning the last 18 digits correspond to the decimal part.
     pub fn digits(&self) -> String {
-        self.abs().secret_magic.0.to_string() // mantissa
+        self.abs().0 .0.to_string() // mantissa
     }
 
     /// Rounds `self`` to `n` places, counting both the integer and decimal parts,

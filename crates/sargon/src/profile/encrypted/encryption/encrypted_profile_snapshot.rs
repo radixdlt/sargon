@@ -37,7 +37,7 @@ impl EncryptedProfileSnapshot {
         let decrypted = self.decrypt_to_bytes(password)?;
 
         // JSON decode bytes into Profile
-        Profile::new_from_json_bytes(decrypted)
+        decrypted.deserialize()
     }
 
     pub fn decrypt_to_bytes(
@@ -63,7 +63,7 @@ impl EncryptedProfileSnapshot {
         let encryption_scheme = encryption_scheme.into().unwrap_or_default();
 
         // JSON encode profile
-        let json = profile.to_json_bytes();
+        let json = profile.serialize_to_bytes().unwrap();
 
         // derive symmetric encryption key
         let mut encryption_key =

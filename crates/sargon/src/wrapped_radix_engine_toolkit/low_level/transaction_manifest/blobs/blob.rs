@@ -7,20 +7,17 @@ use crate::prelude::*;
     Eq,
     DeserializeFromStr,
     SerializeDisplay,
-    uniffi::Record,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct Blob {
-    pub(crate) secret_magic: BagOfBytes,
-}
+pub struct Blob(pub BagOfBytes);
 
 impl Blob {
     pub fn to_hex(&self) -> String {
-        self.secret_magic.to_hex()
+        self.0.to_hex()
     }
 
     pub fn from_hex(s: &str) -> Result<Self> {
@@ -30,37 +27,31 @@ impl Blob {
 
 impl From<BagOfBytes> for Blob {
     fn from(value: BagOfBytes) -> Self {
-        Self {
-            secret_magic: value,
-        }
+        Self(value)
     }
 }
 
 impl From<Blob> for BagOfBytes {
     fn from(value: Blob) -> BagOfBytes {
-        value.secret_magic
+        value.0
     }
 }
 
 impl From<ScryptoBlob> for Blob {
     fn from(value: ScryptoBlob) -> Self {
-        Self {
-            secret_magic: value.0.into(),
-        }
+        Self(value.0.into())
     }
 }
 
 impl From<Blob> for ScryptoBlob {
     fn from(value: Blob) -> Self {
-        ScryptoBlob(value.secret_magic.to_vec())
+        ScryptoBlob(value.0.to_vec())
     }
 }
 
 impl From<&Vec<u8>> for Blob {
     fn from(value: &Vec<u8>) -> Self {
-        Self {
-            secret_magic: value.clone().into(),
-        }
+        Self(value.clone().into())
     }
 }
 
@@ -74,21 +65,6 @@ impl HasSampleValues for Blob {
             .unwrap()
             .into()
     }
-}
-
-#[uniffi::export]
-pub fn new_blob_from_bytes(bytes: BagOfBytes) -> Blob {
-    bytes.into()
-}
-
-#[uniffi::export]
-pub fn blob_to_bytes(blob: &Blob) -> BagOfBytes {
-    blob.secret_magic.clone()
-}
-
-#[uniffi::export]
-pub fn blob_to_string(blob: &Blob) -> String {
-    blob.to_string()
 }
 
 #[cfg(test)]
@@ -150,7 +126,7 @@ mod tests {
     fn test_to_hex() {
         let sample_blob = SUT::sample();
         let hex = sample_blob.to_hex();
-        let expected_hex = sample_blob.secret_magic.to_hex();
+        let expected_hex = sample_blob.0.to_hex();
         assert_eq!(hex, expected_hex);
     }
 
@@ -161,32 +137,5 @@ mod tests {
         let blob = SUT::from_hex(hex_str).unwrap();
         let expected_blob = SUT::from(BagOfBytes::from_hex(hex_str).unwrap());
         assert_eq!(blob, expected_blob);
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Blob;
-
-    #[test]
-    fn test_blob_to_string() {
-        assert_eq!(
-            blob_to_string(&SUT::sample()),
-            "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"
-        );
-    }
-
-    #[test]
-    fn test_new_blob_from_bytes() {
-        let bytes = BagOfBytes::from_hex("dead").unwrap();
-        assert_eq!(new_blob_from_bytes(bytes.clone()).secret_magic, bytes);
-    }
-
-    #[test]
-    fn test_blob_to_bytes() {
-        assert_eq!(blob_to_bytes(&SUT::sample()), BagOfBytes::sample_aced());
     }
 }

@@ -12,9 +12,7 @@ impl Identifiable for FactorSourceFlag {
 
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
-#[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.

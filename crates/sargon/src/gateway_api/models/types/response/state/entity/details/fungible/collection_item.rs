@@ -8,7 +8,6 @@ use crate::prelude::*;
     Eq,
     Debug,
     EnumAsInner,
-    uniffi::Enum,
 )]
 #[serde(untagged)]
 pub enum FungibleResourcesCollectionItem {

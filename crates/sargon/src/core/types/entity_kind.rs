@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum EntityKind {
     Account,
     Persona,
