@@ -3,7 +3,6 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.AccountLockerClaimableResource
 import com.radixdlt.sargon.AddressOfAccountOrPersona
-import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.Blobs
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.LockerAddress
@@ -36,7 +35,6 @@ import com.radixdlt.sargon.modifyManifestAddGuarantees
 import com.radixdlt.sargon.modifyManifestLockFee
 import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
 import com.radixdlt.sargon.transactionManifestBlobs
-import com.radixdlt.sargon.transactionManifestExecutionSummary
 import com.radixdlt.sargon.transactionManifestInstructionsString
 import com.radixdlt.sargon.transactionManifestString
 import com.radixdlt.sargon.transactionManifestInvolvedPoolAddresses
@@ -192,17 +190,6 @@ val TransactionManifest.involvedResourceAddresses: List<ResourceAddress>
 
 val TransactionManifest.summary: ManifestSummary?
     get() = transactionManifestSummary(manifest = this)
-
-/**
- * Creates the `ExecutionSummary` based on the `engineToolkitReceipt` data. 
- *
- * Such value should be obtained from the Gateway `/transaction/preview` endpoint,
- * under the `radix_engine_toolkit_receipt` field.
- * The content should be parsed as a String.
- */
-@Throws(SargonException::class)
-fun TransactionManifest.executionSummary(engineToolkitReceipt: String) =
-    transactionManifestExecutionSummary(manifest = this, engineToolkitReceipt = engineToolkitReceipt)
 
 fun TransactionManifest.Companion.accountLockerClaim(
     lockerAddress: LockerAddress,

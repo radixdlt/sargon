@@ -54,14 +54,6 @@ pub fn transaction_manifest_involved_pool_addresses(
 }
 
 #[uniffi::export]
-pub fn transaction_manifest_execution_summary(
-    manifest: &TransactionManifest,
-    engine_toolkit_receipt: String,
-) -> Result<ExecutionSummary> {
-    manifest.execution_summary(engine_toolkit_receipt)
-}
-
-#[uniffi::export]
 pub fn transaction_manifest_network_id(
     manifest: &TransactionManifest,
 ) -> NetworkID {
@@ -159,35 +151,6 @@ mod tests {
             transaction_manifest_blobs(&SUT::sample()),
             SUT::sample().blobs().clone()
         );
-    }
-
-    #[test]
-    fn test_execution_summary() {
-        let receipt = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "unstake_partially_from_one_validator.dat"
-        ));
-
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "unstake_partially_from_one_validator.rtm"
-        ));
-
-        let transaction_manifest = TransactionManifest::new(
-            instructions_string,
-            NetworkID::Stokenet,
-            Blobs::default(),
-        )
-        .unwrap();
-
-        let sut = transaction_manifest_execution_summary(
-            &transaction_manifest,
-            receipt.to_owned(),
-        )
-        .unwrap();
-
-        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
-        assert_eq!(sut.addresses_of_accounts_requiring_auth, vec![acc_gk])
     }
 
     #[test]

@@ -19,9 +19,24 @@ uniffi::custom_newtype!(Epoch, u64);
 )]
 pub struct Epoch(pub u64);
 
+impl Epoch {
+    /// Circa 1 hour, since one epoch is circa 6 minutes.
+    pub const DEFAULT_EPOCH_WINDOW_SIZE: u64 = 10;
+}
+
+impl Epoch {
+    pub fn new(value: u64) -> Self {
+        Self(value)
+    }
+
+    pub fn window_end_from_start(start: Self) -> Self {
+        Self::new(start.0 + Self::DEFAULT_EPOCH_WINDOW_SIZE)
+    }
+}
+
 impl From<u64> for Epoch {
     fn from(value: u64) -> Self {
-        Self(value)
+        Self::new(value)
     }
 }
 
@@ -39,7 +54,7 @@ impl From<Epoch> for ScryptoEpoch {
 
 impl From<ScryptoEpoch> for Epoch {
     fn from(value: ScryptoEpoch) -> Self {
-        Self(value.number())
+        Self::new(value.number())
     }
 }
 

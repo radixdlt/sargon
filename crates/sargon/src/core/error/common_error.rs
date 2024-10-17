@@ -675,17 +675,30 @@ pub enum CommonError {
     #[error("Invalid security structure. A factor must not be present in both threshold and override list.")]
     InvalidSecurityStructureFactorInBothThresholdAndOverride = 10188,
 
+    #[error("One of the receiving accounts does not allow deposits")]
+    OneOfReceivingAccountsDoesNotAllowDeposits = 10189,
+
+    #[error("Failed transaction preview with status: {error_message}")]
+    FailedTransactionPreview { error_message: String } = 10190,
+
+    #[error("Failed to extract radix engine toolkit receipt bytes")]
+    FailedToExtractTransactionReceiptBytes = 10191,
+
+    #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
+    ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
+        10192,
+
     #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
-    InvalidManifestFailedToDecompile { underlying: String } = 10189,
+    InvalidManifestFailedToDecompile { underlying: String } = 10193,
 
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
-    InvalidSignedPartialTransactionFailedToCompile = 10190,
+    InvalidSignedPartialTransactionFailedToCompile = 10194,
 
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
-    InvalidSignedPartialTransactionFailedToDecompile = 10191,
+    InvalidSignedPartialTransactionFailedToDecompile = 10195,
 
     #[error("Failed to generate manifest summary")]
-    FailedToGenerateManifestSummary = 10192,
+    FailedToGenerateManifestSummary = 10196,
 }
 
 #[uniffi::export]
