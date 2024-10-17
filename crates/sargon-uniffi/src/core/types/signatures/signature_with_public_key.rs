@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::SignatureWithPublicKey as InternalSignatureWithPublicKey;
 
 /// Represents any natively supported signature, including public key.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum SignatureWithPublicKey {
     // N.B. `radix_transactions::model::SignatureWithPublicKeyV1::Secp256k1` does
     // NOT include the public key, it relies on ECDSA Signature supporting

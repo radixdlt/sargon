@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::AuthorizedPersonaSimple as InternalAuthorizedPersonaSimple;
 
+decl_vec_samples_for!(ReferencesToAuthorizedPersonas, AuthorizedPersonaSimple);
+
 /// Simple data representation of a Persona the user has shared with a Dapp.
 /// Simple meaning "the bare minimum amount of data" that enabled `Sargon` to
 /// be able to reconstruct a `AuthorizedPersonaDetailed` value, used to populate
@@ -10,7 +12,7 @@ use sargon::AuthorizedPersonaSimple as InternalAuthorizedPersonaSimple;
 /// `AuthorizedPersonaDetailed` since it is not JSON, but logic, and we have yet
 /// to migrate `Sargon` into iOS/Android clients, thus we will defer the work
 /// of mapping `AuthorizedPersonaSimple` -> `AuthorizedPersonaDetailed`.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct AuthorizedPersonaSimple {
     /// The globally unique identifier of a Persona is its address, used
     /// to lookup persona

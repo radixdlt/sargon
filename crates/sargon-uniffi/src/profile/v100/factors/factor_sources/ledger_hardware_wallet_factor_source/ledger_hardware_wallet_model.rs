@@ -3,7 +3,7 @@ use sargon::LedgerHardwareWalletModel as InternalLedgerHardwareWalletModel;
 
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
 /// *Ledger Nano S+*.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum LedgerHardwareWalletModel {
     NanoS,
     NanoSPlus,

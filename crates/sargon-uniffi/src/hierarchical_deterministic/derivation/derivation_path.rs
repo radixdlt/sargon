@@ -3,7 +3,7 @@ use sargon::Derivation;
 use sargon::DerivationPath as InternalDerivationPath;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum DerivationPath {
     CAP26 { value: CAP26Path },
     BIP44Like { value: BIP44LikePath },

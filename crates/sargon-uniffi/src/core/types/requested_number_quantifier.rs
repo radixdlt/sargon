@@ -6,7 +6,7 @@ use sargon::RequestedNumberQuantifier as InternalRequestedNumberQuantifier;
 ///
 /// This is typically sent by a Dapp when requesting access to accounts
 /// or PersonaData.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum RequestedNumberQuantifier {
     /// (Request access to) *exactly* N many of something, where quantity `N` is
     /// not part of this enum, e.g. "I want EXACTLY 2 accounts"

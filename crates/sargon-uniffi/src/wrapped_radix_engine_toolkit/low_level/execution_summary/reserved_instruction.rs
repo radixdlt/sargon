@@ -3,7 +3,7 @@ use sargon::ReservedInstruction as InternalReservedInstruction;
 
 /// The set of instructions that is only allowed in manifests created by the
 /// wallet itself.
-#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum ReservedInstruction {
     AccountLockFee,
     AccountSecurify,

@@ -4,7 +4,7 @@ use sargon::PublicKey as InternalPublicKey;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
     Ed25519(Ed25519PublicKey),

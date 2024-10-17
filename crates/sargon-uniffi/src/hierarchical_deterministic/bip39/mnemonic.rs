@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::Mnemonic as InternalMnemonic;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
 
@@ -115,4 +115,14 @@ pub fn new_mnemonic_sample_arculus() -> Mnemonic {
 #[uniffi::export]
 pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
     InternalMnemonic::sample_arculus_other().into()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_passphrase() -> Mnemonic {
+    InternalMnemonic::sample_passphrase().into()
+}
+
+#[uniffi::export]
+pub fn new_mnemonic_sample_passphrase_other() -> Mnemonic {
+    InternalMnemonic::sample_passphrase_other().into()
 }

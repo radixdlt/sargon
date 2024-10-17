@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::HostId as InternalHostId;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HostId {
     /// A best effort stable and unique identifier of this
     /// host's device.

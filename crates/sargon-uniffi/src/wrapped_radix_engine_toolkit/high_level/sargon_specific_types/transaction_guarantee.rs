@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::TransactionGuarantee as InternalTransactionGuarantee;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct TransactionGuarantee {
     /// The guaranteed amount to be obtained on this transaction. For manifest & display purposes.
     pub amount: Decimal192,

@@ -1,9 +1,11 @@
 use crate::prelude::*;
 use sargon::AccountForDisplay as InternalAccountForDisplay;
 
+decl_vec_samples_for!(AccountsForDisplay, AccountForDisplay);
+
 /// A minimal version of an [`Account`] meant for
 /// display purposes within wallet
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct AccountForDisplay {
     pub address: AccountAddress,
 

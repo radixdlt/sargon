@@ -4,7 +4,7 @@ use sargon::ProfileID as InternalProfileID;
 uniffi::custom_newtype!(ProfileID, Uuid);
 
 /// A stable and globally unique identifier of a Profile.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion)]
 pub struct ProfileID(Uuid);
 
 delegate_display_debug_into!(ProfileID, InternalProfileID);

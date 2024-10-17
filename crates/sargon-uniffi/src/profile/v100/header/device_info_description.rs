@@ -5,7 +5,7 @@ use sargon::DeviceInfoDescription as InternalDeviceInfoDescription;
 ///
 /// This used to be a String only in Pre 1.6.0 wallets, so
 /// we have a custom Deserialize impl of it.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct DeviceInfoDescription {
     /// Host device name, e.g. "My Precious"
     pub name: String,

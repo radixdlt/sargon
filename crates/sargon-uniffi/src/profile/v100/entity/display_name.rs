@@ -23,7 +23,7 @@ use sargon::DisplayName as InternalDisplayName;
 /// assert_eq!("A very big name that is over than 30 characters long".parse::<SUT>().unwrap().to_string(), "A very big name that is over t");
 /// ```
 ///
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct DisplayName {
     pub value: String,
 }

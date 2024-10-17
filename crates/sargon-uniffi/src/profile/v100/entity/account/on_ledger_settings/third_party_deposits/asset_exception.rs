@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::AssetException as InternalAssetException;
 
+decl_vec_samples_for!(AssetsExceptionList, AssetException);
+
 /// The specific Asset exception rule, which overrides the general
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]

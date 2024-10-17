@@ -3,7 +3,7 @@ use sargon::HDPathComponent as InternalHDPathComponent;
 
 pub type HDPathValue = u32;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HDPathComponent {
     pub value: HDPathValue,
 }

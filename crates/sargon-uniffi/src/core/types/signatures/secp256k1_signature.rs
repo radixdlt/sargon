@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::Secp256k1Signature as InternalSecp256k1Signature;
 
 /// Represents an Secp256k1 signature.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Secp256k1Signature {
     // recovery id + signature
     pub bytes: Exactly65Bytes,

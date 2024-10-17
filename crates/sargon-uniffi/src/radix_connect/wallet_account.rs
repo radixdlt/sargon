@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use sargon::WalletInteractionWalletAccount as InternalWalletInteractionWalletAccount;
 
-#[derive(PartialEq, Clone, InternalConversionV2, uniffi::Record)]
+#[derive(PartialEq, Clone, InternalConversion, uniffi::Record)]
 pub struct WalletInteractionWalletAccount {
     pub address: AccountAddress,
     pub label: DisplayName,

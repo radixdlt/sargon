@@ -8,7 +8,7 @@ use sargon::DeviceFactorSource as InternalDeviceFactorSource;
 /// all new Accounts and Personas. Users authenticate signing by authorizing
 /// the host to access a mnemonic stored in secure storage on
 /// the device.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.

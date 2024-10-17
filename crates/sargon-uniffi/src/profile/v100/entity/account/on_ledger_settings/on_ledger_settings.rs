@@ -10,7 +10,7 @@ use sargon::OnLedgerSettings as InternalOnLedgerSettings;
 ///
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct OnLedgerSettings {
     /// Controls the ability of third-parties to deposit into this account
     pub third_party_deposits: ThirdPartyDeposits,

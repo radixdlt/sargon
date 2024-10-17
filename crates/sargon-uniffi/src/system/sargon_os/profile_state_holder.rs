@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::ProfileState as InternalProfileState;
 
-#[derive(Clone, PartialEq, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileState {
     /// When no profile exists in secure storage when OS is booted.

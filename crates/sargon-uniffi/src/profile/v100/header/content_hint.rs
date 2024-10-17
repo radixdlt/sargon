@@ -7,7 +7,7 @@ use sargon::ContentHint as InternalContentHint;
 /// Important to know that this is just a **hint**, the values
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
     ///

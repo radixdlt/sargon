@@ -1,8 +1,8 @@
-use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, PathArguments, Type, TypePath};
+use syn::{Field, Type, TypePath};
 use proc_macro2::Ident;
 
+/// Determines the conversion call to be used for the given field.
 pub fn conversion_call(field: &Field, into_internal: bool) -> proc_macro2::TokenStream {
     match &field.ty {
         Type::Path(type_path) => {

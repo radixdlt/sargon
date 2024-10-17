@@ -3,7 +3,7 @@ use sargon::EventKind as InternalEventKind;
 
 /// A discriminator identifying the kind of `Event`, this has no associated
 /// values and flattens the otherwise nested `Event` enum.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum EventKind {
     /* Sort lexicographically */
     /// Profile updated with a new account.

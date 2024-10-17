@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::AuthorizedDappDetailed as InternalAuthorizedDappDetailed;
 
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct AuthorizedDappDetailed {
     pub network_id: NetworkID,
 

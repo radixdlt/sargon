@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::Signature as InternalSignature;
 
 /// Either a Signature on `Curve25519` or `Secp256k1`
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum Signature {
     Secp256k1 { value: Secp256k1Signature },
     Ed25519 { value: Ed25519Signature },

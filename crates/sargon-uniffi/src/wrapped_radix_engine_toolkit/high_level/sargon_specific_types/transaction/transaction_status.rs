@@ -6,7 +6,7 @@ use sargon::TransactionStatus as InternalTransactionStatus;
     PartialEq,
     Eq,
     Hash,
-    InternalConversionV2,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum TransactionStatus {

@@ -5,7 +5,7 @@ use sargon::BIP39Language as InternalBIP39Language;
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-#[derive(Clone, Hash, PartialEq, Eq, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum BIP39Language {
     /// The English language.
     English,

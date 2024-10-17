@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::EventProfileModified as InternalEventProfileModified;
 
 /// The active profile has been modified (might not have been saved yet).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum EventProfileModified {
     /// A new account with `address` was inserted into the active profile
     AccountAdded { address: AccountAddress },

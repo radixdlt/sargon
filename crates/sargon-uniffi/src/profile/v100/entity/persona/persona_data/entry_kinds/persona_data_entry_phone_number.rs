@@ -6,7 +6,7 @@ use sargon::PersonaDataEntryPhoneNumber as InternalPersonaDataEntryPhoneNumber;
 ///
 /// Current implementation does not validate the phone number other than it
 /// cannot be empty, since telephone number validation is tricky.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct PersonaDataEntryPhoneNumber {
     pub number: String,
 }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::SargonBuildInformation as InternalSargonBuildInformation;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SargonBuildInformation {
     pub sargon_version: String,
     pub dependencies: SargonDependencies,

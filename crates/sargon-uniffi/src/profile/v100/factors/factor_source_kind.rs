@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FactorSourceKind as InternalFactorSourceKind;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
     /// thus directly usable. This kind is used as the standard factor source for all new

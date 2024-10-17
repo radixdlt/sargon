@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::AppearanceID as InternalAppearanceID;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct AppearanceID {
     pub value: u8,
 }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NetworkResponse as InternalNetworkResponse;
 
-#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct NetworkResponse {
     pub status_code: u16,
 

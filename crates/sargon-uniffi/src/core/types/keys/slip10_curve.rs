@@ -7,7 +7,7 @@ use sargon::SLIP10Curve as InternalSLIP10Curve;
 /// prefer using Curve25519 - which is incompatible with BIP32 (BIP44).
 ///
 /// For for information see [SLIP10 reference](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum SLIP10Curve {
     /// Curve25519 which we use for Ed25519 for EdDSA signatures.
     Curve25519,

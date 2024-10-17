@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use sargon::AuthorizedPersonaDetailed as InternalAuthorizedPersonaDetailed;
 
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+decl_vec_samples_for!(DetailedAuthorizedPersonas, AuthorizedPersonaDetailed);
+
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct AuthorizedPersonaDetailed {
     /// Address that globally and uniquely identifies this Persona.
     pub identity_address: IdentityAddress,

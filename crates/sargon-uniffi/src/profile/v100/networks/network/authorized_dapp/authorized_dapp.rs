@@ -1,8 +1,10 @@
 use crate::prelude::*;
 use sargon::AuthorizedDapp as InternalAuthorizedDapp;
 
+decl_vec_samples_for!(AuthorizedDapps, AuthorizedDapp);
+
 /// A connection made between a Radix Dapp and the user.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.
     pub network_id: NetworkID,

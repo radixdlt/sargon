@@ -7,7 +7,7 @@ use sargon::TransactionStatusReason as InternalTransactionStatusReason;
     PartialEq,
     Eq,
     Hash,
-    InternalConversionV2,
+    InternalConversion,
     uniffi::Enum,
 )]
 pub enum TransactionStatusReason {

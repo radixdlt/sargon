@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionAuthorizedRequestResponseItems as InternalWalletToDappInteractionAuthorizedRequestResponseItems;
 
-#[derive(Clone, PartialEq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
     pub auth: WalletToDappInteractionAuthRequestResponseItem,
     pub ongoing_accounts:

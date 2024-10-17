@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::LegacyOlympiaAccountAddress as InternalLegacyOlympiaAccountAddress;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct LegacyOlympiaAccountAddress {
     value: Secp256k1PublicKey,
 }

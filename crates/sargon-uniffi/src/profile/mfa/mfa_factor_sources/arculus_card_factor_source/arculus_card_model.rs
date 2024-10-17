@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::ArculusCardModel as InternalArculusCardModel;
 
 /// The model of a Arculus Card.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum ArculusCardModel {
     /// Arculus card model: "Arculus® Cold Storage Wallet",
     /// for more info [see][link].

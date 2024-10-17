@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::DepositRule as InternalDepositRule;
 
 /// The general deposit rule to apply
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum DepositRule {
     /// The account accepts **all** assets by default, except for exceptions (if any) which might not deposit/be deposited into this account.
     AcceptKnown,

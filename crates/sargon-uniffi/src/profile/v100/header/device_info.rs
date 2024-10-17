@@ -3,7 +3,7 @@ use sargon::DeviceInfo as InternalDeviceInfo;
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this
     /// device.

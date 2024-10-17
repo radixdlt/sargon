@@ -6,7 +6,7 @@ use sargon::AppPreferences as InternalAppPreferences;
 ///
 /// Current and other saved Gateways, security settings,
 /// App Display settings and preferences for transaction.
-#[derive(PartialEq, Eq, Clone, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(PartialEq, Eq, Clone, Hash, InternalConversion, uniffi::Record)]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
     pub display: AppDisplay,

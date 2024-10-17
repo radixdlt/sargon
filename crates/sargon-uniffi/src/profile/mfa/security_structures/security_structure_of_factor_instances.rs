@@ -6,7 +6,7 @@ decl_matrix_of_factors!(
     FactorInstance
 );
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureOfFactorInstances {
     /// The ID of the `SecurityStructureOfFactorSourceIDs` in
     /// `profile.app_preferences.security.security_structures_of_factor_source_ids`

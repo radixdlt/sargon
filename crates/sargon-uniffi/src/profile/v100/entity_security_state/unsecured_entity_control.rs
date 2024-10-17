@@ -5,7 +5,7 @@ use sargon::UnsecuredEntityControl as InternalUnsecuredEntityControl;
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which
     // /// also controls this entity and is used for signing transactions.

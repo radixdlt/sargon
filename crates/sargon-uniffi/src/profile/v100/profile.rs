@@ -14,7 +14,7 @@ use sargon::Profile as InternalProfile;
 ///
 /// assert_eq!(Profile::sample(), Profile::sample())
 /// ```
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is

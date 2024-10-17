@@ -5,7 +5,7 @@ use sargon::HasEventKind;
 /// SargonOS event contain information about something of interest that has
 /// happened to the SargonOS, most prominently to the Profile. Host device
 /// can subscribe to these events by use of `EventBusDriver`.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum Event {
     /// The SargonOS just booted.
     Booted,

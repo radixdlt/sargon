@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::EntityCAP26Path;
 use sargon::IdentityPath as InternalIdentityPath;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct IdentityPath {
     pub path: HDPath,
 

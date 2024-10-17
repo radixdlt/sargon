@@ -5,7 +5,7 @@ use sargon::OffDeviceMnemonicFactorSource as InternalOffDeviceMnemonicFactorSour
 /// A factor source representing a Mnemonic the user has to input every time
 /// the use the factor source, since it is not saved on the device, it is said
 /// to be "off device".
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct OffDeviceMnemonicFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.

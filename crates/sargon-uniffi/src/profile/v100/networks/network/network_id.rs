@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NetworkID as InternalNetworkID;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 #[repr(u8)]
 pub enum NetworkID {
     /// Mainnet (0x01 / 0d01)

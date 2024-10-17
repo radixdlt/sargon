@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TrackedValidatorClaim as InternalTrackedValidatorClaim;
 
 /// A validator claim observed in the transaction
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct TrackedValidatorClaim {
     pub validator_address: ValidatorAddress,
 

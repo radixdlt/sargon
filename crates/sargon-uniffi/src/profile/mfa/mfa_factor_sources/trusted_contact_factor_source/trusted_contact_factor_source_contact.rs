@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TrustedContactFactorSourceContact as InternalTrustedContactFactorSourceContact;
 
 /// Hints about the trusted contact.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct TrustedContactFactorSourceContact {
     /// The email address of the contact that the user trusts
     pub email_address: EmailAddress,

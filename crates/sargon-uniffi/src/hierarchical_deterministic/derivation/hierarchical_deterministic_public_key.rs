@@ -6,7 +6,7 @@ use sargon::HierarchicalDeterministicPublicKey as InternalHierarchicalDeterminis
 /// produces virtual badges (signatures).
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
     pub public_key: PublicKey,

@@ -23,7 +23,7 @@ macro_rules! entropy_with_byte_counts {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Clone, Eq, PartialEq, InternalConversionV2, uniffi::Enum)]
+            #[derive(Clone, Eq, PartialEq, InternalConversion, uniffi::Enum)]
             pub enum $enum_name {
                 $(
                     [< EntropyOf $byte_count Bytes >]([< Entropy $byte_count Bytes >]),

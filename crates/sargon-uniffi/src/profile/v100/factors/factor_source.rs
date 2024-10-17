@@ -2,7 +2,9 @@ use crate::prelude::*;
 use sargon::BaseIsFactorSource;
 use sargon::FactorSource as InternalFactorSource;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+decl_vec_samples_for!(FactorSources, FactorSource);
+
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FactorSource {
     Device {
         value: DeviceFactorSource,

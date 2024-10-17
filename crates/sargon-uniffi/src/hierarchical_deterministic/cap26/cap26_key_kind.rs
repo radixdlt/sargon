@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::CAP26KeyKind as InternalCAP26KeyKind;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum CAP26KeyKind {
     /// For a key to be used for signing transactions.
     /// The value is the ascii sum of `"TRANSACTION_SIGNING"`

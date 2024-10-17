@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::ResourceSpecifier as InternalResourceSpecifier;
 
-#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum ResourceSpecifier {
     Fungible {
         resource_address: ResourceAddress,

@@ -3,7 +3,7 @@ use sargon::ThirdPartyDeposits as InternalThirdPartyDeposits;
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
     pub deposit_rule: DepositRule,

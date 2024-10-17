@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::Persona as InternalPersona;
 
+decl_vec_samples_for!(Personas, Persona);
+
 /// A Persona is an identity a user chooses to login to a dApp with, using
 /// RadixConnect - Radix decentralized login solution. A persona is very
 /// similar to [`Account`]s, in the sense that they are On-Network/On-Ledger
@@ -20,7 +22,7 @@ use sargon::Persona as InternalPersona;
 /// technically, nothing stops a user from building their own wallet and uploading
 /// personal information to the metadata of the Identity component... but `Sargon`
 /// never will, nor will the Radix Wallet.).
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct Persona {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,

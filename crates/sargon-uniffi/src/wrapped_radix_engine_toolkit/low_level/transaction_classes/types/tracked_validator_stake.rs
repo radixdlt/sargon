@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TrackedValidatorStake as InternalTrackedValidatorStake;
 
 /// A validator stake observed in the transaction
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct TrackedValidatorStake {
     pub validator_address: ValidatorAddress,
 

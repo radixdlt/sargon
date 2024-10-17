@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::ResourceOrNonFungible as InternalResourceOrNonFungible;
 
+decl_vec_samples_for!(DepositorsAllowList, ResourceOrNonFungible);
+
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ResourceOrNonFungible {

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::StakeClaim as InternalStakeClaim;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct StakeClaim {
     pub validator_address: ValidatorAddress,
     pub resource_address: NonFungibleResourceAddress,

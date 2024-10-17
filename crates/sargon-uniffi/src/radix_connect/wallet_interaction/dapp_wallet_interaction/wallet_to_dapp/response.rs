@@ -3,7 +3,7 @@ use sargon::WalletToDappInteractionResponse as InternalWalletToDappInteractionRe
 
 json_data_convertible!(WalletToDappInteractionResponse);
 
-#[derive(Clone, PartialEq, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponse {
     Success(WalletToDappInteractionSuccessResponse),

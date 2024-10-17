@@ -1,10 +1,12 @@
 use crate::prelude::*;
 use sargon::ProfileNetwork as InternalProfileNetwork;
 
+decl_vec_samples_for!(ProfileNetworks, ProfileNetwork);
+
 /// [`Accounts`], [`Personas`] and [`AuthorizedDapps`] for some [`ProfileNetwork`]
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
 /// identified by `id` ([`NetworkID`]).
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ProfileNetwork {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.

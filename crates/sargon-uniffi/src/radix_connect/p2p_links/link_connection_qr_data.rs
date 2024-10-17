@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::LinkConnectionQRData as InternalLinkConnectionQRData;
 
 /// The QR code data scanned from the Connector Extension
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct LinkConnectionQRData {
     /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
     /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.

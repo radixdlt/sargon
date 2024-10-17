@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NetworkRequest as InternalNetworkRequest;
 
-#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct NetworkRequest {
     pub url: Url,
     pub method: NetworkMethod,

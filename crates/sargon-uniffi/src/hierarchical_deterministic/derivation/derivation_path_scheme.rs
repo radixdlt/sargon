@@ -5,7 +5,7 @@ use sargon::DerivationPathScheme as InternalDerivationPathScheme;
 /// such as signing or public key derivation. Radix Babylon introduces
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.
     Cap26,

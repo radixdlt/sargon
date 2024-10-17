@@ -5,7 +5,7 @@ use sargon::EmailAddress as InternalEmailAddress;
 ///
 /// Current implementation does not validate the email address other than it
 /// cannot be empty (in the future we might add some simple validation).
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct EmailAddress {
     pub email: String,
 }

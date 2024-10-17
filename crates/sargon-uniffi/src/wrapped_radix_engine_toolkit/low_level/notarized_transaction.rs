@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::NotarizedTransaction as InternalNotarizedTransaction;
 
-#[derive(Clone, Eq, PartialEq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, Eq, PartialEq, InternalConversion, uniffi::Record)]
 pub struct NotarizedTransaction {
     signed_intent: SignedIntent,
     pub notary_signature: NotarySignature,

@@ -3,7 +3,7 @@ use sargon::WalletToDappInteractionProofOfOwnershipRequestResponseItem as Intern
 
 /// A response with the list of proofs of ownership for `Accounts`/`Personas`
 /// and the challenge that was signed.
-#[derive(Clone, PartialEq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct WalletToDappInteractionProofOfOwnershipRequestResponseItem {
     pub challenge: DappToWalletInteractionAuthChallengeNonce,
 

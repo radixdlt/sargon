@@ -3,7 +3,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,

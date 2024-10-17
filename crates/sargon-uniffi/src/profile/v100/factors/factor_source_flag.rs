@@ -3,7 +3,7 @@ use sargon::FactorSourceFlag as InternalFactorSourceFlag;
 
 /// Flags which describe a certain state a FactorSource might be in, primarily used
 /// by DeviceFactorSource's to mark which "Babylon" FactorSource is the **main** one.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum FactorSourceFlag {
     /// Used to mark a "babylon" `.device` FactorSource as "main". All new accounts
     /// and Personas are created using the `main` `DeviceFactorSource`.

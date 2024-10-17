@@ -5,7 +5,7 @@ use sargon::Identifiable;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     pub network: NetworkDefinition,
@@ -14,7 +14,7 @@ pub struct Gateway {
     pub url: Url,
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum ChangeGatewayOutcome {
     /// If we did in fact change the gateway, and if the gateway was unknown
     /// or known before it was added, i.e. `is_new` will be true iff the gateway

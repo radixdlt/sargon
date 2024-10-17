@@ -22,7 +22,7 @@ decl_ret_wrapped_address!(
 );
 
 /// The kind of the Pool, either One, Two or Multi resources.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of a single
     /// resource kind.

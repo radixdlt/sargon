@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::TrackedPoolContribution as InternalTrackedPoolContribution;
 
 /// A contribution to a pool observed in the transaction
-#[derive(Clone, PartialEq, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct TrackedPoolContribution {
     pub pool_address: PoolAddress,
 

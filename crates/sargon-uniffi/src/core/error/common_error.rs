@@ -5,7 +5,7 @@ use thiserror::Error as ThisError;
 
 #[repr(u32)]
 #[derive(
-    Clone, Debug, ThisError, PartialEq, InternalConversionV2, uniffi::Error,
+    Clone, Debug, ThisError, PartialEq, InternalConversion, uniffi::Error,
 )]
 pub enum CommonError {
     #[error("Unknown Error")]

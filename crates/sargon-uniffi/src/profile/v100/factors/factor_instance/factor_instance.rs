@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::FactorInstance as InternalFactorInstance;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
     /// factor instance. We will lookup the `FactorSource` in the

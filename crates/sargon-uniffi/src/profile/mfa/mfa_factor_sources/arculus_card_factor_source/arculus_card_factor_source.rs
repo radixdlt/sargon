@@ -5,7 +5,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 /// An Arculus card, a hierarchal deterministic wallet capable of CAP26 derivation
 /// which users interact with by placing it near their host device, which
 /// communicates with the card over NFC.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ArculusCardFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,

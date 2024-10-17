@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::PublicKeyHash as InternalPublicKeyHash;
 
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum PublicKeyHash {
     Ed25519 { value: Exactly29Bytes },
     Secp256k1 { value: Exactly29Bytes },

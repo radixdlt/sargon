@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 use sargon::LedgerHardwareWalletFactorSource as InternalLedgerHardwareWalletFactorSource;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,

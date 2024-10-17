@@ -13,7 +13,7 @@ macro_rules! decl_transfer_of {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Clone,  PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+            #[derive(Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
             pub struct [< $struct_prefix $struct_name Transfer >] {
 
                 /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,

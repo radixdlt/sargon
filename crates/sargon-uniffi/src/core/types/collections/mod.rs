@@ -1,3 +1,3 @@
-mod identified_vec_of;
+mod internal_mapping;
 
-pub use identified_vec_of::*;
+pub use internal_mapping::*;

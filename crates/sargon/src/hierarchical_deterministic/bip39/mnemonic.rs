@@ -333,7 +333,7 @@ impl Mnemonic {
     /// * music
     /// * project
     /// * uphold
-    pub(crate) fn sample_passphrase() -> Self {
+    pub fn sample_passphrase() -> Self {
         Self::from_phrase("pass phrase sign source sample pass phrase sign source sample pass phrase sign source sample pass phrase sign source sample pass phrase sample soon").expect("Valid mnemonic")
     }
     #[allow(dead_code)]
@@ -345,7 +345,7 @@ impl Mnemonic {
     /// * once
     /// * ripple
     /// * summer
-    pub(crate) fn sample_passphrase_other() -> Self {
+    pub fn sample_passphrase_other() -> Self {
         Self::from_phrase("pass phrase sign source sample other pass phrase sign source sample other pass phrase sign source sample other pass phrase source sample other usual").expect("Valid mnemonic")
     }
 }

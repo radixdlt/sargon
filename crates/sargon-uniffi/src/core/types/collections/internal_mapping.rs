@@ -2,7 +2,62 @@ use crate::prelude::*;
 
 use sargon::IdentifiedVecOf;
 
-/// Converting `IdentifiedVecOf` to/from `Vec`
+
+// From InternalType =================================================================================================
+
+pub trait FromInternal<InternalType, Type> {
+    fn into_type(self) -> Type;
+}
+
+impl<InternalElement, Element> FromInternal<Vec<InternalElement>, Vec<Element>>
+    for Vec<InternalElement>
+where
+    Element: From<InternalElement>,
+{
+    fn into_type(self) -> Vec<Element> {
+        self.into_iter().map(Element::from).collect()
+    }
+}
+
+impl<InternalElement, Element> FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
+    for IdentifiedVecOf<InternalElement>
+where
+InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
+Element: From<InternalElement>,
+{
+    fn into_type(self) -> Vec<Element> {
+        self.into_iter().map(Element::from).collect()
+    }
+}
+
+// Into InternalType =================================================================================================
+
+pub trait IntoInternal<Type, InternalType> {
+    fn into_internal(self) -> InternalType;
+}
+
+impl<InternalElement, Element> IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
+    for Vec<Element>
+where
+    InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> IdentifiedVecOf<InternalElement> {
+        self.into_iter().map(Into::into).collect()
+    }
+}
+
+impl<InternalElement, Element> IntoInternal<Vec<Element>, Vec<InternalElement>>
+    for Vec<Element>
+where
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> Vec<InternalElement> {
+        self.into_iter().map(Into::into).collect()
+    }
+}
+
+// HashMap Conversion =================================================================================================
 
 pub trait FromInternalHashMap<InternalKey, InternalElement, Key, Element> {
     fn into_hash_map(self) -> HashMap<Key, Element>;
@@ -111,61 +166,5 @@ where
         self.into_iter()
             .map(|(k, v)| (k.into(), v.into_internal()))
             .collect()
-    }
-}
-
-
-// =================================================================================================
-
-pub trait FromInternal<Internal, External> {
-    fn into_type(self) -> External;
-}
-
-impl<InternalElement, Element> FromInternal<Vec<InternalElement>, Vec<Element>>
-    for Vec<InternalElement>
-where
-    Element: From<InternalElement>,
-{
-    fn into_type(self) -> Vec<Element> {
-        self.into_iter().map(Element::from).collect()
-    }
-}
-
-impl<InternalElement, Element> FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
-    for IdentifiedVecOf<InternalElement>
-where
-InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-Element: From<InternalElement>,
-{
-    fn into_type(self) -> Vec<Element> {
-        self.into_iter().map(Element::from).collect()
-    }
-}
-
-
-// =================================================================================================
-
-pub trait IntoInternal<External, Internal> {
-    fn into_internal(self) -> Internal;
-}
-
-impl<InternalElement, Element> IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
-    for Vec<Element>
-where
-    InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-    Element: Into<InternalElement>,
-{
-    fn into_internal(self) -> IdentifiedVecOf<InternalElement> {
-        self.into_iter().map(Into::into).collect()
-    }
-}
-
-impl<InternalElement, Element> IntoInternal<Vec<Element>, Vec<InternalElement>>
-    for Vec<Element>
-where
-    Element: Into<InternalElement>,
-{
-    fn into_internal(self) -> Vec<InternalElement> {
-        self.into_iter().map(Into::into).collect()
     }
 }

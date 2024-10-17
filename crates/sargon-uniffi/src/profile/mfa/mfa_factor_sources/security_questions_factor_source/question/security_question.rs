@@ -5,7 +5,7 @@ use sargon::Security_NOT_PRODUCTION_READY_Question as InternalSecurity_NOT_PRODU
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A security question
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct Security_NOT_PRODUCTION_READY_Question {
     pub id: u16,     // FIXME: newtype
@@ -19,7 +19,7 @@ pub struct Security_NOT_PRODUCTION_READY_Question {
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A specification of expected format for an answer to a security question.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     /// E.g. `"<CITY>, <YEAR>"`

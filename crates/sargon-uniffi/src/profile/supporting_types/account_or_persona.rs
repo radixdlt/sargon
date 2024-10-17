@@ -2,8 +2,10 @@ use crate::prelude::*;
 use sargon::AccountOrPersona as InternalAccountOrPersona;
 use sargon::Identifiable;
 
+decl_vec_samples_for!(AccountsOrPersonas, AccountOrPersona);
+
 /// Either an `Account` or a `Persona`.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Enum)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Enum)]
 pub enum AccountOrPersona {
     /// An `Account`
     ///

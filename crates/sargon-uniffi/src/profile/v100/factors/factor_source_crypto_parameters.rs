@@ -1,10 +1,12 @@
 use crate::prelude::*;
 use sargon::FactorSourceCryptoParameters as InternalFactorSourceCryptoParameters;
 
+decl_vec_samples_for!(SupportedCurves, SLIP10Curve);
+
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
     /// "Babylon" `DeviceFactorSource` is not capable of deriving keys on the curve

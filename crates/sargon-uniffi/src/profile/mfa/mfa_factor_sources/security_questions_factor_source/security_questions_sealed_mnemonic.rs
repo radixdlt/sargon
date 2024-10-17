@@ -4,7 +4,7 @@ use sargon::SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic as InternalSec
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A mnemonic encrypted by answers to security questions
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
     pub security_questions: Vec<Security_NOT_PRODUCTION_READY_Question>,

@@ -11,7 +11,7 @@ use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
     PartialEq,
     Eq,
     Hash,
-    InternalConversionV2,
+    InternalConversion,
     uniffi::Record,
 )]
 pub struct PassphraseFactorSource {

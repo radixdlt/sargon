@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use sargon::Account as InternalAccount;
 
+decl_vec_samples_for!(Accounts, Account);
+
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
 ///
@@ -18,7 +20,7 @@ use sargon::Account as InternalAccount;
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversionV2, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
 pub struct Account {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,

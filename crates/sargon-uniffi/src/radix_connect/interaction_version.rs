@@ -3,7 +3,7 @@ use sargon::WalletInteractionVersion as InternalWalletInteractionVersion;
 
 uniffi::custom_newtype!(WalletInteractionVersion, u64);
 
-#[derive(PartialEq, Clone, InternalConversionV2)]
+#[derive(PartialEq, Clone, InternalConversion)]
 pub struct WalletInteractionVersion(pub u64);
 
 #[uniffi::export]
