@@ -574,11 +574,10 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     @Test
     fun test_summary() {
+        val summary = TransactionManifest.sample().summary
         assertEquals(
             listOf(AccountAddress.sampleMainnet()),
-            TransactionManifest.sample()
-                .summary
-                .addressesOfAccountsWithdrawnFrom
+            summary?.addressesOfAccountsWithdrawnFrom
         )
     }
 
