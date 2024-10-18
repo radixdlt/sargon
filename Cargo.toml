@@ -5,7 +5,6 @@ members = [
     "crates/sargon-uniffi",
     "crates/sargon-uniffi-conversion-macros",
 ]
-default-members = ["crates/sargon"]
 
 [profile.release]
 incremental = false

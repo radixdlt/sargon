@@ -4,6 +4,8 @@ use sargon::Result as InternalResult;
 
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
+
+/// Utility trait to map `Result` to `InternalResult`
 pub trait IntoInternalResult<Type, InternalType> {
     fn into_internal_result(self) -> InternalResult<InternalType>;
 }
