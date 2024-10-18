@@ -3,7 +3,6 @@ use crate::prelude::*;
 // ==================
 // Submit Transaction
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Submits a notarized transaction payload to the network.
     pub async fn submit_transaction(

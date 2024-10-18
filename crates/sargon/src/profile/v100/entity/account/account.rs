@@ -26,7 +26,6 @@ use crate::prelude::*;
     Hash,
     Eq,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{display_name} | {address}")]
 #[serde(rename_all = "camelCase")]

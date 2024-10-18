@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(WalletInteractionVersion, u64);
-
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct WalletInteractionVersion(pub u64);
 

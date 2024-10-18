@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TransactionGuarantee {
     /// The guaranteed amount to be obtained on this transaction. For manifest & display purposes.
     pub amount: Decimal192,

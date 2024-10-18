@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
 /// Something akin to `SharedToDappWithPersonaIDs<T>`.
 macro_rules! declare_shared_with_dapp {
     (
@@ -27,7 +25,6 @@ macro_rules! declare_shared_with_dapp {
             Eq,
             derive_more::Display,
             derive_more::Debug,
-            uniffi::Record,
         )]
         #[debug("{}", self.shared_ids_string())]
         #[display("{request} - #{} ids shared", self.ids.len())]

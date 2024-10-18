@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SargonDependencies {
     pub radix_engine_toolkit: DependencyInformation,
     pub scrypto_radix_engine: DependencyInformation,

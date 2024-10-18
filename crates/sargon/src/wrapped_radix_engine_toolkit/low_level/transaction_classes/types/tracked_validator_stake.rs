@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A validator stake observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TrackedValidatorStake {
     pub validator_address: ValidatorAddress,
 
@@ -37,6 +37,26 @@ impl From<(RetTrackedValidatorStake, NetworkID)> for TrackedValidatorStake {
             ret.xrd_amount,
             (ret.liquid_stake_unit_address, n),
             ret.liquid_stake_unit_amount,
+        )
+    }
+}
+
+impl HasSampleValues for TrackedValidatorStake {
+    fn sample() -> Self {
+        Self::new(
+            ValidatorAddress::sample(),
+            Decimal192::sample(),
+            ResourceAddress::sample(),
+            Decimal192::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            ValidatorAddress::sample_other(),
+            Decimal192::sample_other(),
+            ResourceAddress::sample_other(),
+            Decimal192::sample_other(),
         )
     }
 }

@@ -161,6 +161,12 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - name: Install cargo nextest
+        uses: RDXWorks-actions/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          locked: true
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -168,7 +174,7 @@ jobs:
           default: true
 
       - name: Run rust tests
-        run: cargo test
+        run: cargo nextest run --all
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:

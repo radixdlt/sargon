@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
 /// it `is_manual_cancellation`.
-#[derive(Clone, Debug, PartialEq, strum::EnumIter, uniffi::Enum)]
+#[derive(Clone, Debug, derive_more::Display, PartialEq, strum::EnumIter)]
 pub enum SecureStorageAccessErrorKind {
     /// The hardware is unavailable. Try again later.
     HardwareUnavailable,
@@ -64,18 +64,21 @@ pub enum SecureStorageAccessErrorKind {
     NoDeviceCredential,
 }
 
+impl HasSampleValues for SecureStorageAccessErrorKind {
+    fn sample() -> Self {
+        SecureStorageAccessErrorKind::HardwareUnavailable
+    }
+
+    fn sample_other() -> Self {
+        SecureStorageAccessErrorKind::UnableToProcess
+    }
+}
+
 impl SecureStorageAccessErrorKind {
     pub fn is_manual_cancellation(&self) -> bool {
         self == &SecureStorageAccessErrorKind::UserCancelled
             || self == &SecureStorageAccessErrorKind::NegativeButton
     }
-}
-
-#[uniffi::export]
-pub fn secure_storage_access_error_kind_is_manual_cancellation(
-    kind: SecureStorageAccessErrorKind,
-) -> bool {
-    kind.is_manual_cancellation()
 }
 
 #[cfg(test)]
@@ -115,20 +118,5 @@ mod tests {
             .is_manual_cancellation());
         assert!(!SecureStorageAccessErrorKind::NoDeviceCredential
             .is_manual_cancellation());
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn test() {
-        for kind in SecureStorageAccessErrorKind::iter() {
-            assert_eq!(
-                kind.is_manual_cancellation(),
-                secure_storage_access_error_kind_is_manual_cancellation(kind)
-            );
-        }
     }
 }

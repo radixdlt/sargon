@@ -7,7 +7,6 @@ mod assets_transfers;
 mod build_information;
 mod manifest_encountered_component_address;
 mod stake_claim;
-mod stake_claim_uniffi_fn;
 mod transaction;
 mod transaction_guarantee;
 
@@ -18,7 +17,6 @@ pub use build_information::*;
 pub use address_union::*;
 
 pub use stake_claim::*;
-pub use stake_claim_uniffi_fn::*;
 pub use transaction_guarantee::*;
 
 pub use account_locker::*;

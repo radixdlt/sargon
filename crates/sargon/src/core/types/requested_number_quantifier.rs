@@ -17,7 +17,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     strum::Display,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum RequestedNumberQuantifier {
@@ -28,6 +27,16 @@ pub enum RequestedNumberQuantifier {
     /// (Request access to) *at least* N many of something, where quantity `N` is
     /// not part of this enum, e.g. "I want AT LEAST 3 accounts"
     AtLeast,
+}
+
+impl HasSampleValues for RequestedNumberQuantifier {
+    fn sample() -> Self {
+        RequestedNumberQuantifier::Exactly
+    }
+
+    fn sample_other() -> Self {
+        RequestedNumberQuantifier::AtLeast
+    }
 }
 
 #[cfg(test)]

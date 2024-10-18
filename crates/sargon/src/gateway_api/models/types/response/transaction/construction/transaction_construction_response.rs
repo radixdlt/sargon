@@ -7,7 +7,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Debug,
-    uniffi::Record,
 )]
 pub struct TransactionConstructionResponse {
     pub ledger_state: LedgerState,

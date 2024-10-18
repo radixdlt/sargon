@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// The execution summary process not only determines the class of the manifest,
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
 pub enum DetailedManifestClass {
     /// A general manifest that involves any amount of arbitrary components
     /// and packages where nothing more concrete can be said about the manifest
@@ -217,6 +217,18 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                     authorized_depositors_removed,
                 }
             }
+        }
+    }
+}
+
+impl HasSampleValues for DetailedManifestClass {
+    fn sample() -> Self {
+        Self::General
+    }
+
+    fn sample_other() -> Self {
+        Self::Transfer {
+            is_one_to_one: false,
         }
     }
 }

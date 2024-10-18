@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 pub enum FiatCurrency {
     /// American dollars.
@@ -66,6 +65,6 @@ mod tests {
 
     #[test]
     fn from_json_str() {
-        assert_eq!(SUT::new_from_json_string("usd").unwrap(), SUT::USD);
+        assert_eq!("usd".deserialize::<FiatCurrency>().unwrap(), SUT::USD);
     }
 }

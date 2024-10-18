@@ -7,28 +7,28 @@ sealed interface DesktopTargetTriple {
     val rustTargetTripleName: String
     object DarwinAArch64: DesktopTargetTriple {
         override val jnaName: String = "darwin-aarch64"
-        override val binaryName: String = "libsargon.dylib"
+        override val binaryName: String = "libsargon_uniffi.dylib"
         override val rustTargetTripleName: String = "aarch64-apple-darwin"
     }
 
     object DarwinX8664: DesktopTargetTriple {
         override val jnaName: String = "darwin-x86-64"
-        override val binaryName: String = "libsargon.dylib"
+        override val binaryName: String = "libsargon_uniffi.dylib"
         override val rustTargetTripleName: String = "x86_64-apple-darwin"
     }
     object LinuxArmel: DesktopTargetTriple {
         override val jnaName: String = "linux-armel"
-        override val binaryName: String = "libsargon.so"
+        override val binaryName: String = "libsargon_uniffi.so"
         override val rustTargetTripleName: String = "aarch64-unknown-linux-gnu"
     }
     object LinuxX8664: DesktopTargetTriple {
         override val jnaName: String = "linux-x86-64"
-        override val binaryName: String = "libsargon.so"
+        override val binaryName: String = "libsargon_uniffi.so"
         override val rustTargetTripleName: String = "x86_64-unknown-linux-gnu"
     }
     object LinuxWin32X8664: DesktopTargetTriple {
         override val jnaName: String = "win32-x86-64"
-        override val binaryName: String = "sargon.dll"
+        override val binaryName: String = "sargon_uniffi.dll"
         override val rustTargetTripleName: String = "x86_64-pc-windows-gnu"
     }
 

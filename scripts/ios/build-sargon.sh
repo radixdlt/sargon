@@ -38,13 +38,13 @@ done
 # for improvements!
 
 generate_ffi() {
-  echo "📦 Generating framework module mapping and FFI bindings"
+  echo "📦 Generating framework module mapping and FFI bindings $1"
   if $maconly; then
     local TARGET_FOR_DYLIB_PATH="aarch64-apple-darwin"
   else
     local TARGET_FOR_DYLIB_PATH="aarch64-apple-ios"
   fi 
-  cargo run --features build-binary --bin sargon-bindgen generate --library target/$TARGET_FOR_DYLIB_PATH/release/lib$1.dylib --language swift --out-dir target/uniffi-xcframework-staging
+  cargo run -p sargon-uniffi --features build-binary --bin sargon-bindgen generate --library target/$TARGET_FOR_DYLIB_PATH/release/lib$1_uniffi.dylib --language swift --out-dir target/uniffi-xcframework-staging
   mkdir -p apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/*.swift apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/$1FFI.modulemap target/uniffi-xcframework-staging/module.modulemap  # Convention requires this have a specific name
@@ -53,20 +53,20 @@ generate_ffi() {
 
 build_xcframework() {
   # Builds an XCFramework
-  echo "📦 Generating XCFramework"
+  echo "📦 Generating XCFramework $1"
   rm -rf target/swift  # Delete the output folder so we can regenerate it
   local XCFRAME_PATH="target/swift/lib$1-rs.xcframework"
   local XCFRAME_ZIP_PATH="$XCFRAME_PATH.zip"
 
   if $maconly; then
     xcodebuild -create-xcframework \
-    -library target/aarch64-apple-darwin/release/lib$1.a -headers target/uniffi-xcframework-staging \
+    -library target/aarch64-apple-darwin/release/lib$1_uniffi.a -headers target/uniffi-xcframework-staging \
     -output $XCFRAME_PATH
   else
     xcodebuild -create-xcframework \
-    -library target/aarch64-apple-darwin/release/lib$1.a -headers target/uniffi-xcframework-staging \
-    -library target/aarch64-apple-ios/release/lib$1.a -headers target/uniffi-xcframework-staging \
-    -library target/aarch64-apple-ios-sim/release/lib$1.a -headers target/uniffi-xcframework-staging \
+    -library target/aarch64-apple-darwin/release/lib$1_uniffi.a -headers target/uniffi-xcframework-staging \
+    -library target/aarch64-apple-ios/release/lib$1_uniffi.a -headers target/uniffi-xcframework-staging \
+    -library target/aarch64-apple-ios-sim/release/lib$1_uniffi.a -headers target/uniffi-xcframework-staging \
     -output $XCFRAME_PATH
   fi
 
@@ -100,13 +100,13 @@ cd "$DIR"
 cd "../../" # go to parent of parent, which is project root.
 
 
-cargo build --lib --release --target aarch64-apple-darwin
+cargo build -p sargon-uniffi --lib --release --target aarch64-apple-darwin
 if $maconly; then
   echo "📦 Build for macOS only (skipping iOS)"
 else
   echo "📦 Building iOS and macOS targets"
-  cargo build --lib --release --target aarch64-apple-ios-sim
-  cargo build --lib --release --target aarch64-apple-ios
+  cargo build -p sargon-uniffi --lib --release --target aarch64-apple-ios-sim
+  cargo build -p sargon-uniffi --lib --release --target aarch64-apple-ios
 fi
 
 

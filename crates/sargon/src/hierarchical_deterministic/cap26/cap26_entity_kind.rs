@@ -16,7 +16,6 @@ use crate::prelude::*;
     Ord,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Enum,
 )]
 #[repr(u32)]
 pub enum CAP26EntityKind {
@@ -33,6 +32,16 @@ impl CAP26EntityKind {
     /// The raw representation of this entity kind, an `HDPathValue`.
     pub fn discriminant(&self) -> HDPathValue {
         *self as HDPathValue
+    }
+}
+
+impl HasSampleValues for CAP26EntityKind {
+    fn sample() -> Self {
+        CAP26EntityKind::Account
+    }
+
+    fn sample_other() -> Self {
+        CAP26EntityKind::Identity
     }
 }
 

@@ -10,7 +10,6 @@ use crate::prelude::*;
     Hash,
     Eq,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{}", self.description())]

@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ResourcePreference {
     Allowed,
     Disallowed,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ResourcePreferenceUpdate {
     Set { value: ResourcePreference },
     Remove,
@@ -29,6 +29,16 @@ impl From<RetUpdate<ScryptoResourcePreference>> for ResourcePreferenceUpdate {
             },
             RetUpdate::Remove => Self::Remove,
         }
+    }
+}
+
+impl HasSampleValues for ResourcePreference {
+    fn sample() -> Self {
+        Self::Allowed
+    }
+
+    fn sample_other() -> Self {
+        Self::Disallowed
     }
 }
 

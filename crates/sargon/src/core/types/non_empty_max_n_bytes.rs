@@ -3,8 +3,6 @@ use delegate::delegate;
 use paste::*;
 use radix_common::crypto::{Hash, IsHash};
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_non_empty_max_n_bytes {
     (
         $(
@@ -28,19 +26,11 @@ macro_rules! decl_non_empty_max_n_bytes {
                 DeserializeFromStr,
                 derive_more::Display,
                 derive_more::Debug,
-                uniffi::Record,
             )]
             #[display("{}", self.to_hex())]
             #[debug("{}", self.to_hex())]
             pub struct [< NonEmptyMax $byte_count Bytes  >] {
-                bag_of_bytes: BagOfBytes,
-            }
-
-            #[uniffi::export]
-            pub fn [<new_non_empty_max_ $byte_count _bytes>](
-                bag_of_bytes: BagOfBytes,
-            ) -> Result<[< NonEmptyMax $byte_count Bytes  >]> {
-                [< NonEmptyMax $byte_count Bytes  >]::try_from(bag_of_bytes)
+                pub bag_of_bytes: BagOfBytes,
             }
 
             impl TryFrom<BagOfBytes> for [< NonEmptyMax $byte_count Bytes  >] {
@@ -151,8 +141,6 @@ decl_non_empty_max_n_bytes!(
     32
 );
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_samples_for_max_n_bytes {
     ($struct_name:ident, $byte_count:expr) => {
         impl HasSampleValues for $struct_name {
@@ -216,6 +204,7 @@ macro_rules! decl_samples_for_max_n_bytes {
 
 // The impl of sample values require an max number of bytes
 decl_samples_for_max_n_bytes!(NonEmptyMax64Bytes, 64);
+decl_samples_for_max_n_bytes!(NonEmptyMax32Bytes, 32);
 
 #[cfg(test)]
 mod tests_non_empty_max_64_bytes {
@@ -377,28 +366,5 @@ mod tests_non_empty_max_64_bytes {
             set.insert(bytes.to_vec());
         }
         assert_eq!(set.len(), n);
-    }
-}
-
-#[cfg(test)]
-mod non_empty_max_64_uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn new_from_bag_of_bytes() {
-        let bytes = generate_bytes::<13>();
-        assert_eq!(
-            new_non_empty_max_64_bytes(bytes.clone().into())
-                .unwrap()
-                .to_vec(),
-            bytes
-        );
-    }
-
-    #[test]
-    fn new_fail() {
-        assert!(
-            new_non_empty_max_64_bytes(generate_bytes::<65>().into()).is_err()
-        );
     }
 }

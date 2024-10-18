@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A request to prove ownership of `Accounts` and/or a `Persona`.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionProofOfOwnershipRequestItem {
     /// The challenge that must be signed to prove ownership.

@@ -10,15 +10,7 @@ use crate::prelude::*;
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
 #[derive(
-    Serialize,
-    Deserialize,
-    Default,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    uniffi::Record,
+    Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct OnLedgerSettings {

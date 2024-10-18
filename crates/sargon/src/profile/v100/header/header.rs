@@ -13,7 +13,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]
@@ -162,26 +161,5 @@ pub mod tests {
         let value = ProfileSnapshotVersion::default();
         let sut = SUT::sample();
         assert_eq!(sut.snapshot_version, value)
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Header;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(SUT::sample(), new_header_sample());
-        assert_eq!(SUT::sample_other(), new_header_sample_other());
-    }
-
-    #[test]
-    fn header_identifiable() {
-        let sut = SUT::sample();
-        assert_eq!(&sut.id(), &sut.id);
     }
 }

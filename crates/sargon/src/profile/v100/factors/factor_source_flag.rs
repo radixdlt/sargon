@@ -3,16 +3,7 @@ use crate::prelude::*;
 /// Flags which describe a certain state a FactorSource might be in, primarily used
 /// by DeviceFactorSource's to mark which "Babylon" FactorSource is the **main** one.
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    uniffi::Enum,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum FactorSourceFlag {
@@ -28,6 +19,16 @@ pub enum FactorSourceFlag {
     /// FactorSource as deleted by the user and hide it, meaning e.g.
     /// that in Multi-Factor Setup flows it will not show up.
     DeletedByUser,
+}
+
+impl HasSampleValues for FactorSourceFlag {
+    fn sample() -> Self {
+        Self::Main
+    }
+
+    fn sample_other() -> Self {
+        Self::DeletedByUser
+    }
 }
 
 #[cfg(test)]

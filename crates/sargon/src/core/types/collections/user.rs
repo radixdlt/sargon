@@ -10,7 +10,6 @@ use crate::prelude::*;
     serde::Deserialize,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[debug("({}: {})", id, name)]
 #[display("{}", name)]

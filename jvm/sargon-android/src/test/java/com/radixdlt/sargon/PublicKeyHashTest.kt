@@ -21,7 +21,7 @@ class PublicKeyHashTest: SampleTestable<PublicKeyHash> {
         val hash = PublicKeyHash.init(publicKey = publicKey) as PublicKeyHash.Ed25519
         assertEquals(
             "f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7",
-            hash.value.secretMagic.hex
+            hash.value.hex
         )
     }
 }

@@ -5,7 +5,6 @@ use crate::prelude::*;
 // ==================
 // Create Unsaved Account(s)
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
@@ -197,7 +196,6 @@ impl SargonOS {
 // ==================
 // Add (Save) Account(s)
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Add the `account` to active profile and **saves** the updated profile to
     /// secure storage.
@@ -265,7 +263,6 @@ impl SargonOS {
 // ==================
 // Update Account(s)
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Updates the account `updated` by mutating current profile and persisting
     /// the change to secure storage. Throws `UnknownAccount` error if the account

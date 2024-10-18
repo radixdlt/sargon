@@ -364,26 +364,3 @@ mod tests {
         );
     }
 }
-
-#[cfg(test)]
-mod test_uniffi_tests {
-
-    use uniffi::{Lift, Lower};
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Accounts;
-
-    #[test]
-    fn manual_perform_uniffi_conversion_successful() {
-        let test = |sut: SUT| {
-            let ffi_side = <SUT as Lower<crate::UniFfiTag>>::lower(sut.clone());
-            let from_ffi =
-                <SUT as Lift<crate::UniFfiTag>>::try_lift(ffi_side).unwrap();
-            assert_eq!(from_ffi, sut);
-        };
-
-        test(SUT::new()); // test can be empty (`FactorSources` cannot be empty, enforced by our `try_lift` impl of `IdentifiedVecOf`, so this test cannot be put in macro declaring the `decl_identified_vec_of` macro)
-    }
-}

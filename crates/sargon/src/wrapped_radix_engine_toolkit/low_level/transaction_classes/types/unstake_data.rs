@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// The data associated with the various validator claim NFTs
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UnstakeData {
     pub name: String,
 
@@ -33,5 +33,19 @@ impl From<ScryptoUnstakeData> for UnstakeData {
             claim_epoch: value.claim_epoch.into(),
             claim_amount: value.claim_amount.into(),
         }
+    }
+}
+
+impl HasSampleValues for UnstakeData {
+    fn sample() -> Self {
+        Self::new(String::sample(), Epoch::sample(), Decimal192::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            String::sample_other(),
+            Epoch::sample_other(),
+            Decimal192::sample_other(),
+        )
     }
 }

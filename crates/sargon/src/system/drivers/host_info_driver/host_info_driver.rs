@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-#[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
 pub trait HostInfoDriver: Send + Sync + std::fmt::Debug {
     /// The **current** device's operating system, e.g. "iOS 17.4.1"

@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     derive_more::Debug,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("<OBFUSCATED>")]
@@ -89,6 +88,13 @@ impl MnemonicWithPassphrase {
         keys
     }
 
+    pub fn derive_public_keys_vec(
+        &self,
+        derivation_paths: Vec<DerivationPath>,
+    ) -> Vec<HierarchicalDeterministicPublicKey> {
+        self.derive_public_keys(derivation_paths)
+    }
+
     pub fn sign(
         &self,
         hash_to_sign: &Hash,
@@ -116,6 +122,13 @@ impl MnemonicWithPassphrase {
                 keys.clone().into_iter().map(|k| k.derivation_path),
             ),
         ) == keys
+    }
+
+    pub fn validate_public_keys_vec(
+        &self,
+        hd_keys: Vec<HierarchicalDeterministicPublicKey>,
+    ) -> bool {
+        self.validate_public_keys(hd_keys)
     }
 }
 

@@ -24,11 +24,11 @@ impl PerAssetNonFungibleTransfer {
     }
 }
 
-impl From<(&AccountOrAddressOf, PerRecipientNonFungiblesTransfer)>
+impl From<(&AccountOrAddressOf, PerRecipientNonFungibleTransfer)>
     for PerAssetNonFungibleTransfer
 {
     fn from(
-        value: (&AccountOrAddressOf, PerRecipientNonFungiblesTransfer),
+        value: (&AccountOrAddressOf, PerRecipientNonFungibleTransfer),
     ) -> Self {
         let (recipient, non_fungibles) = value;
         Self::new(

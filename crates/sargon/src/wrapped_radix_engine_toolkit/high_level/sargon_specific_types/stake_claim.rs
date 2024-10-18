@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct StakeClaim {
     pub validator_address: ValidatorAddress,
     pub resource_address: NonFungibleResourceAddress,

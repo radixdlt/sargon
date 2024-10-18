@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
 pub enum ResourceIndicator {
     Fungible {
         resource_address: ResourceAddress,

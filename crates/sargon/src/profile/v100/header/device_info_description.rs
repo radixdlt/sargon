@@ -5,14 +5,7 @@ use crate::prelude::*;
 /// This used to be a String only in Pre 1.6.0 wallets, so
 /// we have a custom Deserialize impl of it.
 #[derive(
-    Serialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-    uniffi::Record,
+    Serialize, Clone, Debug, PartialEq, Eq, Hash, derive_more::Display,
 )]
 #[display("{name} ({model})")]
 pub struct DeviceInfoDescription {

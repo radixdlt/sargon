@@ -4,14 +4,7 @@ use crate::prelude::*;
 ///
 /// Following the same naming convention as https://docs.rs/rust_decimal/latest/rust_decimal/enum.RoundingStrategy.html.
 #[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    enum_iterator::Sequence,
-    strum::Display,
-    uniffi::Enum,
+    Clone, Copy, Debug, PartialEq, Eq, enum_iterator::Sequence, strum::Display,
 )]
 pub enum RoundingMode {
     /// The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.
@@ -81,6 +74,16 @@ impl From<ScryptoRoundingMode> for RoundingMode {
                 RoundingMode::ToNearestMidpointToEven
             }
         }
+    }
+}
+
+impl HasSampleValues for RoundingMode {
+    fn sample() -> Self {
+        RoundingMode::ToPositiveInfinity
+    }
+
+    fn sample_other() -> Self {
+        RoundingMode::ToNegativeInfinity
     }
 }
 

@@ -12,7 +12,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{}", self.description())]
 pub struct ProfileNetwork {

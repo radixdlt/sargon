@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.to_canonical_string())]
 #[debug("{}", self.to_canonical_string())]

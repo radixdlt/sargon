@@ -6,7 +6,7 @@ use crate::EventKind::{
 /// SargonOS event contain information about something of interest that has
 /// happened to the SargonOS, most prominently to the Profile. Host device
 /// can subscribe to these events by use of `EventBusDriver`.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
     /// The SargonOS just booted.
     Booted,

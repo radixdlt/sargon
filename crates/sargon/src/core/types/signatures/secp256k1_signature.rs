@@ -12,7 +12,6 @@ use crate::prelude::*;
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
-    uniffi::Record,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]

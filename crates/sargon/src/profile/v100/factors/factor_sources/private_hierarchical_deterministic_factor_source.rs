@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
     #[zeroize(skip)]
@@ -62,6 +62,20 @@ impl PrivateHierarchicalDeterministicFactorSource {
             mnemonic_with_passphrase,
             host_info,
         )
+    }
+
+    pub fn new_babylon_with_entropy_bytes(
+        is_main: bool,
+        entropy_bytes: NonEmptyMax32Bytes,
+        host_info: &HostInfo,
+    ) -> Result<Self> {
+        let entropy = BIP39Entropy::try_from(entropy_bytes)?;
+        Ok(Self::new_babylon_with_entropy(
+            is_main,
+            entropy,
+            BIP39Passphrase::default(),
+            host_info,
+        ))
     }
 
     pub fn generate_new_babylon(is_main: bool, host_info: &HostInfo) -> Self {

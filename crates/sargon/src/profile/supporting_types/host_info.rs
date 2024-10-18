@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, derive_more::Display)]
 #[display("Host '{} {}' running on {}, firmware: {}", description.name, description.model, host_os, host_app_version)]
 pub struct HostInfo {
     /// A short description of the device. The host should

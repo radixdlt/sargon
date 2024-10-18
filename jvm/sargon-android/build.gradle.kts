@@ -96,7 +96,7 @@ android {
 cargoNdk {
     targets = arrayListOf("arm64", "arm")
     module = "../"
-    librariesNames = arrayListOf("libsargon.so")
+    librariesNames = arrayListOf("libsargon_uniffi.so")
 }
 
 tasks.withType<Test> {
@@ -269,7 +269,7 @@ afterEvaluate {
                 .filter { !Files.isDirectory(it) }
                 .map { it.toString() }
                 .filter { path ->
-                    path.endsWith("libsargon.so") || path.endsWith("libsargon.dylib") || path.endsWith("libsargon.dll")
+                    path.endsWith("libsargon_uniffi.so") || path.endsWith("libsargon_uniffi.dylib") || path.endsWith("libsargon_uniffi.dll")
                 }
                 .map { File(it) }
                 .toList()
@@ -282,6 +282,7 @@ afterEvaluate {
                 workingDir = rootDir.parentFile
                 commandLine(
                     "cargo", "run",
+                    "-p", "sargon-uniffi",
                     "--features", "build-binary",
                     "--bin", "sargon-bindgen",
                     "generate", "--library", binaryFile.toString(),

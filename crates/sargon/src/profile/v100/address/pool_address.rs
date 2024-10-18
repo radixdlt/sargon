@@ -12,8 +12,7 @@ decl_ret_wrapped_address!(
     /// * GlobalTwoResourcePool
     /// * GlobalMultiResourcePool
     ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPoolAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPoolAddress`][ret].
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L256-L261
@@ -21,25 +20,25 @@ decl_ret_wrapped_address!(
 );
 
 impl PoolAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_single_pool()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_bi_pool()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_single_pool()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_bi_pool()
     }
 }
 
 /// The kind of the Pool, either One, Two or Multi resources.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of a single
     /// resource kind.
@@ -52,12 +51,6 @@ pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of many different
     /// resources
     MultiResources,
-}
-
-/// Returns the kind of pool, either 1, 2 or Multi resources.
-#[uniffi::export]
-pub fn pool_address_kind(address: &PoolAddress) -> PoolKind {
-    address.pool_address_kind()
 }
 
 impl PoolAddress {
@@ -79,6 +72,16 @@ impl HasSampleValues for PoolAddress {
 
     fn sample_other() -> Self {
         Self::sample_mainnet_single_pool()
+    }
+}
+
+impl HasSampleValues for PoolKind {
+    fn sample() -> Self {
+        Self::OneResource
+    }
+
+    fn sample_other() -> Self {
+        Self::TwoResources
     }
 }
 
@@ -175,24 +178,6 @@ mod tests {
             "pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]

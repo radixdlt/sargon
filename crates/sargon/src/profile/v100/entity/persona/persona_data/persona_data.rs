@@ -29,7 +29,6 @@ use crate::prelude::*;
     Eq,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.string_representation(false))]
 #[debug("{}", self.string_representation(true))]

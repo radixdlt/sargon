@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(
-    DappToWalletInteractionAuthChallengeNonce,
-    Exactly32Bytes
-);
-
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
 )]

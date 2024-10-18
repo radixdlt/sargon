@@ -14,7 +14,6 @@ use std::ops::Deref;
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.url.to_string())]
 #[debug("{}: {}", self.network.display_description, self.url.to_string())]

@@ -16,7 +16,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("#networks: {number_of_networks}, #accounts: {number_of_accounts_on_all_networks_in_total}, #personas: {number_of_personas_on_all_networks_in_total}")]

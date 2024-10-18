@@ -13,7 +13,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{quantifier}: {quantity}")]
 pub struct RequestedQuantity {

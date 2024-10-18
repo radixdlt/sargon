@@ -12,7 +12,6 @@ use crate::prelude::*;
     derive_more::Display,
     Ord,
     Hash,
-    uniffi::Record,
 )]
 #[display("{inner}")]
 pub struct U11 {
@@ -26,6 +25,16 @@ impl U11 {
             return Err(CommonError::InvalidBIP39Index { bad_value: inner });
         }
         Ok(Self { inner })
+    }
+}
+
+impl HasSampleValues for U11 {
+    fn sample() -> Self {
+        Self::new(0).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(2047).unwrap()
     }
 }
 

@@ -125,7 +125,6 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
     Hash,
     Debug,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{id}")]

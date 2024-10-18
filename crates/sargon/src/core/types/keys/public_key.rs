@@ -13,7 +13,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     derive_more::Display,
-    uniffi::Enum,
 )]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.

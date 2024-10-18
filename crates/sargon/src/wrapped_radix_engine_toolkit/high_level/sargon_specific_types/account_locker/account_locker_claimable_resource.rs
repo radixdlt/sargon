@@ -2,7 +2,7 @@ use crate::prelude::*;
 use std::cmp::min;
 
 /// A claimable resource in an account locker.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AccountLockerClaimableResource {
     /// A fungible resource with a specific claimable amount
     Fungible {

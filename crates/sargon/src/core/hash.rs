@@ -1,41 +1,6 @@
 use crate::prelude::*;
 
 /// Represents a 32-byte hash digest.
-///
-/// Made UniFFI convertible via bytes (BagOfBytes).
-#[derive(
-    Clone,
-    Debug,
-    Copy,
-    PartialEq,
-    Eq,
-    std::hash::Hash,
-    derive_more::Display,
-    derive_more::FromStr,
-)]
-pub struct HashSecretMagic(ScryptoHash);
-
-uniffi::custom_type!(HashSecretMagic, BagOfBytes);
-
-impl crate::UniffiCustomTypeConverter for HashSecretMagic {
-    type Builtin = BagOfBytes;
-
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Exactly32Bytes::try_from(val.bytes)
-            .map(|e| HashSecretMagic(ScryptoHash::from_bytes(*e.bytes())))
-            .map_err(|e| e.into())
-    }
-
-    fn from_custom(obj: Self) -> Self::Builtin {
-        BagOfBytes::from(obj.0.into_bytes().as_slice())
-    }
-}
-
-/// Represents a 32-byte hash digest.
-///
-/// Made UniFFI convertible via HashSecretMagic,
-/// exposed in Swift/Kotlin as its own struct/data class, with
-/// hidden secret magic.
 #[derive(
     Clone,
     Debug,
@@ -45,21 +10,18 @@ impl crate::UniffiCustomTypeConverter for HashSecretMagic {
     std::hash::Hash,
     derive_more::Display,
     derive_more::FromStr,
-    uniffi::Record,
 )]
-pub struct Hash {
-    pub(crate) secret_magic: HashSecretMagic,
-}
+pub struct Hash(pub(crate) ScryptoHash);
 
 impl AsRef<ScryptoHash> for Hash {
     fn as_ref(&self) -> &ScryptoHash {
-        &self.secret_magic.0
+        &self.0
     }
 }
 
 impl AsRef<[u8]> for Hash {
     fn as_ref(&self) -> &[u8] {
-        self.secret_magic.0.as_ref()
+        self.0.as_ref()
     }
 }
 
@@ -78,24 +40,31 @@ impl From<Hash> for Exactly32Bytes {
     }
 }
 
+impl TryFrom<String> for Hash {
+    type Error = CommonError;
+
+    fn try_from(value: String) -> Result<Self> {
+        let bytes = Exactly32Bytes::from_str(&value)?;
+        Ok(Self::from(bytes))
+    }
+}
+
 impl ScryptoIsHash for Hash {}
 
 impl Hash {
     pub fn bytes(&self) -> Vec<u8> {
-        self.secret_magic.0.clone().to_vec()
+        self.0.clone().to_vec()
     }
 }
 
 impl From<ScryptoHash> for Hash {
     fn from(value: ScryptoHash) -> Self {
-        Self {
-            secret_magic: HashSecretMagic(value),
-        }
+        Self(value)
     }
 }
 impl From<Hash> for ScryptoHash {
     fn from(value: Hash) -> Self {
-        value.secret_magic.0
+        value.0
     }
 }
 
@@ -196,40 +165,6 @@ mod tests {
                 .parse::<SUT>()
                 .unwrap(),
             hash_of("Hello Radix".as_bytes())
-        );
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion_successful() {
-        let sut = SUT::sample().secret_magic;
-        let builtin = BagOfBytes::from_hex(
-            "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935",
-        )
-        .unwrap();
-
-        let ffi_side =
-            <HashSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
-                sut,
-            );
-
-        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
-
-        let from_ffi_side =
-            <HashSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-
-        assert_eq!(sut, from_ffi_side);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion_fail() {
-        assert!(
-            <HashSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
-                BagOfBytes::from_hex("deadbeef").unwrap(),
-            )
-            .is_err()
         );
     }
 }

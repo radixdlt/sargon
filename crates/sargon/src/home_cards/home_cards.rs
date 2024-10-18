@@ -2,9 +2,6 @@ use crate::prelude::*;
 
 decl_identified_vec_of!(HomeCard);
 
-impl JsonDataDeserializing for HomeCards {}
-impl JsonDataSerializing for HomeCards {}
-
 impl HasSampleValues for HomeCards {
     fn sample() -> Self {
         Self::from_iter([HomeCard::sample(), HomeCard::Connector])
