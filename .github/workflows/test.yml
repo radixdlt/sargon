@@ -46,6 +46,12 @@ jobs:
         uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0 # Ensure the full git history is fetched
+      
+      - name: Install cargo nextest
+        uses: RDXWorks-actions/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          locked: true
 
       - name: Fetch all tags
         run: git fetch --tags
@@ -168,7 +174,7 @@ jobs:
           default: true
 
       - name: Run rust tests
-        run: cargo test
+        run: cargo nextest run --all
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
