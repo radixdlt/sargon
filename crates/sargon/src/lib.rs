@@ -221,8 +221,7 @@ pub mod prelude {
             },
             intent::{
                 compile as RET_intent_compile,
-                decompile as RET_decompile_intent,
-                hash as ret_hash_intent
+                decompile as RET_decompile_intent, hash as ret_hash_intent,
             },
             manifest::summary as RET_summary,
             notarized_transaction::{

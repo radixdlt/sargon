@@ -270,7 +270,8 @@ mod tests {
     #[test]
     fn all_relevant_factor_instances_of_source_ok() {
         let account = Account::sample_at(5);
-        let intent = TransactionIntent::new_requiring_auth([account.address], []);
+        let intent =
+            TransactionIntent::new_requiring_auth([account.address], []);
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()

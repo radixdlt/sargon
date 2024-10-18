@@ -1077,7 +1077,10 @@ mod tests {
                 };
                 let failing_transactions = (0..100)
                     .map(|_| {
-                        TransactionIntent::new_requiring_auth_with_hashes([(a0.address, make_random_pk_hash())], [])
+                        TransactionIntent::new_requiring_auth_with_hashes(
+                            [(a0.address, make_random_pk_hash())],
+                            [],
+                        )
                     })
                     .collect::<Vec<_>>();
                 let mut all_transactions = failing_transactions.clone();

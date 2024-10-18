@@ -52,23 +52,24 @@ impl TXToSign {
 impl TXToSign {
     #[allow(unused)]
     pub(crate) fn sample(
-        entities_requiring_auth: impl IntoIterator<Item = impl Into<AccountOrPersona>>,
+        entities_requiring_auth: impl IntoIterator<
+            Item = impl Into<AccountOrPersona>,
+        >,
     ) -> Self {
         let mut account_addresses = Vec::new();
         let mut identity_addresses = Vec::new();
 
-        let all_entities = entities_requiring_auth.into_iter()
+        let all_entities = entities_requiring_auth
+            .into_iter()
             .map(|i| i.into())
             .collect::<Vec<_>>();
 
-        all_entities.iter().for_each(|entity| {
-            match entity {
-                AccountOrPersona::AccountEntity(account) => {
-                    account_addresses.push(account.address)
-                },
-                AccountOrPersona::PersonaEntity(persona) => {
-                    identity_addresses.push(persona.address)
-                }
+        all_entities.iter().for_each(|entity| match entity {
+            AccountOrPersona::AccountEntity(account) => {
+                account_addresses.push(account.address)
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                identity_addresses.push(persona.address)
             }
         });
 
@@ -77,9 +78,6 @@ impl TXToSign {
             identity_addresses,
         );
 
-        Self::with(
-            intent,
-            all_entities
-        )
+        Self::with(intent, all_entities)
     }
 }

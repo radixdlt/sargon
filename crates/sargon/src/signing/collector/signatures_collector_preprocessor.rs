@@ -102,10 +102,7 @@ impl SignaturesCollectorPreprocessor {
                 );
 
                 petition.all_factor_instances().iter().for_each(|f| {
-                    register_factor_in_tx(
-                        &f.factor_source_id(),
-                        &intent_hash,
-                    )
+                    register_factor_in_tx(&f.factor_source_id(), &intent_hash)
                 });
                 petitions_for_entities.insert(address, petition);
             }
