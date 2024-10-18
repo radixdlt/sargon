@@ -8,11 +8,11 @@ impl TransactionIntent {
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
     /// entities. All entities set the same `PublicKeyHash` for the sake of simplicity.
-    pub fn entities_requiring_auth<'a, 'p>(
+    pub fn sample_entities_requiring_auth<'a, 'p>(
         accounts_requiring_auth: impl IntoIterator<Item = &'a Account>,
         personas_requiring_auth: impl IntoIterator<Item = &'p Persona>,
     ) -> Self {
-        Self::new_requiring_auth(
+        Self::sample_entity_addresses_requiring_auth(
             accounts_requiring_auth.into_iter().map(|a| a.address),
             personas_requiring_auth.into_iter().map(|p| p.address),
         )
@@ -23,11 +23,11 @@ impl TransactionIntent {
     /// entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
     /// entity addresses. All entities set the same `PublicKeyHash` for the sake of simplicity.
-    pub fn new_requiring_auth(
+    pub fn sample_entity_addresses_requiring_auth(
         account_addresses_requiring_auth: impl IntoIterator<Item = AccountAddress>,
         identity_addresses_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
     ) -> Self {
-        Self::new_requiring_auth_with_hashes(
+        Self::sample_entity_addresses_with_pub_key_hashes_requiring_auth(
             account_addresses_requiring_auth
                 .into_iter()
                 .map(|a| (a, PublicKeyHash::sample())),
@@ -37,7 +37,7 @@ impl TransactionIntent {
         )
     }
 
-    pub fn new_requiring_auth_with_hashes(
+    pub fn sample_entity_addresses_with_pub_key_hashes_requiring_auth(
         account_addresses_requiring_auth: impl IntoIterator<
             Item = (AccountAddress, PublicKeyHash),
         >,
@@ -97,7 +97,7 @@ mod test {
         let accounts = AccountAddress::sample_all();
         let identities = IdentityAddress::sample_all();
 
-        let intent = TransactionIntent::new_requiring_auth(
+        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
             accounts.clone(),
             identities.clone(),
         );

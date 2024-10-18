@@ -3,14 +3,15 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct TXToSign {
     pub(crate) intent: TransactionIntent,
-    entities_requiring_auth: Vec<AccountOrPersona>, // should be a set but Sets are not `Hash`.
+    intent_hash: IntentHash,
+    entities_requiring_auth: IndexSet<AccountOrPersona>,
 }
 
 impl Identifiable for TXToSign {
     type ID = IntentHash;
 
     fn id(&self) -> Self::ID {
-        self.intent.intent_hash()
+        self.intent_hash.clone()
     }
 }
 
@@ -21,12 +22,14 @@ impl TXToSign {
             Item = impl Into<AccountOrPersona>,
         >,
     ) -> Self {
+        let intent_hash = intent.intent_hash().clone();
         Self {
             intent,
+            intent_hash,
             entities_requiring_auth: entities_requiring_auth
                 .into_iter()
                 .map(|i| i.into())
-                .collect_vec(),
+                .collect::<IndexSet<AccountOrPersona>>(),
         }
     }
 
@@ -73,7 +76,7 @@ impl TXToSign {
             }
         });
 
-        let intent = TransactionIntent::new_requiring_auth(
+        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
             account_addresses,
             identity_addresses,
         );
