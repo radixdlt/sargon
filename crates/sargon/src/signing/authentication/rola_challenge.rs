@@ -2,12 +2,7 @@ use crate::prelude::*;
 
 const ROLA_PREFIX: u8 = 0x52;
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    derive_more::Display,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::Display)]
 #[display("{}", self.payload.to_hex())]
 pub struct RolaChallenge {
     payload: BagOfBytes,
@@ -23,20 +18,21 @@ impl HasSampleValues for RolaChallenge {
     fn sample() -> Self {
         Self::from_request(
             DappToWalletInteractionAuthChallengeNonce::sample(),
-            DappToWalletInteractionMetadata::sample()
-        ).unwrap()
+            DappToWalletInteractionMetadata::sample(),
+        )
+        .unwrap()
     }
 
     fn sample_other() -> Self {
         Self::from_request(
             DappToWalletInteractionAuthChallengeNonce::sample_other(),
-            DappToWalletInteractionMetadata::sample_other()
-        ).unwrap()
+            DappToWalletInteractionMetadata::sample_other(),
+        )
+        .unwrap()
     }
 }
 
 impl RolaChallenge {
-
     /// Constructs a payload to sign in conjunction with the `challenge_nonce` received and
     /// the `metadata` of the dApp that sent the request.
     ///
@@ -66,7 +62,7 @@ impl RolaChallenge {
         payload.extend(origin_str.as_bytes());
 
         Ok(RolaChallenge {
-            payload: BagOfBytes::from(payload)
+            payload: BagOfBytes::from(payload),
         })
     }
 }
@@ -75,11 +71,7 @@ impl RolaChallenge {
 mod tests {
     use super::*;
 
-    #[derive(
-        Debug,
-        Clone,
-        Deserialize,
-    )]
+    #[derive(Debug, Clone, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct RolaChallengeVectorItem {
         pub payload_to_hash: BagOfBytes,
@@ -87,11 +79,13 @@ mod tests {
         pub blake_hash_of_payload: Hash,
         pub d_app_definition_address: AccountAddress,
         pub origin: DappOrigin,
-        pub challenge: Exactly32Bytes
+        pub challenge: Exactly32Bytes,
     }
 
     fn deserialize_hash<'de, D>(deserializer: D) -> Result<Hash, D::Error>
-    where D: Deserializer<'de> {
+    where
+        D: Deserializer<'de>,
+    {
         let buf = String::deserialize(deserializer)?;
 
         Hash::from_str(&buf).map_err(de::Error::custom)
@@ -107,8 +101,8 @@ mod tests {
                     WalletInteractionVersion::current(),
                     self.d_app_definition_address.network_id(),
                     self.origin,
-                    self.d_app_definition_address
-                )
+                    self.d_app_definition_address,
+                ),
             )
         }
     }
@@ -119,20 +113,15 @@ mod tests {
             env!("FIXTURES_VECTOR"),
             "rola_challenge_payload_hash_vectors.json"
         ));
-        let vector = serde_json::from_str::<Vec<RolaChallengeVectorItem>>(json).unwrap();
+        let vector =
+            serde_json::from_str::<Vec<RolaChallengeVectorItem>>(json).unwrap();
 
         vector.iter().for_each(|v| {
             let rola_challenge: RolaChallenge = v.clone().try_into().unwrap();
 
-            assert_eq!(
-                rola_challenge.payload,
-                v.payload_to_hash
-            );
+            assert_eq!(rola_challenge.payload, v.payload_to_hash);
 
-            assert_eq!(
-                rola_challenge.hash(),
-                v.blake_hash_of_payload
-            );
+            assert_eq!(rola_challenge.hash(), v.blake_hash_of_payload);
         });
     }
 
@@ -142,22 +131,21 @@ mod tests {
         let challenge = RolaChallenge::from_request(
             DappToWalletInteractionAuthChallengeNonce(nonce),
             metadata("https://stokenet-dashboard.radixdlt.com"),
-        ).unwrap();
+        )
+        .unwrap();
 
         let expected_payload_hex = "52deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead\
         dead426163636f756e745f72647831323879366a37386d74306171763633373265767a323868727870386d6e30\
         36636364646b7237787070633838687976796e766a64777268747470733a2f2f73746f6b656e65742d64617368\
         626f6172642e7261646978646c742e636f6d";
 
-        assert_eq!(
-            expected_payload_hex,
-            challenge.payload.to_hex()
-        );
+        assert_eq!(expected_payload_hex, challenge.payload.to_hex());
 
         let challenge_with_origin_with_slash = RolaChallenge::from_request(
             DappToWalletInteractionAuthChallengeNonce(nonce),
             metadata("https://stokenet-dashboard.radixdlt.com/"),
-        ).unwrap();
+        )
+        .unwrap();
 
         assert_eq!(
             expected_payload_hex,
@@ -175,7 +163,9 @@ mod tests {
 
         assert_eq!(
             challenge,
-            Err(CommonError::InvalidURL { bad_value: "/".to_string() })
+            Err(CommonError::InvalidURL {
+                bad_value: "/".to_string()
+            })
         );
     }
 

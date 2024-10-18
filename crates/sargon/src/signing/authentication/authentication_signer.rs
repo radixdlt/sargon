@@ -6,7 +6,6 @@ pub struct AuthenticationSigner {
 }
 
 impl AuthenticationSigner {
-
     pub fn new(
         interactor: Arc<dyn AuthenticationSigningInteractor>,
         profile: &Profile,
@@ -18,21 +17,18 @@ impl AuthenticationSigner {
             profile,
             address_of_entity,
             challenge_nonce,
-            metadata
+            metadata,
         )?;
 
-        Ok(Self {
-            input,
-            interactor
-        })
+        Ok(Self { input, interactor })
     }
 
     pub async fn sign(self) -> Result<WalletToDappInteractionAuthProof> {
-        self.interactor.sign(
-            self.input.clone().into()
-        ).await.map(WalletToDappInteractionAuthProof::from)
+        self.interactor
+            .sign(self.input.clone().into())
+            .await
+            .map(WalletToDappInteractionAuthProof::from)
     }
-
 }
 
 #[cfg(test)]
@@ -46,10 +42,11 @@ mod test {
     async fn test_with_account_in_profile() {
         let factor_sources = FactorSource::sample_all();
 
-        let factor_instance = HierarchicalDeterministicFactorInstance::sample_fia0();
+        let factor_instance =
+            HierarchicalDeterministicFactorInstance::sample_fia0();
         let account = Account::sample_unsecurified_mainnet(
             "Unsecurified",
-            factor_instance.clone()
+            factor_instance.clone(),
         );
         let sut = SUT::new(
             Arc::new(TestAuthenticationInteractor::new_succeeding()),
@@ -57,7 +54,8 @@ mod test {
             AddressOfAccountOrPersona::from(account.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let result = sut.sign().await.unwrap();
 
@@ -79,10 +77,11 @@ mod test {
     async fn test_with_persona_in_profile() {
         let factor_sources = FactorSource::sample_all();
 
-        let factor_instance = HierarchicalDeterministicFactorInstance::sample_fii0();
+        let factor_instance =
+            HierarchicalDeterministicFactorInstance::sample_fii0();
         let persona = Persona::sample_unsecurified_mainnet(
             "Alice",
-            factor_instance.clone()
+            factor_instance.clone(),
         );
         let sut = SUT::new(
             Arc::new(TestAuthenticationInteractor::new_succeeding()),
@@ -90,7 +89,8 @@ mod test {
             AddressOfAccountOrPersona::from(persona.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let result = sut.sign().await.unwrap();
 
@@ -112,10 +112,11 @@ mod test {
     async fn test_with_failing_interactor() {
         let factor_sources = FactorSource::sample_all();
 
-        let factor_instance = HierarchicalDeterministicFactorInstance::sample_fii0();
+        let factor_instance =
+            HierarchicalDeterministicFactorInstance::sample_fii0();
         let persona = Persona::sample_unsecurified_mainnet(
             "Alice",
-            factor_instance.clone()
+            factor_instance.clone(),
         );
         let sut = SUT::new(
             Arc::new(TestAuthenticationInteractor::new_failing()),
@@ -123,7 +124,8 @@ mod test {
             AddressOfAccountOrPersona::from(persona.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let result = sut.sign().await;
 
@@ -131,7 +133,9 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Authentication signing not yet implemented for securified entities.")]
+    #[should_panic(
+        expected = "Authentication signing not yet implemented for securified entities."
+    )]
     fn test_with_multi_factor() {
         let factor_sources = FactorSource::sample_all();
 

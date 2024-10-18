@@ -30,9 +30,8 @@ impl TryInto<Url> for DappOrigin {
     type Error = CommonError;
 
     fn try_into(self) -> std::result::Result<Url, Self::Error> {
-        Url::parse(self.0.as_str()).map_err(|_| {
-            CommonError::InvalidURL { bad_value: self.0 }
-        })
+        Url::parse(self.0.as_str())
+            .map_err(|_| CommonError::InvalidURL { bad_value: self.0 })
     }
 }
 
