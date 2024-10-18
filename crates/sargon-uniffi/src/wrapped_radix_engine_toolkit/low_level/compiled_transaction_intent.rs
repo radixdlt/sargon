@@ -3,8 +3,26 @@ use sargon::CompiledTransactionIntent as InternalCompiledTransactionIntent;
 
 uniffi::custom_newtype!(CompiledTransactionIntent, BagOfBytes);
 
-#[derive(Clone, PartialEq, Eq, InternalConversion)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct CompiledTransactionIntent(BagOfBytes);
+
+impl From<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
+    fn from(value: InternalCompiledTransactionIntent) -> Self {
+        Self(value.bytes().into())
+    }
+}
+
+impl CompiledTransactionIntent {
+    pub fn into_internal(&self) -> InternalCompiledTransactionIntent {
+        self.clone().into()
+    }
+}
+
+impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
+    fn into(self) -> InternalCompiledTransactionIntent {
+        InternalCompiledTransactionIntent::new(self.0.into())
+    }
+}
 
 #[uniffi::export]
 pub fn new_compiled_transaction_intent_sample() -> CompiledTransactionIntent {

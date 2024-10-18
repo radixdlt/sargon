@@ -14,7 +14,7 @@ use crate::prelude::*;
 pub struct CompiledTransactionIntent(BagOfBytes);
 
 impl CompiledTransactionIntent {
-    fn new(bytes: BagOfBytes) -> Self {
+    pub fn new(bytes: BagOfBytes) -> Self {
         Self(bytes)
     }
 
