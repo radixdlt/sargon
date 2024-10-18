@@ -118,7 +118,7 @@ impl PetitionForTransaction {
         ));
         assert!(!self.has_tx_failed());
         TransactionSignRequestInput::new(
-            self.intent.intent_hash(),
+            self.intent.compile(),
             *factor_source_id,
             self.all_relevant_factor_instances_of_source(factor_source_id),
         )
