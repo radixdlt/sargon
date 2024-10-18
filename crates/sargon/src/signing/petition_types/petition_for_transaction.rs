@@ -5,8 +5,8 @@ use crate::prelude::*;
 #[derive(derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_str())]
 pub(crate) struct PetitionForTransaction {
-    /// Hash of transaction to sign
-    pub(crate) intent_hash: IntentHash,
+    /// Transaction to sign
+    pub(crate) intent: TransactionIntent,
 
     pub(crate) for_entities:
         RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity>>,
@@ -14,11 +14,11 @@ pub(crate) struct PetitionForTransaction {
 
 impl PetitionForTransaction {
     pub(crate) fn new(
-        intent_hash: IntentHash,
+        intent: TransactionIntent,
         for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity>,
     ) -> Self {
         Self {
-            intent_hash,
+            intent,
             for_entities: RefCell::new(for_entities),
         }
     }
@@ -58,7 +58,7 @@ impl PetitionForTransaction {
 
         PetitionTransactionOutcome::new(
             transaction_valid,
-            self.intent_hash.clone(),
+            self.intent.intent_hash(),
             signatures,
             neglected_factors,
         )
@@ -118,7 +118,7 @@ impl PetitionForTransaction {
         ));
         assert!(!self.has_tx_failed());
         TransactionSignRequestInput::new(
-            self.intent_hash.clone(),
+            self.intent.intent_hash(),
             *factor_source_id,
             self.all_relevant_factor_instances_of_source(factor_source_id),
         )
@@ -158,7 +158,7 @@ impl PetitionForTransaction {
         }
 
         Some(InvalidTransactionIfNeglected::new(
-            self.intent_hash.clone(),
+            self.intent.intent_hash(),
             entities,
         ))
     }
@@ -194,26 +194,28 @@ impl PetitionForTransaction {
 
 impl HasSampleValues for PetitionForTransaction {
     fn sample() -> Self {
-        let intent_hash = IntentHash::sample();
-        let entity = Account::sample_securified_mainnet(
+        let account = Account::sample_securified_mainnet(
             "Grace",
             AccountAddress::sample_other(),
             || {
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(
-                HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-                    CAP26EntityKind::Account,
-                    HDPathComponent::from(6)
+                    HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+                        CAP26EntityKind::Account,
+                        HDPathComponent::from(6)
+                    )
                 )
-            )
             },
         );
+
+        let intent = TransactionIntent::entities_requiring_auth([&account], []);
+        println!("{}", intent.manifest.instructions.to_string());
         Self::new(
-            intent_hash.clone(),
+            intent.clone(),
             HashMap::just((
-                AddressOfAccountOrPersona::from(entity.address),
+                AddressOfAccountOrPersona::from(account.address),
                 PetitionForEntity::new(
-                    intent_hash.clone(),
-                    AddressOfAccountOrPersona::from(entity.address),
+                    intent.intent_hash(),
+                    AddressOfAccountOrPersona::from(account.address),
                     PetitionForFactors::sample(),
                     PetitionForFactors::sample_other(),
                 ),
@@ -222,18 +224,18 @@ impl HasSampleValues for PetitionForTransaction {
     }
 
     fn sample_other() -> Self {
-        let intent_hash = IntentHash::sample_other();
-        let entity = Persona::sample_unsecurified_mainnet(
+        let persona = Persona::sample_unsecurified_mainnet(
             "Sample Unsec",
             HierarchicalDeterministicFactorInstance::sample_fii0(),
         );
+        let intent = TransactionIntent::entities_requiring_auth([], [&persona]);
         Self::new(
-            intent_hash.clone(),
+            intent.clone(),
             HashMap::just((
-                AddressOfAccountOrPersona::Identity(entity.address),
+                AddressOfAccountOrPersona::Identity(persona.address),
                 PetitionForEntity::new(
-                    intent_hash.clone(),
-                    AddressOfAccountOrPersona::Identity(entity.address),
+                    intent.intent_hash(),
+                    AddressOfAccountOrPersona::Identity(persona.address),
                     PetitionForFactors::sample_other(),
                     None,
                 ),
@@ -267,9 +269,8 @@ mod tests {
 
     #[test]
     fn all_relevant_factor_instances_of_source_ok() {
-        let intent_hash = IntentHash::sample();
-
         let account = Account::sample_at(5);
+        let intent = TransactionIntent::new_requiring_auth([account.address], []);
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()
@@ -277,7 +278,7 @@ mod tests {
             _ => panic!(),
         };
         let petition = PetitionForEntity::new_securified(
-            intent_hash.clone(),
+            intent.intent_hash(),
             AddressOfAccountOrPersona::from(account.address),
             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                 (matrix, RoleKind::Primary),
@@ -286,7 +287,7 @@ mod tests {
         );
 
         let sut = Sut::new(
-            IntentHash::sample(),
+            intent,
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),
                 petition,
@@ -312,6 +313,7 @@ mod tests {
         let intent_hash = IntentHash::sample();
 
         let account = Account::sample_at(5);
+        let intent = TransactionIntent::entities_requiring_auth([&account], []);
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()
@@ -328,7 +330,7 @@ mod tests {
         );
 
         let sut = Sut::new(
-            IntentHash::sample(),
+            intent.clone(),
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),
                 petition,

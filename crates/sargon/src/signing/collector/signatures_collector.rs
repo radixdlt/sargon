@@ -59,7 +59,7 @@ impl SignaturesCollector {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
-        transactions: IndexSet<TXToSign>,
+        transactions: IdentifiedVecOf<TXToSign>,
         interactors: Arc<dyn SignInteractors>,
         role_kind: RoleKind,
     ) -> Self {
@@ -95,12 +95,12 @@ impl SignaturesCollector {
         let transactions = transactions
             .into_iter()
             .map(extract_signers)
-            .collect::<Result<IndexSet<TXToSign>>>()?;
+            .collect::<Result<Vec<TXToSign>>>()?;
 
         let collector = Self::with(
             finish_early_strategy,
             all_factor_sources_in_profile,
-            transactions,
+            IdentifiedVecOf::from(transactions),
             interactors,
             role_kind,
         );
@@ -612,7 +612,7 @@ mod tests {
         >| {
             let petitions_ref = petitions.txid_to_petition.borrow();
             let petition = petitions_ref.get(&t.intent_hash()).unwrap();
-            assert_eq!(petition.intent_hash, t.intent_hash());
+            assert_eq!(petition.intent, t.clone());
 
             let mut addresses =
                 threshold_factors.keys().collect::<HashSet<_>>();
@@ -1069,9 +1069,15 @@ mod tests {
                 let a0 = &Account::sample_at(0);
                 let p3 = &Persona::sample_at(3);
                 let tx = TransactionIntent::entities_requiring_auth([], [p3]);
+
+                // In need of different PublicKeyHashes so the IntentHash of each transaction is different
+                let make_random_pk_hash = || {
+                    let private_key = Ed25519PrivateKey::generate();
+                    PublicKeyHash::hash(private_key.public_key())
+                };
                 let failing_transactions = (0..100)
                     .map(|_| {
-                        TransactionIntent::entities_requiring_auth([a0], [])
+                        TransactionIntent::new_requiring_auth_with_hashes([(a0.address, make_random_pk_hash())], [])
                     })
                     .collect::<Vec<_>>();
                 let mut all_transactions = failing_transactions.clone();
@@ -1467,7 +1473,7 @@ mod tests {
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
                 let signature =
                     &collector.collect_signatures().await.all_signatures()[0];
-                assert_eq!(signature.intent_hash(), &tx.intent_hash);
+                assert_eq!(signature.intent_hash(), &tx.intent.intent_hash());
 
                 if sample.is_account_entity() {
                     assert_eq!(

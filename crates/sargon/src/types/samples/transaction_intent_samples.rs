@@ -1,3 +1,4 @@
+use radix_engine_interface::prelude::MethodAccessibility::Public;
 use crate::prelude::*;
 use radix_engine_toolkit::models::canonical_address_types::NetworkId;
 use reqwest::Identity;
@@ -6,10 +7,10 @@ impl TransactionIntent {
     /// Returns a sample intent that its transaction summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
-    /// entities
+    /// entities. All entities set the same `PublicKeyHash` for the sake of simplicity.
     pub fn entities_requiring_auth<'a, 'p>(
-        accounts_requiring_auth: impl IntoIterator<Item = &'a Account>,
-        personas_requiring_auth: impl IntoIterator<Item = &'p Persona>,
+        accounts_requiring_auth: impl IntoIterator<Item=&'a Account>,
+        personas_requiring_auth: impl IntoIterator<Item=&'p Persona>,
     ) -> Self {
         Self::new_requiring_auth(
             accounts_requiring_auth.into_iter().map(|a| a.address),
@@ -21,24 +22,40 @@ impl TransactionIntent {
     /// `account_addresses_requiring_auth` and `identity_addresses_requiring_auth` in
     /// entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
-    /// entity addresses.
+    /// entity addresses. All entities set the same `PublicKeyHash` for the sake of simplicity.
     pub fn new_requiring_auth(
-        account_addresses_requiring_auth: impl IntoIterator<Item = AccountAddress>,
-        identity_addresses_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
+        account_addresses_requiring_auth: impl IntoIterator<Item=AccountAddress>,
+        identity_addresses_requiring_auth: impl IntoIterator<Item=IdentityAddress>,
+    ) -> Self {
+        Self::new_requiring_auth_with_hashes(
+            account_addresses_requiring_auth.into_iter()
+                .map(|a| (a, PublicKeyHash::sample())),
+            identity_addresses_requiring_auth.into_iter()
+                .map(|a| (a, PublicKeyHash::sample())),
+        )
+    }
+
+    pub fn new_requiring_auth_with_hashes(
+        account_addresses_requiring_auth: impl IntoIterator<Item=(AccountAddress, PublicKeyHash)>,
+        identity_addresses_requiring_auth: impl IntoIterator<Item=(IdentityAddress, PublicKeyHash)>,
     ) -> Self {
         let mut network_id: Option<NetworkID> = None;
 
-        let all_addresses = account_addresses_requiring_auth
+        let all_addresses_with_hashes = account_addresses_requiring_auth
             .into_iter()
-            .map(AddressOfAccountOrPersona::from)
+            .map(|(address, hash)| {
+                (AddressOfAccountOrPersona::from(address), hash)
+            })
             .chain(
                 identity_addresses_requiring_auth
                     .into_iter()
-                    .map(AddressOfAccountOrPersona::Identity),
+                    .map(|(address, hash)| {
+                        (AddressOfAccountOrPersona::from(address), hash)
+                    }),
             )
             .collect::<Vec<_>>();
 
-        all_addresses.iter().for_each(|address| {
+        all_addresses_with_hashes.iter().for_each(|(address, _hash)| {
             if let Some(network_id) = network_id {
                 assert_eq!(network_id, address.network_id())
             } else {
@@ -46,29 +63,15 @@ impl TransactionIntent {
             }
         });
 
-        let metadata =
-            HashMap::<AddressOfAccountOrPersona, Vec<PublicKeyHash>>::from_iter(
-                all_addresses.into_iter().map(|address| {
-                    let pub_key = Ed25519PrivateKey::generate().public_key();
-                    (
-                        address,
-                        vec![PublicKeyHash::hash(PublicKey::Ed25519(pub_key))],
-                    )
-                }),
-            );
-
         let mut builder = ScryptoManifestBuilder::new();
         let network_id = network_id.unwrap_or_default();
 
-        for (address, public_key_hashes) in metadata {
+        for (address, hash) in all_addresses_with_hashes {
             builder = builder.set_metadata(
                 address.scrypto(),
                 MetadataKey::OwnerKeys,
                 ScryptoMetadataValue::PublicKeyHashArray(
-                    public_key_hashes
-                        .into_iter()
-                        .map(|h| h.into())
-                        .collect_vec(),
+                    vec![hash.clone().into()],
                 ),
             );
         }
