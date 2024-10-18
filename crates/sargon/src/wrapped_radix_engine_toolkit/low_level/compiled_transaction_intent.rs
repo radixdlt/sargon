@@ -14,7 +14,12 @@ use crate::prelude::*;
 pub struct CompiledTransactionIntent(BagOfBytes);
 
 impl CompiledTransactionIntent {
-    pub fn new(bytes: BagOfBytes) -> Self {
+    /// ONLY Use this in a test or when converting from the homonymous uniffi type.
+    ///
+    /// # Safety
+    /// This is completely unsafe, a random `BagOfBytes` cannot construct a valid
+    /// `CompiledTransactionIntent` and cannot decompile to a valid `TransactionIntent`.
+    pub unsafe fn new(bytes: BagOfBytes) -> Self {
         Self(bytes)
     }
 
@@ -98,8 +103,10 @@ mod tests {
         expected = "Should never fail to decompile a 'CompiledTransactionIntent' since we should not have been able to construct an invalid 'CompiledTransactionIntent'."
     )]
     fn decompile_fail() {
-        _ = CompiledTransactionIntent::new(BagOfBytes::sample_aced())
-            .decompile();
+        unsafe {
+            _ = CompiledTransactionIntent::new(BagOfBytes::sample_aced())
+                .decompile();
+        }
     }
 
     #[test]

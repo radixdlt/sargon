@@ -20,7 +20,7 @@ impl CompiledTransactionIntent {
 
 impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn into(self) -> InternalCompiledTransactionIntent {
-        InternalCompiledTransactionIntent::new(self.0.into())
+        unsafe { InternalCompiledTransactionIntent::new(self.0.into()) }
     }
 }
 
