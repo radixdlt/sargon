@@ -207,7 +207,8 @@ impl HasSampleValues for PetitionForTransaction {
             },
         );
 
-        let intent = TransactionIntent::sample_entities_requiring_auth([&account], []);
+        let intent =
+            TransactionIntent::sample_entities_requiring_auth([&account], []);
         println!("{}", intent.manifest.instructions.to_string());
         Self::new(
             intent.clone(),
@@ -228,7 +229,8 @@ impl HasSampleValues for PetitionForTransaction {
             "Sample Unsec",
             HierarchicalDeterministicFactorInstance::sample_fii0(),
         );
-        let intent = TransactionIntent::sample_entities_requiring_auth([], [&persona]);
+        let intent =
+            TransactionIntent::sample_entities_requiring_auth([], [&persona]);
         Self::new(
             intent.clone(),
             HashMap::just((
@@ -270,8 +272,10 @@ mod tests {
     #[test]
     fn all_relevant_factor_instances_of_source_ok() {
         let account = Account::sample_at(5);
-        let intent =
-            TransactionIntent::sample_entity_addresses_requiring_auth([account.address], []);
+        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
+            [account.address],
+            [],
+        );
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()
@@ -314,7 +318,8 @@ mod tests {
         let intent_hash = IntentHash::sample();
 
         let account = Account::sample_at(5);
-        let intent = TransactionIntent::sample_entities_requiring_auth([&account], []);
+        let intent =
+            TransactionIntent::sample_entities_requiring_auth([&account], []);
         let matrix = match account.security_state {
             EntitySecurityState::Securified { value } => {
                 value.security_structure.matrix_of_factors.clone()

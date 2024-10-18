@@ -98,7 +98,8 @@ mod tests {
         expected = "Should never fail to decompile a 'CompiledTransactionIntent' since we should not have been able to construct an invalid 'CompiledTransactionIntent'."
     )]
     fn decompile_fail() {
-        _ = CompiledTransactionIntent::new(BagOfBytes::sample_aced()).decompile();
+        _ = CompiledTransactionIntent::new(BagOfBytes::sample_aced())
+            .decompile();
     }
 
     #[test]

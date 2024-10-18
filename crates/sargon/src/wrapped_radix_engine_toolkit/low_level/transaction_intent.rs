@@ -78,7 +78,9 @@ fn compile_intent_with(
     compile_intent(into_scrypto(header, manifest, message))
 }
 
-pub(super) fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
+pub(super) fn compile_intent(
+    scrypto_intent: ScryptoIntent,
+) -> Result<BagOfBytes> {
     RET_intent_compile(&scrypto_intent)
         .map_err(|e| CommonError::InvalidIntentFailedToEncode {
             underlying: format!("{:?}", e),

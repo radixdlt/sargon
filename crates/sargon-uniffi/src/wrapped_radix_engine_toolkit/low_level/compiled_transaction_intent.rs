@@ -30,11 +30,14 @@ pub fn new_compiled_transaction_intent_sample() -> CompiledTransactionIntent {
 }
 
 #[uniffi::export]
-pub fn new_compiled_transaction_intent_sample_other() -> CompiledTransactionIntent {
+pub fn new_compiled_transaction_intent_sample_other(
+) -> CompiledTransactionIntent {
     InternalCompiledTransactionIntent::sample_other().into()
 }
 
 #[uniffi::export]
-pub fn compiled_transaction_intent_decompile(compiled_intent: &CompiledTransactionIntent) -> TransactionIntent {
+pub fn compiled_transaction_intent_decompile(
+    compiled_intent: &CompiledTransactionIntent,
+) -> TransactionIntent {
     compiled_intent.into_internal().decompile().into()
 }

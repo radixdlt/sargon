@@ -82,14 +82,16 @@ mod tests {
             None,
         );
 
-        let intent_1 = TransactionIntent::sample_entity_addresses_requiring_auth(
-            vec![account_1.address],
-            vec![persona.address],
-        );
-        let intent_2 = TransactionIntent::sample_entity_addresses_requiring_auth(
-            vec![account_2.address],
-            vec![],
-        );
+        let intent_1 =
+            TransactionIntent::sample_entity_addresses_requiring_auth(
+                vec![account_1.address],
+                vec![persona.address],
+            );
+        let intent_2 =
+            TransactionIntent::sample_entity_addresses_requiring_auth(
+                vec![account_2.address],
+                vec![],
+            );
 
         let result = ExtractorOfInstancesRequiredToSignTransactions::extract(
             &Profile::sample(),

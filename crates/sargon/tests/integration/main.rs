@@ -425,8 +425,10 @@ mod integration_tests {
                 ),
             );
 
-            let tx0 =
-                TransactionIntent::sample_entity_addresses_requiring_auth([alice.address], []);
+            let tx0 = TransactionIntent::sample_entity_addresses_requiring_auth(
+                [alice.address],
+                [],
+            );
             let tx1 = TransactionIntent::sample_entity_addresses_requiring_auth(
                 [alice.address, bob.address, carol.address],
                 [satoshi.address],
