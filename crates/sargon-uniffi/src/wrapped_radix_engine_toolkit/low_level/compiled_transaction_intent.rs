@@ -1,14 +1,16 @@
 use crate::prelude::*;
 use sargon::CompiledTransactionIntent as InternalCompiledTransactionIntent;
 
-uniffi::custom_newtype!(CompiledTransactionIntent, BagOfBytes);
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct CompiledTransactionIntent(BagOfBytes);
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
+pub struct CompiledTransactionIntent {
+    secret_magic: BagOfBytes
+}
 
 impl From<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn from(value: InternalCompiledTransactionIntent) -> Self {
-        Self(value.bytes().into())
+        Self {
+            secret_magic: value.bytes().into()
+        }
     }
 }
 
@@ -20,7 +22,7 @@ impl CompiledTransactionIntent {
 
 impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn into(self) -> InternalCompiledTransactionIntent {
-        unsafe { InternalCompiledTransactionIntent::new(self.0.into()) }
+        unsafe { InternalCompiledTransactionIntent::new(self.secret_magic.into()) }
     }
 }
 
