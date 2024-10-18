@@ -1,6 +1,6 @@
 [package]
 name = "sargon-uniffi"
-version = "1.1.24"
+version = "1.1.31"
 edition = "2021"
 build = "build.rs"
 
@@ -78,7 +78,7 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
 # uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "128097a03d9c74d3a655b13b13d41c676344219b", features = [
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
   "cli",
 ] }
 
@@ -122,7 +122,7 @@ security-framework-sys = "=2.10.0"
 
 [dev-dependencies]
 # uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "128097a03d9c74d3a655b13b13d41c676344219b", features = [
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
   "bindgen-tests",
 ] }
 
@@ -131,7 +131,7 @@ actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d
 
 [build-dependencies]
 # uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "128097a03d9c74d3a655b13b13d41c676344219b", features = [
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
   "build",
 ] }
 
