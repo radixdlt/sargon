@@ -3,13 +3,13 @@ use sargon::CompiledTransactionIntent as InternalCompiledTransactionIntent;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct CompiledTransactionIntent {
-    secret_magic: BagOfBytes
+    secret_magic: BagOfBytes,
 }
 
 impl From<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn from(value: InternalCompiledTransactionIntent) -> Self {
         Self {
-            secret_magic: value.bytes().into()
+            secret_magic: value.bytes().into(),
         }
     }
 }
@@ -22,7 +22,9 @@ impl CompiledTransactionIntent {
 
 impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn into(self) -> InternalCompiledTransactionIntent {
-        unsafe { InternalCompiledTransactionIntent::new(self.secret_magic.into()) }
+        unsafe {
+            InternalCompiledTransactionIntent::new(self.secret_magic.into())
+        }
     }
 }
 
