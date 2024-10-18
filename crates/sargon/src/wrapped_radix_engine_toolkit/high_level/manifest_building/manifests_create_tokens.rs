@@ -14,7 +14,7 @@ impl TransactionManifest {
         initial_supply: Decimal192,
         metadata: TokenDefinitionMetadata,
     ) -> Self {
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
         builder = Self::create_fungible_token_with_metadata_without_deposit(
             builder,
             initial_supply,
@@ -99,7 +99,7 @@ impl TransactionManifest {
             panic!("Must not be greater than {}", U11::MAX);
         }
 
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
 
         let metadata_vec = (0..collection_count)
             .map(|i| U11::new(i).unwrap())
@@ -139,10 +139,10 @@ impl TransactionManifest {
     }
 
     pub fn create_fungible_token_with_metadata_without_deposit(
-        builder: ScryptoManifestBuilder,
+        builder: ScryptoTransactionManifestBuilder,
         initial_supply: Decimal192,
         metadata: TokenDefinitionMetadata,
-    ) -> ScryptoManifestBuilder {
+    ) -> ScryptoTransactionManifestBuilder {
         let initial_supply: ScryptoDecimal192 = initial_supply.into();
         builder.create_fungible_resource(
             ScryptoOwnerRole::Updatable(ScryptoAccessRule::AllowAll),
@@ -195,7 +195,7 @@ impl TransactionManifest {
         let fungibles = all_fungibles.into_iter().take(count).collect_vec();
         assert_eq!(fungibles.len(), count);
 
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
 
         for metadata in fungibles.iter() {
             builder = Self::create_fungible_token_with_metadata_without_deposit(

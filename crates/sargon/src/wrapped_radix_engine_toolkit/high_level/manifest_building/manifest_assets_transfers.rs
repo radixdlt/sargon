@@ -12,7 +12,7 @@ impl TransactionManifest {
     }
 
     pub fn per_asset_transfers(transfers: PerAssetTransfers) -> Self {
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
         let from_account = &transfers.from_account;
 

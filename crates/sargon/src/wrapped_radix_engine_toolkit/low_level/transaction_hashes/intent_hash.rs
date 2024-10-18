@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
-impl HasSampleValues for IntentHash {
+impl HasSampleValues for TransactionIntentHash {
     fn sample() -> Self {
-        IntentHash::new(Hash::sample(), NetworkID::Mainnet)
+        TransactionIntentHash::new(Hash::sample(), NetworkID::Mainnet)
     }
 
     fn sample_other() -> Self {
         let intent = TransactionIntent::sample_other();
-        intent.intent_hash()
+        intent.transaction_intent_hash()
     }
 }
 
@@ -18,7 +18,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = IntentHash;
+    type SUT = TransactionIntentHash;
 
     #[test]
     fn from_hash() {

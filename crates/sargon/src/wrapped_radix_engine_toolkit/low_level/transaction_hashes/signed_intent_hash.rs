@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-impl HasSampleValues for SignedIntentHash {
+impl HasSampleValues for SignedTransactionIntentHash {
     fn sample() -> Self {
         Self::new(Hash::sample(), NetworkID::Mainnet)
     }
@@ -15,7 +15,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = SignedIntentHash;
+    type SUT = SignedTransactionIntentHash;
 
     #[test]
     fn display() {

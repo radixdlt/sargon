@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use radix_engine_toolkit::functions::derive::{
-    virtual_account_address_from_public_key as RET_new_account_address,
-    virtual_identity_address_from_public_key as RET_new_identity_address,
+    preallocated_account_address_from_public_key as RET_new_account_address,
+    preallocated_identity_address_from_public_key as RET_new_identity_address,
 };
 
 /// An address of an entity, provides default implementation of `try_from_bech32`

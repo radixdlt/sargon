@@ -8,8 +8,8 @@ macro_rules! decl_role_with_factors_additional_impl {
         paste! {
             impl From<[< $role RoleWithFactorInstance s >]> for ScryptoAccessRule {
                 fn from(value: [< $role RoleWithFactorInstance s >]) -> Self {
-                    ScryptoAccessRule::Protected(ScryptoAccessRuleNode::AnyOf(vec![
-                        ScryptoAccessRuleNode::ProofRule(ScryptoProofRule::CountOf(
+                    ScryptoAccessRule::Protected(ScryptoCompositeRequirement::AnyOf(vec![
+                        ScryptoCompositeRequirement::BasicRequirement(ScryptoBasicRequirement::CountOf(
                             value.threshold,
                             value
                                 .threshold_factors
@@ -18,7 +18,7 @@ macro_rules! decl_role_with_factors_additional_impl {
                                 .map(ScryptoResourceOrNonFungible::from)
                                 .collect(),
                         )),
-                        ScryptoAccessRuleNode::ProofRule(ScryptoProofRule::AnyOf(
+                        ScryptoCompositeRequirement::BasicRequirement(ScryptoBasicRequirement::AnyOf(
                             value
                                 .override_factors
                                 .into_iter()

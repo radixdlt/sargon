@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
 use radix_engine_interface::blueprints::account::{
-    ACCOUNT_ADD_AUTHORIZED_DEPOSITOR, ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR,
+    ACCOUNT_ADD_AUTHORIZED_DEPOSITOR_IDENT,
+    ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
     ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT,
     ACCOUNT_SET_DEFAULT_DEPOSIT_RULE_IDENT,
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
@@ -21,7 +22,7 @@ impl TransactionManifest {
         owner: &AccountAddress,
         delta: ThirdPartyDepositsDelta,
     ) -> Self {
-        let mut builder = ScryptoManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
 
         if let Some(deposit_rule) = delta.deposit_rule {
             builder = builder.call_method(
@@ -50,7 +51,7 @@ impl TransactionManifest {
         for depositor_address in delta.depositor_addresses_to_remove {
             builder = builder.call_method(
                 owner,
-                ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR,
+                ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
                 depositor_address,
             )
         }
@@ -58,7 +59,7 @@ impl TransactionManifest {
         for depositor_address in delta.depositor_addresses_to_add {
             builder = builder.call_method(
                 owner,
-                ACCOUNT_ADD_AUTHORIZED_DEPOSITOR,
+                ACCOUNT_ADD_AUTHORIZED_DEPOSITOR_IDENT,
                 depositor_address,
             )
         }

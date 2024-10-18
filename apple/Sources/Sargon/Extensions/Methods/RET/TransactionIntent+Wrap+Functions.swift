@@ -2,7 +2,7 @@ import Foundation
 import SargonUniFFI
 
 extension TransactionIntent {
-	public func hash() -> IntentHash {
+	public func hash() -> TransactionIntentHash {
 		transactionIntentHash(intent: self)
 	}
 	

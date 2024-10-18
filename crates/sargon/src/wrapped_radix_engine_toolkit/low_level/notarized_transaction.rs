@@ -117,7 +117,7 @@ impl HasSampleValues for NotarizedTransaction {
             ScryptoSecp256k1PrivateKey::from_u64(1).unwrap().into();
 
         let intent = TransactionIntent::sample_other();
-        assert_eq!(intent.intent_hash().to_string(), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");
+        assert_eq!(intent.transaction_intent_hash().to_string(), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");
         let signed_intent =
             SignedIntent::new(intent, IntentSignatures::new(Vec::new()))
                 .unwrap();

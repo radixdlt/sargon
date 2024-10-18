@@ -15,6 +15,10 @@ extension TransactionManifest {
 		)
 	}
 
+	public var manifestString: String {
+		transactionManifestString(manifest: self)
+	}
+
 	public var instructionsString: String {
 		transactionManifestInstructionsString(manifest: self)
 	}
@@ -35,7 +39,7 @@ extension TransactionManifest {
         transactionManifestInvolvedResourceAddresses(manifest: self)
     }
     
-    public var summary: ManifestSummary {
+    public var summary: ManifestSummary? {
         transactionManifestSummary(manifest: self)
     }
 }

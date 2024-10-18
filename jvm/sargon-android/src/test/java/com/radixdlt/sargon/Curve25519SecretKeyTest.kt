@@ -38,7 +38,7 @@ class Curve25519SecretKeyTest {
     @Test
     fun testNotarize() {
         val sut = Curve25519SecretKey(Exactly32Bytes.sample())
-        val result = sut.notarize(SignedIntentHash.sample())
+        val result = sut.notarize(SignedTransactionIntentHash.sample())
 
         assertEquals(
             "1a30347a04bc5d746b35a568330ba69c9b6ac60ef72d0a28cb63e25680e64908557d85a0e864c423ce782b5f43da3002c301045c6385b40cb013374045392404",
