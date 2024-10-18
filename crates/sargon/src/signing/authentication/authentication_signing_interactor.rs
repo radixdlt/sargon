@@ -9,7 +9,7 @@ pub trait AuthenticationSigningInteractor {
 }
 
 pub struct AuthenticationSigningInteractorRequest {
-    pub input: AuthenticationSigningInput
+    pub input: AuthenticationSigningInput,
 }
 
 impl AuthenticationSigningInteractorRequest {
@@ -18,14 +18,16 @@ impl AuthenticationSigningInteractorRequest {
     }
 }
 
-impl From<AuthenticationSigningInput> for AuthenticationSigningInteractorRequest {
+impl From<AuthenticationSigningInput>
+    for AuthenticationSigningInteractorRequest
+{
     fn from(value: AuthenticationSigningInput) -> Self {
         Self::new(value)
     }
 }
 
 pub struct AuthenticationSigningResponse {
-    pub signature_with_public_key: SignatureWithPublicKey
+    pub signature_with_public_key: SignatureWithPublicKey,
 }
 
 impl From<AuthenticationSigningResponse> for WalletToDappInteractionAuthProof {
@@ -36,7 +38,7 @@ impl From<AuthenticationSigningResponse> for WalletToDappInteractionAuthProof {
         WalletToDappInteractionAuthProof::new(
             public_key,
             public_key.curve(),
-            signature_with_public_key.signature()
+            signature_with_public_key.signature(),
         )
     }
 }
