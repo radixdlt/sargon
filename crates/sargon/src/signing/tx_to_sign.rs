@@ -38,7 +38,6 @@ impl TXToSign {
         intent: &TransactionIntent,
         profile: &Profile,
     ) -> Result<Self> {
-        let intent_hash = intent.intent_hash().clone();
         let entities_requiring_auth =
             ExtractorOfEntitiesRequiringAuth::extract(
                 profile,

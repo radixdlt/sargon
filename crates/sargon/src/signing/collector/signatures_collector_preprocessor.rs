@@ -41,9 +41,9 @@ impl SignaturesCollectorPreprocessor {
         let transactions = transactions
             .into_iter()
             .map(|i| TXToSign::extracting_from_intent_and_profile(&i, profile))
-            .collect::<Result<IdentifiedVecOf<TXToSign>>>()?;
+            .collect::<Result<Vec<_>>>()?;
 
-        Ok(Self::new(transactions))
+        Ok(Self::new(IdentifiedVecOf::from_iter(transactions)))
     }
 
     pub(super) fn preprocess(
