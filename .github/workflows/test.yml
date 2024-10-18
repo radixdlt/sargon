@@ -46,12 +46,6 @@ jobs:
         uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0 # Ensure the full git history is fetched
-      
-      - name: Install cargo nextest
-        uses: RDXWorks-actions/cargo-install@v1
-        with:
-          crate: cargo-nextest
-          locked: true
 
       - name: Fetch all tags
         run: git fetch --tags
@@ -166,6 +160,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - name: Install cargo nextest
+        uses: RDXWorks-actions/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          locked: true
 
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
