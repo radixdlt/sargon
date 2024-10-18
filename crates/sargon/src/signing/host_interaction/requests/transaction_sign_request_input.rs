@@ -5,8 +5,8 @@ use crate::prelude::*;
 /// is `intent_hash`.
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub struct TransactionSignRequestInput {
-    /// Hash to sign
-    intent_hash: IntentHash,
+    /// Compiled Intent
+    compiled_intent: CompiledTransactionIntent,
 
     /// ID of factor to use to sign
     pub(crate) factor_source_id: FactorSourceIDFromHash,
@@ -22,7 +22,7 @@ impl TransactionSignRequestInput {
     ///
     /// Panics if `owned_factor_instances` is empty.
     pub(crate) fn new(
-        intent_hash: IntentHash,
+        compiled_intent: CompiledTransactionIntent,
         factor_source_id: FactorSourceIDFromHash,
         owned_factor_instances: IndexSet<OwnedFactorInstance>,
     ) -> Self {
@@ -34,7 +34,7 @@ impl TransactionSignRequestInput {
                     .iter()
                     .all(|f| f.by_factor_source(factor_source_id)), "Discrepancy! Mismatch between FactorSourceID of owned factor instances and specified FactorSourceID, this is a programmer error.");
         Self {
-            intent_hash,
+            compiled_intent,
             factor_source_id,
             owned_factor_instances: owned_factor_instances
                 .into_iter()
@@ -44,10 +44,11 @@ impl TransactionSignRequestInput {
 
     #[allow(unused)]
     pub fn signature_inputs(&self) -> IndexSet<HDSignatureInput> {
+        let intent_hash = self.compiled_intent.decompile().intent_hash();
         self.owned_factor_instances
             .clone()
             .into_iter()
-            .map(|fi| HDSignatureInput::new(self.intent_hash.clone(), fi))
+            .map(|fi| HDSignatureInput::new(intent_hash.clone(), fi))
             .collect()
     }
 }
@@ -57,7 +58,7 @@ impl HasSampleValues for TransactionSignRequestInput {
         let owned_factor_instance = OwnedFactorInstance::sample();
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
-            IntentHash::sample(),
+            CompiledTransactionIntent::sample(),
             *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )
@@ -67,7 +68,7 @@ impl HasSampleValues for TransactionSignRequestInput {
         let owned_factor_instance = OwnedFactorInstance::sample_other();
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
-            IntentHash::sample_other(),
+            CompiledTransactionIntent::sample_other(),
             *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )
@@ -97,7 +98,7 @@ mod tests_batch_req {
     )]
     fn panics_if_owned_factors_is_empty() {
         Sut::new(
-            IntentHash::sample(),
+            CompiledTransactionIntent::sample(),
             FactorSourceIDFromHash::sample(),
             IndexSet::new(),
         );
@@ -109,7 +110,7 @@ mod tests_batch_req {
     )]
     fn panics_mismatch_factor_source_id() {
         Sut::new(
-            IntentHash::sample_other(),
+            CompiledTransactionIntent::sample_other(),
             FactorSourceIDFromHash::sample_other(),
             IndexSet::just(OwnedFactorInstance::sample_other()),
         );

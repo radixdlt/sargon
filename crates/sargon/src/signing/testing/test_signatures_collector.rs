@@ -7,7 +7,7 @@ impl SignaturesCollector {
     pub(crate) fn new_test_with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
-        transactions: IndexSet<TXToSign>,
+        transactions: IdentifiedVecOf<TXToSign>,
         interactors: Arc<dyn SignInteractors>,
         role_kind: RoleKind,
     ) -> Self {
@@ -29,7 +29,7 @@ impl SignaturesCollector {
         Self::new_test_with(
             finish_early_strategy,
             all_factor_sources_in_profile.into_iter().collect(),
-            transactions.into_iter().collect(),
+            IdentifiedVecOf::from_iter(transactions.into_iter()),
             Arc::new(TestSignatureCollectingInteractors::new(simulated_user)),
             role_kind,
         )

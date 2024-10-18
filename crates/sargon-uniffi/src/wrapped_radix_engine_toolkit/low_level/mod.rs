@@ -1,4 +1,5 @@
 mod compiled_notarized_intent;
+mod compiled_transaction_intent;
 mod execution_summary;
 mod intent_signature;
 mod intent_signatures;
@@ -15,6 +16,7 @@ mod transaction_intent;
 mod transaction_manifest;
 
 pub use compiled_notarized_intent::*;
+pub use compiled_transaction_intent::*;
 pub use execution_summary::*;
 pub use intent_signature::*;
 pub use intent_signatures::*;
