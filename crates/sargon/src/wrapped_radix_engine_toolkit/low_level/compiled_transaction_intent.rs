@@ -11,10 +11,10 @@ use crate::prelude::*;
     derive_more::Display,
     derive_more::FromStr,
 )]
-pub struct CompiledTransactionIntent(pub BagOfBytes);
+pub struct CompiledTransactionIntent(BagOfBytes);
 
 impl CompiledTransactionIntent {
-    pub fn new(bytes: BagOfBytes) -> Self {
+    fn new(bytes: BagOfBytes) -> Self {
         Self(bytes)
     }
 
@@ -28,6 +28,15 @@ impl CompiledTransactionIntent {
         let notarized = RET_decompile_intent(self.bytes()).expect(err);
 
         notarized.try_into().expect(err)
+    }
+}
+
+impl TransactionIntent {
+    pub fn compile(&self) -> CompiledTransactionIntent {
+        let bytes = super::compile_intent(ScryptoIntent::from(self.clone()))
+            .expect("Should always be able to compile an Intent");
+
+        CompiledTransactionIntent(bytes)
     }
 }
 
@@ -89,7 +98,7 @@ mod tests {
         expected = "Should never fail to decompile a 'CompiledTransactionIntent' since we should not have been able to construct an invalid 'CompiledTransactionIntent'."
     )]
     fn decompile_fail() {
-        _ = CompiledTransactionIntent(BagOfBytes::sample_aced()).decompile();
+        _ = CompiledTransactionIntent::new(BagOfBytes::sample_aced()).decompile();
     }
 
     #[test]

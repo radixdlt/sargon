@@ -49,13 +49,6 @@ impl TransactionIntent {
     pub fn manifest_summary(&self) -> ManifestSummary {
         self.manifest.summary()
     }
-
-    pub fn compile(&self) -> CompiledTransactionIntent {
-        let bytes = compile_intent(ScryptoIntent::from(self.clone()))
-            .expect("Should always be able to compile an Intent");
-
-        CompiledTransactionIntent(bytes)
-    }
 }
 
 impl From<TransactionIntent> for ScryptoIntent {
@@ -85,7 +78,7 @@ fn compile_intent_with(
     compile_intent(into_scrypto(header, manifest, message))
 }
 
-fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
+pub(super) fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
     RET_intent_compile(&scrypto_intent)
         .map_err(|e| CommonError::InvalidIntentFailedToEncode {
             underlying: format!("{:?}", e),

@@ -13,6 +13,7 @@ mod transaction_hashes;
 mod transaction_header;
 mod transaction_intent;
 mod transaction_manifest;
+mod compiled_transaction_intent;
 
 pub use compiled_notarized_intent::*;
 pub use execution_summary::*;
@@ -29,3 +30,4 @@ pub use transaction_hashes::*;
 pub use transaction_header::*;
 pub use transaction_intent::*;
 pub use transaction_manifest::*;
+pub use compiled_transaction_intent::*;
