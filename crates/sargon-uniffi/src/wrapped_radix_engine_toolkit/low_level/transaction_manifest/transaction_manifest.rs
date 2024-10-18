@@ -54,9 +54,7 @@ pub fn transaction_manifest_involved_resource_addresses(
     manifest
         .into_internal()
         .involved_resource_addresses()
-        .into_iter()
-        .map(|x| x.into())
-        .collect()
+        .into_type()
 }
 
 #[uniffi::export]
@@ -66,20 +64,7 @@ pub fn transaction_manifest_involved_pool_addresses(
     manifest
         .into_internal()
         .involved_pool_addresses()
-        .into_iter()
-        .map(|x| x.into())
-        .collect()
-}
-
-#[uniffi::export]
-pub fn transaction_manifest_execution_summary(
-    manifest: &TransactionManifest,
-    engine_toolkit_receipt: String,
-) -> Result<ExecutionSummary> {
-    manifest
-        .into_internal()
-        .execution_summary(engine_toolkit_receipt)
-        .into_result()
+        .into_type()
 }
 
 #[uniffi::export]

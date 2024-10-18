@@ -55,7 +55,11 @@ pub fn android_notarize_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
     signed_intent_hash: &SignedIntentHash,
 ) -> Result<NotarySignature> {
-    unimplemented!("Should be moved as actual func in  internal Sargon")
+    sargon::android_notarize_hash_with_private_key_bytes(
+        private_key_bytes.into_internal(),
+        &signed_intent_hash.into_internal(),
+    )
+    .into_result()
 }
 
 #[uniffi::export]
@@ -63,7 +67,11 @@ pub fn android_sign_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
     hash: &Hash,
 ) -> Result<Ed25519Signature> {
-    unimplemented!("Should be moved as actual func in  internal Sargon")
+    sargon::android_sign_hash_with_private_key_bytes(
+        private_key_bytes.into_internal(),
+        &hash.into_internal(),
+    )
+    .into_result()
 }
 
 decl_conversion_tests_for!(NotarySignature);

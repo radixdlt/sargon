@@ -1,10 +1,6 @@
 use crate::prelude::*;
 
 /// Represents a 32-byte hash digest.
-///
-/// Made UniFFI convertible via HashSecretMagic,
-/// exposed in Swift/Kotlin as its own struct/data class, with
-/// hidden secret magic.
 #[derive(
     Clone,
     Debug,

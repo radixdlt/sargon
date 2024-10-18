@@ -2,9 +2,6 @@ use std::ops::{Deref, DerefMut, Neg};
 
 use crate::prelude::*;
 
-/// This is a TEMPORARY workaround until Kotlin => ByteArray equatable issue for
-/// Records has been solved, see: https://github.com/mozilla/uniffi-rs/issues/1985
-///
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
 #[derive(

@@ -24,8 +24,7 @@ decl_ret_wrapped_address!(
     /// );
     /// ```
     ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalIdentityAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalIdentityAddress`][ret].
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L229-L234

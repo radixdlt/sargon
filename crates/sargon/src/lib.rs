@@ -264,3 +264,25 @@ pub mod prelude {
 }
 
 pub use prelude::*;
+
+/// Helper implementation for Uniffi
+pub fn android_notarize_hash_with_private_key_bytes(
+    private_key_bytes: Exactly32Bytes,
+    signed_intent_hash: &SignedIntentHash,
+) -> Result<NotarySignature> {
+    let ed25519_private_key =
+        Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
+
+    let private_key = PrivateKey::from(ed25519_private_key);
+    let signature = private_key.notarize_hash(signed_intent_hash);
+
+    Ok(signature)
+}
+
+pub fn android_sign_hash_with_private_key_bytes(
+    private_key_bytes: Exactly32Bytes,
+    hash: &Hash,
+) -> Result<Ed25519Signature> {
+    Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
+        .map(|pk| pk.sign(hash))
+}

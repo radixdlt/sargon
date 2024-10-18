@@ -2,9 +2,6 @@ use radix_rust::prelude::{IndexMap, IndexSet};
 
 use crate::prelude::*;
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
-///
 /// Declares a struct with a "generic" value, with an `instruction_index`.
 macro_rules! decl_predicted {
     (

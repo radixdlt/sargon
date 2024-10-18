@@ -2,7 +2,6 @@ use std::sync::RwLockWriteGuard;
 
 use crate::prelude::*;
 
-#[uniffi::export]
 impl SargonOS {
     /// Performs initial transaction analysis for a given raw manifest, including:
     /// 1. Extracting the transaction signers.

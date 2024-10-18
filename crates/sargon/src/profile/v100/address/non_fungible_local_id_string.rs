@@ -2,9 +2,6 @@ use crate::prelude::*;
 
 /// A string matching `[_0-9a-zA-Z]{1,64}`.
 ///
-/// This is an internal wrapping of Scrypto's `StringNonFungibleLocalId`
-/// with a UniFFI custom converter using `String` as `Builtin`.
-///
 /// Using this type instead of `String` directly in `NonFungibleLocalId::Str`,
 /// allows us to do impl `From<NonFungibleLocalId> for NonFungibleLocalId` instead
 /// of `TryFrom<NonFungibleLocalId>`.

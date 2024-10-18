@@ -1,5 +1,4 @@
 use crate::common::*;
-
 use proc_macro2::Ident;
 use quote::quote;
 use syn::Fields;

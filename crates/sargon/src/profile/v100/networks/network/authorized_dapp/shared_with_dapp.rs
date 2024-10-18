@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
 /// Something akin to `SharedToDappWithPersonaIDs<T>`.
 macro_rules! declare_shared_with_dapp {
     (

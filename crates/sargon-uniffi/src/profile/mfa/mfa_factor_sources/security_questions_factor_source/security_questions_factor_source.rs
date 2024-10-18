@@ -108,6 +108,7 @@ use sargon::SecurityQuestions_NOT_PRODUCTION_READY_FactorSource as InternalSecur
 /// [itertools]: https://docs.rs/itertools/latest/itertools/trait.Itertools.html#method.combinations
 ///
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.

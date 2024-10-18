@@ -6,18 +6,9 @@ use crate::prelude::*;
 )]
 pub enum AccountOrPersona {
     /// An `Account`
-    ///
-    /// Note:
-    /// This case/variant can not be named `account`/ `Account` due
-    /// to Kotlin UniFFI limitation.
     AccountEntity(Account),
 
     /// A `Persona`
-    ///
-    /// Note:
-    /// This is named `personaEntity` / `PersonaEntity` to match
-    /// `accountEntity` / `AccountEntity` which can not be named
-    /// `account`/ `Account` due to Kotlin UniFFI limitation.
     PersonaEntity(Persona),
 }
 

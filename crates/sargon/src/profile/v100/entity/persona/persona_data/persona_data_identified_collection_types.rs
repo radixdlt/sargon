@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
 /// Something akin to: `CollectionOfIdentifiedPersonaDataEntries<T>`.
 macro_rules! declare_collection_of_identified_entry {
     (

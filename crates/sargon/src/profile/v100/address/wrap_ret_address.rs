@@ -40,8 +40,6 @@ pub trait IntoScryptoAddress: IsNetworkAware {
     fn scrypto(&self) -> ScryptoGlobalAddress;
 }
 
-/// This macro exists since UniFFI does not support generics currently, when/if
-/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_ret_wrapped_address {
     (
         $(

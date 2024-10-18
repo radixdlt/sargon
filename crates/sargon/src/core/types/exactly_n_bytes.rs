@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use delegate::delegate;
 
-/// Small macro to facilitate generation of UniFFI exported functions.
 macro_rules! decl_exactly_n_bytes {
     (
         $(
@@ -333,8 +332,7 @@ macro_rules! decl_exactly_n_bytes {
 
 decl_exactly_n_bytes!(
     /// 29 bytes, typically used as PublicKeyHash, or otherwise NodeId payload,
-    /// implementation wise those bytes are stored inside a `BagOfBytes`
-    /// (wrapper of `Vec<u8>`) for UniFFI compat.
+    /// implementation wise those bytes are stored inside a `BagOfBytes`.
     29,
     "29deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
@@ -342,35 +340,35 @@ decl_exactly_n_bytes!(
 decl_exactly_n_bytes!(
     /// 32 bytes, most commonly used fixed length bytes, used by PrivateKeys,
     /// Ed25519PublicKey, and BIP39 entropy, implementation wise those bytes are
-    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`).
     32,
     "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 64 bytes, used by Ed25519Signatures, implementation wise those bytes are
-    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`).
     64,
     "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 33 bytes, used by Secp256k1PublicKeys, implementation wise those bytes are
-    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`).
     33,
     "33deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 65 bytes, used by Secp256k1Signatures, implementation wise those bytes are
-    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`).
     65,
     "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 12 bytes, used by AES encryption, implementation wise those bytes are
-    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`).
     12,
     "deaddeaddeaddeaddeaddead", // expected sample value for tests
 );

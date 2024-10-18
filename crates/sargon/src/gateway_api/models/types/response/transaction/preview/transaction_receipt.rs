@@ -3,14 +3,7 @@ use crate::prelude::*;
 /// This is part of the response to a transaction preview request, and contains the status of the transaction.
 /// Error message is only present if status is `Failed` or `Rejected`.
 #[derive(
-    Deserialize,
-    Serialize,
-    Clone,
-    PartialEq,
-    Eq,
-    Debug,
-    derive_more::Display,
-    uniffi::Record,
+    Deserialize, Serialize, Clone, PartialEq, Eq, Debug, derive_more::Display,
 )]
 #[display("{status}")]
 pub struct TransactionReceipt {
