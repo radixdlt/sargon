@@ -45,3 +45,5 @@ pub fn compiled_transaction_intent_decompile(
 ) -> TransactionIntent {
     compiled_intent.into_internal().decompile().into()
 }
+
+decl_conversion_tests_for!(CompiledTransactionIntent);
