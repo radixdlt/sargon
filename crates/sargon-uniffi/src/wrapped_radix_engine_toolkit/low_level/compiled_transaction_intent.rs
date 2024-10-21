@@ -39,6 +39,13 @@ pub fn new_compiled_transaction_intent_sample_other(
 }
 
 #[uniffi::export]
+pub fn compiled_transaction_intent_bytes(
+    compiled_intent: &CompiledTransactionIntent,
+) -> BagOfBytes {
+    compiled_intent.into_internal().bytes().into()
+}
+
+#[uniffi::export]
 pub fn compiled_transaction_intent_decompile(
     compiled_intent: &CompiledTransactionIntent,
 ) -> TransactionIntent {
