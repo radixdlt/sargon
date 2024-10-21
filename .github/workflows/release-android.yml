@@ -29,6 +29,23 @@ jobs:
       CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
     steps:
       - uses: RDXWorks-actions/checkout@main
+      - name: Remove unused software
+        run: |
+          sudo rm -rf \
+          "$AGENT_TOOLSDIRECTORY" \
+          /opt/google/chrome \
+          /opt/microsoft/msedge \
+          /opt/microsoft/powershell \
+          /opt/pipx \
+          /usr/lib/mono \
+          /usr/local/julia* \
+          /usr/local/lib/node_modules \
+          /usr/local/share/chromium \
+          /usr/local/share/powershell \
+          /usr/share/dotnet \
+          /usr/local/share/boost \
+          /opt/ghc \
+          df -h /
 
       - name: Install Rust Toolchain for aarch64-linux-android
         uses: RDXWorks-actions/toolchain@master
