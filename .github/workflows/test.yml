@@ -214,6 +214,24 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - name: Remove unused software
+        run: |
+          sudo rm -rf \
+          "$AGENT_TOOLSDIRECTORY" \
+          /opt/google/chrome \
+          /opt/microsoft/msedge \
+          /opt/microsoft/powershell \
+          /opt/pipx \
+          /usr/lib/mono \
+          /usr/local/julia* \
+          /usr/local/lib/node_modules \
+          /usr/local/share/chromium \
+          /usr/local/share/powershell \
+          /usr/share/dotnet \
+          /usr/local/share/boost \
+          /opt/ghc \
+          df -h /
+
       - name: Install Rust Toolchain for x86_64-unknown-linux-gnu
         uses: RDXWorks-actions/toolchain@master
         with:
