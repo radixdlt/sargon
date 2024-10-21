@@ -685,6 +685,9 @@ pub enum CommonError {
     #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
         10192,
+
+    #[error("Failed to decompile bytes into TransactionIntent")]
+    FailedToDecompileBytesIntoTransactionIntent = 10193,
 }
 
 impl CommonError {

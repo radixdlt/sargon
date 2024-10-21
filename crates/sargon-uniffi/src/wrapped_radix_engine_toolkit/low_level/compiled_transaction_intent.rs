@@ -22,9 +22,8 @@ impl CompiledTransactionIntent {
 
 impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn into(self) -> InternalCompiledTransactionIntent {
-        unsafe {
-            InternalCompiledTransactionIntent::new(self.secret_magic.into())
-        }
+        InternalCompiledTransactionIntent::new(self.secret_magic.into())
+            .expect("Should always be able to compile an Intent")
     }
 }
 
