@@ -1,15 +1,18 @@
 use crate::prelude::*;
+use base64::prelude::BASE64_STANDARD_NO_PAD;
+use base64::Engine;
 use sargon::CompiledTransactionIntent as InternalCompiledTransactionIntent;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct CompiledTransactionIntent {
-    secret_magic: BagOfBytes,
+    /// A base-64 encoded version of the compiled intent
+    secret_magic: String,
 }
 
 impl From<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn from(value: InternalCompiledTransactionIntent) -> Self {
         Self {
-            secret_magic: value.bytes().into(),
+            secret_magic: BASE64_STANDARD_NO_PAD.encode(value.bytes().bytes()),
         }
     }
 }
@@ -22,8 +25,14 @@ impl CompiledTransactionIntent {
 
 impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
     fn into(self) -> InternalCompiledTransactionIntent {
-        InternalCompiledTransactionIntent::new(self.secret_magic.into())
-            .expect("Should always be able to compile an Intent")
+        let decoded = BASE64_STANDARD_NO_PAD
+            .decode(self.secret_magic)
+            .expect("Should always be able to decode base-64 encoded bytes");
+
+        InternalCompiledTransactionIntent::new(sargon::BagOfBytes::from(
+            decoded,
+        ))
+        .expect("Should always be able to compile an Intent")
     }
 }
 
