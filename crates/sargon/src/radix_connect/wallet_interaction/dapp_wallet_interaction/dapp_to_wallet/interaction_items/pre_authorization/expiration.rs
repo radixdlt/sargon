@@ -5,12 +5,24 @@ use crate::prelude::*;
 #[serde(tag = "discriminator", content = "value", rename_all = "camelCase")]
 pub enum DappToWalletInteractionSubintentExpiration {
     /// The subintent expires at a specific time.
+    ///
+    /// For example, a dApp sends a subintent for `User A` to approve sending 100 XRD before 5:00 PM,
+    /// and a subintent for `User B` to approve sending 2 USDT with same expiration.
+    ///
+    /// If both users sign their subintents before 5:00 PM, the transaction to exchange
+    /// 100 XRD over 2 USDT will succeed. Otherwise, it would fail.
     #[serde(rename = "expireAtTime")]
     AtTime(Timestamp),
 
     /// The subintent expires X seconds after its signature.
+    ///
+    /// For example, a dApp sends a subintent for `User A` to approve sending 100 XRD with 1 hour expiration,
+    /// and a subintent for `User B` to approve sending 2 USDT with same expiration.
+    ///
+    /// If both users sign their subintents within one hour from each other, the transaction to exchange
+    /// 100 XRD over 2 USDT will succeed. Otherwise, it would fail.
     #[serde(rename = "expireAfterSignature")]
-    AfterSignature(u64),
+    AllSubintentsSubmittedWithin(u64),
 }
 
 impl HasSampleValues for DappToWalletInteractionSubintentExpiration {
@@ -19,7 +31,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentExpiration {
     }
 
     fn sample_other() -> Self {
-        Self::AfterSignature(10)
+        Self::AllSubintentsSubmittedWithin(10)
     }
 }
 
