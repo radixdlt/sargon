@@ -14,13 +14,14 @@ use crate::prelude::*;
 pub struct CompiledTransactionIntent(BagOfBytes);
 
 impl CompiledTransactionIntent {
-
     /// Constructs a `CompiledTransactionIntent` from bytes.
     /// Fails if the bytes do not construct a valid `TransactionIntent`
     pub fn new(bytes: BagOfBytes) -> Result<Self> {
         RET_decompile_intent(bytes.clone())
             .map(|_| Self(bytes))
-            .map_err(|_| CommonError::FailedToDecompileBytesIntoTransactionIntent)
+            .map_err(|_| {
+                CommonError::FailedToDecompileBytesIntoTransactionIntent
+            })
     }
 
     pub fn bytes(&self) -> BagOfBytes {
