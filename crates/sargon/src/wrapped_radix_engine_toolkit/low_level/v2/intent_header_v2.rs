@@ -26,7 +26,8 @@ impl IntentHeaderV2 {
     /// Creates a new `IntentHeaderV2`
     ///
     /// # Panics
-    /// Panics if `end_epoch_exclusive < start_epoch_inclusive`
+    /// Panics if `end_epoch_exclusive` is less than `start_epoch_inclusive` or if
+    /// `max_proposer_timestamp_exclusive` is less than `min_proposer_timestamp_inclusive`.
     pub fn new(
         network_id: NetworkID,
         start_epoch_inclusive: impl Into<Epoch>,
