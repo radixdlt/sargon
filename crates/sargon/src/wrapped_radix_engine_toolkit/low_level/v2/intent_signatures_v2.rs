@@ -108,8 +108,7 @@ mod tests {
         let valid_hash = SignatureWithPublicKey::sample_hash();
         let invalid_hash = Hash::sample();
         let valid_signature = IntentSignature::sample();
-        let valid_signatures =
-            IntentSignaturesV2::new(vec![valid_signature.clone()]);
+        let valid_signatures = IntentSignaturesV2::new(vec![valid_signature]);
 
         assert!(valid_signatures.validate(valid_hash));
         assert!(!valid_signatures.validate(invalid_hash));

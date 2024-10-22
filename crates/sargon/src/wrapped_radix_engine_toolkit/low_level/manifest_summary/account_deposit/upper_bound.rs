@@ -1,13 +1,16 @@
 use crate::prelude::*;
+use radix_common::prelude::ManifestResourceConstraint;
 
 /// Represents an upper bound on a non-negative decimal.
-///
-/// `Unbounded` represents an upper bound above any possible decimal, and is included for
-/// clarity of intention. Considering Decimal has a max size, it is effectively equivalent to
-/// an inclusive bound of Decimal::MAX.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum UpperBound {
+    /// The amount is required to be non-negative before using this model.
+    /// This can be validated via [`ManifestResourceConstraint::is_valid_for`].
     Inclusive { decimal: Decimal },
+
+    /// `Unbounded` represents an upper bound above any possible decimal, and is included for
+    /// clarity of intention. Considering Decimal has a max size, it is effectively equivalent to
+    /// an inclusive bound of [`Decimal::max()`].
     Unbounded,
 }
 
@@ -23,21 +26,29 @@ impl UpperBound {
 }
 
 impl UpperBound {
-    pub fn get_amount(&self) -> Option<Decimal192> {
-        match self {
-            UpperBound::Inclusive { decimal } => Some(*decimal),
-            UpperBound::Unbounded => None,
-        }
+    pub fn get_amount(&self) -> Decimal {
+        ScryptoUpperBound::from(self.clone())
+            .equivalent_decimal()
+            .into()
     }
 }
 
 impl From<ScryptoUpperBound> for UpperBound {
     fn from(value: ScryptoUpperBound) -> Self {
         match value {
-            ScryptoUpperBound::Inclusive(decimal) => Self::Inclusive {
-                decimal: decimal.into(),
-            },
-            ScryptoUpperBound::Unbounded => Self::Unbounded,
+            ScryptoUpperBound::Inclusive(decimal) => Self::inclusive(decimal),
+            ScryptoUpperBound::Unbounded => Self::unbounded(),
+        }
+    }
+}
+
+impl From<UpperBound> for ScryptoUpperBound {
+    fn from(value: UpperBound) -> Self {
+        match value {
+            UpperBound::Inclusive { decimal } => {
+                ScryptoUpperBound::Inclusive(decimal.into())
+            }
+            UpperBound::Unbounded => ScryptoUpperBound::Unbounded,
         }
     }
 }
@@ -83,8 +94,22 @@ mod tests {
     }
 
     #[test]
+    fn to_scrypto_inclusive() {
+        let upper_bound = SUT::sample();
+        let scrypto: ScryptoUpperBound = upper_bound.into();
+        assert_eq!(scrypto, ScryptoUpperBound::Inclusive(1.into()));
+    }
+
+    #[test]
+    fn to_scrypto_unbounded() {
+        let upper_bound = SUT::sample_other();
+        let scrypto: ScryptoUpperBound = upper_bound.into();
+        assert_eq!(scrypto, ScryptoUpperBound::Unbounded);
+    }
+
+    #[test]
     fn get_amount() {
-        assert_eq!(SUT::sample().get_amount(), Some(Decimal192::from(1)));
-        assert_eq!(SUT::sample_other().get_amount(), None);
+        assert_eq!(SUT::sample().get_amount(), Decimal::from(1));
+        assert_eq!(SUT::sample_other().get_amount(), Decimal::max());
     }
 }

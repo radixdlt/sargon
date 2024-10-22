@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
-use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 use radix_transactions::manifest::CallMethod;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
@@ -75,7 +74,7 @@ fn instructions_string_from(
 
 impl InstructionsV2 {
     pub fn instructions_string(&self) -> String {
-        instructions_string_from(self.secret_magic.instructions().as_ref(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
+        instructions_string_from(self.secret_magic.instructions(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -90,7 +89,7 @@ impl InstructionsV2 {
             &network_definition,
             blob_provider,
         )
-        .map_err(|e| extract_error_from_error(e, network_id))
+        .map_err(|e| CommonError::from_scrypto_compile_error(e, network_id))
         .and_then(|manifest: ScryptoTransactionManifestV2| {
             Self::try_from((manifest.instructions.as_ref(), network_id))
         })
@@ -123,64 +122,6 @@ impl InstructionsV2 {
     }
 
     pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
-}
-
-fn extract_error_from_addr(
-    s: String,
-    expected_network: NetworkID,
-) -> CommonError {
-    let Some(Some(network_id)) = RET_decode_address(&s)
-        .map(|t| t.0)
-        .map(NetworkID::from_repr)
-    else {
-        return CommonError::InvalidInstructionsString {
-            underlying: "Failed to get NetworkID from address".to_owned(),
-        };
-    };
-    if network_id != expected_network {
-        CommonError::InvalidInstructionsWrongNetwork {
-            found_in_instructions: network_id,
-            specified_to_instructions_ctor: expected_network,
-        }
-    } else {
-        CommonError::InvalidInstructionsString {
-            underlying: "Failed to determine why an address was invalid"
-                .to_owned(),
-        }
-    }
-}
-
-fn extract_error_from_error(
-    err: ScryptoCompileError,
-    expected_network: NetworkID,
-) -> CommonError {
-    use radix_transactions::manifest::parser::ParserError;
-    use radix_transactions::manifest::parser::ParserErrorKind::*;
-    use GeneratorError;
-    use GeneratorErrorKind::*;
-    let n = expected_network;
-    match err {
-        ScryptoCompileError::GeneratorError(GeneratorError {
-            error_kind: gen_err,
-            ..
-        }) => match gen_err {
-            InvalidPackageAddress(a) => extract_error_from_addr(a, n),
-            InvalidResourceAddress(a) => extract_error_from_addr(a, n),
-            InvalidGlobalAddress(a) => extract_error_from_addr(a, n),
-            _ => CommonError::InvalidInstructionsString {
-                underlying: format!("GeneratorError: {:?}", gen_err),
-            },
-        },
-        ScryptoCompileError::ParserError(ParserError {
-            error_kind: MaxDepthExceeded { max, .. },
-            ..
-        }) => CommonError::InvalidTransactionMaxSBORDepthExceeded {
-            max: max as u16,
-        },
-        _ => CommonError::InvalidInstructionsString {
-            underlying: format!("{:?}", err),
-        },
-    }
 }
 
 impl HasSampleValues for InstructionsV2 {
@@ -328,7 +269,10 @@ mod tests {
     #[test]
     fn extract_error_from_addr_fallbacks_to_invalid_ins_err() {
         assert_eq!(
-            extract_error_from_addr("foo".to_owned(), NetworkID::Simulator),
+            CommonError::from_address_error(
+                "foo".to_owned(),
+                NetworkID::Simulator
+            ),
             CommonError::InvalidInstructionsString {
                 underlying: "Failed to get NetworkID from address".to_owned()
             }
@@ -338,7 +282,7 @@ mod tests {
     fn extract_error_from_addr_uses_invalid_instructions_string_if_same_network(
     ) {
         assert_eq!(
-            extract_error_from_addr("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".to_owned(), NetworkID::Mainnet),
+            CommonError::from_address_error("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".to_owned(), NetworkID::Mainnet),
             CommonError::InvalidInstructionsString { underlying: "Failed to determine why an address was invalid".to_owned() }
         );
     }
@@ -346,7 +290,7 @@ mod tests {
     #[test]
     fn extract_error_from_error_non_gen_err() {
         assert_eq!(
-            extract_error_from_error(
+            CommonError::from_scrypto_compile_error(
                 ScryptoCompileError::LexerError(LexerError {
                     error_kind: LexerErrorKind::UnexpectedEof,
                     span: Span {
@@ -391,7 +335,7 @@ mod tests {
     #[test]
     fn extract_error_from_error_gen_non_addr_err() {
         assert_eq!(
-            extract_error_from_error(
+            CommonError::from_scrypto_compile_error(
                 ScryptoCompileError::GeneratorError(GeneratorError {
                     error_kind: GeneratorErrorKind::BlobNotFound(
                         "dead".to_owned()
@@ -420,7 +364,7 @@ mod tests {
     #[test]
     fn extract_error_from_error_gen_err_package_addr() {
         assert_eq!(
-            extract_error_from_error(
+            CommonError::from_scrypto_compile_error(
                 ScryptoCompileError::GeneratorError(GeneratorError {
                     error_kind: GeneratorErrorKind::InvalidPackageAddress(
                         PackageAddress::sample().to_string()
@@ -450,7 +394,7 @@ mod tests {
     #[test]
     fn extract_error_from_error_gen_err_resource_addr() {
         assert_eq!(
-            extract_error_from_error(
+            CommonError::from_scrypto_compile_error(
                 ScryptoCompileError::GeneratorError(GeneratorError {
                     error_kind: GeneratorErrorKind::InvalidResourceAddress(
                         ResourceAddress::sample().to_string()

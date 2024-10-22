@@ -7,7 +7,6 @@ pub use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    Ord,
     PartialOrd,
     derive_more::Display,
     derive_more::Debug,

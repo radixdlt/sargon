@@ -35,7 +35,7 @@ pub fn transaction_manifest_instructions_string(
 #[uniffi::export]
 pub fn transaction_manifest_summary(
     manifest: &TransactionManifest,
-) -> Option<ManifestSummary> {
+) -> Result<ManifestSummary> {
     manifest.summary()
 }
 

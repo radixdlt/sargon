@@ -5,21 +5,23 @@ pub struct ChildSubintent {
     pub hash: SubintentHash,
 }
 
+impl ChildSubintent {
+    pub fn new(hash: SubintentHash) -> Self {
+        Self { hash }
+    }
+}
+
 impl From<ChildSubintent> for ScryptoChildSubintent {
     fn from(value: ChildSubintent) -> Self {
         ScryptoChildSubintent {
-            hash: ScryptoSubintentHash {
-                0: value.hash.hash.into(),
-            },
+            hash: ScryptoSubintentHash(value.hash.hash.into()),
         }
     }
 }
 
 impl From<(ScryptoChildSubintent, NetworkID)> for ChildSubintent {
     fn from(value: (ScryptoChildSubintent, NetworkID)) -> Self {
-        Self {
-            hash: (value.0.hash, value.1).into(),
-        }
+        Self::new((value.0.hash, value.1).into())
     }
 }
 
@@ -31,9 +33,7 @@ impl From<(ScryptoSubintentHash, NetworkID)> for SubintentHash {
 
 impl From<SubintentHash> for ScryptoSubintentHash {
     fn from(value: SubintentHash) -> Self {
-        Self {
-            0: value.hash.into(),
-        }
+        Self(ScryptoHash::from(value.hash))
     }
 }
 

@@ -116,11 +116,8 @@ impl FromStr for NonFungibleGlobalId {
                 }
             })?;
 
-        TryInto::<NetworkID>::try_into(network_id).and_then(|network_id| {
-            Ok(NonFungibleGlobalId::from((
-                non_fungible_global_id,
-                network_id,
-            )))
+        TryInto::<NetworkID>::try_into(network_id).map(|network_id| {
+            NonFungibleGlobalId::from((non_fungible_global_id, network_id))
         })
     }
 }

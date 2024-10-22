@@ -21,19 +21,38 @@ pub enum SimpleFungibleResourceBounds {
 }
 
 impl SimpleFungibleResourceBounds {
-    pub fn exact(amount: Decimal) -> Self {
-        Self::Exact { amount }
+    pub fn exact(amount: impl Into<Decimal>) -> Self {
+        Self::Exact {
+            amount: amount.into(),
+        }
     }
 
-    pub fn at_most(amount: Decimal) -> Self {
-        Self::AtMost { amount }
+    pub fn at_most(amount: impl Into<Decimal>) -> Self {
+        Self::AtMost {
+            amount: amount.into(),
+        }
     }
 
-    pub fn at_least(amount: Decimal) -> Self {
-        Self::AtLeast { amount }
+    pub fn at_least(amount: impl Into<Decimal>) -> Self {
+        Self::AtLeast {
+            amount: amount.into(),
+        }
     }
 
-    pub fn between(min_amount: Decimal, max_amount: Decimal) -> Self {
+    /// # Panics
+    /// Panics if `max_amount` is less than `min_amount`.
+    pub fn between(
+        min_amount: impl Into<Decimal>,
+        max_amount: impl Into<Decimal>,
+    ) -> Self {
+        let max_amount = max_amount.into();
+        let min_amount = min_amount.into();
+
+        assert!(
+            max_amount >= min_amount,
+            "Max amount MUST be greater than or equal min amount."
+        );
+
         Self::Between {
             min_amount,
             max_amount,
@@ -50,28 +69,21 @@ impl From<ScryptoSimpleFungibleResourceBounds>
 {
     fn from(value: ScryptoSimpleFungibleResourceBounds) -> Self {
         match value {
-            ScryptoSimpleFungibleResourceBounds::Exact(amount) => Self::Exact {
-                amount: amount.into(),
-            },
+            ScryptoSimpleFungibleResourceBounds::Exact(amount) => {
+                Self::exact(amount)
+            }
             ScryptoSimpleFungibleResourceBounds::AtMost(amount) => {
-                Self::AtMost {
-                    amount: amount.into(),
-                }
+                Self::at_most(amount)
             }
             ScryptoSimpleFungibleResourceBounds::AtLeast(amount) => {
-                Self::AtLeast {
-                    amount: amount.into(),
-                }
+                Self::at_least(amount)
             }
             ScryptoSimpleFungibleResourceBounds::Between(
                 min_amount,
                 max_amount,
-            ) => Self::Between {
-                min_amount: min_amount.into(),
-                max_amount: max_amount.into(),
-            },
+            ) => Self::between(min_amount, max_amount),
             ScryptoSimpleFungibleResourceBounds::UnknownAmount => {
-                Self::UnknownAmount
+                Self::unknown_amount()
             }
         }
     }
@@ -89,19 +101,19 @@ impl HasSampleValues for SimpleFungibleResourceBounds {
 
 impl SimpleFungibleResourceBounds {
     fn sample_exact() -> Self {
-        Self::exact(Decimal::from(1337))
+        Self::exact(1337)
     }
 
     fn sample_at_most() -> Self {
-        Self::at_most(Decimal::from(3))
+        Self::at_most(3)
     }
 
     fn sample_at_least() -> Self {
-        Self::at_least(Decimal::from(2))
+        Self::at_least(2)
     }
 
     fn sample_between() -> Self {
-        Self::between(Decimal::from(1), Decimal::from(3))
+        Self::between(1, 3)
     }
 
     fn sample_unknown_amount() -> Self {
@@ -129,25 +141,19 @@ mod tests {
 
     #[test]
     fn from_scrypto_exact() {
-        let scrypto = ScryptoSimpleFungibleResourceBounds::Exact(
-            Decimal::from(1337).into(),
-        );
+        let scrypto = ScryptoSimpleFungibleResourceBounds::Exact(1337.into());
         assert_eq!(SUT::from(scrypto), SUT::sample_exact());
     }
 
     #[test]
     fn from_scrypto_at_most() {
-        let scrypto = ScryptoSimpleFungibleResourceBounds::AtMost(
-            Decimal::from(3).into(),
-        );
+        let scrypto = ScryptoSimpleFungibleResourceBounds::AtMost(3.into());
         assert_eq!(SUT::from(scrypto), SUT::sample_at_most());
     }
 
     #[test]
     fn from_scrypto_at_least() {
-        let scrypto = ScryptoSimpleFungibleResourceBounds::AtLeast(
-            Decimal::from(2).into(),
-        );
+        let scrypto = ScryptoSimpleFungibleResourceBounds::AtLeast(2.into());
         assert_eq!(SUT::from(scrypto), SUT::sample_at_least());
     }
 
@@ -164,5 +170,13 @@ mod tests {
     fn from_scrypto_unknown_amount() {
         let scrypto = ScryptoSimpleFungibleResourceBounds::UnknownAmount;
         assert_eq!(SUT::from(scrypto), SUT::sample_unknown_amount());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Max amount MUST be greater than or equal min amount."
+    )]
+    fn between_should_panic_when_max_less_than_min() {
+        SUT::between(3, 1);
     }
 }

@@ -4,7 +4,10 @@ use crate::prelude::*;
 /// may be present with a list of change sources.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum UnspecifiedResources {
+    /// There are no unspecified resources present
     NonePresent,
+
+    /// There might be non-zero balances of unspecified resources present
     MayBePresent { change_sources: Vec<ChangeSource> },
 }
 
