@@ -31,9 +31,7 @@ impl TXToSign {
         profile: &Profile,
     ) -> Result<Self> {
         let intent_hash = intent.transaction_intent_hash().clone();
-        let summary = intent
-            .manifest_summary()
-            .ok_or(CommonError::FailedToGenerateManifestSummary)?;
+        let summary = intent.manifest_summary()?;
         let entities_requiring_auth =
             ExtractorOfEntitiesRequiringAuth::extract(profile, summary)?;
 

@@ -15,8 +15,10 @@ impl TransactionManifest {
             .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
                 &network_definition,
             ))
-            .ok()
-            .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+            .map_err(|e| {
+                error!("Failed to decode engine toolkit receipt  {:?}", e);
+                CommonError::FailedToDecodeEngineToolkitReceipt
+            })?;
 
         self.execution_summary_with_receipt(runtime_receipt)
     }
@@ -973,7 +975,7 @@ mod tests {
         value: impl AsRef<str>,
     ) -> ScryptoSerializableToolkitTransactionReceipt {
         serde_json::from_str::<ScryptoSerializableToolkitTransactionReceipt>(
-            &value.as_ref(),
+            value.as_ref(),
         )
         .unwrap()
     }

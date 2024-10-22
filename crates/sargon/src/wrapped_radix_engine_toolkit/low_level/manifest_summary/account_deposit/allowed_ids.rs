@@ -23,10 +23,10 @@ impl AllowedIds {
         Self::Any
     }
 
-    pub fn ids(&self) -> Vec<NonFungibleLocalId> {
+    pub fn ids(&self) -> IndexSet<NonFungibleLocalId> {
         match self {
-            AllowedIds::Allowlist { ids } => ids.clone(),
-            AllowedIds::Any => vec![],
+            AllowedIds::Allowlist { ids } => ids.clone().into_iter().collect(),
+            AllowedIds::Any => IndexSet::new(),
         }
     }
 }
@@ -44,7 +44,7 @@ impl From<ScryptoAllowedIds> for AllowedIds {
 
 impl HasSampleValues for AllowedIds {
     fn sample() -> Self {
-        Self::allowlist(vec![
+        Self::allowlist([
             NonFungibleLocalId::sample(),
             NonFungibleLocalId::sample_other(),
         ])
@@ -75,26 +75,28 @@ mod tests {
 
     #[test]
     fn get_ids() {
-        let ids = vec![
+        let ids = [
             NonFungibleLocalId::random(),
             NonFungibleLocalId::random(),
             NonFungibleLocalId::random(),
-        ];
+        ]
+        .into_iter()
+        .collect::<IndexSet<_>>();
 
         assert_eq!(SUT::allowlist(ids.clone()).ids(), ids);
-        assert_eq!(SUT::any().ids(), vec![]);
+        assert_eq!(SUT::any().ids(), IndexSet::new());
     }
 
     #[test]
     fn from_scrypto_allowlist() {
         let scrypto = ScryptoAllowedIds::Allowlist(
-            vec![
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ]
             .into_iter()
             .map(ScryptoNonFungibleLocalId::from)
-            .collect(),
+            .collect::<IndexSet<_>>(),
         );
         assert_eq!(SUT::from(scrypto), SUT::sample());
     }

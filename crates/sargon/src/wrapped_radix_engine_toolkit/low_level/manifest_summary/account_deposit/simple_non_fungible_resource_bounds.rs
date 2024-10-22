@@ -17,21 +17,28 @@ pub enum SimpleNonFungibleResourceBounds {
 
 impl SimpleNonFungibleResourceBounds {
     pub fn exact(
-        amount: Decimal,
+        amount: impl Into<Decimal>,
         certain_ids: impl IntoIterator<Item = NonFungibleLocalId>,
     ) -> Self {
         Self::Exact {
-            amount,
+            amount: amount.into(),
             certain_ids: certain_ids.into_iter().collect(),
         }
     }
 
+    /// # Panics
+    /// Panics if `lower_bound` is greater than `upper_bound`.
     pub fn not_exact(
         certain_ids: impl IntoIterator<Item = NonFungibleLocalId>,
         lower_bound: LowerBound,
         upper_bound: UpperBound,
         allowed_ids: AllowedIds,
     ) -> Self {
+        assert!(
+            lower_bound.get_amount() <= upper_bound.get_amount(),
+            "Upper bound MUST be greater than or equal lower bound."
+        );
+
         Self::NotExact {
             certain_ids: certain_ids.into_iter().collect(),
             lower_bound,
@@ -40,10 +47,14 @@ impl SimpleNonFungibleResourceBounds {
         }
     }
 
-    pub fn certain_ids(&self) -> Vec<NonFungibleLocalId> {
+    pub fn certain_ids(&self) -> IndexSet<NonFungibleLocalId> {
         match self {
-            Self::Exact { certain_ids, .. } => certain_ids.clone(),
-            Self::NotExact { certain_ids, .. } => certain_ids.clone(),
+            Self::Exact { certain_ids, .. } => {
+                certain_ids.clone().into_iter().collect()
+            }
+            Self::NotExact { certain_ids, .. } => {
+                certain_ids.clone().into_iter().collect()
+            }
         }
     }
 }
@@ -56,27 +67,27 @@ impl From<ScryptoSimpleNonFungibleResourceBounds>
             ScryptoSimpleNonFungibleResourceBounds::Exact {
                 amount,
                 certain_ids,
-            } => Self::Exact {
-                amount: amount.into(),
-                certain_ids: certain_ids
+            } => Self::exact(
+                amount,
+                certain_ids
                     .into_iter()
                     .map(NonFungibleLocalId::from)
-                    .collect(),
-            },
+                    .collect::<IndexSet<_>>(),
+            ),
             ScryptoSimpleNonFungibleResourceBounds::NotExact {
                 certain_ids,
                 lower_bound,
                 upper_bound,
                 allowed_ids,
-            } => Self::NotExact {
-                certain_ids: certain_ids
+            } => Self::not_exact(
+                certain_ids
                     .into_iter()
                     .map(NonFungibleLocalId::from)
-                    .collect(),
-                lower_bound: LowerBound::from(lower_bound),
-                upper_bound: UpperBound::from(upper_bound),
-                allowed_ids: AllowedIds::from(allowed_ids),
-            },
+                    .collect::<IndexSet<_>>(),
+                LowerBound::from(lower_bound),
+                UpperBound::from(upper_bound),
+                AllowedIds::from(allowed_ids),
+            ),
         }
     }
 }
@@ -84,8 +95,8 @@ impl From<ScryptoSimpleNonFungibleResourceBounds>
 impl HasSampleValues for SimpleNonFungibleResourceBounds {
     fn sample() -> Self {
         Self::exact(
-            Decimal::from(150),
-            vec![
+            150,
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ],
@@ -94,7 +105,7 @@ impl HasSampleValues for SimpleNonFungibleResourceBounds {
 
     fn sample_other() -> Self {
         Self::not_exact(
-            vec![
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ],
@@ -126,8 +137,8 @@ mod tests {
     #[test]
     fn from_scrypto_exact() {
         let scrypto = ScryptoSimpleNonFungibleResourceBounds::Exact {
-            amount: Decimal::from(150).into(),
-            certain_ids: vec![
+            amount: 150.into(),
+            certain_ids: [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ]
@@ -141,15 +152,15 @@ mod tests {
     #[test]
     fn from_scrypto_not_exact() {
         let scrypto = ScryptoSimpleNonFungibleResourceBounds::NotExact {
-            certain_ids: vec![
+            certain_ids: [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ]
             .into_iter()
             .map(ScryptoNonFungibleLocalId::from)
             .collect(),
-            lower_bound: ScryptoLowerBound::Inclusive(Decimal::from(1).into()),
-            upper_bound: ScryptoUpperBound::Inclusive(Decimal::from(1).into()),
+            lower_bound: ScryptoLowerBound::Inclusive(1.into()),
+            upper_bound: ScryptoUpperBound::Inclusive(1.into()),
             allowed_ids: ScryptoAllowedIds::Any,
         };
         assert_eq!(SUT::from(scrypto), SUT::sample_other());
@@ -158,25 +169,27 @@ mod tests {
     #[test]
     fn test_certain_ids_exact() {
         let exact = SUT::exact(
-            Decimal::from(100),
-            vec![
+            100,
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ],
         );
         assert_eq!(
             exact.certain_ids(),
-            vec![
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other()
             ]
+            .into_iter()
+            .collect::<IndexSet<_>>()
         )
     }
 
     #[test]
     fn test_certain_ids_not_exact() {
         let not_exact = SUT::not_exact(
-            vec![
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other(),
             ],
@@ -186,10 +199,25 @@ mod tests {
         );
         assert_eq!(
             not_exact.certain_ids(),
-            vec![
+            [
                 NonFungibleLocalId::sample(),
                 NonFungibleLocalId::sample_other()
             ]
+            .into_iter()
+            .collect::<IndexSet<_>>()
         )
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Upper bound MUST be greater than or equal lower bound."
+    )]
+    fn not_exact_should_panic_when_upper_bound_less_than_lower_bound() {
+        SUT::not_exact(
+            [],
+            LowerBound::inclusive(2),
+            UpperBound::inclusive(1),
+            AllowedIds::sample(),
+        );
     }
 }

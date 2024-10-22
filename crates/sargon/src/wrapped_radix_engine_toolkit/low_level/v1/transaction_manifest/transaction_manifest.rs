@@ -158,9 +158,10 @@ impl TransactionManifest {
         self.secret_magic.instructions.instructions_string()
     }
 
-    pub fn summary(&self) -> Option<ManifestSummary> {
-        let summary = RET_statically_analyze(&self.scrypto_manifest())?;
-        Some(ManifestSummary::from((summary, self.network_id())))
+    pub fn summary(&self) -> Result<ManifestSummary> {
+        let summary = RET_statically_analyze(&self.scrypto_manifest())
+            .ok_or(CommonError::FailedToGenerateManifestSummary)?;
+        Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -247,7 +248,7 @@ mod tests {
         let sut = SUT::sample();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
-            sut.clone().secret_magic.instructions,
+            sut.clone().secret_magic.instructions.to_string(),
             Instructions::sample_mainnet_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 4);
@@ -258,7 +259,7 @@ mod tests {
         let sut = SUT::sample_other();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
-            sut.clone().secret_magic.instructions,
+            sut.clone().secret_magic.instructions.to_string(),
             Instructions::sample_other_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 8);
@@ -269,8 +270,7 @@ mod tests {
         let ins: Vec<InstructionV1> = vec![
             ScryptoInstruction::DropAllProofs(DropAllProofs),
             ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
-        ]
-        .into();
+        ];
         let scrypto = ScryptoTransactionManifest {
             instructions: ins.clone(),
             blobs: Default::default(),
@@ -306,8 +306,7 @@ mod tests {
         let ins: Vec<ScryptoInstruction> = vec![
             ScryptoInstruction::DropAllProofs(DropAllProofs),
             ScryptoInstruction::DropAuthZoneProofs(DropAuthZoneProofs),
-        ]
-        .into();
+        ];
         let scrypto = ScryptoTransactionManifest {
             instructions: ins.clone(),
             blobs: Default::default(),
@@ -395,7 +394,7 @@ BURN_RESOURCE
         )
         .unwrap();
         let summary = manifest.summary();
-        assert!(summary.is_none());
+        assert_eq!(summary, Err(CommonError::FailedToGenerateManifestSummary));
     }
 
     #[test]

@@ -10,11 +10,11 @@ pub struct AccountDeposit {
 
 impl AccountDeposit {
     pub fn new(
-        specified_resources: HashMap<ResourceAddress, SimpleResourceBounds>,
+        specified_resources: IndexMap<ResourceAddress, SimpleResourceBounds>,
         unspecified_resources: UnspecifiedResources,
     ) -> Self {
         Self {
-            specified_resources,
+            specified_resources: specified_resources.into_iter().collect(),
             unspecified_resources,
         }
     }
@@ -27,7 +27,10 @@ impl From<(ScryptoAccountDeposit, NetworkID)> for AccountDeposit {
             .specified_resources()
             .into_iter()
             .map(|(address, bounds)| {
-                ((address.clone(), network_id).into(), bounds.clone().into())
+                (
+                    ResourceAddress::from((*address, network_id)),
+                    SimpleResourceBounds::from(bounds.clone()),
+                )
             })
             .collect();
         let unspecified_resources =
@@ -79,7 +82,7 @@ mod tests {
 
     #[test]
     fn new_account_deposit() {
-        let specified_resources: HashMap<
+        let specified_resources: IndexMap<
             ResourceAddress,
             SimpleResourceBounds,
         > = vec![
@@ -98,7 +101,10 @@ mod tests {
             unspecified_resources.clone(),
         );
 
-        assert_eq!(account_deposit.specified_resources, specified_resources);
+        assert_eq!(
+            account_deposit.specified_resources,
+            specified_resources.into_iter().collect()
+        );
         assert_eq!(
             account_deposit.unspecified_resources,
             unspecified_resources

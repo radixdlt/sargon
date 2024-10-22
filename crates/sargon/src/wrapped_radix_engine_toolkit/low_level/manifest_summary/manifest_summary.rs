@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ManifestSummary {
     /// The withdrawals done in the manifest.
-    pub account_withdraws: HashMap<AccountAddress, Vec<AccountWithdraw>>,
+    pub account_withdrawals: HashMap<AccountAddress, Vec<AccountWithdraw>>,
 
     /// The deposits done in the manifest.
     pub account_deposits: HashMap<AccountAddress, Vec<AccountDeposit>>,
@@ -38,7 +38,7 @@ impl ManifestSummary {
         personas_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
     ) -> Self {
         Self {
-            account_withdraws: account_withdraws.into(),
+            account_withdrawals: account_withdraws.into(),
             account_deposits: account_deposits.into(),
             addresses_of_accounts_withdrawn_from: withdrawn_from
                 .into_iter()

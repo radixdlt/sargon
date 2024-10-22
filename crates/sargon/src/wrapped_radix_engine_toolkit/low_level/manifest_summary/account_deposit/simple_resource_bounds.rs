@@ -24,13 +24,11 @@ impl SimpleResourceBounds {
 impl From<ScryptoSimpleResourceBounds> for SimpleResourceBounds {
     fn from(value: ScryptoSimpleResourceBounds) -> Self {
         match value {
-            ScryptoSimpleResourceBounds::Fungible(bounds) => Self::Fungible {
-                bounds: bounds.into(),
-            },
+            ScryptoSimpleResourceBounds::Fungible(bounds) => {
+                Self::fungible(bounds.into())
+            }
             ScryptoSimpleResourceBounds::NonFungible(bounds) => {
-                Self::NonFungible {
-                    bounds: bounds.into(),
-                }
+                Self::non_fungible(bounds.into())
             }
         }
     }

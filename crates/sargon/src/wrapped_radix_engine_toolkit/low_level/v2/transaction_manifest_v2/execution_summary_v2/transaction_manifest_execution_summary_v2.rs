@@ -13,8 +13,10 @@ impl TransactionManifestV2 {
             .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
                 &network_definition,
             ))
-            .ok()
-            .ok_or(CommonError::FailedToDecodeEngineToolkitReceipt)?;
+            .map_err(|e| {
+                error!("Failed to decode engine toolkit receipt  {:?}", e);
+                CommonError::FailedToDecodeEngineToolkitReceipt
+            })?;
 
         self.execution_summary_with_receipt(runtime_receipt)
     }
@@ -45,13 +47,7 @@ impl TransactionManifestV2 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use radix_engine::transaction::{
-        AbortReason, AbortResult, TransactionResult,
-    };
     use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ExecutionSummary;
 
     #[test]
     fn failure_if_receipt_result_is_abort() {

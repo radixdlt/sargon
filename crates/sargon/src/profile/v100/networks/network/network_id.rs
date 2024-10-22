@@ -100,7 +100,7 @@ impl NetworkID {
     /// Name, most not be changed, i.e. cannot capitalized, is used
     /// by app to validate against Gateway
     pub fn logical_name(&self) -> String {
-        self.network_definition().logical_name.to_string()
+        self.network_definition().logical_name.into_owned()
     }
 
     /// Returns collection of all by Sargon known network ids.

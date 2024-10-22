@@ -41,11 +41,11 @@ impl AccountWithdraw {
 
     pub fn ids(
         resource_address: impl Into<ResourceAddress>,
-        ids: Vec<NonFungibleLocalId>,
+        ids: impl IntoIterator<Item = NonFungibleLocalId>,
     ) -> Self {
         Self::Ids {
             resource_address: resource_address.into(),
-            ids,
+            ids: ids.into_iter().collect(),
         }
     }
 }
@@ -59,7 +59,7 @@ impl From<(ScryptoAccountWithdraw, NetworkID)> for AccountWithdraw {
             }
             ScryptoAccountWithdraw::Ids(resource_address, ids) => Self::ids(
                 (resource_address, network_id),
-                ids.into_iter().map(NonFungibleLocalId::from).collect(),
+                ids.into_iter().map(NonFungibleLocalId::from),
             ),
         }
     }
@@ -80,7 +80,9 @@ impl From<AccountWithdraw> for ScryptoAccountWithdraw {
                 ids,
             } => ScryptoAccountWithdraw::Ids(
                 resource_address.into(),
-                ids.into_iter().map(Into::into).collect(),
+                ids.into_iter()
+                    .map(ScryptoNonFungibleLocalId::from)
+                    .collect::<IndexSet<_>>(),
             ),
         }
     }

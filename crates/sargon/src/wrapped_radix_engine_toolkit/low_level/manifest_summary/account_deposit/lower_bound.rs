@@ -1,10 +1,14 @@
 use crate::prelude::*;
+use radix_common::prelude::ManifestResourceConstraint;
 
 /// Represents a lower bound on a non-negative decimal.
 ///
 /// `NonZero` represents a lower bound of an infinitesimal amount above 0, and is included for
 /// clarity of intention. Considering Decimal has a limited precision of 10^(-18), it is roughly
 /// equivalent to an inclusive bound of 10^(-18), or Decimal::from_attos(1).
+///
+/// The amount in LowerBound::Inclusive(amount) is required to be non-negative before
+/// using this model. This can be validated via [`ManifestResourceConstraint::is_valid_for`].
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum LowerBound {
     NonZero,
@@ -23,11 +27,10 @@ impl LowerBound {
 }
 
 impl LowerBound {
-    pub fn get_amount(&self) -> Option<Decimal192> {
-        match self {
-            LowerBound::Inclusive { decimal } => Some(*decimal),
-            LowerBound::NonZero => None,
-        }
+    pub fn get_amount(&self) -> Decimal {
+        ScryptoLowerBound::from(self.clone())
+            .equivalent_decimal()
+            .into()
     }
 }
 
@@ -38,6 +41,17 @@ impl From<ScryptoLowerBound> for LowerBound {
                 decimal: decimal.into(),
             },
             ScryptoLowerBound::NonZero => Self::NonZero,
+        }
+    }
+}
+
+impl From<LowerBound> for ScryptoLowerBound {
+    fn from(value: LowerBound) -> Self {
+        match value {
+            LowerBound::Inclusive { decimal } => {
+                ScryptoLowerBound::Inclusive(decimal.into())
+            }
+            LowerBound::NonZero => ScryptoLowerBound::NonZero,
         }
     }
 }
@@ -83,8 +97,21 @@ mod tests {
     }
 
     #[test]
+    fn to_scrypto_inclusive() {
+        let lower_bound = LowerBound::inclusive(1);
+        let scrypto: ScryptoLowerBound = lower_bound.into();
+        assert_eq!(scrypto, ScryptoLowerBound::Inclusive(1.into()));
+    }
+
+    #[test]
+    fn to_scrypto_none_zero() {
+        let lower_bound = LowerBound::non_zero();
+        let scrypto: ScryptoLowerBound = lower_bound.into();
+        assert_eq!(scrypto, ScryptoLowerBound::NonZero);
+    }
+
+    #[test]
     fn get_amount() {
-        assert_eq!(SUT::sample().get_amount(), Some(Decimal192::from(1)));
-        assert_eq!(SUT::sample_other().get_amount(), None);
+        assert_eq!(SUT::sample().get_amount(), Decimal::from(1));
     }
 }

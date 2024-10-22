@@ -19,6 +19,13 @@ pub struct IntentHeaderV2 {
     pub end_epoch_exclusive: Epoch,
     pub min_proposer_timestamp_inclusive: Option<Instant>,
     pub max_proposer_timestamp_exclusive: Option<Instant>,
+
+    /// This field is intended to enable a network user to generate an identical intent with
+    /// a new hash. Users can simply set this randomly if they wish to. A u64 is large
+    /// enough to avoid any risk of collision over the course of a single epoch anyway.
+    ///
+    /// This field's name intent_discriminator is the new name for what was the nonce field in
+    /// IntentV1. This was poorly named, as it caused confusion with an Ethereum-style nonce.
     pub intent_discriminator: IntentDiscriminator,
 }
 
@@ -51,6 +58,15 @@ impl IntentHeaderV2 {
             assert!(
                 max_ts >= min_ts,
                 "Max proposer timestamp MUST be greater than or equal min proposer timestamp."
+            );
+            assert!(
+                min_ts.seconds_since_unix_epoch
+                    >= start_epoch_inclusive.0 as i64,
+                "Min proposer timestamp MUST be within the epoch window."
+            );
+            assert!(
+                max_ts.seconds_since_unix_epoch <= end_epoch_exclusive.0 as i64,
+                "Max proposer timestamp MUST be within the epoch window."
             );
         }
         Self {
@@ -107,8 +123,8 @@ impl HasSampleValues for IntentHeaderV2 {
             NetworkID::Mainnet,
             76935,
             76945,
-            Some(1728480000.into()),
-            Some(1728481000.into()),
+            Some(76938.into()),
+            Some(76940.into()),
             IntentDiscriminator::sample(),
         )
     }
@@ -170,6 +186,36 @@ mod tests {
             247,
             Some(1728481000.into()),
             Some(1728480000.into()),
+            421337237,
+        )
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Min proposer timestamp MUST be within the epoch window."
+    )]
+    fn panics_if_min_proposer_is_not_within_epoch_window() {
+        _ = SUT::new(
+            NetworkID::Mainnet,
+            237,
+            247,
+            Some(227.into()),
+            Some(247.into()),
+            421337237,
+        )
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Max proposer timestamp MUST be within the epoch window."
+    )]
+    fn panics_if_max_proposer_is_not_within_epoch_window() {
+        _ = SUT::new(
+            NetworkID::Mainnet,
+            237,
+            247,
+            Some(237.into()),
+            Some(257.into()),
             421337237,
         )
     }

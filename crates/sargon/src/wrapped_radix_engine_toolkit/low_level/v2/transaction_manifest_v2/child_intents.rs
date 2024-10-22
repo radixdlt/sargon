@@ -5,6 +5,20 @@ pub struct ChildIntents {
     pub children: Vec<ChildSubintent>,
 }
 
+impl ChildIntents {
+    pub fn new(children: impl IntoIterator<Item = ChildSubintent>) -> Self {
+        Self {
+            children: children.into_iter().collect(),
+        }
+    }
+}
+
+impl Default for ChildIntents {
+    fn default() -> Self {
+        Self::new([])
+    }
+}
+
 impl From<ChildIntents> for Vec<ScryptoChildSubintent> {
     fn from(value: ChildIntents) -> Self {
         value.children.into_iter().map(Into::into).collect()
@@ -21,35 +35,29 @@ impl From<ChildIntents> for ScryptoChildIntents {
 
 impl From<(Vec<ScryptoChildSubintent>, NetworkID)> for ChildIntents {
     fn from(value: (Vec<ScryptoChildSubintent>, NetworkID)) -> Self {
-        Self {
-            children: value
+        Self::new(
+            value
                 .0
                 .into_iter()
                 .map(|c| (c, value.1).into())
-                .collect(),
-        }
+                .collect::<Vec<_>>(),
+        )
     }
 }
 
 impl ChildIntents {
     pub(crate) fn empty() -> Self {
-        Self {
-            children: Vec::new(),
-        }
+        Self::default()
     }
 }
 
 impl HasSampleValues for ChildIntents {
     fn sample() -> Self {
-        Self {
-            children: vec![ChildSubintent::sample()],
-        }
+        Self::new([ChildSubintent::sample()])
     }
 
     fn sample_other() -> Self {
-        Self {
-            children: vec![ChildSubintent::sample_other()],
-        }
+        Self::new([ChildSubintent::sample_other()])
     }
 }
 

@@ -235,8 +235,8 @@ mod tests {
     fn sample_string_roundtrip() {
         let sut = SUT::sample();
         assert_eq!(sut.clone(), sut.clone());
-        instructions_v2_eq(
-            sut.clone().secret_magic.instructions,
+        instructions_eq(
+            sut.clone().secret_magic.instructions.to_string(),
             InstructionsV2::sample_mainnet_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 4);
@@ -246,8 +246,8 @@ mod tests {
     fn sample_other_string_roundtrip() {
         let sut = SUT::sample_other();
         assert_eq!(sut.clone(), sut.clone());
-        instructions_v2_eq(
-            sut.clone().secret_magic.instructions,
+        instructions_eq(
+            sut.clone().secret_magic.instructions.to_string(),
             InstructionsV2::sample_other_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 8);
@@ -276,7 +276,7 @@ mod tests {
         };
 
         let sut = SUT::with_instructions_and_blobs_and_children(
-            InstructionsV2::new_unchecked(ins, network_id.clone()),
+            InstructionsV2::new_unchecked(ins, network_id),
             Blobs::default(),
             (children, network_id).into(),
         );
@@ -314,8 +314,7 @@ mod tests {
         let ins: Vec<ScryptoInstructionV2> = vec![
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
-        ]
-        .into();
+        ];
         let children = vec![
             ScryptoChildSubintent {
                 hash: SubintentHash::sample().into(),
@@ -575,6 +574,6 @@ DROP_AUTH_ZONE_PROOFS;
     #[test]
     fn is_enclosed_false() {
         let manifest = SUT::sample();
-        assert_eq!(manifest.is_enclosed(), false);
+        assert!(!manifest.is_enclosed());
     }
 }
