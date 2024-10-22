@@ -10,7 +10,7 @@ pub fn transaction_manifest_string_v2(
 #[uniffi::export]
 pub fn transaction_manifest_summary_v2(
     manifest: &TransactionManifestV2,
-) -> Option<ManifestSummary> {
+) -> Result<ManifestSummary> {
     manifest.summary()
 }
 
