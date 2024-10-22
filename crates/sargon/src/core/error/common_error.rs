@@ -685,6 +685,18 @@ pub enum CommonError {
     #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
         10192,
+
+    #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
+    InvalidManifestFailedToDecompile { underlying: String } = 10193,
+
+    #[error("Invalid SignedPartialTransaction, failed to decompile")]
+    InvalidSignedPartialTransactionFailedToCompile = 10194,
+
+    #[error("Invalid SignedPartialTransaction, failed to decompile")]
+    InvalidSignedPartialTransactionFailedToDecompile = 10195,
+
+    #[error("Failed to generate manifest summary")]
+    FailedToGenerateManifestSummary = 10196,
 }
 
 impl CommonError {
@@ -694,6 +706,62 @@ impl CommonError {
 
     pub fn is_safe_to_show_error_message(&self) -> bool {
         matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
+    }
+
+    pub fn from_address_error(s: String, expected_network: NetworkID) -> Self {
+        use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+        let Some(Some(network_id)) = RET_decode_address(&s)
+            .map(|t| t.0)
+            .map(NetworkID::from_repr)
+        else {
+            return CommonError::InvalidInstructionsString {
+                underlying: "Failed to get NetworkID from address".to_owned(),
+            };
+        };
+        if network_id != expected_network {
+            CommonError::InvalidInstructionsWrongNetwork {
+                found_in_instructions: network_id,
+                specified_to_instructions_ctor: expected_network,
+            }
+        } else {
+            CommonError::InvalidInstructionsString {
+                underlying: "Failed to determine why an address was invalid"
+                    .to_owned(),
+            }
+        }
+    }
+
+    pub fn from_scrypto_compile_error(
+        err: ScryptoCompileError,
+        expected_network: NetworkID,
+    ) -> Self {
+        use radix_transactions::manifest::parser::ParserError;
+        use radix_transactions::manifest::parser::ParserErrorKind::*;
+        use GeneratorError;
+        use GeneratorErrorKind::*;
+        let n = expected_network;
+        match err {
+            ScryptoCompileError::GeneratorError(GeneratorError {
+                error_kind: gen_err,
+                ..
+            }) => match gen_err {
+                InvalidPackageAddress(a) => Self::from_address_error(a, n),
+                InvalidResourceAddress(a) => Self::from_address_error(a, n),
+                InvalidGlobalAddress(a) => Self::from_address_error(a, n),
+                _ => CommonError::InvalidInstructionsString {
+                    underlying: format!("GeneratorError: {:?}", gen_err),
+                },
+            },
+            ScryptoCompileError::ParserError(ParserError {
+                error_kind: MaxDepthExceeded { max, .. },
+                ..
+            }) => CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: max as u16,
+            },
+            _ => CommonError::InvalidInstructionsString {
+                underlying: format!("{:?}", err),
+            },
+        }
     }
 }
 

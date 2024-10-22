@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub use radix_engine_toolkit::functions::signed_intent::compile as RET_signed_intent_compile;
+pub use radix_engine_toolkit::functions::transaction_v1::signed_intent::to_payload_bytes as RET_signed_intent_compile;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SignedIntent {
@@ -13,7 +13,7 @@ impl SignedIntent {
         intent: TransactionIntent,
         intent_signatures: IntentSignatures,
     ) -> Result<Self> {
-        if !intent_signatures.validate(intent.intent_hash()) {
+        if !intent_signatures.validate(intent.transaction_intent_hash()) {
             return Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash);
         }
 
@@ -83,12 +83,13 @@ impl SignedIntent {
         self.intent.network_id()
     }
 
-    pub fn hash(&self) -> SignedIntentHash {
+    pub fn hash(&self) -> SignedTransactionIntentHash {
         let scrypto_signed_intent: ScryptoSignedIntent = self.clone().into();
         let hash = RET_signed_intent_hash(&scrypto_signed_intent).expect("Sargon should only produce valid SignedIntent, should never fail to produce signed intent hash using RET.");
-        let scrypto_signed_intent_hash = ScryptoSignedIntentHash(hash.hash);
-        SignedIntentHash::from_scrypto(
-            scrypto_signed_intent_hash,
+        let scrypto_transaction_signed_intent_hash =
+            ScryptoSignedTransactionIntentHash(hash.hash);
+        SignedTransactionIntentHash::from_scrypto(
+            scrypto_transaction_signed_intent_hash,
             self.network_id(),
         )
     }
@@ -99,8 +100,11 @@ impl TryFrom<ScryptoSignedIntent> for SignedIntent {
 
     fn try_from(value: ScryptoSignedIntent) -> Result<Self, Self::Error> {
         let intent: TransactionIntent = value.intent.try_into()?;
-        let intent_signatures: IntentSignatures =
-            (value.intent_signatures, intent.intent_hash().hash).try_into()?;
+        let intent_signatures: IntentSignatures = (
+            value.intent_signatures,
+            intent.transaction_intent_hash().hash,
+        )
+            .try_into()?;
         Ok(Self {
             intent,
             intent_signatures,
@@ -117,8 +121,9 @@ impl HasSampleValues for SignedIntent {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-            let intent_signature =
-                private_key.sign_intent_hash(&intent.intent_hash());
+            let intent_signature = private_key.sign_transaction_intent_hash(
+                &intent.transaction_intent_hash(),
+            );
             signatures.push(intent_signature)
         }
 
@@ -149,8 +154,10 @@ impl SignedIntent {
                     let private_key: Secp256k1PrivateKey =
                         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-                    let intent_signature =
-                        private_key.sign_intent_hash(&intent.intent_hash());
+                    let intent_signature = private_key
+                        .sign_transaction_intent_hash(
+                            &intent.transaction_intent_hash(),
+                        );
                     signatures.push(intent_signature)
                 }
 
@@ -203,8 +210,9 @@ mod tests {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-            let intent_signature =
-                private_key.sign_intent_hash(&intent.intent_hash());
+            let intent_signature = private_key.sign_transaction_intent_hash(
+                &intent.transaction_intent_hash(),
+            );
             signatures.push(intent_signature)
         }
 
@@ -228,8 +236,9 @@ mod tests {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-            let intent_signature =
-                private_key.sign_intent_hash(&intent.intent_hash());
+            let intent_signature = private_key.sign_transaction_intent_hash(
+                &intent.transaction_intent_hash(),
+            );
             signatures.push(intent_signature)
         }
 
@@ -249,8 +258,9 @@ mod tests {
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
-            let hash = intent.intent_hash();
-            let intent_signature = private_key.sign_intent_hash(&hash);
+            let hash = intent.transaction_intent_hash();
+            let intent_signature =
+                private_key.sign_transaction_intent_hash(&hash);
             signatures.push(intent_signature)
         }
 

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use radix_transactions::manifest::CallMethod;
 
 #[derive(
     Serialize,
@@ -79,7 +80,7 @@ pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
         &[0xffu8; 29],
         NetworkID::Stokenet,
     );
-    let invalid_instruction = ScryptoInstruction::CallMethod {
+    let invalid_instruction = ScryptoInstruction::CallMethod(CallMethod {
         address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
             &dummy_address,
         )
@@ -87,11 +88,11 @@ pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
         .into(),
         method_name: "dummy".to_owned(),
         args: invalid_value,
-    };
+    });
     ScryptoSignedIntent {
         intent: ScryptoIntent {
             header: TransactionHeader::sample().into(),
-            instructions: ScryptoInstructions(vec![invalid_instruction]),
+            instructions: ScryptoInstructions(vec![invalid_instruction].into()),
             blobs: ScryptoBlobs { blobs: Vec::new() },
             message: ScryptoMessage::None,
         },

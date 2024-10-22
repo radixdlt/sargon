@@ -26,8 +26,7 @@ impl UnvalidatedTransactionManifest {
 impl From<TransactionManifest> for UnvalidatedTransactionManifest {
     fn from(transaction_manifest: TransactionManifest) -> Self {
         Self {
-            transaction_manifest_string: transaction_manifest
-                .instructions_string(),
+            transaction_manifest_string: transaction_manifest.manifest_string(),
             blobs: transaction_manifest.blobs().clone(),
         }
     }
@@ -36,14 +35,14 @@ impl From<TransactionManifest> for UnvalidatedTransactionManifest {
 impl HasSampleValues for UnvalidatedTransactionManifest {
     fn sample() -> Self {
         Self::new(
-            TransactionManifest::sample().instructions_string(),
+            TransactionManifest::sample().manifest_string(),
             Blobs::default(),
         )
     }
 
     fn sample_other() -> Self {
         Self::new(
-            TransactionManifest::sample_other().instructions_string(),
+            TransactionManifest::sample_other().manifest_string(),
             Blobs::sample_other(),
         )
     }
@@ -74,9 +73,9 @@ mod tests {
         pretty_assertions::assert_eq!(
             transaction_manifest,
             TransactionManifest::new(
-                TransactionManifest::sample().instructions_string(),
+                TransactionManifest::sample().manifest_string(),
                 NetworkID::Mainnet,
-                Blobs::default()
+                Blobs::default(),
             )
         );
     }

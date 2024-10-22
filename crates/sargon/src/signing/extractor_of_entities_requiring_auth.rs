@@ -60,7 +60,7 @@ mod tests {
             &AccountAddress::sample_stokenet(),
             Some(Decimal192::one()),
         );
-        let manifest_summary = manifest.summary();
+        let manifest_summary = manifest.summary().unwrap();
 
         let result = ExtractorOfEntitiesRequiringAuth::extract(
             &profile,
@@ -78,7 +78,7 @@ mod tests {
             &Persona::sample_mainnet_third().address.into(),
             vec![PublicKeyHash::sample()],
         );
-        let manifest_summary = manifest.summary();
+        let manifest_summary = manifest.summary().unwrap();
 
         let result = ExtractorOfEntitiesRequiringAuth::extract(
             &profile,
@@ -97,7 +97,7 @@ mod tests {
             manifest_builder,
             NetworkID::Mainnet,
         );
-        let manifest_summary = manifest.summary();
+        let manifest_summary = manifest.summary().unwrap();
 
         let result = ExtractorOfEntitiesRequiringAuth::extract(
             &profile,
@@ -119,7 +119,7 @@ mod tests {
             vec![PublicKeyHash::sample()],
         )
         .modify_add_lock_fee(&account.address, Some(Decimal192::one()));
-        let manifest_summary = manifest.summary();
+        let manifest_summary = manifest.summary().unwrap();
 
         let result = ExtractorOfEntitiesRequiringAuth::extract(
             &profile,
