@@ -160,13 +160,12 @@
             }
           }
         },
-  {
-    "discriminator": "success",
-    "interactionId": "17d530f6-0cb6-4122-8540-64e46a2e0f84",
-    "items": {
-      "discriminator": "preAuthorizationRequest",
-      "signedPartialTransaction": "replace_actual_encoded_string_here"
-    }
-  }
-
+        {
+          "discriminator": "success",
+          "interactionId": "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+          "items": {
+            "discriminator": "preAuthorizationResponse",
+            "signedPartialTransaction": "replace_actual_encoded_string_here"
+          }
+        }
 ]

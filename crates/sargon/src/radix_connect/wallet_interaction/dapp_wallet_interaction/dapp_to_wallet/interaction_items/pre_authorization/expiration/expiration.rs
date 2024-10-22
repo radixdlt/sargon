@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 /// An enum that represents the different ways a subintent can expire.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
-#[serde(tag = "discriminator", content = "value", rename_all = "camelCase")]
+#[serde(tag = "discriminator", rename_all = "camelCase")]
 pub enum DappToWalletInteractionSubintentExpiration {
-    /// The subintent expires at a specific time.
+    /// The subintent expires at a specific fixed timestamp.
     ///
     /// For example, a dApp sends a subintent for `User A` to approve sending 100 XRD before 5:00 PM,
     /// and a subintent for `User B` to approve sending 2 USDT with same expiration.
@@ -12,7 +12,7 @@ pub enum DappToWalletInteractionSubintentExpiration {
     /// If both users sign their subintents before 5:00 PM, the transaction to exchange
     /// 100 XRD over 2 USDT will succeed. Otherwise, it would fail.
     #[serde(rename = "expireAtTime")]
-    AtTime(Timestamp),
+    AtTime(DappToWalletInteractionSubintentExpireAtTime),
 
     /// The subintent expires X seconds after its signature.
     ///
@@ -21,17 +21,19 @@ pub enum DappToWalletInteractionSubintentExpiration {
     ///
     /// If both users sign their subintents within one hour from each other, the transaction to exchange
     /// 100 XRD over 2 USDT will succeed. Otherwise, it would fail.
-    #[serde(rename = "expireAfterSignature")]
-    AllSubintentsSubmittedWithin(u64),
+    #[serde(rename = "expireAfterDelay")]
+    AfterDelay(DappToWalletInteractionSubintentExpireAfterDelay),
 }
 
 impl HasSampleValues for DappToWalletInteractionSubintentExpiration {
     fn sample() -> Self {
-        Self::AtTime(Timestamp::sample())
+        Self::AtTime(DappToWalletInteractionSubintentExpireAtTime::sample())
     }
 
     fn sample_other() -> Self {
-        Self::AllSubintentsSubmittedWithin(10)
+        Self::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::sample(),
+        )
     }
 }
 
@@ -60,7 +62,7 @@ mod tests {
             r#"
         {
             "discriminator": "expireAtTime",
-            "value": "2023-09-11T16:05:56.000Z"
+            "unixTimestampSeconds": "2023-09-11T16:05:56.000Z"
         }
         "#,
         );
@@ -69,8 +71,8 @@ mod tests {
             &SUT::sample_other(),
             r#"
         {
-            "discriminator": "expireAfterSignature",
-            "value": 10
+            "discriminator": "expireAfterDelay",
+            "expireAfterSeconds": 10
         }
         "#,
         );

@@ -83,7 +83,7 @@ mod tests {
                 "message" : "message",
                 "expiration": {
                     "discriminator": "expireAtTime",
-                    "value": "2023-09-11T16:05:56.000Z"
+                    "unixTimestampSeconds": "2023-09-11T16:05:56.000Z"
                 }
             }
             "#,
