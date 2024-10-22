@@ -3,10 +3,13 @@ use crate::prelude::*;
 /// Represents a withdrawal from an account, either by amount or by specific IDs.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum AccountWithdraw {
+    /// Withdraw a specific amount from the account.
     Amount {
         resource_address: ResourceAddress,
         amount: Decimal,
     },
+
+    /// Withdraw specific IDs from the account.
     Ids {
         resource_address: ResourceAddress,
         ids: Vec<NonFungibleLocalId>,

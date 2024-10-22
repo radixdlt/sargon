@@ -59,15 +59,6 @@ impl IntentHeaderV2 {
                 max_ts >= min_ts,
                 "Max proposer timestamp MUST be greater than or equal min proposer timestamp."
             );
-            assert!(
-                min_ts.seconds_since_unix_epoch
-                    >= start_epoch_inclusive.0 as i64,
-                "Min proposer timestamp MUST be within the epoch window."
-            );
-            assert!(
-                max_ts.seconds_since_unix_epoch <= end_epoch_exclusive.0 as i64,
-                "Max proposer timestamp MUST be within the epoch window."
-            );
         }
         Self {
             network_id,
@@ -123,8 +114,8 @@ impl HasSampleValues for IntentHeaderV2 {
             NetworkID::Mainnet,
             76935,
             76945,
-            Some(76938.into()),
-            Some(76940.into()),
+            Some(1728480000.into()),
+            Some(1728481000.into()),
             IntentDiscriminator::sample(),
         )
     }
@@ -186,36 +177,6 @@ mod tests {
             247,
             Some(1728481000.into()),
             Some(1728480000.into()),
-            421337237,
-        )
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Min proposer timestamp MUST be within the epoch window."
-    )]
-    fn panics_if_min_proposer_is_not_within_epoch_window() {
-        _ = SUT::new(
-            NetworkID::Mainnet,
-            237,
-            247,
-            Some(227.into()),
-            Some(247.into()),
-            421337237,
-        )
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Max proposer timestamp MUST be within the epoch window."
-    )]
-    fn panics_if_max_proposer_is_not_within_epoch_window() {
-        _ = SUT::new(
-            NetworkID::Mainnet,
-            237,
-            247,
-            Some(237.into()),
-            Some(257.into()),
             421337237,
         )
     }

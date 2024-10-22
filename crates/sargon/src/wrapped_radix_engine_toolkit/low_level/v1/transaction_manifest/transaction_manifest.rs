@@ -338,6 +338,8 @@ DROP_AUTH_ZONE_PROOFS;
             &[0xffu8; 29],
             NetworkID::Stokenet,
         );
+        // The instruction is invalid because it contains a `ScryptoManifestValue::Array`
+        // with mixed element types (`U8` and `U16`), which is not allowed.
         let invalid_instruction = ScryptoInstruction::CallMethod(CallMethod {
             address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
                 &dummy_address,
