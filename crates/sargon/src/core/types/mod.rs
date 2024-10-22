@@ -20,6 +20,7 @@ mod safe_to_log;
 mod secret_bytes;
 mod signatures;
 mod vector_image_type;
+mod version_type;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
@@ -43,3 +44,4 @@ pub use safe_to_log::*;
 pub use secret_bytes::*;
 pub use signatures::*;
 pub use vector_image_type::*;
+pub use version_type::*;

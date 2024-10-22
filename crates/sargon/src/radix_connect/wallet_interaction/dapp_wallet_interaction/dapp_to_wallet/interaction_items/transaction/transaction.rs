@@ -11,6 +11,8 @@ impl DappToWalletInteractionTransactionItems {
     }
 }
 
+decl_version_type!(TX);
+
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSendTransactionItem {

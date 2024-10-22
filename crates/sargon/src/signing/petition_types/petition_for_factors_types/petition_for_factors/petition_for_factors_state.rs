@@ -103,6 +103,7 @@ impl PetitionForFactorsState {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::DependencyInformation::Tag;
 
     type Sut = PetitionForFactorsState;
 
