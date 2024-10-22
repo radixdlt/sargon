@@ -69,6 +69,15 @@ impl KeysCollector {
     }
 }
 
+impl FactorSource {
+    pub(super) fn id_from_hash(&self) -> FactorSourceIDFromHash {
+        self.factor_source_id()
+            .as_hash()
+            .expect("Expect all FactorSourceIDs to be from Hash.")
+            .clone()
+    }
+}
+
 // === PRIVATE ===
 impl KeysCollector {
     async fn use_factor_sources(
@@ -87,7 +96,7 @@ impl KeysCollector {
                 let request = self.request_for_parallel_interactor(
                     factor_sources
                         .into_iter()
-                        .map(|f| f.factor_source_id())
+                        .map(|f| f.id_from_hash())
                         .collect(),
                 )?;
                 debug!("Dispatching poly request to interactor: {:?}", request);
@@ -100,7 +109,7 @@ impl KeysCollector {
                     // Prepare the request for the interactor
                     debug!("Creating mono request for interactor");
                     let request = self.request_for_serial_interactor(
-                        &factor_source.factor_source_id(),
+                        &factor_source.id_from_hash(),
                     )?;
 
                     debug!(

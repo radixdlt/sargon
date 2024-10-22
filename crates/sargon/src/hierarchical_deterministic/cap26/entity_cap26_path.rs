@@ -9,7 +9,7 @@ pub trait EntityCAP26Path: Derivation + FromStr {
         network_id: NetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
-        index: HDPathValue,
+        index: HDIndex,
     ) -> Self;
 
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
@@ -92,11 +92,10 @@ pub trait EntityCAP26Path: Derivation + FromStr {
         Self::try_from_hdpath(&path)
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative
     fn new(
         network_id: NetworkID,
         key_kind: CAP26KeyKind,
-        index: HDPathValue,
+        index: HDIndex,
     ) -> Self {
         let entity_kind = Self::entity_kind();
         let c0 = HDPathComponent::bip44_purpose();
@@ -105,7 +104,7 @@ pub trait EntityCAP26Path: Derivation + FromStr {
             HDPathComponent::harden(network_id.discriminant() as HDPathValue);
         let c3 = HDPathComponent::harden(entity_kind.discriminant());
         let c4 = HDPathComponent::harden(key_kind.discriminant());
-        let c5 = HDPathComponent::harden(index);
+        let c5 = HDPathComponent::new(index);
         let components = vec![c0, c1, c2, c3, c4, c5];
         assert!(components.clone().iter().all(|c| c.is_hardened()));
         let path = HDPath::from_components(components);

@@ -689,6 +689,15 @@ pub enum CommonError {
 
     #[error("Invalid security structure. A factor must not be present in both threshold and override list.")]
     InvalidSecurityStructureFactorInBothThresholdAndOverride = 10188,
+
+    #[error("Unknown Factor Source with ID {id}")]
+    UnknownFactorSource { id: String } = 10189,
+
+    #[error("Invalid u30, overflows {bad_value}")]
+    InvalidU30 { bad_value: u32 } = 10190,
+
+    #[error("Invalid u31, overflows {bad_value}")]
+    InvalidU31 { bad_value: u32 } = 10191,
 }
 
 #[uniffi::export]

@@ -520,7 +520,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e31ea183f6ee62ac8b8a8cf7feddd766317adfb13ff469de57ce033efd6a790"
 dependencies = [
  "num-integer",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -646,7 +646,7 @@ dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "wasm-bindgen",
  "windows-targets 0.52.6",
@@ -1985,7 +1985,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2000,7 +2000,7 @@ version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
 dependencies = [
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2008,6 +2008,14 @@ name = "num-traits"
 version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.19"
+source = "git+https://github.com/rust-num/num-traits?rev=7ec3d41d39b28190ec1d42db38021107b3951f3a#7ec3d41d39b28190ec1d42db38021107b3951f3a"
 dependencies = [
  "autocfg",
 ]
@@ -2327,7 +2335,7 @@ dependencies = [
  "lazy_static",
  "num-bigint",
  "num-integer",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "paste 1.0.15",
  "radix-rust",
  "radix-sbor-derive",
@@ -2362,7 +2370,7 @@ dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "moka",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "paste 1.0.15",
  "radix-blueprint-schema-init",
  "radix-common",
@@ -2888,6 +2896,7 @@ dependencies = [
  "itertools 0.12.0",
  "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
  "log",
+ "num-traits 0.2.19 (git+https://github.com/rust-num/num-traits?rev=7ec3d41d39b28190ec1d42db38021107b3951f3a)",
  "once_cell 1.19.0 (git+https://github.com/matklad/once_cell/?rev=c48d3c2c01de926228aea2ac1d03672b4ce160c1)",
  "paste 1.0.14",
  "pretty_assertions",
@@ -3092,7 +3101,7 @@ dependencies = [
  "const-sha1",
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-bigint",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "paste 1.0.15",
  "radix-blueprint-schema-init",
  "radix-common",
@@ -4178,7 +4187,7 @@ checksum = "d21fc8d8dafc2df566ebcba7d48a2df7b37386d6afa64237cdf9415c8d7d98ec"
 dependencies = [
  "downcast-rs",
  "libm",
- "num-traits",
+ "num-traits 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "paste 1.0.15",
 ]
 

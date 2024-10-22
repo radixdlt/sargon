@@ -1,6 +1,24 @@
 #![cfg(test)]
 use crate::prelude::*;
 
+impl DerivationPath {
+    pub fn new(
+        network_id: NetworkID,
+        entity_kind: CAP26EntityKind,
+        key_kind: CAP26KeyKind,
+        index: HDPathComponent,
+    ) -> Self {
+        match entity_kind {
+            CAP26EntityKind::Account => {
+                AccountPath::new(network_id, key_kind, index).into()
+            }
+            CAP26EntityKind::Identity => {
+                IdentityPath::new(network_id, key_kind, index).into()
+            }
+        }
+    }
+}
+
 mod key_derivation_tests {
 
     use super::CAP26EntityKind::*;
@@ -13,7 +31,7 @@ mod key_derivation_tests {
         let res = KeysCollector::new(
             IndexSet::new(),
             IndexMap::just((
-                FactorSourceIDFromHash::fs0(),
+                FactorSourceIDFromHash::sample_at(0),
                 IndexSet::just(DerivationPath::new(
                     Mainnet,
                     Account,
@@ -23,7 +41,10 @@ mod key_derivation_tests {
             )),
             Arc::new(TestDerivationInteractors::default()),
         );
-        assert!(matches!(res, Err(CommonError::UnknownFactorSource)));
+        assert!(matches!(
+            res,
+            Err(CommonError::UnknownFactorSource { id: _ })
+        ));
     }
 
     #[actix_rt::test]

@@ -25,7 +25,7 @@ impl KeysCollectorPreprocessor {
     ) -> Result<(KeysCollectorState, IndexSet<FactorSourcesOfKind>)> {
         let all_factor_sources_in_profile = all_factor_sources_in_profile
             .into_iter()
-            .map(|f| (f.factor_source_id(), f))
+            .map(|f| (f.factor_source_id().as_hash().unwrap().clone(), f))
             .collect::<HashMap<FactorSourceIDFromHash, FactorSource>>();
 
         let unsorted = self
@@ -33,10 +33,9 @@ impl KeysCollectorPreprocessor {
             .clone()
             .keys()
             .map(|id| {
-                all_factor_sources_in_profile
-                    .get(id)
-                    .cloned()
-                    .ok_or(CommonError::UnknownFactorSource)
+                all_factor_sources_in_profile.get(id).cloned().ok_or(
+                    CommonError::UnknownFactorSource { id: id.to_string() },
+                )
             })
             .collect::<Result<HashSet<_>>>()?;
 

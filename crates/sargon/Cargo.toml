@@ -132,6 +132,9 @@ url = { version = "2.5.0", features = ["serde"] }
 # paste = "1.0.14"
 paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
 
+# num-traits = "0.2.19"
+num-traits = { git = "https://github.com/rust-num/num-traits", rev = "7ec3d41d39b28190ec1d42db38021107b3951f3a", default-features = false }
+
 # regex = "1.9.3"
 regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88", optional = true }
 

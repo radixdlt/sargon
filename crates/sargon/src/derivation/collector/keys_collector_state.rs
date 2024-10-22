@@ -10,7 +10,10 @@ pub(crate) struct KeysCollectorState {
 
 impl KeysCollectorState {
     pub(crate) fn new(
-        derivation_paths: IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
+        derivation_paths: IndexMap<
+            FactorSourceIDFromHash,
+            IndexSet<DerivationPath>,
+        >,
     ) -> Self {
         let keyrings = derivation_paths
             .into_iter()
@@ -36,22 +39,34 @@ impl KeysCollectorState {
         )
     }
 
-    pub(crate) fn keyring_for(&self, factor_source_id: &FactorSourceIDFromHash) -> Result<Keyring> {
+    pub(crate) fn keyring_for(
+        &self,
+        factor_source_id: &FactorSourceIDFromHash,
+    ) -> Result<Keyring> {
         self.keyrings
             .try_read()
             .unwrap()
             .get(factor_source_id)
             .map(|x| x.clone_snapshot())
             .inspect(|k| assert_eq!(k.factor_source_id, *factor_source_id))
-            .ok_or(CommonError::UnknownFactorSource)
+            .ok_or(CommonError::UnknownFactorSource {
+                id: factor_source_id.to_string(),
+            })
     }
 
-    pub(crate) fn process_batch_response(&self, response: KeyDerivationResponse) -> Result<()> {
-        for (factor_source_id, factors) in response.per_factor_source.into_iter() {
+    pub(crate) fn process_batch_response(
+        &self,
+        response: KeyDerivationResponse,
+    ) -> Result<()> {
+        for (factor_source_id, factors) in
+            response.per_factor_source.into_iter()
+        {
             let mut rings = self.keyrings.try_write().unwrap();
-            let keyring = rings
-                .get_mut(&factor_source_id)
-                .ok_or(CommonError::UnknownFactorSource)?;
+            let keyring = rings.get_mut(&factor_source_id).ok_or(
+                CommonError::UnknownFactorSource {
+                    id: factor_source_id.to_string(),
+                },
+            )?;
             keyring.process_response(factors)
         }
         Ok(())

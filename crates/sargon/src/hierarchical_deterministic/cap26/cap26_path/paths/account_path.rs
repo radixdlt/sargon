@@ -22,7 +22,7 @@ pub struct AccountPath {
 
     pub key_kind: CAP26KeyKind,
 
-    pub index: HDPathValue,
+    pub index: HDIndex,
 }
 
 impl IsNetworkAware for AccountPath {
@@ -36,7 +36,7 @@ impl IsEntityPath for AccountPath {
         self.key_kind
     }
 
-    fn index(&self) -> HDPathValue {
+    fn index(&self) -> HDIndex {
         self.index
     }
 }
@@ -70,7 +70,7 @@ impl EntityCAP26Path for AccountPath {
         network_id: NetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
-        index: HDPathValue,
+        index: HDPathComponent,
     ) -> Self {
         Self {
             path,

@@ -50,6 +50,9 @@ pub mod prelude {
     pub(crate) use serde_with::*;
     pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
+    pub(crate) use num_traits::{
+        CheckedAdd, CheckedDiv, CheckedMul, CheckedSub,
+    };
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cell::RefCell;
     pub(crate) use std::cmp::Ordering;

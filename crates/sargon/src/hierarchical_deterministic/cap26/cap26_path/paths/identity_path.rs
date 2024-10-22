@@ -22,7 +22,7 @@ pub struct IdentityPath {
 
     pub key_kind: CAP26KeyKind,
 
-    pub index: HDPathValue,
+    pub index: HDIndex,
 }
 
 impl IsNetworkAware for IdentityPath {
@@ -70,7 +70,7 @@ impl EntityCAP26Path for IdentityPath {
         network_id: NetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
-        index: HDPathValue,
+        index: HDIndex,
     ) -> Self {
         Self {
             path,
