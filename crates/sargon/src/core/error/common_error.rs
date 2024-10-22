@@ -697,8 +697,12 @@ pub enum CommonError {
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
     InvalidSignedPartialTransactionFailedToDecompile = 10195,
 
+    #[error("Invalid Signed Partial Transaction, failed to encode, reason: '{underlying}'")]
+    InvalidSignedPartialTransactionFailedToEncode { underlying: String } =
+        10196,
+
     #[error("Failed to generate manifest summary")]
-    FailedToGenerateManifestSummary = 10196,
+    FailedToGenerateManifestSummary = 10197,
 }
 
 #[uniffi::export]
