@@ -44,7 +44,7 @@ pub fn transaction_manifest_instructions_string(
 pub fn transaction_manifest_summary(
     manifest: &TransactionManifest,
 ) -> ManifestSummary {
-    manifest.into_internal().summary().into()
+    manifest.into_internal().summary().unwrap().into()
 }
 
 #[uniffi::export]

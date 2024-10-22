@@ -131,6 +131,8 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
 impl HasSampleValues for ManifestSummary {
     fn sample() -> Self {
         Self {
+            account_withdrawals: HashMap::new(),
+            account_deposits: HashMap::new(),
             addresses_of_accounts_withdrawn_from: vec![AccountAddress::sample()],
             addresses_of_accounts_deposited_into: vec![AccountAddress::sample()],
             addresses_of_accounts_requiring_auth: vec![AccountAddress::sample()],
@@ -142,6 +144,8 @@ impl HasSampleValues for ManifestSummary {
 
     fn sample_other() -> Self {
         Self {
+            account_withdrawals: HashMap::new(),
+            account_deposits: HashMap::new(),
             addresses_of_accounts_withdrawn_from: vec![
                 AccountAddress::sample_other(),
             ],

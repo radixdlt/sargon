@@ -2,7 +2,7 @@ use crate::prelude::*;
 use radix_common::prelude::ManifestResourceConstraint;
 
 /// Represents a lower bound on a non-negative decimal.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum LowerBound {
     /// Represents a lower bound of an infinitesimal amount above 0, and is included for
     /// clarity of intention. Considering Decimal has a limited precision of 10^(-18), it is roughly

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Represents the bounds for a simple fungible resource, which can
 /// be exact, at most, at least, between, or unknown amount.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SimpleFungibleResourceBounds {
     Exact {
         amount: Decimal,

@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 /// Represents the core of an intent in V2, including the header, manifest, and message.
-#[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]
 pub struct IntentCoreV2 {
     pub header: IntentHeaderV2,
-    manifest: TransactionManifestV2,
+    pub manifest: TransactionManifestV2,
     pub message: MessageV2,
 }
 

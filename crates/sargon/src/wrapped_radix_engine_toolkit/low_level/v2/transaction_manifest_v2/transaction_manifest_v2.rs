@@ -2,10 +2,12 @@ use crate::prelude::*;
 use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.manifest_string())]
 pub struct TransactionManifestV2 {
-    secret_magic: TransactionManifestSecretMagicV2,
+    pub instructions: InstructionsV2,
+    pub blobs: Blobs,
+    pub children: ChildIntents,
 }
 
 impl TransactionManifestV2 {
@@ -17,11 +19,9 @@ impl TransactionManifestV2 {
     ) -> Result<Self> {
         InstructionsV2::new(instructions_string, network_id).map(
             |instructions| Self {
-                secret_magic: TransactionManifestSecretMagicV2 {
                     instructions,
                     blobs,
                     children,
-                },
             },
         )
     }
@@ -32,11 +32,9 @@ impl TransactionManifestV2 {
         children: ChildIntents,
     ) -> Self {
         Self {
-            secret_magic: TransactionManifestSecretMagicV2::new(
                 instructions,
                 blobs,
                 children,
-            ),
         }
     }
 }
@@ -44,19 +42,9 @@ impl TransactionManifestV2 {
 impl TransactionManifestV2 {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-            secret_magic: TransactionManifestSecretMagicV2 {
                 instructions: InstructionsV2::empty(network_id),
                 blobs: Blobs::default(),
                 children: ChildIntents::empty(),
-            },
-        }
-    }
-}
-
-impl From<TransactionManifestSecretMagicV2> for TransactionManifestV2 {
-    fn from(value: TransactionManifestSecretMagicV2) -> Self {
-        Self {
-            secret_magic: value,
         }
     }
 }
@@ -65,8 +53,8 @@ impl TransactionManifestV2 {
     pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifestV2 {
         ScryptoTransactionManifestV2 {
             instructions: self.instructions().clone(),
-            blobs: self.secret_magic.blobs.clone().into(),
-            children: self.secret_magic.children.clone().into(),
+            blobs: self.blobs.clone().into(),
+            children: self.children.clone().into(),
             object_names: Default::default(),
         }
     }
@@ -92,11 +80,9 @@ impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
             network_id,
         ))?;
         let value = Self {
-            secret_magic: TransactionManifestSecretMagicV2::new(
                 instructions,
-                scrypto_manifest.blobs.clone(),
-                (scrypto_manifest.children.clone(), network_id).into(),
-            ),
+                blobs: scrypto_manifest.blobs.clone().into(),
+                children: (scrypto_manifest.children.clone(), network_id).into(),
         };
 
         // Verify that the manifest can be decompiled and that the instructions are from a validated notarized transaction
@@ -141,23 +127,23 @@ impl TransactionManifestV2 {
 
 impl TransactionManifestV2 {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
-        self.secret_magic.instructions()
+        &self.instructions.instructions()
     }
 
     pub(crate) fn blobs(&self) -> &Blobs {
-        &self.secret_magic.blobs
+        &self.blobs
     }
 
     pub(crate) fn children(&self) -> &ChildIntents {
-        &self.secret_magic.children
+        &self.children
     }
 
     pub fn manifest_string(&self) -> String {
-        manifest_v2_string_from(self.scrypto_manifest(), self.secret_magic.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
+        manifest_v2_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
 
     pub fn instructions_string(&self) -> String {
-        self.secret_magic.instructions.instructions_string()
+        self.instructions.instructions_string()
     }
 
     pub fn summary(&self) -> Option<ManifestSummary> {
@@ -170,12 +156,12 @@ impl TransactionManifestV2 {
     }
 
     pub fn network_id(&self) -> NetworkID {
-        self.secret_magic.instructions.network_id
+        self.instructions.network_id
     }
 
     pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
         let (addresses, _) = RET_ins_extract_addresses_v2(
-            self.secret_magic.instructions.secret_magic.0.as_slice(),
+            self.instructions.as_slice(),
         );
         addresses
             .into_iter()
@@ -198,11 +184,19 @@ impl TransactionManifestV2 {
 
 impl HasSampleValues for TransactionManifestV2 {
     fn sample() -> Self {
-        TransactionManifestSecretMagicV2::sample().into()
+        Self {
+            instructions: InstructionsV2::sample(),
+            blobs: Blobs::default(),
+            children: ChildIntents::empty(),
+        }
     }
 
     fn sample_other() -> Self {
-        TransactionManifestSecretMagicV2::sample_other().into()
+        Self {
+            instructions: InstructionsV2::sample_other(),
+            blobs: Blobs::default(),
+            children: ChildIntents::empty(),
+        }
     }
 }
 
@@ -236,7 +230,7 @@ mod tests {
         let sut = SUT::sample();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
-            sut.clone().secret_magic.instructions.to_string(),
+            sut.clone().instructions.to_string(),
             InstructionsV2::sample_mainnet_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 4);
@@ -247,7 +241,7 @@ mod tests {
         let sut = SUT::sample_other();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
-            sut.clone().secret_magic.instructions.to_string(),
+            sut.clone().instructions.to_string(),
             InstructionsV2::sample_other_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 8);

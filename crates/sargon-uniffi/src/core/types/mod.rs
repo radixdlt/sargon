@@ -14,6 +14,8 @@ mod requested_quantity;
 mod rounding_mode;
 mod secret_bytes;
 mod signatures;
+mod instant;
+mod intent_discriminator;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
@@ -31,3 +33,5 @@ pub use requested_quantity::*;
 pub use rounding_mode::*;
 pub use secret_bytes::*;
 pub use signatures::*;
+pub use instant::*;
+pub use intent_discriminator::*;

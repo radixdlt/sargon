@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Represents the bounds for a simple non-fungible resource, which can be either exact or not exact.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SimpleNonFungibleResourceBounds {
     Exact {
         amount: Decimal,

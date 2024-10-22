@@ -2,10 +2,10 @@ use crate::prelude::*;
 use std::collections::HashMap;
 
 /// Represents an account deposit, which includes specified and unspecified resources.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AccountDeposit {
-    specified_resources: HashMap<ResourceAddress, SimpleResourceBounds>,
-    unspecified_resources: UnspecifiedResources,
+    pub specified_resources: HashMap<ResourceAddress, SimpleResourceBounds>,
+    pub unspecified_resources: UnspecifiedResources,
 }
 
 impl AccountDeposit {

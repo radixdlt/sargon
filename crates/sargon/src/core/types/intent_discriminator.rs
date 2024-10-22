@@ -1,27 +1,5 @@
 pub use crate::prelude::*;
 
-// Generate the FfiConverter needed by UniFFI for newtype `IntentDiscriminator`.
-uniffi::custom_newtype!(IntentDiscriminatorSecretMagic, u64);
-
-#[derive(
-    Clone, Copy, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
-)]
-pub struct IntentDiscriminatorSecretMagic(pub u64);
-
-impl IntentDiscriminatorSecretMagic {
-    /// Generates 8 random bytes and creates a IntentDiscriminator (u64) from it.
-    pub fn random() -> Self {
-        let value = u64::from_be_bytes(
-            generate_bytes::<8>()
-                .as_slice()
-                .try_into()
-                .expect("It is 8 bytes."),
-        );
-
-        Self(value)
-    }
-}
-
 /// A random number generated part of an intent header,
 /// ensuring every intent is unique even though its
 /// transaction manifest might be equal. This intent discriminator is
@@ -36,48 +14,44 @@ impl IntentDiscriminatorSecretMagic {
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
-#[display("{}", self.secret_magic)]
-#[debug("{}", self.secret_magic)]
-pub struct IntentDiscriminator {
-    secret_magic: IntentDiscriminatorSecretMagic,
-}
-
-impl From<IntentDiscriminatorSecretMagic> for IntentDiscriminator {
-    fn from(value: IntentDiscriminatorSecretMagic) -> Self {
-        Self {
-            secret_magic: value,
-        }
-    }
-}
+#[display("{}", self.0)]
+#[debug("{}", self.0)]
+pub struct IntentDiscriminator(pub u64);
 
 impl From<u64> for IntentDiscriminator {
     fn from(value: u64) -> Self {
-        Self::from(IntentDiscriminatorSecretMagic(value))
+        Self(value)
     }
 }
 
 impl From<IntentDiscriminator> for u64 {
     fn from(value: IntentDiscriminator) -> Self {
-        value.secret_magic.0
+        value.0
     }
 }
 
 impl IntentDiscriminator {
     /// Generates 8 random bytes and creates a IntentDiscriminator (u64) from it.
     pub fn random() -> Self {
-        Self::from(IntentDiscriminatorSecretMagic::random())
+        let value = u64::from_be_bytes(
+            generate_bytes::<8>()
+                .as_slice()
+                .try_into()
+                .expect("It is 8 bytes."),
+        );
+
+        Self(value)
     }
 }
 
 impl HasSampleValues for IntentDiscriminator {
     fn sample() -> Self {
-        Self::from(IntentDiscriminatorSecretMagic(123456789))
+        Self(123456789)
     }
 
     fn sample_other() -> Self {
-        Self::from(IntentDiscriminatorSecretMagic(987654321))
+        Self(987654321)
     }
 }
 
@@ -144,16 +118,5 @@ mod tests {
             set.insert(sut);
         }
         assert_eq!(set.len(), n); // with a low probability this might fail yes.
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        let sut = SUT::sample();
-        let ffi_side =
-            <IntentDiscriminatorSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
-                sut.secret_magic,
-            );
-        let from_ffi_side = <IntentDiscriminatorSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(ffi_side).unwrap();
-        assert_eq!(sut, from_ffi_side.into());
     }
 }

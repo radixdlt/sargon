@@ -7,7 +7,7 @@ use crate::prelude::*;
 ///
 /// # Fields
 /// - `children`: A vector of `ChildSubintent` instances.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ChildIntents {
     pub children: Vec<ChildSubintent>,
 }

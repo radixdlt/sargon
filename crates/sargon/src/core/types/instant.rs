@@ -10,7 +10,6 @@ pub use crate::prelude::*;
     PartialOrd,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 pub struct Instant {
     pub seconds_since_unix_epoch: i64,
@@ -41,6 +40,16 @@ impl From<ScryptoInstant> for Instant {
         Self {
             seconds_since_unix_epoch: value.seconds_since_unix_epoch,
         }
+    }
+}
+
+impl HasSampleValues for Instant {
+    fn sample() -> Self {
+        Self::from(0)
+    }
+
+    fn sample_other() -> Self {
+        Self::from(1)
     }
 }
 

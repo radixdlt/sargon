@@ -136,7 +136,7 @@ impl TransactionManifest {
     }
 
     pub fn manifest_string(&self) -> String {
-        manifest_string_from(self.scrypto_manifest(), self.secret_magic.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
+        manifest_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
 
     pub fn instructions_string(&self) -> String {

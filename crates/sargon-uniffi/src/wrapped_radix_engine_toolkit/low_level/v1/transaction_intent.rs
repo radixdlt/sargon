@@ -19,8 +19,8 @@ pub fn new_transaction_intent_sample_other() -> TransactionIntent {
 }
 
 #[uniffi::export]
-pub fn transaction_intent_hash(intent: &TransactionIntent) -> IntentHash {
-    intent.into_internal().intent_hash().into()
+pub fn transaction_intent_hash(intent: &TransactionIntent) -> TransactionIntentHash {
+    intent.into_internal().transaction_intent_hash().into()
 }
 
 #[uniffi::export]

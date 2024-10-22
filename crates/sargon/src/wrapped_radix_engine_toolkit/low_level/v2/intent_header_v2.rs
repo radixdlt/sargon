@@ -10,7 +10,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{} intent_discriminator: {}", network_id, intent_discriminator)]
 pub struct IntentHeaderV2 {

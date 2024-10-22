@@ -9,7 +9,7 @@ impl SargonOS {
     pub async fn submit_transaction(
         &self,
         notarized_transaction: NotarizedTransaction,
-    ) -> Result<IntentHash> {
+    ) -> Result<TransactionIntentHash> {
         self.wrapped
             .submit_transaction(notarized_transaction.into_internal())
             .await

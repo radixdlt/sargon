@@ -3,10 +3,10 @@ use crate::prelude::*;
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
 use radix_transactions::manifest::CallMethod;
 
-#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())]
 pub struct InstructionsV2 {
-    pub secret_magic: InstructionsSecretMagicV2, // MUST be first prop, else you break build.
+    pub instructions: Vec<ScryptoInstructionV2>, // MUST be first prop, else you break build.
     pub network_id: NetworkID,
 }
 
@@ -14,7 +14,7 @@ impl Deref for InstructionsV2 {
     type Target = Vec<ScryptoInstructionV2>;
 
     fn deref(&self) -> &Self::Target {
-        self.secret_magic.instructions()
+        self.instructions()
     }
 }
 
@@ -26,7 +26,7 @@ impl InstructionsV2 {
         network_id: NetworkID,
     ) -> Self {
         Self {
-            secret_magic: InstructionsSecretMagicV2::new(instructions),
+            instructions,
             network_id,
         }
     }
@@ -51,9 +51,7 @@ impl TryFrom<(&Vec<ScryptoInstructionV2>, NetworkID)> for InstructionsV2 {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            secret_magic: InstructionsSecretMagicV2::from(
-                ScryptoInstructionsV2(scrypto.to_owned().into()),
-            ),
+            instructions: ScryptoInstructionsV2(scrypto.to_owned().into()).0.to_vec(),
             network_id,
         })
     }
@@ -74,7 +72,7 @@ fn instructions_string_from(
 
 impl InstructionsV2 {
     pub fn instructions_string(&self) -> String {
-        instructions_string_from(self.secret_magic.instructions(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
+        instructions_string_from(self.instructions(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -93,6 +91,30 @@ impl InstructionsV2 {
         .and_then(|manifest: ScryptoTransactionManifestV2| {
             Self::try_from((manifest.instructions.as_ref(), network_id))
         })
+    }
+}
+
+impl InstructionsV2 {
+    pub fn new_from_byte_instructions(
+        byte_instructions: Vec<u8>,
+        network_id: NetworkID,
+    ) -> Result<Self> {
+        let instructions = RET_from_payload_bytes_instructions_v2(&byte_instructions)
+            .map_err(|e| {
+                let err_msg = format!("{:?}", e);
+                error!("{}", err_msg);
+                CommonError::FailedToDecodeBytesToManifestInstructions.into()
+            })?;
+        Ok(Self {
+            instructions,
+            network_id,
+        })
+    }
+
+    pub fn instructions_as_bytes(&self) -> Vec<u8> {
+        RET_to_payload_bytes_instructions_v2(self.instructions())
+            .map(|b| b.into())
+            .expect("to never fail")
     }
 }
 
@@ -137,7 +159,7 @@ impl HasSampleValues for InstructionsV2 {
 impl InstructionsV2 {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-            secret_magic: InstructionsSecretMagicV2::new(Vec::new()),
+            instructions: Vec::new(),
             network_id,
         }
     }
@@ -325,7 +347,7 @@ mod tests {
         ];
         assert_eq!(
             SUT {
-                secret_magic: InstructionsSecretMagicV2::sample(),
+                instructions: instructions.clone(),
                 network_id
             },
             SUT::try_from((instructions, network_id)).unwrap()

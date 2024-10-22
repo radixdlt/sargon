@@ -4,6 +4,12 @@ use sargon::ManifestSummary as InternalManifestSummary;
 /// A summary of the manifest
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct ManifestSummary {
+    /// The withdrawals done in the manifest.
+    pub account_withdrawals: HashMap<AccountAddress, Vec<AccountWithdraw>>,
+
+    /// The deposits done in the manifest.
+    pub account_deposits: HashMap<AccountAddress, Vec<AccountDeposit>>,
+
     /// Addresses of accounts withdrawn from in the manifest.
     pub addresses_of_accounts_withdrawn_from: Vec<AccountAddress>,
 

@@ -24,7 +24,7 @@ impl Instructions {
         byte_instructions: Vec<u8>,
         network_id: NetworkID,
     ) -> Result<Self> {
-        let instructions = RET_decompile_instructions(&byte_instructions)
+        let instructions = RET_from_payload_bytes_instructions(&byte_instructions)
             .map_err(|e| {
                 let err_msg = format!("{:?}", e);
                 error!("{}", err_msg);
@@ -41,7 +41,7 @@ impl Instructions {
     }
 
     pub fn instructions_as_bytes(&self) -> Vec<u8> {
-        RET_compile_instructions(self.instructions())
+        RET_to_payload_bytes_instructions(self.instructions())
             .map(|b| b.into())
             .expect("to never fail")
     }
@@ -60,7 +60,7 @@ impl TryFrom<(&Vec<ScryptoInstruction>, NetworkID)> for Instructions {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            instructions: ScryptoInstructions(scrypto.to_owned()).0,
+            instructions: ScryptoInstructions(scrypto.to_owned().into()).0.to_vec(),
             network_id,
         })
     }
@@ -99,34 +99,6 @@ impl Instructions {
             Self::try_from((manifest.instructions.as_ref(), network_id))
         })
     }
-}
-
-#[cfg(test)]
-impl Instructions {
-    /// Utility function which uses `Instructions::new(<string>, <network_id>)`
-    /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
-    /// we can assert in unit tests.
-    pub(crate) fn test_with_sbor_depth(
-        depth: usize,
-        network_id: NetworkID,
-    ) -> Result<Self> {
-        let nested_value = manifest_value_with_sbor_depth(depth);
-        let dummy_address =
-            ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);
-        let instruction = ScryptoInstruction::CallMethod(CallMethod {
-            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
-                &dummy_address,
-            )
-            .unwrap()
-            .into(),
-            method_name: "dummy".to_owned(),
-            args: nested_value,
-        });
-        instructions_string_from(&vec![instruction], network_id)
-            .and_then(|x: String| Self::new(x, network_id))
-    }
-
-    pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
 }
 
 impl HasSampleValues for Instructions {

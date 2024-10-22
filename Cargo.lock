@@ -2884,7 +2884,7 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "pretty_env_logger",
- "rand 0.8.5",
+ "rand",
  "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "sargon",
  "sargon-uniffi-conversion-macros",
@@ -2904,7 +2904,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.77",
+ "syn 2.0.79",
 ]
 
 [[package]]
