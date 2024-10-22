@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[debug("{}", self.debug_str())]
 pub(crate) struct PetitionForTransaction {
     /// Hash of transaction to sign
-    pub(crate) intent_hash: IntentHash,
+    pub(crate) intent_hash: TransactionIntentHash,
 
     pub(crate) for_entities:
         RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity>>,
@@ -14,7 +14,7 @@ pub(crate) struct PetitionForTransaction {
 
 impl PetitionForTransaction {
     pub(crate) fn new(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity>,
     ) -> Self {
         Self {
@@ -194,7 +194,7 @@ impl PetitionForTransaction {
 
 impl HasSampleValues for PetitionForTransaction {
     fn sample() -> Self {
-        let intent_hash = IntentHash::sample();
+        let intent_hash = TransactionIntentHash::sample();
         let entity = Account::sample_securified_mainnet(
             "Grace",
             AccountAddress::sample_other(),
@@ -222,7 +222,7 @@ impl HasSampleValues for PetitionForTransaction {
     }
 
     fn sample_other() -> Self {
-        let intent_hash = IntentHash::sample_other();
+        let intent_hash = TransactionIntentHash::sample_other();
         let entity = Persona::sample_unsecurified_mainnet(
             "Sample Unsec",
             HierarchicalDeterministicFactorInstance::sample_fii0(),
@@ -267,7 +267,7 @@ mod tests {
 
     #[test]
     fn all_relevant_factor_instances_of_source_ok() {
-        let intent_hash = IntentHash::sample();
+        let intent_hash = TransactionIntentHash::sample();
 
         let account = Account::sample_at(5);
         let matrix = match account.security_state {
@@ -286,7 +286,7 @@ mod tests {
         );
 
         let sut = Sut::new(
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),
                 petition,
@@ -309,7 +309,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn all_relevant_factor_instances_of_source_panics_if_invalid() {
-        let intent_hash = IntentHash::sample();
+        let intent_hash = TransactionIntentHash::sample();
 
         let account = Account::sample_at(5);
         let matrix = match account.security_state {
@@ -328,7 +328,7 @@ mod tests {
         );
 
         let sut = Sut::new(
-            IntentHash::sample(),
+            TransactionIntentHash::sample(),
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),
                 petition,

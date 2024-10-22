@@ -39,7 +39,8 @@ impl AccountAddress {
     /// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
     /// imported from the legacy Olympia desktop application.
     pub fn is_legacy_address(&self) -> bool {
-        self.entity_type() == ScryptoEntityType::GlobalVirtualSecp256k1Account
+        self.entity_type()
+            == ScryptoEntityType::GlobalPreallocatedSecp256k1Account
     }
 }
 
@@ -358,7 +359,7 @@ mod tests {
             ScryptoGlobalAddress::from(SUT::sample())
                 .into_node_id()
                 .as_bytes()[0],
-            ScryptoEntityType::GlobalVirtualEd25519Account as u8
+            ScryptoEntityType::GlobalPreallocatedEd25519Account as u8
         );
     }
 

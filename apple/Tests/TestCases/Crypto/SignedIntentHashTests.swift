@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class SignedIntentHashTests: TransactionHashProtocolTest<SignedIntentHash> {
+final class SignedTransactionIntentHashTests: TransactionHashProtocolTest<SignedTransactionIntentHash> {
 	func test_network_id() {
 		XCTAssertEqual(SUT.sample.networkID, .mainnet)
 	}

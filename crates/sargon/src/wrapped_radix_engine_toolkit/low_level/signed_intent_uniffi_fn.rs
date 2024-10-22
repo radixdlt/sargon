@@ -1,7 +1,9 @@
 use crate::prelude::*;
 
 #[uniffi::export]
-pub fn signed_intent_hash(signed_intent: &SignedIntent) -> SignedIntentHash {
+pub fn signed_intent_hash(
+    signed_intent: &SignedIntent,
+) -> SignedTransactionIntentHash {
     signed_intent.hash()
 }
 

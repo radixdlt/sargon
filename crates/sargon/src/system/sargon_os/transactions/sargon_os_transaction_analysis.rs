@@ -33,12 +33,12 @@ impl SargonOS {
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
 /// We use it part of logic below, matching against this String - we really should upgrade this code to be more
 /// structured - we MUST update this value if Gateway where to change this value.
-const GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED: &'static str =
+const GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED: &str =
     "AccountError(DepositIsDisallowed";
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
 /// We use it part of logic below, matching against this String - we really should upgrade this code to be more
 /// structured - we MUST update this value if Gateway where to change this value.
-const GW_ERR_NOT_ALL_COULD_BE_DEPOSITED: &'static str =
+const GW_ERR_NOT_ALL_COULD_BE_DEPOSITED: &str =
     "AccountError(NotAllBucketsCouldBeDeposited";
 
 impl SargonOS {
@@ -121,11 +121,9 @@ impl SargonOS {
 
         // Extracting the entities requiring auth to check if the notary is signatory
         let profile = self.profile_state_holder.profile()?;
+        let summary = manifest.summary()?;
         let entities_requiring_auth =
-            ExtractorOfEntitiesRequiringAuth::extract(
-                &profile,
-                manifest.summary(),
-            )?;
+            ExtractorOfEntitiesRequiringAuth::extract(&profile, summary)?;
 
         // Creating the transaction header and intent
         let header = TransactionHeader::new(
@@ -192,8 +190,11 @@ impl SargonOS {
 #[cfg(test)]
 mod transaction_preview_analysis_tests {
     use super::*;
-    use native_radix_engine_toolkit::receipt::AsStr;
     use radix_common::prelude::Decimal;
+    use radix_engine_toolkit_common::receipt::{
+        AsStr, FeeSummary as RETFeeSummary, LockedFees as RETLockedFees,
+        StateUpdatesSummary as RETStateUpdatesSummary,
+    };
     use std::sync::Mutex;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -537,20 +538,20 @@ mod transaction_preview_analysis_tests {
             TransactionPreviewResponse {
                 encoded_receipt: "".to_string(),
                 radix_engine_toolkit_receipt: Some(ScryptoSerializableToolkitTransactionReceipt::CommitSuccess {
-                    state_updates_summary: native_radix_engine_toolkit::receipt::StateUpdatesSummary {
+                    state_updates_summary: RETStateUpdatesSummary {
                         new_entities: IndexSet::new(),
                         metadata_updates: IndexMap::new(),
                         non_fungible_data_updates: IndexMap::new(),
                         newly_minted_non_fungibles: IndexSet::new(),
                     },
                     worktop_changes: IndexMap::new(),
-                    fee_summary: native_radix_engine_toolkit::receipt::FeeSummary {
+                    fee_summary: RETFeeSummary {
                         execution_fees_in_xrd: ret_zero,
                         finalization_fees_in_xrd: ret_zero,
                         storage_fees_in_xrd: ret_zero,
                         royalty_fees_in_xrd: ret_zero,
                     },
-                    locked_fees: native_radix_engine_toolkit::receipt::LockedFees {
+                    locked_fees: RETLockedFees {
                         contingent: ret_zero,
                         non_contingent: ret_zero,
                     },
@@ -598,20 +599,20 @@ mod transaction_preview_analysis_tests {
             TransactionPreviewResponse {
                 encoded_receipt: "".to_string(),
                 radix_engine_toolkit_receipt: Some(ScryptoSerializableToolkitTransactionReceipt::CommitSuccess {
-                    state_updates_summary: native_radix_engine_toolkit::receipt::StateUpdatesSummary {
+                    state_updates_summary: RETStateUpdatesSummary {
                         new_entities: IndexSet::new(),
                         metadata_updates: IndexMap::new(),
                         non_fungible_data_updates: IndexMap::new(),
                         newly_minted_non_fungibles: IndexSet::new(),
                     },
                     worktop_changes: IndexMap::new(),
-                    fee_summary: native_radix_engine_toolkit::receipt::FeeSummary {
+                    fee_summary: RETFeeSummary {
                         execution_fees_in_xrd: ScryptoDecimal192::zero().into(),
                         finalization_fees_in_xrd: ScryptoDecimal192::zero().into(),
                         storage_fees_in_xrd: ScryptoDecimal192::zero().into(),
                         royalty_fees_in_xrd: ScryptoDecimal192::zero().into(),
                     },
-                    locked_fees: native_radix_engine_toolkit::receipt::LockedFees {
+                    locked_fees: RETLockedFees {
                         contingent: ScryptoDecimal192::zero().into(),
                         non_contingent: ScryptoDecimal192::zero().into(),
                     },

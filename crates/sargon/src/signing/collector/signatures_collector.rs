@@ -577,7 +577,8 @@ mod tests {
 
         {
             let petitions_ref = petitions.txid_to_petition.borrow();
-            let petition = petitions_ref.get(&t3.intent_hash()).unwrap();
+            let petition =
+                petitions_ref.get(&t3.transaction_intent_hash()).unwrap();
             let for_entities = petition.for_entities.borrow().clone();
             let pet6 = for_entities.get(&a6.address.into()).unwrap();
 
@@ -611,8 +612,9 @@ mod tests {
             HashSet<FactorSourceIDFromHash>,
         >| {
             let petitions_ref = petitions.txid_to_petition.borrow();
-            let petition = petitions_ref.get(&t.intent_hash()).unwrap();
-            assert_eq!(petition.intent_hash, t.intent_hash());
+            let petition =
+                petitions_ref.get(&t.transaction_intent_hash()).unwrap();
+            assert_eq!(petition.intent_hash, t.transaction_intent_hash());
 
             let mut addresses =
                 threshold_factors.keys().collect::<HashSet<_>>();
@@ -633,11 +635,9 @@ mod tests {
                 .iter()
                 .all(|(a, p)| { p.entity == *a }));
 
-            assert!(petition
-                .for_entities
-                .borrow()
-                .iter()
-                .all(|(_, p)| { p.intent_hash == t.intent_hash() }));
+            assert!(petition.for_entities.borrow().iter().all(|(_, p)| {
+                p.intent_hash == t.transaction_intent_hash()
+            }));
 
             for (k, v) in petition.for_entities.borrow().iter() {
                 let threshold = threshold_factors.get(k);
@@ -826,15 +826,15 @@ mod tests {
                     .map(|t| t.intent_hash)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
-                    t0.clone().intent_hash(),
-                    t1.clone().intent_hash(),
-                    t2.clone().intent_hash(),
+                    t0.clone().transaction_intent_hash(),
+                    t1.clone().transaction_intent_hash(),
+                    t2.clone().transaction_intent_hash(),
                 ])
             );
             let st0 = outcome
                 .successful_transactions()
                 .into_iter()
-                .find(|st| st.intent_hash == t0.intent_hash())
+                .find(|st| st.intent_hash == t0.transaction_intent_hash())
                 .unwrap();
 
             assert_eq!(
@@ -854,7 +854,7 @@ mod tests {
             let st1 = outcome
                 .successful_transactions()
                 .into_iter()
-                .find(|st| st.intent_hash == t1.intent_hash())
+                .find(|st| st.intent_hash == t1.transaction_intent_hash())
                 .unwrap();
 
             assert_eq!(
@@ -873,7 +873,7 @@ mod tests {
             let st2 = outcome
                 .successful_transactions()
                 .into_iter()
-                .find(|st| st.intent_hash == t2.intent_hash())
+                .find(|st| st.intent_hash == t2.transaction_intent_hash())
                 .unwrap();
 
             assert_eq!(
@@ -970,10 +970,10 @@ mod tests {
                     .map(|t| t.intent_hash)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
-                    t0.clone().intent_hash(),
-                    t1.clone().intent_hash(),
-                    t2.clone().intent_hash(),
-                    t3.clone().intent_hash(),
+                    t0.clone().transaction_intent_hash(),
+                    t1.clone().transaction_intent_hash(),
+                    t2.clone().transaction_intent_hash(),
+                    t3.clone().transaction_intent_hash(),
                 ])
             );
 
@@ -1051,7 +1051,7 @@ mod tests {
                         .into_iter()
                         .map(|t| t.intent_hash.clone())
                         .collect_vec(),
-                    vec![tx0.clone().intent_hash()]
+                    vec![tx0.clone().transaction_intent_hash()]
                 );
                 assert_eq!(
                     outcome
@@ -1105,7 +1105,7 @@ mod tests {
                         .collect_vec(),
                     failing_transactions
                         .iter()
-                        .map(|t| t.intent_hash().clone())
+                        .map(|t| t.transaction_intent_hash().clone())
                         .collect_vec()
                 );
 
@@ -1127,7 +1127,7 @@ mod tests {
                         .into_iter()
                         .map(|t| t.intent_hash)
                         .collect_vec(),
-                    vec![tx.intent_hash()]
+                    vec![tx.transaction_intent_hash()]
                 )
             }
 
@@ -1184,7 +1184,7 @@ mod tests {
                         (
                             FactorSourceKind::LedgerHQHardwareWallet,
                             IndexSet::just(InvalidTransactionIfNeglected::new(
-                                tx0.clone().intent_hash(),
+                                tx0.clone().transaction_intent_hash(),
                                 [a7.address.into()]
                             ))
                         ),
@@ -1192,7 +1192,7 @@ mod tests {
                         (
                             FactorSourceKind::Device,
                             IndexSet::just(InvalidTransactionIfNeglected::new(
-                                tx1.clone().intent_hash(),
+                                tx1.clone().transaction_intent_hash(),
                                 [a0.address.into()]
                             ))
                         ),
@@ -1221,7 +1221,7 @@ mod tests {
                         .into_iter()
                         .map(|t| t.intent_hash)
                         .collect_vec(),
-                    vec![tx1.intent_hash().clone()]
+                    vec![tx1.transaction_intent_hash().clone()]
                 );
 
                 assert_eq!(
@@ -1230,7 +1230,7 @@ mod tests {
                         .into_iter()
                         .map(|t| t.intent_hash)
                         .collect_vec(),
-                    vec![tx0.intent_hash().clone()]
+                    vec![tx0.transaction_intent_hash().clone()]
                 );
 
                 assert_eq!(outcome.all_signatures().len(), 1);
@@ -1239,7 +1239,7 @@ mod tests {
                     .all_signatures()
                     .into_iter()
                     .map(|s| s.intent_hash().clone())
-                    .all(|i| i == tx1.intent_hash()));
+                    .all(|i| i == tx1.transaction_intent_hash()));
 
                 assert_eq!(
                     outcome

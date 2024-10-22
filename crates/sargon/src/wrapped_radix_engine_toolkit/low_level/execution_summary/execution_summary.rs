@@ -127,8 +127,8 @@ fn addresses_of_accounts_from_ret(
         .collect::<HashMap<_, _>>()
 }
 
-impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
-    fn from(value: (RetExecutionSummary, NetworkID)) -> Self {
+impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
+    fn from(value: (RetDynamicAnalysis, NetworkID)) -> Self {
         let (ret, n) = value;
 
         let mut newly_created_non_fungibles =
