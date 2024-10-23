@@ -1,16 +1,14 @@
 use crate::prelude::*;
-use radix_common::prelude::ManifestBucket;
-use radix_transactions::manifest::KnownManifestObjectNames;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.manifest_string())]
-pub struct TransactionManifestV2 {
+pub struct SubintentManifest {
     pub instructions: InstructionsV2,
     pub blobs: Blobs,
     pub children: ChildIntents,
 }
 
-impl TransactionManifestV2 {
+impl SubintentManifest {
     pub fn new(
         instructions_string: impl AsRef<str>,
         network_id: NetworkID,
@@ -39,7 +37,7 @@ impl TransactionManifestV2 {
     }
 }
 
-impl TransactionManifestV2 {
+impl SubintentManifest {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: InstructionsV2::empty(network_id),
@@ -49,9 +47,9 @@ impl TransactionManifestV2 {
     }
 }
 
-impl TransactionManifestV2 {
-    pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifestV2 {
-        ScryptoTransactionManifestV2 {
+impl SubintentManifest {
+    pub(crate) fn scrypto_manifest(&self) -> ScryptoSubintentManifestV2 {
+        ScryptoSubintentManifestV2 {
             instructions: self.instructions().clone(),
             blobs: self.blobs.clone().into(),
             children: self.children.clone().into(),
@@ -60,18 +58,16 @@ impl TransactionManifestV2 {
     }
 }
 
-impl From<TransactionManifestV2> for ScryptoTransactionManifestV2 {
-    fn from(value: TransactionManifestV2) -> Self {
+impl From<SubintentManifest> for ScryptoSubintentManifestV2 {
+    fn from(value: SubintentManifest) -> Self {
         value.scrypto_manifest()
     }
 }
 
-impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
-    for TransactionManifestV2
-{
+impl TryFrom<(ScryptoSubintentManifestV2, NetworkID)> for SubintentManifest {
     type Error = CommonError;
     fn try_from(
-        value: (ScryptoTransactionManifestV2, NetworkID),
+        value: (ScryptoSubintentManifestV2, NetworkID),
     ) -> Result<Self> {
         let scrypto_manifest = value.0;
         let network_id = value.1;
@@ -86,7 +82,10 @@ impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
         };
 
         // Verify that the manifest can be decompiled and that the instructions are from a validated notarized transaction
-        _ = manifest_v2_string_from(scrypto_manifest.clone(), network_id)?;
+        _ = subintent_manifest_v2_string_from(
+            scrypto_manifest.clone(),
+            network_id,
+        )?;
 
         assert_eq!(
             value.scrypto_manifest().instructions,
@@ -101,8 +100,8 @@ impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
     }
 }
 
-pub fn manifest_v2_string_from(
-    scrypto_manifest: ScryptoTransactionManifestV2,
+pub fn subintent_manifest_v2_string_from(
+    scrypto_manifest: ScryptoSubintentManifestV2,
     network_id: NetworkID,
 ) -> Result<String, CommonError> {
     let network_definition = network_id.network_definition();
@@ -113,9 +112,9 @@ pub fn manifest_v2_string_from(
     })
 }
 
-impl TransactionManifestV2 {
+impl SubintentManifest {
     pub fn sargon_built(
-        builder: ScryptoTransactionManifestV2Builder,
+        builder: ScryptoSubintentManifestV2Builder,
         network_id: NetworkID,
     ) -> Self {
         let scrypto_manifest = builder.build();
@@ -125,13 +124,13 @@ impl TransactionManifestV2 {
     }
 }
 
-impl TransactionManifestV2 {
+impl SubintentManifest {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
         &self.instructions.instructions()
     }
 
     pub fn manifest_string(&self) -> String {
-        manifest_v2_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
+        subintent_manifest_v2_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
 
     pub fn instructions_string(&self) -> String {
@@ -139,8 +138,16 @@ impl TransactionManifestV2 {
     }
 
     pub fn summary(&self) -> Option<ManifestSummary> {
-        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())?;
+        let summary = RET_statically_analyze_subintent_manifest(
+            &self.scrypto_manifest(),
+        )?;
         Some(ManifestSummary::from((summary, self.network_id())))
+    }
+
+    pub fn as_enclosed(&self) -> Option<TransactionManifestV2> {
+        let enclosed_manifest =
+            RET_subintent_manifest_as_enclosed(&self.scrypto_manifest())?;
+        (enclosed_manifest, self.network_id()).try_into().ok()
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -169,7 +176,7 @@ impl TransactionManifestV2 {
     }
 }
 
-impl HasSampleValues for TransactionManifestV2 {
+impl HasSampleValues for SubintentManifest {
     fn sample() -> Self {
         Self {
             instructions: InstructionsV2::sample(),
@@ -193,13 +200,13 @@ mod tests {
     use crate::prelude::*;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
-        CallMethod, DropAllProofs, DropAuthZoneProofs,
+        CallMethod, DropAllProofs, DropAuthZoneProofs, YieldToParent,
     };
     use radix_transactions::model::InstructionV1;
     use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = TransactionManifestV2;
+    type SUT = SubintentManifest;
 
     #[test]
     fn equality() {
@@ -249,7 +256,7 @@ mod tests {
                 hash: SubintentHash::sample_other().into(),
             },
         ];
-        let scrypto = ScryptoTransactionManifestV2 {
+        let scrypto = ScryptoSubintentManifestV2 {
             instructions: ins.clone(),
             blobs: Default::default(),
             children: children.clone(),
@@ -279,7 +286,7 @@ mod tests {
                 hash: SubintentHash::sample_other().into(),
             },
         ];
-        let scrypto = ScryptoTransactionManifestV2 {
+        let scrypto = ScryptoSubintentManifestV2 {
             instructions: instructions.clone(),
             blobs: Default::default(),
             children,
@@ -543,12 +550,13 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn sargon_built() {
-        let builder = ScryptoTransactionManifestV2Builder::new_v2()
-            .lock_fee_from_faucet();
+        let builder = ScryptoSubintentManifestV2Builder::new_subintent_v2()
+            .lock_fee_from_faucet()
+            .yield_to_parent(());
 
         assert_eq!(
             SUT::sargon_built(builder, NetworkID::Mainnet,).manifest_string(),
-            "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\n",
+            "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\nYIELD_TO_PARENT;\n",
         )
     }
 }

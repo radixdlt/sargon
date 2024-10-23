@@ -3,7 +3,7 @@ use sargon::InstructionsV2 as InternalInstructionsV2;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct InstructionsV2 {
-    pub secret_magic: BagOfBytes, // MUST be first prop, else you break build.
+    pub secret_magic: String,
     pub network_id: NetworkID,
 }
 
@@ -16,7 +16,7 @@ impl InstructionsV2 {
 impl From<InternalInstructionsV2> for InstructionsV2 {
     fn from(value: InternalInstructionsV2) -> Self {
         Self {
-            secret_magic: value.instructions_as_bytes().into(),
+            secret_magic: value.instructions_string(),
             network_id: value.network_id.into(),
         }
     }
@@ -24,11 +24,8 @@ impl From<InternalInstructionsV2> for InstructionsV2 {
 
 impl Into<InternalInstructionsV2> for InstructionsV2 {
     fn into(self) -> InternalInstructionsV2 {
-        InternalInstructionsV2::new_from_byte_instructions(
-            self.secret_magic.to_vec(),
-            self.network_id.into_internal(),
-        )
-        .unwrap()
+        InternalInstructionsV2::new(self.secret_magic, self.network_id.into())
+            .unwrap()
     }
 }
 

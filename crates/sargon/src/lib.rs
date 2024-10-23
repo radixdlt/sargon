@@ -234,6 +234,8 @@ pub mod prelude {
             TransactionIntentHash as ScryptoTransactionIntentHash,
         },
         prelude::{
+            SubintentManifestV2 as ScryptoSubintentManifestV2,
+            SubintentManifestV2Builder as ScryptoSubintentManifestV2Builder,
             TransactionManifestV1 as ScryptoTransactionManifest,
             TransactionManifestV1Builder as ScryptoTransactionManifestBuilder,
             TransactionManifestV2 as ScryptoTransactionManifestV2,
@@ -244,16 +246,16 @@ pub mod prelude {
     pub use radix_engine_toolkit::{
         functions::{
             transaction_v1::{
-                instructions::{
-                    extract_addresses as RET_ins_extract_addresses,
-                    from_payload_bytes as RET_from_payload_bytes_instructions,
-                    to_payload_bytes as RET_to_payload_bytes_instructions,
-                },
+                instructions::extract_addresses as RET_ins_extract_addresses,
                 intent::{
                     hash as ret_hash_intent,
                     to_payload_bytes as RET_intent_to_payload_bytes,
                 },
-                manifest::statically_analyze as RET_statically_analyze,
+                manifest::{
+                    from_payload_bytes as RET_from_payload_bytes_manifest_v1,
+                    statically_analyze as RET_statically_analyze,
+                    to_payload_bytes as RET_to_payload_bytes_manifest_v1,
+                },
                 notarized_transaction::{
                     from_payload_bytes as RET_decompile_notarize_tx,
                     to_payload_bytes as RET_compile_notarized_tx,
@@ -261,20 +263,7 @@ pub mod prelude {
                 signed_intent::hash as RET_signed_intent_hash,
             },
             transaction_v2::{
-                instructions::{
-                    extract_addresses as RET_ins_extract_addresses_v2,
-                    from_payload_bytes as RET_from_payload_bytes_instructions_v2,
-                    to_payload_bytes as RET_to_payload_bytes_instructions_v2,
-                },
-                intent_core::{
-                    hash as ret_hash_intent_core_v2,
-                    to_payload_bytes as RET_intent_to_payload_bytes_v2,
-                },
-                manifest::{
-                    dynamically_analyze as RET_dynamically_analyze_v2,
-                    is_enclosed as RET_is_enclosed,
-                    statically_analyze as RET_statically_analyze_v2,
-                },
+                instructions::extract_addresses as RET_ins_extract_addresses_v2,
                 notarized_transaction::{
                     from_payload_bytes as RET_decompile_notarize_tx_v2,
                     to_payload_bytes as RET_compile_notarized_tx_v2,
@@ -284,7 +273,26 @@ pub mod prelude {
                     to_payload_bytes as RET_compile_signed_partial_tx,
                 },
                 signed_transaction_intent::hash as RET_signed_intent_hash_v2,
-                subintent::hash as ret_hash_subintent,
+                subintent::{
+                    hash as ret_hash_subintent,
+                    to_payload_bytes as RET_subintent_to_payload_bytes,
+                },
+                subintent_manifest::{
+                    as_enclosed as RET_subintent_manifest_as_enclosed,
+                    from_payload_bytes as RET_from_payload_bytes_subintent_manifest,
+                    statically_analyze as RET_statically_analyze_subintent_manifest,
+                    to_payload_bytes as RET_to_payload_bytes_subintent_manifest,
+                },
+                transaction_intent::{
+                    hash as ret_hash_transaction_intent_v2,
+                    to_payload_bytes as RET_transaction_intent_to_payload_bytes_v2,
+                },
+                transaction_manifest::{
+                    dynamically_analyze as RET_dynamically_analyze_v2,
+                    from_payload_bytes as RET_from_payload_bytes_manifest_v2,
+                    statically_analyze as RET_statically_analyze_v2,
+                    to_payload_bytes as RET_to_payload_bytes_manifest_v2,
+                },
             },
         },
         models::{

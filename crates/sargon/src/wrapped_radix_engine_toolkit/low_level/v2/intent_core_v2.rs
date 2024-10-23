@@ -14,15 +14,12 @@ impl IntentCoreV2 {
         header: IntentHeaderV2,
         manifest: TransactionManifestV2,
         message: MessageV2,
-    ) -> Result<Self> {
-        // Verify that this IntentCoreV2 has acceptable depth and is compatible
-        _ = compile_intent_with(&header, &manifest, &message)?;
-
-        Ok(Self {
+    ) -> Self {
+        Self {
             header,
             manifest,
             message,
-        })
+        }
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -35,31 +32,6 @@ impl IntentCoreV2 {
 
     pub fn blobs(&self) -> &Blobs {
         &self.manifest.blobs
-    }
-
-    pub fn subintent_hash(&self) -> SubintentHash {
-        let hash = ret_hash_intent_core_v2(&ScryptoIntentCoreV2::from(self.clone()))
-            .expect("Should never fail to hash an intent. Sargon should only produce valid Intents");
-
-        SubintentHash::from_scrypto(
-            ScryptoSubintentHash(hash),
-            self.header.network_id,
-        )
-    }
-
-    pub fn transaction_intent_hash(&self) -> TransactionIntentHash {
-        let hash = ret_hash_subintent(&ScryptoSubintent{intent_core: self.clone().into()})
-            .expect("Should never fail to hash an subintent. Sargon should only produce valid Subintents");
-
-        TransactionIntentHash::from_scrypto(
-            ScryptoTransactionIntentHash(hash.hash),
-            self.header.network_id,
-        )
-    }
-
-    pub fn compile(&self) -> BagOfBytes {
-        compile_intent(ScryptoIntentCoreV2::from(self.clone()))
-            .expect("Should always be able to compile an Intent")
     }
 }
 
@@ -85,22 +57,6 @@ fn into_scrypto(
     }
 }
 
-fn compile_intent_with(
-    header: &IntentHeaderV2,
-    manifest: &TransactionManifestV2,
-    message: &MessageV2,
-) -> Result<BagOfBytes> {
-    compile_intent(into_scrypto(header, manifest, message))
-}
-
-fn compile_intent(scrypto_intent: ScryptoIntentCoreV2) -> Result<BagOfBytes> {
-    RET_intent_to_payload_bytes_v2(&scrypto_intent)
-        .map_err(|e| CommonError::InvalidIntentFailedToEncode {
-            underlying: format!("{:?}", e),
-        })
-        .map(BagOfBytes::from)
-}
-
 impl TryFrom<ScryptoIntentCoreV2> for IntentCoreV2 {
     type Error = crate::CommonError;
 
@@ -122,7 +78,7 @@ impl TryFrom<ScryptoIntentCoreV2> for IntentCoreV2 {
                 children,
             );
 
-        Self::new(header, manifest, message)
+        Ok(Self::new(header, manifest, message))
     }
 }
 
@@ -133,7 +89,6 @@ impl HasSampleValues for IntentCoreV2 {
             TransactionManifestV2::sample(),
             MessageV2::sample(),
         )
-        .unwrap()
     }
 
     fn sample_other() -> Self {
@@ -142,7 +97,6 @@ impl HasSampleValues for IntentCoreV2 {
             TransactionManifestV2::empty(NetworkID::Simulator),
             MessageV2::None,
         )
-        .unwrap()
     }
 }
 
@@ -165,11 +119,11 @@ impl IntentCoreV2 {
                 )
             })
             .and_then(|manifest| {
-                Self::new(
+                Ok(Self::new(
                     IntentHeaderV2::sample(),
                     manifest,
                     MessageV2::sample(),
-                )
+                ))
             })
     }
 
@@ -200,25 +154,13 @@ mod tests {
     fn manifest_string() {
         let sut = SUT::sample();
         let manifest_string = SUT::sample().manifest_string();
-        assert_eq!(manifest_string, sut.manifest.manifest_string());
+        assert_eq!(manifest_string, sut.manifest.manifest_string())
     }
 
     #[test]
     fn blobs() {
         let sut = SUT::sample();
         assert_eq!(sut.blobs().clone(), Blobs::default());
-    }
-
-    #[test]
-    fn subintent_hash() {
-        let hash = SUT::sample().subintent_hash();
-        assert_eq!(hash.to_string(), "subtxid_rdx1a5lhr7dfxv0mgah8tglyvs6s7zfgt5mwszngr3hxadr4efh0mx3qdu5dz3")
-    }
-
-    #[test]
-    fn transaction_intent_hash() {
-        let hash = SUT::sample().transaction_intent_hash();
-        assert_eq!(hash.to_string(), "txid_rdx1e95452vfay89t46gtw2jgfagw6p9uee3m2harsppwdhzprdjn8vsahws8v")
     }
 
     #[test]
@@ -236,61 +178,10 @@ mod tests {
     }
 
     #[test]
-    fn compile() {
-        assert_eq!(SUT::sample().compile().to_string(), "4d2105210607010a872c0100000000000a912c01000000000022010105008306670000000022010105e8860667000000000a15cd5b070000000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f205261646978212020002022044103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c086c6f636b5f6665652101850000fda0c4277708000000000000000000000000000000004103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a480000000000000000000000000000004103800051ac224ee242c339b5ea5f1ae567f0520a6ffa24b52a10b8e6cd96a8347f0c147472795f6465706f7369745f6f725f61626f727421028100000000220000");
-    }
-
-    #[test]
-    fn compile_intent_failure() {
-        let invalid_value = ScryptoManifestValue::Tuple {
-            fields: vec![ScryptoManifestValue::Array {
-                element_value_kind: ScryptoValueKind::U8,
-                elements: vec![
-                    ScryptoManifestValue::U8 { value: 1 },
-                    ScryptoManifestValue::U16 { value: 2 },
-                ],
-            }],
-        };
-        let dummy_address = ComponentAddress::with_node_id_bytes(
-            &[0xffu8; 29],
-            NetworkID::Stokenet,
-        );
-        let invalid_instruction =
-            ScryptoInstructionV2::CallMethod(CallMethod {
-                address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
-                    &dummy_address,
-                )
-                .unwrap()
-                .into(),
-                method_name: "dummy".to_owned(),
-                args: invalid_value,
-            });
-        let invalid_scrypto_intent = ScryptoIntentCoreV2 {
-            header: IntentHeaderV2::sample().into(),
-            blobs: Blobs::default().into(),
-            message: MessageV2::sample().into(),
-            children: ChildIntents::empty().into(),
-            instructions: ScryptoInstructionsV2(
-                vec![invalid_instruction].into(),
-            ),
-        };
-
-        let result = compile_intent(invalid_scrypto_intent);
-        assert_eq!(
-            result,
-            Err(CommonError::InvalidIntentFailedToEncode {
-                underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_string(),
-            })
-        )
-    }
-
-    #[test]
     fn intent_with_max_sbor_depth_is_ok() {
         let sut =
-            SUT::test_with_sbor_depth(SUT::MAX_SBOR_DEPTH, NetworkID::Stokenet)
-                .unwrap();
-        println!("{}", &sut.manifest);
-        assert_eq!(sut.subintent_hash().to_string(), "subtxid_rdx1m85aam85y92cswkpy0tk4ya56xv09xepmrtcrp09vf2c87895nhqkmnt3y")
+            SUT::test_with_sbor_depth(SUT::MAX_SBOR_DEPTH, NetworkID::Stokenet);
+        assert!(sut.is_ok());
     }
 
     #[test]

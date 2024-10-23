@@ -33,7 +33,7 @@ impl InstructionsV2 {
 }
 
 impl InstructionsV2 {
-    pub(crate) fn instructions_deref(&self) -> &Vec<ScryptoInstructionV2> {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
         self.deref()
     }
 }
@@ -74,7 +74,7 @@ fn instructions_string_from(
 
 impl InstructionsV2 {
     pub fn instructions_string(&self) -> String {
-        instructions_string_from(self.instructions_deref(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
+        instructions_string_from(self.instructions(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -93,32 +93,6 @@ impl InstructionsV2 {
         .and_then(|manifest: ScryptoTransactionManifestV2| {
             Self::try_from((manifest.instructions.as_ref(), network_id))
         })
-    }
-}
-
-impl InstructionsV2 {
-    pub fn new_from_byte_instructions(
-        byte_instructions: Vec<u8>,
-        network_id: NetworkID,
-    ) -> Result<Self> {
-        let instructions =
-            RET_from_payload_bytes_instructions_v2(&byte_instructions)
-                .map_err(|e| {
-                    let err_msg = format!("{:?}", e);
-                    error!("{}", err_msg);
-                    CommonError::FailedToDecodeBytesToManifestInstructions
-                        .into()
-                })?;
-        Ok(Self {
-            instructions,
-            network_id,
-        })
-    }
-
-    pub fn instructions_as_bytes(&self) -> Vec<u8> {
-        RET_to_payload_bytes_instructions_v2(&self.instructions_deref())
-            .map(|b| b.into())
-            .expect("to never fail")
     }
 }
 

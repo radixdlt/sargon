@@ -20,32 +20,8 @@ impl Deref for Instructions {
 }
 
 impl Instructions {
-    pub fn new_from_byte_instructions(
-        byte_instructions: Vec<u8>,
-        network_id: NetworkID,
-    ) -> Result<Self> {
-        let instructions = RET_from_payload_bytes_instructions(
-            &byte_instructions,
-        )
-        .map_err(|e| {
-            let err_msg = format!("{:?}", e);
-            error!("{}", err_msg);
-            CommonError::FailedToDecodeBytesToManifestInstructions.into()
-        })?;
-        Ok(Self {
-            instructions,
-            network_id,
-        })
-    }
-
     pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
         self.deref()
-    }
-
-    pub fn instructions_as_bytes(&self) -> Vec<u8> {
-        RET_to_payload_bytes_instructions(self.instructions())
-            .map(|b| b.into())
-            .expect("to never fail")
     }
 }
 

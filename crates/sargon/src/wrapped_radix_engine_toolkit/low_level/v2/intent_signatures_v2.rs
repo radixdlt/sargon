@@ -55,14 +55,17 @@ impl TryFrom<(ScryptoIntentSignaturesV2, Hash)> for IntentSignaturesV2 {
 
 impl HasSampleValues for IntentSignaturesV2 {
     fn sample() -> Self {
-        let intent = IntentCoreV2::sample();
+        let intent = Subintent::sample();
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
             signatures.push(private_key.sign_transaction_intent_hash(
-                &intent.transaction_intent_hash(),
+                &TransactionIntentHash::new(
+                    intent.hash().hash,
+                    intent.network_id(),
+                ),
             ))
         }
 
@@ -70,14 +73,17 @@ impl HasSampleValues for IntentSignaturesV2 {
     }
 
     fn sample_other() -> Self {
-        let intent = IntentCoreV2::sample_other();
+        let intent = Subintent::sample_other();
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
             signatures.push(private_key.sign_transaction_intent_hash(
-                &intent.transaction_intent_hash(),
+                &TransactionIntentHash::new(
+                    intent.hash().hash,
+                    intent.network_id(),
+                ),
             ))
         }
 
@@ -122,16 +128,13 @@ mod tests {
         };
         assert_eq!(
             SUT::sample(),
-            roundtrip(
-                SUT::sample(),
-                IntentCoreV2::sample().transaction_intent_hash().hash
-            )
+            roundtrip(SUT::sample(), Subintent::sample().hash().hash)
         );
         assert_eq!(
             SUT::sample_other(),
             roundtrip(
                 SUT::sample_other(),
-                IntentCoreV2::sample_other().transaction_intent_hash().hash
+                Subintent::sample_other().hash().hash
             )
         );
     }
