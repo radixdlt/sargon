@@ -150,14 +150,19 @@ impl Account {
 
     fn sample_at_index_name_network(
         network_id: NetworkID,
-        index: HDPathValue,
+        index: u32,
         name: &str,
         is_hidden: bool,
     ) -> Self {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::sample();
+        let derivation_index =
+            HDPathComponent::unsecurified_hardened(index).unwrap();
         let account_creating_factor_instance = private_hd_factor_source
-            .derive_entity_creation_factor_instance(network_id, index);
+            .derive_entity_creation_factor_instance(
+                network_id,
+                derivation_index,
+            );
 
         let mut account = Self::new(
             account_creating_factor_instance,
@@ -170,11 +175,7 @@ impl Account {
         account
     }
 
-    fn sample_at_index_name(
-        index: HDPathValue,
-        name: &str,
-        is_hidden: bool,
-    ) -> Self {
+    fn sample_at_index_name(index: u32, name: &str, is_hidden: bool) -> Self {
         Self::sample_at_index_name_network(
             NetworkID::Mainnet,
             index,

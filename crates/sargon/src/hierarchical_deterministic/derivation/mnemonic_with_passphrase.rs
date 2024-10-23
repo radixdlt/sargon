@@ -315,6 +315,7 @@ mod tests {
     fn validation_cap26_account_paths() {
         let sut = SUT::sample();
         let hd_keys = (0..10u32)
+            .map(|i| UnsecurifiedHardened::from_local_key_space(i).unwrap())
             .map(|i| {
                 let account_path =
                     AccountPath::new_mainnet_transaction_signing(i);
@@ -339,6 +340,7 @@ mod tests {
     fn validation_cap26_account_paths_fail_wrong_mnemonic() {
         let sut = SUT::sample();
         let hd_keys = (0..10u32)
+            .map(|i| UnsecurifiedHardened::from_local_key_space(i).unwrap())
             .map(|i| {
                 let account_path =
                     AccountPath::new_mainnet_transaction_signing(i);
@@ -354,6 +356,7 @@ mod tests {
     fn validation_cap26_identity_paths() {
         let sut = SUT::sample();
         let hd_keys = (0..10u32)
+            .map(|i| UnsecurifiedHardened::from_local_key_space(i).unwrap())
             .map(|i| {
                 let identity_path =
                     IdentityPath::new_mainnet_transaction_signing(i);
@@ -369,6 +372,10 @@ mod tests {
     fn validation_bip44_account_paths() {
         let sut = SUT::sample();
         let hd_keys = (0..10u32)
+            .map(|i| {
+                Unsecurified::from_local_key_space(i, IsHardened(true)).unwrap()
+            })
+            .map(HDPathComponent::from)
             .map(|i| {
                 let account_path = BIP44LikePath::new(i);
                 let seed = sut.to_seed();
@@ -475,7 +482,7 @@ mod tests {
         let path = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,
-            0,
+            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
         );
         let seed = mwp.to_seed();
         let private_key = seed.derive_private_key(&path);

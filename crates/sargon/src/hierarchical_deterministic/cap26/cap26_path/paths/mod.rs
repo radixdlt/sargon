@@ -1,9 +1,11 @@
-mod account_path;
-mod getid_path;
-mod identity_path;
-mod is_entity_path;
+mod cap26_account_path;
+mod cap26_get_id_path;
+mod cap26_identity_path;
+mod traits;
+mod unvalidated_cap26_path;
 
-pub use account_path::*;
-pub use getid_path::*;
-pub use identity_path::*;
-pub use is_entity_path::*;
+pub use cap26_account_path::*;
+pub use cap26_get_id_path::*;
+pub use cap26_identity_path::*;
+pub use traits::*;
+pub use unvalidated_cap26_path::*;

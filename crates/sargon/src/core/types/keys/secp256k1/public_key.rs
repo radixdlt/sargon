@@ -129,7 +129,7 @@ impl TryFrom<Secp256k1PublicKeyUncheckedBytes> for Secp256k1PublicKey {
                 )
                 .expect("Discrepancy: Scrypto's Secp256k1PublicKey library considers key invalid, but BIP32 crate considers it valid. We trust BIP32 crate.")
             })
-            .map(|value| Self(value))
+            .map(Self)
     }
 }
 

@@ -62,7 +62,7 @@ impl LegacyOlympiaAccountAddress {
 
 impl From<Secp256k1PublicKey> for LegacyOlympiaAccountAddress {
     fn from(value: Secp256k1PublicKey) -> Self {
-        Self { value: value }
+        Self { value }
     }
 }
 

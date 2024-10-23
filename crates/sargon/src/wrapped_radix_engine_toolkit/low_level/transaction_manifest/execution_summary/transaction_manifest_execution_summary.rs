@@ -974,7 +974,7 @@ mod tests {
         value: impl AsRef<str>,
     ) -> ScryptoSerializableToolkitTransactionReceipt {
         serde_json::from_str::<ScryptoSerializableToolkitTransactionReceipt>(
-            &value.as_ref(),
+            value.as_ref(),
         )
         .unwrap()
     }

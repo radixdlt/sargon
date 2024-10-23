@@ -12,11 +12,11 @@ decl_secret_bytes!(
 
 impl HDPath {
     fn hardened_chain(&self) -> Vec<IotaSlip10PathComponent> {
-        self.components
+        self.components()
             .iter()
-            .map(|c| c.value)
+            .map(|c| c.map_to_global_key_space())
             .map(|v| IotaSlip10PathComponent::try_from(v).expect("Should work"))
-            .collect_vec()
+            .collect::<Vec<IotaSlip10PathComponent>>()
     }
 }
 
@@ -27,7 +27,10 @@ use crypto::{
 };
 
 impl BIP39Seed {
-    fn derive_slip10_private_key<K, I>(&self, chain: I) -> IotaSlip10::Slip10<K>
+    fn _derive_slip10_private_key<K, I>(
+        &self,
+        chain: I,
+    ) -> IotaSlip10::Slip10<K>
     where
         K: IotaSlip10::IsSecretKey
             + IotaSlip10::WithSegment<<I as Iterator>::Item>,
@@ -36,29 +39,48 @@ impl BIP39Seed {
     {
         let iota_seed = IotaSlip10::Seed::from_bytes(&*self.0);
         iota_seed.derive(chain)
-        // `IotaSlip10::Seed` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
-    fn derive_ed25519_private_key(&self, path: &HDPath) -> Ed25519PrivateKey {
-        let ck = self
-            .derive_slip10_private_key::<IotaSlip10Ed25519::SecretKey, _>(
-                path.hardened_chain().into_iter(),
-            );
-        Ed25519PrivateKey::from_bytes(ck.secret_key().as_slice())
-            .expect("Valid Ed25519PrivateKey bytes")
+    fn _derive_ed25519_private_key(
+        &self,
+        path: &HDPath,
+    ) -> IotaSlip10Ed25519::SecretKey {
+        self._derive_slip10_private_key::<_, _>(
+            path.hardened_chain().into_iter(),
+        )
+        .secret_key()
+    }
+
+    fn _derive_secp256k1_private_key(
+        &self,
+        path: &HDPath,
+    ) -> IotaSlip10Secp256k1::SecretKey {
+        self._derive_slip10_private_key::<_, _>(
+            path.components()
+                .iter()
+                .cloned()
+                .map(|c| c.map_to_global_key_space()),
+        )
+        .secret_key()
+    }
+
+    pub fn derive_secp256k1_private_key(
+        &self,
+        hd_path: impl Into<HDPath>,
+    ) -> Secp256k1PrivateKey {
+        let inner = self._derive_secp256k1_private_key(&hd_path.into());
+        Secp256k1PrivateKey::from_bytes(&*inner.to_bytes())
+            .expect("Valid Secp256k1PrivateKey bytes")
         // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
-    pub(crate) fn derive_secp256k1_private_key(
+    pub fn derive_ed25519_private_key(
         &self,
-        path: &HDPath,
-    ) -> Secp256k1PrivateKey {
-        let ck = self
-            .derive_slip10_private_key::<IotaSlip10Secp256k1::SecretKey, _>(
-                path.components.iter().cloned().map(|c| c.value),
-            );
-        Secp256k1PrivateKey::from_bytes(&*ck.secret_key().to_bytes())
-            .expect("Valid Secp256k1PrivateKey bytes")
+        hd_path: impl Into<HDPath>,
+    ) -> Ed25519PrivateKey {
+        let inner = self._derive_ed25519_private_key(&hd_path.into());
+        Ed25519PrivateKey::from_bytes(inner.as_slice())
+            .expect("Valid Ed25519PrivateKey bytes")
         // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
@@ -71,15 +93,16 @@ impl BIP39Seed {
     {
         match derivation.curve() {
             SLIP10Curve::Curve25519 => {
-                let key = self.derive_ed25519_private_key(derivation.hd_path());
+                let key = self
+                    .derive_ed25519_private_key(derivation.derivation_path());
                 HierarchicalDeterministicPrivateKey::new(
                     key.into(),
                     derivation.derivation_path(),
                 )
             }
             SLIP10Curve::Secp256k1 => {
-                let key =
-                    self.derive_secp256k1_private_key(derivation.hd_path());
+                let key = self
+                    .derive_secp256k1_private_key(derivation.derivation_path());
                 HierarchicalDeterministicPrivateKey::new(
                     key.into(),
                     derivation.derivation_path(),
@@ -87,6 +110,18 @@ impl BIP39Seed {
             }
         }
     }
+}
+
+pub trait Derivation:
+    Clone + Into<DerivationPath> + HasDerivationPathSchemeObjectSafe
+{
+    fn derivation_path(&self) -> DerivationPath {
+        self.clone().into()
+    }
+}
+impl<T: Clone + Into<DerivationPath> + HasDerivationPathSchemeObjectSafe>
+    Derivation for T
+{
 }
 
 #[cfg(test)]

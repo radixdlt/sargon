@@ -62,7 +62,7 @@ impl WalletInteractionTransport for Service {
         let mut encryption_key = session.encryption_key;
         let encrypted_response = self
             .encryption_scheme
-            .encrypt(serialized_response.to_vec(), &mut encryption_key);
+            .encrypt(&serialized_response, &mut encryption_key);
 
         let hex = hex_encode(encrypted_response);
 
@@ -139,7 +139,7 @@ mod tests {
 
             // Encrypt the response
             let encrypted = EncryptionScheme::default()
-                .encrypt(body.to_vec(), &mut encryption_key);
+                .encrypt(&body, &mut encryption_key);
             let hex = hex_encode(encrypted);
             let success_response = SuccessResponse::new(
                 SessionID::sample(),

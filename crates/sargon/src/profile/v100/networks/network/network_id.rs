@@ -127,6 +127,14 @@ impl TryFrom<u8> for NetworkID {
     }
 }
 
+impl TryFrom<U31> for NetworkID {
+    type Error = CommonError;
+    fn try_from(value: U31) -> Result<Self> {
+        let discriminant = u32::from(value) as u8;
+        Self::try_from(discriminant)
+    }
+}
+
 impl std::fmt::Display for NetworkID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.logical_name())

@@ -372,7 +372,8 @@ mod integration_tests {
                 "Alice",
                 AccountAddress::sample_at(0),
                 || {
-                    let i = HDPathComponent::from(0);
+                    let i = Hardened::from_local_key_space_unsecurified(0u32)
+                        .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
                         [
                             FI::sample_mainnet_tx_account(i, *f0.factor_source_id().as_hash().unwrap()), // SKIPPED
@@ -388,7 +389,8 @@ mod integration_tests {
                 "Bob",
                 AccountAddress::sample_at(1),
                 || {
-                    let i = HDPathComponent::from(1);
+                    let i = Hardened::from_local_key_space_unsecurified(1u32)
+                        .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
                         FI::sample_mainnet_tx_account(
                             i,
@@ -402,7 +404,8 @@ mod integration_tests {
                 "Carol",
                 AccountAddress::sample_at(2),
                 || {
-                    let i = HDPathComponent::from(2);
+                    let i = Hardened::from_local_key_space_unsecurified(2u32)
+                        .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                         [FI::sample_mainnet_tx_account(
                             i,
@@ -420,7 +423,7 @@ mod integration_tests {
             let satoshi = Persona::sample_unsecurified_mainnet(
                 "Satoshi",
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_identity(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
                     *f4.factor_source_id().as_hash().unwrap(),
                 ),
             );

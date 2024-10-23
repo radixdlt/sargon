@@ -30,10 +30,28 @@ pub enum CAP26KeyKind {
     MessageEncryption = 1391,
 }
 
+impl HasSampleValues for CAP26KeyKind {
+    fn sample() -> Self {
+        Self::TransactionSigning
+    }
+    fn sample_other() -> Self {
+        Self::AuthenticationSigning
+    }
+}
+
 impl CAP26KeyKind {
-    /// The raw representation of this key kind, an `HDPathValue`.
-    pub fn discriminant(&self) -> HDPathValue {
-        *self as HDPathValue
+    /// The raw representation of this key kind, a `u32`.
+    pub fn discriminant(&self) -> u32 {
+        *self as u32
+    }
+}
+
+impl TryFrom<U31> for CAP26KeyKind {
+    type Error = CommonError;
+    fn try_from(value: U31) -> Result<Self> {
+        let repr = u32::from(value);
+        Self::from_repr(repr)
+            .ok_or(CommonError::InvalidKeyKind { bad_value: repr })
     }
 }
 

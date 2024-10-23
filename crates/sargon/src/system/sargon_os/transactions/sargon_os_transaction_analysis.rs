@@ -32,12 +32,12 @@ impl SargonOS {
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
 /// We use it part of logic below, matching against this String - we really should upgrade this code to be more
 /// structured - we MUST update this value if Gateway where to change this value.
-const GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED: &'static str =
+const GW_ERR_ACCOUNT_DEPOSIT_DISALLOWED: &str =
     "AccountError(DepositIsDisallowed";
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
 /// We use it part of logic below, matching against this String - we really should upgrade this code to be more
 /// structured - we MUST update this value if Gateway where to change this value.
-const GW_ERR_NOT_ALL_COULD_BE_DEPOSITED: &'static str =
+const GW_ERR_NOT_ALL_COULD_BE_DEPOSITED: &str =
     "AccountError(NotAllBucketsCouldBeDeposited";
 
 impl SargonOS {

@@ -23,21 +23,26 @@ mod profile_snapshot_tests {
     }
 }
 
+#[derive(Clone)]
 struct TestDerivation {
     curve: SLIP10Curve,
     hd_path: HDPath,
     derivation_path: DerivationPath,
 }
+impl From<TestDerivation> for DerivationPath {
+    fn from(value: TestDerivation) -> Self {
+        value.derivation_path
+    }
+}
+
 #[cfg(not(tarpaulin_include))]
-impl Derivation for TestDerivation {
+impl HasDerivationPathSchemeObjectSafe for TestDerivation {
     fn curve(&self) -> SLIP10Curve {
         self.curve
     }
-    fn hd_path(&self) -> &HDPath {
-        &self.hd_path
-    }
-    fn derivation_path(&self) -> DerivationPath {
-        self.derivation_path.clone()
+
+    fn get_derivation_path_scheme(&self) -> DerivationPathScheme {
+        self.derivation_path.get_derivation_path_scheme()
     }
 }
 
@@ -49,7 +54,7 @@ mod cap26_tests {
     #[allow(dead_code)]
     #[derive(Deserialize, Debug)]
     struct CAP26Vector {
-        path: CAP26Path,
+        path: DerivationPath,
 
         #[serde(rename = "publicKey")]
         public_key_hex: String,
@@ -61,7 +66,7 @@ mod cap26_tests {
         private_key_hex: String,
 
         #[serde(rename = "entityIndex")]
-        entity_index: HDPathValue,
+        entity_index: u32,
 
         #[serde(rename = "keyKind")]
         key_kind: CAP26KeyKind,
@@ -93,10 +98,8 @@ mod cap26_tests {
                     // use Secp256k1 instead!"
                     let derivation = TestDerivation {
                         curve: S::curve(), // will be `Secp256k1` for `cap26_secp256k1.json` vectors!
-                        hd_path: v.path.hd_path().clone(),
-                        derivation_path: DerivationPath::CAP26 {
-                            value: v.path.clone(),
-                        },
+                        hd_path: v.path.to_hd_path(),
+                        derivation_path: v.path.clone(),
                     };
 
                     let derived = seed.derive_private_key(&derivation);
@@ -253,11 +256,7 @@ mod slip10_tests {
                 curve,
                 hd_path: path.clone(),
                 derivation_path: // no used by the test, unable to express non Radix BIP44 paths which this test uses...
-                DerivationPath::CAP26 {
-                    value: CAP26Path::GetID {
-                        value: GetIDPath::default(),
-                    },
-                }
+                DerivationPath::sample()
             };
             let derived = seed.derive_private_key(&derivation);
             assert_eq!(derived.private_key.to_hex(), self.private_key);

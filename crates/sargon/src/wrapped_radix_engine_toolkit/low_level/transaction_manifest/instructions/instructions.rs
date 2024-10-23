@@ -27,7 +27,7 @@ impl Instructions {
             .map_err(|e| {
                 let err_msg = format!("{:?}", e);
                 error!("{}", err_msg);
-                CommonError::FailedToDecodeBytesToManifestInstructions.into()
+                CommonError::FailedToDecodeBytesToManifestInstructions
             })?;
         Ok(Self {
             instructions,
@@ -41,7 +41,6 @@ impl Instructions {
 
     pub fn instructions_as_bytes(&self) -> Vec<u8> {
         RET_compile_instructions(self.instructions())
-            .map(|b| b.into())
             .expect("to never fail")
     }
 }
@@ -244,7 +243,7 @@ impl Instructions {
         network_id: NetworkID,
     ) -> Self {
         Self {
-            instructions: instructions,
+            instructions,
             network_id,
         }
     }

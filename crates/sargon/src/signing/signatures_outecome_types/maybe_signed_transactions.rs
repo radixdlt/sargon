@@ -128,7 +128,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
@@ -138,7 +138,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(1),
+                    Hardened::from_local_key_space_unsecurified(1u32).unwrap(),
                     FactorSourceIDFromHash::sample_other(),
                 ),
             ),
@@ -158,7 +158,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(2),
+                    Hardened::from_local_key_space_unsecurified(2u32).unwrap(),
                     FactorSourceIDFromHash::sample_at(3),
                 ),
             ),
@@ -168,7 +168,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(3),
+                    Hardened::from_local_key_space_unsecurified(3u32).unwrap(),
                     FactorSourceIDFromHash::sample_at(4),
                 ),
             ),
@@ -201,7 +201,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(10),
+                    Hardened::from_local_key_space_unsecurified(10u32).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
@@ -211,7 +211,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(11),
+                    Hardened::from_local_key_space_unsecurified(11u32).unwrap(),
                     FactorSourceIDFromHash::sample_other(),
                 ),
             ),
@@ -221,7 +221,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(12),
+                    Hardened::from_local_key_space_unsecurified(12u32).unwrap(),
                     FactorSourceIDFromHash::sample_at(3),
                 ),
             ),
@@ -279,7 +279,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
@@ -302,7 +302,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
