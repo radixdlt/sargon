@@ -84,6 +84,21 @@ impl BIP39Seed {
         // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
+    pub fn derive_private_key_curve(
+        &self,
+        curve: SLIP10Curve,
+        path: impl Into<HDPath>,
+    ) -> PrivateKey {
+        match curve {
+            SLIP10Curve::Curve25519 => {
+                self.derive_ed25519_private_key(path).into()
+            }
+            SLIP10Curve::Secp256k1 => {
+                self.derive_secp256k1_private_key(path).into()
+            }
+        }
+    }
+
     pub fn derive_private_key<D>(
         &self,
         derivation: &D,
@@ -91,24 +106,15 @@ impl BIP39Seed {
     where
         D: Derivation,
     {
-        match derivation.curve() {
-            SLIP10Curve::Curve25519 => {
-                let key = self
-                    .derive_ed25519_private_key(derivation.derivation_path());
-                HierarchicalDeterministicPrivateKey::new(
-                    key.into(),
-                    derivation.derivation_path(),
-                )
-            }
-            SLIP10Curve::Secp256k1 => {
-                let key = self
-                    .derive_secp256k1_private_key(derivation.derivation_path());
-                HierarchicalDeterministicPrivateKey::new(
-                    key.into(),
-                    derivation.derivation_path(),
-                )
-            }
-        }
+        let key = self.derive_private_key_curve(
+            derivation.curve(),
+            derivation.derivation_path(),
+        );
+
+        HierarchicalDeterministicPrivateKey::new(
+            key,
+            derivation.derivation_path(),
+        )
     }
 }
 

@@ -470,7 +470,7 @@ mod tests {
     }
 
     #[test]
-    fn display_max() {
+    fn display_u30_max() {
         assert_eq!(
             format!("{}", Sut::from_global_key_space(U30_MAX).unwrap()),
             "1073741823"
@@ -478,12 +478,13 @@ mod tests {
     }
 
     #[test]
-    fn debug_max() {
+    fn debug_u30_max() {
         assert_eq!(
             format!("{:?}", Sut::from_global_key_space(U30_MAX).unwrap()),
             "1073741823"
         );
     }
+
 
     #[test]
     fn from_str_invalid() {

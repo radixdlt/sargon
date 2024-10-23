@@ -43,7 +43,7 @@ impl FromBIP32Str for HDPath {
         let components = s
             .split(Self::SEPARATOR)
             .filter(|s| !s.is_empty())
-            .map(HDPathComponent::from_str)
+            .map(HDPathComponent::from_bip32_string)
             .collect::<Result<Vec<_>>>()?;
         Ok(Self(components))
     }
@@ -79,11 +79,15 @@ impl FromStr for HDPath {
     }
 }
 
-// impl<T: TryFromHDPath> FromBIP32Str for T {
-//     fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
-//         todo!()
-//     }
-// }
+impl HasSampleValues for HDPath {
+    fn sample() -> Self {
+        Self::from_str("m/44H/1022H/1H/525H/1460H/1H").unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/0H").unwrap()
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -92,13 +96,101 @@ mod tests {
     type Sut = HDPath;
 
     #[test]
-    fn display() {
-        // assert_eq!(Sut::default().to_string(), "");
-    }
-
-    #[test]
     fn account_path() {
         let hdpath = Sut::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
         assert_eq!(hdpath, AccountPath::sample().to_hd_path());
+    }
+
+    impl HDPath {
+        fn harden<I>(iter: I) -> Self
+        where
+            I: IntoIterator<Item = u32>,
+        {
+            HDPath::new(
+                iter.into_iter()
+                    .map(|i| HDPathComponent::unsecurified_hardened(i).unwrap())
+                    .collect_vec(),
+            )
+        }
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(HDPath::sample(), HDPath::sample());
+        assert_eq!(HDPath::sample_other(), HDPath::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(HDPath::sample(), HDPath::sample_other());
+    }
+
+    #[test]
+    fn display_two() {
+        let path = HDPath::harden([44, 1022]);
+        assert_eq!(format!("{}", path), "m/44H/1022H");
+    }
+
+    #[test]
+    fn debug() {
+        let path = HDPath::harden([44, 1022]);
+        assert_eq!(format!("{:?}", path), "m/44'/1022'");
+    }
+
+    #[test]
+    fn from_str() {
+        assert_eq!(
+            HDPath::from_str("m/44H/1022H").unwrap(),
+            HDPath::harden([44, 1022])
+        );
+    }
+
+    #[test]
+    fn from_str_capital_m_is_ok() {
+        assert_eq!(
+            HDPath::from_str("M/44H/1022H").unwrap(),
+            HDPath::harden([44, 1022])
+        );
+    }
+
+    #[test]
+    fn from_str_invalid_prefix() {
+        let s = "x/44H/1022H";
+        assert_eq!(
+            HDPath::from_str(s),
+            Err(CommonError::InvalidBIP32Path {
+                bad_value: "x".to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn from_str_invalid_separator() {
+        let s = "m#44H#1022H";
+        assert_eq!(
+            HDPath::from_str(s),
+            Err(CommonError::InvalidBIP32Path {
+                bad_value: s.to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn ord() {
+        assert!(HDPath::harden([44, 2]) > HDPath::harden([44, 1]));
+    }
+
+    #[test]
+    fn json_roundtrip_success() {
+        let sut = HDPath::harden([44, 1022]);
+        assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H"));
+        assert_json_value_ne_after_roundtrip(&sut, json!("m/44H/33H"));
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<HDPath>(json!("x/44H"));
+        assert_json_value_fails::<HDPath>(json!("m/44X"));
+        assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
 }
