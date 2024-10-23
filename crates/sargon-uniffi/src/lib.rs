@@ -24,6 +24,23 @@ pub mod prelude {
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
+    pub use radix_engine_toolkit::functions::{
+        transaction_v1::manifest::{
+            from_payload_bytes as RET_from_payload_bytes_manifest_v1,
+            to_payload_bytes as RET_to_payload_bytes_manifest_v1,
+        },
+        transaction_v2::{
+            subintent_manifest::{
+                from_payload_bytes as RET_from_payload_bytes_subintent_manifest,
+                to_payload_bytes as RET_to_payload_bytes_subintent_manifest,
+            },
+            transaction_manifest::{
+                from_payload_bytes as RET_from_payload_bytes_manifest_v2,
+                to_payload_bytes as RET_to_payload_bytes_manifest_v2,
+            },
+        },
+    };
+
     pub(crate) use sargon_uniffi_conversion_macros::*;
 
     pub(crate) use sargon::prelude::{

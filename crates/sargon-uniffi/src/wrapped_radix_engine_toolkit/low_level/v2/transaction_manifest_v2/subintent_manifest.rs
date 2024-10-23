@@ -1,12 +1,44 @@
 use crate::prelude::*;
 use sargon::SubintentManifest as InternalSubintentManifest;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SubintentManifest {
-    pub instructions: InstructionsV2,
-    pub blobs: Blobs,
-    pub children: ChildIntents,
+    pub raw_manifest: BagOfBytes,
+    pub network_id: NetworkID,
 }
+
+impl SubintentManifest {
+    pub fn into_internal(&self) -> InternalSubintentManifest {
+        self.clone().into()
+    }
+}
+
+impl Into<InternalSubintentManifest> for SubintentManifest {
+    fn into(self) -> InternalSubintentManifest {
+        let scrypto_manifest = RET_from_payload_bytes_subintent_manifest(
+            self.raw_manifest.to_vec(),
+        )
+        .unwrap();
+        (scrypto_manifest, self.network_id.into())
+            .try_into()
+            .unwrap()
+    }
+}
+
+impl From<InternalSubintentManifest> for SubintentManifest {
+    fn from(manifest: InternalSubintentManifest) -> Self {
+        Self {
+            raw_manifest: RET_to_payload_bytes_subintent_manifest(
+                &manifest.scrypto_manifest(),
+            )
+            .unwrap()
+            .into(),
+            network_id: manifest.network_id().into(),
+        }
+    }
+}
+
+decl_conversion_tests_for!(SubintentManifest);
 
 #[uniffi::export]
 pub fn subintent_manifest_string(manifest: &SubintentManifest) -> String {
@@ -49,7 +81,7 @@ pub fn subintent_manifest_network_id(
 
 #[uniffi::export]
 pub fn subintent_manifest_blobs(manifest: &SubintentManifest) -> Blobs {
-    manifest.blobs.clone()
+    manifest.into_internal().blobs.into()
 }
 
 #[uniffi::export]

@@ -1,6 +1,6 @@
 [package]
 name = "sargon-uniffi"
-version = "1.1.31"
+version = "1.1.32"
 edition = "2021"
 build = "build.rs"
 
@@ -19,6 +19,8 @@ required-features = ["build-binary"]
 
 sargon = { path = "../sargon" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" } 
+
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "51f0115f1e93f6910b4931ef8367eec2f5b11805" }
 
 # zeroize = "1.7.0"
 zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [

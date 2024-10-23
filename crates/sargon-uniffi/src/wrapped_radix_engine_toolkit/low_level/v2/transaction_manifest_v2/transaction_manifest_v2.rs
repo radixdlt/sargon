@@ -1,12 +1,43 @@
 use crate::prelude::*;
 use sargon::TransactionManifestV2 as InternalTransactionManifestV2;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct TransactionManifestV2 {
-    pub instructions: InstructionsV2,
-    pub blobs: Blobs,
-    pub children: ChildIntents,
+    pub raw_manifest: BagOfBytes,
+    pub network_id: NetworkID,
 }
+
+impl TransactionManifestV2 {
+    pub fn into_internal(&self) -> InternalTransactionManifestV2 {
+        self.clone().into()
+    }
+}
+
+impl Into<InternalTransactionManifestV2> for TransactionManifestV2 {
+    fn into(self) -> InternalTransactionManifestV2 {
+        let scrypto_manifest =
+            RET_from_payload_bytes_manifest_v2(self.raw_manifest.to_vec())
+                .unwrap();
+        (scrypto_manifest, self.network_id.into())
+            .try_into()
+            .unwrap()
+    }
+}
+
+impl From<InternalTransactionManifestV2> for TransactionManifestV2 {
+    fn from(manifest: InternalTransactionManifestV2) -> Self {
+        Self {
+            raw_manifest: RET_to_payload_bytes_manifest_v2(
+                &manifest.scrypto_manifest(),
+            )
+            .unwrap()
+            .into(),
+            network_id: manifest.network_id().into(),
+        }
+    }
+}
+
+decl_conversion_tests_for!(TransactionManifestV2);
 
 #[uniffi::export]
 pub fn transaction_manifest_string_v2(
@@ -53,7 +84,7 @@ pub fn transaction_manifest_network_id_v2(
 pub fn transaction_manifest_blobs_v2(
     manifest: &TransactionManifestV2,
 ) -> Blobs {
-    manifest.blobs.clone()
+    manifest.into_internal().blobs.into()
 }
 
 #[uniffi::export]
