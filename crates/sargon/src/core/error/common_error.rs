@@ -686,21 +686,24 @@ pub enum CommonError {
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
         10192,
 
+    #[error("Failed to decompile bytes into TransactionIntent")]
+    FailedToDecompileBytesIntoTransactionIntent = 10193,
+
     #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
-    InvalidManifestFailedToDecompile { underlying: String } = 10193,
+    InvalidManifestFailedToDecompile { underlying: String } = 10194,
 
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
-    InvalidSignedPartialTransactionFailedToCompile = 10194,
+    InvalidSignedPartialTransactionFailedToCompile = 10195,
 
     #[error("Invalid SignedPartialTransaction, failed to decompile")]
-    InvalidSignedPartialTransactionFailedToDecompile = 10195,
+    InvalidSignedPartialTransactionFailedToDecompile = 10196,
 
     #[error("Invalid Signed Partial Transaction, failed to encode, reason: '{underlying}'")]
     InvalidSignedPartialTransactionFailedToEncode { underlying: String } =
-        10196,
+        10197,
 
     #[error("Failed to generate manifest summary")]
-    FailedToGenerateManifestSummary = 10197,
+    FailedToGenerateManifestSummary = 10198,
 }
 
 impl CommonError {

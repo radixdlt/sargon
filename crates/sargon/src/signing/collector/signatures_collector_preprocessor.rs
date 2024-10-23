@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub(crate) struct SignaturesCollectorPreprocessor {
-    transactions: IndexSet<TXToSign>,
+    transactions: IdentifiedVecOf<TXToSign>,
 }
 
 pub(crate) fn sort_group_factors(
@@ -30,6 +30,10 @@ pub(crate) fn sort_group_factors(
 }
 
 impl SignaturesCollectorPreprocessor {
+    pub(super) fn new(transactions: IdentifiedVecOf<TXToSign>) -> Self {
+        Self { transactions }
+    }
+
     pub(super) fn analyzing_transaction_intents(
         profile: &Profile,
         transactions: Vec<TransactionIntent>,
@@ -37,13 +41,9 @@ impl SignaturesCollectorPreprocessor {
         let transactions = transactions
             .into_iter()
             .map(|i| TXToSign::extracting_from_intent_and_profile(&i, profile))
-            .collect::<Result<IndexSet<TXToSign>>>()?;
+            .collect::<Result<Vec<_>>>()?;
 
-        Ok(Self::new(transactions))
-    }
-
-    pub(super) fn new(transactions: IndexSet<TXToSign>) -> Self {
-        Self { transactions }
+        Ok(Self::new(IdentifiedVecOf::from_iter(transactions)))
     }
 
     pub(super) fn preprocess(
@@ -94,30 +94,27 @@ impl SignaturesCollectorPreprocessor {
             let mut petitions_for_entities =
                 HashMap::<AddressOfAccountOrPersona, PetitionForEntity>::new();
 
+            let intent_hash = transaction.intent.transaction_intent_hash();
             for entity in transaction.entities_requiring_auth() {
                 let address = entity.address();
                 let petition = PetitionForEntity::new_from_entity(
-                    transaction.intent_hash.clone(),
+                    intent_hash.clone(),
                     entity,
                     role_kind,
                 );
 
                 petition.all_factor_instances().iter().for_each(|f| {
-                    register_factor_in_tx(
-                        &f.factor_source_id(),
-                        &transaction.intent_hash,
-                    )
+                    register_factor_in_tx(&f.factor_source_id(), &intent_hash)
                 });
                 petitions_for_entities.insert(address, petition);
             }
 
             let petition_of_tx = PetitionForTransaction::new(
-                transaction.intent_hash.clone(),
+                transaction.intent.clone(),
                 petitions_for_entities,
             );
 
-            petitions_for_all_transactions
-                .insert(transaction.intent_hash, petition_of_tx);
+            petitions_for_all_transactions.insert(intent_hash, petition_of_tx);
         }
 
         let factors_of_kind = sort_group_factors(used_factor_sources);

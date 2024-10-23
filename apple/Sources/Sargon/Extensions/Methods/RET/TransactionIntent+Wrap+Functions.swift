@@ -6,7 +6,7 @@ extension TransactionIntent {
 		transactionIntentHash(intent: self)
 	}
 	
-	public func compile() -> Data {
+	public func compile() -> CompiledTransactionIntent {
 		transactionIntentCompile(intent: self)
 	}
 }

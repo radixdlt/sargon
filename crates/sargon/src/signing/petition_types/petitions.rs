@@ -227,9 +227,9 @@ impl HasSampleValues for Petitions {
         Self::new(
             HashMap::just((
                 FactorSourceIDFromHash::sample_at(0),
-                IndexSet::just(p0.intent_hash.clone()),
+                IndexSet::just(p0.intent.transaction_intent_hash()),
             )),
-            IndexMap::just((p0.intent_hash.clone(), p0)),
+            IndexMap::just((p0.intent.transaction_intent_hash(), p0)),
         )
     }
 
@@ -238,9 +238,9 @@ impl HasSampleValues for Petitions {
         Self::new(
             HashMap::just((
                 FactorSourceIDFromHash::sample_at(1),
-                IndexSet::just(p1.intent_hash.clone()),
+                IndexSet::just(p1.intent.transaction_intent_hash()),
             )),
-            IndexMap::just((p1.intent_hash.clone(), p1)),
+            IndexMap::just((p1.intent.transaction_intent_hash(), p1)),
         )
     }
 }
