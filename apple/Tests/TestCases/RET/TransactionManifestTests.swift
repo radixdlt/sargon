@@ -8,10 +8,10 @@ import XCTest
 
 final class TransactionManifestTests: Test<TransactionManifest> {
 
-	func test_manifest_string() {
-		let manifest = SUT.sample
-		XCTAssert(manifest.manifestString.contains("CALL_METHOD"))
-	}
+//	func test_manifest_string() {
+//		let manifest = SUT.sample
+//		XCTAssert(manifest.manifestString.contains("CALL_METHOD"))
+//	}
 
 	func test_manifest_instructions_string() {
 		let manifest = TransactionManifest.sample

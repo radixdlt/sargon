@@ -15,9 +15,9 @@ extension TransactionManifest {
 		)
 	}
 
-	public var manifestString: String {
-		transactionManifestString(manifest: self)
-	}
+//	public var manifestString: String {
+//		transactionManifestString(manifest: self)
+//	}
 
 	public var instructionsString: String {
 		transactionManifestInstructionsString(manifest: self)

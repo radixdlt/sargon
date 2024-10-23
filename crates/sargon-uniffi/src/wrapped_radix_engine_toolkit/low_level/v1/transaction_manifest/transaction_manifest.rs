@@ -34,6 +34,11 @@ pub fn new_transaction_manifest_from_unvalidated_transaction_manifest(
 }
 
 #[uniffi::export]
+pub fn transaction_manifest_string(manifest: &TransactionManifest) -> String {
+    manifest.manifest_string()
+}
+
+#[uniffi::export]
 pub fn transaction_manifest_instructions_string(
     manifest: &TransactionManifest,
 ) -> String {
