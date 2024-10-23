@@ -17,21 +17,24 @@ pub(crate) struct Petitions {
     /// Where A, B, C and D, all use the factor source, e.g. some arculus
     /// card which the user has setup as a factor (source) for all these accounts.
     pub(crate) factor_source_to_intent_hashes:
-        HashMap<FactorSourceIDFromHash, IndexSet<IntentHash>>,
+        HashMap<FactorSourceIDFromHash, IndexSet<TransactionIntentHash>>,
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<IntentHash, PetitionForTransaction>>,
+        RefCell<IndexMap<TransactionIntentHash, PetitionForTransaction>>,
 }
 
 impl Petitions {
     pub(crate) fn new(
         factor_source_to_intent_hashes: HashMap<
             FactorSourceIDFromHash,
-            IndexSet<IntentHash>,
+            IndexSet<TransactionIntentHash>,
         >,
-        txid_to_petition: IndexMap<IntentHash, PetitionForTransaction>,
+        txid_to_petition: IndexMap<
+            TransactionIntentHash,
+            PetitionForTransaction,
+        >,
     ) -> Self {
         Self {
             factor_source_to_intent_hashes,

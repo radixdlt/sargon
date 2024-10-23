@@ -689,23 +689,39 @@ pub enum CommonError {
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
         10192,
 
+    #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
+    InvalidManifestFailedToDecompile { underlying: String } = 10193,
+
+    #[error("Invalid SignedPartialTransaction, failed to decompile")]
+    InvalidSignedPartialTransactionFailedToCompile = 10194,
+
+    #[error("Invalid SignedPartialTransaction, failed to decompile")]
+    InvalidSignedPartialTransactionFailedToDecompile = 10195,
+
+    #[error("Invalid Signed Partial Transaction, failed to encode, reason: '{underlying}'")]
+    InvalidSignedPartialTransactionFailedToEncode { underlying: String } =
+        10196,
+
+    #[error("Failed to generate manifest summary")]
+    FailedToGenerateManifestSummary = 10197,
+
     #[error("Index Not Hardened {bad_value}")]
-    IndexNotHardened { bad_value: u32 } = 10193,
+    IndexNotHardened { bad_value: u32 } = 10198,
 
     #[error("Index Securified expected Unsecurified")]
-    IndexSecurifiedExpectedUnsecurified = 10194,
+    IndexSecurifiedExpectedUnsecurified = 10199,
 
     #[error("Index Unsecurified expected Securified")]
-    IndexUnsecurifiedExpectedSecurified = 10195,
+    IndexUnsecurifiedExpectedSecurified = 10200,
 
     #[error("Index In Global Key Space Is Lower Than Offset")]
-    IndexInGlobalKeySpaceIsLowerThanOffset = 10196,
+    IndexInGlobalKeySpaceIsLowerThanOffset = 10201,
 
     #[error("Index Overflow")]
-    IndexOverflow = 10197,
+    IndexOverflow = 10202,
 
     #[error("Cannot Add To Index Since It Would Change KeySpace")]
-    CannotAddMoreToIndexSinceItWouldChangeKeySpace = 10198,
+    CannotAddMoreToIndexSinceItWouldChangeKeySpace = 10203,
 }
 
 #[uniffi::export]

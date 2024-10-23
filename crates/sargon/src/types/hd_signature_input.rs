@@ -10,7 +10,7 @@ use crate::prelude::*;
 )]
 pub struct HDSignatureInput {
     /// Hash which was signed.
-    pub intent_hash: IntentHash,
+    pub intent_hash: TransactionIntentHash,
 
     /// The account or identity address of the entity which signed the hash,
     /// with expected public key and with derivation path to derive PrivateKey
@@ -20,7 +20,7 @@ pub struct HDSignatureInput {
 impl HDSignatureInput {
     /// Constructs a new `HDSignatureInput`.
     pub fn new(
-        intent_hash: IntentHash,
+        intent_hash: TransactionIntentHash,
         owned_factor_instance: OwnedFactorInstance,
     ) -> Self {
         Self {
@@ -32,11 +32,14 @@ impl HDSignatureInput {
 
 impl HasSampleValues for HDSignatureInput {
     fn sample() -> Self {
-        Self::new(IntentHash::sample(), OwnedFactorInstance::sample())
+        Self::new(
+            TransactionIntentHash::sample(),
+            OwnedFactorInstance::sample(),
+        )
     }
     fn sample_other() -> Self {
         Self::new(
-            IntentHash::sample_other(),
+            TransactionIntentHash::sample_other(),
             OwnedFactorInstance::sample_other(),
         )
     }

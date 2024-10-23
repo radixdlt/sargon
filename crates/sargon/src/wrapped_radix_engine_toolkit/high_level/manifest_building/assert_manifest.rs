@@ -45,11 +45,14 @@ pub fn manifest_eq(manifest: TransactionManifest, expected: impl AsRef<str>) {
 /// This function also allows for prettier formatting of the Instructions set string
 /// we assert against, since we can use any number of tabs.
 #[cfg(test)]
-pub fn instructions_eq(instructions: Instructions, expected: impl AsRef<str>) {
+pub fn instructions_eq(
+    instructions_string: impl AsRef<str>,
+    expected: impl AsRef<str>,
+) {
     let trim =
         |s: &str| s.replace(' ', "").replace('\t', " ").trim().to_owned();
     pretty_assertions::assert_eq!(
-        trim(&instructions.to_string()),
+        trim(instructions_string.as_ref()),
         trim(expected.as_ref())
     );
 }

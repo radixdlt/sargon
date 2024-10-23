@@ -6,7 +6,7 @@ pub struct WalletToDappInteractionTransactionResponseItems {
 }
 
 impl WalletToDappInteractionTransactionResponseItems {
-    pub fn new(transaction_intent_hash: IntentHash) -> Self {
+    pub fn new(transaction_intent_hash: TransactionIntentHash) -> Self {
         Self {
             send: WalletToDappInteractionSendTransactionResponseItem {
                 transaction_intent_hash,
@@ -17,7 +17,7 @@ impl WalletToDappInteractionTransactionResponseItems {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
-    pub transaction_intent_hash: IntentHash,
+    pub transaction_intent_hash: TransactionIntentHash,
 }
 
 impl Serialize for WalletToDappInteractionSendTransactionResponseItem {
@@ -51,7 +51,7 @@ impl<'de> Deserialize<'de>
             transaction_intent_hash: String,
         }
         let wrapped = Wrapper::deserialize(deserializer)?;
-        IntentHash::from_bech32(&wrapped.transaction_intent_hash)
+        TransactionIntentHash::from_bech32(&wrapped.transaction_intent_hash)
             .map_err(de::Error::custom)
             .map(|i| Self {
                 transaction_intent_hash: i,
@@ -77,12 +77,12 @@ impl HasSampleValues for WalletToDappInteractionTransactionResponseItems {
 impl HasSampleValues for WalletToDappInteractionSendTransactionResponseItem {
     fn sample() -> Self {
         Self {
-            transaction_intent_hash: IntentHash::sample(),
+            transaction_intent_hash: TransactionIntentHash::sample(),
         }
     }
     fn sample_other() -> Self {
         Self {
-            transaction_intent_hash: IntentHash::sample_other(),
+            transaction_intent_hash: TransactionIntentHash::sample_other(),
         }
     }
 }

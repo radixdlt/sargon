@@ -8,32 +8,37 @@ import XCTest
 
 final class TransactionManifestTests: Test<TransactionManifest> {
 
-    func test_manifest_instructions_string() {
+//	func test_manifest_string() {
+//		let manifest = SUT.sample
+//		XCTAssert(manifest.manifestString.contains("CALL_METHOD"))
+//	}
+
+	func test_manifest_instructions_string() {
 		let manifest = TransactionManifest.sample
 		XCTAssert(manifest.instructionsString.contains("CALL_METHOD"))
 	}
 
-    func test_manifest_network_id() {
+	func test_manifest_network_id() {
 		let manifest = TransactionManifest.sample
-        XCTAssertNoDifference(manifest.networkID, .mainnet)
+		XCTAssertNoDifference(manifest.networkID, .mainnet)
 	}
 
-    func test_manifest_blobs() {
+	func test_manifest_blobs() {
 		let manifest = TransactionManifest.sample
-        XCTAssertNoDifference(manifest.blobs, [])
+		XCTAssertNoDifference(manifest.blobs, [])
 	}
-    
-    func test_involved_resource_addresses() {
-        XCTAssertNoDifference(SUT.sample.involvedResourceAddresses, [ResourceAddress.sampleMainnetXRD])
+
+	func test_involved_resource_addresses() {
+		XCTAssertNoDifference(SUT.sample.involvedResourceAddresses, [ResourceAddress.sampleMainnetXRD])
     }
-    
-    func test_involved_pool_addresses() {
-        XCTAssertNoDifference(SUT.sample.involvedPoolAddresses, [])
-    }
-    
-    func test_manifest_summary() {
-        XCTAssertNoDifference(SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
-    }
+
+	func test_involved_pool_addresses() {
+		XCTAssertNoDifference(SUT.sample.involvedPoolAddresses, [])
+	}
+
+	func test_manifest_summary() throws {
+		XCTAssertNoDifference(try SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
+	}
 	
 	func test_from_instructions_string_with_max_sbor_depth_is_ok() throws {
 		let instructionsString = """

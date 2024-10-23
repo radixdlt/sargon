@@ -9,5 +9,5 @@ pub struct WalletToDappInteractionTransactionResponseItems {
 
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
-    transaction_intent_hash: IntentHash,
+    pub transaction_intent_hash: TransactionIntentHash,
 }

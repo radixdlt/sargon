@@ -6,4 +6,5 @@ pub enum DappToWalletInteractionItems {
     UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems),
     AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems),
     Transaction(DappToWalletInteractionTransactionItems),
+    PreAuthorization(DappToWalletInteractionPreAuthorizationItems),
 }

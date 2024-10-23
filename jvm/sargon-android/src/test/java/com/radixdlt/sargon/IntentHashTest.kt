@@ -7,19 +7,19 @@ import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class IntentHashTest: SampleTestable<IntentHash> {
-    override val samples: List<Sample<IntentHash>>
-        get() = listOf(IntentHash.sample)
+class TransactionIntentHashTest: SampleTestable<TransactionIntentHash> {
+    override val samples: List<Sample<TransactionIntentHash>>
+        get() = listOf(TransactionIntentHash.sample)
 
     @Test
     fun testNetworkId() {
         assertEquals(
             NetworkId.MAINNET,
-            IntentHash.sample().networkId
+            TransactionIntentHash.sample().networkId
         )
         assertEquals(
             NetworkId.SIMULATOR,
-            IntentHash.sample.other().networkId
+            TransactionIntentHash.sample.other().networkId
         )
     }
 
@@ -28,7 +28,7 @@ class IntentHashTest: SampleTestable<IntentHash> {
         val txId = "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd"
         assertEquals(
             txId,
-            IntentHash.init(txId).bech32EncodedTxId
+            TransactionIntentHash.init(txId).bech32EncodedTxId
         )
     }
 
@@ -38,19 +38,19 @@ class IntentHashTest: SampleTestable<IntentHash> {
         val formatted = "txid...zm3ltd"
         assertEquals(
             formatted,
-            IntentHash.init(txId).formatted()
+            TransactionIntentHash.init(txId).formatted()
         )
         assertEquals(
             formatted,
-            IntentHash.init(txId).formatted(format = AddressFormat.DEFAULT)
+            TransactionIntentHash.init(txId).formatted(format = AddressFormat.DEFAULT)
         )
         assertEquals(
             txId,
-            IntentHash.init(txId).formatted(format = AddressFormat.FULL)
+            TransactionIntentHash.init(txId).formatted(format = AddressFormat.FULL)
         )
         assertEquals(
             txId,
-            IntentHash.init(txId).formatted(format = AddressFormat.RAW)
+            TransactionIntentHash.init(txId).formatted(format = AddressFormat.RAW)
         )
     }
 }

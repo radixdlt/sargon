@@ -2,15 +2,15 @@ use crate::prelude::*;
 
 decl_tx_hash!(
     /// A Signed Intent Hash is a bech32 encoded string starting with `"signedintent_"
-    SignedIntentHash,
+    SignedTransactionIntentHash,
 );
 
 #[uniffi::export]
-pub fn new_signed_intent_hash_sample() -> SignedIntentHash {
-    InternalSignedIntentHash::sample().into()
+pub fn new_signed_intent_hash_sample() -> SignedTransactionIntentHash {
+    InternalSignedTransactionIntentHash::sample().into()
 }
 
 #[uniffi::export]
-pub fn new_signed_intent_hash_sample_other() -> SignedIntentHash {
-    InternalSignedIntentHash::sample_other().into()
+pub fn new_signed_intent_hash_sample_other() -> SignedTransactionIntentHash {
+    InternalSignedTransactionIntentHash::sample_other().into()
 }

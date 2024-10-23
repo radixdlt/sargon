@@ -7,19 +7,19 @@ import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class SignedIntentHashTest: SampleTestable<SignedIntentHash> {
-    override val samples: List<Sample<SignedIntentHash>>
-        get() = listOf(SignedIntentHash.sample)
+class SignedTransactionIntentHashTest: SampleTestable<SignedTransactionIntentHash> {
+    override val samples: List<Sample<SignedTransactionIntentHash>>
+        get() = listOf(SignedTransactionIntentHash.sample)
 
     @Test
     fun testNetworkId() {
         Assertions.assertEquals(
             NetworkId.MAINNET,
-            SignedIntentHash.sample().networkId
+            SignedTransactionIntentHash.sample().networkId
         )
         Assertions.assertEquals(
             NetworkId.SIMULATOR,
-            SignedIntentHash.sample.other().networkId
+            SignedTransactionIntentHash.sample.other().networkId
         )
     }
 
@@ -28,7 +28,7 @@ class SignedIntentHashTest: SampleTestable<SignedIntentHash> {
         val s = "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl"
         Assertions.assertEquals(
             s,
-            SignedIntentHash.init(s).bech32EncodedTxId
+            SignedTransactionIntentHash.init(s).bech32EncodedTxId
         )
     }
 
@@ -38,19 +38,19 @@ class SignedIntentHashTest: SampleTestable<SignedIntentHash> {
         val formatted = "sign...xsk6nl"
         Assertions.assertEquals(
             formatted,
-            SignedIntentHash.init(txId).formatted()
+            SignedTransactionIntentHash.init(txId).formatted()
         )
         Assertions.assertEquals(
             formatted,
-            SignedIntentHash.init(txId).formatted(format = AddressFormat.DEFAULT)
+            SignedTransactionIntentHash.init(txId).formatted(format = AddressFormat.DEFAULT)
         )
         Assertions.assertEquals(
             txId,
-            SignedIntentHash.init(txId).formatted(format = AddressFormat.FULL)
+            SignedTransactionIntentHash.init(txId).formatted(format = AddressFormat.FULL)
         )
         Assertions.assertEquals(
             txId,
-            SignedIntentHash.init(txId).formatted(format = AddressFormat.RAW)
+            SignedTransactionIntentHash.init(txId).formatted(format = AddressFormat.RAW)
         )
     }
 }

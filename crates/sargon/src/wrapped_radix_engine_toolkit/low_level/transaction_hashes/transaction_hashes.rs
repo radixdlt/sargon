@@ -144,17 +144,25 @@ macro_rules! decl_tx_hash {
 }
 
 decl_tx_hash!(
-    /// `IntentHash` used to identify transactions.
+    /// `TransactionIntentHash` used to identify transactions.
     /// Representation is bech32 encoded string starting with `txid_` e.g.:
     /// `"txid_rdx19rpveua6xuhvz0axu0mwpqk8fywr83atv8mkrugchvw6uuslgppqh9cnj4"`
-    Intent,
+    TransactionIntent,
     "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd",
     "txid...zm3ltd",
 );
 
 decl_tx_hash!(
-    /// A Signed Intent Hash is a bech32 encoded string starting with `"signedintent_"
-    SignedIntent,
+    /// A Signed Transaction Intent Hash is a bech32 encoded string starting with `"signedintent_"
+    SignedTransactionIntent,
     "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl",
     "sign...xsk6nl",
+);
+
+decl_tx_hash!(
+    /// A hash of the subintent.
+    /// A Subintent Hash is a bech32 encoded string starting with `"subtxid_"
+    Subintent,
+    "subtxid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sy6hgte",
+    "subt...y6hgte",
 );

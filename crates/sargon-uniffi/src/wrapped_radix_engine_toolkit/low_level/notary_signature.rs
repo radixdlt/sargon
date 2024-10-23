@@ -53,7 +53,7 @@ pub fn notary_signature_get_signature(
 #[uniffi::export]
 pub fn android_notarize_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
-    signed_intent_hash: &SignedIntentHash,
+    signed_intent_hash: &SignedTransactionIntentHash,
 ) -> Result<NotarySignature> {
     sargon::android_notarize_hash_with_private_key_bytes(
         private_key_bytes.into_internal(),

@@ -37,14 +37,17 @@ impl SignaturesOutcome {
             .into_iter()
             .collect::<IndexSet<_>>();
 
-        let successful_hashes: IndexSet<IntentHash> = successful_transactions
+        let successful_hashes = successful_transactions
             .transactions
             .keys()
             .cloned()
-            .collect();
+            .collect::<IndexSet<_>>();
 
-        let failure_hashes: IndexSet<IntentHash> =
-            failed_transactions.transactions.keys().cloned().collect();
+        let failure_hashes = failed_transactions
+            .transactions
+            .keys()
+            .cloned()
+            .collect::<IndexSet<_>>();
 
         let valid = successful_hashes
             .intersection(&failure_hashes)

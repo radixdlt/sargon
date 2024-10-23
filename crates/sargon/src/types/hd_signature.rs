@@ -23,7 +23,7 @@ impl HDSignature {
         Self { input, signature }
     }
 
-    pub fn intent_hash(&self) -> &IntentHash {
+    pub fn intent_hash(&self) -> &TransactionIntentHash {
         &self.input.intent_hash
     }
 

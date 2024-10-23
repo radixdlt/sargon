@@ -5,7 +5,7 @@ import com.radixdlt.sargon.Exactly32Bytes
 import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.NotarySignature
 import com.radixdlt.sargon.PublicKey
-import com.radixdlt.sargon.SignedIntentHash
+import com.radixdlt.sargon.SignedTransactionIntentHash
 import com.radixdlt.sargon.androidNotarizeHashWithPrivateKeyBytes
 import com.radixdlt.sargon.androidSecretKeyGetPublicKeyFromPrivateKeyBytes
 import com.radixdlt.sargon.androidSignHashWithPrivateKeyBytes
@@ -21,10 +21,10 @@ class Curve25519SecretKey(
     }
 
     @Throws(SargonException::class)
-    fun notarize(signedIntentHash: SignedIntentHash): NotarySignature =
+    fun notarize(signedTransactionIntentHash: SignedTransactionIntentHash): NotarySignature =
         androidNotarizeHashWithPrivateKeyBytes(
             privateKeyBytes = exactly32Bytes,
-            signedIntentHash = signedIntentHash
+            signedIntentHash = signedTransactionIntentHash
         )
 
     @Throws(SargonException::class)
