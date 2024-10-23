@@ -688,6 +688,24 @@ pub enum CommonError {
     #[error("Transaction Manifest contains forbidden instructions: {reserved_instructions}")]
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
         10192,
+
+    #[error("Index Not Hardened {bad_value}")]
+    IndexNotHardened { bad_value: u32 } = 10193,
+
+    #[error("Index Securified expected Unsecurified")]
+    IndexSecurifiedExpectedUnsecurified = 10194,
+
+    #[error("Index Unsecurified expected Securified")]
+    IndexUnsecurifiedExpectedSecurified = 10195,
+
+    #[error("Index In Global Key Space Is Lower Than Offset")]
+    IndexInGlobalKeySpaceIsLowerThanOffset = 10196,
+
+    #[error("Index Overflow")]
+    IndexOverflow = 10197,
+
+    #[error("Cannot Add To Index Since It Would Change KeySpace")]
+    CannotAddMoreToIndexSinceItWouldChangeKeySpace = 10198,
 }
 
 #[uniffi::export]

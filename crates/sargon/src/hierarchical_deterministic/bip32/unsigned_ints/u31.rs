@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(
     Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Deref, AsRef,
 )]
-pub struct U31(u32);
+pub struct U31(pub u32);
 
 impl HasSampleValues for U31 {
     fn sample() -> Self {

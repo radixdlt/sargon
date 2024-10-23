@@ -17,13 +17,15 @@ use crate::prelude::*;
 )]
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
-pub struct HDPath(Vec<HDPathComponent>);
+pub struct HDPath {
+    pub components: Vec<HDPathComponent>,
+}
 impl HDPath {
     pub const fn new(components: Vec<HDPathComponent>) -> Self {
-        Self(components)
+        Self { components }
     }
     pub fn components(&self) -> &[HDPathComponent] {
-        &self.0
+        &self.components
     }
 }
 
@@ -45,7 +47,7 @@ impl FromBIP32Str for HDPath {
             .filter(|s| !s.is_empty())
             .map(HDPathComponent::from_bip32_string)
             .collect::<Result<Vec<_>>>()?;
-        Ok(Self(components))
+        Ok(Self::new(components))
     }
 }
 
@@ -57,7 +59,7 @@ impl HDPath {
     {
         let head = "m".to_owned();
         let mut path = vec![head];
-        let tail = self.0.iter().map(map);
+        let tail = self.components().iter().map(map);
         path.extend(tail.collect_vec());
         path.into_iter().join(Self::SEPARATOR)
     }

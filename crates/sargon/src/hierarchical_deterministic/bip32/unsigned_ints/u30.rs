@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(
     Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Deref, AsRef,
 )]
-pub struct U30(u32);
+pub struct U30(pub u32);
 
 impl U30 {
     pub const MAX: u32 = U30_MAX;

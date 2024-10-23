@@ -47,7 +47,7 @@ use crate::prelude::*;
 #[deref(forward)]
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
-pub struct Unhardened(U31);
+pub struct Unhardened(pub U31);
 
 impl Unhardened {
     pub(crate) const fn new(value: U31) -> Self {

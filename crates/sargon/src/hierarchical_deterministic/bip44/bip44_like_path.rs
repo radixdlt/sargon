@@ -41,7 +41,7 @@ use crate::prelude::*;
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
 pub struct BIP44LikePath {
-    index: HDPathComponent,
+    pub index: HDPathComponent,
 }
 impl BIP44LikePath {
     pub fn new(index: HDPathComponent) -> Self {

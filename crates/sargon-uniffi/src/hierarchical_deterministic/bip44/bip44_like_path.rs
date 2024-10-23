@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::BIP44LikePath as InternalBIP44LikePath;
+use sargon::{BIP44LikePath as InternalBIP44LikePath, HasIndex};
 
 /// Either a canonical BIP44 derivation path like so:
 ///
@@ -29,11 +29,11 @@ use sargon::BIP44LikePath as InternalBIP44LikePath;
 /// ```
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct BIP44LikePath {
-    pub path: HDPath,
+    pub index: HDPathComponent,
 }
 
 #[uniffi::export]
-pub fn new_bip44_like_path_from_index(index: HDPathValue) -> BIP44LikePath {
+pub fn new_bip44_like_path_from_index(index: HDPathComponent) -> BIP44LikePath {
     InternalBIP44LikePath::new(index.into()).into()
 }
 
@@ -50,8 +50,10 @@ pub fn bip44_like_path_to_string(path: &BIP44LikePath) -> String {
 }
 
 #[uniffi::export]
-pub fn bip44_like_path_get_address_index(path: &BIP44LikePath) -> HDPathValue {
-    path.into_internal().get_address_index()
+pub fn bip44_like_path_get_address_index(
+    path: &BIP44LikePath,
+) -> HDPathComponent {
+    path.into_internal().index().into()
 }
 
 #[uniffi::export]

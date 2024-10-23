@@ -15,9 +15,9 @@ use crate::prelude::*;
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
 pub struct AccountPath {
-    network_id: NetworkID,
-    key_kind: CAP26KeyKind,
-    index: Hardened,
+    pub network_id: NetworkID,
+    pub key_kind: CAP26KeyKind,
+    pub index: Hardened,
 }
 
 impl HasKeyKind for AccountPath {
@@ -25,12 +25,6 @@ impl HasKeyKind for AccountPath {
         self.key_kind
     }
 }
-
-// impl HasDerivationPathScheme for AccountPath {
-//     fn derivation_path_scheme() -> DerivationPathScheme {
-//         DerivationPathScheme::Cap26
-//     }
-// }
 
 impl IsNetworkAware for AccountPath {
     fn network_id(&self) -> NetworkID {

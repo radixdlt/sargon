@@ -44,7 +44,7 @@ use crate::prelude::*;
 #[deref(forward)]
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
-pub struct UnsecurifiedHardened(U30);
+pub struct UnsecurifiedHardened(pub U30);
 
 impl UnsecurifiedHardened {
     pub const MAX_LOCAL: u32 = U30::MAX;
