@@ -8,7 +8,9 @@ pub struct SignedIntent {
 }
 
 #[uniffi::export]
-pub fn signed_intent_hash(signed_intent: &SignedIntent) -> SignedTransactionIntentHash {
+pub fn signed_intent_hash(
+    signed_intent: &SignedIntent,
+) -> SignedTransactionIntentHash {
     signed_intent.into_internal().hash().into()
 }
 

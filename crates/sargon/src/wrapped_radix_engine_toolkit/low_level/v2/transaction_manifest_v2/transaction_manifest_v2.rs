@@ -19,9 +19,9 @@ impl TransactionManifestV2 {
     ) -> Result<Self> {
         InstructionsV2::new(instructions_string, network_id).map(
             |instructions| Self {
-                    instructions,
-                    blobs,
-                    children,
+                instructions,
+                blobs,
+                children,
             },
         )
     }
@@ -32,9 +32,9 @@ impl TransactionManifestV2 {
         children: ChildIntents,
     ) -> Self {
         Self {
-                instructions,
-                blobs,
-                children,
+            instructions,
+            blobs,
+            children,
         }
     }
 }
@@ -42,9 +42,9 @@ impl TransactionManifestV2 {
 impl TransactionManifestV2 {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-                instructions: InstructionsV2::empty(network_id),
-                blobs: Blobs::default(),
-                children: ChildIntents::empty(),
+            instructions: InstructionsV2::empty(network_id),
+            blobs: Blobs::default(),
+            children: ChildIntents::empty(),
         }
     }
 }
@@ -80,9 +80,9 @@ impl TryFrom<(ScryptoTransactionManifestV2, NetworkID)>
             network_id,
         ))?;
         let value = Self {
-                instructions,
-                blobs: scrypto_manifest.blobs.clone().into(),
-                children: (scrypto_manifest.children.clone(), network_id).into(),
+            instructions,
+            blobs: scrypto_manifest.blobs.clone().into(),
+            children: (scrypto_manifest.children.clone(), network_id).into(),
         };
 
         // Verify that the manifest can be decompiled and that the instructions are from a validated notarized transaction
@@ -127,15 +127,7 @@ impl TransactionManifestV2 {
 
 impl TransactionManifestV2 {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
-        &self.instructions.instructions()
-    }
-
-    pub(crate) fn blobs(&self) -> &Blobs {
-        &self.blobs
-    }
-
-    pub(crate) fn children(&self) -> &ChildIntents {
-        &self.children
+        &self.instructions.instructions_deref()
     }
 
     pub fn manifest_string(&self) -> String {
@@ -160,9 +152,8 @@ impl TransactionManifestV2 {
     }
 
     pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
-        let (addresses, _) = RET_ins_extract_addresses_v2(
-            self.instructions.as_slice(),
-        );
+        let (addresses, _) =
+            RET_ins_extract_addresses_v2(self.instructions.as_slice());
         addresses
             .into_iter()
             .filter_map(|a| {

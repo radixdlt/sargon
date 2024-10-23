@@ -689,17 +689,21 @@ pub enum CommonError {
     ReservedInstructionsNotAllowedInManifest { reserved_instructions: String } =
         10192,
 
-        #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
-        InvalidManifestFailedToDecompile { underlying: String } = 10193,
-    
-        #[error("Invalid SignedPartialTransaction, failed to decompile")]
-        InvalidSignedPartialTransactionFailedToCompile = 10194,
-    
-        #[error("Invalid SignedPartialTransaction, failed to decompile")]
-        InvalidSignedPartialTransactionFailedToDecompile = 10195,
-    
-        #[error("Failed to generate manifest summary")]
-        FailedToGenerateManifestSummary = 10196,
+    #[error("Invalid Transaction Manifest, failed to decompile, reason: '{underlying}'")]
+    InvalidManifestFailedToDecompile { underlying: String } = 10193,
+
+    #[error("Invalid SignedPartialTransaction, failed to decompile")]
+    InvalidSignedPartialTransactionFailedToCompile = 10194,
+
+    #[error("Invalid SignedPartialTransaction, failed to decompile")]
+    InvalidSignedPartialTransactionFailedToDecompile = 10195,
+
+    #[error("Invalid Signed Partial Transaction, failed to encode, reason: '{underlying}'")]
+    InvalidSignedPartialTransactionFailedToEncode { underlying: String } =
+        10196,
+
+    #[error("Failed to generate manifest summary")]
+    FailedToGenerateManifestSummary = 10197,
 }
 
 #[uniffi::export]

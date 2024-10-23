@@ -2,15 +2,7 @@ use crate::prelude::*;
 
 /// Represents the header of an intent in V2, containing network ID,
 /// epoch range, optional proposer timestamps, and an intent discriminator.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, derive_more::Display)]
 #[display("{} intent_discriminator: {}", network_id, intent_discriminator)]
 pub struct IntentHeaderV2 {
     pub network_id: NetworkID,

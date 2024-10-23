@@ -24,12 +24,14 @@ impl Instructions {
         byte_instructions: Vec<u8>,
         network_id: NetworkID,
     ) -> Result<Self> {
-        let instructions = RET_from_payload_bytes_instructions(&byte_instructions)
-            .map_err(|e| {
-                let err_msg = format!("{:?}", e);
-                error!("{}", err_msg);
-                CommonError::FailedToDecodeBytesToManifestInstructions.into()
-            })?;
+        let instructions = RET_from_payload_bytes_instructions(
+            &byte_instructions,
+        )
+        .map_err(|e| {
+            let err_msg = format!("{:?}", e);
+            error!("{}", err_msg);
+            CommonError::FailedToDecodeBytesToManifestInstructions.into()
+        })?;
         Ok(Self {
             instructions,
             network_id,
@@ -60,7 +62,9 @@ impl TryFrom<(&Vec<ScryptoInstruction>, NetworkID)> for Instructions {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            instructions: ScryptoInstructions(scrypto.to_owned().into()).0.to_vec(),
+            instructions: ScryptoInstructions(scrypto.to_owned().into())
+                .0
+                .to_vec(),
             network_id,
         })
     }

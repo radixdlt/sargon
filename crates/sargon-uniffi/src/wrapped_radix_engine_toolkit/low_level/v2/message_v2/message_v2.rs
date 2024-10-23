@@ -26,4 +26,3 @@ pub fn new_message_v2_plaintext_string(string: String) -> MessageV2 {
 pub fn message_v2_as_plaintext(message: &MessageV2) -> Option<String> {
     message.into_internal().as_plaintext()
 }
-

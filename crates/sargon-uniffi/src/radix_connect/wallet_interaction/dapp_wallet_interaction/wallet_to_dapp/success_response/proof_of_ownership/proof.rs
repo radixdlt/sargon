@@ -5,6 +5,5 @@ use sargon::WalletToDappInteractionProofOfOwnership as InternalWalletToDappInter
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum WalletToDappInteractionProofOfOwnership {
     Account(WalletToDappInteractionAccountProof),
-
     Persona(WalletToDappInteractionPersonaProof),
 }

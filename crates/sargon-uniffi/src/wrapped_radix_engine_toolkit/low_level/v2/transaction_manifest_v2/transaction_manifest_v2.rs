@@ -26,14 +26,20 @@ pub fn transaction_manifest_summary_v2(
 pub fn transaction_manifest_involved_resource_addresses_v2(
     manifest: &TransactionManifestV2,
 ) -> Vec<ResourceAddress> {
-    manifest.into_internal().involved_resource_addresses().into_type()
+    manifest
+        .into_internal()
+        .involved_resource_addresses()
+        .into_type()
 }
 
 #[uniffi::export]
 pub fn transaction_manifest_involved_pool_addresses_v2(
     manifest: &TransactionManifestV2,
 ) -> Vec<PoolAddress> {
-    manifest.into_internal().involved_pool_addresses().into_type()
+    manifest
+        .into_internal()
+        .involved_pool_addresses()
+        .into_type()
 }
 
 #[uniffi::export]

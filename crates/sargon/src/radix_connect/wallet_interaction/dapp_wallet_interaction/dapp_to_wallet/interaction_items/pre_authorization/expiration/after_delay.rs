@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Suggests that the subintent's expiry timestamp is set to `current_time + expire_after_seconds`
 /// at the last moment, right before the intent is fixed for signing.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSubintentExpireAfterDelay {
     /// The time (in seconds) after the subintent is signed that it will expire.

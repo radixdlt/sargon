@@ -27,10 +27,7 @@ pub struct Decimal192 {
 
 pub type Decimal = Decimal192;
 
-delegate_display_debug_into!(
-    Decimal192,
-    InternalDecimal192
-);
+delegate_display_debug_into!(Decimal192, InternalDecimal192);
 
 impl Decimal192 {
     pub fn into_internal(&self) -> InternalDecimal192 {

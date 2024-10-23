@@ -7,7 +7,7 @@ macro_rules! decl_version_type {
         paste! {
             #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
             #[serde(transparent)]
-            pub struct [<$name Version>](u64);
+            pub struct [<$name Version>](pub u64);
 
             impl HasSampleValues for [<$name Version>] {
                 fn sample() -> Self {
@@ -32,8 +32,6 @@ macro_rules! decl_version_type {
                     &self.0
                 }
             }
-
-            uniffi::custom_newtype!([<$name Version>], u64);
         }
     };
 }

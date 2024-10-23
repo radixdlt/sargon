@@ -6,7 +6,7 @@ use radix_transactions::manifest::CallMethod;
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())]
 pub struct InstructionsV2 {
-    pub instructions: Vec<ScryptoInstructionV2>, // MUST be first prop, else you break build.
+    pub instructions: Vec<ScryptoInstructionV2>,
     pub network_id: NetworkID,
 }
 
@@ -14,7 +14,7 @@ impl Deref for InstructionsV2 {
     type Target = Vec<ScryptoInstructionV2>;
 
     fn deref(&self) -> &Self::Target {
-        self.instructions()
+        self.instructions.as_ref()
     }
 }
 
@@ -33,7 +33,7 @@ impl InstructionsV2 {
 }
 
 impl InstructionsV2 {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
+    pub(crate) fn instructions_deref(&self) -> &Vec<ScryptoInstructionV2> {
         self.deref()
     }
 }
@@ -51,7 +51,9 @@ impl TryFrom<(&Vec<ScryptoInstructionV2>, NetworkID)> for InstructionsV2 {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            instructions: ScryptoInstructionsV2(scrypto.to_owned().into()).0.to_vec(),
+            instructions: ScryptoInstructionsV2(scrypto.to_owned().into())
+                .0
+                .to_vec(),
             network_id,
         })
     }
@@ -72,7 +74,7 @@ fn instructions_string_from(
 
 impl InstructionsV2 {
     pub fn instructions_string(&self) -> String {
-        instructions_string_from(self.instructions(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
+        instructions_string_from(self.instructions_deref(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -99,12 +101,14 @@ impl InstructionsV2 {
         byte_instructions: Vec<u8>,
         network_id: NetworkID,
     ) -> Result<Self> {
-        let instructions = RET_from_payload_bytes_instructions_v2(&byte_instructions)
-            .map_err(|e| {
-                let err_msg = format!("{:?}", e);
-                error!("{}", err_msg);
-                CommonError::FailedToDecodeBytesToManifestInstructions.into()
-            })?;
+        let instructions =
+            RET_from_payload_bytes_instructions_v2(&byte_instructions)
+                .map_err(|e| {
+                    let err_msg = format!("{:?}", e);
+                    error!("{}", err_msg);
+                    CommonError::FailedToDecodeBytesToManifestInstructions
+                        .into()
+                })?;
         Ok(Self {
             instructions,
             network_id,
@@ -112,7 +116,7 @@ impl InstructionsV2 {
     }
 
     pub fn instructions_as_bytes(&self) -> Vec<u8> {
-        RET_to_payload_bytes_instructions_v2(self.instructions())
+        RET_to_payload_bytes_instructions_v2(&self.instructions_deref())
             .map(|b| b.into())
             .expect("to never fail")
     }

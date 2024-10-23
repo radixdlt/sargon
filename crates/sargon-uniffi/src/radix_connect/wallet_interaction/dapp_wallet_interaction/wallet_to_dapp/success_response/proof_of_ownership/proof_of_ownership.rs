@@ -6,6 +6,5 @@ use sargon::WalletToDappInteractionProofOfOwnershipRequestResponseItem as Intern
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct WalletToDappInteractionProofOfOwnershipRequestResponseItem {
     pub challenge: DappToWalletInteractionAuthChallengeNonce,
-
     pub proofs: Vec<WalletToDappInteractionProofOfOwnership>,
 }

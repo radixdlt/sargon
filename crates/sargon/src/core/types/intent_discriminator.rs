@@ -7,13 +7,7 @@ pub use crate::prelude::*;
 ///
 /// `IntentDiscriminator` is similar to the `Nonce` used in `TransactionHeader`.
 #[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    Clone, Copy, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
 )]
 #[display("{}", self.0)]
 #[debug("{}", self.0)]

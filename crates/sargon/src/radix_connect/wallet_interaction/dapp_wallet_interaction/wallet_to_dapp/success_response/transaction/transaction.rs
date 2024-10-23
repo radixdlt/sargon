@@ -67,7 +67,9 @@ impl HasSampleValues for WalletToDappInteractionTransactionResponseItems {
     }
     fn sample_other() -> Self {
         Self {
-            send: WalletToDappInteractionSendTransactionResponseItem::sample_other(),
+            send:
+                WalletToDappInteractionSendTransactionResponseItem::sample_other(
+                ),
         }
     }
 }

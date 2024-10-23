@@ -9,4 +9,5 @@ pub enum WalletToDappInteractionResponseItems {
         WalletToDappInteractionUnauthorizedRequestResponseItems,
     ),
     Transaction(WalletToDappInteractionTransactionResponseItems),
+    PreAuthorization(WalletToDappInteractionPreAuthorizationResponseItems),
 }

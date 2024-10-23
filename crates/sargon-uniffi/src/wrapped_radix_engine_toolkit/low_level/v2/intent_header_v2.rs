@@ -3,14 +3,7 @@ use sargon::IntentHeaderV2 as InternalIntentHeaderV2;
 
 /// Represents the header of an intent in V2, containing network ID,
 /// epoch range, optional proposer timestamps, and an intent discriminator.
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    uniffi::Record,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct IntentHeaderV2 {
     pub network_id: NetworkID,
     pub start_epoch_inclusive: Epoch,
