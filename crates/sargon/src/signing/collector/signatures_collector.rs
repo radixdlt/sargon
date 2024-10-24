@@ -843,7 +843,7 @@ mod tests {
                 outcome
                     .successful_transactions()
                     .into_iter()
-                    .map(|t| t.intent_hash)
+                    .map(|t| t.signable_id)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
                     t0.clone().transaction_intent_hash(),
@@ -854,7 +854,7 @@ mod tests {
             let st0 = outcome
                 .successful_transactions()
                 .into_iter()
-                .find(|st| st.intent_hash == t0.transaction_intent_hash())
+                .find(|st| st.signable_id == t0.transaction_intent_hash())
                 .unwrap();
 
             assert_eq!(
@@ -874,7 +874,7 @@ mod tests {
             let st1 = outcome
                 .successful_transactions()
                 .into_iter()
-                .find(|st| st.intent_hash == t1.transaction_intent_hash())
+                .find(|st| st.signable_id == t1.transaction_intent_hash())
                 .unwrap();
 
             assert_eq!(
@@ -893,7 +893,7 @@ mod tests {
             let st2 = outcome
                 .successful_transactions()
                 .into_iter()
-                .find(|st| st.intent_hash == t2.transaction_intent_hash())
+                .find(|st| st.signable_id == t2.transaction_intent_hash())
                 .unwrap();
 
             assert_eq!(
@@ -994,7 +994,7 @@ mod tests {
                 outcome
                     .successful_transactions()
                     .into_iter()
-                    .map(|t| t.intent_hash)
+                    .map(|t| t.signable_id)
                     .collect::<HashSet<_>>(),
                 HashSet::from_iter([
                     t0.clone().transaction_intent_hash(),
@@ -1077,7 +1077,7 @@ mod tests {
                     outcome
                         .successful_transactions()
                         .into_iter()
-                        .map(|t| t.intent_hash.clone())
+                        .map(|t| t.signable_id.clone())
                         .collect_vec(),
                     vec![tx0.clone().transaction_intent_hash()]
                 );
@@ -1139,7 +1139,7 @@ mod tests {
                     outcome
                         .failed_transactions()
                         .iter()
-                        .map(|t| t.intent_hash.clone())
+                        .map(|t| t.signable_id.clone())
                         .collect_vec(),
                     failing_transactions
                         .iter()
@@ -1163,7 +1163,7 @@ mod tests {
                     outcome
                         .successful_transactions()
                         .into_iter()
-                        .map(|t| t.intent_hash)
+                        .map(|t| t.signable_id)
                         .collect_vec(),
                     vec![tx.transaction_intent_hash()]
                 )
@@ -1262,7 +1262,7 @@ mod tests {
                     outcome
                         .successful_transactions()
                         .into_iter()
-                        .map(|t| t.intent_hash)
+                        .map(|t| t.signable_id)
                         .collect_vec(),
                     vec![tx1.transaction_intent_hash().clone()]
                 );
@@ -1271,7 +1271,7 @@ mod tests {
                     outcome
                         .failed_transactions()
                         .into_iter()
-                        .map(|t| t.intent_hash)
+                        .map(|t| t.signable_id)
                         .collect_vec(),
                     vec![tx0.transaction_intent_hash().clone()]
                 );
