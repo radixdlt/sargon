@@ -51,9 +51,7 @@ impl TryFrom<(&Vec<ScryptoInstructionV2>, NetworkID)> for InstructionsV2 {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            instructions: ScryptoInstructionsV2(scrypto.to_owned())
-                .0
-                .to_vec(),
+            instructions: ScryptoInstructionsV2(scrypto.to_owned()).0.to_vec(),
             network_id,
         })
     }

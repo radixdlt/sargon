@@ -24,8 +24,7 @@ impl From<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
 
 impl From<Secp256k1PublicKey> for InternalSecp256k1PublicKey {
     fn from(val: Secp256k1PublicKey) -> Self {
-        InternalSecp256k1PublicKey::try_from(val.secret_magic.to_vec())
-            .unwrap()
+        InternalSecp256k1PublicKey::try_from(val.secret_magic.to_vec()).unwrap()
     }
 }
 

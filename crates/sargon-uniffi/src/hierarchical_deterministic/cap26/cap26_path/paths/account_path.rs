@@ -31,6 +31,5 @@ pub fn new_account_path(
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 ) -> AccountPath {
-    InternalAccountPath::new(network_id.into(), key_kind.into(), index)
-        .into()
+    InternalAccountPath::new(network_id.into(), key_kind.into(), index).into()
 }

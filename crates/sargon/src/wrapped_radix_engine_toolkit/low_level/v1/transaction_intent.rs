@@ -69,9 +69,7 @@ fn into_scrypto(
 ) -> ScryptoIntent {
     ScryptoIntent {
         header: (*header).into(),
-        instructions: ScryptoInstructions(
-            manifest.instructions().clone(),
-        ),
+        instructions: ScryptoInstructions(manifest.instructions().clone()),
         blobs: manifest.blobs().clone().into(),
         message: message.clone().into(),
     }
