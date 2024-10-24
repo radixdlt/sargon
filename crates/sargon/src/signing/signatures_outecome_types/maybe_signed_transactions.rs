@@ -64,7 +64,7 @@ impl MaybeSignedTransactions {
     fn validate(&self) {
         for (intent_hash, signatures) in self.transactions.iter() {
             assert!(
-                signatures.iter().all(|s| s.intent_hash() == intent_hash),
+                signatures.iter().all(|s| s.payload_id() == intent_hash),
                 "Discrepancy between intent hash and signature intent hash."
             );
         }

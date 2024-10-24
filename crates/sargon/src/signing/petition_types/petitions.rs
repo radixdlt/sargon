@@ -167,7 +167,7 @@ impl Petitions {
 
     fn add_signature(&self, signature: &HDSignature) {
         let binding = self.txid_to_petition.borrow();
-        let petition = binding.get(signature.intent_hash()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
+        let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
     }
 

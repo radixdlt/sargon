@@ -1281,7 +1281,7 @@ mod tests {
                 assert!(outcome
                     .all_signatures()
                     .into_iter()
-                    .map(|s| s.intent_hash().clone())
+                    .map(|s| s.payload_id().clone())
                     .all(|i| i == tx1.transaction_intent_hash()));
 
                 assert_eq!(
@@ -1511,7 +1511,7 @@ mod tests {
                 let signature =
                     &collector.collect_signatures().await.all_signatures()[0];
                 assert_eq!(
-                    signature.intent_hash(),
+                    signature.payload_id(),
                     &tx.intent.transaction_intent_hash()
                 );
 

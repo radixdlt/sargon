@@ -4,33 +4,33 @@ use crate::prelude::*;
 /// has the same signer, which would be a bug.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 #[debug(
-    "HDSignatureInput {{ intent_hash: {:#?}, owned_factor_instance: {:#?} }}",
-    intent_hash,
+    "HDSignatureInput {{ payload_id: {:#?}, owned_factor_instance: {:#?} }}",
+    payload_id,
     owned_factor_instance
 )]
-pub struct HDSignatureInput {
+pub struct HDSignatureInput<ID: SignablePayloadID> {
     /// Hash which was signed.
-    pub intent_hash: TransactionIntentHash,
+    pub payload_id: ID,
 
     /// The account or identity address of the entity which signed the hash,
     /// with expected public key and with derivation path to derive PrivateKey
     /// with.
     pub owned_factor_instance: OwnedFactorInstance,
 }
-impl HDSignatureInput {
+impl <ID: SignablePayloadID> HDSignatureInput<ID> {
     /// Constructs a new `HDSignatureInput`.
     pub fn new(
-        intent_hash: TransactionIntentHash,
+        payload_id: ID,
         owned_factor_instance: OwnedFactorInstance,
     ) -> Self {
         Self {
-            intent_hash,
+            payload_id,
             owned_factor_instance,
         }
     }
 }
 
-impl HasSampleValues for HDSignatureInput {
+impl HasSampleValues for HDSignatureInput<TransactionIntentHash> {
     fn sample() -> Self {
         Self::new(
             TransactionIntentHash::sample(),
@@ -49,7 +49,7 @@ impl HasSampleValues for HDSignatureInput {
 mod tests {
     use super::*;
 
-    type Sut = HDSignatureInput;
+    type Sut = HDSignatureInput<TransactionIntentHash>;
 
     #[test]
     fn equality_of_samples() {

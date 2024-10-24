@@ -23,7 +23,7 @@ impl PetitionTransactionOutcome {
         neglected_factors: IndexSet<NeglectedFactor>,
     ) -> Self {
         assert!(
-            signatures.iter().all(|s| *s.intent_hash() == intent_hash),
+            signatures.iter().all(|s| *s.payload_id() == intent_hash),
             "Discprenacy! Mismatching intent hash found in a signature."
         );
         Self {
