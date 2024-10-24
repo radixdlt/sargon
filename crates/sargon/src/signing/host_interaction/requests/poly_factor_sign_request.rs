@@ -4,13 +4,13 @@ use crate::prelude::*;
 /// (derivations paths).
 #[derive(derive_more::Debug, Clone)]
 #[debug("per_factor_source: {:#?}", per_factor_source)]
-pub struct PolyFactorSignRequest {
+pub struct PolyFactorSignRequest<SP: SignablePayload> {
     factor_source_kind: FactorSourceKind,
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.
     pub per_factor_source:
-        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput>,
+        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<SP>>,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
@@ -18,7 +18,7 @@ pub struct PolyFactorSignRequest {
         IndexSet<InvalidTransactionIfNeglected>,
 }
 
-impl PolyFactorSignRequest {
+impl <SP: SignablePayload> PolyFactorSignRequest<SP> {
     /// # Panics
     /// Panics if `per_factor_source` is empty
     ///
@@ -27,7 +27,7 @@ impl PolyFactorSignRequest {
         factor_source_kind: FactorSourceKind,
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
-            MonoFactorSignRequestInput,
+            MonoFactorSignRequestInput<SP>,
         >,
         invalid_transactions_if_neglected: IndexSet<
             InvalidTransactionIfNeglected,
@@ -64,7 +64,7 @@ impl PolyFactorSignRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PolyFactorSignRequest;
+    type Sut = PolyFactorSignRequest<CompiledTransactionIntent>;
 
     #[test]
     #[should_panic(

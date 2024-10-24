@@ -3,9 +3,9 @@ use crate::prelude::*;
 /// A request to sign a batch of transactions with a single factor source.
 #[derive(derive_more::Debug, Clone)]
 #[debug("input: {:#?}", input)]
-pub struct MonoFactorSignRequest {
+pub struct MonoFactorSignRequest<SP: SignablePayload> {
     /// The input needed to sign the transactions.
-    pub input: MonoFactorSignRequestInput,
+    pub input: MonoFactorSignRequestInput<SP>,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source, or if we fail to sign
@@ -13,9 +13,9 @@ pub struct MonoFactorSignRequest {
         IndexSet<InvalidTransactionIfNeglected>,
 }
 
-impl MonoFactorSignRequest {
+impl <SP: SignablePayload> MonoFactorSignRequest<SP> {
     pub fn new(
-        input: MonoFactorSignRequestInput,
+        input: MonoFactorSignRequestInput<SP>,
         invalid_transactions_if_neglected: IndexSet<
             InvalidTransactionIfNeglected,
         >,
