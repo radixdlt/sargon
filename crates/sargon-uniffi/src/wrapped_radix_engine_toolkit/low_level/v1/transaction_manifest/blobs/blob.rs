@@ -22,9 +22,9 @@ impl From<InternalBlob> for Blob {
     }
 }
 
-impl Into<InternalBlob> for Blob {
-    fn into(self) -> InternalBlob {
-        InternalBlob(self.secret_magic.into())
+impl From<Blob> for InternalBlob {
+    fn from(val: Blob) -> Self {
+        InternalBlob(val.secret_magic.into())
     }
 }
 

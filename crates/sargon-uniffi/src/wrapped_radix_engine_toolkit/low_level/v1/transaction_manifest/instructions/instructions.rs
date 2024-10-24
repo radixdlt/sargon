@@ -22,9 +22,9 @@ impl From<InternalInstructions> for Instructions {
     }
 }
 
-impl Into<InternalInstructions> for Instructions {
-    fn into(self) -> InternalInstructions {
-        InternalInstructions::new(self.secret_magic, self.network_id.into())
+impl From<Instructions> for InternalInstructions {
+    fn from(val: Instructions) -> Self {
+        InternalInstructions::new(val.secret_magic, val.network_id.into())
             .unwrap()
     }
 }

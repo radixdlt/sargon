@@ -29,11 +29,11 @@ impl From<InternalAssetException> for AssetException {
     }
 }
 
-impl Into<InternalAssetException> for AssetException {
-    fn into(self) -> InternalAssetException {
+impl From<AssetException> for InternalAssetException {
+    fn from(val: AssetException) -> Self {
         InternalAssetException {
-            address: self.address.into(),
-            exception_rule: self.exception_rule.into(),
+            address: val.address.into(),
+            exception_rule: val.exception_rule.into(),
         }
     }
 }

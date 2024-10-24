@@ -47,9 +47,9 @@ impl From<Vec<u8>> for BagOfBytes {
     }
 }
 
-impl Into<Vec<u8>> for BagOfBytes {
-    fn into(self) -> Vec<u8> {
-        self.bytes.into_iter().map(twos_complement_of_i8).collect()
+impl From<BagOfBytes> for Vec<u8> {
+    fn from(val: BagOfBytes) -> Self {
+        val.bytes.into_iter().map(twos_complement_of_i8).collect()
     }
 }
 
@@ -82,9 +82,9 @@ impl From<InternalBagOfBytes> for BagOfBytes {
     }
 }
 
-impl Into<InternalBagOfBytes> for BagOfBytes {
-    fn into(self) -> InternalBagOfBytes {
-        let vec: Vec<u8> = self.into();
+impl From<BagOfBytes> for InternalBagOfBytes {
+    fn from(val: BagOfBytes) -> Self {
+        let vec: Vec<u8> = val.into();
         vec.into()
     }
 }

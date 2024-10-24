@@ -43,11 +43,11 @@ impl From<InternalDecimal192> for Decimal192 {
     }
 }
 
-impl Into<InternalDecimal192> for Decimal192 {
-    fn into(self) -> InternalDecimal192 {
+impl From<Decimal192> for InternalDecimal192 {
+    fn from(val: Decimal192) -> Self {
         // This is safe because the Decimal192 can be created only InternalDecimal192 which is already valid.
         // Here the conversion back happens.
-        self.secret_magic.parse::<InternalDecimal192>().unwrap()
+        val.secret_magic.parse::<InternalDecimal192>().unwrap()
     }
 }
 

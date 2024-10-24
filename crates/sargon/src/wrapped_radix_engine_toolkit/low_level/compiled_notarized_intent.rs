@@ -92,7 +92,7 @@ pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
     ScryptoSignedIntent {
         intent: ScryptoIntent {
             header: TransactionHeader::sample().into(),
-            instructions: ScryptoInstructions(vec![invalid_instruction].into()),
+            instructions: ScryptoInstructions(vec![invalid_instruction]),
             blobs: ScryptoBlobs { blobs: Vec::new() },
             message: ScryptoMessage::None,
         },

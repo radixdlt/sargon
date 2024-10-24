@@ -248,15 +248,6 @@ pub(crate) fn cap26(
     HDPath::new(Vec::from_iter(path))
 }
 
-pub(crate) fn bip44(index: HDPathComponent) -> HDPath {
-    let mut path: [HDPathComponent; 5] = [PURPOSE; 5];
-    path[1] = COIN_TYPE;
-    path[2] = BIP44_ACCOUNT;
-    path[3] = BIP44_CHANGE;
-    path[4] = index;
-    HDPath::new(Vec::from_iter(path))
-}
-
 #[cfg(test)]
 mod tests {
     use serde_json::json;

@@ -23,9 +23,9 @@ impl From<InternalEd25519PublicKey> for Ed25519PublicKey {
     }
 }
 
-impl Into<InternalEd25519PublicKey> for Ed25519PublicKey {
-    fn into(self) -> InternalEd25519PublicKey {
-        InternalEd25519PublicKey::try_from(self.secret_magic.to_vec()).unwrap()
+impl From<Ed25519PublicKey> for InternalEd25519PublicKey {
+    fn from(val: Ed25519PublicKey) -> Self {
+        InternalEd25519PublicKey::try_from(val.secret_magic.to_vec()).unwrap()
     }
 }
 

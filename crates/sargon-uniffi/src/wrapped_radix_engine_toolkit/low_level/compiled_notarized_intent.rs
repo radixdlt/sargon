@@ -20,9 +20,9 @@ impl From<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
     }
 }
 
-impl Into<InternalCompiledNotarizedIntent> for CompiledNotarizedIntent {
-    fn into(self) -> InternalCompiledNotarizedIntent {
-        InternalCompiledNotarizedIntent::new(self.secret_magic.into())
+impl From<CompiledNotarizedIntent> for InternalCompiledNotarizedIntent {
+    fn from(val: CompiledNotarizedIntent) -> Self {
+        InternalCompiledNotarizedIntent::new(val.secret_magic.into())
     }
 }
 

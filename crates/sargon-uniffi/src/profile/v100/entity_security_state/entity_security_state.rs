@@ -30,9 +30,9 @@ impl From<InternalEntitySecurityState> for EntitySecurityState {
     }
 }
 
-impl Into<InternalEntitySecurityState> for EntitySecurityState {
-    fn into(self) -> InternalEntitySecurityState {
-        match self {
+impl From<EntitySecurityState> for InternalEntitySecurityState {
+    fn from(val: EntitySecurityState) -> Self {
+        match val {
             EntitySecurityState::Unsecured { value } => {
                 InternalEntitySecurityState::Unsecured {
                     value: value.into_internal(),

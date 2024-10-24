@@ -26,9 +26,9 @@ impl From<InternalIntentDiscriminator> for IntentDiscriminator {
     }
 }
 
-impl Into<InternalIntentDiscriminator> for IntentDiscriminator {
-    fn into(self) -> InternalIntentDiscriminator {
-        InternalIntentDiscriminator(self.secret_magic)
+impl From<IntentDiscriminator> for InternalIntentDiscriminator {
+    fn from(val: IntentDiscriminator) -> Self {
+        InternalIntentDiscriminator(val.secret_magic)
     }
 }
 

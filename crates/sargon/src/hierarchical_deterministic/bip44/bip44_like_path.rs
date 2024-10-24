@@ -41,11 +41,29 @@ use crate::prelude::*;
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
 pub struct BIP44LikePath {
+    pub account: HDPathComponent,
+    pub change: HDPathComponent,
     pub index: HDPathComponent,
 }
 impl BIP44LikePath {
+    /// # Panics
+    /// Panics if account is not hardened
+    /// Panics if change is hardened
+    pub fn with_account_change_and_index(
+        account: HDPathComponent,
+        change: HDPathComponent,
+        index: HDPathComponent,
+    ) -> Self {
+        assert!(account.is_hardened());
+        assert!(!change.is_hardened());
+        Self {
+            account,
+            change,
+            index,
+        }
+    }
     pub fn new(index: HDPathComponent) -> Self {
-        Self { index }
+        Self::with_account_change_and_index(BIP44_ACCOUNT, BIP44_CHANGE, index)
     }
     pub fn is_canonical(&self) -> bool {
         self.index.is_unhardened()
@@ -73,7 +91,12 @@ impl HasSampleValues for BIP44LikePath {
 
 impl BIP44LikePath {
     pub fn to_hd_path(&self) -> HDPath {
-        bip44(self.index)
+        let mut path: [HDPathComponent; 5] = [PURPOSE; 5];
+        path[1] = COIN_TYPE;
+        path[2] = self.account;
+        path[3] = self.change;
+        path[4] = self.index;
+        HDPath::new(Vec::from_iter(path))
     }
     pub const PATH_DEPTH: usize = 5;
 }
@@ -119,7 +142,11 @@ impl TryFrom<HDPath> for BIP44LikePath {
 
         let index = components[4];
 
-        Ok(Self::new(index))
+        Ok(Self::with_account_change_and_index(
+            bip44_account,
+            bip44_change,
+            index,
+        ))
     }
 }
 
@@ -151,6 +178,28 @@ mod tests {
     use super::*;
 
     type Sut = BIP44LikePath;
+
+    #[test]
+    #[should_panic]
+    fn panics_if_account_is_not_hardened() {
+        _ = Sut::with_account_change_and_index(
+            HDPathComponent::from_global_key_space(0).unwrap(),
+            HDPathComponent::from_global_key_space(0).unwrap(),
+            HDPathComponent::from_global_key_space(0).unwrap(),
+        )
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_if_change_is_hardened() {
+        _ = Sut::with_account_change_and_index(
+            HDPathComponent::from_global_key_space(GLOBAL_OFFSET_HARDENED)
+                .unwrap(),
+            HDPathComponent::from_global_key_space(GLOBAL_OFFSET_HARDENED)
+                .unwrap(),
+            HDPathComponent::from_global_key_space(0).unwrap(),
+        )
+    }
 
     #[test]
     fn equality() {
@@ -263,8 +312,42 @@ mod tests {
     }
 
     #[test]
+    fn string_roundtrip_custom_change_and_account_from_str() {
+        let str = "m/44H/1022H/2H/3/4H";
+        let a: BIP44LikePath = str.parse().unwrap();
+        assert_eq!(a.to_string(), str);
+    }
+
+    #[test]
+    fn string_roundtrip_custom_change_and_account_to_str() {
+        let a = BIP44LikePath::with_account_change_and_index(
+            HDPathComponent::from_local_key_space(
+                5,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+            HDPathComponent::from_local_key_space(
+                1,
+                KeySpace::Unsecurified { is_hardened: false },
+            )
+            .unwrap(),
+            HDPathComponent::from_local_key_space(
+                3,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+        );
+        let str = a.to_string();
+        assert_eq!(str, "m/44H/1022H/5H/1/3H");
+        assert_eq!(BIP44LikePath::from_str(&str).unwrap(), a);
+    }
+
+    #[test]
     fn sample() {
-        assert_eq!(BIP44LikePath::sample().to_string(), "m/44H/1022H/0H/0/0H");
+        assert_eq!(
+            BIP44LikePath::sample_other().to_string(),
+            "m/44H/1022H/0H/0/1H"
+        );
     }
 
     #[test]
@@ -314,6 +397,13 @@ mod tests {
     fn inequality_different_accounts() {
         let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
         let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".parse().unwrap();
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn inequality_different_change() {
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/0H/1/0H".parse().unwrap();
         assert_ne!(a, b);
     }
 

@@ -29,6 +29,8 @@ use sargon::{BIP44LikePath as InternalBIP44LikePath, HasIndex};
 /// ```
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct BIP44LikePath {
+    pub account: HDPathComponent,
+    pub change: HDPathComponent,
     pub index: HDPathComponent,
 }
 

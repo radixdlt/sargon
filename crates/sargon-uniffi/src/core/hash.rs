@@ -26,9 +26,9 @@ impl From<InternalHash> for Hash {
     }
 }
 
-impl Into<InternalHash> for Hash {
-    fn into(self) -> InternalHash {
-        InternalHash::from(self.value.into_internal())
+impl From<Hash> for InternalHash {
+    fn from(val: Hash) -> Self {
+        InternalHash::from(val.value.into_internal())
     }
 }
 

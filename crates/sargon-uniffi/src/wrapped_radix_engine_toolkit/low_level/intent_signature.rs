@@ -20,9 +20,9 @@ impl From<InternalIntentSignature> for IntentSignature {
     }
 }
 
-impl Into<InternalIntentSignature> for IntentSignature {
-    fn into(self) -> InternalIntentSignature {
-        InternalIntentSignature(self.value.into())
+impl From<IntentSignature> for InternalIntentSignature {
+    fn from(val: IntentSignature) -> Self {
+        InternalIntentSignature(val.value.into())
     }
 }
 

@@ -133,6 +133,14 @@ macro_rules! path_union {
                                     return Ok(success);
                         }
                     )+
+                    // This is a hack to fix a bug in the Android app where BIP44 paths
+                    // were incorrectly marked cap26.
+                    $(
+                        if let Ok(success) = $variant_type::deserialize(path)
+                                .map(Self::[< $variant_name:snake >]) {
+                                    return Ok(success);
+                        }
+                    )+
                     return Err(serde::de::Error::custom("Fail"));
 
 
@@ -466,14 +474,14 @@ mod tests {
         let json = r#"
         {
             "scheme": "cap26",
-            "path": "m/44H/1022H/0H/0/0H"
+            "path": "m/44H/1022H/0H/0/1H"
         }
         "#;
         let sut = serde_json::from_str::<Sut>(json).unwrap();
         assert_eq!(
             sut,
             Sut::Bip44Like {
-                value: BIP44LikePath::sample()
+                value: BIP44LikePath::sample_other()
             }
         );
     }

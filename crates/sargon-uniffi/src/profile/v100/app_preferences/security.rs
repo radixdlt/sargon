@@ -39,19 +39,19 @@ impl From<InternalSecurity> for Security {
     }
 }
 
-impl Into<InternalSecurity> for Security {
-    fn into(self) -> InternalSecurity {
+impl From<Security> for InternalSecurity {
+    fn from(val: Security) -> Self {
         InternalSecurity {
             is_cloud_profile_sync_enabled: IsCloudProfileSyncEnabled(
-                self.is_cloud_profile_sync_enabled,
+                val.is_cloud_profile_sync_enabled,
             ),
             is_developer_mode_enabled: IsDeveloperModeEnabled(
-                self.is_developer_mode_enabled,
+                val.is_developer_mode_enabled,
             ),
             is_advanced_lock_enabled: IsAdvancedLockEnabled(
-                self.is_advanced_lock_enabled,
+                val.is_advanced_lock_enabled,
             ),
-            security_structures_of_factor_source_ids: self
+            security_structures_of_factor_source_ids: val
                 .security_structures_of_factor_source_ids
                 .into_internal(),
         }

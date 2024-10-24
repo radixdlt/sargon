@@ -21,9 +21,9 @@ impl From<InternalBlobs> for Blobs {
     }
 }
 
-impl Into<InternalBlobs> for Blobs {
-    fn into(self) -> InternalBlobs {
-        InternalBlobs::from_vec(self.secret_magic.into_internal())
+impl From<Blobs> for InternalBlobs {
+    fn from(val: Blobs) -> Self {
+        InternalBlobs::from_vec(val.secret_magic.into_internal())
     }
 }
 

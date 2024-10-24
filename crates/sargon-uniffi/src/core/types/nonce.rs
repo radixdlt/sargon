@@ -20,9 +20,9 @@ impl From<InternalNonce> for Nonce {
     }
 }
 
-impl Into<InternalNonce> for Nonce {
-    fn into(self) -> InternalNonce {
-        InternalNonce(self.secret_magic)
+impl From<Nonce> for InternalNonce {
+    fn from(val: Nonce) -> Self {
+        InternalNonce(val.secret_magic)
     }
 }
 
