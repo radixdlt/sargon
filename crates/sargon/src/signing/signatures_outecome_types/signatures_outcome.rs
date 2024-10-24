@@ -6,31 +6,31 @@ use crate::prelude::*;
 /// since not enough signatures have been gathered. And a collection of factor sources
 /// which were skipped.
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct SignaturesOutcome {
-    /// A potentially empty collection of transactions which which would be
+pub struct SignaturesOutcome<ID: SignableID> {
+    /// A potentially empty collection of transactions which would be
     /// successful if submitted to the network (from a signatures point of view).
     ///
     /// Potentially empty
-    successful_transactions: MaybeSignedTransactions,
+    successful_transactions: MaybeSignedTransactions<ID>,
 
     /// A collection of transactions which would fail if submitted to the network,
     /// since not enough signatures have been gathered.
     ///
     /// Potentially empty
-    failed_transactions: MaybeSignedTransactions,
+    failed_transactions: MaybeSignedTransactions<ID>,
 
     /// List of all neglected factor sources, either explicitly skipped by user or
     /// implicitly neglected due to failure.
     neglected_factor_sources: IndexSet<NeglectedFactor>,
 }
 
-impl SignaturesOutcome {
+impl <ID: SignableID> SignaturesOutcome<ID> {
     /// # Panics
     /// Panics if the `successful_transactions` or `failed_transactions` shared
     /// either any transaction intent hash, or any signature.
     pub(crate) fn new(
-        successful_transactions: MaybeSignedTransactions,
-        failed_transactions: MaybeSignedTransactions,
+        successful_transactions: MaybeSignedTransactions<ID>,
+        failed_transactions: MaybeSignedTransactions<ID>,
         neglected_factor_sources: impl IntoIterator<Item = NeglectedFactor>,
     ) -> Self {
         let neglected_factor_sources = neglected_factor_sources
@@ -74,15 +74,15 @@ impl SignaturesOutcome {
 
     pub fn signatures_of_successful_transactions(
         &self,
-    ) -> IndexSet<HDSignature> {
+    ) -> IndexSet<HDSignature<ID>> {
         self.successful_transactions.all_signatures()
     }
 
-    pub fn successful_transactions(&self) -> Vec<SignedTransaction> {
+    pub fn successful_transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.successful_transactions.clone().transactions()
     }
 
-    pub fn failed_transactions(&self) -> Vec<SignedTransaction> {
+    pub fn failed_transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.failed_transactions.clone().transactions()
     }
 
@@ -139,13 +139,13 @@ impl SignaturesOutcome {
     #[allow(unused)]
     pub(crate) fn signatures_of_failed_transactions(
         &self,
-    ) -> IndexSet<HDSignature> {
+    ) -> IndexSet<HDSignature<ID>> {
         self.failed_transactions.all_signatures()
     }
 
     #[allow(unused)]
     /// All signatures from both successful transactions and failed transactions.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.signatures_of_successful_transactions()
             .union(&self.signatures_of_failed_transactions())
             .cloned()
@@ -157,7 +157,7 @@ impl SignaturesOutcome {
 mod tests {
 
     use super::*;
-    type Sut = SignaturesOutcome;
+    type Sut = SignaturesOutcome<TransactionIntentHash>;
 
     #[test]
     #[should_panic(

@@ -136,7 +136,7 @@ impl <S: Signable> PetitionForTransaction<S> {
     pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> Option<InvalidTransactionIfNeglected> {
+    ) -> Option<InvalidTransactionIfNeglected<S::SignableID>> {
         if self.has_tx_failed() {
             // No need to display already failed tx.
             return None;
