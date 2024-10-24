@@ -4,9 +4,9 @@ use crate::prelude::*;
 /// with id `factor_source_id` to sign a single transaction with, which hash
 /// is `intent_hash`.
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
-pub struct TransactionSignRequestInput {
+pub struct TransactionSignRequestInput<SP: SignablePayload> {
     /// Compiled Intent
-    compiled_intent: CompiledTransactionIntent,
+    payload: SP,
 
     /// ID of factor to use to sign
     pub(crate) factor_source_id: FactorSourceIDFromHash,
@@ -16,13 +16,13 @@ pub struct TransactionSignRequestInput {
     owned_factor_instances: Vec<OwnedFactorInstance>,
 }
 
-impl TransactionSignRequestInput {
+impl <SP: SignablePayload> TransactionSignRequestInput<SP> {
     /// # Panics
     /// Panics if any of the owned factor instances does not match the `factor_source_id`.
     ///
     /// Panics if `owned_factor_instances` is empty.
     pub(crate) fn new(
-        compiled_intent: CompiledTransactionIntent,
+        payload: SP,
         factor_source_id: FactorSourceIDFromHash,
         owned_factor_instances: IndexSet<OwnedFactorInstance>,
     ) -> Self {
@@ -34,7 +34,7 @@ impl TransactionSignRequestInput {
                     .iter()
                     .all(|f| f.by_factor_source(factor_source_id)), "Discrepancy! Mismatch between FactorSourceID of owned factor instances and specified FactorSourceID, this is a programmer error.");
         Self {
-            compiled_intent,
+            payload,
             factor_source_id,
             owned_factor_instances: owned_factor_instances
                 .into_iter()
@@ -43,18 +43,17 @@ impl TransactionSignRequestInput {
     }
 
     #[allow(unused)]
-    pub fn signature_inputs(&self) -> IndexSet<HDSignatureInput> {
-        let intent_hash =
-            self.compiled_intent.decompile().transaction_intent_hash();
+    pub fn signature_inputs(&self) -> IndexSet<HDSignatureInput<SP::PayloadId>> {
+        let payload_id = self.payload.get_payload_id();
         self.owned_factor_instances
             .clone()
             .into_iter()
-            .map(|fi| HDSignatureInput::new(intent_hash.clone(), fi))
+            .map(|fi| HDSignatureInput::new(payload_id.clone(), fi))
             .collect()
     }
 }
 
-impl HasSampleValues for TransactionSignRequestInput {
+impl HasSampleValues for TransactionSignRequestInput<CompiledTransactionIntent> {
     fn sample() -> Self {
         let owned_factor_instance = OwnedFactorInstance::sample();
         let factor_source_id = &owned_factor_instance.factor_source_id();
@@ -80,7 +79,7 @@ impl HasSampleValues for TransactionSignRequestInput {
 mod tests_batch_req {
     use super::*;
 
-    type Sut = TransactionSignRequestInput;
+    type Sut = TransactionSignRequestInput<CompiledTransactionIntent>;
 
     #[test]
     fn equality() {

@@ -8,7 +8,7 @@ pub trait Signable: Identifiable {
 
     fn get_payload(&self) -> Self::Payload;
 
-    fn get_payload_id(&self) -> Self::SignableID;
+    fn get_id(&self) -> Self::SignableID;
 }
 
 pub trait SignablePayload {
@@ -28,7 +28,7 @@ impl Signable for TransactionIntent {
         self.compile()
     }
 
-    fn get_payload_id(&self) -> Self::SignableID {
+    fn get_id(&self) -> Self::SignableID {
         self.transaction_intent_hash().clone()
     }
 }

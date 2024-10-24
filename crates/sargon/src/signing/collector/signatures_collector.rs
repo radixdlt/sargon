@@ -628,7 +628,7 @@ mod tests {
             let petition =
                 petitions_ref.get(&t.transaction_intent_hash()).unwrap();
             assert_eq!(
-                petition.intent.transaction_intent_hash(),
+                petition.signable.transaction_intent_hash(),
                 t.transaction_intent_hash()
             );
 

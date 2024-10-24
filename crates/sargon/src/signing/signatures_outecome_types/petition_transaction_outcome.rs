@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// a set of neglected factors (might be empty).
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct PetitionTransactionOutcome<ID: SignableID> {
-    payload_id: ID,
+    signable_id: ID,
     pub(crate) transaction_valid: bool,
     pub(crate) signatures: IndexSet<HDSignature<ID>>,
     pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
@@ -18,16 +18,16 @@ impl <ID: SignableID> PetitionTransactionOutcome<ID> {
     /// match `intent_hash`
     pub(crate) fn new(
         transaction_valid: bool,
-        payload_id: ID,
+        signable_id: ID,
         signatures: IndexSet<HDSignature<ID>>,
         neglected_factors: IndexSet<NeglectedFactor>,
     ) -> Self {
         assert!(
-            signatures.iter().all(|s| *s.payload_id() == payload_id),
+            signatures.iter().all(|s| *s.payload_id() == signable_id),
             "Discprenacy! Mismatching intent hash found in a signature."
         );
         Self {
-            payload_id,
+            signable_id,
             transaction_valid,
             signatures,
             neglected_factors,

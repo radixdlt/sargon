@@ -4,21 +4,20 @@ use crate::prelude::*;
 /// Essentially a wrapper around `Iterator<Item = PetitionForEntity>`.
 #[derive(derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForTransaction {
+pub(crate) struct PetitionForTransaction<S: Signable> {
     /// Transaction to sign
-    pub(crate) intent: TransactionIntent,
+    pub(crate) signable: S,
 
-    pub(crate) for_entities:
-        RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity>>,
+    pub(crate) for_entities: RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::SignableID>>>,
 }
 
-impl PetitionForTransaction {
+impl <S: Signable> PetitionForTransaction<S> {
     pub(crate) fn new(
-        intent: TransactionIntent,
-        for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity>,
+        signable: S,
+        for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::SignableID>>,
     ) -> Self {
         Self {
-            intent,
+            signable,
             for_entities: RefCell::new(for_entities),
         }
     }
@@ -34,7 +33,7 @@ impl PetitionForTransaction {
     ///
     /// The third value in the tuple `(_, _, IndexSet<FactorSourceIDFromHash>)` contains the
     /// id of all the factor sources which was skipped.
-    pub(crate) fn outcome(self) -> PetitionTransactionOutcome {
+    pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S::SignableID> {
         let for_entities = self
             .for_entities
             .into_inner()
@@ -58,7 +57,7 @@ impl PetitionForTransaction {
 
         PetitionTransactionOutcome::new(
             transaction_valid,
-            self.intent.transaction_intent_hash(),
+            self.signable.get_id(),
             signatures,
             neglected_factors,
         )
@@ -94,7 +93,7 @@ impl PetitionForTransaction {
             .collect()
     }
 
-    pub(crate) fn add_signature(&self, signature: HDSignature) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<S::SignableID>) {
         let for_entities = self.for_entities.borrow_mut();
         let for_entity = for_entities
             .get(&signature.owned_factor_instance().owner)
@@ -118,7 +117,7 @@ impl PetitionForTransaction {
         ));
         assert!(!self.has_tx_failed());
         TransactionSignRequestInput::new(
-            self.intent.compile(),
+            self.signable.get_payload(),
             *factor_source_id,
             self.all_relevant_factor_instances_of_source(factor_source_id),
         )
@@ -158,7 +157,7 @@ impl PetitionForTransaction {
         }
 
         Some(InvalidTransactionIfNeglected::new(
-            self.intent.transaction_intent_hash(),
+            self.signable.get_id(),
             entities,
         ))
     }
@@ -192,7 +191,7 @@ impl PetitionForTransaction {
     }
 }
 
-impl HasSampleValues for PetitionForTransaction {
+impl HasSampleValues for PetitionForTransaction<TransactionIntent> {
     fn sample() -> Self {
         let account = Account::sample_securified_mainnet(
             "Grace",
@@ -251,7 +250,7 @@ mod tests {
 
     use super::*;
 
-    type Sut = PetitionForTransaction;
+    type Sut = PetitionForTransaction<TransactionIntent>;
 
     #[test]
     fn equality() {
