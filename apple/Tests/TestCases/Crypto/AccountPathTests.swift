@@ -25,7 +25,7 @@ final class AccountPathTests: HDPathProtocolTest<AccountPath> {
 	}
 	
 	func test_init_network_id_key_kind_index() {
-		XCTAssertEqual(SUT.sampleOther, SUT.init(networkID: .mainnet, keyKind: .transactionSigning, index: 1))
+        XCTAssertEqual(SUT.sampleOther, SUT.init(networkID: .mainnet, keyKind: .transactionSigning, index: .unsecurified(UnsecurifiedHardened)))
 	}
 	
 	func test_index() {

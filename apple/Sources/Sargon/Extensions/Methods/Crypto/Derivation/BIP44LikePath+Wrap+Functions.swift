@@ -11,11 +11,11 @@ extension BIP44LikePath {
         bip44LikePathToString(path: self)
     }
 	
-	public init(index: HDPathValue) {
+	public init(index: HdPathComponent) {
 		self = newBip44LikePathFromIndex(index: index)
 	}
 	
-	public var addressIndex: HDPathValue {
+	public var addressIndex: HdPathComponent {
 		bip44LikePathGetAddressIndex(path: self)
 	}
 }

@@ -16,50 +16,56 @@ extension DerivationPath: CustomStringConvertible {
 }
 
 extension DerivationPath: DerivationPathProtocol {
+    public var asGeneral: DerivationPath {
+        self
+    }
+    
     public var asDerivationPath: DerivationPath { self }
 }
 
 public typealias HDPath = HdPath
 
 extension DerivationPath {
-	/// Returns the index, non hardened, so `3H` returns `3`.
-	public var nonHardenedIndex: HDPathValue {
-		let component = self.path.components.last! // safe to unwrap, we disallow empty paths.
-		return component.nonHardenedValue
-	}
+//	/// Returns the index, non hardened, so `3H` returns `3`.
+//	public var nonHardenedIndex: HDPathValue {
+//		let component = self.path.components.last! // safe to unwrap, we disallow empty paths.
+//		return component.nonHardenedValue
+//	}
   
     public var curve: SLIP10Curve {
         switch self {
         case .bip44Like: .secp256k1
-        case .cap26: .curve25519
+        case .account, .identity: .curve25519
         }
     }
 
     public static func forEntity(
         kind: EntityKind,
         networkID: NetworkID,
-        index: HDPathValue
+        index: HdPathComponent
     ) -> Self {
-        switch kind {
-        case .account:
-            AccountPath(
-                networkID: networkID,
-                keyKind: .transactionSigning,
-                index: index
-            ).asDerivationPath
-        case .persona:
-            IdentityPath(
-                networkID: networkID,
-                keyKind: .transactionSigning,
-                index: index
-            ).asDerivationPath
-        }
+//        switch kind {
+//        case .account:
+//            AccountPath(
+//                networkID: networkID,
+//                keyKind: .transactionSigning,
+//                index: index
+//            ).asDerivationPath
+//        case .persona:
+//            IdentityPath(
+//                networkID: networkID,
+//                keyKind: .transactionSigning,
+//                index: index
+//            ).asDerivationPath
+//        }
+        fatalError()
     }
 }
 
 
 extension HdPathComponent {
-	public var nonHardenedValue: HDPathValue {
-		hdPathComponentGetNonHardenedValue(component: self)
+    public var nonHardenedValue: HdPathComponent {
+//		hdPathComponentGetNonHardenedValue(component: self)
+        fatalError()
 	}
 }
