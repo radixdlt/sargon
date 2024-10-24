@@ -97,12 +97,12 @@ impl TryFrom<HDPath> for BIP44LikePath {
         }
         if components[0] != PURPOSE {
             return Err(CommonError::BIP44PurposeNotFound {
-                bad_value: components[0].map_to_global_key_space(),
+                bad_value: u32::from(components[0].index_in_local_key_space()),
             });
         }
         if components[1] != COIN_TYPE {
             return Err(CommonError::CoinTypeNotFound {
-                bad_value: components[1].map_to_global_key_space(),
+                bad_value: u32::from(components[1].index_in_local_key_space()),
             });
         }
         let bip44_account = components[2];

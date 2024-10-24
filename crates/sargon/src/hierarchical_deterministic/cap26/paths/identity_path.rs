@@ -1,5 +1,55 @@
 use crate::prelude::*;
 
+/// A Radix Babylon [BIP-32][bip32] path used to derive identities for Personas, for example `m/44'/1022'/1'/618'/1460'/2'`.
+///
+/// Internally at RDX Works known as a CAP26 path - [see Confuence][cap26].
+///
+/// This comes from the general derivation pattern for Radix addresses according to the [SLIP-10][slip10]
+/// derivation scheme. In the [SLIP-10][slip10] derivation scheme, every level must be hardened, which
+/// is denoted by the `'` or `H` suffix. The official Radix wallet uses 6 levels:
+///
+/// ```text
+/// m / purpose' / coin_type' / network' / entity_kind' / key_kind' / entity_index'
+/// ```
+///
+/// The `IdentityPath` struct is parametrized by Radix network id and account index, but fixes the other
+/// constants in the path as follows:
+///
+/// ```text
+/// m / 44' / 1022' / NETWORK_ID' / 618' / 1460' / ACCOUNT_INDEX'
+/// ```
+///
+/// More generally:
+/// * `purpose` is fixed as `44` as per [BIP-44][bip44].
+/// * `coin_type` is fixed as `1022` for Radix as per [SLIP-0044][slip44].
+/// * `network` is the Radix network id (1 for `mainnet`, 2 for `stokenet`, ...).
+/// * `entity_kind` is the type of Radix entity which keys are being generated for. Possible values include:
+///   * 525 - Pre-allocated [accounts][account].
+///   * 618 - Pre-allocated [identities][identity], which are used for [ROLA][rola] for personas.
+/// * `key_kind` is the type of key. Possible values include:
+///   * 1460 - Transaction Signing (the default).
+///   * 1678 - Authentication Signing such as [ROLA][rola]. This is used if a separate key is
+///     created for ROLA and stored in account metadata.
+/// * `entity_index` is the 0-based index of the particular entity which is being derived.
+///
+/// See `test_asciisum` for the source of the `entity_kind` and `key_kind` numbers.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+///
+/// assert!("m/44'/1022'/1'/618'/1460'/1'".parse::<IdentityPath>().is_ok());
+/// assert!("m/44H/1022H/1H/618H/1460H/1H".parse::<IdentityPath>().is_ok());
+/// ```
+///
+/// [cap26]: https://radixdlt.atlassian.net/wiki/x/aoC4r
+/// [bip32]: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
+/// [bip44]: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
+/// [slip10]: https://github.com/satoshilabs/slips/blob/master/slip-0010.md
+/// [slip44]: https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+/// [rola]: https://docs.radixdlt.com/docs/rola-radix-off-ledger-auth
+/// [account]: https://docs.radixdlt.com/docs/account
+/// [identity]: https://docs.radixdlt.com/docs/identity
 #[derive(
     Clone,
     PartialEq,

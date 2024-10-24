@@ -11,8 +11,8 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate hdpath;
-/// use hdpath::prelude::*;
+/// extern crate sargon;
+/// use sargon::prelude::*;
 /// // From Global KeySpace
 /// assert_eq!(
 ///   Hardened::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap(),
@@ -27,7 +27,7 @@ use crate::prelude::*;
 /// assert!(
 ///   matches!(
 ///     Hardened::from_global_key_space(3),
-///     Err(CommonError::IndexNotHardened { bad_index: 3 })
+///     Err(CommonError::IndexNotHardened { bad_value: 3 })
 ///  )
 /// );
 ///

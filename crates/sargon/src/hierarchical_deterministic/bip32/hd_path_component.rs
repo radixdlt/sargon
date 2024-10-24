@@ -13,8 +13,8 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate hdpath;
-/// use hdpath::prelude::*;
+/// extern crate sargon;
+/// use sargon::prelude::*;
 ///
 /// assert_eq!(
 ///     HDPathComponent::from_global_key_space(0).unwrap(),
@@ -208,8 +208,6 @@ impl From<CAP26KeyKind> for HDPathComponent {
 }
 
 /// # Safety
-/// Unsafe, does not validate the value to be small enough.
-///
 /// Only use this for tests and constants.
 const unsafe fn hard(value: u16) -> HDPathComponent {
     unsafe {
@@ -220,8 +218,6 @@ const unsafe fn hard(value: u16) -> HDPathComponent {
 }
 
 /// # Safety
-/// Unsafe, does not validate the value to be small enough.
-///
 /// Only use this for tests and constants.
 const unsafe fn unhard(value: u16) -> HDPathComponent {
     HDPathComponent::Unsecurified(Unsecurified::Unhardened(Unhardened::new(
@@ -230,7 +226,9 @@ const unsafe fn unhard(value: u16) -> HDPathComponent {
 }
 
 pub(crate) const PURPOSE: HDPathComponent = unsafe { hard(44) };
-pub(crate) const GET_ID_LAST: HDPathComponent = unsafe { hard(365) };
+pub const GET_ID_CAP26_LOCAL: u16 = 365;
+pub(crate) const GET_ID_LAST: HDPathComponent =
+    unsafe { hard(GET_ID_CAP26_LOCAL) };
 pub(crate) const COIN_TYPE: HDPathComponent = unsafe { hard(1022) };
 pub(crate) const BIP44_ACCOUNT: HDPathComponent = unsafe { hard(0) };
 pub(crate) const BIP44_CHANGE: HDPathComponent = unsafe { unhard(0) };
@@ -484,7 +482,6 @@ mod tests {
             "1073741823"
         );
     }
-
 
     #[test]
     fn from_str_invalid() {

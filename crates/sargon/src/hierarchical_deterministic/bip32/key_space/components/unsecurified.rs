@@ -6,8 +6,8 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate hdpath;
-/// use hdpath::prelude::*;
+/// extern crate sargon;
+/// use sargon::prelude::*;
 ///
 /// assert_eq!(
 ///     Unsecurified::from_global_key_space(1).unwrap(),

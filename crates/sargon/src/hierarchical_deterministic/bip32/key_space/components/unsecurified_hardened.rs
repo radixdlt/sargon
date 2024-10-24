@@ -6,8 +6,8 @@ use crate::prelude::*;
 /// The internal representation hold a non-hardened, so called "local" offset, and at the time of usage, when forming a BIP32 path, we "map" it to a global offset by adding the `GLOBAL_OFFSET_HARDENED`.
 /// # Examples
 /// ```
-/// extern crate hdpath;
-/// use hdpath::prelude::*;
+/// extern crate sargon;
+/// use sargon::prelude::*;
 ///
 /// assert_eq!(
 ///   UnsecurifiedHardened::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap().index_in_local_key_space(),

@@ -5,8 +5,8 @@ use crate::prelude::*;
 /// Represented internally using a U31.
 /// # Examples
 /// ```
-/// extern crate hdpath;
-/// use hdpath::prelude::*;
+/// extern crate sargon;
+/// use sargon::prelude::*;
 ///
 /// assert_eq!(
 ///     Unhardened::from_local_key_space(0u32).unwrap().map_to_global_key_space(),

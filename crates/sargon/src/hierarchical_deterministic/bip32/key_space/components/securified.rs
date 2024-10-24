@@ -11,8 +11,8 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate hdpath;
-/// use hdpath::prelude::*;
+/// extern crate sargon;
+/// use sargon::prelude::*;
 /// // From Global KeySpace
 /// assert_eq!(
 ///   SecurifiedU30::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED_SECURIFIED)

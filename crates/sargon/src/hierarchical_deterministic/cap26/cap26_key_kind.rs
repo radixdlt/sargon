@@ -58,7 +58,9 @@ impl TryFrom<U31> for CAP26KeyKind {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+
 
     #[test]
     fn discriminant() {
