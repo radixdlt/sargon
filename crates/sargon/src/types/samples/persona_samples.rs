@@ -17,7 +17,8 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
             "Ziggy",
             IdentityAddress::random(NetworkID::Mainnet),
             || {
-                let idx = HDPathComponent::from(2);
+                let idx =
+                    Hardened::from_local_key_space_unsecurified(2u32).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r2(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Identity,
                     idx,
@@ -29,7 +30,8 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
             "Superman",
             IdentityAddress::random(NetworkID::Mainnet),
             || {
-                let idx = HDPathComponent::from(3);
+                let idx =
+                    Hardened::from_local_key_space_unsecurified(3u32).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r3(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Identity,
                     idx,
@@ -41,7 +43,8 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
             "Banksy",
             IdentityAddress::random(NetworkID::Mainnet),
             || {
-                let idx = HDPathComponent::from(4);
+                let idx =
+                    Hardened::from_local_key_space_unsecurified(4u32).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r4(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Identity,
                     idx,
@@ -53,7 +56,8 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
             "Voltaire",
             IdentityAddress::random(NetworkID::Mainnet),
             || {
-                let idx = HDPathComponent::from(5);
+                let idx =
+                    Hardened::from_local_key_space_unsecurified(5u32).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r5(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Identity,
                     idx,
@@ -65,7 +69,8 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
             "Kasparov",
             IdentityAddress::random(NetworkID::Mainnet),
             || {
-                let idx = HDPathComponent::from(6);
+                let idx =
+                    Hardened::from_local_key_space_unsecurified(6u32).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Identity,
                     idx,
@@ -77,7 +82,8 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
             "Pelé",
             IdentityAddress::random(NetworkID::Mainnet),
             || {
-                let idx = HDPathComponent::from(7);
+                let idx =
+                    Hardened::from_local_key_space_unsecurified(7u32).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r7(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Identity,
                     idx,

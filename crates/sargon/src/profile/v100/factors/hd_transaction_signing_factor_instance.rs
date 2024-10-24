@@ -1,25 +1,55 @@
 use crate::prelude::*;
 
+pub trait HasKeyKind {
+    fn key_kind(&self) -> CAP26KeyKind;
+}
+
+pub trait IsEntityPath:
+    NewEntityPath
+    + IsNetworkAware
+    + HasEntityKind
+    + HasKeyKind
+    + Clone
+    + Into<DerivationPath>
+    + TryFrom<DerivationPath, Error = CommonError>
+{
+    fn derivation_path(&self) -> DerivationPath {
+        self.clone().into()
+    }
+}
+impl<
+        T: NewEntityPath
+            + Clone
+            + IsNetworkAware
+            + HasEntityKind
+            + HasKeyKind
+            + Into<DerivationPath>
+            + TryFrom<DerivationPath, Error = CommonError>,
+    > IsEntityPath for T
+{
+}
+
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath + Clone> {
+pub struct HDFactorInstanceTransactionSigning<T: IsEntityPath> {
     pub factor_source_id: FactorSourceIDFromHash,
     pub public_key: PublicKey,
-    pub path: E,
+    pub path: T,
 }
 
-impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
+impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
     fn try_from_factor_instance(
         value: HierarchicalDeterministicFactorInstance,
     ) -> Result<Self> {
-        value
-            .derivation_path()
-            .as_cap26()
-            .ok_or(CommonError::WrongEntityKindOfInFactorInstancesPath).cloned()
-            .and_then(|p| {
-                p.try_into()
-                    .map_err(|_| CommonError::WrongEntityKindOfInFactorInstancesPath)
+        T::try_from(value
+            .derivation_path())
+            .and_then(|p: T| {
+                if p.get_entity_kind() != T::entity_kind() {
+                    Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
+                } else {
+                    Ok(p)
+                }
             })
             .and_then(|p: T| {
                 if !p.key_kind().is_transaction_signing() {
@@ -36,15 +66,11 @@ impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
     }
 }
 
-impl<E: IsEntityPath + Clone> HasEntityPath<E>
-    for HDFactorInstanceTransactionSigning<E>
-{
-    fn path(&self) -> E {
-        self.path.clone()
+impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
+    pub fn network_id(&self) -> NetworkID {
+        self.path.network_id()
     }
-}
 
-impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
     pub fn public_key(&self) -> HierarchicalDeterministicPublicKey {
         HierarchicalDeterministicPublicKey::new(
             self.public_key,
@@ -63,7 +89,7 @@ pub type HDFactorInstanceIdentityCreation =
 
 impl<T> HDFactorInstanceTransactionSigning<T>
 where
-    T: IsEntityPath + Clone,
+    T: IsEntityPath,
 {
     pub fn new(
         hd_factor_instance: HierarchicalDeterministicFactorInstance,
@@ -72,7 +98,7 @@ where
     }
 }
 
-impl<E: IsEntityPath + Clone> From<HDFactorInstanceTransactionSigning<E>>
+impl<E: IsEntityPath> From<HDFactorInstanceTransactionSigning<E>>
     for HierarchicalDeterministicFactorInstance
 {
     fn from(value: HDFactorInstanceTransactionSigning<E>) -> Self {
@@ -116,10 +142,7 @@ mod tests {
             FactorSourceIDFromHash::sample(),
             hd_key,
         );
-        assert_eq!(
-            HDFactorInstanceAccountCreation::new(hd_fi),
-            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
-        );
+        assert!(HDFactorInstanceAccountCreation::new(hd_fi).is_err());
     }
 
     #[test]
@@ -129,7 +152,7 @@ mod tests {
             AccountPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
-                0,
+                UnsecurifiedHardened::from_local_key_space(0).unwrap(),
             )
             .into(),
         );
@@ -172,10 +195,7 @@ mod tests {
             FactorSourceIDFromHash::sample(),
             hd_key,
         );
-        assert_eq!(
-            HDFactorInstanceIdentityCreation::new(hd_fi),
-            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
-        );
+        assert!(HDFactorInstanceIdentityCreation::new(hd_fi).is_err());
     }
 
     #[test]
@@ -185,7 +205,7 @@ mod tests {
             IdentityPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
-                0,
+                Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
             )
             .into(),
         );

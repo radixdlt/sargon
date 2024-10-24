@@ -67,7 +67,7 @@ impl Profile {
         kind: EntityKind,
         network_id: NetworkID,
         factor_source_id: FactorSourceIDFromHash,
-    ) -> HDPathValue {
+    ) -> u32 {
         match kind {
             EntityKind::Persona => {
                 unreachable!("Personas are not supported yet")
@@ -102,7 +102,7 @@ impl Profile {
         &self,
         kind: EntityKind,
         network_id: NetworkID,
-    ) -> HDPathValue {
+    ) -> u32 {
         self.next_derivation_index_for_entity_for_factor_source(
             kind,
             network_id,

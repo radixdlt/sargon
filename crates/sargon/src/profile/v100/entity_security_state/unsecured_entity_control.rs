@@ -21,7 +21,7 @@ impl UnsecuredEntityControl {
         entity_creating_factor_instance: HDFactorInstanceTransactionSigning<T>,
     ) -> Self
     where
-        T: IsEntityPath + Clone,
+        T: IsEntityPath,
     {
         Self {
             transaction_signing: entity_creating_factor_instance.into(),

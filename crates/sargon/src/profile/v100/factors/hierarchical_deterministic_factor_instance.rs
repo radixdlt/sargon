@@ -38,19 +38,19 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn new_for_entity(
         factor_source_id: FactorSourceIDFromHash,
         entity_kind: CAP26EntityKind,
-        index: HDPathComponent,
+        index: Hardened,
     ) -> Self {
         let derivation_path: DerivationPath = match entity_kind {
             CAP26EntityKind::Account => AccountPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::TransactionSigning,
-                index.index(),
+                index,
             )
             .into(),
             CAP26EntityKind::Identity => IdentityPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::TransactionSigning,
-                index.index(),
+                index,
             )
             .into(),
         };
@@ -103,13 +103,10 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     pub fn key_kind(&self) -> Option<CAP26KeyKind> {
-        match &self.derivation_path() {
-            DerivationPath::CAP26 { value } => match value {
-                CAP26Path::GetID { value: _ } => None,
-                CAP26Path::Identity { value } => Some(value.key_kind()),
-                CAP26Path::Account { value } => Some(value.key_kind()),
-            },
-            DerivationPath::BIP44Like { value: _ } => None,
+        match self.derivation_path() {
+            DerivationPath::Account { value } => Some(value.key_kind()),
+            DerivationPath::Identity { value } => Some(value.key_kind()),
+            DerivationPath::Bip44Like { value: _ } => None,
         }
     }
 }
@@ -169,11 +166,12 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     /// A sample used to facilitate unit tests.
-    fn sample_with_key_kind(
-        key_kind: CAP26KeyKind,
-        index: HDPathValue,
-    ) -> Self {
-        let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
+    fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {
+        let path = AccountPath::new(
+            NetworkID::Mainnet,
+            key_kind,
+            UnsecurifiedHardened::from_local_key_space(index).unwrap(),
+        );
         let mwp = MnemonicWithPassphrase::sample();
         let seed = mwp.to_seed();
         let private_key = seed.derive_private_key(&path);
@@ -268,19 +266,6 @@ mod tests {
             ),
         );
         assert_eq!(sut.key_kind(), Some(CAP26KeyKind::TransactionSigning));
-    }
-
-    #[test]
-    fn key_kind_cap26_getid_is_none() {
-        let derivation_path: DerivationPath = GetIDPath::default().into();
-        let sut = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::sample(),
-            HierarchicalDeterministicPublicKey::new(
-                PublicKey::sample_ed25519(),
-                derivation_path,
-            ),
-        );
-        assert_eq!(sut.key_kind(), None);
     }
 
     #[test]

@@ -28,7 +28,6 @@ use crate::prelude::*;
 /// ```
 #[derive(
     Clone,
-    Debug,
     PartialEq,
     Eq,
     Hash,
@@ -36,152 +35,273 @@ use crate::prelude::*;
     Ord,
     SerializeDisplay,
     DeserializeFromStr,
+    derive_more::Debug,
     derive_more::Display,
 )]
-#[display("{}", self.bip32_string())]
+#[display("{}", self.to_bip32_string())]
+#[debug("{}", self.to_bip32_string_debug())]
 pub struct BIP44LikePath {
-    pub path: HDPath,
+    pub account: HDPathComponent,
+    pub change: HDPathComponent,
+    pub index: HDPathComponent,
+}
+impl BIP44LikePath {
+    /// # Panics
+    /// Panics if account is not hardened
+    /// Panics if change is hardened
+    pub fn with_account_change_and_index(
+        account: HDPathComponent,
+        change: HDPathComponent,
+        index: HDPathComponent,
+    ) -> Self {
+        assert!(account.is_hardened());
+        assert!(!change.is_hardened());
+        Self {
+            account,
+            change,
+            index,
+        }
+    }
+    pub fn new(index: HDPathComponent) -> Self {
+        Self::with_account_change_and_index(BIP44_ACCOUNT, BIP44_CHANGE, index)
+    }
+    pub fn is_canonical(&self) -> bool {
+        self.index.is_unhardened()
+    }
+}
+
+impl HasDerivationPathScheme for BIP44LikePath {
+    fn derivation_path_scheme() -> DerivationPathScheme {
+        DerivationPathScheme::Bip44Olympia
+    }
+}
+
+impl HasSampleValues for BIP44LikePath {
+    fn sample() -> Self {
+        Self::new(HDPathComponent::Unsecurified(Unsecurified::Unhardened(
+            Unhardened::from_local_key_space(0u32).unwrap(),
+        )))
+    }
+    fn sample_other() -> Self {
+        Self::new(HDPathComponent::Unsecurified(Unsecurified::Hardened(
+            UnsecurifiedHardened::from_local_key_space(1u32).unwrap(),
+        )))
+    }
 }
 
 impl BIP44LikePath {
-    pub fn from(path: HDPath) -> Self {
-        Self { path }
+    pub fn to_hd_path(&self) -> HDPath {
+        let mut path: [HDPathComponent; 5] = [PURPOSE; 5];
+        path[1] = COIN_TYPE;
+        path[2] = self.account;
+        path[3] = self.change;
+        path[4] = self.index;
+        HDPath::new(Vec::from_iter(path))
     }
     pub const PATH_DEPTH: usize = 5;
+}
 
-    fn assert_depth_of(path: &HDPath) -> Result<(), CommonError> {
-        let found = path.depth();
-        if found != Self::PATH_DEPTH {
-            return Err(CommonError::InvalidDepthOfBIP44Path {
-                expected: Self::PATH_DEPTH as u64,
-                found: found as u64,
-            });
-        }
-        Ok(())
-    }
-
-    /// Returns true if this is a canonical BIP44 path, with the last path component
-    /// - the `address_index` component - being NOT hardened.
-    pub fn is_canonical(&self) -> bool {
-        !self.path.components.last().unwrap().is_hardened()
-    }
-
-    pub fn get_address_index(&self) -> HDPathValue {
-        self.last_component().index()
+impl From<BIP44LikePath> for HDPath {
+    fn from(path: BIP44LikePath) -> Self {
+        path.to_hd_path()
     }
 }
 
-impl TryFrom<&HDPath> for BIP44LikePath {
+impl TryFrom<HDPath> for BIP44LikePath {
     type Error = CommonError;
+    fn try_from(path: HDPath) -> Result<Self> {
+        let components = path.components();
 
-    fn try_from(value: &HDPath) -> Result<Self> {
-        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
-            CommonError::InvalidDepthOfBIP44Path {
+        if components.len() != Self::PATH_DEPTH {
+            return Err(CommonError::InvalidDepthOfBIP44Path {
                 expected: Self::PATH_DEPTH as u64,
-                found: v as u64,
-            }
-        })?;
-
-        BIP44LikePath::assert_depth_of(value)?;
-        let account = &components[2];
-        if !account.is_hardened() {
+                found: components.len() as u64,
+            });
+        }
+        if components[0] != PURPOSE {
+            return Err(CommonError::BIP44PurposeNotFound {
+                bad_value: u32::from(components[0].index_in_local_key_space()),
+            });
+        }
+        if components[1] != COIN_TYPE {
+            return Err(CommonError::CoinTypeNotFound {
+                bad_value: u32::from(components[1].index_in_local_key_space()),
+            });
+        }
+        let bip44_account = components[2];
+        if bip44_account.is_unhardened() {
             return Err(CommonError::InvalidBIP44LikePathAccountWasNotHardened);
         }
-        let change = &components[3];
-        if change.is_hardened() {
+        let bip44_change = components[3];
+
+        if bip44_change.is_hardened() {
             return Err(
                 CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened,
             );
         }
 
-        Ok(Self::from(path))
+        let index = components[4];
+
+        Ok(Self::with_account_change_and_index(
+            bip44_account,
+            bip44_change,
+            index,
+        ))
     }
 }
 
-impl BIP44LikePath {
-    fn with_account_and_index(
-        account: HDPathValue,
-        index: HDPathValue,
-    ) -> Self {
-        let c0 = HDPathComponent::bip44_purpose(); // purpose
-        let c1 = HDPathComponent::bip44_cointype(); // cointype
-        let c2 = HDPathComponent::harden(account); // account
-        let c3 = HDPathComponent::non_hardened(0); // change
-        let c4 = HDPathComponent::harden(index); // index
-        let components = vec![c0, c1, c2, c3, c4];
-        let path = HDPath::from_components(components);
-        Self::from(path)
+impl ToBIP32Str for BIP44LikePath {
+    fn to_bip32_string(&self) -> String {
+        self.to_hd_path().to_bip32_string()
     }
-
-    pub fn new(index: HDPathValue) -> Self {
-        Self::with_account_and_index(0, index)
+    fn to_bip32_string_debug(&self) -> String {
+        self.to_hd_path().to_bip32_string_debug()
     }
 }
-
-impl Derivation for BIP44LikePath {
-    fn curve(&self) -> SLIP10Curve {
-        self.scheme().curve()
-    }
-
-    fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::BIP44Like {
-            value: self.clone(),
-        }
-    }
-    fn hd_path(&self) -> &HDPath {
-        &self.path
+impl FromBIP32Str for BIP44LikePath {
+    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+        HDPath::from_bip32_string(s).and_then(Self::try_from)
     }
 }
-
-impl BIP44LikePath {
-    fn scheme(&self) -> DerivationPathScheme {
-        DerivationPathScheme::Bip44Olympia
-    }
-}
-
 impl FromStr for BIP44LikePath {
     type Err = CommonError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (path, _) = HDPath::try_parse_base(s, |v| {
-            CommonError::InvalidDepthOfBIP44Path {
-                expected: Self::PATH_DEPTH as u64,
-                found: v as u64,
-            }
-        })?;
-        Self::try_from(&path)
-    }
-}
-
-impl HasSampleValues for BIP44LikePath {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid sample")
-    }
-
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::from_str("m/44H/1022H/0H/0/1H").expect("Valid sample")
+    fn from_str(s: &str) -> Result<Self> {
+        Self::from_bip32_string(s)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
 
-    use crate::prelude::*;
+    use super::*;
+
+    type Sut = BIP44LikePath;
+
+    #[test]
+    #[should_panic]
+    fn panics_if_account_is_not_hardened() {
+        _ = Sut::with_account_change_and_index(
+            HDPathComponent::from_global_key_space(0).unwrap(),
+            HDPathComponent::from_global_key_space(0).unwrap(),
+            HDPathComponent::from_global_key_space(0).unwrap(),
+        )
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_if_change_is_hardened() {
+        _ = Sut::with_account_change_and_index(
+            HDPathComponent::from_global_key_space(GLOBAL_OFFSET_HARDENED)
+                .unwrap(),
+            HDPathComponent::from_global_key_space(GLOBAL_OFFSET_HARDENED)
+                .unwrap(),
+            HDPathComponent::from_global_key_space(0).unwrap(),
+        )
+    }
 
     #[test]
     fn equality() {
-        assert_eq!(BIP44LikePath::sample(), BIP44LikePath::sample());
-        assert_eq!(
-            BIP44LikePath::sample_other(),
-            BIP44LikePath::sample_other()
-        );
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(BIP44LikePath::sample(), BIP44LikePath::sample_other());
+        assert_ne!(Sut::sample(), Sut::sample_other());
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", Sut::sample()), "m/44H/1022H/0H/0/0");
+        assert_eq!(format!("{}", Sut::sample_other()), "m/44H/1022H/0H/0/1H");
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", Sut::sample()), "m/44'/1022'/0'/0/0");
+        assert_eq!(format!("{:?}", Sut::sample_other()), "m/44'/1022'/0'/0/1'");
+    }
+
+    #[test]
+    fn to_bip32_path() {
+        let sut = Sut::sample();
+        assert_eq!(format!("{}", sut), "m/44H/1022H/0H/0/0");
+    }
+
+    #[test]
+    fn from_str_hardened() {
+        let sut = Sut::from_str("m/44H/1022H/0H/0/8H").unwrap();
+        assert_eq!(
+            sut.index,
+            HDPathComponent::Unsecurified(Unsecurified::Hardened(
+                UnsecurifiedHardened::from_local_key_space(8u32).unwrap(),
+            ))
+        );
+    }
+
+    #[test]
+    fn from_str_hardened_non_canonical() {
+        let sut = Sut::from_str("m/44'/1022'/0'/0/8'").unwrap();
+        assert_eq!(
+            sut.index,
+            HDPathComponent::Unsecurified(Unsecurified::Hardened(
+                UnsecurifiedHardened::from_local_key_space(8u32).unwrap(),
+            ))
+        );
+    }
+
+    #[test]
+    fn from_str_unhardened() {
+        let sut = Sut::from_str("m/44H/1022H/0H/0/6").unwrap();
+        assert_eq!(
+            sut.index,
+            HDPathComponent::Unsecurified(Unsecurified::Unhardened(
+                Unhardened::from_local_key_space(6u32).unwrap(),
+            ))
+        );
+    }
+
+    #[test]
+    fn from_str_unhardened_non_canonical() {
+        let sut = Sut::from_str("m/44'/1022'/0'/0/6").unwrap();
+        assert_eq!(
+            sut.index,
+            HDPathComponent::Unsecurified(Unsecurified::Unhardened(
+                Unhardened::from_local_key_space(6u32).unwrap(),
+            ))
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_unhardened() {
+        let sut = Sut::sample();
+
+        assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H/0H/0/0"));
+        assert_json_roundtrip(&sut);
+    }
+    #[test]
+    fn json_roundtrip_hardened() {
+        let sut = Sut::sample_other();
+
+        assert_json_value_eq_after_roundtrip(
+            &sut,
+            json!("m/44H/1022H/0H/0/1H"),
+        );
+        assert_json_roundtrip(&sut);
+    }
+
+    #[test]
+    fn json_fails_for_invalid() {
+        assert_json_value_fails::<Sut>(json!(""));
+        assert_json_value_fails::<Sut>(json!("foobar"));
+        assert_json_value_fails::<Sut>(json!("^"));
+        assert_json_value_fails::<Sut>(json!("S"));
+        assert_json_value_fails::<Sut>(json!("2"));
+        assert_json_value_fails::<Sut>(json!("2'"));
+        assert_json_value_fails::<Sut>(json!("2X"));
+        assert_json_value_fails::<Sut>(json!("   "));
     }
 
     #[test]
@@ -192,8 +312,42 @@ mod tests {
     }
 
     #[test]
+    fn string_roundtrip_custom_change_and_account_from_str() {
+        let str = "m/44H/1022H/2H/3/4H";
+        let a: BIP44LikePath = str.parse().unwrap();
+        assert_eq!(a.to_string(), str);
+    }
+
+    #[test]
+    fn string_roundtrip_custom_change_and_account_to_str() {
+        let a = BIP44LikePath::with_account_change_and_index(
+            HDPathComponent::from_local_key_space(
+                5,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+            HDPathComponent::from_local_key_space(
+                1,
+                KeySpace::Unsecurified { is_hardened: false },
+            )
+            .unwrap(),
+            HDPathComponent::from_local_key_space(
+                3,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+        );
+        let str = a.to_string();
+        assert_eq!(str, "m/44H/1022H/5H/1/3H");
+        assert_eq!(BIP44LikePath::from_str(&str).unwrap(), a);
+    }
+
+    #[test]
     fn sample() {
-        assert_eq!(BIP44LikePath::sample().to_string(), "m/44H/1022H/0H/0/0H");
+        assert_eq!(
+            BIP44LikePath::sample_other().to_string(),
+            "m/44H/1022H/0H/0/1H"
+        );
     }
 
     #[test]
@@ -211,18 +365,6 @@ mod tests {
     fn invalid_depth_3() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H"),
-            Err(CommonError::InvalidDepthOfBIP44Path {
-                expected: BIP44LikePath::PATH_DEPTH as u64,
-                found: 3
-            })
-        );
-    }
-
-    #[test]
-    fn invalid_depth_3_via_hdpath() {
-        let hdpath: HDPath = "m/44H/1022H/0H".parse().unwrap();
-        assert_eq!(
-            BIP44LikePath::try_from(&hdpath),
             Err(CommonError::InvalidDepthOfBIP44Path {
                 expected: BIP44LikePath::PATH_DEPTH as u64,
                 found: 3
@@ -255,32 +397,20 @@ mod tests {
     fn inequality_different_accounts() {
         let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
         let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".parse().unwrap();
-        assert!(a != b);
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn inequality_different_change() {
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/0H/1/0H".parse().unwrap();
+        assert_ne!(a, b);
     }
 
     #[test]
     fn inequality_different_index() {
         let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
         let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".parse().unwrap();
-        assert!(a != b);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let str = "m/44H/1022H/0H/0/0H";
-        let parsed: BIP44LikePath = str.parse().unwrap();
-        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(
-            &parsed,
-            json!("m/44H/1022H/0H/0/1H"),
-        );
-    }
-
-    #[test]
-    fn new_with_account() {
-        assert_ne!(
-            BIP44LikePath::with_account_and_index(1, 0),
-            BIP44LikePath::new(0)
-        );
+        assert_ne!(a, b);
     }
 }

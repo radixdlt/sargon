@@ -104,7 +104,7 @@ impl Persona {
     #[cfg(not(tarpaulin_include))] // false negative
     fn sample_at_index_name_network<P, E>(
         network_id: NetworkID,
-        index: HDPathValue,
+        index: u32,
         display_name: &str,
         is_hidden: bool,
         name: PersonaDataEntryName,
@@ -143,8 +143,12 @@ impl Persona {
         );
 
         let mut persona = Self::new(
-            private_hd_factor_source
-                .derive_entity_creation_factor_instance(network_id, index),
+            private_hd_factor_source.derive_entity_creation_factor_instance(
+                network_id,
+                HDPathComponent::Unsecurified(Unsecurified::Hardened(
+                    UnsecurifiedHardened::from_local_key_space(index).unwrap(),
+                )),
+            ),
             DisplayName::new(display_name).unwrap(),
             PersonaData::new(name, phone_numbers, email_addresses),
         );
@@ -156,7 +160,7 @@ impl Persona {
 
     #[cfg(not(tarpaulin_include))] // false negative
     fn sample_at_index_name<P, E>(
-        index: HDPathValue,
+        index: u32,
         display_name: &str,
         is_hidden: bool,
         name: PersonaDataEntryName,

@@ -30,9 +30,7 @@ pub trait EntityAddress: AddressViaRet {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    fn from_hd_factor_instance_virtual_entity_creation<
-        E: IsEntityPath + Clone,
-    >(
+    fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
         hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
     ) -> Self {
         let network_id =

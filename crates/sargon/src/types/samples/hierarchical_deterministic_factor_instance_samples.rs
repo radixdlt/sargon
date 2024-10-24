@@ -3,7 +3,7 @@ use crate::prelude::*;
 impl HierarchicalDeterministicFactorInstance {
     pub(crate) fn sample_id_to_instance(
         entity_kind: CAP26EntityKind,
-        index: HDPathComponent,
+        index: Hardened,
     ) -> impl Fn(FactorSourceIDFromHash) -> Self {
         move |id: FactorSourceIDFromHash| {
             Self::new_for_entity(id, entity_kind, index)
@@ -11,14 +11,14 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     pub fn sample_mainnet_tx_account(
-        index: HDPathComponent,
+        index: Hardened,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Self {
         Self::new_for_entity(factor_source_id, CAP26EntityKind::Account, index)
     }
 
     pub fn sample_mainnet_tx_identity(
-        index: HDPathComponent,
+        index: Hardened,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Self {
         Self::new_for_entity(factor_source_id, CAP26EntityKind::Identity, index)
@@ -29,7 +29,7 @@ impl HierarchicalDeterministicFactorInstance {
         Self::new_for_entity(
             FactorSourceIDFromHash::sample_at(0),
             entity_kind,
-            HDPathComponent::from(0),
+            Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
         )
     }
 
@@ -47,7 +47,7 @@ impl HierarchicalDeterministicFactorInstance {
         Self::new_for_entity(
             FactorSourceIDFromHash::sample_at(1),
             entity_kind,
-            HDPathComponent::from(1),
+            Hardened::from_local_key_space_unsecurified(1u32).unwrap(),
         )
     }
 
@@ -65,7 +65,7 @@ impl HierarchicalDeterministicFactorInstance {
         Self::new_for_entity(
             FactorSourceIDFromHash::sample_at(10),
             entity_kind,
-            HDPathComponent::from(8),
+            Hardened::from_local_key_space_unsecurified(8u32).unwrap(),
         )
     }
 

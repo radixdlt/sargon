@@ -59,9 +59,15 @@ mod tests {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::sample();
         let account_creating_factor_instance_1 = private_hd_factor_source
-            .derive_entity_creation_factor_instance(NetworkID::Mainnet, 0);
+            .derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(0).unwrap(),
+            );
         let account_creating_factor_instance_2 = private_hd_factor_source
-            .derive_entity_creation_factor_instance(NetworkID::Mainnet, 1);
+            .derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(1).unwrap(),
+            );
 
         let account_1 = Account::new(
             account_creating_factor_instance_1.clone(),
@@ -75,7 +81,10 @@ mod tests {
         );
 
         let persona_creating_factor_instance = private_hd_factor_source
-            .derive_entity_creation_factor_instance(NetworkID::Mainnet, 1);
+            .derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(1).unwrap(),
+            );
         let persona = Persona::new(
             persona_creating_factor_instance.clone(),
             DisplayName::sample(),

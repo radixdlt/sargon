@@ -265,7 +265,7 @@
                     ]
                 },
                 {
-                    "path": "m/1H/2H/3H/4H/2147483647H",
+                    "path": "m/1H/2H/3H/4H/1073741823S",
                     "childKeys": [
                         {
                             "curve": "secp256k1",
@@ -521,7 +521,7 @@
                     ]
                 },
                 {
-                    "path": "m/2H/3H/4H/2147483647H",
+                    "path": "m/2H/3H/4H/1073741823S",
                     "childKeys": [
                         {
                             "curve": "secp256k1",
@@ -745,7 +745,7 @@
                     ]
                 },
                 {
-                    "path": "m/3H/4H/2147483647H",
+                    "path": "m/3H/4H/1073741823S",
                     "childKeys": [
                         {
                             "curve": "secp256k1",
@@ -937,7 +937,7 @@
                     ]
                 },
                 {
-                    "path": "m/1H/2147483647H",
+                    "path": "m/1H/1073741823S",
                     "childKeys": [
                         {
                             "curve": "secp256k1",
@@ -1033,7 +1033,7 @@
                     ]
                 },
                 {
-                    "path": "m/2147483647H",
+                    "path": "m/1073741823S",
                     "childKeys": [
                         {
                             "curve": "secp256k1",

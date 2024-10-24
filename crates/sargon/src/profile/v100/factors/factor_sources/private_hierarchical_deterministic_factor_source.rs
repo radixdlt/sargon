@@ -93,10 +93,10 @@ impl PrivateHierarchicalDeterministicFactorSource {
     pub fn derive_entity_creation_factor_instance<T>(
         &self,
         network_id: NetworkID,
-        index: HDPathValue,
+        index: HDPathComponent,
     ) -> HDFactorInstanceTransactionSigning<T>
     where
-        T: IsEntityPath + Clone,
+        T: IsEntityPath,
     {
         self.derive_entity_creation_factor_instances(network_id, [index])
             .into_iter()
@@ -107,13 +107,14 @@ impl PrivateHierarchicalDeterministicFactorSource {
     pub fn derive_entity_creation_factor_instances<T>(
         &self,
         network_id: NetworkID,
-        indices: impl IntoIterator<Item = HDPathValue>,
+        indices: impl IntoIterator<Item = HDPathComponent>,
     ) -> Vec<HDFactorInstanceTransactionSigning<T>>
     where
-        T: IsEntityPath + Clone,
+        T: IsEntityPath,
     {
         let paths = indices
             .into_iter()
+            .map(|i| Hardened::try_from(i).expect("only supports hardened"))
             .map(|i| T::new(network_id, CAP26KeyKind::TransactionSigning, i));
 
         let mut seed = self.mnemonic_with_passphrase.to_seed();

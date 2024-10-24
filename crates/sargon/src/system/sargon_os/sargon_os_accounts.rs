@@ -483,12 +483,8 @@ mod tests {
                 .unwrap()
                 .transaction_signing
                 .derivation_path()
-                .hd_path()
-                .components
-                .last()
-                .unwrap()
                 .index(),
-            0
+            HDPathComponent::unsecurified_hardened(0).unwrap()
         );
     }
 
@@ -516,12 +512,8 @@ mod tests {
                 .unwrap()
                 .transaction_signing
                 .derivation_path()
-                .hd_path()
-                .components
-                .last()
-                .unwrap()
                 .index(),
-            1
+            HDPathComponent::unsecurified_hardened(1).unwrap()
         );
     }
 
@@ -553,12 +545,9 @@ mod tests {
                     .unwrap()
                     .transaction_signing
                     .derivation_path()
-                    .hd_path()
-                    .components
-                    .last()
-                    .unwrap()
                     .index()
             })
+            .map(|i| u32::from(i.index_in_local_key_space()))
             .collect_vec();
         assert_eq!(indices, (0u32..n).collect_vec());
     }
