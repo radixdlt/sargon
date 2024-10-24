@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub(crate) struct SignaturesCollectorPreprocessor<S: Signable + Debug + Eq + PartialEq + Clone> {
-    signables: IdentifiedVecOf<S>,
+    signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,
 }
 
 pub(crate) fn sort_group_factors(
@@ -30,8 +30,8 @@ pub(crate) fn sort_group_factors(
 }
 
 impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreprocessor<S> {
-    pub(super) fn new(signables: IdentifiedVecOf<S>) -> Self {
-        Self { signables }
+    pub(super) fn new(signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>) -> Self {
+        Self { signables_with_entities }
     }
 
     pub(super) fn analyzing_signables(
@@ -51,7 +51,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
         profile_factor_sources: IndexSet<FactorSource>,
         role_kind: RoleKind,
     ) -> (Petitions<S>, IndexSet<FactorSourcesOfKind>) {
-        let transactions = self.signables;
+        let transactions = self.signables_with_entities;
         let mut petitions_for_all_transactions =
             IndexMap::<S::SignableID, PetitionForTransaction<S>>::new();
 
@@ -91,7 +91,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
             let mut petitions_for_entities =
                 HashMap::<AddressOfAccountOrPersona, PetitionForEntity<S::SignableID>>::new();
 
-            let id = transaction.get_id();
+            let id = transaction.signable.get_id();
             for entity in transaction.entities_requiring_auth() {
                 let address = entity.address();
                 let petition = PetitionForEntity::new_from_entity(
@@ -107,7 +107,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
             }
 
             let petition_of_tx = PetitionForTransaction::new(
-                transaction.clone(),
+                transaction.signable.clone(),
                 petitions_for_entities,
             );
 
