@@ -20,7 +20,14 @@ final class IdentityPathTests: HDPathProtocolTest<IdentityPath> {
 		XCTAssertThrowsError(try SUT(string: "m/44H/1022H/1H/525H/1460H/0H"))
 	}
 	
-//	func test_init_network_id_key_kind_index() {
-//		XCTAssertEqual(SUT.sampleOther, SUT.init(networkID: .mainnet, keyKind: .transactionSigning, index: 1))
-//	}
+	func test_init_network_id_key_kind_index() throws {
+        try XCTAssertEqual(
+            SUT.sampleOther,
+            SUT.init(
+                networkID: .mainnet,
+                keyKind: .transactionSigning,
+                index: Hardened.unsecurified(UnsecurifiedHardened(localKeySpace: 1))
+            )
+        )
+	}
 }
