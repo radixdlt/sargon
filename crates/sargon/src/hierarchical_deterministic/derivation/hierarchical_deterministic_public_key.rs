@@ -49,10 +49,8 @@ impl HasSampleValues for HierarchicalDeterministicPublicKey {
         let path = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,
-            UnsecurifiedHardened::from_global_key_space(
-                GLOBAL_OFFSET_HARDENED,
-            )
-            .unwrap(),
+            UnsecurifiedHardened::from_global_key_space(GLOBAL_OFFSET_HARDENED)
+                .unwrap(),
         );
         let seed = mwp.to_seed();
         let private_key = seed.derive_private_key(&path);

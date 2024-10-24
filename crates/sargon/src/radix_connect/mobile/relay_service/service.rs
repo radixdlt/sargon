@@ -138,8 +138,8 @@ mod tests {
                 .unwrap();
 
             // Encrypt the response
-            let encrypted = EncryptionScheme::default()
-                .encrypt(&body, &mut encryption_key);
+            let encrypted =
+                EncryptionScheme::default().encrypt(&body, &mut encryption_key);
             let hex = hex_encode(encrypted);
             let success_response = SuccessResponse::new(
                 SessionID::sample(),

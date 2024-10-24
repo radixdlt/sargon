@@ -60,8 +60,6 @@ mod tests {
 
     use super::*;
 
-
-
     #[test]
     fn discriminant() {
         assert_eq!(CAP26KeyKind::TransactionSigning.discriminant(), 1460);
