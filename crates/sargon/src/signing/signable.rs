@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub trait Signable: Identifiable {
 
-    type Payload: SignablePayload;
+    type Payload: SignablePayload + PartialEq + Eq + Clone + Debug + std::hash::Hash;
 
     type SignableID: SignableID;
 

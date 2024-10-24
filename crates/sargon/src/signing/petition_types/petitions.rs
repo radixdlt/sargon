@@ -16,33 +16,33 @@ pub(crate) struct Petitions<S: Signable> {
     ///
     /// Where A, B, C and D, all use the factor source, e.g. some arculus
     /// card which the user has setup as a factor (source) for all these accounts.
-    pub(crate) factor_source_to_intent_hashes:
-        HashMap<FactorSourceIDFromHash, IndexSet<TransactionIntentHash>>,
+    pub(crate) factor_source_to_signable_id:
+        HashMap<FactorSourceIDFromHash, IndexSet<S::SignableID>>,
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<TransactionIntentHash, PetitionForTransaction<S>>>,
+        RefCell<IndexMap<S::SignableID, PetitionForTransaction<S>>>,
 }
 
 impl <S: Signable> Petitions<S> {
     pub(crate) fn new(
-        factor_source_to_intent_hashes: HashMap<
+        factor_source_to_signable_ids: HashMap<
             FactorSourceIDFromHash,
-            IndexSet<TransactionIntentHash>,
+            IndexSet<S::SignableID>,
         >,
         txid_to_petition: IndexMap<
-            TransactionIntentHash,
+            S::SignableID,
             PetitionForTransaction<S>,
         >,
     ) -> Self {
         Self {
-            factor_source_to_intent_hashes,
+            factor_source_to_signable_id: factor_source_to_signable_ids,
             txid_to_petition: RefCell::new(txid_to_petition),
         }
     }
 
-    pub(crate) fn outcome(self) -> SignaturesOutcome {
+    pub(crate) fn outcome(self) -> SignaturesOutcome<S::SignableID> {
         let txid_to_petition = self.txid_to_petition.into_inner();
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
@@ -78,7 +78,7 @@ impl <S: Signable> Petitions<S> {
             .clone()
             .iter()
             .flat_map(|f| {
-                self.factor_source_to_intent_hashes
+                self.factor_source_to_signable_id
                     .get(f)
                     .expect("Should be able to lookup intent hash for each factor source, did you call this method with irrelevant factor sources? Or did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `factor_source_to_intent_hash`.map")
                     .iter()
@@ -94,7 +94,7 @@ impl <S: Signable> Petitions<S> {
     pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected> {
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::SignableID>> {
         self.each_petition(
             factor_source_ids.clone(),
             |p| {
@@ -156,7 +156,7 @@ impl <S: Signable> Petitions<S> {
 
     pub(crate) fn status(&self) -> PetitionsStatus {
         self.each_petition(
-            self.factor_source_to_intent_hashes
+            self.factor_source_to_signable_id
                 .keys()
                 .cloned()
                 .collect(),
