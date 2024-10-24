@@ -181,7 +181,7 @@ impl <S: Signable> Petitions<S> {
 
     pub(crate) fn process_batch_response(
         &self,
-        response: SignWithFactorsOutcome,
+        response: SignWithFactorsOutcome<S::SignableID>,
     ) {
         match response {
             SignWithFactorsOutcome::Signed {

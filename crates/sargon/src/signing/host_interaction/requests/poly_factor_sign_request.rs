@@ -14,8 +14,7 @@ pub struct PolyFactorSignRequest<SP: SignablePayload> {
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
-    pub invalid_transactions_if_neglected:
-        IndexSet<InvalidTransactionIfNeglected>,
+    pub invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<SP::PayloadId>>,
 }
 
 impl <SP: SignablePayload> PolyFactorSignRequest<SP> {
@@ -29,9 +28,7 @@ impl <SP: SignablePayload> PolyFactorSignRequest<SP> {
             FactorSourceIDFromHash,
             MonoFactorSignRequestInput<SP>,
         >,
-        invalid_transactions_if_neglected: IndexSet<
-            InvalidTransactionIfNeglected,
-        >,
+        invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<SP::PayloadId>>,
     ) -> Self {
         assert!(
             !per_factor_source.is_empty(),

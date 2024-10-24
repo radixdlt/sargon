@@ -10,15 +10,13 @@ pub struct MonoFactorSignRequest<SP: SignablePayload> {
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source, or if we fail to sign
     pub invalid_transactions_if_neglected:
-        IndexSet<InvalidTransactionIfNeglected>,
+        IndexSet<InvalidTransactionIfNeglected<SP::PayloadId>>,
 }
 
 impl <SP: SignablePayload> MonoFactorSignRequest<SP> {
     pub fn new(
         input: MonoFactorSignRequestInput<SP>,
-        invalid_transactions_if_neglected: IndexSet<
-            InvalidTransactionIfNeglected,
-        >,
+        invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<SP::PayloadId>>,
     ) -> Self {
         Self {
             input,
