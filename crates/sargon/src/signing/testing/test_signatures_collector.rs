@@ -7,7 +7,7 @@ impl SignaturesCollector<TransactionIntent> {
     pub(crate) fn new_test_with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
-        transactions: IdentifiedVecOf<TXToSign>,
+        transactions: IdentifiedVecOf<SignableWithEntities>,
         interactors: Arc<dyn SignInteractors>,
         role_kind: RoleKind,
     ) -> Self {
@@ -22,7 +22,7 @@ impl SignaturesCollector<TransactionIntent> {
     pub(crate) fn new_test(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
         simulated_user: SimulatedUser,
         role_kind: RoleKind,
     ) -> Self {
@@ -38,7 +38,7 @@ impl SignaturesCollector<TransactionIntent> {
     pub(crate) fn test_prudent_with_factors_and_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::new_test(
             finish_early_strategy,
@@ -51,7 +51,7 @@ impl SignaturesCollector<TransactionIntent> {
 
     pub(crate) fn test_prudent_with_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::test_prudent_with_factors_and_finish_early(
             finish_early_strategy,
@@ -61,7 +61,7 @@ impl SignaturesCollector<TransactionIntent> {
     }
 
     pub(crate) fn test_prudent(
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::test_prudent_with_finish_early(
             SigningFinishEarlyStrategy::default(),
@@ -70,7 +70,7 @@ impl SignaturesCollector<TransactionIntent> {
     }
 
     pub(crate) fn test_prudent_with_failures(
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
         simulated_failures: SimulatedFailures,
     ) -> Self {
         Self::new_test(
@@ -84,7 +84,7 @@ impl SignaturesCollector<TransactionIntent> {
 
     pub(crate) fn test_lazy_sign_minimum_no_failures_with_factors(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::new_test(
             SigningFinishEarlyStrategy::default(),
@@ -96,7 +96,7 @@ impl SignaturesCollector<TransactionIntent> {
     }
 
     pub(crate) fn test_lazy_sign_minimum_no_failures(
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::test_lazy_sign_minimum_no_failures_with_factors(
             FactorSource::sample_all(),
@@ -106,7 +106,7 @@ impl SignaturesCollector<TransactionIntent> {
 
     pub(crate) fn test_lazy_always_skip_with_factors(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::new_test(
             SigningFinishEarlyStrategy::default(),
@@ -118,7 +118,7 @@ impl SignaturesCollector<TransactionIntent> {
     }
 
     pub(crate) fn test_lazy_always_skip(
-        transactions: impl IntoIterator<Item = TXToSign>,
+        transactions: impl IntoIterator<Item =SignableWithEntities>,
     ) -> Self {
         Self::test_lazy_always_skip_with_factors(
             FactorSource::sample_all(),

@@ -9,6 +9,8 @@ pub trait Signable: Identifiable {
     fn get_payload(&self) -> Self::Payload;
 
     fn get_id(&self) -> Self::SignableID;
+
+    fn entities_requiring_signing(&self, profile: &Profile) -> Result<IndexSet<AccountOrPersona>>;
 }
 
 pub trait SignablePayload {
@@ -30,6 +32,15 @@ impl Signable for TransactionIntent {
 
     fn get_id(&self) -> Self::SignableID {
         self.transaction_intent_hash().clone()
+    }
+
+    fn entities_requiring_signing(&self, profile: &Profile) -> Result<IndexSet<AccountOrPersona>> {
+        let summary = self.manifest_summary()?;
+
+        ExtractorOfEntitiesRequiringAuth::extract(
+            profile,
+            summary
+        )
     }
 }
 

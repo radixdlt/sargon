@@ -38,12 +38,12 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
         profile: &Profile,
         signables: Vec<S>,
     ) -> Result<Self> {
-        let transactions = signables
+        let signables_with_entities = signables
             .into_iter()
-            .map(|i| TXToSign::extracting_from_intent_and_profile(&i, profile))
+            .map(|s| SignableWithEntities::extracting_from_profile(&s, profile))
             .collect::<Result<Vec<_>>>()?;
 
-        Ok(Self::new(IdentifiedVecOf::from_iter(transactions)))
+        Ok(Self::new(IdentifiedVecOf::from_iter(signables_with_entities)))
     }
 
     pub(super) fn preprocess(
