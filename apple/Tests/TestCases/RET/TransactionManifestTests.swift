@@ -62,11 +62,7 @@ CALL_METHOD
 															Tuple(
 																Tuple(
 																	Tuple(
-																		Tuple(
-																			Tuple(
-																				Tuple()
-																			)
-																		)
+																		
 																	)
 																)
 															)
@@ -88,7 +84,7 @@ CALL_METHOD
 """
 		let sut = try SUT(instructionsString: instructionsString, networkID: .stokenet, blobs: []) // should be OK
 		let intent = TransactionIntent(header: .sample, manifest: sut, message: .sample)
-		XCTAssertEqual(intent.hash().description, "txid_rdx1uwcfczupvvrrtxwxx6p5jugaxvu3j83tj5nz9pnrr44jyxccg2cqhuvzhy")
+		XCTAssertEqual(intent.hash().description, "txid_rdx1mecs336t36x7rcuyhwa0jtsef08jq5r573nfa63t8f4aq9faxrls2n3u3c")
 	}
 	
 	func test_from_instructions_string_with_exceeded_sbor_depth_throws() {
