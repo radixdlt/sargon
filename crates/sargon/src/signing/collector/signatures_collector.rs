@@ -24,8 +24,6 @@ pub struct SignaturesCollector<S: Signable> {
     /// Mutable internal state of the collector which builds up the list
     /// of signatures from each used factor source.
     state: RefCell<SignaturesCollectorState<S>>,
-
-    phantom: PhantomData<S>,
 }
 
 // === PUBLIC ===
@@ -80,8 +78,7 @@ impl <S: Signable> SignaturesCollector<S> {
 
         Self {
             dependencies,
-            state: RefCell::new(state),
-            phantom: PhantomData,
+            state: RefCell::new(state)
         }
     }
 
