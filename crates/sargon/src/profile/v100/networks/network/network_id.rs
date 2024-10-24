@@ -131,8 +131,13 @@ impl TryFrom<u8> for NetworkID {
 impl TryFrom<U31> for NetworkID {
     type Error = CommonError;
     fn try_from(value: U31) -> Result<Self> {
-        let discriminant = u32::from(value) as u8;
-        Self::try_from(discriminant)
+        let value = u32::from(value);
+        if value >= u8::MAX as u32 {
+            return Err(CommonError::InvalidNetworkIDExceedsLimit {
+                bad_value: value,
+            });
+        }
+        Self::try_from(value as u8)
     }
 }
 

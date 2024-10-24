@@ -331,14 +331,14 @@ mod tests {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/618H/1460H/4294967296H"),
             Err(CommonError::InvalidBIP32Path {
-                bad_value: "m/44H/1022H/1H/618H/1460H/4294967296H".to_string()
+                bad_value: "4294967296H".to_string()
             })
         )
     }
     #[test]
     fn cointype_not_found() {
         assert_eq!(
-            IdentityPath::from_str("m/44H/33H/1H/618H/1460H/0"), // `33` instead of 1022
+            IdentityPath::from_str("m/44H/33H/1H/618H/1460H/0H"), // `33` instead of 1022
             Err(CommonError::CoinTypeNotFound { bad_value: 33 })
         )
     }

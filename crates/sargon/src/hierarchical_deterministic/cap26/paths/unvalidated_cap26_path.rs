@@ -93,7 +93,24 @@ mod tests {
     }
 
     #[test]
-    fn from_str_invalid_network_id() {
+    fn from_str_invalid_network_id_unknown() {
+        assert!(matches!(
+            Sut::try_from(
+                HDPath::from_str("m/44H/1022H/5555/525H/1460H/0H").unwrap()
+            ),
+            Err(CommonError::NotAllComponentsAreHardened)
+        ));
+
+        assert!(matches!(
+            Sut::try_from(
+                HDPath::from_str("m/44H/1022H/200H/525H/1460H/0H").unwrap()
+            ),
+            Err(CommonError::UnknownNetworkID { bad_value: _ })
+        ));
+    }
+
+    #[test]
+    fn from_str_invalid_network_id_too_large() {
         assert!(matches!(
             Sut::try_from(
                 HDPath::from_str("m/44H/1022H/5555/525H/1460H/0H").unwrap()
@@ -105,7 +122,7 @@ mod tests {
             Sut::try_from(
                 HDPath::from_str("m/44H/1022H/5555H/525H/1460H/0H").unwrap()
             ),
-            Err(CommonError::UnknownNetworkID { bad_value: _ })
+            Err(CommonError::InvalidNetworkIDExceedsLimit { bad_value: 5555 })
         ));
     }
 

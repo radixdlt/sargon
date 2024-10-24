@@ -412,7 +412,7 @@ mod tests {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/1460H/4294967296H"),
             Err(CommonError::InvalidBIP32Path {
-                bad_value: "m/44H/1022H/1H/525H/1460H/4294967296H".to_string()
+                bad_value: "4294967296H".to_string()
             })
         )
     }
