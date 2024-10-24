@@ -3,17 +3,17 @@ use crate::prelude::*;
 /// An immutable "snapshot" of `PetitionForFactorsState`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(super) struct PetitionForFactorsStateSnapshot {
+pub(super) struct PetitionForFactorsStateSnapshot<ID: SignablePayloadID> {
     /// Factors that have signed.
-    signed: IndexSet<HDSignature>,
+    signed: IndexSet<HDSignature<ID>>,
 
     /// Factors that has been neglected.
     neglected: IndexSet<NeglectedFactorInstance>,
 }
 
-impl PetitionForFactorsStateSnapshot {
+impl <ID: SignablePayloadID> PetitionForFactorsStateSnapshot<ID> {
     pub(super) fn new(
-        signed: IndexSet<HDSignature>,
+        signed: IndexSet<HDSignature<ID>>,
         neglected: IndexSet<NeglectedFactorInstance>,
     ) -> Self {
         Self { signed, neglected }
@@ -51,7 +51,7 @@ impl PetitionForFactorsStateSnapshot {
     }
 }
 
-impl HasSampleValues for PetitionForFactorsStateSnapshot {
+impl HasSampleValues for PetitionForFactorsStateSnapshot<TransactionIntentHash> {
     fn sample() -> Self {
         Self::new(
             IndexSet::from_iter([
@@ -76,7 +76,7 @@ impl HasSampleValues for PetitionForFactorsStateSnapshot {
 mod tests {
     use super::*;
 
-    type Sut = PetitionForFactorsStateSnapshot;
+    type Sut = PetitionForFactorsStateSnapshot<TransactionIntentHash>;
 
     #[test]
     fn equality() {
