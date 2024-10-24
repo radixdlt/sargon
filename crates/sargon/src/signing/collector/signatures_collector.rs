@@ -652,7 +652,7 @@ mod tests {
                 .all(|(a, p)| { p.entity == *a }));
 
             assert!(petition.for_entities.borrow().iter().all(|(_, p)| {
-                p.intent_hash == t.transaction_intent_hash()
+                p.payload_id == t.transaction_intent_hash()
             }));
 
             for (k, v) in petition.for_entities.borrow().iter() {

@@ -13,7 +13,7 @@ pub trait SignablePayload {
     fn get_payload_id(&self) -> Self::PayloadId;
 }
 
-pub trait SignablePayloadID: Into<Hash> + Clone + PartialEq + Eq + std::hash::Hash {}
+pub trait SignablePayloadID: Into<Hash> + Clone + PartialEq + Eq + std::hash::Hash + Debug {}
 
 ////////////////////////////////////////////////////////////////////////
 impl Signable for TransactionIntent {
