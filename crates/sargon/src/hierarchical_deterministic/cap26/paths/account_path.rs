@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 /// A Radix Babylon [BIP-32][bip32] path used to derive accounts, for example `m/44'/1022'/1'/525'/1460'/2'`.
 ///
+/// Internally at RDX Works known as a CAP26 path - [see Confuence][cap26].
+///
 /// This comes from the general derivation pattern for Radix addresses according to the [SLIP-10][slip10]
 /// derivation scheme. In the [SLIP-10][slip10] derivation scheme, every level must be hardened, which
 /// is denoted by the `'` or `H` suffix. The official Radix wallet uses 6 levels:
@@ -40,6 +42,7 @@ use crate::prelude::*;
 /// assert!("m/44H/1022H/1H/525H/1460H/1H".parse::<AccountPath>().is_ok());
 /// ```
 ///
+/// [cap26]: https://radixdlt.atlassian.net/wiki/x/aoC4r
 /// [bip32]: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
 /// [bip44]: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
 /// [slip10]: https://github.com/satoshilabs/slips/blob/master/slip-0010.md
