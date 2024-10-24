@@ -138,19 +138,14 @@ mod tests5 {
 
         assert_eq!(
             hd_path_component_to_bip32_string_debug(
-                new_hd_path_component_from_global_key_space(
-                    3,
-                )
+                new_hd_path_component_from_global_key_space(3,)
             ),
             "3"
         );
 
-
         assert_eq!(
             hd_path_component_to_bip32_string_debug(
-                new_hd_path_component_from_global_key_space(
-                    4 + 0x8000_0000,
-                )
+                new_hd_path_component_from_global_key_space(4 + 0x8000_0000,)
             ),
             "4'"
         );
@@ -171,19 +166,14 @@ mod tests5 {
 
         assert_eq!(
             hd_path_component_to_bip32_string(
-                new_hd_path_component_from_global_key_space(
-                    3,
-                )
+                new_hd_path_component_from_global_key_space(3,)
             ),
             "3"
         );
 
-
         assert_eq!(
             hd_path_component_to_bip32_string(
-                new_hd_path_component_from_global_key_space(
-                    4 + 0x8000_0000,
-                )
+                new_hd_path_component_from_global_key_space(4 + 0x8000_0000,)
             ),
             "4H"
         );
