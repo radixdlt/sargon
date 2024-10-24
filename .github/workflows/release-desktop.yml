@@ -27,10 +27,10 @@ jobs:
         build-target:
           - runner: ubuntu-latest
             toolchain: x86_64-unknown-linux-gnu
-            binary: libsargon.so
+            binary: libsargon_uniffi.so
           - runner: macos-latest
             toolchain: aarch64-apple-darwin
-            binary: libsargon.dylib
+            binary: libsargon_uniffi.dylib
     runs-on: ${{ matrix.build-target.runner }}
     env:
       RUST_TOOLCHAIN: nightly-2024-07-30
