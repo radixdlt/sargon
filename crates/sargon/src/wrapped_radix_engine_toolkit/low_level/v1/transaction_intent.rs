@@ -49,11 +49,6 @@ impl TransactionIntent {
     pub fn manifest_summary(&self) -> Result<ManifestSummary> {
         self.manifest.summary()
     }
-
-    pub fn compile(&self) -> BagOfBytes {
-        compile_intent(ScryptoIntent::from(self.clone()))
-            .expect("Should always be able to compile an Intent")
-    }
 }
 
 impl From<TransactionIntent> for ScryptoIntent {
@@ -182,7 +177,7 @@ mod tests {
     }
 
     #[test]
-    fn intent_hash() {
+    fn transaction_intent_hash() {
         let hash = SUT::sample().transaction_intent_hash();
         assert_eq!(hash.to_string(), "txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz")
     }

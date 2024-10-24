@@ -59,7 +59,7 @@ impl SignaturesCollector {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
-        transactions: IndexSet<TXToSign>,
+        transactions: IdentifiedVecOf<TXToSign>,
         interactors: Arc<dyn SignInteractors>,
         role_kind: RoleKind,
     ) -> Self {
@@ -95,12 +95,12 @@ impl SignaturesCollector {
         let transactions = transactions
             .into_iter()
             .map(extract_signers)
-            .collect::<Result<IndexSet<TXToSign>>>()?;
+            .collect::<Result<IdentifiedVecOf<TXToSign>>>()?;
 
         let collector = Self::with(
             finish_early_strategy,
             all_factor_sources_in_profile,
-            transactions,
+            IdentifiedVecOf::from(transactions),
             interactors,
             role_kind,
         );
@@ -391,7 +391,7 @@ mod tests {
     fn invalid_profile_unknown_account() {
         let res = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
-            [TransactionIntent::entities_requiring_auth(
+            [TransactionIntent::sample_entities_requiring_auth(
                 [&Account::sample_at(0)],
                 [],
             )],
@@ -408,7 +408,7 @@ mod tests {
     fn invalid_profile_unknown_persona() {
         let res = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
-            [TransactionIntent::entities_requiring_auth(
+            [TransactionIntent::sample_entities_requiring_auth(
                 [],
                 [&Persona::sample_at(0)],
             )],
@@ -428,7 +428,10 @@ mod tests {
 
         let collector = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
-            [TransactionIntent::entities_requiring_auth([], [&persona])],
+            [TransactionIntent::sample_entities_requiring_auth(
+                [],
+                [&persona],
+            )],
             Arc::new(TestSignatureCollectingInteractors::new(
                 SimulatedUser::prudent_no_fail(),
             )),
@@ -446,8 +449,8 @@ mod tests {
         let a0 = &Account::sample_at(0);
         let a1 = &Account::sample_at(1);
 
-        let t0 = TransactionIntent::entities_requiring_auth([a1], []);
-        let t1 = TransactionIntent::entities_requiring_auth([a0], []);
+        let t0 = TransactionIntent::sample_entities_requiring_auth([a1], []);
+        let t1 = TransactionIntent::sample_entities_requiring_auth([a0], []);
 
         let profile =
             Profile::sample_from(factor_sources.clone(), [a0, a1], []);
@@ -483,7 +486,8 @@ mod tests {
             let factor_sources = &FactorSource::sample_all();
             let a5 = &Account::sample_at(5);
 
-            let t0 = TransactionIntent::entities_requiring_auth([a5], []);
+            let t0 =
+                TransactionIntent::sample_entities_requiring_auth([a5], []);
 
             let profile =
                 Profile::sample_from(factor_sources.clone(), [a5], []);
@@ -549,10 +553,15 @@ mod tests {
         let p2 = &Persona::sample_at(2);
         let p6 = &Persona::sample_at(6);
 
-        let t0 = TransactionIntent::entities_requiring_auth([a0, a1], [p0, p1]);
-        let t1 = TransactionIntent::entities_requiring_auth([a0, a1, a2], []);
-        let t2 = TransactionIntent::entities_requiring_auth([], [p0, p1, p2]);
-        let t3 = TransactionIntent::entities_requiring_auth([a6], [p6]);
+        let t0 = TransactionIntent::sample_entities_requiring_auth(
+            [a0, a1],
+            [p0, p1],
+        );
+        let t1 =
+            TransactionIntent::sample_entities_requiring_auth([a0, a1, a2], []);
+        let t2 =
+            TransactionIntent::sample_entities_requiring_auth([], [p0, p1, p2]);
+        let t3 = TransactionIntent::sample_entities_requiring_auth([a6], [p6]);
 
         let profile = Profile::sample_from(
             factor_sources.clone(),
@@ -615,7 +624,10 @@ mod tests {
             let petitions_ref = petitions.txid_to_petition.borrow();
             let petition =
                 petitions_ref.get(&t.transaction_intent_hash()).unwrap();
-            assert_eq!(petition.intent_hash, t.transaction_intent_hash());
+            assert_eq!(
+                petition.intent.transaction_intent_hash(),
+                t.transaction_intent_hash()
+            );
 
             let mut addresses =
                 threshold_factors.keys().collect::<HashSet<_>>();
@@ -789,14 +801,18 @@ mod tests {
             let p1 = Persona::sample_at(1);
             let p2 = Persona::sample_at(2);
 
-            let t0 = TransactionIntent::entities_requiring_auth(
+            let t0 = TransactionIntent::sample_entities_requiring_auth(
                 [&a0, &a1],
                 [&p0, &p1],
             );
-            let t1 =
-                TransactionIntent::entities_requiring_auth([&a0, &a1, &a2], []);
-            let t2 =
-                TransactionIntent::entities_requiring_auth([], [&p0, &p1, &p2]);
+            let t1 = TransactionIntent::sample_entities_requiring_auth(
+                [&a0, &a1, &a2],
+                [],
+            );
+            let t2 = TransactionIntent::sample_entities_requiring_auth(
+                [],
+                [&p0, &p1, &p2],
+            );
 
             let profile = Profile::sample_from(
                 factor_sources.clone(),
@@ -926,13 +942,20 @@ mod tests {
             let p5 = &Persona::sample_at(5);
             let p6 = &Persona::sample_at(6);
 
-            let t0 = TransactionIntent::entities_requiring_auth([a5], [p5]);
-            let t1 =
-                TransactionIntent::entities_requiring_auth([a4, a5, a6], []);
-            let t2 =
-                TransactionIntent::entities_requiring_auth([a4, a6], [p4, p6]);
-            let t3 =
-                TransactionIntent::entities_requiring_auth([], [p4, p5, p6]);
+            let t0 =
+                TransactionIntent::sample_entities_requiring_auth([a5], [p5]);
+            let t1 = TransactionIntent::sample_entities_requiring_auth(
+                [a4, a5, a6],
+                [],
+            );
+            let t2 = TransactionIntent::sample_entities_requiring_auth(
+                [a4, a6],
+                [p4, p6],
+            );
+            let t3 = TransactionIntent::sample_entities_requiring_auth(
+                [],
+                [p4, p5, p6],
+            );
 
             let profile = Profile::sample_from(
                 factor_sources.clone(),
@@ -1022,7 +1045,8 @@ mod tests {
             async fn failed_threshold_successful_override() {
                 let factor_sources = &FactorSource::sample_all();
                 let a9 = &Account::sample_at(9);
-                let tx0 = TransactionIntent::entities_requiring_auth([a9], []);
+                let tx0 =
+                    TransactionIntent::sample_entities_requiring_auth([a9], []);
 
                 let all_transactions = [tx0.clone()];
 
@@ -1069,10 +1093,20 @@ mod tests {
                 let factor_sources = &FactorSource::sample_all();
                 let a0 = &Account::sample_at(0);
                 let p3 = &Persona::sample_at(3);
-                let tx = TransactionIntent::entities_requiring_auth([], [p3]);
+                let tx =
+                    TransactionIntent::sample_entities_requiring_auth([], [p3]);
+
+                // In need of different PublicKeyHashes so the IntentHash of each transaction is different
+                let make_random_pk_hash = || {
+                    let private_key = Ed25519PrivateKey::generate();
+                    PublicKeyHash::hash(private_key.public_key())
+                };
                 let failing_transactions = (0..100)
                     .map(|_| {
-                        TransactionIntent::entities_requiring_auth([a0], [])
+                        TransactionIntent::sample_entity_addresses_with_pub_key_hashes_requiring_auth(
+                            [(a0.address, make_random_pk_hash())],
+                            [],
+                        )
                     })
                     .collect::<Vec<_>>();
                 let mut all_transactions = failing_transactions.clone();
@@ -1139,9 +1173,14 @@ mod tests {
                 let a7 = Account::sample_at(7);
                 let a0 = Account::sample_at(0);
 
-                let tx0 =
-                    TransactionIntent::entities_requiring_auth([&a7, &a0], []);
-                let tx1 = TransactionIntent::entities_requiring_auth([&a0], []);
+                let tx0 = TransactionIntent::sample_entities_requiring_auth(
+                    [&a7, &a0],
+                    [],
+                );
+                let tx1 = TransactionIntent::sample_entities_requiring_auth(
+                    [&a0],
+                    [],
+                );
 
                 let profile = Profile::sample_from(
                     factor_sources.clone(),
@@ -1477,7 +1516,10 @@ mod tests {
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
                 let signature =
                     &collector.collect_signatures().await.all_signatures()[0];
-                assert_eq!(signature.intent_hash(), &tx.intent_hash);
+                assert_eq!(
+                    signature.intent_hash(),
+                    &tx.intent.transaction_intent_hash()
+                );
 
                 if sample.is_account_entity() {
                     assert_eq!(

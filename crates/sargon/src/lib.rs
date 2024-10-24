@@ -251,6 +251,7 @@ pub mod prelude {
             transaction_v1::{
                 instructions::extract_addresses as RET_ins_extract_addresses,
                 intent::{
+                    from_payload_bytes as RET_intent_from_payload_bytes,
                     hash as ret_hash_intent,
                     to_payload_bytes as RET_intent_to_payload_bytes,
                 },

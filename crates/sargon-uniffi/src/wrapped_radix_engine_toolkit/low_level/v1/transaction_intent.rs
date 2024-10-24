@@ -26,6 +26,8 @@ pub fn transaction_intent_hash(
 }
 
 #[uniffi::export]
-pub fn transaction_intent_compile(intent: &TransactionIntent) -> BagOfBytes {
+pub fn transaction_intent_compile(
+    intent: &TransactionIntent,
+) -> CompiledTransactionIntent {
     intent.into_internal().compile().into()
 }
