@@ -11,8 +11,7 @@ decl_ret_wrapped_address!(
     ///
     /// An `AccessControllerAddress` has the [Scrypto's `EntityType`][entt] `GlobalAccessController`.
     ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccessControllerAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccessControllerAddress`][ret].
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L247-L248
@@ -83,24 +82,6 @@ mod tests {
         let s = "accesscontroller_rdx1cw9383xuqx6cme0knucw5aggknvrqmc8lzu7jcn3kwherk8x55zmtt";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]

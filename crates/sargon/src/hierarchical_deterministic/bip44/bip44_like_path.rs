@@ -37,7 +37,6 @@ use crate::prelude::*;
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{}", self.bip32_string())]
 pub struct BIP44LikePath {
@@ -65,6 +64,10 @@ impl BIP44LikePath {
     /// - the `address_index` component - being NOT hardened.
     pub fn is_canonical(&self) -> bool {
         !self.path.components.last().unwrap().is_hardened()
+    }
+
+    pub fn get_address_index(&self) -> HDPathValue {
+        self.last_component().index()
     }
 }
 

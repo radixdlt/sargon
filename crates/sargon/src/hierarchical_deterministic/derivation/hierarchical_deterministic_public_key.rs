@@ -5,9 +5,7 @@ use crate::prelude::*;
 /// produces virtual badges (signatures).
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`

@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use std::fmt::Display;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -16,7 +17,6 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 #[repr(u16)] // most likely we will not do more than 65536 iterations.
 pub enum ProfileSnapshotVersion {
@@ -40,6 +40,16 @@ impl ProfileSnapshotVersion {
 impl Display for ProfileSnapshotVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.discriminant())
+    }
+}
+
+impl HasSampleValues for ProfileSnapshotVersion {
+    fn sample() -> Self {
+        Self::V100
+    }
+
+    fn sample_other() -> Self {
+        Self::V100
     }
 }
 

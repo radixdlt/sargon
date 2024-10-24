@@ -26,96 +26,12 @@ macro_rules! address_union {
                 derive_more::Debug,
                 SerializeDisplay,
                 DeserializeFromStr,
-                uniffi::Enum,
             )]
             pub enum $union_name {
                 $(
                     $variant_name($variant_type),
                 )+
             }
-
-            #[uniffi::export]
-            pub fn [< new_ $union_name:snake _from_bech32 >](
-                string: String,
-            ) -> Result<$union_name> {
-                $union_name::new_from_bech32(&string)
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _to_string >](
-                address: &$union_name,
-            ) -> String {
-                address.to_string()
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _formatted>](address: &$union_name, format: AddressFormat) -> String {
-                address.formatted(format)
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _network_id >](
-                address: &$union_name,
-            ) -> NetworkID {
-                address.network_id()
-            }
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _map_to_network>](
-                address: &$union_name,
-                network_id: NetworkID,
-            ) -> $union_name {
-                address.map_to_network(network_id)
-            }
-
-
-            #[uniffi::export]
-            pub fn [< $union_name:snake _sample_values_all>]() -> Vec<$union_name> {
-                $union_name::sample_values_all()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_mainnet >]() -> $union_name {
-                $union_name::sample_mainnet()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_mainnet_other >]() -> $union_name {
-                $union_name::sample_mainnet_other()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_stokenet >]() -> $union_name {
-                $union_name::sample_stokenet()
-            }
-
-            #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_stokenet_other >]() -> $union_name {
-                $union_name::sample_stokenet_other()
-            }
-
-            $(
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _mainnet >]()
-                }
-
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet_other >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _mainnet_other >]()
-                }
-
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _stokenet >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _stokenet >]()
-                }
-
-                #[uniffi::export]
-                pub(crate) fn [< new_ $union_name:snake _sample_ $variant_name:snake _stokenet_other >]() -> $union_name {
-                    $union_name::[<sample_ $variant_name:snake _stokenet_other >]()
-                }
-            )+
-
 
             #[cfg(test)]
             mod [< $union_name:snake _tests >] {
@@ -195,110 +111,6 @@ macro_rules! address_union {
                         .is_err());
                 }
 
-
-            }
-
-            #[cfg(test)]
-            mod [< uniffi_ $union_name:snake _tests >] {
-                use super::*;
-
-                #[allow(clippy::upper_case_acronyms)]
-                type SUT = $union_name;
-
-                #[test]
-                fn hash_of_samples() {
-                    assert_eq!(
-                        HashSet::<SUT>::from_iter([
-                            $(
-                                [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet >](),
-                                [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet_other >](),
-                                [< new_ $union_name:snake _sample_ $variant_name:snake _stokenet >](),
-                                [< new_ $union_name:snake _sample_ $variant_name:snake _stokenet_other >](),
-                            )+
-                        ]),
-                        HashSet::<SUT>::from_iter(
-                            [< $union_name:snake _sample_values_all>]()
-                        )
-                    );
-
-                    assert_eq!(
-                        HashSet::<SUT>::from_iter([
-                            [< new_ $union_name:snake _sample_mainnet >](),
-                            [< new_ $union_name:snake _sample_mainnet_other >](),
-                            [< new_ $union_name:snake _sample_stokenet >](),
-                            [< new_ $union_name:snake _sample_stokenet_other >](),
-                            // duplicates should be removed
-                            [< new_ $union_name:snake _sample_mainnet >](),
-                            [< new_ $union_name:snake _sample_mainnet_other >](),
-                            [< new_ $union_name:snake _sample_stokenet >](),
-                            [< new_ $union_name:snake _sample_stokenet_other >](),
-                        ]).len(),
-                        4
-                    );
-
-                    let mut samples = SUT::sample_values_mainnet();
-                    samples.extend(SUT::sample_values_stokenet());
-                    assert_eq!(
-                        HashSet::<SUT>::from_iter(SUT::sample_values_all()),
-                        HashSet::<SUT>::from_iter(samples)
-                    );
-                }
-
-                #[test]
-                fn bech32_roundtrip() {
-                    $(
-                        let sut = [< new_ $union_name:snake _sample_ $variant_name:snake _mainnet >]();
-                        let s = [< $union_name:snake _to_string >](&sut);
-                        assert_eq!(
-                            [< new_ $union_name:snake _from_bech32 >](s).unwrap(),
-                            sut
-                        );
-                    )+
-                }
-
-                #[test]
-                fn network_id() {
-                    $(
-                        assert_eq!(
-                            [< $union_name:snake _network_id >](&[< new_ $union_name:snake _sample_ $variant_name:snake _mainnet_other >]()),
-                            NetworkID::Mainnet
-                        );
-                    )+
-
-                    $(
-                        assert_eq!(
-                            [< $union_name:snake _network_id >](&[< new_ $union_name:snake _sample_ $variant_name:snake _stokenet_other >]()),
-                            NetworkID::Stokenet
-                        );
-                    )+
-                }
-
-                #[test]
-                fn map_to_network() {
-
-                    SUT::sample_values_all().into_iter().for_each(|a| {
-                        assert_eq!(
-                            [< $union_name:snake _map_to_network>](&a, NetworkID::Stokenet).network_id(),
-                            NetworkID::Stokenet
-                        );
-                    });
-
-                    SUT::sample_values_all().into_iter().for_each(|a| {
-                        assert_eq!(
-                            [< $union_name:snake _map_to_network>](&a, NetworkID::Mainnet).network_id(),
-                            NetworkID::Mainnet
-                        );
-                    });
-                }
-
-                #[test]
-                fn format_address() {
-                    let test = |a: SUT| {
-                        assert_eq!([< $union_name:snake _formatted>](&a, AddressFormat::Full), a.to_string());
-                        assert_ne!([< $union_name:snake _formatted>](&a, AddressFormat::Default), a.to_string());
-                    };
-                    SUT::sample_values_all().into_iter().for_each(test);
-                }
 
             }
 
@@ -384,36 +196,36 @@ macro_rules! address_union {
             #[allow(unused)]
             impl $union_name {
                 $(
-                    pub(crate) fn [< sample_ $variant_name:snake _mainnet >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _mainnet >]() -> Self {
                         Self::from($variant_type::sample_mainnet())
                     }
 
-                    pub(crate) fn [< sample_ $variant_name:snake _mainnet_other >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _mainnet_other >]() -> Self {
                         Self::from($variant_type::sample_mainnet_other())
                     }
 
-                    pub(crate) fn [< sample_ $variant_name:snake _stokenet >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _stokenet >]() -> Self {
                         Self::from($variant_type::sample_stokenet())
                     }
 
-                    pub(crate) fn [< sample_ $variant_name:snake _stokenet_other >]() -> Self {
+                    pub fn [< sample_ $variant_name:snake _stokenet_other >]() -> Self {
                         Self::from($variant_type::sample_stokenet_other())
                     }
                 )+
 
-                pub(crate) fn sample_mainnet() -> Self {
+                pub fn sample_mainnet() -> Self {
                     Self::sample_values_mainnet().into_iter().next().unwrap()
                 }
 
-                pub(crate) fn sample_mainnet_other() -> Self {
+                pub fn sample_mainnet_other() -> Self {
                     Self::sample_values_mainnet().into_iter().rev().next().unwrap()
                 }
 
-                pub(crate) fn sample_stokenet() -> Self {
+                pub fn sample_stokenet() -> Self {
                     Self::sample_values_stokenet().into_iter().next().unwrap()
                 }
 
-                pub(crate) fn sample_stokenet_other() -> Self {
+                pub fn sample_stokenet_other() -> Self {
                     Self::sample_values_stokenet().into_iter().rev().next().unwrap()
                 }
 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A proof of ownership of either an `Account` or a `Persona`.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum WalletToDappInteractionProofOfOwnership {

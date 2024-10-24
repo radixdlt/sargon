@@ -22,7 +22,7 @@ impl KeyAgreementPrivateKey {
         &self,
         other: &KeyAgreementPublicKey,
     ) -> KeyAgreementSharedSecret {
-        self.0.diffie_hellman(&other.secret_magic)
+        self.0.diffie_hellman(&other.0)
     }
 }
 

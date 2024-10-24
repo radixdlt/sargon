@@ -33,7 +33,6 @@ use crate::prelude::*;
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{value}")]
 pub struct DisplayName {

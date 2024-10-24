@@ -2,10 +2,11 @@ use crate::prelude::*;
 use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
-#[display("{}", self.manifest_string())]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
+#[display("{}", self.manifest_string())] // TODO add blobs to Display
 pub struct TransactionManifest {
-    secret_magic: TransactionManifestSecretMagic,
+    pub instructions: Instructions,
+    pub blobs: Blobs,
 }
 
 impl TransactionManifest {
@@ -16,10 +17,8 @@ impl TransactionManifest {
     ) -> Result<Self> {
         Instructions::new(instructions_string, network_id).map(|instructions| {
             Self {
-                secret_magic: TransactionManifestSecretMagic {
-                    instructions,
-                    blobs,
-                },
+                instructions,
+                blobs,
             }
         })
     }
@@ -29,10 +28,8 @@ impl TransactionManifest {
         blobs: Blobs,
     ) -> Self {
         Self {
-            secret_magic: TransactionManifestSecretMagic::new(
-                instructions,
-                blobs,
-            ),
+            instructions,
+            blobs,
         }
     }
 }
@@ -40,27 +37,17 @@ impl TransactionManifest {
 impl TransactionManifest {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-            secret_magic: TransactionManifestSecretMagic {
-                instructions: Instructions::empty(network_id),
-                blobs: Blobs::default(),
-            },
-        }
-    }
-}
-
-impl From<TransactionManifestSecretMagic> for TransactionManifest {
-    fn from(value: TransactionManifestSecretMagic) -> Self {
-        Self {
-            secret_magic: value,
+            instructions: Instructions::empty(network_id),
+            blobs: Blobs::default(),
         }
     }
 }
 
 impl TransactionManifest {
-    pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
+    pub fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
         ScryptoTransactionManifest {
-            instructions: self.instructions().clone(),
-            blobs: self.secret_magic.blobs.clone().into(),
+            instructions: self.instructions.instructions().clone(),
+            blobs: self.blobs.clone().into(),
             object_names: Default::default(),
         }
     }
@@ -84,10 +71,8 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
             network_id,
         ))?;
         let value = Self {
-            secret_magic: TransactionManifestSecretMagic::new(
-                instructions,
-                scrypto_manifest.blobs.clone(),
-            ),
+            instructions,
+            blobs: scrypto_manifest.blobs.clone().into(),
         };
 
         // Verify that the manifest can be decompiled and that the instructions are from a validated notarized transaction
@@ -142,20 +127,20 @@ impl TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
-        self.secret_magic.instructions()
+    pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
+        &self.instructions
     }
 
-    pub(crate) fn blobs(&self) -> &Blobs {
-        &self.secret_magic.blobs
+    pub fn blobs(&self) -> &Blobs {
+        &self.blobs
     }
 
     pub fn manifest_string(&self) -> String {
-        manifest_string_from(self.scrypto_manifest(), self.secret_magic.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
+        manifest_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
 
     pub fn instructions_string(&self) -> String {
-        self.secret_magic.instructions.instructions_string()
+        self.instructions.instructions_string()
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
@@ -165,13 +150,12 @@ impl TransactionManifest {
     }
 
     pub fn network_id(&self) -> NetworkID {
-        self.secret_magic.instructions.network_id
+        self.instructions.network_id
     }
 
     pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
-        let (addresses, _) = RET_ins_extract_addresses(
-            self.secret_magic.instructions.secret_magic.0.as_slice(),
-        );
+        let (addresses, _) =
+            RET_ins_extract_addresses(self.instructions.as_slice());
         addresses
             .into_iter()
             .filter_map(|a| {
@@ -193,18 +177,25 @@ impl TransactionManifest {
 
 impl HasSampleValues for TransactionManifest {
     fn sample() -> Self {
-        TransactionManifestSecretMagic::sample().into()
+        Self::with_instructions_and_blobs(
+            Instructions::sample(),
+            Blobs::default(),
+        )
     }
 
     fn sample_other() -> Self {
-        TransactionManifestSecretMagic::sample_other().into()
+        Self::with_instructions_and_blobs(
+            Instructions::sample_other(),
+            Blobs::default(),
+        )
     }
 }
 
 #[allow(unused)]
 impl TransactionManifest {
     pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
-        TransactionManifestSecretMagic::sample_mainnet_without_lock_fee().into()
+        let instructions = Instructions::sample_mainnet_without_lock_fee();
+        Self::with_instructions_and_blobs(instructions, Blobs::default())
     }
 }
 
@@ -248,7 +239,7 @@ mod tests {
         let sut = SUT::sample();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
-            sut.clone().secret_magic.instructions.to_string(),
+            sut.clone().instructions.to_string(),
             Instructions::sample_mainnet_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 4);
@@ -259,7 +250,7 @@ mod tests {
         let sut = SUT::sample_other();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
-            sut.clone().secret_magic.instructions.to_string(),
+            sut.clone().instructions.to_string(),
             Instructions::sample_other_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 8);

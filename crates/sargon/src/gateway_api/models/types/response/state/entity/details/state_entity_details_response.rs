@@ -11,7 +11,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Debug,
-    uniffi::Record,
 )]
 pub struct StateEntityDetailsResponse {
     pub items: Vec<StateEntityDetailsResponseItem>,

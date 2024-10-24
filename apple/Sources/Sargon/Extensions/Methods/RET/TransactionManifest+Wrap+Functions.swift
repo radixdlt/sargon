@@ -15,9 +15,9 @@ extension TransactionManifest {
 		)
 	}
 
-	public var manifestString: String {
-		transactionManifestString(manifest: self)
-	}
+//	public var manifestString: String {
+//		transactionManifestString(manifest: self)
+//	}
 
 	public var instructionsString: String {
 		transactionManifestInstructionsString(manifest: self)
@@ -27,10 +27,10 @@ extension TransactionManifest {
 		transactionManifestNetworkId(manifest: self)
 	}
 
-	public var blobs: Blobs {
-		transactionManifestBlobs(manifest: self)
-	}
-    
+    public var blobs: Blobs {
+        transactionManifestBlobs(manifest: self)
+    }
+
     public var involvedPoolAddresses: [PoolAddress] {
         transactionManifestInvolvedPoolAddresses(manifest: self)
     }

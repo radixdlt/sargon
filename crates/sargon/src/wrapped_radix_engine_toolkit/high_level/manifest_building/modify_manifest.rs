@@ -55,7 +55,7 @@ where
 impl TransactionManifest {
     /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
     /// term for `assert_worktop_contains`.
-    pub(crate) fn modify_add_guarantees<I>(
+    pub fn modify_add_guarantees<I>(
         self,
         guarantees: I,
     ) -> Result<TransactionManifest>
@@ -112,7 +112,14 @@ impl TransactionManifest {
         Ok(manifest)
     }
 
-    pub(crate) fn modify_add_lock_fee(
+    pub fn modify_add_guarantees_vec(
+        self,
+        guarantees: Vec<TransactionGuarantee>,
+    ) -> Result<TransactionManifest> {
+        self.modify_add_guarantees(guarantees)
+    }
+
+    pub fn modify_add_lock_fee(
         self,
         address_of_fee_payer: &AccountAddress,
         fee: Option<Decimal192>,
@@ -565,16 +572,13 @@ CALL_METHOD
     ) {
         let manifest = TransactionManifest::sample();
         assert_eq!(
-            modify_manifest_add_guarantees(
-                manifest,
-                vec![TransactionGuarantee::new(
-                    0,
-                    0,
-                    5,
-                    ResourceAddress::sample(),
-                    None
-                )]
-            ),
+            manifest.modify_add_guarantees(vec![TransactionGuarantee::new(
+                0,
+                0,
+                5,
+                ResourceAddress::sample(),
+                None
+            )]),
             Err(CommonError::TXGuaranteeIndexOutOfBounds {
                 index: 5,
                 count: 4

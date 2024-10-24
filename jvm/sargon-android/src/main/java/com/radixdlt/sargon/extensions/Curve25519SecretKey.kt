@@ -24,7 +24,7 @@ class Curve25519SecretKey(
     fun notarize(signedTransactionIntentHash: SignedTransactionIntentHash): NotarySignature =
         androidNotarizeHashWithPrivateKeyBytes(
             privateKeyBytes = exactly32Bytes,
-            signedTransactionIntentHash = signedTransactionIntentHash
+            signedIntentHash = signedTransactionIntentHash
         )
 
     @Throws(SargonException::class)

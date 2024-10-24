@@ -15,7 +15,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[serde(untagged, remote = "Self")]
 pub enum FactorSourceID {

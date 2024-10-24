@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(DappOrigin, String);
-
 /// The origin of a dapp.
 #[derive(
     Clone,
@@ -14,7 +12,7 @@ uniffi::custom_newtype!(DappOrigin, String);
     Deserialize,
 )]
 #[serde(transparent)]
-pub struct DappOrigin(pub(crate) String);
+pub struct DappOrigin(pub String);
 
 impl DappOrigin {
     pub fn new(value: impl Into<String>) -> Self {

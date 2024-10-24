@@ -16,7 +16,6 @@ use crate::prelude::*;
     Hash,
     derive_more::Debug,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[debug(

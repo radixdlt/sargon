@@ -13,7 +13,7 @@ macro_rules! decl_transfer_of {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+            #[derive(Clone, Debug, PartialEq, Eq, Hash)]
             pub struct [< $struct_prefix $struct_name Transfer >] {
 
                 /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
@@ -21,7 +21,7 @@ macro_rules! decl_transfer_of {
                 /// (`AccountOrAddressOf::ProfileAccount`) controlled by a DeviceFactorSource thy have
                 /// access to and which third party deposit setting's `DepositRule` is `AcceptKnown` and
                 /// which resource is known (`resource_address` is owned or has been owned before).
-                pub(crate) use_try_deposit_or_abort: bool,
+                pub use_try_deposit_or_abort: bool,
 
                 $($fields)*
 
@@ -97,14 +97,14 @@ decl_per_asset_transfer_of!(
     /// A fungible transfer to `recipient`, with a specified amount of tokens to send.
     Fungible,
     /// Amount
-    pub(crate) amount: Decimal192,
+    pub amount: Decimal192,
 );
 
 decl_per_asset_transfer_of!(
     /// A non fungible transfer to `recipient`, with specified Local IDs to send.
     NonFungible,
     /// Amount
-    pub(crate) non_fungible_local_ids: Vec<NonFungibleLocalId>,
+    pub non_fungible_local_ids: Vec<NonFungibleLocalId>,
 );
 
 decl_per_recipient_transfer_of!(
@@ -112,13 +112,13 @@ decl_per_recipient_transfer_of!(
     /// of tokens and divisibility.
     Fungible,
     /// Amount
-    pub(crate) amount: Decimal192,
+    pub amount: Decimal192,
     pub divisibility: Option<u8>,
 );
 
 decl_per_recipient_transfer_of!(
     /// A non fungible transfer of `resource_address` token, with specified Local IDs to send.
-    NonFungibles,
+    NonFungible,
     /// The local IDS of the NonFungible tokens being sent
-    pub(crate) local_ids: Vec<NonFungibleLocalId>,
+    pub local_ids: Vec<NonFungibleLocalId>,
 );

@@ -34,11 +34,6 @@ impl HasSampleValues for FactorSources {
 mod tests {
 
     use super::*;
-    use uniffi::{
-        check_remaining,
-        deps::bytes::{Buf, BufMut},
-        metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
-    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSources;
@@ -62,19 +57,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn manual_uniffi_conversion_fails_if_factor_sources_is_empty() {
-        // This is some advanced techniques...
-        let mut bad_value_from_ffi_vec = Vec::new();
-        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
-        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
-        let res =
-            <IdentifiedVecOf<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
-                bad_value_from_ffi,
-            );
-        assert!(res.is_err());
     }
 
     #[test]
@@ -158,19 +140,5 @@ mod tests {
             ]
             "#,
         )
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = FactorSources;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(SUT::sample(), new_factor_sources_sample());
-        assert_eq!(SUT::sample_other(), new_factor_sources_sample_other());
     }
 }

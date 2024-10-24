@@ -12,7 +12,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     Hash,
-    uniffi::Record,
 )]
 #[serde(try_from = "u8")]
 #[serde(into = "u8")]
@@ -147,7 +146,7 @@ mod tests {
 
     #[test]
     fn presets() {
-        let set = appearance_ids_all()
+        let set = AppearanceID::all()
             .into_iter()
             .map(|a| a.value)
             .collect::<HashSet<_>>();

@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// whether the message is intended to be displayable as text, or not.
 ///
 /// This data model ensures that messages intended to be displayable as text are valid unicode strings.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumAsInner, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumAsInner)]
 pub enum MessageContents {
     StringMessage { string: String },
     BinaryMessage { bag_of_bytes: BagOfBytes },

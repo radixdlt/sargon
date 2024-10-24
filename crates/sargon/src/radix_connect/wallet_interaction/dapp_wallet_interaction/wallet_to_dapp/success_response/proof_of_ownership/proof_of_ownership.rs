@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// A response with the list of proofs of ownership for `Accounts`/`Personas`
 /// and the challenge that was signed.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WalletToDappInteractionProofOfOwnershipRequestResponseItem {
     pub challenge: DappToWalletInteractionAuthChallengeNonce,
 

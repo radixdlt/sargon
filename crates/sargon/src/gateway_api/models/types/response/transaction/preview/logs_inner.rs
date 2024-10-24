@@ -8,7 +8,6 @@ use crate::prelude::*;
     Eq,
     Debug,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{message}")]
 pub struct TransactionPreviewResponseLogsInner {

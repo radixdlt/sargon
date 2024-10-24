@@ -1,9 +1,19 @@
 use crate::prelude::*;
 
-#[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 pub enum EncryptionScheme {
     /// AES GCM 256 encryption
     Version1(AesGcm256),
+}
+
+impl HasSampleValues for EncryptionScheme {
+    fn sample() -> Self {
+        Self::version1()
+    }
+
+    fn sample_other() -> Self {
+        Self::version1()
+    }
 }
 
 impl std::fmt::Display for EncryptionScheme {

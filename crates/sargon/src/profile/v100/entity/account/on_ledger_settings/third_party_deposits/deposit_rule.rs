@@ -15,7 +15,6 @@ use crate::prelude::*;
     Ord,
     enum_iterator::Sequence,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum DepositRule {
@@ -96,12 +95,15 @@ mod tests {
     #[test]
     fn from_json_str() {
         assert_eq!(
-            SUT::new_from_json_string("acceptAll").unwrap(),
+            "acceptAll".deserialize::<DepositRule>().unwrap(),
             SUT::AcceptAll
         );
-        assert_eq!(SUT::new_from_json_string("denyAll").unwrap(), SUT::DenyAll);
         assert_eq!(
-            SUT::new_from_json_string("acceptKnown").unwrap(),
+            "denyAll".deserialize::<DepositRule>().unwrap(),
+            SUT::DenyAll
+        );
+        assert_eq!(
+            "acceptKnown".deserialize::<DepositRule>().unwrap(),
             SUT::AcceptKnown
         )
     }

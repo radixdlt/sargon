@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt;
 
-#[uniffi::export]
 impl GatewayClient {
     /// Returns the current `Epoch` of the Radix Network of the provided gateway.
     pub async fn current_epoch(&self) -> Result<Epoch> {

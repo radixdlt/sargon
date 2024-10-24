@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::types::*;
 
 pub fn is_vector_image(url: &str, image_type: VectorImageType) -> bool {
     let parsed_url = match parse_url(url) {

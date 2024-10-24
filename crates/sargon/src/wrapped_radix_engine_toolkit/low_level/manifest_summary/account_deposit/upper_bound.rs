@@ -2,7 +2,7 @@ use crate::prelude::*;
 use radix_common::prelude::ManifestResourceConstraint;
 
 /// Represents an upper bound on a non-negative decimal.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum UpperBound {
     /// The amount is required to be non-negative before using this model.
     /// This can be validated via [`ManifestResourceConstraint::is_valid_for`].

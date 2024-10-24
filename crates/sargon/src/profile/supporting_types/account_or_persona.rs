@@ -2,30 +2,13 @@ use crate::prelude::*;
 
 /// Either an `Account` or a `Persona`.
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Hash,
-    Eq,
-    EnumAsInner,
-    uniffi::Enum,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, EnumAsInner,
 )]
 pub enum AccountOrPersona {
     /// An `Account`
-    ///
-    /// Note:
-    /// This case/variant can not be named `account`/ `Account` due
-    /// to Kotlin UniFFI limitation.
     AccountEntity(Account),
 
     /// A `Persona`
-    ///
-    /// Note:
-    /// This is named `personaEntity` / `PersonaEntity` to match
-    /// `accountEntity` / `AccountEntity` which can not be named
-    /// `account`/ `Account` due to Kotlin UniFFI limitation.
     PersonaEntity(Persona),
 }
 
@@ -85,27 +68,27 @@ impl HasSampleValues for AccountOrPersona {
 }
 
 impl AccountOrPersona {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::from(Account::sample_mainnet())
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::from(Persona::sample_mainnet_other())
     }
 
-    pub(crate) fn sample_mainnet_third() -> Self {
+    pub fn sample_mainnet_third() -> Self {
         Self::from(Account::sample_mainnet_third())
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::from(Account::sample_stokenet())
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::from(Persona::sample_stokenet_other())
     }
 
-    pub(crate) fn sample_stokenet_third() -> Self {
+    pub fn sample_stokenet_third() -> Self {
         Self::from(Account::sample_stokenet_third())
     }
 

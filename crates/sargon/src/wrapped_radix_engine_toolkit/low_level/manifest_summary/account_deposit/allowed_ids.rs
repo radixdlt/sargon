@@ -4,7 +4,7 @@ use crate::prelude::*;
 ///
 /// `Any` represents that any id is possible. `Allowlist` represents that
 /// any ids in the balance have to be in the allowlist.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AllowedIds {
     Allowlist { ids: Vec<NonFungibleLocalId> },
     Any,

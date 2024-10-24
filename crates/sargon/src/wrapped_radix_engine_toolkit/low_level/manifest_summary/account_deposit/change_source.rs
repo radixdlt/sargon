@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Created by the visitor, generally references a particular instruction,
 /// or maybe an initial YIELD_TO_PARENT.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ChangeSource {
     InitialYieldFromParent,
     Invocation { instruction_index: u64 },

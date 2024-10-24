@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// An enum that represents the different ways a subintent can expire.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(tag = "discriminator", rename_all = "camelCase")]
 pub enum DappToWalletInteractionSubintentExpiration {
     /// The subintent expires at a specific fixed timestamp.

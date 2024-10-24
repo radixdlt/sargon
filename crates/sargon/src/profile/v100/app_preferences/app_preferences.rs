@@ -15,7 +15,6 @@ use crate::prelude::*;
     Clone,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{}", self.description())]

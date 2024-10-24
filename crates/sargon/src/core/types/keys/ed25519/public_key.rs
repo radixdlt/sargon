@@ -1,8 +1,6 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::prelude::*;
 
 use crypto::signatures::ed25519 as IotaSlip10Ed25519;
-
-json_string_convertible!(Ed25519PublicKey);
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
@@ -18,79 +16,15 @@ json_string_convertible!(Ed25519PublicKey);
     DeserializeFromStr, // yes we could have #[serde(transparent)] since `ScryptoEd25519PublicKey` is Deserialize, but we wanna be in control.
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct Ed25519PublicKey {
-    secret_magic: ScryptoEd25519PublicKey,
-}
+pub struct Ed25519PublicKey(ScryptoEd25519PublicKey);
 
 impl From<Ed25519PublicKey> for ScryptoEd25519PublicKey {
     fn from(value: Ed25519PublicKey) -> Self {
-        value.secret_magic
+        value.0
     }
-}
-
-uniffi::custom_type!(ScryptoEd25519PublicKey, BagOfBytes);
-impl UniffiCustomTypeConverter for ScryptoEd25519PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from(val.as_slice()).map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec().into()
-    }
-}
-
-#[uniffi::export]
-pub fn new_ed25519_public_key_from_hex(
-    hex: String,
-) -> Result<Ed25519PublicKey> {
-    hex.parse()
-}
-
-#[uniffi::export]
-pub fn new_ed25519_public_key_from_bytes(
-    bytes: BagOfBytes,
-) -> Result<Ed25519PublicKey> {
-    bytes.to_vec().try_into()
-}
-
-#[uniffi::export]
-pub fn new_ed25519_public_key_sample() -> Ed25519PublicKey {
-    Ed25519PublicKey::sample()
-}
-
-#[uniffi::export]
-pub fn new_ed25519_public_key_sample_other() -> Ed25519PublicKey {
-    Ed25519PublicKey::sample_other()
-}
-
-#[uniffi::export]
-pub fn android_secret_key_get_public_key_from_private_key_bytes(
-    private_key_bytes: Exactly32Bytes,
-) -> Result<Ed25519PublicKey> {
-    Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
-        .map(|k| k.public_key())
-}
-
-/// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
-/// `"b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde"`
-#[uniffi::export]
-pub fn ed25519_public_key_to_hex(public_key: &Ed25519PublicKey) -> String {
-    public_key.to_hex()
-}
-
-#[uniffi::export]
-pub fn ed25519_public_key_to_bytes(
-    public_key: &Ed25519PublicKey,
-) -> BagOfBytes {
-    public_key.to_bytes().into()
 }
 
 impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
@@ -110,15 +44,26 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
 
 impl Ed25519PublicKey {
     pub(crate) fn scrypto(&self) -> ScryptoEd25519PublicKey {
-        self.secret_magic
+        self.0
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
         self.scrypto().to_vec()
     }
 
+    pub fn to_bag_of_bytes(&self) -> BagOfBytes {
+        self.to_bytes().into()
+    }
+
     pub fn to_hex(&self) -> String {
         hex_encode(self.to_bytes())
+    }
+
+    pub fn from_private_key_bytes(
+        private_key_bytes: Exactly32Bytes,
+    ) -> Result<Self> {
+        Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
+            .map(|k| k.public_key())
     }
 }
 
@@ -128,9 +73,7 @@ impl TryFrom<ScryptoEd25519PublicKey> for Ed25519PublicKey {
     fn try_from(value: ScryptoEd25519PublicKey) -> Result<Self, Self::Error> {
         IotaSlip10Ed25519::PublicKey::try_from_bytes(value.0)
             .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
-            .map(|_| Self {
-                secret_magic: value,
-            })
+            .map(|_| Self(value))
     }
 }
 
@@ -370,62 +313,5 @@ mod tests {
             .len(),
             1
         );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(Ed25519PublicKey::sample(), new_ed25519_public_key_sample());
-        assert_eq!(
-            Ed25519PublicKey::sample_other(),
-            new_ed25519_public_key_sample_other()
-        );
-    }
-
-    #[test]
-    fn new_from_bytes() {
-        let bag_of_bytes = BagOfBytes::from_str(
-            "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
-        )
-        .unwrap();
-
-        let from_bytes =
-            new_ed25519_public_key_from_bytes(bag_of_bytes.clone()).unwrap();
-        assert_eq!(
-            from_bytes,
-            Ed25519PublicKey::try_from(bag_of_bytes.as_ref()).unwrap()
-        );
-        assert_eq!(ed25519_public_key_to_bytes(&from_bytes), bag_of_bytes);
-    }
-
-    #[test]
-    fn new_from_hex() {
-        let hex =
-            "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
-        let from_hex =
-            new_ed25519_public_key_from_hex(hex.to_string()).unwrap();
-        assert_eq!(
-            from_hex,
-            Ed25519PublicKey::from_hex(hex.to_string()).unwrap()
-        );
-        assert_eq!(ed25519_public_key_to_hex(&from_hex), hex)
-    }
-
-    #[test]
-    fn test_android_secret_key_get_public_key_from_private_key_bytes() {
-        let entropy = Exactly32Bytes::sample();
-
-        let sut =
-            android_secret_key_get_public_key_from_private_key_bytes(entropy)
-                .unwrap();
-
-        assert_eq!(
-            "3b321b74bdcb169f7260c60592bbb63d9b4d629424a0c58aff4640a75f0a2b06",
-            sut.to_hex()
-        )
     }
 }

@@ -4,7 +4,6 @@ use std::time::Duration;
 // ==================
 // Poll Transaction Status (Public)
 // ==================
-#[uniffi::export]
 impl SargonOS {
     /// Polls the state of a Transaction until we can determine its `TransactionStatus`.
     pub async fn poll_transaction_status(

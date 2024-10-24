@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct LocaleConfig {
     pub decimal_separator: Option<String>,
     pub grouping_separator: Option<String>,
@@ -40,6 +40,16 @@ impl LocaleConfig {
     }
     pub fn english_united_states() -> Self {
         Self::with(".", ",")
+    }
+}
+
+impl HasSampleValues for LocaleConfig {
+    fn sample() -> Self {
+        Self::swedish_sweden()
+    }
+
+    fn sample_other() -> Self {
+        Self::english_united_states()
     }
 }
 

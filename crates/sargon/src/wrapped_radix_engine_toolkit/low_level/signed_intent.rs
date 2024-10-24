@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 pub use radix_engine_toolkit::functions::transaction_v1::signed_intent::to_payload_bytes as RET_signed_intent_compile;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SignedIntent {
-    intent: TransactionIntent,
+    pub intent: TransactionIntent,
     pub intent_signatures: IntentSignatures,
 }
 

@@ -9,8 +9,7 @@ decl_ret_wrapped_address!(
     /// * InternalFungibleVault
     /// * InternalNonFungibleVault
     ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalVaultAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalVaultAddress`][ret].
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L251-L255
@@ -19,28 +18,28 @@ decl_ret_wrapped_address!(
 
 impl VaultAddress {
     pub fn is_fungible(&self) -> bool {
-        self.secret_magic.is_fungible()
+        self.0.is_fungible()
     }
 
     pub fn is_non_fungible(&self) -> bool {
-        self.secret_magic.is_non_fungible()
+        self.0.is_non_fungible()
     }
 }
 
 impl VaultAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_fungible()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_non_fungible()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_fungible()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_non_fungible()
     }
 }
@@ -112,24 +111,6 @@ mod tests {
         let s = "internal_vault_rdx1nz8nsf78zrrxq7r2r059vzsnmleawr36470chegf84p06fhze6wq3d";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]

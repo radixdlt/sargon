@@ -14,7 +14,6 @@ use crate::NetworkID::{self, *};
     PartialOrd,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{} ({})", self.display_description, self.id.discriminant())]

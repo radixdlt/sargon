@@ -36,7 +36,6 @@ impl SargonOS {
     }
 }
 
-#[uniffi::export]
 impl SargonOS {
     pub async fn set_profile(&self, profile: Profile) -> Result<()> {
         if let Ok(current_profile) = self.profile() {

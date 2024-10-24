@@ -11,7 +11,6 @@ use crate::prelude::*;
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{}", self.bip32_string())]
 #[debug("{}", self.bip32_string())]
@@ -243,14 +242,6 @@ mod tests {
     #[test]
     fn ord() {
         assert!(HDPath::harden([44, 2]) > HDPath::harden([44, 1]));
-    }
-
-    #[test]
-    fn uniffi_record() {
-        #[derive(uniffi::Record)]
-        struct UniffiRecordAssertCompilesHDPath {
-            inner: HDPath,
-        }
     }
 
     #[test]

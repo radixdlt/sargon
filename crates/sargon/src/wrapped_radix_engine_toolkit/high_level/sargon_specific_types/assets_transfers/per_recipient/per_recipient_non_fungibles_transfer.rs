@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-impl PerRecipientNonFungiblesTransfer {
+impl PerRecipientNonFungibleTransfer {
     pub fn new(
         resource_address: impl Into<ResourceAddress>,
         use_try_deposit_or_abort: bool,
@@ -14,7 +14,7 @@ impl PerRecipientNonFungiblesTransfer {
     }
 }
 
-impl PerRecipientNonFungiblesTransfer {
+impl PerRecipientNonFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
             ResourceAddress::sample_mainnet_xrd(),
@@ -60,7 +60,7 @@ impl PerRecipientNonFungiblesTransfer {
     }
 }
 
-impl HasSampleValues for PerRecipientNonFungiblesTransfer {
+impl HasSampleValues for PerRecipientNonFungibleTransfer {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
@@ -75,7 +75,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = PerRecipientNonFungiblesTransfer;
+    type SUT = PerRecipientNonFungibleTransfer;
 
     #[test]
     fn equality() {

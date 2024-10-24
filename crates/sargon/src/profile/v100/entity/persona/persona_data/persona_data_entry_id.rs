@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
-// Generate the FfiConverter needed by UniFFI for newtype `PersonaDataEntryID`.
-uniffi::custom_newtype!(PersonaDataEntryID, Uuid);
-
 /// An ID of some PersonaData Entry a user has shared.
 #[derive(
     Serialize,

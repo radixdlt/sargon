@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A pool redemptions observed in the transaction
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TrackedPoolRedemption {
     pub pool_address: PoolAddress,
 
@@ -37,6 +37,26 @@ impl From<(RetTrackedPoolRedemption, NetworkID)> for TrackedPoolRedemption {
             (ret.pool_units_resource_address, n),
             ret.pool_units_amount,
             to_hashmap_network_aware_key(ret.redeemed_resources, n),
+        )
+    }
+}
+
+impl HasSampleValues for TrackedPoolRedemption {
+    fn sample() -> Self {
+        Self::new(
+            PoolAddress::sample(),
+            ResourceAddress::sample(),
+            Decimal192::sample(),
+            HashMap::<ResourceAddress, Decimal192>::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            PoolAddress::sample_other(),
+            ResourceAddress::sample_other(),
+            Decimal192::sample_other(),
+            HashMap::<ResourceAddress, Decimal192>::sample_other(),
         )
     }
 }

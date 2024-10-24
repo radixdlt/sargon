@@ -12,7 +12,6 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum ArculusCardModel {
@@ -32,20 +31,26 @@ impl Default for ArculusCardModel {
 impl FromStr for ArculusCardModel {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::new_from_json_string(s).map_err(|_| {
-            CommonError::InvalidArculusCardModel {
+        s.deserialize()
+            .map_err(|_| CommonError::InvalidArculusCardModel {
                 bad_value: s.to_owned(),
-            }
-        })
+            })
     }
 }
 
-impl JsonStringSerializing for ArculusCardModel {} // to raw String
-impl JsonStringDeserializing for ArculusCardModel {} // from raw String
-
 impl std::fmt::Display for ArculusCardModel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_json_string())
+        write!(f, "{}", self.serialize_to_string())
+    }
+}
+
+impl HasSampleValues for ArculusCardModel {
+    fn sample() -> Self {
+        ArculusCardModel::ArculusColdStorageWallet
+    }
+
+    fn sample_other() -> Self {
+        ArculusCardModel::ArculusColdStorageWallet
     }
 }
 

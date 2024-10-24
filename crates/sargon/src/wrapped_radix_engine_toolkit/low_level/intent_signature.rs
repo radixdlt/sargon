@@ -1,24 +1,20 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash, uniffi::Record,
-)]
-pub struct IntentSignature {
-    pub(crate) secret_magic: SignatureWithPublicKey,
-}
+#[derive(Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash)]
+pub struct IntentSignature(pub SignatureWithPublicKey);
 
 impl IntentSignature {
     pub fn signature(&self) -> Signature {
-        self.secret_magic.clone().signature()
+        self.0.clone().signature()
     }
 
     pub fn public_key(&self) -> PublicKey {
-        self.secret_magic.clone().public_key()
+        self.0.clone().public_key()
     }
 
     pub fn validate(&self, hash: impl Into<Hash>) -> bool {
         let hash = hash.into();
-        self.secret_magic.is_valid_for_hash(&hash)
+        self.0.is_valid_for_hash(&hash)
     }
 }
 
@@ -41,15 +37,13 @@ impl TryFrom<(ScryptoIntentSignature, Hash)> for IntentSignature {
 
 impl From<SignatureWithPublicKey> for IntentSignature {
     fn from(value: SignatureWithPublicKey) -> Self {
-        Self {
-            secret_magic: value,
-        }
+        Self(value)
     }
 }
 
 impl From<IntentSignature> for ScryptoIntentSignature {
     fn from(value: IntentSignature) -> Self {
-        ScryptoIntentSignature(value.secret_magic.into())
+        ScryptoIntentSignature(value.0.into())
     }
 }
 

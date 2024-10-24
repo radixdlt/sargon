@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// The subintent expires at a specific fixed timestamp
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSubintentExpireAtTime {
     /// The unix timestamp in seconds when the subintent expires.

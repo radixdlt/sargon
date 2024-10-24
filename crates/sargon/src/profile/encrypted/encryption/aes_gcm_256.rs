@@ -14,9 +14,18 @@ use aes_gcm::{
     Hash,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 pub struct AesGcm256 {}
+
+impl HasSampleValues for AesGcm256 {
+    fn sample() -> Self {
+        Self::default()
+    }
+
+    fn sample_other() -> Self {
+        Self::default()
+    }
+}
 
 impl AesGcm256 {
     pub const DESCRIPTION: &'static str = "AESGCM-256";

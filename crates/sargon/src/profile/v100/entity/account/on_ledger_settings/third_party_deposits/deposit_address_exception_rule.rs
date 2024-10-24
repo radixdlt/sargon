@@ -15,7 +15,6 @@ use crate::prelude::*;
     Ord,
     enum_iterator::Sequence,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum DepositAddressExceptionRule {
@@ -23,6 +22,16 @@ pub enum DepositAddressExceptionRule {
     Allow,
     /// A resource can never be deposited in to the account by third-parties
     Deny,
+}
+
+impl HasSampleValues for DepositAddressExceptionRule {
+    fn sample() -> Self {
+        Self::Allow
+    }
+
+    fn sample_other() -> Self {
+        Self::Deny
+    }
 }
 
 #[cfg(test)]

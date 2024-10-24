@@ -14,7 +14,6 @@ use crate::prelude::*;
     Eq,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[display("{number}")]
 #[debug("{number}")]

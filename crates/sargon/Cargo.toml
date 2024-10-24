@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.31"
+version = "1.1.33"
 edition = "2021"
 build = "build.rs"
 
@@ -9,11 +9,6 @@ name = "vectors"
 
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
-
-[[bin]]
-name = "sargon-bindgen"
-path = "src/bindgen/bin.rs"
-required-features = ["build-binary"]
 
 [dependencies]
 
@@ -72,22 +67,22 @@ strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf1501
   "derive",
 ] }
 
-sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae" }
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae", features = [
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582", features = [
   "serde",
 ] }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae" }
-radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae", features = [
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582" }
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582", features = [
   "serde",
   "secp256k1_sign_and_validate",
 ] }
-radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae" }
-radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae" }
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582" }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582" }
+radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582" }
 
-radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "147a1f27e0bcad958475fd3afebb5677acbeb3ae" }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "cuttlefish-2ea8b582" }
 
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "0f928f6338694b64bc51bf9928a447a51b8b71d0" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "51f0115f1e93f6910b4931ef8367eec2f5b11805" }
 
 # enum-iterator = "1.4.1"
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
@@ -106,11 +101,6 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 
 # enum-as-inner = "0.6.0"
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
-
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-  "cli",
-] }
 
 # SLIP10 implementation
 # iota_crypto = "0.23.1"
@@ -190,19 +180,11 @@ security-framework-sys = "=2.10.0"
 
 
 [dev-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-  "bindgen-tests",
-] }
 
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
 
 [build-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-  "build",
-] }
 
 # cargo_toml = "0.15.3"
 cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }

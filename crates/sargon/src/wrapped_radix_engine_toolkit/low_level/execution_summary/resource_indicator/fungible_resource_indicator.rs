@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FungibleResourceIndicator {
     Guaranteed { decimal: Decimal },
     Predicted { predicted_decimal: PredictedDecimal },

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Represents the bounds for a simple resource, which can be either fungible or non-fungible.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SimpleResourceBounds {
     Fungible {
         bounds: SimpleFungibleResourceBounds,

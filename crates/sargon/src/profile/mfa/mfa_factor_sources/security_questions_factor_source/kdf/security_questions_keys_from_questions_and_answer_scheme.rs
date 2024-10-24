@@ -6,9 +6,7 @@ use crate::prelude::*;
 /// N.B. Not to be confused with the much simpler password based Key Derivation used
 /// to encrypt Profile part of manual file export.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Enum,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub enum SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
@@ -46,14 +44,30 @@ impl IsSecurityQuestionsKDFScheme
 /// Version1 of SecurityQuestions KDF, derives encryption keys from security
 /// questions and answers, using two "sub-KDFs".
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
     pub kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8,
     pub kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold,
+}
+
+impl HasSampleValues
+    for SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1
+{
+    fn sample() -> Self {
+        Self {
+            kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8::sample(),
+            kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8::sample_other(),
+            kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold::sample_other(),
+        }
+    }
 }
 
 impl Default for SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
@@ -83,5 +97,17 @@ impl IsSecurityQuestionsKDFScheme
             .collect::<Result<_>>()?;
 
         Ok(kdf_enc.derive_encryption_keys_from(kek))
+    }
+}
+
+impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
+    fn sample() -> Self {
+        Self::Version1(
+            SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::Version1(SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1::sample_other())
     }
 }

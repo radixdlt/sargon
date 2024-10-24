@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Detailed information on the amount of cost units consumed.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FeeSummary {
     pub execution_cost: Decimal192,
     pub finalization_cost: Decimal192,

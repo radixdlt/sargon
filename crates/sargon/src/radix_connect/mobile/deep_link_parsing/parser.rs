@@ -53,9 +53,7 @@ pub fn parse_mobile_connect_request(
     let decoded_request = URL_SAFE_NO_PAD
         .decode(request_string.as_str())
         .map_err(|_| CommonError::RadixConnectMobileInvalidRequestFormat)?;
-    let request = DappToWalletInteractionUnvalidated::new_from_json_bytes(
-        decoded_request,
-    )?;
+    let request = decoded_request.deserialize()?;
 
     let dapp_definition_address_string = get_key(
         url,
@@ -279,12 +277,10 @@ mod tests {
         pretty_assertions::assert_eq!(result, Ok(expected_request));
 
         let parsed_request = result.unwrap();
-        let expected_interaction =
-            DappToWalletInteractionUnvalidated::new_from_json_bytes(
-                URL_SAFE_NO_PAD
-                    .decode(request_params.request.unwrap())
-                    .unwrap(),
-            )
+        let expected_interaction = URL_SAFE_NO_PAD
+            .decode(request_params.request.unwrap())
+            .unwrap()
+            .deserialize()
             .unwrap();
         pretty_assertions::assert_eq!(
             parsed_request.interaction,

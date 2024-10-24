@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// The active profile has been modified (might not have been saved yet).
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum EventProfileModified {
     /// A new account with `address` was inserted into the active profile
     AccountAdded { address: AccountAddress },

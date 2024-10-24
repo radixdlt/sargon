@@ -1,0 +1,147 @@
+[package]
+name = "sargon-uniffi"
+version = "1.1.33"
+edition = "2021"
+build = "build.rs"
+
+[[test]]
+name = "vectors"
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]
+
+[[bin]]
+name = "sargon-bindgen"
+path = "src/bindgen/bin.rs"
+required-features = ["build-binary"]
+
+[dependencies]
+
+sargon = { path = "../sargon" }
+sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" } 
+
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "51f0115f1e93f6910b4931ef8367eec2f5b11805" }
+
+# zeroize = "1.7.0"
+zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [
+  "zeroize_derive",
+  "derive",
+] }
+
+log = "0.4.20"
+# log = { git = "https://github.com/rust-lang/log/", rev = "4708f1484c7e6b8d4418b571c05e613b18e57673" }
+
+# pretty_env_logger = "0.5.0"
+pretty_env_logger = { git = "https://github.com/seanmonstar/pretty-env-logger/", rev = "0e238400e18649415dc710c025e99c009a1bb744" }
+
+# derive_more = "1.0.0-beta.6"
+derive_more = { git = "https://github.com/JelteF/derive_more", rev = "1196b2dd7a366c06db621093884adbc379fc0f0a", features = [
+  "debug",
+  "display",
+  "from_str",
+] }
+
+# thiserror = "1.0.50"
+thiserror = { git = "https://github.com/dtolnay/thiserror/", rev = "a7d220d7915fb888413aa7978efd70f7006bda9d" }
+
+# iso8601-timestamp = "0.2.16"
+iso8601-timestamp = { git = "https://github.com/Lantern-chat/iso8601-timestamp/", rev = "e5a3f2a5911759bc6b0d8100b032a6b4dd6e12c1", features = [
+  "serde",
+  "std",
+] }
+
+# uuid = "1.6.1"
+uuid = { git = "https://github.com/uuid-rs/uuid/", rev = "c8891073248ddc7faa8c53ac9ceb629a341c7b9b", features = [
+  "v4",
+  "serde",
+] }
+
+# strum = "0.26.1"
+strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf150112e26c00e6c8ca666d8d068d", features = [
+  "derive",
+] }
+
+# enum-iterator = "1.4.1"
+enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
+
+# rand = "0.8.5"
+rand = { git = "https://github.com/rust-random/rand/", rev = "937320cbfeebd4352a23086d9c6e68f067f74644" }
+
+# hex = "0.4.3"
+hex = { git = "https://github.com/KokaKiwi/rust-hex/", rev = "b2b4370b5bf021b98ee7adc92233e8de3f2de792" }
+
+# delegate = "0.12.0"
+delegate = { git = "https://github.com/Kobzol/rust-delegate/", rev = "ac852be64f3e4b5f9b58be910d09921488d2845d" }
+
+# itertools = "0.12.0"
+itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98ecabb47d7147dae06fc3fa400ec758947194f3" }
+
+# enum-as-inner = "0.6.0"
+enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
+
+# uniffi = "0.27.1"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+  "cli",
+] }
+
+# assert-json-diff = "2.0.2"
+assert-json-diff = { git = "https://github.com/davidpdrsn/assert-json-diff/", rev = "bca0d2c590808274298d939e0533da79cd09076d" }
+
+# url = "2.5.0"
+# url = { git = "https://github.com/servo/rust-url", rev = "00e9e18ce6504e0e9157816c593afec8e69cb9e3", features = ["serde"] } # BROKEN compat with reqwest: the trait bound `url::Url: IntoUrl` is not satisfied --> tests/integration/network_antenna_reqwest.rs:31:50
+url = { version = "2.5.0", features = ["serde"] }
+
+# paste = "1.0.14"
+paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
+
+# regex = "1.9.3"
+regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88", optional = true }
+
+# clap = "4.5.1"
+clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
+  "std",
+  "derive",
+], optional = true }
+
+# camino = "1.0.8"
+camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
+
+# async-trait = "0.1.79"
+async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
+
+# pretty_assertions = "1.4.0"
+pretty_assertions = { git = "https://github.com/rust-pretty-assertions/rust-pretty-assertions", rev = "3f1ebc0cac5f88e875f036bf16636e15fa935c8d" }
+
+base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14400697453bcc85997119b874bc03d9601d0af" }
+
+# Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
+# This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS
+# The bug is fixed already but the fix is not released yet. https://github.com/kornelski/rust-security-framework/pull/204
+[target.'cfg(target_os = "ios")'.dependencies]
+security-framework = { version = "=2.10" }
+security-framework-sys = "=2.10.0"
+
+
+[dev-dependencies]
+# uniffi = "0.27.1"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+  "bindgen-tests",
+] }
+
+# actix-rt = "3.3.0"
+actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
+
+[build-dependencies]
+# uniffi = "0.27.1"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+  "build",
+] }
+
+# cargo_toml = "0.15.3"
+cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
+
+[features]
+build-binary = ["camino", "clap", "regex"]
+
+[lints.rust]
+unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }

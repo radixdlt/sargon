@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
-#[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]
 pub struct TransactionIntent {
     pub header: TransactionHeader,
-    manifest: TransactionManifest,
+    pub manifest: TransactionManifest,
     pub message: Message,
 }
 
@@ -69,9 +69,7 @@ fn into_scrypto(
 ) -> ScryptoIntent {
     ScryptoIntent {
         header: (*header).into(),
-        instructions: ScryptoInstructions(
-            manifest.instructions().clone().into(),
-        ),
+        instructions: ScryptoInstructions(manifest.instructions().clone()),
         blobs: manifest.blobs().clone().into(),
         message: message.clone().into(),
     }

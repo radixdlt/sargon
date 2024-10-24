@@ -18,12 +18,22 @@ impl From<X25519PublicKey> for EncryptionKey {
 /// key exchange keys, by performing Diffie-Hellman key exchange on each
 /// Key Exchange Key in a Set, by "folding" from left to right.
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold;
+
+impl HasSampleValues
+    for SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold
+{
+    fn sample() -> Self {
+        Self
+    }
+
+    fn sample_other() -> Self {
+        Self
+    }
+}
 
 impl Default
     for SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold

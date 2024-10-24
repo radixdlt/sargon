@@ -57,13 +57,12 @@ impl WalletInteractionTransport for Service {
         session: Session,
         response: WalletToDappInteractionResponse,
     ) -> Result<()> {
-        let serialized_response =
-            wallet_to_dapp_interaction_response_to_json_bytes(&response);
+        let serialized_response = response.serialize_to_bytes()?;
 
         let mut encryption_key = session.encryption_key;
         let encrypted_response = self
             .encryption_scheme
-            .encrypt(serialized_response.to_vec(), &mut encryption_key);
+            .encrypt(&serialized_response, &mut encryption_key);
 
         let hex = hex_encode(encrypted_response);
 
@@ -134,13 +133,13 @@ mod tests {
             // Serialize the response
             let wallet_to_dapp_interaction_response =
                 WalletToDappInteractionResponse::sample();
-            let body = wallet_to_dapp_interaction_response_to_json_bytes(
-                &wallet_to_dapp_interaction_response,
-            );
+            let body = wallet_to_dapp_interaction_response
+                .serialize_to_bytes()
+                .unwrap();
 
             // Encrypt the response
-            let encrypted = EncryptionScheme::default()
-                .encrypt(body.to_vec(), &mut encryption_key);
+            let encrypted =
+                EncryptionScheme::default().encrypt(&body, &mut encryption_key);
             let hex = hex_encode(encrypted);
             let success_response = SuccessResponse::new(
                 SessionID::sample(),

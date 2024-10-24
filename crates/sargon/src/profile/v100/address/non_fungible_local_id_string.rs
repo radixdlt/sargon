@@ -2,9 +2,6 @@ use crate::prelude::*;
 
 /// A string matching `[_0-9a-zA-Z]{1,64}`.
 ///
-/// This is an internal wrapping of Scrypto's `StringNonFungibleLocalId`
-/// with a UniFFI custom converter using `String` as `Builtin`.
-///
 /// Using this type instead of `String` directly in `NonFungibleLocalId::Str`,
 /// allows us to do impl `From<NonFungibleLocalId> for NonFungibleLocalId` instead
 /// of `TryFrom<NonFungibleLocalId>`.
@@ -19,20 +16,10 @@ use crate::prelude::*;
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
-    uniffi::Record,
 )]
 #[debug("{}", self.to_string())]
-#[display("{}", self.secret_magic.value().to_owned())]
-pub struct NonFungibleLocalIdString {
-    secret_magic: ScryptoStringNonFungibleLocalId,
-}
-
-#[uniffi::export]
-pub fn new_non_fungible_local_id_string_from_str(
-    string: String,
-) -> Result<NonFungibleLocalIdString> {
-    string.parse()
-}
+#[display("{}", self.0.value().to_owned())]
+pub struct NonFungibleLocalIdString(pub ScryptoStringNonFungibleLocalId);
 
 impl FromStr for NonFungibleLocalIdString {
     type Err = crate::CommonError;
@@ -44,14 +31,12 @@ impl FromStr for NonFungibleLocalIdString {
 
 impl From<ScryptoStringNonFungibleLocalId> for NonFungibleLocalIdString {
     fn from(value: ScryptoStringNonFungibleLocalId) -> Self {
-        Self {
-            secret_magic: value,
-        }
+        Self(value)
     }
 }
 impl From<NonFungibleLocalIdString> for ScryptoStringNonFungibleLocalId {
     fn from(value: NonFungibleLocalIdString) -> Self {
-        value.secret_magic
+        value.0
     }
 }
 
@@ -64,19 +49,13 @@ fn scrypto_string_non_fungible_local_id(
     })
 }
 
-uniffi::custom_type!(ScryptoStringNonFungibleLocalId, String);
-
-impl crate::UniffiCustomTypeConverter for ScryptoStringNonFungibleLocalId {
-    type Builtin = String;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        scrypto_string_non_fungible_local_id(val).map_err(|e| e.into())
+impl HasSampleValues for NonFungibleLocalIdString {
+    fn sample() -> Self {
+        "foo".parse().unwrap()
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.value().to_owned()
+    fn sample_other() -> Self {
+        "bar".parse().unwrap()
     }
 }
 
@@ -117,57 +96,6 @@ mod tests {
         let s = "a".repeat(64 + 1);
         assert_eq!(
             s.parse::<SUT>(),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = NonFungibleLocalIdString;
-
-    #[test]
-    fn from_str() {
-        let s = "foo";
-        let sut: SUT =
-            new_non_fungible_local_id_string_from_str(s.to_owned()).unwrap();
-        assert_eq!(sut.to_string(), s.to_owned());
-    }
-
-    #[test]
-    fn underscore_is_allowed() {
-        let s = "Member_237";
-        let sut: SUT =
-            new_non_fungible_local_id_string_from_str(s.to_owned()).unwrap();
-        assert_eq!(sut.to_string(), s.to_owned());
-    }
-
-    #[test]
-    fn invalid_forbidden_chars() {
-        let s = "<foo>";
-        assert_eq!(
-            new_non_fungible_local_id_string(s.to_owned()),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-
-    #[test]
-    fn invalid_empty() {
-        let s = "";
-        assert_eq!(
-            new_non_fungible_local_id_string(s.to_owned()),
-            Err(CommonError::InvalidNonFungibleLocalIDString)
-        );
-    }
-
-    #[test]
-    fn invalid_too_long() {
-        let s = "a".repeat(64 + 1);
-        assert_eq!(
-            new_non_fungible_local_id_string(s.to_owned()),
             Err(CommonError::InvalidNonFungibleLocalIDString)
         );
     }

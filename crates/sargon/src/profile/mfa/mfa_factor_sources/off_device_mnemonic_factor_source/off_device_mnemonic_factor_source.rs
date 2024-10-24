@@ -12,7 +12,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{hint} {id}")]

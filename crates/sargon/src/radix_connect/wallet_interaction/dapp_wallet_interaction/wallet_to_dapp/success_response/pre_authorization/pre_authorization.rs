@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use radix_transactions::model::TransactionPayload;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WalletToDappInteractionPreAuthorizationResponseItems {
     /// A hex encoded signed partial transaction.
     #[serde(rename = "signedPartialTransaction")]

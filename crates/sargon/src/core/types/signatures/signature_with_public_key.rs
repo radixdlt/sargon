@@ -2,16 +2,7 @@ use crate::prelude::*;
 
 /// Represents any natively supported signature, including public key.
 #[derive(
-    Debug,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    EnumAsInner,
-    uniffi::Enum,
+    Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, EnumAsInner,
 )]
 pub enum SignatureWithPublicKey {
     // N.B. `radix_transactions::model::SignatureWithPublicKeyV1::Secp256k1` does

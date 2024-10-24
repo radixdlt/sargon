@@ -38,8 +38,6 @@ macro_rules! decl_bool_type {
                 &self.0
             }
         }
-
-        uniffi::custom_newtype!($name, bool);
     };
 }
 

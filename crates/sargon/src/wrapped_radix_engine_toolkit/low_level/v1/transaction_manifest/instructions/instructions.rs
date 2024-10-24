@@ -4,10 +4,10 @@ use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
 use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 use radix_transactions::manifest::CallMethod;
 
-#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
-    pub secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
+    pub instructions: Vec<ScryptoInstruction>,
     pub network_id: NetworkID,
 }
 
@@ -15,26 +15,12 @@ impl Deref for Instructions {
     type Target = Vec<ScryptoInstruction>;
 
     fn deref(&self) -> &Self::Target {
-        self.secret_magic.instructions()
-    }
-}
-
-#[cfg(test)]
-impl Instructions {
-    /// For tests only, does not validate the SBOR depth of the instructions.
-    pub(crate) fn new_unchecked(
-        instructions: Vec<ScryptoInstruction>,
-        network_id: NetworkID,
-    ) -> Self {
-        Self {
-            secret_magic: InstructionsSecretMagic::new(instructions),
-            network_id,
-        }
+        self.instructions.as_ref()
     }
 }
 
 impl Instructions {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+    pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
         self.deref()
     }
 }
@@ -52,9 +38,7 @@ impl TryFrom<(&Vec<ScryptoInstruction>, NetworkID)> for Instructions {
         _ = instructions_string_from(scrypto, network_id)?;
 
         Ok(Self {
-            secret_magic: InstructionsSecretMagic::from(ScryptoInstructions(
-                scrypto.to_owned().into(),
-            )),
+            instructions: ScryptoInstructions(scrypto.to_owned()).0.to_vec(),
             network_id,
         })
     }
@@ -74,7 +58,7 @@ fn instructions_string_from(
 
 impl Instructions {
     pub fn instructions_string(&self) -> String {
-        instructions_string_from(self.secret_magic.instructions(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
+        instructions_string_from(self.instructions.as_ref(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -95,34 +79,6 @@ impl Instructions {
     }
 }
 
-#[cfg(test)]
-impl Instructions {
-    /// Utility function which uses `Instructions::new(<string>, <network_id>)`
-    /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
-    /// we can assert in unit tests.
-    pub(crate) fn test_with_sbor_depth(
-        depth: usize,
-        network_id: NetworkID,
-    ) -> Result<Self> {
-        let nested_value = manifest_value_with_sbor_depth(depth);
-        let dummy_address =
-            ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);
-        let instruction = ScryptoInstruction::CallMethod(CallMethod {
-            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
-                &dummy_address,
-            )
-            .unwrap()
-            .into(),
-            method_name: "dummy".to_owned(),
-            args: nested_value,
-        });
-        instructions_string_from(&vec![instruction], network_id)
-            .and_then(|x: String| Self::new(x, network_id))
-    }
-
-    pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
-}
-
 impl HasSampleValues for Instructions {
     fn sample() -> Self {
         Self::sample_mainnet()
@@ -136,7 +92,7 @@ impl HasSampleValues for Instructions {
 impl Instructions {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-            secret_magic: InstructionsSecretMagic::new(Vec::new()),
+            instructions: Vec::new(),
             network_id,
         }
     }
@@ -199,6 +155,48 @@ impl Instructions {
         )
         .expect("Valid sample value")
     }
+}
+
+#[cfg(test)]
+impl Instructions {
+    /// For tests only, does not validate the SBOR depth of the instructions.
+    pub(crate) fn new_unchecked(
+        instructions: Vec<ScryptoInstruction>,
+        network_id: NetworkID,
+    ) -> Self {
+        Self {
+            instructions,
+            network_id,
+        }
+    }
+}
+
+#[cfg(test)]
+impl Instructions {
+    /// Utility function which uses `Instructions::new(<string>, <network_id>)`
+    /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
+    /// we can assert in unit tests.
+    pub(crate) fn test_with_sbor_depth(
+        depth: usize,
+        network_id: NetworkID,
+    ) -> Result<Self> {
+        let nested_value = manifest_value_with_sbor_depth(depth);
+        let dummy_address =
+            ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);
+        let instruction = ScryptoInstruction::CallMethod(CallMethod {
+            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                &dummy_address,
+            )
+            .unwrap()
+            .into(),
+            method_name: "dummy".to_owned(),
+            args: nested_value,
+        });
+        instructions_string_from(&vec![instruction], network_id)
+            .and_then(|x: String| Self::new(x, network_id))
+    }
+
+    pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
 }
 
 #[cfg(test)]
@@ -311,7 +309,7 @@ mod tests {
         ];
         assert_eq!(
             SUT {
-                secret_magic: InstructionsSecretMagic::sample(),
+                instructions: instructions.to_owned(),
                 network_id
             },
             SUT::try_from((instructions, network_id)).unwrap()

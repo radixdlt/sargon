@@ -4,9 +4,7 @@ use crate::prelude::*;
 /// Allows users, for example, to hide a given resource on their accounts.
 ///
 /// Named like this to differ from RET's `ResourcePreference`.
-#[derive(
-    Deserialize, Serialize, Clone, PartialEq, Eq, Debug, Hash, uniffi::Record,
-)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct ResourceAppPreference {
     /// The resource for which the preference is set up.
     pub resource: ResourceIdentifier,

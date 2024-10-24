@@ -8,7 +8,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Debug,
-    uniffi::Record,
 )]
 pub struct FungibleResourcesCollectionItemGloballyAggregated {
     pub amount: Decimal192,

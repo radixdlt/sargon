@@ -14,7 +14,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     derive_more::Display,
-    uniffi::Enum,
 )]
 pub enum BIP39Language {
     /// The English language.

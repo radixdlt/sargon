@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(WalletInteractionId, String);
-
 /// We ought to make `WalletInteractionId` a UUID.
 /// Temporarily, it will be a String because the iOS wallet has specific logic that uses custom IDs for wallet interactions.
 #[derive(
@@ -16,7 +14,7 @@ uniffi::custom_newtype!(WalletInteractionId, String);
     Hash,
     derive_more::Display,
 )]
-pub struct WalletInteractionId(pub(crate) String);
+pub struct WalletInteractionId(pub String);
 
 impl FromStr for WalletInteractionId {
     type Err = CommonError;

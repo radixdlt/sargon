@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WalletToDappInteractionTransactionResponseItems {
     pub send: WalletToDappInteractionSendTransactionResponseItem,
 }
@@ -15,9 +15,9 @@ impl WalletToDappInteractionTransactionResponseItems {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
-    transaction_intent_hash: TransactionIntentHash,
+    pub transaction_intent_hash: TransactionIntentHash,
 }
 
 impl Serialize for WalletToDappInteractionSendTransactionResponseItem {
@@ -61,10 +61,29 @@ impl<'de> Deserialize<'de>
 
 impl HasSampleValues for WalletToDappInteractionTransactionResponseItems {
     fn sample() -> Self {
-        Self::new(TransactionIntentHash::sample())
+        Self {
+            send: WalletToDappInteractionSendTransactionResponseItem::sample(),
+        }
     }
     fn sample_other() -> Self {
-        Self::new(TransactionIntentHash::sample_other())
+        Self {
+            send:
+                WalletToDappInteractionSendTransactionResponseItem::sample_other(
+                ),
+        }
+    }
+}
+
+impl HasSampleValues for WalletToDappInteractionSendTransactionResponseItem {
+    fn sample() -> Self {
+        Self {
+            transaction_intent_hash: TransactionIntentHash::sample(),
+        }
+    }
+    fn sample_other() -> Self {
+        Self {
+            transaction_intent_hash: TransactionIntentHash::sample_other(),
+        }
     }
 }
 

@@ -9,8 +9,7 @@ decl_ret_wrapped_address!(
     /// * GlobalFungibleResourceManager
     /// * GlobalNonFungibleResourceManager
     ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalResourceAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalResourceAddress`][ret].
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L236-L239
@@ -19,11 +18,11 @@ decl_ret_wrapped_address!(
 
 impl ResourceAddress {
     pub fn is_fungible(&self) -> bool {
-        self.secret_magic.is_fungible()
+        self.0.is_fungible()
     }
 
     pub fn is_non_fungible(&self) -> bool {
-        self.secret_magic.is_non_fungible()
+        self.0.is_non_fungible()
     }
 
     pub fn xrd_on_network(id: NetworkID) -> Self {
@@ -49,87 +48,87 @@ impl HasSampleValues for ResourceAddress {
 
 #[allow(unused)]
 impl ResourceAddress {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::sample_mainnet_xrd()
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_candy()
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_xrd()
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_gum()
     }
 }
 
 impl ResourceAddress {
     /// The RAD on mainnet
-    pub(crate) fn sample_mainnet_xrd() -> Self {
+    pub fn sample_mainnet_xrd() -> Self {
         "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
             .parse()
             .expect("XRD")
     }
 
     /// Candy by Gumball club on mainnet
-    pub(crate) fn sample_mainnet_candy() -> Self {
+    pub fn sample_mainnet_candy() -> Self {
         "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
             .parse()
             .expect("Candy")
     }
 
-    pub(crate) fn sample_mainnet_nft_gc_membership() -> Self {
+    pub fn sample_mainnet_nft_gc_membership() -> Self {
         "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"
             .parse()
             .expect("GC Membership")
     }
 
-    pub(crate) fn sample_mainnet_nft_other() -> Self {
+    pub fn sample_mainnet_nft_other() -> Self {
         "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
             .parse()
             .expect("Valid Scorpion NFT Global ID")
     }
 
-    pub(crate) fn sample_stokenet_xrd() -> Self {
+    pub fn sample_stokenet_xrd() -> Self {
         "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
             .parse()
             .expect("XRD")
     }
 
-    pub(crate) fn sample_stokenet_gum() -> Self {
+    pub fn sample_stokenet_gum() -> Self {
         "resource_tdx_2_1t4kep9ldg9t0cszj78z6fcr2zvfxfq7muetq7pyvhdtctwxum90scq"
             .parse()
             .expect("Gum")
     }
 
-    pub(crate) fn sample_stokenet_gc_tokens() -> Self {
+    pub fn sample_stokenet_gc_tokens() -> Self {
         "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp"
             .parse()
             .expect("GC Tokens")
     }
 
-    pub(crate) fn sample_stokenet_candy() -> Self {
+    pub fn sample_stokenet_candy() -> Self {
         "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3"
             .parse()
             .expect("Candy")
     }
 
-    pub(crate) fn sample_stokenet_nft_gc_membership() -> Self {
+    pub fn sample_stokenet_nft_gc_membership() -> Self {
         "resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9"
             .parse()
             .expect("GC membership")
     }
 
-    pub(crate) fn sample_stokenet_nft_abandon() -> Self {
+    pub fn sample_stokenet_nft_abandon() -> Self {
         "resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x"
             .parse()
             .expect("Abandon")
     }
 
-    pub(crate) fn sample_stokenet_nft_other() -> Self {
+    pub fn sample_stokenet_nft_other() -> Self {
         "resource_tdx_2_1ngw6cufaxs5p82kw49juy2yfkt53se76vr0xfsu3tvyduuw6s0y6lc"
             .parse()
             .expect("valid sample value")
@@ -254,12 +253,8 @@ mod tests {
             SUT::sample_mainnet_xrd()
         );
 
-        // UniFFI exported func
         assert_eq!(
-            resource_address_map_to_network(
-                &SUT::sample_mainnet_xrd(),
-                NetworkID::Stokenet
-            ),
+            SUT::sample_mainnet_xrd().map_to_network(NetworkID::Stokenet),
             SUT::sample_stokenet_xrd()
         );
     }
@@ -319,24 +314,6 @@ mod tests {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
-    }
-
-    #[test]
-    fn manual_perform_uniffi_conversion() {
-        type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::sample();
-        let bech32 = sut.to_string();
-        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
-
-        let ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
-        assert_eq!(ffi_side, bech32);
-        let from_ffi_side =
-            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
-                ffi_side,
-            )
-            .unwrap();
-        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]

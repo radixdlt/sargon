@@ -16,7 +16,6 @@ use crate::prelude::*;
     PartialOrd,
     enum_iterator::Sequence,
     Ord,
-    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum BIP39WordCount {
@@ -71,6 +70,16 @@ impl BIP39WordCount {
 impl Default for BIP39WordCount {
     fn default() -> Self {
         Self::TwentyFour
+    }
+}
+
+impl HasSampleValues for BIP39WordCount {
+    fn sample() -> Self {
+        Self::TwentyFour
+    }
+
+    fn sample_other() -> Self {
+        Self::Twelve
     }
 }
 

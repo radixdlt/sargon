@@ -11,9 +11,9 @@ class TestCase: XCTestCase {
 	}
 	
 	class override func setUp() {
-		if shouldEnableRustLog() {
-			rustLoggerInit()
-		}
+//		if shouldEnableRustLog() {
+//			
+//		}
 		super.setUp()
 	}
 	

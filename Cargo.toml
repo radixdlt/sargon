@@ -1,9 +1,16 @@
 [workspace]
 resolver = "2"
-members = ["crates/sargon"]
-default-members = ["crates/sargon"]
+members = [
+    "crates/sargon",
+    "crates/sargon-uniffi",
+    "crates/sargon-uniffi-conversion-macros",
+]
 
 [profile.release]
 incremental = false
 panic = 'unwind'
 codegen-units = 1
+
+[profile.profiling]
+inherits = "release"
+debug = true

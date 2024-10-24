@@ -11,7 +11,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{} | created: {} | #{}", description, self.date.date(), id.to_string())]
 pub struct DeviceInfo {

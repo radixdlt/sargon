@@ -96,7 +96,7 @@ mod tests {
                     false,
                     None,
                 )],
-                [PerRecipientNonFungiblesTransfer::new(
+                [PerRecipientNonFungibleTransfer::new(
                     NonFungibleResourceAddress::sample_mainnet_other(),
                     false,
                     [NonFungibleLocalId::integer(237)],

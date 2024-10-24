@@ -1,9 +1,7 @@
 use crate::prelude::*;
 
-json_data_convertible!(RadixConnectMobileSessionRequest);
-
 /// The request received from the dApp that needs to be handled.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, uniffi::Record)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct RadixConnectMobileSessionRequest {
     /// The id of the session established with the dApp.
     /// Needs to be passed back by the Host as to know which session to respond to.
@@ -55,18 +53,6 @@ impl HasSampleValues for RadixConnectMobileSessionRequest {
     }
 }
 
-#[uniffi::export]
-pub fn new_radix_connect_mobile_session_request_sample(
-) -> RadixConnectMobileSessionRequest {
-    RadixConnectMobileSessionRequest::sample()
-}
-
-#[uniffi::export]
-pub fn new_radix_connect_mobile_session_request_sample_other(
-) -> RadixConnectMobileSessionRequest {
-    RadixConnectMobileSessionRequest::sample_other()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,22 +69,5 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_radix_connect_mobile_session_request_sample(),
-            RadixConnectMobileSessionRequest::sample()
-        );
-        assert_eq!(
-            new_radix_connect_mobile_session_request_sample_other(),
-            RadixConnectMobileSessionRequest::sample_other()
-        );
     }
 }

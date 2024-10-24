@@ -9,7 +9,6 @@ use crate::prelude::*;
     Eq,
     Hash,
     derive_more::Display,
-    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionStatus {

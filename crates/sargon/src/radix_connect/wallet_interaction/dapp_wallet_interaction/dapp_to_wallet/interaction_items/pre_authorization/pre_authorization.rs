@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct DappToWalletInteractionPreAuthorizationItems {
     pub request: DappToWalletInteractionSubintentRequestItem,
 }

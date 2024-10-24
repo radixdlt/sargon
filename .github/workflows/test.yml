@@ -161,6 +161,12 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - name: Install cargo nextest
+        uses: RDXWorks-actions/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          locked: true
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -168,7 +174,7 @@ jobs:
           default: true
 
       - name: Run rust tests
-        run: cargo test
+        run: cargo nextest run --all
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
@@ -207,6 +213,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - name: Remove unused software
+        run: |
+          sudo rm -rf \
+          "$AGENT_TOOLSDIRECTORY" \
+          /opt/google/chrome \
+          /opt/microsoft/msedge \
+          /opt/microsoft/powershell \
+          /opt/pipx \
+          /usr/lib/mono \
+          /usr/local/julia* \
+          /usr/local/lib/node_modules \
+          /usr/local/share/chromium \
+          /usr/local/share/powershell \
+          /usr/share/dotnet \
+          /usr/local/share/boost \
+          /opt/ghc
 
       - name: Install Rust Toolchain for x86_64-unknown-linux-gnu
         uses: RDXWorks-actions/toolchain@master

@@ -3,9 +3,7 @@ use crate::prelude::*;
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A mnemonic encrypted by answers to security questions
 /// ❗️ NOT PRODUCTION READY YET ❗️
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
@@ -99,6 +97,40 @@ impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
 
         // Failure
         Err(CommonError::FailedToDecryptSealedMnemonic)
+    }
+}
+
+impl HasSampleValues for SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+    fn sample() -> Self {
+        let mnemonic = Mnemonic::sample();
+        let questions_and_answers =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
+        let kdf_scheme =
+            SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::default();
+        let encryption_scheme = EncryptionScheme::default();
+        Self::new_by_encrypting(
+            mnemonic,
+            questions_and_answers,
+            kdf_scheme,
+            encryption_scheme,
+        )
+        .expect("Should have been able to create a sample")
+    }
+
+    fn sample_other() -> Self {
+        let mnemonic = Mnemonic::sample();
+        let questions_and_answers =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
+        let kdf_scheme =
+            SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme::default();
+        let encryption_scheme = EncryptionScheme::default();
+        Self::new_by_encrypting(
+            mnemonic,
+            questions_and_answers,
+            kdf_scheme,
+            encryption_scheme,
+        )
+        .expect("Should have been able to create a sample")
     }
 }
 

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 decl_version_type!(Subintent);
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSubintentRequestItem {
     pub version: SubintentVersion,

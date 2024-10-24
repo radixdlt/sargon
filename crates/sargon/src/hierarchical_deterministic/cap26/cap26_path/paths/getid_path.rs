@@ -14,7 +14,6 @@ use crate::prelude::*;
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
-    uniffi::Record,
 )]
 #[display("{}", self.bip32_string())]
 pub struct GetIDPath {
@@ -96,6 +95,20 @@ impl FromStr for GetIDPath {
             }
         })?;
         Self::try_from(&path)
+    }
+}
+
+impl HasSampleValues for GetIDPath {
+    fn sample() -> Self {
+        Self {
+            path: HDPath::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            path: HDPath::sample_other(),
+        }
     }
 }
 
