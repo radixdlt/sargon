@@ -421,19 +421,19 @@ mod tests {
     fn inequality_different_index() {
         let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
         let b: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".parse().unwrap();
-        assert!(a != b);
+        assert_ne!(a, b);
     }
     #[test]
     fn inequality_different_network_id() {
         let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
         let b: AccountPath = "m/44H/1022H/2H/525H/1460H/0H".parse().unwrap();
-        assert!(a != b);
+        assert_ne!(a, b);
     }
 
     #[test]
     fn inequality_different_key_kind() {
         let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
         let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".parse().unwrap();
-        assert!(a != b);
+        assert_ne!(a, b);
     }
 }

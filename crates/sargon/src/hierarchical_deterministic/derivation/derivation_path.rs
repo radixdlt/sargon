@@ -281,52 +281,48 @@ mod tests {
         let value = BIP44LikePath::from_bip32_string(&s).unwrap();
         assert_eq!(Sut::Bip44Like { value }, sut)
     }
-}
-/*
-#[cfg(test)]
-mod old_sargon_tests {
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DerivationPath;
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(Sut::sample(), Sut::sample_other());
     }
 
     #[test]
     fn curve() {
-        assert_eq!(SUT::sample().curve(), SLIP10Curve::Curve25519)
+        assert_eq!(Sut::sample().curve(), SLIP10Curve::Curve25519)
     }
 
     #[test]
     fn cap26_scheme() {
-        assert_eq!(SUT::sample_cap26().scheme(), DerivationPathScheme::Cap26);
+        assert_eq!(
+            Sut::sample().get_derivation_path_scheme(),
+            DerivationPathScheme::Cap26
+        );
     }
 
     #[test]
     fn cap26_hdpath() {
         assert_eq!(
-            SUT::sample_cap26().hd_path(),
-            AccountPath::sample().hd_path()
+            Sut::sample().to_hd_path(),
+            AccountPath::sample().to_hd_path()
         );
     }
 
     #[test]
     fn bip44like_scheme() {
         assert_eq!(
-            SUT::BIP44Like {
-                value: BIP44LikePath::new(0)
+            Sut::Bip44Like {
+                value: BIP44LikePath::new(
+                    HDPathComponent::from_global_key_space(0).unwrap()
+                )
             }
-            .scheme(),
+            .get_derivation_path_scheme(),
             DerivationPathScheme::Bip44Olympia
         );
     }
@@ -334,18 +330,27 @@ mod old_sargon_tests {
     #[test]
     fn bip44like_hdpath() {
         assert_eq!(
-            SUT::BIP44Like {
-                value: BIP44LikePath::new(0)
+            Sut::Bip44Like {
+                value: BIP44LikePath::new(
+                    HDPathComponent::from_global_key_space(0).unwrap()
+                )
             }
-            .hd_path(),
-            BIP44LikePath::new(0).hd_path()
+            .to_hd_path(),
+            BIP44LikePath::new(
+                HDPathComponent::from_local_key_space(
+                    0,
+                    KeySpace::Unsecurified { is_hardened: false }
+                )
+                .unwrap()
+            )
+            .to_hd_path()
         );
     }
 
     #[test]
     fn into_from_account_bip44_path() {
         assert_eq!(
-            SUT::BIP44Like {
+            Sut::Bip44Like {
                 value: BIP44LikePath::sample()
             },
             BIP44LikePath::sample().into()
@@ -354,15 +359,15 @@ mod old_sargon_tests {
 
     #[test]
     fn as_bip44_path() {
-        let path: SUT = BIP44LikePath::sample().into();
+        let path: Sut = BIP44LikePath::sample().into();
         assert_eq!(path.as_bip44_like().unwrap(), &BIP44LikePath::sample());
     }
 
     #[test]
     fn into_from_account_cap26_path() {
         assert_eq!(
-            SUT::CAP26 {
-                value: AccountPath::sample().into()
+            Sut::Account {
+                value: AccountPath::sample()
             },
             AccountPath::sample().into()
         );
@@ -371,8 +376,8 @@ mod old_sargon_tests {
     #[test]
     fn into_from_identity_cap26_path() {
         assert_eq!(
-            SUT::CAP26 {
-                value: IdentityPath::sample().into()
+            Sut::Identity {
+                value: IdentityPath::sample()
             },
             IdentityPath::sample().into()
         );
@@ -380,51 +385,13 @@ mod old_sargon_tests {
 
     #[test]
     fn derivation_path_identity() {
-        let derivation_path: SUT = IdentityPath::sample().into();
+        let derivation_path: Sut = IdentityPath::sample().into();
         assert_eq!(derivation_path, derivation_path.derivation_path());
     }
 
     #[test]
-    fn try_from_hdpath_account() {
-        let derivation_path: SUT = AccountPath::sample().into();
-        let hd_path = derivation_path.hd_path();
-        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
-    }
-
-    #[test]
-    fn try_from_hdpath_identity() {
-        let derivation_path: SUT = IdentityPath::sample().into();
-        let hd_path = derivation_path.hd_path();
-        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
-    }
-
-    #[test]
-    fn try_from_hdpath_bip44() {
-        let derivation_path: SUT = BIP44LikePath::sample().into();
-        let hd_path = derivation_path.hd_path();
-        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
-    }
-
-    #[test]
-    fn try_from_hdpath_getid() {
-        let derivation_path: SUT = GetIDPath::default().into();
-        let hd_path = derivation_path.hd_path();
-        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
-    }
-
-    #[test]
-    fn into_from_getid_path() {
-        assert_eq!(
-            SUT::CAP26 {
-                value: GetIDPath::default().into()
-            },
-            GetIDPath::default().into()
-        );
-    }
-
-    #[test]
     fn json_cap26_account() {
-        let model = SUT::sample();
+        let model = Sut::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -438,53 +405,56 @@ mod old_sargon_tests {
 
     #[test]
     fn test_from_str_bip44() {
-        let s = "m/44H/1022H/0H/0/0H";
-        assert_eq!(SUT::from_str(s).unwrap(), BIP44LikePath::sample().into())
+        let s = "m/44H/1022H/0H/0/1H";
+        assert_eq!(
+            Sut::from_str(s).unwrap(),
+            BIP44LikePath::sample_other().into()
+        )
     }
 
     #[test]
     fn test_from_str_cap26_account_path() {
         let s = "m/44H/1022H/1H/525H/1460H/0H";
-        assert_eq!(SUT::from_str(s).unwrap(), AccountPath::sample().into())
+        assert_eq!(Sut::from_str(s).unwrap(), AccountPath::sample().into())
     }
 
     #[test]
     fn display() {
-        let model = SUT::sample();
+        let model = Sut::sample();
         assert_eq!(format!("{}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]
     fn debug() {
-        let model = SUT::sample();
-        assert_eq!(format!("{:?}", model), "m/44H/1022H/1H/525H/1460H/0H")
+        let model = Sut::sample();
+        assert_eq!(format!("{:?}", model), "m/44'/1022'/1'/525'/1460'/0'")
     }
 
     #[test]
-    fn json_cap26_getid() {
-        let path = GetIDPath::default();
-        let model: SUT = path.into();
+    fn json_bip44like_account_hardened() {
+        let path = BIP44LikePath::sample_other();
+        let model: Sut = path.into();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
         {
-            "scheme": "cap26",
-            "path": "m/44H/1022H/365H"
+            "scheme": "bip44Olympia",
+            "path": "m/44H/1022H/0H/0/1H"
         }
         "#,
         );
     }
 
     #[test]
-    fn json_bip44like_account() {
+    fn json_bip44like_account_unhardened() {
         let path = BIP44LikePath::sample();
-        let model: SUT = path.into();
+        let model: Sut = path.into();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
         {
             "scheme": "bip44Olympia",
-            "path": "m/44H/1022H/0H/0/0H"
+            "path": "m/44H/1022H/0H/0/0"
         }
         "#,
         );
@@ -499,13 +469,12 @@ mod old_sargon_tests {
             "path": "m/44H/1022H/0H/0/0H"
         }
         "#;
-        let sut = serde_json::from_str::<SUT>(json).unwrap();
+        let sut = serde_json::from_str::<Sut>(json).unwrap();
         assert_eq!(
             sut,
-            SUT::BIP44Like {
+            Sut::Bip44Like {
                 value: BIP44LikePath::sample()
             }
         );
     }
 }
- */

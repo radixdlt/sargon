@@ -254,26 +254,6 @@ mod tests {
         assert_json_value_fails::<Sut>(json!("2X"));
         assert_json_value_fails::<Sut>(json!("   "));
     }
-}
-/*
-#[cfg(test)]
-mod old_sargon_tests {
-
-    use super::*;
-
-    #[test]
-    fn equality() {
-        assert_eq!(BIP44LikePath::sample(), BIP44LikePath::sample());
-        assert_eq!(
-            BIP44LikePath::sample_other(),
-            BIP44LikePath::sample_other()
-        );
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(BIP44LikePath::sample(), BIP44LikePath::sample_other());
-    }
 
     #[test]
     fn string_roundtrip() {
@@ -310,18 +290,6 @@ mod old_sargon_tests {
     }
 
     #[test]
-    fn invalid_depth_3_via_hdpath() {
-        let hdpath: HDPath = "m/44H/1022H/0H".parse().unwrap();
-        assert_eq!(
-            BIP44LikePath::try_from(&hdpath),
-            Err(CommonError::InvalidDepthOfBIP44Path {
-                expected: BIP44LikePath::PATH_DEPTH as u64,
-                found: 3
-            })
-        );
-    }
-
-    #[test]
     fn invalid_account_not_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0/1/2H"),
@@ -346,34 +314,13 @@ mod old_sargon_tests {
     fn inequality_different_accounts() {
         let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
         let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".parse().unwrap();
-        assert!(a != b);
+        assert_ne!(a, b);
     }
 
     #[test]
     fn inequality_different_index() {
         let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
         let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".parse().unwrap();
-        assert!(a != b);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let str = "m/44H/1022H/0H/0/0H";
-        let parsed: BIP44LikePath = str.parse().unwrap();
-        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(
-            &parsed,
-            json!("m/44H/1022H/0H/0/1H"),
-        );
-    }
-
-    #[test]
-    fn new_with_account() {
-        assert_ne!(
-            BIP44LikePath::with_account_and_index(1, 0),
-            BIP44LikePath::new(0)
-        );
+        assert_ne!(a, b);
     }
 }
-
-*/
