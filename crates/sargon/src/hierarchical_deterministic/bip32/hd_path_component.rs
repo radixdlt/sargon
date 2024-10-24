@@ -55,6 +55,16 @@ pub enum HDPathComponent {
     Securified(SecurifiedU30),
 }
 
+impl ToBIP32Str for HDPathComponent {
+    fn to_bip32_string(&self) -> String {
+        format!("{}", self)
+    }
+
+    fn to_bip32_string_debug(&self) -> String {
+        format!("{:?}", self)
+    }
+}
+
 impl From<Unsecurified> for HDPathComponent {
     fn from(value: Unsecurified) -> Self {
         Self::Unsecurified(value)
@@ -456,12 +466,24 @@ mod tests {
             format!("{:?}", Sut::from_global_key_space(0).unwrap()),
             "0"
         );
+        assert_eq!(
+            Sut::from_global_key_space(0)
+                .unwrap()
+                .to_bip32_string_debug(),
+            "0"
+        );
     }
 
     #[test]
     fn display_u30_max() {
         assert_eq!(
             format!("{}", Sut::from_global_key_space(U30_MAX).unwrap()),
+            "1073741823"
+        );
+        assert_eq!(
+            Sut::from_global_key_space(U30_MAX)
+                .unwrap()
+                .to_bip32_string(),
             "1073741823"
         );
     }

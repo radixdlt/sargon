@@ -16,7 +16,6 @@ extension BIP44LikePath {
 	}
 	
 	public var addressIndex: HdPathComponent {
-//		bip44LikePathGetAddressIndex(path: self)
-        fatalError()
+        bip44LikePathGetAddressIndex(path: self)
 	}
 }
