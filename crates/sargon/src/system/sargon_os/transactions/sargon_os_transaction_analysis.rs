@@ -1,5 +1,7 @@
 use std::sync::RwLockWriteGuard;
 
+use radix_engine_toolkit::functions::transaction_v2::subintent_manifest;
+
 use crate::prelude::*;
 
 impl SargonOS {
@@ -27,6 +29,26 @@ impl SargonOS {
             notary_public_key,
         )
         .await
+    }
+
+    pub async fn analyse_pre_auth_preview(
+        &self,
+        instructions: String,
+        blobs: Blobs,
+        message: Message,
+        nonce: Nonce,
+    ) -> Result<TransactionToReview> {
+        let network_id = self.profile_state_holder.current_network_id()?;
+        let subintent_manifest = SubintentManifest::new(
+            instructions,
+             network_id, 
+             blobs,
+              ChildIntents::default()
+            )?;
+
+        let summary = subintent_manifest.summary()?;
+        
+        Err(CommonError::AESDecryptionFailed)
     }
 }
 

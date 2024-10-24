@@ -460,10 +460,13 @@ BURN_RESOURCE
                 hashmap!(
                     AccountAddress::sample_other() => vec![AccountDeposit::sample()],
                 ),
+                Vec::<_>::sample(),
                 [AccountAddress::sample()],
                 [AccountAddress::sample_other()],
+                Vec::<_>::sample(),
                 [AccountAddress::sample()],
                 [],
+                Vec::<_>::sample(),
             )
         );
     }
@@ -512,6 +515,7 @@ BURN_RESOURCE
                         )
                     ],
                 ),
+                Vec::<_>::sample(),
                 [
                     a
                 ],
@@ -520,8 +524,10 @@ BURN_RESOURCE
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
                 ],
+                Vec::<_>::sample(),
                 [a],
-                []
+                [],
+                Vec::<_>::sample(),
             )
         );
     }
