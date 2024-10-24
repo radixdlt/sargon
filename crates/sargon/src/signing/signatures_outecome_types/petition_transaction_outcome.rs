@@ -5,29 +5,29 @@ use crate::prelude::*;
 /// set of collected signatues (might be empty) and
 /// a set of neglected factors (might be empty).
 #[derive(Clone, PartialEq, Eq)]
-pub(crate) struct PetitionTransactionOutcome {
-    intent_hash: TransactionIntentHash,
+pub(crate) struct PetitionTransactionOutcome<ID: SignablePayloadID> {
+    payload_id: ID,
     pub(crate) transaction_valid: bool,
-    pub(crate) signatures: IndexSet<HDSignature>,
+    pub(crate) signatures: IndexSet<HDSignature<ID>>,
     pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
 }
 
-impl PetitionTransactionOutcome {
+impl <ID: SignablePayloadID> PetitionTransactionOutcome<ID> {
     /// # Panics
     /// Panics if the intent hash in any signatures does not
     /// match `intent_hash`
     pub(crate) fn new(
         transaction_valid: bool,
-        intent_hash: TransactionIntentHash,
-        signatures: IndexSet<HDSignature>,
+        payload_id: ID,
+        signatures: IndexSet<HDSignature<ID>>,
         neglected_factors: IndexSet<NeglectedFactor>,
     ) -> Self {
         assert!(
-            signatures.iter().all(|s| *s.payload_id() == intent_hash),
+            signatures.iter().all(|s| *s.payload_id() == payload_id),
             "Discprenacy! Mismatching intent hash found in a signature."
         );
         Self {
-            intent_hash,
+            payload_id,
             transaction_valid,
             signatures,
             neglected_factors,
@@ -39,7 +39,7 @@ impl PetitionTransactionOutcome {
 mod tests {
     use super::*;
 
-    type Sut = PetitionTransactionOutcome;
+    type Sut = PetitionTransactionOutcome<TransactionIntentHash>;
 
     #[test]
     #[should_panic(
