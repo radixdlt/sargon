@@ -22,6 +22,27 @@ impl DappToWalletInteractionUnvalidated {
     }
 }
 
+impl DappToWalletInteractionUnvalidated {
+    pub fn new_from_json_string(
+        json_str: impl AsRef<str>,
+    ) -> Result<DappToWalletInteractionUnvalidated> {
+        let json_str = json_str.as_ref();
+        serde_json::from_str(json_str)
+            .map_failed_to_deserialize_string::<Self>(json_str)
+    }
+}
+
+impl DappToWalletInteractionUnvalidated {
+    pub fn to_json_string(&self, pretty_printed: bool) -> String {
+        if pretty_printed {
+            serde_json::to_string_pretty(self)
+        } else {
+            serde_json::to_string(self)
+        }
+        .expect("Should always be able to JSON encode DappToWalletInteractionUnvalidated.")
+    }
+}
+
 impl HasSampleValues for DappToWalletInteractionUnvalidated {
     fn sample() -> Self {
         Self::new(

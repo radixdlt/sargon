@@ -10,7 +10,22 @@ pub struct DappToWalletInteractionUnvalidated {
     pub metadata: DappToWalletInteractionMetadataUnvalidated,
 }
 
-json_string_convertible!(DappToWalletInteractionUnvalidated);
+#[uniffi::export]
+pub fn new_dapp_to_wallet_interaction_unvalidated_from_json_string(
+    json_str: String,
+) -> Result<DappToWalletInteractionUnvalidated> {
+    InternalDappToWalletInteractionUnvalidated::new_from_json_string(json_str)
+        .into_result()
+}
+
+#[uniffi::export]
+pub fn dapp_to_wallet_interaction_unvalidated_to_json_string(
+    interaction_unvalidated: &DappToWalletInteractionUnvalidated,
+) -> String {
+    interaction_unvalidated
+        .into_internal()
+        .to_json_string(false)
+}
 
 #[uniffi::export]
 pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample(

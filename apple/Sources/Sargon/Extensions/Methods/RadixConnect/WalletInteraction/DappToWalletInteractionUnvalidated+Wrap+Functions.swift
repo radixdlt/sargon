@@ -3,10 +3,10 @@ import SargonUniFFI
 
 extension DappToWalletInteractionUnvalidated {
     public func toJSONString() -> String {
-        dappToWalletInteractionUnvalidatedToJsonString(dappToWalletInteractionUnvalidated: self)
+        dappToWalletInteractionUnvalidatedToJsonString(interactionUnvalidated: self)
 	}
 
     public init(jsonString: String) throws {
-        self = try newDappToWalletInteractionUnvalidatedFromJsonString(jsonString: jsonString)
+        self = try newDappToWalletInteractionUnvalidatedFromJsonString(jsonStr: jsonString)
 	}
 }
