@@ -48,7 +48,7 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
-    pub(crate) fn scrypto_manifest(&self) -> ScryptoSubintentManifestV2 {
+    pub fn scrypto_manifest(&self) -> ScryptoSubintentManifestV2 {
         ScryptoSubintentManifestV2 {
             instructions: self.instructions().clone(),
             blobs: self.blobs.clone().into(),

@@ -1,11 +1,43 @@
 use crate::prelude::*;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct TransactionManifest {
-    pub instructions: Instructions,
-    pub blobs: Blobs,
+    pub raw_manifest: BagOfBytes,
+    pub network_id: NetworkID,
 }
+
+impl TransactionManifest {
+    pub fn into_internal(&self) -> InternalTransactionManifest {
+        self.clone().into()
+    }
+}
+
+impl Into<InternalTransactionManifest> for TransactionManifest {
+    fn into(self) -> InternalTransactionManifest {
+        let scrypto_manifest =
+            RET_from_payload_bytes_manifest_v1(self.raw_manifest.to_vec())
+                .unwrap();
+        (scrypto_manifest, self.network_id.into())
+            .try_into()
+            .unwrap()
+    }
+}
+
+impl From<InternalTransactionManifest> for TransactionManifest {
+    fn from(manifest: InternalTransactionManifest) -> Self {
+        Self {
+            raw_manifest: RET_to_payload_bytes_manifest_v1(
+                &manifest.scrypto_manifest(),
+            )
+            .unwrap()
+            .into(),
+            network_id: manifest.network_id().into(),
+        }
+    }
+}
+
+decl_conversion_tests_for!(TransactionManifest);
 
 #[uniffi::export]
 pub fn new_transaction_manifest_from_instructions_string_and_blobs(

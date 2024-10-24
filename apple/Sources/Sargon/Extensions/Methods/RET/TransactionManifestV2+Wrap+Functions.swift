@@ -15,6 +15,10 @@ extension TransactionManifestV2 {
 		transactionManifestNetworkIdV2(manifest: self)
 	}
 
+    public var blobs: Blobs {
+        transactionManifestBlobsV2(manifest: self)
+    }
+
 	public var involvedPoolAddresses: [PoolAddress] {
 		transactionManifestInvolvedPoolAddressesV2(manifest: self)
 	}

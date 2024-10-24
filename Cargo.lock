@@ -2737,7 +2737,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.1.31"
+version = "1.1.33"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -2791,7 +2791,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.1.31"
+version = "1.1.33"
 dependencies = [
  "actix-rt",
  "assert-json-diff",
@@ -2811,6 +2811,7 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "pretty_env_logger",
+ "radix-engine-toolkit",
  "rand",
  "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "sargon",

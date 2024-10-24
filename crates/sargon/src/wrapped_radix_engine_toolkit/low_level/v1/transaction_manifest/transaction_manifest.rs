@@ -44,7 +44,7 @@ impl TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
+    pub fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
         ScryptoTransactionManifest {
             instructions: self.instructions.instructions().clone(),
             blobs: self.blobs.clone().into(),
