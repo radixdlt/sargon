@@ -13,13 +13,13 @@ impl SubintentManifest {
     }
 }
 
-impl Into<InternalSubintentManifest> for SubintentManifest {
-    fn into(self) -> InternalSubintentManifest {
+impl From<SubintentManifest> for InternalSubintentManifest {
+    fn from(val: SubintentManifest) -> Self {
         let scrypto_manifest = RET_from_payload_bytes_subintent_manifest(
-            self.raw_manifest.to_vec(),
+            val.raw_manifest.to_vec(),
         )
         .unwrap();
-        (scrypto_manifest, self.network_id.into())
+        (scrypto_manifest, val.network_id.into())
             .try_into()
             .unwrap()
     }

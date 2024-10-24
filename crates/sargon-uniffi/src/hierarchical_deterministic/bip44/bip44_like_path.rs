@@ -34,7 +34,7 @@ pub struct BIP44LikePath {
 
 #[uniffi::export]
 pub fn new_bip44_like_path_from_index(index: HDPathValue) -> BIP44LikePath {
-    InternalBIP44LikePath::new(index.into()).into()
+    InternalBIP44LikePath::new(index).into()
 }
 
 #[uniffi::export]

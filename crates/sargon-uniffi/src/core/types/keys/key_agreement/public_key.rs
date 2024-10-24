@@ -26,10 +26,10 @@ impl From<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
     }
 }
 
-impl Into<InternalKeyAgreementPublicKey> for KeyAgreementPublicKey {
-    fn into(self) -> InternalKeyAgreementPublicKey {
+impl From<KeyAgreementPublicKey> for InternalKeyAgreementPublicKey {
+    fn from(val: KeyAgreementPublicKey) -> Self {
         InternalKeyAgreementPublicKey::try_from(
-            self.value.into_internal().to_vec(),
+            val.value.into_internal().to_vec(),
         )
         .unwrap()
     }

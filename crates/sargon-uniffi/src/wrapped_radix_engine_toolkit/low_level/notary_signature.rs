@@ -20,9 +20,9 @@ impl From<InternalNotarySignature> for NotarySignature {
     }
 }
 
-impl Into<InternalNotarySignature> for NotarySignature {
-    fn into(self) -> InternalNotarySignature {
-        InternalNotarySignature(self.secret_magic.into())
+impl From<NotarySignature> for InternalNotarySignature {
+    fn from(val: NotarySignature) -> Self {
+        InternalNotarySignature(val.secret_magic.into())
     }
 }
 

@@ -47,7 +47,7 @@ fn into_scrypto(
             message: message.clone().into(),
             children: manifest.children.clone().into(),
             instructions: ScryptoInstructionsV2(
-                manifest.instructions().clone().into(),
+                manifest.instructions().clone(),
             ),
         },
     }

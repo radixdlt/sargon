@@ -5,7 +5,7 @@ mod integration_tests {
     use actix_rt::time::timeout;
     use sargon::prelude::*;
     use std::collections::HashMap;
-    use url::Url;
+    
 
     const MAX: Duration = Duration::from_secs(5);
 

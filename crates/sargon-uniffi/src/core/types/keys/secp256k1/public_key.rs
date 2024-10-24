@@ -22,9 +22,9 @@ impl From<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
     }
 }
 
-impl Into<InternalSecp256k1PublicKey> for Secp256k1PublicKey {
-    fn into(self) -> InternalSecp256k1PublicKey {
-        InternalSecp256k1PublicKey::try_from(self.secret_magic.to_vec())
+impl From<Secp256k1PublicKey> for InternalSecp256k1PublicKey {
+    fn from(val: Secp256k1PublicKey) -> Self {
+        InternalSecp256k1PublicKey::try_from(val.secret_magic.to_vec())
             .unwrap()
     }
 }

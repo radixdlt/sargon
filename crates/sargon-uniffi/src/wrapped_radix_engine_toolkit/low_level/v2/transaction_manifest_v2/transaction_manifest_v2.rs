@@ -13,12 +13,12 @@ impl TransactionManifestV2 {
     }
 }
 
-impl Into<InternalTransactionManifestV2> for TransactionManifestV2 {
-    fn into(self) -> InternalTransactionManifestV2 {
+impl From<TransactionManifestV2> for InternalTransactionManifestV2 {
+    fn from(val: TransactionManifestV2) -> Self {
         let scrypto_manifest =
-            RET_from_payload_bytes_manifest_v2(self.raw_manifest.to_vec())
+            RET_from_payload_bytes_manifest_v2(val.raw_manifest.to_vec())
                 .unwrap();
-        (scrypto_manifest, self.network_id.into())
+        (scrypto_manifest, val.network_id.into())
             .try_into()
             .unwrap()
     }

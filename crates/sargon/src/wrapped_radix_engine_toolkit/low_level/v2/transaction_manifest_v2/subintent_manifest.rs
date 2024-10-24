@@ -126,7 +126,7 @@ impl SubintentManifest {
 
 impl SubintentManifest {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
-        &self.instructions.instructions()
+        self.instructions.instructions()
     }
 
     pub fn manifest_string(&self) -> String {

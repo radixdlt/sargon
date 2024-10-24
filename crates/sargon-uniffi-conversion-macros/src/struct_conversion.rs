@@ -118,7 +118,7 @@ fn generate_struct_field_conversions(
         .iter()
         .map(|f| {
             let field_name = &f.ident;
-            let field_conversion = conversion_call(&f, false);
+            let field_conversion = conversion_call(f, false);
             quote! {
                 #field_name: value.#field_name.#field_conversion
             }
@@ -134,7 +134,7 @@ fn generate_struct_internal_field_conversions(
         .iter()
         .map(|f| {
             let field_name = &f.ident;
-            let field_conversion = conversion_call(&f, true);
+            let field_conversion = conversion_call(f, true);
             quote! {
                 #field_name: self.#field_name.#field_conversion
             }
@@ -151,7 +151,7 @@ fn generate_struct_unnamed_field_conversions(
         .enumerate()
         .map(|(i, f)| {
             let index = syn::Index::from(i);
-            let field_conversion = conversion_call(&f, false);
+            let field_conversion = conversion_call(f, false);
             quote! {
                 value.#index.#field_conversion
             }
@@ -168,7 +168,7 @@ fn generate_struct_unnamed_field_internal_conversions(
         .enumerate()
         .map(|(i, f)| {
             let index = syn::Index::from(i);
-            let field_conversion = conversion_call(&f, true);
+            let field_conversion = conversion_call(f, true);
             quote! {
                 self.#index.#field_conversion
             }

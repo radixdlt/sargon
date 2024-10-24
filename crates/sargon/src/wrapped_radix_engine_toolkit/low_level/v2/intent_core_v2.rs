@@ -52,7 +52,7 @@ fn into_scrypto(
         message: message.clone().into(),
         children: manifest.children.clone().into(),
         instructions: ScryptoInstructionsV2(
-            manifest.instructions().clone().into(),
+            manifest.instructions().clone(),
         ),
     }
 }
@@ -117,14 +117,11 @@ impl IntentCoreV2 {
                     Blobs::default(),
                     ChildIntents::empty(),
                 )
-            })
-            .and_then(|manifest| {
-                Ok(Self::new(
+            }).map(|manifest| Self::new(
                     IntentHeaderV2::sample(),
                     manifest,
                     MessageV2::sample(),
                 ))
-            })
     }
 
     pub(crate) const MAX_SBOR_DEPTH: usize = InstructionsV2::MAX_SBOR_DEPTH;

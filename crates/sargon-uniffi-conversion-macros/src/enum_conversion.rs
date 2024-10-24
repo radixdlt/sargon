@@ -30,7 +30,7 @@ pub fn handle_enum(
             },
             Fields::Named(fields) => {
                 let field_names: Vec<_> = fields.named.iter().map(|f| &f.ident).collect();
-                let field_conversions: Vec<_> = generate_field_conversions(&fields);
+                let field_conversions: Vec<_> = generate_field_conversions(fields);
                 quote! {
                     #internal_name::#variant_name { #( #field_names ),* } => Self::#variant_name { #( #field_conversions ),* }
                 }
@@ -55,7 +55,7 @@ pub fn handle_enum(
             },
             Fields::Named(fields) => {
                 let field_names: Vec<_> = fields.named.iter().map(|f| &f.ident).collect();
-                let field_conversions: Vec<_> = generate_internal_field_conversions(&fields);
+                let field_conversions: Vec<_> = generate_internal_field_conversions(fields);
                 quote! {
                     Self::#variant_name { #( #field_names ),* } => #internal_name::#variant_name  { #( #field_conversions ),* }
                 }
@@ -153,7 +153,7 @@ fn generate_field_conversions(
         .iter()
         .map(|f| {
             let field_name = &f.ident;
-            let field_conversion = conversion_call(&f, false);
+            let field_conversion = conversion_call(f, false);
             quote! {
                 #field_name: #field_name.#field_conversion
             }
@@ -169,7 +169,7 @@ fn generate_internal_field_conversions(
         .iter()
         .map(|f| {
             let field_name = &f.ident;
-            let field_conversion = conversion_call(&f, true);
+            let field_conversion = conversion_call(f, true);
             quote! {
                 #field_name: #field_name.#field_conversion
             }

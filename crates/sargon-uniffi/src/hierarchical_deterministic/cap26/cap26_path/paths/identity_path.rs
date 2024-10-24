@@ -31,6 +31,6 @@ pub fn new_identity_path(
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 ) -> IdentityPath {
-    InternalIdentityPath::new(network_id.into(), key_kind.into(), index.into())
+    InternalIdentityPath::new(network_id.into(), key_kind.into(), index)
         .into()
 }

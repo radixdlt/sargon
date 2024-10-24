@@ -59,5 +59,4 @@ pub fn signature_with_public_key_is_valid(
     signature_with_public_key
         .into_internal()
         .is_valid_for_hash(&for_hash.into_internal())
-        .into()
 }

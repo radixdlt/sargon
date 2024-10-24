@@ -28,9 +28,9 @@ impl From<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
     }
 }
 
-impl Into<InternalNonFungibleLocalIdString> for NonFungibleLocalIdString {
-    fn into(self) -> InternalNonFungibleLocalIdString {
-        self.secret_magic
+impl From<NonFungibleLocalIdString> for InternalNonFungibleLocalIdString {
+    fn from(val: NonFungibleLocalIdString) -> Self {
+        val.secret_magic
             .parse::<InternalNonFungibleLocalIdString>()
             .unwrap()
     }
