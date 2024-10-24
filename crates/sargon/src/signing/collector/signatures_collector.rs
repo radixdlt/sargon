@@ -19,7 +19,7 @@ use SignaturesCollectingContinuation::*;
 pub struct SignaturesCollector<S: Signable> {
     /// Stateless immutable values used by the collector to gather signatures
     /// from factor sources.
-    dependencies: SignaturesCollectorDependencies,
+    dependencies: SignaturesCollectorDependencies<S::Payload>,
 
     /// Mutable internal state of the collector which builds up the list
     /// of signatures from each used factor source.
