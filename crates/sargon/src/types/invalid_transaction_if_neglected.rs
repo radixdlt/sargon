@@ -4,24 +4,24 @@ use crate::prelude::*;
 /// neglect certain factor source, either by user explicitly skipping
 /// it or if implicitly neglected due to failure.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
-pub struct InvalidTransactionIfNeglected {
+pub struct InvalidTransactionIfNeglected<ID: SignableID> {
     /// The intent hash of the transaction which would be invalid if a
     /// certain factor source would be neglected, either if user
     /// explicitly skipped it or implicitly neglected due to failure.
-    pub intent_hash: TransactionIntentHash,
+    pub signable_id: ID,
 
     /// The entities in the transaction which would fail auth.
     entities_which_would_fail_auth: Vec<AddressOfAccountOrPersona>,
 }
 
-impl InvalidTransactionIfNeglected {
+impl <ID: SignableID> InvalidTransactionIfNeglected<ID> {
     /// Constructs a new `InvalidTransactionIfNeglected` from an IndexSet of
     /// entities which would fail auth..
     ///
     /// # Panics
     /// Panics if `entities_which_would_fail_auth` is empty.
     pub fn new(
-        intent_hash: TransactionIntentHash,
+        signable_id: ID,
         entities_which_would_fail_auth: impl IntoIterator<
             Item = AddressOfAccountOrPersona,
         >,
@@ -42,7 +42,7 @@ impl InvalidTransactionIfNeglected {
         );
 
         Self {
-            intent_hash,
+            signable_id,
             entities_which_would_fail_auth: entities_which_would_fail_auth
                 .into_iter()
                 .collect_vec(),
@@ -59,7 +59,7 @@ impl InvalidTransactionIfNeglected {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = InvalidTransactionIfNeglected;
+    type Sut = InvalidTransactionIfNeglected<TransactionIntentHash>;
 
     #[test]
     #[should_panic(

@@ -111,7 +111,7 @@ impl <S: Signable> PetitionForTransaction<S> {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> TransactionSignRequestInput {
+    ) -> TransactionSignRequestInput<S::Payload> {
         assert!(!self.should_neglect_factors_due_to_irrelevant(
             IndexSet::just(*factor_source_id)
         ));

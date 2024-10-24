@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 #[derive(derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct Petitions {
+pub(crate) struct Petitions<S: Signable> {
     /// Lookup from factor to TXID.
     ///
     ///
@@ -22,10 +22,10 @@ pub(crate) struct Petitions {
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<TransactionIntentHash, PetitionForTransaction>>,
+        RefCell<IndexMap<TransactionIntentHash, PetitionForTransaction<S>>>,
 }
 
-impl Petitions {
+impl <S: Signable> Petitions<S> {
     pub(crate) fn new(
         factor_source_to_intent_hashes: HashMap<
             FactorSourceIDFromHash,
@@ -33,7 +33,7 @@ impl Petitions {
         >,
         txid_to_petition: IndexMap<
             TransactionIntentHash,
-            PetitionForTransaction,
+            PetitionForTransaction<S>,
         >,
     ) -> Self {
         Self {
@@ -71,7 +71,7 @@ impl Petitions {
     pub(crate) fn each_petition<T, U>(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-        each: impl Fn(&PetitionForTransaction) -> T,
+        each: impl Fn(&PetitionForTransaction<S>) -> T,
         combine: impl Fn(Vec<T>) -> U,
     ) -> U {
         let for_each = factor_source_ids
@@ -135,7 +135,7 @@ impl Petitions {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput {
+    ) -> MonoFactorSignRequestInput<S::Payload> {
         self.each_petition(
             IndexSet::just(*factor_source_id),
             |p| {
@@ -165,7 +165,7 @@ impl Petitions {
         )
     }
 
-    fn add_signature(&self, signature: &HDSignature) {
+    fn add_signature(&self, signature: &HDSignature<S::SignableID>) {
         let binding = self.txid_to_petition.borrow();
         let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
@@ -221,7 +221,7 @@ impl Petitions {
     }
 }
 
-impl HasSampleValues for Petitions {
+impl HasSampleValues for Petitions<TransactionIntent> {
     fn sample() -> Self {
         let p0 = PetitionForTransaction::sample();
         Self::new(
@@ -249,7 +249,7 @@ impl HasSampleValues for Petitions {
 mod tests {
     use super::*;
 
-    type Sut = Petitions;
+    type Sut = Petitions<TransactionIntent>;
 
     #[test]
     fn equality_of_samples() {
