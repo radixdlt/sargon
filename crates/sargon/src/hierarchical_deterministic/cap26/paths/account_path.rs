@@ -291,64 +291,33 @@ mod tests {
     fn get_entity_kind() {
         assert_eq!(Sut::sample().get_entity_kind(), CAP26EntityKind::Account);
     }
-}
-
-/*
-#[cfg(test)]
-mod old_sargon_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn equality() {
-        assert_eq!(AccountPath::sample(), AccountPath::sample());
-        assert_eq!(AccountPath::sample_other(), AccountPath::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(AccountPath::sample(), AccountPath::sample_other());
-    }
 
     #[test]
     fn index() {
-        assert_eq!(AccountPath::sample().index(), 0);
-    }
-
-    #[test]
-    fn entity_kind() {
-        assert_eq!(AccountPath::sample().entity_kind, CAP26EntityKind::Account);
+        assert_eq!(
+            AccountPath::sample().index(),
+            HDPathComponent::unsecurified_hardened(0).unwrap()
+        );
     }
 
     #[test]
     fn hd_path() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
         let parsed: AccountPath = str.parse().unwrap();
-        assert_eq!(parsed.hd_path().depth(), 6);
+        assert_eq!(parsed.to_hd_path().components.len(), 6);
     }
 
     #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
         let parsed: AccountPath = str.parse().unwrap();
-        assert_eq!(parsed.network_id, NetworkID::Mainnet);
-        assert_eq!(parsed.entity_kind, CAP26EntityKind::Account);
-        assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
-        assert_eq!(parsed.index, 0);
         assert_eq!(parsed.to_string(), str);
         let built = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,
-            0,
+            Hardened::from_local_key_space_unsecurified(U31::new(0)).unwrap(),
         );
         assert_eq!(built, parsed)
-    }
-
-    #[test]
-    fn new_tx_sign() {
-        assert_eq!(
-            AccountPath::new_mainnet_transaction_signing(77).to_string(),
-            "m/44H/1022H/1H/525H/1460H/77H"
-        );
     }
 
     #[test]
@@ -373,9 +342,21 @@ mod old_sargon_tests {
     #[test]
     fn cointype_not_found() {
         assert_eq!(
-            AccountPath::from_str("m/44H/33H/1H/525H/1460H/0"), // `33` instead of 1022
+            AccountPath::from_str("m/44H/33H/1H/525H/1460H/0H"), // `33` instead of 1022
             Err(CommonError::CoinTypeNotFound { bad_value: 33 })
         )
+    }
+
+    #[test]
+    fn new_tx_sign() {
+        assert_eq!(
+            AccountPath::new_mainnet_transaction_signing(
+                UnsecurifiedHardened::from_local_key_space(U31::new(77))
+                    .unwrap()
+            )
+            .to_string(),
+            "m/44H/1022H/1H/525H/1460H/77H"
+        );
     }
 
     #[test]
@@ -455,44 +436,4 @@ mod old_sargon_tests {
         let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".parse().unwrap();
         assert!(a != b);
     }
-
-    #[test]
-    fn json_roundtrip() {
-        let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.parse().unwrap();
-        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(
-            &parsed,
-            json!("m/44H/1022H/1H/525H/1460H/1H"),
-        );
-    }
-
-    #[test]
-    fn is_entity_path_index() {
-        let sut = AccountPath::sample();
-        assert_eq!(sut.index(), 0);
-        assert_eq!(sut.network_id(), NetworkID::Mainnet);
-        assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
-    }
-
-    #[test]
-    fn try_from_hdpath_valid() {
-        let hdpath = HDPath::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
-        let account_path = AccountPath::try_from(&hdpath);
-        assert!(account_path.is_ok());
-    }
-
-    #[test]
-    fn try_from_hdpath_invalid() {
-        let hdpath = HDPath::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
-        assert_eq!(
-            AccountPath::try_from(&hdpath),
-            Err(CommonError::WrongEntityKind {
-                expected: CAP26EntityKind::Account,
-                found: CAP26EntityKind::Identity
-            })
-        );
-    }
 }
-
-*/

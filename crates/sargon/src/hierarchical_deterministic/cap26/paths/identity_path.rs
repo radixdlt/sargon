@@ -292,4 +292,89 @@ mod tests {
     fn get_entity_kind() {
         assert_eq!(Sut::sample().get_entity_kind(), CAP26EntityKind::Identity);
     }
+
+    #[test]
+    fn inequality_different_index() {
+        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".parse().unwrap();
+        let b: IdentityPath = "m/44H/1022H/1H/618H/1460H/1H".parse().unwrap();
+        assert_ne!(a, b);
+    }
+    #[test]
+    fn inequality_different_network_id() {
+        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".parse().unwrap();
+        let b: IdentityPath = "m/44H/1022H/2H/618H/1460H/0H".parse().unwrap();
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn inequality_different_key_kind() {
+        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".parse().unwrap();
+        let b: IdentityPath = "m/44H/1022H/1H/618H/1678H/0H".parse().unwrap();
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn fails_when_not_bip44() {
+        assert_eq!(
+            IdentityPath::from_str("m/777H/1022H/1H/618H/1460H/0H"),
+            Err(CommonError::BIP44PurposeNotFound { bad_value: 777 })
+        )
+    }
+
+    #[test]
+    fn missing_leading_m_is_ok() {
+        assert!(IdentityPath::from_str("44H/1022H/1H/618H/1460H/0H").is_ok())
+    }
+
+    #[test]
+    fn fails_when_index_is_too_large() {
+        assert_eq!(
+            IdentityPath::from_str("m/44H/1022H/1H/618H/1460H/4294967296H"),
+            Err(CommonError::InvalidBIP32Path {
+                bad_value: "m/44H/1022H/1H/618H/1460H/4294967296H".to_string()
+            })
+        )
+    }
+    #[test]
+    fn cointype_not_found() {
+        assert_eq!(
+            IdentityPath::from_str("m/44H/33H/1H/618H/1460H/0"), // `33` instead of 1022
+            Err(CommonError::CoinTypeNotFound { bad_value: 33 })
+        )
+    }
+
+    #[test]
+    fn fails_when_entity_type_identity() {
+        assert_eq!(
+            IdentityPath::from_str("m/44H/1022H/1H/525H/1460H/0H"),
+            Err(CommonError::WrongEntityKind {
+                expected: CAP26EntityKind::Identity,
+                found: CAP26EntityKind::Account,
+            })
+        )
+    }
+
+    #[test]
+    fn fails_when_entity_type_does_not_exist() {
+        assert_eq!(
+            IdentityPath::from_str("m/44H/1022H/1H/99999H/1460H/0H"),
+            Err(CommonError::InvalidEntityKind { bad_value: 99999 })
+        )
+    }
+
+    #[test]
+    fn fails_when_key_kind_does_not_exist() {
+        assert_eq!(
+            IdentityPath::from_str("m/44H/1022H/1H/618H/22222H/0H"),
+            Err(CommonError::InvalidKeyKind { bad_value: 22222 })
+        )
+    }
+
+    #[test]
+    fn fails_when_network_id_is_out_of_bounds() {
+        assert_eq!(
+            IdentityPath::from_str("m/44H/1022H/4444H/618H/1460H/0H"),
+            Err(CommonError::InvalidNetworkIDExceedsLimit { bad_value: 4444 })
+        )
+    }
 }
