@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait Signable: Identifiable {
+pub trait Signable {
 
     type Payload: SignablePayload + PartialEq + Eq + Clone + Debug + std::hash::Hash;
 
