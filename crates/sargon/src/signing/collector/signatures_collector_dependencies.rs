@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
-pub(super) struct SignaturesCollectorDependencies {
+pub(super) struct SignaturesCollectorDependencies<SP: SignablePayload> {
     /// If `true` we stop collecting signatures as soon as all transactions are
     /// valid. This is typically always set to `true`, but can be useful for
     /// tests to set to `false` to see how the system behaves.
     pub(super) finish_early_strategy: SigningFinishEarlyStrategy,
 
     /// A collection of "interactors" used to sign with factor sources.
-    pub(super) interactors: Arc<dyn SignInteractors>,
+    pub(super) interactors: Arc<dyn SignInteractors<SP>>,
 
     /// Factor sources grouped by kind, sorted according to "friction order",
     /// that is, we want to control which FactorSourceKind users sign with
@@ -21,10 +21,10 @@ pub(super) struct SignaturesCollectorDependencies {
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
 }
 
-impl SignaturesCollectorDependencies {
+impl <SP: SignablePayload> SignaturesCollectorDependencies<SP> {
     pub(crate) fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
-        interactors: Arc<dyn SignInteractors>,
+        interactors: Arc<dyn SignInteractors<SP>>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
     ) -> Self {
         Self {
