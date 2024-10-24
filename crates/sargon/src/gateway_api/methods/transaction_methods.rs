@@ -68,9 +68,11 @@ impl GatewayClient {
         &self,
         intent_hash: SubintentHash,
         mock: bool,
-    ) -> Result<Option<TransactionIntentHash>> {
+    ) -> Result<Option<String>> {
         if mock {
-            return Ok(Some(TransactionIntentHash::sample()))
+            return Ok(Some(
+                TransactionIntentHash::sample().bech32_encoded_tx_id,
+            ));
         } else {
             Ok(None)
         }

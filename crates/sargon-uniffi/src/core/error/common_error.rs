@@ -707,6 +707,9 @@ pub enum CommonError {
 
     #[error("Failed to generate manifest summary")]
     FailedToGenerateManifestSummary = 10198,
+
+    #[error("The subintent has expired")]
+    ExpiredSubintent = 10199,
 }
 
 #[uniffi::export]
