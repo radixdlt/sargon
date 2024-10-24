@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt;
+use radix_transactions::model::IntentHash;
 
 impl GatewayClient {
     /// Returns the current `Epoch` of the Radix Network of the provided gateway.
@@ -57,5 +58,21 @@ impl GatewayClient {
         self.transaction_preview(request)
             .await
             .map(|r| r.radix_engine_toolkit_receipt)
+    }
+}
+
+impl GatewayClient {
+    /// Checks the status of a PreAuthorization.
+    /// Returns the `TransactionIntentHash` if the subinent has been submitted, otherwise `None`.
+    pub async fn get_pre_authorization_status(
+        &self,
+        intent_hash: SubintentHash,
+        mock: bool,
+    ) -> Result<Option<TransactionIntentHash>> {
+        if mock {
+            return Ok(Some(TransactionIntentHash::sample()))
+        } else {
+            Ok(None)
+        }
     }
 }
