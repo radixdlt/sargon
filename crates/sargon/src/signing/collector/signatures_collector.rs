@@ -23,7 +23,7 @@ pub struct SignaturesCollector<S: Signable> {
 
     /// Mutable internal state of the collector which builds up the list
     /// of signatures from each used factor source.
-    state: RefCell<SignaturesCollectorState>,
+    state: RefCell<SignaturesCollectorState<S>>,
 
     phantom: PhantomData<S>,
 }
@@ -33,7 +33,7 @@ impl SignaturesCollector<TransactionIntent> {
     pub fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = TransactionIntent>,
-        interactors: Arc<dyn SignInteractors>,
+        interactors: Arc<dyn SignInteractors<CompiledTransactionIntent>>,
         profile: &Profile,
         role_kind: RoleKind,
     ) -> Result<Self> {
@@ -47,7 +47,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub async fn collect_signatures(self) -> SignaturesOutcome {
+    pub async fn collect_signatures(self) -> SignaturesOutcome<TransactionIntentHash> {
         let _ = self
             .sign_with_factors() // in decreasing "friction order"
             .await
@@ -63,7 +63,7 @@ impl <S: Signable> SignaturesCollector<S> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<TXToSign>,
-        interactors: Arc<dyn SignInteractors>,
+        interactors: Arc<dyn SignInteractors<S::Payload>>,
         role_kind: RoleKind,
     ) -> Self {
         debug!("Init SignaturesCollector");
@@ -89,7 +89,7 @@ impl <S: Signable> SignaturesCollector<S> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = TransactionIntent>,
-        interactors: Arc<dyn SignInteractors>,
+        interactors: Arc<dyn SignInteractors<S::Payload>>,
         role_kind: RoleKind,
         extract_signers: F,
     ) -> Result<Self>
@@ -282,7 +282,7 @@ impl <S: Signable> SignaturesCollector<S> {
     fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput {
+    ) -> MonoFactorSignRequestInput<S::Payload> {
         self.state
             .borrow()
             .petitions
@@ -293,7 +293,7 @@ impl <S: Signable> SignaturesCollector<S> {
     fn request_for_serial_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequest {
+    ) -> MonoFactorSignRequest<S::Payload> {
         let batch_signing_request = self.input_for_interactor(factor_source_id);
 
         MonoFactorSignRequest::new(
@@ -309,7 +309,7 @@ impl <S: Signable> SignaturesCollector<S> {
     fn request_for_parallel_interactor(
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
-    ) -> PolyFactorSignRequest {
+    ) -> PolyFactorSignRequest<S::Payload> {
         let factor_source_ids = factor_sources_of_kind
             .factor_sources()
             .iter()
@@ -323,7 +323,7 @@ impl <S: Signable> SignaturesCollector<S> {
             .clone()
             .iter()
             .map(|fid| (*fid, self.input_for_interactor(fid)))
-            .collect::<IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput>>();
+            .collect::<IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<S::Payload>>>();
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(
@@ -341,7 +341,7 @@ impl <S: Signable> SignaturesCollector<S> {
     fn invalid_transactions_if_neglected_factor_sources(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected> {
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::SignableID>> {
         self.state
             .borrow()
             .petitions
@@ -349,13 +349,13 @@ impl <S: Signable> SignaturesCollector<S> {
             .invalid_transactions_if_neglected_factors(factor_source_ids)
     }
 
-    fn process_batch_response(&self, response: SignWithFactorsOutcome) {
+    fn process_batch_response(&self, response: SignWithFactorsOutcome<S::SignableID>) {
         let state = self.state.borrow_mut();
         let petitions = state.petitions.borrow_mut();
         petitions.process_batch_response(response)
     }
 
-    fn outcome(self) -> SignaturesOutcome {
+    fn outcome(self) -> SignaturesOutcome<S::SignableID> {
         let expected_number_of_transactions;
         {
             let state = self.state.borrow_mut();
@@ -386,7 +386,7 @@ mod tests {
 
     impl SignaturesCollector<TransactionIntent> {
         /// Used by tests
-        pub(crate) fn petitions(self) -> Petitions {
+        pub(crate) fn petitions(self) -> Petitions<TransactionIntent> {
             self.state.into_inner().petitions.into_inner()
         }
     }
@@ -1192,7 +1192,7 @@ mod tests {
                 );
 
                 type Tuple =
-                    (FactorSourceKind, IndexSet<InvalidTransactionIfNeglected>);
+                    (FactorSourceKind, IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>);
                 type Tuples = Vec<Tuple>;
                 let tuples =
                     Rc::<RefCell<Tuples>>::new(RefCell::new(Tuples::default()));
