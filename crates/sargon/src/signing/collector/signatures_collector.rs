@@ -16,7 +16,7 @@ use SignaturesCollectingContinuation::*;
 /// By increasing friction order we mean, the quickest and easiest to use FactorSourceKind
 /// is last; namely `DeviceFactorSource`, and the most tedious FactorSourceKind is
 /// first; namely `LedgerFactorSource`, which user might also lack access to.
-pub struct SignaturesCollector<S: Signable> {
+pub struct SignaturesCollector<S: Signable + Clone> {
     /// Stateless immutable values used by the collector to gather signatures
     /// from factor sources.
     dependencies: SignaturesCollectorDependencies<S::Payload>,
@@ -56,11 +56,11 @@ impl SignaturesCollector<TransactionIntent> {
 }
 
 // === INTERNAL ===
-impl <S: Signable> SignaturesCollector<S> {
+impl <S: Signable + Clone> SignaturesCollector<S> {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
-        transactions: IdentifiedVecOf<SignableWithEntities>,
+        transactions: IdentifiedVecOf<SignableWithEntities<S>>,
         interactors: Arc<dyn SignInteractors<S::Payload>>,
         role_kind: RoleKind,
     ) -> Self {
@@ -91,12 +91,12 @@ impl <S: Signable> SignaturesCollector<S> {
         extract_signers: F,
     ) -> Result<Self>
     where
-        F: Fn(TransactionIntent) -> Result<SignableWithEntities>,
+        F: Fn(TransactionIntent) -> Result<SignableWithEntities<S>>,
     {
         let transactions = transactions
             .into_iter()
             .map(extract_signers)
-            .collect::<Result<IdentifiedVecOf<SignableWithEntities>>>()?;
+            .collect::<Result<IdentifiedVecOf<SignableWithEntities<S>>>>()?;
 
         let collector = Self::with(
             finish_early_strategy,
@@ -111,7 +111,7 @@ impl <S: Signable> SignaturesCollector<S> {
 }
 
 // === PRIVATE ===
-impl <S: Signable> SignaturesCollector<S> {
+impl <S: Signable + Clone> SignaturesCollector<S> {
     /// Returning `Continue` means that we should continue collecting signatures.
     ///
     /// Returning `FinishEarly` if it is meaningless to continue collecting signatures,

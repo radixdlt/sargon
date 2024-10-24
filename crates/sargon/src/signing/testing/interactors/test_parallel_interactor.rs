@@ -21,11 +21,11 @@ impl IsTestInteractor for TestSigningParallelInteractor {
 }
 
 #[async_trait::async_trait]
-impl PolyFactorSignInteractor for TestSigningParallelInteractor {
+impl PolyFactorSignInteractor<CompiledTransactionIntent> for TestSigningParallelInteractor {
     async fn sign(
         &self,
-        request: PolyFactorSignRequest,
-    ) -> SignWithFactorsOutcome {
+        request: PolyFactorSignRequest<CompiledTransactionIntent>,
+    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
         self.simulated_user.spy_on_request_before_handled(
             request.clone().factor_source_kind(),
             request.clone().invalid_transactions_if_neglected,
@@ -57,9 +57,9 @@ impl PolyFactorSignInteractor for TestSigningParallelInteractor {
                                     .map(|y| HDSignature::produced_signing_with_input(y.clone()))
                                     .collect_vec()
                             })
-                            .collect::<IndexSet<HDSignature>>()
+                            .collect::<IndexSet<HDSignature<TransactionIntentHash>>>()
                     })
-                    .collect::<IndexSet<HDSignature>>();
+                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
 
                 let signatures = signatures
                     .into_iter()
