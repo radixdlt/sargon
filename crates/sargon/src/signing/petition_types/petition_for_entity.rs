@@ -13,18 +13,18 @@ pub(crate) struct PetitionForEntity<ID: SignablePayloadID> {
     pub(crate) payload_id: ID,
 
     /// Petition with threshold factors
-    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors>>,
+    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<ID>>>,
 
     /// Petition with override factors
-    pub(crate) override_factors: Option<RefCell<PetitionForFactors>>,
+    pub(crate) override_factors: Option<RefCell<PetitionForFactors<ID>>>,
 }
 
 impl <ID: SignablePayloadID> PetitionForEntity<ID> {
     pub(super) fn new(
         payload_id: ID,
         entity: AddressOfAccountOrPersona,
-        threshold_factors: impl Into<Option<PetitionForFactors>>,
-        override_factors: impl Into<Option<PetitionForFactors>>,
+        threshold_factors: impl Into<Option<PetitionForFactors<ID>>>,
+        override_factors: impl Into<Option<PetitionForFactors<ID>>>,
     ) -> Self {
         let threshold_factors = threshold_factors.into();
         let override_factors = override_factors.into();
@@ -311,11 +311,11 @@ impl <ID: SignablePayloadID> PetitionForEntity<ID> {
     /// and `Option` repeatedly.
     fn access_both_list<T, U>(
         &self,
-        access: impl Fn(&PetitionForFactors) -> T,
+        access: impl Fn(&PetitionForFactors<ID>) -> T,
         combine: impl Fn(Option<T>, Option<T>) -> U,
     ) -> U {
         let access_list_if_exists =
-            |list: &Option<RefCell<PetitionForFactors>>| {
+            |list: &Option<RefCell<PetitionForFactors<ID>>>| {
                 list.as_ref().map(|refcell| access(&refcell.borrow()))
             };
         let t = access_list_if_exists(&self.threshold_factors);
@@ -327,7 +327,7 @@ impl <ID: SignablePayloadID> PetitionForEntity<ID> {
     /// of each list is then combined together using `IndexSet::union` and returned.
     fn access_both_list_then_form_union<T>(
         &self,
-        access: impl Fn(&PetitionForFactors) -> IndexSet<T>,
+        access: impl Fn(&PetitionForFactors<ID>) -> IndexSet<T>,
     ) -> IndexSet<T>
     where
         T: Eq + std::hash::Hash + Clone,
