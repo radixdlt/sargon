@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use crate::prelude::*;
 
 use super::{
@@ -15,7 +16,7 @@ use SignaturesCollectingContinuation::*;
 /// By increasing friction order we mean, the quickest and easiest to use FactorSourceKind
 /// is last; namely `DeviceFactorSource`, and the most tedious FactorSourceKind is
 /// first; namely `LedgerFactorSource`, which user might also lack access to.
-pub struct SignaturesCollector {
+pub struct SignaturesCollector<S: Signable> {
     /// Stateless immutable values used by the collector to gather signatures
     /// from factor sources.
     dependencies: SignaturesCollectorDependencies,
@@ -23,10 +24,12 @@ pub struct SignaturesCollector {
     /// Mutable internal state of the collector which builds up the list
     /// of signatures from each used factor source.
     state: RefCell<SignaturesCollectorState>,
+
+    phantom: PhantomData<S>,
 }
 
 // === PUBLIC ===
-impl SignaturesCollector {
+impl SignaturesCollector<TransactionIntent> {
     pub fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = TransactionIntent>,
@@ -55,7 +58,7 @@ impl SignaturesCollector {
 }
 
 // === INTERNAL ===
-impl SignaturesCollector {
+impl <S: Signable> SignaturesCollector<S> {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
@@ -78,6 +81,7 @@ impl SignaturesCollector {
         Self {
             dependencies,
             state: RefCell::new(state),
+            phantom: PhantomData,
         }
     }
 
@@ -110,7 +114,7 @@ impl SignaturesCollector {
 }
 
 // === PRIVATE ===
-impl SignaturesCollector {
+impl <S: Signable> SignaturesCollector<S> {
     /// Returning `Continue` means that we should continue collecting signatures.
     ///
     /// Returning `FinishEarly` if it is meaningless to continue collecting signatures,
@@ -380,7 +384,7 @@ mod tests {
 
     use super::*;
 
-    impl SignaturesCollector {
+    impl SignaturesCollector<TransactionIntent> {
         /// Used by tests
         pub(crate) fn petitions(self) -> Petitions {
             self.state.into_inner().petitions.into_inner()

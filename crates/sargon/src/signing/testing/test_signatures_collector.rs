@@ -3,7 +3,7 @@
 
 use crate::prelude::*;
 
-impl SignaturesCollector {
+impl SignaturesCollector<TransactionIntent> {
     pub(crate) fn new_test_with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
