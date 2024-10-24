@@ -3,15 +3,15 @@ use crate::prelude::*;
 /// A batch of transactions each batching over multiple keys (derivation paths)
 /// to sign each transaction with.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
-pub struct MonoFactorSignRequestInput {
+pub struct MonoFactorSignRequestInput<SP: SignablePayload> {
     /// The ID of the factor source used to sign each per_transaction
     pub factor_source_id: FactorSourceIDFromHash,
 
     // The `factor_source_id` of each item must match `self.factor_source_id`.
-    pub per_transaction: Vec<TransactionSignRequestInput>,
+    pub per_transaction: Vec<TransactionSignRequestInput<SP>>,
 }
 
-impl MonoFactorSignRequestInput {
+impl <SP: SignablePayload> MonoFactorSignRequestInput<SP> {
     /// # Panics
     /// Panics if `per_transaction` is empty
     ///
@@ -19,7 +19,7 @@ impl MonoFactorSignRequestInput {
     /// of each request does not match `factor_source_id`.
     pub(crate) fn new(
         factor_source_id: FactorSourceIDFromHash,
-        per_transaction: IndexSet<TransactionSignRequestInput>,
+        per_transaction: IndexSet<TransactionSignRequestInput<SP>>,
     ) -> Self {
         assert!(
             !per_transaction.is_empty(),
@@ -43,7 +43,7 @@ impl MonoFactorSignRequestInput {
     }
 }
 
-impl HasSampleValues for MonoFactorSignRequestInput {
+impl HasSampleValues for MonoFactorSignRequestInput<CompiledTransactionIntent> {
     /// Creates a new MonoFactorSignRequestInput with sample values.
     fn sample() -> Self {
         let input = TransactionSignRequestInput::sample();
@@ -60,7 +60,7 @@ impl HasSampleValues for MonoFactorSignRequestInput {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = MonoFactorSignRequestInput;
+    type Sut = MonoFactorSignRequestInput<CompiledTransactionIntent>;
 
     #[test]
     fn equality() {
