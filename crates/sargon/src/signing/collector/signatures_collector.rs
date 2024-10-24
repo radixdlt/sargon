@@ -56,7 +56,7 @@ impl SignaturesCollector<TransactionIntent> {
 }
 
 // === INTERNAL ===
-impl <S: Signable + Clone> SignaturesCollector<S> {
+impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollector<S> {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
@@ -111,7 +111,7 @@ impl <S: Signable + Clone> SignaturesCollector<S> {
 }
 
 // === PRIVATE ===
-impl <S: Signable + Clone> SignaturesCollector<S> {
+impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollector<S> {
     /// Returning `Continue` means that we should continue collecting signatures.
     ///
     /// Returning `FinishEarly` if it is meaningless to continue collecting signatures,
