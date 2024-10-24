@@ -8,7 +8,7 @@ use crate::prelude::*;
     payload_id,
     owned_factor_instance
 )]
-pub struct HDSignatureInput<ID: SignablePayloadID> {
+pub struct HDSignatureInput<ID: SignableID> {
     /// Hash which was signed.
     pub payload_id: ID,
 
@@ -17,7 +17,7 @@ pub struct HDSignatureInput<ID: SignablePayloadID> {
     /// with.
     pub owned_factor_instance: OwnedFactorInstance,
 }
-impl <ID: SignablePayloadID> HDSignatureInput<ID> {
+impl <ID: SignableID> HDSignatureInput<ID> {
     /// Constructs a new `HDSignatureInput`.
     pub fn new(
         payload_id: ID,

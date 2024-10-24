@@ -4,25 +4,33 @@ pub trait Signable: Identifiable {
 
     type Payload: SignablePayload;
 
+    type SignableID: SignableID;
+
     fn get_payload(&self) -> Self::Payload;
+
+    fn get_payload_id(&self) -> Self::SignableID;
 }
 
 pub trait SignablePayload {
-    type PayloadId: SignablePayloadID;
+    type PayloadId: SignableID;
 
     fn get_payload_id(&self) -> Self::PayloadId;
 }
 
-pub trait SignablePayloadID: Into<Hash> + Clone + PartialEq + Eq + std::hash::Hash + Debug {}
+pub trait SignableID: Into<Hash> + Clone + PartialEq + Eq + std::hash::Hash + Debug {}
 
 ////////////////////////////////////////////////////////////////////////
 impl Signable for TransactionIntent {
     type Payload = CompiledTransactionIntent;
+    type SignableID = TransactionIntentHash;
 
     fn get_payload(&self) -> Self::Payload {
         self.compile()
     }
 
+    fn get_payload_id(&self) -> Self::SignableID {
+        self.transaction_intent_hash().clone()
+    }
 }
 
 impl SignablePayload for CompiledTransactionIntent {
@@ -33,7 +41,7 @@ impl SignablePayload for CompiledTransactionIntent {
     }
 }
 
-impl SignablePayloadID for TransactionIntentHash {}
+impl SignableID for TransactionIntentHash {}
 
 impl Identifiable for CompiledTransactionIntent {
     type ID = TransactionIntentHash;

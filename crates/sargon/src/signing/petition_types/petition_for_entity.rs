@@ -5,7 +5,7 @@ use crate::prelude::*;
 /// `{ threshold: PetitionForFactors, override: PetitionForFactors }`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForEntity<ID: SignablePayloadID> {
+pub(crate) struct PetitionForEntity<ID: SignableID> {
     /// The owner of these factors
     pub(crate) entity: AddressOfAccountOrPersona,
 
@@ -19,7 +19,7 @@ pub(crate) struct PetitionForEntity<ID: SignablePayloadID> {
     pub(crate) override_factors: Option<RefCell<PetitionForFactors<ID>>>,
 }
 
-impl <ID: SignablePayloadID> PetitionForEntity<ID> {
+impl <ID: SignableID> PetitionForEntity<ID> {
     pub(super) fn new(
         payload_id: ID,
         entity: AddressOfAccountOrPersona,
@@ -302,7 +302,7 @@ impl <ID: SignablePayloadID> PetitionForEntity<ID> {
 }
 
 // === Private ===
-impl <ID: SignablePayloadID> PetitionForEntity<ID> {
+impl <ID: SignableID> PetitionForEntity<ID> {
     /// Derefs and calls `access` on both lists respectively, if they exist. Then combines the results
     /// of each list access using `combine`.
     ///

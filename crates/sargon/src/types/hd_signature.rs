@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// A signature of `intent_hash` by `entity` using `factor_source_id` and `derivation_path`, with `public_key` used for verification.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 #[debug("HDSignature {{ input: {:#?} }}", input)]
-pub struct HDSignature<ID: SignablePayloadID> {
+pub struct HDSignature<ID: SignableID> {
     /// The input used to produce this `HDSignature`
     pub input: HDSignatureInput<ID>,
 
@@ -17,7 +17,7 @@ pub struct HDSignature<ID: SignablePayloadID> {
     pub signature: Signature,
 }
 
-impl <ID: SignablePayloadID> HDSignature<ID> {
+impl <ID: SignableID> HDSignature<ID> {
     /// Constructs a HDSignature from an already produced `Signature`.
     pub fn with_details(input: HDSignatureInput<ID>, signature: Signature) -> Self {
         Self { input, signature }
@@ -59,7 +59,7 @@ impl HasSampleValues for HDSignature<TransactionIntentHash> {
     }
 }
 
-impl <ID: SignablePayloadID> HDSignature<ID> {
+impl <ID: SignableID> HDSignature<ID> {
     /// WARNING: Should only be used in samples and unit tests
     ///
     /// Signs with predefined mnemonics associated to the input's factor source id
@@ -80,7 +80,7 @@ impl <ID: SignablePayloadID> HDSignature<ID> {
 }
 
 #[cfg(test)]
-impl <ID: SignablePayloadID> HDSignature<ID> {
+impl <ID: SignableID> HDSignature<ID> {
     pub fn produced_signing_with_input(input: HDSignatureInput<ID>) -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(input)
     }

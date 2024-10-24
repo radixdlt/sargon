@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// An immutable "snapshot" of `PetitionForFactorsState`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(super) struct PetitionForFactorsStateSnapshot<ID: SignablePayloadID> {
+pub(super) struct PetitionForFactorsStateSnapshot<ID: SignableID> {
     /// Factors that have signed.
     signed: IndexSet<HDSignature<ID>>,
 
@@ -11,7 +11,7 @@ pub(super) struct PetitionForFactorsStateSnapshot<ID: SignablePayloadID> {
     neglected: IndexSet<NeglectedFactorInstance>,
 }
 
-impl <ID: SignablePayloadID> PetitionForFactorsStateSnapshot<ID> {
+impl <ID: SignableID> PetitionForFactorsStateSnapshot<ID> {
     pub(super) fn new(
         signed: IndexSet<HDSignature<ID>>,
         neglected: IndexSet<NeglectedFactorInstance>,

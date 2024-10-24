@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// Petition of signatures from a factors list of an entity in a transaction.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForFactors<ID: SignablePayloadID> {
+pub(crate) struct PetitionForFactors<ID: SignableID> {
     pub(crate) factor_list_kind: FactorListKind,
 
     /// Factors to sign with and the required number of them.
@@ -25,7 +25,7 @@ impl HasSampleValues for PetitionForFactors<TransactionIntentHash> {
     }
 }
 
-impl <ID: SignablePayloadID> PetitionForFactors<ID> {
+impl <ID: SignableID> PetitionForFactors<ID> {
     pub(crate) fn new(
         factor_list_kind: FactorListKind,
         input: PetitionForFactorsInput,

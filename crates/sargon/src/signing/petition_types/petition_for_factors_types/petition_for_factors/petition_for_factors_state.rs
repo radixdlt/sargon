@@ -7,7 +7,7 @@ use crate::prelude::*;
 /// have either signed or been neglected.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("PetitionForFactorsState(signed: {:?}, neglected: {:?})", signed.borrow().clone(), neglected.borrow().clone())]
-pub(crate) struct PetitionForFactorsState<ID: SignablePayloadID> {
+pub(crate) struct PetitionForFactorsState<ID: SignableID> {
     /// Factors that have signed.
     signed: RefCell<PetitionForFactorsSubState<HDSignature<ID>>>,
 
@@ -16,7 +16,7 @@ pub(crate) struct PetitionForFactorsState<ID: SignablePayloadID> {
     neglected: RefCell<PetitionForFactorsSubState<NeglectedFactorInstance>>,
 }
 
-impl <ID: SignablePayloadID> PetitionForFactorsState<ID> {
+impl <ID: SignableID> PetitionForFactorsState<ID> {
     /// Creates a new `PetitionForFactorsState`.
     pub(super) fn new() -> Self {
         Self {
