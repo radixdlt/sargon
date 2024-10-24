@@ -81,7 +81,7 @@ impl <ID: SignablePayloadID> PetitionForFactorsState<ID> {
         self.signed.borrow_mut().insert(signature)
     }
 
-    pub(super) fn snapshot(&self) -> PetitionForFactorsStateSnapshot {
+    pub(super) fn snapshot(&self) -> PetitionForFactorsStateSnapshot<ID> {
         PetitionForFactorsStateSnapshot::new(
             self.signed().snapshot(),
             self.neglected().snapshot(),
