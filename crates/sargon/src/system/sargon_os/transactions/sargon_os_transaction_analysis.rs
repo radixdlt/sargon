@@ -91,7 +91,7 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        message: Message,
+        message: MessageV2,
         nonce: Nonce,
     ) -> Result<PreAuthToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
@@ -648,6 +648,30 @@ mod transaction_preview_analysis_tests {
                 )
             })
         )
+    }
+
+    #[actix_rt::test]
+    async fn analyse_pre_auth_preview() {
+        let os =
+            prepare_os(MockNetworkingDriver::new_always_failing())
+                .await;
+
+        let scrypto_subintent_manifest = ScryptoSubintentManifestV2Builder::new_subintent_v2()
+        .assert_worktop_is_empty()
+        .drop_all_proofs()
+        .yield_to_parent(())
+        .build();
+
+        let summary = RET_statically_analyze_subintent_manifest(&scrypto_subintent_manifest).unwrap();
+
+        let subintent_manifest: SubintentManifest = (scrypto_subintent_manifest, NetworkID::Stokenet).try_into().unwrap();
+
+        let result = os.analyse_pre_auth_preview(subintent_manifest.manifest_string(), Blobs::default(), MessageV2::sample(), Nonce::sample()).await.unwrap();
+
+        assert_eq!(result, PreAuthToReview::Open(PreAuthOpenManifest {
+            manifest: subintent_manifest.clone(),
+            summary: subintent_manifest.summary().unwrap(),
+        }))
     }
 
     async fn prepare_os(

@@ -42,7 +42,7 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        message: Message,
+        message: MessageV2,
         nonce: Nonce,
     ) -> Result<PreAuthToReview> {
         self.wrapped
