@@ -38,6 +38,7 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
+    #[allow(dead_code)]
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: InstructionsV2::empty(network_id),

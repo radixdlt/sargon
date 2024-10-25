@@ -19,11 +19,6 @@ impl Subintent {
         })
     }
 
-    pub fn compile(&self) -> BagOfBytes {
-        compile_intent(ScryptoSubintent::from(self.clone()))
-            .expect("Should always be able to compile an Intent")
-    }
-
     pub fn hash(&self) -> SubintentHash {
         let hash = ret_hash_subintent(&ScryptoSubintent::from(self.clone()))
             .expect("Should never fail to hash an intent. Sargon should only produce valid Intents");
@@ -74,6 +69,22 @@ impl From<Subintent> for ScryptoSubintent {
         ScryptoSubintent {
             intent_core: value.intent_core.into(),
         }
+    }
+}
+
+impl TryFrom<ScryptoSubintent> for Subintent {
+    type Error = CommonError;
+
+    fn try_from(value: ScryptoSubintent) -> std::result::Result<Self, Self::Error> {
+        let network_id = NetworkID::try_from(value.intent_core.header.network_id)?;
+
+        let manifest = TryFrom::<(ScryptoTransactionManifestV2, NetworkID)>::try_from(
+            (ScryptoTransactionManifestV2::from_intent_core(&value.intent_core), network_id)
+        )?;
+        let header = TryFrom::<ScryptoIntentHeaderV2>::try_from(value.intent_core.header.clone())?;
+        let message = TryFrom::<ScryptoMessageV2>::try_from(value.intent_core.message)?;
+
+        Self::new(header, manifest, message)
     }
 }
 

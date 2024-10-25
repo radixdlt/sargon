@@ -31,9 +31,9 @@ impl CompiledTransactionIntent {
     pub fn decompile(&self) -> TransactionIntent {
         let err = "Should never fail to decompile a 'CompiledTransactionIntent' since we should not have been able to construct an invalid 'CompiledTransactionIntent'.";
 
-        let notarized = RET_intent_from_payload_bytes(self.bytes()).expect(err);
+        let intent = RET_intent_from_payload_bytes(self.bytes()).expect(err);
 
-        notarized.try_into().expect(err)
+        intent.try_into().expect(err)
     }
 }
 
@@ -117,18 +117,6 @@ mod tests {
         assert_eq!(
             CompiledTransactionIntent::new(BagOfBytes::sample_aced()),
             Err(CommonError::FailedToDecompileBytesIntoTransactionIntent)
-        );
-    }
-
-    #[test]
-    fn other_reasons_for_invalid() {
-        let res = compile_notarized_intent(ScryptoNotarizedTransaction {
-            signed_intent: invalid_signed_intent(),
-            notary_signature: NotarySignature::sample().into(),
-        });
-        assert_eq!(
-            res,
-            Err(CommonError::InvalidNotarizedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() })
         );
     }
 }

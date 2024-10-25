@@ -277,6 +277,7 @@ pub mod prelude {
                 subintent::{
                     hash as ret_hash_subintent,
                     to_payload_bytes as RET_subintent_to_payload_bytes,
+                    from_payload_bytes as RET_subintent_from_payload_bytes,
                 },
                 subintent_manifest::{
                     as_enclosed as RET_subintent_manifest_as_enclosed,
