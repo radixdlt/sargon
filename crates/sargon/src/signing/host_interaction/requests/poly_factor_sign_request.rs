@@ -4,20 +4,20 @@ use crate::prelude::*;
 /// (derivations paths).
 #[derive(derive_more::Debug, Clone)]
 #[debug("per_factor_source: {:#?}", per_factor_source)]
-pub struct PolyFactorSignRequest<SP: SignablePayload> {
+pub struct PolyFactorSignRequest<S: Signable> {
     factor_source_kind: FactorSourceKind,
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.
     pub per_factor_source:
-        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<SP>>,
+        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<S>>,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
-    pub invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<SP::PayloadId>>,
+    pub invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<S>>,
 }
 
-impl <SP: SignablePayload> PolyFactorSignRequest<SP> {
+impl <S: Signable> PolyFactorSignRequest<S> {
     /// # Panics
     /// Panics if `per_factor_source` is empty
     ///
@@ -26,9 +26,9 @@ impl <SP: SignablePayload> PolyFactorSignRequest<SP> {
         factor_source_kind: FactorSourceKind,
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
-            MonoFactorSignRequestInput<SP>,
+            MonoFactorSignRequestInput<S>,
         >,
-        invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<SP::PayloadId>>,
+        invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<S>>,
     ) -> Self {
         assert!(
             !per_factor_source.is_empty(),
@@ -61,7 +61,7 @@ impl <SP: SignablePayload> PolyFactorSignRequest<SP> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PolyFactorSignRequest<CompiledTransactionIntent>;
+    type Sut = PolyFactorSignRequest<TransactionIntent>;
 
     #[test]
     #[should_panic(

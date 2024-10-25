@@ -53,7 +53,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
     ) -> (Petitions<S>, IndexSet<FactorSourcesOfKind>) {
         let transactions = self.signables_with_entities;
         let mut petitions_for_all_transactions =
-            IndexMap::<S::SignableID, PetitionForTransaction<S>>::new();
+            IndexMap::<<S::Payload as Identifiable>::ID, PetitionForTransaction<S>>::new();
 
         // We care for only the factor sources which are HD based
         let mut all_factor_sources_in_profile =
@@ -64,12 +64,12 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
             }
         });
 
-        let mut factor_to_payloads = HashMap::<FactorSourceIDFromHash, IndexSet<S::SignableID>>::new();
+        let mut factor_to_payloads = HashMap::<FactorSourceIDFromHash, IndexSet<<S::Payload as Identifiable>::ID>>::new();
 
         let mut used_factor_sources = HashSet::<FactorSource>::new();
 
         let mut register_factor_in_tx =
-            |id: &FactorSourceIDFromHash, txid: &S::SignableID| {
+            |id: &FactorSourceIDFromHash, txid: &<S::Payload as Identifiable>::ID| {
                 if let Some(ref mut txids) = factor_to_payloads.get_mut(id) {
                     txids.insert(txid.clone());
                 } else {
@@ -89,7 +89,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
 
         for transaction in transactions.into_iter() {
             let mut petitions_for_entities =
-                HashMap::<AddressOfAccountOrPersona, PetitionForEntity<S::SignableID>>::new();
+                HashMap::<AddressOfAccountOrPersona, PetitionForEntity<S>>::new();
 
             let id = transaction.signable.get_id();
             for entity in transaction.entities_requiring_auth() {

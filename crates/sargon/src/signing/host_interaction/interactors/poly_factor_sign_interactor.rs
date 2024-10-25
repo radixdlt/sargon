@@ -19,9 +19,9 @@ use crate::prelude::*;
 ///
 /// Example of a PolyFactor Batch Signing Driver is that for DeviceFactorSource.
 #[async_trait::async_trait]
-pub trait PolyFactorSignInteractor<SP: SignablePayload> {
+pub trait PolyFactorSignInteractor<S: Signable> {
     async fn sign(
         &self,
-        request: PolyFactorSignRequest<SP>,
-    ) -> SignWithFactorsOutcome<SP::PayloadId>;
+        request: PolyFactorSignRequest<S>,
+    ) -> SignWithFactorsOutcome<S>;
 }

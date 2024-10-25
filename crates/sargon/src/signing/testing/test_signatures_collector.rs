@@ -8,7 +8,7 @@ impl SignaturesCollector<TransactionIntent> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
-        interactors: Arc<dyn SignInteractors<CompiledTransactionIntent>>,
+        interactors: Arc<dyn SignInteractors<TransactionIntent>>,
         role_kind: RoleKind,
     ) -> Self {
         Self::with(

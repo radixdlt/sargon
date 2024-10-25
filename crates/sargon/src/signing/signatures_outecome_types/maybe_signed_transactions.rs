@@ -1,23 +1,23 @@
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub(crate) struct MaybeSignedTransactions<ID: SignableID> {
+pub(crate) struct MaybeSignedTransactions<S: Signable> {
     /// Collection of transactions which might be signed or not.
     pub(super) transactions:
-        IndexMap<ID, IndexSet<HDSignature<ID>>>,
+        IndexMap<<S::Payload as Identifiable>::ID, IndexSet<HDSignature<S>>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct SignedTransaction<ID: SignableID> {
+pub struct SignedTransaction<S: Signable> {
     /// The transaction intent hash.
-    pub(crate) signable_id: ID,
+    pub(crate) signable_id: <S::Payload as Identifiable>::ID,
     /// The signatures for this transaction.
-    pub(crate) signatures: IndexSet<HDSignature<ID>>,
+    pub(crate) signatures: IndexSet<HDSignature<S>>,
 }
-impl <ID: SignableID> SignedTransaction<ID> {
+impl <S: Signable> SignedTransaction<S> {
     pub(crate) fn new(
-        signable_id: ID,
-        signatures: IndexSet<HDSignature<ID>>,
+        signable_id: <S::Payload as Identifiable>::ID,
+        signatures: IndexSet<HDSignature<S>>,
     ) -> Self {
         Self {
             signable_id,
@@ -26,9 +26,9 @@ impl <ID: SignableID> SignedTransaction<ID> {
     }
 }
 
-impl <ID: SignableID> MaybeSignedTransactions<ID> {
+impl <S: Signable> MaybeSignedTransactions<S> {
     fn new(
-        transactions: IndexMap<ID, IndexSet<HDSignature<ID>>>,
+        transactions: IndexMap<<S::Payload as Identifiable>::ID, IndexSet<HDSignature<S>>>,
     ) -> Self {
         Self { transactions }
     }
@@ -45,7 +45,7 @@ impl <ID: SignableID> MaybeSignedTransactions<ID> {
         self.transactions.is_empty()
     }
 
-    pub(crate) fn transactions(&self) -> Vec<SignedTransaction<ID>> {
+    pub(crate) fn transactions(&self) -> Vec<SignedTransaction<S>> {
         self.transactions
             .clone()
             .into_iter()
@@ -94,8 +94,8 @@ impl <ID: SignableID> MaybeSignedTransactions<ID> {
     /// in `transactions`.
     pub(crate) fn add_signatures(
         &mut self,
-        signable_id: ID,
-        signatures: IndexSet<HDSignature<ID>>,
+        signable_id: <S::Payload as Identifiable>::ID,
+        signatures: IndexSet<HDSignature<S>>,
     ) {
         if let Some(ref mut sigs) = self.transactions.get_mut(&signable_id) {
             let old_count = sigs.len();
@@ -113,7 +113,7 @@ impl <ID: SignableID> MaybeSignedTransactions<ID> {
     }
 
     /// Returns all the signatures for all the transactions.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<S>> {
         self.transactions
             .values()
             .flat_map(|v| v.iter())
@@ -122,7 +122,7 @@ impl <ID: SignableID> MaybeSignedTransactions<ID> {
     }
 }
 
-impl HasSampleValues for MaybeSignedTransactions<TransactionIntentHash> {
+impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
     fn sample() -> Self {
         let tx_a = TransactionIntentHash::sample();
 
@@ -192,7 +192,7 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntentHash> {
                 (tx_b, IndexSet::from_iter([tx_b_sig_x, tx_b_sig_y])),
             ]
             .into_iter()
-            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntentHash>>>>(
+            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntent>>>>(
             ),
         )
     }
@@ -252,7 +252,7 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntentHash> {
                 IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y, tx_a_sig_z]),
             )]
             .into_iter()
-            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntentHash>>>>(
+            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntent>>>>(
             ),
         )
     }
@@ -262,7 +262,7 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntentHash> {
 mod tests {
     use super::*;
 
-    type Sut = MaybeSignedTransactions<TransactionIntentHash>;
+    type Sut = MaybeSignedTransactions<TransactionIntent>;
 
     #[test]
     fn equality_of_samples() {

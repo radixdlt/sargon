@@ -4,9 +4,9 @@ use crate::prelude::*;
 /// with id `factor_source_id` to sign a single transaction with, which hash
 /// is `intent_hash`.
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
-pub struct TransactionSignRequestInput<SP: SignablePayload> {
+pub struct TransactionSignRequestInput<S: Signable> {
     /// Compiled Intent
-    payload: SP,
+    payload: S::Payload,
 
     /// ID of factor to use to sign
     pub(crate) factor_source_id: FactorSourceIDFromHash,
@@ -16,13 +16,13 @@ pub struct TransactionSignRequestInput<SP: SignablePayload> {
     owned_factor_instances: Vec<OwnedFactorInstance>,
 }
 
-impl <SP: SignablePayload> TransactionSignRequestInput<SP> {
+impl <S: Signable> TransactionSignRequestInput<S> {
     /// # Panics
     /// Panics if any of the owned factor instances does not match the `factor_source_id`.
     ///
     /// Panics if `owned_factor_instances` is empty.
     pub(crate) fn new(
-        payload: SP,
+        payload: S::Payload,
         factor_source_id: FactorSourceIDFromHash,
         owned_factor_instances: IndexSet<OwnedFactorInstance>,
     ) -> Self {
@@ -43,8 +43,8 @@ impl <SP: SignablePayload> TransactionSignRequestInput<SP> {
     }
 
     #[allow(unused)]
-    pub fn signature_inputs(&self) -> IndexSet<HDSignatureInput<SP::PayloadId>> {
-        let payload_id = self.payload.get_payload_id();
+    pub fn signature_inputs(&self) -> IndexSet<HDSignatureInput<S>> {
+        let payload_id = self.payload.id();
         self.owned_factor_instances
             .clone()
             .into_iter()
@@ -53,7 +53,7 @@ impl <SP: SignablePayload> TransactionSignRequestInput<SP> {
     }
 }
 
-impl HasSampleValues for TransactionSignRequestInput<CompiledTransactionIntent> {
+impl HasSampleValues for TransactionSignRequestInput<TransactionIntent> {
     fn sample() -> Self {
         let owned_factor_instance = OwnedFactorInstance::sample();
         let factor_source_id = &owned_factor_instance.factor_source_id();
@@ -79,7 +79,7 @@ impl HasSampleValues for TransactionSignRequestInput<CompiledTransactionIntent> 
 mod tests_batch_req {
     use super::*;
 
-    type Sut = TransactionSignRequestInput<CompiledTransactionIntent>;
+    type Sut = TransactionSignRequestInput<TransactionIntent>;
 
     #[test]
     fn equality() {

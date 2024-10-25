@@ -8,13 +8,13 @@ pub(crate) struct PetitionForTransaction<S: Signable> {
     /// Transaction to sign
     pub(crate) signable: S,
 
-    pub(crate) for_entities: RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::SignableID>>>,
+    pub(crate) for_entities: RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>>,
 }
 
 impl <S: Signable> PetitionForTransaction<S> {
     pub(crate) fn new(
         signable: S,
-        for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::SignableID>>,
+        for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>,
     ) -> Self {
         Self {
             signable,
@@ -33,7 +33,7 @@ impl <S: Signable> PetitionForTransaction<S> {
     ///
     /// The third value in the tuple `(_, _, IndexSet<FactorSourceIDFromHash>)` contains the
     /// id of all the factor sources which was skipped.
-    pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S::SignableID> {
+    pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S> {
         let for_entities = self
             .for_entities
             .into_inner()
@@ -93,7 +93,7 @@ impl <S: Signable> PetitionForTransaction<S> {
             .collect()
     }
 
-    pub(crate) fn add_signature(&self, signature: HDSignature<S::SignableID>) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<S>) {
         let for_entities = self.for_entities.borrow_mut();
         let for_entity = for_entities
             .get(&signature.owned_factor_instance().owner)
@@ -111,7 +111,7 @@ impl <S: Signable> PetitionForTransaction<S> {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> TransactionSignRequestInput<S::Payload> {
+    ) -> TransactionSignRequestInput<S> {
         assert!(!self.should_neglect_factors_due_to_irrelevant(
             IndexSet::just(*factor_source_id)
         ));
@@ -136,7 +136,7 @@ impl <S: Signable> PetitionForTransaction<S> {
     pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> Option<InvalidTransactionIfNeglected<S::SignableID>> {
+    ) -> Option<InvalidTransactionIfNeglected<S>> {
         if self.has_tx_failed() {
             // No need to display already failed tx.
             return None;

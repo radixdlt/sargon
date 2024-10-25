@@ -17,22 +17,22 @@ pub(crate) struct Petitions<S: Signable> {
     /// Where A, B, C and D, all use the factor source, e.g. some arculus
     /// card which the user has setup as a factor (source) for all these accounts.
     pub(crate) factor_source_to_signable_id:
-        HashMap<FactorSourceIDFromHash, IndexSet<S::SignableID>>,
+        HashMap<FactorSourceIDFromHash, IndexSet<<S::Payload as Identifiable>::ID>>,
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<S::SignableID, PetitionForTransaction<S>>>,
+        RefCell<IndexMap<<S::Payload as Identifiable>::ID, PetitionForTransaction<S>>>,
 }
 
 impl <S: Signable> Petitions<S> {
     pub(crate) fn new(
         factor_source_to_signable_ids: HashMap<
             FactorSourceIDFromHash,
-            IndexSet<S::SignableID>,
+            IndexSet<<S::Payload as Identifiable>::ID>,
         >,
         txid_to_petition: IndexMap<
-            S::SignableID,
+            <S::Payload as Identifiable>::ID,
             PetitionForTransaction<S>,
         >,
     ) -> Self {
@@ -42,7 +42,7 @@ impl <S: Signable> Petitions<S> {
         }
     }
 
-    pub(crate) fn outcome(self) -> SignaturesOutcome<S::SignableID> {
+    pub(crate) fn outcome(self) -> SignaturesOutcome<S> {
         let txid_to_petition = self.txid_to_petition.into_inner();
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
@@ -94,7 +94,7 @@ impl <S: Signable> Petitions<S> {
     pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected<S::SignableID>> {
+    ) -> IndexSet<InvalidTransactionIfNeglected<S>> {
         self.each_petition(
             factor_source_ids.clone(),
             |p| {
@@ -135,7 +135,7 @@ impl <S: Signable> Petitions<S> {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput<S::Payload> {
+    ) -> MonoFactorSignRequestInput<S> {
         self.each_petition(
             IndexSet::just(*factor_source_id),
             |p| {
@@ -165,7 +165,7 @@ impl <S: Signable> Petitions<S> {
         )
     }
 
-    fn add_signature(&self, signature: &HDSignature<S::SignableID>) {
+    fn add_signature(&self, signature: &HDSignature<S>) {
         let binding = self.txid_to_petition.borrow();
         let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
@@ -181,7 +181,7 @@ impl <S: Signable> Petitions<S> {
 
     pub(crate) fn process_batch_response(
         &self,
-        response: SignWithFactorsOutcome<S::SignableID>,
+        response: SignWithFactorsOutcome<S>,
     ) {
         match response {
             SignWithFactorsOutcome::Signed {

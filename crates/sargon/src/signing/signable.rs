@@ -1,37 +1,24 @@
+use std::hash::Hasher;
 use crate::prelude::*;
 
-pub trait Signable {
-
-    type Payload: SignablePayload + PartialEq + Eq + Clone + Debug + std::hash::Hash;
-
-    type SignableID: SignableID;
+pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone {
+    type Payload: PartialEq + Eq + Clone + Debug + std::hash::Hash + Identifiable;
 
     fn get_payload(&self) -> Self::Payload;
 
-    fn get_id(&self) -> Self::SignableID;
-
     fn entities_requiring_signing(&self, profile: &Profile) -> Result<IndexSet<AccountOrPersona>>;
+
+    fn get_id(&self) -> <Self::Payload as Identifiable>::ID {
+        self.get_payload().id()
+    }
 }
-
-pub trait SignablePayload {
-    type PayloadId: SignableID;
-
-    fn get_payload_id(&self) -> Self::PayloadId;
-}
-
-pub trait SignableID: Into<Hash> + Clone + PartialEq + Eq + std::hash::Hash + Debug {}
 
 ////////////////////////////////////////////////////////////////////////
 impl Signable for TransactionIntent {
     type Payload = CompiledTransactionIntent;
-    type SignableID = TransactionIntentHash;
 
     fn get_payload(&self) -> Self::Payload {
         self.compile()
-    }
-
-    fn get_id(&self) -> Self::SignableID {
-        self.transaction_intent_hash().clone()
     }
 
     fn entities_requiring_signing(&self, profile: &Profile) -> Result<IndexSet<AccountOrPersona>> {
@@ -44,15 +31,11 @@ impl Signable for TransactionIntent {
     }
 }
 
-impl SignablePayload for CompiledTransactionIntent {
-    type PayloadId = TransactionIntentHash;
-
-    fn get_payload_id(&self) -> Self::PayloadId {
-        self.decompile().transaction_intent_hash()
+impl std::hash::Hash for TransactionIntent {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.transaction_intent_hash().hash.0.to_string().hash(state)
     }
 }
-
-impl SignableID for TransactionIntentHash {}
 
 impl Identifiable for CompiledTransactionIntent {
     type ID = TransactionIntentHash;

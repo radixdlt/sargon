@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
-pub enum SignWithFactorsOutcome<ID: SignableID> {
+pub enum SignWithFactorsOutcome<S: Signable> {
     /// The user successfully signed with the factor source(s), the associated
     /// value contains the produces signatures and any relevant metadata.
     #[debug("Signed: {:#?}", produced_signatures)]
-    Signed { produced_signatures: SignResponse<ID> },
+    Signed { produced_signatures: SignResponse<S> },
 
     /// The factor source got neglected, either due to user explicitly skipping
     /// or due to failure
@@ -13,9 +13,9 @@ pub enum SignWithFactorsOutcome<ID: SignableID> {
     Neglected(NeglectedFactors),
 }
 
-impl <ID: SignableID> SignWithFactorsOutcome<ID> {
+impl <S: Signable> SignWithFactorsOutcome<S> {
     #[allow(unused)]
-    pub fn signed(produced_signatures: SignResponse<ID>) -> Self {
+    pub fn signed(produced_signatures: SignResponse<S>) -> Self {
         Self::Signed {
             produced_signatures,
         }

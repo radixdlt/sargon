@@ -13,7 +13,7 @@ impl FactorSourceReferencing for HierarchicalDeterministicFactorInstance {
     }
 }
 
-impl <ID: SignableID> FactorSourceReferencing for HDSignature<ID> {
+impl <S: Signable> FactorSourceReferencing for HDSignature<S> {
     fn factor_source_id(&self) -> FactorSourceIDFromHash {
         self.owned_factor_instance()
             .factor_instance()

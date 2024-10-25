@@ -3,9 +3,9 @@ use crate::prelude::*;
 /// A signature of `intent_hash` by `entity` using `factor_source_id` and `derivation_path`, with `public_key` used for verification.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 #[debug("HDSignature {{ input: {:#?} }}", input)]
-pub struct HDSignature<ID: SignableID> {
+pub struct HDSignature<S: Signable> {
     /// The input used to produce this `HDSignature`
-    pub input: HDSignatureInput<ID>,
+    pub input: HDSignatureInput<S>,
 
     /// The ECDSA/EdDSA signature produced by the private key of the
     /// `owned_hd_factor_instance.public_key`,
@@ -17,13 +17,13 @@ pub struct HDSignature<ID: SignableID> {
     pub signature: Signature,
 }
 
-impl <ID: SignableID> HDSignature<ID> {
+impl <S: Signable> HDSignature<S> {
     /// Constructs a HDSignature from an already produced `Signature`.
-    pub fn with_details(input: HDSignatureInput<ID>, signature: Signature) -> Self {
+    pub fn with_details(input: HDSignatureInput<S>, signature: Signature) -> Self {
         Self { input, signature }
     }
 
-    pub fn payload_id(&self) -> &ID {
+    pub fn payload_id(&self) -> &<S::Payload as Identifiable>::ID {
         &self.input.payload_id
     }
 
@@ -45,7 +45,7 @@ impl <ID: SignableID> HDSignature<ID> {
     }
 }
 
-impl HasSampleValues for HDSignature<TransactionIntentHash> {
+impl HasSampleValues for HDSignature<TransactionIntent> {
     fn sample() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
             HDSignatureInput::sample(),
@@ -59,12 +59,12 @@ impl HasSampleValues for HDSignature<TransactionIntentHash> {
     }
 }
 
-impl <ID: SignableID> HDSignature<ID> {
+impl <S: Signable> HDSignature<S> {
     /// WARNING: Should only be used in samples and unit tests
     ///
     /// Signs with predefined mnemonics associated to the input's factor source id
     pub fn fake_sign_by_looking_up_mnemonic_amongst_samples(
-        input: HDSignatureInput<ID>,
+        input: HDSignatureInput<S>,
     ) -> Self {
         let id = input.owned_factor_instance.factor_source_id();
 
@@ -80,8 +80,8 @@ impl <ID: SignableID> HDSignature<ID> {
 }
 
 #[cfg(test)]
-impl <ID: SignableID> HDSignature<ID> {
-    pub fn produced_signing_with_input(input: HDSignatureInput<ID>) -> Self {
+impl <S: Signable> HDSignature<S> {
+    pub fn produced_signing_with_input(input: HDSignatureInput<S>) -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(input)
     }
 }
@@ -90,7 +90,7 @@ impl <ID: SignableID> HDSignature<ID> {
 mod tests {
     use super::*;
 
-    type Sut = HDSignature<TransactionIntentHash>;
+    type Sut = HDSignature<TransactionIntent>;
 
     #[test]
     fn equality_of_samples() {

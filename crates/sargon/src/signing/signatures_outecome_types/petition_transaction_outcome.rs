@@ -5,21 +5,21 @@ use crate::prelude::*;
 /// set of collected signatues (might be empty) and
 /// a set of neglected factors (might be empty).
 #[derive(Clone, PartialEq, Eq)]
-pub(crate) struct PetitionTransactionOutcome<ID: SignableID> {
-    signable_id: ID,
+pub(crate) struct PetitionTransactionOutcome<S: Signable> {
+    signable_id: <S::Payload as Identifiable>::ID,
     pub(crate) transaction_valid: bool,
-    pub(crate) signatures: IndexSet<HDSignature<ID>>,
+    pub(crate) signatures: IndexSet<HDSignature<S>>,
     pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
 }
 
-impl <ID: SignableID> PetitionTransactionOutcome<ID> {
+impl <S: Signable> PetitionTransactionOutcome<S> {
     /// # Panics
     /// Panics if the intent hash in any signatures does not
     /// match `intent_hash`
     pub(crate) fn new(
         transaction_valid: bool,
-        signable_id: ID,
-        signatures: IndexSet<HDSignature<ID>>,
+        signable_id: <S::Payload as Identifiable>::ID,
+        signatures: IndexSet<HDSignature<S>>,
         neglected_factors: IndexSet<NeglectedFactor>,
     ) -> Self {
         assert!(
@@ -39,7 +39,7 @@ impl <ID: SignableID> PetitionTransactionOutcome<ID> {
 mod tests {
     use super::*;
 
-    type Sut = PetitionTransactionOutcome<TransactionIntentHash>;
+    type Sut = PetitionTransactionOutcome<TransactionIntent>;
 
     #[test]
     #[should_panic(
