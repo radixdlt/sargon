@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// A Radix Babylon [BIP-32][bip32] path used to derive accounts, for example `m/44'/1022'/1'/525'/1460'/2'`.
 ///
-/// Internally at RDX Works known as a CAP26 path - [see Confuence][cap26].
+/// Internally at RDX Works known as a CAP26 path - [see Confluence][cap26].
 ///
 /// This comes from the general derivation pattern for Radix addresses according to the [SLIP-10][slip10]
 /// derivation scheme. In the [SLIP-10][slip10] derivation scheme, every level must be hardened, which
@@ -16,7 +16,7 @@ use crate::prelude::*;
 /// constants in the path as follows:
 ///
 /// ```text
-/// m / 44' / 1022' / NETWORK_ID' / 525' / 1460' / ACCOUNT_INDEX'
+/// m / 44' / 1022' / NETWORK_ID' / 525' / 1460' / entity_index'
 /// ```
 ///
 /// More generally:

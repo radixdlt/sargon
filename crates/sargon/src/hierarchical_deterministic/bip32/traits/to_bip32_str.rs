@@ -20,7 +20,7 @@ where
         format!(
             "{}{}",
             u32::from(self.index_in_local_key_space()),
-            T::NON_CANONICAL_SUFFIXES
+            T::NON_CANONICAL_SUFFIX
         )
     }
 }

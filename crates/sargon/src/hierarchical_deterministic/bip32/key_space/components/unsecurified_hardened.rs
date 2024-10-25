@@ -3,7 +3,10 @@ use crate::prelude::*;
 /// Represents a hardened component in a BIP32 path, furthermore it is
 /// known to not be "Securified".
 ///
-/// The internal representation hold a non-hardened, so called "local" offset, and at the time of usage, when forming a BIP32 path, we "map" it to a global offset by adding the `GLOBAL_OFFSET_HARDENED`.
+/// The internal representation hold a "local" offset, a non-hardened index,
+/// and at the time of usage, when forming a BIP32 path, we "map" it to a global
+/// offset by adding the `GLOBAL_OFFSET_HARDENED`.
+///
 /// # Examples
 /// ```
 /// extern crate sargon;
@@ -105,7 +108,7 @@ pub const UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX: &str = "'";
 impl IsPathComponentStringConvertible for UnsecurifiedHardened {
     const CANONICAL_SUFFIX: &'static str =
         UNSECURIFIED_HARDENED_CANONICAL_SUFFIX;
-    const NON_CANONICAL_SUFFIXES: &'static str =
+    const NON_CANONICAL_SUFFIX: &'static str =
         UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX;
 }
 

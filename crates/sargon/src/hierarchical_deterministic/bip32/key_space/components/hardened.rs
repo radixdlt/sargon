@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
 /// Represents a hardened component in a BIP32 path, known to be "Securified" or "Unsecurified", if it's "Securified" we
-/// will not only add the `GLOBAL_OFFSET_HARDENED` (0x80000000) to the index, but also the `RELATIVELY_LOCAL_OFFSET_SECURIFIED` (0x40000000) to the index.
+/// will not only add the `GLOBAL_OFFSET_HARDENED` (2^31 / 0x80000000) to the index, but also the `RELATIVELY_LOCAL_OFFSET_SECURIFIED` (2^30 / 0x40000000) to the index.
 ///
-/// The internal representation hold a non-hardened, so called "local" offset, and at the time of usage, when forming a BIP32 path, we "map" it to a global offset by adding the appropriate global offset.
+/// The internal representation hold a "local" offset - a non-hardened index,
+/// and at the time of usage, when forming a BIP32 path, we "map" it to a global
+/// offset by adding the appropriate global offset.
 ///
 /// The internal representation keeps track of the key space, and the index in the local key space.
 ///

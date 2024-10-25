@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// A Radix Babylon [BIP-32][bip32] path used to derive identities for Personas, for example `m/44'/1022'/1'/618'/1460'/2'`.
 ///
-/// Internally at RDX Works known as a CAP26 path - [see Confuence][cap26].
+/// Internally at RDX Works known as a CAP26 path - [see Confluence][cap26].
 ///
 /// This comes from the general derivation pattern for Radix addresses according to the [SLIP-10][slip10]
 /// derivation scheme. In the [SLIP-10][slip10] derivation scheme, every level must be hardened, which
@@ -12,11 +12,11 @@ use crate::prelude::*;
 /// m / purpose' / coin_type' / network' / entity_kind' / key_kind' / entity_index'
 /// ```
 ///
-/// The `IdentityPath` struct is parametrized by Radix network id and account index, but fixes the other
+/// The `IdentityPath` struct is parametrized by Radix network id and entity index, but fixes the other
 /// constants in the path as follows:
 ///
 /// ```text
-/// m / 44' / 1022' / NETWORK_ID' / 618' / 1460' / ACCOUNT_INDEX'
+/// m / 44' / 1022' / NETWORK_ID' / 618' / 1460' / entity_index'
 /// ```
 ///
 /// More generally:

@@ -4,8 +4,9 @@ use crate::prelude::*;
 /// the last path component in an HDPath for a securified Account or
 /// Persona.
 ///
-/// The internal representation hold a non-hardened, so called "local" offset, and at the time of usage, when forming a BIP32 path, we "map" it to a global offset by adding `GLOBAL_OFFSET_HARDENED_SECURIFIED` to
-/// the local index.
+/// The internal representation hold a "local" offset, a non-hardened index, 
+/// and at the time of usage, when forming a BIP32 path, we "map" it to a 
+/// global offset by adding `GLOBAL_OFFSET_HARDENED_SECURIFIED` to the local index.
 ///
 /// We can instantiate a `SecurifiedU30` from a global key space index, or from a local key space index, and we can convert it back to a global key space index.
 ///
@@ -131,7 +132,7 @@ impl TryFrom<HDPathComponent> for SecurifiedU30 {
 }
 impl IsPathComponentStringConvertible for SecurifiedU30 {
     const CANONICAL_SUFFIX: &'static str = "S";
-    const NON_CANONICAL_SUFFIXES: &'static str = "^";
+    const NON_CANONICAL_SUFFIX: &'static str = "^";
 }
 impl FromStr for SecurifiedU30 {
     type Err = CommonError;
