@@ -14,6 +14,7 @@ use sargon::U31 as InternalU31;
 use sargon::IsInLocalKeySpace;
 use sargon::IsMappableToGlobalKeySpace;
 use sargon::KeySpace as InternalKeySpace;
+use sargon::{GLOBAL_OFFSET_HARDENED_SECURIFIED, GLOBAL_OFFSET_HARDENED};
 
 /// A discriminator of an `HDPathComponent`.
 #[derive(
@@ -108,8 +109,12 @@ pub fn hd_path_component_index_in_local_key_space(
 }
 
 #[uniffi::export]
-pub fn bip32_constant_offset_hardened() -> u32 {
+pub fn bip32_constant_global_offset_hardened() -> u32 {
     GLOBAL_OFFSET_HARDENED
+}
+#[uniffi::export]
+pub fn bip32_constant_global_offset_securified() -> u32 {
+    GLOBAL_OFFSET_HARDENED_SECURIFIED
 }
 
 #[uniffi::export]

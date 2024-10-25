@@ -146,6 +146,7 @@ public protocol BaseHDPathComponentProtocol: SargonModel {
     func indexInGlobalKeySpace() -> UInt32
 }
 public protocol HDPathComponentProtocol: BaseHDPathComponentProtocol {
+	static var globalOffset: UInt32 { get }
     init(localKeySpace: UInt32) throws
 }
 
@@ -155,9 +156,15 @@ extension SecurifiedU30 {
     public static let sampleOther: Self = newSecurifiedSampleOther()
 }
 #endif
-extension SecurifiedU30: HDPathComponentProtocol {}
-extension Unhardened: HDPathComponentProtocol {}
-extension UnsecurifiedHardened: HDPathComponentProtocol {}
+extension SecurifiedU30: HDPathComponentProtocol {
+	public static let globalOffset: UInt32 = bip32ConstantGlobalOffsetSecurified()
+}
+extension Unhardened: HDPathComponentProtocol {
+	public static let globalOffset: UInt32 = 0
+}
+extension UnsecurifiedHardened: HDPathComponentProtocol {
+	public static let globalOffset: UInt32 = bip32ConstantGlobalOffsetHardened()
+}
 #if DEBUG
 extension UnsecurifiedHardened {
     public static let sample: Self = newUnsecurifiedHardenedSample()
