@@ -48,7 +48,7 @@ impl<S: Signable> SignableWithEntities<S> {
 }
 
 // -- Samples
-impl SignableWithEntities<TransactionIntent> {
+impl <S: Signable> SignableWithEntities<S> {
     #[allow(unused)]
     pub(crate) fn sample(
         entities_requiring_auth: impl IntoIterator<
@@ -72,7 +72,7 @@ impl SignableWithEntities<TransactionIntent> {
             }
         });
 
-        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
+        let intent = S::sample_entity_addresses_requiring_auth(
             account_addresses,
             identity_addresses,
         );
