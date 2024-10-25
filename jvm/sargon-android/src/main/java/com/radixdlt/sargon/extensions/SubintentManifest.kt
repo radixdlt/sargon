@@ -27,6 +27,3 @@ val SubintentManifest.involvedPoolAddresses: List<PoolAddress>
 
 val SubintentManifest.involvedResourceAddresses: List<ResourceAddress>
     get() = subintentManifestInvolvedResourceAddresses(manifest = this)
-
-val SubintentManifest.summary: ManifestSummary?
-    get() = subintentManifestSummary(manifest = this)

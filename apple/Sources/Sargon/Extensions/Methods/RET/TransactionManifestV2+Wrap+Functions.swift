@@ -11,10 +11,6 @@ extension TransactionManifestV2 {
 		transactionManifestStringV2(manifest: self)
 	}
 
-	public var networkID: NetworkID {
-		transactionManifestNetworkIdV2(manifest: self)
-	}
-
     public var blobs: Blobs {
         transactionManifestBlobsV2(manifest: self)
     }
