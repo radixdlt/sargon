@@ -76,8 +76,7 @@ impl TransactionIntent {
             builder = builder.set_metadata(
                 address.scrypto(),
                 MetadataKey::OwnerKeys,
-                ScryptoMetadataValue::PublicKeyHashArray(vec![hash
-                    .into()]),
+                ScryptoMetadataValue::PublicKeyHashArray(vec![hash.into()]),
             );
         }
 
