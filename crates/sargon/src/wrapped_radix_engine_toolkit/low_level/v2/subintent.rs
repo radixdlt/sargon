@@ -1,3 +1,4 @@
+use std::hash::Hasher;
 use crate::prelude::*;
 use delegate::delegate;
 
@@ -95,6 +96,12 @@ impl TryFrom<ScryptoSubintent> for Subintent {
             TryFrom::<ScryptoMessageV2>::try_from(value.intent_core.message)?;
 
         Self::new(header, manifest, message)
+    }
+}
+
+impl std::hash::Hash for Subintent {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write(self.hash().hash.as_ref())
     }
 }
 
