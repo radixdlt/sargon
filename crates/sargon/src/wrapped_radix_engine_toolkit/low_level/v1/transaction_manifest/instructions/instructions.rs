@@ -45,11 +45,11 @@ impl TryFrom<(&Vec<ScryptoInstruction>, NetworkID)> for Instructions {
 }
 
 fn instructions_string_from(
-    scrypto_instructions: &Vec<ScryptoInstruction>,
+    scrypto_instructions: &[ScryptoInstruction],
     network_id: NetworkID,
 ) -> Result<String, CommonError> {
     let scrypto_manifest = ScryptoTransactionManifest {
-        instructions: scrypto_instructions.clone(),
+        instructions: scrypto_instructions.to_owned(),
         blobs: Default::default(),
         object_names: Default::default(),
     };

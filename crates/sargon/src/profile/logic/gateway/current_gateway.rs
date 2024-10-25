@@ -77,13 +77,7 @@ impl SavedGateways {
     }
 
     /// Appends `gateway` to the `other` list if `gateway` not equals `current`,
-    ///  without changing the `current` Gateway.
-    /// If `other` already contains `gateway` then `(false, other.len())` is returned.
-    /// If `other` was new then `(true, index_of_new)` is returned.
-    ///
-    /// - Returns: `true` if it was added, `false` if it was already present (noop)
-    /// Appends `gateway` to the `other` list if `gateway` not equals `current`,
-    ///  without changing the `current` Gateway.
+    /// without changing the `current` Gateway.
     /// If `other` already contains `gateway` then `(false, other.len())` is returned.
     /// If `other` was new then `(true, index_of_new)` is returned.
     ///
