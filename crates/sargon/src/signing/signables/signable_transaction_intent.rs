@@ -64,3 +64,40 @@ impl Signable for TransactionIntent {
 }
 
 impl SignableID for TransactionIntentHash {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn account_addresses_and_identity_addresses_require_auth() {
+        let accounts = AccountAddress::sample_all();
+        let identities = IdentityAddress::sample_all();
+
+        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
+            accounts.clone(),
+            identities.clone(),
+        );
+
+        let summary = intent.manifest_summary().unwrap();
+
+        assert_eq!(
+            accounts.iter().sorted().collect_vec(),
+            summary
+                .clone()
+                .addresses_of_accounts_requiring_auth
+                .iter()
+                .sorted()
+                .collect_vec()
+        );
+
+        assert_eq!(
+            identities.iter().sorted().collect_vec(),
+            summary
+                .addresses_of_personas_requiring_auth
+                .iter()
+                .sorted()
+                .collect_vec()
+        );
+    }
+}
