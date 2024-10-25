@@ -17,9 +17,12 @@ pub struct HDSignature<S: Signable> {
     pub signature: Signature,
 }
 
-impl <S: Signable> HDSignature<S> {
+impl<S: Signable> HDSignature<S> {
     /// Constructs a HDSignature from an already produced `Signature`.
-    pub fn with_details(input: HDSignatureInput<S>, signature: Signature) -> Self {
+    pub fn with_details(
+        input: HDSignatureInput<S>,
+        signature: Signature,
+    ) -> Self {
         Self { input, signature }
     }
 
@@ -59,7 +62,7 @@ impl HasSampleValues for HDSignature<TransactionIntent> {
     }
 }
 
-impl <S: Signable> HDSignature<S> {
+impl<S: Signable> HDSignature<S> {
     /// WARNING: Should only be used in samples and unit tests
     ///
     /// Signs with predefined mnemonics associated to the input's factor source id
@@ -80,7 +83,7 @@ impl <S: Signable> HDSignature<S> {
 }
 
 #[cfg(test)]
-impl <S: Signable> HDSignature<S> {
+impl<S: Signable> HDSignature<S> {
     pub fn produced_signing_with_input(input: HDSignatureInput<S>) -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(input)
     }

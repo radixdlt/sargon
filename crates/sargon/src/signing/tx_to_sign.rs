@@ -7,7 +7,7 @@ pub(crate) struct SignableWithEntities<S: Signable> {
     entities_requiring_auth: IndexSet<AccountOrPersona>,
 }
 
-impl <S: Signable> Identifiable for SignableWithEntities<S> {
+impl<S: Signable> Identifiable for SignableWithEntities<S> {
     type ID = S::ID;
 
     fn id(&self) -> Self::ID {
@@ -15,7 +15,7 @@ impl <S: Signable> Identifiable for SignableWithEntities<S> {
     }
 }
 
-impl <S: Signable> SignableWithEntities<S> {
+impl<S: Signable> SignableWithEntities<S> {
     pub(crate) fn with(
         signable: S,
         entities_requiring_auth: impl IntoIterator<

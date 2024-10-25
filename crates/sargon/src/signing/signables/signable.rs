@@ -1,5 +1,5 @@
-use std::hash::Hasher;
 use crate::prelude::*;
+use std::hash::Hasher;
 
 /// Any type conforming to `Signable` can be used with `SignaturesCollector` and collect
 /// signatures from all involved entities according to their security structure.
@@ -8,10 +8,19 @@ pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone + Debug {
     type ID: SignableID;
 
     /// A compiled version of the `Signable` that is passed down to the interactors.
-    type Payload: PartialEq + Eq + Clone + Debug + std::hash::Hash + Into<Self::ID> + From<Self>;
+    type Payload: PartialEq
+        + Eq
+        + Clone
+        + Debug
+        + std::hash::Hash
+        + Into<Self::ID>
+        + From<Self>;
 
     /// A function that extracts the involved entities that require signing.
-    fn entities_requiring_signing(&self, profile: &Profile) -> Result<IndexSet<AccountOrPersona>>;
+    fn entities_requiring_signing(
+        &self,
+        profile: &Profile,
+    ) -> Result<IndexSet<AccountOrPersona>>;
 
     fn get_payload(&self) -> Self::Payload {
         From::<Self>::from(self.clone())

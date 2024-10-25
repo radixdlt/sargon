@@ -19,7 +19,7 @@ pub(crate) struct PetitionForEntity<S: Signable> {
     pub(crate) override_factors: Option<RefCell<PetitionForFactors<S>>>,
 }
 
-impl <S: Signable> PetitionForEntity<S> {
+impl<S: Signable> PetitionForEntity<S> {
     pub(super) fn new(
         payload_id: S::ID,
         entity: AddressOfAccountOrPersona,
@@ -302,7 +302,7 @@ impl <S: Signable> PetitionForEntity<S> {
 }
 
 // === Private ===
-impl <S: Signable> PetitionForEntity<S> {
+impl<S: Signable> PetitionForEntity<S> {
     /// Derefs and calls `access` on both lists respectively, if they exist. Then combines the results
     /// of each list access using `combine`.
     ///

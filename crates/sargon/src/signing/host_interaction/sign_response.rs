@@ -10,7 +10,7 @@ pub struct SignResponse<S: Signable> {
     pub signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<S>>>,
 }
 
-impl <S: Signable> SignResponse<S> {
+impl<S: Signable> SignResponse<S> {
     pub fn new(
         signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<S>>>,
     ) -> Self {

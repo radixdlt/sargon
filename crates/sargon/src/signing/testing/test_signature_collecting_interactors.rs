@@ -14,7 +14,10 @@ impl TestSignatureCollectingInteractors {
 }
 
 impl SignInteractors<TransactionIntent> for TestSignatureCollectingInteractors {
-    fn interactor_for(&self, kind: FactorSourceKind) -> SignInteractor<TransactionIntent> {
+    fn interactor_for(
+        &self,
+        kind: FactorSourceKind,
+    ) -> SignInteractor<TransactionIntent> {
         match kind {
             FactorSourceKind::Device => SignInteractor::poly(Arc::new(
                 TestSigningParallelInteractor::new(self.simulated_user.clone()),

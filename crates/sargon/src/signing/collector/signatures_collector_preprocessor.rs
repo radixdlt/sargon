@@ -29,9 +29,13 @@ pub(crate) fn sort_group_factors(
         .collect::<IndexSet<_>>()
 }
 
-impl <S: Signable> SignaturesCollectorPreprocessor<S> {
-    pub(super) fn new(signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>) -> Self {
-        Self { signables_with_entities }
+impl<S: Signable> SignaturesCollectorPreprocessor<S> {
+    pub(super) fn new(
+        signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,
+    ) -> Self {
+        Self {
+            signables_with_entities,
+        }
     }
 
     pub(super) fn analyzing_signables(
@@ -43,7 +47,9 @@ impl <S: Signable> SignaturesCollectorPreprocessor<S> {
             .map(|s| SignableWithEntities::extracting_from_profile(&s, profile))
             .collect::<Result<Vec<_>>>()?;
 
-        Ok(Self::new(IdentifiedVecOf::from_iter(signables_with_entities)))
+        Ok(Self::new(IdentifiedVecOf::from_iter(
+            signables_with_entities,
+        )))
     }
 
     pub(super) fn preprocess(
@@ -64,7 +70,8 @@ impl <S: Signable> SignaturesCollectorPreprocessor<S> {
             }
         });
 
-        let mut factor_to_payloads = HashMap::<FactorSourceIDFromHash, IndexSet<S::ID>>::new();
+        let mut factor_to_payloads =
+            HashMap::<FactorSourceIDFromHash, IndexSet<S::ID>>::new();
 
         let mut used_factor_sources = HashSet::<FactorSource>::new();
 
@@ -88,8 +95,10 @@ impl <S: Signable> SignaturesCollectorPreprocessor<S> {
             };
 
         for transaction in transactions.into_iter() {
-            let mut petitions_for_entities =
-                HashMap::<AddressOfAccountOrPersona, PetitionForEntity<S>>::new();
+            let mut petitions_for_entities = HashMap::<
+                AddressOfAccountOrPersona,
+                PetitionForEntity<S>,
+            >::new();
 
             let id = transaction.signable.get_id();
             for entity in transaction.entities_requiring_auth() {

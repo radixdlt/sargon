@@ -6,7 +6,7 @@ pub enum SignInteractor<S: Signable> {
     MonoFactor(Arc<dyn MonoFactorSignInteractor<S>>),
 }
 
-impl <S: Signable> SignInteractor<S> {
+impl<S: Signable> SignInteractor<S> {
     #[allow(unused)]
     pub fn poly(interactor: Arc<dyn PolyFactorSignInteractor<S>>) -> Self {
         Self::PolyFactor(interactor)

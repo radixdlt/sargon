@@ -1,5 +1,5 @@
-use std::hash::Hasher;
 use crate::prelude::*;
+use std::hash::Hasher;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]

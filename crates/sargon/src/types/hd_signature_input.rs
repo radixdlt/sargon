@@ -17,7 +17,7 @@ pub struct HDSignatureInput<S: Signable> {
     /// with.
     pub owned_factor_instance: OwnedFactorInstance,
 }
-impl <S: Signable> HDSignatureInput<S> {
+impl<S: Signable> HDSignatureInput<S> {
     /// Constructs a new `HDSignatureInput`.
     pub fn new(
         payload_id: S::ID,

@@ -25,16 +25,13 @@ pub(crate) struct Petitions<S: Signable> {
         RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
 }
 
-impl <S: Signable> Petitions<S> {
+impl<S: Signable> Petitions<S> {
     pub(crate) fn new(
         factor_source_to_signable_ids: HashMap<
             FactorSourceIDFromHash,
             IndexSet<S::ID>,
         >,
-        txid_to_petition: IndexMap<
-            S::ID,
-            PetitionForTransaction<S>,
-        >,
+        txid_to_petition: IndexMap<S::ID, PetitionForTransaction<S>>,
     ) -> Self {
         Self {
             factor_source_to_signable_id: factor_source_to_signable_ids,
@@ -156,10 +153,7 @@ impl <S: Signable> Petitions<S> {
 
     pub(crate) fn status(&self) -> PetitionsStatus {
         self.each_petition(
-            self.factor_source_to_signable_id
-                .keys()
-                .cloned()
-                .collect(),
+            self.factor_source_to_signable_id.keys().cloned().collect(),
             |p| p.status_of_each_petition_for_entity(),
             |i| PetitionsStatus::reducing(i.into_iter().flatten()),
         )

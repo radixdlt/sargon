@@ -1,5 +1,5 @@
-use std::marker::PhantomData;
 use crate::prelude::*;
+use std::marker::PhantomData;
 
 use super::{
     signatures_collector_dependencies::*, signatures_collector_preprocessor::*,
@@ -27,7 +27,7 @@ pub struct SignaturesCollector<S: Signable> {
 }
 
 // === PUBLIC ===
-impl <S: Signable> SignaturesCollector<S> {
+impl<S: Signable> SignaturesCollector<S> {
     pub fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = S>,
@@ -56,7 +56,7 @@ impl <S: Signable> SignaturesCollector<S> {
 }
 
 // === INTERNAL ===
-impl <S: Signable> SignaturesCollector<S> {
+impl<S: Signable> SignaturesCollector<S> {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
@@ -78,7 +78,7 @@ impl <S: Signable> SignaturesCollector<S> {
 
         Self {
             dependencies,
-            state: RefCell::new(state)
+            state: RefCell::new(state),
         }
     }
 
@@ -96,7 +96,8 @@ impl <S: Signable> SignaturesCollector<S> {
         let transactions = transactions
             .into_iter()
             .map(extract_signers)
-            .collect::<Result<IdentifiedVecOf<SignableWithEntities<S>>>>()?;
+            .collect::<Result<IdentifiedVecOf<SignableWithEntities<S>>>>(
+        )?;
 
         let collector = Self::with(
             finish_early_strategy,
@@ -111,7 +112,7 @@ impl <S: Signable> SignaturesCollector<S> {
 }
 
 // === PRIVATE ===
-impl <S: Signable> SignaturesCollector<S> {
+impl<S: Signable> SignaturesCollector<S> {
     /// Returning `Continue` means that we should continue collecting signatures.
     ///
     /// Returning `FinishEarly` if it is meaningless to continue collecting signatures,
@@ -648,9 +649,11 @@ mod tests {
                 .iter()
                 .all(|(a, p)| { p.entity == *a }));
 
-            assert!(petition.for_entities.borrow().iter().all(|(_, p)| {
-                p.payload_id == t.transaction_intent_hash()
-            }));
+            assert!(petition
+                .for_entities
+                .borrow()
+                .iter()
+                .all(|(_, p)| { p.payload_id == t.transaction_intent_hash() }));
 
             for (k, v) in petition.for_entities.borrow().iter() {
                 let threshold = threshold_factors.get(k);
@@ -1188,8 +1191,10 @@ mod tests {
                     [],
                 );
 
-                type Tuple =
-                    (FactorSourceKind, IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>);
+                type Tuple = (
+                    FactorSourceKind,
+                    IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+                );
                 type Tuples = Vec<Tuple>;
                 let tuples =
                     Rc::<RefCell<Tuples>>::new(RefCell::new(Tuples::default()));
@@ -1410,11 +1415,12 @@ mod tests {
             #[actix_rt::test]
             async fn prudent_user_single_tx_two_accounts_different_factor_sources(
             ) {
-                let collector =
-                    SignaturesCollector::test_prudent([SignableWithEntities::sample([
+                let collector = SignaturesCollector::test_prudent([
+                    SignableWithEntities::sample([
                         Account::sample_at(0),
                         Account::sample_at(1),
-                    ])]);
+                    ]),
+                ]);
 
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());
@@ -1774,9 +1780,8 @@ mod tests {
             >() {
                 let collector =
                     SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::sample([sample_securified_mainnet::<E>(
-                            "Alice",
-                            || {
+                        SignableWithEntities::sample([
+                            sample_securified_mainnet::<E>("Alice", || {
                                 GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                                     FactorSource::sample_all().into_iter().map(|f| {
                                         HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
@@ -1785,8 +1790,8 @@ mod tests {
                                         )
                                     }),
                                 )
-                            },
-                        )]),
+                            }),
+                        ]),
                     ]);
                 let outcome = collector.collect_signatures().await;
                 assert!(outcome.successful());

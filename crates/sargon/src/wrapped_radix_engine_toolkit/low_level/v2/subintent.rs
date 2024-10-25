@@ -75,14 +75,24 @@ impl From<Subintent> for ScryptoSubintent {
 impl TryFrom<ScryptoSubintent> for Subintent {
     type Error = CommonError;
 
-    fn try_from(value: ScryptoSubintent) -> std::result::Result<Self, Self::Error> {
-        let network_id = NetworkID::try_from(value.intent_core.header.network_id)?;
+    fn try_from(
+        value: ScryptoSubintent,
+    ) -> std::result::Result<Self, Self::Error> {
+        let network_id =
+            NetworkID::try_from(value.intent_core.header.network_id)?;
 
-        let manifest = TryFrom::<(ScryptoTransactionManifestV2, NetworkID)>::try_from(
-            (ScryptoTransactionManifestV2::from_intent_core(&value.intent_core), network_id)
+        let manifest =
+            TryFrom::<(ScryptoTransactionManifestV2, NetworkID)>::try_from((
+                ScryptoTransactionManifestV2::from_intent_core(
+                    &value.intent_core,
+                ),
+                network_id,
+            ))?;
+        let header = TryFrom::<ScryptoIntentHeaderV2>::try_from(
+            value.intent_core.header.clone(),
         )?;
-        let header = TryFrom::<ScryptoIntentHeaderV2>::try_from(value.intent_core.header.clone())?;
-        let message = TryFrom::<ScryptoMessageV2>::try_from(value.intent_core.message)?;
+        let message =
+            TryFrom::<ScryptoMessageV2>::try_from(value.intent_core.message)?;
 
         Self::new(header, manifest, message)
     }

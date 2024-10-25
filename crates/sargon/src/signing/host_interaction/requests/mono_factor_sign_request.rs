@@ -13,10 +13,12 @@ pub struct MonoFactorSignRequest<S: Signable> {
         IndexSet<InvalidTransactionIfNeglected<S>>,
 }
 
-impl <S: Signable> MonoFactorSignRequest<S> {
+impl<S: Signable> MonoFactorSignRequest<S> {
     pub fn new(
         input: MonoFactorSignRequestInput<S>,
-        invalid_transactions_if_neglected: IndexSet<InvalidTransactionIfNeglected<S>>,
+        invalid_transactions_if_neglected: IndexSet<
+            InvalidTransactionIfNeglected<S>,
+        >,
     ) -> Self {
         Self {
             input,

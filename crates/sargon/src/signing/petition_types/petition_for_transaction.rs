@@ -8,10 +8,11 @@ pub(crate) struct PetitionForTransaction<S: Signable> {
     /// Transaction to sign
     pub(crate) signable: S,
 
-    pub(crate) for_entities: RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>>,
+    pub(crate) for_entities:
+        RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>>,
 }
 
-impl <S: Signable> PetitionForTransaction<S> {
+impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn new(
         signable: S,
         for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>,

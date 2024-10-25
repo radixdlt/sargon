@@ -21,7 +21,9 @@ impl IsTestInteractor for TestSigningParallelInteractor {
 }
 
 #[async_trait::async_trait]
-impl PolyFactorSignInteractor<TransactionIntent> for TestSigningParallelInteractor {
+impl PolyFactorSignInteractor<TransactionIntent>
+    for TestSigningParallelInteractor
+{
     async fn sign(
         &self,
         request: PolyFactorSignRequest<TransactionIntent>,

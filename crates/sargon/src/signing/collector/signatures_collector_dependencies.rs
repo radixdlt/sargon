@@ -21,7 +21,7 @@ pub(super) struct SignaturesCollectorDependencies<S: Signable> {
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
 }
 
-impl <S: Signable> SignaturesCollectorDependencies<S> {
+impl<S: Signable> SignaturesCollectorDependencies<S> {
     pub(crate) fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         interactors: Arc<dyn SignInteractors<S>>,

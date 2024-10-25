@@ -268,14 +268,19 @@ mod integration_tests {
         struct TestLazySignMinimumInteractor;
 
         #[async_trait::async_trait]
-        impl PolyFactorSignInteractor<TransactionIntent> for TestLazySignMinimumInteractor {
+        impl PolyFactorSignInteractor<TransactionIntent>
+            for TestLazySignMinimumInteractor
+        {
             async fn sign(
                 &self,
                 request: PolyFactorSignRequest<TransactionIntent>,
             ) -> SignWithFactorsOutcome<TransactionIntent> {
-                let mut signatures = IndexSet::<HDSignature<TransactionIntent>>::new();
+                let mut signatures =
+                    IndexSet::<HDSignature<TransactionIntent>>::new();
                 for (_, req) in request.per_factor_source.iter() {
-                    let resp = <Self as MonoFactorSignInteractor<TransactionIntent>>::sign(
+                    let resp = <Self as MonoFactorSignInteractor<
+                        TransactionIntent,
+                    >>::sign(
                         self,
                         MonoFactorSignRequest::new(
                             req.clone(),
@@ -313,7 +318,9 @@ mod integration_tests {
         }
 
         #[async_trait::async_trait]
-        impl MonoFactorSignInteractor<TransactionIntent> for TestLazySignMinimumInteractor {
+        impl MonoFactorSignInteractor<TransactionIntent>
+            for TestLazySignMinimumInteractor
+        {
             async fn sign(
                 &self,
                 request: MonoFactorSignRequest<TransactionIntent>,
@@ -346,7 +353,10 @@ mod integration_tests {
         }
 
         impl SignInteractors<TransactionIntent> for TestLazySignMinimumInteractors {
-            fn interactor_for(&self, kind: FactorSourceKind) -> SignInteractor<TransactionIntent> {
+            fn interactor_for(
+                &self,
+                kind: FactorSourceKind,
+            ) -> SignInteractor<TransactionIntent> {
                 match kind {
                     FactorSourceKind::Device => SignInteractor::mono(Arc::new(
                         TestLazySignMinimumInteractor,

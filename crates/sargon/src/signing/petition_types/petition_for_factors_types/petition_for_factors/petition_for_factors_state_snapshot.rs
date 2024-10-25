@@ -11,7 +11,7 @@ pub(super) struct PetitionForFactorsStateSnapshot<S: Signable> {
     neglected: IndexSet<NeglectedFactorInstance>,
 }
 
-impl <S: Signable> PetitionForFactorsStateSnapshot<S> {
+impl<S: Signable> PetitionForFactorsStateSnapshot<S> {
     pub(super) fn new(
         signed: IndexSet<HDSignature<S>>,
         neglected: IndexSet<NeglectedFactorInstance>,

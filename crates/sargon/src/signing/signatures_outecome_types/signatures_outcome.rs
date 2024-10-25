@@ -24,7 +24,7 @@ pub struct SignaturesOutcome<S: Signable> {
     neglected_factor_sources: IndexSet<NeglectedFactor>,
 }
 
-impl <S: Signable> SignaturesOutcome<S> {
+impl<S: Signable> SignaturesOutcome<S> {
     /// # Panics
     /// Panics if the `successful_transactions` or `failed_transactions` shared
     /// either any transaction intent hash, or any signature.

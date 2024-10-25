@@ -25,7 +25,7 @@ impl HasSampleValues for PetitionForFactors<TransactionIntent> {
     }
 }
 
-impl <S: Signable> PetitionForFactors<S> {
+impl<S: Signable> PetitionForFactors<S> {
     pub(crate) fn new(
         factor_list_kind: FactorListKind,
         input: PetitionForFactorsInput,

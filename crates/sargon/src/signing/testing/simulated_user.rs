@@ -12,8 +12,12 @@ pub(crate) enum SigningUserInput {
 #[derive(Clone, derive_more::Debug)]
 #[debug("SimulatedUser(mode: {mode:?}, failures: {failures:?})")]
 pub(crate) struct SimulatedUser {
-    spy_on_request:
-        Arc<dyn Fn(FactorSourceKind, IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>)>,
+    spy_on_request: Arc<
+        dyn Fn(
+            FactorSourceKind,
+            IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+        ),
+    >,
     mode: SimulatedUserMode,
     /// `None` means never failures
     failures: Option<SimulatedFailures>,
@@ -21,8 +25,10 @@ pub(crate) struct SimulatedUser {
 
 impl SimulatedUser {
     pub(crate) fn with_spy(
-        spy_on_request: impl Fn(FactorSourceKind, IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>)
-            + 'static,
+        spy_on_request: impl Fn(
+                FactorSourceKind,
+                IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+            ) + 'static,
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
     ) -> Self {
@@ -137,7 +143,9 @@ impl SimulatedUser {
     pub(crate) fn spy_on_request_before_handled(
         &self,
         factor_source_kind: FactorSourceKind,
-        invalid_tx_if_skipped: IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+        invalid_tx_if_skipped: IndexSet<
+            InvalidTransactionIfNeglected<TransactionIntent>,
+        >,
     ) {
         (self.spy_on_request)(
             factor_source_kind,

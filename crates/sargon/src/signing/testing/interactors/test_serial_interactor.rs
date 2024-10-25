@@ -21,7 +21,9 @@ impl IsTestInteractor for TestSigningSerialInteractor {
 }
 
 #[async_trait::async_trait]
-impl MonoFactorSignInteractor<TransactionIntent> for TestSigningSerialInteractor {
+impl MonoFactorSignInteractor<TransactionIntent>
+    for TestSigningSerialInteractor
+{
     async fn sign(
         &self,
         request: MonoFactorSignRequest<TransactionIntent>,

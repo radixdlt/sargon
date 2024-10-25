@@ -29,9 +29,7 @@ impl Into<InternalCompiledSubintent> for CompiledSubintent {
             .decode(self.secret_magic)
             .expect("Should always be able to decode base-64 encoded bytes");
 
-        InternalCompiledSubintent::new(sargon::BagOfBytes::from(
-            decoded,
-        ))
+        InternalCompiledSubintent::new(sargon::BagOfBytes::from(decoded))
             .expect("Should always be able to compile a Subintent")
     }
 }
@@ -42,8 +40,7 @@ pub fn new_compiled_subintent_sample() -> CompiledSubintent {
 }
 
 #[uniffi::export]
-pub fn new_compiled_subintent_sample_other(
-) -> CompiledSubintent {
+pub fn new_compiled_subintent_sample_other() -> CompiledSubintent {
     InternalCompiledSubintent::sample_other().into()
 }
 

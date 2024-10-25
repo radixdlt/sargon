@@ -19,9 +19,7 @@ impl CompiledSubintent {
     pub fn new(bytes: BagOfBytes) -> Result<Self> {
         RET_subintent_from_payload_bytes(bytes.clone())
             .map(|_| Self(bytes))
-            .map_err(|_| {
-                CommonError::FailedToDecompileBytesIntoSubintent
-            })
+            .map_err(|_| CommonError::FailedToDecompileBytesIntoSubintent)
     }
 
     pub fn bytes(&self) -> BagOfBytes {
@@ -31,18 +29,19 @@ impl CompiledSubintent {
     pub fn decompile(&self) -> Subintent {
         let err = "Should never fail to decompile a 'CompiledSubintent' since we should not have been able to construct an invalid 'Subintent'.";
 
-        let scrypto_subintent = RET_subintent_from_payload_bytes(self.bytes()).expect(err);
+        let scrypto_subintent =
+            RET_subintent_from_payload_bytes(self.bytes()).expect(err);
 
         scrypto_subintent.try_into().expect(err)
     }
 }
 
-
 impl Subintent {
     pub fn compile(&self) -> CompiledSubintent {
-        let bytes =
-            RET_subintent_to_payload_bytes(&ScryptoSubintent::from(self.clone()))
-                .expect("Should always be able to compile a Subintent");
+        let bytes = RET_subintent_to_payload_bytes(&ScryptoSubintent::from(
+            self.clone(),
+        ))
+        .expect("Should always be able to compile a Subintent");
 
         CompiledSubintent(bytes.into())
     }
@@ -107,10 +106,7 @@ mod tests {
     #[test]
     fn decompile() {
         assert_eq!(SUT::sample().decompile(), Subintent::sample());
-        assert_eq!(
-            SUT::sample_other().decompile(),
-            Subintent::sample_other()
-        );
+        assert_eq!(SUT::sample_other().decompile(), Subintent::sample_other());
     }
 
     #[test]

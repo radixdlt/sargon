@@ -11,7 +11,7 @@ pub struct MonoFactorSignRequestInput<S: Signable> {
     pub per_transaction: Vec<TransactionSignRequestInput<S>>,
 }
 
-impl <S: Signable> MonoFactorSignRequestInput<S> {
+impl<S: Signable> MonoFactorSignRequestInput<S> {
     /// # Panics
     /// Panics if `per_transaction` is empty
     ///

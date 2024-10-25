@@ -14,7 +14,7 @@ pub struct InvalidTransactionIfNeglected<S: Signable> {
     entities_which_would_fail_auth: Vec<AddressOfAccountOrPersona>,
 }
 
-impl <S: Signable> InvalidTransactionIfNeglected<S> {
+impl<S: Signable> InvalidTransactionIfNeglected<S> {
     /// Constructs a new `InvalidTransactionIfNeglected` from an IndexSet of
     /// entities which would fail auth..
     ///

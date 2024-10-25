@@ -16,7 +16,7 @@ pub struct TransactionSignRequestInput<S: Signable> {
     owned_factor_instances: Vec<OwnedFactorInstance>,
 }
 
-impl <S: Signable> TransactionSignRequestInput<S> {
+impl<S: Signable> TransactionSignRequestInput<S> {
     /// # Panics
     /// Panics if any of the owned factor instances does not match the `factor_source_id`.
     ///

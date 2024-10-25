@@ -3,8 +3,7 @@ use crate::prelude::*;
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct MaybeSignedTransactions<S: Signable> {
     /// Collection of transactions which might be signed or not.
-    pub(super) transactions:
-        IndexMap<S::ID, IndexSet<HDSignature<S>>>,
+    pub(super) transactions: IndexMap<S::ID, IndexSet<HDSignature<S>>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -14,7 +13,7 @@ pub struct SignedTransaction<S: Signable> {
     /// The signatures for this transaction.
     pub(crate) signatures: IndexSet<HDSignature<S>>,
 }
-impl <S: Signable> SignedTransaction<S> {
+impl<S: Signable> SignedTransaction<S> {
     pub(crate) fn new(
         signable_id: S::ID,
         signatures: IndexSet<HDSignature<S>>,
@@ -26,10 +25,8 @@ impl <S: Signable> SignedTransaction<S> {
     }
 }
 
-impl <S: Signable> MaybeSignedTransactions<S> {
-    fn new(
-        transactions: IndexMap<S::ID, IndexSet<HDSignature<S>>>,
-    ) -> Self {
+impl<S: Signable> MaybeSignedTransactions<S> {
+    fn new(transactions: IndexMap<S::ID, IndexSet<HDSignature<S>>>) -> Self {
         Self { transactions }
     }
 
@@ -192,8 +189,10 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
                 (tx_b, IndexSet::from_iter([tx_b_sig_x, tx_b_sig_y])),
             ]
             .into_iter()
-            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntent>>>>(
-            ),
+            .collect::<IndexMap<
+                TransactionIntentHash,
+                IndexSet<HDSignature<TransactionIntent>>,
+            >>(),
         )
     }
 
@@ -252,8 +251,10 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
                 IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y, tx_a_sig_z]),
             )]
             .into_iter()
-            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntent>>>>(
-            ),
+            .collect::<IndexMap<
+                TransactionIntentHash,
+                IndexSet<HDSignature<TransactionIntent>>,
+            >>(),
         )
     }
 }

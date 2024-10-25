@@ -16,7 +16,7 @@ pub(crate) struct PetitionForFactorsState<S: Signable> {
     neglected: RefCell<PetitionForFactorsSubState<NeglectedFactorInstance>>,
 }
 
-impl <S: Signable> PetitionForFactorsState<S> {
+impl<S: Signable> PetitionForFactorsState<S> {
     /// Creates a new `PetitionForFactorsState`.
     pub(super) fn new() -> Self {
         Self {

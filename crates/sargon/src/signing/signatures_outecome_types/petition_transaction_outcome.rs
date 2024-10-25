@@ -12,7 +12,7 @@ pub(crate) struct PetitionTransactionOutcome<S: Signable> {
     pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
 }
 
-impl <S: Signable> PetitionTransactionOutcome<S> {
+impl<S: Signable> PetitionTransactionOutcome<S> {
     /// # Panics
     /// Panics if the intent hash in any signatures does not
     /// match `intent_hash`
