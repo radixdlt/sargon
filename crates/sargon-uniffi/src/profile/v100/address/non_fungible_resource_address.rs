@@ -43,7 +43,9 @@ macro_rules! decl_specialized_address {
                 }
             }
 
+            #[allow(clippy::from_over_into)]
             impl Into<[< Internal $specialized_address_type >]> for $specialized_address_type {
+                #[allow(clippy::from_over_into)]
                 fn into(self) -> [< Internal $specialized_address_type >] {
                     [< Internal $specialized_address_type >](self.value.into())
                 }

@@ -45,6 +45,7 @@ macro_rules! decl_ret_wrapped_address {
 
             #[allow(clippy::from_over_into)]
             impl Into<[< Internal $address_type:camel Address >]> for [< $address_type:camel Address >] {
+                #[allow(clippy::from_over_into)]
                 fn into(self) -> [< Internal $address_type:camel Address >] {
                     self.secret_magic.parse().unwrap()
                 }
