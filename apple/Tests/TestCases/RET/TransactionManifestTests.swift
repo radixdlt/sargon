@@ -20,7 +20,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
 
 	func test_manifest_network_id() {
 		let manifest = TransactionManifest.sample
-		XCTAssertNoDifference(manifest.networkID, .mainnet)
+        XCTAssertNoDifference(manifest.networkId, .mainnet)
 	}
 
 	func test_manifest_blobs() {

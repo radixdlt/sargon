@@ -16,9 +16,6 @@ import com.radixdlt.sargon.subintentManifestSummary
 val SubintentManifest.manifestString: String
     get() = subintentManifestString(manifest = this)
 
-val SubintentManifest.networkId: NetworkId
-    get() = subintentManifestNetworkId(manifest = this)
-
 val SubintentManifest.blobs: Blobs
     get() = subintentManifestBlobs(manifest = this)
 
