@@ -31,7 +31,7 @@ impl SignaturesCollector<TransactionIntent> {
         Self::new_test_with(
             finish_early_strategy,
             all_factor_sources_in_profile.into_iter().collect(),
-            IdentifiedVecOf::from_iter(transactions.into_iter()),
+            IdentifiedVecOf::from_iter(transactions),
             Arc::new(TestSignatureCollectingInteractors::new(simulated_user)),
             role_kind,
         )

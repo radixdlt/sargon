@@ -23,10 +23,10 @@ impl CompiledSubintent {
     }
 }
 
-impl Into<InternalCompiledSubintent> for CompiledSubintent {
-    fn into(self) -> InternalCompiledSubintent {
+impl From<CompiledSubintent> for InternalCompiledSubintent {
+    fn from(val: CompiledSubintent) -> Self {
         let decoded = BASE64_STANDARD_NO_PAD
-            .decode(self.secret_magic)
+            .decode(val.secret_magic)
             .expect("Should always be able to decode base-64 encoded bytes");
 
         InternalCompiledSubintent::new(sargon::BagOfBytes::from(decoded))

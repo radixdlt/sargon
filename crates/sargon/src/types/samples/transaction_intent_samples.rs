@@ -77,7 +77,6 @@ impl TransactionIntent {
                 address.scrypto(),
                 MetadataKey::OwnerKeys,
                 ScryptoMetadataValue::PublicKeyHashArray(vec![hash
-                    .clone()
                     .into()]),
             );
         }

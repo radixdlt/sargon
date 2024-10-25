@@ -47,9 +47,9 @@ impl TransactionIntent {
     }
 }
 
-impl Into<TransactionIntentHash> for CompiledTransactionIntent {
-    fn into(self) -> TransactionIntentHash {
-        self.decompile().transaction_intent_hash()
+impl From<CompiledTransactionIntent> for TransactionIntentHash {
+    fn from(val: CompiledTransactionIntent) -> Self {
+        val.decompile().transaction_intent_hash()
     }
 }
 

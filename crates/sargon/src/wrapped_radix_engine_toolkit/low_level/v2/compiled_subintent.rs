@@ -47,9 +47,9 @@ impl Subintent {
     }
 }
 
-impl Into<SubintentHash> for CompiledSubintent {
-    fn into(self) -> SubintentHash {
-        self.decompile().hash()
+impl From<CompiledSubintent> for SubintentHash {
+    fn from(val: CompiledSubintent) -> Self {
+        val.decompile().hash()
     }
 }
 

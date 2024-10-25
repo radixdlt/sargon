@@ -209,7 +209,7 @@ impl HasSampleValues for PetitionForTransaction<TransactionIntent> {
 
         let intent =
             TransactionIntent::sample_entities_requiring_auth([&account], []);
-        println!("{}", intent.manifest.instructions.to_string());
+        println!("{}", intent.manifest.instructions);
         Self::new(
             intent.clone(),
             HashMap::just((
