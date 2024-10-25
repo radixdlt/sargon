@@ -41,7 +41,7 @@ impl SignableID for TransactionIntentHash {}
 
 impl std::hash::Hash for TransactionIntent {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.transaction_intent_hash().hash.0.to_string().hash(state)
+        state.write(self.transaction_intent_hash().hash.as_ref())
     }
 }
 
