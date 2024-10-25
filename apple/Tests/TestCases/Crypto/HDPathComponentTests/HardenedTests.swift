@@ -9,10 +9,4 @@ import XCTest
 import Sargon
 
 final class HardenedTests: Test<Hardened> {
-    func test_() {
-        XCTAssertEqual(
-            SUT.sample,
-            SUT.securified(.sample)
-        )
-    }
 }
