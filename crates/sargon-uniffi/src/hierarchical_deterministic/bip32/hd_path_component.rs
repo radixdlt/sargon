@@ -108,6 +108,11 @@ pub fn hd_path_component_index_in_local_key_space(
 }
 
 #[uniffi::export]
+pub fn bip32_constant_offset_hardened() -> u32 {
+    GLOBAL_OFFSET_HARDENED
+}
+
+#[uniffi::export]
 pub fn hd_path_component_get_key_space(component: HDPathComponent) -> KeySpace {
     Into::<InternalHDPathComponent>::into(component)
         .key_space()

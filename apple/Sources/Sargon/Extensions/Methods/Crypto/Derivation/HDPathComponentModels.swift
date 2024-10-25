@@ -65,6 +65,19 @@ extension U30 {
         u30GetValue(u30: self)
     }
 }
+#if DEBUG
+extension U30 {
+    public static let sample: Self = newU30Sample()
+    public static let sampleOther: Self = newU30SampleOther()
+}
+#endif
+
+#if DEBUG
+extension U31 {
+    public static let sample: Self = newU31Sample()
+    public static let sampleOther: Self = newU31SampleOther()
+}
+#endif
 
 extension UnsecurifiedHardened {
     public init(u30: U30) {
@@ -102,6 +115,12 @@ extension SecurifiedU30 {
         securifiedIndexInGlobalKeySpace(securified: self)
     }
 }
+#if DEBUG
+extension Unhardened {
+    public static let sample: Self = newUnhardenedSample()
+    public static let sampleOther: Self = newUnhardenedSampleOther()
+}
+#endif
 extension Unhardened {
     public init(u31: U31) {
         self = newUnhardened(u31: u31)
@@ -120,3 +139,45 @@ extension Unhardened {
         unhardenedIndexInGlobalKeySpace(unhardened: self)
     }
 }
+
+public protocol BaseHDPathComponentProtocol: SargonModel {
+    init(globalKeySpace: UInt32) throws
+    func indexInLocalKeySpace() -> UInt32
+    func indexInGlobalKeySpace() -> UInt32
+}
+public protocol HDPathComponentProtocol: BaseHDPathComponentProtocol {
+    init(localKeySpace: UInt32) throws
+}
+
+#if DEBUG
+extension SecurifiedU30 {
+    public static let sample: Self = newSecurifiedSample()
+    public static let sampleOther: Self = newSecurifiedSampleOther()
+}
+#endif
+extension SecurifiedU30: HDPathComponentProtocol {}
+extension Unhardened: HDPathComponentProtocol {}
+extension UnsecurifiedHardened: HDPathComponentProtocol {}
+#if DEBUG
+extension UnsecurifiedHardened {
+    public static let sample: Self = newUnsecurifiedHardenedSample()
+    public static let sampleOther: Self = newUnsecurifiedHardenedSampleOther()
+}
+#endif
+extension HdPathComponent: BaseHDPathComponentProtocol {}
+
+#if DEBUG
+extension HdPathComponent {
+    public static let sample: Self = newHdPathComponentSample()
+    public static let sampleOther: Self = newHdPathComponentSampleOther()
+}
+#endif
+
+
+#if DEBUG
+extension Hardened {
+    public static let sample: Self = newHardenedSample()
+    public static let sampleOther: Self = newHardenedSampleOther()
+}
+#endif
+extension Hardened: SargonModel {}

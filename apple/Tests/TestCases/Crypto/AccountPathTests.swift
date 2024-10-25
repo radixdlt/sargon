@@ -38,12 +38,12 @@ final class AccountPathTests: HDPathProtocolTest<AccountPath> {
 	func test_index() throws {
         XCTAssertEqual(
             SUT.sample.asGeneral.lastPathComponent,
-            HdPathComponent(indexInGlobalKeySpace: 0 + 0x8000_0000)
+            HdPathComponent(globalKeySpace: 0 + 0x8000_0000)
         )
 
         try XCTAssertEqual(
             SUT.sampleOther.asGeneral.lastPathComponent,
-            HdPathComponent(indexInLocalKeySpace: 1, keySpace: .unsecurified(isHardened: true))
+            HdPathComponent(localKeySpace: 1, keySpace: .unsecurified(isHardened: true))
         )
 	}
 }
