@@ -451,10 +451,10 @@ DROP_AUTH_ZONE_PROOFS;
                 hashmap!(
                     AccountAddress::sample_other() => vec![AccountDeposit::sample()],
                 ),
-                Vec::<_>::sample(),
+                [],
                 [AccountAddress::sample()],
                 [AccountAddress::sample_other()],
-                Vec::<_>::sample(),
+                [],
                 [AccountAddress::sample()],
                 [],
                 Vec::<_>::sample(),
@@ -506,7 +506,7 @@ DROP_AUTH_ZONE_PROOFS;
                         )
                     ],
                 ),
-                Vec::<_>::sample(),
+                [],
                 [
                     a
                 ],
@@ -515,7 +515,7 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
                 ],
-                Vec::<_>::sample(),
+                [],
                 [a],
                 [],
                 Vec::<_>::sample(),

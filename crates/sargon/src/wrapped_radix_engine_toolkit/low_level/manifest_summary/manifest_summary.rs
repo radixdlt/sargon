@@ -47,7 +47,9 @@ impl ManifestSummary {
         presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
         withdrawn_from: impl IntoIterator<Item = AccountAddress>,
         deposited_into: impl IntoIterator<Item = AccountAddress>,
-        encountered_entities: impl IntoIterator<Item = ManifestEncounteredComponentAddress>,
+        encountered_entities: impl IntoIterator<
+            Item = ManifestEncounteredComponentAddress,
+        >,
         accounts_requiring_auth: impl IntoIterator<Item = AccountAddress>,
         personas_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
         reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
@@ -135,15 +137,19 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
         let addresses_of_personas_requiring_auth =
             to_vec_network_aware(ret.identities_requiring_auth, network_id);
 
-        let presented_proofs = ret.presented_proofs.values()
-        .cloned()
-        .flat_map(|vec| filter_try_to_vec_network_aware(vec, network_id));
+        let presented_proofs =
+            ret.presented_proofs.values().cloned().flat_map(|vec| {
+                filter_try_to_vec_network_aware(vec, network_id)
+            });
 
-    let encountered_entities = filter_try_to_vec_network_aware(ret.encountered_entities, network_id);
-    let reserved_instructions = ret.reserved_instructions
-    .into_iter()
-    .map(ReservedInstruction::from);
-
+        let encountered_entities = filter_try_to_vec_network_aware(
+            ret.encountered_entities,
+            network_id,
+        );
+        let reserved_instructions = ret
+            .reserved_instructions
+            .into_iter()
+            .map(ReservedInstruction::from);
 
         Self::new(
             account_withdraws,

@@ -4,74 +4,6 @@ use radix_engine_toolkit::functions::transaction_v2::subintent_manifest;
 
 use crate::prelude::*;
 
-impl SargonOS {
-    /// Performs initial transaction analysis for a given raw manifest, including:
-    /// 1. Extracting the transaction signers.
-    /// 2. Executing the transaction preview GW request.
-    /// 3. Running the execution summary with the manifest and receipt.
-    ///
-    ///     Maps relevant errors to ensure proper handling by the hosts.
-    pub async fn analyse_transaction_preview(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        message: Message,
-        are_instructions_originating_from_host: bool,
-        nonce: Nonce,
-        notary_public_key: PublicKey,
-    ) -> Result<TransactionToReview> {
-        self.perform_transaction_preview_analysis(
-            instructions,
-            blobs,
-            message,
-            are_instructions_originating_from_host,
-            nonce,
-            notary_public_key,
-        )
-        .await
-    }
-
-    pub async fn analyse_pre_auth_preview(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        message: Message,
-        nonce: Nonce,
-    ) -> Result<PreAuthToReview> {
-        let network_id = self.profile_state_holder.current_network_id()?;
-        let subintent_manifest = SubintentManifest::new(
-            instructions,
-             network_id, 
-             blobs,
-              ChildIntents::default()
-            )?;
-
-        let summary = subintent_manifest.summary()?;
-
-        if !summary.reserved_instructions.is_empty() {
-            return Err(
-                CommonError::ReservedInstructionsNotAllowedInManifest {
-                    reserved_instructions: summary
-                        .reserved_instructions
-                        .iter()
-                        .map(|i| i.to_string())
-                        .collect(),
-                },
-            );
-        }
-
-        match subintent_manifest.as_enclosed() {
-            Some(_) => {
-                // TODO: perform the actual analysis
-                Ok(PreAuthToReview::Enclosed(PreAuthEnclosedManifest { manifest: subintent_manifest, summary: ExecutionSummary::sample() }))
-            },
-            None => {
-                Ok(PreAuthToReview::Open(PreAuthOpenManifest { manifest: subintent_manifest, summary: summary }))
-            }
-        }
-    }
-}
-
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
 /// We use it part of logic below, matching against this String - we really should upgrade this code to be more
 /// structured - we MUST update this value if Gateway where to change this value.
@@ -88,12 +20,8 @@ impl SargonOS {
     /// 1. Extracting the transaction signers.
     /// 2. Executing the transaction preview GW request.
     /// 3. Running the execution summary with the manifest and receipt.
-    ///
-    ///     Maps relevant errors to ensure proper handling by the hosts.
-    ///
-    /// This is the internal implementation of `analyse_transaction_preview`, which is the public API.
-    /// Returns `TransactionToReview`, which includes the manifest and the execution summary.
-    pub async fn perform_transaction_preview_analysis(
+    /// Maps relevant errors to ensure proper handling by the hosts.
+    pub async fn analyse_transaction_preview(
         &self,
         instructions: String,
         blobs: Blobs,
@@ -114,18 +42,18 @@ impl SargonOS {
 
         // Transactions created outside of the Wallet are not allowed to use reserved instructions
         if !are_instructions_originating_from_host
-        && !summary.reserved_instructions.is_empty()
+            && !summary.reserved_instructions.is_empty()
         {
-              return Err(
-                  CommonError::ReservedInstructionsNotAllowedInManifest {
-                      reserved_instructions: summary
-                          .reserved_instructions
-                          .iter()
-                          .map(|i| i.to_string())
-                          .collect(),
-                  },
-              );
-         }
+            return Err(
+                CommonError::ReservedInstructionsNotAllowedInManifest {
+                    reserved_instructions: summary
+                        .reserved_instructions
+                        .iter()
+                        .map(|i| i.to_string())
+                        .collect(),
+                },
+            );
+        }
 
         // Get the transaction preview
         let transaction_preview = self
@@ -152,6 +80,59 @@ impl SargonOS {
         })
     }
 
+    /// Performs initial transaction analysis for a given raw manifest, including:
+    /// 1. Creating the SubintentManifest.
+    /// 2. Validating if the manifest is open or enclosed.
+    /// 3. If open, the manifest with its summary is returned.
+    /// 4. If enclosed, it extracts the transaction signers and then transaction preview GW request is executed.
+    /// 3. The execution summary is created with the manifest and receipt.
+    /// Maps relevant errors to ensure proper handling by the hosts.
+    pub async fn analyse_pre_auth_preview(
+        &self,
+        instructions: String,
+        blobs: Blobs,
+        message: Message,
+        nonce: Nonce,
+    ) -> Result<PreAuthToReview> {
+        let network_id = self.profile_state_holder.current_network_id()?;
+        let subintent_manifest = SubintentManifest::new(
+            instructions,
+            network_id,
+            blobs,
+            ChildIntents::default(),
+        )?;
+
+        let summary = subintent_manifest.summary()?;
+
+        if !summary.reserved_instructions.is_empty() {
+            return Err(
+                CommonError::ReservedInstructionsNotAllowedInManifest {
+                    reserved_instructions: summary
+                        .reserved_instructions
+                        .iter()
+                        .map(|i| i.to_string())
+                        .collect(),
+                },
+            );
+        }
+
+        match subintent_manifest.as_enclosed() {
+            Some(_) => {
+                // TODO: perform the actual analysis
+                Ok(PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
+                    manifest: subintent_manifest,
+                    summary: ExecutionSummary::sample_stokenet(),
+                }))
+            }
+            None => Ok(PreAuthToReview::Open(PreAuthOpenManifest {
+                manifest: subintent_manifest,
+                summary: summary,
+            })),
+        }
+    }
+}
+
+impl SargonOS {
     async fn get_transaction_preview(
         &self,
         gateway_client: GatewayClient,
@@ -250,7 +231,7 @@ mod transaction_preview_analysis_tests {
         let os = SUT::fast_boot().await;
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 "instructions".to_string(),
                 Blobs::sample(),
                 Message::sample(),
@@ -274,7 +255,7 @@ mod transaction_preview_analysis_tests {
             .unwrap();
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 TransactionManifest::sample().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
@@ -295,11 +276,11 @@ mod transaction_preview_analysis_tests {
         let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -333,11 +314,11 @@ mod transaction_preview_analysis_tests {
                 .await;
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -403,11 +384,11 @@ mod transaction_preview_analysis_tests {
         let manifest = prepare_manifest_with_account_entity();
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -419,11 +400,11 @@ mod transaction_preview_analysis_tests {
         );
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -464,11 +445,11 @@ mod transaction_preview_analysis_tests {
         );
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -509,11 +490,11 @@ mod transaction_preview_analysis_tests {
                 .await;
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 TransactionManifest::sample().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -551,11 +532,11 @@ mod transaction_preview_analysis_tests {
                 .await;
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
-                false,
+                true,
                 Nonce::sample(),
                 PublicKey::sample(),
             )
@@ -571,49 +552,10 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn execution_summary_reserved_instructions_error() {
-        let ret_zero: AsStr<Decimal> = Decimal::ZERO.into();
-        let responses = prepare_responses(
-            LedgerState {
-                network: "".to_string(),
-                state_version: 0,
-                proposer_round_timestamp: "".to_string(),
-                epoch: 0,
-                round: 0,
-            },
-            TransactionPreviewResponse {
-                encoded_receipt: "".to_string(),
-                radix_engine_toolkit_receipt: Some(ScryptoSerializableToolkitTransactionReceipt::CommitSuccess {
-                    state_updates_summary: RETStateUpdatesSummary {
-                        new_entities: IndexSet::new(),
-                        metadata_updates: IndexMap::new(),
-                        non_fungible_data_updates: IndexMap::new(),
-                        newly_minted_non_fungibles: IndexSet::new(),
-                    },
-                    worktop_changes: IndexMap::new(),
-                    fee_summary: RETFeeSummary {
-                        execution_fees_in_xrd: ret_zero,
-                        finalization_fees_in_xrd: ret_zero,
-                        storage_fees_in_xrd: ret_zero,
-                        royalty_fees_in_xrd: ret_zero,
-                    },
-                    locked_fees: RETLockedFees {
-                        contingent: ret_zero,
-                        non_contingent: ret_zero,
-                    },
-                }),
-                logs: vec![],
-                receipt: TransactionReceipt {
-                    status: TransactionReceiptStatus::Succeeded,
-                    error_message: None,
-                },
-            },
-        );
-        let os =
-            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
-                .await;
+        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
 
         let result = os
-            .perform_transaction_preview_analysis(
+            .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 Message::sample(),
