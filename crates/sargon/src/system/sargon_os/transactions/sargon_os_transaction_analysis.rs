@@ -37,7 +37,7 @@ impl SargonOS {
         blobs: Blobs,
         message: Message,
         nonce: Nonce,
-    ) -> Result<TransactionToReview> {
+    ) -> Result<PreAuthToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
         let subintent_manifest = SubintentManifest::new(
             instructions,
@@ -47,8 +47,28 @@ impl SargonOS {
             )?;
 
         let summary = subintent_manifest.summary()?;
-        
-        Err(CommonError::AESDecryptionFailed)
+
+        if !summary.reserved_instructions.is_empty() {
+            return Err(
+                CommonError::ReservedInstructionsNotAllowedInManifest {
+                    reserved_instructions: summary
+                        .reserved_instructions
+                        .iter()
+                        .map(|i| i.to_string())
+                        .collect(),
+                },
+            );
+        }
+
+        match subintent_manifest.as_enclosed() {
+            Some(_) => {
+                // TODO: perform the actual analysis
+                Ok(PreAuthToReview::Enclosed(PreAuthEnclosedManifest { manifest: subintent_manifest, summary: ExecutionSummary::sample() }))
+            },
+            None => {
+                Ok(PreAuthToReview::Open(PreAuthOpenManifest { manifest: subintent_manifest, summary: summary }))
+            }
+        }
     }
 }
 
@@ -90,6 +110,23 @@ impl SargonOS {
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
 
+        let summary = transaction_manifest.summary()?;
+
+        // Transactions created outside of the Wallet are not allowed to use reserved instructions
+        if !are_instructions_originating_from_host
+        && !summary.reserved_instructions.is_empty()
+        {
+              return Err(
+                  CommonError::ReservedInstructionsNotAllowedInManifest {
+                      reserved_instructions: summary
+                          .reserved_instructions
+                          .iter()
+                          .map(|i| i.to_string())
+                          .collect(),
+                  },
+              );
+         }
+
         // Get the transaction preview
         let transaction_preview = self
             .get_transaction_preview(
@@ -108,21 +145,6 @@ impl SargonOS {
         // Analyze the manifest
         let execution_summary =
             transaction_manifest.execution_summary(engine_toolkit_receipt)?;
-
-        // Transactions created outside of the Wallet are not allowed to use reserved instructions
-        if !are_instructions_originating_from_host
-            && !execution_summary.reserved_instructions.is_empty()
-        {
-            return Err(
-                CommonError::ReservedInstructionsNotAllowedInManifest {
-                    reserved_instructions: execution_summary
-                        .reserved_instructions
-                        .iter()
-                        .map(|i| i.to_string())
-                        .collect(),
-                },
-            );
-        }
 
         Ok(TransactionToReview {
             transaction_manifest,
