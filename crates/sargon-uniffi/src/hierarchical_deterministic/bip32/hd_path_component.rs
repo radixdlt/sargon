@@ -43,6 +43,13 @@ pub fn new_hd_path_component_from_global_key_space(
 }
 
 #[uniffi::export]
+pub fn hd_path_component_to_hardened(
+    component: HDPathComponent,
+) -> Result<Hardened> {
+    sargon::Hardened::try_from(component.into_internal()).into_result()
+}
+
+#[uniffi::export]
 pub fn hd_path_component_to_bip32_string(component: HDPathComponent) -> String {
     component.into_internal().to_bip32_string()
 }
@@ -115,6 +122,21 @@ mod tests {
                 .unwrap(),
             ),
             99
+        );
+    }
+
+    #[test]
+    fn test_hd_path_component_to_hardened() {
+        assert_eq!(
+            hd_path_component_to_hardened(
+                new_hd_path_component_from_local_key_space(
+                    99,
+                    KeySpace::Securified
+                )
+                .unwrap(),
+            )
+            .unwrap(),
+            Hardened::Securified(new_securified(new_u30(99).unwrap()))
         );
     }
 

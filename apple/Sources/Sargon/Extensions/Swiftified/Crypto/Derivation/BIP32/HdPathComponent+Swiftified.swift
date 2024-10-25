@@ -22,3 +22,8 @@ extension HdPathComponent: CustomStringConvertible {
     }
 }
 
+extension HdPathComponent {
+    public func asHardened() throws -> Hardened {
+        try hdPathComponentToHardened(component: self)
+    }
+}
