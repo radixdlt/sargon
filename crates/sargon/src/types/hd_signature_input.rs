@@ -30,18 +30,12 @@ impl<S: Signable> HDSignatureInput<S> {
     }
 }
 
-impl <S: Signable> HasSampleValues for HDSignatureInput<S> {
+impl<S: Signable> HasSampleValues for HDSignatureInput<S> {
     fn sample() -> Self {
-        Self::new(
-            S::ID::sample(),
-            OwnedFactorInstance::sample(),
-        )
+        Self::new(S::ID::sample(), OwnedFactorInstance::sample())
     }
     fn sample_other() -> Self {
-        Self::new(
-            S::ID::sample_other(),
-            OwnedFactorInstance::sample_other(),
-        )
+        Self::new(S::ID::sample_other(), OwnedFactorInstance::sample_other())
     }
 }
 

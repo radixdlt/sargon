@@ -119,7 +119,7 @@ impl<S: Signable> MaybeSignedTransactions<S> {
     }
 }
 
-impl <S: Signable> HasSampleValues for MaybeSignedTransactions<S> {
+impl<S: Signable> HasSampleValues for MaybeSignedTransactions<S> {
     fn sample() -> Self {
         let tx_a = S::ID::sample();
 
@@ -189,10 +189,7 @@ impl <S: Signable> HasSampleValues for MaybeSignedTransactions<S> {
                 (tx_b, IndexSet::from_iter([tx_b_sig_x, tx_b_sig_y])),
             ]
             .into_iter()
-            .collect::<IndexMap<
-                S::ID,
-                IndexSet<HDSignature<S>>,
-            >>(),
+            .collect::<IndexMap<S::ID, IndexSet<HDSignature<S>>>>(),
         )
     }
 
@@ -248,10 +245,7 @@ impl <S: Signable> HasSampleValues for MaybeSignedTransactions<S> {
                 IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y, tx_a_sig_z]),
             )]
             .into_iter()
-            .collect::<IndexMap<
-                S::ID,
-                IndexSet<HDSignature<S>>,
-            >>(),
+            .collect::<IndexMap<S::ID, IndexSet<HDSignature<S>>>>(),
         )
     }
 }

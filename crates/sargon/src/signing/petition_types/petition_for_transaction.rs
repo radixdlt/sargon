@@ -192,7 +192,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     }
 }
 
-impl HasSampleValues for PetitionForTransaction<TransactionIntent> {
+impl<S: Signable> HasSampleValues for PetitionForTransaction<S> {
     fn sample() -> Self {
         let account = Account::sample_securified_mainnet(
             "Grace",
@@ -207,15 +207,13 @@ impl HasSampleValues for PetitionForTransaction<TransactionIntent> {
             },
         );
 
-        let intent =
-            TransactionIntent::sample_entities_requiring_auth([&account], []);
-        println!("{}", intent.manifest.instructions);
+        let signable = S::sample_entities_requiring_auth([&account], []);
         Self::new(
-            intent.clone(),
+            signable.clone(),
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),
                 PetitionForEntity::new(
-                    intent.transaction_intent_hash(),
+                    signable.get_id(),
                     AddressOfAccountOrPersona::from(account.address),
                     PetitionForFactors::sample(),
                     PetitionForFactors::sample_other(),
@@ -229,14 +227,13 @@ impl HasSampleValues for PetitionForTransaction<TransactionIntent> {
             "Sample Unsec",
             HierarchicalDeterministicFactorInstance::sample_fii0(),
         );
-        let intent =
-            TransactionIntent::sample_entities_requiring_auth([], [&persona]);
+        let signable = S::sample_entities_requiring_auth([], [&persona]);
         Self::new(
-            intent.clone(),
+            signable.clone(),
             HashMap::just((
                 AddressOfAccountOrPersona::Identity(persona.address),
                 PetitionForEntity::new(
-                    intent.transaction_intent_hash(),
+                    signable.get_id(),
                     AddressOfAccountOrPersona::Identity(persona.address),
                     PetitionForFactors::sample_other(),
                     None,

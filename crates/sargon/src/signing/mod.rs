@@ -9,14 +9,14 @@ mod signatures_outecome_types;
 mod testing;
 mod tx_to_sign;
 
+pub use authentication::*;
 pub(crate) use extractor_of_entities_requiring_auth::*;
-pub(crate) use signables::*;
 pub(crate) use tx_to_sign::*;
 
-pub use authentication::*;
 pub use collector::*;
 pub use host_interaction::*;
 pub use petition_types::*;
+pub use signables::*;
 pub use signatures_outecome_types::*;
 
 #[cfg(test)]

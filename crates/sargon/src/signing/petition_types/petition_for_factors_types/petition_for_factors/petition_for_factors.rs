@@ -12,7 +12,7 @@ pub(crate) struct PetitionForFactors<S: Signable> {
     state: RefCell<PetitionForFactorsState<S>>,
 }
 
-impl <S: Signable> HasSampleValues for PetitionForFactors<S> {
+impl<S: Signable> HasSampleValues for PetitionForFactors<S> {
     fn sample() -> Self {
         Self::new(FactorListKind::Threshold, PetitionForFactorsInput::sample())
     }

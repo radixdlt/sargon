@@ -3,7 +3,9 @@ use std::hash::Hasher;
 
 /// Any type conforming to `Signable` can be used with `SignaturesCollector` and collect
 /// signatures from all involved entities according to their security structure.
-pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone + Debug + HasSampleValues {
+pub trait Signable:
+    std::hash::Hash + PartialEq + Eq + Clone + Debug + HasSampleValues
+{
     /// A stable identifier for this `Signable`.
     type ID: SignableID;
 
@@ -31,7 +33,91 @@ pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone + Debug + HasSample
     fn get_id(&self) -> Self::ID {
         self.get_payload().into()
     }
+
+    /// Returns a sample `Signable` that its summary will involve all the
+    /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
+    /// This can be accomplished by building a manifest that constructs owner keys from these
+    /// entities. All entities set the same `PublicKeyHash` for the sake of simplicity.
+    fn sample_entities_requiring_auth<'a, 'p>(
+        accounts_requiring_auth: impl IntoIterator<Item = &'a Account>,
+        personas_requiring_auth: impl IntoIterator<Item = &'p Persona>,
+    ) -> Self {
+        Self::sample_entity_addresses_requiring_auth(
+            accounts_requiring_auth.into_iter().map(|a| a.address),
+            personas_requiring_auth.into_iter().map(|p| p.address),
+        )
+    }
+
+    /// Returns a sample `Signable` that its summary will involve all the
+    /// `account_addresses_requiring_auth` and `identity_addresses_requiring_auth` in
+    /// entities requiring auth.
+    /// This can be accomplished by building a manifest that constructs owner keys from these
+    /// entity addresses. All entities set the same `PublicKeyHash` for the sake of simplicity.
+    fn sample_entity_addresses_requiring_auth(
+        account_addresses_requiring_auth: impl IntoIterator<Item = AccountAddress>,
+        identity_addresses_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
+    ) -> Self {
+        Self::sample_entity_addresses_with_pub_key_hashes_requiring_auth(
+            account_addresses_requiring_auth
+                .into_iter()
+                .map(|a| (a, PublicKeyHash::sample())),
+            identity_addresses_requiring_auth
+                .into_iter()
+                .map(|a| (a, PublicKeyHash::sample())),
+        )
+    }
+
+    fn sample_entity_addresses_with_pub_key_hashes_requiring_auth(
+        account_addresses_requiring_auth: impl IntoIterator<
+            Item = (AccountAddress, PublicKeyHash),
+        >,
+        identity_addresses_requiring_auth: impl IntoIterator<
+            Item = (IdentityAddress, PublicKeyHash),
+        >,
+    ) -> Self;
 }
 
 /// An identifier that is unique for each `Signable`
-pub trait SignableID: Eq + StdHash + Clone + Debug + Into<Hash> + HasSampleValues {}
+pub trait SignableID:
+    Eq + StdHash + Clone + Debug + Into<Hash> + HasSampleValues
+{
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn account_addresses_and_identity_addresses_require_auth() {
+        let accounts = AccountAddress::sample_all();
+        let identities = IdentityAddress::sample_all();
+
+        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
+            accounts.clone(),
+            identities.clone(),
+        );
+
+        let summary = intent.manifest_summary();
+
+        assert_eq!(
+            accounts.iter().sorted().collect_vec(),
+            summary
+                .clone()
+                .unwrap()
+                .addresses_of_accounts_requiring_auth
+                .iter()
+                .sorted()
+                .collect_vec()
+        );
+
+        assert_eq!(
+            identities.iter().sorted().collect_vec(),
+            summary
+                .unwrap()
+                .addresses_of_personas_requiring_auth
+                .iter()
+                .sorted()
+                .collect_vec()
+        );
+    }
+}

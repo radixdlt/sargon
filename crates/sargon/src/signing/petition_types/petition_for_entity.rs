@@ -365,7 +365,7 @@ impl<S: Signable> PetitionForEntity<S> {
 }
 
 // === SAMPLE VALUES ===
-impl <S: Signable> PetitionForEntity<S> {
+impl<S: Signable> PetitionForEntity<S> {
     fn from_entity_with_role_kind(
         entity: impl Into<AccountOrPersona>,
         id: S::ID,
@@ -389,7 +389,7 @@ impl <S: Signable> PetitionForEntity<S> {
     }
 }
 
-impl <S: Signable> HasSampleValues for PetitionForEntity<S> {
+impl<S: Signable> HasSampleValues for PetitionForEntity<S> {
     fn sample() -> Self {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(

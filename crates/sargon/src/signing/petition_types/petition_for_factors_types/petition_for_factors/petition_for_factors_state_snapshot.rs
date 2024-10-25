@@ -51,7 +51,7 @@ impl<S: Signable> PetitionForFactorsStateSnapshot<S> {
     }
 }
 
-impl <S: Signable> HasSampleValues for PetitionForFactorsStateSnapshot<S> {
+impl<S: Signable> HasSampleValues for PetitionForFactorsStateSnapshot<S> {
     fn sample() -> Self {
         Self::new(
             IndexSet::from_iter([

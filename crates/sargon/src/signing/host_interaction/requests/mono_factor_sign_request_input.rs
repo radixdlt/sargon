@@ -43,7 +43,7 @@ impl<S: Signable> MonoFactorSignRequestInput<S> {
     }
 }
 
-impl <S: Signable> HasSampleValues for MonoFactorSignRequestInput<S> {
+impl<S: Signable> HasSampleValues for MonoFactorSignRequestInput<S> {
     /// Creates a new MonoFactorSignRequestInput with sample values.
     fn sample() -> Self {
         let input = TransactionSignRequestInput::<S>::sample();

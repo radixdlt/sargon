@@ -215,26 +215,26 @@ impl<S: Signable> Petitions<S> {
     }
 }
 
-impl HasSampleValues for Petitions<TransactionIntent> {
+impl<S: Signable> HasSampleValues for Petitions<S> {
     fn sample() -> Self {
-        let p0 = PetitionForTransaction::sample();
+        let p0 = PetitionForTransaction::<S>::sample();
         Self::new(
             HashMap::just((
                 FactorSourceIDFromHash::sample_at(0),
-                IndexSet::just(p0.signable.transaction_intent_hash()),
+                IndexSet::just(p0.signable.get_id()),
             )),
-            IndexMap::just((p0.signable.transaction_intent_hash(), p0)),
+            IndexMap::just((p0.signable.get_id(), p0)),
         )
     }
 
     fn sample_other() -> Self {
-        let p1 = PetitionForTransaction::sample();
+        let p1 = PetitionForTransaction::<S>::sample();
         Self::new(
             HashMap::just((
                 FactorSourceIDFromHash::sample_at(1),
-                IndexSet::just(p1.signable.transaction_intent_hash()),
+                IndexSet::just(p1.signable.get_id()),
             )),
-            IndexMap::just((p1.signable.transaction_intent_hash(), p1)),
+            IndexMap::just((p1.signable.get_id(), p1)),
         )
     }
 }

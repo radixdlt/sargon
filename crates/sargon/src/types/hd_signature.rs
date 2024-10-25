@@ -48,7 +48,7 @@ impl<S: Signable> HDSignature<S> {
     }
 }
 
-impl <S: Signable> HasSampleValues for HDSignature<S> {
+impl<S: Signable> HasSampleValues for HDSignature<S> {
     fn sample() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
             HDSignatureInput::<S>::sample(),

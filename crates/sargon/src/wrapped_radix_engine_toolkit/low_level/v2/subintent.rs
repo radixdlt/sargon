@@ -1,6 +1,6 @@
-use std::hash::Hasher;
 use crate::prelude::*;
 use delegate::delegate;
+use std::hash::Hasher;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{:?}", self.intent_core)]
