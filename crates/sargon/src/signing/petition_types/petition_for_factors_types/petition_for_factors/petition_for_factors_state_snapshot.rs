@@ -51,12 +51,12 @@ impl<S: Signable> PetitionForFactorsStateSnapshot<S> {
     }
 }
 
-impl HasSampleValues for PetitionForFactorsStateSnapshot<TransactionIntent> {
+impl <S: Signable> HasSampleValues for PetitionForFactorsStateSnapshot<S> {
     fn sample() -> Self {
         Self::new(
             IndexSet::from_iter([
-                HDSignature::sample(),
-                HDSignature::sample_other(),
+                HDSignature::<S>::sample(),
+                HDSignature::<S>::sample_other(),
             ]),
             IndexSet::from_iter([
                 NeglectedFactorInstance::sample(),
@@ -66,7 +66,7 @@ impl HasSampleValues for PetitionForFactorsStateSnapshot<TransactionIntent> {
     }
     fn sample_other() -> Self {
         Self::new(
-            IndexSet::just(HDSignature::sample_other()),
+            IndexSet::just(HDSignature::<S>::sample_other()),
             IndexSet::just(NeglectedFactorInstance::sample_other()),
         )
     }

@@ -48,16 +48,16 @@ impl<S: Signable> HDSignature<S> {
     }
 }
 
-impl HasSampleValues for HDSignature<TransactionIntent> {
+impl <S: Signable> HasSampleValues for HDSignature<S> {
     fn sample() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
-            HDSignatureInput::sample(),
+            HDSignatureInput::<S>::sample(),
         )
     }
 
     fn sample_other() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
-            HDSignatureInput::sample_other(),
+            HDSignatureInput::<S>::sample_other(),
         )
     }
 }

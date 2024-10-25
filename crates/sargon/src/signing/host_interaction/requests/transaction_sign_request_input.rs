@@ -53,12 +53,12 @@ impl<S: Signable> TransactionSignRequestInput<S> {
     }
 }
 
-impl HasSampleValues for TransactionSignRequestInput<TransactionIntent> {
+impl <S: Signable> HasSampleValues for TransactionSignRequestInput<S> {
     fn sample() -> Self {
         let owned_factor_instance = OwnedFactorInstance::sample();
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
-            CompiledTransactionIntent::sample(),
+            S::Payload::sample(),
             *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )
@@ -68,7 +68,7 @@ impl HasSampleValues for TransactionSignRequestInput<TransactionIntent> {
         let owned_factor_instance = OwnedFactorInstance::sample_other();
         let factor_source_id = &owned_factor_instance.factor_source_id();
         Self::new(
-            CompiledTransactionIntent::sample_other(),
+            S::Payload::sample_other(),
             *factor_source_id,
             IndexSet::just(owned_factor_instance),
         )

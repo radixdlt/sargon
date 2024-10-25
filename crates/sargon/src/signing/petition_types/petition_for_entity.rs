@@ -365,20 +365,20 @@ impl<S: Signable> PetitionForEntity<S> {
 }
 
 // === SAMPLE VALUES ===
-impl PetitionForEntity<TransactionIntent> {
+impl <S: Signable> PetitionForEntity<S> {
     fn from_entity_with_role_kind(
         entity: impl Into<AccountOrPersona>,
-        intent_hash: TransactionIntentHash,
+        id: S::ID,
         role_kind: RoleKind,
     ) -> Self {
         let entity = entity.into();
         match entity.entity_security_state() {
             EntitySecurityState::Unsecured { value } => {
-                Self::new_unsecurified(intent_hash, entity.address(), value.transaction_signing)
+                Self::new_unsecurified(id, entity.address(), value.transaction_signing)
             }
             EntitySecurityState::Securified { value } => {
                 Self::new_securified(
-                    intent_hash,
+                    id,
                     entity.address(),
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                         (value.security_structure.matrix_of_factors, role_kind)
@@ -389,7 +389,7 @@ impl PetitionForEntity<TransactionIntent> {
     }
 }
 
-impl HasSampleValues for PetitionForEntity<TransactionIntent> {
+impl <S: Signable> HasSampleValues for PetitionForEntity<S> {
     fn sample() -> Self {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
@@ -402,7 +402,7 @@ impl HasSampleValues for PetitionForEntity<TransactionIntent> {
                     ))
                 },
             ),
-            TransactionIntentHash::sample(),
+            S::ID::sample(),
             RoleKind::Primary,
         )
     }
@@ -415,7 +415,7 @@ impl HasSampleValues for PetitionForEntity<TransactionIntent> {
                     CAP26EntityKind::Account,
                 ),
             ),
-            TransactionIntentHash::sample_other(),
+            S::ID::sample_other(),
             RoleKind::Primary,
         )
     }

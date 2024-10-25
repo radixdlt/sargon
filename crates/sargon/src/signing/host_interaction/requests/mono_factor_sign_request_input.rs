@@ -43,16 +43,16 @@ impl<S: Signable> MonoFactorSignRequestInput<S> {
     }
 }
 
-impl HasSampleValues for MonoFactorSignRequestInput<TransactionIntent> {
+impl <S: Signable> HasSampleValues for MonoFactorSignRequestInput<S> {
     /// Creates a new MonoFactorSignRequestInput with sample values.
     fn sample() -> Self {
-        let input = TransactionSignRequestInput::sample();
+        let input = TransactionSignRequestInput::<S>::sample();
         Self::new(input.clone().factor_source_id, IndexSet::just(input))
     }
 
     /// Creates a new MonoFactorSignRequestInput with sample values.
     fn sample_other() -> Self {
-        let input = TransactionSignRequestInput::sample_other();
+        let input = TransactionSignRequestInput::<S>::sample_other();
         Self::new(input.clone().factor_source_id, IndexSet::just(input))
     }
 }

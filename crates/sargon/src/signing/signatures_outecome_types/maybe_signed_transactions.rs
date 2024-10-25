@@ -119,9 +119,9 @@ impl<S: Signable> MaybeSignedTransactions<S> {
     }
 }
 
-impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
+impl <S: Signable> HasSampleValues for MaybeSignedTransactions<S> {
     fn sample() -> Self {
-        let tx_a = TransactionIntentHash::sample();
+        let tx_a = S::ID::sample();
 
         let tx_a_input_x = HDSignatureInput::new(
             tx_a.clone(),
@@ -152,7 +152,7 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
                 tx_a_input_y,
             );
 
-        let tx_b = TransactionIntentHash::sample_other();
+        let tx_b = S::ID::sample_other();
         let tx_b_input_x = HDSignatureInput::new(
             tx_b.clone(),
             OwnedFactorInstance::new(
@@ -190,17 +190,14 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
             ]
             .into_iter()
             .collect::<IndexMap<
-                TransactionIntentHash,
-                IndexSet<HDSignature<TransactionIntent>>,
+                S::ID,
+                IndexSet<HDSignature<S>>,
             >>(),
         )
     }
 
     fn sample_other() -> Self {
-        let tx_a = TransactionIntentHash::new(
-            Hash::sample_third(),
-            NetworkID::Mainnet,
-        );
+        let tx_a = S::ID::sample_other();
 
         let tx_a_input_x = HDSignatureInput::new(
             tx_a.clone(),
@@ -252,8 +249,8 @@ impl HasSampleValues for MaybeSignedTransactions<TransactionIntent> {
             )]
             .into_iter()
             .collect::<IndexMap<
-                TransactionIntentHash,
-                IndexSet<HDSignature<TransactionIntent>>,
+                S::ID,
+                IndexSet<HDSignature<S>>,
             >>(),
         )
     }

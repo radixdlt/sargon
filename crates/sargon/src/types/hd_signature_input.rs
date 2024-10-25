@@ -30,16 +30,16 @@ impl<S: Signable> HDSignatureInput<S> {
     }
 }
 
-impl HasSampleValues for HDSignatureInput<TransactionIntent> {
+impl <S: Signable> HasSampleValues for HDSignatureInput<S> {
     fn sample() -> Self {
         Self::new(
-            TransactionIntentHash::sample(),
+            S::ID::sample(),
             OwnedFactorInstance::sample(),
         )
     }
     fn sample_other() -> Self {
         Self::new(
-            TransactionIntentHash::sample_other(),
+            S::ID::sample_other(),
             OwnedFactorInstance::sample_other(),
         )
     }
