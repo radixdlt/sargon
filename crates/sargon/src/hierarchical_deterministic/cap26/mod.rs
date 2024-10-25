@@ -15,7 +15,7 @@ mod tests {
     #[test]
     fn test_asciisum() {
         let ascii_sum =
-            |s: &str| s.chars().into_iter().fold(0, |acc, c| acc + c as u32);
+            |s: &str| s.chars().fold(0, |acc, c| acc + c as u32);
         assert_eq!(
             ascii_sum("ACCOUNT"),
             CAP26EntityKind::Account.discriminant()

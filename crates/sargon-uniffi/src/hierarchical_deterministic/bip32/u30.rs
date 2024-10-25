@@ -36,7 +36,7 @@ impl From<U30> for InternalU30 {
 impl From<InternalU30> for U30 {
     fn from(value: InternalU30) -> U30 {
         U30 {
-            secret_magic: value.0.into(),
+            secret_magic: value.0,
         }
     }
 }

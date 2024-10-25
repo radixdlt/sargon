@@ -100,7 +100,7 @@ impl SignaturesCollector {
         let collector = Self::with(
             finish_early_strategy,
             all_factor_sources_in_profile,
-            IdentifiedVecOf::from(transactions),
+            transactions,
             interactors,
             role_kind,
         );
