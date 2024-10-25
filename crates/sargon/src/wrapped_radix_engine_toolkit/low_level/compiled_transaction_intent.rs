@@ -47,6 +47,12 @@ impl TransactionIntent {
     }
 }
 
+impl Into<TransactionIntentHash> for CompiledTransactionIntent {
+    fn into(self) -> TransactionIntentHash {
+        self.decompile().transaction_intent_hash()
+    }
+}
+
 impl HasSampleValues for CompiledTransactionIntent {
     fn sample() -> Self {
         TransactionIntent::sample().compile()

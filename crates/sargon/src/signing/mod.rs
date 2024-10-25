@@ -7,11 +7,11 @@ mod signatures_outecome_types;
 #[cfg(test)]
 mod testing;
 mod tx_to_sign;
-mod signable;
+mod signables;
 
 pub(crate) use extractor_of_entities_requiring_auth::*;
 pub(crate) use tx_to_sign::*;
-pub(crate) use signable::*;
+pub(crate) use signables::*;
 
 pub use authentication::*;
 pub use collector::*;
