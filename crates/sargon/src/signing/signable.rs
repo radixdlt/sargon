@@ -50,17 +50,3 @@ impl Into<TransactionIntentHash> for CompiledTransactionIntent {
         self.decompile().transaction_intent_hash()
     }
 }
-
-impl From<CompiledTransactionIntent> for Hash {
-    fn from(value: CompiledTransactionIntent) -> Self {
-        value.decompile().transaction_intent_hash().hash
-    }
-}
-
-impl Identifiable for TransactionIntent {
-    type ID = TransactionIntentHash;
-
-    fn id(&self) -> Self::ID {
-        self.transaction_intent_hash()
-    }
-}
