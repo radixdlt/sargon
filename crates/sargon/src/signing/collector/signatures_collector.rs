@@ -16,7 +16,7 @@ use SignaturesCollectingContinuation::*;
 /// By increasing friction order we mean, the quickest and easiest to use FactorSourceKind
 /// is last; namely `DeviceFactorSource`, and the most tedious FactorSourceKind is
 /// first; namely `LedgerFactorSource`, which user might also lack access to.
-pub struct SignaturesCollector<S: Signable + Clone> {
+pub struct SignaturesCollector<S: Signable> {
     /// Stateless immutable values used by the collector to gather signatures
     /// from factor sources.
     dependencies: SignaturesCollectorDependencies<S>,
@@ -27,11 +27,11 @@ pub struct SignaturesCollector<S: Signable + Clone> {
 }
 
 // === PUBLIC ===
-impl SignaturesCollector<TransactionIntent> {
+impl <S: Signable> SignaturesCollector<S> {
     pub fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
-        transactions: impl IntoIterator<Item = TransactionIntent>,
-        interactors: Arc<dyn SignInteractors<TransactionIntent>>,
+        transactions: impl IntoIterator<Item = S>,
+        interactors: Arc<dyn SignInteractors<S>>,
         profile: &Profile,
         role_kind: RoleKind,
     ) -> Result<Self> {
@@ -45,7 +45,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub async fn collect_signatures(self) -> SignaturesOutcome<TransactionIntent> {
+    pub async fn collect_signatures(self) -> SignaturesOutcome<S> {
         let _ = self
             .sign_with_factors() // in decreasing "friction order"
             .await
@@ -56,7 +56,7 @@ impl SignaturesCollector<TransactionIntent> {
 }
 
 // === INTERNAL ===
-impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollector<S> {
+impl <S: Signable> SignaturesCollector<S> {
     pub(crate) fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
@@ -85,13 +85,13 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollector<S> {
     pub(crate) fn with_signers_extraction<F>(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
-        transactions: impl IntoIterator<Item = TransactionIntent>,
+        transactions: impl IntoIterator<Item = S>,
         interactors: Arc<dyn SignInteractors<S>>,
         role_kind: RoleKind,
         extract_signers: F,
     ) -> Result<Self>
     where
-        F: Fn(TransactionIntent) -> Result<SignableWithEntities<S>>,
+        F: Fn(S) -> Result<SignableWithEntities<S>>,
     {
         let transactions = transactions
             .into_iter()
@@ -111,7 +111,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollector<S> {
 }
 
 // === PRIVATE ===
-impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollector<S> {
+impl <S: Signable> SignaturesCollector<S> {
     /// Returning `Continue` means that we should continue collecting signatures.
     ///
     /// Returning `FinishEarly` if it is meaningless to continue collecting signatures,

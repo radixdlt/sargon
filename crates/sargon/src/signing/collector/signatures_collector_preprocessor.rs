@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) struct SignaturesCollectorPreprocessor<S: Signable + Debug + Eq + PartialEq + Clone> {
+pub(crate) struct SignaturesCollectorPreprocessor<S: Signable> {
     signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,
 }
 
@@ -29,7 +29,7 @@ pub(crate) fn sort_group_factors(
         .collect::<IndexSet<_>>()
 }
 
-impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreprocessor<S> {
+impl <S: Signable> SignaturesCollectorPreprocessor<S> {
     pub(super) fn new(signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>) -> Self {
         Self { signables_with_entities }
     }

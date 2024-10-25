@@ -1,7 +1,7 @@
 use std::hash::Hasher;
 use crate::prelude::*;
 
-pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone {
+pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone + Debug {
     type ID: SignableID;
 
     type Payload: PartialEq + Eq + Clone + Debug + std::hash::Hash + Into<Self::ID>;

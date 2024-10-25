@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct SignableWithEntities<S: Signable + Clone> {
+pub(crate) struct SignableWithEntities<S: Signable> {
     pub(crate) signable: S,
     id: S::ID,
     entities_requiring_auth: IndexSet<AccountOrPersona>,
 }
 
-impl <S: Signable + Clone> Identifiable for SignableWithEntities<S> {
+impl <S: Signable> Identifiable for SignableWithEntities<S> {
     type ID = S::ID;
 
     fn id(&self) -> Self::ID {
@@ -15,7 +15,7 @@ impl <S: Signable + Clone> Identifiable for SignableWithEntities<S> {
     }
 }
 
-impl <S: Signable + Clone> SignableWithEntities<S> {
+impl <S: Signable> SignableWithEntities<S> {
     pub(crate) fn with(
         signable: S,
         entities_requiring_auth: impl IntoIterator<
