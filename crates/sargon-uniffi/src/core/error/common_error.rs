@@ -705,8 +705,8 @@ pub enum CommonError {
     InvalidSignedPartialTransactionFailedToEncode { underlying: String } =
         10197,
 
-    #[error("Failed to generate manifest summary")]
-    FailedToGenerateManifestSummary = 10198,
+    #[error("Failed to generate manifest summary, reason: '{underlying}'")]
+    FailedToGenerateManifestSummary { underlying: String } = 10198,
 
     #[error("Index Securified expected Unsecurified")]
     IndexSecurifiedExpectedUnsecurified = 10199,

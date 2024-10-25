@@ -145,7 +145,15 @@ impl TransactionManifest {
 
     pub fn summary(&self) -> Result<ManifestSummary> {
         let summary = RET_statically_analyze(&self.scrypto_manifest())
-            .ok_or(CommonError::FailedToGenerateManifestSummary)?;
+        .map_err(|e| {
+            error!(
+                "Failed to get execution summary from RET, error: {:?}",
+                e
+            );
+            CommonError::FailedToGenerateManifestSummary {
+                underlying: format!("{:?}", e),
+            }
+        })?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
@@ -387,7 +395,7 @@ BURN_RESOURCE
         )
         .unwrap();
         let summary = manifest.summary();
-        assert_eq!(summary, Err(CommonError::FailedToGenerateManifestSummary));
+        matches!(summary, Err(CommonError::FailedToGenerateManifestSummary { .. }));
     }
 
     #[test]

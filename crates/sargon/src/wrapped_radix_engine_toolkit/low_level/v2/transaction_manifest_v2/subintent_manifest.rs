@@ -141,7 +141,15 @@ impl SubintentManifest {
     pub fn summary(&self) -> Result<ManifestSummary> {
         let summary =
             RET_statically_analyze_subintent_manifest(&self.scrypto_manifest())
-                .ok_or(CommonError::FailedToGenerateManifestSummary)?;
+            .map_err(|e| {
+                error!(
+                    "Failed to get execution summary from RET, error: {:?}",
+                    e
+                );
+                CommonError::FailedToGenerateManifestSummary {
+                    underlying: format!("{:?}", e),
+                }
+            })?;
 
         Ok(ManifestSummary::from((summary, self.network_id())))
     }

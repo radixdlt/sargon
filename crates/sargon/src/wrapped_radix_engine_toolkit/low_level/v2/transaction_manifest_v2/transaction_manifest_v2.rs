@@ -138,9 +138,18 @@ impl TransactionManifestV2 {
         self.instructions.instructions_string()
     }
 
-    pub fn summary(&self) -> Option<ManifestSummary> {
-        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())?;
-        Some(ManifestSummary::from((summary, self.network_id())))
+    pub fn summary(&self) -> Result<ManifestSummary> {
+        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())
+        .map_err(|e| {
+            error!(
+                "Failed to get execution summary from RET, error: {:?}",
+                e
+            );
+            CommonError::FailedToGenerateManifestSummary {
+                underlying: format!("{:?}", e),
+            }
+        })?;
+        Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
     pub fn network_id(&self) -> NetworkID {

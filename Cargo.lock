@@ -2376,7 +2376,7 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit"
 version = "2.2.0-dev2"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=51f0115f1e93f6910b4931ef8367eec2f5b11805#51f0115f1e93f6910b4931ef8367eec2f5b11805"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=263bc81f497f686b7327ffcc45fbaad6e04df85a#263bc81f497f686b7327ffcc45fbaad6e04df85a"
 dependencies = [
  "bech32",
  "cargo_toml 0.15.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2875,7 +2875,7 @@ dependencies = [
 [[package]]
 name = "sbor-json"
 version = "2.2.0-dev2"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=51f0115f1e93f6910b4931ef8367eec2f5b11805#51f0115f1e93f6910b4931ef8367eec2f5b11805"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=263bc81f497f686b7327ffcc45fbaad6e04df85a#263bc81f497f686b7327ffcc45fbaad6e04df85a"
 dependencies = [
  "bech32",
  "radix-common",
