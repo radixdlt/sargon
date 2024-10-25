@@ -33,12 +33,32 @@ pub enum KeySpace {
     Securified,
 }
 
+#[uniffi::export]
+pub fn new_key_space_sample() -> KeySpace {
+    InternalKeySpace::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_key_space_sample_other() -> KeySpace {
+    InternalKeySpace::sample_other().into()
+}
+
 #[derive(
     Clone, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
 )]
 pub enum HDPathComponent {
     Unsecurified(Unsecurified),
     Securified(SecurifiedU30),
+}
+
+#[uniffi::export]
+pub fn new_hd_path_component_sample() -> HDPathComponent {
+    InternalHDPathComponent::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_hd_path_component_sample_other() -> HDPathComponent {
+    InternalHDPathComponent::sample_other().into()
 }
 
 #[uniffi::export]
@@ -97,6 +117,22 @@ pub fn hd_path_component_get_key_space(component: HDPathComponent) -> KeySpace {
 #[cfg(test)]
 mod tests5 {
     use super::*;
+
+    #[test]
+    fn test_samples() {
+        assert_eq!(
+            new_hd_path_component_sample(),
+            new_hd_path_component_sample()
+        );
+        assert_eq!(
+            new_hd_path_component_sample_other(),
+            new_hd_path_component_sample_other()
+        );
+        assert_ne!(
+            new_hd_path_component_sample(),
+            new_hd_path_component_sample_other()
+        );
+    }
 
     #[test]
     fn test_hd_path_component_get_key_space() {
@@ -268,6 +304,16 @@ pub enum Hardened {
     Securified(SecurifiedU30),
 }
 
+#[uniffi::export]
+pub fn new_hardened_sample() -> Hardened {
+    InternalHardened::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_hardened_sample_other() -> Hardened {
+    InternalHardened::sample_other().into()
+}
+
 #[derive(
     Clone, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
 )]
@@ -277,9 +323,29 @@ pub enum Unsecurified {
     Hardened(UnsecurifiedHardened),
 }
 
+#[uniffi::export]
+pub fn new_unsecurified_sample() -> Unsecurified {
+    InternalUnsecurified::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_unsecurified_sample_other() -> Unsecurified {
+    InternalUnsecurified::sample_other().into()
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Unhardened {
     secret_magic: U31,
+}
+
+#[uniffi::export]
+pub fn new_unhardened_sample() -> Unhardened {
+    InternalUnhardened::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_unhardened_sample_other() -> Unhardened {
+    InternalUnhardened::sample_other().into()
 }
 
 #[uniffi::export]
@@ -319,6 +385,16 @@ mod tests4 {
             new_unhardened(new_u31(8).unwrap()),
             new_unhardened_from_local_key_space(8).unwrap()
         );
+    }
+
+    #[test]
+    fn test_unhardened_samples() {
+        assert_eq!(new_unhardened_sample(), new_unhardened_sample());
+        assert_eq!(
+            new_unhardened_sample_other(),
+            new_unhardened_sample_other()
+        );
+        assert_ne!(new_unhardened_sample(), new_unhardened_sample_other());
     }
 
     #[test]
@@ -371,6 +447,16 @@ pub struct SecurifiedU30 {
 }
 
 #[uniffi::export]
+pub fn new_securified_sample() -> SecurifiedU30 {
+    InternalSecurifiedU30::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_securified_sample_other() -> SecurifiedU30 {
+    InternalSecurifiedU30::sample_other().into()
+}
+
+#[uniffi::export]
 pub fn new_securified(u30: U30) -> SecurifiedU30 {
     SecurifiedU30 { secret_magic: u30 }
 }
@@ -411,6 +497,16 @@ mod tests3 {
             new_securified(new_u30(4).unwrap()),
             new_securified_from_local_key_space(4).unwrap()
         );
+    }
+
+    #[test]
+    fn test_securified_samples() {
+        assert_eq!(new_securified_sample(), new_securified_sample());
+        assert_eq!(
+            new_securified_sample_other(),
+            new_securified_sample_other()
+        );
+        assert_ne!(new_securified_sample(), new_securified_sample_other());
     }
 
     #[test]
@@ -467,6 +563,16 @@ pub fn new_unsecurified_hardened(u30: U30) -> UnsecurifiedHardened {
 }
 
 #[uniffi::export]
+pub fn new_unsecurified_hardened_sample() -> UnsecurifiedHardened {
+    InternalUnsecurifiedHardened::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_unsecurified_hardened_sample_other() -> UnsecurifiedHardened {
+    InternalUnsecurifiedHardened::sample_other().into()
+}
+
+#[uniffi::export]
 pub fn new_unsecurified_hardened_from_local_key_space(
     value: u32,
 ) -> Result<UnsecurifiedHardened> {
@@ -500,6 +606,22 @@ pub fn unsecurified_hardened_index_in_global_key_space(
 #[cfg(test)]
 mod tests2 {
     use super::*;
+
+    #[test]
+    fn test_unsecurified_hardened_samples() {
+        assert_eq!(
+            new_unsecurified_hardened_sample(),
+            new_unsecurified_hardened_sample()
+        );
+        assert_eq!(
+            new_unsecurified_hardened_sample_other(),
+            new_unsecurified_hardened_sample_other()
+        );
+        assert_ne!(
+            new_unsecurified_hardened_sample(),
+            new_unsecurified_hardened_sample_other()
+        );
+    }
 
     #[test]
     fn test_unsecurified_hardened_index_in_global_key_space() {
@@ -577,6 +699,16 @@ pub struct U31 {
 }
 
 #[uniffi::export]
+pub fn new_u31_sample() -> U31 {
+    InternalU31::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_u31_sample_other() -> U31 {
+    InternalU31::sample_other().into()
+}
+
+#[uniffi::export]
 pub fn new_u31(value: u32) -> Result<U31> {
     InternalU31::try_from(value).into_result()
 }
@@ -603,6 +735,16 @@ impl From<InternalU31> for U31 {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct U30 {
     secret_magic: u32,
+}
+
+#[uniffi::export]
+pub fn new_u30_sample() -> U30 {
+    InternalU30::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_u30_sample_other() -> U30 {
+    InternalU30::sample_other().into()
 }
 
 #[uniffi::export]
@@ -640,6 +782,13 @@ mod tests {
     }
 
     #[test]
+    fn test_u30_samples() {
+        assert_eq!(new_u30_sample(), new_u30_sample());
+        assert_eq!(new_u30_sample_other(), new_u30_sample_other());
+        assert_ne!(new_u30_sample(), new_u30_sample_other());
+    }
+
+    #[test]
     fn test_new_u30_overflow() {
         assert!(new_u30(0x4000_0000).is_err());
     }
@@ -652,6 +801,13 @@ mod tests {
     #[test]
     fn test_new_u31() {
         assert_eq!(new_u31(0).unwrap(), U31 { secret_magic: 0 });
+    }
+
+    #[test]
+    fn test_u31_samples() {
+        assert_eq!(new_u31_sample(), new_u31_sample());
+        assert_eq!(new_u31_sample_other(), new_u31_sample_other());
+        assert_ne!(new_u31_sample(), new_u31_sample_other());
     }
 
     #[test]

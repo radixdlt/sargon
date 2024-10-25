@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 /// A discriminator of an `HDPathComponent`.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum KeySpace {
@@ -20,11 +22,32 @@ impl KeySpace {
     }
 }
 
+impl HasSampleValues for KeySpace {
+    fn sample() -> Self {
+        KeySpace::Securified
+    }
+
+    fn sample_other() -> Self {
+        KeySpace::Unsecurified { is_hardened: false }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     type Sut = KeySpace;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Sut::sample(), Sut::sample_other());
+    }
 
     #[test]
     pub fn is_securified() {
