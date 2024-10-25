@@ -53,7 +53,7 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
     ) -> (Petitions<S>, IndexSet<FactorSourcesOfKind>) {
         let transactions = self.signables_with_entities;
         let mut petitions_for_all_transactions =
-            IndexMap::<<S::Payload as Identifiable>::ID, PetitionForTransaction<S>>::new();
+            IndexMap::<S::ID, PetitionForTransaction<S>>::new();
 
         // We care for only the factor sources which are HD based
         let mut all_factor_sources_in_profile =
@@ -64,12 +64,12 @@ impl <S: Signable + Debug + Eq + PartialEq + Clone> SignaturesCollectorPreproces
             }
         });
 
-        let mut factor_to_payloads = HashMap::<FactorSourceIDFromHash, IndexSet<<S::Payload as Identifiable>::ID>>::new();
+        let mut factor_to_payloads = HashMap::<FactorSourceIDFromHash, IndexSet<S::ID>>::new();
 
         let mut used_factor_sources = HashSet::<FactorSource>::new();
 
         let mut register_factor_in_tx =
-            |id: &FactorSourceIDFromHash, txid: &<S::Payload as Identifiable>::ID| {
+            |id: &FactorSourceIDFromHash, txid: &S::ID| {
                 if let Some(ref mut txids) = factor_to_payloads.get_mut(id) {
                     txids.insert(txid.clone());
                 } else {

@@ -44,7 +44,7 @@ impl <S: Signable> TransactionSignRequestInput<S> {
 
     #[allow(unused)]
     pub fn signature_inputs(&self) -> IndexSet<HDSignatureInput<S>> {
-        let payload_id = self.payload.id();
+        let payload_id: S::ID = self.payload.clone().into();
         self.owned_factor_instances
             .clone()
             .into_iter()

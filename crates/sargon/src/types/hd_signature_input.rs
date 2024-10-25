@@ -10,7 +10,7 @@ use crate::prelude::*;
 )]
 pub struct HDSignatureInput<S: Signable> {
     /// Hash which was signed.
-    pub payload_id: <S::Payload as Identifiable>::ID,
+    pub payload_id: S::ID,
 
     /// The account or identity address of the entity which signed the hash,
     /// with expected public key and with derivation path to derive PrivateKey
@@ -20,7 +20,7 @@ pub struct HDSignatureInput<S: Signable> {
 impl <S: Signable> HDSignatureInput<S> {
     /// Constructs a new `HDSignatureInput`.
     pub fn new(
-        payload_id: <S::Payload as Identifiable>::ID,
+        payload_id: S::ID,
         owned_factor_instance: OwnedFactorInstance,
     ) -> Self {
         Self {

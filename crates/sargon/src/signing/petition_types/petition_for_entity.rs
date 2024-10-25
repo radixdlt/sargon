@@ -10,7 +10,7 @@ pub(crate) struct PetitionForEntity<S: Signable> {
     pub(crate) entity: AddressOfAccountOrPersona,
 
     /// Index and hash of transaction
-    pub(crate) payload_id: <S::Payload as Identifiable>::ID,
+    pub(crate) payload_id: S::ID,
 
     /// Petition with threshold factors
     pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<S>>>,
@@ -21,7 +21,7 @@ pub(crate) struct PetitionForEntity<S: Signable> {
 
 impl <S: Signable> PetitionForEntity<S> {
     pub(super) fn new(
-        payload_id: <S::Payload as Identifiable>::ID,
+        payload_id: S::ID,
         entity: AddressOfAccountOrPersona,
         threshold_factors: impl Into<Option<PetitionForFactors<S>>>,
         override_factors: impl Into<Option<PetitionForFactors<S>>>,
@@ -40,7 +40,7 @@ impl <S: Signable> PetitionForEntity<S> {
     }
 
     pub(crate) fn new_from_entity(
-        payload_id: <S::Payload as Identifiable>::ID,
+        payload_id: S::ID,
         entity: AccountOrPersona,
         if_securified_select_role: RoleKind,
     ) -> Self {
@@ -71,7 +71,7 @@ impl <S: Signable> PetitionForEntity<S> {
 
     /// Creates a new Petition from an entity which is securified, i.e. has a matrix of factors.
     pub(crate) fn new_securified(
-        payload_id: <S::Payload as Identifiable>::ID,
+        payload_id: S::ID,
         entity: AddressOfAccountOrPersona,
         role_with_factor_instances: GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
@@ -90,7 +90,7 @@ impl <S: Signable> PetitionForEntity<S> {
 
     /// Creates a new Petition from an entity which is unsecurified, i.e. has a single factor.
     pub(crate) fn new_unsecurified(
-        payload_id: <S::Payload as Identifiable>::ID,
+        payload_id: S::ID,
         entity: AddressOfAccountOrPersona,
         instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {

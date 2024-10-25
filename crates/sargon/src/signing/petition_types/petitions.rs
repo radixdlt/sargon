@@ -17,22 +17,22 @@ pub(crate) struct Petitions<S: Signable> {
     /// Where A, B, C and D, all use the factor source, e.g. some arculus
     /// card which the user has setup as a factor (source) for all these accounts.
     pub(crate) factor_source_to_signable_id:
-        HashMap<FactorSourceIDFromHash, IndexSet<<S::Payload as Identifiable>::ID>>,
+        HashMap<FactorSourceIDFromHash, IndexSet<S::ID>>,
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<<S::Payload as Identifiable>::ID, PetitionForTransaction<S>>>,
+        RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
 }
 
 impl <S: Signable> Petitions<S> {
     pub(crate) fn new(
         factor_source_to_signable_ids: HashMap<
             FactorSourceIDFromHash,
-            IndexSet<<S::Payload as Identifiable>::ID>,
+            IndexSet<S::ID>,
         >,
         txid_to_petition: IndexMap<
-            <S::Payload as Identifiable>::ID,
+            S::ID,
             PetitionForTransaction<S>,
         >,
     ) -> Self {

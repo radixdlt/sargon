@@ -2,19 +2,25 @@ use std::hash::Hasher;
 use crate::prelude::*;
 
 pub trait Signable: std::hash::Hash + PartialEq + Eq + Clone {
-    type Payload: PartialEq + Eq + Clone + Debug + std::hash::Hash + Identifiable;
+    type ID: SignableID;
+
+    type Payload: PartialEq + Eq + Clone + Debug + std::hash::Hash + Into<Self::ID>;
 
     fn get_payload(&self) -> Self::Payload;
 
     fn entities_requiring_signing(&self, profile: &Profile) -> Result<IndexSet<AccountOrPersona>>;
 
-    fn get_id(&self) -> <Self::Payload as Identifiable>::ID {
-        self.get_payload().id()
+    fn get_id(&self) -> Self::ID {
+        self.get_payload().into()
     }
 }
 
+pub trait SignableID: Eq + StdHash + Clone + Debug + Into<Hash> {}
+
 ////////////////////////////////////////////////////////////////////////
 impl Signable for TransactionIntent {
+    type ID = TransactionIntentHash;
+
     type Payload = CompiledTransactionIntent;
 
     fn get_payload(&self) -> Self::Payload {
@@ -31,9 +37,17 @@ impl Signable for TransactionIntent {
     }
 }
 
+impl SignableID for TransactionIntentHash {}
+
 impl std::hash::Hash for TransactionIntent {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.transaction_intent_hash().hash.0.to_string().hash(state)
+    }
+}
+
+impl Into<TransactionIntentHash> for CompiledTransactionIntent {
+    fn into(self) -> TransactionIntentHash {
+        self.decompile().transaction_intent_hash()
     }
 }
 

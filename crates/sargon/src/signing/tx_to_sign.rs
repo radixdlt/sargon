@@ -3,12 +3,12 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SignableWithEntities<S: Signable + Clone> {
     pub(crate) signable: S,
-    id: <S::Payload as Identifiable>::ID,
+    id: S::ID,
     entities_requiring_auth: IndexSet<AccountOrPersona>,
 }
 
 impl <S: Signable + Clone> Identifiable for SignableWithEntities<S> {
-    type ID = <S::Payload as Identifiable>::ID;
+    type ID = S::ID;
 
     fn id(&self) -> Self::ID {
         self.id.clone()

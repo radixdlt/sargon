@@ -23,7 +23,7 @@ impl <S: Signable> HDSignature<S> {
         Self { input, signature }
     }
 
-    pub fn payload_id(&self) -> &<S::Payload as Identifiable>::ID {
+    pub fn payload_id(&self) -> &S::ID {
         &self.input.payload_id
     }
 

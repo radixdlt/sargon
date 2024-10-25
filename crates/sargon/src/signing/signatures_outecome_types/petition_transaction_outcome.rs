@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// a set of neglected factors (might be empty).
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct PetitionTransactionOutcome<S: Signable> {
-    signable_id: <S::Payload as Identifiable>::ID,
+    signable_id: S::ID,
     pub(crate) transaction_valid: bool,
     pub(crate) signatures: IndexSet<HDSignature<S>>,
     pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
@@ -18,7 +18,7 @@ impl <S: Signable> PetitionTransactionOutcome<S> {
     /// match `intent_hash`
     pub(crate) fn new(
         transaction_valid: bool,
-        signable_id: <S::Payload as Identifiable>::ID,
+        signable_id: S::ID,
         signatures: IndexSet<HDSignature<S>>,
         neglected_factors: IndexSet<NeglectedFactor>,
     ) -> Self {

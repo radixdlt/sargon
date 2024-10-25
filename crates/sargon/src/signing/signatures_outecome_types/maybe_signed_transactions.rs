@@ -4,19 +4,19 @@ use crate::prelude::*;
 pub(crate) struct MaybeSignedTransactions<S: Signable> {
     /// Collection of transactions which might be signed or not.
     pub(super) transactions:
-        IndexMap<<S::Payload as Identifiable>::ID, IndexSet<HDSignature<S>>>,
+        IndexMap<S::ID, IndexSet<HDSignature<S>>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SignedTransaction<S: Signable> {
     /// The transaction intent hash.
-    pub(crate) signable_id: <S::Payload as Identifiable>::ID,
+    pub(crate) signable_id: S::ID,
     /// The signatures for this transaction.
     pub(crate) signatures: IndexSet<HDSignature<S>>,
 }
 impl <S: Signable> SignedTransaction<S> {
     pub(crate) fn new(
-        signable_id: <S::Payload as Identifiable>::ID,
+        signable_id: S::ID,
         signatures: IndexSet<HDSignature<S>>,
     ) -> Self {
         Self {
@@ -28,7 +28,7 @@ impl <S: Signable> SignedTransaction<S> {
 
 impl <S: Signable> MaybeSignedTransactions<S> {
     fn new(
-        transactions: IndexMap<<S::Payload as Identifiable>::ID, IndexSet<HDSignature<S>>>,
+        transactions: IndexMap<S::ID, IndexSet<HDSignature<S>>>,
     ) -> Self {
         Self { transactions }
     }
@@ -94,7 +94,7 @@ impl <S: Signable> MaybeSignedTransactions<S> {
     /// in `transactions`.
     pub(crate) fn add_signatures(
         &mut self,
-        signable_id: <S::Payload as Identifiable>::ID,
+        signable_id: S::ID,
         signatures: IndexSet<HDSignature<S>>,
     ) {
         if let Some(ref mut sigs) = self.transactions.get_mut(&signable_id) {

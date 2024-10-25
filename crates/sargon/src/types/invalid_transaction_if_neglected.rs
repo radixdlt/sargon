@@ -8,7 +8,7 @@ pub struct InvalidTransactionIfNeglected<S: Signable> {
     /// The intent hash of the transaction which would be invalid if a
     /// certain factor source would be neglected, either if user
     /// explicitly skipped it or implicitly neglected due to failure.
-    pub signable_id: <S::Payload as Identifiable>::ID,
+    pub signable_id: S::ID,
 
     /// The entities in the transaction which would fail auth.
     entities_which_would_fail_auth: Vec<AddressOfAccountOrPersona>,
@@ -21,7 +21,7 @@ impl <S: Signable> InvalidTransactionIfNeglected<S> {
     /// # Panics
     /// Panics if `entities_which_would_fail_auth` is empty.
     pub fn new(
-        signable_id: <S::Payload as Identifiable>::ID,
+        signable_id: S::ID,
         entities_which_would_fail_auth: impl IntoIterator<
             Item = AddressOfAccountOrPersona,
         >,
