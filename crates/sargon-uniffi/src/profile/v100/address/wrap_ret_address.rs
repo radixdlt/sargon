@@ -7,7 +7,10 @@ macro_rules! decl_ret_wrapped_address {
         $(
             #[doc = $expr: expr]
         )*
-        $address_type: ident
+        $address_type:ident,
+        {
+            $($extra_field_name:ident : $extra_field_type:ty  = $conversion:tt)*
+        }
     ) => {
         paste! {
             use sargon::IsNetworkAware;
@@ -25,6 +28,10 @@ macro_rules! decl_ret_wrapped_address {
             )]
             pub struct [< $address_type:camel Address >] {
                 pub(crate) secret_magic: String,
+                pub address: String,
+                pub network_id: NetworkID,
+                pub formatted: FormattedAddress,
+                $($extra_field_name : $extra_field_type,)*
             }
 
             delegate_display_debug_into!([< $address_type:camel Address >], [< Internal $address_type:camel Address >]);
@@ -39,6 +46,22 @@ macro_rules! decl_ret_wrapped_address {
                 fn from(internal: [< Internal $address_type:camel Address >]) -> Self {
                     Self {
                         secret_magic: internal.to_string(),
+                        address: internal.address(),
+                        network_id: internal.network_id().into(),
+                        formatted: internal.clone().into(),
+                        $(
+                            $extra_field_name: $conversion(internal),
+                        )*
+                    }
+                }
+            }
+
+            impl From<[< Internal $address_type:camel Address >]> for FormattedAddress {
+                fn from(val: [< Internal $address_type:camel Address >]) -> Self {
+                    Self {
+                        full: val.formatted(sargon::AddressFormat::Full),
+                        raw: val.formatted(sargon::AddressFormat::Raw),
+                        default: val.formatted(sargon::AddressFormat::Default)
                     }
                 }
             }
@@ -61,29 +84,50 @@ macro_rules! decl_ret_wrapped_address {
                 address.into_internal().map_to_network(network_id.into()).into()
             }
 
-            #[uniffi::export]
-            pub fn [<$address_type:snake _address_network_id>](address: &[< $address_type:camel Address >]) -> NetworkID {
-                address.into_internal().network_id().into()
-            }
-
-            #[uniffi::export]
-            pub fn [<$address_type:snake _address_bech32_address>](address: &[< $address_type:camel Address >]) -> String {
-                address.into_internal().address()
-            }
-
-            #[uniffi::export]
-            pub fn [<$address_type:snake _address_formatted>](address: &[< $address_type:camel Address >], format: AddressFormat) -> String {
-                address.into_internal().formatted(format.into())
-            }
-
             /// Returns a random address in `network_id` as Network
             #[uniffi::export]
             pub fn [<new_ $address_type:snake _address_random>](network_id: NetworkID) -> [<$address_type:camel Address >] {
                 [< Internal $address_type:camel Address >]::random(network_id.into()).into()
             }
 
-            decl_conversion_tests_for!([< $address_type:camel Address >]);
+            #[cfg(test)]
+            mod conversion_tests {
+                use super::*;
+                type SUT = [< $address_type:camel Address >];
+
+                #[test]
+                fn test_conversion_roundtrip() {
+                    let internal = [< Internal $address_type:camel Address >]::sample();
+                    let expected_address = SUT {
+                        secret_magic: internal.to_string(),
+                        address: internal.address(),
+                        network_id: internal.network_id().into(),
+                        formatted: internal.clone().into(),
+                        $(
+                            $extra_field_name: $conversion(internal),
+                        )*
+                    };
+
+                    let converted = SUT::from(internal);
+                    pretty_assertions::assert_eq!(expected_address, converted);
+                }
+            }
         }
+    };
+
+      (
+        $(
+            #[doc = $expr:expr]
+        )*
+        $address_type:ident
+    ) => {
+        decl_ret_wrapped_address!(
+            $(
+                #[doc = $expr]
+            )*
+            $address_type,
+            {}
+        );
     };
 }
 

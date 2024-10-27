@@ -6,18 +6,13 @@ extension ValidatorAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        validatorAddressFormatted(address: self, format: format)
+        self.formatted(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		validatorAddressBech32Address(address: self)
-	}
 
 	public var networkID: NetworkId {
-		validatorAddressNetworkId(address: self)
+        self.networkId
 	}
-	
 }
 
 #if DEBUG

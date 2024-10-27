@@ -6,10 +6,23 @@ extension NonFungibleGlobalID {
     }
     
     public func toRawString() -> String {
-        nonFungibleGlobalIdToString(globalId: self)
+        self.asString
     }
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        nonFungibleGlobalIdFormatted(globalId: self, format: format)
+        self.formatted.getString(format)
+    }
+}
+
+extension FormattedAddress {
+    func getString(_ format: AddressFormat) -> Self {
+        switch format {
+        case .default:
+            self.default
+        case .full:
+            self.full
+        case .raw:
+            self.raw
+        }
     }
 }

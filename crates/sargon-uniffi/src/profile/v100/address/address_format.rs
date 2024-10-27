@@ -7,3 +7,10 @@ pub enum AddressFormat {
     Raw,
     Default,
 }
+
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+pub struct FormattedAddress {
+    pub full: String,
+    pub raw: String,
+    pub default: String
+}

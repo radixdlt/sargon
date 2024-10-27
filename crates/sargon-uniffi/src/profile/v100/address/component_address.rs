@@ -14,19 +14,24 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L243-L246
-    component
+    component,
+    {
+        kind: ComponentAddressKind = (|internal: InternalComponentAddress| kind(&internal))
+    }
 );
 
-/// Returns `true` if the ComponentAddress is `global` (i.e. not `internal`)
-#[uniffi::export]
-pub fn component_address_is_global(address: &ComponentAddress) -> bool {
-    address.into_internal().is_global()
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+pub enum ComponentAddressKind {
+    Global,
+    Internal
 }
 
-/// Returns `true` if the ComponentAddress is `internal` (i.e. not `global`)
-#[uniffi::export]
-pub fn component_address_is_internal(address: &ComponentAddress) -> bool {
-    address.into_internal().is_internal()
+fn kind(component_address: &InternalComponentAddress) -> ComponentAddressKind {
+    if component_address.is_global() {
+        ComponentAddressKind::Global
+    } else {
+        ComponentAddressKind::Internal
+    }
 }
 
 /// Sample to a mainnet ComponentAddress (global)

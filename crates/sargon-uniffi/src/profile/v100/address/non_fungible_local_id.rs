@@ -1,8 +1,16 @@
 use crate::prelude::*;
 use sargon::NonFungibleLocalId as InternalNonFungibleLocalId;
 
-#[derive(Clone, Hash, PartialEq, Eq, InternalConversion, uniffi::Enum)]
-pub enum NonFungibleLocalId {
+#[derive(Clone, Hash, PartialEq, Eq, uniffi::Record)]
+pub struct NonFungibleLocalId {
+    pub kind: NonFungibleLocalIdKind,
+    pub as_string: String,
+    pub user_facing_string: String,
+    pub formatted: FormattedAddress,
+}
+
+#[derive(Clone, Hash, PartialEq, Eq, uniffi::Enum)]
+pub enum NonFungibleLocalIdKind {
     /// Unsigned integers, up to u64.
     ///
     /// Create using `NonFungibleLocalId::integer(...)`.
@@ -24,31 +32,68 @@ pub enum NonFungibleLocalId {
     Ruid { value: Exactly32Bytes },
 }
 
+impl NonFungibleLocalId {
+    pub fn into_internal(&self) -> InternalNonFungibleLocalId {
+        self.clone().into()
+    }
+}
+
+impl From<InternalNonFungibleLocalId> for NonFungibleLocalId {
+    fn from(val: InternalNonFungibleLocalId) -> Self {
+        Self {
+            kind: val.clone().into(),
+            as_string: val.to_string(),
+            user_facing_string: val.to_user_facing_string(),
+            formatted: val.into()
+        }
+    }
+}
+
+impl From<NonFungibleLocalId> for InternalNonFungibleLocalId {
+    fn from(val: NonFungibleLocalId) -> Self {
+        val.into()
+    }
+}
+
+impl From<InternalNonFungibleLocalId> for NonFungibleLocalIdKind {
+    fn from(val: InternalNonFungibleLocalId) -> Self {
+        match val {
+            InternalNonFungibleLocalId::Integer { value } => NonFungibleLocalIdKind::Integer { value: value },
+            InternalNonFungibleLocalId::Bytes { value } => NonFungibleLocalIdKind::Bytes { value: value.into() },
+            InternalNonFungibleLocalId::Str { value } => NonFungibleLocalIdKind::Str { value: value.into() },
+            InternalNonFungibleLocalId::Ruid { value } => NonFungibleLocalIdKind::Ruid { value: value.into() },
+        }
+    }
+}
+
+impl From<NonFungibleLocalIdKind> for InternalNonFungibleLocalId {
+    fn from(val: NonFungibleLocalIdKind) -> Self {
+        match val {
+            NonFungibleLocalIdKind::Integer { value } => InternalNonFungibleLocalId::Integer { value: value },
+            NonFungibleLocalIdKind::Bytes { value } => InternalNonFungibleLocalId::Bytes { value: value.into() },
+            NonFungibleLocalIdKind::Str { value } => InternalNonFungibleLocalId::Str { value: value.into() },
+            NonFungibleLocalIdKind::Ruid { value } => InternalNonFungibleLocalId::Ruid { value: value.into() },
+        }
+    }
+}
+
+
+
+impl From<InternalNonFungibleLocalId> for FormattedAddress {
+    fn from(val: InternalNonFungibleLocalId) -> Self {
+        Self {
+            full: val.formatted(sargon::AddressFormat::Full),
+            raw: val.formatted(sargon::AddressFormat::Raw),
+            default: val.formatted(sargon::AddressFormat::Default)
+        }
+    }
+}
+
 #[uniffi::export]
 pub fn new_non_fungible_local_id_from_string(
     local_id: String,
 ) -> Result<NonFungibleLocalId> {
     InternalNonFungibleLocalId::from_str(&local_id).into_result()
-}
-
-#[uniffi::export]
-pub fn non_fungible_local_id_as_str(id: NonFungibleLocalId) -> String {
-    id.into_internal().to_string()
-}
-
-#[uniffi::export]
-pub fn non_fungible_local_id_to_user_facing_string(
-    id: &NonFungibleLocalId,
-) -> String {
-    id.into_internal().to_user_facing_string()
-}
-
-#[uniffi::export]
-pub fn non_fungible_local_id_formatted(
-    id: &NonFungibleLocalId,
-    format: AddressFormat,
-) -> String {
-    id.into_internal().formatted(format.into_internal())
 }
 
 #[uniffi::export]

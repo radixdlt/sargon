@@ -6,7 +6,7 @@ extension AccessControllerAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        accessControllerAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
 	/// The bech32 encoded string for this address.

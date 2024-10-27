@@ -18,7 +18,10 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L256-L261
-    pool
+    pool,
+    {
+        kind: PoolKind = (|internal: InternalPoolAddress| internal.pool_address_kind().into())
+    }
 );
 
 /// The kind of the Pool, either One, Two or Multi resources.
@@ -35,12 +38,6 @@ pub enum PoolKind {
     /// A Pool to which user can contribute liquidity of many different
     /// resources
     MultiResources,
-}
-
-/// Returns the kind of pool, either 1, 2 or Multi resources.
-#[uniffi::export]
-pub fn pool_address_kind(address: &PoolAddress) -> PoolKind {
-    address.into_internal().pool_address_kind().into()
 }
 
 /// Sample to a mainnet PoolAddress with single resource.
