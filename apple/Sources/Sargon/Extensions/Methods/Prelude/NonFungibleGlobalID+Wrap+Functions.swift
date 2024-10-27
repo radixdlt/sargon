@@ -15,7 +15,7 @@ extension NonFungibleGlobalID {
 }
 
 extension FormattedAddress {
-    func getString(_ format: AddressFormat) -> Self {
+    func getString(_ format: AddressFormat) -> String {
         switch format {
         case .default:
             self.default

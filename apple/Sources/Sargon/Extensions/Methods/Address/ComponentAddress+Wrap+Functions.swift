@@ -6,26 +6,21 @@ extension ComponentAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        componentAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		componentAddressBech32Address(address: self)
-	}
-
 	public var networkID: NetworkId {
-		componentAddressNetworkId(address: self)
+        self.networkId
 	}
 
 	/// If the `EntityType == .globalGenericComponent`
 	public var isGlobal: Bool {
-		componentAddressIsGlobal(address: self)
+        self.kind == .global
 	}
 	
 	/// If the `EntityType == .InternalGenericComponent`
 	public var isInternal: Bool {
-		componentAddressIsInternal(address: self)
+        self.kind == .internal
 	}
 }
 

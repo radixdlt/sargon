@@ -6,16 +6,11 @@ extension LockerAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        lockerAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		lockerAddressBech32Address(address: self)
-	}
-
 	public var networkID: NetworkId {
-		lockerAddressNetworkId(address: self)
+        self.networkId
 	}
 
 }

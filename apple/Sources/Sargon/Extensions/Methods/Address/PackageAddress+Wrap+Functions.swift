@@ -6,16 +6,11 @@ extension PackageAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        packageAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		packageAddressBech32Address(address: self)
-	}
-
 	public var networkID: NetworkId {
-		packageAddressNetworkId(address: self)
+        self.networkId
 	}
 
 }

@@ -15,7 +15,9 @@ extension NonFungibleGlobalID {
     ) {
         self.init(
             resourceAddress: nonFungibleResourceAddress.asResourceAddress,
-            nonFungibleLocalId: localID
+            nonFungibleLocalId: localID,
+            asString: "",
+            formatted: .init(full: "", raw: "", default: "")
         )
     }
 }

@@ -18,24 +18,11 @@ extension AccountAddress {
 	}
 
 	public func formatted(_ format: AddressFormat = .default) -> String {
-		accountAddressFormatted(address: self, format: format)
-	}
-
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		accountAddressBech32Address(address: self)
+        self.formatted.getString(format)
 	}
 
 	public var networkID: NetworkId {
-		accountAddressNetworkId(address: self)
-	}
-
-	/// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
-	/// for all accounts created by the Babylon Radix Wallets.
-	/// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
-	/// imported from the Olympia Wallet.
-	public var isLegacy: Bool {
-		accountAddressIsLegacy(address: self)
+        self.networkId
 	}
 
 	/// Formats the AccountAddress to its abbreviated form which is what the user
@@ -51,7 +38,7 @@ extension AccountAddress {
 	/// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
 	///
 	public var shortFormat: String {
-		formatted(AddressFormat.default)
+        self.formatted(.default)
 	}
 
 }
