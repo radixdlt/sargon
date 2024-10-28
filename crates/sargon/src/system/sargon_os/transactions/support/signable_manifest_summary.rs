@@ -61,7 +61,7 @@ impl Signable for SignableManifestSummary {
     }
 
     fn get_payload(&self) -> Self::Payload {
-        panic!("Manifest summary cannot be actualy signed")
+        panic!("Manifest summary cannot be actually signed")
     }
 
     fn sample_entities_requiring_auth<'a, 'p>(
