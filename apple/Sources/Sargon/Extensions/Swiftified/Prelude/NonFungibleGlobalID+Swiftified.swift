@@ -9,15 +9,17 @@ extension NonFungibleGlobalID: IdentifiableByStringProtocol {
 }
 
 extension NonFungibleGlobalID {
-    public init(
+    public static func createWith(
         nonFungibleResourceAddress: NonFungibleResourceAddress,
         localID: NonFungibleLocalID
-    ) {
-        self.init(
-            resourceAddress: nonFungibleResourceAddress.asResourceAddress,
-            nonFungibleLocalId: localID,
-            asString: "",
-            formatted: .init(full: "", raw: "", default: "")
-        )
+    ) -> Self {
+        newNonFungibleGlobalId(address: nonFungibleResourceAddress, localId: localID)
+    }
+
+    public static func createWith(
+        resourceAddress: ResourceAddress,
+        localID: NonFungibleLocalID
+    ) -> Self {
+        newNonFungibleGlobalId(address: NonFungibleResourceAddress(value: resourceAddress), localId: localID)
     }
 }

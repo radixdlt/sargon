@@ -17,6 +17,16 @@ pub struct NonFungibleGlobalId {
     pub formatted: FormattedAddress
 }
 
+impl From<InternalNonFungibleGlobalId> for FormattedAddress {
+    fn from(val: InternalNonFungibleGlobalId) -> Self {
+        Self {
+            full: val.formatted(sargon::AddressFormat::Full),
+            raw: val.formatted(sargon::AddressFormat::Raw),
+            default: val.formatted(sargon::AddressFormat::Default)
+        }
+    }
+}
+
 impl From<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
     fn from(val: InternalNonFungibleGlobalId) -> Self {
         Self {
@@ -51,6 +61,14 @@ pub fn new_non_fungible_global_id_from_string(
 }
 
 #[uniffi::export]
+pub fn new_non_fungible_global_id(
+    address: NonFungibleResourceAddress,
+    local_id: NonFungibleLocalId,
+) -> NonFungibleGlobalId {
+    InternalNonFungibleGlobalId::new(address.into_internal(), local_id.into_internal()).into()
+}
+
+#[uniffi::export]
 pub fn new_non_fungible_global_id_sample() -> NonFungibleGlobalId {
     InternalNonFungibleGlobalId::sample().into()
 }
@@ -58,14 +76,4 @@ pub fn new_non_fungible_global_id_sample() -> NonFungibleGlobalId {
 #[uniffi::export]
 pub fn new_non_fungible_global_id_sample_other() -> NonFungibleGlobalId {
     InternalNonFungibleGlobalId::sample_other().into()
-}
-
-impl From<InternalNonFungibleGlobalId> for FormattedAddress {
-    fn from(val: InternalNonFungibleGlobalId) -> Self {
-        Self {
-            full: val.formatted(sargon::AddressFormat::Full),
-            raw: val.formatted(sargon::AddressFormat::Raw),
-            default: val.formatted(sargon::AddressFormat::Default)
-        }
-    }
 }
