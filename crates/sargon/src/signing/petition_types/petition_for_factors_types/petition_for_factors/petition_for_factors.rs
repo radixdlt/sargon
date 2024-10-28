@@ -4,15 +4,15 @@ use crate::prelude::*;
 /// Petition of signatures from a factors list of an entity in a transaction.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForFactors<S: Signable> {
+pub(crate) struct PetitionForFactors<ID: SignableID> {
     pub(crate) factor_list_kind: FactorListKind,
 
     /// Factors to sign with and the required number of them.
     pub(crate) input: PetitionForFactorsInput,
-    state: RefCell<PetitionForFactorsState<S>>,
+    state: RefCell<PetitionForFactorsState<ID>>,
 }
 
-impl<S: Signable> HasSampleValues for PetitionForFactors<S> {
+impl<ID: SignableID> HasSampleValues for PetitionForFactors<ID> {
     fn sample() -> Self {
         Self::new(FactorListKind::Threshold, PetitionForFactorsInput::sample())
     }
@@ -25,7 +25,7 @@ impl<S: Signable> HasSampleValues for PetitionForFactors<S> {
     }
 }
 
-impl<S: Signable> PetitionForFactors<S> {
+impl<ID: SignableID> PetitionForFactors<ID> {
     pub(crate) fn new(
         factor_list_kind: FactorListKind,
         input: PetitionForFactorsInput,
@@ -47,7 +47,7 @@ impl<S: Signable> PetitionForFactors<S> {
         self.state.borrow().all_neglected()
     }
 
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<S>> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.state.borrow().all_signatures()
     }
 
@@ -131,7 +131,7 @@ impl<S: Signable> PetitionForFactors<S> {
 
     pub(crate) fn add_signature_if_relevant(
         &self,
-        signature: &HDSignature<S>,
+        signature: &HDSignature<ID>,
     ) -> bool {
         if self.has_owned_instance_with_id(signature.owned_factor_instance()) {
             self.add_signature(signature);
@@ -143,7 +143,7 @@ impl<S: Signable> PetitionForFactors<S> {
 
     /// # Panics
     /// Panics if this factor source has already been neglected or signed with.
-    fn add_signature(&self, signature: &HDSignature<S>) {
+    fn add_signature(&self, signature: &HDSignature<ID>) {
         let state = self.state.borrow_mut();
         state.add_signature(signature)
     }
@@ -171,7 +171,7 @@ impl<S: Signable> PetitionForFactors<S> {
         self.input.reference_factor_source_with_id(factor_source_id)
     }
 
-    fn state_snapshot(&self) -> PetitionForFactorsStateSnapshot<S> {
+    fn state_snapshot(&self) -> PetitionForFactorsStateSnapshot<ID> {
         self.state.borrow().snapshot()
     }
 

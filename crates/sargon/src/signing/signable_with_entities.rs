@@ -48,7 +48,7 @@ impl<S: Signable> SignableWithEntities<S> {
 }
 
 // -- Samples
-impl <S: Signable> SignableWithEntities<S> {
+impl<S: Signable> SignableWithEntities<S> {
     #[allow(unused)]
     pub(crate) fn sample(
         entities_requiring_auth: impl IntoIterator<

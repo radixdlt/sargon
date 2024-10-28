@@ -8,19 +8,19 @@ use crate::prelude::*;
     payload_id,
     owned_factor_instance
 )]
-pub struct HDSignatureInput<S: Signable> {
+pub struct HDSignatureInput<ID: SignableID> {
     /// Hash which was signed.
-    pub payload_id: S::ID,
+    pub payload_id: ID,
 
     /// The account or identity address of the entity which signed the hash,
     /// with expected public key and with derivation path to derive PrivateKey
     /// with.
     pub owned_factor_instance: OwnedFactorInstance,
 }
-impl<S: Signable> HDSignatureInput<S> {
+impl<ID: SignableID> HDSignatureInput<ID> {
     /// Constructs a new `HDSignatureInput`.
     pub fn new(
-        payload_id: S::ID,
+        payload_id: ID,
         owned_factor_instance: OwnedFactorInstance,
     ) -> Self {
         Self {
@@ -30,12 +30,12 @@ impl<S: Signable> HDSignatureInput<S> {
     }
 }
 
-impl<S: Signable> HasSampleValues for HDSignatureInput<S> {
+impl<ID: SignableID> HasSampleValues for HDSignatureInput<ID> {
     fn sample() -> Self {
-        Self::new(S::ID::sample(), OwnedFactorInstance::sample())
+        Self::new(ID::sample(), OwnedFactorInstance::sample())
     }
     fn sample_other() -> Self {
-        Self::new(S::ID::sample_other(), OwnedFactorInstance::sample_other())
+        Self::new(ID::sample_other(), OwnedFactorInstance::sample_other())
     }
 }
 
@@ -43,7 +43,7 @@ impl<S: Signable> HasSampleValues for HDSignatureInput<S> {
 mod tests {
     use super::*;
 
-    type Sut = HDSignatureInput<TransactionIntent>;
+    type Sut = HDSignatureInput<TransactionIntentHash>;
 
     #[test]
     fn equality_of_samples() {

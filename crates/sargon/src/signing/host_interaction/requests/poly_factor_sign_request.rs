@@ -15,7 +15,7 @@ pub struct PolyFactorSignRequest<S: Signable> {
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
     pub invalid_transactions_if_neglected:
-        IndexSet<InvalidTransactionIfNeglected<S>>,
+        IndexSet<InvalidTransactionIfNeglected<S::ID>>,
 }
 
 impl<S: Signable> PolyFactorSignRequest<S> {
@@ -30,7 +30,7 @@ impl<S: Signable> PolyFactorSignRequest<S> {
             MonoFactorSignRequestInput<S>,
         >,
         invalid_transactions_if_neglected: IndexSet<
-            InvalidTransactionIfNeglected<S>,
+            InvalidTransactionIfNeglected<S::ID>,
         >,
     ) -> Self {
         assert!(

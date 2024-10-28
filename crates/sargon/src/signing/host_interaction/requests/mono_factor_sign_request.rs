@@ -10,14 +10,14 @@ pub struct MonoFactorSignRequest<S: Signable> {
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source, or if we fail to sign
     pub invalid_transactions_if_neglected:
-        IndexSet<InvalidTransactionIfNeglected<S>>,
+        IndexSet<InvalidTransactionIfNeglected<S::ID>>,
 }
 
 impl<S: Signable> MonoFactorSignRequest<S> {
     pub fn new(
         input: MonoFactorSignRequestInput<S>,
         invalid_transactions_if_neglected: IndexSet<
-            InvalidTransactionIfNeglected<S>,
+            InvalidTransactionIfNeglected<S::ID>,
         >,
     ) -> Self {
         Self {

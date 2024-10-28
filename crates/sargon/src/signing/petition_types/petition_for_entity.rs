@@ -5,26 +5,26 @@ use crate::prelude::*;
 /// `{ threshold: PetitionForFactors, override: PetitionForFactors }`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForEntity<S: Signable> {
+pub(crate) struct PetitionForEntity<ID: SignableID> {
     /// The owner of these factors
     pub(crate) entity: AddressOfAccountOrPersona,
 
     /// Index and hash of transaction
-    pub(crate) payload_id: S::ID,
+    pub(crate) payload_id: ID,
 
     /// Petition with threshold factors
-    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<S>>>,
+    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<ID>>>,
 
     /// Petition with override factors
-    pub(crate) override_factors: Option<RefCell<PetitionForFactors<S>>>,
+    pub(crate) override_factors: Option<RefCell<PetitionForFactors<ID>>>,
 }
 
-impl<S: Signable> PetitionForEntity<S> {
+impl<ID: SignableID> PetitionForEntity<ID> {
     pub(super) fn new(
-        payload_id: S::ID,
+        payload_id: ID,
         entity: AddressOfAccountOrPersona,
-        threshold_factors: impl Into<Option<PetitionForFactors<S>>>,
-        override_factors: impl Into<Option<PetitionForFactors<S>>>,
+        threshold_factors: impl Into<Option<PetitionForFactors<ID>>>,
+        override_factors: impl Into<Option<PetitionForFactors<ID>>>,
     ) -> Self {
         let threshold_factors = threshold_factors.into();
         let override_factors = override_factors.into();
@@ -40,7 +40,7 @@ impl<S: Signable> PetitionForEntity<S> {
     }
 
     pub(crate) fn new_from_entity(
-        payload_id: S::ID,
+        payload_id: ID,
         entity: AccountOrPersona,
         if_securified_select_role: RoleKind,
     ) -> Self {
@@ -71,7 +71,7 @@ impl<S: Signable> PetitionForEntity<S> {
 
     /// Creates a new Petition from an entity which is securified, i.e. has a matrix of factors.
     pub(crate) fn new_securified(
-        payload_id: S::ID,
+        payload_id: ID,
         entity: AddressOfAccountOrPersona,
         role_with_factor_instances: GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
@@ -90,7 +90,7 @@ impl<S: Signable> PetitionForEntity<S> {
 
     /// Creates a new Petition from an entity which is unsecurified, i.e. has a single factor.
     pub(crate) fn new_unsecurified(
-        payload_id: S::ID,
+        payload_id: ID,
         entity: AddressOfAccountOrPersona,
         instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
@@ -152,7 +152,7 @@ impl<S: Signable> PetitionForEntity<S> {
     }
 
     /// Returrns the aggregate of all signatures from both lists, either threshold or override.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<S>> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.access_both_list_then_form_union(|f| f.all_signatures())
     }
 
@@ -163,7 +163,7 @@ impl<S: Signable> PetitionForEntity<S> {
     /// Panics if this factor source has already been neglected or signed with.
     ///
     /// Or panics if the factor source is not known to this petition.
-    pub(crate) fn add_signature(&self, signature: HDSignature<S>) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<ID>) {
         self.access_both_list(|l| l.add_signature_if_relevant(&signature), |t, o| {
             match (t, o) {
                 (Some(true), Some(true)) => {
@@ -302,7 +302,7 @@ impl<S: Signable> PetitionForEntity<S> {
 }
 
 // === Private ===
-impl<S: Signable> PetitionForEntity<S> {
+impl<ID: SignableID> PetitionForEntity<ID> {
     /// Derefs and calls `access` on both lists respectively, if they exist. Then combines the results
     /// of each list access using `combine`.
     ///
@@ -311,11 +311,11 @@ impl<S: Signable> PetitionForEntity<S> {
     /// and `Option` repeatedly.
     fn access_both_list<T, U>(
         &self,
-        access: impl Fn(&PetitionForFactors<S>) -> T,
+        access: impl Fn(&PetitionForFactors<ID>) -> T,
         combine: impl Fn(Option<T>, Option<T>) -> U,
     ) -> U {
         let access_list_if_exists =
-            |list: &Option<RefCell<PetitionForFactors<S>>>| {
+            |list: &Option<RefCell<PetitionForFactors<ID>>>| {
                 list.as_ref().map(|refcell| access(&refcell.borrow()))
             };
         let t = access_list_if_exists(&self.threshold_factors);
@@ -327,7 +327,7 @@ impl<S: Signable> PetitionForEntity<S> {
     /// of each list is then combined together using `IndexSet::union` and returned.
     fn access_both_list_then_form_union<T>(
         &self,
-        access: impl Fn(&PetitionForFactors<S>) -> IndexSet<T>,
+        access: impl Fn(&PetitionForFactors<ID>) -> IndexSet<T>,
     ) -> IndexSet<T>
     where
         T: Eq + std::hash::Hash + Clone,
@@ -365,10 +365,10 @@ impl<S: Signable> PetitionForEntity<S> {
 }
 
 // === SAMPLE VALUES ===
-impl<S: Signable> PetitionForEntity<S> {
+impl<ID: SignableID> PetitionForEntity<ID> {
     fn from_entity_with_role_kind(
         entity: impl Into<AccountOrPersona>,
-        id: S::ID,
+        id: ID,
         role_kind: RoleKind,
     ) -> Self {
         let entity = entity.into();
@@ -389,7 +389,7 @@ impl<S: Signable> PetitionForEntity<S> {
     }
 }
 
-impl<S: Signable> HasSampleValues for PetitionForEntity<S> {
+impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
     fn sample() -> Self {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
@@ -402,7 +402,7 @@ impl<S: Signable> HasSampleValues for PetitionForEntity<S> {
                     ))
                 },
             ),
-            S::ID::sample(),
+            ID::sample(),
             RoleKind::Primary,
         )
     }
@@ -415,7 +415,7 @@ impl<S: Signable> HasSampleValues for PetitionForEntity<S> {
                     CAP26EntityKind::Account,
                 ),
             ),
-            S::ID::sample_other(),
+            ID::sample_other(),
             RoleKind::Primary,
         )
     }
@@ -424,7 +424,7 @@ impl<S: Signable> HasSampleValues for PetitionForEntity<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PetitionForEntity<TransactionIntent>;
+    type Sut = PetitionForEntity<TransactionIntentHash>;
 
     #[test]
     fn multiple_device_as_override_skipped_both_is_invalid() {

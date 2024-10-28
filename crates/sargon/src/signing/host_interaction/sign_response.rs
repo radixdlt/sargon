@@ -6,18 +6,18 @@ use crate::prelude::*;
 /// Radix network.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("SignResponse {{ signatures: {:#?} }}", signatures.values().map(|f| format!("{:#?}", f)).join(", "))]
-pub struct SignResponse<S: Signable> {
-    pub signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<S>>>,
+pub struct SignResponse<ID: SignableID> {
+    pub signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<ID>>>,
 }
 
-impl<S: Signable> SignResponse<S> {
+impl<ID: SignableID> SignResponse<ID> {
     pub fn new(
-        signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<S>>>,
+        signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<ID>>>,
     ) -> Self {
         Self { signatures }
     }
 
-    pub fn with_signatures(signatures: IndexSet<HDSignature<S>>) -> Self {
+    pub fn with_signatures(signatures: IndexSet<HDSignature<ID>>) -> Self {
         let signatures = signatures
             .into_iter()
             .into_group_map_by(|x| x.factor_source_id());

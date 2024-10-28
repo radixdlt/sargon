@@ -3,11 +3,11 @@ mod collector;
 mod extractor_of_entities_requiring_auth;
 mod host_interaction;
 mod petition_types;
+mod signable_with_entities;
 mod signables;
 mod signatures_outecome_types;
 #[cfg(test)]
 mod testing;
-mod signable_with_entities;
 
 pub use authentication::*;
 pub(crate) use extractor_of_entities_requiring_auth::*;

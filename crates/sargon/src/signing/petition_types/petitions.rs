@@ -39,7 +39,7 @@ impl<S: Signable> Petitions<S> {
         }
     }
 
-    pub(crate) fn outcome(self) -> SignaturesOutcome<S> {
+    pub(crate) fn outcome(self) -> SignaturesOutcome<S::ID> {
         let txid_to_petition = self.txid_to_petition.into_inner();
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
@@ -91,7 +91,7 @@ impl<S: Signable> Petitions<S> {
     pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected<S>> {
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.each_petition(
             factor_source_ids.clone(),
             |p| {
@@ -159,7 +159,7 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    fn add_signature(&self, signature: &HDSignature<S>) {
+    fn add_signature(&self, signature: &HDSignature<S::ID>) {
         let binding = self.txid_to_petition.borrow();
         let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
@@ -175,7 +175,7 @@ impl<S: Signable> Petitions<S> {
 
     pub(crate) fn process_batch_response(
         &self,
-        response: SignWithFactorsOutcome<S>,
+        response: SignWithFactorsOutcome<S::ID>,
     ) {
         match response {
             SignWithFactorsOutcome::Signed {

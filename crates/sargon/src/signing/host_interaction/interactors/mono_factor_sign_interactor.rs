@@ -19,5 +19,5 @@ pub trait MonoFactorSignInteractor<S: Signable> {
     async fn sign(
         &self,
         request: MonoFactorSignRequest<S>,
-    ) -> SignWithFactorsOutcome<S>;
+    ) -> SignWithFactorsOutcome<S::ID>;
 }

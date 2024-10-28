@@ -274,9 +274,9 @@ mod integration_tests {
             async fn sign(
                 &self,
                 request: PolyFactorSignRequest<TransactionIntent>,
-            ) -> SignWithFactorsOutcome<TransactionIntent> {
+            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
                 let mut signatures =
-                    IndexSet::<HDSignature<TransactionIntent>>::new();
+                    IndexSet::<HDSignature<TransactionIntentHash>>::new();
                 for (_, req) in request.per_factor_source.iter() {
                     let resp = <Self as MonoFactorSignInteractor<
                         TransactionIntent,
@@ -324,7 +324,7 @@ mod integration_tests {
             async fn sign(
                 &self,
                 request: MonoFactorSignRequest<TransactionIntent>,
-            ) -> SignWithFactorsOutcome<TransactionIntent> {
+            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
                 if request.invalid_transactions_if_neglected.is_empty() {
                     return SignWithFactorsOutcome::Neglected(
                         NeglectedFactors::new(
@@ -343,7 +343,7 @@ mod integration_tests {
                             .map(|x| HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(x.clone()))
                             .collect::<IndexSet<_>>()
                     })
-                    .collect::<IndexSet<HDSignature<TransactionIntent>>>();
+                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
                 SignWithFactorsOutcome::Signed {
                     produced_signatures: SignResponse::with_signatures(
                         signatures,

@@ -9,13 +9,16 @@ pub(crate) struct PetitionForTransaction<S: Signable> {
     pub(crate) signable: S,
 
     pub(crate) for_entities:
-        RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>>,
+        RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::ID>>>,
 }
 
 impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn new(
         signable: S,
-        for_entities: HashMap<AddressOfAccountOrPersona, PetitionForEntity<S>>,
+        for_entities: HashMap<
+            AddressOfAccountOrPersona,
+            PetitionForEntity<S::ID>,
+        >,
     ) -> Self {
         Self {
             signable,
@@ -34,7 +37,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     ///
     /// The third value in the tuple `(_, _, IndexSet<FactorSourceIDFromHash>)` contains the
     /// id of all the factor sources which was skipped.
-    pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S> {
+    pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S::ID> {
         let for_entities = self
             .for_entities
             .into_inner()
@@ -94,7 +97,7 @@ impl<S: Signable> PetitionForTransaction<S> {
             .collect()
     }
 
-    pub(crate) fn add_signature(&self, signature: HDSignature<S>) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<S::ID>) {
         let for_entities = self.for_entities.borrow_mut();
         let for_entity = for_entities
             .get(&signature.owned_factor_instance().owner)
@@ -137,7 +140,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> Option<InvalidTransactionIfNeglected<S>> {
+    ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
         if self.has_tx_failed() {
             // No need to display already failed tx.
             return None;

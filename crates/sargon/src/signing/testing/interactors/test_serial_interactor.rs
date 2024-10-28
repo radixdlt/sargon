@@ -27,7 +27,7 @@ impl MonoFactorSignInteractor<TransactionIntent>
     async fn sign(
         &self,
         request: MonoFactorSignRequest<TransactionIntent>,
-    ) -> SignWithFactorsOutcome<TransactionIntent> {
+    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
         self.simulated_user.spy_on_request_before_handled(
             request.clone().factor_source_kind(),
             request.clone().invalid_transactions_if_neglected,
@@ -58,7 +58,7 @@ impl MonoFactorSignInteractor<TransactionIntent>
                             })
                             .collect::<IndexSet<_>>()
                     })
-                    .collect::<IndexSet<HDSignature<TransactionIntent>>>();
+                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
                 SignWithFactorsOutcome::signed(SignResponse::with_signatures(
                     signatures,
                 ))

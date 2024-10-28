@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::marker::PhantomData;
 
 use super::{
     signatures_collector_dependencies::*, signatures_collector_preprocessor::*,
@@ -45,7 +44,7 @@ impl<S: Signable> SignaturesCollector<S> {
         )
     }
 
-    pub async fn collect_signatures(self) -> SignaturesOutcome<S> {
+    pub async fn collect_signatures(self) -> SignaturesOutcome<S::ID> {
         let _ = self
             .sign_with_factors() // in decreasing "friction order"
             .await
@@ -339,7 +338,7 @@ impl<S: Signable> SignaturesCollector<S> {
     fn invalid_transactions_if_neglected_factor_sources(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected<S>> {
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.state
             .borrow()
             .petitions
@@ -347,13 +346,13 @@ impl<S: Signable> SignaturesCollector<S> {
             .invalid_transactions_if_neglected_factors(factor_source_ids)
     }
 
-    fn process_batch_response(&self, response: SignWithFactorsOutcome<S>) {
+    fn process_batch_response(&self, response: SignWithFactorsOutcome<S::ID>) {
         let state = self.state.borrow_mut();
         let petitions = state.petitions.borrow_mut();
         petitions.process_batch_response(response)
     }
 
-    fn outcome(self) -> SignaturesOutcome<S> {
+    fn outcome(self) -> SignaturesOutcome<S::ID> {
         let expected_number_of_transactions;
         {
             let state = self.state.borrow_mut();
@@ -1193,7 +1192,9 @@ mod tests {
 
                 type Tuple = (
                     FactorSourceKind,
-                    IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+                    IndexSet<
+                        InvalidTransactionIfNeglected<TransactionIntentHash>,
+                    >,
                 );
                 type Tuples = Vec<Tuple>;
                 let tuples =

@@ -23,5 +23,5 @@ pub trait PolyFactorSignInteractor<S: Signable> {
     async fn sign(
         &self,
         request: PolyFactorSignRequest<S>,
-    ) -> SignWithFactorsOutcome<S>;
+    ) -> SignWithFactorsOutcome<S::ID>;
 }

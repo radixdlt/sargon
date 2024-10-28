@@ -15,7 +15,7 @@ pub(crate) struct SimulatedUser {
     spy_on_request: Arc<
         dyn Fn(
             FactorSourceKind,
-            IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+            IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
         ),
     >,
     mode: SimulatedUserMode,
@@ -27,7 +27,7 @@ impl SimulatedUser {
     pub(crate) fn with_spy(
         spy_on_request: impl Fn(
                 FactorSourceKind,
-                IndexSet<InvalidTransactionIfNeglected<TransactionIntent>>,
+                IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
             ) + 'static,
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
@@ -144,7 +144,7 @@ impl SimulatedUser {
         &self,
         factor_source_kind: FactorSourceKind,
         invalid_tx_if_skipped: IndexSet<
-            InvalidTransactionIfNeglected<TransactionIntent>,
+            InvalidTransactionIfNeglected<TransactionIntentHash>,
         >,
     ) {
         (self.spy_on_request)(
@@ -156,7 +156,7 @@ impl SimulatedUser {
     pub(crate) fn sign_or_skip(
         &self,
         invalid_tx_if_skipped: impl IntoIterator<
-            Item = InvalidTransactionIfNeglected<TransactionIntent>,
+            Item = InvalidTransactionIfNeglected<TransactionIntentHash>,
         >,
     ) -> SigningUserInput {
         let invalid_tx_if_skipped = invalid_tx_if_skipped

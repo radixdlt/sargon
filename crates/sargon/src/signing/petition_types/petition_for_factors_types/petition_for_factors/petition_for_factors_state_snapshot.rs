@@ -3,17 +3,17 @@ use crate::prelude::*;
 /// An immutable "snapshot" of `PetitionForFactorsState`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(super) struct PetitionForFactorsStateSnapshot<S: Signable> {
+pub(super) struct PetitionForFactorsStateSnapshot<ID: SignableID> {
     /// Factors that have signed.
-    signed: IndexSet<HDSignature<S>>,
+    signed: IndexSet<HDSignature<ID>>,
 
     /// Factors that has been neglected.
     neglected: IndexSet<NeglectedFactorInstance>,
 }
 
-impl<S: Signable> PetitionForFactorsStateSnapshot<S> {
+impl<ID: SignableID> PetitionForFactorsStateSnapshot<ID> {
     pub(super) fn new(
-        signed: IndexSet<HDSignature<S>>,
+        signed: IndexSet<HDSignature<ID>>,
         neglected: IndexSet<NeglectedFactorInstance>,
     ) -> Self {
         Self { signed, neglected }
@@ -51,12 +51,12 @@ impl<S: Signable> PetitionForFactorsStateSnapshot<S> {
     }
 }
 
-impl<S: Signable> HasSampleValues for PetitionForFactorsStateSnapshot<S> {
+impl<ID: SignableID> HasSampleValues for PetitionForFactorsStateSnapshot<ID> {
     fn sample() -> Self {
         Self::new(
             IndexSet::from_iter([
-                HDSignature::<S>::sample(),
-                HDSignature::<S>::sample_other(),
+                HDSignature::<ID>::sample(),
+                HDSignature::<ID>::sample_other(),
             ]),
             IndexSet::from_iter([
                 NeglectedFactorInstance::sample(),
@@ -66,7 +66,7 @@ impl<S: Signable> HasSampleValues for PetitionForFactorsStateSnapshot<S> {
     }
     fn sample_other() -> Self {
         Self::new(
-            IndexSet::just(HDSignature::<S>::sample_other()),
+            IndexSet::just(HDSignature::<ID>::sample_other()),
             IndexSet::just(NeglectedFactorInstance::sample_other()),
         )
     }
@@ -76,7 +76,7 @@ impl<S: Signable> HasSampleValues for PetitionForFactorsStateSnapshot<S> {
 mod tests {
     use super::*;
 
-    type Sut = PetitionForFactorsStateSnapshot<TransactionIntent>;
+    type Sut = PetitionForFactorsStateSnapshot<TransactionIntentHash>;
 
     #[test]
     fn equality() {

@@ -97,7 +97,7 @@ impl<S: Signable> SignaturesCollectorPreprocessor<S> {
         for transaction in transactions.into_iter() {
             let mut petitions_for_entities = HashMap::<
                 AddressOfAccountOrPersona,
-                PetitionForEntity<S>,
+                PetitionForEntity<S::ID>,
             >::new();
 
             let id = transaction.signable.get_id();
