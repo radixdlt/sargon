@@ -6,7 +6,7 @@ extension PoolAddress {
 	}
 
     public func formatted(_ format: AddressFormat = .default) -> String {
-        poolAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
 	public var networkID: NetworkId {

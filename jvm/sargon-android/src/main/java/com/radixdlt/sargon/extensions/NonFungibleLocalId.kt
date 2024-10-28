@@ -8,8 +8,6 @@ import com.radixdlt.sargon.newNonFungibleLocalIdFromString
 import com.radixdlt.sargon.newNonFungibleLocalIdInt
 import com.radixdlt.sargon.newNonFungibleLocalIdRuid
 import com.radixdlt.sargon.newNonFungibleLocalIdString
-import com.radixdlt.sargon.nonFungibleLocalIdAsStr
-import com.radixdlt.sargon.nonFungibleLocalIdFormatted
 
 /**
  * Creates a child type of [NonFungibleLocalId] from the local id string
@@ -66,8 +64,8 @@ fun NonFungibleLocalId.Companion.stringId(string: String): NonFungibleLocalId =
     newNonFungibleLocalIdString(string = string)
 
 val NonFungibleLocalId.string: String
-    get() = nonFungibleLocalIdAsStr(id = this)
+    get() = this.asString
 
 fun NonFungibleLocalId.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
-): String = nonFungibleLocalIdFormatted(id = this, format = format)
+): String = this.formatted.getString(format)
