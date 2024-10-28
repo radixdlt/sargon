@@ -89,3 +89,17 @@ impl Signable for SignableManifestSummary {
         Self::sample()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_signable_manifest_summary() {
+        let summary = ManifestSummary::sample();
+        let signable = SignableManifestSummary::new(summary.clone());
+
+        assert_eq!(signable.summary, summary);
+        assert_eq!(signable.entities_requiring_signing(&Profile::sample()), Ok(IndexSet::new()));
+    }
+}
