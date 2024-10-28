@@ -51,9 +51,17 @@ impl SargonOS {
             delay_duration += DELAY_INCREMENT;
             let sleep_duration = Duration::from_millis(delay_duration);
 
-            let response = gateway_client
+            let response = match gateway_client
                 .get_transaction_status(intent_hash.clone())
-                .await?;
+                .await
+            {
+                Ok(response) => response,
+                Err(_) => {
+                    delays.push(delay_duration);
+                    async_std::task::sleep(sleep_duration).await;
+                    continue;
+                }
+            };
 
             match response
                 .known_payloads
@@ -177,9 +185,17 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn poll_status_error() {
-        // This test will simulate the case where we fail to get a `TransactionStatusResponse` from gateway
-        let mock_driver = MockNetworkingDriver::new_always_failing();
+    async fn poll_status_error_then_success() {
+        // This test will simulate the case where we fail to get a `TransactionStatusResponse` from gateway on the first response,
+        // while the second response is a `CommittedSuccess`.
+        let responses = vec![
+            MockNetworkingDriverResponse::new_failing(),
+            MockNetworkingDriverResponse::new_success(
+                sample_committed_success(),
+            ),
+        ];
+
+        let mock_driver = MockNetworkingDriver::new_with_responses(responses);
 
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
 
@@ -189,12 +205,17 @@ mod tests {
                 .unwrap()
                 .unwrap();
 
-        let result = os
-            .poll_transaction_status(TransactionIntentHash::sample())
+        let result =
+            os.poll_transaction_status_with_delays(
+                TransactionIntentHash::sample(),
+            )
             .await
-            .expect_err("Expected an error");
+            .unwrap();
 
-        assert_eq!(result, CommonError::NetworkResponseBadCode);
+        // Result should be `Success`
+        assert_eq!(result.0, TransactionStatus::Success);
+        // and there should have been a delay of 2s after first call
+        assert_eq!(result.1, vec![2]);
     }
 
     // Creates a `MockNetworkingDriver` that returns the given list of responses sequentially,
