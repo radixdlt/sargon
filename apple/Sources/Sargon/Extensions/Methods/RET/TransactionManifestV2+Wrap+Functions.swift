@@ -24,6 +24,6 @@ extension TransactionManifestV2 {
 	}
 
 	public var summary: ManifestSummary? {
-		transactionManifestSummaryV2(manifest: self)
+		try? transactionManifestSummaryV2(manifest: self)
 	}
 }

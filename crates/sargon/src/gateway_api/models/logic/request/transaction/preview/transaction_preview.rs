@@ -34,6 +34,43 @@ impl TransactionPreviewRequest {
             opt_ins: TransactionPreviewRequestOptIns::default(),
         }
     }
+
+    pub fn new_transaction_analysis_v1(
+        manifest: TransactionManifest,
+        start_epoch_inclusive: Epoch,
+        signer_public_keys: impl IntoIterator<Item = PublicKey>,
+        notary_public_key: PublicKey,
+        nonce: Nonce,
+    ) -> Self {
+        let signer_public_keys = signer_public_keys
+            .into_iter()
+            .map(GWPublicKey::from)
+            .collect_vec();
+
+        Self {
+            manifest: manifest.manifest_string(),
+            blobs_hex: Some(
+                manifest
+                    .blobs()
+                    .blobs()
+                    .into_iter()
+                    .map(|b| b.to_hex())
+                    .collect_vec(),
+            ),
+            start_epoch_inclusive: start_epoch_inclusive.into(),
+            end_epoch_exclusive: Epoch::window_end_from_start(
+                start_epoch_inclusive,
+            )
+            .into(),
+            notary_public_key: Some(GWPublicKey::from(notary_public_key)),
+            notary_is_signatory: signer_public_keys.is_empty(),
+            tip_percentage: 0,
+            nonce: nonce.into(),
+            signer_public_keys: signer_public_keys,
+            flags: TransactionPreviewRequestFlags::default(),
+            opt_ins: TransactionPreviewRequestOptIns::default(),
+        }
+    }
 }
 
 #[cfg(test)]

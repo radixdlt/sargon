@@ -42,14 +42,12 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        message: MessageV2,
         nonce: Nonce,
     ) -> Result<PreAuthToReview> {
         self.wrapped
             .analyse_pre_auth_preview(
                 instructions,
                 blobs.into_internal(),
-                message.into_internal(),
                 nonce.into_internal(),
             )
             .await

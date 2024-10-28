@@ -7,9 +7,9 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
     /// Extracts factor instances required to sign transactions.
     /// Returns a set of `HierarchicalDeterministicFactorInstance`.
     /// Returns an error if the `SignaturesCollectorPreprocessor` fails to initialize.
-    pub fn extract(
+    pub fn extract<S: Signable>(
         profile: &Profile,
-        transactions: Vec<TransactionIntent>,
+        transactions: Vec<S>,
         for_any_securified_entity_select_role: RoleKind,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         let preprocessor =

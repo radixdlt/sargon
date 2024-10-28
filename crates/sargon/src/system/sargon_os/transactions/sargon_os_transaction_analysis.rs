@@ -60,8 +60,6 @@ impl SargonOS {
             .get_transaction_preview(
                 gateway_client,
                 transaction_manifest.clone(),
-                network_id,
-                message,
                 nonce,
                 notary_public_key,
             )
@@ -91,7 +89,6 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        message: MessageV2,
         nonce: Nonce,
     ) -> Result<PreAuthToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
@@ -117,8 +114,14 @@ impl SargonOS {
         }
 
         match subintent_manifest.as_enclosed() {
-            Some(_) => {
+            Some(manifest) => {
                 // TODO: perform the actual analysis
+                // let gateway_client = GatewayClient::new(
+                //     self.clients.http_client.driver.clone(),
+                //     network_id,
+                // );
+                // let response = self.get_subintent_preview(manifest, gateway_client, nonce).await?;
+
                 Ok(PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
                     manifest: subintent_manifest,
                     summary: ExecutionSummary::sample_stokenet(),
@@ -133,52 +136,45 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    fn extract_signer_public_keys(
+        &self,
+        manifest_summary: ManifestSummary,
+    ) -> Result<IndexSet<PublicKey>> {
+        // Extracting the entities requiring auth to check if the notary is signatory
+        let profile = self.profile_state_holder.profile()?;
+        let signable_summary =
+            SignableManifestSummary::new(manifest_summary.clone());
+
+        // Extracting the signers public keys
+        Ok(ExtractorOfInstancesRequiredToSignTransactions::extract(
+            &profile,
+            vec![signable_summary],
+            RoleKind::Primary,
+        )?
+        .iter()
+        .map(|i| i.public_key.public_key)
+        .collect::<IndexSet<PublicKey>>())
+    }
+
     async fn get_transaction_preview(
         &self,
         gateway_client: GatewayClient,
         manifest: TransactionManifest,
-        network_id: NetworkID,
-        message: Message,
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionPreviewResponse> {
+        let signer_public_keys =
+            self.extract_signer_public_keys(manifest.summary()?)?;
+
         // Getting the current ledger epoch
         let epoch = gateway_client.current_epoch().await?;
 
-        // Extracting the entities requiring auth to check if the notary is signatory
-        let profile = self.profile_state_holder.profile()?;
-        let summary = manifest.summary()?;
-        let entities_requiring_auth =
-            ExtractorOfEntitiesRequiringAuth::extract(&profile, summary)?;
-
-        // Creating the transaction header and intent
-        let header = TransactionHeader::new(
-            network_id,
+        let request = TransactionPreviewRequest::new_transaction_analysis_v1(
+            manifest,
             epoch,
-            Epoch::window_end_from_start(epoch),
-            nonce,
-            notary_public_key,
-            entities_requiring_auth.is_empty(),
-            0,
-        );
-        let intent = TransactionIntent::new(header, manifest, message)?;
-
-        // Extracting the signers public keys
-        let signer_public_keys =
-            ExtractorOfInstancesRequiredToSignTransactions::extract(
-                &profile,
-                vec![intent.clone()],
-                RoleKind::Primary,
-            )?
-            .iter()
-            .map(|i| i.public_key.public_key)
-            .collect::<IndexSet<PublicKey>>();
-
-        // Making the transaction preview Gateway request
-        let request = TransactionPreviewRequest::new(
-            intent,
             signer_public_keys,
-            TransactionPreviewRequestFlags::default(),
+            notary_public_key,
+            nonce,
         );
         let response = gateway_client.transaction_preview(request).await?;
 
@@ -187,6 +183,21 @@ impl SargonOS {
             return Err(Self::map_failed_transaction_preview(response));
         };
         Ok(response)
+    }
+
+    async fn get_subintent_preview(
+        &self,
+        gateway_client: GatewayClient,
+        manifest: TransactionManifestV2,
+        nonce: Nonce,
+    ) -> Result<TransactionPreviewResponse> {
+        let signer_public_keys =
+            self.extract_signer_public_keys(manifest.summary()?)?;
+
+        // Getting the current ledger epoch
+        let epoch = gateway_client.current_epoch().await?;
+
+        unimplemented!("To be defined when GW is available, likely that there will be a new endpoint with new payload definition")
     }
 
     fn map_failed_transaction_preview(
@@ -651,27 +662,72 @@ mod transaction_preview_analysis_tests {
     }
 
     #[actix_rt::test]
-    async fn analyse_pre_auth_preview() {
-        let os =
-            prepare_os(MockNetworkingDriver::new_always_failing())
-                .await;
+    async fn analyse_open_pre_auth_preview() {
+        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
 
-        let scrypto_subintent_manifest = ScryptoSubintentManifestV2Builder::new_subintent_v2()
-        .assert_worktop_is_empty()
-        .drop_all_proofs()
-        .yield_to_parent(())
-        .build();
+        let scrypto_subintent_manifest =
+            ScryptoSubintentManifestV2Builder::new_subintent_v2()
+                .assert_worktop_is_empty()
+                .drop_all_proofs()
+                .yield_to_parent(())
+                .yield_to_parent(())
+                .build();
 
-        let summary = RET_statically_analyze_subintent_manifest(&scrypto_subintent_manifest).unwrap();
+        let subintent_manifest: SubintentManifest =
+            (scrypto_subintent_manifest, NetworkID::Mainnet)
+                .try_into()
+                .unwrap();
 
-        let subintent_manifest: SubintentManifest = (scrypto_subintent_manifest, NetworkID::Stokenet).try_into().unwrap();
+        let result = os
+            .analyse_pre_auth_preview(
+                subintent_manifest.manifest_string(),
+                Blobs::default(),
+                Nonce::sample(),
+            )
+            .await
+            .unwrap();
 
-        let result = os.analyse_pre_auth_preview(subintent_manifest.manifest_string(), Blobs::default(), MessageV2::sample(), Nonce::sample()).await.unwrap();
+        assert_eq!(
+            result,
+            PreAuthToReview::Open(PreAuthOpenManifest {
+                manifest: subintent_manifest.clone(),
+                summary: subintent_manifest.summary().unwrap(),
+            })
+        )
+    }
 
-        assert_eq!(result, PreAuthToReview::Open(PreAuthOpenManifest {
-            manifest: subintent_manifest.clone(),
-            summary: subintent_manifest.summary().unwrap(),
-        }))
+    #[actix_rt::test]
+    async fn analyse_open_enclosed_auth_preview() {
+        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
+
+        let scrypto_subintent_manifest =
+            ScryptoSubintentManifestV2Builder::new_subintent_v2()
+                .assert_worktop_is_empty()
+                .drop_all_proofs()
+                .yield_to_parent(())
+                .build();
+
+        let subintent_manifest: SubintentManifest =
+            (scrypto_subintent_manifest, NetworkID::Mainnet)
+                .try_into()
+                .unwrap();
+
+        let result = os
+            .analyse_pre_auth_preview(
+                subintent_manifest.manifest_string(),
+                Blobs::default(),
+                Nonce::sample(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            result,
+            PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
+                manifest: subintent_manifest.clone(),
+                summary: ExecutionSummary::sample_stokenet(),
+            })
+        )
     }
 
     async fn prepare_os(

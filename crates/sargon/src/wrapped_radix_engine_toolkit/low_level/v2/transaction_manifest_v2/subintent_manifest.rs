@@ -141,15 +141,15 @@ impl SubintentManifest {
     pub fn summary(&self) -> Result<ManifestSummary> {
         let summary =
             RET_statically_analyze_subintent_manifest(&self.scrypto_manifest())
-            .map_err(|e| {
-                error!(
-                    "Failed to get execution summary from RET, error: {:?}",
-                    e
-                );
-                CommonError::FailedToGenerateManifestSummary {
-                    underlying: format!("{:?}", e),
-                }
-            })?;
+                .map_err(|e| {
+                    error!(
+                        "Failed to get execution summary from RET, error: {:?}",
+                        e
+                    );
+                    CommonError::FailedToGenerateManifestSummary {
+                        underlying: format!("{:?}", e),
+                    }
+                })?;
 
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
@@ -186,10 +186,44 @@ impl SubintentManifest {
     }
 }
 
+impl SubintentManifest {
+    pub(crate) fn sample_mainnet_instructions_string() -> String {
+        include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "resource_transfer_subintent.rtm"
+        ))
+        .to_owned()
+    }
+
+    pub fn sample_mainnet_instructions() -> InstructionsV2 {
+        InstructionsV2::new(
+            Self::sample_mainnet_instructions_string(),
+            NetworkID::Mainnet,
+        )
+        .expect("Valid sample value")
+    }
+
+    pub(crate) fn sample_other_simulator_instructions_string() -> String {
+        include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "multi_account_resource_transfer_subintent.rtm"
+        ))
+        .to_owned()
+    }
+
+    pub fn sample_simulator_other_instructions() -> InstructionsV2 {
+        InstructionsV2::new(
+            Self::sample_other_simulator_instructions_string(),
+            NetworkID::Simulator,
+        )
+        .expect("Valid sample value")
+    }
+}
+
 impl HasSampleValues for SubintentManifest {
     fn sample() -> Self {
         Self {
-            instructions: InstructionsV2::sample(),
+            instructions: Self::sample_mainnet_instructions(),
             blobs: Blobs::default(),
             children: ChildIntents::empty(),
         }
@@ -197,7 +231,7 @@ impl HasSampleValues for SubintentManifest {
 
     fn sample_other() -> Self {
         Self {
-            instructions: InstructionsV2::sample_other(),
+            instructions: Self::sample_simulator_other_instructions(),
             blobs: Blobs::default(),
             children: ChildIntents::empty(),
         }
@@ -235,9 +269,9 @@ mod tests {
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().instructions.to_string(),
-            InstructionsV2::sample_mainnet_instructions_string(),
+            SUT::sample_mainnet_instructions_string(),
         );
-        assert_eq!(sut.instructions().len(), 4);
+        assert_eq!(sut.instructions().len(), 5);
     }
 
     #[test]
@@ -246,9 +280,9 @@ mod tests {
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().instructions.to_string(),
-            InstructionsV2::sample_other_simulator_instructions_string(),
+            SUT::sample_other_simulator_instructions_string(),
         );
-        assert_eq!(sut.instructions().len(), 8);
+        assert_eq!(sut.instructions().len(), 9);
     }
 
     #[test]
