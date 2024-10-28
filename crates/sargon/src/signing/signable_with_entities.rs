@@ -1,31 +1,31 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct TXToSign {
-    pub(crate) intent: TransactionIntent,
-    intent_hash: TransactionIntentHash,
+pub(crate) struct SignableWithEntities<S: Signable> {
+    pub(crate) signable: S,
+    id: S::ID,
     entities_requiring_auth: IndexSet<AccountOrPersona>,
 }
 
-impl Identifiable for TXToSign {
-    type ID = TransactionIntentHash;
+impl<S: Signable> Identifiable for SignableWithEntities<S> {
+    type ID = S::ID;
 
     fn id(&self) -> Self::ID {
-        self.intent_hash.clone()
+        self.id.clone()
     }
 }
 
-impl TXToSign {
+impl<S: Signable> SignableWithEntities<S> {
     pub(crate) fn with(
-        intent: TransactionIntent,
+        signable: S,
         entities_requiring_auth: impl IntoIterator<
             Item = impl Into<AccountOrPersona>,
         >,
     ) -> Self {
-        let intent_hash = intent.transaction_intent_hash().clone();
+        let id = signable.get_id();
         Self {
-            intent,
-            intent_hash,
+            signable,
+            id,
             entities_requiring_auth: entities_requiring_auth
                 .into_iter()
                 .map(|i| i.into())
@@ -37,22 +37,18 @@ impl TXToSign {
         self.entities_requiring_auth.clone().into_iter().collect()
     }
 
-    pub(crate) fn extracting_from_intent_and_profile(
-        intent: &TransactionIntent,
+    pub(crate) fn extracting_from_profile(
+        signable: &S,
         profile: &Profile,
     ) -> Result<Self> {
-        let entities_requiring_auth =
-            ExtractorOfEntitiesRequiringAuth::extract(
-                profile,
-                intent.manifest_summary()?,
-            )?;
+        let entities = signable.entities_requiring_signing(profile)?;
 
-        Ok(Self::with(intent.clone(), entities_requiring_auth))
+        Ok(Self::with(signable.clone(), entities))
     }
 }
 
 // -- Samples
-impl TXToSign {
+impl<S: Signable> SignableWithEntities<S> {
     #[allow(unused)]
     pub(crate) fn sample(
         entities_requiring_auth: impl IntoIterator<
@@ -76,7 +72,7 @@ impl TXToSign {
             }
         });
 
-        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
+        let intent = S::sample_entity_addresses_requiring_auth(
             account_addresses,
             identity_addresses,
         );

@@ -3,17 +3,17 @@ use crate::prelude::*;
 /// An immutable "snapshot" of `PetitionForFactorsState`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(super) struct PetitionForFactorsStateSnapshot {
+pub(super) struct PetitionForFactorsStateSnapshot<ID: SignableID> {
     /// Factors that have signed.
-    signed: IndexSet<HDSignature>,
+    signed: IndexSet<HDSignature<ID>>,
 
     /// Factors that has been neglected.
     neglected: IndexSet<NeglectedFactorInstance>,
 }
 
-impl PetitionForFactorsStateSnapshot {
+impl<ID: SignableID> PetitionForFactorsStateSnapshot<ID> {
     pub(super) fn new(
-        signed: IndexSet<HDSignature>,
+        signed: IndexSet<HDSignature<ID>>,
         neglected: IndexSet<NeglectedFactorInstance>,
     ) -> Self {
         Self { signed, neglected }
@@ -51,12 +51,12 @@ impl PetitionForFactorsStateSnapshot {
     }
 }
 
-impl HasSampleValues for PetitionForFactorsStateSnapshot {
+impl<ID: SignableID> HasSampleValues for PetitionForFactorsStateSnapshot<ID> {
     fn sample() -> Self {
         Self::new(
             IndexSet::from_iter([
-                HDSignature::sample(),
-                HDSignature::sample_other(),
+                HDSignature::<ID>::sample(),
+                HDSignature::<ID>::sample_other(),
             ]),
             IndexSet::from_iter([
                 NeglectedFactorInstance::sample(),
@@ -66,7 +66,7 @@ impl HasSampleValues for PetitionForFactorsStateSnapshot {
     }
     fn sample_other() -> Self {
         Self::new(
-            IndexSet::just(HDSignature::sample_other()),
+            IndexSet::just(HDSignature::<ID>::sample_other()),
             IndexSet::just(NeglectedFactorInstance::sample_other()),
         )
     }
@@ -76,7 +76,7 @@ impl HasSampleValues for PetitionForFactorsStateSnapshot {
 mod tests {
     use super::*;
 
-    type Sut = PetitionForFactorsStateSnapshot;
+    type Sut = PetitionForFactorsStateSnapshot<TransactionIntentHash>;
 
     #[test]
     fn equality() {

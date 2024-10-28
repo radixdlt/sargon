@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 #[derive(derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct Petitions {
+pub(crate) struct Petitions<S: Signable> {
     /// Lookup from factor to TXID.
     ///
     ///
@@ -16,33 +16,30 @@ pub(crate) struct Petitions {
     ///
     /// Where A, B, C and D, all use the factor source, e.g. some arculus
     /// card which the user has setup as a factor (source) for all these accounts.
-    pub(crate) factor_source_to_intent_hashes:
-        HashMap<FactorSourceIDFromHash, IndexSet<TransactionIntentHash>>,
+    pub(crate) factor_source_to_signable_id:
+        HashMap<FactorSourceIDFromHash, IndexSet<S::ID>>,
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<TransactionIntentHash, PetitionForTransaction>>,
+        RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
 }
 
-impl Petitions {
+impl<S: Signable> Petitions<S> {
     pub(crate) fn new(
-        factor_source_to_intent_hashes: HashMap<
+        factor_source_to_signable_ids: HashMap<
             FactorSourceIDFromHash,
-            IndexSet<TransactionIntentHash>,
+            IndexSet<S::ID>,
         >,
-        txid_to_petition: IndexMap<
-            TransactionIntentHash,
-            PetitionForTransaction,
-        >,
+        txid_to_petition: IndexMap<S::ID, PetitionForTransaction<S>>,
     ) -> Self {
         Self {
-            factor_source_to_intent_hashes,
+            factor_source_to_signable_id: factor_source_to_signable_ids,
             txid_to_petition: RefCell::new(txid_to_petition),
         }
     }
 
-    pub(crate) fn outcome(self) -> SignaturesOutcome {
+    pub(crate) fn outcome(self) -> SignaturesOutcome<S::ID> {
         let txid_to_petition = self.txid_to_petition.into_inner();
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
@@ -71,14 +68,14 @@ impl Petitions {
     pub(crate) fn each_petition<T, U>(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-        each: impl Fn(&PetitionForTransaction) -> T,
+        each: impl Fn(&PetitionForTransaction<S>) -> T,
         combine: impl Fn(Vec<T>) -> U,
     ) -> U {
         let for_each = factor_source_ids
             .clone()
             .iter()
             .flat_map(|f| {
-                self.factor_source_to_intent_hashes
+                self.factor_source_to_signable_id
                     .get(f)
                     .expect("Should be able to lookup intent hash for each factor source, did you call this method with irrelevant factor sources? Or did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `factor_source_to_intent_hash`.map")
                     .iter()
@@ -94,7 +91,7 @@ impl Petitions {
     pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected> {
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.each_petition(
             factor_source_ids.clone(),
             |p| {
@@ -135,7 +132,7 @@ impl Petitions {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput {
+    ) -> MonoFactorSignRequestInput<S> {
         self.each_petition(
             IndexSet::just(*factor_source_id),
             |p| {
@@ -156,18 +153,15 @@ impl Petitions {
 
     pub(crate) fn status(&self) -> PetitionsStatus {
         self.each_petition(
-            self.factor_source_to_intent_hashes
-                .keys()
-                .cloned()
-                .collect(),
+            self.factor_source_to_signable_id.keys().cloned().collect(),
             |p| p.status_of_each_petition_for_entity(),
             |i| PetitionsStatus::reducing(i.into_iter().flatten()),
         )
     }
 
-    fn add_signature(&self, signature: &HDSignature) {
+    fn add_signature(&self, signature: &HDSignature<S::ID>) {
         let binding = self.txid_to_petition.borrow();
-        let petition = binding.get(signature.intent_hash()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
+        let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
     }
 
@@ -181,7 +175,7 @@ impl Petitions {
 
     pub(crate) fn process_batch_response(
         &self,
-        response: SignWithFactorsOutcome,
+        response: SignWithFactorsOutcome<S::ID>,
     ) {
         match response {
             SignWithFactorsOutcome::Signed {
@@ -221,26 +215,26 @@ impl Petitions {
     }
 }
 
-impl HasSampleValues for Petitions {
+impl<S: Signable> HasSampleValues for Petitions<S> {
     fn sample() -> Self {
-        let p0 = PetitionForTransaction::sample();
+        let p0 = PetitionForTransaction::<S>::sample();
         Self::new(
             HashMap::just((
                 FactorSourceIDFromHash::sample_at(0),
-                IndexSet::just(p0.intent.transaction_intent_hash()),
+                IndexSet::just(p0.signable.get_id()),
             )),
-            IndexMap::just((p0.intent.transaction_intent_hash(), p0)),
+            IndexMap::just((p0.signable.get_id(), p0)),
         )
     }
 
     fn sample_other() -> Self {
-        let p1 = PetitionForTransaction::sample();
+        let p1 = PetitionForTransaction::<S>::sample();
         Self::new(
             HashMap::just((
                 FactorSourceIDFromHash::sample_at(1),
-                IndexSet::just(p1.intent.transaction_intent_hash()),
+                IndexSet::just(p1.signable.get_id()),
             )),
-            IndexMap::just((p1.intent.transaction_intent_hash(), p1)),
+            IndexMap::just((p1.signable.get_id(), p1)),
         )
     }
 }
@@ -249,7 +243,7 @@ impl HasSampleValues for Petitions {
 mod tests {
     use super::*;
 
-    type Sut = Petitions;
+    type Sut = Petitions<TransactionIntent>;
 
     #[test]
     fn equality_of_samples() {
