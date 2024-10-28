@@ -1,43 +1,20 @@
 use crate::prelude::*;
-use radix_engine_interface::prelude::MethodAccessibility::Public;
-use radix_engine_toolkit::models::canonical_address_types::NetworkId;
-use reqwest::Identity;
 
-impl TransactionIntent {
-    /// Returns a sample intent that its transaction summary will involve all the
-    /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
-    /// This can be accomplished by building a manifest that constructs owner keys from these
-    /// entities. All entities set the same `PublicKeyHash` for the sake of simplicity.
-    pub fn sample_entities_requiring_auth<'a, 'p>(
-        accounts_requiring_auth: impl IntoIterator<Item = &'a Account>,
-        personas_requiring_auth: impl IntoIterator<Item = &'p Persona>,
-    ) -> Self {
-        Self::sample_entity_addresses_requiring_auth(
-            accounts_requiring_auth.into_iter().map(|a| a.address),
-            personas_requiring_auth.into_iter().map(|p| p.address),
-        )
+impl Signable for TransactionIntent {
+    type ID = TransactionIntentHash;
+
+    type Payload = CompiledTransactionIntent;
+
+    fn entities_requiring_signing(
+        &self,
+        profile: &Profile,
+    ) -> Result<IndexSet<AccountOrPersona>> {
+        let summary = self.manifest_summary()?;
+
+        ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
     }
 
-    /// Returns a sample intent that its transaction summary will involve all the
-    /// `account_addresses_requiring_auth` and `identity_addresses_requiring_auth` in
-    /// entities requiring auth.
-    /// This can be accomplished by building a manifest that constructs owner keys from these
-    /// entity addresses. All entities set the same `PublicKeyHash` for the sake of simplicity.
-    pub fn sample_entity_addresses_requiring_auth(
-        account_addresses_requiring_auth: impl IntoIterator<Item = AccountAddress>,
-        identity_addresses_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
-    ) -> Self {
-        Self::sample_entity_addresses_with_pub_key_hashes_requiring_auth(
-            account_addresses_requiring_auth
-                .into_iter()
-                .map(|a| (a, PublicKeyHash::sample())),
-            identity_addresses_requiring_auth
-                .into_iter()
-                .map(|a| (a, PublicKeyHash::sample())),
-        )
-    }
-
-    pub fn sample_entity_addresses_with_pub_key_hashes_requiring_auth(
+    fn sample_entity_addresses_with_pub_key_hashes_requiring_auth(
         account_addresses_requiring_auth: impl IntoIterator<
             Item = (AccountAddress, PublicKeyHash),
         >,
@@ -86,6 +63,8 @@ impl TransactionIntent {
     }
 }
 
+impl SignableID for TransactionIntentHash {}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -100,13 +79,12 @@ mod test {
             identities.clone(),
         );
 
-        let summary = intent.manifest_summary();
+        let summary = intent.manifest_summary().unwrap();
 
         assert_eq!(
             accounts.iter().sorted().collect_vec(),
             summary
                 .clone()
-                .unwrap()
                 .addresses_of_accounts_requiring_auth
                 .iter()
                 .sorted()
@@ -116,7 +94,6 @@ mod test {
         assert_eq!(
             identities.iter().sorted().collect_vec(),
             summary
-                .unwrap()
                 .addresses_of_personas_requiring_auth
                 .iter()
                 .sorted()

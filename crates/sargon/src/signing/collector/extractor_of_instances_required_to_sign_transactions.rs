@@ -13,7 +13,7 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
         for_any_securified_entity_select_role: RoleKind,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         let preprocessor =
-            SignaturesCollectorPreprocessor::analyzing_transaction_intents(
+            SignaturesCollectorPreprocessor::analyzing_signables(
                 profile,
                 transactions,
             )?;

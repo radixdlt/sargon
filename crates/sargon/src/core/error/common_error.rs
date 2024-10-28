@@ -722,6 +722,9 @@ pub enum CommonError {
 
     #[error("Index Not Hardened {bad_value}")]
     IndexNotHardened { bad_value: u32 } = 10204,
+
+    #[error("Failed to decompile bytes into Subintent")]
+    FailedToDecompileBytesIntoSubintent = 10205,
 }
 
 impl CommonError {

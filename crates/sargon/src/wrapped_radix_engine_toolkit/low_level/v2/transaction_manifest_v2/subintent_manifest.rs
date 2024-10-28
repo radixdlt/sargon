@@ -38,6 +38,17 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
+    #[allow(dead_code)]
+    pub(crate) fn empty(network_id: NetworkID) -> Self {
+        Self {
+            instructions: InstructionsV2::empty(network_id),
+            blobs: Blobs::default(),
+            children: ChildIntents::empty(),
+        }
+    }
+}
+
+impl SubintentManifest {
     pub fn scrypto_manifest(&self) -> ScryptoSubintentManifestV2 {
         ScryptoSubintentManifestV2 {
             instructions: self.instructions().clone(),

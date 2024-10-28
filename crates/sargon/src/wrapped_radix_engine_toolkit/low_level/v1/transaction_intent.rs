@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::hash::Hasher;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]
@@ -54,6 +55,12 @@ impl TransactionIntent {
 impl From<TransactionIntent> for ScryptoIntent {
     fn from(value: TransactionIntent) -> Self {
         into_scrypto(&value.header, &value.manifest, &value.message)
+    }
+}
+
+impl std::hash::Hash for TransactionIntent {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write(self.transaction_intent_hash().hash.as_ref())
     }
 }
 

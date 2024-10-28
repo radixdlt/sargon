@@ -21,11 +21,13 @@ impl IsTestInteractor for TestSigningSerialInteractor {
 }
 
 #[async_trait::async_trait]
-impl MonoFactorSignInteractor for TestSigningSerialInteractor {
+impl MonoFactorSignInteractor<TransactionIntent>
+    for TestSigningSerialInteractor
+{
     async fn sign(
         &self,
-        request: MonoFactorSignRequest,
-    ) -> SignWithFactorsOutcome {
+        request: MonoFactorSignRequest<TransactionIntent>,
+    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
         self.simulated_user.spy_on_request_before_handled(
             request.clone().factor_source_kind(),
             request.clone().invalid_transactions_if_neglected,
@@ -56,7 +58,7 @@ impl MonoFactorSignInteractor for TestSigningSerialInteractor {
                             })
                             .collect::<IndexSet<_>>()
                     })
-                    .collect::<IndexSet<HDSignature>>();
+                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
                 SignWithFactorsOutcome::signed(SignResponse::with_signatures(
                     signatures,
                 ))

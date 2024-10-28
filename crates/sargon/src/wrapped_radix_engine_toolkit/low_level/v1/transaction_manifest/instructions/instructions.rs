@@ -192,7 +192,7 @@ impl Instructions {
             method_name: "dummy".to_owned(),
             args: nested_value,
         });
-        instructions_string_from(&vec![instruction], network_id)
+        instructions_string_from(&[instruction], network_id)
             .and_then(|x: String| Self::new(x, network_id))
     }
 

@@ -8,7 +8,6 @@ mod hierarchical_deterministic_factor_instance_samples;
 mod identity_address_samples;
 mod persona_samples;
 mod profile_samples;
-mod transaction_intent_samples;
 
 pub use access_controller_address_samples::*;
 pub use account_address_samples::*;
@@ -20,4 +19,3 @@ pub use hierarchical_deterministic_factor_instance_samples::*;
 pub use identity_address_samples::*;
 pub use persona_samples::*;
 pub use profile_samples::*;
-pub use transaction_intent_samples::*;
