@@ -6,13 +6,37 @@ use sargon::{
     IsMappableToGlobalKeySpace, ToBIP32Str,
 };
 
-#[derive(
-    Clone, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum Unsecurified {
-    Unhardened(Unhardened),
+    UnhardenedComponent(Unhardened),
 
-    Hardened(UnsecurifiedHardened),
+    HardenedComponent(UnsecurifiedHardened),
+}
+
+impl From<InternalUnsecurified> for Unsecurified {
+    fn from(value: InternalUnsecurified) -> Self {
+        match value {
+            InternalUnsecurified::Unhardened(unhardened) => {
+                Self::UnhardenedComponent(unhardened.into())
+            }
+            InternalUnsecurified::Hardened(hardened) => {
+                Self::HardenedComponent(hardened.into())
+            }
+        }
+    }
+}
+
+impl From<Unsecurified> for InternalUnsecurified {
+    fn from(value: Unsecurified) -> Self {
+        match value {
+            Unsecurified::UnhardenedComponent(unhardened) => {
+                Self::Unhardened(unhardened.into())
+            }
+            Unsecurified::HardenedComponent(hardened) => {
+                Self::Hardened(hardened.into())
+            }
+        }
+    }
 }
 
 #[uniffi::export]

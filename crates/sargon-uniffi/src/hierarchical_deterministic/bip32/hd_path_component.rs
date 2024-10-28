@@ -6,12 +6,42 @@ use sargon::{
     IsMappableToGlobalKeySpace, ToBIP32Str,
 };
 
-#[derive(
-    Clone, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum HDPathComponent {
-    Unsecurified(Unsecurified),
-    Securified(SecurifiedU30),
+    UnsecurifiedComponent(Unsecurified),
+    SecurifiedComponent(SecurifiedU30),
+}
+
+impl From<InternalHDPathComponent> for HDPathComponent {
+    fn from(value: InternalHDPathComponent) -> Self {
+        match value {
+            InternalHDPathComponent::Unsecurified(unsecurified) => {
+                Self::UnsecurifiedComponent(unsecurified.into())
+            }
+            InternalHDPathComponent::Securified(securified) => {
+                Self::SecurifiedComponent(securified.into())
+            }
+        }
+    }
+}
+
+impl From<HDPathComponent> for InternalHDPathComponent {
+    fn from(value: HDPathComponent) -> Self {
+        match value {
+            HDPathComponent::UnsecurifiedComponent(unsecurified) => {
+                Self::Unsecurified(unsecurified.into())
+            }
+            HDPathComponent::SecurifiedComponent(securified) => {
+                Self::Securified(securified.into())
+            }
+        }
+    }
+}
+
+impl HDPathComponent {
+    pub fn into_internal(&self) -> InternalHDPathComponent {
+        self.clone().into()
+    }
 }
 
 #[uniffi::export]
@@ -225,23 +255,29 @@ mod tests {
     fn test_new_hd_path_component_from_global_key_space() {
         assert_eq!(
             new_hd_path_component_from_global_key_space(1),
-            HDPathComponent::Unsecurified(Unsecurified::Unhardened(
-                new_unhardened(new_u31(1).unwrap())
-            ))
+            HDPathComponent::UnsecurifiedComponent(
+                Unsecurified::UnhardenedComponent(new_unhardened(
+                    new_u31(1).unwrap()
+                ))
+            )
         );
 
         assert_eq!(
             new_hd_path_component_from_global_key_space(2 + 0x8000_0000),
-            HDPathComponent::Unsecurified(Unsecurified::Hardened(
-                new_unsecurified_hardened(new_u30(2).unwrap())
-            ))
+            HDPathComponent::UnsecurifiedComponent(
+                Unsecurified::HardenedComponent(new_unsecurified_hardened(
+                    new_u30(2).unwrap()
+                ))
+            )
         );
 
         assert_eq!(
             new_hd_path_component_from_global_key_space(
                 3 + 0x8000_0000 + 0x4000_0000
             ),
-            HDPathComponent::Securified(new_securified(new_u30(3).unwrap()))
+            HDPathComponent::SecurifiedComponent(new_securified(
+                new_u30(3).unwrap()
+            ))
         );
     }
 
@@ -253,9 +289,11 @@ mod tests {
                 KeySpace::Unsecurified { is_hardened: false }
             )
             .unwrap(),
-            HDPathComponent::Unsecurified(Unsecurified::Unhardened(
-                new_unhardened(new_u31(1).unwrap())
-            ))
+            HDPathComponent::UnsecurifiedComponent(
+                Unsecurified::UnhardenedComponent(new_unhardened(
+                    new_u31(1).unwrap()
+                ))
+            )
         );
 
         assert_eq!(
@@ -264,15 +302,19 @@ mod tests {
                 KeySpace::Unsecurified { is_hardened: true }
             )
             .unwrap(),
-            HDPathComponent::Unsecurified(Unsecurified::Hardened(
-                new_unsecurified_hardened(new_u30(2).unwrap())
-            ))
+            HDPathComponent::UnsecurifiedComponent(
+                Unsecurified::HardenedComponent(new_unsecurified_hardened(
+                    new_u30(2).unwrap()
+                ))
+            )
         );
 
         assert_eq!(
             new_hd_path_component_from_local_key_space(3, KeySpace::Securified)
                 .unwrap(),
-            HDPathComponent::Securified(new_securified(new_u30(3).unwrap()))
+            HDPathComponent::SecurifiedComponent(new_securified(
+                new_u30(3).unwrap()
+            ))
         );
     }
 }

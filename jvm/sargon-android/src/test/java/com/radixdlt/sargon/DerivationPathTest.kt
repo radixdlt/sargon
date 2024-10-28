@@ -1,111 +1,112 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.account
-import com.radixdlt.sargon.extensions.addressIndex
 import com.radixdlt.sargon.extensions.asGeneral
-import com.radixdlt.sargon.extensions.default
-import com.radixdlt.sargon.extensions.hdPath
-import com.radixdlt.sargon.extensions.identity
+import com.radixdlt.sargon.extensions.curve
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.nonHardenedIndex
-import com.radixdlt.sargon.extensions.nonHardenedValue
+import com.radixdlt.sargon.extensions.initForEntity
+import com.radixdlt.sargon.extensions.initFromLocal
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-class DerivationPathTest {
+class DerivationPathTest: SampleTestable<DerivationPath> {
+    override val samples: List<Sample<DerivationPath>>
+        get() = listOf(DerivationPath.sample)
 
     @Test
-    fun testAccountPath() {
-        val path = DerivationPath.Cap26(Cap26Path.Account(AccountPath.sample()))
+    fun testInit() {
         assertEquals(
-            path,
-            DerivationPath.Cap26.init(path.string)
+            DerivationPath.sample(),
+            DerivationPath.initForEntity(
+                kind = EntityKind.ACCOUNT,
+                networkId = NetworkId.MAINNET,
+                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+            )
+        )
+
+        assertEquals(
+            DerivationPath.sample.other(),
+            DerivationPath.initForEntity(
+                kind = EntityKind.PERSONA,
+                networkId = NetworkId.MAINNET,
+                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+            )
         )
     }
 
     @Test
-    fun testIdentityPath() {
-        val path = DerivationPath.Cap26(Cap26Path.Identity(IdentityPath.sample()))
+    fun testInitFromPath() {
         assertEquals(
-            path,
-            DerivationPath.Cap26.init(path.string)
-        )
-    }
-
-    @Test
-    fun testBip44LikePath() {
-        val path = DerivationPath.Bip44Like(Bip44LikePath.sample())
-        assertEquals(
-            path,
-            DerivationPath.Bip44Like.init(path.string)
-        )
-    }
-
-    @Test
-    fun testDefaultGetIdPath() {
-        assertNotNull(Cap26Path.GetId(GetIdPath.default()).value)
-    }
-
-    @Test
-    fun testBip44LikePathFromIndex() {
-        val sut = DerivationPath.Bip44Like.init(index = 0u)
-        assertEquals(
-            0u,
-            sut.addressIndex
-        )
-    }
-
-    @Test
-    fun testNewAccountPathFromElements() {
-        assertEquals(
-            "m/44H/1022H/1H/525H/1460H/0H",
-            DerivationPath.Cap26.account(
+            DerivationPath.init("m/44H/1022H/1H/525H/1460H/0H"),
+            AccountPath.init(
                 networkId = NetworkId.MAINNET,
                 keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
-                index = 0u
-            ).string
+                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+            ).asGeneral()
         )
-    }
 
-    @Test
-    fun testNewIdentityPathFromElements() {
         assertEquals(
-            "m/44H/1022H/1H/618H/1460H/0H",
-            DerivationPath.Cap26.identity(
+            DerivationPath.init("m/44H/1022H/1H/525H/1460H/0H"),
+            AccountPath.init("m/44H/1022H/1H/525H/1460H/0H").asGeneral()
+        )
+
+        assertThrows<CommonException> {
+            AccountPath.init("m/44H/1022H/1H/618H/1460H/0H")
+        }
+
+        assertThrows<CommonException> {
+            AccountPath.init(Bip44LikePath.sample().string)
+        }
+
+        assertEquals(
+            DerivationPath.init("m/44H/1022H/1H/618H/1460H/0H"),
+            IdentityPath.init(
                 networkId = NetworkId.MAINNET,
                 keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
-                index = 0u
-            ).string
+                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+            ).asGeneral()
+        )
+
+        assertEquals(
+            DerivationPath.init("m/44H/1022H/1H/618H/1460H/0H"),
+            IdentityPath.init("m/44H/1022H/1H/618H/1460H/0H").asGeneral()
+        )
+
+        assertThrows<CommonException> {
+            IdentityPath.init("m/44H/1022H/1H/525H/1460H/0H")
+        }
+
+        assertThrows<CommonException> {
+            IdentityPath.init(Bip44LikePath.sample().string)
+        }
+    }
+
+    @Test
+    fun testCurve() {
+        assertEquals(
+            Slip10Curve.CURVE25519,
+            AccountPath.sample().asGeneral().curve
+        )
+
+        assertEquals(
+            Slip10Curve.CURVE25519,
+            IdentityPath.sample().asGeneral().curve
+        )
+
+        assertEquals(
+            Slip10Curve.SECP256K1,
+            Bip44LikePath.sample().asGeneral().curve
         )
     }
 
     @Test
-    fun testDerivationPathString() {
-        val derivationPathCap26: DerivationPath =
-            Cap26Path.Account(AccountPath.sample()).asGeneral()
+    fun testString() {
         assertEquals(
-            derivationPathCap26.string,
-            DerivationPath.Cap26(Cap26Path.Account(AccountPath.sample())).string
-        )
-
-        val derivationPathBip44: DerivationPath = Bip44LikePath.sample().asGeneral()
-        assertEquals(
-            derivationPathBip44.string,
-            DerivationPath.Bip44Like(Bip44LikePath.sample()).string
+            Bip44LikePath.sample().string,
+            Bip44LikePath.sample().asGeneral().string
         )
     }
-
-    @Test
-    fun testDerivationPathHdPath() {
-        val derivationPath = DerivationPath.sample()
-        val index = derivationPath.nonHardenedIndex
-        assertEquals(
-            derivationPath.hdPath.components.last().nonHardenedValue,
-            index
-        )
-    }
-
 }
