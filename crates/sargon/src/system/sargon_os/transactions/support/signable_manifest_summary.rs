@@ -95,11 +95,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_signable_manifest_summary() {
-        let summary = ManifestSummary::sample();
+    fn test_api() {
+        let profile = Profile::sample();
+        let account = Account::sample_mainnet();
+        let persona = Persona::sample_mainnet();
+
+        let manifest = TransactionManifest::set_owner_keys_hashes(
+            &persona.address.into(),
+            vec![PublicKeyHash::sample()],
+        )
+        .modify_add_lock_fee(&account.address, Some(Decimal192::one()));
+        let summary = manifest.summary().unwrap();
         let signable = SignableManifestSummary::new(summary.clone());
 
         assert_eq!(signable.summary, summary);
-        assert_eq!(signable.entities_requiring_signing(&Profile::sample()), Ok(IndexSet::new()));
+        assert_eq!(
+            signable.entities_requiring_signing(&profile),
+            Ok(IndexSet::from_iter(vec![
+                AccountOrPersona::from(account),
+                AccountOrPersona::from(persona),
+            ]))
+        );
     }
 }

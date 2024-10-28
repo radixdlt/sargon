@@ -25,7 +25,6 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        message: Message,
         are_instructions_originating_from_host: bool,
         nonce: Nonce,
         notary_public_key: PublicKey,
@@ -245,7 +244,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 "instructions".to_string(),
                 Blobs::sample(),
-                Message::sample(),
                 false,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -269,7 +267,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 TransactionManifest::sample().instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 false,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -290,7 +287,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -328,7 +324,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -398,7 +393,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -414,7 +408,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -459,7 +452,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -504,7 +496,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 TransactionManifest::sample().instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -546,7 +537,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -569,7 +559,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
-                Message::sample(),
                 false,
                 Nonce::sample(),
                 PublicKey::sample(),
@@ -632,7 +621,6 @@ mod transaction_preview_analysis_tests {
             .analyse_transaction_preview(
                 manifest.instructions_string(),
                 Blobs::default(),
-                Message::sample(),
                 true,
                 Nonce::sample(),
                 PublicKey::sample(),

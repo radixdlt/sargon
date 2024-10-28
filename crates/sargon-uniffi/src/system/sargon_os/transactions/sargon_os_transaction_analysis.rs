@@ -13,7 +13,6 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        message: Message,
         are_instructions_originating_from_host: bool,
         nonce: Nonce,
         notary_public_key: PublicKey,
@@ -22,7 +21,6 @@ impl SargonOS {
             .analyse_transaction_preview(
                 instructions,
                 blobs.into_internal(),
-                message.into_internal(),
                 are_instructions_originating_from_host,
                 nonce.into_internal(),
                 notary_public_key.into_internal(),
