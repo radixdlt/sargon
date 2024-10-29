@@ -69,8 +69,15 @@ mod tests {
     #[test]
     fn from_subintent_manifest() {
         let subintent_manifest = SubintentManifest::sample();
-        let unvalidated_subintent_manifest = UnvalidatedSubintentManifest::from(subintent_manifest.clone());
-        assert_eq!(unvalidated_subintent_manifest.subintent_manifest_string, subintent_manifest.manifest_string());
-        assert_eq!(unvalidated_subintent_manifest.blobs, subintent_manifest.blobs().clone());
+        let unvalidated_subintent_manifest =
+            UnvalidatedSubintentManifest::from(subintent_manifest.clone());
+        assert_eq!(
+            unvalidated_subintent_manifest.subintent_manifest_string,
+            subintent_manifest.manifest_string()
+        );
+        assert_eq!(
+            unvalidated_subintent_manifest.blobs,
+            subintent_manifest.blobs().clone()
+        );
     }
 }
