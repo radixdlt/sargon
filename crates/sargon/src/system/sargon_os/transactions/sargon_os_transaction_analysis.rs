@@ -7,7 +7,8 @@ impl SargonOS {
     /// 1. Extracting the transaction signers.
     /// 2. Executing the transaction preview GW request.
     /// 3. Running the execution summary with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_transaction_preview(
         &self,
         instructions: String,
@@ -45,7 +46,8 @@ impl SargonOS {
     /// 1. Extracting the transaction signers.
     /// 2. Executing the transaction preview GW request.
     /// 3. Running the execution summary with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     ///
     /// This is the internal implementation of `analyse_transaction_preview`, which is the public API.
     /// Returns `TransactionToReview`, which includes the manifest and the execution summary.

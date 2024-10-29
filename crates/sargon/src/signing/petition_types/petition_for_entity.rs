@@ -398,7 +398,7 @@ impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
                 || {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
-                        HDPathComponent::from(6)
+                        Hardened::from_local_key_space_unsecurified(6u32).unwrap(),
                     ))
                 },
             ),
@@ -602,7 +602,7 @@ mod tests {
     fn factor_should_not_be_used_in_both_lists() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            HDPathComponent::from(0),
+            Hardened::from_local_key_space_unsecurified(0).unwrap(),
         );
         assert_eq!(
             GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
@@ -618,7 +618,7 @@ mod tests {
     fn threshold_should_not_be_bigger_than_threshold_factors() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            HDPathComponent::from(0),
+            Hardened::from_local_key_space_unsecurified(0).unwrap(),
         );
         assert_eq!(
             GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
@@ -645,7 +645,7 @@ mod tests {
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                 CAP26EntityKind::Account,
-                HDPathComponent::from(0)
+                Hardened::from_local_key_space_unsecurified(0).unwrap(),
             );
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                     [FactorSourceIDFromHash::sample_at(0)].map(&fi),
@@ -666,7 +666,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::from(entity.address),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
                     FactorSourceIDFromHash::sample_at(0),
                 ),
             ),
@@ -686,7 +686,7 @@ mod tests {
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                        HDPathComponent::from(6),
+                        Hardened::from_local_key_space_unsecurified(6).unwrap(),
                         FactorSourceIDFromHash::sample_at(1),
                     ),
                 ),

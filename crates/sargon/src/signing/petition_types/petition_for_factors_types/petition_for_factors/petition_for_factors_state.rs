@@ -151,7 +151,7 @@ mod tests {
 
         let factor_instance =
             HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                HDPathComponent::from(0),
+                Hardened::from_local_key_space_unsecurified(0).unwrap(),
                 FactorSourceIDFromHash::sample_at(0),
             );
         let sign_input = HDSignatureInput::new(
@@ -176,7 +176,7 @@ mod tests {
         let intent_hash = TransactionIntentHash::sample();
         let factor_instance =
             HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                HDPathComponent::from(0),
+                Hardened::from_local_key_space_unsecurified(0).unwrap(),
                 FactorSourceIDFromHash::sample_at(0),
             );
 

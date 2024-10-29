@@ -34,7 +34,8 @@ impl FactorSourceIDFromHash {
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {
         let seed = mnemonic_with_passphrase.to_seed();
-        let private_key = seed.derive_private_key(&GetIDPath::default());
+        let private_key =
+            seed.derive_ed25519_private_key(GetIDPath.to_hd_path());
         let public_key_bytes = private_key.public_key().to_bytes();
         // TODO: Impl Zeroize for `PrivateKey`!
         let hash = hash_of(public_key_bytes);

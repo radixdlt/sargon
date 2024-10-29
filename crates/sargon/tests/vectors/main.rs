@@ -23,24 +23,6 @@ mod profile_snapshot_tests {
     }
 }
 
-struct TestDerivation {
-    curve: SLIP10Curve,
-    hd_path: HDPath,
-    derivation_path: DerivationPath,
-}
-#[cfg(not(tarpaulin_include))]
-impl Derivation for TestDerivation {
-    fn curve(&self) -> SLIP10Curve {
-        self.curve
-    }
-    fn hd_path(&self) -> &HDPath {
-        &self.hd_path
-    }
-    fn derivation_path(&self) -> DerivationPath {
-        self.derivation_path.clone()
-    }
-}
-
 #[cfg(test)]
 mod cap26_tests {
 
@@ -49,7 +31,7 @@ mod cap26_tests {
     #[allow(dead_code)]
     #[derive(Deserialize, Debug)]
     struct CAP26Vector {
-        path: CAP26Path,
+        path: HDPath,
 
         #[serde(rename = "publicKey")]
         public_key_hex: String,
@@ -61,7 +43,7 @@ mod cap26_tests {
         private_key_hex: String,
 
         #[serde(rename = "entityIndex")]
-        entity_index: HDPathValue,
+        entity_index: u32,
 
         #[serde(rename = "keyKind")]
         key_kind: CAP26KeyKind,
@@ -81,25 +63,14 @@ mod cap26_tests {
                 + PartialEq,
             S: IsPrivateKey<P> + FromStr<Err = CommonError> + std::fmt::Debug,
         {
+            let curve = S::curve();
             let seed = self.mnemonic.to_seed("");
             self.tests
                 .iter()
                 .map(|v| {
                     let private_key = v.private_key::<S, P>()?;
-
-                    // A liiittle bit hacky, but this allows us to test CAP26 paths with Secp256k1,
-                    // which we have test vectors for - but which we actually do not allow in
-                    // the wallets. So we force say "No, dont use Ed25519 curve for these CAP26 paths, actu
-                    // use Secp256k1 instead!"
-                    let derivation = TestDerivation {
-                        curve: S::curve(), // will be `Secp256k1` for `cap26_secp256k1.json` vectors!
-                        hd_path: v.path.hd_path().clone(),
-                        derivation_path: DerivationPath::CAP26 {
-                            value: v.path.clone(),
-                        },
-                    };
-
-                    let derived = seed.derive_private_key(&derivation);
+                    let derived =
+                        seed.derive_private_key_curve(curve, v.path.clone());
                     assert_eq!(derived.to_hex(), format!("{:?}", private_key));
                     Ok::<(), CommonError>(())
                 })
@@ -248,19 +219,8 @@ mod slip10_tests {
                 }
             };
             let Some(curve) = maybe_curve else { return };
-
-            let derivation = TestDerivation {
-                curve,
-                hd_path: path.clone(),
-                derivation_path: // no used by the test, unable to express non Radix BIP44 paths which this test uses...
-                DerivationPath::CAP26 {
-                    value: CAP26Path::GetID {
-                        value: GetIDPath::default(),
-                    },
-                }
-            };
-            let derived = seed.derive_private_key(&derivation);
-            assert_eq!(derived.private_key.to_hex(), self.private_key);
+            let derived = seed.derive_private_key_curve(curve, path.clone());
+            assert_eq!(derived.to_hex(), self.private_key);
             assert!(self.public_key.ends_with(&derived.public_key().to_hex()));
         }
     }

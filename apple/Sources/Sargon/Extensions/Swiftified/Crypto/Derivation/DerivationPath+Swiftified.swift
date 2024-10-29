@@ -16,29 +16,32 @@ extension DerivationPath: CustomStringConvertible {
 }
 
 extension DerivationPath: DerivationPathProtocol {
+    public var asGeneral: DerivationPath {
+        self
+    }
+    
     public var asDerivationPath: DerivationPath { self }
 }
 
 public typealias HDPath = HdPath
 
 extension DerivationPath {
-	/// Returns the index, non hardened, so `3H` returns `3`.
-	public var nonHardenedIndex: HDPathValue {
-		let component = self.path.components.last! // safe to unwrap, we disallow empty paths.
-		return component.nonHardenedValue
+	/// Returns the last path component
+    public var lastPathComponent: HdPathComponent {
+        self.path.components.last! // safe to unwrap, we disallow empty paths.
 	}
   
     public var curve: SLIP10Curve {
         switch self {
         case .bip44Like: .secp256k1
-        case .cap26: .curve25519
+        case .account, .identity: .curve25519
         }
     }
 
     public static func forEntity(
         kind: EntityKind,
         networkID: NetworkID,
-        index: HDPathValue
+        index: Hardened
     ) -> Self {
         switch kind {
         case .account:
@@ -46,20 +49,13 @@ extension DerivationPath {
                 networkID: networkID,
                 keyKind: .transactionSigning,
                 index: index
-            ).asDerivationPath
+            ).asGeneral
         case .persona:
             IdentityPath(
                 networkID: networkID,
                 keyKind: .transactionSigning,
                 index: index
-            ).asDerivationPath
+            ).asGeneral
         }
     }
-}
-
-
-extension HdPathComponent {
-	public var nonHardenedValue: HDPathValue {
-		hdPathComponentGetNonHardenedValue(component: self)
-	}
 }

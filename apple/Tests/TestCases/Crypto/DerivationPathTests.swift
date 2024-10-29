@@ -13,8 +13,8 @@ final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
         let sut = AccountPath.sample
         
         XCTAssertEqual(
-            sut.asDerivationPath,
-            DerivationPath.cap26(value: .account(value: sut))
+            sut.asGeneral,
+            DerivationPath.account(value: sut)
         )
     }
     
@@ -25,40 +25,13 @@ final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
         }
     }
     
-    func test_cap26_account_hd_path() {
-        
-        let accountPath = AccountPath.sample
-        
-        XCTAssertEqual(
-            accountPath.asDerivationPath.path,
-            accountPath.path
-        )
-    }
-    
-    func test_cap26_hd_path() {
-        let accountPath = AccountPath.sample
-        
-        XCTAssertEqual(
-            accountPath.asDerivationPath.path,
-            accountPath.asGeneral.path
-        )
-    }
-    
-    func test_bip44_account_hd_path() {
-        let bip44Path = BIP44LikePath.sample
-        
-        XCTAssertEqual(
-            bip44Path.asDerivationPath.path,
-            bip44Path.path
-        )
-    }
-    
+ 
     
     func test_bip44_account_path_as_derivation_path() {
         let bip44Path = BIP44LikePath.sample
         
         XCTAssertEqual(
-            bip44Path.asDerivationPath,
+            bip44Path.asGeneral,
             DerivationPath.bip44Like(value: bip44Path)
         )
     }
@@ -74,8 +47,8 @@ final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
     
     func test_bip44_string() throws {
         XCTAssertNoDifference(
-            try SUT(string: "m/44H/1022H/0H/0/0H"),
-            BIP44LikePath.sample.asDerivationPath
+            try SUT(string: "m/44H/1022H/0H/0/1H"),
+            BIP44LikePath.sampleOther.asGeneral
         )
     }
     
@@ -88,8 +61,24 @@ final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
         XCTAssertEqual(SUT.bip44Like(value: .sample).curve, .secp256k1)
     }
     
-    func test_for_entity() {
-        XCTAssertEqual(SUT.forEntity(kind: .account, networkID: .mainnet, index: 9).toString(), "m/44H/1022H/1H/525H/1460H/9H")
-        XCTAssertEqual(SUT.forEntity(kind: .persona, networkID: .stokenet, index: 42).toString(), "m/44H/1022H/2H/618H/1460H/42H")
+    func test_for_entity() throws {
+        try XCTAssertEqual(
+            SUT.forEntity(
+                kind: .account,
+                networkID: .mainnet,
+                index: .unsecurified(UnsecurifiedHardened(globalKeySpace: 9 + 0x8000_0000))
+            )
+            .toString(),
+            "m/44H/1022H/1H/525H/1460H/9H"
+        )
+        try XCTAssertEqual(
+            SUT.forEntity(
+                kind: .persona,
+                networkID: .stokenet,
+                index: Hardened.unsecurified(UnsecurifiedHardened(localKeySpace: 42))
+            )
+            .toString(),
+            "m/44H/1022H/2H/618H/1460H/42H"
+        )
     }
 }

@@ -35,7 +35,7 @@ extension MnemonicWithPassphrase {
 	) -> [HierarchicalDeterministicPublicKey] {
 		mnemonicWithPassphraseDerivePublicKeys(
 			mnemonicWithPassphrase: self,
-			derivationPaths: paths.map(\.asDerivationPath)
+            derivationPaths: paths.map(\.asGeneral)
 		)
 	}
 	
@@ -45,7 +45,7 @@ extension MnemonicWithPassphrase {
 	) -> SignatureWithPublicKey {
 		mnemonicWithPassphraseSign(
 			mnemonicWithPassphrase: self,
-			derivationPath: path.asDerivationPath,
+			derivationPath: path.asGeneral,
 			hashToSign: hash
 		)
 	}

@@ -604,7 +604,8 @@ mod tests {
                     DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        6
+                        Hardened::from_local_key_space(6, IsSecurified(false))
+                            .unwrap()
                     )),
                     5
                 )
@@ -1296,7 +1297,8 @@ mod tests {
                     vec![DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        0
+                        Hardened::from_local_key_space(0, IsSecurified(false))
+                            .unwrap()
                     ))]
                 )
             }
@@ -1374,7 +1376,7 @@ mod tests {
                         HierarchicalDeterministicFactorInstance::new_for_entity(
                             FactorSourceIDFromHash::sample_at(0),
                             CAP26EntityKind::Account,
-                            HDPathComponent::from(0),
+                            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap()
                         ),
                     ),
                     Account::sample_unsecurified_mainnet(
@@ -1382,7 +1384,7 @@ mod tests {
                         HierarchicalDeterministicFactorInstance::new_for_entity(
                             FactorSourceIDFromHash::sample_at(0),
                             CAP26EntityKind::Account,
-                            HDPathComponent::from(1),
+                            Hardened::from_local_key_space(1, IsSecurified(false)).unwrap()
                         ),
                     ),
                 ])]);
@@ -1400,12 +1402,20 @@ mod tests {
                         DerivationPath::from(AccountPath::new(
                             NetworkID::Mainnet,
                             CAP26KeyKind::TransactionSigning,
-                            0
+                            Hardened::from_local_key_space(
+                                0,
+                                IsSecurified(false)
+                            )
+                            .unwrap()
                         )),
                         DerivationPath::from(AccountPath::new(
                             NetworkID::Mainnet,
                             CAP26KeyKind::TransactionSigning,
-                            1
+                            Hardened::from_local_key_space(
+                                1,
+                                IsSecurified(false)
+                            )
+                            .unwrap()
                         )),
                     ]
                     .into_iter()
@@ -1523,22 +1533,18 @@ mod tests {
                     assert_eq!(
                         signature
                             .derivation_path()
-                            .as_cap26()
-                            .unwrap()
                             .as_account()
                             .unwrap()
-                            .entity_kind,
+                            .get_entity_kind(),
                         CAP26EntityKind::Account
                     );
                 } else {
                     assert_eq!(
                         signature
                             .derivation_path()
-                            .as_cap26()
-                            .unwrap()
                             .as_identity()
                             .unwrap()
-                            .entity_kind,
+                            .get_entity_kind(),
                         CAP26EntityKind::Identity
                     );
                 }
@@ -1786,7 +1792,7 @@ mod tests {
                                 GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                                     FactorSource::sample_all().into_iter().map(|f| {
                                         HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                                            HDPathComponent::from(0),
+                                            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
                                             *f.factor_source_id().as_hash().unwrap(),
                                         )
                                     }),

@@ -705,8 +705,26 @@ pub enum CommonError {
     #[error("Failed to generate manifest summary")]
     FailedToGenerateManifestSummary = 10198,
 
+    #[error("Index Securified expected Unsecurified")]
+    IndexSecurifiedExpectedUnsecurified = 10199,
+
+    #[error("Index Unsecurified expected Securified")]
+    IndexUnsecurifiedExpectedSecurified = 10200,
+
+    #[error("Index In Global Key Space Is Lower Than Offset")]
+    IndexInGlobalKeySpaceIsLowerThanOffset = 10201,
+
+    #[error("Index Overflow")]
+    IndexOverflow = 10202,
+
+    #[error("Cannot Add To Index Since It Would Change KeySpace")]
+    CannotAddMoreToIndexSinceItWouldChangeKeySpace = 10203,
+
+    #[error("Index Not Hardened {bad_value}")]
+    IndexNotHardened { bad_value: u32 } = 10204,
+
     #[error("Failed to decompile bytes into Subintent")]
-    FailedToDecompileBytesIntoSubintent = 10199,
+    FailedToDecompileBytesIntoSubintent = 10205,
 }
 
 impl CommonError {

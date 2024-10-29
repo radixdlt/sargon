@@ -24,12 +24,26 @@ final class AccountPathTests: HDPathProtocolTest<AccountPath> {
 		XCTAssertThrowsError(try SUT(string: "m/44H/1022H/0H/0/0H"))
 	}
 	
-	func test_init_network_id_key_kind_index() {
-		XCTAssertEqual(SUT.sampleOther, SUT.init(networkID: .mainnet, keyKind: .transactionSigning, index: 1))
+	func test_init_network_id_key_kind_index() throws {
+        try XCTAssertEqual(
+            SUT.sampleOther,
+            SUT(
+                networkID: .mainnet,
+                keyKind: .transactionSigning,
+                index: .unsecurified(UnsecurifiedHardened(localKeySpace: 1))
+            )
+        )
 	}
 	
-	func test_index() {
-		XCTAssertEqual(SUT.sample.asDerivationPath.nonHardenedIndex, 0)
-		XCTAssertEqual(SUT.sampleOther.asDerivationPath.nonHardenedIndex, 1)
+	func test_index() throws {
+        XCTAssertEqual(
+            SUT.sample.asGeneral.lastPathComponent,
+            HdPathComponent(globalKeySpace: 0 + 0x8000_0000)
+        )
+
+        try XCTAssertEqual(
+            SUT.sampleOther.asGeneral.lastPathComponent,
+            HdPathComponent(localKeySpace: 1, keySpace: .unsecurified(isHardened: true))
+        )
 	}
 }

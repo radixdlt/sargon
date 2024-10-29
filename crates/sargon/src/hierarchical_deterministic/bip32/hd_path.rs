@@ -1,5 +1,8 @@
+use itertools::Itertools;
+
 use crate::prelude::*;
 
+#[allow(unused)]
 #[derive(
     Clone,
     PartialEq,
@@ -7,51 +10,74 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    SerializeDisplay,
-    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
+    DeserializeFromStr,
+    SerializeDisplay,
 )]
-#[display("{}", self.bip32_string())]
-#[debug("{}", self.bip32_string())]
+#[display("{}", self.to_bip32_string())]
+#[debug("{}", self.to_bip32_string_debug())]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
 }
+impl HDPath {
+    pub const fn new(components: Vec<HDPathComponent>) -> Self {
+        Self { components }
+    }
+    pub fn components(&self) -> &[HDPathComponent] {
+        &self.components
+    }
+}
 
-fn valid_bip32_char(c: char) -> bool {
-    "mM/H'0123456789".contains(c)
+impl FromBIP32Str for HDPath {
+    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+        let s = s.as_ref();
+        let mut s = s;
+        if s.starts_with("m/") {
+            s = &s[2..]
+        }
+        if s.starts_with("M/") {
+            s = &s[2..]
+        }
+        if s.starts_with("/") {
+            s = &s[1..]
+        }
+        let components = s
+            .split(Self::SEPARATOR)
+            .filter(|s| !s.is_empty())
+            .map(HDPathComponent::from_bip32_string)
+            .collect::<Result<Vec<_>>>()?;
+        Ok(Self::new(components))
+    }
+}
+
+impl HDPath {
+    pub const SEPARATOR: &str = "/";
+    fn to_string_map<F>(&self, map: F) -> String
+    where
+        F: Fn(&HDPathComponent) -> String,
+    {
+        let head = "m".to_owned();
+        let mut path = vec![head];
+        let tail = self.components().iter().map(map);
+        path.extend(tail.collect_vec());
+        path.into_iter().join(Self::SEPARATOR)
+    }
+}
+impl ToBIP32Str for HDPath {
+    fn to_bip32_string(&self) -> String {
+        self.to_string_map(|c| format!("{}", c))
+    }
+    fn to_bip32_string_debug(&self) -> String {
+        self.to_string_map(|c| format!("{:?}", c))
+    }
 }
 
 impl FromStr for HDPath {
-    type Err = crate::CommonError;
+    type Err = CommonError;
 
-    fn from_str(path: &str) -> Result<Self, Self::Err> {
-        let err = CommonError::InvalidBIP32Path {
-            bad_value: path.to_owned(),
-        };
-        if !path.chars().all(valid_bip32_char) {
-            return Err(err);
-        }
-        let mut path = path;
-        if path.starts_with("m/") {
-            path = &path[2..];
-        }
-        if path.starts_with("M/") {
-            path = &path[2..];
-        }
-
-        let expected_component_count = path.matches('/').count() + 1;
-        let replaced = path.replace('/', "\n");
-
-        let components = replaced
-            .lines()
-            .filter_map(HDPathComponent::try_from_str)
-            .collect_vec();
-        if components.len() != expected_component_count {
-            Err(err)
-        } else {
-            Ok(Self::from_components(components))
-        }
+    fn from_str(s: &str) -> Result<Self> {
+        Self::from_bip32_string(s)
     }
 }
 
@@ -65,116 +91,28 @@ impl HasSampleValues for HDPath {
     }
 }
 
-impl HDPath {
-    pub(crate) fn from_components<I>(components: I) -> Self
-    where
-        I: IntoIterator<Item = HDPathComponent>,
-    {
-        Self {
-            components: components.into_iter().collect_vec(),
-        }
-    }
-
-    pub(crate) fn depth(&self) -> usize {
-        self.components.len()
-    }
-
-    pub(crate) fn parse_try_map<T, F>(
-        path: &[HDPathComponent],
-        index: usize,
-        try_map: F,
-    ) -> Result<T>
-    where
-        F: Fn(HDPathValue) -> Result<T>,
-    {
-        let got = &path[index];
-        try_map(got.index())
-    }
-
-    pub(crate) fn parse<F>(
-        path: &[HDPathComponent],
-        index: usize,
-        expected: HDPathComponent,
-        err: F,
-    ) -> Result<&HDPathComponent>
-    where
-        F: Fn(HDPathValue) -> CommonError,
-    {
-        let got = &path[index];
-        if got != &expected {
-            return Err(err(got.index()));
-        }
-        Ok(got)
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative
-    pub(crate) fn try_parse_base_hdpath<F>(
-        path: &HDPath,
-        depth_error: F,
-    ) -> Result<(HDPath, Vec<HDPathComponent>)>
-    where
-        F: FnOnce(usize) -> CommonError,
-    {
-        let expected_depth = 2;
-        if path.depth() < expected_depth {
-            return Err(depth_error(path.depth()));
-        }
-        let components = &path.components;
-
-        _ = Self::parse(
-            components,
-            0,
-            HDPathComponent::bip44_purpose(),
-            |v| CommonError::BIP44PurposeNotFound { bad_value: v },
-        )?;
-
-        _ = Self::parse(
-            components,
-            1,
-            HDPathComponent::bip44_cointype(),
-            |v| CommonError::CoinTypeNotFound { bad_value: v },
-        )?;
-        Ok((path.clone(), components.clone()))
-    }
-
-    pub(crate) fn try_parse_base<F>(
-        s: &str,
-        depth_error: F,
-    ) -> Result<(HDPath, Vec<HDPathComponent>)>
-    where
-        F: FnOnce(usize) -> CommonError,
-    {
-        HDPath::from_str(s)
-            .map_err(|_| CommonError::InvalidBIP32Path {
-                bad_value: s.to_string(),
-            })
-            .and_then(|p| Self::try_parse_base_hdpath(&p, depth_error))
-    }
-}
-
-impl HDPath {
-    fn bip32_string(&self) -> String {
-        let rest = self.components.iter().map(|c| c.to_string()).join("/");
-        format!("m/{}", rest)
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use super::*;
 
-    use crate::prelude::*;
+    type Sut = HDPath;
+
+    #[test]
+    fn account_path() {
+        let hdpath = Sut::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
+        assert_eq!(hdpath, AccountPath::sample().to_hd_path());
+    }
 
     impl HDPath {
         fn harden<I>(iter: I) -> Self
         where
-            I: IntoIterator<Item = HDPathValue>,
+            I: IntoIterator<Item = u32>,
         {
-            HDPath {
-                components: iter
-                    .into_iter()
-                    .map(HDPathComponent::harden)
+            HDPath::new(
+                iter.into_iter()
+                    .map(|i| HDPathComponent::unsecurified_hardened(i).unwrap())
                     .collect_vec(),
-            }
+            )
         }
     }
 
@@ -190,7 +128,7 @@ mod tests {
     }
 
     #[test]
-    fn display() {
+    fn display_two() {
         let path = HDPath::harden([44, 1022]);
         assert_eq!(format!("{}", path), "m/44H/1022H");
     }
@@ -198,7 +136,7 @@ mod tests {
     #[test]
     fn debug() {
         let path = HDPath::harden([44, 1022]);
-        assert_eq!(format!("{:?}", path), "m/44H/1022H");
+        assert_eq!(format!("{:?}", path), "m/44'/1022'");
     }
 
     #[test]
@@ -223,7 +161,7 @@ mod tests {
         assert_eq!(
             HDPath::from_str(s),
             Err(CommonError::InvalidBIP32Path {
-                bad_value: s.to_owned()
+                bad_value: "x".to_owned()
             })
         );
     }
