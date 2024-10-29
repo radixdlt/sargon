@@ -5,9 +5,12 @@ import com.radixdlt.sargon.Cap26KeyKind
 import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.EntityKind
 import com.radixdlt.sargon.Hardened
+import com.radixdlt.sargon.HdPath
+import com.radixdlt.sargon.HdPathComponent
 import com.radixdlt.sargon.IdentityPath
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Slip10Curve
+import com.radixdlt.sargon.derivationPathToHdPath
 import com.radixdlt.sargon.derivationPathToString
 import com.radixdlt.sargon.newDerivationPathFromString
 import kotlin.jvm.Throws
@@ -36,8 +39,14 @@ fun DerivationPath.Companion.init(path: String) = newDerivationPathFromString(st
 val DerivationPath.string
     get() = derivationPathToString(path = this)
 
+val DerivationPath.path: HdPath
+    get() = derivationPathToHdPath(path = this)
+
 val DerivationPath.curve: Slip10Curve
     get() = when (this) {
         is DerivationPath.Bip44Like -> Slip10Curve.SECP256K1
         is DerivationPath.Account, is DerivationPath.Identity -> Slip10Curve.CURVE25519
     }
+
+val DerivationPath.lastPathComponent: HdPathComponent
+    get() = path.components.last()

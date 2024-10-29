@@ -5,6 +5,7 @@ import com.radixdlt.sargon.extensions.curve
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.initForEntity
 import com.radixdlt.sargon.extensions.initFromLocal
+import com.radixdlt.sargon.extensions.lastPathComponent
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -107,6 +108,46 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
         assertEquals(
             Bip44LikePath.sample().string,
             Bip44LikePath.sample().asGeneral().string
+        )
+    }
+
+    @Test
+    fun testLastPathComponent() {
+        assertEquals(
+            AccountPath.init(
+                networkId = NetworkId.MAINNET,
+                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+            ).asGeneral().lastPathComponent,
+            HdPathComponent.init(
+                localKeySpace = 0u,
+                keySpace = KeySpace.Unsecurified(isHardened = true)
+            )
+        )
+
+        assertEquals(
+            IdentityPath.init(
+                networkId = NetworkId.MAINNET,
+                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+            ).asGeneral().lastPathComponent,
+            HdPathComponent.init(
+                localKeySpace = 0u,
+                keySpace = KeySpace.Unsecurified(isHardened = true)
+            )
+        )
+
+        assertEquals(
+            Bip44LikePath.init(
+                index = HdPathComponent.init(
+                    localKeySpace = 0u,
+                    keySpace = KeySpace.Unsecurified(isHardened = true)
+                )
+            ).asGeneral().lastPathComponent,
+            HdPathComponent.init(
+                localKeySpace = 0u,
+                keySpace = KeySpace.Unsecurified(isHardened = true)
+            )
         )
     }
 }

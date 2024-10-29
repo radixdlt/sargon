@@ -6,12 +6,12 @@ import com.radixdlt.sargon.extensions.globalOffset
 import com.radixdlt.sargon.extensions.indexInGlobalKeySpace
 import com.radixdlt.sargon.extensions.indexInLocalKeySpace
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.initFromLocal
 import com.radixdlt.sargon.extensions.keySpace
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class HDPathComponentTest: SampleTestable<HdPathComponent> {
 
@@ -70,11 +70,18 @@ class HDPathComponentTest: SampleTestable<HdPathComponent> {
     }
 
     @Test
-    fun testIsHardened() {
+    fun testAsHardened() {
         assertEquals(
             HdPathComponent.sample.other().asHardened(),
             Hardened.Securified(SecurifiedU30.init(U30.init(1073741823u)))
         )
+    }
+
+    @Test
+    fun testAsHardenedThrows() {
+        assertThrows<CommonException.IndexNotHardened> {
+            HdPathComponent.init(globalKeySpace = 0u).asHardened()
+        }
     }
 
 }
