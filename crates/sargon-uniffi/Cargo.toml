@@ -1,7 +1,7 @@
 [package]
 name = "sargon-uniffi"
 # Don't forget to update version in crates/sargon/Cargo.toml
-version = "1.1.39"
+version = "1.1.41"
 edition = "2021"
 build = "build.rs"
 
@@ -19,7 +19,7 @@ required-features = ["build-binary"]
 [dependencies]
 
 sargon = { path = "../sargon" }
-sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
+sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" } 
 
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "51f0115f1e93f6910b4931ef8367eec2f5b11805" }
 
