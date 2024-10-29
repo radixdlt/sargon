@@ -4,7 +4,12 @@ use crate::prelude::*;
 /// It contains all the information needed to compute and display the transaction details to the user.
 #[derive(Clone, Debug, PartialEq)]
 pub enum PreAuthToReview {
+    /// Pre-Auth analysis open manifest, which contains multiple interactions with the parent manifest,
+    /// thus its preview can be computed only based on the static analysis manifest summary
     Open(PreAuthOpenManifest),
+
+    /// Pre-Auth analysis enclosed manifest, which does not contain any interactions with the parent manifest,
+    /// thus its preview can be computed as if it would have been a standalone transaction.
     Enclosed(PreAuthEnclosedManifest),
 }
 
@@ -78,5 +83,10 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_eq!(SUT::sample(), SUT::sample_other());
     }
 }
