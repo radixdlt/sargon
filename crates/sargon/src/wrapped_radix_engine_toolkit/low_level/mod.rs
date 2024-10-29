@@ -30,3 +30,15 @@ pub use transaction_hashes::*;
 pub use v1::intent_signatures::*;
 pub use v1::*;
 pub use v2::*;
+
+pub(crate) fn map_static_analysis_error(
+    error: radix_transactions::manifest::static_resource_movements::StaticResourceMovementsError,
+) -> crate::prelude::CommonError {
+    crate::prelude::error!(
+        "Failed to get execution summary from RET, error: {:?}",
+        error
+    );
+    crate::prelude::CommonError::FailedToGenerateManifestSummary {
+        underlying: format!("{:?}", error),
+    }
+}

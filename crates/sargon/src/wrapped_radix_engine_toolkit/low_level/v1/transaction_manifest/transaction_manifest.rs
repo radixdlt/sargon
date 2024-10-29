@@ -145,15 +145,7 @@ impl TransactionManifest {
 
     pub fn summary(&self) -> Result<ManifestSummary> {
         let summary = RET_statically_analyze(&self.scrypto_manifest())
-            .map_err(|e| {
-                error!(
-                    "Failed to get execution summary from RET, error: {:?}",
-                    e
-                );
-                CommonError::FailedToGenerateManifestSummary {
-                    underlying: format!("{:?}", e),
-                }
-            })?;
+            .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
