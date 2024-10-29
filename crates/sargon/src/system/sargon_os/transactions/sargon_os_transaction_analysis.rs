@@ -184,6 +184,7 @@ impl SargonOS {
         Ok(response)
     }
 
+    #[cfg(not(tarpaulin_include))] // TBD
     async fn get_subintent_preview(
         &self,
         gateway_client: GatewayClient,

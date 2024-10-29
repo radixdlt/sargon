@@ -405,7 +405,7 @@ DROP_AUTH_ZONE_PROOFS;
                 method_name: "dummy".to_owned(),
                 args: invalid_value,
             });
-        let scrypto_manifest = ScryptoTransactionManifestV2 {
+        let scrypto_manifest = ScryptoSubintentManifestV2 {
             instructions: vec![invalid_instruction],
             blobs: Default::default(),
             children: Default::default(),
@@ -413,7 +413,8 @@ DROP_AUTH_ZONE_PROOFS;
         };
         let network_id = NetworkID::Mainnet;
 
-        let result = manifest_v2_string_from(scrypto_manifest, network_id);
+        let result =
+            subintent_manifest_v2_string_from(scrypto_manifest, network_id);
         assert_eq!(
             result,
             Err(CommonError::InvalidManifestFailedToDecompile {
