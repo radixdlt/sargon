@@ -117,6 +117,8 @@ impl Signable for SignableManifestSummary {
 mod tests {
     use super::*;
 
+    type SUT = SignableManifestSummary;
+
     #[test]
     fn test_eq() {
         assert_eq!(SUT::sample(), SUT::sample());
@@ -135,7 +137,7 @@ mod tests {
         )
         .modify_add_lock_fee(&account.address, Some(Decimal192::one()));
         let summary = manifest.summary().unwrap();
-        let signable = SignableManifestSummary::new(summary.clone());
+        let signable = SUT::new(summary.clone());
 
         assert_eq!(signable.summary, summary);
         assert_eq!(
