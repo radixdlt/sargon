@@ -1,6 +1,6 @@
 [package]
 name = "sargon-uniffi"
-# Don't forget to update crates/sargon/Cargo.toml
+# Don't forget to update version in crates/sargon/Cargo.toml
 version = "1.1.37"
 edition = "2021"
 build = "build.rs"
