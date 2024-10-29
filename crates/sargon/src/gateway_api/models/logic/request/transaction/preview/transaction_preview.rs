@@ -83,7 +83,7 @@ mod tests {
                     .map(|b| b.to_string())
                     .collect_vec()
             );
-            assert_eq!(sut.notary_is_signatory, header.notary_is_signatory);
+            assert_eq!(sut.notary_is_signatory, false);
             assert_eq!(
                 sut.notary_public_key.unwrap(),
                 GWPublicKey::from(header.notary_public_key)
