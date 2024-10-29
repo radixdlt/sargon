@@ -87,6 +87,6 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_eq!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
