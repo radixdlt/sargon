@@ -68,13 +68,13 @@ jobs:
 
           echo "Latest tag version: $latest_tag_version"
           echo "PR version sargon: $pr_version_sargon"
-		  echo "PR version sargon-uniffi: $pr_version_sargon_uniffi"
-		  
-		  # Check if sargon and sargon-uniffi versions match
-		  if [ "$pr_version_sargon" != "$pr_version_sargon_uniffi" ]; then
-			echo "Error: sargon version ($pr_version_sargon) does not match sargon-uniffi version ($pr_version_sargon_uniffi)."
-			exit 1
-		  fi
+          echo "PR version sargon-uniffi: $pr_version_sargon_uniffi"
+          
+          # Check if sargon and sargon-uniffi versions match
+          if [ "$pr_version_sargon" != "$pr_version_sargon_uniffi" ]; then
+            echo "Error: sargon version ($pr_version_sargon) does not match sargon-uniffi version ($pr_version_sargon_uniffi)."
+            exit 1
+          fi
 
           # Split the versions into major, minor, and patch components
           IFS='.' read -r -a tag_version_parts <<< "$latest_tag_version"
