@@ -179,6 +179,7 @@ jobs:
   # Swift testing on macOS (Apple Silicon)
   test-swift:
     runs-on: macos-14-xlarge
+    timeout-minutes: 20
     steps:
       - uses: RDXWorks-actions/checkout@main
 
