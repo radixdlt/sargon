@@ -1,4 +1,4 @@
-ASSERT_WORKTOP_RESOURCES_ONLY
+ASSERT_WORKTOP_RESOURCES_INCLUDE
     Map<Address, Enum>(
         Address("resource_tdx_2_1t5cjs290gd2v4pm5rys02ty372zapefjejqm3w6ktcxj9aw3e7t4jw") => Enum<ResourceConstraint::General>(
             Tuple(
@@ -41,10 +41,6 @@ ASSERT_WORKTOP_RESOURCES_ONLY
             )
         ),
     )
-;
-
-ASSERT_NEXT_CALL_RETURNS_ONLY
-    Map<Address, Enum>()
 ;
 
 CALL_METHOD
