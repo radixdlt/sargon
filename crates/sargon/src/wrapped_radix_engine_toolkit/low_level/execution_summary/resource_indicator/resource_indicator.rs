@@ -70,6 +70,15 @@ impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
     }
 }
 
+impl ResourceIndicator {
+    pub fn sample_stokenet() -> Self {
+        Self::fungible(
+            ResourceAddress::sample_stokenet_candy(),
+            FungibleResourceIndicator::sample(),
+        )
+    }
+}
+
 impl HasSampleValues for ResourceIndicator {
     fn sample() -> Self {
         Self::fungible(

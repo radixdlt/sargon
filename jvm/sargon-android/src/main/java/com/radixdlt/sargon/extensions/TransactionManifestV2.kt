@@ -16,9 +16,6 @@ import com.radixdlt.sargon.transactionManifestSummaryV2
 val TransactionManifestV2.manifestString: String
     get() = transactionManifestStringV2(manifest = this)
 
-val TransactionManifestV2.networkId: NetworkId
-    get() = transactionManifestNetworkIdV2(manifest = this)
-
 val TransactionManifestV2.blobs: Blobs
     get() = transactionManifestBlobsV2(manifest = this)
 

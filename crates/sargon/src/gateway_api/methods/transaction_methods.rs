@@ -52,8 +52,13 @@ impl GatewayClient {
         intent: TransactionIntent,
         signer_public_keys: Vec<PublicKey>,
     ) -> Result<Option<ScryptoSerializableToolkitTransactionReceipt>> {
-        let request =
-            TransactionPreviewRequest::new(intent, signer_public_keys, None);
+        let request = TransactionPreviewRequest::new_transaction_analysis_v1(
+            intent.manifest,
+            intent.header.start_epoch_inclusive,
+            signer_public_keys,
+            intent.header.notary_public_key,
+            intent.header.nonce,
+        );
         self.transaction_preview(request)
             .await
             .map(|r| r.radix_engine_toolkit_receipt)

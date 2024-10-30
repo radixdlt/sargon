@@ -49,8 +49,8 @@ pub fn transaction_manifest_string_v2(
 #[uniffi::export]
 pub fn transaction_manifest_summary_v2(
     manifest: &TransactionManifestV2,
-) -> Option<ManifestSummary> {
-    manifest.into_internal().summary().map(|s| s.into())
+) -> Result<ManifestSummary> {
+    manifest.into_internal().summary().into_result()
 }
 
 #[uniffi::export]

@@ -176,9 +176,6 @@ val TransactionManifest.manifestString: String
 val TransactionManifest.instructionsString: String
     get() = transactionManifestInstructionsString(manifest = this)
 
-val TransactionManifest.networkId: NetworkId
-    get() = transactionManifestNetworkId(manifest = this)
-
 val TransactionManifest.blobs: Blobs
     get() = transactionManifestBlobs(manifest = this)
 

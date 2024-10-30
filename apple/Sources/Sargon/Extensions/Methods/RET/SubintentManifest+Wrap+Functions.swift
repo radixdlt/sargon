@@ -11,10 +11,6 @@ extension SubintentManifest {
         subintentManifestString(manifest: self)
     }
 
-    public var networkID: NetworkID {
-        subintentManifestNetworkId(manifest: self)
-    }
-
     public var blobs: Blobs {
         subintentManifestBlobs(manifest: self)
     }
@@ -25,9 +21,5 @@ extension SubintentManifest {
 
     public var involvedResourceAddresses: [ResourceAddress] {
         subintentManifestInvolvedResourceAddresses(manifest: self)
-    }
-
-    public var summary: ManifestSummary? {
-        subintentManifestSummary(manifest: self)
     }
 }
