@@ -7,8 +7,8 @@ decl_version_type!(Subintent);
 pub struct DappToWalletInteractionSubintentRequestItem {
     pub version: SubintentVersion,
 
-    #[serde(flatten, with = "UnvalidatedTransactionManifest")]
-    pub unvalidated_manifest: UnvalidatedTransactionManifest,
+    #[serde(flatten, with = "UnvalidatedSubintentManifest")]
+    pub unvalidated_manifest: UnvalidatedSubintentManifest,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -20,7 +20,7 @@ pub struct DappToWalletInteractionSubintentRequestItem {
 impl DappToWalletInteractionSubintentRequestItem {
     pub fn new(
         version: impl Into<SubintentVersion>,
-        unvalidated_manifest: impl Into<UnvalidatedTransactionManifest>,
+        unvalidated_manifest: impl Into<UnvalidatedSubintentManifest>,
         message: impl Into<Option<String>>,
         expiration: impl Into<Option<DappToWalletInteractionSubintentExpiration>>,
     ) -> Self {
@@ -37,7 +37,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
     fn sample() -> Self {
         Self::new(
             SubintentVersion::sample(),
-            UnvalidatedTransactionManifest::sample(),
+            UnvalidatedSubintentManifest::sample(),
             "message".to_owned(),
             DappToWalletInteractionSubintentExpiration::sample(),
         )
@@ -46,7 +46,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
     fn sample_other() -> Self {
         Self::new(
             SubintentVersion::sample_other(),
-            UnvalidatedTransactionManifest::sample_other(),
+            UnvalidatedSubintentManifest::sample_other(),
             "message_other".to_owned(),
             DappToWalletInteractionSubintentExpiration::sample_other(),
         )
@@ -78,7 +78,7 @@ mod tests {
             r#"
            {
                 "version" : 1,
-                "transactionManifest" : "CALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n",
+                "subintentManifest" : "CALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n",
                 "blobs" : [],
                 "message" : "message",
                 "expiration": {

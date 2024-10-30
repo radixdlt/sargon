@@ -130,6 +130,10 @@ impl SubintentManifest {
         self.instructions.instructions()
     }
 
+    pub fn blobs(&self) -> &Blobs {
+        &self.blobs
+    }
+
     pub fn manifest_string(&self) -> String {
         subintent_manifest_v2_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
