@@ -240,7 +240,8 @@ mod tests {
     use crate::prelude::*;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
-        CallMethod, DropAllProofs, DropAuthZoneProofs, YieldToParent,
+        BlobProvider, CallMethod, DropAllProofs, DropAuthZoneProofs,
+        YieldToParent,
     };
     use radix_transactions::model::InstructionV1;
     use sbor::ValueKind as ScryptoValueKind;
@@ -601,9 +602,37 @@ DROP_AUTH_ZONE_PROOFS;
             .lock_fee_from_faucet()
             .yield_to_parent(());
 
+        let manifest = SUT::sargon_built(builder, NetworkID::Mainnet);
+
+        let summary = manifest.clone().summary().unwrap();
+
         assert_eq!(
-            SUT::sargon_built(builder, NetworkID::Mainnet,).manifest_string(),
+            manifest.manifest_string(),
             "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\nYIELD_TO_PARENT;\n",
         )
+    }
+
+    #[test]
+    fn complex_summary() {
+        let manifest_str = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "open_subintent_manifest.rtm"
+        ));
+
+        let network = NetworkID::Stokenet.network_definition();
+        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+            manifest_str,
+            &network,
+            BlobProvider::new(),
+        )
+        .unwrap();
+
+        let manifest: SubintentManifest =
+            (man, NetworkID::Stokenet).try_into().unwrap();
+        let summary = manifest.summary().unwrap();
+
+        // pretty print like json format
+
+        print!("{:?}", summary);
     }
 }
