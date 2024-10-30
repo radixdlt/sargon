@@ -112,7 +112,7 @@ impl SargonOS {
             );
         }
 
-        match subintent_manifest.as_enclosed() {
+        let pre_auth_to_review = match subintent_manifest.as_enclosed() {
             Some(manifest) => {
                 // TODO: perform the actual analysis
                 // let gateway_client = GatewayClient::new(
@@ -121,16 +121,18 @@ impl SargonOS {
                 // );
                 // let response = self.get_subintent_preview(manifest, gateway_client, nonce).await?;
 
-                Ok(PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
+                PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
                     manifest: subintent_manifest,
                     summary: ExecutionSummary::sample_stokenet(),
-                }))
+                })
             }
-            None => Ok(PreAuthToReview::Open(PreAuthOpenManifest {
+            None => PreAuthToReview::Open(PreAuthOpenManifest {
                 manifest: subintent_manifest,
                 summary: summary,
-            })),
-        }
+            }),
+        };
+
+        Ok(pre_auth_to_review)
     }
 }
 
