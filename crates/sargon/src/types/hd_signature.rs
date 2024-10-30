@@ -3,9 +3,9 @@ use crate::prelude::*;
 /// A signature of `intent_hash` by `entity` using `factor_source_id` and `derivation_path`, with `public_key` used for verification.
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 #[debug("HDSignature {{ input: {:#?} }}", input)]
-pub struct HDSignature {
+pub struct HDSignature<ID: SignableID> {
     /// The input used to produce this `HDSignature`
-    pub input: HDSignatureInput,
+    pub input: HDSignatureInput<ID>,
 
     /// The ECDSA/EdDSA signature produced by the private key of the
     /// `owned_hd_factor_instance.public_key`,
@@ -17,14 +17,17 @@ pub struct HDSignature {
     pub signature: Signature,
 }
 
-impl HDSignature {
+impl<ID: SignableID> HDSignature<ID> {
     /// Constructs a HDSignature from an already produced `Signature`.
-    pub fn with_details(input: HDSignatureInput, signature: Signature) -> Self {
+    pub fn with_details(
+        input: HDSignatureInput<ID>,
+        signature: Signature,
+    ) -> Self {
         Self { input, signature }
     }
 
-    pub fn intent_hash(&self) -> &TransactionIntentHash {
-        &self.input.intent_hash
+    pub fn payload_id(&self) -> &ID {
+        &self.input.payload_id
     }
 
     pub fn owned_factor_instance(&self) -> &OwnedFactorInstance {
@@ -45,33 +48,33 @@ impl HDSignature {
     }
 }
 
-impl HasSampleValues for HDSignature {
+impl<ID: SignableID> HasSampleValues for HDSignature<ID> {
     fn sample() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
-            HDSignatureInput::sample(),
+            HDSignatureInput::<ID>::sample(),
         )
     }
 
     fn sample_other() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
-            HDSignatureInput::sample_other(),
+            HDSignatureInput::<ID>::sample_other(),
         )
     }
 }
 
-impl HDSignature {
+impl<ID: SignableID> HDSignature<ID> {
     /// WARNING: Should only be used in samples and unit tests
     ///
     /// Signs with predefined mnemonics associated to the input's factor source id
     pub fn fake_sign_by_looking_up_mnemonic_amongst_samples(
-        input: HDSignatureInput,
+        input: HDSignatureInput<ID>,
     ) -> Self {
         let id = input.owned_factor_instance.factor_source_id();
 
         let mnemonic_with_passphrase = id.sample_associated_mnemonic();
 
         let signature = mnemonic_with_passphrase.sign(
-            &input.intent_hash.hash,
+            &input.payload_id.clone().into(),
             &input.owned_factor_instance.value.public_key.derivation_path,
         );
 
@@ -80,8 +83,8 @@ impl HDSignature {
 }
 
 #[cfg(test)]
-impl HDSignature {
-    pub fn produced_signing_with_input(input: HDSignatureInput) -> Self {
+impl<ID: SignableID> HDSignature<ID> {
+    pub fn produced_signing_with_input(input: HDSignatureInput<ID>) -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(input)
     }
 }
@@ -90,7 +93,7 @@ impl HDSignature {
 mod tests {
     use super::*;
 
-    type Sut = HDSignature;
+    type Sut = HDSignature<TransactionIntentHash>;
 
     #[test]
     fn equality_of_samples() {

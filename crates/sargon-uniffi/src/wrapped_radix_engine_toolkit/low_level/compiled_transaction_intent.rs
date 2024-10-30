@@ -23,10 +23,10 @@ impl CompiledTransactionIntent {
     }
 }
 
-impl Into<InternalCompiledTransactionIntent> for CompiledTransactionIntent {
-    fn into(self) -> InternalCompiledTransactionIntent {
+impl From<CompiledTransactionIntent> for InternalCompiledTransactionIntent {
+    fn from(val: CompiledTransactionIntent) -> Self {
         let decoded = BASE64_STANDARD_NO_PAD
-            .decode(self.secret_magic)
+            .decode(val.secret_magic)
             .expect("Should always be able to decode base-64 encoded bytes");
 
         InternalCompiledTransactionIntent::new(sargon::BagOfBytes::from(

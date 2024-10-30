@@ -33,7 +33,9 @@ macro_rules! decl_secret_bytes {
                 }
             }
 
+            #[allow(clippy::from_over_into)]
             impl Into<[< Internal $struct_name >]> for $struct_name {
+                #[allow(clippy::from_over_into)]
                 fn into(self) -> [< Internal $struct_name >] {
                     [< Internal $struct_name >]::try_from(self.value.into_internal()).unwrap()
                 }

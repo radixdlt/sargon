@@ -5,26 +5,26 @@ use crate::prelude::*;
 /// `{ threshold: PetitionForFactors, override: PetitionForFactors }`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForEntity {
+pub(crate) struct PetitionForEntity<ID: SignableID> {
     /// The owner of these factors
     pub(crate) entity: AddressOfAccountOrPersona,
 
     /// Index and hash of transaction
-    pub(crate) intent_hash: TransactionIntentHash,
+    pub(crate) payload_id: ID,
 
     /// Petition with threshold factors
-    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors>>,
+    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<ID>>>,
 
     /// Petition with override factors
-    pub(crate) override_factors: Option<RefCell<PetitionForFactors>>,
+    pub(crate) override_factors: Option<RefCell<PetitionForFactors<ID>>>,
 }
 
-impl PetitionForEntity {
+impl<ID: SignableID> PetitionForEntity<ID> {
     pub(super) fn new(
-        intent_hash: TransactionIntentHash,
+        payload_id: ID,
         entity: AddressOfAccountOrPersona,
-        threshold_factors: impl Into<Option<PetitionForFactors>>,
-        override_factors: impl Into<Option<PetitionForFactors>>,
+        threshold_factors: impl Into<Option<PetitionForFactors<ID>>>,
+        override_factors: impl Into<Option<PetitionForFactors<ID>>>,
     ) -> Self {
         let threshold_factors = threshold_factors.into();
         let override_factors = override_factors.into();
@@ -33,14 +33,14 @@ impl PetitionForEntity {
         }
         Self {
             entity,
-            intent_hash,
+            payload_id,
             threshold_factors: threshold_factors.map(RefCell::new),
             override_factors: override_factors.map(RefCell::new),
         }
     }
 
     pub(crate) fn new_from_entity(
-        intent_hash: TransactionIntentHash,
+        payload_id: ID,
         entity: AccountOrPersona,
         if_securified_select_role: RoleKind,
     ) -> Self {
@@ -49,7 +49,7 @@ impl PetitionForEntity {
                 let factor_instance = value.transaction_signing;
 
                 Self::new_unsecurified(
-                    intent_hash,
+                    payload_id,
                     entity.address(),
                     factor_instance,
                 )
@@ -61,7 +61,7 @@ impl PetitionForEntity {
                     ).unwrap();
 
                 PetitionForEntity::new_securified(
-                    intent_hash,
+                    payload_id,
                     entity.address(),
                     general_role,
                 )
@@ -71,12 +71,12 @@ impl PetitionForEntity {
 
     /// Creates a new Petition from an entity which is securified, i.e. has a matrix of factors.
     pub(crate) fn new_securified(
-        intent_hash: TransactionIntentHash,
+        payload_id: ID,
         entity: AddressOfAccountOrPersona,
         role_with_factor_instances: GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
         Self::new(
-            intent_hash,
+            payload_id,
             entity,
             PetitionForFactors::new_threshold(
                 role_with_factor_instances.threshold_factors,
@@ -90,12 +90,12 @@ impl PetitionForEntity {
 
     /// Creates a new Petition from an entity which is unsecurified, i.e. has a single factor.
     pub(crate) fn new_unsecurified(
-        intent_hash: TransactionIntentHash,
+        payload_id: ID,
         entity: AddressOfAccountOrPersona,
         instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         Self::new(
-            intent_hash,
+            payload_id,
             entity,
             PetitionForFactors::new_unsecurified(instance),
             None,
@@ -152,7 +152,7 @@ impl PetitionForEntity {
     }
 
     /// Returrns the aggregate of all signatures from both lists, either threshold or override.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.access_both_list_then_form_union(|f| f.all_signatures())
     }
 
@@ -163,7 +163,7 @@ impl PetitionForEntity {
     /// Panics if this factor source has already been neglected or signed with.
     ///
     /// Or panics if the factor source is not known to this petition.
-    pub(crate) fn add_signature(&self, signature: HDSignature) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<ID>) {
         self.access_both_list(|l| l.add_signature_if_relevant(&signature), |t, o| {
             match (t, o) {
                 (Some(true), Some(true)) => {
@@ -302,7 +302,7 @@ impl PetitionForEntity {
 }
 
 // === Private ===
-impl PetitionForEntity {
+impl<ID: SignableID> PetitionForEntity<ID> {
     /// Derefs and calls `access` on both lists respectively, if they exist. Then combines the results
     /// of each list access using `combine`.
     ///
@@ -311,11 +311,11 @@ impl PetitionForEntity {
     /// and `Option` repeatedly.
     fn access_both_list<T, U>(
         &self,
-        access: impl Fn(&PetitionForFactors) -> T,
+        access: impl Fn(&PetitionForFactors<ID>) -> T,
         combine: impl Fn(Option<T>, Option<T>) -> U,
     ) -> U {
         let access_list_if_exists =
-            |list: &Option<RefCell<PetitionForFactors>>| {
+            |list: &Option<RefCell<PetitionForFactors<ID>>>| {
                 list.as_ref().map(|refcell| access(&refcell.borrow()))
             };
         let t = access_list_if_exists(&self.threshold_factors);
@@ -327,7 +327,7 @@ impl PetitionForEntity {
     /// of each list is then combined together using `IndexSet::union` and returned.
     fn access_both_list_then_form_union<T>(
         &self,
-        access: impl Fn(&PetitionForFactors) -> IndexSet<T>,
+        access: impl Fn(&PetitionForFactors<ID>) -> IndexSet<T>,
     ) -> IndexSet<T>
     where
         T: Eq + std::hash::Hash + Clone,
@@ -359,26 +359,26 @@ impl PetitionForEntity {
 
         format!(
             "intent_hash: {:#?}, entity: {:#?}, {:#?}{:#?}",
-            self.intent_hash, self.entity, thres, overr
+            self.payload_id, self.entity, thres, overr
         )
     }
 }
 
 // === SAMPLE VALUES ===
-impl PetitionForEntity {
+impl<ID: SignableID> PetitionForEntity<ID> {
     fn from_entity_with_role_kind(
         entity: impl Into<AccountOrPersona>,
-        intent_hash: TransactionIntentHash,
+        id: ID,
         role_kind: RoleKind,
     ) -> Self {
         let entity = entity.into();
         match entity.entity_security_state() {
             EntitySecurityState::Unsecured { value } => {
-                Self::new_unsecurified(intent_hash, entity.address(), value.transaction_signing)
+                Self::new_unsecurified(id, entity.address(), value.transaction_signing)
             }
             EntitySecurityState::Securified { value } => {
                 Self::new_securified(
-                    intent_hash,
+                    id,
                     entity.address(),
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                         (value.security_structure.matrix_of_factors, role_kind)
@@ -389,7 +389,7 @@ impl PetitionForEntity {
     }
 }
 
-impl HasSampleValues for PetitionForEntity {
+impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
     fn sample() -> Self {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
@@ -398,11 +398,11 @@ impl HasSampleValues for PetitionForEntity {
                 || {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
-                        HDPathComponent::from(6)
+                        Hardened::from_local_key_space_unsecurified(6u32).unwrap(),
                     ))
                 },
             ),
-            TransactionIntentHash::sample(),
+            ID::sample(),
             RoleKind::Primary,
         )
     }
@@ -415,7 +415,7 @@ impl HasSampleValues for PetitionForEntity {
                     CAP26EntityKind::Account,
                 ),
             ),
-            TransactionIntentHash::sample_other(),
+            ID::sample_other(),
             RoleKind::Primary,
         )
     }
@@ -424,7 +424,7 @@ impl HasSampleValues for PetitionForEntity {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PetitionForEntity;
+    type Sut = PetitionForEntity<TransactionIntentHash>;
 
     #[test]
     fn multiple_device_as_override_skipped_both_is_invalid() {
@@ -602,7 +602,7 @@ mod tests {
     fn factor_should_not_be_used_in_both_lists() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            HDPathComponent::from(0),
+            Hardened::from_local_key_space_unsecurified(0).unwrap(),
         );
         assert_eq!(
             GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
@@ -618,7 +618,7 @@ mod tests {
     fn threshold_should_not_be_bigger_than_threshold_factors() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            HDPathComponent::from(0),
+            Hardened::from_local_key_space_unsecurified(0).unwrap(),
         );
         assert_eq!(
             GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
@@ -645,7 +645,7 @@ mod tests {
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                 CAP26EntityKind::Account,
-                HDPathComponent::from(0)
+                Hardened::from_local_key_space_unsecurified(0).unwrap(),
             );
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                     [FactorSourceIDFromHash::sample_at(0)].map(&fi),
@@ -666,7 +666,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::from(entity.address),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
                     FactorSourceIDFromHash::sample_at(0),
                 ),
             ),
@@ -682,11 +682,11 @@ mod tests {
         let sut = Sut::sample();
         let signature = HDSignature::produced_signing_with_input(
             HDSignatureInput::new(
-                sut.intent_hash.clone(),
+                sut.payload_id.clone(),
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                        HDPathComponent::from(6),
+                        Hardened::from_local_key_space_unsecurified(6).unwrap(),
                         FactorSourceIDFromHash::sample_at(1),
                     ),
                 ),

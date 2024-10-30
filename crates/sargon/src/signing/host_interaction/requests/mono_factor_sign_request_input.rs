@@ -3,15 +3,15 @@ use crate::prelude::*;
 /// A batch of transactions each batching over multiple keys (derivation paths)
 /// to sign each transaction with.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
-pub struct MonoFactorSignRequestInput {
+pub struct MonoFactorSignRequestInput<S: Signable> {
     /// The ID of the factor source used to sign each per_transaction
     pub factor_source_id: FactorSourceIDFromHash,
 
     // The `factor_source_id` of each item must match `self.factor_source_id`.
-    pub per_transaction: Vec<TransactionSignRequestInput>,
+    pub per_transaction: Vec<TransactionSignRequestInput<S>>,
 }
 
-impl MonoFactorSignRequestInput {
+impl<S: Signable> MonoFactorSignRequestInput<S> {
     /// # Panics
     /// Panics if `per_transaction` is empty
     ///
@@ -19,7 +19,7 @@ impl MonoFactorSignRequestInput {
     /// of each request does not match `factor_source_id`.
     pub(crate) fn new(
         factor_source_id: FactorSourceIDFromHash,
-        per_transaction: IndexSet<TransactionSignRequestInput>,
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>,
     ) -> Self {
         assert!(
             !per_transaction.is_empty(),
@@ -43,16 +43,16 @@ impl MonoFactorSignRequestInput {
     }
 }
 
-impl HasSampleValues for MonoFactorSignRequestInput {
+impl<S: Signable> HasSampleValues for MonoFactorSignRequestInput<S> {
     /// Creates a new MonoFactorSignRequestInput with sample values.
     fn sample() -> Self {
-        let input = TransactionSignRequestInput::sample();
+        let input = TransactionSignRequestInput::<S>::sample();
         Self::new(input.clone().factor_source_id, IndexSet::just(input))
     }
 
     /// Creates a new MonoFactorSignRequestInput with sample values.
     fn sample_other() -> Self {
-        let input = TransactionSignRequestInput::sample_other();
+        let input = TransactionSignRequestInput::<S>::sample_other();
         Self::new(input.clone().factor_source_id, IndexSet::just(input))
     }
 }
@@ -60,7 +60,7 @@ impl HasSampleValues for MonoFactorSignRequestInput {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = MonoFactorSignRequestInput;
+    type Sut = MonoFactorSignRequestInput<TransactionIntent>;
 
     #[test]
     fn equality() {

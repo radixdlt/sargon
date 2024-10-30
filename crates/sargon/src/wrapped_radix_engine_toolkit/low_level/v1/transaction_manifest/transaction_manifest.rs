@@ -145,7 +145,7 @@ impl TransactionManifest {
 
     pub fn summary(&self) -> Result<ManifestSummary> {
         let summary = RET_statically_analyze(&self.scrypto_manifest())
-            .ok_or(CommonError::FailedToGenerateManifestSummary)?;
+            .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
@@ -387,7 +387,10 @@ BURN_RESOURCE
         )
         .unwrap();
         let summary = manifest.summary();
-        assert_eq!(summary, Err(CommonError::FailedToGenerateManifestSummary));
+        matches!(
+            summary,
+            Err(CommonError::FailedToGenerateManifestSummary { .. })
+        );
     }
 
     #[test]
@@ -460,10 +463,13 @@ BURN_RESOURCE
                 hashmap!(
                     AccountAddress::sample_other() => vec![AccountDeposit::sample()],
                 ),
+                [],
                 [AccountAddress::sample()],
                 [AccountAddress::sample_other()],
+                [],
                 [AccountAddress::sample()],
                 [],
+                Vec::<_>::sample(),
             )
         );
     }
@@ -512,6 +518,7 @@ BURN_RESOURCE
                         )
                     ],
                 ),
+                [],
                 [
                     a
                 ],
@@ -520,8 +527,10 @@ BURN_RESOURCE
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
                 ],
+                [],
                 [a],
-                []
+                [],
+                Vec::<_>::sample(),
             )
         );
     }

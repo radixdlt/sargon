@@ -138,9 +138,10 @@ impl TransactionManifestV2 {
         self.instructions.instructions_string()
     }
 
-    pub fn summary(&self) -> Option<ManifestSummary> {
-        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())?;
-        Some(ManifestSummary::from((summary, self.network_id())))
+    pub fn summary(&self) -> Result<ManifestSummary> {
+        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())
+            .map_err(map_static_analysis_error)?;
+        Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -451,10 +452,13 @@ DROP_AUTH_ZONE_PROOFS;
                 hashmap!(
                     AccountAddress::sample_other() => vec![AccountDeposit::sample()],
                 ),
+                [],
                 [AccountAddress::sample()],
                 [AccountAddress::sample_other()],
+                [],
                 [AccountAddress::sample()],
                 [],
+                Vec::<_>::sample(),
             )
         );
     }
@@ -503,6 +507,7 @@ DROP_AUTH_ZONE_PROOFS;
                         )
                     ],
                 ),
+                [],
                 [
                     a
                 ],
@@ -511,8 +516,10 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
                 ],
+                [],
                 [a],
-                []
+                [],
+                Vec::<_>::sample(),
             )
         );
     }

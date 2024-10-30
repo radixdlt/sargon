@@ -38,6 +38,7 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
+    #[allow(dead_code)]
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: InstructionsV2::empty(network_id),
@@ -129,6 +130,10 @@ impl SubintentManifest {
         self.instructions.instructions()
     }
 
+    pub fn blobs(&self) -> &Blobs {
+        &self.blobs
+    }
+
     pub fn manifest_string(&self) -> String {
         subintent_manifest_v2_string_from(self.scrypto_manifest(), self.instructions.network_id).expect("Should never fail, because should never have allowed invalid manifest.")
     }
@@ -137,11 +142,12 @@ impl SubintentManifest {
         self.instructions.instructions_string()
     }
 
-    pub fn summary(&self) -> Option<ManifestSummary> {
-        let summary = RET_statically_analyze_subintent_manifest(
-            &self.scrypto_manifest(),
-        )?;
-        Some(ManifestSummary::from((summary, self.network_id())))
+    pub fn summary(&self) -> Result<ManifestSummary> {
+        let summary =
+            RET_statically_analyze_subintent_manifest(&self.scrypto_manifest())
+                .map_err(map_static_analysis_error)?;
+
+        Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
     pub fn as_enclosed(&self) -> Option<TransactionManifestV2> {
@@ -176,10 +182,44 @@ impl SubintentManifest {
     }
 }
 
+impl SubintentManifest {
+    pub(crate) fn sample_mainnet_instructions_string() -> String {
+        include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "resource_transfer_subintent.rtm"
+        ))
+        .to_owned()
+    }
+
+    pub fn sample_mainnet_instructions() -> InstructionsV2 {
+        InstructionsV2::new(
+            Self::sample_mainnet_instructions_string(),
+            NetworkID::Mainnet,
+        )
+        .expect("Valid sample value")
+    }
+
+    pub(crate) fn sample_other_simulator_instructions_string() -> String {
+        include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "multi_account_resource_transfer_subintent.rtm"
+        ))
+        .to_owned()
+    }
+
+    pub fn sample_simulator_other_instructions() -> InstructionsV2 {
+        InstructionsV2::new(
+            Self::sample_other_simulator_instructions_string(),
+            NetworkID::Simulator,
+        )
+        .expect("Valid sample value")
+    }
+}
+
 impl HasSampleValues for SubintentManifest {
     fn sample() -> Self {
         Self {
-            instructions: InstructionsV2::sample(),
+            instructions: Self::sample_mainnet_instructions(),
             blobs: Blobs::default(),
             children: ChildIntents::empty(),
         }
@@ -187,7 +227,7 @@ impl HasSampleValues for SubintentManifest {
 
     fn sample_other() -> Self {
         Self {
-            instructions: InstructionsV2::sample_other(),
+            instructions: Self::sample_simulator_other_instructions(),
             blobs: Blobs::default(),
             children: ChildIntents::empty(),
         }
@@ -225,9 +265,9 @@ mod tests {
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().instructions.to_string(),
-            InstructionsV2::sample_mainnet_instructions_string(),
+            SUT::sample_mainnet_instructions_string(),
         );
-        assert_eq!(sut.instructions().len(), 4);
+        assert_eq!(sut.instructions().len(), 5);
     }
 
     #[test]
@@ -236,9 +276,9 @@ mod tests {
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().instructions.to_string(),
-            InstructionsV2::sample_other_simulator_instructions_string(),
+            SUT::sample_other_simulator_instructions_string(),
         );
-        assert_eq!(sut.instructions().len(), 8);
+        assert_eq!(sut.instructions().len(), 9);
     }
 
     #[test]
@@ -361,7 +401,7 @@ DROP_AUTH_ZONE_PROOFS;
                 method_name: "dummy".to_owned(),
                 args: invalid_value,
             });
-        let scrypto_manifest = ScryptoTransactionManifestV2 {
+        let scrypto_manifest = ScryptoSubintentManifestV2 {
             instructions: vec![invalid_instruction],
             blobs: Default::default(),
             children: Default::default(),
@@ -369,7 +409,8 @@ DROP_AUTH_ZONE_PROOFS;
         };
         let network_id = NetworkID::Mainnet;
 
-        let result = manifest_v2_string_from(scrypto_manifest, network_id);
+        let result =
+            subintent_manifest_v2_string_from(scrypto_manifest, network_id);
         assert_eq!(
             result,
             Err(CommonError::InvalidManifestFailedToDecompile {
@@ -458,10 +499,13 @@ DROP_AUTH_ZONE_PROOFS;
                 hashmap!(
                     AccountAddress::sample_other() => vec![AccountDeposit::sample()],
                 ),
+                [],
                 [AccountAddress::sample()],
                 [AccountAddress::sample_other()],
+                [],
                 [AccountAddress::sample()],
                 [],
+                Vec::<_>::sample(),
             )
         );
     }
@@ -510,6 +554,7 @@ DROP_AUTH_ZONE_PROOFS;
                         )
                     ],
                 ),
+                [],
                 [
                     a
                 ],
@@ -518,8 +563,10 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
                 ],
+                [],
                 [a],
-                []
+                [],
+                Vec::<_>::sample(),
             )
         );
     }

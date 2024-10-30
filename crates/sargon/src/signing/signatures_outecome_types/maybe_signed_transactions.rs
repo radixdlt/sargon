@@ -1,35 +1,32 @@
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub(crate) struct MaybeSignedTransactions {
+pub(crate) struct MaybeSignedTransactions<ID: SignableID> {
     /// Collection of transactions which might be signed or not.
-    pub(super) transactions:
-        IndexMap<TransactionIntentHash, IndexSet<HDSignature>>,
+    pub(super) transactions: IndexMap<ID, IndexSet<HDSignature<ID>>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct SignedTransaction {
+pub struct SignedTransaction<ID: SignableID> {
     /// The transaction intent hash.
-    pub(crate) intent_hash: TransactionIntentHash,
+    pub(crate) signable_id: ID,
     /// The signatures for this transaction.
-    pub(crate) signatures: IndexSet<HDSignature>,
+    pub(crate) signatures: IndexSet<HDSignature<ID>>,
 }
-impl SignedTransaction {
+impl<ID: SignableID> SignedTransaction<ID> {
     pub(crate) fn new(
-        intent_hash: TransactionIntentHash,
-        signatures: IndexSet<HDSignature>,
+        signable_id: ID,
+        signatures: IndexSet<HDSignature<ID>>,
     ) -> Self {
         Self {
-            intent_hash,
+            signable_id,
             signatures,
         }
     }
 }
 
-impl MaybeSignedTransactions {
-    fn new(
-        transactions: IndexMap<TransactionIntentHash, IndexSet<HDSignature>>,
-    ) -> Self {
+impl<ID: SignableID> MaybeSignedTransactions<ID> {
+    fn new(transactions: IndexMap<ID, IndexSet<HDSignature<ID>>>) -> Self {
         Self { transactions }
     }
 
@@ -45,7 +42,7 @@ impl MaybeSignedTransactions {
         self.transactions.is_empty()
     }
 
-    pub(crate) fn transactions(&self) -> Vec<SignedTransaction> {
+    pub(crate) fn transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.transactions
             .clone()
             .into_iter()
@@ -62,9 +59,9 @@ impl MaybeSignedTransactions {
     /// # Panics
     /// Panics if any signature has a different `intent_hash` than its key.
     fn validate(&self) {
-        for (intent_hash, signatures) in self.transactions.iter() {
+        for (signable_id, signatures) in self.transactions.iter() {
             assert!(
-                signatures.iter().all(|s| s.intent_hash() == intent_hash),
+                signatures.iter().all(|s| s.payload_id() == signable_id),
                 "Discrepancy between intent hash and signature intent hash."
             );
         }
@@ -94,10 +91,10 @@ impl MaybeSignedTransactions {
     /// in `transactions`.
     pub(crate) fn add_signatures(
         &mut self,
-        intent_hash: TransactionIntentHash,
-        signatures: IndexSet<HDSignature>,
+        signable_id: ID,
+        signatures: IndexSet<HDSignature<ID>>,
     ) {
-        if let Some(ref mut sigs) = self.transactions.get_mut(&intent_hash) {
+        if let Some(ref mut sigs) = self.transactions.get_mut(&signable_id) {
             let old_count = sigs.len();
             let delta_count = signatures.len();
             sigs.extend(signatures);
@@ -107,13 +104,13 @@ impl MaybeSignedTransactions {
                 "Discrepancy, some signature in signatures to add found in existing set."
             );
         } else {
-            self.transactions.insert(intent_hash, signatures);
+            self.transactions.insert(signable_id, signatures);
         }
         self.validate();
     }
 
     /// Returns all the signatures for all the transactions.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.transactions
             .values()
             .flat_map(|v| v.iter())
@@ -122,16 +119,16 @@ impl MaybeSignedTransactions {
     }
 }
 
-impl HasSampleValues for MaybeSignedTransactions {
+impl<ID: SignableID> HasSampleValues for MaybeSignedTransactions<ID> {
     fn sample() -> Self {
-        let tx_a = TransactionIntentHash::sample();
+        let tx_a = ID::sample();
 
         let tx_a_input_x = HDSignatureInput::new(
             tx_a.clone(),
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
@@ -141,7 +138,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(1),
+                    Hardened::from_local_key_space_unsecurified(1u32).unwrap(),
                     FactorSourceIDFromHash::sample_other(),
                 ),
             ),
@@ -155,13 +152,13 @@ impl HasSampleValues for MaybeSignedTransactions {
                 tx_a_input_y,
             );
 
-        let tx_b = TransactionIntentHash::sample_other();
+        let tx_b = ID::sample_other();
         let tx_b_input_x = HDSignatureInput::new(
             tx_b.clone(),
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(2),
+                    Hardened::from_local_key_space_unsecurified(2u32).unwrap(),
                     FactorSourceIDFromHash::sample_at(3),
                 ),
             ),
@@ -171,7 +168,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(3),
+                    Hardened::from_local_key_space_unsecurified(3u32).unwrap(),
                     FactorSourceIDFromHash::sample_at(4),
                 ),
             ),
@@ -192,23 +189,19 @@ impl HasSampleValues for MaybeSignedTransactions {
                 (tx_b, IndexSet::from_iter([tx_b_sig_x, tx_b_sig_y])),
             ]
             .into_iter()
-            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature>>>(
-            ),
+            .collect::<IndexMap<ID, IndexSet<HDSignature<ID>>>>(),
         )
     }
 
     fn sample_other() -> Self {
-        let tx_a = TransactionIntentHash::new(
-            Hash::sample_third(),
-            NetworkID::Mainnet,
-        );
+        let tx_a = ID::sample_other();
 
         let tx_a_input_x = HDSignatureInput::new(
             tx_a.clone(),
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(10),
+                    Hardened::from_local_key_space_unsecurified(10u32).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
@@ -218,7 +211,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(11),
+                    Hardened::from_local_key_space_unsecurified(11u32).unwrap(),
                     FactorSourceIDFromHash::sample_other(),
                 ),
             ),
@@ -228,7 +221,7 @@ impl HasSampleValues for MaybeSignedTransactions {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(12),
+                    Hardened::from_local_key_space_unsecurified(12u32).unwrap(),
                     FactorSourceIDFromHash::sample_at(3),
                 ),
             ),
@@ -252,8 +245,7 @@ impl HasSampleValues for MaybeSignedTransactions {
                 IndexSet::from_iter([tx_a_sig_x, tx_a_sig_y, tx_a_sig_z]),
             )]
             .into_iter()
-            .collect::<IndexMap<TransactionIntentHash, IndexSet<HDSignature>>>(
-            ),
+            .collect::<IndexMap<ID, IndexSet<HDSignature<ID>>>>(),
         )
     }
 }
@@ -262,7 +254,7 @@ impl HasSampleValues for MaybeSignedTransactions {
 mod tests {
     use super::*;
 
-    type Sut = MaybeSignedTransactions;
+    type Sut = MaybeSignedTransactions<TransactionIntentHash>;
 
     #[test]
     fn equality_of_samples() {
@@ -287,7 +279,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),
@@ -310,7 +302,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),

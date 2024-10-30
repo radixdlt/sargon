@@ -104,14 +104,17 @@ impl SimpleFungibleResourceBounds {
         Self::exact(1337)
     }
 
+    #[allow(dead_code)]
     fn sample_at_most() -> Self {
         Self::at_most(3)
     }
 
+    #[allow(dead_code)]
     fn sample_at_least() -> Self {
         Self::at_least(2)
     }
 
+    #[allow(dead_code)]
     fn sample_between() -> Self {
         Self::between(1, 3)
     }
@@ -137,6 +140,8 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample_between(), SUT::sample_at_least());
+        assert_ne!(SUT::sample_at_most(), SUT::sample_at_least());
     }
 
     #[test]

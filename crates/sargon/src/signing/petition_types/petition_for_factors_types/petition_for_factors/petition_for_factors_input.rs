@@ -67,30 +67,30 @@ impl PetitionForFactorsInput {
         self.factors.len() as i8
     }
 
-    fn remaining_factors_until_success(
+    fn remaining_factors_until_success<ID: SignableID>(
         &self,
-        snapshot: PetitionForFactorsStateSnapshot,
+        snapshot: PetitionForFactorsStateSnapshot<ID>,
     ) -> i8 {
         self.required - snapshot.signed_count()
     }
 
-    pub(super) fn is_fulfilled_by(
+    pub(super) fn is_fulfilled_by<ID: SignableID>(
         &self,
-        snapshot: PetitionForFactorsStateSnapshot,
+        snapshot: PetitionForFactorsStateSnapshot<ID>,
     ) -> bool {
         self.remaining_factors_until_success(snapshot) <= 0
     }
 
-    fn factors_left_to_prompt(
+    fn factors_left_to_prompt<ID: SignableID>(
         &self,
-        snapshot: PetitionForFactorsStateSnapshot,
+        snapshot: PetitionForFactorsStateSnapshot<ID>,
     ) -> i8 {
         self.factors_count() - snapshot.prompted_count()
     }
 
-    pub(super) fn is_failure_with(
+    pub(super) fn is_failure_with<ID: SignableID>(
         &self,
-        snapshot: PetitionForFactorsStateSnapshot,
+        snapshot: PetitionForFactorsStateSnapshot<ID>,
     ) -> bool {
         let signed_or_pending = self.factors_left_to_prompt(snapshot.clone())
             + snapshot.signed_count();

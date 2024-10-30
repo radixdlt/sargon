@@ -15,9 +15,9 @@ use crate::prelude::*;
 /// questions from different security questions factor sources (in fact we
 /// might not even allow multiple SecurityQuestionsFactorSources to be used).
 #[async_trait::async_trait]
-pub trait MonoFactorSignInteractor {
+pub trait MonoFactorSignInteractor<S: Signable> {
     async fn sign(
         &self,
-        request: MonoFactorSignRequest,
-    ) -> SignWithFactorsOutcome;
+        request: MonoFactorSignRequest<S>,
+    ) -> SignWithFactorsOutcome<S::ID>;
 }

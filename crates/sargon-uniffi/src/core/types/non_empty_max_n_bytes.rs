@@ -41,7 +41,9 @@ macro_rules! decl_non_empty_max_n_bytes {
                 }
             }
 
+            #[allow(clippy::from_over_into)]
             impl Into<[< InternalNonEmptyMax $byte_count Bytes  >]> for [< NonEmptyMax $byte_count Bytes  >] {
+                #[allow(clippy::from_over_into)]
                 fn into(self) -> [< InternalNonEmptyMax $byte_count Bytes  >] {
                     [< InternalNonEmptyMax $byte_count Bytes  >]::try_from(self.bag_of_bytes.into_internal()).unwrap().into()
                 }

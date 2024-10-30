@@ -1,36 +1,39 @@
 use crate::prelude::*;
 
 impl TransactionPreviewRequest {
-    pub fn new(
-        intent: TransactionIntent,
+    pub fn new_transaction_analysis_v1(
+        manifest: TransactionManifest,
+        start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
-        flags: impl Into<Option<TransactionPreviewRequestFlags>>,
+        notary_public_key: PublicKey,
+        nonce: Nonce,
     ) -> Self {
+        let signer_public_keys = signer_public_keys
+            .into_iter()
+            .map(GWPublicKey::from)
+            .collect_vec();
+
         Self {
-            manifest: intent.manifest_string(),
+            manifest: manifest.manifest_string(),
             blobs_hex: Some(
-                intent
+                manifest
                     .blobs()
                     .blobs()
                     .into_iter()
                     .map(|b| b.to_hex())
                     .collect_vec(),
             ),
-            start_epoch_inclusive: intent.header.start_epoch_inclusive.into(),
-            end_epoch_exclusive: intent.header.end_epoch_exclusive.into(),
-            notary_public_key: Some(GWPublicKey::from(
-                intent.header.notary_public_key,
-            )),
-            notary_is_signatory: intent.header.notary_is_signatory,
-            tip_percentage: intent.header.tip_percentage,
-            nonce: intent.header.nonce.into(),
-            signer_public_keys: signer_public_keys
-                .into_iter()
-                .map(GWPublicKey::from)
-                .collect_vec(),
-            flags: flags
-                .into()
-                .unwrap_or(TransactionPreviewRequestFlags::default()),
+            start_epoch_inclusive: start_epoch_inclusive.into(),
+            end_epoch_exclusive: Epoch::window_end_from_start(
+                start_epoch_inclusive,
+            )
+            .into(),
+            notary_public_key: Some(GWPublicKey::from(notary_public_key)),
+            notary_is_signatory: signer_public_keys.is_empty(),
+            tip_percentage: 0,
+            nonce: nonce.into(),
+            signer_public_keys: signer_public_keys,
+            flags: TransactionPreviewRequestFlags::default(),
             opt_ins: TransactionPreviewRequestOptIns::default(),
         }
     }
@@ -49,7 +52,13 @@ mod tests {
             let header = intent.header;
             let keys = vec![PublicKey::sample(), PublicKey::sample_other()];
             let flags = TransactionPreviewRequestFlags::default();
-            let sut = SUT::new(intent.clone(), keys.clone(), flags.clone());
+            let sut = SUT::new_transaction_analysis_v1(
+                intent.clone().manifest,
+                intent.header.start_epoch_inclusive,
+                keys.clone(),
+                intent.header.notary_public_key,
+                intent.header.nonce,
+            );
             assert_eq!(sut.flags, flags);
             assert_eq!(
                 sut.signer_public_keys,
@@ -74,7 +83,7 @@ mod tests {
                     .map(|b| b.to_string())
                     .collect_vec()
             );
-            assert_eq!(sut.notary_is_signatory, header.notary_is_signatory);
+            assert_eq!(sut.notary_is_signatory, false);
             assert_eq!(
                 sut.notary_public_key.unwrap(),
                 GWPublicKey::from(header.notary_public_key)

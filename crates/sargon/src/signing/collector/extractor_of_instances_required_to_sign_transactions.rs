@@ -7,13 +7,13 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
     /// Extracts factor instances required to sign transactions.
     /// Returns a set of `HierarchicalDeterministicFactorInstance`.
     /// Returns an error if the `SignaturesCollectorPreprocessor` fails to initialize.
-    pub fn extract(
+    pub fn extract<S: Signable>(
         profile: &Profile,
-        transactions: Vec<TransactionIntent>,
+        transactions: Vec<S>,
         for_any_securified_entity_select_role: RoleKind,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         let preprocessor =
-            SignaturesCollectorPreprocessor::analyzing_transaction_intents(
+            SignaturesCollectorPreprocessor::analyzing_signables(
                 profile,
                 transactions,
             )?;
@@ -59,9 +59,15 @@ mod tests {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::sample();
         let account_creating_factor_instance_1 = private_hd_factor_source
-            .derive_entity_creation_factor_instance(NetworkID::Mainnet, 0);
+            .derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(0).unwrap(),
+            );
         let account_creating_factor_instance_2 = private_hd_factor_source
-            .derive_entity_creation_factor_instance(NetworkID::Mainnet, 1);
+            .derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(1).unwrap(),
+            );
 
         let account_1 = Account::new(
             account_creating_factor_instance_1.clone(),
@@ -75,7 +81,10 @@ mod tests {
         );
 
         let persona_creating_factor_instance = private_hd_factor_source
-            .derive_entity_creation_factor_instance(NetworkID::Mainnet, 1);
+            .derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(1).unwrap(),
+            );
         let persona = Persona::new(
             persona_creating_factor_instance.clone(),
             DisplayName::sample(),

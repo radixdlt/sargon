@@ -29,9 +29,18 @@ pub enum CAP26EntityKind {
 }
 
 impl CAP26EntityKind {
-    /// The raw representation of this entity kind, an `HDPathValue`.
-    pub fn discriminant(&self) -> HDPathValue {
-        *self as HDPathValue
+    /// The raw representation of this entity kind, a `u32`.
+    pub fn discriminant(&self) -> u32 {
+        *self as u32
+    }
+}
+
+impl TryFrom<U31> for CAP26EntityKind {
+    type Error = CommonError;
+    fn try_from(value: U31) -> Result<Self> {
+        let repr = u32::from(value);
+        Self::from_repr(repr)
+            .ok_or(CommonError::InvalidEntityKind { bad_value: repr })
     }
 }
 

@@ -7,7 +7,7 @@ decl_version_type!(Subintent);
 pub struct DappToWalletInteractionSubintentRequestItem {
     pub version: SubintentVersion,
 
-    pub unvalidated_manifest: UnvalidatedTransactionManifest,
+    pub unvalidated_manifest: UnvalidatedSubintentManifest,
 
     pub message: Option<String>,
 

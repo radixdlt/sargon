@@ -40,7 +40,10 @@ macro_rules! decl_exactly_n_bytes {
                 }
             }
 
+
+            #[allow(clippy::from_over_into)]
             impl Into<[<InternalExactly $byte_count Bytes>]> for [<Exactly $byte_count Bytes>] {
+                #[allow(clippy::from_over_into)]
                 fn into(self) -> [<InternalExactly $byte_count Bytes>] {
                     [<InternalExactly $byte_count Bytes>]::try_from(self.value.into_internal()).unwrap()
                 }

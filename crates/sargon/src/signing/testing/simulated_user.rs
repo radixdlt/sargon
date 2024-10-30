@@ -12,8 +12,12 @@ pub(crate) enum SigningUserInput {
 #[derive(Clone, derive_more::Debug)]
 #[debug("SimulatedUser(mode: {mode:?}, failures: {failures:?})")]
 pub(crate) struct SimulatedUser {
-    spy_on_request:
-        Arc<dyn Fn(FactorSourceKind, IndexSet<InvalidTransactionIfNeglected>)>,
+    spy_on_request: Arc<
+        dyn Fn(
+            FactorSourceKind,
+            IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
+        ),
+    >,
     mode: SimulatedUserMode,
     /// `None` means never failures
     failures: Option<SimulatedFailures>,
@@ -21,8 +25,10 @@ pub(crate) struct SimulatedUser {
 
 impl SimulatedUser {
     pub(crate) fn with_spy(
-        spy_on_request: impl Fn(FactorSourceKind, IndexSet<InvalidTransactionIfNeglected>)
-            + 'static,
+        spy_on_request: impl Fn(
+                FactorSourceKind,
+                IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
+            ) + 'static,
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
     ) -> Self {
@@ -137,7 +143,9 @@ impl SimulatedUser {
     pub(crate) fn spy_on_request_before_handled(
         &self,
         factor_source_kind: FactorSourceKind,
-        invalid_tx_if_skipped: IndexSet<InvalidTransactionIfNeglected>,
+        invalid_tx_if_skipped: IndexSet<
+            InvalidTransactionIfNeglected<TransactionIntentHash>,
+        >,
     ) {
         (self.spy_on_request)(
             factor_source_kind,
@@ -148,7 +156,7 @@ impl SimulatedUser {
     pub(crate) fn sign_or_skip(
         &self,
         invalid_tx_if_skipped: impl IntoIterator<
-            Item = InvalidTransactionIfNeglected,
+            Item = InvalidTransactionIfNeglected<TransactionIntentHash>,
         >,
     ) -> SigningUserInput {
         let invalid_tx_if_skipped = invalid_tx_if_skipped

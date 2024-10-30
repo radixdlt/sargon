@@ -159,6 +159,39 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
     }
 }
 
+impl ExecutionSummary {
+    pub fn sample_stokenet() -> Self {
+        Self {
+            withdrawals: vec![(
+                AccountAddress::sample_stokenet(),
+                vec![ResourceIndicator::sample_stokenet()],
+            )]
+            .into_iter()
+            .collect(),
+            deposits: vec![(
+                AccountAddress::sample_stokenet_other(),
+                vec![ResourceIndicator::sample_stokenet()],
+            )]
+            .into_iter()
+            .collect(),
+            addresses_of_accounts_requiring_auth: vec![
+                AccountAddress::sample_stokenet_other(),
+            ],
+            addresses_of_identities_requiring_auth: Vec::new(),
+            newly_created_non_fungibles: Vec::new(),
+            reserved_instructions: Vec::new(),
+            presented_proofs: Vec::new(),
+            encountered_addresses: vec![
+                ManifestEncounteredComponentAddress::sample_component_stokenet(
+                ),
+            ],
+            detailed_classification: vec![DetailedManifestClass::sample()],
+            fee_locks: FeeLocks::sample(),
+            fee_summary: FeeSummary::sample(),
+            new_entities: NewEntities::sample(),
+        }
+    }
+}
 impl HasSampleValues for ExecutionSummary {
     fn sample() -> Self {
         Self {

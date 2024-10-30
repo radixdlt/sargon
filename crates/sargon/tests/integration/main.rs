@@ -268,14 +268,19 @@ mod integration_tests {
         struct TestLazySignMinimumInteractor;
 
         #[async_trait::async_trait]
-        impl PolyFactorSignInteractor for TestLazySignMinimumInteractor {
+        impl PolyFactorSignInteractor<TransactionIntent>
+            for TestLazySignMinimumInteractor
+        {
             async fn sign(
                 &self,
-                request: PolyFactorSignRequest,
-            ) -> SignWithFactorsOutcome {
-                let mut signatures = IndexSet::<HDSignature>::new();
+                request: PolyFactorSignRequest<TransactionIntent>,
+            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+                let mut signatures =
+                    IndexSet::<HDSignature<TransactionIntentHash>>::new();
                 for (_, req) in request.per_factor_source.iter() {
-                    let resp = <Self as MonoFactorSignInteractor>::sign(
+                    let resp = <Self as MonoFactorSignInteractor<
+                        TransactionIntent,
+                    >>::sign(
                         self,
                         MonoFactorSignRequest::new(
                             req.clone(),
@@ -313,11 +318,13 @@ mod integration_tests {
         }
 
         #[async_trait::async_trait]
-        impl MonoFactorSignInteractor for TestLazySignMinimumInteractor {
+        impl MonoFactorSignInteractor<TransactionIntent>
+            for TestLazySignMinimumInteractor
+        {
             async fn sign(
                 &self,
-                request: MonoFactorSignRequest,
-            ) -> SignWithFactorsOutcome {
+                request: MonoFactorSignRequest<TransactionIntent>,
+            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
                 if request.invalid_transactions_if_neglected.is_empty() {
                     return SignWithFactorsOutcome::Neglected(
                         NeglectedFactors::new(
@@ -336,7 +343,7 @@ mod integration_tests {
                             .map(|x| HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(x.clone()))
                             .collect::<IndexSet<_>>()
                     })
-                    .collect::<IndexSet<HDSignature>>();
+                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
                 SignWithFactorsOutcome::Signed {
                     produced_signatures: SignResponse::with_signatures(
                         signatures,
@@ -345,8 +352,11 @@ mod integration_tests {
             }
         }
 
-        impl SignInteractors for TestLazySignMinimumInteractors {
-            fn interactor_for(&self, kind: FactorSourceKind) -> SignInteractor {
+        impl SignInteractors<TransactionIntent> for TestLazySignMinimumInteractors {
+            fn interactor_for(
+                &self,
+                kind: FactorSourceKind,
+            ) -> SignInteractor<TransactionIntent> {
                 match kind {
                     FactorSourceKind::Device => SignInteractor::mono(Arc::new(
                         TestLazySignMinimumInteractor,
@@ -372,7 +382,8 @@ mod integration_tests {
                 "Alice",
                 AccountAddress::sample_at(0),
                 || {
-                    let i = HDPathComponent::from(0);
+                    let i = Hardened::from_local_key_space_unsecurified(0u32)
+                        .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
                         [
                             FI::sample_mainnet_tx_account(i, *f0.factor_source_id().as_hash().unwrap()), // SKIPPED
@@ -388,7 +399,8 @@ mod integration_tests {
                 "Bob",
                 AccountAddress::sample_at(1),
                 || {
-                    let i = HDPathComponent::from(1);
+                    let i = Hardened::from_local_key_space_unsecurified(1u32)
+                        .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
                         FI::sample_mainnet_tx_account(
                             i,
@@ -402,7 +414,8 @@ mod integration_tests {
                 "Carol",
                 AccountAddress::sample_at(2),
                 || {
-                    let i = HDPathComponent::from(2);
+                    let i = Hardened::from_local_key_space_unsecurified(2u32)
+                        .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                         [FI::sample_mainnet_tx_account(
                             i,
@@ -420,7 +433,7 @@ mod integration_tests {
             let satoshi = Persona::sample_unsecurified_mainnet(
                 "Satoshi",
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_identity(
-                    HDPathComponent::from(0),
+                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
                     *f4.factor_source_id().as_hash().unwrap(),
                 ),
             );

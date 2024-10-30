@@ -7,16 +7,16 @@ use crate::prelude::*;
 /// have either signed or been neglected.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("PetitionForFactorsState(signed: {:?}, neglected: {:?})", signed.borrow().clone(), neglected.borrow().clone())]
-pub(crate) struct PetitionForFactorsState {
+pub(crate) struct PetitionForFactorsState<ID: SignableID> {
     /// Factors that have signed.
-    signed: RefCell<PetitionForFactorsSubState<HDSignature>>,
+    signed: RefCell<PetitionForFactorsSubState<HDSignature<ID>>>,
 
     /// Neglected factors, either due to user explicitly skipping, or due
     /// implicitly neglected to failure.
     neglected: RefCell<PetitionForFactorsSubState<NeglectedFactorInstance>>,
 }
 
-impl PetitionForFactorsState {
+impl<ID: SignableID> PetitionForFactorsState<ID> {
     /// Creates a new `PetitionForFactorsState`.
     pub(super) fn new() -> Self {
         Self {
@@ -35,12 +35,12 @@ impl PetitionForFactorsState {
     /// A reference to the factors which have been signed with so far.
     pub(super) fn signed(
         &self,
-    ) -> Ref<PetitionForFactorsSubState<HDSignature>> {
+    ) -> Ref<PetitionForFactorsSubState<HDSignature<ID>>> {
         self.signed.borrow()
     }
 
     /// A set of signatures from factors that have been signed with so far.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.signed().snapshot()
     }
 
@@ -76,12 +76,12 @@ impl PetitionForFactorsState {
 
     /// # Panics
     /// Panics if this factor source has already been neglected or signed with.
-    pub(crate) fn add_signature(&self, signature: &HDSignature) {
+    pub(crate) fn add_signature(&self, signature: &HDSignature<ID>) {
         self.assert_not_referencing_factor_source(signature.factor_source_id());
         self.signed.borrow_mut().insert(signature)
     }
 
-    pub(super) fn snapshot(&self) -> PetitionForFactorsStateSnapshot {
+    pub(super) fn snapshot(&self) -> PetitionForFactorsStateSnapshot<ID> {
         PetitionForFactorsStateSnapshot::new(
             self.signed().snapshot(),
             self.neglected().snapshot(),
@@ -105,9 +105,9 @@ mod tests {
     use super::*;
     use crate::DependencyInformation::Tag;
 
-    type Sut = PetitionForFactorsState;
+    type Sut = PetitionForFactorsState<TransactionIntentHash>;
 
-    impl PetitionForFactorsState {
+    impl PetitionForFactorsState<TransactionIntentHash> {
         fn test_neglect(
             &self,
             id: &HierarchicalDeterministicFactorInstance,
@@ -151,7 +151,7 @@ mod tests {
 
         let factor_instance =
             HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                HDPathComponent::from(0),
+                Hardened::from_local_key_space_unsecurified(0).unwrap(),
                 FactorSourceIDFromHash::sample_at(0),
             );
         let sign_input = HDSignatureInput::new(
@@ -176,7 +176,7 @@ mod tests {
         let intent_hash = TransactionIntentHash::sample();
         let factor_instance =
             HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                HDPathComponent::from(0),
+                Hardened::from_local_key_space_unsecurified(0).unwrap(),
                 FactorSourceIDFromHash::sample_at(0),
             );
 

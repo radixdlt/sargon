@@ -4,21 +4,21 @@ use crate::prelude::*;
 /// (derivations paths).
 #[derive(derive_more::Debug, Clone)]
 #[debug("per_factor_source: {:#?}", per_factor_source)]
-pub struct PolyFactorSignRequest {
+pub struct PolyFactorSignRequest<S: Signable> {
     factor_source_kind: FactorSourceKind,
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.
     pub per_factor_source:
-        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput>,
+        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<S>>,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
     pub invalid_transactions_if_neglected:
-        IndexSet<InvalidTransactionIfNeglected>,
+        IndexSet<InvalidTransactionIfNeglected<S::ID>>,
 }
 
-impl PolyFactorSignRequest {
+impl<S: Signable> PolyFactorSignRequest<S> {
     /// # Panics
     /// Panics if `per_factor_source` is empty
     ///
@@ -27,10 +27,10 @@ impl PolyFactorSignRequest {
         factor_source_kind: FactorSourceKind,
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
-            MonoFactorSignRequestInput,
+            MonoFactorSignRequestInput<S>,
         >,
         invalid_transactions_if_neglected: IndexSet<
-            InvalidTransactionIfNeglected,
+            InvalidTransactionIfNeglected<S::ID>,
         >,
     ) -> Self {
         assert!(
@@ -64,7 +64,7 @@ impl PolyFactorSignRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PolyFactorSignRequest;
+    type Sut = PolyFactorSignRequest<TransactionIntent>;
 
     #[test]
     #[should_panic(

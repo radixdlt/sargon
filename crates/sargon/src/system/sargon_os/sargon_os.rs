@@ -581,8 +581,10 @@ mod tests {
         let other_hd =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let invalid_account = Account::new(
-            other_hd
-                .derive_entity_creation_factor_instance(NetworkID::Mainnet, 0),
+            other_hd.derive_entity_creation_factor_instance(
+                NetworkID::Mainnet,
+                HDPathComponent::unsecurified_hardened(0).unwrap(),
+            ),
             DisplayName::new("Invalid Account").unwrap(),
             AppearanceID::sample(),
         );

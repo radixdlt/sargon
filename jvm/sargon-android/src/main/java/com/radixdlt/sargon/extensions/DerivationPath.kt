@@ -1,79 +1,52 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.Bip44LikePath
+import com.radixdlt.sargon.AccountPath
 import com.radixdlt.sargon.Cap26KeyKind
-import com.radixdlt.sargon.Cap26Path
 import com.radixdlt.sargon.DerivationPath
-import com.radixdlt.sargon.GetIdPath
+import com.radixdlt.sargon.EntityKind
+import com.radixdlt.sargon.Hardened
 import com.radixdlt.sargon.HdPath
+import com.radixdlt.sargon.HdPathComponent
+import com.radixdlt.sargon.IdentityPath
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.bip44LikePathGetAddressIndex
-import com.radixdlt.sargon.bip44LikePathToString
-import com.radixdlt.sargon.cap26PathToString
-import com.radixdlt.sargon.defaultGetIdPath
+import com.radixdlt.sargon.Slip10Curve
 import com.radixdlt.sargon.derivationPathToHdPath
-import com.radixdlt.sargon.newAccountPath
-import com.radixdlt.sargon.newBip44LikePathFromIndex
-import com.radixdlt.sargon.newBip44LikePathFromString
-import com.radixdlt.sargon.newCap26PathFromString
-import com.radixdlt.sargon.newIdentityPath
+import com.radixdlt.sargon.derivationPathToString
+import com.radixdlt.sargon.newDerivationPathFromString
+import kotlin.jvm.Throws
 
-typealias HDPathValue = UInt
+fun DerivationPath.Companion.initForEntity(
+    kind: EntityKind,
+    networkId: NetworkId,
+    index: Hardened
+): DerivationPath = when (kind) {
+    EntityKind.ACCOUNT -> AccountPath.init(
+        networkId = networkId,
+        keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+        index = index
+    ).asGeneral()
+
+    EntityKind.PERSONA -> IdentityPath.init(
+        networkId = networkId,
+        keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+        index = index
+    ).asGeneral()
+}
 
 @Throws(SargonException::class)
-fun DerivationPath.Cap26.Companion.init(cap26Path: String): DerivationPath.Cap26 =
-    DerivationPath.Cap26(newCap26PathFromString(string = cap26Path))
+fun DerivationPath.Companion.init(path: String) = newDerivationPathFromString(string = path)
 
-fun DerivationPath.Cap26.Companion.account(
-    networkId: NetworkId,
-    keyKind: Cap26KeyKind,
-    index: HDPathValue
-): DerivationPath.Cap26 = DerivationPath.Cap26(Cap26Path.Account(newAccountPath(
-    networkId = networkId,
-    keyKind = keyKind,
-    index = index
-)))
+val DerivationPath.string
+    get() = derivationPathToString(path = this)
 
-fun DerivationPath.Cap26.Companion.identity(
-    networkId: NetworkId,
-    keyKind: Cap26KeyKind,
-    index: HDPathValue
-): DerivationPath.Cap26 = DerivationPath.Cap26(Cap26Path.Identity(newIdentityPath(
-    networkId = networkId,
-    keyKind = keyKind,
-    index = index
-)))
-
-val DerivationPath.Cap26.string: String
-    get() = cap26PathToString(path = value)
-
-@Throws(SargonException::class)
-fun DerivationPath.Bip44Like.Companion.init(bip44LikePath: String): DerivationPath.Bip44Like =
-    DerivationPath.Bip44Like(newBip44LikePathFromString(string = bip44LikePath))
-
-fun DerivationPath.Bip44Like.Companion.init(index: HDPathValue): DerivationPath.Bip44Like =
-    DerivationPath.Bip44Like(newBip44LikePathFromIndex(index = index))
-
-val DerivationPath.Bip44Like.addressIndex: HDPathValue
-    get() = bip44LikePathGetAddressIndex(path = value)
-
-val DerivationPath.Bip44Like.string: String
-    get() = bip44LikePathToString(path = value)
-
-fun GetIdPath.Companion.default() = defaultGetIdPath()
-
-val DerivationPath.string: String
-    get() = when (this) {
-        is DerivationPath.Bip44Like -> string
-        is DerivationPath.Cap26 -> string
-    }
-
-val DerivationPath.hdPath: HdPath
+val DerivationPath.path: HdPath
     get() = derivationPathToHdPath(path = this)
 
-val DerivationPath.nonHardenedIndex: HDPathValue
-    get() = hdPath.components.last() // safe, we disallow empty paths.
-        .nonHardenedValue
+val DerivationPath.curve: Slip10Curve
+    get() = when (this) {
+        is DerivationPath.Bip44Like -> Slip10Curve.SECP256K1
+        is DerivationPath.Account, is DerivationPath.Identity -> Slip10Curve.CURVE25519
+    }
 
-fun Bip44LikePath.asGeneral() = DerivationPath.Bip44Like(this)
-fun Cap26Path.asGeneral() = DerivationPath.Cap26(this)
+val DerivationPath.lastPathComponent: HdPathComponent
+    get() = path.components.last()
