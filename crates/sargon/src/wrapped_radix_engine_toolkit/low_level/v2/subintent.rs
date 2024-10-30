@@ -3,20 +3,24 @@ use delegate::delegate;
 use std::hash::Hasher;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
-#[debug("{:?}", self.intent_core)]
+#[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.manifest_string())]
 pub struct Subintent {
-    pub intent_core: IntentCoreV2,
+    pub header: IntentHeaderV2,
+    pub manifest: SubintentManifest,
+    pub message: MessageV2,
 }
 
 impl Subintent {
     pub fn new(
         header: IntentHeaderV2,
-        manifest: TransactionManifestV2,
+        manifest: SubintentManifest,
         message: MessageV2,
     ) -> Result<Self> {
         _ = compile_intent_with(&header, &manifest, &message)?;
         Ok(Self {
-            intent_core: IntentCoreV2::new(header, manifest, message),
+            header,
+            manifest,
+            message,
         })
     }
 
@@ -29,11 +33,23 @@ impl Subintent {
             self.network_id(),
         )
     }
+
+    pub fn network_id(&self) -> NetworkID {
+        self.header.network_id
+    }
+
+    pub fn manifest_string(&self) -> String {
+        self.manifest.manifest_string()
+    }
+
+    pub fn blobs(&self) -> &Blobs {
+        &self.manifest.blobs
+    }
 }
 
 fn into_scrypto(
     header: &IntentHeaderV2,
-    manifest: &TransactionManifestV2,
+    manifest: &SubintentManifest,
     message: &MessageV2,
 ) -> ScryptoSubintent {
     ScryptoSubintent {
@@ -51,7 +67,7 @@ fn into_scrypto(
 
 fn compile_intent_with(
     header: &IntentHeaderV2,
-    manifest: &TransactionManifestV2,
+    manifest: &SubintentManifest,
     message: &MessageV2,
 ) -> Result<BagOfBytes> {
     compile_intent(into_scrypto(header, manifest, message))
@@ -67,9 +83,7 @@ fn compile_intent(scrypto_intent: ScryptoSubintent) -> Result<BagOfBytes> {
 
 impl From<Subintent> for ScryptoSubintent {
     fn from(value: Subintent) -> Self {
-        ScryptoSubintent {
-            intent_core: value.intent_core.into(),
-        }
+        into_scrypto(&value.header, &value.manifest, &value.message)
     }
 }
 
@@ -83,8 +97,8 @@ impl TryFrom<ScryptoSubintent> for Subintent {
             NetworkID::try_from(value.intent_core.header.network_id)?;
 
         let manifest =
-            TryFrom::<(ScryptoTransactionManifestV2, NetworkID)>::try_from((
-                ScryptoTransactionManifestV2::from_intent_core(
+            TryFrom::<(ScryptoSubintentManifestV2, NetworkID)>::try_from((
+                ScryptoSubintentManifestV2::from_intent_core(
                     &value.intent_core,
                 ),
                 network_id,
@@ -105,21 +119,11 @@ impl std::hash::Hash for Subintent {
     }
 }
 
-impl Subintent {
-    delegate! {
-        to self.intent_core{
-            pub fn network_id(&self) -> NetworkID;
-            pub fn manifest_string(&self) -> String;
-            pub fn blobs(&self) -> &Blobs;
-        }
-    }
-}
-
 impl HasSampleValues for Subintent {
     fn sample() -> Self {
         Self::new(
             IntentHeaderV2::sample(),
-            TransactionManifestV2::sample(),
+            SubintentManifest::sample(),
             MessageV2::sample(),
         )
         .unwrap()
@@ -128,7 +132,7 @@ impl HasSampleValues for Subintent {
     fn sample_other() -> Self {
         Self::new(
             IntentHeaderV2::sample_other(),
-            TransactionManifestV2::empty(NetworkID::Simulator),
+            SubintentManifest::empty(NetworkID::Simulator),
             MessageV2::None,
         )
         .unwrap()
@@ -159,12 +163,12 @@ mod tests {
 
     #[test]
     fn compile() {
-        assert_eq!(SUT::sample().compile().to_string(), "4d220b012105210607010a872c0100000000000a912c01000000000022010105008306670000000022010105e8860667000000000a15cd5b070000000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f205261646978212020002022044103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c086c6f636b5f6665652101850000fda0c4277708000000000000000000000000000000004103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a480000000000000000000000000000004103800051ac224ee242c339b5ea5f1ae567f0520a6ffa24b52a10b8e6cd96a8347f0c147472795f6465706f7369745f6f725f61626f727421028100000000220000");
+        assert_eq!(SUT::sample().compile().to_string(), "4d220b012105210607010a872c0100000000000a912c01000000000022010105008306670000000022010105e8860667000000000a15cd5b070000000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f205261646978212020002022054103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c086c6f636b5f6665652101850000fda0c4277708000000000000000000000000000000004103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a480000000000000000000000000000004103800051ac224ee242c339b5ea5f1ae567f0520a6ffa24b52a10b8e6cd96a8347f0c147472795f6465706f7369745f6f725f61626f72742102810000000022000060012100");
     }
 
     #[test]
     fn subintent_hash() {
         let hash = SUT::sample().hash();
-        assert_eq!(hash.to_string(), "subtxid_rdx1e95452vfay89t46gtw2jgfagw6p9uee3m2harsppwdhzprdjn8vsmkg88c")
+        assert_eq!(hash.to_string(), "subtxid_rdx1xput628m2l7jjweefd70gnq3t3a5x2gjeljduwm7vwly94s8ullql92sa0")
     }
 }

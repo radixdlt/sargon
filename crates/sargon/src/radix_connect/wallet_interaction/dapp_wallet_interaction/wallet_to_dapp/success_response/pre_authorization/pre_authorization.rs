@@ -32,13 +32,20 @@ impl WalletToDappInteractionPreAuthorizationResponseItems {
             encoded_signed_partial_transaction,
         })
     }
+
+    pub fn new_with_subintent_and_signatures(
+        subintent: Subintent,
+        signatures: Vec<IntentSignature>,
+    ) -> Result<Self> {
+        Self::new(build_signed_partial_transaction(subintent, signatures))
+    }
 }
 
 impl HasSampleValues for WalletToDappInteractionPreAuthorizationResponseItems {
     fn sample() -> Self {
         Self {
             encoded_signed_partial_transaction:
-                "replace_actual_encoded_string_here".to_owned(),
+                "4d220e03210221012105210607010a872c0100000000000a912c01000000000022010105008306670000000022010105e8860667000000000a15cd5b070000000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f205261646978212020002022054103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c086c6f636b5f6665652101850000fda0c4277708000000000000000000000000000000004103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a480000000000000000000000000000004103800051ac224ee242c339b5ea5f1ae567f0520a6ffa24b52a10b8e6cd96a8347f0c147472795f6465706f7369745f6f725f61626f727421028100000000220000600121002021002022010102200720c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b362101200740fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103202000".to_owned(),
         }
     }
 
@@ -66,5 +73,14 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn new() {
+        let subintent = Subintent::sample();
+        let signatures = vec![IntentSignature::sample()];
+        let sut = SUT::new_with_subintent_and_signatures(subintent, signatures)
+            .unwrap();
+        assert_eq!(sut, SUT::sample());
     }
 }
