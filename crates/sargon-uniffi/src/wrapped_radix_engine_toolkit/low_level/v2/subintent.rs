@@ -3,7 +3,19 @@ use sargon::Subintent as InternalSubintent;
 
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct Subintent {
-    pub intent_core: IntentCoreV2,
+    pub header: IntentHeaderV2,
+    pub manifest: SubintentManifest,
+    pub message: MessageV2,
+}
+
+#[uniffi::export]
+pub fn new_subintent(
+    header: IntentHeaderV2,
+    manifest: SubintentManifest,
+    message: MessageV2,
+) -> Result<Subintent> {
+    InternalSubintent::new(header.into(), manifest.into(), message.into())
+        .into_result()
 }
 
 #[uniffi::export]
