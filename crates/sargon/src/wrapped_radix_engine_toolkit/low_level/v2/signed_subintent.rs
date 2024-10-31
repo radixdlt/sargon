@@ -29,7 +29,7 @@ impl SignedSubintent {
             &self.subintent,
             &self.subintent_signatures,
         )
-        .expect("Compiling after intialization is always valid")
+        .expect("Compiling after initialization is always valid")
     }
 }
 
@@ -64,9 +64,9 @@ fn compile_signed_subintent_with(
 }
 
 fn compile_signed_subintent(
-    signed_partial_transaciton: ScryptoSignedPartialTransaction,
+    signed_partial_transaction: ScryptoSignedPartialTransaction,
 ) -> Result<Vec<u8>> {
-    RET_compile_signed_partial_tx(&signed_partial_transaciton).map_err(|e| {
+    RET_compile_signed_partial_tx(&signed_partial_transaction).map_err(|e| {
         match e {
             sbor::EncodeError::MaxDepthExceeded(max) => {
                 CommonError::InvalidTransactionMaxSBORDepthExceeded {
