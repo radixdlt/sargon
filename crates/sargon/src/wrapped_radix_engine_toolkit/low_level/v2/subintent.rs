@@ -171,4 +171,24 @@ mod tests {
         let hash = SUT::sample().hash();
         assert_eq!(hash.to_string(), "subtxid_rdx1xput628m2l7jjweefd70gnq3t3a5x2gjeljduwm7vwly94s8ullql92sa0")
     }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn manifest_string() {
+        assert_eq!(
+            SUT::sample().manifest_string(),
+            "CallMethod { method: \"text/plain\", data: \"Hello Radix!  \" }"
+        );
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| SUT::try_from(ScryptoSubintent::from(s)).unwrap();
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
 }
