@@ -9,12 +9,10 @@ pub struct WalletToDappInteractionPreAuthorizationResponseItems {
 
 #[uniffi::export]
 pub fn new_wallet_to_dapp_interaction_pre_authorization_response_items(
-    subintent: Subintent,
-    signatures: Vec<IntentSignature>,
-) -> Result<WalletToDappInteractionPreAuthorizationResponseItems> {
-    InternalWalletToDappInteractionPreAuthorizationResponseItems::new_with_subintent_and_signatures(
-        subintent.into(),
-        signatures.into_type(),
+    signed_subintent: SignedSubintent,
+) -> WalletToDappInteractionPreAuthorizationResponseItems {
+    InternalWalletToDappInteractionPreAuthorizationResponseItems::new(
+        signed_subintent.into(),
     )
-    .into_result()
+    .into()
 }

@@ -181,13 +181,14 @@ mod tests {
     fn manifest_string() {
         assert_eq!(
             SUT::sample().manifest_string(),
-            "CallMethod { method: \"text/plain\", data: \"Hello Radix!  \" }"
+            "CALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\nYIELD_TO_PARENT;\n"
         );
     }
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip = |s: SUT| SUT::try_from(ScryptoSubintent::from(s)).unwrap();
+        let roundtrip =
+            |s: SUT| SUT::try_from(ScryptoSubintent::from(s)).unwrap();
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }
