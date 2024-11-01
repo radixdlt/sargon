@@ -95,30 +95,30 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
-    // #[test]
-    // fn from_scrypto_fungible() {
-    //     let scrypto = ScryptoSimpleResourceBounds::Fungible(
-    //         ScryptoSimpleFungibleResourceBounds::Exact(
-    //             Decimal::from(1337).into(),
-    //         ),
-    //     );
-    //     assert_eq!(SUT::from(scrypto), SUT::sample());
-    // }
+    #[test]
+    fn from_scrypto_fungible() {
+        let scrypto = ScryptoSimpleResourceBounds::Fungible(
+            ScryptoSimpleFungibleResourceBounds::Exact(
+                Decimal::from(1337).into(),
+            ),
+        );
+        assert_eq!(SUT::from((ResourceAddress::sample(), scrypto)), SUT::sample());
+    }
 
-    // #[test]
-    // fn from_scrypto_non_fungible() {
-    //     let scrypto = ScryptoSimpleResourceBounds::NonFungible(
-    //         ScryptoSimpleNonFungibleResourceBounds::Exact {
-    //             amount: Decimal::from(150).into(),
-    //             certain_ids: vec![
-    //                 NonFungibleLocalId::sample(),
-    //                 NonFungibleLocalId::sample_other(),
-    //             ]
-    //             .into_iter()
-    //             .map(ScryptoNonFungibleLocalId::from)
-    //             .collect(),
-    //         },
-    //     );
-    //     assert_eq!(SUT::from(scrypto), SUT::sample_other());
-    // }
+    #[test]
+    fn from_scrypto_non_fungible() {
+        let scrypto = ScryptoSimpleResourceBounds::NonFungible(
+            ScryptoSimpleNonFungibleResourceBounds::Exact {
+                amount: Decimal::from(150).into(),
+                certain_ids: vec![
+                    NonFungibleLocalId::sample(),
+                    NonFungibleLocalId::sample_other(),
+                ]
+                .into_iter()
+                .map(ScryptoNonFungibleLocalId::from)
+                .collect(),
+            },
+        );
+        assert_eq!(SUT::from((ResourceAddress::sample_other(), scrypto)), SUT::sample_other());
+    }
 }
