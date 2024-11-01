@@ -14,9 +14,10 @@ ASSERT_WORKTOP_RESOURCES_INCLUDE
             Tuple(
                 Array<NonFungibleLocalId>(
                     NonFungibleLocalId("#0#"),
-                    NonFungibleLocalId("#1#")
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#")
                 ),
-                Enum<LowerBound::Inclusive>(Decimal("2")),
+                Enum<LowerBound::Inclusive>(Decimal("3")),
                 Enum<UpperBound::Unbounded>(),
                 Enum<AllowedIds::Any>()
             )

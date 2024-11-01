@@ -25,11 +25,11 @@ impl SimpleResourceBounds {
     }
 
     pub fn non_fungible(
-        resource_address: ResourceAddress,
+        resource_address: impl Into<ResourceAddress>,
         bounds: SimpleNonFungibleResourceBounds,
     ) -> Self {
         Self::NonFungible {
-            resource_address,
+            resource_address: resource_address.into(),
             bounds,
         }
     }
