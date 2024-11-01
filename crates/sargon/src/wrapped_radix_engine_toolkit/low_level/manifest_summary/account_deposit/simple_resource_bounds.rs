@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SimpleResourceBounds {
     Fungible {
-        bounds: SimpleFungibleResourceBounds,
+        bounds: SimpleCountedResourceBounds,
     },
     NonFungible {
         bounds: SimpleNonFungibleResourceBounds,
@@ -12,7 +12,7 @@ pub enum SimpleResourceBounds {
 }
 
 impl SimpleResourceBounds {
-    pub fn fungible(bounds: SimpleFungibleResourceBounds) -> Self {
+    pub fn fungible(bounds: SimpleCountedResourceBounds) -> Self {
         Self::Fungible { bounds }
     }
 
@@ -36,7 +36,7 @@ impl From<ScryptoSimpleResourceBounds> for SimpleResourceBounds {
 
 impl HasSampleValues for SimpleResourceBounds {
     fn sample() -> Self {
-        Self::fungible(SimpleFungibleResourceBounds::sample())
+        Self::fungible(SimpleCountedResourceBounds::sample())
     }
 
     fn sample_other() -> Self {

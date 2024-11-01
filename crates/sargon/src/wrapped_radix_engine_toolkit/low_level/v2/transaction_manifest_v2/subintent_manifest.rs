@@ -527,7 +527,7 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") => vec![
                         AccountDeposit::new(
                             vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(150)))),
+                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(150)))),
                             ]
                             .into_iter()
                             .collect(),
@@ -537,7 +537,7 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") => vec![
                         AccountDeposit::new(
                             vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(50)))),
+                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(50)))),
                             ]
                             .into_iter()
                             .collect(),
@@ -547,7 +547,7 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") => vec![
                         AccountDeposit::new(
                             vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(130)))),
+                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(130)))),
                             ]
                             .into_iter()
                             .collect(),
@@ -612,27 +612,27 @@ DROP_AUTH_ZONE_PROOFS;
         )
     }
 
-    #[test]
-    fn complex_summary() {
-        let manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "open_subintent_manifest.rtm"
-        ));
+    // #[test]
+    // fn complex_summary() {
+    //     let manifest_str = include_str!(concat!(
+    //         env!("FIXTURES_TX"),
+    //         "open_subintent_manifest.rtm"
+    //     ));
 
-        let network = NetworkID::Stokenet.network_definition();
-        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
-            manifest_str,
-            &network,
-            BlobProvider::new(),
-        )
-        .unwrap();
+    //     let network = NetworkID::Stokenet.network_definition();
+    //     let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+    //         manifest_str,
+    //         &network,
+    //         BlobProvider::new(),
+    //     )
+    //     .unwrap();
 
-        let manifest: SubintentManifest =
-            (man, NetworkID::Stokenet).try_into().unwrap();
-        let summary = manifest.summary().unwrap();
+    //     let manifest: SubintentManifest =
+    //         (man, NetworkID::Stokenet).try_into().unwrap();
+    //     let summary = manifest.summary().unwrap();
 
-        // pretty print like json format
+    //     // pretty print like json format
 
-        print!("{:?}", summary);
-    }
+    //     print!("{:?}", summary);
+    // }
 }

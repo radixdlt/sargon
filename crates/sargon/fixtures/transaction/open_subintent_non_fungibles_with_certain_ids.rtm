@@ -1,0 +1,118 @@
+ASSERT_WORKTOP_RESOURCES_INCLUDE
+    Map<Address, Enum>(
+        Address("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("<Member_103>")
+                ),
+                Enum<LowerBound::NonZero>(),
+                Enum<UpperBound::Unbounded>(),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+        Address("resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#")
+                ),
+                Enum<LowerBound::Inclusive>(Decimal("2")),
+                Enum<UpperBound::Unbounded>(),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+        Address("resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::Inclusive>(Decimal("3")),
+                Enum<UpperBound::Inclusive>(Decimal("3")),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+        Address("resource_tdx_2_1nfn4gd24pcpnqegcq07mgvz9cea4zryytswn5vmgepnan7tjqedkxp") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::Inclusive>(Decimal("3")),
+                Enum<UpperBound::Inclusive>(Decimal("5")),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+        Address("resource_tdx_2_1nt8pgfd7xj954403vfgkej25g8kcc56ldu4j3akl4vzlcfen6jcfjg") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::NonZero>(),
+                Enum<UpperBound::Inclusive>(Decimal("3")),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+
+        Address("resource_tdx_2_1n2q3kj4sfa6sh45kvau2f08hfhjuls7zcevwl77vjzmgf3sea0uzzu") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::NonZero>(),
+                Enum<UpperBound::Inclusive>(Decimal("5")),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+        Address("resource_tdx_2_1n2rpk9w8d8kzu578jxvqr0dplctfh5clylmyqpu9kvnz7hvceh2mxe") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::Inclusive>(Decimal("5")),
+                Enum<UpperBound::Unbounded>(),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+        Address("resource_tdx_2_1ngu8tgxvv26rpmdwxxfd8gclnsnjeew7zdcw2p3genru58a7wkmue4") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::Inclusive>(Decimal("5")),
+                Enum<UpperBound::Inclusive>(Decimal("5")),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+         Address("resource_tdx_2_1nfve52p2wvx0kp0eq3xaznuvwakcu5a6aqtsjqq8x30zk4wkglxmlv") => Enum<ResourceConstraint::General>(
+            Tuple(
+                Array<NonFungibleLocalId>(
+                    NonFungibleLocalId("#0#"),
+                    NonFungibleLocalId("#1#"),
+                    NonFungibleLocalId("#2#"),
+                ),
+                Enum<LowerBound::Inclusive>(Decimal("5")),
+                Enum<UpperBound::Inclusive>(Decimal("8")),
+                Enum<AllowedIds::Any>()
+            )
+        ),
+    )
+;
+
+CALL_METHOD
+    Address("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl")
+    "deposit_batch"
+    Expression("ENTIRE_WORKTOP")
+;
+
+YIELD_TO_PARENT;

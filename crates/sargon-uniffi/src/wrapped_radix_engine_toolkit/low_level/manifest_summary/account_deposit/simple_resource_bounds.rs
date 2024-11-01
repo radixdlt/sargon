@@ -5,7 +5,7 @@ use sargon::SimpleResourceBounds as InternalSimpleResourceBounds;
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum SimpleResourceBounds {
     Fungible {
-        bounds: SimpleFungibleResourceBounds,
+        bounds: SimpleCountedResourceBounds,
     },
     NonFungible {
         bounds: SimpleNonFungibleResourceBounds,
