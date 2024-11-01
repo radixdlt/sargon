@@ -6,6 +6,12 @@ pub struct HierarchicalDeterministicFactorInstance {
     pub public_key: HierarchicalDeterministicPublicKey,
 }
 
+impl HasKeyKindObjectSafe for HierarchicalDeterministicFactorInstance {
+    fn get_key_kind(&self) -> CAP26KeyKind {
+        self.derivation_path().get_key_kind()
+    }
+}
+
 impl HierarchicalDeterministicFactorInstance {
     pub fn derivation_path(&self) -> DerivationPath {
         self.public_key.derivation_path.clone()
@@ -100,14 +106,6 @@ impl HierarchicalDeterministicFactorInstance {
                 value: self.public_key.clone().into(),
             },
         )
-    }
-
-    pub fn key_kind(&self) -> Option<CAP26KeyKind> {
-        match self.derivation_path() {
-            DerivationPath::Account { value } => Some(value.key_kind()),
-            DerivationPath::Identity { value } => Some(value.key_kind()),
-            DerivationPath::Bip44Like { value: _ } => None,
-        }
     }
 }
 
@@ -243,7 +241,7 @@ mod tests {
     }
 
     #[test]
-    fn key_kind_bip44_is_none() {
+    fn key_kind_bip44_is_tx() {
         let derivation_path: DerivationPath = BIP44LikePath::sample().into();
         let sut = HierarchicalDeterministicFactorInstance::new(
             FactorSourceIDFromHash::sample(),
@@ -252,7 +250,7 @@ mod tests {
                 derivation_path,
             ),
         );
-        assert_eq!(sut.key_kind(), None);
+        assert_eq!(sut.get_key_kind(), CAP26KeyKind::TransactionSigning);
     }
 
     #[test]
@@ -265,7 +263,7 @@ mod tests {
                 derivation_path,
             ),
         );
-        assert_eq!(sut.key_kind(), Some(CAP26KeyKind::TransactionSigning));
+        assert_eq!(sut.get_key_kind(), CAP26KeyKind::TransactionSigning);
     }
 
     #[test]

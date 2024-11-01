@@ -1,14 +1,24 @@
 use crate::prelude::*;
 
 pub trait HasKeyKind {
-    fn key_kind(&self) -> CAP26KeyKind;
+    fn key_kind() -> CAP26KeyKind;
+}
+
+pub trait HasKeyKindObjectSafe {
+    fn get_key_kind(&self) -> CAP26KeyKind;
+}
+
+impl<T: HasKeyKind> HasKeyKindObjectSafe for T {
+    fn get_key_kind(&self) -> CAP26KeyKind {
+        T::key_kind()
+    }
 }
 
 pub trait IsEntityPath:
     NewEntityPath
     + IsNetworkAware
     + HasEntityKind
-    + HasKeyKind
+    + HasKeyKindObjectSafe
     + Clone
     + Into<DerivationPath>
     + TryFrom<DerivationPath, Error = CommonError>
@@ -22,7 +32,7 @@ impl<
             + Clone
             + IsNetworkAware
             + HasEntityKind
-            + HasKeyKind
+            + HasKeyKindObjectSafe
             + Into<DerivationPath>
             + TryFrom<DerivationPath, Error = CommonError>,
     > IsEntityPath for T
@@ -52,7 +62,7 @@ impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
                 }
             })
             .and_then(|p: T| {
-                if !p.key_kind().is_transaction_signing() {
+                if !p.get_key_kind().is_transaction_signing() {
                     Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
                 } else {
                     Ok(p)
@@ -127,7 +137,7 @@ mod tests {
             HDFactorInstanceAccountCreation::new(hd_fi)
                 .unwrap()
                 .path
-                .key_kind(),
+                .get_key_kind(),
             CAP26KeyKind::TransactionSigning
         );
     }
@@ -180,7 +190,7 @@ mod tests {
             HDFactorInstanceIdentityCreation::new(hd_fi)
                 .unwrap()
                 .path
-                .key_kind(),
+                .get_key_kind(),
             CAP26KeyKind::TransactionSigning
         );
     }

@@ -6,6 +6,7 @@
 #![feature(iter_repeat_n)]
 
 mod core;
+mod factor_instances_provider;
 mod gateway_api;
 mod hierarchical_deterministic;
 mod home_cards;
@@ -19,6 +20,7 @@ mod wrapped_radix_engine_toolkit;
 pub mod prelude {
 
     pub use crate::core::*;
+    pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;

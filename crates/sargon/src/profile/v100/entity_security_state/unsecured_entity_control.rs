@@ -36,10 +36,8 @@ impl UnsecuredEntityControl {
     ) -> Result<Self> {
         let is_invalid_auth_signing_key = authentication_signing
             .as_ref()
-            .and_then(|auth| {
-                auth.key_kind().map(|key_kind| {
-                    key_kind != CAP26KeyKind::AuthenticationSigning
-                })
+            .map(|auth| {
+                auth.get_key_kind() != CAP26KeyKind::AuthenticationSigning
             })
             .unwrap_or(false);
 
@@ -49,12 +47,11 @@ impl UnsecuredEntityControl {
             );
         }
 
-        if let Some(key_kind) = transaction_signing.key_kind() {
-            if key_kind != CAP26KeyKind::TransactionSigning {
-                return Err(
-                    CommonError::WrongKeyKindOfTransactionSigningFactorInstance,
-                );
-            }
+        let key_kind = transaction_signing.get_key_kind();
+        if key_kind != CAP26KeyKind::TransactionSigning {
+            return Err(
+                CommonError::WrongKeyKindOfTransactionSigningFactorInstance,
+            );
         }
         Ok(Self {
             transaction_signing,

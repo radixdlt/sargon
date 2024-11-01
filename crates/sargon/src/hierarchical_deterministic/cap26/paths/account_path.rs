@@ -70,8 +70,8 @@ pub struct AccountPath {
     pub index: Hardened,
 }
 
-impl HasKeyKind for AccountPath {
-    fn key_kind(&self) -> CAP26KeyKind {
+impl HasKeyKindObjectSafe for AccountPath {
+    fn get_key_kind(&self) -> CAP26KeyKind {
         self.key_kind
     }
 }

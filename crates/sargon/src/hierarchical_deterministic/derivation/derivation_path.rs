@@ -186,6 +186,41 @@ path_union!(
     Bip44Like, BIP44LikePath
 );
 
+impl BIP44LikePath {
+    pub fn network_id(&self) -> NetworkID {
+        NetworkID::Mainnet
+    }
+}
+
+impl IsNetworkAware for DerivationPath {
+    fn network_id(&self) -> NetworkID {
+        match self {
+            Self::Account { value } => value.network_id(),
+            Self::Identity { value } => value.network_id(),
+            Self::Bip44Like { value } => value.network_id(),
+        }
+    }
+}
+impl HasKeyKindObjectSafe for DerivationPath {
+    fn get_key_kind(&self) -> CAP26KeyKind {
+        match self {
+            Self::Account { value } => value.get_key_kind(),
+            Self::Identity { value } => value.get_key_kind(),
+            Self::Bip44Like { value: _ } => CAP26KeyKind::TransactionSigning,
+        }
+    }
+}
+
+impl HasEntityKindObjectSafe for DerivationPath {
+    fn get_entity_kind(&self) -> CAP26EntityKind {
+        match self {
+            Self::Account { value } => value.get_entity_kind(),
+            Self::Identity { value } => value.get_entity_kind(),
+            Self::Bip44Like { value: _ } => CAP26EntityKind::Account,
+        }
+    }
+}
+
 impl HasSampleValues for DerivationPath {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
