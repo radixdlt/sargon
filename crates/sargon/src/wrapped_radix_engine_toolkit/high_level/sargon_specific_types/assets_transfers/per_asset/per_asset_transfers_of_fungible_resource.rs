@@ -7,7 +7,7 @@ pub struct PerAssetTransfersOfFungibleResource {
 }
 
 impl PerAssetTransfersOfFungibleResource {
-    pub(crate) fn expanded(
+    pub fn expanded(
         &mut self,
         transfer: impl Into<PerAssetFungibleTransfer>,
     ) {
@@ -42,7 +42,7 @@ impl PerAssetTransfersOfFungibleResource {
 }
 
 impl PerAssetTransfersOfFungibleResource {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(
             PerAssetFungibleResource::sample_mainnet(),
             [
@@ -52,14 +52,14 @@ impl PerAssetTransfersOfFungibleResource {
         )
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::new(
             PerAssetFungibleResource::sample_mainnet_other(),
             [PerAssetFungibleTransfer::sample_mainnet_other()],
         )
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::new(
             PerAssetFungibleResource::sample_stokenet(),
             [
@@ -69,7 +69,7 @@ impl PerAssetTransfersOfFungibleResource {
         )
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::new(
             PerAssetFungibleResource::sample_stokenet_other(),
             [PerAssetFungibleTransfer::sample_stokenet_other()],

@@ -4,7 +4,7 @@
 use crate::prelude::*;
 
 impl SignaturesCollector<TransactionIntent> {
-    pub(crate) fn new_test_with(
+    pub fn new_test_with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
@@ -19,7 +19,7 @@ impl SignaturesCollector<TransactionIntent> {
             role_kind,
         )
     }
-    pub(crate) fn new_test(
+    pub fn new_test(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<
@@ -37,7 +37,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_prudent_with_factors_and_finish_early(
+    pub fn test_prudent_with_factors_and_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<
@@ -53,7 +53,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_prudent_with_finish_early(
+    pub fn test_prudent_with_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
@@ -66,7 +66,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_prudent(
+    pub fn test_prudent(
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
         >,
@@ -77,7 +77,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_prudent_with_failures(
+    pub fn test_prudent_with_failures(
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
         >,
@@ -92,7 +92,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_lazy_sign_minimum_no_failures_with_factors(
+    pub fn test_lazy_sign_minimum_no_failures_with_factors(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
@@ -107,7 +107,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_lazy_sign_minimum_no_failures(
+    pub fn test_lazy_sign_minimum_no_failures(
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
         >,
@@ -118,7 +118,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_lazy_always_skip_with_factors(
+    pub fn test_lazy_always_skip_with_factors(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
@@ -133,7 +133,7 @@ impl SignaturesCollector<TransactionIntent> {
         )
     }
 
-    pub(crate) fn test_lazy_always_skip(
+    pub fn test_lazy_always_skip(
         transactions: impl IntoIterator<
             Item = SignableWithEntities<TransactionIntent>,
         >,

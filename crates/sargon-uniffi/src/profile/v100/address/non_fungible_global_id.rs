@@ -11,8 +11,8 @@ pub struct NonFungibleGlobalId {
     //
     // For more info see slack:
     // https://rdxworks.slack.com/archives/C01HK4QFXNY/p1709633826502809?thread_ts=1709633374.199459&channel=C01HK4QFXNY&message_ts=1709633826.502809
-    pub(crate) resource_address: ResourceAddress,
-    pub(crate) non_fungible_local_id: NonFungibleLocalId,
+    pub resource_address: ResourceAddress,
+    pub non_fungible_local_id: NonFungibleLocalId,
 }
 
 #[uniffi::export]

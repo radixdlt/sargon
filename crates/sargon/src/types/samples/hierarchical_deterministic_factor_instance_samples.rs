@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl HierarchicalDeterministicFactorInstance {
-    pub(crate) fn sample_id_to_instance(
+    pub fn sample_id_to_instance(
         entity_kind: CAP26EntityKind,
         index: Hardened,
     ) -> impl Fn(FactorSourceIDFromHash) -> Self {

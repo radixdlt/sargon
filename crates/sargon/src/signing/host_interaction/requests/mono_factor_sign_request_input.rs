@@ -17,7 +17,7 @@ impl<S: Signable> MonoFactorSignRequestInput<S> {
     ///
     /// Also panics if `per_transaction` if the factor source id
     /// of each request does not match `factor_source_id`.
-    pub(crate) fn new(
+    pub fn new(
         factor_source_id: FactorSourceIDFromHash,
         per_transaction: IndexSet<TransactionSignRequestInput<S>>,
     ) -> Self {
@@ -38,7 +38,7 @@ impl<S: Signable> MonoFactorSignRequestInput<S> {
 
     /// Returns the factor source kind of the factor source id.
     #[allow(unused)]
-    pub(crate) fn factor_source_kind(&self) -> FactorSourceKind {
+    pub fn factor_source_kind(&self) -> FactorSourceKind {
         self.factor_source_id.kind
     }
 }

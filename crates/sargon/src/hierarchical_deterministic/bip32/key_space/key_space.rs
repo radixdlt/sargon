@@ -1,9 +1,24 @@
 use crate::prelude::*;
 
 /// A discriminator of an `HDPathComponent`.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Debug,
+    derive_more::Display,
+)]
 pub enum KeySpace {
+    #[debug("{}", if *is_hardened { UnsecurifiedHardened::NON_CANONICAL_SUFFIX } else { "" })]
+    #[display("{}", if *is_hardened { UnsecurifiedHardened::CANONICAL_SUFFIX } else { "" })]
     Unsecurified { is_hardened: bool },
+
+    #[debug("{}", SecurifiedU30::NON_CANONICAL_SUFFIX)]
+    #[display("{}", SecurifiedU30::CANONICAL_SUFFIX)]
     Securified,
 }
 

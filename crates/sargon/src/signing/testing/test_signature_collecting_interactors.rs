@@ -3,12 +3,12 @@
 
 use crate::prelude::*;
 
-pub(crate) struct TestSignatureCollectingInteractors {
-    pub(crate) simulated_user: SimulatedUser,
+pub struct TestSignatureCollectingInteractors {
+    pub simulated_user: SimulatedUser,
 }
 
 impl TestSignatureCollectingInteractors {
-    pub(crate) fn new(simulated_user: SimulatedUser) -> Self {
+    pub fn new(simulated_user: SimulatedUser) -> Self {
         Self { simulated_user }
     }
 }

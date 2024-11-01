@@ -135,7 +135,7 @@ impl ResourceAddress {
     }
 
     #[allow(unused)]
-    pub(crate) fn sample_sim_xrd() -> Self {
+    pub fn sample_sim_xrd() -> Self {
         "resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3"
             .parse()
             .expect("valid sample value")

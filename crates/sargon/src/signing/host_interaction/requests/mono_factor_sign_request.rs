@@ -27,7 +27,7 @@ impl<S: Signable> MonoFactorSignRequest<S> {
     }
 
     #[allow(unused)]
-    pub(crate) fn factor_source_kind(&self) -> FactorSourceKind {
+    pub fn factor_source_kind(&self) -> FactorSourceKind {
         self.input.factor_source_kind()
     }
 }

@@ -8,7 +8,7 @@ pub struct U30(pub u32);
 impl U30 {
     pub const MAX: u32 = U30_MAX;
 
-    pub(crate) const fn new(value: u16) -> Self {
+    pub const fn new(value: u16) -> Self {
         Self(value as u32)
     }
 

@@ -56,7 +56,7 @@ impl<S: Signable> SignaturesCollector<S> {
 
 // === INTERNAL ===
 impl<S: Signable> SignaturesCollector<S> {
-    pub(crate) fn with(
+    pub fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
@@ -81,7 +81,7 @@ impl<S: Signable> SignaturesCollector<S> {
         }
     }
 
-    pub(crate) fn with_signers_extraction<F>(
+    pub fn with_signers_extraction<F>(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = S>,
@@ -383,7 +383,7 @@ mod tests {
 
     impl SignaturesCollector<TransactionIntent> {
         /// Used by tests
-        pub(crate) fn petitions(self) -> Petitions<TransactionIntent> {
+        pub fn petitions(self) -> Petitions<TransactionIntent> {
             self.state.into_inner().petitions.into_inner()
         }
     }

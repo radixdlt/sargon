@@ -7,7 +7,7 @@ use crate::prelude::*;
 /// have either signed or been neglected.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("PetitionForFactorsState(signed: {:?}, neglected: {:?})", signed.borrow().clone(), neglected.borrow().clone())]
-pub(crate) struct PetitionForFactorsState<ID: SignableID> {
+pub struct PetitionForFactorsState<ID: SignableID> {
     /// Factors that have signed.
     signed: RefCell<PetitionForFactorsSubState<HDSignature<ID>>>,
 
@@ -40,12 +40,12 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     }
 
     /// A set of signatures from factors that have been signed with so far.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
+    pub fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.signed().snapshot()
     }
 
     /// A set factors have been neglected so far.
-    pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
+    pub fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
         self.neglected().snapshot()
     }
 
@@ -65,7 +65,7 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     /// # Panics
     /// Panics if this factor source has already been neglected or signed and
     /// this is not a simulation.
-    pub(crate) fn neglect(&self, neglected: &NeglectedFactorInstance) {
+    pub fn neglect(&self, neglected: &NeglectedFactorInstance) {
         if neglected.reason != NeglectFactorReason::Simulation {
             self.assert_not_referencing_factor_source(
                 neglected.factor_source_id(),
@@ -76,7 +76,7 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
 
     /// # Panics
     /// Panics if this factor source has already been neglected or signed with.
-    pub(crate) fn add_signature(&self, signature: &HDSignature<ID>) {
+    pub fn add_signature(&self, signature: &HDSignature<ID>) {
         self.assert_not_referencing_factor_source(signature.factor_source_id());
         self.signed.borrow_mut().insert(signature)
     }

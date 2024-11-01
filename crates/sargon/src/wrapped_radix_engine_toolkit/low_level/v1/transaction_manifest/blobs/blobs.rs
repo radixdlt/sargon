@@ -17,7 +17,7 @@ impl Blobs {
         Self(blobs.into_iter().collect_vec())
     }
 
-    pub(crate) fn from_bags<I>(bags: I) -> Self
+    pub fn from_bags<I>(bags: I) -> Self
     where
         I: IntoIterator<Item = BagOfBytes>,
     {
@@ -36,7 +36,7 @@ impl Default for Blobs {
     }
 }
 
-pub(crate) type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
+pub type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
 
 impl From<ScryptoBlobsMap> for Blobs {
     fn from(value: ScryptoBlobsMap) -> Self {

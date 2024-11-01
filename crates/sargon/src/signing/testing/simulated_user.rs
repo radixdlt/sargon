@@ -4,14 +4,14 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum SigningUserInput {
+pub enum SigningUserInput {
     Sign,
     Skip,
 }
 
 #[derive(Clone, derive_more::Debug)]
 #[debug("SimulatedUser(mode: {mode:?}, failures: {failures:?})")]
-pub(crate) struct SimulatedUser {
+pub struct SimulatedUser {
     spy_on_request: Arc<
         dyn Fn(
             FactorSourceKind,
@@ -24,7 +24,7 @@ pub(crate) struct SimulatedUser {
 }
 
 impl SimulatedUser {
-    pub(crate) fn with_spy(
+    pub fn with_spy(
         spy_on_request: impl Fn(
                 FactorSourceKind,
                 IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
@@ -38,7 +38,7 @@ impl SimulatedUser {
             failures: failures.into(),
         }
     }
-    pub(crate) fn new(
+    pub fn new(
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
     ) -> Self {
@@ -47,25 +47,25 @@ impl SimulatedUser {
 }
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct SimulatedFailures {
+pub struct SimulatedFailures {
     /// Set of FactorSources which should always fail.
     simulated_failures: IndexSet<FactorSourceIDFromHash>,
 }
 impl SimulatedFailures {
-    pub(crate) fn with_details(
+    pub fn with_details(
         simulated_failures: IndexSet<FactorSourceIDFromHash>,
     ) -> Self {
         Self { simulated_failures }
     }
 
-    pub(crate) fn with_simulated_failures(
+    pub fn with_simulated_failures(
         failures: impl IntoIterator<Item = FactorSourceIDFromHash>,
     ) -> Self {
         Self::with_details(IndexSet::from_iter(failures))
     }
 
     /// If needed, simulates failure for ALL factor sources or NONE.
-    pub(crate) fn simulate_failure_if_needed(
+    pub fn simulate_failure_if_needed(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> bool {
@@ -76,7 +76,7 @@ impl SimulatedFailures {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum SimulatedUserMode {
+pub enum SimulatedUserMode {
     /// Emulation of a "prudent" user, that signs with all factors sources, i.e.
     /// she never ever "skips" a factor source
     Prudent,
@@ -87,34 +87,34 @@ pub(crate) enum SimulatedUserMode {
 }
 
 impl SimulatedUserMode {
-    pub(crate) fn lazy_always_skip() -> Self {
+    pub fn lazy_always_skip() -> Self {
         Self::Lazy(Laziness::AlwaysSkip)
     }
 
     /// Skips only if `invalid_tx_if_skipped` is empty
-    pub(crate) fn lazy_sign_minimum() -> Self {
+    pub fn lazy_sign_minimum() -> Self {
         Self::Lazy(Laziness::SignMinimum)
     }
 }
 
 impl SimulatedUser {
-    pub(crate) fn prudent_no_fail() -> Self {
+    pub fn prudent_no_fail() -> Self {
         Self::new(SimulatedUserMode::Prudent, None)
     }
 
-    pub(crate) fn prudent_with_failures(
+    pub fn prudent_with_failures(
         simulated_failures: SimulatedFailures,
     ) -> Self {
         Self::new(SimulatedUserMode::Prudent, simulated_failures)
     }
 
-    pub(crate) fn lazy_always_skip_no_fail() -> Self {
+    pub fn lazy_always_skip_no_fail() -> Self {
         Self::new(SimulatedUserMode::lazy_always_skip(), None)
     }
 
     /// Skips only if `invalid_tx_if_skipped` is empty
     /// (or if simulated failure for that factor source)
-    pub(crate) fn lazy_sign_minimum(
+    pub fn lazy_sign_minimum(
         simulated_failures: impl IntoIterator<Item = FactorSourceIDFromHash>,
     ) -> Self {
         Self::new(
@@ -134,13 +134,13 @@ unsafe impl Send for SimulatedUser {}
 /// factor. But since user is so lazy, she defers signing with that override
 /// factor if prompted for it first.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum Laziness {
+pub enum Laziness {
     SignMinimum,
     AlwaysSkip,
 }
 
 impl SimulatedUser {
-    pub(crate) fn spy_on_request_before_handled(
+    pub fn spy_on_request_before_handled(
         &self,
         factor_source_kind: FactorSourceKind,
         invalid_tx_if_skipped: IndexSet<
@@ -153,7 +153,7 @@ impl SimulatedUser {
         );
     }
 
-    pub(crate) fn sign_or_skip(
+    pub fn sign_or_skip(
         &self,
         invalid_tx_if_skipped: impl IntoIterator<
             Item = InvalidTransactionIfNeglected<TransactionIntentHash>,
@@ -170,7 +170,7 @@ impl SimulatedUser {
         }
     }
 
-    pub(crate) fn simulate_failure_if_needed(
+    pub fn simulate_failure_if_needed(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> bool {

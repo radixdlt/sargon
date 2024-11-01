@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     /// Securified { Single Threshold only }
-    pub(crate) fn r2<F>(fi: F) -> Self
+    pub fn r2<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -12,7 +12,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     }
 
     /// Securified { Single Override only }
-    pub(crate) fn r3<F>(fi: F) -> Self
+    pub fn r3<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -22,7 +22,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     }
 
     /// Securified { Threshold factors only #3 }
-    pub(crate) fn r4<F>(fi: F) -> Self
+    pub fn r4<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -37,7 +37,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     }
 
     /// Securified { Override factors only #2 }
-    pub(crate) fn r5<F>(fi: F) -> Self
+    pub fn r5<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -48,7 +48,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     }
 
     /// Securified { Threshold #3 and Override factors #2  }
-    pub(crate) fn r6<F>(fi: F) -> Self
+    pub fn r6<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -64,7 +64,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     }
 
     /// Securified { Threshold only # 5/5 }
-    pub(crate) fn r7<F>(fi: F) -> Self
+    pub fn r7<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -85,7 +85,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         .unwrap()
     }
     /// Securified { Threshold 1/1 and Override factors #1  }
-    pub(crate) fn r8<F>(fi: F) -> Self
+    pub fn r8<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,

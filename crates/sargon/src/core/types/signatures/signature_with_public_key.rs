@@ -135,7 +135,7 @@ impl SignatureWithPublicKey {
     fn sample_message() -> String {
         "There is a computer disease that anybody who works with computers knows about. It's a very serious disease and it interferes completely with the work. The trouble with computers is that you 'play' with them!".to_owned()
     }
-    pub(crate) fn sample_hash() -> Hash {
+    pub fn sample_hash() -> Hash {
         hash_of(Self::sample_message().as_bytes())
     }
 }

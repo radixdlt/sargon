@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
+pub static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
     [FactorSourceIDFromHash; 11],
 > = Lazy::new(|| {
     [
@@ -18,7 +18,7 @@ pub(crate) static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
     ]
 });
 
-pub(crate) static MNEMONIC_BY_ID_MAP: Lazy<
+pub static MNEMONIC_BY_ID_MAP: Lazy<
     IndexMap<FactorSourceIDFromHash, MnemonicWithPassphrase>,
 > = Lazy::new(|| {
     IndexMap::from_iter([

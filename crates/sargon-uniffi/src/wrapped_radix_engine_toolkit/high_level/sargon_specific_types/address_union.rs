@@ -75,22 +75,22 @@ macro_rules! address_union {
             }
 
             #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_mainnet >]() -> $union_name {
+            pub fn [< new_ $union_name:snake _sample_mainnet >]() -> $union_name {
                 [< Internal $union_name >]::sample_mainnet().into()
             }
 
             #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_mainnet_other >]() -> $union_name {
+            pub fn [< new_ $union_name:snake _sample_mainnet_other >]() -> $union_name {
                 [< Internal $union_name >]::sample_mainnet_other().into()
             }
 
             #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_stokenet >]() -> $union_name {
+            pub fn [< new_ $union_name:snake _sample_stokenet >]() -> $union_name {
                 [< Internal $union_name >]::sample_stokenet().into()
             }
 
             #[uniffi::export]
-            pub(crate) fn [< new_ $union_name:snake _sample_stokenet_other >]() -> $union_name {
+            pub fn [< new_ $union_name:snake _sample_stokenet_other >]() -> $union_name {
                 [< Internal $union_name >]::sample_stokenet_other().into()
             }
         }

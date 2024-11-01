@@ -21,15 +21,11 @@ pub trait IsAddress:
 /// `AccountAddress::RetAddress`
 /// instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
 #[allow(dead_code)]
-pub(crate) trait FromRetAddress {
+pub trait FromRetAddress {
     type RetAddress;
 }
 
-pub(crate) fn format_string(
-    s: impl AsRef<str>,
-    start: usize,
-    end: usize,
-) -> String {
+pub fn format_string(s: impl AsRef<str>, start: usize, end: usize) -> String {
     let s = s.as_ref();
     let prefix = &s[0..start];
     let suffix = suffix_str(end, s);
@@ -64,7 +60,7 @@ macro_rules! decl_ret_wrapped_address {
             )]
             #[display("{}", self.0)]
             #[debug("{}", self.0)]
-            pub struct [< $address_type:camel Address >](pub(crate) [< Ret $address_type:camel Address >]);
+            pub struct [< $address_type:camel Address >](pub [< Ret $address_type:camel Address >]);
 
             impl From<[< Ret $address_type:camel Address >]> for [< $address_type:camel Address >] {
                 fn from(value: [< Ret $address_type:camel Address >]) -> Self {
@@ -136,12 +132,12 @@ macro_rules! decl_ret_wrapped_address {
                     }
                 }
 
-                pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
+                pub fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
                 }
 
-                pub(crate) fn node_id(&self) -> ScryptoNodeId {
+                pub fn node_id(&self) -> ScryptoNodeId {
                     self.0.node_id()
                 }
 

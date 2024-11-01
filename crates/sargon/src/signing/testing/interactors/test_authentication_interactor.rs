@@ -3,16 +3,16 @@
 
 use crate::prelude::*;
 
-pub(crate) struct TestAuthenticationInteractor {
+pub struct TestAuthenticationInteractor {
     should_fail: bool,
 }
 
 impl TestAuthenticationInteractor {
-    pub(crate) fn new_failing() -> Self {
+    pub fn new_failing() -> Self {
         Self { should_fail: true }
     }
 
-    pub(crate) fn new_succeeding() -> Self {
+    pub fn new_succeeding() -> Self {
         Self { should_fail: false }
     }
 }

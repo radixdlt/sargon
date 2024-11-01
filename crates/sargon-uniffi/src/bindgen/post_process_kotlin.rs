@@ -4,7 +4,7 @@ use sargon::prelude::*;
 
 use crate::bindgen_error::BindgenError;
 
-pub(crate) fn kotlin_transform(
+pub fn kotlin_transform(
     needle: &str,
     contents: String,
 ) -> Result<String, BindgenError> {

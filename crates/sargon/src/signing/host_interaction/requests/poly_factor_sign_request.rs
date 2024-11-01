@@ -23,7 +23,7 @@ impl<S: Signable> PolyFactorSignRequest<S> {
     /// Panics if `per_factor_source` is empty
     ///
     /// Panics if not all factor sources are of the same kind
-    pub(crate) fn new(
+    pub fn new(
         factor_source_kind: FactorSourceKind,
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
@@ -56,7 +56,7 @@ impl<S: Signable> PolyFactorSignRequest<S> {
     }
 
     #[allow(unused)]
-    pub(crate) fn factor_source_kind(&self) -> FactorSourceKind {
+    pub fn factor_source_kind(&self) -> FactorSourceKind {
         self.factor_source_kind
     }
 }

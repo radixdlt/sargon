@@ -11,13 +11,13 @@ pub enum WalletToDappInteractionResponse {
 }
 
 #[uniffi::export]
-pub(crate) fn new_wallet_to_dapp_interaction_response_sample(
+pub fn new_wallet_to_dapp_interaction_response_sample(
 ) -> WalletToDappInteractionResponse {
     InternalWalletToDappInteractionResponse::sample().into()
 }
 
 #[uniffi::export]
-pub(crate) fn new_wallet_to_dapp_interaction_response_sample_other(
+pub fn new_wallet_to_dapp_interaction_response_sample_other(
 ) -> WalletToDappInteractionResponse {
     InternalWalletToDappInteractionResponse::sample_other().into()
 }

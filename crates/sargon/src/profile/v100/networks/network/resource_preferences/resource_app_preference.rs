@@ -39,21 +39,21 @@ impl Identifiable for ResourceAppPreference {
 }
 
 impl ResourceAppPreference {
-    pub(crate) fn sample_fungible_mainnet() -> Self {
+    pub fn sample_fungible_mainnet() -> Self {
         Self::new(
             ResourceIdentifier::sample_fungible_mainnet(),
             ResourceVisibility::sample(),
         )
     }
 
-    pub(crate) fn sample_non_fungible_mainnet() -> Self {
+    pub fn sample_non_fungible_mainnet() -> Self {
         Self::new(
             ResourceIdentifier::sample_non_fungible_mainnet(),
             ResourceVisibility::sample_other(),
         )
     }
 
-    pub(crate) fn sample_non_fungible_stokenet() -> Self {
+    pub fn sample_non_fungible_stokenet() -> Self {
         Self::new(
             ResourceIdentifier::sample_non_fungible_stokenet(),
             ResourceVisibility::sample_other(),

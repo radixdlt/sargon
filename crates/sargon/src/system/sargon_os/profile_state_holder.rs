@@ -20,8 +20,8 @@ pub enum ProfileState {
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct ProfileStateHolder {
-    // This is pub(crate) for testing purposes only, i.e. causing the RwLock to be poisoned.
-    pub(crate) profile_state: RwLock<ProfileState>,
+    // This is pub for testing purposes only, i.e. causing the RwLock to be poisoned.
+    pub profile_state: RwLock<ProfileState>,
 }
 
 impl ProfileStateHolder {

@@ -141,7 +141,7 @@ impl TransactionIntent {
     /// Utility function which uses `TransactionIntent::new(<TransactionHeader>, <TransactionManifest>, <Message>)`
     /// and SHOULD return `Err` if `depth > TransactionIntent::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
-    pub(crate) fn test_with_sbor_depth(
+    pub fn test_with_sbor_depth(
         depth: usize,
         network_id: NetworkID,
     ) -> Result<Self> {
@@ -162,7 +162,7 @@ impl TransactionIntent {
             })
     }
 
-    pub(crate) const MAX_SBOR_DEPTH: usize = Instructions::MAX_SBOR_DEPTH;
+    pub const MAX_SBOR_DEPTH: usize = Instructions::MAX_SBOR_DEPTH;
 }
 
 #[cfg(test)]

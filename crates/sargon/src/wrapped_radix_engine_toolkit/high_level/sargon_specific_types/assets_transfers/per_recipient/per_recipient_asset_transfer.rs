@@ -23,7 +23,7 @@ impl PerRecipientAssetTransfer {
 
 #[allow(unused)]
 impl PerRecipientAssetTransfer {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(
             AccountOrAddressOf::sample_mainnet(),
             [
@@ -37,7 +37,7 @@ impl PerRecipientAssetTransfer {
         )
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::new(
             AccountOrAddressOf::sample_mainnet_other(),
             [PerRecipientFungibleTransfer::sample_mainnet_other()],
@@ -45,7 +45,7 @@ impl PerRecipientAssetTransfer {
         )
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::new(
             AccountOrAddressOf::sample_stokenet(),
             [
@@ -59,7 +59,7 @@ impl PerRecipientAssetTransfer {
         )
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::new(
             AccountOrAddressOf::sample_stokenet_other(),
             [PerRecipientFungibleTransfer::sample_stokenet_other()],

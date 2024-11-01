@@ -19,7 +19,7 @@ pub use accounts_for_display::*;
 pub use accounts_or_personas::*;
 pub use authorized_dapp_detailed::*;
 pub use authorized_persona_detailed::*;
-pub use decl_identified_vec_of_with_samples::*;
+pub(crate) use decl_identified_vec_of_with_samples::*;
 pub use detailed_authorized_personas::*;
 pub use email_address::*;
 pub use host_id::*;

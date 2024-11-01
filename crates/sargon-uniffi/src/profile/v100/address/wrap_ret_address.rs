@@ -24,7 +24,7 @@ macro_rules! decl_ret_wrapped_address {
                 uniffi::Record,
             )]
             pub struct [< $address_type:camel Address >] {
-                pub(crate) secret_magic: String,
+                pub secret_magic: String,
             }
 
             delegate_display_debug_into!([< $address_type:camel Address >], [< Internal $address_type:camel Address >]);

@@ -31,7 +31,7 @@ impl TransactionGuarantee {
 }
 
 impl TransactionGuarantee {
-    pub(crate) fn rounded_amount(&self) -> Decimal192 {
+    pub fn rounded_amount(&self) -> Decimal192 {
         self.amount.clone().round(self.resource_divisibility)
     }
 }

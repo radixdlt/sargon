@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub(crate) struct Bucket {
-    pub(crate) name: String,
+pub struct Bucket {
+    pub name: String,
 }
 
 impl AsRef<str> for Bucket {

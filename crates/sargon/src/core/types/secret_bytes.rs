@@ -52,7 +52,7 @@ macro_rules! decl_secret_bytes {
                 }
 
                 #[allow(unused)]
-                pub(crate) fn is_zeroized(&self) -> bool {
+                pub fn is_zeroized(&self) -> bool {
                     *self.0 == [0; Self::LENGTH]
                 }
             }

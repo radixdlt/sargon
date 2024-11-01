@@ -47,7 +47,7 @@ impl HasSampleValues for PerAssetFungibleTransfer {
 }
 
 impl PerAssetFungibleTransfer {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(
             AccountOrAddressOf::ProfileAccount {
                 value: Account::sample_mainnet_carol(),
@@ -57,7 +57,7 @@ impl PerAssetFungibleTransfer {
         )
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::new(AccountOrAddressOf::AddressOfExternalAccount {
             value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap()
         },
@@ -65,7 +65,7 @@ impl PerAssetFungibleTransfer {
         Decimal192::from_str("987654.1234").unwrap())
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::new(
             AccountOrAddressOf::ProfileAccount {
                 value: Account::sample_stokenet_olivia(),
@@ -75,7 +75,7 @@ impl PerAssetFungibleTransfer {
         )
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::new(AccountOrAddressOf::AddressOfExternalAccount {
             value: AccountAddress::from_str("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk").unwrap() 
         },

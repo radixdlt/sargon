@@ -4,11 +4,11 @@ use crate::prelude::*;
 /// Petition of signatures from a factors list of an entity in a transaction.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub(crate) struct PetitionForFactors<ID: SignableID> {
-    pub(crate) factor_list_kind: FactorListKind,
+pub struct PetitionForFactors<ID: SignableID> {
+    pub factor_list_kind: FactorListKind,
 
     /// Factors to sign with and the required number of them.
-    pub(crate) input: PetitionForFactorsInput,
+    pub input: PetitionForFactorsInput,
     state: RefCell<PetitionForFactorsState<ID>>,
 }
 
@@ -26,7 +26,7 @@ impl<ID: SignableID> HasSampleValues for PetitionForFactors<ID> {
 }
 
 impl<ID: SignableID> PetitionForFactors<ID> {
-    pub(crate) fn new(
+    pub fn new(
         factor_list_kind: FactorListKind,
         input: PetitionForFactorsInput,
     ) -> Self {
@@ -37,21 +37,21 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         }
     }
 
-    pub(crate) fn factor_instances(
+    pub fn factor_instances(
         &self,
     ) -> IndexSet<HierarchicalDeterministicFactorInstance> {
         self.input.factors.clone()
     }
 
-    pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
+    pub fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
         self.state.borrow().all_neglected()
     }
 
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
+    pub fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.state.borrow().all_signatures()
     }
 
-    pub(crate) fn new_threshold(
+    pub fn new_threshold(
         factors: Vec<HierarchicalDeterministicFactorInstance>,
         threshold: i8,
     ) -> Option<Self> {
@@ -67,13 +67,13 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         ))
     }
 
-    pub(crate) fn new_unsecurified(
+    pub fn new_unsecurified(
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         Self::new_threshold(vec![factor], 1).expect("Factors is not empty") // define as 1/1 threshold factor, which is a good definition.
     }
 
-    pub(crate) fn new_override(
+    pub fn new_override(
         factors: Vec<HierarchicalDeterministicFactorInstance>,
     ) -> Option<Self> {
         if factors.is_empty() {
@@ -85,7 +85,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         ))
     }
 
-    pub(crate) fn neglect_if_referenced(&self, neglected: NeglectedFactor) {
+    pub fn neglect_if_referenced(&self, neglected: NeglectedFactor) {
         let factor_source_id = &neglected.factor_source_id();
         if let Some(_x_) =
             self.reference_to_factor_source_with_id(factor_source_id)
@@ -115,21 +115,21 @@ impl<ID: SignableID> PetitionForFactors<ID> {
             ));
     }
 
-    pub(crate) fn has_owned_instance_with_id(
+    pub fn has_owned_instance_with_id(
         &self,
         owned_factor_instance: &OwnedFactorInstance,
     ) -> bool {
         self.has_instance_with_id(owned_factor_instance.factor_instance())
     }
 
-    pub(crate) fn has_instance_with_id(
+    pub fn has_instance_with_id(
         &self,
         factor_instance: &HierarchicalDeterministicFactorInstance,
     ) -> bool {
         self.input.factors.iter().any(|f| f == factor_instance)
     }
 
-    pub(crate) fn add_signature_if_relevant(
+    pub fn add_signature_if_relevant(
         &self,
         signature: &HDSignature<ID>,
     ) -> bool {
@@ -148,7 +148,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         state.add_signature(signature)
     }
 
-    pub(crate) fn references_factor_source_with_id(
+    pub fn references_factor_source_with_id(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> bool {
@@ -202,7 +202,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         }
     }
 
-    pub(crate) fn status(&self) -> PetitionForFactorsStatus {
+    pub fn status(&self) -> PetitionForFactorsStatus {
         if let Some(finished_state) = self.get_finished_with() {
             return PetitionForFactorsStatus::Finished(finished_state);
         }
@@ -210,7 +210,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
     }
 
     #[allow(unused)]
-    pub(crate) fn debug_str(&self) -> String {
+    pub fn debug_str(&self) -> String {
         format!(
             "PetitionForFactors(input: {:#?}, state_snapshot: {:#?})",
             self.input,

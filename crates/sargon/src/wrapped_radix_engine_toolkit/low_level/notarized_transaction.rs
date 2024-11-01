@@ -73,7 +73,7 @@ impl NotarizedTransaction {
     /// Utility function which uses `NotarizedTransaction::new(<SignedIntent>, <NotarySignature>)`
     /// and SHOULD return `Err` if `depth > NotarizedTransaction::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
-    pub(crate) fn test_with_sbor_depth(
+    pub fn test_with_sbor_depth(
         depth: usize,
         network_id: NetworkID,
     ) -> Result<Self> {
@@ -88,7 +88,7 @@ impl NotarizedTransaction {
         )
     }
 
-    pub(crate) const MAX_SBOR_DEPTH: usize = SignedIntent::MAX_SBOR_DEPTH - 1;
+    pub const MAX_SBOR_DEPTH: usize = SignedIntent::MAX_SBOR_DEPTH - 1;
 }
 
 impl HasSampleValues for NotarizedTransaction {

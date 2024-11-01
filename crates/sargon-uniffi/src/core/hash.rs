@@ -9,7 +9,7 @@ use sargon::Hash as InternalHash;
 /// hidden secret magic.
 #[derive(Clone, PartialEq, Eq, std::hash::Hash, uniffi::Record)]
 pub struct Hash {
-    pub(crate) value: Exactly32Bytes,
+    pub value: Exactly32Bytes,
 }
 
 impl Hash {

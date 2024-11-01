@@ -133,98 +133,98 @@ impl MnemonicWithPassphrase {
 }
 
 impl MnemonicWithPassphrase {
-    pub(crate) fn sample_device() -> Self {
+    pub fn sample_device() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_device_other() -> Self {
+    pub fn sample_device_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device_other(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_device_12_words() -> Self {
+    pub fn sample_device_12_words() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device_12_words(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_device_12_words_other() -> Self {
+    pub fn sample_device_12_words_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device_12_words_other(),
             BIP39Passphrase::new("Olympia rules!"),
         )
     }
 
-    pub(crate) fn sample_ledger() -> Self {
+    pub fn sample_ledger() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_ledger(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_ledger_other() -> Self {
+    pub fn sample_ledger_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_ledger_other(),
             BIP39Passphrase::new("Mellon"),
         )
     }
 
-    pub(crate) fn sample_off_device() -> Self {
+    pub fn sample_off_device() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_off_device(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_off_device_other() -> Self {
+    pub fn sample_off_device_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_off_device_other(),
             BIP39Passphrase::new("open sesame"),
         )
     }
 
-    pub(crate) fn sample_arculus() -> Self {
+    pub fn sample_arculus() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_arculus(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_arculus_other() -> Self {
+    pub fn sample_arculus_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_arculus_other(),
             BIP39Passphrase::new("Leonidas"),
         )
     }
 
-    pub(crate) fn sample_security_questions() -> Self {
+    pub fn sample_security_questions() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_security_questions(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_security_questions_other() -> Self {
+    pub fn sample_security_questions_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_security_questions_other(),
             BIP39Passphrase::new("Questions?"),
         )
     }
 
-    pub(crate) fn sample_passphrase() -> Self {
+    pub fn sample_passphrase() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_passphrase(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_passphrase_other() -> Self {
+    pub fn sample_passphrase_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_security_questions_other(),
             BIP39Passphrase::new("Pass phrase"),

@@ -24,7 +24,7 @@ impl<ID: SignableID> SignWithFactorsOutcome<ID> {
     }
 
     #[allow(unused)]
-    pub(crate) fn failure_with_factors(
+    pub fn failure_with_factors(
         ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Self {
         Self::Neglected(NeglectedFactors::new(
@@ -34,7 +34,7 @@ impl<ID: SignableID> SignWithFactorsOutcome<ID> {
     }
 
     #[allow(unused)]
-    pub(crate) fn user_skipped_factors(
+    pub fn user_skipped_factors(
         ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Self {
         Self::Neglected(NeglectedFactors::new(
@@ -44,11 +44,11 @@ impl<ID: SignableID> SignWithFactorsOutcome<ID> {
     }
 
     #[allow(unused)]
-    pub(crate) fn user_skipped_factor(id: FactorSourceIDFromHash) -> Self {
+    pub fn user_skipped_factor(id: FactorSourceIDFromHash) -> Self {
         Self::user_skipped_factors(IndexSet::from_iter([id]))
     }
 
-    pub(crate) fn irrelevant(
+    pub fn irrelevant(
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> Self {
         Self::Neglected(NeglectedFactors::new(

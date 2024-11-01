@@ -79,7 +79,7 @@ macro_rules! entropy_with_byte_counts {
                 }
 
                 #[allow(unused)]
-                pub(crate) fn is_zeroized(&self) -> bool {
+                pub fn is_zeroized(&self) -> bool {
                     match self {
                         $(
                             Self::[< EntropyOf $byte_count Bytes >](bytes) => bytes.is_zeroized(),

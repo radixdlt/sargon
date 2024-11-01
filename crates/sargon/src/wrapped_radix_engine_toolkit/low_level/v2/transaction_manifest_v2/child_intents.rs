@@ -53,7 +53,7 @@ impl From<(Vec<ScryptoChildSubintent>, NetworkID)> for ChildIntents {
 }
 
 impl ChildIntents {
-    pub(crate) fn empty() -> Self {
+    pub fn empty() -> Self {
         Self::default()
     }
 }

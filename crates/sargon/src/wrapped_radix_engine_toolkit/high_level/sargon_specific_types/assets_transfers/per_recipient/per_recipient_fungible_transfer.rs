@@ -17,19 +17,19 @@ impl PerRecipientFungibleTransfer {
 }
 
 impl PerRecipientFungibleTransfer {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(ResourceAddress::sample_mainnet_xrd(), 237, true, None)
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::new(ResourceAddress::sample_mainnet_candy(), 1337, true, 4)
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::new(ResourceAddress::sample_stokenet_xrd(), 42, false, None)
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::new(ResourceAddress::sample_stokenet_candy(), 3, true, 6)
     }
 }

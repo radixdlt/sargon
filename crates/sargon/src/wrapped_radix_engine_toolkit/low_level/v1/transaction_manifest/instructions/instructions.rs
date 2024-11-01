@@ -90,7 +90,7 @@ impl HasSampleValues for Instructions {
 }
 
 impl Instructions {
-    pub(crate) fn empty(network_id: NetworkID) -> Self {
+    pub fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: Vec::new(),
             network_id,
@@ -99,7 +99,7 @@ impl Instructions {
 }
 
 impl Instructions {
-    pub(crate) fn sample_mainnet_instructions_string() -> String {
+    pub fn sample_mainnet_instructions_string() -> String {
         include_str!(concat!(env!("FIXTURES_TX"), "resource_transfer.rtm"))
             .to_owned()
     }
@@ -140,7 +140,7 @@ impl Instructions {
 
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
-    pub(crate) fn sample_other_simulator_instructions_string() -> String {
+    pub fn sample_other_simulator_instructions_string() -> String {
         include_str!(concat!(
             env!("FIXTURES_TX"),
             "multi_account_resource_transfer.rtm"
@@ -160,7 +160,7 @@ impl Instructions {
 #[cfg(test)]
 impl Instructions {
     /// For tests only, does not validate the SBOR depth of the instructions.
-    pub(crate) fn new_unchecked(
+    pub fn new_unchecked(
         instructions: Vec<ScryptoInstruction>,
         network_id: NetworkID,
     ) -> Self {
@@ -176,7 +176,7 @@ impl Instructions {
     /// Utility function which uses `Instructions::new(<string>, <network_id>)`
     /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
-    pub(crate) fn test_with_sbor_depth(
+    pub fn test_with_sbor_depth(
         depth: usize,
         network_id: NetworkID,
     ) -> Result<Self> {
@@ -196,7 +196,7 @@ impl Instructions {
             .and_then(|x: String| Self::new(x, network_id))
     }
 
-    pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
+    pub const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
 }
 
 #[cfg(test)]

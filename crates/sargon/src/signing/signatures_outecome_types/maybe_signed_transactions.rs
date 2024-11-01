@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub(crate) struct MaybeSignedTransactions<ID: SignableID> {
+pub struct MaybeSignedTransactions<ID: SignableID> {
     /// Collection of transactions which might be signed or not.
     pub(super) transactions: IndexMap<ID, IndexSet<HDSignature<ID>>>,
 }
@@ -9,12 +9,12 @@ pub(crate) struct MaybeSignedTransactions<ID: SignableID> {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SignedTransaction<ID: SignableID> {
     /// The transaction intent hash.
-    pub(crate) signable_id: ID,
+    pub signable_id: ID,
     /// The signatures for this transaction.
-    pub(crate) signatures: IndexSet<HDSignature<ID>>,
+    pub signatures: IndexSet<HDSignature<ID>>,
 }
 impl<ID: SignableID> SignedTransaction<ID> {
-    pub(crate) fn new(
+    pub fn new(
         signable_id: ID,
         signatures: IndexSet<HDSignature<ID>>,
     ) -> Self {
@@ -32,17 +32,17 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
 
     /// Constructs a new empty `MaybeSignedTransactions` which can be used
     /// as a "builder".
-    pub(crate) fn empty() -> Self {
+    pub fn empty() -> Self {
         Self::new(IndexMap::new())
     }
 
     /// Returns whether or not this `MaybeSignedTransactions` contains
     /// any transactions.
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.transactions.is_empty()
     }
 
-    pub(crate) fn transactions(&self) -> Vec<SignedTransaction<ID>> {
+    pub fn transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.transactions
             .clone()
             .into_iter()
@@ -89,7 +89,7 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
     ///
     /// Panics if any signatures in `signature` is not new, that is, already present
     /// in `transactions`.
-    pub(crate) fn add_signatures(
+    pub fn add_signatures(
         &mut self,
         signable_id: ID,
         signatures: IndexSet<HDSignature<ID>>,
@@ -110,7 +110,7 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
     }
 
     /// Returns all the signatures for all the transactions.
-    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
+    pub fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.transactions
             .values()
             .flat_map(|v| v.iter())

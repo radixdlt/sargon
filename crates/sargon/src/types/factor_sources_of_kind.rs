@@ -2,12 +2,12 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FactorSourcesOfKind {
-    pub(crate) kind: FactorSourceKind,
+    pub kind: FactorSourceKind,
     factor_sources: Vec<FactorSource>,
 }
 
 impl FactorSourcesOfKind {
-    pub(crate) fn new(
+    pub fn new(
         kind: FactorSourceKind,
         factor_sources: impl IntoIterator<Item = FactorSource>,
     ) -> Result<Self> {
@@ -32,7 +32,7 @@ impl FactorSourcesOfKind {
         })
     }
 
-    pub(crate) fn factor_sources(&self) -> IndexSet<FactorSource> {
+    pub fn factor_sources(&self) -> IndexSet<FactorSource> {
         self.factor_sources.clone().into_iter().collect()
     }
 }

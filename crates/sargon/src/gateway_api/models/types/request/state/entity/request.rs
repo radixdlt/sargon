@@ -9,9 +9,9 @@ use crate::prelude::*;
     Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
 )]
 pub struct StateEntityDetailsRequest {
-    pub(crate) addresses: Vec<Address>,
+    pub addresses: Vec<Address>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) opt_ins: Option<StateEntityDetailsOptIns>,
+    pub opt_ins: Option<StateEntityDetailsOptIns>,
 }
 
 impl StateEntityDetailsRequest {

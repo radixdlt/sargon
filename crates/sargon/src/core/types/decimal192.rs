@@ -485,7 +485,7 @@ impl Decimal {
 impl Decimal {
     /// Creates the Decimal `10^exponent`, returns `None` if overflows.
     #[inline]
-    pub(crate) fn checked_powi(&self, exp: i64) -> Option<Self> {
+    pub fn checked_powi(&self, exp: i64) -> Option<Self> {
         self.native().checked_powi(exp).map(|n| n.into())
     }
 
@@ -723,7 +723,7 @@ impl Decimal192 {
     enum_iterator::Sequence,
 )]
 #[repr(u8)]
-pub(crate) enum Multiplier {
+pub enum Multiplier {
     Million = 6,
     Billion = 9,
     Trillion = 12,
@@ -736,12 +736,12 @@ impl Multiplier {
     }
 
     /// The exponent of a `Multiplier`, i.e. `6` for `Million`.
-    pub(crate) fn value(&self) -> Decimal192 {
+    pub fn value(&self) -> Decimal192 {
         Decimal192::pow(self.discriminant())
     }
 
     /// Symbol of a `Multiplier`, i.e. 'M' for `Million`.
-    pub(crate) fn suffix(&self) -> char {
+    pub fn suffix(&self) -> char {
         match self {
             Self::Million => 'M',
             Self::Billion => 'B',
@@ -791,7 +791,7 @@ fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
 
 // Helper for formatting
 impl Decimal192 {
-    pub(crate) fn multiplier(&self) -> Option<Multiplier> {
+    pub fn multiplier(&self) -> Option<Multiplier> {
         let abs = self.abs();
         reverse_all::<Multiplier>().find(|x| x.value() <= abs)
     }
@@ -803,7 +803,7 @@ impl Decimal192 {
 
     /// Rounds `self`` to `n` places, counting both the integer and decimal parts,
     /// as well as any leading zeros.
-    pub(crate) fn rounded_to_total_places(&self, n: u8) -> Self {
+    pub fn rounded_to_total_places(&self, n: u8) -> Self {
         let total_places = n;
         let digits = self.digits();
         // If we only have decimals, we will still count the 0 before the separator as an integer

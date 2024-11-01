@@ -10,8 +10,8 @@ use crate::prelude::*;
 /// phone.
 #[derive(Debug)]
 pub struct SargonOS {
-    pub(crate) profile_state_holder: ProfileStateHolder,
-    pub(crate) clients: Clients,
+    pub profile_state_holder: ProfileStateHolder,
+    pub clients: Clients,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -222,7 +222,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    pub(crate) async fn create_new_profile_with_bdfs(
+    pub async fn create_new_profile_with_bdfs(
         &self,
         mnemonic_with_passphrase: Option<MnemonicWithPassphrase>,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
@@ -265,11 +265,11 @@ impl SargonOS {
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn host_id(&self) -> Result<HostId> {
+    pub async fn host_id(&self) -> Result<HostId> {
         Self::get_host_id(&self.clients).await
     }
 
-    pub(crate) async fn get_host_id(clients: &Clients) -> Result<HostId> {
+    pub async fn get_host_id(clients: &Clients) -> Result<HostId> {
         debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
 
@@ -289,18 +289,18 @@ impl SargonOS {
         }
     }
 
-    pub(crate) async fn host_info(&self) -> HostInfo {
+    pub async fn host_info(&self) -> HostInfo {
         Self::get_host_info(&self.clients).await
     }
 
-    pub(crate) async fn get_host_info(clients: &Clients) -> HostInfo {
+    pub async fn get_host_info(clients: &Clients) -> HostInfo {
         debug!("Get Host info");
         clients.host.resolve_host_info().await
     }
 }
 
 #[cfg(test)]
-pub(crate) const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
+pub const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
     std::time::Duration::from_millis(50);
 
 #[cfg(test)]

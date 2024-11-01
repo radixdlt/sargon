@@ -11,7 +11,7 @@ fn validate_and_decode_hash_try_network<
         .map_err(|_| ())
 }
 
-pub(crate) fn validate_and_decode_hash<
+pub fn validate_and_decode_hash<
     T: ScryptoIsTransactionHashWithStaticHrp,
 >(
     bech32_encoded_hash: &str,

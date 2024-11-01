@@ -6,7 +6,7 @@ pub struct ProfileStateChangeClient {
 }
 
 impl ProfileStateChangeClient {
-    pub(crate) fn new(driver: Arc<dyn ProfileStateChangeDriver>) -> Self {
+    pub fn new(driver: Arc<dyn ProfileStateChangeDriver>) -> Self {
         Self { driver }
     }
 }

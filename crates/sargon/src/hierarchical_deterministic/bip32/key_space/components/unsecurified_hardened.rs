@@ -81,7 +81,7 @@ impl HasSampleValues for UnsecurifiedHardened {
 impl UnsecurifiedHardened {
     /// # Safety
     /// Only use this for tests and constants.
-    pub(crate) const unsafe fn new(value: U30) -> Self {
+    pub const unsafe fn new(value: U30) -> Self {
         Self(value)
     }
 }

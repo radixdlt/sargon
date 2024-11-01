@@ -3,7 +3,7 @@ use sargon::IntentSignature as InternalIntentSignature;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct IntentSignature {
-    pub(crate) value: SignatureWithPublicKey,
+    pub value: SignatureWithPublicKey,
 }
 
 impl IntentSignature {

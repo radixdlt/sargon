@@ -61,7 +61,7 @@ impl ContentHint {
     }
 
     /// Instantiates a new `ContentHint` with all counters equal `count`.
-    pub(crate) fn all(count: usize) -> Self {
+    pub fn all(count: usize) -> Self {
         Self::with_counters(count, count, count)
     }
 

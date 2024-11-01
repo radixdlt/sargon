@@ -43,7 +43,7 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
-    pub(crate) fn scrypto(&self) -> ScryptoEd25519PublicKey {
+    pub fn scrypto(&self) -> ScryptoEd25519PublicKey {
         self.0
     }
 

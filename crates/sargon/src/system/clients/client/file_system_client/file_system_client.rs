@@ -8,13 +8,13 @@ pub struct FileSystemClient {
 }
 
 impl FileSystemClient {
-    pub(crate) fn new(driver: Arc<dyn FileSystemDriver>) -> Self {
+    pub fn new(driver: Arc<dyn FileSystemDriver>) -> Self {
         Self { driver }
     }
 }
 
 #[allow(dead_code)]
-pub(crate) fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
+pub fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
     path.as_ref()
         .to_str()
         .ok_or(CommonError::InvalidPath {
@@ -95,7 +95,7 @@ mod tests {
     }
 
     impl FileSystemClient {
-        pub(crate) fn test() -> Self {
+        pub fn test() -> Self {
             Self::new(RustFileSystemDriver::new())
         }
     }

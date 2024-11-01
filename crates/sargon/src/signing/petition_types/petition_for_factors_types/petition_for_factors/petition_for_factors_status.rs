@@ -1,7 +1,7 @@
 /// The status of building using a certain list of factors, e.g. threshold or
 /// override factors list.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum PetitionForFactorsStatus {
+pub enum PetitionForFactorsStatus {
     /// In progress, still gathering output from factors (signatures or public keys).
     InProgress,
 
@@ -11,7 +11,7 @@ pub(crate) enum PetitionForFactorsStatus {
 
 /// Finished building with factors, either successfully or failed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum PetitionFactorsStatusFinished {
+pub enum PetitionFactorsStatusFinished {
     /// Successful completion of building with factors.
     Success,
 
@@ -26,7 +26,7 @@ pub(crate) enum PetitionFactorsStatusFinished {
 impl PetitionForFactorsStatus {
     /// Reduces / aggergates a list of `PetitionForFactorsStatus` into some
     /// other status, e.g. `PetitionsStatus`.
-    pub(crate) fn aggregate<T>(
+    pub fn aggregate<T>(
         statuses: impl IntoIterator<Item = Self>,
         valid: T,
         invalid: T,
