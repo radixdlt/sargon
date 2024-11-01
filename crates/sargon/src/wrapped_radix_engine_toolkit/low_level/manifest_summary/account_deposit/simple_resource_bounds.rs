@@ -102,7 +102,10 @@ mod tests {
                 Decimal::from(1337).into(),
             ),
         );
-        assert_eq!(SUT::from((ResourceAddress::sample(), scrypto)), SUT::sample());
+        assert_eq!(
+            SUT::from((ResourceAddress::sample(), scrypto)),
+            SUT::sample()
+        );
     }
 
     #[test]
@@ -119,6 +122,9 @@ mod tests {
                 .collect(),
             },
         );
-        assert_eq!(SUT::from((ResourceAddress::sample_other(), scrypto)), SUT::sample_other());
+        assert_eq!(
+            SUT::from((ResourceAddress::sample_other(), scrypto)),
+            SUT::sample_other()
+        );
     }
 }
