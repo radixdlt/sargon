@@ -32,7 +32,7 @@ impl TransactionPreviewRequest {
             notary_is_signatory: signer_public_keys.is_empty(),
             tip_percentage: 0,
             nonce: nonce.into(),
-            signer_public_keys: signer_public_keys,
+            signer_public_keys,
             flags: TransactionPreviewRequestFlags::default(),
             opt_ins: TransactionPreviewRequestOptIns::default(),
         }
@@ -83,7 +83,7 @@ mod tests {
                     .map(|b| b.to_string())
                     .collect_vec()
             );
-            assert_eq!(sut.notary_is_signatory, false);
+            assert!(!sut.notary_is_signatory);
             assert_eq!(
                 sut.notary_public_key.unwrap(),
                 GWPublicKey::from(header.notary_public_key)
