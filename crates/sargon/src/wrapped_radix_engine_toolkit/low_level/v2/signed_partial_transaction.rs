@@ -1,17 +1,17 @@
 use crate::prelude::*;
 
 pub fn build_signed_partial_transaction(
-    intent_core: IntentCoreV2,
-    signatures: IntentSignaturesV2,
+    subintent: Subintent,
+    signatures: Vec<IntentSignature>,
 ) -> ScryptoSignedPartialTransaction {
     ScryptoSignedPartialTransaction {
         partial_transaction: ScryptoPartialTransaction {
-            root_subintent: ScryptoSubintent {
-                intent_core: intent_core.into(),
-            },
+            root_subintent: ScryptoSubintent::from(subintent),
             non_root_subintents: ScryptoNonRootSubintents(vec![]),
         },
-        root_subintent_signatures: signatures.into(),
+        root_subintent_signatures: ScryptoIntentSignaturesV2 {
+            signatures: signatures.into_iter().map(|s| s.into()).collect(),
+        },
         non_root_subintent_signatures: ScryptoNonRootSubintentSignatures {
             by_subintent: vec![],
         },

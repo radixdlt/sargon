@@ -10,7 +10,7 @@ impl Signable for Subintent {
         &self,
         profile: &Profile,
     ) -> Result<IndexSet<AccountOrPersona>> {
-        let summary = self.intent_core.manifest.summary().unwrap();
+        let summary = self.manifest.summary().unwrap();
 
         ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
     }
@@ -22,7 +22,7 @@ impl Signable for Subintent {
         )>,
         network_id: Option<NetworkID>,
     ) -> Self {
-        let mut builder = TransactionManifestV2Builder::new_v2();
+        let mut builder = ScryptoSubintentManifestV2Builder::new_subintent_v2();
         let network_id = network_id.unwrap_or_default();
 
         for (address, hash) in all_addresses_with_hashes {
@@ -33,7 +33,9 @@ impl Signable for Subintent {
             );
         }
 
-        let manifest = TransactionManifestV2::sargon_built(builder, network_id);
+        builder = builder.yield_to_parent(());
+
+        let manifest = SubintentManifest::sargon_built(builder, network_id);
 
         Self::new(IntentHeaderV2::sample(), manifest, MessageV2::None).unwrap()
     }
@@ -55,7 +57,7 @@ mod test {
             identities.clone(),
         );
 
-        let summary = intent.intent_core.manifest.summary().unwrap();
+        let summary = intent.manifest.summary().unwrap();
 
         assert_eq!(
             accounts.iter().sorted().collect_vec(),
