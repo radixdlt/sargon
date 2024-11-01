@@ -498,7 +498,7 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::sample() => vec![AccountWithdraw::amount(ResourceAddress::sample(), 1337)],
                 ),
                 hashmap!(
-                    AccountAddress::sample_other() => vec![AccountDeposit::sample()],
+                    AccountAddress::sample_other() => AccountDeposits::sample(),
                 ),
                 [],
                 [AccountAddress::sample()],
@@ -524,36 +524,23 @@ DROP_AUTH_ZONE_PROOFS;
                     a => vec![AccountWithdraw::sample()],
                 ),
                 hashmap!(
-                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(150)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") =>
+                        AccountDeposits::new(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 150)],
                             UnspecifiedResources::NonePresent,
                         )
-                    ],
-                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(50)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    ,
+                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") =>
+                        AccountDeposits::new(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 50)],
                             UnspecifiedResources::NonePresent,
                         )
-                    ],
-                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(130)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    ,
+                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") =>
+                        AccountDeposits::new(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 130)],
                             UnspecifiedResources::NonePresent,
-                        )
-                    ],
+                        ),
                 ),
                 [],
                 [
@@ -612,27 +599,156 @@ DROP_AUTH_ZONE_PROOFS;
         )
     }
 
-    // #[test]
-    // fn complex_summary() {
-    //     let manifest_str = include_str!(concat!(
-    //         env!("FIXTURES_TX"),
-    //         "open_subintent_manifest.rtm"
-    //     ));
+    #[test]
+    fn open_pre_auth_fungibles_deposit_summary() {
+        let manifest_str = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "open_subintent_fungibles.rtm"
+        ));
 
-    //     let network = NetworkID::Stokenet.network_definition();
-    //     let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
-    //         manifest_str,
-    //         &network,
-    //         BlobProvider::new(),
-    //     )
-    //     .unwrap();
+        let network = NetworkID::Stokenet.network_definition();
+        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+            manifest_str,
+            &network,
+            BlobProvider::new(),
+        )
+        .unwrap();
 
-    //     let manifest: SubintentManifest =
-    //         (man, NetworkID::Stokenet).try_into().unwrap();
-    //     let summary = manifest.summary().unwrap();
+        let manifest: SubintentManifest =
+            (man, NetworkID::Stokenet).try_into().unwrap();
+        let summary = manifest.summary().unwrap();
 
-    //     // pretty print like json format
+        pretty_assertions::assert_eq!(
+            summary.account_deposits,
+            hashmap! {
+                AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
+                    AccountDeposits::new(
+                        vec![
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tj4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_most(10)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tj4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::between(100, 159)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tj4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::exact(3)),
+                        ],
+                        UnspecifiedResources::MayBePresent,
+                    ),
+            }
+        )
+    }
 
-    //     print!("{:?}", summary);
-    // }
+    //     #[test]
+    //     fn open_pre_auth_non_fungibles_no_certain_ids_deposit_summary() {
+    //         let manifest_str = include_str!(concat!(
+    //             env!("FIXTURES_TX"),
+    //             "open_subintent_non_fungibles_no_certain_ids.rtm"
+    //         ));
+
+    //         let network = NetworkID::Stokenet.network_definition();
+    //         let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+    //             manifest_str,
+    //             &network,
+    //             BlobProvider::new(),
+    //         )
+    //         .unwrap();
+
+    //         let manifest: SubintentManifest =
+    //             (man, NetworkID::Stokenet).try_into().unwrap();
+    //         let summary = manifest.summary().unwrap();
+
+    //         /*
+    //         <{
+    // <    account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl: [
+    // <        AccountDeposits {
+    // <            specified_resources: {
+    // <                resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5: NonFungible {
+    // <                    bounds: SimpleNonFungibleResourceBounds {
+    // <                        certain_ids: [],
+    // <                        additional_amount: Some(
+    // <                            AtMost {
+    // <                                amount: Decimal192(
+    // <                                    10,
+    // <                                ),
+    // <                            },
+    // <                        ),
+    // <                    },
+    // <                },
+    // <                resource_tdx_2_1nfn4gd24pcpnqegcq07mgvz9cea4zryytswn5vmgepnan7tjqedkxp: NonFungible {
+    // <                    bounds: SimpleNonFungibleResourceBounds {
+    // <                        certain_ids: [],
+    // <                        additional_amount: Some(
+    // <                            Between {
+    // <                                min_amount: Decimal192(
+    // <                                    100,
+    // <                                ),
+    // <                                max_amount: Decimal192(
+    // <                                    159,
+    // <                                ),
+    // <                            },
+    // <                        ),
+    // <                    },
+    // <                },
+    // <                resource_tdx_2_1nt8pgfd7xj954403vfgkej25g8kcc56ldu4j3akl4vzlcfen6jcfjg: NonFungible {
+    // <                    bounds: SimpleNonFungibleResourceBounds {
+    // <                        certain_ids: [],
+    // <                        additional_amount: Some(
+    // <                            Exact {
+    // <                                amount: Decimal192(
+    // <                                    3,
+    // <                                ),
+    // <                            },
+    // <                        ),
+    // <                    },
+    // <                },
+    // <                resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue: NonFungible {
+    // <                    bounds: SimpleNonFungibleResourceBounds {
+    // <                        certain_ids: [],
+    // <                        additional_amount: Some(
+    // <                            UnknownAmount,
+    // <                        ),
+    // <                    },
+    // <                },
+    // <                resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7: NonFungible {
+    // <                    bounds: SimpleNonFungibleResourceBounds {
+    // <                        certain_ids: [],
+    // <                        additional_amount: Some(
+    // <                            AtLeast {
+    // <                                amount: Decimal192(
+    // <                                    6,
+    // <                                ),
+    // <                            },
+    // <                        ),
+    // <                    },
+    // <                },
+    // <            },
+    // <            unspecified_resources: MayBePresent {
+    // <                change_sources: [
+    // <                    InitialYieldFromParent,
+    // <                ],
+    // <            },
+    // <        },
+    // <    ],
+    // <}
+    //          */
+    //         pretty_assertions::assert_eq!(
+    //             summary.account_deposits,
+    //             hashmap! {
+    //                 AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") => vec![
+    //                     AccountDeposits::new(
+    //                         vec![
+    //                             (ResourceAddress::from("resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5"), SimpleResourceBounds::non_fungible(SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleNonFungibleResourceBounds::at_most(10)))),
+    //                             // (ResourceAddress::from("resource_tdx_2_1nfn4gd24pcpnqegcq07mgvz9cea4zryytswn5vmgepnan7tjqedkxp"), SimpleResourceBounds::non_fungible(SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleNonFungibleResourceBounds::between(100, 159)))),
+    //                             // (ResourceAddress::from("resource_tdx_2_1nt8pgfd7xj954403vfgkej25g8kcc56ldu4j3akl4vzlcfen6jcfjg"), SimpleResourceBounds::non_fungible(SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleNonFungibleResourceBounds::exact(3)))),
+    //                             // (ResourceAddress::from("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue"), SimpleResourceBounds::non_fungible(SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleNonFungibleResourceBounds::unknown_amount()))),
+    //                             // (ResourceAddress::from("resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7"), SimpleResourceBounds::non_fungible(SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleNonFungibleResourceBounds::at_least(6)))),
+    //                         ]
+    //                         .into_iter()
+    //                         .collect(),
+    //                         UnspecifiedResources::MayBePresent {
+    //                             change_sources: vec![ChangeSource::InitialYieldFromParent],
+    //                         },
+    //                     ),
+    //                 ],
+    //             }
+    //         );
+    //     }
 }

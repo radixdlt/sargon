@@ -461,7 +461,7 @@ BURN_RESOURCE
                     AccountAddress::sample() => vec![AccountWithdraw::amount(ResourceAddress::sample(), 1337)],
                 ),
                 hashmap!(
-                    AccountAddress::sample_other() => vec![AccountDeposit::sample()],
+                    AccountAddress::sample_other() => AccountDeposits::sample(),
                 ),
                 [],
                 [AccountAddress::sample()],
@@ -487,36 +487,23 @@ BURN_RESOURCE
                     a => vec![AccountWithdraw::sample()],
                 ),
                 hashmap!(
-                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(150)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") =>
+                        AccountDeposits::new(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 150)],
                             UnspecifiedResources::NonePresent,
                         )
-                    ],
-                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(50)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    ,
+                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") =>
+                        AccountDeposits::new(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 50)],
                             UnspecifiedResources::NonePresent,
                         )
-                    ],
-                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleCountedResourceBounds::exact(Decimal::from(130)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    ,
+                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") =>
+                        AccountDeposits::new(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 130)],
                             UnspecifiedResources::NonePresent,
-                        )
-                    ],
+                        ),
                 ),
                 [],
                 [

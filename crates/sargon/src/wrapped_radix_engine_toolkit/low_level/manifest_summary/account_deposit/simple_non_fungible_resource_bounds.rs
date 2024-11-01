@@ -9,7 +9,7 @@ pub struct SimpleNonFungibleResourceBounds {
 }
 
 impl SimpleNonFungibleResourceBounds {
-    fn new(
+    pub fn new(
         certain_ids: impl IntoIterator<Item = NonFungibleLocalId>,
         additional_amount: Option<SimpleCountedResourceBounds>,
     ) -> Self {

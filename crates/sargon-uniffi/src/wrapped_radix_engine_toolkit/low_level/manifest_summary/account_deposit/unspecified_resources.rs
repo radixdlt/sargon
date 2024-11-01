@@ -9,5 +9,5 @@ pub enum UnspecifiedResources {
     NonePresent,
 
     /// There might be non-zero balances of unspecified resources present
-    MayBePresent { change_sources: Vec<ChangeSource> },
+    MayBePresent,
 }
