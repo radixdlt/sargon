@@ -8,7 +8,7 @@ pub struct ManifestSummary {
     pub account_withdrawals: HashMap<AccountAddress, Vec<AccountWithdraw>>,
 
     /// The deposits done in the manifest.
-    pub account_deposits: HashMap<AccountAddress, Vec<AccountDeposit>>,
+    pub account_deposits: HashMap<AccountAddress, AccountDeposits>,
 
     /// The list of the resources of proofs that were presented in the manifest.
     pub presented_proofs: Vec<ResourceSpecifier>,

@@ -128,7 +128,7 @@ impl SargonOS {
             }
             None => PreAuthToReview::Open(PreAuthOpenManifest {
                 manifest: subintent_manifest,
-                summary: summary,
+                summary,
             }),
         };
 

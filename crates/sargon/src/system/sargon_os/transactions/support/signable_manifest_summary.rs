@@ -10,7 +10,7 @@ impl SignableManifestSummary {
     pub fn new(summary: ManifestSummary) -> Self {
         Self {
             id: Exactly32Bytes::generate(),
-            summary: summary,
+            summary,
         }
     }
 }
@@ -35,7 +35,7 @@ impl SignableID for Exactly32Bytes {}
 
 impl From<SignableManifestSummary> for Exactly32Bytes {
     fn from(val: SignableManifestSummary) -> Exactly32Bytes {
-        val.id.clone()
+        val.id
     }
 }
 
@@ -57,7 +57,7 @@ impl Signable for SignableManifestSummary {
     }
 
     fn get_id(&self) -> Self::ID {
-        self.id.clone()
+        self.id
     }
 
     fn get_payload(&self) -> Self::Payload {
