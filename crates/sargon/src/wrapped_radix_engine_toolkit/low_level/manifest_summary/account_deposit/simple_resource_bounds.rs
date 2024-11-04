@@ -123,8 +123,17 @@ mod tests {
             },
         );
         assert_eq!(
-            SUT::from((ResourceAddress::sample_other(), scrypto)),
-            SUT::sample_other()
+            SUT::from((ResourceAddress::sample_mainnet_nft_other(), scrypto)),
+            SUT::non_fungible(
+                ResourceAddress::sample_mainnet_nft_other(),
+                SimpleNonFungibleResourceBounds::new(
+                    vec![
+                        NonFungibleLocalId::sample(),
+                        NonFungibleLocalId::sample_other(),
+                    ],
+                    None,
+                )
+            )
         );
     }
 }

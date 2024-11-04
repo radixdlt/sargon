@@ -659,6 +659,14 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountDeposits::new_for_test(
                         vec![
                             SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::unknown_amount())),
+                            ),
+                            SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::at_least(6))),
+                            ),
+                            SimpleResourceBounds::non_fungible(
                                 "resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5",
                                 SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::at_most(10))),
                             ),
@@ -669,14 +677,6 @@ DROP_AUTH_ZONE_PROOFS;
                             SimpleResourceBounds::non_fungible(
                                 "resource_tdx_2_1nt8pgfd7xj954403vfgkej25g8kcc56ldu4j3akl4vzlcfen6jcfjg",
                                 SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::exact(3))),
-                            ),
-                            SimpleResourceBounds::non_fungible(
-                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
-                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::unknown_amount())),
-                            ),
-                            SimpleResourceBounds::non_fungible(
-                                "resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7",
-                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::at_least(6))),
                             ),
                         ],
                         UnspecifiedResources::MayBePresent,
@@ -710,7 +710,7 @@ DROP_AUTH_ZONE_PROOFS;
             NonFungibleLocalId::from("#2#"),
         ];
 
-        let memeber_card_id = NonFungibleLocalId::from("<Member_103>");
+        let member_card_id = NonFungibleLocalId::from("<Member_103>");
 
         pretty_assertions::assert_eq!(
             summary.account_deposits,
@@ -720,7 +720,7 @@ DROP_AUTH_ZONE_PROOFS;
                     vec![
                         SimpleResourceBounds::non_fungible(
                             "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
-                            SimpleNonFungibleResourceBounds::new(vec![memeber_card_id], Some(SimpleCountedResourceBounds::unknown_amount())),
+                            SimpleNonFungibleResourceBounds::new(vec![member_card_id], Some(SimpleCountedResourceBounds::unknown_amount())),
                         ),
                         SimpleResourceBounds::non_fungible(
                             "resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7",
