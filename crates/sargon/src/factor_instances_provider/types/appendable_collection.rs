@@ -25,7 +25,9 @@ impl AppendableCollection for FactorInstances {
 pub trait AppendableMap {
     type Key: Eq + std::hash::Hash + Clone;
     type AC: AppendableCollection;
-    fn append_or_insert_to<I: IntoIterator<Item = <Self::AC as AppendableCollection>::Element>>(
+    fn append_or_insert_to<
+        I: IntoIterator<Item = <Self::AC as AppendableCollection>::Element>,
+    >(
         &mut self,
         key: impl Borrow<Self::Key>,
         items: I,
@@ -58,7 +60,9 @@ where
 {
     type Key = K;
     type AC = V;
-    fn append_or_insert_to<I: IntoIterator<Item = <Self::AC as AppendableCollection>::Element>>(
+    fn append_or_insert_to<
+        I: IntoIterator<Item = <Self::AC as AppendableCollection>::Element>,
+    >(
         &mut self,
         key: impl Borrow<Self::Key>,
         items: I,

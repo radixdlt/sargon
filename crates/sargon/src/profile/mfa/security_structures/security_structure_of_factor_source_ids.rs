@@ -56,7 +56,8 @@ impl From<MatrixOfFactorSources> for MatrixOfFactorSourceIDs {
             value.primary_role.into(),
             value.recovery_role.into(),
             value.confirmation_role.into(),
-        ).unwrap()
+        )
+        .unwrap()
     }
 }
 impl From<SecurityStructureOfFactorSources>
@@ -86,65 +87,61 @@ impl HasSampleValues for MatrixOfFactorSourceIDs {
             PrimaryRoleWithFactorSourceIDs::sample(),
             RecoveryRoleWithFactorSourceIDs::sample(),
             ConfirmationRoleWithFactorSourceIDs::sample(),
-        ).unwrap()
+        )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             PrimaryRoleWithFactorSourceIDs::sample_other(),
             RecoveryRoleWithFactorSourceIDs::sample_other(),
             ConfirmationRoleWithFactorSourceIDs::sample_other(),
-        ).unwrap()
+        )
+        .unwrap()
     }
 }
 
 impl HasSampleValues for PrimaryRoleWithFactorSourceIDs {
     fn sample() -> Self {
-        Self::new(
-            [FactorSourceID::sample()],
-            1,
-            [FactorSourceID::sample()],
-        ).unwrap()
+        Self::new([FactorSourceID::sample()], 1, [FactorSourceID::sample()])
+            .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             [FactorSourceID::sample_other()],
             2,
             [FactorSourceID::sample_other()],
-        ).unwrap()
+        )
+        .unwrap()
     }
 }
 
 impl HasSampleValues for RecoveryRoleWithFactorSourceIDs {
     fn sample() -> Self {
-        Self::new(
-            [FactorSourceID::sample()],
-            1,
-            [FactorSourceID::sample()],
-        ).unwrap()
+        Self::new([FactorSourceID::sample()], 1, [FactorSourceID::sample()])
+            .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             [FactorSourceID::sample_other()],
             2,
             [FactorSourceID::sample_other()],
-        ).unwrap()
+        )
+        .unwrap()
     }
 }
 
 impl HasSampleValues for ConfirmationRoleWithFactorSourceIDs {
     fn sample() -> Self {
-        Self::new(
-            [FactorSourceID::sample()],
-            1,
-            [FactorSourceID::sample()],
-        ).unwrap()
+        Self::new([FactorSourceID::sample()], 1, [FactorSourceID::sample()])
+            .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             [FactorSourceID::sample_other()],
             2,
             [FactorSourceID::sample_other()],
-        ).unwrap()
+        )
+        .unwrap()
     }
 }
 

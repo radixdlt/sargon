@@ -60,8 +60,7 @@ impl HasSampleValues for NeglectedFactorInstance {
 }
 
 /// ID to some neglected factor source, with the reason why it was neglected (skipped/failed)
-pub type NeglectedFactor =
-    AbstractNeglectedFactor<FactorSourceIDFromHash>;
+pub type NeglectedFactor = AbstractNeglectedFactor<FactorSourceIDFromHash>;
 
 /// IDs to some neglected factor source, with the reason why they were neglected (skipped/failed)
 pub type NeglectedFactors =

@@ -154,7 +154,8 @@ impl Persona {
                 override_factors.clone(),
             )
             .unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
         let address =
             IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);
         Self {
@@ -163,14 +164,13 @@ impl Persona {
             display_name: DisplayName::new(name).unwrap(),
             security_state: SecuredEntityControl::new(
                 veci.clone(),
-                    AccessControllerAddress::sample_from_identity_address(
-                        address,
-                    ),
+                AccessControllerAddress::sample_from_identity_address(address),
                 SecurityStructureOfFactorInstances {
                     security_structure_id: SecurityStructureID::sample(),
                     matrix_of_factors: matrix,
                 },
-            ).unwrap()
+            )
+            .unwrap()
             .into(),
             flags: Default::default(),
             persona_data: Default::default(),

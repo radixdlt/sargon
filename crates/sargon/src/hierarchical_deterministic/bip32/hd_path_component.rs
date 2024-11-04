@@ -61,8 +61,8 @@ impl PartialOrd for HDPathComponent {
 impl Ord for HDPathComponent {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
-            (Self::Unsecurified(lhs), Self::Unsecurified(rhs)) => lhs.cmp(rhs), 
-            (Self::Securified(lhs), Self::Securified(rhs)) => lhs.cmp(rhs), 
+            (Self::Unsecurified(lhs), Self::Unsecurified(rhs)) => lhs.cmp(rhs),
+            (Self::Securified(lhs), Self::Securified(rhs)) => lhs.cmp(rhs),
             (Self::Unsecurified(_), Self::Securified(_)) => Ordering::Less,
             (Self::Securified(_), Self::Unsecurified(_)) => Ordering::Greater,
         }

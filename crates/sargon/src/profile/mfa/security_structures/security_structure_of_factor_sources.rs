@@ -239,14 +239,16 @@ impl HasSampleValues for MatrixOfFactorSources {
             PrimaryRoleWithFactorSources::sample(),
             RecoveryRoleWithFactorSources::sample(),
             ConfirmationRoleWithFactorSources::sample(),
-        ).unwrap()
+        )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             PrimaryRoleWithFactorSources::sample_other(),
             RecoveryRoleWithFactorSources::sample_other(),
             ConfirmationRoleWithFactorSources::sample_other(),
-        ).unwrap()
+        )
+        .unwrap()
     }
 }
 

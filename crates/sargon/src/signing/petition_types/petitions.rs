@@ -21,8 +21,7 @@ pub struct Petitions<S: Signable> {
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
-    pub txid_to_petition:
-        RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
+    pub txid_to_petition: RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
 }
 
 impl<S: Signable> Petitions<S> {

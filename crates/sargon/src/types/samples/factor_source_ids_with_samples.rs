@@ -1,22 +1,21 @@
 use crate::prelude::*;
 
-pub static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
-    [FactorSourceIDFromHash; 11],
-> = Lazy::new(|| {
-    [
-        FactorSourceIDFromHash::sample_device(),
-        FactorSourceIDFromHash::sample_ledger(),
-        FactorSourceIDFromHash::sample_ledger_other(),
-        FactorSourceIDFromHash::sample_arculus(),
-        FactorSourceIDFromHash::sample_arculus_other(),
-        FactorSourceIDFromHash::sample_passphrase(),
-        FactorSourceIDFromHash::sample_passphrase_other(),
-        FactorSourceIDFromHash::sample_off_device(),
-        FactorSourceIDFromHash::sample_off_device_other(),
-        FactorSourceIDFromHash::sample_security_questions(),
-        FactorSourceIDFromHash::sample_device_other(),
-    ]
-});
+pub static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<[FactorSourceIDFromHash; 11]> =
+    Lazy::new(|| {
+        [
+            FactorSourceIDFromHash::sample_device(),
+            FactorSourceIDFromHash::sample_ledger(),
+            FactorSourceIDFromHash::sample_ledger_other(),
+            FactorSourceIDFromHash::sample_arculus(),
+            FactorSourceIDFromHash::sample_arculus_other(),
+            FactorSourceIDFromHash::sample_passphrase(),
+            FactorSourceIDFromHash::sample_passphrase_other(),
+            FactorSourceIDFromHash::sample_off_device(),
+            FactorSourceIDFromHash::sample_off_device_other(),
+            FactorSourceIDFromHash::sample_security_questions(),
+            FactorSourceIDFromHash::sample_device_other(),
+        ]
+    });
 
 pub static MNEMONIC_BY_ID_MAP: Lazy<
     IndexMap<FactorSourceIDFromHash, MnemonicWithPassphrase>,

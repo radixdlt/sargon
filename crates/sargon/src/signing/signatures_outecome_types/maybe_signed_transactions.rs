@@ -14,10 +14,7 @@ pub struct SignedTransaction<ID: SignableID> {
     pub signatures: IndexSet<HDSignature<ID>>,
 }
 impl<ID: SignableID> SignedTransaction<ID> {
-    pub fn new(
-        signable_id: ID,
-        signatures: IndexSet<HDSignature<ID>>,
-    ) -> Self {
+    pub fn new(signable_id: ID, signatures: IndexSet<HDSignature<ID>>) -> Self {
         Self {
             signable_id,
             signatures,

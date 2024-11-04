@@ -24,12 +24,8 @@ impl UnsecurifiedEntity {
         todo!()
     }
 
-    pub fn with_veci(
-        veci: VirtualEntityCreatingInstance,
-    ) -> Self {
-        Self {
-            veci
-        }
+    pub fn with_veci(veci: VirtualEntityCreatingInstance) -> Self {
+        Self { veci }
     }
 
     pub fn address(&self) -> AddressOfAccountOrPersona {
@@ -45,7 +41,6 @@ impl UnsecurifiedEntity {
     pub fn veci(&self) -> VirtualEntityCreatingInstance {
         self.veci.clone()
     }
-
 }
 
 impl From<UnsecurifiedEntity> for AccountOrPersona {
@@ -115,6 +110,4 @@ mod tests {
     fn network_id() {
         assert_eq!(Sut::sample_other().network_id(), NetworkID::Stokenet);
     }
-
-  
 }

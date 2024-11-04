@@ -189,7 +189,8 @@ impl Account {
                 override_factors.clone(),
             )
             .unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
         let network_id = NetworkID::Mainnet;
         let address =
             AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
@@ -199,14 +200,13 @@ impl Account {
             display_name: DisplayName::new(name).unwrap(),
             security_state: SecuredEntityControl::new(
                 Some(veci.clone()),
-                    AccessControllerAddress::sample_from_account_address(
-                        address,
-                    ),
+                AccessControllerAddress::sample_from_account_address(address),
                 SecurityStructureOfFactorInstances {
                     security_structure_id: SecurityStructureID::sample(),
                     matrix_of_factors: matrix,
                 },
-            ).unwrap()
+            )
+            .unwrap()
             .into(),
             appearance_id: Default::default(),
             flags: Default::default(),

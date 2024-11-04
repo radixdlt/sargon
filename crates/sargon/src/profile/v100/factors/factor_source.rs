@@ -56,7 +56,7 @@ pub enum FactorSource {
     },
 }
 
-/// A bit hacky... but used to make it possible for us to validate FactorInstance 
+/// A bit hacky... but used to make it possible for us to validate FactorInstance
 /// in RoleWithFactor...
 impl IsMaybeKeySpaceAware for FactorSource {
     fn maybe_key_space(&self) -> Option<KeySpace> {

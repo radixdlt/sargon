@@ -108,10 +108,7 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(
-            SUT::sample_other(),
-            SUT::sample_other()
-        );
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
@@ -125,7 +122,6 @@ mod tests {
             SUT::sample_mainnet_account_securified_fs0_idx_0(),
             SUT::sample_mainnet_account_securified_fs0_idx_1(),
             SUT::sample_mainnet_account_securified_fs0_idx_2(),
-
             SUT::sample_mainnet_account_securified_fs1_idx_0(),
             SUT::sample_mainnet_account_securified_fs1_idx_1(),
             SUT::sample_mainnet_account_securified_fs1_idx_2(),

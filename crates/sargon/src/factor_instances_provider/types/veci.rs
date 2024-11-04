@@ -46,7 +46,6 @@ impl VirtualEntityCreatingInstance {
         self.factor_instance().public_key
     }
 
-
     pub fn public_key(&self) -> PublicKey {
         self.hd_public_key().public_key
     }

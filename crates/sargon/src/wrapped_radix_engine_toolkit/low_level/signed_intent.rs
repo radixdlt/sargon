@@ -168,8 +168,7 @@ impl SignedIntent {
         )
     }
 
-    pub const MAX_SBOR_DEPTH: usize =
-        TransactionIntent::MAX_SBOR_DEPTH - 1;
+    pub const MAX_SBOR_DEPTH: usize = TransactionIntent::MAX_SBOR_DEPTH - 1;
 }
 
 #[cfg(test)]

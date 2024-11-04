@@ -28,4 +28,3 @@ use crate::HasSampleValues;
     Deserialize,
 )]
 pub struct HiddenConstructor;
-

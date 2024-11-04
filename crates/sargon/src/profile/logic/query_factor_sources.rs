@@ -61,7 +61,6 @@ impl Profile {
 
         explicit_main.unwrap_or(implicit_main).clone()
     }
-
 }
 
 impl Profile {
@@ -230,8 +229,4 @@ mod tests {
         let profile = Profile::sample_no_babylon_device_factor_source();
         profile.bdfs();
     }
-
-
-
-
 }

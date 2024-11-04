@@ -7,10 +7,7 @@ pub struct PerAssetTransfersOfFungibleResource {
 }
 
 impl PerAssetTransfersOfFungibleResource {
-    pub fn expanded(
-        &mut self,
-        transfer: impl Into<PerAssetFungibleTransfer>,
-    ) {
+    pub fn expanded(&mut self, transfer: impl Into<PerAssetFungibleTransfer>) {
         self.transfers.push(transfer.into());
     }
 }
