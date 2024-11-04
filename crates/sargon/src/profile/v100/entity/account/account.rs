@@ -77,18 +77,22 @@ impl HasEntityKind for Account {
         CAP26EntityKind::Account
     }
 }
-impl IsEntity for Account {
+impl HasSecurityState for Account {
+    fn security_state(&self) -> EntitySecurityState {
+        self.security_state.clone()
+    }
+}
+impl IsBaseEntity for Account {
     type Address = AccountAddress;
+
+    fn address(&self) -> Self::Address {
+        self.address.clone()
+    }
     fn flags(&self) -> EntityFlags {
         self.flags.clone()
     }
 }
-
-impl IsNetworkAware for Account {
-    fn network_id(&self) -> NetworkID {
-        self.network_id
-    }
-}
+impl IsEntity for Account {}
 
 impl Account {
     pub fn new(

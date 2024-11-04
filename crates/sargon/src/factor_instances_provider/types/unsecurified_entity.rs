@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// The HierarchicalDeterministicFactorInstance, address and possibly third party deposit state of some
+/// The HierarchicalDeterministicFactorInstance and address of some
 /// unsecurified entity.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UnsecurifiedEntity {
@@ -8,34 +8,30 @@ pub struct UnsecurifiedEntity {
 }
 
 impl UnsecurifiedEntity {
+    pub fn with_veci(veci: VirtualEntityCreatingInstance) -> Self {
+        Self { veci }
+    }
+
     /// # Panics
     /// Panics if address does not match `factor_instance`
     pub fn new(
         address: AddressOfAccountOrPersona,
         factor_instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
-        // let veci = VirtualEntityCreatingInstance::new(factor_instance, address);
-        // Self::with_veci(veci, third_party_deposit)
-        todo!()
+        let veci = VirtualEntityCreatingInstance::new(factor_instance, address);
+        Self::with_veci(veci)
     }
 
     pub fn network_id(&self) -> NetworkID {
-        // self.address().network_id()
-        todo!()
-    }
-
-    pub fn with_veci(veci: VirtualEntityCreatingInstance) -> Self {
-        Self { veci }
+        self.address().network_id()
     }
 
     pub fn address(&self) -> AddressOfAccountOrPersona {
-        // self.veci.clone().address()
-        todo!()
+        self.veci.clone().address()
     }
 
     pub fn factor_instance(&self) -> HierarchicalDeterministicFactorInstance {
-        // self.veci.factor_instance()
-        todo!()
+        self.veci.factor_instance()
     }
 
     pub fn veci(&self) -> VirtualEntityCreatingInstance {
@@ -43,37 +39,30 @@ impl UnsecurifiedEntity {
     }
 }
 
-impl From<UnsecurifiedEntity> for AccountOrPersona {
-    fn from(value: UnsecurifiedEntity) -> Self {
-        // let address = value.address();
-        // let name = "Recovered";
-        // let security_state = EntitySecurityState::Unsecured(value.factor_instance());
+// impl TryFrom<UnsecurifiedEntity> for AccountOrPersona {
+//     type Error = CommonError;
+//     fn try_from(value: UnsecurifiedEntity) -> Result<Self> {
+//         let address = value.address();
+//         let name = "UNNAMED";
+//         let uec = UnsecuredEntityControl::new(value.factor_instance(), None)?;
+//         let security_state = EntitySecurityState::Unsecured { value: uec };
 
-        // if let Ok(account_address) = address.clone().into_account() {
-        //     Account::new(name, account_address, security_state, None).into()
-        // } else if let Ok(identity_address) = address.clone().into_identity() {
-        //     Persona::new(name, identity_address, security_state, None).into()
-        // } else {
-        //     unreachable!("Either account or persona.")
-        // }
-        todo!()
-    }
-}
+//         if let Ok(account_address) = address.clone().into_account() {
+//             Account::new(name, account_address, security_state).into()
+//         } else if let Ok(identity_address) = address.clone().into_identity() {
+//             Persona::new(name, identity_address, security_state).into()
+//         } else {
+//             unreachable!("Either account or persona.")
+//         }
+//     }
+// }
 
 impl HasSampleValues for UnsecurifiedEntity {
     fn sample() -> Self {
-        // Self::with_veci(
-        //     VirtualEntityCreatingInstance::sample(),
-        //     DepositRule::sample(),
-        // )
-        todo!()
+        Self::with_veci(VirtualEntityCreatingInstance::sample())
     }
     fn sample_other() -> Self {
-        todo!()
-        // Self::with_veci(
-        //     VirtualEntityCreatingInstance::sample_other(),
-        //     DepositRule::sample_other(),
-        // )
+        Self::with_veci(VirtualEntityCreatingInstance::sample_other())
     }
 }
 
@@ -94,17 +83,17 @@ mod tests {
         assert_ne!(Sut::sample(), Sut::sample_other());
     }
 
-    #[test]
-    fn unsecurified_persona_into_tagged_union() {
-        let sut = Sut::sample_other();
-        assert!(AccountOrPersona::from(sut).is_persona_entity());
-    }
+    // #[test]
+    // fn unsecurified_persona_into_tagged_union() {
+    //     let sut = Sut::sample_other();
+    //     assert!(AccountOrPersona::from(sut).is_persona_entity());
+    // }
 
-    #[test]
-    fn unsecurified_account_into_tagged_union() {
-        let sut = Sut::sample();
-        assert!(AccountOrPersona::from(sut).is_account_entity());
-    }
+    // #[test]
+    // fn unsecurified_account_into_tagged_union() {
+    //     let sut = Sut::sample();
+    //     assert!(AccountOrPersona::from(sut).is_account_entity());
+    // }
 
     #[test]
     fn network_id() {

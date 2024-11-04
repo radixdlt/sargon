@@ -82,7 +82,7 @@ impl Profile {
         )
     }
 
-    pub fn get_securified_entities_of_kind_on_network<E: IsSecurifiedEntity>(
+    pub fn get_securified_entities_of_kind_on_network<E: IsSecurifiedEntity + HasEntityKind + TryFrom<AccountOrPersona>>(
         &self,
         network_id: NetworkID,
     ) -> IndexSet<E> {

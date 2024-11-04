@@ -7,11 +7,17 @@ use radix_engine_toolkit::functions::derive::{
 
 /// An address of an entity, provides default implementation of `try_from_bech32`
 /// to decode a bech32 encoded address string into Self.
-pub trait EntityAddress:
-    AddressViaRet + Into<AddressOfAccountOrPersona> + Clone + IsNetworkAware
+pub trait IsBaseEntityAddress:
+    HasEntityKindObjectSafe
+    + Into<AddressOfAccountOrPersona>
+    + Clone
+    + IsNetworkAware
 {
-    fn abstract_entity_type() -> AbstractEntityType;
+}
 
+pub trait IsEntityAddress:
+    IsBaseEntityAddress + HasEntityKind + AddressViaRet
+{
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding
     /// it.
     #[cfg(not(tarpaulin_include))] // false negative
@@ -19,11 +25,9 @@ pub trait EntityAddress:
     where
         P: Into<ScryptoPublicKey> + Clone,
     {
-        let component = match Self::abstract_entity_type() {
-            AbstractEntityType::Account => RET_new_account_address(&public_key),
-            AbstractEntityType::Identity => {
-                RET_new_identity_address(&public_key)
-            }
+        let component = match Self::entity_kind() {
+            CAP26EntityKind::Account => RET_new_account_address(&public_key),
+            CAP26EntityKind::Identity => RET_new_identity_address(&public_key),
         };
 
         let node_id = component.into_node_id();

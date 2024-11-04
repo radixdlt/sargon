@@ -762,6 +762,9 @@ pub enum CommonError {
         wrong_network: NetworkID,
         expected_network: NetworkID,
     } = 10213,
+
+    #[error("SecurityState not securified")]
+    SecurityStateNotSecurified = 10214,
 }
 
 #[uniffi::export]

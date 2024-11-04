@@ -66,18 +66,24 @@ impl HasEntityKind for Persona {
         CAP26EntityKind::Identity
     }
 }
-impl IsEntity for Persona {
+
+impl HasSecurityState for Persona {
+    fn security_state(&self) -> EntitySecurityState {
+        self.security_state.clone()
+    }
+}
+impl IsBaseEntity for Persona {
     type Address = IdentityAddress;
+
+    fn address(&self) -> Self::Address {
+        self.address.clone()
+    }
     fn flags(&self) -> EntityFlags {
         self.flags.clone()
     }
 }
+impl IsEntity for Persona {}
 
-impl IsNetworkAware for Persona {
-    fn network_id(&self) -> NetworkID {
-        self.network_id
-    }
-}
 impl TryFrom<AccountOrPersona> for Persona {
     type Error = CommonError;
 

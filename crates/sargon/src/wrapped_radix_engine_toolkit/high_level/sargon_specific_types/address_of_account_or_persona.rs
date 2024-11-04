@@ -5,6 +5,17 @@ address_union!(
     enum AddressOfAccountOrPersona: account, identity
 );
 
+impl IsBaseEntityAddress for AddressOfAccountOrPersona {}
+
+impl HasEntityKindObjectSafe for AddressOfAccountOrPersona {
+    fn get_entity_kind(&self) -> CAP26EntityKind {
+        match self {
+            Self::Account(a) => a.get_entity_kind(),
+            Self::Identity(i) => i.get_entity_kind(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

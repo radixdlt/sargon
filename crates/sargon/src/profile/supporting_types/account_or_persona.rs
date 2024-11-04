@@ -12,20 +12,49 @@ pub enum AccountOrPersona {
     PersonaEntity(Persona),
 }
 
-impl IsNetworkAware for AccountOrPersona {
-    fn network_id(&self) -> NetworkID {
+// impl IsNetworkAware for AccountOrPersona {
+//     fn network_id(&self) -> NetworkID {
+//         match self {
+//             Self::AccountEntity(account) => account.network_id,
+//             Self::PersonaEntity(persona) => persona.network_id,
+//         }
+//     }
+// }
+
+impl HasEntityKindObjectSafe for AccountOrPersona {
+    fn get_entity_kind(&self) -> CAP26EntityKind {
         match self {
-            Self::AccountEntity(account) => account.network_id,
-            Self::PersonaEntity(persona) => persona.network_id,
+            Self::AccountEntity(account) => account.get_entity_kind(),
+            Self::PersonaEntity(persona) => persona.get_entity_kind(),
         }
     }
 }
-
-impl AccountOrPersona {
-    pub fn security_state(&self) -> EntitySecurityState {
+impl HasSecurityState for AccountOrPersona {
+    fn security_state(&self) -> EntitySecurityState {
         match self {
-            Self::AccountEntity(a) => a.security_state.clone(),
-            Self::PersonaEntity(p) => p.security_state.clone(),
+            Self::AccountEntity(a) => a.security_state(),
+            Self::PersonaEntity(p) => p.security_state(),
+        }
+    }
+}
+impl IsBaseEntity for AccountOrPersona {
+    type Address = AddressOfAccountOrPersona;
+
+    fn address(&self) -> Self::Address {
+        match self {
+            Self::AccountEntity(account) => {
+                AddressOfAccountOrPersona::Account(account.address)
+            }
+            Self::PersonaEntity(persona) => {
+                AddressOfAccountOrPersona::Identity(persona.address)
+            }
+        }
+    }
+
+    fn flags(&self) -> EntityFlags {
+        match self {
+            Self::AccountEntity(a) => a.flags.clone(),
+            Self::PersonaEntity(p) => p.flags.clone(),
         }
     }
 }
