@@ -7,7 +7,9 @@ use radix_engine_toolkit::functions::derive::{
 
 /// An address of an entity, provides default implementation of `try_from_bech32`
 /// to decode a bech32 encoded address string into Self.
-pub trait EntityAddress: AddressViaRet {
+pub trait EntityAddress:
+    AddressViaRet + Into<AddressOfAccountOrPersona> + Clone + IsNetworkAware
+{
     fn abstract_entity_type() -> AbstractEntityType;
 
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding

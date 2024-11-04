@@ -753,6 +753,15 @@ pub enum CommonError {
         "Account not securified, but was expected to be, address {address}"
     )]
     PersonaNotSecurified { address: String } = 10212,
+
+    #[error(
+        "Entity of kind {entity_kind}, on wrong network: {wrong_network}, expected: {expected_network}"
+    )]
+    EntityOnWrongNetwork {
+        entity_kind: String,
+        wrong_network: NetworkID,
+        expected_network: NetworkID,
+    } = 10213,
 }
 
 #[uniffi::export]

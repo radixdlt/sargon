@@ -6,18 +6,36 @@ pub type Personas = Entities<Persona>;
 /// A NonEmpty collection of Entities all on the SAME Network
 /// but mixed if they are securified or unsecurified.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Entities<E: IsNetworkAware + Clone + std::hash::Hash + std::cmp::Eq> {
+pub struct Entities<
+    E: IsNetworkAware
+        + HasEntityKindObjectSafe
+        + Clone
+        + std::hash::Hash
+        + std::cmp::Eq,
+> {
     pub network_id: NetworkID,
     entities: IndexSet<E>,
 }
 
-impl<E: IsNetworkAware + Clone + std::hash::Hash + std::cmp::Eq> Entities<E> {
+impl<
+        E: IsNetworkAware
+            + HasEntityKindObjectSafe
+            + Clone
+            + std::hash::Hash
+            + std::cmp::Eq,
+    > Entities<E>
+{
     pub fn new(network_id: NetworkID, entities: IndexSet<E>) -> Result<Self> {
         if entities.is_empty() {
-            return Err(CommonError::EmptyCollection);
+            return Err(CommonError::ExpectedNonEmptyCollection);
         }
-        if !entities.iter().all(|a| a.network_id() == network_id) {
-            return Err(CommonError::WrongNetwork);
+        if let Some(e) = entities.iter().find(|e| e.network_id() != network_id)
+        {
+            return Err(CommonError::EntityOnWrongNetwork {
+                entity_kind: e.get_entity_kind().to_string(),
+                wrong_network: e.network_id(),
+                expected_network: network_id,
+            });
         }
         Ok(Self {
             network_id,
@@ -39,7 +57,14 @@ impl<E: IsNetworkAware + Clone + std::hash::Hash + std::cmp::Eq> Entities<E> {
     }
 }
 
-impl<E: IsNetworkAware + Clone + std::hash::Hash + std::cmp::Eq> IntoIterator for Entities<E> {
+impl<
+        E: IsNetworkAware
+            + HasEntityKindObjectSafe
+            + Clone
+            + std::hash::Hash
+            + std::cmp::Eq,
+    > IntoIterator for Entities<E>
+{
     type Item = E;
     type IntoIter = <IndexSet<E> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
@@ -56,14 +81,14 @@ mod tests {
     fn empty_throws() {
         assert!(matches!(
             Sut::new(NetworkID::Mainnet, IndexSet::new()),
-            Err(CommonError::EmptyCollection)
+            Err(CommonError::ExpectedNonEmptyCollection)
         ));
     }
     #[test]
     fn wrong_network_single() {
         assert!(matches!(
             Sut::new(NetworkID::Stokenet, IndexSet::just(Item::sample())),
-            Err(CommonError::WrongNetwork)
+            Err(CommonError::EntityOnWrongNetwork { .. })
         ));
     }
     #[test]
@@ -73,12 +98,13 @@ mod tests {
                 NetworkID::Stokenet,
                 IndexSet::from_iter([Item::sample_other(), Item::sample(),])
             ),
-            Err(CommonError::WrongNetwork)
+            Err(CommonError::EntityOnWrongNetwork { .. })
         ));
     }
     #[test]
     fn ok_new() {
-        let sut = Sut::new(NetworkID::Mainnet, IndexSet::just(Item::sample())).unwrap();
+        let sut = Sut::new(NetworkID::Mainnet, IndexSet::just(Item::sample()))
+            .unwrap();
         assert!(!sut.is_empty());
     }
 }

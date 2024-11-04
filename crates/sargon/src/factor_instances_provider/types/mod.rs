@@ -1,4 +1,4 @@
-// mod accounts;
+mod accounts;
 mod appendable_collection;
 mod factor_instances;
 mod hidden_constructor;
