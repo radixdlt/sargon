@@ -6,12 +6,24 @@ pub struct HierarchicalDeterministicFactorInstance {
     pub public_key: HierarchicalDeterministicPublicKey,
 }
 
+impl IsKeySpaceAware for HierarchicalDeterministicFactorInstance {
+    fn key_space(&self) -> KeySpace {
+        self.public_key.key_space()
+    }
+}
+
 impl HasKeyKindObjectSafe for HierarchicalDeterministicFactorInstance {
     fn get_key_kind(&self) -> CAP26KeyKind {
         self.derivation_path().get_key_kind()
     }
 }
+impl TryFrom<FactorInstance> for HierarchicalDeterministicFactorInstance {
+    type Error = CommonError;
 
+    fn try_from(value: FactorInstance) -> Result<Self> {
+        Self::try_from_factor_instance(value)
+    }
+}
 impl HierarchicalDeterministicFactorInstance {
     pub fn derivation_path(&self) -> DerivationPath {
         self.public_key.derivation_path.clone()
@@ -25,6 +37,14 @@ impl HierarchicalDeterministicFactorInstance {
             factor_source_id,
             public_key,
         }
+    }
+
+    pub fn hd_public_key(&self) -> HierarchicalDeterministicPublicKey {
+        self.public_key.clone()
+    }
+
+    pub fn public_key(&self) -> PublicKey {
+        self.hd_public_key().public_key
     }
 
     pub fn with_key_and_path(

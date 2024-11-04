@@ -15,6 +15,12 @@ pub struct HierarchicalDeterministicPublicKey {
     pub derivation_path: DerivationPath,
 }
 
+impl IsKeySpaceAware for HierarchicalDeterministicPublicKey {
+    fn key_space(&self) -> KeySpace {
+        self.derivation_path.key_space()
+    }
+}
+
 impl HierarchicalDeterministicPublicKey {
     pub fn new(public_key: PublicKey, derivation_path: DerivationPath) -> Self {
         Self {

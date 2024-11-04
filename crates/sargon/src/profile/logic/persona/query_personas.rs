@@ -9,6 +9,25 @@ impl Personas {
     }
 }
 
+impl Profile {
+    pub fn unsecurified_personas_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<UnsecurifiedEntity> {
+        self.get_unsecurified_entities_of_kind_on_network(
+            CAP26EntityKind::Identity,
+            network_id,
+        )
+    }
+
+    pub fn securified_personas_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<SecurifiedPersona> {
+        self.get_securified_entities_of_kind_on_network(network_id)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

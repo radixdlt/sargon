@@ -145,40 +145,10 @@ mod tests {
 
     #[test]
     fn test() {
+        let secured_entity_control = SecuredEntityControl::sample();
+
         let model = EntitySecurityState::Securified {
-            value: SecuredEntityControl {
-                access_controller_address: AccessControllerAddress::sample(),
-                security_structure: SecurityStructureOfFactorInstances::new(
-                    SecurityStructureID::sample(),
-                    MatrixOfFactorInstances::new(
-                        PrimaryRoleWithFactorInstances::new(
-                            [FactorInstance::sample()],
-                            1,
-                            [],
-                        )
-                        .unwrap(),
-                        RecoveryRoleWithFactorInstances::new(
-                            [FactorInstance::new(
-                                FactorSourceIDFromHash::sample_ledger().into(),
-                                FactorInstanceBadge::sample(),
-                            )],
-                            1,
-                            [],
-                        )
-                        .unwrap(),
-                        ConfirmationRoleWithFactorInstances::new(
-                            [FactorInstance::new(
-                                FactorSourceIDFromHash::sample_passphrase()
-                                    .into(),
-                                FactorInstanceBadge::sample(),
-                            )],
-                            1,
-                            [],
-                        )
-                        .unwrap(),
-                    ),
-                ),
-            },
+            value: secured_entity_control,
         };
 
         assert_eq_after_json_roundtrip(

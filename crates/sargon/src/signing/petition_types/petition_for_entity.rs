@@ -142,9 +142,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 
     /// Returns the aggregate of all **neglected** factor sources from both lists, either threshold or override.
-    pub fn all_neglected_factor_sources(
-        &self,
-    ) -> IndexSet<NeglectedFactor> {
+    pub fn all_neglected_factor_sources(&self) -> IndexSet<NeglectedFactor> {
         self.all_neglected_factor_instances()
             .into_iter()
             .map(|n| n.as_neglected_factor())
@@ -394,7 +392,7 @@ impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
                 "Grace",
-                AccountAddress::sample_other(),
+                HierarchicalDeterministicFactorInstance::sample_fii10(),
                 || {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -641,7 +639,7 @@ mod tests {
         let intent_hash = TransactionIntentHash::sample();
         let entity = Account::sample_securified_mainnet(
             "Alice",
-            AccountAddress::sample(),
+            HierarchicalDeterministicFactorInstance::sample_fii10(),
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                 CAP26EntityKind::Account,

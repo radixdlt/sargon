@@ -21,6 +21,15 @@ impl IsNetworkAware for AccountOrPersona {
     }
 }
 
+impl AccountOrPersona {
+    pub fn security_state(&self) -> EntitySecurityState {
+        match self {
+            Self::AccountEntity(a) => a.security_state.clone(),
+            Self::PersonaEntity(p) => p.security_state.clone(),
+        }
+    }
+}
+
 impl From<Account> for AccountOrPersona {
     fn from(value: Account) -> Self {
         Self::AccountEntity(value)

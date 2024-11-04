@@ -121,18 +121,19 @@ impl IsMappableToGlobalKeySpace for Hardened {
         }
     }
 }
-
-impl IsInLocalKeySpace for Hardened {
-    fn key_space(&self) -> KeySpace {
-        match self {
-            Self::Unsecurified(u) => u.key_space(),
-            Self::Securified(s) => s.key_space(),
-        }
-    }
+impl HasIndexInLocalKeySpace for Hardened {
     fn index_in_local_key_space(&self) -> U31 {
         match self {
             Self::Unsecurified(u) => u.index_in_local_key_space(),
             Self::Securified(s) => s.index_in_local_key_space(),
+        }
+    }
+}
+impl IsKeySpaceAware for Hardened {
+    fn key_space(&self) -> KeySpace {
+        match self {
+            Self::Unsecurified(u) => u.key_space(),
+            Self::Securified(s) => s.key_space(),
         }
     }
 }

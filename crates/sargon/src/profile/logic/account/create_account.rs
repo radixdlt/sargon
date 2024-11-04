@@ -58,55 +58,12 @@ impl Profile {
             Output = Result<PrivateHierarchicalDeterministicFactorSource>,
         >,
     {
-        let index = self
-            .next_derivation_index_for_entity(EntityKind::Account, network_id);
-
-        assert!((index as i64) - (count as i64) < (u32::MAX as i64)); // unlikely edge case
-
         let bdfs = self.bdfs();
-        let count = count as u32;
-
-        let number_of_accounts_on_network = self
-            .networks
-            .get_id(network_id)
-            .map(|n| n.accounts.len())
-            .unwrap_or(0);
-
-        let indices = index..index + count;
-        let indices = indices
-            .into_iter()
-            .map(|i| Unsecurified::from_local_key_space(i, IsHardened(true)))
-            .collect::<Result<Vec<Unsecurified>>>()?;
-        let indices =
-            indices.into_iter().map(HDPathComponent::from).collect_vec();
-
-        let factor_instances = load_private_device_factor_source(bdfs.clone())
-            .await
-            .map(|p| {
-                assert_eq!(p.factor_source, bdfs);
-                p.derive_entity_creation_factor_instances::<AccountPath>(
-                    network_id, indices,
-                )
-            })?;
-
-        let accounts = factor_instances
-            .into_iter()
-            .map(|f: HDFactorInstanceTransactionSigning<AccountPath>| {
-                let idx = u32::from(f.path.index().index_in_local_key_space());
-                let name = get_name(idx);
-                let appearance_id =
-                    AppearanceID::from_number_of_accounts_on_network(
-                        (idx as usize) + number_of_accounts_on_network,
-                    );
-
-                Account::new(f, name, appearance_id)
-            })
-            .collect::<Accounts>();
-
-        Ok((bdfs.factor_source_id(), accounts))
+        todo!()
     }
 }
 
+/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,3 +109,5 @@ mod tests {
         )
     }
 }
+
+*/

@@ -57,73 +57,84 @@ impl HasSampleValues for SecurityStructureOfFactorInstances {
 
 impl HasSampleValues for MatrixOfFactorInstances {
     fn sample() -> Self {
-        Self {
-            primary_role: PrimaryRoleWithFactorInstances::sample(),
-            recovery_role: RecoveryRoleWithFactorInstances::sample(),
-            confirmation_role: ConfirmationRoleWithFactorInstances::sample(),
-        }
+        Self::new(
+            PrimaryRoleWithFactorInstances::sample(),
+            RecoveryRoleWithFactorInstances::sample(),
+            ConfirmationRoleWithFactorInstances::sample(),
+        )
+        .unwrap()
     }
 
     fn sample_other() -> Self {
-        Self {
-            primary_role: PrimaryRoleWithFactorInstances::sample_other(),
-            recovery_role: RecoveryRoleWithFactorInstances::sample_other(),
-            confirmation_role:
-                ConfirmationRoleWithFactorInstances::sample_other(),
-        }
+        Self::new(
+            PrimaryRoleWithFactorInstances::sample_other(),
+            RecoveryRoleWithFactorInstances::sample_other(),
+            ConfirmationRoleWithFactorInstances::sample_other(),
+        )
+        .unwrap()
     }
 }
 
 impl HasSampleValues for PrimaryRoleWithFactorInstances {
     fn sample() -> Self {
-        Self {
-            threshold_factors: vec![FactorInstance::sample()],
-            threshold: 1,
-            override_factors: vec![FactorInstance::sample()],
-        }
+        Self::new([FactorInstance::sample()], 1, [FactorInstance::sample()])
+            .unwrap()
     }
 
     fn sample_other() -> Self {
-        Self {
-            threshold_factors: vec![FactorInstance::sample_other()],
-            threshold: 2,
-            override_factors: vec![FactorInstance::sample_other()],
-        }
+        Self::new(
+            [FactorInstance::sample_other()],
+            2,
+            [FactorInstance::sample_other()],
+        )
+        .unwrap()
     }
 }
 
 impl HasSampleValues for RecoveryRoleWithFactorInstances {
     fn sample() -> Self {
-        Self {
-            threshold_factors: vec![FactorInstance::sample()],
-            threshold: 1,
-            override_factors: vec![FactorInstance::sample()],
-        }
+        Self::new([FactorInstance::sample()], 1, [FactorInstance::sample()])
+            .unwrap()
     }
 
     fn sample_other() -> Self {
-        Self {
-            threshold_factors: vec![FactorInstance::sample_other()],
-            threshold: 2,
-            override_factors: vec![FactorInstance::sample_other()],
-        }
+        Self::new(
+            [FactorInstance::sample_other()],
+            2,
+            [FactorInstance::sample_other()],
+        )
+        .unwrap()
     }
 }
 
 impl HasSampleValues for ConfirmationRoleWithFactorInstances {
     fn sample() -> Self {
-        Self {
-            threshold_factors: vec![FactorInstance::sample()],
-            threshold: 1,
-            override_factors: vec![FactorInstance::sample()],
-        }
+        Self::new([FactorInstance::sample()], 1, [FactorInstance::sample()])
+            .unwrap()
     }
 
     fn sample_other() -> Self {
-        Self {
-            threshold_factors: vec![FactorInstance::sample_other()],
-            threshold: 2,
-            override_factors: vec![FactorInstance::sample_other()],
-        }
+        Self::new(
+            [FactorInstance::sample_other()],
+            2,
+            [FactorInstance::sample_other()],
+        )
+        .unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests_primary {
+    use super::*;
+
+    type Sut = PrimaryRoleWithFactorInstances;
+    type Factor = FactorInstance;
+
+    #[test]
+    fn primary_role_non_securified_threshold_instances_is_err() {
+        assert!(matches!(
+            Sut::new(vec![Factor::sample()], 1, vec![]),
+            Err(CommonError::IndexUnsecurifiedExpectedSecurified)
+        ));
     }
 }

@@ -56,6 +56,9 @@ macro_rules! decl_role_with_factors {
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< $role RoleWith $factor s >] {
+                #[doc(hidden)]
+                #[serde(skip_serializing)]
+                pub __hidden: HiddenConstructor,
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
@@ -88,6 +91,18 @@ macro_rules! decl_role_with_factors {
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Result<Self> {
+
+                    let assert_is_securified = |factors: &Vec::<$factor>| -> Result<()> {
+                        let trait_objects: Vec<&dyn IsMaybeKeySpaceAware> = factors.iter().map(|x| x as &dyn IsMaybeKeySpaceAware).collect();
+                        if trait_objects.iter()
+                        .filter_map(|x| x.maybe_key_space())
+                        .any(|x| x != KeySpace::Securified) {
+                            return Err(crate::CommonError::IndexUnsecurifiedExpectedSecurified)
+                        }
+                        Ok(())
+                    };
+
+
                     let threshold_factors = threshold_factors.into_iter().collect_vec();
 
                     if threshold_factors.len() < threshold as usize {
@@ -99,6 +114,9 @@ macro_rules! decl_role_with_factors {
 
                     let override_factors = override_factors.into_iter().collect_vec();
 
+                    assert_is_securified(&threshold_factors)?;
+                    assert_is_securified(&override_factors)?;
+
                     if !HashSet::<$factor>::from_iter(threshold_factors.clone())
                             .intersection(&HashSet::<$factor>::from_iter(override_factors.clone()))
                             .collect_vec()
@@ -107,6 +125,7 @@ macro_rules! decl_role_with_factors {
                     }
 
                     Ok(Self {
+                        __hidden: HiddenConstructor,
                         threshold_factors,
                         threshold,
                         override_factors,
@@ -162,6 +181,10 @@ macro_rules! decl_matrix_of_factors {
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< MatrixOf $factor s >] {
+                #[doc(hidden)]
+                #[serde(skip_serializing)]
+                pub __hidden: HiddenConstructor,
+
                 /// Used for Signing transactions
                 pub primary_role: [< PrimaryRoleWith $factor s >],
 
@@ -178,12 +201,13 @@ macro_rules! decl_matrix_of_factors {
                     primary_role: [< PrimaryRoleWith $factor s >],
                     recovery_role: [< RecoveryRoleWith $factor s >],
                     confirmation_role: [< ConfirmationRoleWith $factor s >],
-                ) -> Self {
-                    Self {
+                ) -> Result<Self> {
+                    Ok(Self {
+                        __hidden: HiddenConstructor,
                         primary_role,
                         recovery_role,
                         confirmation_role,
-                    }
+                    })
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {

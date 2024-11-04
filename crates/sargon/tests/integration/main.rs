@@ -380,9 +380,9 @@ mod integration_tests {
 
             let alice = Account::sample_securified_mainnet(
                 "Alice",
-                AccountAddress::sample_at(0),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0),
                 || {
-                    let i = Hardened::from_local_key_space_unsecurified(0u32)
+                    let i = Hardened::from_local_key_space(0u32, IsSecurified(true))
                         .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
                         [
@@ -397,9 +397,9 @@ mod integration_tests {
 
             let bob = Account::sample_securified_mainnet(
                 "Bob",
-                AccountAddress::sample_at(1),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(1),
                 || {
-                    let i = Hardened::from_local_key_space_unsecurified(1u32)
+                    let i = Hardened::from_local_key_space(1u32, IsSecurified(true))
                         .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
                         FI::sample_mainnet_tx_account(
@@ -412,9 +412,9 @@ mod integration_tests {
 
             let carol = Account::sample_securified_mainnet(
                 "Carol",
-                AccountAddress::sample_at(2),
+                HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
                 || {
-                    let i = Hardened::from_local_key_space_unsecurified(2u32)
+                    let i = Hardened::from_local_key_space(2u32, IsSecurified(true))
                         .unwrap();
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                         [FI::sample_mainnet_tx_account(
@@ -433,7 +433,7 @@ mod integration_tests {
             let satoshi = Persona::sample_unsecurified_mainnet(
                 "Satoshi",
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_identity(
-                    Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
+                    Hardened::from_local_key_space(0u32, IsSecurified(true)).unwrap(),
                     *f4.factor_source_id().as_hash().unwrap(),
                 ),
             );

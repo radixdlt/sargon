@@ -87,11 +87,13 @@ mod test {
     #[test]
     fn test_from_primary_role() {
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+            SUT::try_from(
                 (matrix(), RoleKind::Primary)
             ).unwrap(),
             SUT::new(
-                [HierarchicalDeterministicFactorInstance::try_from_factor_instance(FactorInstance::sample()).unwrap()],
+                [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
+                    ],
                 1,
                 []
             ).unwrap()
@@ -101,16 +103,13 @@ mod test {
     #[test]
     fn test_from_recovery_role() {
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+            SUT::try_from(
                 (matrix(), RoleKind::Recovery)
             ).unwrap(),
             SUT::new(
-                [HierarchicalDeterministicFactorInstance::try_from_factor_instance(
-                    FactorInstance::new(
-                        FactorSourceIDFromHash::sample_ledger().into(),
-                        FactorInstanceBadge::sample()
-                    )
-                ).unwrap()],
+                [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
+                ],
                 1,
                 []
             ).unwrap()
@@ -120,16 +119,13 @@ mod test {
     #[test]
     fn test_from_confirmation_role() {
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+            SUT::try_from(
                 (matrix(), RoleKind::Confirmation)
             ).unwrap(),
             SUT::new(
-                [HierarchicalDeterministicFactorInstance::try_from_factor_instance(
-                    FactorInstance::new(
-                        FactorSourceIDFromHash::sample_passphrase().into(),
-                        FactorInstanceBadge::sample()
-                    )
-                ).unwrap()],
+                [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
+                ],
                 1,
                 []
             ).unwrap()
@@ -147,12 +143,11 @@ mod test {
             .unwrap(),
             recovery_role(),
             confirmation_role(),
-        );
+        )
+        .unwrap();
 
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-                (matrix, RoleKind::Primary)
-            ),
+            SUT::try_from((matrix, RoleKind::Primary)),
             Err(CommonError::BadgeIsNotVirtualHierarchicalDeterministic)
         );
     }
@@ -163,19 +158,19 @@ mod test {
             recovery_role(),
             confirmation_role(),
         )
+        .unwrap()
     }
 
     fn primary_role() -> PrimaryRoleWithFactorInstances {
-        PrimaryRoleWithFactorInstances::new([FactorInstance::sample()], 1, [])
+        PrimaryRoleWithFactorInstances::new([HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0).into()], 1, [])
             .unwrap()
     }
 
     fn recovery_role() -> RecoveryRoleWithFactorInstances {
         RecoveryRoleWithFactorInstances::new(
-            [FactorInstance::new(
-                FactorSourceIDFromHash::sample_ledger().into(),
-                FactorInstanceBadge::sample(),
-            )],
+            [
+                HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(1).into()
+            ],
             1,
             [],
         )
@@ -184,10 +179,9 @@ mod test {
 
     fn confirmation_role() -> ConfirmationRoleWithFactorInstances {
         ConfirmationRoleWithFactorInstances::new(
-            [FactorInstance::new(
-                FactorSourceIDFromHash::sample_passphrase().into(),
-                FactorInstanceBadge::sample(),
-            )],
+            [
+                HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(2).into()
+            ],
             1,
             [],
         )

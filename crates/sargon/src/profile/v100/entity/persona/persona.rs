@@ -63,6 +63,7 @@ pub struct Persona {
 }
 
 impl IsEntity for Persona {
+    type Address = IdentityAddress;
     fn flags(&self) -> EntityFlags {
         self.flags.clone()
     }
@@ -71,6 +72,20 @@ impl IsEntity for Persona {
 impl IsNetworkAware for Persona {
     fn network_id(&self) -> NetworkID {
         self.network_id
+    }
+}
+impl TryFrom<AccountOrPersona> for Persona {
+    type Error = CommonError;
+
+    fn try_from(value: AccountOrPersona) -> Result<Self> {
+        match value {
+            AccountOrPersona::PersonaEntity(p) => Ok(p),
+            AccountOrPersona::AccountEntity(a) => {
+                Err(CommonError::ExpectedPersonaButGotAccount {
+                    address: a.address.to_string(),
+                })
+            }
+        }
     }
 }
 

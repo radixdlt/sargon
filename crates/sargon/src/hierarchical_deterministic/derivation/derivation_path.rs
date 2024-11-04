@@ -192,6 +192,12 @@ impl BIP44LikePath {
     }
 }
 
+impl IsKeySpaceAware for DerivationPath {
+    fn key_space(&self) -> KeySpace {
+        self.to_hd_path().index().key_space()
+    }
+}
+
 impl IsNetworkAware for DerivationPath {
     fn network_id(&self) -> NetworkID {
         match self {

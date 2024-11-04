@@ -32,6 +32,76 @@ impl Profile {
         }
         Err(CommonError::UnknownAccount)
     }
+
+    pub fn get_entities_of_kind_on_network_in_key_space(
+        &self,
+        entity_kind: CAP26EntityKind,
+        network_id: NetworkID,
+        key_space: KeySpace,
+    ) -> IndexSet<AccountOrPersona> {
+        self.networks
+            .get_id(&network_id)
+            .map(|n| {
+                n.get_entities_of_kind_in_key_space(entity_kind, key_space)
+            })
+            .unwrap_or_default()
+    }
+
+    pub fn get_unsecurified_entities_of_kind_on_network(
+        &self,
+        entity_kind: CAP26EntityKind,
+        network_id: NetworkID,
+    ) -> IndexSet<UnsecurifiedEntity> {
+        self.get_entities_of_kind_on_network_in_key_space(
+            entity_kind,
+            network_id,
+            KeySpace::Unsecurified { is_hardened: true },
+        )
+        .into_iter()
+        .map(|e: AccountOrPersona| {
+            let factor_instance = match e.security_state() {
+                EntitySecurityState::Unsecured { value: uec } => {
+                    uec.transaction_signing.clone()
+                }
+                _ => unreachable!(
+                    "Should already have filtered out securified entities"
+                ),
+            };
+            UnsecurifiedEntity::new(e.address(), factor_instance)
+        })
+        .collect()
+    }
+
+    pub fn unsecurified_accounts_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<UnsecurifiedEntity> {
+        self.get_unsecurified_entities_of_kind_on_network(
+            CAP26EntityKind::Account,
+            network_id,
+        )
+    }
+
+    pub fn get_securified_entities_of_kind_on_network<E: IsSecurifiedEntity>(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<E> {
+        self.get_entities_of_kind_on_network_in_key_space(
+            E::entity_kind(),
+            network_id,
+            KeySpace::Securified,
+        )
+        .into_iter()
+        .flat_map(|x| E::try_from(x).ok())
+        .collect()
+    }
+
+    pub fn securified_accounts_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<SecurifiedAccount> {
+        self.get_securified_entities_of_kind_on_network(network_id)
+    }
 }
 
 #[cfg(test)]

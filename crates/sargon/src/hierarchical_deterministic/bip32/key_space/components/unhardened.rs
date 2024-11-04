@@ -84,12 +84,14 @@ impl HasSampleValues for Unhardened {
     }
 }
 
-impl IsInLocalKeySpace for Unhardened {
-    fn key_space(&self) -> KeySpace {
-        KeySpace::Unsecurified { is_hardened: false }
-    }
+impl HasIndexInLocalKeySpace for Unhardened {
     fn index_in_local_key_space(&self) -> U31 {
         self.0
+    }
+}
+impl IsKeySpaceAware for Unhardened {
+    fn key_space(&self) -> KeySpace {
+        KeySpace::Unsecurified { is_hardened: false }
     }
 }
 

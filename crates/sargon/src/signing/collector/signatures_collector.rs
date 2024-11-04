@@ -1456,19 +1456,16 @@ mod tests {
 
             fn sample_securified_mainnet<E: IsEntity + 'static>(
                 name: impl AsRef<str>,
+                veci: HierarchicalDeterministicFactorInstance,
                 make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
             ) -> AccountOrPersona {
                 if TypeId::of::<Account>() == TypeId::of::<E>() {
                     AccountOrPersona::from(Account::sample_securified_mainnet(
-                        name,
-                        AccountAddress::sample(),
-                        make_role,
+                        name, veci, make_role,
                     ))
                 } else {
                     AccountOrPersona::from(Persona::sample_securified_mainnet(
-                        name,
-                        IdentityAddress::sample(),
-                        make_role,
+                        name, veci, make_role,
                     ))
                 }
             }
@@ -1788,7 +1785,7 @@ mod tests {
                 let collector =
                     SignaturesCollector::test_lazy_sign_minimum_no_failures([
                         SignableWithEntities::sample([
-                            sample_securified_mainnet::<E>("Alice", || {
+                            sample_securified_mainnet::<E>("Alice", HierarchicalDeterministicFactorInstance::sample_fii10(), || {
                                 GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                                     FactorSource::sample_all().into_iter().map(|f| {
                                         HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(

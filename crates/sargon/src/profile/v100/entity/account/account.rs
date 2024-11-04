@@ -73,6 +73,7 @@ pub struct Account {
 }
 
 impl IsEntity for Account {
+    type Address = AccountAddress;
     fn flags(&self) -> EntityFlags {
         self.flags.clone()
     }
@@ -117,6 +118,19 @@ impl Identifiable for Account {
         self.address
     }
 }
+
+
+impl TryFrom<AccountOrPersona> for Account {
+    type Error = CommonError;
+
+    fn try_from(value: AccountOrPersona) -> Result<Self> {
+        match value {
+            AccountOrPersona::AccountEntity(a) => Ok(a),
+            AccountOrPersona::PersonaEntity(p) => Err(CommonError::ExpectedAccountButGotPersona { address: p.address.to_string() }),
+        }
+    }
+}
+
 
 impl HasSampleValues for Account {
     /// A sample used to facilitate unit tests.

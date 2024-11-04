@@ -130,7 +130,7 @@ impl TryFrom<(&MatrixOfFactorSourceIDs, &FactorSources)>
             factor_sources,
         ))?;
 
-        Ok(Self::new(primary_role, recovery_role, confirmation_role))
+        Self::new(primary_role, recovery_role, confirmation_role)
     }
 }
 
@@ -239,14 +239,14 @@ impl HasSampleValues for MatrixOfFactorSources {
             PrimaryRoleWithFactorSources::sample(),
             RecoveryRoleWithFactorSources::sample(),
             ConfirmationRoleWithFactorSources::sample(),
-        )
+        ).unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             PrimaryRoleWithFactorSources::sample_other(),
             RecoveryRoleWithFactorSources::sample_other(),
             ConfirmationRoleWithFactorSources::sample_other(),
-        )
+        ).unwrap()
     }
 }
 

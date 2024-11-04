@@ -1,5 +1,43 @@
 use crate::prelude::*;
 
+impl IsKeySpaceAware for AccountOrPersona {
+    fn key_space(&self) -> KeySpace {
+        if self.security_state().is_securified() {
+            KeySpace::Securified
+        } else if self.is_unsecurified(IsHardened(true)) {
+            KeySpace::Unsecurified { is_hardened: true }
+        } else if self.is_unsecurified(IsHardened(false)) {
+            KeySpace::Unsecurified { is_hardened: false }
+        } else {
+            unreachable!("should never happen")
+        }
+    }
+}
+
+impl AccountOrPersona {
+    pub fn is_unsecurified(&self, is_hardened: IsHardened) -> bool {
+        match self.security_state() {
+            EntitySecurityState::Unsecured { value: uec } => {
+                uec.transaction_signing
+                    .derivation_path()
+                    .index()
+                    .is_hardened()
+                    == is_hardened.0
+            }
+            _ => false,
+        }
+    }
+
+    pub fn matches_key_space(&self, key_space: KeySpace) -> bool {
+        match key_space {
+            KeySpace::Securified => self.is_securified(),
+            KeySpace::Unsecurified { is_hardened } => {
+                self.is_unsecurified(IsHardened(is_hardened))
+            }
+        }
+    }
+}
+
 impl ProfileNetwork {
     pub fn personas_non_hidden(&self) -> Personas {
         self.personas.non_hidden()
@@ -7,6 +45,37 @@ impl ProfileNetwork {
 
     pub fn accounts_non_hidden(&self) -> Accounts {
         self.accounts.non_hidden()
+    }
+
+    pub fn get_entities_erased(
+        &self,
+        entity_kind: CAP26EntityKind,
+    ) -> IndexSet<AccountOrPersona> {
+        match entity_kind {
+            CAP26EntityKind::Account => self
+                .accounts
+                .items()
+                .into_iter()
+                .map(AccountOrPersona::from)
+                .collect::<IndexSet<_>>(),
+            CAP26EntityKind::Identity => self
+                .personas
+                .items()
+                .into_iter()
+                .map(AccountOrPersona::from)
+                .collect::<IndexSet<_>>(),
+        }
+    }
+
+    pub fn get_entities_of_kind_in_key_space(
+        &self,
+        entity_kind: CAP26EntityKind,
+        key_space: KeySpace,
+    ) -> IndexSet<AccountOrPersona> {
+        self.get_entities_erased(entity_kind)
+            .into_iter()
+            .filter(|e| e.matches_key_space(key_space))
+            .collect()
     }
 }
 

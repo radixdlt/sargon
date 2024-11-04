@@ -36,8 +36,6 @@ use crate::prelude::*;
     Copy,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     EnumAsInner,
     derive_more::Display,
@@ -53,6 +51,22 @@ pub enum HDPathComponent {
     #[display("{_0}")]
     #[debug("{:?}", _0)]
     Securified(SecurifiedU30),
+}
+
+impl PartialOrd for HDPathComponent {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for HDPathComponent {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Self::Unsecurified(lhs), Self::Unsecurified(rhs)) => lhs.cmp(rhs), 
+            (Self::Securified(lhs), Self::Securified(rhs)) => lhs.cmp(rhs), 
+            (Self::Unsecurified(_), Self::Securified(_)) => Ordering::Less,
+            (Self::Securified(_), Self::Unsecurified(_)) => Ordering::Greater,
+        }
+    }
 }
 
 impl ToBIP32Str for HDPathComponent {
@@ -87,18 +101,19 @@ impl HasSampleValues for HDPathComponent {
         Self::Securified(SecurifiedU30::sample_other())
     }
 }
-
-impl IsInLocalKeySpace for HDPathComponent {
-    fn key_space(&self) -> KeySpace {
-        match self {
-            Self::Unsecurified(u) => u.key_space(),
-            Self::Securified(s) => s.key_space(),
-        }
-    }
+impl HasIndexInLocalKeySpace for HDPathComponent {
     fn index_in_local_key_space(&self) -> U31 {
         match self {
             Self::Unsecurified(u) => u.index_in_local_key_space(),
             Self::Securified(s) => s.index_in_local_key_space(),
+        }
+    }
+}
+impl IsKeySpaceAware for HDPathComponent {
+    fn key_space(&self) -> KeySpace {
+        match self {
+            Self::Unsecurified(u) => u.key_space(),
+            Self::Securified(s) => s.key_space(),
         }
     }
 }
@@ -237,8 +252,7 @@ const unsafe fn unhard(value: u16) -> HDPathComponent {
 
 pub const PURPOSE: HDPathComponent = unsafe { hard(44) };
 pub const GET_ID_CAP26_LOCAL: u16 = 365;
-pub const GET_ID_LAST: HDPathComponent =
-    unsafe { hard(GET_ID_CAP26_LOCAL) };
+pub const GET_ID_LAST: HDPathComponent = unsafe { hard(GET_ID_CAP26_LOCAL) };
 pub const COIN_TYPE: HDPathComponent = unsafe { hard(1022) };
 pub const BIP44_ACCOUNT: HDPathComponent = unsafe { hard(0) };
 pub const BIP44_CHANGE: HDPathComponent = unsafe { unhard(0) };

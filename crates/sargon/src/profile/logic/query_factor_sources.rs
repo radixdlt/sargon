@@ -62,53 +62,6 @@ impl Profile {
         explicit_main.unwrap_or(implicit_main).clone()
     }
 
-    fn next_derivation_index_for_entity_for_factor_source(
-        &self,
-        kind: EntityKind,
-        network_id: NetworkID,
-        factor_source_id: FactorSourceIDFromHash,
-    ) -> u32 {
-        match kind {
-            EntityKind::Persona => {
-                unreachable!("Personas are not supported yet")
-            }
-            EntityKind::Account => {}
-        };
-        let index = self
-            .networks
-            .get_id(network_id)
-            .map(|n| {
-                n.accounts
-                    .items()
-                    .into_iter()
-                    .filter(|a| match &a.security_state {
-                        EntitySecurityState::Unsecured { value } => {
-                            value.transaction_signing.factor_source_id
-                                == factor_source_id
-                        }
-                        EntitySecurityState::Securified { value: _ } => {
-                            panic!("Not implemented yet")
-                        }
-                    })
-                    .collect_vec()
-                    .len()
-            })
-            .unwrap_or(0);
-
-        index as u32
-    }
-
-    pub fn next_derivation_index_for_entity(
-        &self,
-        kind: EntityKind,
-        network_id: NetworkID,
-    ) -> u32 {
-        self.next_derivation_index_for_entity_for_factor_source(
-            kind,
-            network_id,
-            self.bdfs().id,
-        )
-    }
 }
 
 impl Profile {
@@ -278,40 +231,7 @@ mod tests {
         profile.bdfs();
     }
 
-    #[test]
-    fn next_derivation_index_for_entity_account_bdfs_mainnet() {
-        let profile = Profile::sample();
-        assert_eq!(
-            profile.next_derivation_index_for_entity(
-                EntityKind::Account,
-                NetworkID::Mainnet
-            ),
-            2
-        );
-    }
 
-    #[test]
-    fn next_derivation_index_for_entity_account_bdfs_stokenet() {
-        let profile = Profile::sample();
-        assert_eq!(
-            profile.next_derivation_index_for_entity(
-                EntityKind::Account,
-                NetworkID::Stokenet
-            ),
-            2
-        );
-    }
 
-    #[test]
-    fn next_derivation_index_for_entity_account_olympia_dfs_mainnet() {
-        let profile = Profile::sample();
-        assert_eq!(
-            profile.next_derivation_index_for_entity_for_factor_source(
-                EntityKind::Account,
-                NetworkID::Mainnet,
-                DeviceFactorSource::sample_olympia().id
-            ),
-            0
-        );
-    }
+
 }

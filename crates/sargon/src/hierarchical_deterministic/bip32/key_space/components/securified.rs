@@ -90,12 +90,14 @@ impl HasSampleValues for SecurifiedU30 {
     }
 }
 
-impl IsInLocalKeySpace for SecurifiedU30 {
-    fn key_space(&self) -> KeySpace {
-        KeySpace::Securified
-    }
+impl HasIndexInLocalKeySpace for SecurifiedU30 {
     fn index_in_local_key_space(&self) -> U31 {
         U31::from(self.0)
+    }
+}
+impl IsKeySpaceAware for SecurifiedU30 {
+    fn key_space(&self) -> KeySpace {
+        KeySpace::Securified
     }
 }
 impl HasOffsetFromGlobalKeySpace for SecurifiedU30 {

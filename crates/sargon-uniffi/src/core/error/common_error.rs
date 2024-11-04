@@ -728,6 +728,31 @@ pub enum CommonError {
 
     #[error("Failed to decompile bytes into Subintent")]
     FailedToDecompileBytesIntoSubintent = 10205,
+
+    #[error("FactorSource Discrepancy")]
+    FactorSourceDiscrepancy = 10206,
+
+    #[error("FactorInstancesProvider did not derive enough factors")]
+    FactorInstancesProviderDidNotDeriveEnoughFactors = 10207,
+
+    #[error("FactorInstancesCache already contains FactorInstance")]
+    CacheAlreadyContainsFactorInstance { derivation_path: String } = 10208,
+
+    #[error("Expected Account but Got Persona, address of persona {address}")]
+    ExpectedAccountButGotPersona { address: String } = 10209,
+
+    #[error("Expected Persona but Got Account, address of account {address}")]
+    ExpectedPersonaButGotAccount { address: String } = 10210,
+
+    #[error(
+        "Account not securified, but was expected to be, address {address}"
+    )]
+    AccountNotSecurified { address: String } = 10211,
+
+    #[error(
+        "Account not securified, but was expected to be, address {address}"
+    )]
+    PersonaNotSecurified { address: String } = 10212,
 }
 
 #[uniffi::export]

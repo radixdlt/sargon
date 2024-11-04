@@ -31,8 +31,6 @@ use crate::prelude::*;
     Copy,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     EnumAsInner,
     derive_more::Display,
@@ -48,6 +46,22 @@ pub enum Unsecurified {
     #[display("{_0}")]
     #[debug("{:?}", _0)]
     Hardened(UnsecurifiedHardened),
+}
+
+impl PartialOrd for Unsecurified {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Unsecurified {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Self::Unhardened(lhs), Self::Unhardened(rhs)) => lhs.cmp(rhs),
+            (Self::Hardened(lhs), Self::Hardened(rhs)) => lhs.cmp(rhs),
+            (Self::Unhardened(_), Self::Hardened(_)) => Ordering::Less,
+            (Self::Hardened(_), Self::Unhardened(_)) => Ordering::Greater,
+        }
+    }
 }
 
 impl From<Unhardened> for Unsecurified {
@@ -77,17 +91,19 @@ impl HasSampleValues for Unsecurified {
     }
 }
 
-impl IsInLocalKeySpace for Unsecurified {
-    fn key_space(&self) -> KeySpace {
-        match self {
-            Self::Unhardened(u) => u.key_space(),
-            Self::Hardened(h) => h.key_space(),
-        }
-    }
+impl HasIndexInLocalKeySpace for Unsecurified {
     fn index_in_local_key_space(&self) -> U31 {
         match self {
             Self::Unhardened(u) => u.index_in_local_key_space(),
             Self::Hardened(h) => h.index_in_local_key_space(),
+        }
+    }
+}
+impl IsKeySpaceAware for Unsecurified {
+    fn key_space(&self) -> KeySpace {
+        match self {
+            Self::Unhardened(u) => u.key_space(),
+            Self::Hardened(h) => h.key_space(),
         }
     }
 }

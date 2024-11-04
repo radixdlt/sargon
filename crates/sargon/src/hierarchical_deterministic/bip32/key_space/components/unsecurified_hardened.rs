@@ -112,12 +112,14 @@ impl IsPathComponentStringConvertible for UnsecurifiedHardened {
         UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX;
 }
 
-impl IsInLocalKeySpace for UnsecurifiedHardened {
-    fn key_space(&self) -> KeySpace {
-        KeySpace::Unsecurified { is_hardened: true }
-    }
+impl HasIndexInLocalKeySpace for UnsecurifiedHardened {
     fn index_in_local_key_space(&self) -> U31 {
         U31::from(self.0)
+    }
+}
+impl IsKeySpaceAware for UnsecurifiedHardened {
+    fn key_space(&self) -> KeySpace {
+        KeySpace::Unsecurified { is_hardened: true }
     }
 }
 
