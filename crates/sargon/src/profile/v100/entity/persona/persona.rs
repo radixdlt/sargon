@@ -61,7 +61,11 @@ pub struct Persona {
     /// uploaded to the Radix Network.
     pub persona_data: PersonaData,
 }
-
+impl HasEntityKind for Persona {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Identity
+    }
+}
 impl IsEntity for Persona {
     type Address = IdentityAddress;
     fn flags(&self) -> EntityFlags {

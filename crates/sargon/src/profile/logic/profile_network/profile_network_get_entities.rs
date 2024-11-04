@@ -77,6 +77,20 @@ impl ProfileNetwork {
             .filter(|e| e.matches_key_space(key_space))
             .collect()
     }
+
+    pub fn contains_entity_by_address<E: IsEntity>(
+        &self,
+        entity_address: &E::Address,
+    ) -> bool {
+        self.get_entities_erased(E::entity_kind())
+            .into_iter()
+            .any(|e| {
+                e.address()
+                    == Into::<AddressOfAccountOrPersona>::into(
+                        entity_address.clone(),
+                    )
+            })
+    }
 }
 
 #[cfg(test)]

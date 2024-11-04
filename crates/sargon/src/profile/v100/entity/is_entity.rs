@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-pub trait IsEntity {
-    type Address: EntityAddress;
+pub trait IsEntity: HasEntityKind {
+    type Address: EntityAddress + Into<AddressOfAccountOrPersona> + Clone;
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
