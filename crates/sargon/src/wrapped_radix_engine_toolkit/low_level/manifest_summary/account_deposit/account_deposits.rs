@@ -9,7 +9,7 @@ pub struct AccountDeposits {
 }
 
 impl AccountDeposits {
-    pub fn new(
+    fn new(
         specified_resources: Vec<SimpleResourceBounds>,
         unspecified_resources: UnspecifiedResources,
     ) -> Self {
@@ -17,6 +17,16 @@ impl AccountDeposits {
             specified_resources,
             unspecified_resources,
         }
+    }
+}
+
+#[cfg(test)]
+impl AccountDeposits {
+    pub fn new_for_test(
+        specified_resources: Vec<SimpleResourceBounds>,
+        unspecified_resources: UnspecifiedResources,
+    ) -> Self {
+        Self::new(specified_resources, unspecified_resources)
     }
 }
 
@@ -38,7 +48,7 @@ impl From<(Vec<ScryptoAccountDeposit>, NetworkID)> for AccountDeposits {
             })
             .collect();
 
-        // Check if there are any unspecified resources
+        // fold the unspecified resources into a single value.
         let unspecified_resources = deposits
             .iter()
             .map(|deposit| deposit.unspecified_resources())

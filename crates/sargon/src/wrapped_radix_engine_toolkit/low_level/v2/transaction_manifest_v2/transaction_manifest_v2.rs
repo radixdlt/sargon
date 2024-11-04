@@ -477,19 +477,19 @@ DROP_AUTH_ZONE_PROOFS;
                 ),
                 hashmap!(
                     AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") =>
-                        AccountDeposits::new(
+                        AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 150)],
                             UnspecifiedResources::NonePresent,
                         )
                     ,
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") =>
-                        AccountDeposits::new(
+                        AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 50)],
                             UnspecifiedResources::NonePresent,
                         )
                     ,
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") =>
-                        AccountDeposits::new(
+                        AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 130)],
                             UnspecifiedResources::NonePresent,
                         ),

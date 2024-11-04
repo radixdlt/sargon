@@ -525,19 +525,19 @@ DROP_AUTH_ZONE_PROOFS;
                 ),
                 hashmap!(
                     AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") =>
-                        AccountDeposits::new(
+                        AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 150)],
                             UnspecifiedResources::NonePresent,
                         )
                     ,
                     AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") =>
-                        AccountDeposits::new(
+                        AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 50)],
                             UnspecifiedResources::NonePresent,
                         )
                     ,
                     AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") =>
-                        AccountDeposits::new(
+                        AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 130)],
                             UnspecifiedResources::NonePresent,
                         ),
@@ -590,9 +590,6 @@ DROP_AUTH_ZONE_PROOFS;
             .yield_to_parent(());
 
         let manifest = SUT::sargon_built(builder, NetworkID::Mainnet);
-
-        let summary = manifest.clone().summary().unwrap();
-
         assert_eq!(
             manifest.manifest_string(),
             "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\nYIELD_TO_PARENT;\n",
@@ -622,7 +619,7 @@ DROP_AUTH_ZONE_PROOFS;
             summary.account_deposits,
             hashmap! {
                 AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
-                    AccountDeposits::new(
+                    AccountDeposits::new_for_test(
                         vec![
                             SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
                             SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
@@ -659,7 +656,7 @@ DROP_AUTH_ZONE_PROOFS;
             summary.account_deposits,
             hashmap!(
                 AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
-                    AccountDeposits::new(
+                    AccountDeposits::new_for_test(
                         vec![
                             SimpleResourceBounds::non_fungible(
                                 "resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5",
@@ -719,7 +716,7 @@ DROP_AUTH_ZONE_PROOFS;
             summary.account_deposits,
             hashmap!(
             AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
-                AccountDeposits::new(
+                AccountDeposits::new_for_test(
                     vec![
                         SimpleResourceBounds::non_fungible(
                             "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
@@ -787,7 +784,7 @@ DROP_AUTH_ZONE_PROOFS;
             summary.account_deposits,
             hashmap!(
                 AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
-                    AccountDeposits::new(
+                    AccountDeposits::new_for_test(
                         vec![
                             SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
                             SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
@@ -803,7 +800,7 @@ DROP_AUTH_ZONE_PROOFS;
                         ],
                         UnspecifiedResources::MayBePresent,
                     ),
-                    AccountAddress::from("account_tdx_2_1288u4aka2dm8787texaeta8ruzhcr7dyckmnck5wt0llrm6x0ak7e4") => AccountDeposits::new(
+                    AccountAddress::from("account_tdx_2_1288u4aka2dm8787texaeta8ruzhcr7dyckmnck5wt0llrm6x0ak7e4") => AccountDeposits::new_for_test(
                         vec![
                             SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
                             SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
