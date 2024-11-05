@@ -83,9 +83,23 @@ impl HierarchicalDeterministicFactorInstance {
         )
     }
 
+    /// 10 | Unsecurified { Device } (fs10)
+    pub fn sample_fi12(entity_kind: CAP26EntityKind) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(10),
+            entity_kind,
+            Hardened::from_local_key_space_unsecurified(10u32).unwrap(),
+        )
+    }
+
     /// Account: 9 | Unsecurified { Device } (fs10)
     pub fn sample_fia11() -> Self {
         Self::sample_fi11(CAP26EntityKind::Account)
+    }
+
+    /// 10 | Unsecurified { Device } (fs10)
+    pub fn sample_fia12() -> Self {
+        Self::sample_fi12(CAP26EntityKind::Account)
     }
 
     /// Identity: 8 | Unsecurified { Device } (fs10)

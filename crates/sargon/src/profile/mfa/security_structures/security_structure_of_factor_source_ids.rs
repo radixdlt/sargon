@@ -100,46 +100,110 @@ impl HasSampleValues for MatrixOfFactorSourceIDs {
     }
 }
 
+#[cfg(test)]
+mod test_primary {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PrimaryRoleWithFactorSourceIDs;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
+
 impl HasSampleValues for PrimaryRoleWithFactorSourceIDs {
     fn sample() -> Self {
-        Self::new([FactorSourceID::sample()], 1, [FactorSourceID::sample()])
-            .unwrap()
+        Self::threshold_factors_only(
+            [FactorSourceID::sample(), FactorSourceID::sample_other()],
+            2,
+        )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
-            [FactorSourceID::sample_other()],
-            2,
+            [FactorSourceID::sample()],
+            1,
             [FactorSourceID::sample_other()],
         )
         .unwrap()
+    }
+}
+
+#[cfg(test)]
+mod test_recovery {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = RecoveryRoleWithFactorSourceIDs;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
 
 impl HasSampleValues for RecoveryRoleWithFactorSourceIDs {
     fn sample() -> Self {
-        Self::new([FactorSourceID::sample()], 1, [FactorSourceID::sample()])
+        Self::threshold_factors_only([FactorSourceID::sample_other()], 1)
             .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
-            [FactorSourceID::sample_other()],
-            2,
+            [FactorSourceID::sample()],
+            1,
             [FactorSourceID::sample_other()],
         )
         .unwrap()
     }
 }
 
+#[cfg(test)]
+mod test_confirm {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ConfirmationRoleWithFactorSourceIDs;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
+
 impl HasSampleValues for ConfirmationRoleWithFactorSourceIDs {
     fn sample() -> Self {
-        Self::new([FactorSourceID::sample()], 1, [FactorSourceID::sample()])
-            .unwrap()
+        Self::new(
+            [FactorSourceID::sample()],
+            1,
+            [FactorSourceID::sample_other()],
+        )
+        .unwrap()
     }
     fn sample_other() -> Self {
         Self::new(
             [FactorSourceID::sample_other()],
-            2,
-            [FactorSourceID::sample_other()],
+            0,
+            [FactorSourceID::sample()],
         )
         .unwrap()
     }

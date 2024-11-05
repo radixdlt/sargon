@@ -112,7 +112,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Klara | 9 |  Securified { Threshold 1/1 and Override factors #1  }
         Account::sample_securified_mainnet(
             "Klara",
-            HierarchicalDeterministicFactorInstance::sample_fia11(),
+            HierarchicalDeterministicFactorInstance::sample_fia12(),
             || {
                 let idx =
                 Hardened::from_local_key_space(9u32, IsSecurified(true)).unwrap();
@@ -220,5 +220,23 @@ impl Account {
 
     pub fn sample_all() -> Vec<Account> {
         ALL_ACCOUNT_SAMPLES.to_vec()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unique_addresses() {
+        let accounts_addresses = Account::sample_all()
+            .into_iter()
+            .map(|a| a.address)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accounts_addresses.len(),
+            HashSet::<AccountAddress>::from_iter(accounts_addresses.clone())
+                .len()
+        );
     }
 }

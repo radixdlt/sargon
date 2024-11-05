@@ -55,7 +55,10 @@ mod test {
         );
 
         let summary = intent.manifest_summary().unwrap();
-
+        assert_eq!(
+            accounts.len(),
+            HashSet::<AccountAddress>::from_iter(accounts.clone()).len()
+        );
         pretty_assertions::assert_eq!(
             accounts.iter().sorted().collect_vec(),
             summary

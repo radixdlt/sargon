@@ -215,17 +215,44 @@ mod tests {
     type SUT = ManifestSummary;
 
     #[test]
-    fn duplicates_are_removed() {
+    fn duplicates_are_removed_from_addresses_of_accounts_withdrawn_from() {
+        let duplicates = vec![
+            AccountAddress::sample(),
+            AccountAddress::sample()
+        ];
+        assert_eq!(duplicates.len(), 2);
         let sut = SUT::new(
             HashMap::default(),
             HashMap::default(),
             Vec::default(),
-            Vec::default(),
+            duplicates,
             Vec::default(),
             Vec::default(),
             Vec::default(),
             Vec::default(),
             Vec::default(),
         );
+        assert_eq!(sut.addresses_of_accounts_withdrawn_from.len(), 1);
+    }
+
+    #[test]
+    fn duplicates_are_removed_from_addresses_of_accounts_deposited_into() {
+        let duplicates = vec![
+            AccountAddress::sample(),
+            AccountAddress::sample()
+        ];
+        assert_eq!(duplicates.len(), 2);
+        let sut = SUT::new(
+            HashMap::default(),
+            HashMap::default(),
+            Vec::default(),
+            Vec::default(),
+            duplicates,
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+        );
+        assert_eq!(sut.addresses_of_accounts_deposited_into.len(), 1);
     }
 }
