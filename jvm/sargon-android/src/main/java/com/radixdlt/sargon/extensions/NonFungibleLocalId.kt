@@ -3,6 +3,7 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.NonFungibleLocalId
+import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.newNonFungibleLocalIdBytes
 import com.radixdlt.sargon.newNonFungibleLocalIdFromString
 import com.radixdlt.sargon.newNonFungibleLocalIdInt
