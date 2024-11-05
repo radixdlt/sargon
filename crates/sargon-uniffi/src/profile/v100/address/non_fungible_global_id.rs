@@ -41,8 +41,8 @@ impl From<InternalNonFungibleGlobalId> for NonFungibleGlobalId {
 impl From<NonFungibleGlobalId> for InternalNonFungibleGlobalId {
     fn from(val: NonFungibleGlobalId) -> Self {
         Self {
-            resource_address: val.resource_address.into_internal(),
-            non_fungible_local_id: val.non_fungible_local_id.into_internal(),
+            resource_address: val.resource_address.into(),
+            non_fungible_local_id: val.non_fungible_local_id.into(),
         }
     }
 }
@@ -52,6 +52,8 @@ impl NonFungibleGlobalId {
         self.clone().into()
     }
 }
+
+decl_conversion_tests_for!(NonFungibleGlobalId);
 
 #[uniffi::export]
 pub fn new_non_fungible_global_id_from_string(

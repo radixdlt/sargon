@@ -51,7 +51,7 @@ impl From<InternalNonFungibleLocalId> for NonFungibleLocalId {
 
 impl From<NonFungibleLocalId> for InternalNonFungibleLocalId {
     fn from(val: NonFungibleLocalId) -> Self {
-        val.into()
+        val.kind.into()
     }
 }
 
@@ -114,6 +114,8 @@ impl From<InternalNonFungibleLocalId> for FormattedAddress {
         }
     }
 }
+
+decl_conversion_tests_for!(NonFungibleLocalId);
 
 #[uniffi::export]
 pub fn new_non_fungible_local_id_from_string(
