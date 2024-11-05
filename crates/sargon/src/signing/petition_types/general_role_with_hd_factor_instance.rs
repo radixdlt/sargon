@@ -91,14 +91,20 @@ mod test {
 
     #[test]
     fn test_from_recovery_role() {
+        let r = recovery_role();
         assert_eq!(
             SUT::try_from(
                 (matrix(), RoleKind::Recovery)
             ).unwrap(),
             SUT::new(
-                [
-                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
-                ],
+                r.threshold_factors
+                .clone()
+                .into_iter()
+                .map(|f: FactorInstance| {
+                    HierarchicalDeterministicFactorInstance::try_from_factor_instance(f)
+                        .unwrap()
+                })
+                .collect_vec(),
                 1,
                 []
             ).unwrap()
@@ -109,14 +115,27 @@ mod test {
     fn test_from_confirmation_role() {
         let r = confirmation_role();
         assert_eq!(
-            SUT::try_from(
-                (matrix(), RoleKind::Confirmation)
-            ).unwrap(),
+            SUT::try_from((matrix(), RoleKind::Confirmation)).unwrap(),
             SUT::new(
-               r.threshold_factors.clone(),
+                r.threshold_factors
+                    .clone()
+                    .into_iter()
+                    .map(|f: FactorInstance| {
+                        HierarchicalDeterministicFactorInstance::try_from_factor_instance(f)
+                            .unwrap()
+                    })
+                    .collect_vec(),
                 r.threshold,
-                r.override_factors.clone()
-            ).unwrap()
+                r.override_factors
+                    .clone()
+                    .into_iter()
+                    .map(|f: FactorInstance| {
+                        HierarchicalDeterministicFactorInstance::try_from_factor_instance(f)
+                            .unwrap()
+                    })
+                    .collect_vec()
+            )
+            .unwrap()
         )
     }
 
