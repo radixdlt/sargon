@@ -17,8 +17,7 @@ impl AppendableCollection for FactorInstances {
     type Element = HierarchicalDeterministicFactorInstance;
 
     fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
-        // self.extend(iter)
-        todo!()
+        self.extend(iter)
     }
 }
 
