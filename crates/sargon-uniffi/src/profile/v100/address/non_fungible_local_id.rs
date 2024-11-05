@@ -44,7 +44,7 @@ impl From<InternalNonFungibleLocalId> for NonFungibleLocalId {
             kind: val.clone().into(),
             as_string: val.to_string(),
             user_facing_string: val.to_user_facing_string(),
-            formatted: val.into()
+            formatted: val.into(),
         }
     }
 }
@@ -58,10 +58,24 @@ impl From<NonFungibleLocalId> for InternalNonFungibleLocalId {
 impl From<InternalNonFungibleLocalId> for NonFungibleLocalIdKind {
     fn from(val: InternalNonFungibleLocalId) -> Self {
         match val {
-            InternalNonFungibleLocalId::Integer { value } => NonFungibleLocalIdKind::Integer { value: value },
-            InternalNonFungibleLocalId::Bytes { value } => NonFungibleLocalIdKind::Bytes { value: value.into() },
-            InternalNonFungibleLocalId::Str { value } => NonFungibleLocalIdKind::Str { value: value.into() },
-            InternalNonFungibleLocalId::Ruid { value } => NonFungibleLocalIdKind::Ruid { value: value.into() },
+            InternalNonFungibleLocalId::Integer { value } => {
+                NonFungibleLocalIdKind::Integer { value: value }
+            }
+            InternalNonFungibleLocalId::Bytes { value } => {
+                NonFungibleLocalIdKind::Bytes {
+                    value: value.into(),
+                }
+            }
+            InternalNonFungibleLocalId::Str { value } => {
+                NonFungibleLocalIdKind::Str {
+                    value: value.into(),
+                }
+            }
+            InternalNonFungibleLocalId::Ruid { value } => {
+                NonFungibleLocalIdKind::Ruid {
+                    value: value.into(),
+                }
+            }
         }
     }
 }
@@ -69,22 +83,34 @@ impl From<InternalNonFungibleLocalId> for NonFungibleLocalIdKind {
 impl From<NonFungibleLocalIdKind> for InternalNonFungibleLocalId {
     fn from(val: NonFungibleLocalIdKind) -> Self {
         match val {
-            NonFungibleLocalIdKind::Integer { value } => InternalNonFungibleLocalId::Integer { value: value },
-            NonFungibleLocalIdKind::Bytes { value } => InternalNonFungibleLocalId::Bytes { value: value.into() },
-            NonFungibleLocalIdKind::Str { value } => InternalNonFungibleLocalId::Str { value: value.into() },
-            NonFungibleLocalIdKind::Ruid { value } => InternalNonFungibleLocalId::Ruid { value: value.into() },
+            NonFungibleLocalIdKind::Integer { value } => {
+                InternalNonFungibleLocalId::Integer { value: value }
+            }
+            NonFungibleLocalIdKind::Bytes { value } => {
+                InternalNonFungibleLocalId::Bytes {
+                    value: value.into(),
+                }
+            }
+            NonFungibleLocalIdKind::Str { value } => {
+                InternalNonFungibleLocalId::Str {
+                    value: value.into(),
+                }
+            }
+            NonFungibleLocalIdKind::Ruid { value } => {
+                InternalNonFungibleLocalId::Ruid {
+                    value: value.into(),
+                }
+            }
         }
     }
 }
-
-
 
 impl From<InternalNonFungibleLocalId> for FormattedAddress {
     fn from(val: InternalNonFungibleLocalId) -> Self {
         Self {
             full: val.formatted(sargon::AddressFormat::Full),
             raw: val.formatted(sargon::AddressFormat::Raw),
-            default: val.formatted(sargon::AddressFormat::Default)
+            default: val.formatted(sargon::AddressFormat::Default),
         }
     }
 }

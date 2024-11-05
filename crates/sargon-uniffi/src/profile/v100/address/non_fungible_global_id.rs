@@ -14,7 +14,7 @@ pub struct NonFungibleGlobalId {
     pub resource_address: ResourceAddress,
     pub non_fungible_local_id: NonFungibleLocalId,
     pub as_string: String,
-    pub formatted: FormattedAddress
+    pub formatted: FormattedAddress,
 }
 
 impl From<InternalNonFungibleGlobalId> for FormattedAddress {
@@ -22,7 +22,7 @@ impl From<InternalNonFungibleGlobalId> for FormattedAddress {
         Self {
             full: val.formatted(sargon::AddressFormat::Full),
             raw: val.formatted(sargon::AddressFormat::Raw),
-            default: val.formatted(sargon::AddressFormat::Default)
+            default: val.formatted(sargon::AddressFormat::Default),
         }
     }
 }
@@ -65,7 +65,11 @@ pub fn new_non_fungible_global_id(
     address: NonFungibleResourceAddress,
     local_id: NonFungibleLocalId,
 ) -> NonFungibleGlobalId {
-    InternalNonFungibleGlobalId::new(address.into_internal(), local_id.into_internal()).into()
+    InternalNonFungibleGlobalId::new(
+        address.into_internal(),
+        local_id.into_internal(),
+    )
+    .into()
 }
 
 #[uniffi::export]

@@ -12,5 +12,5 @@ pub enum AddressFormat {
 pub struct FormattedAddress {
     pub full: String,
     pub raw: String,
-    pub default: String
+    pub default: String,
 }

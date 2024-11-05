@@ -23,7 +23,7 @@ decl_ret_wrapped_address!(
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ComponentAddressKind {
     Global,
-    Internal
+    Internal,
 }
 
 fn kind(component_address: &InternalComponentAddress) -> ComponentAddressKind {
