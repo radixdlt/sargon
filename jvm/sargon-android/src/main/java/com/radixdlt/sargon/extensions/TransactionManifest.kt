@@ -185,7 +185,7 @@ val TransactionManifest.involvedPoolAddresses: List<PoolAddress>
 val TransactionManifest.involvedResourceAddresses: List<ResourceAddress>
     get() = transactionManifestInvolvedResourceAddresses(manifest = this)
 
-val TransactionManifest.summary: ManifestSummary?
+val TransactionManifest.summary: ManifestSummary
     get() = transactionManifestSummary(manifest = this)
 
 fun TransactionManifest.Companion.accountLockerClaim(
