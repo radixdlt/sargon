@@ -24,6 +24,19 @@ pub trait IsPrivateKey<P: IsPublicKey<Self::Signature>>: Sized {
         tuple.into()
     }
 
+    fn sign_subintent_hash(
+        &self,
+        subintent_hash: &SubintentHash,
+    ) -> IntentSignature
+    where
+        (P, Self::Signature): Into<SignatureWithPublicKey>,
+    {
+        let public_key: P = self.public_key();
+        let signature = self.sign(&subintent_hash.hash);
+        let tuple: SignatureWithPublicKey = (public_key, signature).into();
+        tuple.into()
+    }
+
     fn notarize_hash(
         &self,
         signed_transaction_intent_hash: &SignedTransactionIntentHash,

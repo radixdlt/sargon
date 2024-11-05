@@ -426,4 +426,10 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn test_man() {
+        let instructions = TransactionManifest::sample_other();
+        instructions.summary().unwrap();
+    }
 }
