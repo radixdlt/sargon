@@ -170,6 +170,18 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
 pub type AnySecurifiedEntity = AbstractSecurifiedEntity<AccountOrPersona>;
 pub type SecurifiedAccount = AbstractSecurifiedEntity<Account>;
 pub type SecurifiedPersona = AbstractSecurifiedEntity<Persona>;
+impl SecurifiedAccount {
+    pub fn erase_to_any(&self) -> AnySecurifiedEntity {
+        AnySecurifiedEntity::new(AccountOrPersona::from(self.entity.clone()))
+            .unwrap()
+    }
+}
+impl SecurifiedPersona {
+    pub fn erase_to_any(&self) -> AnySecurifiedEntity {
+        AnySecurifiedEntity::new(AccountOrPersona::from(self.entity.clone()))
+            .unwrap()
+    }
+}
 impl HasEntityKind for SecurifiedAccount {
     fn entity_kind() -> CAP26EntityKind {
         CAP26EntityKind::Account

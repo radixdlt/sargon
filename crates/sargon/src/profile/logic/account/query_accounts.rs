@@ -7,6 +7,14 @@ impl Profile {
         self.current_network().map(|n| n.accounts.non_hidden())
     }
 
+    /// Returns **ALL** accounts - including hidden/deleted ones, on **ALL** networks.
+    pub fn accounts_on_all_networks_including_hidden(&self) -> Accounts {
+        self.networks
+            .iter()
+            .flat_map(|n| n.accounts.clone().into_iter())
+            .collect::<Accounts>()
+    }
+
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,

@@ -57,6 +57,15 @@ impl UnsecurifiedEntity {
 //     }
 // }
 
+impl TryFrom<Account> for UnsecurifiedEntity {
+    type Error = CommonError;
+    fn try_from(value: Account) -> Result<Self> {
+        let factor_instance = value.factor_instance();
+        let address = value.address();
+        Ok(Self::new(address, factor_instance))
+    }
+}
+
 impl HasSampleValues for UnsecurifiedEntity {
     fn sample() -> Self {
         Self::with_veci(VirtualEntityCreatingInstance::sample())
