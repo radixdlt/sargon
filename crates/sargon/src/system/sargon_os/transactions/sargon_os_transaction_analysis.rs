@@ -20,7 +20,8 @@ impl SargonOS {
     /// 1. Extracting the transaction signers.
     /// 2. Executing the transaction preview GW request.
     /// 3. Running the execution summary with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_transaction_preview(
         &self,
         instructions: String,
@@ -83,12 +84,13 @@ impl SargonOS {
     /// 3. If open, the manifest with its summary is returned.
     /// 4. If enclosed, it extracts the transaction signers and then transaction preview GW request is executed.
     /// 3. The execution summary is created with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_pre_auth_preview(
         &self,
         instructions: String,
         blobs: Blobs,
-        nonce: Nonce,
+        _nonce: Nonce,
     ) -> Result<PreAuthToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
         let subintent_manifest = SubintentManifest::new(
@@ -128,7 +130,7 @@ impl SargonOS {
             }
             None => PreAuthToReview::Open(PreAuthOpenManifest {
                 manifest: subintent_manifest,
-                summary: summary,
+                summary,
             }),
         };
 

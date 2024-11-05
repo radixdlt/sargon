@@ -153,7 +153,7 @@ mod tests {
                 assert_eq!(back_again, preset);
             };
 
-            DerivationPreset::all().into_iter().for_each(|p| f(p));
+            DerivationPreset::all().into_iter().for_each(f);
         });
     }
 

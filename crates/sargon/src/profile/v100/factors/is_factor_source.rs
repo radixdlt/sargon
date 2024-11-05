@@ -11,7 +11,6 @@ pub trait BaseIsFactorSource:
             .into_hash()
             .map_err(|_| CommonError::FactorSourceIDNotFromHash)
             .unwrap()
-            .clone()
     }
 
     fn common_properties(&self) -> FactorSourceCommon;

@@ -86,7 +86,7 @@ impl IsBaseEntity for Account {
     type Address = AccountAddress;
 
     fn address(&self) -> Self::Address {
-        self.address.clone()
+        self.address
     }
     fn flags(&self) -> EntityFlags {
         self.flags.clone()

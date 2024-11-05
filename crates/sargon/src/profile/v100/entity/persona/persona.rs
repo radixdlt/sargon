@@ -76,7 +76,7 @@ impl IsBaseEntity for Persona {
     type Address = IdentityAddress;
 
     fn address(&self) -> Self::Address {
-        self.address.clone()
+        self.address
     }
     fn flags(&self) -> EntityFlags {
         self.flags.clone()

@@ -32,7 +32,7 @@ impl VirtualEntityCreatingInstance {
     }
 
     pub fn address(&self) -> AddressOfAccountOrPersona {
-        self.address.clone()
+        self.address
     }
 
     pub fn factor_instance(&self) -> HierarchicalDeterministicFactorInstance {

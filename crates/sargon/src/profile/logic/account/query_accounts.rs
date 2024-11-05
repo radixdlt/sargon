@@ -40,7 +40,7 @@ impl Profile {
         key_space: KeySpace,
     ) -> IndexSet<AccountOrPersona> {
         self.networks
-            .get_id(&network_id)
+            .get_id(network_id)
             .map(|n| {
                 n.get_entities_of_kind_in_key_space(entity_kind, key_space)
             })
