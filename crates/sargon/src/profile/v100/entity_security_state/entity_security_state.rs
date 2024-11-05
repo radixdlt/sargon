@@ -152,8 +152,6 @@ mod tests {
             value: secured_entity_control,
         };
 
-        let json = serde_json::to_string_pretty(&model).unwrap();
-        println!("🔮\n\n{:?}", json);
 
         assert_eq_after_json_roundtrip(
             &model,
@@ -161,6 +159,7 @@ mod tests {
             {
               "discriminator": "securified",
               "securedEntityControl": {
+                "veci": null,
                 "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
                 "securityStructure": {
                   "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
@@ -182,11 +181,11 @@ mod tests {
                               "hierarchicalDeterministicPublicKey": {
                                 "publicKey": {
                                   "curve": "curve25519",
-                                  "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                  "compressedData": "427969814e15d74c3ff4d9971465cb709d210c8a7627af9466bdaa67bd0929b7"
                                 },
                                 "derivationPath": {
                                   "scheme": "cap26",
-                                  "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                  "path": "m/44H/1022H/1H/525H/1460H/0S"
                                 }
                               }
                             }
@@ -194,7 +193,33 @@ mod tests {
                         }
                       ],
                       "threshold": 1,
-                      "overrideFactors": []
+                      "overrideFactors": [
+                        {
+                          "factorSourceID": {
+                            "discriminator": "fromHash",
+                            "fromHash": {
+                              "kind": "device",
+                              "body": "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd"
+                            }
+                          },
+                          "badge": {
+                            "discriminator": "virtualSource",
+                            "virtualSource": {
+                              "discriminator": "hierarchicalDeterministicPublicKey",
+                              "hierarchicalDeterministicPublicKey": {
+                                "publicKey": {
+                                  "curve": "curve25519",
+                                  "compressedData": "e0293d4979bc303ea4fe361a62baf9c060c7d90267972b05c61eead9ef3eed3e"
+                                },
+                                "derivationPath": {
+                                  "scheme": "cap26",
+                                  "path": "m/44H/1022H/1H/525H/1460H/0S"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
                     },
                     "recoveryRole": {
                       "thresholdFactors": [
@@ -202,8 +227,8 @@ mod tests {
                           "factorSourceID": {
                             "discriminator": "fromHash",
                             "fromHash": {
-                              "kind": "ledgerHQHardwareWallet",
-                              "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                              "kind": "device",
+                              "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                             }
                           },
                           "badge": {
@@ -213,11 +238,11 @@ mod tests {
                               "hierarchicalDeterministicPublicKey": {
                                 "publicKey": {
                                   "curve": "curve25519",
-                                  "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                  "compressedData": "161a65a7b4f374d81bf5e7f73669f5b09b684a860812ec1a34f3220b6ffe8dcf"
                                 },
                                 "derivationPath": {
                                   "scheme": "cap26",
-                                  "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                  "path": "m/44H/1022H/1H/525H/1460H/54S"
                                 }
                               }
                             }
@@ -225,7 +250,33 @@ mod tests {
                         }
                       ],
                       "threshold": 1,
-                      "overrideFactors": []
+                      "overrideFactors": [
+                        {
+                          "factorSourceID": {
+                            "discriminator": "fromHash",
+                            "fromHash": {
+                              "kind": "device",
+                              "body": "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd"
+                            }
+                          },
+                          "badge": {
+                            "discriminator": "virtualSource",
+                            "virtualSource": {
+                              "discriminator": "hierarchicalDeterministicPublicKey",
+                              "hierarchicalDeterministicPublicKey": {
+                                "publicKey": {
+                                  "curve": "curve25519",
+                                  "compressedData": "23fa85f95c79684d2768f46ec4379b5e031757b727f76cfd01a50bd4cf8afcff"
+                                },
+                                "derivationPath": {
+                                  "scheme": "cap26",
+                                  "path": "m/44H/1022H/1H/525H/1460H/237S"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
                     },
                     "confirmationRole": {
                       "thresholdFactors": [
@@ -233,8 +284,8 @@ mod tests {
                           "factorSourceID": {
                             "discriminator": "fromHash",
                             "fromHash": {
-                              "kind": "passphrase",
-                              "body": "181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9"
+                              "kind": "device",
+                              "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                             }
                           },
                           "badge": {
@@ -244,11 +295,11 @@ mod tests {
                               "hierarchicalDeterministicPublicKey": {
                                 "publicKey": {
                                   "curve": "curve25519",
-                                  "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                  "compressedData": "0f081cd5f944efc9cae2f3262e30b445b947601b2fc668938a7c4d464c88fe69"
                                 },
                                 "derivationPath": {
                                   "scheme": "cap26",
-                                  "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                  "path": "m/44H/1022H/1H/525H/1460H/27S"
                                 }
                               }
                             }
@@ -256,7 +307,33 @@ mod tests {
                         }
                       ],
                       "threshold": 1,
-                      "overrideFactors": []
+                      "overrideFactors": [
+                        {
+                          "factorSourceID": {
+                            "discriminator": "fromHash",
+                            "fromHash": {
+                              "kind": "device",
+                              "body": "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd"
+                            }
+                          },
+                          "badge": {
+                            "discriminator": "virtualSource",
+                            "virtualSource": {
+                              "discriminator": "hierarchicalDeterministicPublicKey",
+                              "hierarchicalDeterministicPublicKey": {
+                                "publicKey": {
+                                  "curve": "curve25519",
+                                  "compressedData": "d3d66160cf7117b310c7875fbf8b5695ccc13116a167d13196d22dd8be18a60f"
+                                },
+                                "derivationPath": {
+                                  "scheme": "cap26",
+                                  "path": "m/44H/1022H/1H/525H/1460H/13S"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
                     }
                   }
                 }

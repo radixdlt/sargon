@@ -604,7 +604,7 @@ mod tests {
                     DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        Hardened::from_local_key_space(6, IsSecurified(false))
+                        Hardened::from_local_key_space(6, IsSecurified(true))
                             .unwrap()
                     )),
                     5
@@ -1297,7 +1297,7 @@ mod tests {
                     vec![DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        Hardened::from_local_key_space(0, IsSecurified(false))
+                        Hardened::from_local_key_space(0, IsSecurified(false)) // unsecurified account at `0`.
                             .unwrap()
                     ))]
                 )
@@ -1789,7 +1789,7 @@ mod tests {
                                 GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                                     FactorSource::sample_all().into_iter().map(|f| {
                                         HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                                            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
+                                            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
                                             *f.factor_source_id().as_hash().unwrap(),
                                         )
                                     }),

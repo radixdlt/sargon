@@ -107,16 +107,15 @@ mod test {
 
     #[test]
     fn test_from_confirmation_role() {
+        let r = confirmation_role();
         assert_eq!(
             SUT::try_from(
                 (matrix(), RoleKind::Confirmation)
             ).unwrap(),
             SUT::new(
-                [
-                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
-                ],
-                1,
-                []
+               r.threshold_factors.clone(),
+                r.threshold,
+                r.override_factors.clone()
             ).unwrap()
         )
     }
