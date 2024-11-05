@@ -57,7 +57,7 @@ macro_rules! decl_role_with_factors {
             #[serde(rename_all = "camelCase")]
             pub struct [< $role RoleWith $factor s >] {
                 #[doc(hidden)]
-                #[serde(skip_serializing)]
+                #[serde(skip)]
                 pub __hidden: HiddenConstructor,
 
                 /// Factors which are used in combination with other instances, amounting to at
@@ -86,6 +86,9 @@ macro_rules! decl_role_with_factors {
                 /// Panics if threshold > threshold_factor.len()
                 ///
                 /// Panics if the same factor is present in both lists
+                ///
+                /// Panics if Factor elements are FactorInstances and the derivation
+                /// path contains a non-securified last path component.
                 pub fn new(
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
@@ -130,6 +133,27 @@ macro_rules! decl_role_with_factors {
                         threshold,
                         override_factors,
                     })
+                }
+
+                /// # Panics
+                /// Panics if threshold > threshold_factor.len()
+                ///
+                /// Panics if Factor elements are FactorInstances and the derivation
+                /// path contains a non-securified last path component.
+                pub fn threshold_factors_only(
+                    factors: impl IntoIterator<Item = $factor>,
+                    threshold: u8,
+                ) -> Result<Self> {
+                    Self::new(factors, threshold, [])
+                }
+
+                /// # Panics
+                /// Panics if Factor elements are FactorInstances and the derivation
+                /// path contains a non-securified last path component.
+                pub fn override_only(
+                    factors: impl IntoIterator<Item = $factor>,
+                ) -> Result<Self> {
+                    Self::new([], 0, factors)
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {
@@ -182,7 +206,7 @@ macro_rules! decl_matrix_of_factors {
             #[serde(rename_all = "camelCase")]
             pub struct [< MatrixOf $factor s >] {
                 #[doc(hidden)]
-                #[serde(skip_serializing)]
+                #[serde(skip)]
                 pub __hidden: HiddenConstructor,
 
                 /// Used for Signing transactions

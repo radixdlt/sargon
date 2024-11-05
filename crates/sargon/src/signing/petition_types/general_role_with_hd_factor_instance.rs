@@ -48,30 +48,20 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
 }
 
 impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
-    pub fn override_only(
-        factors: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
-    ) -> Self {
-        Self::new([], 0, factors)
-            .expect("Zero threshold with zero threshold factors and one override should not fail.")
-    }
 
     pub fn single_override(
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
+        assert!(factor.is_securified(), "non securified factor");
         Self::override_only([factor])
+        .expect("Zero threshold with zero threshold factors and one override should not fail.")
     }
-
-    pub fn threshold_only(
-        factors: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
-        threshold: u8,
-    ) -> Result<Self> {
-        Self::new(factors, threshold, [])
-    }
-
+    
     pub fn single_threshold(
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
-        Self::threshold_only([factor], 1).expect(
+        assert!(factor.is_securified(), "non securified factor");
+        Self::threshold_factors_only([factor], 1).expect(
             "Single threshold with one threshold factor should not fail.",
         )
     }

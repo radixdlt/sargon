@@ -426,17 +426,13 @@ mod tests {
 
     #[test]
     fn multiple_device_as_override_skipped_both_is_invalid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
         let matrix =
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]);
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
             Hash::sample_third(),
@@ -466,7 +462,7 @@ mod tests {
         let matrix =
             GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
                 [d0.clone(), d1.clone()]
-            );
+            ).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
             Hash::sample_third(),
@@ -490,7 +486,7 @@ mod tests {
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
             [d0.clone(), d1.clone()],
             2,
         ).unwrap();
@@ -520,7 +516,7 @@ mod tests {
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
             [d0.clone(), d1.clone()],
             2,
         ).unwrap();
@@ -552,7 +548,7 @@ mod tests {
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
             [d0.clone(), d1.clone()],
             1,
         ).unwrap();

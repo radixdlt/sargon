@@ -1,5 +1,5 @@
 use crate::{
-    AccessControllerAddress, AccountAddress, IdentityAddress, IsNetworkAware,
+    AccessControllerAddress, AccountAddress, HasNodeId, IdentityAddress, IsNetworkAware
 };
 
 impl AccessControllerAddress {

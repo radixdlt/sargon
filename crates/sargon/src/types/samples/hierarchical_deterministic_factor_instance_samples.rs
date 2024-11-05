@@ -104,6 +104,17 @@ impl HierarchicalDeterministicFactorInstance {
         )
     }
 
+    pub fn sample_mainnet_entity_device_factor_fs_10_securified_at_index(
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(10),
+            entity_kind,
+            Hardened::from_local_key_space(index, IsSecurified(true)).unwrap(),
+        )
+    }
+
     pub fn sample_mainnet_entity_device_factor_fs_1_securified_at_index(
         entity_kind: CAP26EntityKind,
         index: u32,
@@ -119,6 +130,15 @@ impl HierarchicalDeterministicFactorInstance {
         index: u32,
     ) -> Self {
         Self::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+            CAP26EntityKind::Account,
+            index,
+        )
+    }
+
+    pub fn sample_mainnet_account_device_factor_fs_10_securified_at_index(
+        index: u32,
+    ) -> Self {
+        Self::sample_mainnet_entity_device_factor_fs_10_securified_at_index(
             CAP26EntityKind::Account,
             index,
         )

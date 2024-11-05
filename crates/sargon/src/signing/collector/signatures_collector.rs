@@ -1793,7 +1793,7 @@ mod tests {
                                             *f.factor_source_id().as_hash().unwrap(),
                                         )
                                     }),
-                                )
+                                ).unwrap()
                             }),
                         ]),
                     ]);

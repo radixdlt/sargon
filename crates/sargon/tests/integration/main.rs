@@ -384,7 +384,7 @@ mod integration_tests {
                 || {
                     let i = Hardened::from_local_key_space(0u32, IsSecurified(true))
                         .unwrap();
-                    GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
                         [
                             FI::sample_mainnet_tx_account(i, *f0.factor_source_id().as_hash().unwrap()), // SKIPPED
                             FI::sample_mainnet_tx_account(i, *f1.factor_source_id().as_hash().unwrap()),
@@ -406,7 +406,7 @@ mod integration_tests {
                             i,
                             *f3.factor_source_id().as_hash().unwrap(),
                         )
-                    ])
+                    ]).unwrap()
                 },
             );
 

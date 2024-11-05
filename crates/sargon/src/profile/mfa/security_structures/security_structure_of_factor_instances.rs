@@ -128,12 +128,17 @@ mod tests_primary {
     use super::*;
 
     type Sut = PrimaryRoleWithFactorInstances;
-    type Factor = FactorInstance;
 
     #[test]
     fn primary_role_non_securified_threshold_instances_is_err() {
         assert!(matches!(
-            Sut::new(vec![Factor::sample()], 1, vec![]),
+            Sut::new(
+                [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0).into()
+                ], 
+                1,
+                [] // no override
+            ),
             Err(CommonError::IndexUnsecurifiedExpectedSecurified)
         ));
     }

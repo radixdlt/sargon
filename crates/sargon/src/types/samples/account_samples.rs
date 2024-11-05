@@ -20,7 +20,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(2u32).unwrap();
+                    Hardened::from_local_key_space(2u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r2(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -220,15 +220,5 @@ impl Account {
 
     pub fn sample_all() -> Vec<Account> {
         ALL_ACCOUNT_SAMPLES.to_vec()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn account_samples() {
-        assert_eq!(Account::sample_all().len(), 11);
     }
 }

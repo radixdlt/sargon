@@ -17,21 +17,18 @@ impl VirtualEntityCreatingInstance {
         factor_instance: HierarchicalDeterministicFactorInstance,
         address: AddressOfAccountOrPersona,
     ) -> Self {
-        // assert_eq!(
-        //     factor_instance.key_space(),
-        //     KeySpace::Unsecurified,
-        //     "factor instance not in unsecurified space"
-        // );
-        // assert_eq!(
-        //     address.public_key_hash(),
-        //     factor_instance.public_key_hash(),
-        //     "Discrepancy! PublicKeys does not match, this is a programmer error!"
-        // );
-        // Self {
-        //     address,
-        //     factor_instance,
-        // }
-        todo!()
+        assert!(
+            !factor_instance.is_securified(),
+            "factor instance not in unsecurified space"
+        );
+        assert!(
+            address.matches_public_key(factor_instance.public_key()),
+            "Discrepancy! PublicKeys does not match, this is a programmer error!"
+        );
+        Self {
+            address,
+            factor_instance,
+        }
     }
 
     pub fn address(&self) -> AddressOfAccountOrPersona {
@@ -55,36 +52,33 @@ impl VirtualEntityCreatingInstance {
         entity_kind: CAP26EntityKind,
         network_id: NetworkID,
     ) -> Self {
-        // let public_key_hash = factor_instance.public_key_hash();
-        // let address = match entity_kind {
-        //     CAP26EntityKind::Account => {
-        //         AddressOfAccountOrPersona::from(AccountAddress::new(network_id, public_key_hash))
-        //     }
-        //     CAP26EntityKind::Identity => {
-        //         AddressOfAccountOrPersona::from(IdentityAddress::new(network_id, public_key_hash))
-        //     }
-        // };
-        // Self::new(factor_instance, address)
-        todo!()
+        let public_key = factor_instance.public_key();
+        let address = match entity_kind {
+            CAP26EntityKind::Account => AddressOfAccountOrPersona::from(
+                AccountAddress::new(public_key, network_id),
+            ),
+            CAP26EntityKind::Identity => AddressOfAccountOrPersona::from(
+                IdentityAddress::new(public_key, network_id),
+            ),
+        };
+        Self::new(factor_instance, address)
     }
 }
 
 impl HasSampleValues for VirtualEntityCreatingInstance {
     fn sample() -> Self {
-        // Self::with_factor_instance_on_network(
-        //     HierarchicalDeterministicFactorInstance::sample(),
-        //     CAP26EntityKind::Account,
-        //     NetworkID::Mainnet,
-        // )
-        todo!()
+        Self::with_factor_instance_on_network(
+            HierarchicalDeterministicFactorInstance::sample(),
+            CAP26EntityKind::Account,
+            NetworkID::Mainnet,
+        )
     }
     fn sample_other() -> Self {
-        // Self::with_factor_instance_on_network(
-        //     HierarchicalDeterministicFactorInstance::sample_other(),
-        //     CAP26EntityKind::Identity,
-        //     NetworkID::Stokenet,
-        // )
-        todo!()
+        Self::with_factor_instance_on_network(
+            HierarchicalDeterministicFactorInstance::sample_other(),
+            CAP26EntityKind::Identity,
+            NetworkID::Stokenet,
+        )
     }
 }
 

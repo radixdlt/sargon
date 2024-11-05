@@ -7,7 +7,7 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct SecuredEntityControl {
     #[doc(hidden)]
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     pub __hidden: HiddenConstructor,
 
     /// Virtual Entity Creation (Factor)Instance
@@ -70,5 +70,24 @@ impl HasSampleValues for SecuredEntityControl {
     }
     fn sample_other() -> Self {
         Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AccessControllerAddress::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecuredEntityControl;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
