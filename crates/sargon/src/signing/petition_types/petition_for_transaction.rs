@@ -199,12 +199,12 @@ impl<S: Signable> HasSampleValues for PetitionForTransaction<S> {
     fn sample() -> Self {
         let account = Account::sample_securified_mainnet(
             "Grace",
-            HierarchicalDeterministicFactorInstance::sample_fii10(),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0),
             || {
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(
                 HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Account,
-                    Hardened::from_local_key_space_unsecurified(6u32).unwrap(),
+                    Hardened::from_local_key_space(6u32, IsSecurified(true)).unwrap(),
                 ))
             },
         );

@@ -152,7 +152,6 @@ mod tests {
             value: secured_entity_control,
         };
 
-
         assert_eq_after_json_roundtrip(
             &model,
             r#"
