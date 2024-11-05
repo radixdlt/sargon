@@ -10,6 +10,7 @@ mod factor_instances_provider;
 mod gateway_api;
 mod hierarchical_deterministic;
 mod home_cards;
+mod keys_collector;
 mod profile;
 mod radix_connect;
 mod signing;
@@ -24,6 +25,7 @@ pub mod prelude {
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
+    pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::signing::*;
