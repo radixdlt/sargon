@@ -13,7 +13,6 @@ pub trait IsBaseEntityAddress:
     + Clone
     + IsNetworkAware
 {
-
 }
 
 pub trait IsEntityAddress:

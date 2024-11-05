@@ -14,8 +14,7 @@ impl Profile {
     pub fn contains_entity_by_address<E: IsEntity>(
         &self,
         entity_address: &E::Address,
-    ) -> bool
-    {
+    ) -> bool {
         self.networks.iter().any(|n: ProfileNetwork| {
             n.contains_entity_by_address::<E>(entity_address)
         })

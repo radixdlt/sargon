@@ -81,8 +81,7 @@ impl ProfileNetwork {
     pub fn contains_entity_by_address<E: IsEntity>(
         &self,
         entity_address: &E::Address,
-    ) -> bool
-    {
+    ) -> bool {
         self.get_entities_erased(E::entity_kind())
             .into_iter()
             .any(|e| {

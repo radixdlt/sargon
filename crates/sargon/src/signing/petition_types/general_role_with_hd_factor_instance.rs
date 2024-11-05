@@ -48,7 +48,6 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
 }
 
 impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
-
     pub fn single_override(
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
@@ -56,7 +55,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         Self::override_only([factor])
         .expect("Zero threshold with zero threshold factors and one override should not fail.")
     }
-    
+
     pub fn single_threshold(
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {

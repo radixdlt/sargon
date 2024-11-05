@@ -149,14 +149,13 @@ mod tests_primary {
             Sut::threshold_factors_only(
                 [
                     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0).into()
-                ], 
+                ],
                 1,
             ),
             Err(CommonError::IndexUnsecurifiedExpectedSecurified)
         ));
     }
 }
-
 
 #[cfg(test)]
 mod tests_recovery {

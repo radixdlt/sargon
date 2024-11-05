@@ -3,7 +3,9 @@ use crate::prelude::*;
 /// Advanced security control of an entity which has been "securified",
 /// meaning an MFA security structure (`SecurityStructureOfFactorSources`)
 /// which user has created has been applied to it.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, derive_more::Debug)]
+#[derive(
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, derive_more::Debug,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct SecuredEntityControl {
     #[doc(hidden)]
@@ -83,7 +85,10 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SecurityStructureOfFactorInstances::sample(), SecurityStructureOfFactorInstances::sample());
+        assert_eq!(
+            SecurityStructureOfFactorInstances::sample(),
+            SecurityStructureOfFactorInstances::sample()
+        );
         // assert_eq!(SUT::sample(), SUT::sample());
         // assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
