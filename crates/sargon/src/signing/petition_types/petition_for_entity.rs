@@ -396,7 +396,7 @@ impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
                 || {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
-                        Hardened::from_local_key_space_unsecurified(6u32).unwrap(),
+                        Hardened::from_local_key_space(6u32, IsSecurified(true)).unwrap(),
                     ))
                 },
             ),
@@ -450,12 +450,8 @@ mod tests {
 
     #[test]
     fn multiple_device_as_override_skipped_one_is_valid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
@@ -477,12 +473,8 @@ mod tests {
 
     #[test]
     fn multiple_device_as_threshold_skipped_both_is_invalid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
@@ -507,12 +499,8 @@ mod tests {
 
     #[test]
     fn two_device_as_threshold_of_2_skipped_one_is_invalid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
@@ -539,12 +527,8 @@ mod tests {
 
     #[test]
     fn two_device_as_threshold_of_1_skipped_one_is_valid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
@@ -596,7 +580,7 @@ mod tests {
     fn factor_should_not_be_used_in_both_lists() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            Hardened::from_local_key_space_unsecurified(0).unwrap(),
+            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
         );
         assert_eq!(
             GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
@@ -612,7 +596,7 @@ mod tests {
     fn threshold_should_not_be_bigger_than_threshold_factors() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            Hardened::from_local_key_space_unsecurified(0).unwrap(),
+            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
         );
         assert_eq!(
             GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
@@ -639,7 +623,7 @@ mod tests {
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                 CAP26EntityKind::Account,
-                Hardened::from_local_key_space_unsecurified(0).unwrap(),
+                Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
             );
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
                     [FactorSourceIDFromHash::sample_at(0)].map(&fi),
@@ -660,7 +644,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::from(entity.address),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
+                    Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
                     FactorSourceIDFromHash::sample_at(0),
                 ),
             ),
@@ -680,7 +664,7 @@ mod tests {
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                        Hardened::from_local_key_space_unsecurified(6).unwrap(),
+                        Hardened::from_local_key_space(6, IsSecurified(true)).unwrap(),
                         FactorSourceIDFromHash::sample_at(1),
                     ),
                 ),
