@@ -60,17 +60,29 @@ impl ManifestSummary {
             presented_proofs: presented_proofs.into_iter().collect(),
             addresses_of_accounts_withdrawn_from: withdrawn_from
                 .into_iter()
-                .collect(),
+                .collect::<IndexSet<_>>()
+                .into_iter()
+                .collect_vec(),
             addresses_of_accounts_deposited_into: deposited_into
                 .into_iter()
-                .collect(),
-            encountered_entities: encountered_entities.into_iter().collect(),
+                .collect::<IndexSet<_>>()
+                .into_iter()
+                .collect_vec(),
+            encountered_entities: encountered_entities
+                .into_iter()
+                .collect::<IndexSet<_>>()
+                .into_iter()
+                .collect_vec(),
             addresses_of_accounts_requiring_auth: accounts_requiring_auth
                 .into_iter()
-                .collect(),
+                .collect::<IndexSet<_>>()
+                .into_iter()
+                .collect_vec(),
             addresses_of_personas_requiring_auth: personas_requiring_auth
                 .into_iter()
-                .collect(),
+                .collect::<IndexSet<_>>()
+                .into_iter()
+                .collect_vec(),
             reserved_instructions: reserved_instructions.into_iter().collect(),
         }
     }
@@ -192,5 +204,28 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_personas_requiring_auth: Vec::<_>::sample_other(),
             reserved_instructions: Vec::<_>::sample_other(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ManifestSummary;
+
+    #[test]
+    fn duplicates_are_removed() {
+        let sut = SUT::new(
+            HashMap::default(),
+            HashMap::default(),
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+            Vec::default(),
+        );
     }
 }
