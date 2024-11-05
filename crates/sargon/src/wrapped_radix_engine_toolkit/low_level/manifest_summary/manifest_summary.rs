@@ -41,7 +41,6 @@ pub struct ManifestSummary {
 }
 
 impl ManifestSummary {
-
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         account_withdraws: impl Into<HashMap<AccountAddress, Vec<AccountWithdraw>>>,
