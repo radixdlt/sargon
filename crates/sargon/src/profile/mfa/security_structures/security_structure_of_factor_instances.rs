@@ -77,15 +77,17 @@ impl HasSampleValues for MatrixOfFactorInstances {
 
 impl HasSampleValues for PrimaryRoleWithFactorInstances {
     fn sample() -> Self {
-        Self::new([FactorInstance::sample()], 1, [FactorInstance::sample()])
+        Self::new([HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0).into()], 1, [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0).into()])
             .unwrap()
     }
 
     fn sample_other() -> Self {
         Self::new(
-            [FactorInstance::sample_other()],
+            [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(1).into(),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(11).into(),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(12).into()],
             2,
-            [FactorInstance::sample_other()],
+            [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(6).into()],
         )
         .unwrap()
     }
@@ -93,15 +95,16 @@ impl HasSampleValues for PrimaryRoleWithFactorInstances {
 
 impl HasSampleValues for RecoveryRoleWithFactorInstances {
     fn sample() -> Self {
-        Self::new([FactorInstance::sample()], 1, [FactorInstance::sample()])
+        Self::new([HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(54).into()], 1, [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(237).into()])
             .unwrap()
     }
 
     fn sample_other() -> Self {
         Self::new(
-            [FactorInstance::sample_other()],
-            2,
-            [FactorInstance::sample_other()],
+            [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(65).into(),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(25).into()],
+        2,
+            [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(31).into()],
         )
         .unwrap()
     }
@@ -109,15 +112,15 @@ impl HasSampleValues for RecoveryRoleWithFactorInstances {
 
 impl HasSampleValues for ConfirmationRoleWithFactorInstances {
     fn sample() -> Self {
-        Self::new([FactorInstance::sample()], 1, [FactorInstance::sample()])
+        Self::new([HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(27).into()], 1, [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(13).into()])
             .unwrap()
     }
 
     fn sample_other() -> Self {
         Self::new(
-            [FactorInstance::sample_other()],
+            [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(6).into(), HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(42).into()],
             2,
-            [FactorInstance::sample_other()],
+            [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(19).into()],
         )
         .unwrap()
     }
@@ -130,16 +133,81 @@ mod tests_primary {
     type Sut = PrimaryRoleWithFactorInstances;
 
     #[test]
+    fn equality() {
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Sut::sample(), Sut::sample_other());
+    }
+
+    #[test]
     fn primary_role_non_securified_threshold_instances_is_err() {
         assert!(matches!(
-            Sut::new(
+            Sut::threshold_factors_only(
                 [
-                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0).into()
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0).into()
                 ], 
                 1,
-                [] // no override
             ),
             Err(CommonError::IndexUnsecurifiedExpectedSecurified)
         ));
+    }
+}
+
+
+#[cfg(test)]
+mod tests_recovery {
+    use super::*;
+
+    type Sut = RecoveryRoleWithFactorInstances;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Sut::sample(), Sut::sample_other());
+    }
+}
+
+#[cfg(test)]
+mod tests_confirmation {
+    use super::*;
+
+    type Sut = ConfirmationRoleWithFactorInstances;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Sut::sample(), Sut::sample_other());
+    }
+}
+
+#[cfg(test)]
+mod tests_security_structure_of_factor_instances {
+    use super::*;
+
+    type Sut = SecurityStructureOfFactorInstances;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Sut::sample(), Sut::sample());
+        assert_eq!(Sut::sample_other(), Sut::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Sut::sample(), Sut::sample_other());
     }
 }

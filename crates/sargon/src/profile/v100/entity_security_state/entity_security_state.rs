@@ -104,8 +104,9 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_unsecurified() {
         let model = SUT::sample();
+
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -144,12 +145,15 @@ mod tests {
     }
 
     #[test]
-    fn test() {
+    fn json_roundtrip_securified() {
         let secured_entity_control = SecuredEntityControl::sample();
 
         let model = EntitySecurityState::Securified {
             value: secured_entity_control,
         };
+
+        let json = serde_json::to_string_pretty(&model).unwrap();
+        println!("🔮\n\n{:?}", json);
 
         assert_eq_after_json_roundtrip(
             &model,
