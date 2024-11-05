@@ -79,6 +79,7 @@ impl VirtualEntityCreatingInstanceProvider {
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+        println!("🔮 VirtualEntityCreatingInstanceProvider START");
         let provider = FactorInstancesProvider::new(
             network_id,
             IndexSet::just(factor_source.clone()),
@@ -86,6 +87,7 @@ impl VirtualEntityCreatingInstanceProvider {
             cache,
             interactors,
         );
+        println!("🔮 VirtualEntityCreatingInstanceProvider proivder created");
         let outcome = provider
             .provide(QuantifiedDerivationPreset::new(
                 DerivationPreset::veci_entity_kind(entity_kind),
@@ -93,16 +95,20 @@ impl VirtualEntityCreatingInstanceProvider {
             ))
             .await?;
 
+        println!("🔮 VirtualEntityCreatingInstanceProvider proivder outcome generated");
         let outcome = outcome
             .per_factor
             .get(&factor_source.id_from_hash())
             .cloned()
             .expect("Expected to have instances for the factor source");
+        println!(
+            "🔮 VirtualEntityCreatingInstanceProvider proivder outcome mapped"
+        );
 
         Ok(outcome.into())
     }
 }
-/*
+
 #[cfg(test)]
 mod tests {
 
@@ -125,7 +131,7 @@ mod tests {
         )
         .await
         .unwrap();
-
+        /*
         assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
 
         assert_eq!(outcome.debug_found_in_cache.len(), 0);
@@ -188,8 +194,9 @@ mod tests {
             persona_veci_indices.last().unwrap().clone(),
             HDPathComponent::unsecurified_hardening_base_index(30)
         );
+        */
     }
-
+    /*
     #[actix_rt::test]
     async fn cache_is_always_filled_account_veci_then_after_all_used_we_start_over_at_zero_if_no_profile_is_used(
     ) {
@@ -491,6 +498,5 @@ mod tests {
             ))
         );
     }
+    */
 }
-
-*/

@@ -2,28 +2,19 @@
 
 use std::ops::{Add, AddAssign};
 
-#[async_trait::async_trait]
-trait SargonOSWithBDFS: Sized {
-    async fn with_bdfs() -> (Self, FactorSource);
-}
+impl SargonOS {
+    async fn with_bdfs() -> (Arc<Self>, FactorSource) {
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        let os = Self::boot(bios).await;
+        let (_, bdfs) = os
+            .create_new_profile_with_bdfs(None)
+            .await
+            .expect("Should create BDFS");
 
-#[async_trait::async_trait]
-trait SargonOSCreateAccountWithStats {
-    async fn create_and_save_new_mainnet_account_with_instances_stats(
-        &self,
-        name: DisplayName,
-    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)>;
-}
-
-#[async_trait::async_trait]
-impl SargonOSWithBDFS for SargonOS {
-    async fn with_bdfs() -> (Self, FactorSource) {
-        todo!()
+        (os, bdfs.factor_source.into())
     }
-}
 
-#[async_trait::async_trait]
-impl SargonOSCreateAccountWithStats for SargonOS {
     async fn create_and_save_new_mainnet_account_with_instances_stats(
         &self,
         _name: DisplayName,
@@ -41,7 +32,9 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
     for i in 0..CACHE_FILLING_QUANTITY {
         let name = DisplayName::new(format!("Acco {}", i)).unwrap();
         let (acco, stats) = os
-            .create_and_save_new_mainnet_account_with_instances_stats(name.clone())
+            .create_and_save_new_mainnet_account_with_instances_stats(
+                name.clone(),
+            )
             .await
             .unwrap();
         assert_eq!(acco.display_name, name);
@@ -84,8 +77,11 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
             .transaction_signing
             .derivation_path()
             .index(),
-        HDPathComponent::from_local_key_space(30, KeySpace::Unsecurified { is_hardened: true })
-            .unwrap()
+        HDPathComponent::from_local_key_space(
+            30,
+            KeySpace::Unsecurified { is_hardened: true }
+        )
+        .unwrap()
     );
     /*
     assert!(os

@@ -39,9 +39,13 @@ impl NextDerivationEntityIndexAssigner {
         cache: FactorInstancesCache,
     ) -> Self {
         let profile_analyzing =
-            NextDerivationEntityIndexProfileAnalyzingAssigner::new(network_id, profile);
-        let cache_analyzing = NextDerivationEntityIndexCacheAnalyzingAssigner::new(cache);
-        let ephemeral_offsets = NextDerivationEntityIndexWithEphemeralOffsets::default();
+            NextDerivationEntityIndexProfileAnalyzingAssigner::new(
+                network_id, profile,
+            );
+        let cache_analyzing =
+            NextDerivationEntityIndexCacheAnalyzingAssigner::new(cache);
+        let ephemeral_offsets =
+            NextDerivationEntityIndexWithEphemeralOffsets::default();
         Self {
             profile_analyzing,
             cache_analyzing,
@@ -57,26 +61,59 @@ impl NextDerivationEntityIndexAssigner {
         factor_source_id: FactorSourceIDFromHash,
         index_agnostic_path: IndexAgnosticPath,
     ) -> Result<HDPathComponent> {
-        let default_index =
-            HDPathComponent::from_local_key_space(0u32, index_agnostic_path.key_space)?;
+        // println!("🐁 NextIndexAssigner START");
+        let default_index = HDPathComponent::from_local_key_space(
+            0u32,
+            index_agnostic_path.key_space,
+        )?;
+        // println!("🐁 NextIndexAssigner default_index: {:?}", default_index);
 
         let maybe_next_from_cache = self
             .cache_analyzing
             .next(factor_source_id, index_agnostic_path)?;
+        // println!(
+        //     "🐁 NextIndexAssigner maybe_next_from_cache: {:?}",
+        //     maybe_next_from_cache
+        // );
 
         let next_from_cache = maybe_next_from_cache.unwrap_or(default_index);
+        // println!(
+        //     "🐁 NextIndexAssigner next_from_cache: {:?}",
+        //     next_from_cache
+        // );
         let ephemeral = self
             .ephemeral_offsets
             .reserve(factor_source_id, index_agnostic_path)?;
+        // println!("🐁 NextIndexAssigner ephemeral: {:?}", ephemeral);
 
         let maybe_next_from_profile = self
             .profile_analyzing
             .next(factor_source_id, index_agnostic_path)?;
 
-        let next_from_profile = maybe_next_from_profile.unwrap_or(default_index);
+        // println!(
+        //     "🐁 NextIndexAssigner maybe_next_from_profile: {:?}",
+        //     maybe_next_from_profile
+        // );
+        let next_from_profile =
+            maybe_next_from_profile.unwrap_or(default_index);
+        // println!(
+        //     "🐁 NextIndexAssigner next_from_profile: {:?}",
+        //     next_from_profile
+        // );
 
         let max_index = std::cmp::max(next_from_profile, next_from_cache);
+        // println!("🐁 NextIndexAssigner max_index: {:?}", max_index);
 
-        max_index.checked_add_n_to_global(ephemeral.map_to_global_key_space())
+        max_index
+            // We add the LOCAL index "offset" to the max_index
+            .checked_add_n_to_global(u32::from(
+                ephemeral.index_in_local_key_space(),
+            ))
+            .inspect_err(|e| {
+                println!(
+                    "🐁🐁 NextIndexAssigner ❌ error last ADD failed: {:?}",
+                    e
+                )
+            })
     }
 }
