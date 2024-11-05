@@ -14,8 +14,25 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L251-L255
-    vault
+    vault,
+    {
+        kind: VaultAddressKind = (|internal: InternalVaultAddress| kind(&internal))
+    }
 );
+
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+pub enum VaultAddressKind {
+    Fungible,
+    NonFungible,
+}
+
+fn kind(vault_address: &InternalVaultAddress) -> VaultAddressKind {
+    if vault_address.is_fungible() {
+        VaultAddressKind::Fungible
+    } else {
+        VaultAddressKind::NonFungible
+    }
+}
 
 #[uniffi::export]
 pub fn vault_address_is_fungible(address: &VaultAddress) -> bool {

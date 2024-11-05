@@ -11,11 +11,15 @@ extension NonFungibleGlobalID: IdentifiableByStringProtocol {
 extension NonFungibleGlobalID {
     public init(
         nonFungibleResourceAddress: NonFungibleResourceAddress,
-        localID: NonFungibleLocalID
+        nonFungibleLocalId: NonFungibleLocalID
     ) {
-        self.init(
-            resourceAddress: nonFungibleResourceAddress.asResourceAddress,
-            nonFungibleLocalId: localID
-        )
+        self = newNonFungibleGlobalId(address: nonFungibleResourceAddress, localId: nonFungibleLocalId)
+    }
+
+    public init(
+        resourceAddress: ResourceAddress,
+        nonFungibleLocalId: NonFungibleLocalID
+    ) {
+        self.init(nonFungibleResourceAddress: NonFungibleResourceAddress(value: resourceAddress), nonFungibleLocalId: nonFungibleLocalId)
     }
 }

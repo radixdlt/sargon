@@ -3,7 +3,7 @@ import SargonUniFFI
 
 extension NonFungibleLocalID {
 	public func toRawString() -> String {
-		nonFungibleLocalIdAsStr(id: self)
+        self.asString
 	}
 	
 	public init(integer value: UInt64) {
@@ -11,11 +11,11 @@ extension NonFungibleLocalID {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        nonFungibleLocalIdFormatted(id: self, format: format)
+        self.formatted.getString(format)
     }
     
     public func toUserFacingString() -> String {
-        nonFungibleLocalIdToUserFacingString(id: self)
+        self.userFacingString
     }
 	
     /// Tries to decode an String representation of any NonFungibleLocalID, either:

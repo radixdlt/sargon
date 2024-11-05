@@ -5,7 +5,6 @@ import com.radixdlt.sargon.IdentityAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.NonFungibleResourceAddress
 import com.radixdlt.sargon.ResourceAddress
-import com.radixdlt.sargon.identityAddressFormatted
 import com.radixdlt.sargon.newNonFungibleResourceAddress
 import com.radixdlt.sargon.nonFungibleResourceAddressBech32Address
 import com.radixdlt.sargon.nonFungibleResourceAddressNetworkId
@@ -27,8 +26,8 @@ val NonFungibleResourceAddress.string: String
  * Returns the network id this address
  */
 val NonFungibleResourceAddress.networkId: NetworkId
-    get() = nonFungibleResourceAddressNetworkId(address = this)
+    get() = this.value.networkId
 
 fun NonFungibleResourceAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
-): String = ResourceAddress.init(string).formatted(format = format)
+): String = this.value.formatted(format)

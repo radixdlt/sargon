@@ -13,16 +13,11 @@ extension IdentityAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        identityAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		identityAddressBech32Address(address: self)
-	}
-
 	public var networkID: NetworkId {
-		identityAddressNetworkId(address: self)
+        self.networkId
 	}
 	
 

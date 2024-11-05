@@ -2,11 +2,9 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.AddressFormat
-import com.radixdlt.sargon.IdentityAddress
 import com.radixdlt.sargon.LegacyOlympiaAccountAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PublicKey
-import com.radixdlt.sargon.identityAddressFormatted
 import com.radixdlt.sargon.legacyOlympiaAccountAddressFormatted
 import com.radixdlt.sargon.legacyOlympiaAccountAddressIsLegacyOfBabylon
 import com.radixdlt.sargon.legacyOlympiaAccountAddressToBabylonAccountAddress

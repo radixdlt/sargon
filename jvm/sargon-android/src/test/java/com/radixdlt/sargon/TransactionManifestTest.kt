@@ -380,7 +380,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                             AccountOrAddressOf
                                 .AddressOfExternalAccount(
                                     value =
-                                    AccountAddress(
+                                    AccountAddress.init (
                                         "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
                                     )
                                 ),

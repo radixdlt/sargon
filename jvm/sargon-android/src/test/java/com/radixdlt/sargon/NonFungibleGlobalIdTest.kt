@@ -16,7 +16,9 @@ class NonFungibleGlobalIdTest {
             resourceAddress = ResourceAddress.init(
                 NonFungibleResourceAddress.sampleMainnet().string
             ),
-            nonFungibleLocalId = NonFungibleLocalId.init("#1#")
+            nonFungibleLocalId = NonFungibleLocalId.init("#1#"),
+            asString = "",
+            formatted = FormattedAddress("", "", "")
         )
 
         assertEquals(
@@ -41,7 +43,9 @@ class NonFungibleGlobalIdTest {
             resourceAddress = ResourceAddress.init(
                 NonFungibleResourceAddress.sampleMainnet().string
             ),
-            nonFungibleLocalId = NonFungibleLocalId.init("#1#")
+            nonFungibleLocalId = NonFungibleLocalId.init("#1#"),
+            asString = "",
+            formatted = FormattedAddress("", "", "")
         )
 
         assertEquals("reso...c9wlxa:#1#", address.formatted())

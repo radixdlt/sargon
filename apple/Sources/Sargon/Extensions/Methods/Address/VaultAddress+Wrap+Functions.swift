@@ -6,26 +6,21 @@ extension VaultAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        vaultAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		vaultAddressBech32Address(address: self)
-	}
-
 	public var networkID: NetworkId {
-		vaultAddressNetworkId(address: self)
+        self.networkId
 	}
 
 	/// If this is an address of a **fungible** vault or not.
 	public var isFungible: Bool {
-		vaultAddressIsFungible(address: self)
+        self.kind == .fungible
 	}
 
 	/// If this is an address of a **non-fungible** vault or not.
 	public var isNonFungible: Bool {
-		vaultAddressIsNonFungible(address: self)
+        self.kind == .nonFungible
 	}
 
 }

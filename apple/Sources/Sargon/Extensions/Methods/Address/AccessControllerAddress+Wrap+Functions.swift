@@ -6,16 +6,11 @@ extension AccessControllerAddress {
 	}
     
     public func formatted(_ format: AddressFormat = .default) -> String {
-        accessControllerAddressFormatted(address: self, format: format)
+        self.formatted.getString(format)
     }
 
-	/// The bech32 encoded string for this address.
-	public var address: String {
-		accessControllerAddressBech32Address(address: self)
-	}
-
 	public var networkID: NetworkId {
-		accessControllerAddressNetworkId(address: self)
+        self.networkId
 	}
 	
 }
