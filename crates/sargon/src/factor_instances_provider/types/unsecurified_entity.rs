@@ -22,6 +22,17 @@ impl UnsecurifiedEntity {
         Self::with_veci(veci)
     }
 
+    pub fn with_entity<E: IsEntity>(entity: E) -> Result<Self>
+    where
+        E::Address: Into<AddressOfAccountOrPersona>,
+    {
+        let unsecurified_entity_control = entity.try_get_unsecured_control()?;
+        Ok(Self::new(
+            Into::<AddressOfAccountOrPersona>::into(entity.address()),
+            unsecurified_entity_control.transaction_signing.clone(),
+        ))
+    }
+
     pub fn network_id(&self) -> NetworkID {
         self.address().network_id()
     }
@@ -60,9 +71,14 @@ impl UnsecurifiedEntity {
 impl TryFrom<Account> for UnsecurifiedEntity {
     type Error = CommonError;
     fn try_from(value: Account) -> Result<Self> {
-        let factor_instance = value.factor_instance();
-        let address = value.address();
-        Ok(Self::new(address, factor_instance))
+        Self::with_entity(value)
+    }
+}
+
+impl TryFrom<Persona> for UnsecurifiedEntity {
+    type Error = CommonError;
+    fn try_from(value: Persona) -> Result<Self> {
+        Self::with_entity(value)
     }
 }
 

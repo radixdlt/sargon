@@ -762,6 +762,9 @@ pub enum CommonError {
 
     #[error("SecurityState not securified")]
     SecurityStateNotSecurified = 10214,
+
+    #[error("SecurityState securified but expected unsecurified")]
+    SecurityStateSecurifiedButExpectedUnsecurified = 10215,
 }
 
 impl CommonError {

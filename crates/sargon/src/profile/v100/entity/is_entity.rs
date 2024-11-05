@@ -8,6 +8,13 @@ pub trait HasSecurityState {
             .cloned()
             .ok_or(CommonError::SecurityStateNotSecurified)
     }
+
+    fn try_get_unsecured_control(&self) -> Result<UnsecuredEntityControl> {
+        self.security_state()
+            .as_unsecured()
+            .cloned()
+            .ok_or(CommonError::SecurityStateSecurifiedButExpectedUnsecurified)
+    }
 }
 
 pub trait IsBaseEntity:

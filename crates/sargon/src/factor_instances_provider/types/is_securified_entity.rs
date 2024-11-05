@@ -162,8 +162,9 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     }
 
     pub fn veci(&self) -> Option<VirtualEntityCreatingInstance> {
-        // self.veci.clone()
-        todo!()
+        self.securified_entity_control()
+            .veci()
+            .map(|fi| VirtualEntityCreatingInstance::new(fi, self.address()))
     }
 }
 
