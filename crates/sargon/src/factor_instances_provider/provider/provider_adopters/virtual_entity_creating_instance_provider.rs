@@ -17,12 +17,44 @@ impl VirtualEntityCreatingInstanceProvider {
     /// and we are always appending to the end.
     pub async fn for_account_veci(
         cache: &mut FactorInstancesCache,
-        profile: Option<Profile>,
+        profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         Self::for_entity_veci(
+            CAP26EntityKind::Account,
+            cache,
+            profile,
+            factor_source,
+            network_id,
+            interactors,
+        )
+        .await
+    }
+
+    /// Uses a `FactorInstancesProvider` to provide `count` many VECIs for new virtual entities.
+    ///
+    /// Reads FactorInstances for `factor_source` on `network_id` of kind `account_veci`,
+    /// meaning `(EntityKind::Account, KeyKind::TransactionSigning, KeySpace::Unsecurified)`,
+    /// from cache, if any, otherwise derives more of that kind AND other kinds:
+    /// identity_veci, account_mfa, identity_mfa
+    /// and saves into the cache and returns a collection of instances, split into
+    /// factor instance to use directly and factor instances which was cached, into
+    /// the mutable `cache` parameter.
+    ///
+    /// We are always reading from the beginning of each FactorInstance collection in the cache,
+    /// and we are always appending to the end.
+    pub async fn for_many_account_vecis(
+        count: usize,
+        cache: &mut FactorInstancesCache,
+        profile: Option<&Profile>,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        interactors: Arc<dyn KeysDerivationInteractors>,
+    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+        Self::for_many_entity_vecis(
+            count,
             CAP26EntityKind::Account,
             cache,
             profile,
@@ -45,12 +77,44 @@ impl VirtualEntityCreatingInstanceProvider {
     /// and we are always appending to the end.
     pub async fn for_persona_veci(
         cache: &mut FactorInstancesCache,
-        profile: Option<Profile>,
+        profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         Self::for_entity_veci(
+            CAP26EntityKind::Identity,
+            cache,
+            profile,
+            factor_source,
+            network_id,
+            interactors,
+        )
+        .await
+    }
+
+    /// Uses a `FactorInstancesProvider` to provide `count` many VECIs for new virtual entities.
+    ///
+    /// Reads FactorInstances for `factor_source` on `network_id` of kind `persona_veci`,
+    /// meaning `(EntityKind::Identity, KeyKind::TransactionSigning, KeySpace::Unsecurified)`,
+    /// from cache, if any, otherwise derives more of that kind AND other kinds:
+    /// account_veci, account_mfa, identity_mfa
+    /// and saves into the cache and returns a collection of instances, split into
+    /// factor instance to use directly and factor instances which was cached, into
+    /// the mutable `cache` parameter.
+    ///
+    /// We are always reading from the beginning of each FactorInstance collection in the cache,
+    /// and we are always appending to the end.
+    pub async fn for_many_persona_vecis(
+        count: usize,
+        cache: &mut FactorInstancesCache,
+        profile: Option<&Profile>,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        interactors: Arc<dyn KeysDerivationInteractors>,
+    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+        Self::for_many_entity_vecis(
+            count,
             CAP26EntityKind::Identity,
             cache,
             profile,
@@ -74,7 +138,40 @@ impl VirtualEntityCreatingInstanceProvider {
     pub async fn for_entity_veci(
         entity_kind: CAP26EntityKind,
         cache: &mut FactorInstancesCache,
-        profile: Option<Profile>,
+        profile: Option<&Profile>,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        interactors: Arc<dyn KeysDerivationInteractors>,
+    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+        Self::for_many_entity_vecis(
+            1,
+            entity_kind,
+            cache,
+            profile,
+            factor_source,
+            network_id,
+            interactors,
+        )
+        .await
+    }
+
+    /// Uses a `FactorInstancesProvider` to provide `count` many VECIs for new virtual entities.
+    ///
+    /// Reads FactorInstances for `factor_source` on `network_id` of kind `account_veci`,
+    /// meaning `(EntityKind::Account, KeyKind::TransactionSigning, KeySpace::Unsecurified)`,
+    /// from cache, if any, otherwise derives more of that kind AND other kinds:
+    /// identity_veci, account_mfa, identity_mfa
+    /// and saves into the cache and returns a collection of instances, split into
+    /// factor instance to use directly and factor instances which was cached, into
+    /// the mutable `cache` parameter.
+    ///
+    /// We are always reading from the beginning of each FactorInstance collection in the cache,
+    /// and we are always appending to the end.
+    pub async fn for_many_entity_vecis(
+        count: usize,
+        entity_kind: CAP26EntityKind,
+        cache: &mut FactorInstancesCache,
+        profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
@@ -91,7 +188,7 @@ impl VirtualEntityCreatingInstanceProvider {
         let outcome = provider
             .provide(QuantifiedDerivationPreset::new(
                 DerivationPreset::veci_entity_kind(entity_kind),
-                1,
+                count,
             ))
             .await?;
 
@@ -498,23 +595,22 @@ mod tests {
         // create 29 more accounts, then we should be able to crate one more which should ONLY derive
         // more instances for ACCOUNT VECI, and not Identity Veci, Identity MFA and Account MFA, since that is
         // not needed.
-        for _ in 0..29 {
-            let outcome = Sut::for_account_veci(
-                &mut cache,
-                None,
-                bdfs.clone(),
-                network,
-                Arc::new(TestDerivationInteractors::default()),
-            )
-            .await
-            .unwrap();
+        let outcome = Sut::for_many_account_vecis(
+            29,
+            &mut cache,
+            None,
+            bdfs.clone(),
+            network,
+            Arc::new(TestDerivationInteractors::default()),
+        )
+        .await
+        .unwrap();
 
-            assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
+        assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
 
-            assert_eq!(outcome.debug_found_in_cache.len(), 1);
-            assert_eq!(outcome.debug_was_cached.len(), 0);
-            assert_eq!(outcome.debug_was_derived.len(), 0);
-        }
+        assert_eq!(outcome.debug_found_in_cache.len(), 29);
+        assert_eq!(outcome.debug_was_cached.len(), 0);
+        assert_eq!(outcome.debug_was_derived.len(), 0);
 
         let cached = cache
             .peek_all_instances_of_factor_source(bdfs.id_from_hash())

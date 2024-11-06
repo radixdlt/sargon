@@ -168,7 +168,7 @@ impl Persona {
         );
 
         let mut persona = Self::new(
-            private_hd_factor_source.derive_entity_creation_factor_instance(
+            private_hd_factor_source._derive_entity_creation_factor_instance(
                 network_id,
                 HDPathComponent::Unsecurified(Unsecurified::Hardened(
                     UnsecurifiedHardened::from_local_key_space(index).unwrap(),

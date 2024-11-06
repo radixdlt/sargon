@@ -90,7 +90,9 @@ impl PrivateHierarchicalDeterministicFactorSource {
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
-    pub fn derive_entity_creation_factor_instance<T>(
+    /// Should only be used for testing and sample values, for production code use
+    /// `VirtualEntityCreatingInstanceProvider` powered by the `FactorInstancesProvider`
+    pub(crate) fn _derive_entity_creation_factor_instance<T>(
         &self,
         network_id: NetworkID,
         index: HDPathComponent,
@@ -98,13 +100,15 @@ impl PrivateHierarchicalDeterministicFactorSource {
     where
         T: IsEntityPath,
     {
-        self.derive_entity_creation_factor_instances(network_id, [index])
+        self._derive_entity_creation_factor_instances(network_id, [index])
             .into_iter()
             .last()
             .expect("Should have created one factor instance")
     }
 
-    pub fn derive_entity_creation_factor_instances<T>(
+    /// Should only be used for testing and sample values, for production code use
+    /// `VirtualEntityCreatingInstanceProvider` powered by the `FactorInstancesProvider`
+    pub(crate) fn _derive_entity_creation_factor_instances<T>(
         &self,
         network_id: NetworkID,
         indices: impl IntoIterator<Item = HDPathComponent>,

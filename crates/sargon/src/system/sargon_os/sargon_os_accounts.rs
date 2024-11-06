@@ -72,7 +72,7 @@ impl SargonOS {
         let profile = self.profile()?;
 
         let (factor_source_id, account) = profile
-            .create_unsaved_account(network_id, name, async move |fs| {
+            .create_unsaved_account(network_id, name, &mut self.cache, async move |fs| {
                 self.load_private_device_factor_source(&fs).await
             })
             .await?;

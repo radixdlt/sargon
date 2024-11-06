@@ -13,6 +13,7 @@ impl Profile {
         &self,
         network_id: NetworkID,
         name: DisplayName,
+        cache: &mut FactorInstancesCache,
         load_private_device_factor_source: F,
     ) -> Result<(FactorSourceID, Account)>
     where
@@ -25,6 +26,7 @@ impl Profile {
             .create_unsaved_accounts(
                 network_id,
                 1,
+                cache,
                 |_| name.clone(),
                 load_private_device_factor_source,
             )
@@ -49,6 +51,7 @@ impl Profile {
         &self,
         network_id: NetworkID,
         count: u16,
+        cache: &mut FactorInstancesCache,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
         load_private_device_factor_source: F,
     ) -> Result<(FactorSourceID, Accounts)>
@@ -59,6 +62,28 @@ impl Profile {
         >,
     {
         let bdfs = self.bdfs();
+        let cache = cache.into();
+        let outcome =
+            VirtualEntityCreatingInstanceProvider::for_many_account_vecis(
+                count as usize,
+                cache,
+                Some(self),
+                bdfs.into(),
+                network_id,
+                Arc::new(NoUIDerivationInteractors),
+            )
+            .await?;
+
+        todo!()
+    }
+}
+
+pub struct NoUIDerivationInteractors;
+impl KeysDerivationInteractors for NoUIDerivationInteractors {
+    fn interactor_for(
+        &self,
+        kind: FactorSourceKind,
+    ) -> KeyDerivationInteractor {
         todo!()
     }
 }

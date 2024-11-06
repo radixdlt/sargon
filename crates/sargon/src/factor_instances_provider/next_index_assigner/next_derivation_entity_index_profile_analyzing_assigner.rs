@@ -23,9 +23,9 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     /// `Profile` is optional so that one can use the same initializer from `FactorInstancesProvider`,
     /// which accepts an optional Profile. Will just default to empty lists if `None` is passed,
     /// effectively making this whole assigner NOOP.
-    pub fn new(
+    pub fn new<'a>(
         network_id: NetworkID,
-        profile: impl Into<Option<Profile>>,
+        profile: impl Into<Option<&'a Profile>>,
     ) -> Self {
         let profile = profile.into();
         let unsecurified_accounts_on_network = profile
@@ -255,7 +255,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [&Account::sample_at(0)],
                 [],
@@ -284,7 +284,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [&Account::sample_at(0)],
                 [],
@@ -306,7 +306,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [&Account::sample_at(0)],
                 [],
@@ -328,7 +328,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [
                     &Account::sample_at(8),
@@ -360,7 +360,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [
                     &Account::sample_at(8), /* unsecurified, should not interfere */
@@ -395,7 +395,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [],
                 [&Persona::sample_at(7)],
@@ -427,7 +427,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 [],
                 [
@@ -489,7 +489,7 @@ mod tests {
             });
         let sut = Sut::new(
             network_id,
-            Some(Profile::sample_from(
+            Some(&Profile::sample_from(
                 FactorSource::sample_all(),
                 &accounts,
                 [],

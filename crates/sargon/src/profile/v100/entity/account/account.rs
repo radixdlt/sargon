@@ -184,7 +184,7 @@ impl Account {
         let derivation_index =
             HDPathComponent::unsecurified_hardened(index).unwrap();
         let account_creating_factor_instance = private_hd_factor_source
-            .derive_entity_creation_factor_instance(
+            ._derive_entity_creation_factor_instance(
                 network_id,
                 derivation_index,
             );

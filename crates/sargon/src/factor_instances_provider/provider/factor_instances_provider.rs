@@ -21,10 +21,10 @@ use itertools::cloned;
 /// to read "account_veci" instances, we will derive more "account_mfa" instances as well,
 /// so many that at the end of execution we will have `CACHE_FILLING_QUANTITY` instances for
 /// both "account_veci" and "account_mfa" (and same for identities).
-pub struct FactorInstancesProvider<'a> {
+pub struct FactorInstancesProvider<'a, 'b> {
     network_id: NetworkID,
     factor_sources: IndexSet<FactorSource>,
-    profile: Option<Profile>,
+    profile: Option<&'b Profile>,
     cache: &'a mut FactorInstancesCache,
     interactors: Arc<dyn KeysDerivationInteractors>,
 }
@@ -32,11 +32,11 @@ pub struct FactorInstancesProvider<'a> {
 /// ===============
 /// PUBLIC
 /// ===============
-impl<'a> FactorInstancesProvider<'a> {
+impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
     pub fn new(
         network_id: NetworkID,
         factor_sources: IndexSet<FactorSource>,
-        profile: impl Into<Option<Profile>>,
+        profile: impl Into<Option<&'b Profile>>,
         cache: &'a mut FactorInstancesCache,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Self {
@@ -67,7 +67,7 @@ impl CacheFiller {
     /// copy of the instances.
     pub async fn for_new_factor_source(
         cache: &mut FactorInstancesCache,
-        profile: Option<Profile>,
+        profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID, // typically mainnet
         interactors: Arc<dyn KeysDerivationInteractors>,
@@ -106,7 +106,7 @@ impl CacheFiller {
 /// ===============
 /// Private
 /// ===============
-impl<'a> FactorInstancesProvider<'a> {
+impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
     async fn _provide(
         &mut self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
@@ -289,7 +289,7 @@ impl<'a> FactorInstancesProvider<'a> {
         println!("🤡 derive more: creating next index assigner",);
         let next_index_assigner = NextDerivationEntityIndexAssigner::new(
             network_id,
-            self.profile.clone(),
+            self.profile,
             self.cache.clone(),
         );
 

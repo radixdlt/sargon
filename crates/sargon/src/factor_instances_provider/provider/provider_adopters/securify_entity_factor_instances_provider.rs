@@ -15,9 +15,9 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_account_mfa(
+    pub async fn for_account_mfa<'a>(
         cache: &mut FactorInstancesCache,
-        profile: Profile,
+        profile: &'a Profile,
         matrix_of_factor_sources: MatrixOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
@@ -43,9 +43,9 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_persona_mfa(
+    pub async fn for_persona_mfa<'a>(
         cache: &mut FactorInstancesCache,
-        profile: Profile,
+        profile: &'a Profile,
         matrix_of_factor_sources: MatrixOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
@@ -71,9 +71,9 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_entity_mfa<E: IsEntity>(
+    pub async fn for_entity_mfa<'a, E: IsEntity>(
         cache: &mut FactorInstancesCache,
-        profile: Profile,
+        profile: &'a Profile,
         matrix_of_factor_sources: MatrixOfFactorSources,
         addresses_of_entities: IndexSet<E::Address>,
         interactors: Arc<dyn KeysDerivationInteractors>,
@@ -139,7 +139,7 @@ mod tests {
         let a = Account::sample();
         let _ = Sut::for_account_mfa(
             &mut FactorInstancesCache::default(),
-            Profile::sample_from([fs.clone()], [&a], []),
+            &Profile::sample_from([fs.clone()], [&a], []),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
                     .unwrap(),
@@ -163,7 +163,7 @@ mod tests {
         let a = Account::sample();
         let _ = Sut::for_account_mfa(
             &mut FactorInstancesCache::default(),
-            Profile::sample_from([fs.clone()], [&a], []),
+            &Profile::sample_from([fs.clone()], [&a], []),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
                     .unwrap(),
@@ -215,7 +215,7 @@ mod tests {
         assert_eq!(profile.networks.len(), 2);
         let _ = Sut::for_account_mfa(
             &mut FactorInstancesCache::default(),
-            profile,
+            &profile,
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
                     .unwrap(),
