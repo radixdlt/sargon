@@ -272,6 +272,18 @@ pub fn cap26(
     HDPath::new(Vec::from_iter(path))
 }
 
+pub fn index_agnostic(
+    network_id: NetworkID,
+    entity_kind: CAP26EntityKind,
+    key_kind: CAP26KeyKind,
+) -> HDPath {
+    let mut path: Vec<HDPathComponent> = vec![];
+    path.push(HDPathComponent::from(network_id));
+    path.push(HDPathComponent::from(entity_kind));
+    path.push(HDPathComponent::from(key_kind));
+    HDPath::new(path)
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;

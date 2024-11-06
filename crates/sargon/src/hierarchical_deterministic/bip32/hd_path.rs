@@ -33,13 +33,13 @@ impl FromBIP32Str for HDPath {
     fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();
         let mut s = s;
-        if s.starts_with("m/") {
+        if s.starts_with(&format!("m{}", Self::SEPARATOR)) {
             s = &s[2..]
         }
-        if s.starts_with("M/") {
+        if s.starts_with(&format!("M{}", Self::SEPARATOR)) {
             s = &s[2..]
         }
-        if s.starts_with("/") {
+        if s.starts_with(Self::SEPARATOR) {
             s = &s[1..]
         }
         let components = s
@@ -53,23 +53,38 @@ impl FromBIP32Str for HDPath {
 
 impl HDPath {
     pub const SEPARATOR: &str = "/";
-    fn to_string_map<F>(&self, map: F) -> String
+    fn to_string_map_with<F>(&self, include_head: bool, map: F) -> String
     where
         F: Fn(&HDPathComponent) -> String,
     {
         let head = "m".to_owned();
-        let mut path = vec![head];
-        let tail = self.components().iter().map(map);
-        path.extend(tail.collect_vec());
+        let mut path = self.components().iter().map(map).collect_vec();
+        if include_head {
+            path.splice(0..0, vec![head].into_iter());
+        }
         path.into_iter().join(Self::SEPARATOR)
+    }
+
+    fn to_string_map<F>(&self, map: F) -> String
+    where
+        F: Fn(&HDPathComponent) -> String,
+    {
+        self.to_string_map_with(true, map)
+    }
+
+    pub fn to_bip32_string_with(&self, include_head: bool) -> String {
+        self.to_string_map_with(include_head, |c| format!("{}", c))
+    }
+    pub fn to_bip32_string_debug_with(&self, include_head: bool) -> String {
+        self.to_string_map_with(include_head, |c| format!("{:?}", c))
     }
 }
 impl ToBIP32Str for HDPath {
     fn to_bip32_string(&self) -> String {
-        self.to_string_map(|c| format!("{}", c))
+        self.to_bip32_string_with(true)
     }
     fn to_bip32_string_debug(&self) -> String {
-        self.to_string_map(|c| format!("{:?}", c))
+        self.to_bip32_string_debug_with(true)
     }
 }
 

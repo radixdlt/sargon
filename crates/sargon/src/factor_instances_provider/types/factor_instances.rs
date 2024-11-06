@@ -1,10 +1,14 @@
 use crate::prelude::*;
 
 /// A collection of factor instances.
-#[derive(Default, Clone, PartialEq, Eq, derive_more::Debug)]
+#[derive(Default, Clone, PartialEq, Eq, Serialize, Deserialize, derive_more::Debug)]
 #[debug("FIS[{:?}]", self.factor_instances)]
+#[serde(transparent)]
 pub struct FactorInstances {
     #[allow(dead_code)]
+    #[doc(hidden)]
+    #[serde(skip)]
+    #[debug(skip)]
     __hidden: HiddenConstructor,
     factor_instances: IndexSet<HierarchicalDeterministicFactorInstance>,
 }

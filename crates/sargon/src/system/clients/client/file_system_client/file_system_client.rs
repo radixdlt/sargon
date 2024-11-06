@@ -25,7 +25,7 @@ pub fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
 
 #[allow(dead_code)]
 impl FileSystemClient {
-    async fn load_from_file(
+    pub async fn load_from_file(
         &self,
         path: impl AsRef<Path>,
     ) -> Result<Option<BagOfBytes>> {
@@ -36,7 +36,7 @@ impl FileSystemClient {
             .await
     }
 
-    async fn save_to_file(
+    pub async fn save_to_file(
         &self,
         path: impl AsRef<Path>,
         data: impl AsRef<[u8]>,

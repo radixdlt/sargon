@@ -101,10 +101,14 @@ pub struct FactorInstancesCache {
     /// PER FactorSource PER IndexAgnosticPath FactorInstances (matching that IndexAgnosticPath)
     map: RwLock<Storage>,
 }
-type Storage = IndexMap<
+pub type Storage = IndexMap<
     FactorSourceIDFromHash,
     IndexMap<IndexAgnosticPath, FactorInstances>,
 >;
+
+#[derive(Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct FactorInstancesCacheSnapshot(pub Storage);
 
 impl FactorInstancesCache {
     pub fn clone_snapshot(&self) -> Self {

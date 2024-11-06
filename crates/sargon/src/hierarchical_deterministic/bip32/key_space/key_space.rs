@@ -22,6 +22,22 @@ pub enum KeySpace {
     Securified,
 }
 
+impl FromStr for KeySpace {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        if s == Self::Securified.to_string() {
+            Ok(Self::Securified)
+        } else if s == (Self::Unsecurified { is_hardened: false }).to_string() {
+            Ok(Self::Unsecurified { is_hardened: false })
+        } else if s == (Self::Unsecurified { is_hardened: true }).to_string() {
+            Ok(Self::Unsecurified { is_hardened: true })
+        } else {
+            Err(CommonError::Unknown)
+        }
+    }
+}
+
 impl KeySpace {
     pub fn is_securified(&self) -> bool {
         matches!(self, Self::Securified)
