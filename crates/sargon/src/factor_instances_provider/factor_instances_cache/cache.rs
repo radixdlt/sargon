@@ -99,19 +99,31 @@ use crate::prelude::*;
 #[derive(Debug, Default)]
 pub struct FactorInstancesCache {
     /// PER FactorSource PER IndexAgnosticPath FactorInstances (matching that IndexAgnosticPath)
-    map: RwLock<
-        IndexMap<
-            FactorSourceIDFromHash,
-            IndexMap<IndexAgnosticPath, FactorInstances>,
-        >,
-    >,
+    map: RwLock<Storage>,
 }
+type Storage = IndexMap<
+    FactorSourceIDFromHash,
+    IndexMap<IndexAgnosticPath, FactorInstances>,
+>;
 
 impl FactorInstancesCache {
     pub fn clone_snapshot(&self) -> Self {
         Self {
             map: RwLock::new(self.map.read().unwrap().clone()),
         }
+    }
+
+    fn update_with<F, R>(&self, mutate: F) -> Result<R>
+    where
+        F: Fn(&mut Storage) -> Result<R>,
+    {
+        let mut guard = self.map.write().expect(
+            "Stop execution due to the FactorInstancesCache lock being poisoned",
+        );
+
+        let storage = &mut *guard;
+
+        mutate(storage)
     }
 
     /// Inserts `instances` under `factor_source_id` by splitting them and grouping
