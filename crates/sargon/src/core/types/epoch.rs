@@ -29,6 +29,10 @@ impl Epoch {
     pub fn window_end_from_start(start: Self) -> Self {
         Self::new(start.0 + Self::DEFAULT_EPOCH_WINDOW_SIZE)
     }
+
+    pub fn adding(&self, amount: u64) -> Self {
+        Self::new(self.0 + amount)
+    }
 }
 
 impl From<u64> for Epoch {
@@ -96,5 +100,11 @@ mod tests {
         test(1);
         test(2);
         test(1337);
+    }
+
+    #[test]
+    fn adding() {
+        let sut = Epoch(10);
+        assert_eq!(sut.adding(5), Epoch(15));
     }
 }
