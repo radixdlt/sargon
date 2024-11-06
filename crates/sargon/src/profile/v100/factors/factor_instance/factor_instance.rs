@@ -52,6 +52,14 @@ impl FactorInstance {
             },
         )
     }
+
+    pub fn try_as_hd_factor_instances(
+        &self,
+    ) -> Result<HierarchicalDeterministicFactorInstance> {
+        HierarchicalDeterministicFactorInstance::try_from_factor_instance(
+            self.clone(),
+        )
+    }
 }
 
 impl From<HierarchicalDeterministicFactorInstance> for FactorInstance {

@@ -131,7 +131,7 @@ mod tests {
         )
         .await
         .unwrap();
-        /*
+
         assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
 
         assert_eq!(outcome.debug_found_in_cache.len(), 0);
@@ -146,15 +146,18 @@ mod tests {
             DerivationPreset::all().len() * CACHE_FILLING_QUANTITY + 1
         );
 
-        let instances_used_directly = outcome.to_use_directly.factor_instances();
+        let instances_used_directly =
+            outcome.to_use_directly.factor_instances();
         assert_eq!(instances_used_directly.len(), 1);
         let instances_used_directly = instances_used_directly.first().unwrap();
 
         assert_eq!(
-            instances_used_directly.derivation_entity_index(),
-            HDPathComponent::Hardened(HDPathComponentHardened::Unsecurified(
-                UnsecurifiedIndex::unsecurified_hardening_base_index(0)
-            ))
+            instances_used_directly.derivation_path().index(),
+            HDPathComponent::from_local_key_space(
+                0,
+                KeySpace::Unsecurified { is_hardened: true }
+            )
+            .unwrap()
         );
 
         cache.assert_is_full(network, bdfs.id_from_hash());
@@ -171,7 +174,7 @@ mod tests {
             .into_iter()
             .map(|x| x.derivation_path())
             .collect_vec();
-
+        
         assert_eq!(persona_veci_paths.len(), CACHE_FILLING_QUANTITY);
 
         assert!(persona_veci_paths.iter().all(|x| x.get_entity_kind()
@@ -194,7 +197,7 @@ mod tests {
             persona_veci_indices.last().unwrap().clone(),
             HDPathComponent::unsecurified_hardening_base_index(30)
         );
-        */
+        
     }
     /*
     #[actix_rt::test]

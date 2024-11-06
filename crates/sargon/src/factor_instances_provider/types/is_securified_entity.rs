@@ -25,75 +25,83 @@ trait HighestDerivationPathIndex {
         assert_matches: AssertMatches,
     ) -> Option<HDPathComponent>;
 }
+// impl HighestDerivationPathIndex
+//     for GeneralRoleWithHierarchicalDeterministicFactorInstances
+// {
+//     fn highest_derivation_path_index(
+//         &self,
+//         factor_source_id: FactorSourceIDFromHash,
+//         assert_matches: AssertMatches,
+//     ) -> Option<HDPathComponent> {
+//         self.all_factors()
+//             .into_iter()
+//             .filter(|f| f.factor_source_id == factor_source_id)
+//             .map(|f| f.derivation_path())
+//             .map(|p| assert_matches.matches(&p))
+//             .map(|p| p.index())
+//             .max()
+//     }
+// }
 impl HighestDerivationPathIndex for MatrixOfFactorInstances {
     fn highest_derivation_path_index(
         &self,
         factor_source_id: FactorSourceIDFromHash,
+        // if_securified_select_role: RoleKind,
         assert_matches: AssertMatches,
     ) -> Option<HDPathComponent> {
-        // self.all_factors()
-        //     .into_iter()
-        //     .filter(|f| f.factor_source_id == factor_source_id)
-        //     .map(|f| f.derivation_path())
-        //     .map(|p| assert_matches.matches(&p))
-        //     .map(|p| p.index)
-        //     .max()
-        todo!()
+        // let general_role =
+        //     GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+        //         (self.clone(), if_securified_select_role),
+        //     )
+        //     .unwrap();
+
+        // general_role
+        //     .highest_derivation_path_index(factor_source_id, assert_matches)
+
+        self.all_factors()
+            .into_iter()
+            .flat_map(|f| f.try_as_hd_factor_instances().ok())
+            .filter(|f| f.factor_source_id == factor_source_id)
+            .map(|f| f.derivation_path())
+            .map(|p| assert_matches.matches(&p))
+            .map(|p| p.index())
+            .max()
     }
 }
 impl HighestDerivationPathIndex for SecuredEntityControl {
     fn highest_derivation_path_index(
         &self,
         factor_source_id: FactorSourceIDFromHash,
+        // if_securified_select_role: RoleKind,
         assert_matches: AssertMatches,
     ) -> Option<HDPathComponent> {
-        // self.matrix
-        // .highest_derivation_path_index(factor_source_id, assert_matches)
-        todo!()
+        self.security_structure
+            .matrix_of_factors
+            .highest_derivation_path_index(
+                factor_source_id,
+                // if_securified_select_role,
+                assert_matches,
+            )
     }
 }
-
-// pub trait IsSecurifiedEntity:
-//     Hash + Eq + Clone + IsNetworkAware + HasEntityKind + TryFrom<AccountOrPersona>
-// {
-//     type BaseEntity: IsEntity + std::hash::Hash + Eq;
-
-//     fn securified_entity_control(&self) -> SecuredEntityControl;
-
-//     fn new(
-//         name: impl Into<DisplayName>,
-//         address: <Self::BaseEntity as IsBaseEntity>::Address,
-//         securified_entity_control: SecuredEntityControl,
-//     ) -> Self;
-
-//     fn highest_derivation_path_index(
-//         &self,
-//         factor_source_id: FactorSourceIDFromHash,
-//         assert_matches: AssertMatches,
-//     ) -> Option<HDPathComponent> {
-//         self.securified_entity_control()
-//             .highest_derivation_path_index(factor_source_id, assert_matches)
-//     }
-// }
 
 pub trait IsSecurifiedEntity: Hash + Eq + Clone + IsNetworkAware {
     type BaseEntity: IsBaseEntity + std::hash::Hash + Eq;
 
     fn securified_entity_control(&self) -> SecuredEntityControl;
 
-    // fn new(
-    //     name: impl Into<DisplayName>,
-    //     address: <Self::BaseEntity as IsBaseEntity>::Address,
-    //     securified_entity_control: SecuredEntityControl,
-    // ) -> Self;
-
     fn highest_derivation_path_index(
         &self,
         factor_source_id: FactorSourceIDFromHash,
+        // if_securified_select_role: RoleKind,
         assert_matches: AssertMatches,
     ) -> Option<HDPathComponent> {
         self.securified_entity_control()
-            .highest_derivation_path_index(factor_source_id, assert_matches)
+            .highest_derivation_path_index(
+                factor_source_id,
+                // if_securified_select_role,
+                assert_matches,
+            )
     }
 }
 
