@@ -11,7 +11,10 @@ pub trait SampleDerivationPath: Sized {
         global_key_space: u32,
     ) -> Self;
 
-    fn hardening_global_index_account_tx(network_id: NetworkID, global_key_space: u32) -> Self {
+    fn hardening_global_index_account_tx(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Account,
@@ -20,7 +23,10 @@ pub trait SampleDerivationPath: Sized {
         )
     }
 
-    fn hardening_global_index_account_rola(network_id: NetworkID, global_key_space: u32) -> Self {
+    fn hardening_global_index_account_rola(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Account,
@@ -29,7 +35,10 @@ pub trait SampleDerivationPath: Sized {
         )
     }
 
-    fn hardening_global_index_identity_tx(network_id: NetworkID, global_key_space: u32) -> Self {
+    fn hardening_global_index_identity_tx(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Identity,
@@ -38,7 +47,10 @@ pub trait SampleDerivationPath: Sized {
         )
     }
 
-    fn hardening_global_index_identity_rola(network_id: NetworkID, global_key_space: u32) -> Self {
+    fn hardening_global_index_identity_rola(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Identity,
@@ -54,7 +66,10 @@ pub trait SampleDerivationPath: Sized {
         index: u32,
     ) -> Self;
 
-    fn account_tx_unsecurified_hardening_base_index(network_id: NetworkID, index: u32) -> Self {
+    fn account_tx_unsecurified_hardening_base_index(
+        network_id: NetworkID,
+        index: u32,
+    ) -> Self {
         Self::unsecurified_hardening_base_index(
             network_id,
             CAP26EntityKind::Account,
@@ -78,12 +93,12 @@ impl SampleDerivationPath for DerivationPath {
         hardened: Hardened,
     ) -> Self {
         match entity_kind {
-            CAP26EntityKind::Account => {
-                DerivationPath::account(AccountPath::new(network_id, key_kind, hardened))
-            }
-            CAP26EntityKind::Identity => {
-                DerivationPath::identity(IdentityPath::new(network_id, key_kind, hardened))
-            }
+            CAP26EntityKind::Account => DerivationPath::account(
+                AccountPath::new(network_id, key_kind, hardened),
+            ),
+            CAP26EntityKind::Identity => DerivationPath::identity(
+                IdentityPath::new(network_id, key_kind, hardened),
+            ),
         }
     }
     fn hardening_global_index(
@@ -104,12 +119,12 @@ impl SampleDerivationPath for DerivationPath {
         let index = U30::try_from(index).unwrap();
         let index = Hardened::Unsecurified(UnsecurifiedHardened::from(index));
         match entity_kind {
-            CAP26EntityKind::Account => {
-                DerivationPath::account(AccountPath::new(network_id, key_kind, index))
-            }
-            CAP26EntityKind::Identity => {
-                DerivationPath::identity(IdentityPath::new(network_id, key_kind, index))
-            }
+            CAP26EntityKind::Account => DerivationPath::account(
+                AccountPath::new(network_id, key_kind, index),
+            ),
+            CAP26EntityKind::Identity => DerivationPath::identity(
+                IdentityPath::new(network_id, key_kind, index),
+            ),
         }
     }
 }
@@ -118,7 +133,10 @@ impl SampleDerivationPath for DerivationPath {
 pub(crate) struct StatelessDummyIndices;
 
 impl StatelessDummyIndices {
-    pub(crate) fn next_derivation_index_for(&self, key_space: KeySpace) -> HDPathComponent {
+    pub(crate) fn next_derivation_index_for(
+        &self,
+        key_space: KeySpace,
+    ) -> HDPathComponent {
         HDPathComponent::from_local_key_space(0, key_space).unwrap()
     }
 

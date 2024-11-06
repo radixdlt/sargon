@@ -5,8 +5,10 @@ use crate::prelude::*;
 /// a single tuple.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KeyDerivationResponse {
-    pub per_factor_source:
-        IndexMap<FactorSourceIDFromHash, IndexSet<HierarchicalDeterministicFactorInstance>>,
+    pub per_factor_source: IndexMap<
+        FactorSourceIDFromHash,
+        IndexSet<HierarchicalDeterministicFactorInstance>,
+    >,
 }
 
 impl KeyDerivationResponse {

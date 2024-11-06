@@ -23,7 +23,10 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     /// `Profile` is optional so that one can use the same initializer from `FactorInstancesProvider`,
     /// which accepts an optional Profile. Will just default to empty lists if `None` is passed,
     /// effectively making this whole assigner NOOP.
-    pub fn new(network_id: NetworkID, profile: impl Into<Option<Profile>>) -> Self {
+    pub fn new(
+        network_id: NetworkID,
+        profile: impl Into<Option<Profile>>,
+    ) -> Self {
         let profile = profile.into();
         let unsecurified_accounts_on_network = profile
             .as_ref()
@@ -81,7 +84,8 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
                 .max()
         };
 
-        let of_unsecurified = max_veci(entities.into_iter().map(|x| x.veci()).collect());
+        let of_unsecurified =
+            max_veci(entities.into_iter().map(|x| x.veci()).collect());
 
         // The securified entities might have been originally created - having a veci -
         // with the same factor source id.
@@ -138,7 +142,10 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     /// factor source id found.
     /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
     /// factor in **any role** in its MatrixOfFactorInstances.
-    fn max_account_mfa(&self, factor_source_id: FactorSourceIDFromHash) -> Option<HDPathComponent> {
+    fn max_account_mfa(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Option<HDPathComponent> {
         self.securified_accounts_on_network
             .clone()
             .into_iter()
@@ -201,10 +208,18 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         let derivation_preset = DerivationPreset::try_from(agnostic_path)?;
 
         let max = match derivation_preset {
-            DerivationPreset::AccountVeci => self.max_account_veci(factor_source_id),
-            DerivationPreset::AccountMfa => self.max_account_mfa(factor_source_id),
-            DerivationPreset::IdentityVeci => self.max_identity_veci(factor_source_id),
-            DerivationPreset::IdentityMfa => self.max_identity_mfa(factor_source_id),
+            DerivationPreset::AccountVeci => {
+                self.max_account_veci(factor_source_id)
+            }
+            DerivationPreset::AccountMfa => {
+                self.max_account_mfa(factor_source_id)
+            }
+            DerivationPreset::IdentityVeci => {
+                self.max_identity_veci(factor_source_id)
+            }
+            DerivationPreset::IdentityMfa => {
+                self.max_identity_mfa(factor_source_id)
+            }
         };
 
         let Some(max) = max else { return Ok(None) };

@@ -37,9 +37,14 @@ impl Default for TestDerivationInteractors {
 }
 
 impl KeysDerivationInteractors for TestDerivationInteractors {
-    fn interactor_for(&self, kind: FactorSourceKind) -> KeyDerivationInteractor {
+    fn interactor_for(
+        &self,
+        kind: FactorSourceKind,
+    ) -> KeyDerivationInteractor {
         match kind {
-            FactorSourceKind::Device => KeyDerivationInteractor::poly(self.poly.clone()),
+            FactorSourceKind::Device => {
+                KeyDerivationInteractor::poly(self.poly.clone())
+            }
             _ => KeyDerivationInteractor::mono(self.mono.clone()),
         }
     }
@@ -48,13 +53,15 @@ impl KeysDerivationInteractors for TestDerivationInteractors {
 pub(crate) struct TestDerivationPolyInteractor {
     handle: fn(
         MonoFactorKeyDerivationRequest,
-    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
+    )
+        -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
 }
 impl TestDerivationPolyInteractor {
     pub(crate) fn new(
         handle: fn(
             MonoFactorKeyDerivationRequest,
-        ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
+        )
+            -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
     ) -> Self {
         Self { handle }
     }
@@ -102,7 +109,10 @@ impl PolyFactorKeyDerivationInteractor for TestDerivationPolyInteractor {
         request: PolyFactorKeyDerivationRequest,
     ) -> Result<KeyDerivationResponse> {
         let pairs_result: Result<
-            IndexMap<FactorSourceIDFromHash, IndexSet<HierarchicalDeterministicFactorInstance>>,
+            IndexMap<
+                FactorSourceIDFromHash,
+                IndexSet<HierarchicalDeterministicFactorInstance>,
+            >,
         > = request
             .per_factor_source
             .into_iter()
@@ -119,13 +129,15 @@ impl PolyFactorKeyDerivationInteractor for TestDerivationPolyInteractor {
 pub(crate) struct TestDerivationMonoInteractor {
     handle: fn(
         MonoFactorKeyDerivationRequest,
-    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
+    )
+        -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
 }
 impl TestDerivationMonoInteractor {
     pub(crate) fn new(
         handle: fn(
             MonoFactorKeyDerivationRequest,
-        ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
+        )
+            -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
     ) -> Self {
         Self { handle }
     }
@@ -162,7 +174,9 @@ impl MonoFactorKeyDerivationInteractor for TestDerivationMonoInteractor {
 impl KeysCollector {
     pub(crate) fn new_test_with_factor_sources(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        derivation_paths: impl IntoIterator<Item = (FactorSourceIDFromHash, IndexSet<DerivationPath>)>,
+        derivation_paths: impl IntoIterator<
+            Item = (FactorSourceIDFromHash, IndexSet<DerivationPath>),
+        >,
     ) -> Self {
         Self::new(
             all_factor_sources_in_profile,
@@ -175,9 +189,14 @@ impl KeysCollector {
     }
 
     pub(crate) fn new_test(
-        derivation_paths: impl IntoIterator<Item = (FactorSourceIDFromHash, IndexSet<DerivationPath>)>,
+        derivation_paths: impl IntoIterator<
+            Item = (FactorSourceIDFromHash, IndexSet<DerivationPath>),
+        >,
     ) -> Self {
-        Self::new_test_with_factor_sources(FactorSource::sample_all(), derivation_paths)
+        Self::new_test_with_factor_sources(
+            FactorSource::sample_all(),
+            derivation_paths,
+        )
     }
 
     pub(crate) fn with(
@@ -188,7 +207,12 @@ impl KeysCollector {
         key_space: KeySpace,
     ) -> Self {
         let indices = StatelessDummyIndices;
-        let path = indices.next_derivation_path(network_id, key_kind, entity_kind, key_space);
+        let path = indices.next_derivation_path(
+            network_id,
+            key_kind,
+            entity_kind,
+            key_space,
+        );
         Self::new_test_with_factor_sources(
             [factor_source.clone()],
             [(factor_source.id_from_hash(), IndexSet::just(path))],

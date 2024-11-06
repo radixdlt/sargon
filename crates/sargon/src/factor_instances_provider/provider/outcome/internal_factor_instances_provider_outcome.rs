@@ -2,8 +2,10 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct InternalFactorInstancesProviderOutcome {
-    pub per_factor:
-        IndexMap<FactorSourceIDFromHash, InternalFactorInstancesProviderOutcomeForFactor>,
+    pub per_factor: IndexMap<
+        FactorSourceIDFromHash,
+        InternalFactorInstancesProviderOutcomeForFactor,
+    >,
 }
 
 impl InternalFactorInstancesProviderOutcome {
@@ -46,18 +48,22 @@ impl InternalFactorInstancesProviderOutcome {
             /// Might be empty
             pub to_cache: IndexSet<HierarchicalDeterministicFactorInstance>,
             /// Might be empty
-            pub to_use_directly: IndexSet<HierarchicalDeterministicFactorInstance>,
+            pub to_use_directly:
+                IndexSet<HierarchicalDeterministicFactorInstance>,
 
             /// LESS IMPORTANT - for tests...
             /// might overlap with `to_use_directly`
-            pub found_in_cache: IndexSet<HierarchicalDeterministicFactorInstance>,
+            pub found_in_cache:
+                IndexSet<HierarchicalDeterministicFactorInstance>,
             /// might overlap with `to_cache` and `to_use_directly`
-            pub newly_derived: IndexSet<HierarchicalDeterministicFactorInstance>,
+            pub newly_derived:
+                IndexSet<HierarchicalDeterministicFactorInstance>,
         }
         impl Builder {
             fn build(self) -> InternalFactorInstancesProviderOutcomeForFactor {
                 let to_cache = FactorInstances::from(self.to_cache);
-                let to_use_directly = FactorInstances::from(self.to_use_directly);
+                let to_use_directly =
+                    FactorInstances::from(self.to_use_directly);
                 let found_in_cache = FactorInstances::from(self.found_in_cache);
                 let newly_derived = FactorInstances::from(self.newly_derived);
                 InternalFactorInstancesProviderOutcomeForFactor::new(
@@ -124,7 +130,10 @@ impl InternalFactorInstancesProviderOutcome {
             builders
                 .into_iter()
                 .map(|(k, v)| (k, v.build()))
-                .collect::<IndexMap<FactorSourceIDFromHash, InternalFactorInstancesProviderOutcomeForFactor>>(),
+                .collect::<IndexMap<
+                    FactorSourceIDFromHash,
+                    InternalFactorInstancesProviderOutcomeForFactor,
+                >>(),
         )
     }
 }

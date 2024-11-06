@@ -4,10 +4,15 @@ use crate::prelude::*;
 /// renamed field values to make it clear that `to_cache` instances  already have been cached.
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcome {
-    pub per_factor: IndexMap<FactorSourceIDFromHash, FactorInstancesProviderOutcomeForFactor>,
+    pub per_factor: IndexMap<
+        FactorSourceIDFromHash,
+        FactorInstancesProviderOutcomeForFactor,
+    >,
 }
 
-impl From<InternalFactorInstancesProviderOutcome> for FactorInstancesProviderOutcome {
+impl From<InternalFactorInstancesProviderOutcome>
+    for FactorInstancesProviderOutcome
+{
     fn from(value: InternalFactorInstancesProviderOutcome) -> Self {
         Self {
             per_factor: value
@@ -21,7 +26,9 @@ impl From<InternalFactorInstancesProviderOutcome> for FactorInstancesProviderOut
 
 #[cfg(test)]
 impl FactorInstancesProviderOutcome {
-    pub fn newly_derived_instances_from_all_factor_sources(&self) -> FactorInstances {
+    pub fn newly_derived_instances_from_all_factor_sources(
+        &self,
+    ) -> FactorInstances {
         self.per_factor
             .values()
             .flat_map(|x| x.debug_was_derived.factor_instances())
@@ -36,7 +43,9 @@ impl FactorInstancesProviderOutcome {
         self.total_number_of_newly_derived_instances() > 0
     }
 
-    pub fn instances_found_in_cache_from_all_factor_sources(&self) -> FactorInstances {
+    pub fn instances_found_in_cache_from_all_factor_sources(
+        &self,
+    ) -> FactorInstances {
         self.per_factor
             .values()
             .flat_map(|x| x.debug_found_in_cache.factor_instances())

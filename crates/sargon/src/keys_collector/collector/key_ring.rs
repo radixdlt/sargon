@@ -27,7 +27,9 @@ impl Keyring {
             derived: RwLock::new(IndexSet::new()),
         }
     }
-    pub(crate) fn factors(&self) -> IndexSet<HierarchicalDeterministicFactorInstance> {
+    pub(crate) fn factors(
+        &self,
+    ) -> IndexSet<HierarchicalDeterministicFactorInstance> {
         self.derived.try_read().unwrap().clone()
     }
 
@@ -35,15 +37,14 @@ impl Keyring {
         &self,
         response: IndexSet<HierarchicalDeterministicFactorInstance>,
     ) {
-        assert!(response
-            .iter()
-            .all(|f| f.factor_source_id == self.factor_source_id
-                && !self
-                    .derived
-                    .try_read()
-                    .unwrap()
-                    .iter()
-                    .any(|x| x.public_key == f.public_key)));
+        assert!(response.iter().all(|f| f.factor_source_id
+            == self.factor_source_id
+            && !self
+                .derived
+                .try_read()
+                .unwrap()
+                .iter()
+                .any(|x| x.public_key == f.public_key)));
 
         self.derived.try_write().unwrap().extend(response)
     }

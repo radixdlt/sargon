@@ -2,7 +2,9 @@ use std::borrow::Borrow;
 
 use crate::prelude::*;
 
-pub struct KeyedInstances<K: Eq + std::hash::Hash + Clone>(pub IndexMap<K, FactorInstances>);
+pub struct KeyedInstances<K: Eq + std::hash::Hash + Clone>(
+    pub IndexMap<K, FactorInstances>,
+);
 
 impl<K: Eq + std::hash::Hash + Clone> KeyedInstances<K> {
     pub fn validate_from_source(

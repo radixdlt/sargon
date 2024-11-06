@@ -10,7 +10,10 @@ pub(crate) struct KeysCollectorState {
 
 impl KeysCollectorState {
     pub(crate) fn new(
-        derivation_paths: IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
+        derivation_paths: IndexMap<
+            FactorSourceIDFromHash,
+            IndexSet<DerivationPath>,
+        >,
     ) -> Self {
         let keyrings = derivation_paths
             .into_iter()
@@ -36,7 +39,10 @@ impl KeysCollectorState {
         )
     }
 
-    pub(crate) fn keyring_for(&self, factor_source_id: &FactorSourceIDFromHash) -> Result<Keyring> {
+    pub(crate) fn keyring_for(
+        &self,
+        factor_source_id: &FactorSourceIDFromHash,
+    ) -> Result<Keyring> {
         self.keyrings
             .try_read()
             .unwrap()
@@ -48,8 +54,13 @@ impl KeysCollectorState {
             })
     }
 
-    pub(crate) fn process_batch_response(&self, response: KeyDerivationResponse) -> Result<()> {
-        for (factor_source_id, factors) in response.per_factor_source.into_iter() {
+    pub(crate) fn process_batch_response(
+        &self,
+        response: KeyDerivationResponse,
+    ) -> Result<()> {
+        for (factor_source_id, factors) in
+            response.per_factor_source.into_iter()
+        {
             let mut rings = self.keyrings.try_write().unwrap();
             let keyring = rings.get_mut(&factor_source_id).ok_or(
                 CommonError::ProfileDoesNotContainFactorSourceWithID {

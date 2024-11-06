@@ -21,7 +21,9 @@ pub struct KeysCollector {
 impl KeysCollector {
     pub fn new(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        derivation_paths: impl Into<IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>>,
+        derivation_paths: impl Into<
+            IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
+        >,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<Self> {
         let derivation_paths = derivation_paths.into();
@@ -41,8 +43,10 @@ impl KeysCollector {
         preprocessor: KeysCollectorPreprocessor,
     ) -> Result<Self> {
         debug!("Init KeysCollector");
-        let all_factor_sources_in_profile = all_factor_sources_in_profile.into();
-        let (state, factors) = preprocessor.preprocess(all_factor_sources_in_profile)?;
+        let all_factor_sources_in_profile =
+            all_factor_sources_in_profile.into();
+        let (state, factors) =
+            preprocessor.preprocess(all_factor_sources_in_profile)?;
 
         let dependencies = KeysCollectorDependencies::new(interactors, factors);
 
@@ -67,7 +71,10 @@ impl KeysCollector {
 
 // === PRIVATE ===
 impl KeysCollector {
-    async fn use_factor_sources(&self, factor_sources_of_kind: &FactorSourcesOfKind) -> Result<()> {
+    async fn use_factor_sources(
+        &self,
+        factor_sources_of_kind: &FactorSourcesOfKind,
+    ) -> Result<()> {
         let interactor = self
             .dependencies
             .interactors
@@ -92,10 +99,14 @@ impl KeysCollector {
                 for factor_source in factor_sources {
                     // Prepare the request for the interactor
                     debug!("Creating mono request for interactor");
-                    let request =
-                        self.request_for_serial_interactor(&factor_source.id_from_hash())?;
+                    let request = self.request_for_serial_interactor(
+                        &factor_source.id_from_hash(),
+                    )?;
 
-                    debug!("Dispatching mono request to interactor: {:?}", request);
+                    debug!(
+                        "Dispatching mono request to interactor: {:?}",
+                        request
+                    );
                     // Produce the results from the interactor
                     let response = interactor.derive(request).await?;
 
@@ -160,7 +171,10 @@ impl KeysCollector {
         self.input_for_interactor(factor_source_id)
     }
 
-    fn process_batch_response(&self, response: KeyDerivationResponse) -> Result<()> {
+    fn process_batch_response(
+        &self,
+        response: KeyDerivationResponse,
+    ) -> Result<()> {
         self.state
             .try_write()
             .unwrap()
@@ -218,7 +232,9 @@ mod tests {
                     NetworkID::Mainnet,
                     CAP26EntityKind::Account,
                     CAP26KeyKind::TransactionSigning,
-                    Hardened::Unsecurified(UnsecurifiedHardened::try_from(4u32).unwrap()),
+                    Hardened::Unsecurified(
+                        UnsecurifiedHardened::try_from(4u32).unwrap(),
+                    ),
                 )),
             ),
             (
@@ -227,7 +243,9 @@ mod tests {
                     NetworkID::Mainnet,
                     CAP26EntityKind::Identity,
                     CAP26KeyKind::AuthenticationSigning,
-                    Hardened::Securified(SecurifiedU30::try_from(5u32).unwrap()),
+                    Hardened::Securified(
+                        SecurifiedU30::try_from(5u32).unwrap(),
+                    ),
                 )),
             ),
         ]);

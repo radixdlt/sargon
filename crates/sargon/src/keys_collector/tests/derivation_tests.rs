@@ -24,7 +24,9 @@ mod key_derivation_tests {
         );
         assert!(matches!(
             res,
-            Err(CommonError::ProfileDoesNotContainFactorSourceWithID { bad_value: _ })
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID {
+                bad_value: _
+            })
         ));
     }
 
@@ -70,8 +72,10 @@ mod key_derivation_tests {
                     )
                 })
                 .collect::<IndexSet<_>>();
-            let collector =
-                KeysCollector::new_test([(factor_source.id_from_hash(), paths.clone())]);
+            let collector = KeysCollector::new_test([(
+                factor_source.id_from_hash(),
+                paths.clone(),
+            )]);
             let outcome = collector.collect_keys().await;
             assert_eq!(
                 outcome
@@ -90,7 +94,10 @@ mod key_derivation_tests {
 
         #[actix_rt::test]
         async fn multi_keys_multi_factor_sources_single_index_per() {
-            let path = DerivationPath::account_tx_unsecurified_hardening_base_index(Mainnet, 0);
+            let path =
+                DerivationPath::account_tx_unsecurified_hardening_base_index(
+                    Mainnet, 0,
+                );
             let paths = IndexSet::just(path);
             let factor_sources = FactorSource::sample_all();
 
@@ -256,50 +263,11 @@ mod key_derivation_tests {
                 ]
                 .into_iter()
                 .map(|i| i + GLOBAL_OFFSET_HARDENED)
-                .map(|i| DerivationPath::hardening_global_index_account_tx(NetworkID::Mainnet, i)),
-            );
-
-            paths.extend(
-                [
-                    0,
-                    1,
-                    2,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 1,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 2,
-                ]
-                .into_iter()
-                .map(|i| i + GLOBAL_OFFSET_HARDENED)
-                .map(|i| DerivationPath::hardening_global_index_account_tx(NetworkID::Stokenet, i)),
-            );
-
-            paths.extend(
-                [
-                    0,
-                    1,
-                    2,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 1,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 2,
-                ]
-                .into_iter()
-                .map(|i| i + GLOBAL_OFFSET_HARDENED)
-                .map(|i| DerivationPath::hardening_global_index_identity_tx(NetworkID::Mainnet, i)),
-            );
-
-            paths.extend(
-                [
-                    0,
-                    1,
-                    2,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 1,
-                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 2,
-                ]
-                .into_iter()
-                .map(|i| i + GLOBAL_OFFSET_HARDENED)
                 .map(|i| {
-                    DerivationPath::hardening_global_index_identity_tx(NetworkID::Stokenet, i)
+                    DerivationPath::hardening_global_index_account_tx(
+                        NetworkID::Mainnet,
+                        i,
+                    )
                 }),
             );
 
@@ -315,7 +283,10 @@ mod key_derivation_tests {
                 .into_iter()
                 .map(|i| i + GLOBAL_OFFSET_HARDENED)
                 .map(|i| {
-                    DerivationPath::hardening_global_index_account_rola(NetworkID::Mainnet, i)
+                    DerivationPath::hardening_global_index_account_tx(
+                        NetworkID::Stokenet,
+                        i,
+                    )
                 }),
             );
 
@@ -331,7 +302,10 @@ mod key_derivation_tests {
                 .into_iter()
                 .map(|i| i + GLOBAL_OFFSET_HARDENED)
                 .map(|i| {
-                    DerivationPath::hardening_global_index_account_rola(NetworkID::Stokenet, i)
+                    DerivationPath::hardening_global_index_identity_tx(
+                        NetworkID::Mainnet,
+                        i,
+                    )
                 }),
             );
 
@@ -347,7 +321,10 @@ mod key_derivation_tests {
                 .into_iter()
                 .map(|i| i + GLOBAL_OFFSET_HARDENED)
                 .map(|i| {
-                    DerivationPath::hardening_global_index_identity_rola(NetworkID::Mainnet, i)
+                    DerivationPath::hardening_global_index_identity_tx(
+                        NetworkID::Stokenet,
+                        i,
+                    )
                 }),
             );
 
@@ -363,7 +340,67 @@ mod key_derivation_tests {
                 .into_iter()
                 .map(|i| i + GLOBAL_OFFSET_HARDENED)
                 .map(|i| {
-                    DerivationPath::hardening_global_index_identity_rola(NetworkID::Stokenet, i)
+                    DerivationPath::hardening_global_index_account_rola(
+                        NetworkID::Mainnet,
+                        i,
+                    )
+                }),
+            );
+
+            paths.extend(
+                [
+                    0,
+                    1,
+                    2,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 1,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 2,
+                ]
+                .into_iter()
+                .map(|i| i + GLOBAL_OFFSET_HARDENED)
+                .map(|i| {
+                    DerivationPath::hardening_global_index_account_rola(
+                        NetworkID::Stokenet,
+                        i,
+                    )
+                }),
+            );
+
+            paths.extend(
+                [
+                    0,
+                    1,
+                    2,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 1,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 2,
+                ]
+                .into_iter()
+                .map(|i| i + GLOBAL_OFFSET_HARDENED)
+                .map(|i| {
+                    DerivationPath::hardening_global_index_identity_rola(
+                        NetworkID::Mainnet,
+                        i,
+                    )
+                }),
+            );
+
+            paths.extend(
+                [
+                    0,
+                    1,
+                    2,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 1,
+                    RELATIVELY_LOCAL_OFFSET_SECURIFIED + 2,
+                ]
+                .into_iter()
+                .map(|i| i + GLOBAL_OFFSET_HARDENED)
+                .map(|i| {
+                    DerivationPath::hardening_global_index_identity_rola(
+                        NetworkID::Stokenet,
+                        i,
+                    )
                 }),
             );
 
@@ -416,8 +453,13 @@ mod key_derivation_tests {
             key_kind: CAP26KeyKind,
             expected: Expected,
         ) {
-            let collector =
-                KeysCollector::with(factor_source, network_id, key_kind, entity_kind, key_space);
+            let collector = KeysCollector::with(
+                factor_source,
+                network_id,
+                key_kind,
+                entity_kind,
+                key_space,
+            );
 
             let outcome = collector.collect_keys().await;
             let factors = outcome.all_factors().factor_instances();
@@ -425,7 +467,12 @@ mod key_derivation_tests {
             let factor = factors.first().unwrap();
             assert_eq!(
                 factor.derivation_path(),
-                DerivationPath::for_entity(network_id, entity_kind, key_kind, expected.index)
+                DerivationPath::for_entity(
+                    network_id,
+                    entity_kind,
+                    key_kind,
+                    expected.index
+                )
             );
             assert_eq!(factor.factor_source_id, factor_source.id_from_hash());
         }
@@ -446,7 +493,11 @@ mod key_derivation_tests {
                     entity_kind,
                     key_kind,
                     Expected {
-                        index: Hardened::from_local_key_space(0u32, IsSecurified(true)).unwrap(),
+                        index: Hardened::from_local_key_space(
+                            0u32,
+                            IsSecurified(true),
+                        )
+                        .unwrap(),
                     },
                 )
                 .await
@@ -455,7 +506,10 @@ mod key_derivation_tests {
             mod account {
                 use super::*;
 
-                async fn each_factor(network_id: NetworkID, key_kind: CAP26KeyKind) {
+                async fn each_factor(
+                    network_id: NetworkID,
+                    key_kind: CAP26KeyKind,
+                ) {
                     for factor_source in FactorSource::sample_all().iter() {
                         test(factor_source, network_id, Account, key_kind).await
                     }
@@ -484,7 +538,11 @@ mod key_derivation_tests {
                     entity_kind,
                     key_kind,
                     Expected {
-                        index: Hardened::from_local_key_space(0u32, IsSecurified(false)).unwrap(),
+                        index: Hardened::from_local_key_space(
+                            0u32,
+                            IsSecurified(false),
+                        )
+                        .unwrap(),
                     },
                 )
                 .await
@@ -493,7 +551,10 @@ mod key_derivation_tests {
             mod account {
                 use super::*;
 
-                async fn each_factor(network_id: NetworkID, key_kind: CAP26KeyKind) {
+                async fn each_factor(
+                    network_id: NetworkID,
+                    key_kind: CAP26KeyKind,
+                ) {
                     for factor_source in FactorSource::sample_all().iter() {
                         test(factor_source, network_id, Account, key_kind).await
                     }
@@ -523,9 +584,13 @@ mod key_derivation_tests {
             mod persona {
                 use super::*;
 
-                async fn each_factor(network_id: NetworkID, key_kind: CAP26KeyKind) {
+                async fn each_factor(
+                    network_id: NetworkID,
+                    key_kind: CAP26KeyKind,
+                ) {
                     for factor_source in FactorSource::sample_all().iter() {
-                        test(factor_source, network_id, Identity, key_kind).await
+                        test(factor_source, network_id, Identity, key_kind)
+                            .await
                     }
                 }
 

@@ -304,10 +304,9 @@ impl<'a> FactorInstancesProvider<'a> {
                         // `qty` many paths
                         let paths = (0..qty)
                             .map(|offset| {
-
                                 // println!("🤡 derive more: creating next...offset: {:?}", offset);
                                 let index_agnostic_path = derivation_preset
-                                .index_agnostic_path_on_network(network_id);
+                                    .index_agnostic_path_on_network(network_id);
                                 // println!("🤡 derive more: index_agnostic_path: {:?}", index_agnostic_path);
                                 let index = next_index_assigner.next(
                                     factor_source_id,

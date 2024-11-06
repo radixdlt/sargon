@@ -6,8 +6,10 @@ use crate::prelude::*;
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct KeyDerivationOutcome {
     count: usize, // hide ctor...
-    pub factors_by_source:
-        IndexMap<FactorSourceIDFromHash, IndexSet<HierarchicalDeterministicFactorInstance>>,
+    pub factors_by_source: IndexMap<
+        FactorSourceIDFromHash,
+        IndexSet<HierarchicalDeterministicFactorInstance>,
+    >,
 }
 
 impl KeyDerivationOutcome {
