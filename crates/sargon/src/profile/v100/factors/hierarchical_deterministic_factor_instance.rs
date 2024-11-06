@@ -65,20 +65,21 @@ impl HierarchicalDeterministicFactorInstance {
         )
     }
 
-    pub fn new_for_entity(
+    pub fn new_for_entity_on_network(
+        network_id: NetworkID,
         factor_source_id: FactorSourceIDFromHash,
         entity_kind: CAP26EntityKind,
         index: Hardened,
     ) -> Self {
         let derivation_path: DerivationPath = match entity_kind {
             CAP26EntityKind::Account => AccountPath::new(
-                NetworkID::Mainnet,
+                network_id,
                 CAP26KeyKind::TransactionSigning,
                 index,
             )
             .into(),
             CAP26EntityKind::Identity => IdentityPath::new(
-                NetworkID::Mainnet,
+                network_id,
                 CAP26KeyKind::TransactionSigning,
                 index,
             )
@@ -89,6 +90,20 @@ impl HierarchicalDeterministicFactorInstance {
         let hd_private_key = seed.derive_private_key(&derivation_path);
 
         Self::new(factor_source_id, hd_private_key.public_key())
+    }
+
+    /// Mainnet
+    pub fn new_for_entity(
+        factor_source_id: FactorSourceIDFromHash,
+        entity_kind: CAP26EntityKind,
+        index: Hardened,
+    ) -> Self {
+        Self::new_for_entity_on_network(
+            NetworkID::Mainnet,
+            factor_source_id,
+            entity_kind,
+            index,
+        )
     }
 
     pub fn try_from(

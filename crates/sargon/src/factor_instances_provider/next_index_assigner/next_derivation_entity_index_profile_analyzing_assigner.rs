@@ -226,7 +226,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         max.checked_add_one_to_global().map(Some)
     }
 }
-/*
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -236,13 +236,17 @@ mod tests {
     #[test]
     fn test_network_discrepancy() {
         let sut = Sut::new(NetworkID::Mainnet, None);
-        assert_eq!(
+        assert!(matches!(
             sut.next(
                 FactorSourceIDFromHash::sample_at(0),
-                DerivationPreset::AccountVeci.index_agnostic_path_on_network(NetworkID::Stokenet),
+                DerivationPreset::AccountVeci
+                    .index_agnostic_path_on_network(NetworkID::Stokenet),
             ),
-            Err(CommonError::NetworkDiscrepancy)
-        );
+            Err(CommonError::NetworkDiscrepancy {
+                expected: NetworkID::Mainnet,
+                actual: NetworkID::Stokenet
+            })
+        ));
     }
 
     #[test]
@@ -251,9 +255,9 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
-                [&Account::a0()],
+                [&Account::sample_at(0)],
                 [],
             )),
         );
@@ -266,7 +270,11 @@ mod tests {
 
         assert_eq!(
             next,
-            Some(HDPathComponent::unsecurified_hardening_base_index(1))
+            HDPathComponent::from_local_key_space(
+                1,
+                KeySpace::Unsecurified { is_hardened: true }
+            )
+            .ok()
         )
     }
 
@@ -276,9 +284,9 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
-                [&Account::a0()],
+                [&Account::sample_at(0)],
                 [],
             )),
         );
@@ -298,9 +306,9 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
-                [&Account::a0()],
+                [&Account::sample_at(0)],
                 [],
             )),
         );
@@ -320,11 +328,11 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
                 [
-                    &Account::a8(),
-                    &Account::a2(), /* securified, should not interfere */
+                    &Account::sample_at(8),
+                    &Account::sample_at(2), /* securified, should not interfere */
                 ],
                 [],
             )),
@@ -338,7 +346,11 @@ mod tests {
 
         assert_eq!(
             next,
-            Some(HDPathComponent::unsecurified_hardening_base_index(9))
+            HDPathComponent::from_local_key_space(
+                9,
+                KeySpace::Unsecurified { is_hardened: true }
+            )
+            .ok()
         )
     }
 
@@ -348,22 +360,32 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
                 [
-                    &Account::a8(), /* unsecurified, should not interfere */
-                    &Account::a7(),
+                    &Account::sample_at(8), /* unsecurified, should not interfere */
+                    &Account::sample_at(7),
                 ],
                 [],
             )),
         );
         type F = FactorSourceIDFromHash;
-        for fid in [F::fs2(), F::fs6(), F::fs7(), F::fs8(), F::fs9()] {
+        for fid in [
+            F::sample_at(2),
+            F::sample_at(6),
+            F::sample_at(7),
+            F::sample_at(8),
+            F::sample_at(9),
+        ] {
             let next = sut
                 .next(fid, preset.index_agnostic_path_on_network(network_id))
                 .unwrap();
 
-            assert_eq!(next, Some(HDPathComponent::securifying_base_index(8)))
+            assert_eq!(
+                next,
+                HDPathComponent::from_local_key_space(8, KeySpace::Securified)
+                    .ok()
+            );
         }
     }
 
@@ -373,19 +395,29 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
                 [],
-                [&Persona::p7()],
+                [&Persona::sample_at(7)],
             )),
         );
         type F = FactorSourceIDFromHash;
-        for fid in [F::fs2(), F::fs6(), F::fs7(), F::fs8(), F::fs9()] {
+        for fid in [
+            F::sample_at(2),
+            F::sample_at(6),
+            F::sample_at(7),
+            F::sample_at(8),
+            F::sample_at(9),
+        ] {
             let next = sut
                 .next(fid, preset.index_agnostic_path_on_network(network_id))
                 .unwrap();
 
-            assert_eq!(next, Some(HDPathComponent::securifying_base_index(8)))
+            assert_eq!(
+                next,
+                HDPathComponent::from_local_key_space(8, KeySpace::Securified)
+                    .ok()
+            )
         }
     }
 
@@ -395,12 +427,12 @@ mod tests {
         let network_id = NetworkID::Mainnet;
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(
+            Some(Profile::sample_from(
                 FactorSource::sample_all(),
                 [],
                 [
-                    &Persona::p7(), /* securified should not interfere */
-                    &Persona::p1(),
+                    &Persona::sample_at(7), /* securified should not interfere */
+                    &Persona::sample_at(1),
                 ],
             )),
         );
@@ -413,7 +445,11 @@ mod tests {
 
         assert_eq!(
             next,
-            Some(HDPathComponent::unsecurified_hardening_base_index(2))
+            HDPathComponent::from_local_key_space(
+                2,
+                KeySpace::Unsecurified { is_hardened: true }
+            )
+            .ok()
         )
     }
 
@@ -421,46 +457,59 @@ mod tests {
     fn test_next_account_veci_with_non_contiguous_at_0_1_7_is_8() {
         let fsid = FactorSourceIDFromHash::sample_at(0);
 
-        let fi0 = HierarchicalDeterministicFactorInstance::mainnet_tx(
-            CAP26EntityKind::Account,
-            HDPathComponent::unsecurified_hardening_base_index(0),
+        let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
             fsid,
-        );
-        let fi1 = HierarchicalDeterministicFactorInstance::mainnet_tx(
             CAP26EntityKind::Account,
-            HDPathComponent::unsecurified_hardening_base_index(1),
-            fsid,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(0u32).unwrap(),
+            ),
         );
 
-        let fi7 = HierarchicalDeterministicFactorInstance::mainnet_tx(
-            CAP26EntityKind::Account,
-            HDPathComponent::unsecurified_hardening_base_index(7),
+        let fi1 = HierarchicalDeterministicFactorInstance::new_for_entity(
             fsid,
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(1u32).unwrap(),
+            ),
+        );
+
+        let fi7 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(7u32).unwrap(),
+            ),
         );
 
         let network_id = NetworkID::Mainnet;
-        let accounts = [fi0, fi1, fi7].map(|fi| {
-            Account::new(
-                "acco",
-                AccountAddress::new(network_id, fi.public_key_hash()),
-                EntitySecurityState::Unsecured(fi),
-            )
-        });
+        let accounts = [fi0, fi1, fi7]
+            .map(|fi| HDFactorInstanceTransactionSigning::new(fi).unwrap())
+            .map(|fi| {
+                Account::new(fi, DisplayName::sample(), AppearanceID::sample())
+            });
         let sut = Sut::new(
             network_id,
-            Some(Profile::new(FactorSource::sample_all(), &accounts, [])),
+            Some(Profile::sample_from(
+                FactorSource::sample_all(),
+                &accounts,
+                [],
+            )),
         );
         let next = sut
             .next(
                 fsid,
-                DerivationPreset::AccountVeci.index_agnostic_path_on_network(network_id),
+                DerivationPreset::AccountVeci
+                    .index_agnostic_path_on_network(network_id),
             )
             .unwrap();
 
         assert_eq!(
             next,
-            Some(HDPathComponent::unsecurified_hardening_base_index(8))
+            HDPathComponent::from_local_key_space(
+                8,
+                KeySpace::Unsecurified { is_hardened: true }
+            )
+            .ok()
         )
     }
 }
- */

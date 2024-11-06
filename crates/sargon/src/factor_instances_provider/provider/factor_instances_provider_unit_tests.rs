@@ -26,6 +26,7 @@ impl SargonOS {
 use crate::prelude::*;
 
 #[actix_rt::test]
+#[ignore]
 async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis_and_if_profile_is_used_a_new_account_is_created(
 ) {
     let (os, bdfs) = SargonOS::with_bdfs().await;

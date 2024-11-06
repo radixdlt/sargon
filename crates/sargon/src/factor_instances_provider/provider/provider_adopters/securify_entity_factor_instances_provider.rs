@@ -124,26 +124,32 @@ impl SecurifyEntityFactorInstancesProvider {
         Ok(outcome.into())
     }
 }
-/*
+
 #[cfg(test)]
 mod tests {
 
-    use std::ops::Add;
-
-    use crate::{factor_instances_provider::provider::test_sargon_os::SargonOS, prelude::*};
+    use super::*;
 
     type Sut = SecurifyEntityFactorInstancesProvider;
 
     #[should_panic]
     #[actix_rt::test]
     async fn mfa_panics_if_entities_empty() {
-        let fs = FactorSource::fs0();
-        let a = Account::sample_unsecurified();
+        let fs = FactorSource::sample_at(0);
+        let a = Account::sample();
         let _ = Sut::for_account_mfa(
             &mut FactorInstancesCache::default(),
-            Profile::new([fs.clone()], [&a], []),
-            MatrixOfFactorSources::new([], 1, [fs.clone()]),
-            IndexSet::new(), // <---- EMPTY => should_panic
+            Profile::sample_from([fs.clone()], [&a], []),
+            MatrixOfFactorSources::new(
+                PrimaryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                RecoveryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+            )
+            .unwrap(),
+            IndexSet::<AccountAddress>::new(), // <---- EMPTY => should_panic
             Arc::new(TestDerivationInteractors::default()),
         )
         .await
@@ -153,13 +159,21 @@ mod tests {
     #[should_panic]
     #[actix_rt::test]
     async fn mfa_panics_if_entity_unknown() {
-        let fs = FactorSource::fs0();
-        let a = Account::sample_unsecurified();
+        let fs = FactorSource::sample_at(0);
+        let a = Account::sample();
         let _ = Sut::for_account_mfa(
             &mut FactorInstancesCache::default(),
-            Profile::new([fs.clone()], [&a], []),
-            MatrixOfFactorSources::new([], 1, [fs.clone()]),
-            IndexSet::just(Account::a1().entity_address()), // <---- unknown => should_panic
+            Profile::sample_from([fs.clone()], [&a], []),
+            MatrixOfFactorSources::new(
+                PrimaryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                RecoveryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+            )
+            .unwrap(),
+            IndexSet::just(Account::sample_other().address()), // <---- unknown => should_panic
             Arc::new(TestDerivationInteractors::default()),
         )
         .await
@@ -169,38 +183,51 @@ mod tests {
     #[should_panic]
     #[actix_rt::test]
     async fn mfa_panics_if_wrong_network() {
-        let fs = FactorSource::fs0();
+        let fs = FactorSource::sample_at(0);
         let network = NetworkID::Mainnet;
-        let mainnet_account = Account::unsecurified_on_network(
-            "main",
+
+        let mainnet_account = Account::new(HDFactorInstanceTransactionSigning::new(HierarchicalDeterministicFactorInstance::new_for_entity_on_network(
             network,
-            HierarchicalDeterministicFactorInstance::tx_on_network(
-                CAP26EntityKind::Account,
-                network,
-                HDPathComponent::unsecurified_hardening_base_index(0),
-                fs.factor_source_id(),
+            fs.id_from_hash(),
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(0u32).unwrap(),
             ),
-        );
+        )).unwrap(), DisplayName::sample(), AppearanceID::sample());
+
         let network = NetworkID::Stokenet;
-        let stokenet_account = Account::unsecurified_on_network(
-            "stoknet",
+
+        let stokenet_account = Account::new(HDFactorInstanceTransactionSigning::new(HierarchicalDeterministicFactorInstance::new_for_entity_on_network(
             network,
-            HierarchicalDeterministicFactorInstance::tx_on_network(
-                CAP26EntityKind::Account,
-                network,
-                HDPathComponent::unsecurified_hardening_base_index(0),
-                fs.factor_source_id(),
+            fs.id_from_hash(),
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(0u32).unwrap(),
             ),
+        )).unwrap(), DisplayName::sample(), AppearanceID::sample());
+
+        let profile = Profile::sample_from(
+            [fs.clone()],
+            [&mainnet_account, &stokenet_account],
+            [],
         );
-        let profile = Profile::new([fs.clone()], [&mainnet_account, &stokenet_account], []);
+
         assert_eq!(profile.networks.len(), 2);
         let _ = Sut::for_account_mfa(
             &mut FactorInstancesCache::default(),
             profile,
-            MatrixOfFactorSources::new([], 1, [fs.clone()]),
+            MatrixOfFactorSources::new(
+                PrimaryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                RecoveryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+            )
+            .unwrap(),
             IndexSet::from_iter([
-                mainnet_account.entity_address(),
-                stokenet_account.entity_address(),
+                mainnet_account.address(),
+                stokenet_account.address(),
             ]), // <---- wrong network => should_panic
             Arc::new(TestDerivationInteractors::default()),
         )
@@ -209,7 +236,9 @@ mod tests {
     }
 
     #[actix_rt::test]
+    #[ignore]
     async fn securify_accounts_and_personas_with_override_factor() {
+        /*
         // this is mostly a soundness test for the two functions `for_persona_mfa` and `for_account_mfa`
         // using `os` because I'm lazy. We might in fact remove `for_persona_mfa` and `for_account_mfa`
         // and only use the `for_entity_mfa` function... but we have these to get code coverage.
@@ -247,6 +276,6 @@ mod tests {
         .unwrap();
         let outcome = outcome.per_factor.get(&bdfs.factor_source_id()).unwrap();
         assert_eq!(outcome.to_use_directly.len(), 1);
+        */
     }
 }
-*/
