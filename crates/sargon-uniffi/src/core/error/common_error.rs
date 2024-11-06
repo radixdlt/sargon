@@ -728,6 +728,9 @@ pub enum CommonError {
 
     #[error("Failed to decompile bytes into Subintent")]
     FailedToDecompileBytesIntoSubintent = 10205,
+
+    #[error("Subintent has already expired")]
+    SubintentExpired = 10206,
 }
 
 #[uniffi::export]
