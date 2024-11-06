@@ -96,16 +96,24 @@ use crate::prelude::*;
 /// Or if we don't wanna use such a "custom" one we can use `525`/`616`
 /// discriminator for EntityKind and `1460`/`1678` for KeyKind:
 /// "1/525/1460/U".
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Default)]
 pub struct FactorInstancesCache {
     /// PER FactorSource PER IndexAgnosticPath FactorInstances (matching that IndexAgnosticPath)
-    map: IndexMap<
-        FactorSourceIDFromHash,
-        IndexMap<IndexAgnosticPath, FactorInstances>,
+    map: RwLock<
+        IndexMap<
+            FactorSourceIDFromHash,
+            IndexMap<IndexAgnosticPath, FactorInstances>,
+        >,
     >,
 }
 
 impl FactorInstancesCache {
+    pub fn clone_snapshot(&self) -> Self {
+        Self {
+            map: RwLock::new(self.map.read().unwrap().clone()),
+        }
+    }
+
     /// Inserts `instances` under `factor_source_id` by splitting them and grouping
     /// them by their `IndexAgnosticPath`.
     ///
@@ -116,7 +124,7 @@ impl FactorInstancesCache {
     /// we do not use for now. Might be something we enforce or not for certain operations
     /// in the future.
     pub fn insert_for_factor(
-        &mut self,
+        &self,
         factor_source_id: &FactorSourceIDFromHash,
         instances: &FactorInstances,
     ) -> Result<bool> {
@@ -125,7 +133,8 @@ impl FactorInstancesCache {
         let instances_by_agnostic_path =
             InstancesByAgnosticPath::from(instances.clone());
         instances_by_agnostic_path.validate_from_source(factor_source_id)?;
-        if let Some(existing_for_factor) = self.map.get_mut(factor_source_id) {
+        let mut binding = self.map.write().unwrap();
+        if let Some(existing_for_factor) = binding.get_mut(factor_source_id) {
             for (agnostic_path, instances) in instances_by_agnostic_path {
                 let instances = instances.factor_instances();
 
@@ -176,8 +185,7 @@ impl FactorInstancesCache {
                 }
             }
         } else {
-            self.map
-                .insert(*factor_source_id, instances_by_agnostic_path.0);
+            binding.insert(*factor_source_id, instances_by_agnostic_path.0);
         }
 
         Ok(skipped_an_index_resulting_in_non_contiguity)
@@ -185,7 +193,7 @@ impl FactorInstancesCache {
 
     /// Inserts all instance in `per_factor`.
     pub fn insert_all(
-        &mut self,
+        &self,
         per_factor: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
     ) -> Result<()> {
         for (factor_source_id, instances) in per_factor {
@@ -318,21 +326,22 @@ impl FactorInstancesCache {
         factor_source_id: impl Borrow<FactorSourceIDFromHash>,
         index_agnostic_path: impl Borrow<IndexAgnosticPath>,
     ) -> Option<FactorInstances> {
-        let for_factor = self.map.get(factor_source_id.borrow())?;
+        let binding = self.map.read().unwrap();
+        let for_factor = binding.get(factor_source_id.borrow())?;
         let instances = for_factor.get(index_agnostic_path.borrow())?;
         Some(instances.clone())
     }
 
     pub fn delete(
-        &mut self,
+        &self,
         pf_instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
     ) {
         for (factor_source_id, instances_to_delete) in pf_instances {
             if instances_to_delete.is_empty() {
                 continue;
             }
-            let existing_for_factor = self
-                .map
+            let mut binding = self.map.write().unwrap();
+            let existing_for_factor = binding
                 .get_mut(factor_source_id)
                 .expect("expected to delete factors");
 
@@ -369,13 +378,15 @@ impl FactorInstancesCache {
     }
 
     /// "Prunes" the cache from empty collections
-    fn prune(&mut self) {
+    fn prune(&self) {
         let ids = self.factor_source_ids();
         for factor_source_id in ids.iter() {
-            let inner_map = self.map.get_mut(factor_source_id).unwrap();
+            let mut binding = self.map.write().unwrap();
+
+            let inner_map = binding.get_mut(factor_source_id).unwrap();
             if inner_map.is_empty() {
                 // empty map, prune it!
-                self.map.shift_remove(factor_source_id);
+                binding.shift_remove(factor_source_id);
                 continue;
             }
             // see if pruning of instances inside of values `inner_map` is needed
@@ -393,10 +404,10 @@ impl FactorInstancesCache {
     }
 
     fn factor_source_ids(&self) -> IndexSet<FactorSourceIDFromHash> {
-        self.map.keys().cloned().collect()
+        self.map.read().unwrap().keys().cloned().collect()
     }
     pub fn insert(
-        &mut self,
+        &self,
         pf_instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
     ) {
         self.insert_all(pf_instances).expect("works")
@@ -407,11 +418,13 @@ impl FactorInstancesCache {
         &self,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Option<IndexMap<IndexAgnosticPath, FactorInstances>> {
-        self.map.get(&factor_source_id).cloned()
+        self.map.read().unwrap().get(&factor_source_id).cloned()
     }
 
     pub fn total_number_of_factor_instances(&self) -> usize {
         self.map
+            .read()
+            .unwrap()
             .values()
             .map(|x| {
                 x.values()
@@ -465,15 +478,13 @@ impl FactorInstancesCache {
 #[cfg(test)]
 mod tests {
 
-    use std::fs;
-
     use super::*;
 
     type Sut = FactorInstancesCache;
 
     #[test]
     fn non_contiguous_indices() {
-        let mut sut = Sut::default();
+        let sut = Sut::default();
         let fsid = FactorSourceIDFromHash::sample_at(0);
 
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
@@ -500,7 +511,7 @@ mod tests {
 
     #[test]
     fn factor_source_discrepancy() {
-        let mut sut = Sut::default();
+        let sut = Sut::default();
         let fs0 = FactorSourceIDFromHash::sample_at(0);
         let fs1 = FactorSourceIDFromHash::sample_at(1);
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
@@ -579,7 +590,7 @@ mod tests {
 
     #[test]
     fn throws_if_same_is_added() {
-        let mut sut = Sut::default();
+        let sut = Sut::default();
         let fsid = FactorSourceIDFromHash::sample_at(0);
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
             fsid,

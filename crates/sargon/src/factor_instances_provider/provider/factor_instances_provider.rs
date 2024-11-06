@@ -290,7 +290,7 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
         let next_index_assigner = NextDerivationEntityIndexAssigner::new(
             network_id,
             self.profile,
-            self.cache.clone(),
+            self.cache.clone_snapshot(),
         );
 
         println!("🤡 derive more: created next index assigner",);
