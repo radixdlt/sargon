@@ -22,7 +22,8 @@ impl NextDerivationEntityIndexWithEphemeralOffsets {
         factor_source_id: FactorSourceIDFromHash,
         agnostic_path: IndexAgnosticPath,
     ) -> Result<HDPathComponent> {
-        let mut binding = self.ephemeral_offsets_per_factor_source.write().unwrap();
+        let mut binding =
+            self.ephemeral_offsets_per_factor_source.write().unwrap();
         if let Some(for_factor) = binding.get_mut(&factor_source_id) {
             for_factor.reserve(agnostic_path)
         } else {
@@ -90,7 +91,9 @@ mod tests {
         assert_eq!(
             indices,
             vec![
-                HDPathComponent::Unsecurified(Unsecurified::Hardened(UnsecurifiedHardened::ZERO));
+                HDPathComponent::Unsecurified(Unsecurified::Hardened(
+                    UnsecurifiedHardened::ZERO
+                ));
                 fsids.len()
             ]
         );
@@ -115,9 +118,9 @@ mod tests {
             indices,
             vec![
                 HDPathComponent::unsecurified_hardened(0u32).unwrap(), // Account Veci
-                HDPathComponent::Securified(SecurifiedU30::ZERO),      // Account MFA
+                HDPathComponent::Securified(SecurifiedU30::ZERO), // Account MFA
                 HDPathComponent::unsecurified_hardened(0u32).unwrap(), // Identify Veci
-                HDPathComponent::Securified(SecurifiedU30::ZERO),      // Identity MFA
+                HDPathComponent::Securified(SecurifiedU30::ZERO), // Identity MFA
             ]
         );
     }
@@ -132,7 +135,8 @@ mod tests {
             .map(|network_id| {
                 sut.reserve(
                     FactorSourceIDFromHash::sample_at(0),
-                    DerivationPreset::AccountMfa.index_agnostic_path_on_network(network_id),
+                    DerivationPreset::AccountMfa
+                        .index_agnostic_path_on_network(network_id),
                 )
                 .unwrap()
             })

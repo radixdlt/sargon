@@ -29,6 +29,10 @@ impl HierarchicalDeterministicFactorInstance {
         self.public_key.derivation_path.clone()
     }
 
+    pub fn derivation_entity_index(&self) -> HDPathComponent {
+        self.derivation_path().index()
+    }
+
     pub fn new(
         factor_source_id: FactorSourceIDFromHash,
         public_key: HierarchicalDeterministicPublicKey,
