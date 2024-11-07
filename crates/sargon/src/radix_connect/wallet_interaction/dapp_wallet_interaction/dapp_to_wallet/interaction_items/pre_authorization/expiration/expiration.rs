@@ -48,12 +48,12 @@ impl DappToWalletInteractionSubintentExpiration {
                     DappToWalletInteractionSubintentExpirationStatus::Expired
                 } else if expiration.unix_timestamp_seconds < in_thirty_seconds
                 {
-                    DappToWalletInteractionSubintentExpirationStatus::TooCloseToExpiration
+                    DappToWalletInteractionSubintentExpirationStatus::ExpirationTooClose
                 } else {
                     DappToWalletInteractionSubintentExpirationStatus::Valid
                 }
             }
-            Self::AfterDelay(expiration) => {
+            Self::AfterDelay(_) => {
                 DappToWalletInteractionSubintentExpirationStatus::Valid
             }
         }
@@ -123,7 +123,7 @@ mod tests {
         );
         assert_eq!(
             expiration.get_status(),
-            DappToWalletInteractionSubintentExpirationStatus::TooCloseToExpiration
+            DappToWalletInteractionSubintentExpirationStatus::ExpirationTooClose
         );
 
         // AtTime which is more than 30 seconds from expiration

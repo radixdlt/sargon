@@ -12,7 +12,7 @@ pub enum DappToWalletInteractionSubintentExpirationStatus {
 
     /// The subintent is too close to its expiration. Although it hasn't expired yet, the Host apps
     /// shouldn't allow the user dealing with it.
-    TooCloseToExpiration,
+    ExpirationTooClose,
 
     /// The subintent has already expired.
     Expired,
