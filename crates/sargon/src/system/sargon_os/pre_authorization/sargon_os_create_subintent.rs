@@ -11,20 +11,22 @@ impl SargonOS {
         intent_discriminator: IntentDiscriminator,
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
+        message: Option<String>,
     ) -> Result<Subintent> {
-        let network_id = self.current_network_id()?;
-        let gateway_client = GatewayClient::new(
-            self.clients.http_client.driver.clone(),
-            network_id,
-        );
-        let current_epoch = gateway_client.current_epoch().await?;
-
         // Calculate the seconds until the expiration of the subintent.
         let expiry_time_from_now_in_seconds =
             self.expiry_time_from_now_in_seconds(expiration);
         if expiry_time_from_now_in_seconds == 0 {
             return Err(CommonError::SubintentExpired);
         }
+
+        // Get current epoch
+        let network_id = self.current_network_id()?;
+        let gateway_client = GatewayClient::new(
+            self.clients.http_client.driver.clone(),
+            network_id,
+        );
+        let current_epoch = gateway_client.current_epoch().await?;
 
         // Calculate header ranges
         let end_ranges = self.calculate_end_ranges(
@@ -43,7 +45,7 @@ impl SargonOS {
         };
 
         // Build subintent
-        Subintent::new(header, subintent_manifest, MessageV2::None)
+        Subintent::new(header, subintent_manifest, message.into())
     }
 
     /// Returns the seconds until the expiration of the subintent.
@@ -70,20 +72,9 @@ impl SargonOS {
         current_epoch: Epoch,
         expiry_time_from_now_in_seconds: u64,
     ) -> (Epoch, Instant) {
-        // 5 minutes
-        const EXPECTED_EPOCH_DURATION_IN_SECONDS: u64 = 300;
-
-        // As per the transaction validation configuration, epoch diff should be less than 1 month.
-        const MAX_EPOCH_DIFF: u64 =
-            30 * 24 * 60 * 60 / EXPECTED_EPOCH_DURATION_IN_SECONDS;
-
-        // 1 epoch for the fact that it's min_inclusive and max_exclusive; 1 more for the fact that we might be very close to the end of the epoch already
-        const MIN_EPOCH_DIFF: u64 = 2;
-
         let epoch_diff = MAX_EPOCH_DIFF.min(
             MIN_EPOCH_DIFF
-                + (expiry_time_from_now_in_seconds
-                    / EXPECTED_EPOCH_DURATION_IN_SECONDS),
+                + (expiry_time_from_now_in_seconds / EPOCH_DURATION_IN_SECONDS),
         );
         let end_epoch_exclusive = current_epoch.adding(epoch_diff);
         let max_proposer_timestamp_exclusive = Timestamp::now_utc()
@@ -116,6 +107,7 @@ mod tests {
                 IntentDiscriminator::sample(),
                 SubintentManifest::sample(),
                 expiration,
+                None,
             )
             .await
             .expect_err("Expected an error");
@@ -134,12 +126,14 @@ mod tests {
 
         let intent_discriminator = IntentDiscriminator::sample();
         let manifest = SubintentManifest::sample();
+        let message = "Hello Radix!".to_string();
 
         let result = os
             .create_subintent(
                 intent_discriminator,
                 manifest.clone(),
                 expiration,
+                Some(message.clone()),
             )
             .await
             .expect("Expected a valid subintent");
@@ -156,7 +150,7 @@ mod tests {
         );
         assert_eq!(result.header.intent_discriminator, intent_discriminator);
         assert_eq!(result.manifest, manifest);
-        assert_eq!(result.message, MessageV2::None);
+        assert_eq!(result.message, MessageV2::plain_text(message));
     }
 
     #[actix_rt::test]
@@ -171,7 +165,7 @@ mod tests {
         );
 
         let mut result = os.expiry_time_from_now_in_seconds(expiration);
-        let mut diff = seconds.abs_diff(result);
+        let diff = seconds.abs_diff(result);
         assert!(diff <= 1); // Less than 1s difference
 
         // Check for AfterDelay expiration

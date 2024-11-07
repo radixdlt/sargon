@@ -11,12 +11,14 @@ impl SargonOS {
         intent_discriminator: IntentDiscriminator,
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
+        message: Option<String>,
     ) -> Result<Subintent> {
         self.wrapped
             .create_subintent(
                 intent_discriminator.into_internal(),
                 subintent_manifest.into_internal(),
                 expiration.into_internal(),
+                message,
             )
             .await
             .into_result()
