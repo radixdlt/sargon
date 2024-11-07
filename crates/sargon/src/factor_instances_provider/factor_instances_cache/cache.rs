@@ -206,19 +206,6 @@ impl FactorInstancesCache {
         FactorInstancesCacheSnapshot::from(self.map.read().unwrap().clone())
     }
 
-    fn update_with<F, R>(&self, mutate: F) -> Result<R>
-    where
-        F: Fn(&mut Storage) -> Result<R>,
-    {
-        let mut guard = self.map.write().expect(
-            "Stop execution due to the FactorInstancesCache lock being poisoned",
-        );
-
-        let storage = &mut *guard;
-
-        mutate(storage)
-    }
-
     /// Inserts `instances` under `factor_source_id` by splitting them and grouping
     /// them by their `IndexAgnosticPath`.
     ///
