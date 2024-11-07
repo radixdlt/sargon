@@ -410,7 +410,7 @@ impl FactorInstancesCache {
     }
 }
 
-#[derive(Debug, enum_as_inner::EnumAsInner)]
+#[derive(Debug, PartialEq, Eq, enum_as_inner::EnumAsInner)]
 pub enum CachedInstancesWithQuantitiesOutcome {
     Satisfied(IndexMap<FactorSourceIDFromHash, FactorInstances>),
     NotSatisfied {
