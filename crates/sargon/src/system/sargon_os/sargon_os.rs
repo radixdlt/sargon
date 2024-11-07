@@ -12,6 +12,9 @@ use crate::prelude::*;
 pub struct SargonOS {
     pub profile_state_holder: ProfileStateHolder,
     pub clients: Clients,
+
+    /// Optional so that we can defer intergration with hosts...
+    pub interactors: Option<Interactors>,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -65,6 +68,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
+            interactors: None,
         });
         os.clients
             .profile_state_change

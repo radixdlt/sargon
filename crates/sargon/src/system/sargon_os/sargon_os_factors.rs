@@ -171,25 +171,7 @@ impl SargonOS {
         Ok(factor_source)
     }
 
-    /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
-    /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
-    /// built from both.
-    ///
-    /// Useful for when you will want to sign transactions or derive public keys for
-    /// creation of new entities.
-    ///
-    /// Returns `Err` if loading or decoding of `MnemonicWithPassphrase` from
-    /// SecureStorage fails.
-    pub async fn load_private_device_factor_source_by_id(
-        &self,
-        id: &FactorSourceIDFromHash,
-    ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        let device_factor_source = self
-            .profile_state_holder
-            .try_access_profile_with(|p| p.device_factor_source_by_id(id))?;
-        self.load_private_device_factor_source(&device_factor_source)
-            .await
-    }
+
 }
 
 impl SargonOS {
@@ -320,38 +302,6 @@ impl SargonOS {
         self.secure_storage.load_mnemonic_with_passphrase(id).await
     }
 
-    /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
-    /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
-    /// built from both.
-    ///
-    /// Useful for when you will want to sign transactions or derive public keys for
-    /// creation of new entities.
-    ///
-    /// Returns `Err` if loading or decoding of `MnemonicWithPassphrase` from
-    /// SecureStorage fails.
-    pub async fn load_private_device_factor_source(
-        &self,
-        device_factor_source: &DeviceFactorSource,
-    ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        info!(
-            "Load Private DeviceFactorSource from SecureStorage, factor source id: {}",
-            &device_factor_source.id
-        );
-        self.mnemonic_with_passphrase_of_device_factor_source_by_id(
-            &device_factor_source.id,
-        )
-        .await
-        .map(|mwp| {
-            PrivateHierarchicalDeterministicFactorSource::new(
-                mwp,
-                device_factor_source.clone(),
-            )
-        })
-        .log_info(
-            "Successfully loaded Private DeviceFactorSource from SecureStorage",
-        )
-    }
-
     /// Tries to load a `MnemonicWithPassphrase` from secure storage
     /// by `factor_source_id`.
     pub async fn mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(
@@ -390,24 +340,6 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
-    #[actix_rt::test]
-    async fn test_load_private_device_factor_source_by_id() {
-        // ARRANGE
-        let mwp = MnemonicWithPassphrase::sample();
-        let factor_source_id = FactorSourceIDFromHash::new_for_device(&mwp);
-        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
-
-        // ACT
-        let private = os
-            .with_timeout(|x| {
-                x.load_private_device_factor_source_by_id(&factor_source_id)
-            })
-            .await
-            .unwrap();
-
-        // ASSERT
-        assert_eq!(private.mnemonic_with_passphrase, mwp);
-    }
 
     #[actix_rt::test]
     async fn test_bdfs() {

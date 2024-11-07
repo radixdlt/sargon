@@ -69,24 +69,30 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
+        let key_derivation_interactors = self
+            .interactors
+            .as_ref()
+            .expect("Interactors is not set")
+            .key_derivation
+            .clone();
+
         let profile = self.profile()?;
-        todo!()
-        // let (factor_source_id, account) = profile
-        //     .create_unsaved_account(
-        //         network_id,
-        //         name,
-        //         self.cache,
-        //         async move |fs| {
-        //             self.load_private_device_factor_source(&fs).await
-        //         },
-        //     )
-        //     .await?;
 
-        // // Change of `last_used_on` of FactorSource
-        // self.update_last_used_of_factor_source(factor_source_id)
-        //     .await?;
+        let (factor_source_id, account) = profile
+            .create_unsaved_account(
+                network_id,
+                name,
+                &self.clients.factor_instances_cache,
+                key_derivation_interactors,
+            )
+            .await?;
 
-        // Ok(account)
+        // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
+            .await?;
+
+        Ok(account)
     }
 
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
@@ -174,27 +180,34 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
+        let key_derivation_interactors = self
+            .interactors
+            .as_ref()
+            .expect("Interactors is not set")
+            .key_derivation
+            .clone();
+
         let profile = self.profile()?;
-        todo!()
-        // let (factor_source_id, accounts) = profile
-        //     .create_unsaved_accounts(
-        //         network_id,
-        //         count,
-        //         |idx| {
-        //             DisplayName::new(format!("{} {}", name_prefix, idx))
-        //                 .expect("Should not use a long name_prefix")
-        //         },
-        //         async move |fs| {
-        //             self.load_private_device_factor_source(&fs).await
-        //         },
-        //     )
-        //     .await?;
 
-        // // Change of `last_used_on` of FactorSource
-        // self.update_last_used_of_factor_source(factor_source_id)
-        //     .await?;
+        let (factor_source_id, accounts) = profile
+            .create_unsaved_accounts(
+                network_id,
+                count,
+                &self.clients.factor_instances_cache,
+                key_derivation_interactors,
+                |idx| {
+                    DisplayName::new(format!("{} {}", name_prefix, idx))
+                        .expect("Should not use a long name_prefix")
+                },
+            )
+            .await?;
 
-        // Ok(accounts)
+        // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
+            .await?;
+
+        Ok(accounts)
     }
 }
 

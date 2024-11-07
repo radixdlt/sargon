@@ -3,9 +3,10 @@
 
 use crate::prelude::*;
 
+#[derive(Debug)]
 pub(crate) struct TestDerivationInteractors {
-    pub(crate) poly: Arc<dyn PolyFactorKeyDerivationInteractor + Send + Sync>,
-    pub(crate) mono: Arc<dyn MonoFactorKeyDerivationInteractor + Send + Sync>,
+    pub(crate) poly: Arc<dyn PolyFactorKeyDerivationInteractor>,
+    pub(crate) mono: Arc<dyn MonoFactorKeyDerivationInteractor>,
 }
 impl TestDerivationInteractors {
     pub(crate) fn new(
@@ -50,6 +51,7 @@ impl KeysDerivationInteractors for TestDerivationInteractors {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct TestDerivationPolyInteractor {
     handle: fn(
         MonoFactorKeyDerivationRequest,
@@ -77,30 +79,10 @@ impl TestDerivationPolyInteractor {
 }
 impl Default for TestDerivationPolyInteractor {
     fn default() -> Self {
-        Self::new(do_derive_serially)
+        Self::new(do_derive_serially_looking_up_mnemonic_amongst_samples)
     }
 }
 
-fn do_derive_serially(
-    request: MonoFactorKeyDerivationRequest,
-) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-    let factor_source_id = &request.factor_source_id;
-    let instances = request
-        .derivation_paths
-        .into_iter()
-        .map(|p| {
-            let mnemonic = factor_source_id.sample_associated_mnemonic();
-            let seed = mnemonic.to_seed();
-            let hd_private_key = seed.derive_private_key(&p);
-            HierarchicalDeterministicFactorInstance::new(
-                (*factor_source_id),
-                hd_private_key.public_key(),
-            )
-        })
-        .collect::<IndexSet<_>>();
-
-    Ok(instances)
-}
 
 #[async_trait::async_trait]
 impl PolyFactorKeyDerivationInteractor for TestDerivationPolyInteractor {
@@ -126,6 +108,7 @@ impl PolyFactorKeyDerivationInteractor for TestDerivationPolyInteractor {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct TestDerivationMonoInteractor {
     handle: fn(
         MonoFactorKeyDerivationRequest,
@@ -153,7 +136,7 @@ impl TestDerivationMonoInteractor {
 }
 impl Default for TestDerivationMonoInteractor {
     fn default() -> Self {
-        Self::new(do_derive_serially)
+        Self::new(do_derive_serially_looking_up_mnemonic_amongst_samples)
     }
 }
 
