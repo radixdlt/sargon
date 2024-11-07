@@ -108,20 +108,92 @@ pub type Storage = IndexMap<
 
 pub type DenseKeyStorage = IndexMap<
     FactorSourceIDFromHashDenseKey,
-    IndexMap<IndexAgnosticPath, FactorInstances>,
+    IndexMap<IndexAgnosticPath, IndexSet<HierarchicalDeterministicPublicKey>>,
 >;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct FactorInstancesCacheSnapshot(pub DenseKeyStorage);
+impl From<FactorInstancesCacheSnapshot> for Storage {
+    fn from(value: FactorInstancesCacheSnapshot) -> Self {
+        value
+            .0
+            .into_iter()
+            .map(|(k, v)| {
+                let key = FactorSourceIDFromHash::from(k);
+                let value = v.into_iter().map(|(l, u)| {
+                    (
+                        l,
+                        u.into_iter()
+                            .map(|x| HierarchicalDeterministicFactorInstance::new(key, x))
+                            .collect::<FactorInstances>(),
+                    )
+                }).collect::<IndexMap<IndexAgnosticPath, FactorInstances>>();
+                (key, value)
+            })
+            .collect::<Storage>()
+    }
+}
+impl From<FactorInstancesCacheSnapshot> for FactorInstancesCache {
+    fn from(value: FactorInstancesCacheSnapshot) -> Self {
+        Self {
+            map: RwLock::new(Storage::from(value)),
+        }
+    }
+}
 impl From<Storage> for FactorInstancesCacheSnapshot {
     fn from(value: Storage) -> Self {
-        todo!()
+        Self(
+            value
+                .into_iter()
+                .map(|(k, v)| {
+                    let key = FactorSourceIDFromHashDenseKey::from(k);
+                    let value = v
+                        .into_iter()
+                        .map(|(l, u)| {
+                            (
+                                    l,
+                                    u.into_iter()
+                                        .map(|x| x.hd_public_key())
+                                        .collect::<IndexSet<
+                                        HierarchicalDeterministicPublicKey,
+                                    >>(),
+                                )
+                        })
+                        .collect::<IndexMap<
+                            IndexAgnosticPath,
+                            IndexSet<HierarchicalDeterministicPublicKey>,
+                        >>();
+                    (key, value)
+                })
+                .collect::<DenseKeyStorage>(),
+        )
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, derive_more::Display, derive_more::FromStr)]
+#[derive(
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Hash,
+    derive_more::Display,
+    derive_more::FromStr,
+    SerializeDisplay,
+    DeserializeFromStr,
+)]
 pub struct FactorSourceIDFromHashDenseKey(FactorSourceIDFromHash);
+
+impl From<FactorSourceIDFromHash> for FactorSourceIDFromHashDenseKey {
+    fn from(value: FactorSourceIDFromHash) -> Self {
+        Self(value)
+    }
+}
+impl From<FactorSourceIDFromHashDenseKey> for FactorSourceIDFromHash {
+    fn from(value: FactorSourceIDFromHashDenseKey) -> Self {
+        value.0
+    }
+}
 
 impl FactorInstancesCache {
     pub fn clone_snapshot(&self) -> Self {
@@ -131,7 +203,7 @@ impl FactorInstancesCache {
     }
 
     pub fn serializable_snapshot(&self) -> FactorInstancesCacheSnapshot {
-        FactorInstancesCacheSnapshot(self.map.read().unwrap().clone())
+        FactorInstancesCacheSnapshot::from(self.map.read().unwrap().clone())
     }
 
     fn update_with<F, R>(&self, mutate: F) -> Result<R>
@@ -577,12 +649,10 @@ mod tests {
             CAP26KeyKind::TransactionSigning,
             KeySpace::Unsecurified { is_hardened: true },
         );
-        println!("🐶 json of index agnostic path");
         assert_json_value_eq_after_roundtrip(
             &index_agnostic_path,
             json!("1H/525H/1460H/H?"),
         );
-        println!("🐱🐶 SUCCESS json of index agnostic path");
         let inner = Inner::kv(index_agnostic_path, instances);
 
         assert_eq_after_json_roundtrip(
@@ -621,12 +691,14 @@ mod tests {
         );
 
         let storage = Storage::kv(element.factor_source_id, inner);
+        let cache_snapshot =
+            FactorInstancesCacheSnapshot::from(storage.clone());
 
         assert_eq_after_json_roundtrip(
-            &inner,
+            &cache_snapshot,
             r#"
             {
-                "f": {
+                "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a": {
                     "1H/525H/1460H/H?": [
                         {
                             "badge": {
@@ -658,7 +730,6 @@ mod tests {
             }
             "#,
         );
-
     }
 
     #[test]
@@ -709,18 +780,64 @@ mod tests {
             .unwrap());
 
         let serializable = sut.serializable_snapshot();
-        println!(
-            "\n🐶🐶🐶🐶🐶🐶🐶\n>>>\n{}\n<<<\n",
-            serde_json::to_string_pretty(&serializable).unwrap()
-        );
+        let json = serde_json::to_value(&serializable).unwrap();
+        let and_back: FactorInstancesCacheSnapshot =
+            serde_json::from_value(json).unwrap();
+        assert_eq!(serializable, and_back);
+
         assert_eq_after_json_roundtrip(
             &serializable,
             r#"
-            [
-            "apa": {
-				"key": "value"
+            {
+              "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a": {
+                "1H/525H/1460H/H?": [
+                  {
+                    "publicKey": {
+                      "curve": "curve25519",
+                      "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                    },
+                    "derivationPath": {
+                      "scheme": "cap26",
+                      "path": "m/44H/1022H/1H/525H/1460H/0H"
+                    }
+                  },
+                  {
+                    "publicKey": {
+                      "curve": "curve25519",
+                      "compressedData": "543ece3944963391882cf59e8e5bd5f9a0d5669c7e5b9f5a32fc7e7925464d8f"
+                    },
+                    "derivationPath": {
+                      "scheme": "cap26",
+                      "path": "m/44H/1022H/1H/525H/1460H/2H"
+                    }
+                  }
+                ]
+              },
+              "ledgerHQHardwareWallet:ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b": {
+                "1H/525H/1460H/S?": [
+                  {
+                    "publicKey": {
+                      "curve": "curve25519",
+                      "compressedData": "92cd6838cd4e7b0523ed93d498e093f71139ffd5d632578189b39a26005be56b"
+                    },
+                    "derivationPath": {
+                      "scheme": "cap26",
+                      "path": "m/44H/1022H/1H/525H/1460H/0S"
+                    }
+                  },
+                  {
+                    "publicKey": {
+                      "curve": "curve25519",
+                      "compressedData": "d5c14836f71268aca2df8c560244747277b8ad268a619b18f1c6dbfb6a93f37f"
+                    },
+                    "derivationPath": {
+                      "scheme": "cap26",
+                      "path": "m/44H/1022H/1H/525H/1460H/2S"
+                    }
+                  }
+                ]
+              }
             }
-            ]
             "#,
         );
     }
