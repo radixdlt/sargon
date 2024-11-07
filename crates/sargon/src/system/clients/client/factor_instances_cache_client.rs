@@ -161,6 +161,8 @@ impl FactorInstancesCacheClient {
 
 #[cfg(test)]
 mod tests {
+    use sbor::prelude::indexmap::IndexMap;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -244,6 +246,30 @@ mod tests {
         assert_eq!(
             poly,
             CachedInstancesWithQuantitiesOutcome::Satisfied(satisfied)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_insert_all() {
+        let file_system = Arc::new(FileSystemClient::in_memory());
+        let sut = SUT::new(file_system);
+
+        let fs = FactorSourceIDFromHash::sample_at(0);
+        sut.insert_all(IndexMap::kv(fs, FactorInstances::sample()))
+            .await
+            .unwrap();
+
+        let max = sut
+            .max_index_for(
+                fs,
+                DerivationPreset::AccountMfa
+                    .index_agnostic_path_on_network(NetworkID::Mainnet),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            max.unwrap(),
+            HDPathComponent::Securified(SecurifiedU30::ONE)
         );
     }
 }
