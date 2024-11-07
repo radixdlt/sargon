@@ -55,7 +55,7 @@ impl SargonOS {
             );
         }
 
-        // Get the transaction preview
+        // Get the execution summary
         let execution_summary = self
             .get_transaction_execution_summary(
                 gateway_client,
