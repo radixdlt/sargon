@@ -36,12 +36,12 @@ xcode-select --install
 
 Or install `Xcode` from App Store
 
-After installing, you should run the following command to verify the SDK path is set to the Xcode app.
+After installing, you should run the following command to verify the SDK path is set to the Xcode app under `Applications`.
 ```sh
 $ xcrun --show-sdk-path
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 ```
-If it doesn't point to the expected path, make sure you have the PATH exported on your profile (e.g. `.zshrc`):
+If it doesn't point to the expected path (and instead points to something like `/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk`), make sure you have the PATH exported on your profile (e.g. `.zshrc`):
 ```
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 ```
