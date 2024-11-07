@@ -16,7 +16,7 @@ impl VirtualEntityCreatingInstanceProvider {
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
     pub async fn for_account_veci(
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -24,7 +24,7 @@ impl VirtualEntityCreatingInstanceProvider {
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         Self::for_entity_veci(
             CAP26EntityKind::Account,
-            cache,
+            cache_client,
             profile,
             factor_source,
             network_id,
@@ -47,7 +47,7 @@ impl VirtualEntityCreatingInstanceProvider {
     /// and we are always appending to the end.
     pub async fn for_many_account_vecis(
         count: usize,
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -56,7 +56,7 @@ impl VirtualEntityCreatingInstanceProvider {
         Self::for_many_entity_vecis(
             count,
             CAP26EntityKind::Account,
-            cache,
+            cache_client,
             profile,
             factor_source,
             network_id,
@@ -76,7 +76,7 @@ impl VirtualEntityCreatingInstanceProvider {
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
     pub async fn for_persona_veci(
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -84,7 +84,7 @@ impl VirtualEntityCreatingInstanceProvider {
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         Self::for_entity_veci(
             CAP26EntityKind::Identity,
-            cache,
+            cache_client,
             profile,
             factor_source,
             network_id,
@@ -107,7 +107,7 @@ impl VirtualEntityCreatingInstanceProvider {
     /// and we are always appending to the end.
     pub async fn for_many_persona_vecis(
         count: usize,
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -116,7 +116,7 @@ impl VirtualEntityCreatingInstanceProvider {
         Self::for_many_entity_vecis(
             count,
             CAP26EntityKind::Identity,
-            cache,
+            cache_client,
             profile,
             factor_source,
             network_id,
@@ -137,7 +137,7 @@ impl VirtualEntityCreatingInstanceProvider {
     /// and we are always appending to the end.
     pub async fn for_entity_veci(
         entity_kind: CAP26EntityKind,
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -146,7 +146,7 @@ impl VirtualEntityCreatingInstanceProvider {
         Self::for_many_entity_vecis(
             1,
             entity_kind,
-            cache,
+            cache_client,
             profile,
             factor_source,
             network_id,
@@ -170,7 +170,7 @@ impl VirtualEntityCreatingInstanceProvider {
     pub async fn for_many_entity_vecis(
         count: usize,
         entity_kind: CAP26EntityKind,
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -181,7 +181,7 @@ impl VirtualEntityCreatingInstanceProvider {
             network_id,
             IndexSet::just(factor_source.clone()),
             profile,
-            cache,
+            cache_client,
             interactors,
         );
         println!("🔮 VirtualEntityCreatingInstanceProvider proivder created");
@@ -217,10 +217,10 @@ mod tests {
     ) {
         let network = NetworkID::Mainnet;
         let bdfs = FactorSource::sample();
-        let mut cache = FactorInstancesCache::default();
+        let cache_client = FactorInstancesCacheClient::in_memory();
 
         let outcome = Sut::for_persona_veci(
-            &mut cache,
+            &cache_client,
             None,
             bdfs.clone(),
             network,
@@ -257,10 +257,14 @@ mod tests {
             .unwrap()
         );
 
-        cache.assert_is_full(network, bdfs.id_from_hash());
+        cache_client
+            .assert_is_full(network, bdfs.id_from_hash())
+            .await;
 
-        let cached = cache
+        let cached = cache_client
             .peek_all_instances_of_factor_source(bdfs.id_from_hash())
+            .await
+            .unwrap()
             .unwrap();
 
         let persona_veci_paths = cached
@@ -312,10 +316,9 @@ mod tests {
     ) {
         let network = NetworkID::Mainnet;
         let bdfs = FactorSource::sample();
-        let mut cache = FactorInstancesCache::default();
-
+        let cache_client = FactorInstancesCacheClient::in_memory();
         let outcome = Sut::for_account_veci(
-            &mut cache,
+            &cache_client,
             None,
             bdfs.clone(),
             network,
@@ -352,10 +355,14 @@ mod tests {
             .unwrap()
         );
 
-        cache.assert_is_full(network, bdfs.id_from_hash());
+        cache_client
+            .assert_is_full(network, bdfs.id_from_hash())
+            .await;
 
-        let cached = cache
+        let cached = cache_client
             .peek_all_instances_of_factor_source(bdfs.id_from_hash())
+            .await
+            .unwrap()
             .unwrap();
 
         let account_veci_paths = cached
@@ -515,7 +522,7 @@ mod tests {
         // lets create another account (same network, same factor source)
 
         let outcome = Sut::for_account_veci(
-            &mut cache,
+            &cache_client,
             None,
             bdfs.clone(),
             network,
@@ -543,10 +550,14 @@ mod tests {
             .unwrap()
         );
 
-        assert!(!cache.is_full(network, bdfs.id_from_hash())); // not full anymore, since we just used a veci
+        let is_cache_full =
+            cache_client.is_full(network, bdfs.id_from_hash()).await;
+        assert!(!is_cache_full); // not full anymore, since we just used a veci
 
-        let cached = cache
+        let cached = cache_client
             .peek_all_instances_of_factor_source(bdfs.id_from_hash())
+            .await
+            .unwrap()
             .unwrap();
 
         let account_veci_paths = cached
@@ -597,7 +608,7 @@ mod tests {
         // not needed.
         let outcome = Sut::for_many_account_vecis(
             29,
-            &mut cache,
+            &cache_client,
             None,
             bdfs.clone(),
             network,
@@ -612,8 +623,10 @@ mod tests {
         assert_eq!(outcome.debug_was_cached.len(), 0);
         assert_eq!(outcome.debug_was_derived.len(), 0);
 
-        let cached = cache
+        let cached = cache_client
             .peek_all_instances_of_factor_source(bdfs.id_from_hash())
+            .await
+            .unwrap()
             .unwrap();
 
         assert!(
@@ -631,7 +644,7 @@ mod tests {
         // we should NOT derive more instances for Identity Veci, Identity MFA and Account MFA, since
         // that cache is already full.
         let outcome = Sut::for_account_veci(
-            &mut cache,
+            &cache_client,
             None,
             bdfs.clone(),
             network,

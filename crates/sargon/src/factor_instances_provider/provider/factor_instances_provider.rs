@@ -25,7 +25,7 @@ pub struct FactorInstancesProvider<'a, 'b> {
     network_id: NetworkID,
     factor_sources: IndexSet<FactorSource>,
     profile: Option<&'b Profile>,
-    cache: &'a mut FactorInstancesCache,
+    cache_client: &'a FactorInstancesCacheClient,
     interactors: Arc<dyn KeysDerivationInteractors>,
 }
 
@@ -37,14 +37,14 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
         network_id: NetworkID,
         factor_sources: IndexSet<FactorSource>,
         profile: impl Into<Option<&'b Profile>>,
-        cache: &'a mut FactorInstancesCache,
+        cache_client: &'a FactorInstancesCacheClient,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Self {
         Self {
             network_id,
             factor_sources,
             profile: profile.into(),
-            cache,
+            cache_client,
             interactors,
         }
     }
@@ -66,7 +66,7 @@ impl CacheFiller {
     /// Saves FactorInstances into the mutable `cache` parameter and returns a
     /// copy of the instances.
     pub async fn for_new_factor_source(
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: Option<&Profile>,
         factor_source: FactorSource,
         network_id: NetworkID, // typically mainnet
@@ -76,7 +76,7 @@ impl CacheFiller {
             network_id,
             IndexSet::just(factor_source.clone()),
             profile,
-            cache,
+            cache_client,
             interactors,
         );
         let quantities = IndexMap::kv(
@@ -88,7 +88,7 @@ impl CacheFiller {
         );
         let derived = provider.derive_more(quantities).await?;
 
-        cache.insert(&derived);
+        cache_client.insert_all(&derived).await?;
 
         let derived =
             derived.get(&factor_source.id_from_hash()).unwrap().clone();
@@ -114,11 +114,14 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
         println!("🐉 provider: reading from cache");
-        let cached = self.cache.get_poly_factor_with_quantities(
-            &factor_sources.iter().map(|f| f.id_from_hash()).collect(),
-            &quantified_derivation_preset,
-            network_id,
-        )?;
+        let cached = self
+            .cache_client
+            .get_poly_factor_with_quantities(
+                &factor_sources.iter().map(|f| f.id_from_hash()).collect(),
+                &quantified_derivation_preset,
+                network_id,
+            )
+            .await?;
         println!("🐉 provider: read from cache: {:?}", cached);
 
         match cached {
@@ -127,7 +130,7 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
             ) => {
                 // Remove the instances which are going to be used from the cache
                 // since we only peeked at them.
-                self.cache.delete(&enough_instances);
+                self.cache_client.delete(&enough_instances).await?;
                 Ok(InternalFactorInstancesProviderOutcome::satisfied_by_cache(
                     enough_instances,
                 ))
@@ -181,8 +184,10 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
             pf_to_use_directly
         );
 
-        self.cache.delete(&pf_found_in_cache_leq_requested);
-        self.cache.insert(&pf_to_cache);
+        self.cache_client
+            .delete(&pf_found_in_cache_leq_requested)
+            .await?;
+        self.cache_client.insert_all(&pf_to_cache).await?;
 
         let outcome = InternalFactorInstancesProviderOutcome::transpose(
             pf_to_cache,
@@ -287,10 +292,11 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
         let network_id = self.network_id;
 
         println!("🤡 derive more: creating next index assigner",);
+        let cache_snapshot = self.cache_client.snapshot().await?;
         let next_index_assigner = NextDerivationEntityIndexAssigner::new(
             network_id,
             self.profile,
-            self.cache.clone_snapshot(),
+            cache_snapshot,
         );
 
         println!("🤡 derive more: created next index assigner",);
@@ -303,7 +309,7 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
                     .map(|(derivation_preset, qty)| {
                         // `qty` many paths
                         let paths = (0..qty)
-                            .map(|offset| {
+                            .map(|_| {
                                 // println!("🤡 derive more: creating next...offset: {:?}", offset);
                                 let index_agnostic_path = derivation_preset
                                     .index_agnostic_path_on_network(network_id);

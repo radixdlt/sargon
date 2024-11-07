@@ -16,14 +16,14 @@ impl SecurifyEntityFactorInstancesProvider {
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
     pub async fn for_account_mfa<'a>(
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: &'a Profile,
         matrix_of_factor_sources: MatrixOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<FactorInstancesProviderOutcome> {
         Self::for_entity_mfa::<Account>(
-            cache,
+            cache_client,
             profile,
             matrix_of_factor_sources,
             account_addresses,
@@ -44,14 +44,14 @@ impl SecurifyEntityFactorInstancesProvider {
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
     pub async fn for_persona_mfa<'a>(
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: &'a Profile,
         matrix_of_factor_sources: MatrixOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<FactorInstancesProviderOutcome> {
         Self::for_entity_mfa::<Persona>(
-            cache,
+            cache_client,
             profile,
             matrix_of_factor_sources,
             persona_addresses,
@@ -72,7 +72,7 @@ impl SecurifyEntityFactorInstancesProvider {
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
     pub async fn for_entity_mfa<'a, E: IsEntity>(
-        cache: &mut FactorInstancesCache,
+        cache_client: &FactorInstancesCacheClient,
         profile: &'a Profile,
         matrix_of_factor_sources: MatrixOfFactorSources,
         addresses_of_entities: IndexSet<E::Address>,
@@ -110,7 +110,7 @@ impl SecurifyEntityFactorInstancesProvider {
             network_id,
             factor_sources_to_use,
             profile,
-            cache,
+            cache_client,
             interactors,
         );
 
@@ -137,8 +137,10 @@ mod tests {
     async fn mfa_panics_if_entities_empty() {
         let fs = FactorSource::sample_at(0);
         let a = Account::sample();
+        let cache_client = FactorInstancesCacheClient::in_memory();
+
         let _ = Sut::for_account_mfa(
-            &mut FactorInstancesCache::default(),
+            &cache_client,
             &Profile::sample_from([fs.clone()], [&a], []),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
@@ -161,8 +163,10 @@ mod tests {
     async fn mfa_panics_if_entity_unknown() {
         let fs = FactorSource::sample_at(0);
         let a = Account::sample();
+        let cache_client = FactorInstancesCacheClient::in_memory();
+
         let _ = Sut::for_account_mfa(
-            &mut FactorInstancesCache::default(),
+            &cache_client,
             &Profile::sample_from([fs.clone()], [&a], []),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
@@ -213,8 +217,10 @@ mod tests {
         );
 
         assert_eq!(profile.networks.len(), 2);
+        let cache_client = FactorInstancesCacheClient::in_memory();
+
         let _ = Sut::for_account_mfa(
-            &mut FactorInstancesCache::default(),
+            &cache_client,
             &profile,
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])

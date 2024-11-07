@@ -85,6 +85,11 @@ impl FactorInstancesCacheClient {
         .await
     }
 
+    pub async fn snapshot(&self) -> Result<FactorInstancesCache> {
+        self.access_cache_init_if_needed(|cache| Ok(cache.clone_snapshot()))
+            .await
+    }
+
     /// Inserts all instance in `per_factor`.
     pub async fn insert_all(
         &self,
@@ -142,6 +147,24 @@ impl FactorInstancesCacheClient {
         })
         .await
     }
+
+    /// Reads out the instance of `factor_source_id` without mutating the cache.
+    pub async fn peek_all_instances_of_factor_source(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Result<Option<IndexMap<IndexAgnosticPath, FactorInstances>>> {
+        self.access_cache_init_if_needed(|cache| {
+            Ok(cache.peek_all_instances_of_factor_source(factor_source_id))
+        })
+        .await
+    }
+
+    pub async fn total_number_of_factor_instances(&self) -> Result<usize> {
+        self.access_cache_init_if_needed(|cache| {
+            Ok(cache.total_number_of_factor_instances())
+        })
+        .await
+    }
 }
 
 #[cfg(test)]
@@ -157,10 +180,41 @@ impl FactorInstancesCacheClient {
         )
         .await
     }
+
+    pub fn in_memory() -> Self {
+        Self {
+            file_system_client: Arc::new(FileSystemClient::in_memory()),
+        }
+    }
+
+    /// Queries the cache to see if the cache is full for factor_source_id for
+    /// each DerivationPreset
+    pub async fn is_full(
+        &self,
+        network_id: NetworkID,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> bool {
+        self.access_cache_init_if_needed(|cache| {
+            Ok(cache.is_full(network_id, factor_source_id))
+        })
+        .await
+        .unwrap()
+    }
+
+    pub async fn assert_is_full(
+        &self,
+        network_id: NetworkID,
+        factor_source_id: FactorSourceIDFromHash,
+    ) {
+        let is_full = self.is_full(network_id, factor_source_id).await;
+        assert!(is_full);
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::any::Any;
+
     use sbor::prelude::indexmap::IndexMap;
 
     use super::*;
@@ -246,6 +300,13 @@ mod tests {
         assert_eq!(
             poly,
             CachedInstancesWithQuantitiesOutcome::Satisfied(satisfied)
+        );
+
+        let snap_1 = sut1.snapshot().await.unwrap();
+        let snap_2 = sut2.snapshot().await.unwrap();
+        assert_eq!(
+            snap_1.serializable_snapshot(),
+            snap_2.serializable_snapshot(),
         );
     }
 
