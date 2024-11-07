@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::time::Duration;
 
 /// An enum that represents the different ways a subintent can expire.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -34,6 +35,28 @@ impl HasSampleValues for DappToWalletInteractionSubintentExpiration {
         Self::AfterDelay(
             DappToWalletInteractionSubintentExpireAfterDelay::sample(),
         )
+    }
+}
+
+impl DappToWalletInteractionSubintentExpiration {
+    pub fn get_status(&self) -> DappToWalletInteractionSubintentExpirationStatus {
+        match self {
+            Self::AtTime(expiration) => {
+                let now = Timestamp::now_utc();
+                let in_thirty_seconds = now.add(Duration::from_secs(30));
+                if expiration.unix_timestamp_seconds < now {
+                    DappToWalletInteractionSubintentExpirationStatus::Expired
+                } else if expiration.unix_timestamp_seconds < in_thirty_seconds
+                {
+                    DappToWalletInteractionSubintentExpirationStatus::TooCloseToExpiration
+                } else {
+                    DappToWalletInteractionSubintentExpirationStatus::Valid
+                }
+            }
+            Self::AfterDelay(expiration) => {
+                DappToWalletInteractionSubintentExpirationStatus::Valid
+            }
+        }
     }
 }
 
@@ -76,5 +99,59 @@ mod tests {
         }
         "#,
         );
+    }
+
+    #[test]
+    fn status() {
+        let now = Timestamp::now_utc();
+
+        // AtTime which has already expired
+        let now = Timestamp::now_utc();
+        let past = now.sub(Duration::from_secs(30));
+        let expiration = SUT::AtTime(past.into());
+        assert_eq!(
+            expiration.get_status(),
+            DappToWalletInteractionSubintentExpirationStatus::Expired
+        );
+
+        // AtTime which is less than 30 seconds from expiration
+        let in_ten_seconds = now.add(Duration::from_secs(10));
+        let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
+            DappToWalletInteractionSubintentExpireAtTime {
+                unix_timestamp_seconds: in_ten_seconds,
+            },
+        );
+        assert_eq!(
+            expiration.get_status(),
+            DappToWalletInteractionSubintentExpirationStatus::TooCloseToExpiration
+        );
+
+        // AtTime which is more than 30 seconds from expiration
+        let in_forty_seconds = now.add(Duration::from_secs(40));
+        let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
+            DappToWalletInteractionSubintentExpireAtTime {
+                unix_timestamp_seconds: in_forty_seconds,
+            },
+        );
+        assert_eq!(
+            expiration.get_status(),
+            DappToWalletInteractionSubintentExpirationStatus::Valid
+        );
+
+        // AfterDelay is always Valid, either in 10 minutes
+        let expiration = SUT::AfterDelay(600.into());
+        assert_eq!(
+            expiration.get_status(),
+            DappToWalletInteractionSubintentExpirationStatus::Valid
+        );
+
+        // .. or in 15 seconds
+        let expiration = SUT::AfterDelay(15.into());
+        assert_eq!(
+            expiration.get_status(),
+            DappToWalletInteractionSubintentExpirationStatus::Valid
+        );
+
+
     }
 }
