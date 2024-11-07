@@ -108,7 +108,16 @@ impl SargonOS {
 
         let pre_auth_to_review = match subintent_manifest.as_enclosed() {
             Some(manifest) => {
-                let manifest_string = manifest.manifest_string();
+                let mut instructions = manifest.instructions;
+                /// The ASSERT_WORKTOP_IS_EMPTY instruction, as it is a V2 instruction, is not allowed in the V1 manifest.
+                instructions.instructions.remove(0);
+                let manifest_v2 = TransactionManifestV2::with_instructions_and_blobs_and_children(
+                    instructions,
+                    blobs.clone(),
+                    ChildIntents::default(),
+                );
+
+                let manifest_string = manifest_v2.manifest_string();
                 let network_definition = network_id.network_definition();
                 let scrypto_manifest_v1: ScryptoTransactionManifest =
                     scrypto_compile_manifest(
@@ -713,7 +722,7 @@ mod transaction_preview_analysis_tests {
         )
     }
 
-    // Disabled temporary as v1 anaysis is used for now.
+    // Disabled temporary as v1 analysis is used for now.
     // #[actix_rt::test]
     // async fn analyse_open_enclosed_auth_preview() {
     //     let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
