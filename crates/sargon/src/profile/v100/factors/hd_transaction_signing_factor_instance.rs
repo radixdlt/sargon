@@ -49,7 +49,7 @@ pub struct HDFactorInstanceTransactionSigning<T: IsEntityPath> {
 }
 
 impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
-    fn try_from_factor_instance(
+    pub fn try_from_factor_instance(
         value: HierarchicalDeterministicFactorInstance,
     ) -> Result<Self> {
         T::try_from(value

@@ -9,15 +9,42 @@ impl Profile {
     ///
     /// Returns a tuple `(FactorSourceID, Account)` where FactorSourceID is the ID
     /// of the FactorSource used to create the account.
-    pub async fn create_unsaved_account(
+    pub async fn create_unsaved_account_with_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
         factor_instances_cache_client: &FactorInstancesCacheClient,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(FactorSourceID, Account)> {
+        let bdfs = self.bdfs();
+        self.create_unsaved_account_with_factor_source(
+            bdfs.into(),
+            network_id,
+            name,
+            factor_instances_cache_client,
+            key_derivation_interactors,
+        )
+        .await
+    }
+
+    /// Creates a new non securified account **WITHOUT** adding it to Profile, using the *main* "Babylon"
+    /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
+    ///
+    /// If you want to add it to Profile, call `add_account(account)`
+    ///
+    /// Returns a tuple `(FactorSourceID, Account)` where FactorSourceID is the ID
+    /// of the FactorSource used to create the account.
+    pub async fn create_unsaved_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+        factor_instances_cache_client: &FactorInstancesCacheClient,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+    ) -> Result<(FactorSourceID, Account)> {
         let (factor_source_id, accounts) = self
-            .create_unsaved_accounts(
+            .create_unsaved_accounts_with_factor_source(
+                factor_source,
                 network_id,
                 1,
                 factor_instances_cache_client,
@@ -41,8 +68,29 @@ impl Profile {
     ///
     /// Returns a tuple `(FactorSourceID, Accounts)` where FactorSourceID is the ID
     /// of the FactorSource used to create the accounts.
-    pub async fn create_unsaved_accounts(
+    pub async fn create_unsaved_accounts_with_bdfs(
         &self,
+        network_id: NetworkID,
+        count: u16,
+        factor_instances_cache_client: &FactorInstancesCacheClient,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+    ) -> Result<(FactorSourceID, Accounts)> {
+        let bdfs = self.bdfs();
+        self.create_unsaved_accounts_with_factor_source(
+            bdfs.into(),
+            network_id,
+            count,
+            factor_instances_cache_client,
+            key_derivation_interactors,
+            get_name,
+        )
+        .await
+    }
+
+    pub async fn create_unsaved_accounts_with_factor_source(
+        &self,
+        factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: &FactorInstancesCacheClient,
@@ -57,15 +105,14 @@ impl Profile {
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
-        let bdfs = self.bdfs();
-        let fsid = bdfs.factor_source_id();
+        let fsid = factor_source.factor_source_id();
 
         let outcome =
             VirtualEntityCreatingInstanceProvider::for_many_account_vecis(
                 count,
                 factor_instances_cache_client,
                 Some(self),
-                bdfs.into(),
+                factor_source,
                 network_id,
                 key_derivation_interactors,
             )
@@ -124,7 +171,8 @@ mod tests {
         );
 
         let (_, accounts) = sut
-            .create_unsaved_accounts(
+            .create_unsaved_accounts_with_factor_source(
+                fs.factor_source.clone().into(),
                 NetworkID::Mainnet,
                 3,
                 &cache_client,

@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use crate::prelude::*;
 
 /// If we wanna create an Olympia DeviceFactorSource or
@@ -182,8 +184,9 @@ impl SargonOS {
     /// SecureStorage fails.
     pub async fn load_private_device_factor_source_by_id(
         &self,
-        id: &FactorSourceIDFromHash,
+        id: impl Borrow<FactorSourceIDFromHash>,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
+        let id = id.borrow();
         let device_factor_source = self
             .profile_state_holder
             .try_access_profile_with(|p| p.device_factor_source_by_id(id))?;
@@ -378,6 +381,139 @@ impl SargonOS {
             // tarpaulin will incorrectly flag next line is missed
             .await
     }
+
+    fn maybe_keys_derivation_interactors(
+        &self,
+    ) -> Option<Arc<dyn KeysDerivationInteractors>> {
+        self.interactors
+            .borrow()
+            .as_ref()
+            .map(|i| i.key_derivation.clone())
+    }
+
+    pub(crate) fn keys_derivation_interactors(
+        &self,
+    ) -> Arc<dyn KeysDerivationInteractors> {
+        self.maybe_keys_derivation_interactors()
+            .expect("No interactors")
+    }
+}
+
+#[allow(unused)]
+#[cfg(test)]
+impl SargonOS {
+    pub(crate) async fn init_keys_derivation_interactor_if_needed(
+        &self,
+    ) -> Result<Arc<dyn KeysDerivationInteractors>> {
+        if let Some(interactors) = self.maybe_keys_derivation_interactors() {
+            return Ok(interactors);
+        }
+
+        let bdfs = self.bdfs()?;
+        let fsid = bdfs.id_from_hash();
+        let private_bdfs =
+            self.load_private_device_factor_source_by_id(fsid).await?;
+        let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
+            Arc::new(
+                TestDerivationInteractors::mono_and_poly_with_extra_mnemonics(
+                    IndexMap::kv(fsid, private_bdfs.mnemonic_with_passphrase),
+                ),
+            );
+        let interactors = Interactors::new(derivation_interactor.clone());
+        self.interactors.borrow_mut().replace(interactors);
+        Ok(derivation_interactor)
+    }
+
+    pub(crate) async fn clear_cache(&self) {
+        println!("💣 CLEAR CACHE");
+        self.clients.factor_instances_cache.clear().await.unwrap();
+    }
+
+    pub(crate) async fn cache_snapshot(&self) -> FactorInstancesCache {
+        self.clients
+            .factor_instances_cache
+            .snapshot()
+            .await
+            .unwrap()
+    }
+
+    // pub(super) async fn new_mainnet_account_with_bdfs(
+    //     &mut self,
+    //     name: impl AsRef<str>,
+    // ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+    //     self.new_account_with_bdfs(NetworkID::Mainnet, name).await
+    // }
+
+    // pub(super) async fn new_account_with_bdfs(
+    //     &mut self,
+    //     network: NetworkID,
+    //     name: impl AsRef<str>,
+    // ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+    //     let bdfs = self.bdfs().unwrap();
+    //     self.new_account(bdfs.into(), network, name).await
+    // }
+
+    // pub(super) async fn new_account(
+    //     &mut self,
+    //     factor_source: FactorSource,
+    //     network: NetworkID,
+    //     name: impl AsRef<str>,
+    // ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+    //     // self.new_entity(factor_source, network, name).await
+    //     self.create_and_save_new_account(network_id, name)
+    // }
+    /*
+    pub(super) async fn new_entity<E: IsEntity>(
+        &mut self,
+        factor_source: FactorSource,
+        network: NetworkID,
+        name: impl AsRef<str>,
+    ) -> Result<(E, FactorInstancesProviderOutcomeForFactor)>
+    {
+        let interactors = self
+            .init_keys_derivation_interactor_if_needed()
+            .await
+            .unwrap();
+        let profile_snapshot = self.profile()?;
+        let outcome = VirtualEntityCreatingInstanceProvider::for_entity_veci(
+            E::entity_kind(),
+            &self.clients.factor_instances_cache,
+            Some(&profile_snapshot),
+            factor_source.clone(),
+            network,
+            interactors,
+        )
+        .await
+        .unwrap();
+
+        let outcome_for_factor = outcome;
+
+        let instances_to_use_directly =
+            outcome_for_factor.clone().to_use_directly.clone();
+
+        assert_eq!(instances_to_use_directly.len(), 1);
+        let instance = instances_to_use_directly.first().unwrap();
+        let veci = HDFactorInstanceTransactionSigning::<E::Path>::try_from_factor_instance(instance)?;
+        let name = name.as_ref().to_owned();
+        let display_name = DisplayName::new(name)?;
+        let entity = E::with_veci_and_name(veci, display_name);
+
+
+        // self.add_account(account)
+        // let security_state = EntitySecurityState::Unsecured(instance);
+        // let entity =
+        //     E::new(name, address, security_state, DepositRule::default());
+        // self.profile
+        //     .try_write()
+        //     .unwrap()
+        //     .insert_entities(IndexSet::just(Into::<AccountOrPersona>::into(
+        //         entity.clone(),
+        //     )))
+        //     .unwrap();
+
+        // Ok((entity, outcome_for_factor))
+    }
+    */
 }
 
 #[cfg(test)]

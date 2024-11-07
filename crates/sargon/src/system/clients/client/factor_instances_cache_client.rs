@@ -73,6 +73,14 @@ impl FactorInstancesCacheClient {
     }
 }
 
+#[cfg(test)]
+impl FactorInstancesCacheClient {
+    pub async fn clear(&self) -> Result<()> {
+        self.save_to_file(FactorInstancesCacheSnapshot::default())
+            .await
+    }
+}
+
 impl FactorInstancesCacheClient {
     pub async fn insert_for_factor(
         &self,

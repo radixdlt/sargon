@@ -1,4 +1,4 @@
-use std::sync::Once;
+use std::{cell::Cell, sync::Once};
 
 use crate::prelude::*;
 
@@ -13,7 +13,7 @@ pub struct SargonOS {
     pub clients: Clients,
 
     /// Optional so that we can defer integration with hosts...
-    pub interactors: Option<Interactors>,
+    pub interactors: RefCell<Option<Interactors>>,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -67,7 +67,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
-            interactors: None,
+            interactors: RefCell::new(None),
         });
         os.clients
             .profile_state_change

@@ -82,7 +82,6 @@ impl IsBaseEntity for Persona {
         self.flags.clone()
     }
 }
-impl IsEntity for Persona {}
 
 impl TryFrom<AccountOrPersona> for Persona {
     type Error = CommonError;
@@ -99,6 +98,31 @@ impl TryFrom<AccountOrPersona> for Persona {
     }
 }
 
+impl IsEntity for Persona {
+    type Path = IdentityPath;
+    fn with_veci_and_name(
+        veci: HDFactorInstanceTransactionSigning<Self::Path>,
+        name: DisplayName,
+    ) -> Self {
+        let address =
+            IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
+                veci.clone(),
+            );
+        Self {
+            network_id: veci.network_id(),
+            address,
+            display_name: name,
+            security_state:
+                UnsecuredEntityControl::with_entity_creating_factor_instance(
+                    veci,
+                )
+                .into(),
+            flags: EntityFlags::default(),
+            persona_data: PersonaData::default(),
+        }
+    }
+}
+
 impl Persona {
     /// Creates a new `Persona`, if `persona_data` is `None`, an empty object will be created.
     pub fn new(
@@ -106,22 +130,14 @@ impl Persona {
         display_name: DisplayName,
         persona_data: impl Into<Option<PersonaData>>,
     ) -> Self {
-        let address =
-            IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
-                persona_creating_factor_instance.clone(),
-            );
-        Self {
-            network_id: persona_creating_factor_instance.network_id(),
-            address,
+        let mut self_ = Self::with_veci_and_name(
+            persona_creating_factor_instance,
             display_name,
-            security_state:
-                UnsecuredEntityControl::with_entity_creating_factor_instance(
-                    persona_creating_factor_instance,
-                )
-                .into(),
-            flags: EntityFlags::default(),
-            persona_data: persona_data.into().unwrap_or_default(),
+        );
+        if let Some(persona_data) = persona_data.into() {
+            self_.persona_data = persona_data;
         }
+        self_
     }
 }
 

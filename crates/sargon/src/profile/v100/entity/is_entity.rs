@@ -42,4 +42,10 @@ impl<T: IsBaseEntity> IsNetworkAware for T {
     }
 }
 
-pub trait IsEntity: IsBaseEntity + HasEntityKind {}
+pub trait IsEntity: IsBaseEntity + HasEntityKind {
+    type Path: IsEntityPath;
+    fn with_veci_and_name(
+        veci: HDFactorInstanceTransactionSigning<Self::Path>,
+        name: DisplayName,
+    ) -> Self;
+}

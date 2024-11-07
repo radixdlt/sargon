@@ -92,7 +92,34 @@ impl IsBaseEntity for Account {
         self.flags.clone()
     }
 }
-impl IsEntity for Account {}
+impl IsEntity for Account {
+    type Path = AccountPath;
+    fn with_veci_and_name(
+        veci: HDFactorInstanceTransactionSigning<Self::Path>,
+        name: DisplayName,
+    ) -> Self {
+        let address =
+            AccountAddress::from_hd_factor_instance_virtual_entity_creation(
+                veci.clone(),
+            );
+        let appearance_id = AppearanceID::from_number_of_accounts_on_network(
+            u32::from(veci.path.index().index_in_local_key_space()) as usize,
+        );
+        Self {
+            network_id: veci.network_id(),
+            address,
+            display_name: name,
+            security_state:
+                UnsecuredEntityControl::with_entity_creating_factor_instance(
+                    veci,
+                )
+                .into(),
+            appearance_id,
+            flags: EntityFlags::default(),
+            on_ledger_settings: OnLedgerSettings::default(),
+        }
+    }
+}
 
 impl Account {
     pub fn new(
@@ -100,23 +127,12 @@ impl Account {
         display_name: DisplayName,
         appearance_id: AppearanceID,
     ) -> Self {
-        let address =
-            AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-                account_creating_factor_instance.clone(),
-            );
-        Self {
-            network_id: account_creating_factor_instance.network_id(),
-            address,
+        let mut self_ = Self::with_veci_and_name(
+            account_creating_factor_instance,
             display_name,
-            security_state:
-                UnsecuredEntityControl::with_entity_creating_factor_instance(
-                    account_creating_factor_instance,
-                )
-                .into(),
-            appearance_id,
-            flags: EntityFlags::default(),
-            on_ledger_settings: OnLedgerSettings::default(),
-        }
+        );
+        self_.appearance_id = appearance_id;
+        self_
     }
 }
 
