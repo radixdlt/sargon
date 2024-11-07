@@ -713,39 +713,40 @@ mod transaction_preview_analysis_tests {
         )
     }
 
-    #[actix_rt::test]
-    async fn analyse_open_enclosed_auth_preview() {
-        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
+    // Disabled temporary as v1 anaysis is used for now.
+    // #[actix_rt::test]
+    // async fn analyse_open_enclosed_auth_preview() {
+    //     let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
 
-        let scrypto_subintent_manifest =
-            ScryptoSubintentManifestV2Builder::new_subintent_v2()
-                .assert_worktop_is_empty()
-                .drop_all_proofs()
-                .yield_to_parent(())
-                .build();
+    //     let scrypto_subintent_manifest =
+    //         ScryptoSubintentManifestV2Builder::new_subintent_v2()
+    //             .assert_worktop_is_empty()
+    //             .drop_all_proofs()
+    //             .yield_to_parent(())
+    //             .build();
 
-        let subintent_manifest: SubintentManifest =
-            (scrypto_subintent_manifest, NetworkID::Mainnet)
-                .try_into()
-                .unwrap();
+    //     let subintent_manifest: SubintentManifest =
+    //         (scrypto_subintent_manifest, NetworkID::Mainnet)
+    //             .try_into()
+    //             .unwrap();
 
-        let result = os
-            .analyse_pre_auth_preview(
-                subintent_manifest.manifest_string(),
-                Blobs::default(),
-                Nonce::sample(),
-            )
-            .await
-            .unwrap();
+    //     let result = os
+    //         .analyse_pre_auth_preview(
+    //             subintent_manifest.manifest_string(),
+    //             Blobs::default(),
+    //             Nonce::sample(),
+    //         )
+    //         .await
+    //         .unwrap();
 
-        assert_eq!(
-            result,
-            PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
-                manifest: subintent_manifest.clone(),
-                summary: ExecutionSummary::sample_stokenet(),
-            })
-        )
-    }
+    //     assert_eq!(
+    //         result,
+    //         PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
+    //             manifest: subintent_manifest.clone(),
+    //             summary: ExecutionSummary::sample_stokenet(),
+    //         })
+    //     )
+    // }
 
     async fn prepare_os(
         mock_networking_driver: MockNetworkingDriver,
