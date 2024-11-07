@@ -23,6 +23,14 @@ pub struct FactorSourceIDFromHash {
     pub body: Exactly32Bytes,
 }
 
+impl FromStr for FactorSourceIDFromHash {
+    type Err = CommonError;
+ 
+    fn from_str(s: &str) -> Result<Self> {
+        let parts = s.split(pat)
+    }
+}
+
 impl FactorSourceIDFromHash {
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Exactly32Bytes) -> Self {

@@ -106,15 +106,32 @@ pub type Storage = IndexMap<
     IndexMap<IndexAgnosticPath, FactorInstances>,
 >;
 
-#[derive(Serialize, Deserialize)]
+pub type DenseKeyStorage = IndexMap<
+    FactorSourceIDFromHashDenseKey,
+    IndexMap<IndexAgnosticPath, FactorInstances>,
+>;
+
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct FactorInstancesCacheSnapshot(pub Storage);
+pub struct FactorInstancesCacheSnapshot(pub DenseKeyStorage);
+impl From<Storage> for FactorInstancesCacheSnapshot {
+    fn from(value: Storage) -> Self {
+        todo!()
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, derive_more::Display, derive_more::FromStr)]
+pub struct FactorSourceIDFromHashDenseKey(FactorSourceIDFromHash);
 
 impl FactorInstancesCache {
     pub fn clone_snapshot(&self) -> Self {
         Self {
             map: RwLock::new(self.map.read().unwrap().clone()),
         }
+    }
+
+    pub fn serializable_snapshot(&self) -> FactorInstancesCacheSnapshot {
+        FactorInstancesCacheSnapshot(self.map.read().unwrap().clone())
     }
 
     fn update_with<F, R>(&self, mutate: F) -> Result<R>
@@ -173,18 +190,17 @@ impl FactorInstancesCache {
                     if let Some(last) =
                         existing_for_path.factor_instances().last()
                     {
-                        if instances
+                        let first_new = instances
                             .first()
                             .unwrap()
                             .derivation_path()
                             .index()
-                            .map_to_global_key_space()
-                            != last
-                                .derivation_path()
-                                .index()
-                                .map_to_global_key_space()
-                                + 1
-                        {
+                            .map_to_global_key_space();
+                        let last_existing = last
+                            .derivation_path()
+                            .index()
+                            .map_to_global_key_space();
+                        if first_new != last_existing + 1 {
                             warn!(
                                 "Non-contiguous indices, the index `{}` was skipped!",
                                 last.derivation_path().index().map_to_global_key_space() + 1
@@ -494,6 +510,8 @@ impl FactorInstancesCache {
 #[cfg(test)]
 mod tests {
 
+    use crate::factor_instances_provider::next_index_assigner;
+
     use super::*;
 
     type Sut = FactorInstancesCache;
@@ -523,6 +541,188 @@ mod tests {
         assert!(sut
             .insert_for_factor(&fsid, &FactorInstances::from_iter([fi2]))
             .unwrap());
+    }
+
+    #[test]
+    fn non_contiguous_indices_securified() {
+        let sut = Sut::default();
+        let fsid = FactorSourceIDFromHash::sample_at(0);
+
+        let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Securified(SecurifiedU30::ZERO),
+        );
+        assert!(!sut
+            .insert_for_factor(&fsid, &FactorInstances::from_iter([fi0]))
+            .unwrap());
+        let fi2 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Securified(SecurifiedU30::TWO),
+        );
+        assert!(sut
+            .insert_for_factor(&fsid, &FactorInstances::from_iter([fi2]))
+            .unwrap());
+    }
+
+    #[test]
+    fn test_json_of_inner_collection() {
+        let element = HierarchicalDeterministicFactorInstance::sample();
+        let instances = FactorInstances::from_iter([element.clone()]);
+        type Inner = IndexMap<IndexAgnosticPath, FactorInstances>;
+        let index_agnostic_path = IndexAgnosticPath::new(
+            NetworkID::Mainnet,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::TransactionSigning,
+            KeySpace::Unsecurified { is_hardened: true },
+        );
+        println!("🐶 json of index agnostic path");
+        assert_json_value_eq_after_roundtrip(
+            &index_agnostic_path,
+            json!("1H/525H/1460H/H?"),
+        );
+        println!("🐱🐶 SUCCESS json of index agnostic path");
+        let inner = Inner::kv(index_agnostic_path, instances);
+
+        assert_eq_after_json_roundtrip(
+            &inner,
+            r#"
+            {
+                "1H/525H/1460H/H?": [
+                    {
+                        "badge": {
+			        		"virtualSource": {
+			        			"hierarchicalDeterministicPublicKey": {
+			        				"publicKey": {
+			        					"curve": "curve25519",
+			        					"compressedData":   "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+			        				},
+			        				"derivationPath": {
+			        					"scheme": "cap26",
+			        					"path": "m/44H/1022H/1H/525H/1460H/0H"
+			        				}
+			        			},
+			        			"discriminator": "hierarchicalDeterministicPublicKey"
+			        		},
+			        		"discriminator": "virtualSource"
+			        	},
+			        	"factorSourceID": {
+			        		"fromHash": {
+			        			"kind": "device",
+			        			"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+			        		},
+			        		"discriminator": "fromHash"
+			        	}
+			        }
+                ]
+            }
+            "#,
+        );
+
+        let storage = Storage::kv(element.factor_source_id, inner);
+
+        assert_eq_after_json_roundtrip(
+            &inner,
+            r#"
+            {
+                "f": {
+                    "1H/525H/1460H/H?": [
+                        {
+                            "badge": {
+			            		"virtualSource": {
+			            			"hierarchicalDeterministicPublicKey": {
+			            				"publicKey": {
+			            					"curve": "curve25519",
+			            					"compressedData":       "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+			            				},
+			            				"derivationPath": {
+			            					"scheme": "cap26",
+			            					"path": "m/44H/1022H/1H/525H/1460H/0H"
+			            				}
+			            			},
+			            			"discriminator": "hierarchicalDeterministicPublicKey"
+			            		},
+			            		"discriminator": "virtualSource"
+			            	},
+			            	"factorSourceID": {
+			            		"fromHash": {
+			            			"kind": "device",
+			            			"body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+			            		},
+			            		"discriminator": "fromHash"
+			            	}
+			            }
+                    ]
+                }
+            }
+            "#,
+        );
+
+    }
+
+    #[test]
+    fn json() {
+        let sut = Sut::default();
+        let fsid = FactorSourceIDFromHash::sample_at(0);
+
+        let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(0u32).unwrap(),
+            ),
+        );
+        assert!(!sut
+            .insert_for_factor(&fsid, &FactorInstances::from_iter([fi0]))
+            .unwrap());
+        let fi2 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(2u32).unwrap(),
+            ),
+        );
+
+        assert!(sut
+            .insert_for_factor(&fsid, &FactorInstances::from_iter([fi2]))
+            .unwrap());
+
+        let fsid = FactorSourceIDFromHash::sample_at(1);
+
+        let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Securified(SecurifiedU30::ZERO),
+        );
+        assert!(!sut
+            .insert_for_factor(&fsid, &FactorInstances::from_iter([fi0]))
+            .unwrap());
+        let fi2 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fsid,
+            CAP26EntityKind::Account,
+            Hardened::Securified(SecurifiedU30::TWO),
+        );
+
+        assert!(sut
+            .insert_for_factor(&fsid, &FactorInstances::from_iter([fi2]))
+            .unwrap());
+
+        let serializable = sut.serializable_snapshot();
+        println!(
+            "\n🐶🐶🐶🐶🐶🐶🐶\n>>>\n{}\n<<<\n",
+            serde_json::to_string_pretty(&serializable).unwrap()
+        );
+        assert_eq_after_json_roundtrip(
+            &serializable,
+            r#"
+            [
+            "apa": {
+				"key": "value"
+            }
+            ]
+            "#,
+        );
     }
 
     #[test]

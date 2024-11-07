@@ -252,16 +252,55 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", SUT::sample()), "hej")
+        assert_eq!(format!("{:?}", SUT::sample()), "1H/525H/1460H/H?");
+        assert_eq!(format!("{:?}", SUT::sample_other()), "2H/618H/1460H/S?");
+
+        assert_eq!(
+            format!(
+                "{:?}",
+                SUT::new(
+                    NetworkID::Adapanet,
+                    CAP26EntityKind::Account,
+                    CAP26KeyKind::AuthenticationSigning,
+                    KeySpace::Unsecurified { is_hardened: false }
+                )
+            ),
+            "10H/525H/1678H/?"
+        );
+    }
+
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", SUT::sample()), "1H/525H/1460H/H?");
+        assert_eq!(format!("{}", SUT::sample_other()), "2H/618H/1460H/S?");
+
+        assert_eq!(
+            format!(
+                "{}",
+                SUT::new(
+                    NetworkID::Adapanet,
+                    CAP26EntityKind::Account,
+                    CAP26KeyKind::AuthenticationSigning,
+                    KeySpace::Unsecurified { is_hardened: false }
+                )
+            ),
+            "10H/525H/1678H/?"
+        );
+    }
+
+    #[test]
+    fn from_str() {
+        let sut: SUT = "2H/618H/1460H/S?".parse().unwrap();
+        assert_eq!(sut, SUT::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: SUT = "Cool persona".parse().unwrap();
-
-        assert_json_value_eq_after_roundtrip(&a, json!("Cool persona"));
-        assert_json_roundtrip(&a);
-        assert_json_value_ne_after_roundtrip(&a, json!("Main account"));
+        let sut = SUT::sample_other();
+        assert_json_value_eq_after_roundtrip(&sut, json!("2H/618H/1460H/S?"));
+        assert_json_roundtrip(&sut);
+        assert_json_value_ne_after_roundtrip(&sut, json!("1H/618H/1460H/S?"));
     }
 
     #[test]
