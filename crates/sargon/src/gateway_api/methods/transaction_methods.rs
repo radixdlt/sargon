@@ -56,7 +56,7 @@ impl GatewayClient {
             intent.manifest,
             intent.header.start_epoch_inclusive,
             signer_public_keys,
-            intent.header.notary_public_key,
+            Some(intent.header.notary_public_key),
             intent.header.nonce,
         );
         self.transaction_preview(request)
