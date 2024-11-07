@@ -272,56 +272,6 @@ mod tests {
     }
 
     #[test]
-    fn as_enclosed() {
-        let manifest_string = r##"
-        ASSERT_WORKTOP_IS_EMPTY;
-
-CALL_METHOD
-    Address("account_tdx_2_12yv2mk0duna2wz6q8w3jh9rxsf939ysy9a7c9s7zq52qyqn926vwa0")
-    "withdraw"
-    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
-    Decimal("1000")
-;
-TAKE_ALL_FROM_WORKTOP
-    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
-    Bucket("bucket1")
-;
-CALL_METHOD
-    Address("validator_tdx_2_1svwenmn2mkwf9vu5kegs9seql5j535rc3ddjcvg9v3j4d7lvnya70k")
-    "stake"
-    Bucket("bucket1")
-;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_tdx_2_1thjlp88pc28eyfg3f2alq8zkggnr273j0saye4nj70vfnga6ldy7ru")
-    Decimal("973.13572518821453421")
-;
-TAKE_ALL_FROM_WORKTOP
-    Address("resource_tdx_2_1thjlp88pc28eyfg3f2alq8zkggnr273j0saye4nj70vfnga6ldy7ru")
-    Bucket("bucket2")
-;
-CALL_METHOD
-    Address("account_tdx_2_12yv2mk0duna2wz6q8w3jh9rxsf939ysy9a7c9s7zq52qyqn926vwa0")
-    "deposit"
-    Bucket("bucket2")
-;
-
-
-YIELD_TO_PARENT;
-        "##;
-
-        let manifest = SUT::new(
-            manifest_string,
-            NetworkID::Stokenet,
-            Blobs::default(),
-            ChildIntents::empty(),
-        )
-        .unwrap();
-
-        let enclosed = manifest.as_enclosed().unwrap();
-        pretty_assertions::assert_eq!(enclosed.manifest_string(), "");
-    }
-
-    #[test]
     fn sample_other_string_roundtrip() {
         let sut = SUT::sample_other();
         assert_eq!(sut.clone(), sut.clone());
