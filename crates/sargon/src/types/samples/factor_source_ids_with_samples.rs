@@ -73,10 +73,14 @@ impl FactorSourceIDFromHash {
         ALL_FACTOR_SOURCE_ID_SAMPLES[index]
     }
 
+    pub fn maybe_sample_associated_mnemonic(
+        &self,
+    ) -> Option<MnemonicWithPassphrase> {
+        MNEMONIC_BY_ID_MAP.get(self).cloned()
+    }
+
     pub fn sample_associated_mnemonic(&self) -> MnemonicWithPassphrase {
-        MNEMONIC_BY_ID_MAP
-            .get(self)
+        self.maybe_sample_associated_mnemonic()
             .expect("Sample mnemonic with passphrase for id {} not found")
-            .clone()
     }
 }

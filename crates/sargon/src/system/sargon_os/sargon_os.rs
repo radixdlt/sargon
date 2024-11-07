@@ -8,12 +8,11 @@ use crate::prelude::*;
 /// during app launch, enabling the  Sargon "Operating System" to e.g read/write
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
-#[derive(Debug)]
 pub struct SargonOS {
     pub profile_state_holder: ProfileStateHolder,
     pub clients: Clients,
 
-    /// Optional so that we can defer intergration with hosts...
+    /// Optional so that we can defer integration with hosts...
     pub interactors: Option<Interactors>,
 }
 

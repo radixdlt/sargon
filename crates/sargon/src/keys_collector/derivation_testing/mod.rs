@@ -13,9 +13,12 @@ use crate::prelude::*;
 #[cfg(test)]
 pub fn do_derive_serially_looking_up_mnemonic_amongst_samples(
     request: MonoFactorKeyDerivationRequest,
+    extra_mnemonics: IndexMap<FactorSourceIDFromHash, MnemonicWithPassphrase>,
 ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
     __do_derive_serially_with_lookup_of_mnemonic(request, |f| {
-        Ok(f.sample_associated_mnemonic())
+        f.maybe_sample_associated_mnemonic()
+            .or(extra_mnemonics.get(&f).cloned())
+            .ok_or(CommonError::FactorSourceDiscrepancy)
     })
 }
 

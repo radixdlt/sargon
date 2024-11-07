@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
 pub struct Interactors {
     pub key_derivation: Arc<dyn KeysDerivationInteractors>,
 }

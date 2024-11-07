@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::future::Future;
+use std::{future::Future, pin::Pin};
 
 impl Profile {
     /// Creates a new non securified account **WITHOUT** adding it to Profile, using the *main* "Babylon"
@@ -98,121 +98,37 @@ impl Profile {
     }
 }
 
-#[derive(Debug)]
-pub struct NoUIDerivationInteractors {
-    pub(crate) poly: Arc<dyn PolyFactorKeyDerivationInteractor>,
-    pub(crate) mono: Arc<dyn MonoFactorKeyDerivationInteractor>,
-}
-
-#[derive(Debug)]
-pub struct NoUIDerivationInteractorsPolyAndMono {
-    lookup_mnemonic:
-        fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
-}
-impl NoUIDerivationInteractorsPolyAndMono {
-    fn derive_mono(
-        &self,
-        request: MonoFactorKeyDerivationRequest,
-    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-        __do_derive_serially_with_lookup_of_mnemonic(
-            request,
-            self.lookup_mnemonic,
-        )
-    }
-}
-
-#[async_trait::async_trait]
-impl MonoFactorKeyDerivationInteractor
-    for NoUIDerivationInteractorsPolyAndMono
-{
-    async fn derive(
-        &self,
-        request: MonoFactorKeyDerivationRequest,
-    ) -> Result<KeyDerivationResponse> {
-        let instances = self.derive_mono(request.clone())?;
-        Ok(KeyDerivationResponse::new(IndexMap::just((
-            request.factor_source_id,
-            instances,
-        ))))
-    }
-}
-
-#[async_trait::async_trait]
-impl PolyFactorKeyDerivationInteractor
-    for NoUIDerivationInteractorsPolyAndMono
-{
-    async fn derive(
-        &self,
-        request: PolyFactorKeyDerivationRequest,
-    ) -> Result<KeyDerivationResponse> {
-        let pairs_result: Result<
-            IndexMap<
-                FactorSourceIDFromHash,
-                IndexSet<HierarchicalDeterministicFactorInstance>,
-            >,
-        > = request
-            .per_factor_source
-            .into_iter()
-            .map(|(k, r)| {
-                let instances = self.derive_mono(r);
-                instances.map(|i| (k, i))
-            })
-            .collect();
-        let pairs = pairs_result?;
-        Ok(KeyDerivationResponse::new(pairs))
-    }
-}
-
-impl NoUIDerivationInteractors {
-    fn with(
-        poly: impl PolyFactorKeyDerivationInteractor + 'static,
-        mono: impl MonoFactorKeyDerivationInteractor + 'static,
-    ) -> Self {
-        Self {
-            poly: Arc::new(poly),
-            mono: Arc::new(mono),
-        }
-    }
-    pub fn new(secure_storage: &SecureStorageClient) -> Self {
-        /*
-           self.secure_storage.load_mnemonic_with_passphrase(id).await
-        */
-        todo!()
-    }
-}
-impl KeysDerivationInteractors for NoUIDerivationInteractors {
-    fn interactor_for(
-        &self,
-        kind: FactorSourceKind,
-    ) -> KeyDerivationInteractor {
-        match kind {
-            FactorSourceKind::Device => {
-                KeyDerivationInteractor::poly(self.poly.clone())
-            }
-            _ => KeyDerivationInteractor::mono(self.mono.clone()),
-        }
-    }
-}
-
-/*
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[actix_rt::test]
     async fn test_create_unsaved_accounts() {
+        let fs = PrivateHierarchicalDeterministicFactorSource::sample();
         let sut = Profile::from_device_factor_source(
-            PrivateHierarchicalDeterministicFactorSource::sample()
-                .factor_source,
+            fs.factor_source.clone(),
             HostId::sample(),
             HostInfo::sample(),
             None::<Accounts>,
+        );
+
+        let cache_client = FactorInstancesCacheClient::in_memory();
+
+        let interactors = Arc::new(
+            TestDerivationInteractors::mono_and_poly_with_extra_mnemonics(
+                IndexMap::kv(
+                    fs.factor_source.id_from_hash(),
+                    fs.mnemonic_with_passphrase.clone(),
+                ),
+            ),
         );
 
         let (_, accounts) = sut
             .create_unsaved_accounts(
                 NetworkID::Mainnet,
                 3,
+                &cache_client,
+                interactors,
                 |i| {
                     DisplayName::new(if i == 0 {
                         "Alice"
@@ -222,9 +138,6 @@ mod tests {
                         "Carol"
                     })
                     .unwrap()
-                },
-                async move |_| {
-                    Ok(PrivateHierarchicalDeterministicFactorSource::sample())
                 },
             )
             .await
@@ -240,5 +153,3 @@ mod tests {
         )
     }
 }
-
-*/

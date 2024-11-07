@@ -8,9 +8,7 @@ use crate::prelude::*;
 /// which it will use to update it internal state and continue with the next
 /// factor source, or in case of failure the whole process will be aborted.
 #[async_trait::async_trait]
-pub trait MonoFactorKeyDerivationInteractor:
-    Send + Sync + std::fmt::Debug
-{
+pub trait MonoFactorKeyDerivationInteractor: Send + Sync {
     async fn derive(
         &self,
         request: MonoFactorKeyDerivationRequest,

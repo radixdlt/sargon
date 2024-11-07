@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use crate::prelude::*;
 
 /// An abstraction of an implementing host's secure storage, used to
@@ -177,8 +179,9 @@ impl SecureStorageClient {
     /// Loads a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
     pub async fn load_mnemonic_with_passphrase(
         &self,
-        id: &FactorSourceIDFromHash,
+        id: impl Borrow<FactorSourceIDFromHash>,
     ) -> Result<MnemonicWithPassphrase> {
+        let id = id.borrow();
         self.load_or(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: *id,
