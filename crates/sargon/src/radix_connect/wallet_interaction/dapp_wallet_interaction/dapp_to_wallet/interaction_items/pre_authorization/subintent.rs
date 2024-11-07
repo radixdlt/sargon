@@ -13,8 +13,7 @@ pub struct DappToWalletInteractionSubintentRequestItem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub expiration: Option<DappToWalletInteractionSubintentExpiration>,
+    pub expiration: DappToWalletInteractionSubintentExpiration,
 }
 
 impl DappToWalletInteractionSubintentRequestItem {
@@ -22,7 +21,7 @@ impl DappToWalletInteractionSubintentRequestItem {
         version: impl Into<SubintentVersion>,
         unvalidated_manifest: impl Into<UnvalidatedSubintentManifest>,
         message: impl Into<Option<String>>,
-        expiration: impl Into<Option<DappToWalletInteractionSubintentExpiration>>,
+        expiration: impl Into<DappToWalletInteractionSubintentExpiration>,
     ) -> Self {
         Self {
             version: version.into(),

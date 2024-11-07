@@ -7,18 +7,20 @@ import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class NonceTest: SampleTestable<Nonce> {
-    override val samples: List<Sample<Nonce>>
-        get() = listOf(Nonce.sample)
+class IntentDiscriminatorTest : SampleTestable<IntentDiscriminator> {
+
+    override val samples: List<Sample<IntentDiscriminator>>
+        get() = listOf(IntentDiscriminator.sample)
 
     @Test
     fun test_random() {
         val n = 10
-        val nonceSet = List(n) {
-            Nonce.random()
+        val discriminators = List(n) {
+            IntentDiscriminator.random()
         }.toSet()
 
-        assertEquals(n, nonceSet.size)
-        assertEquals(n, nonceSet.map { it.value }.size)
+        assertEquals(n, discriminators.size)
+        assertEquals(n, discriminators.map { it.value }.size)
     }
+
 }

@@ -43,6 +43,16 @@ impl From<ScryptoInstant> for Instant {
     }
 }
 
+impl From<Timestamp> for Instant {
+    fn from(value: Timestamp) -> Self {
+        let seconds_since_unix_epoch =
+            value.duration_since(Timestamp::UNIX_EPOCH).as_seconds_f64() as i64;
+        Self {
+            seconds_since_unix_epoch,
+        }
+    }
+}
+
 impl HasSampleValues for Instant {
     fn sample() -> Self {
         Self::from(0)
@@ -97,5 +107,16 @@ mod tests {
         test(1);
         test(2);
         test(1337);
+    }
+
+    #[test]
+    fn from_timestamp() {
+        let timestamp = Timestamp::now_utc();
+        let seconds_since_unix_epoch = timestamp
+            .duration_since(Timestamp::UNIX_EPOCH)
+            .as_seconds_f64() as i64;
+        let instant = Instant::from(timestamp);
+
+        assert_eq!(instant.seconds_since_unix_epoch, seconds_since_unix_epoch);
     }
 }

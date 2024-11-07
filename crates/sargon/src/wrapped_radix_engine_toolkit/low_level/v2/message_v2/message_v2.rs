@@ -50,6 +50,15 @@ impl TryFrom<ScryptoMessageV2> for MessageV2 {
     }
 }
 
+impl From<Option<String>> for MessageV2 {
+    fn from(value: Option<String>) -> Self {
+        match value {
+            Some(s) => Self::plain_text(s),
+            None => Self::None,
+        }
+    }
+}
+
 impl HasSampleValues for MessageV2 {
     fn sample() -> Self {
         Self::plain_text("Hello Radix!")
@@ -127,5 +136,16 @@ mod tests {
             TryInto::<SUT>::try_into(ScryptoMessageV2::Encrypted(dummy)),
             Err(CommonError::EncryptedMessagesAreNotYetSupported)
         );
+    }
+
+    #[test]
+    fn from_option_string() {
+        let mut str: Option<String> = None;
+        let mut sut: SUT = str.into();
+        assert_eq!(sut, SUT::None);
+
+        str = "Hello Radix!".to_owned().into();
+        sut = str.into();
+        assert_eq!(sut, SUT::sample());
     }
 }
