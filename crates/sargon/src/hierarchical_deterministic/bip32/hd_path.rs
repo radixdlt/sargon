@@ -60,7 +60,7 @@ impl HDPath {
         let head = "m".to_owned();
         let mut path = self.components().iter().map(map).collect_vec();
         if include_head {
-            path.splice(0..0, vec![head].into_iter());
+            path.splice(0..0, vec![head]);
         }
         path.into_iter().join(Self::SEPARATOR)
     }

@@ -59,6 +59,16 @@ impl FileSystemClient {
 }
 
 #[cfg(test)]
+impl FileSystemClient {
+    pub fn test() -> Self {
+        Self::new(RustFileSystemDriver::new())
+    }
+    pub fn in_memory() -> Self {
+        Self::new(InMemoryFileSystemDriver::new())
+    }
+}
+
+#[cfg(test)]
 mod tests {
 
     use std::path::PathBuf;
@@ -94,12 +104,6 @@ mod tests {
         make_contents("second")
     }
 
-    impl FileSystemClient {
-        pub fn test() -> Self {
-            Self::new(RustFileSystemDriver::new())
-        }
-    }
-
     #[actix_rt::test]
     async fn test_create_load_delete() {
         let sut = SUT::test();
@@ -119,6 +123,37 @@ mod tests {
         assert_eq!(loaded, new_data);
 
         assert!(sut.delete_file(file.clone()).await.is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn test_create_load_delete_in_memory_shared() {
+        let client1 = Arc::new(SUT::in_memory());
+        let file = file_in_tmp();
+
+        let data = contents();
+        client1
+            .save_to_file(file.clone(), data.clone())
+            .await
+            .unwrap();
+        let loaded =
+            client1.load_from_file(file.clone()).await.unwrap().unwrap();
+        assert_eq!(loaded, data);
+
+        // Assert can be updated
+        let client2 = client1.clone();
+        let new_data = other_contents();
+        client2
+            .save_to_file(file.clone(), new_data.clone())
+            .await
+            .unwrap();
+
+        let loaded_from_client2 =
+            client2.load_from_file(file.clone()).await.unwrap().unwrap();
+        assert_eq!(loaded_from_client2, new_data);
+
+        let loaded_from_client1 =
+            client1.load_from_file(file.clone()).await.unwrap().unwrap();
+        assert_eq!(loaded_from_client1, new_data);
     }
 
     #[actix_rt::test]

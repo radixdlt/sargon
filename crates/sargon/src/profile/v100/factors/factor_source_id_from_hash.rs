@@ -236,9 +236,13 @@ mod tests {
         };
         test(SUT::sample());
         test(SUT::sample_other());
-        test(SUT::new_for_arculus(&MnemonicWithPassphrase::sample_arculus()));
+        test(SUT::new_for_arculus(
+            &MnemonicWithPassphrase::sample_arculus(),
+        ));
         test(SUT::new_for_ledger(&MnemonicWithPassphrase::sample_ledger()));
-        test(SUT::new_for_security_questions(&&MnemonicWithPassphrase::sample_security_questions()));
+        test(SUT::new_for_security_questions(
+            &MnemonicWithPassphrase::sample_security_questions(),
+        ));
     }
 
     #[test]

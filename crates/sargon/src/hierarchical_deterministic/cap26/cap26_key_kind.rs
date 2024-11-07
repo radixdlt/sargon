@@ -54,7 +54,6 @@ impl TryFrom<HDPathComponent> for CAP26KeyKind {
     }
 }
 
-
 impl TryFrom<U31> for CAP26KeyKind {
     type Error = CommonError;
     fn try_from(value: U31) -> Result<Self> {

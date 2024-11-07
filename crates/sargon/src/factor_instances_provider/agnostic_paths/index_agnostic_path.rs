@@ -269,7 +269,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn display() {
         assert_eq!(format!("{}", SUT::sample()), "1H/525H/1460H/H?");

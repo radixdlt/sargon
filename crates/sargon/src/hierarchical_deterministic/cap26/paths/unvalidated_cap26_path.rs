@@ -36,15 +36,11 @@ impl TryFrom<HDPath> for UnvalidatedCAP26Path {
                 bad_value: u32::from(components[1].index_in_local_key_space()),
             });
         }
-        let network_id =
-            NetworkID::try_from(components[2])?;
+        let network_id = NetworkID::try_from(components[2])?;
 
-        let entity_kind = CAP26EntityKind::try_from(
-            components[3]
-        )?;
-        let key_kind =
-            CAP26KeyKind::try_from(components[4])?;
-            
+        let entity_kind = CAP26EntityKind::try_from(components[3])?;
+        let key_kind = CAP26KeyKind::try_from(components[4])?;
+
         let hardened = Hardened::try_from(components[5])?;
 
         Ok(UnvalidatedCAP26Path {

@@ -277,11 +277,11 @@ pub fn index_agnostic(
     entity_kind: CAP26EntityKind,
     key_kind: CAP26KeyKind,
 ) -> HDPath {
-    let mut path: Vec<HDPathComponent> = vec![];
-    path.push(HDPathComponent::from(network_id));
-    path.push(HDPathComponent::from(entity_kind));
-    path.push(HDPathComponent::from(key_kind));
-    HDPath::new(path)
+    HDPath::new(vec![
+        HDPathComponent::from(network_id),
+        HDPathComponent::from(entity_kind),
+        HDPathComponent::from(key_kind),
+    ])
 }
 
 #[cfg(test)]

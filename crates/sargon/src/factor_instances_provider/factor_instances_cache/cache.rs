@@ -111,9 +111,14 @@ pub type DenseKeyStorage = IndexMap<
     IndexMap<IndexAgnosticPath, IndexSet<HierarchicalDeterministicPublicKey>>,
 >;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct FactorInstancesCacheSnapshot(pub DenseKeyStorage);
+impl FactorInstancesCacheSnapshot {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
 impl From<FactorInstancesCacheSnapshot> for Storage {
     fn from(value: FactorInstancesCacheSnapshot) -> Self {
         value
@@ -200,6 +205,10 @@ impl FactorInstancesCache {
         Self {
             map: RwLock::new(self.map.read().unwrap().clone()),
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.map.read().unwrap().is_empty()
     }
 
     pub fn serializable_snapshot(&self) -> FactorInstancesCacheSnapshot {
@@ -836,7 +845,7 @@ mod tests {
 
     #[test]
     fn delete() {
-        let mut sut = Sut::default();
+        let sut = Sut::default();
 
         let factor_source_ids = FactorSource::sample_all()
             .into_iter()

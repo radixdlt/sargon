@@ -1,6 +1,3 @@
-#![cfg(test)]
-#![allow(unused)]
-
 mod stateless_dummy_indices;
 mod test_keys_collector;
 

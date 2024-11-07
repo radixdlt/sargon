@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 use std::ops::{Add, AddAssign};
 
 impl SargonOS {
