@@ -46,6 +46,13 @@ pub fn subintent_manifest_string(manifest: &SubintentManifest) -> String {
 }
 
 #[uniffi::export]
+pub fn subintent_manifest_summary(
+    manifest: &SubintentManifest,
+) -> ManifestSummary {
+    manifest.into_internal().summary().unwrap().into()
+}
+
+#[uniffi::export]
 pub fn subintent_manifest_involved_resource_addresses(
     manifest: &SubintentManifest,
 ) -> Vec<ResourceAddress> {

@@ -4,7 +4,7 @@ import com.radixdlt.sargon.Nonce
 import com.radixdlt.sargon.newNonceRandom
 import com.radixdlt.sargon.nonceGetValue
 
-fun Nonce.Companion.secureRandom(): Nonce = newNonceRandom()
+fun Nonce.Companion.random(): Nonce = newNonceRandom()
 
 val Nonce.value: UInt
     get() = nonceGetValue(nonce = this)
