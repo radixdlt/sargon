@@ -42,7 +42,13 @@ impl<T: IsBaseEntity> IsNetworkAware for T {
     }
 }
 
-pub trait IsEntity: IsBaseEntity + HasEntityKind + std::hash::Hash + Eq + TryFrom<AccountOrPersona, Error = CommonError> {
+pub trait IsEntity:
+    IsBaseEntity
+    + HasEntityKind
+    + std::hash::Hash
+    + Eq
+    + TryFrom<AccountOrPersona, Error = CommonError>
+{
     type Path: IsEntityPath;
     fn with_veci_and_name(
         veci: HDFactorInstanceTransactionSigning<Self::Path>,

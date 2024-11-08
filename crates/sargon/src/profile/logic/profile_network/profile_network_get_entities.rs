@@ -74,7 +74,6 @@ impl ProfileNetwork {
             .collect()
     }
 
-
     pub fn get_entities_of_kind_in_key_space(
         &self,
         entity_kind: CAP26EntityKind,

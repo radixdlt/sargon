@@ -603,7 +603,8 @@ impl SargonOS {
             .clone()
             .into_iter()
             .map(|a| {
-                let entity = profile_snapshot.get_entity::<E::BaseEntity>(&a).unwrap();
+                let entity =
+                    profile_snapshot.get_entity::<E::BaseEntity>(&a).unwrap();
                 // let matrix_of_instances =
                 //     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
                 //         &mut instance_per_factor,

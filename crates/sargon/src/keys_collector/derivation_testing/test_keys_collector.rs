@@ -97,31 +97,18 @@ impl TestDerivationMonoAndPolyInteractor {
         if self.always_fail {
             return Err(CommonError::Unknown);
         }
-        /*
-                let holder = AsyncFnPtr::new(move |input| {
-            let backend = Arc::new(backend);
-            async move { backend.get_data(input).await }
-        });
-        */
+
         let cloned_client = Arc::new(self.secure_storage_client.clone());
         do_derive_serially_looking_up_mnemonic_amongst_samples(
             request,
             move |id| {
-                let secure_storage_client =
-                cloned_client.clone();
+                let cloned_cloned_client = cloned_client.clone();
                 async move {
-                    secure_storage_client
-                        .load_mnemonic_with_passphrase(id)
-                        // .send()
-                        .await
+                    cloned_cloned_client.load_mnemonic_with_passphrase(id).await
                 }
             },
         )
-        // .send()
         .await
-        // .or_else(|| {
-        //     self.secure_storage_client.load_mnemonic_with_passphrase(request.factor_source_id)
-        // })
     }
 }
 
@@ -133,55 +120,12 @@ impl PolyFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
     ) -> Result<KeyDerivationResponse> {
         let mut pairs = IndexMap::new();
         for (k, r) in request.per_factor_source {
-            let instances = self.do_derive(r).send().await?;
+            let instances = self.do_derive(r).await?;
             pairs.insert(k, instances);
         }
         Ok(KeyDerivationResponse::new(pairs))
     }
 }
-
-// #[derive(Debug)]
-// pub(crate) struct TestDerivationMonoInteractor {
-//     handle: fn(
-//         MonoFactorKeyDerivationRequest,
-//     )
-//         -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
-// }
-// impl TestDerivationMonoInteractor {
-//     pub(crate) fn new(
-//         handle: fn(
-//             MonoFactorKeyDerivationRequest,
-//         )
-//             -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>,
-//     ) -> Self {
-//         Self { handle }
-//     }
-//     pub(crate) fn fail() -> Self {
-//         Self::new(|_| Err(CommonError::Unknown))
-//     }
-//     async fn do_derive(
-//         &self,
-//         request: MonoFactorKeyDerivationRequest,
-//     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-//         (self.handle)(request)
-//     }
-// }
-// impl Default for TestDerivationMonoInteractor {
-//     fn default() -> Self {
-//         Self::new(do_derive_serially_looking_up_mnemonic_amongst_samples)
-//     }
-// }
-
-pub trait SendFuture: core::future::Future {
-    fn send(self) -> impl core::future::Future<Output = Self::Output> + Send
-    where
-        Self: Sized + Send,
-    {
-        self
-    }
-}
-
-impl<T: core::future::Future> SendFuture for T {}
 
 #[async_trait::async_trait]
 impl MonoFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
@@ -189,7 +133,7 @@ impl MonoFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
         &self,
         request: MonoFactorKeyDerivationRequest,
     ) -> Result<KeyDerivationResponse> {
-        let instances = self.do_derive(request.clone()).send().await?;
+        let instances = self.do_derive(request.clone()).await?;
         Ok(KeyDerivationResponse::new(IndexMap::just((
             request.factor_source_id,
             instances,

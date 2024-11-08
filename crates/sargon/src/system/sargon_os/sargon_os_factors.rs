@@ -238,6 +238,9 @@ impl SargonOS {
         let profile_snapshot = self.profile()?;
         let keys_derivation_interactors = self.keys_derivation_interactors();
         for factor_source in new_factors_only.iter() {
+            if factor_source.factor_source_kind() != FactorSourceKind::Device {
+                continue;
+            }
             let outcome = CacheFiller::for_new_factor_source(
                 &self.clients.factor_instances_cache,
                 Some(&profile_snapshot),
@@ -417,8 +420,6 @@ impl SargonOS {
 #[allow(unused)]
 #[cfg(test)]
 impl SargonOS {
-    
-
     pub(crate) async fn clear_cache(&self) {
         println!("💣 CLEAR CACHE");
         self.clients.factor_instances_cache.clear().await.unwrap();

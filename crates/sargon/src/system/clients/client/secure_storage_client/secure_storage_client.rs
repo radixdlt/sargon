@@ -167,6 +167,7 @@ impl SecureStorageClient {
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
         id: &FactorSourceIDFromHash,
     ) -> Result<()> {
+        println!("\n\n\n 🧚‍♀️ 🧚‍♀️ 🧚‍♀️ 🧚‍♀️ SAVING fs: {}", id);
         self.save(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: *id,
@@ -182,6 +183,7 @@ impl SecureStorageClient {
         id: impl Borrow<FactorSourceIDFromHash>,
     ) -> Result<MnemonicWithPassphrase> {
         let id = id.borrow();
+        println!("\n\n 🐝 🐝 🐝 loading fs: {}", id);
         self.load_or(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: *id,
@@ -190,7 +192,7 @@ impl SecureStorageClient {
                 bad_value: *id,
             },
         )
-        .await
+        .await.inspect_err(|e| println!("🎭 FAILED TO LOAD fs: {}, err: {:?}", id, e))
     }
 
     /// Deletes a MnemonicWithPassphrase with a `FactorSourceIDFromHash`

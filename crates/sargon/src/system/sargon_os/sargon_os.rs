@@ -107,26 +107,24 @@ impl SargonOS {
     }
 
     #[cfg(test)]
-    pub(crate) fn init_keys_derivation_interactor_with_test_interactor(
+    pub(crate) async fn init_keys_derivation_interactor_with_test_interactor_with_private_hd_factor_source(
         &self,
+        private_hd_factor_source: &PrivateHierarchicalDeterministicFactorSource,
     ) -> Arc<dyn KeysDerivationInteractors> {
-        self.init_keys_derivation_interactor_with_test_interactor_with_mnemonics(
-            // IndexMap::new()
-        )
+        self.secure_storage
+            .save_private_hd_factor_source(private_hd_factor_source)
+            .await
+            .unwrap();
+        self.init_keys_derivation_interactor_with_test_interactor()
     }
 
     #[cfg(test)]
-    pub(crate) fn init_keys_derivation_interactor_with_test_interactor_with_mnemonics(
+    pub(crate) fn init_keys_derivation_interactor_with_test_interactor(
         &self,
-        // extra_mnemonics: IndexMap<
-        //     FactorSourceIDFromHash,
-        //     MnemonicWithPassphrase,
-        // >,
     ) -> Arc<dyn KeysDerivationInteractors> {
         let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
             Arc::new(TestDerivationInteractors::with_secure_storage(
                 self.clients.secure_storage.clone(),
-                // extra_mnemonics,
             ));
         let interactors = Interactors::new(derivation_interactor.clone());
         self.interactors.borrow_mut().replace(interactors);
@@ -181,6 +179,14 @@ impl SargonOS {
                 &host_info,
             );
 
+            // Must save to secure storage first, then add, so that 
+            // we easily can implement KeysDerivationInteractors that
+            // can try to load the mnemonic from secure storage when
+            // we are Cache filling using the FactorInstancesProvider
+            self.secure_storage
+            .save_private_hd_factor_source(&bdfs)
+            .await?;
+
             let bdfs_result = self
                 .add_factor_source(FactorSource::from(
                     bdfs.clone().factor_source,
@@ -190,9 +196,8 @@ impl SargonOS {
                 self.secure_storage.delete_profile(imported_id).await?;
                 return Err(error);
             }
-            self.secure_storage
-                .save_private_hd_factor_source(&bdfs)
-                .await?;
+         
+         
         }
 
         let profile_to_report = self.profile_state_holder.profile()?;
@@ -396,6 +401,8 @@ impl SargonOS {
         os.profile_state_holder.replace_profile_state_with(
             ProfileState::Loaded(profile.clone()),
         )?;
+
+        _ = os.init_keys_derivation_interactor_with_test_interactor();
 
         Ok(os)
     }

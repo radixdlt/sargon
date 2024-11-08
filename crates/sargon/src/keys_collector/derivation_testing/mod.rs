@@ -15,19 +15,19 @@ use std::future::ready;
 pub async fn do_derive_serially_looking_up_mnemonic_amongst_samples<F>(
     request: MonoFactorKeyDerivationRequest,
     lookup_mnemonic: F,
-) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> 
+) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
 where
     F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
 {
-
-    __do_derive_serially_with_lookup_of_mnemonic(request, async move |f: FactorSourceIDFromHash| {
-        lookup_mnemonic(f).await
-        // let res = f.maybe_sample_associated_mnemonic()
-        //     // .or(extra_mnemonics.get(&f).cloned())
-        //     .ok_or(CommonError::FactorSourceDiscrepancy);
-        // ready(res)
-
-    })
+    __do_derive_serially_with_lookup_of_mnemonic(
+        request,
+        async move |f: FactorSourceIDFromHash| {
+            let res = lookup_mnemonic(f).await;
+            return res.or(f
+                .maybe_sample_associated_mnemonic()
+                .ok_or(CommonError::FactorSourceDiscrepancy));
+        },
+    )
     .await
 }
 

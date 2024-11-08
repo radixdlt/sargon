@@ -146,6 +146,16 @@ impl FactorSourceIDFromHash {
         Self::new_for_device(&MnemonicWithPassphrase::sample_device_other())
     }
 
+    pub fn sample_device_12_words() -> Self {
+        Self::new_for_device(&MnemonicWithPassphrase::sample_device_12_words())
+    }
+
+    pub fn sample_device_12_words_other() -> Self {
+        Self::new_for_device(
+            &MnemonicWithPassphrase::sample_device_12_words_other(),
+        )
+    }
+
     pub fn sample_ledger() -> Self {
         Self::new_for_ledger(&MnemonicWithPassphrase::sample_ledger())
     }

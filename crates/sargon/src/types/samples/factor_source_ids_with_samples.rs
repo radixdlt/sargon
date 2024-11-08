@@ -65,6 +65,14 @@ pub static MNEMONIC_BY_ID_MAP: Lazy<
             FactorSourceIDFromHash::sample_device_other(),
             MnemonicWithPassphrase::sample_device_other(),
         ),
+        (
+            FactorSourceIDFromHash::sample_device_12_words(),
+            MnemonicWithPassphrase::sample_device_12_words(),
+        ),
+        (
+            FactorSourceIDFromHash::sample_device_12_words_other(),
+            MnemonicWithPassphrase::sample_device_12_words_other(),
+        ),
     ])
 });
 
