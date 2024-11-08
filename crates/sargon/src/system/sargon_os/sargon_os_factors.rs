@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::prelude::*;
+use crate::{prelude::*, profile};
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -234,6 +234,37 @@ impl SargonOS {
             new_factors_only.iter().any(|x| x.is_main_bdfs());
         let id_of_old_bdfs = self.bdfs()?.factor_source_id();
 
+        // Use FactorInstancesProvider to eagerly fill cache...
+        let profile_snapshot = self.profile()?;
+        let keys_derivation_interactors = self.keys_derivation_interactors();
+        for factor_source in new_factors_only.iter() {
+            let outcome = CacheFiller::for_new_factor_source(
+                &self.clients.factor_instances_cache,
+                Some(&profile_snapshot),
+                factor_source.clone(),
+                NetworkID::Mainnet, // we care not about other networks here
+                keys_derivation_interactors.clone(),
+            )
+            .await?;
+
+            assert_eq!(outcome.factor_source_id, factor_source.id_from_hash());
+
+            #[cfg(test)]
+            {
+                assert_eq!(outcome.debug_found_in_cache.len(), 0);
+
+                assert_eq!(
+                    outcome.debug_was_cached.len(),
+                    DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+                );
+
+                assert_eq!(
+                    outcome.debug_was_derived.len(),
+                    DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+                );
+            }
+        }
+
         self.update_profile_with(|p| {
             p.factor_sources.extend(new_factors_only.clone());
             Ok(())
@@ -405,18 +436,35 @@ impl SargonOS {
     pub(crate) async fn init_keys_derivation_interactor_if_needed(
         &self,
     ) -> Result<Arc<dyn KeysDerivationInteractors>> {
-        if let Some(interactors) = self.maybe_keys_derivation_interactors() {
-            return Ok(interactors);
-        }
-
         let bdfs = self.bdfs()?;
         let fsid = bdfs.id_from_hash();
         let private_bdfs =
             self.load_private_device_factor_source_by_id(fsid).await?;
+        self.init_keys_derivation_interactor_if_needed_with_mnemonics(
+            false,
+            IndexMap::kv(fsid, private_bdfs.mnemonic_with_passphrase),
+        )
+        .await
+    }
+
+    pub(crate) async fn init_keys_derivation_interactor_if_needed_with_mnemonics(
+        &self,
+        replace_existing: bool,
+        extra_mnemonics: IndexMap<
+            FactorSourceIDFromHash,
+            MnemonicWithPassphrase,
+        >,
+    ) -> Result<Arc<dyn KeysDerivationInteractors>> {
+        if !replace_existing
+            && let Some(interactors) = self.maybe_keys_derivation_interactors()
+        {
+            return Ok(interactors);
+        }
+
         let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
             Arc::new(
                 TestDerivationInteractors::mono_and_poly_with_extra_mnemonics(
-                    IndexMap::kv(fsid, private_bdfs.mnemonic_with_passphrase),
+                    extra_mnemonics,
                 ),
             );
         let interactors = Interactors::new(derivation_interactor.clone());

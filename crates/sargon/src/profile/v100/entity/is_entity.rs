@@ -20,7 +20,7 @@ pub trait HasSecurityState {
 pub trait IsBaseEntity:
     HasEntityKindObjectSafe + IsNetworkAware + HasSecurityState
 {
-    type Address: IsBaseEntityAddress;
+    type Address: IsBaseEntityAddress + PartialEq + Eq + std::hash::Hash;
 
     fn address(&self) -> Self::Address;
 
@@ -42,7 +42,7 @@ impl<T: IsBaseEntity> IsNetworkAware for T {
     }
 }
 
-pub trait IsEntity: IsBaseEntity + HasEntityKind {
+pub trait IsEntity: IsBaseEntity + HasEntityKind + std::hash::Hash + Eq + TryFrom<AccountOrPersona, Error = CommonError> {
     type Path: IsEntityPath;
     fn with_veci_and_name(
         veci: HDFactorInstanceTransactionSigning<Self::Path>,

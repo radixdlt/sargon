@@ -90,6 +90,24 @@ impl Profile {
         )
     }
 
+    pub fn get_entities<E: IsEntity>(&self) -> IndexSet<E> {
+        self.networks
+            .iter()
+            .flat_map(|n| n.get_entities::<E>())
+            .collect()
+    }
+
+    pub fn get_accounts(&self) -> IndexSet<Account> {
+        self.get_entities()
+    }
+
+    pub fn get_entity<E: IsEntity>(&self, address: &E::Address) -> Result<E> {
+        self.get_entities::<E>()
+            .into_iter()
+            .find(|e| e.address() == *address)
+            .ok_or(CommonError::EntityNotFound)
+    }
+
     pub fn get_securified_entities_of_kind_on_network<
         E: IsSecurifiedEntity + HasEntityKind + TryFrom<AccountOrPersona>,
     >(

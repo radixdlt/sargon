@@ -550,6 +550,108 @@ impl SargonOS {
     }
 }
 
+// # Securify
+impl SargonOS {
+    pub(crate) async fn securify_entities<E: IsSecurifiedEntity>(
+        &mut self,
+        addresses_of_entities: IndexSet<
+            <E::BaseEntity as IsBaseEntity>::Address,
+        >,
+        shield: MatrixOfFactorSources,
+    ) -> Result<(IndexSet<E>, FactorInstancesProviderOutcome)>
+    where
+        E::BaseEntity: IsEntity,
+    {
+        let profile_snapshot = self.profile()?;
+        let key_derivation_interactors = self.keys_derivation_interactors();
+
+        let outcome = SecurifyEntityFactorInstancesProvider::for_entity_mfa::<
+            E::BaseEntity,
+        >(
+            &self.clients.factor_instances_cache,
+            &profile_snapshot,
+            shield.clone(),
+            addresses_of_entities.clone(),
+            key_derivation_interactors,
+        )
+        .await?;
+
+        let mut instance_per_factor = outcome
+            .clone()
+            .per_factor
+            .into_iter()
+            .map(|(k, outcome_per_factor)| {
+                (k, outcome_per_factor.to_use_directly)
+            })
+            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+
+        assert_eq!(
+            instance_per_factor
+                .keys()
+                .cloned()
+                .collect::<HashSet<FactorSourceIDFromHash>>(),
+            shield
+                .all_factors()
+                .into_iter()
+                .map(|f| f.id_from_hash())
+                .collect::<HashSet<FactorSourceIDFromHash>>()
+        );
+
+        // Now we need to map the flat set of instances into many MatrixOfFactorInstances, and assign
+        // one to each account
+        let updated_entities = addresses_of_entities
+            .clone()
+            .into_iter()
+            .map(|a| {
+                let entity = profile_snapshot.get_entity::<E::BaseEntity>(&a).unwrap();
+                // let matrix_of_instances =
+                //     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
+                //         &mut instance_per_factor,
+                //         shield.clone(),
+                //     )
+                //     .unwrap();
+
+                // let access_controller = match entity.security_state() {
+                //     EntitySecurityState::Unsecured(_) => {
+                //         AccessController::from_unsecurified_address(a)
+                //     }
+                //     EntitySecurityState::Securified(sec) => sec.access_controller.clone(),
+                // };
+                // let veci = match entity.security_state() {
+                //     EntitySecurityState::Unsecured(veci) => Some(veci),
+                //     EntitySecurityState::Securified(sec) => {
+                //         sec.veci.clone().map(|x| x.factor_instance())
+                //     }
+                // };
+                // let sec = SecuredEntityControl::new(
+                //     matrix_of_instances,
+                //     access_controller,
+                //     veci.map(|x| VirtualEntityCreatingInstance::new(x, entity.address())),
+                // );
+
+                // E::new(entity.name(), entity.entity_address(), sec)
+                todo!()
+            })
+            .collect::<IndexSet<E>>();
+
+        todo!()
+
+        // for entity in updated_entities.clone().into_iter() {
+        //     self.profile
+        //         .try_write()
+        //         .unwrap()
+        //         .update_entity::<E::BaseEntity>(entity.into())
+        // }
+        // assert!(
+        //     instance_per_factor.values().all(|x| x.is_empty()),
+        //     "should have used all instances, but have unused instances: {:?}",
+        //     instance_per_factor
+        // );
+
+        // Ok((updated_entities, outcome))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

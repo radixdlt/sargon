@@ -1,5 +1,7 @@
 use std::{cell::Cell, sync::Once};
 
+use sbor::prelude::indexmap::IndexMap;
+
 use crate::prelude::*;
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
@@ -129,6 +131,16 @@ impl SargonOS {
                 BIP39Passphrase::default(),
                 &host_info,
             );
+
+            #[cfg(test)]
+            self.init_keys_derivation_interactor_if_needed_with_mnemonics(
+                true,
+                IndexMap::kv(
+                    bdfs.factor_source.id.clone(),
+                    bdfs.mnemonic_with_passphrase.clone(),
+                ),
+            )
+            .await?;
 
             let bdfs_result = self
                 .add_factor_source(FactorSource::from(
@@ -358,10 +370,16 @@ impl SargonOS {
     ) -> Arc<Self> {
         let req = Self::boot_test_with_bdfs_mnemonic(bdfs_mnemonic);
 
-        actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+        let os =
+            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+                .await
+                .unwrap()
+                .unwrap();
+
+        os.init_keys_derivation_interactor_if_needed()
             .await
-            .unwrap()
-            .unwrap()
+            .unwrap();
+        os
     }
 
     /// Boot the SargonOS with a mocked networking driver.
