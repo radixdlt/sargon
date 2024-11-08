@@ -24,9 +24,8 @@ pub enum DappToWalletInteractionSubintentExpiration {
 }
 
 #[uniffi::export]
-pub fn get_subintent_expiration_status(expiration: &DappToWalletInteractionSubintentExpiration) -> DappToWalletInteractionSubintentExpirationStatus {
-    expiration
-        .into_internal()
-        .get_status()
-        .into()
+pub fn get_subintent_expiration_status(
+    expiration: &DappToWalletInteractionSubintentExpiration,
+) -> DappToWalletInteractionSubintentExpirationStatus {
+    expiration.into_internal().get_status().into()
 }

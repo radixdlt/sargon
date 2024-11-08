@@ -39,11 +39,13 @@ impl HasSampleValues for DappToWalletInteractionSubintentExpiration {
 }
 
 impl DappToWalletInteractionSubintentExpiration {
-    pub fn get_status(&self) -> DappToWalletInteractionSubintentExpirationStatus {
+    pub fn get_status(
+        &self,
+    ) -> DappToWalletInteractionSubintentExpirationStatus {
         match self {
             Self::AtTime(expiration) => {
-                let now = Timestamp::now_utc();
-                let in_thirty_seconds = now.add(Duration::from_secs(30));
+                let now = seconds_since_unix_epoch();
+                let in_thirty_seconds = now + 30;
                 if expiration.unix_timestamp_seconds < now {
                     DappToWalletInteractionSubintentExpirationStatus::Expired
                 } else if expiration.unix_timestamp_seconds < in_thirty_seconds
@@ -58,6 +60,13 @@ impl DappToWalletInteractionSubintentExpiration {
             }
         }
     }
+}
+
+// Returns the amounts of seconds since the Unix epoch.
+pub fn seconds_since_unix_epoch() -> u64 {
+    Timestamp::now_utc()
+        .duration_since(Timestamp::UNIX_EPOCH)
+        .as_seconds_f64() as u64
 }
 
 #[cfg(test)]
@@ -85,7 +94,7 @@ mod tests {
             r#"
         {
             "discriminator": "expireAtTime",
-            "unixTimestampSeconds": "2023-09-11T16:05:56.000Z"
+            "unixTimestampSeconds": 1730999831257
         }
         "#,
         );
@@ -106,8 +115,8 @@ mod tests {
         let now = Timestamp::now_utc();
 
         // AtTime which has already expired
-        let now = Timestamp::now_utc();
-        let past = now.sub(Duration::from_secs(30));
+        let now = seconds_since_unix_epoch();
+        let past = now - 30;
         let expiration = SUT::AtTime(past.into());
         assert_eq!(
             expiration.get_status(),
@@ -115,7 +124,7 @@ mod tests {
         );
 
         // AtTime which is less than 30 seconds from expiration
-        let in_ten_seconds = now.add(Duration::from_secs(10));
+        let in_ten_seconds = now + 10;
         let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
             DappToWalletInteractionSubintentExpireAtTime {
                 unix_timestamp_seconds: in_ten_seconds,
@@ -127,7 +136,7 @@ mod tests {
         );
 
         // AtTime which is more than 30 seconds from expiration
-        let in_forty_seconds = now.add(Duration::from_secs(40));
+        let in_forty_seconds = now + 40;
         let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
             DappToWalletInteractionSubintentExpireAtTime {
                 unix_timestamp_seconds: in_forty_seconds,
@@ -151,7 +160,5 @@ mod tests {
             expiration.get_status(),
             DappToWalletInteractionSubintentExpirationStatus::Valid
         );
-
-
     }
 }
