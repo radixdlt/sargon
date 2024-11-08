@@ -81,7 +81,56 @@ impl SargonOS {
             .await;
 
         info!("Sargon os Booted with profile state: {}", profile_state);
+
+        #[cfg(test)]
+        {
+            _ = os.init_keys_derivation_interactor_with_test_interactor();
+        }
+
         os
+    }
+
+    fn maybe_keys_derivation_interactors(
+        &self,
+    ) -> Option<Arc<dyn KeysDerivationInteractors>> {
+        self.interactors
+            .borrow()
+            .as_ref()
+            .map(|i| i.key_derivation.clone())
+    }
+
+    pub(crate) fn keys_derivation_interactors(
+        &self,
+    ) -> Arc<dyn KeysDerivationInteractors> {
+        self.maybe_keys_derivation_interactors()
+            .expect("No interactors")
+    }
+
+    #[cfg(test)]
+    pub(crate) fn init_keys_derivation_interactor_with_test_interactor(
+        &self,
+    ) -> Arc<dyn KeysDerivationInteractors> {
+        self.init_keys_derivation_interactor_with_test_interactor_with_mnemonics(
+            // IndexMap::new()
+        )
+    }
+
+    #[cfg(test)]
+    pub(crate) fn init_keys_derivation_interactor_with_test_interactor_with_mnemonics(
+        &self,
+        // extra_mnemonics: IndexMap<
+        //     FactorSourceIDFromHash,
+        //     MnemonicWithPassphrase,
+        // >,
+    ) -> Arc<dyn KeysDerivationInteractors> {
+        let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
+            Arc::new(TestDerivationInteractors::with_secure_storage(
+                self.clients.secure_storage.clone(),
+                // extra_mnemonics,
+            ));
+        let interactors = Interactors::new(derivation_interactor.clone());
+        self.interactors.borrow_mut().replace(interactors);
+        derivation_interactor
     }
 
     pub async fn new_wallet(&self) -> Result<()> {
@@ -131,16 +180,6 @@ impl SargonOS {
                 BIP39Passphrase::default(),
                 &host_info,
             );
-
-            #[cfg(test)]
-            self.init_keys_derivation_interactor_if_needed_with_mnemonics(
-                true,
-                IndexMap::kv(
-                    bdfs.factor_source.id.clone(),
-                    bdfs.mnemonic_with_passphrase.clone(),
-                ),
-            )
-            .await?;
 
             let bdfs_result = self
                 .add_factor_source(FactorSource::from(
@@ -370,16 +409,10 @@ impl SargonOS {
     ) -> Arc<Self> {
         let req = Self::boot_test_with_bdfs_mnemonic(bdfs_mnemonic);
 
-        let os =
-            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
-                .await
-                .unwrap()
-                .unwrap();
-
-        os.init_keys_derivation_interactor_if_needed()
+        actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await
-            .unwrap();
-        os
+            .unwrap()
+            .unwrap()
     }
 
     /// Boot the SargonOS with a mocked networking driver.

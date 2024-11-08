@@ -18,22 +18,17 @@ impl TestDerivationInteractors {
         }
     }
 
-    pub(crate) fn mono_and_poly_with_extra_mnemonics(
-        extra_mnemonics: IndexMap<
-            FactorSourceIDFromHash,
-            MnemonicWithPassphrase,
-        >,
+    pub(crate) fn with_secure_storage(
+        secure_storage_client: SecureStorageClient,
     ) -> Self {
-        Self::new(
-            TestDerivationMonoAndPolyInteractor::new(
-                false,
-                extra_mnemonics.clone(),
-            ),
-            TestDerivationMonoAndPolyInteractor::new(
-                false,
-                extra_mnemonics.clone(),
-            ),
-        )
+        let interactor = Arc::new(TestDerivationMonoAndPolyInteractor::new(
+            false,
+            secure_storage_client.clone(),
+        ));
+        Self {
+            mono: interactor.clone(),
+            poly: interactor.clone(),
+        }
     }
 }
 
@@ -68,27 +63,31 @@ impl KeysDerivationInteractors for TestDerivationInteractors {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(crate) struct TestDerivationMonoAndPolyInteractor {
     pub always_fail: bool,
-    pub extra_mnemonics:
-        IndexMap<FactorSourceIDFromHash, MnemonicWithPassphrase>,
+    pub secure_storage_client: SecureStorageClient,
+}
+impl Default for TestDerivationMonoAndPolyInteractor {
+    fn default() -> Self {
+        Self {
+            always_fail: false,
+            secure_storage_client: SecureStorageClient::ephemeral().0,
+        }
+    }
 }
 impl TestDerivationMonoAndPolyInteractor {
     pub(crate) fn new(
         always_fail: bool,
-        extra_mnemonics: IndexMap<
-            FactorSourceIDFromHash,
-            MnemonicWithPassphrase,
-        >,
+        secure_storage_client: SecureStorageClient,
     ) -> Self {
         Self {
             always_fail,
-            extra_mnemonics,
+            secure_storage_client,
         }
     }
     pub(crate) fn fail() -> Self {
-        Self::new(true, IndexMap::default())
+        Self::new(true, SecureStorageClient::always_fail())
     }
 
     async fn do_derive(
@@ -98,10 +97,31 @@ impl TestDerivationMonoAndPolyInteractor {
         if self.always_fail {
             return Err(CommonError::Unknown);
         }
+        /*
+                let holder = AsyncFnPtr::new(move |input| {
+            let backend = Arc::new(backend);
+            async move { backend.get_data(input).await }
+        });
+        */
+        let cloned_client = Arc::new(self.secure_storage_client.clone());
         do_derive_serially_looking_up_mnemonic_amongst_samples(
             request,
-            self.extra_mnemonics.clone(),
+            move |id| {
+                let secure_storage_client =
+                cloned_client.clone();
+                async move {
+                    secure_storage_client
+                        .load_mnemonic_with_passphrase(id)
+                        // .send()
+                        .await
+                }
+            },
         )
+        // .send()
+        .await
+        // .or_else(|| {
+        //     self.secure_storage_client.load_mnemonic_with_passphrase(request.factor_source_id)
+        // })
     }
 }
 
@@ -113,7 +133,7 @@ impl PolyFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
     ) -> Result<KeyDerivationResponse> {
         let mut pairs = IndexMap::new();
         for (k, r) in request.per_factor_source {
-            let instances = self.do_derive(r).await?;
+            let instances = self.do_derive(r).send().await?;
             pairs.insert(k, instances);
         }
         Ok(KeyDerivationResponse::new(pairs))
@@ -152,13 +172,24 @@ impl PolyFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
 //     }
 // }
 
+pub trait SendFuture: core::future::Future {
+    fn send(self) -> impl core::future::Future<Output = Self::Output> + Send
+    where
+        Self: Sized + Send,
+    {
+        self
+    }
+}
+
+impl<T: core::future::Future> SendFuture for T {}
+
 #[async_trait::async_trait]
 impl MonoFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
     async fn derive(
         &self,
         request: MonoFactorKeyDerivationRequest,
     ) -> Result<KeyDerivationResponse> {
-        let instances = self.do_derive(request.clone()).await?;
+        let instances = self.do_derive(request.clone()).send().await?;
         Ok(KeyDerivationResponse::new(IndexMap::just((
             request.factor_source_id,
             instances,

@@ -412,65 +412,12 @@ impl SargonOS {
             // tarpaulin will incorrectly flag next line is missed
             .await
     }
-
-    fn maybe_keys_derivation_interactors(
-        &self,
-    ) -> Option<Arc<dyn KeysDerivationInteractors>> {
-        self.interactors
-            .borrow()
-            .as_ref()
-            .map(|i| i.key_derivation.clone())
-    }
-
-    pub(crate) fn keys_derivation_interactors(
-        &self,
-    ) -> Arc<dyn KeysDerivationInteractors> {
-        self.maybe_keys_derivation_interactors()
-            .expect("No interactors")
-    }
 }
 
 #[allow(unused)]
 #[cfg(test)]
 impl SargonOS {
-    pub(crate) async fn init_keys_derivation_interactor_if_needed(
-        &self,
-    ) -> Result<Arc<dyn KeysDerivationInteractors>> {
-        let bdfs = self.bdfs()?;
-        let fsid = bdfs.id_from_hash();
-        let private_bdfs =
-            self.load_private_device_factor_source_by_id(fsid).await?;
-        self.init_keys_derivation_interactor_if_needed_with_mnemonics(
-            false,
-            IndexMap::kv(fsid, private_bdfs.mnemonic_with_passphrase),
-        )
-        .await
-    }
-
-    pub(crate) async fn init_keys_derivation_interactor_if_needed_with_mnemonics(
-        &self,
-        replace_existing: bool,
-        extra_mnemonics: IndexMap<
-            FactorSourceIDFromHash,
-            MnemonicWithPassphrase,
-        >,
-    ) -> Result<Arc<dyn KeysDerivationInteractors>> {
-        if !replace_existing
-            && let Some(interactors) = self.maybe_keys_derivation_interactors()
-        {
-            return Ok(interactors);
-        }
-
-        let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
-            Arc::new(
-                TestDerivationInteractors::mono_and_poly_with_extra_mnemonics(
-                    extra_mnemonics,
-                ),
-            );
-        let interactors = Interactors::new(derivation_interactor.clone());
-        self.interactors.borrow_mut().replace(interactors);
-        Ok(derivation_interactor)
-    }
+    
 
     pub(crate) async fn clear_cache(&self) {
         println!("💣 CLEAR CACHE");

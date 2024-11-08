@@ -160,15 +160,19 @@ mod tests {
         );
 
         let cache_client = FactorInstancesCacheClient::in_memory();
-
-        let interactors = Arc::new(
-            TestDerivationInteractors::mono_and_poly_with_extra_mnemonics(
-                IndexMap::kv(
-                    fs.factor_source.id_from_hash(),
-                    fs.mnemonic_with_passphrase.clone(),
-                ),
-            ),
-        );
+        let (secure_storage_client, storage) = SecureStorageClient::ephemeral();
+        secure_storage_client
+            .save_private_hd_factor_source(&fs)
+            .await
+            .unwrap();
+        let interactors =
+            Arc::new(TestDerivationInteractors::with_secure_storage(
+                // IndexMap::kv(
+                //     fs.factor_source.id_from_hash(),
+                //     fs.mnemonic_with_passphrase.clone(),
+                // ),
+                secure_storage_client,
+            ));
 
         let (_, accounts) = sut
             .create_unsaved_accounts_with_factor_source(

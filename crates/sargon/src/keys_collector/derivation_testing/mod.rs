@@ -9,40 +9,47 @@ pub(crate) use stateless_dummy_indices::*;
 pub(crate) use test_keys_collector::*;
 
 use crate::prelude::*;
+use std::future::ready;
 
 #[cfg(test)]
-pub fn do_derive_serially_looking_up_mnemonic_amongst_samples(
+pub async fn do_derive_serially_looking_up_mnemonic_amongst_samples<F>(
     request: MonoFactorKeyDerivationRequest,
-    extra_mnemonics: IndexMap<FactorSourceIDFromHash, MnemonicWithPassphrase>,
-) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-    __do_derive_serially_with_lookup_of_mnemonic(request, |f| {
-        f.maybe_sample_associated_mnemonic()
-            .or(extra_mnemonics.get(&f).cloned())
-            .ok_or(CommonError::FactorSourceDiscrepancy)
+    lookup_mnemonic: F,
+) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> 
+where
+    F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
+{
+
+    __do_derive_serially_with_lookup_of_mnemonic(request, async move |f: FactorSourceIDFromHash| {
+        lookup_mnemonic(f).await
+        // let res = f.maybe_sample_associated_mnemonic()
+        //     // .or(extra_mnemonics.get(&f).cloned())
+        //     .ok_or(CommonError::FactorSourceDiscrepancy);
+        // ready(res)
+
     })
+    .await
 }
 
 // FIXME put this behind a feature flag
-pub fn __do_derive_serially_with_lookup_of_mnemonic(
+pub async fn __do_derive_serially_with_lookup_of_mnemonic<F>(
     request: MonoFactorKeyDerivationRequest,
-    lookup_mnemonic: impl Fn(
-        FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase>,
-) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-    let factor_source_id = &request.factor_source_id;
-    let instances = request
-        .derivation_paths
-        .into_iter()
-        .map(|p| {
-            let mnemonic = lookup_mnemonic(*factor_source_id)?;
-            let seed = mnemonic.to_seed();
-            let hd_private_key = seed.derive_private_key(&p);
-            Ok(HierarchicalDeterministicFactorInstance::new(
-                *factor_source_id,
-                hd_private_key.public_key(),
-            ))
-        })
-        .collect::<Result<IndexSet<_>>>()?;
+    lookup_mnemonic: F,
+) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
+where
+    F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
+{
+    let factor_source_id = request.factor_source_id;
+    let mut out = IndexSet::<HierarchicalDeterministicFactorInstance>::new();
 
-    Ok(instances)
+    for path in request.derivation_paths {
+        let mnemonic = lookup_mnemonic(factor_source_id).await?;
+        let seed = mnemonic.to_seed();
+        let hd_private_key = seed.derive_private_key(&path);
+        out.insert(HierarchicalDeterministicFactorInstance::new(
+            factor_source_id,
+            hd_private_key.public_key(),
+        ));
+    }
+    Ok(out)
 }

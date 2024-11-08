@@ -7,7 +7,7 @@ use crate::prelude::*;
 ///
 /// It uses the lower level CRUD trait `SecureStorageDriver` which works on bytes (Vec<u8>),
 /// by instead working with JSON.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SecureStorageClient {
     /// Low level CRUD traits that works on bytes, passed from host via BIOS when
     /// booting the SargonOS
