@@ -5,11 +5,11 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSubintentExpireAtTime {
     /// The unix timestamp in seconds when the subintent expires.
-    pub unix_timestamp_seconds: Timestamp,
+    pub unix_timestamp_seconds: u64,
 }
 
-impl From<Timestamp> for DappToWalletInteractionSubintentExpireAtTime {
-    fn from(unix_timestamp_seconds: Timestamp) -> Self {
+impl From<u64> for DappToWalletInteractionSubintentExpireAtTime {
+    fn from(unix_timestamp_seconds: u64) -> Self {
         Self {
             unix_timestamp_seconds,
         }
@@ -19,13 +19,13 @@ impl From<Timestamp> for DappToWalletInteractionSubintentExpireAtTime {
 impl HasSampleValues for DappToWalletInteractionSubintentExpireAtTime {
     fn sample() -> Self {
         Self {
-            unix_timestamp_seconds: Timestamp::sample(),
+            unix_timestamp_seconds: 1730999831257,
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            unix_timestamp_seconds: Timestamp::sample_other(),
+            unix_timestamp_seconds: 1730999850000,
         }
     }
 }
@@ -50,6 +50,6 @@ mod tests {
 
     #[test]
     fn from() {
-        assert_eq!(SUT::from(Timestamp::sample()), SUT::sample());
+        assert_eq!(SUT::from(1730999831257), SUT::sample());
     }
 }
