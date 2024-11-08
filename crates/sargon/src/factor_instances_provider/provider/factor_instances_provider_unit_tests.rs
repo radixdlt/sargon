@@ -2,39 +2,35 @@ use std::ops::{Add, AddAssign};
 
 impl SargonOS {
     async fn with_bdfs() -> (Arc<Self>, FactorSource) {
-        let mwp = MnemonicWithPassphrase::sample_device();
-        let os = Self::boot_test_with_bdfs_mnemonic(mwp).await.unwrap();
+        let os = Self::fast_boot().await;
         let bdfs = os.bdfs().unwrap();
         (os, bdfs.into())
     }
 
     async fn create_and_save_new_mainnet_account_with_instances_stats(
         &self,
-        name: DisplayName,
+        name: impl AsRef<str>,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(name).await
+        let display_name = DisplayName::new(name)?;
+        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
     }
 }
 
 use crate::prelude::*;
 
 #[actix_rt::test]
-#[ignore]
 async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis_and_if_profile_is_used_a_new_account_is_created(
 ) {
     let (os, bdfs) = SargonOS::with_bdfs().await;
-    let cache = os.cache_snapshot().await;
-    cache.assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
-    // let name = DisplayName::new(format!("Acco {}", i)).unwrap();
+    os.cache_snapshot()
+        .await
+        .assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
     let prefix = "Acco";
     let stats = os
         .batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, NetworkID::Mainnet, prefix.to_owned())
             .await
             .unwrap();
-    assert_eq!(
-        stats.debug_was_cached.len(),
-        DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
-    );
+    assert_eq!(stats.debug_was_cached.len(), 0);
     assert_eq!(stats.debug_was_derived.len(), 0);
 
     assert_eq!(
@@ -47,7 +43,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
 
     let (acco, stats) = os
         .create_and_save_new_mainnet_account_with_instances_stats(
-            DisplayName::new("newly derive").unwrap(),
+            "newly derive",
         )
         .await
         .unwrap();
@@ -64,10 +60,6 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
     assert_eq!(stats.debug_was_derived.len(), CACHE_FILLING_QUANTITY + 1);
 
     assert_eq!(
-        // acco.as_unsecurified()
-        //     .unwrap()
-        //     .factor_instance()
-        //     .derivation_entity_index(),
         acco.try_get_unsecured_control()
             .unwrap()
             .transaction_signing
@@ -79,19 +71,24 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         )
         .unwrap()
     );
-    /*
-    assert!(os
-        .cache_snapshot()
-        .is_full(NetworkID::Mainnet, bdfs.factor_source_id()));
+
+    os.cache_snapshot()
+        .await
+        .assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
 
     // and another one
     let (acco, stats) = os
-        .new_mainnet_account_with_bdfs("newly derive 2")
+        .create_and_save_new_mainnet_account_with_instances_stats(
+            "newly derive 2",
+        )
         .await
         .unwrap();
 
     assert_eq!(
-        os.profile_snapshot().get_accounts().len(),
+        os.profile()
+            .unwrap()
+            .accounts_on_all_networks_including_hidden()
+            .len(),
         CACHE_FILLING_QUANTITY + 2
     );
 
@@ -99,18 +96,23 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
     assert_eq!(stats.debug_was_derived.len(), 0);
 
     assert_eq!(
-        acco.as_unsecurified()
+        acco.try_get_unsecured_control()
             .unwrap()
-            .factor_instance()
-            .derivation_entity_index(),
-        HDPathComponent::unsecurified_hardening_base_index(31)
+            .transaction_signing
+            .derivation_path()
+            .index(),
+        HDPathComponent::from_local_key_space(
+            31,
+            KeySpace::Unsecurified { is_hardened: true }
+        )
+        .unwrap()
     );
+
+    let cache = os.cache_snapshot().await;
     assert!(
-        !os.cache_snapshot()
-            .is_full(NetworkID::Mainnet, bdfs.factor_source_id()),
+        !cache.is_full(NetworkID::Mainnet, bdfs.id_from_hash()),
         "just consumed one, so not full"
     );
-    */
 }
 /*
 #[actix_rt::test]

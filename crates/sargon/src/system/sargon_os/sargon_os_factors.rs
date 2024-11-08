@@ -196,6 +196,43 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    pub async fn prederive_and_fill_cache_with_instances_for_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+        if !factor_source.factor_source_id().is_hash() {
+            panic!("Unsupported FactorSource which is not HD.")
+        }
+        let profile_snapshot = self.profile()?;
+        let keys_derivation_interactors = self.keys_derivation_interactors();
+        let outcome = CacheFiller::for_new_factor_source(
+            &self.clients.factor_instances_cache,
+            Some(&profile_snapshot),
+            factor_source.clone(),
+            NetworkID::Mainnet, // we care not about other networks here
+            keys_derivation_interactors.clone(),
+        )
+        .await?;
+
+        assert_eq!(outcome.factor_source_id, factor_source.id_from_hash());
+
+        #[cfg(test)]
+        {
+            assert_eq!(outcome.debug_found_in_cache.len(), 0);
+
+            assert_eq!(
+                outcome.debug_was_cached.len(),
+                DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+            );
+
+            assert_eq!(
+                outcome.debug_was_derived.len(),
+                DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+            );
+        }
+        Ok(outcome)
+    }
+
     /// Adds all factor sources to Profile.
     ///
     /// # Emits Event
@@ -235,37 +272,16 @@ impl SargonOS {
         let id_of_old_bdfs = self.bdfs()?.factor_source_id();
 
         // Use FactorInstancesProvider to eagerly fill cache...
-        let profile_snapshot = self.profile()?;
-        let keys_derivation_interactors = self.keys_derivation_interactors();
+
         for factor_source in new_factors_only.iter() {
-            if factor_source.factor_source_kind() != FactorSourceKind::Device {
+            if !factor_source.factor_source_id().is_hash() {
                 continue;
             }
-            let outcome = CacheFiller::for_new_factor_source(
-                &self.clients.factor_instances_cache,
-                Some(&profile_snapshot),
-                factor_source.clone(),
-                NetworkID::Mainnet, // we care not about other networks here
-                keys_derivation_interactors.clone(),
-            )
-            .await?;
-
-            assert_eq!(outcome.factor_source_id, factor_source.id_from_hash());
-
-            #[cfg(test)]
-            {
-                assert_eq!(outcome.debug_found_in_cache.len(), 0);
-
-                assert_eq!(
-                    outcome.debug_was_cached.len(),
-                    DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
-                );
-
-                assert_eq!(
-                    outcome.debug_was_derived.len(),
-                    DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
-                );
-            }
+            let _ = self
+                .prederive_and_fill_cache_with_instances_for_factor_source(
+                    factor_source,
+                )
+                .await?;
         }
 
         self.update_profile_with(|p| {

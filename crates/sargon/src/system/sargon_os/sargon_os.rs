@@ -403,6 +403,10 @@ impl SargonOS {
         )?;
 
         _ = os.init_keys_derivation_interactor_with_test_interactor();
+        os.prederive_and_fill_cache_with_instances_for_factor_source(
+            bdfs.factor_source.into(),
+        )
+        .await?;
 
         Ok(os)
     }
