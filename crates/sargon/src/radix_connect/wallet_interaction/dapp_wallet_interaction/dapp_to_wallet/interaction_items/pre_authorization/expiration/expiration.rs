@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::time::Duration;
 
 /// An enum that represents the different ways a subintent can expire.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
