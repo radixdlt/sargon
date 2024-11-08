@@ -22,10 +22,14 @@ where
     __do_derive_serially_with_lookup_of_mnemonic(
         request,
         async move |f: FactorSourceIDFromHash| {
-            let res = lookup_mnemonic(f).await;
-            return res.or(f
-                .maybe_sample_associated_mnemonic()
-                .ok_or(CommonError::FactorSourceDiscrepancy));
+            // let res = lookup_mnemonic(f).await;
+            // return res.or(f
+            //     .maybe_sample_associated_mnemonic()
+            //     .ok_or(CommonError::FactorSourceDiscrepancy));
+            if let Some(value) = f.maybe_sample_associated_mnemonic() {
+                return Ok(value);
+            };
+            lookup_mnemonic(f).await
         },
     )
     .await

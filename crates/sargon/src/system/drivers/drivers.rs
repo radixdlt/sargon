@@ -42,6 +42,14 @@ impl Drivers {
 
 #[cfg(test)]
 impl Drivers {
+    fn file_system() -> Arc<dyn FileSystemDriver> {
+        #[cfg(test)]
+        return InMemoryFileSystemDriver::new();
+
+        #[cfg(not(test))]
+        return RustFileSystemDriver::new();
+    }
+
     pub fn test() -> Arc<Self> {
         Drivers::new(
             RustNetworkingDriver::new(),
@@ -50,7 +58,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -64,7 +72,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -80,7 +88,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -96,7 +104,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -110,7 +118,7 @@ impl Drivers {
             host_info,
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -124,7 +132,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             logging,
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -138,7 +146,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             event_bus,
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
         )
@@ -170,7 +178,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             unsafe_storage,
             RustProfileStateChangeDriver::new(),
         )
@@ -186,7 +194,7 @@ impl Drivers {
             RustHostInfoDriver::new(),
             RustLoggingDriver::new(),
             RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
+            Self::file_system(),
             EphemeralUnsafeStorage::new(),
             profile_state_change,
         )

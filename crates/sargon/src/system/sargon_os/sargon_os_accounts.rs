@@ -576,7 +576,7 @@ impl SargonOS {
         )
         .await?;
 
-        let mut instance_per_factor = outcome
+        let instance_per_factor = outcome
             .clone()
             .per_factor
             .into_iter()

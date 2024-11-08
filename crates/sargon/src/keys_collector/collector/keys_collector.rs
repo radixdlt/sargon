@@ -83,14 +83,14 @@ impl KeysCollector {
         match interactor {
             KeyDerivationInteractor::PolyFactor(interactor) => {
                 // Prepare the request for the interactor
-                debug!("Creating poly request for interactor");
+                trace!("Creating poly request for interactor");
                 let request = self.request_for_parallel_interactor(
                     factor_sources
                         .into_iter()
                         .map(|f| f.id_from_hash())
                         .collect(),
                 )?;
-                debug!("Dispatching poly request to interactor: {:?}", request);
+                trace!("Dispatching poly request to interactor: {:?}", request);
                 let response = interactor.derive(request).await?;
                 self.process_batch_response(response)?;
             }
@@ -98,12 +98,12 @@ impl KeysCollector {
             KeyDerivationInteractor::MonoFactor(interactor) => {
                 for factor_source in factor_sources {
                     // Prepare the request for the interactor
-                    debug!("Creating mono request for interactor");
+                    trace!("Creating mono request for interactor");
                     let request = self.request_for_serial_interactor(
                         &factor_source.id_from_hash(),
                     )?;
 
-                    debug!(
+                    trace!(
                         "Dispatching mono request to interactor: {:?}",
                         request
                     );

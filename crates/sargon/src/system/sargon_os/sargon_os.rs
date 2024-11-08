@@ -15,7 +15,7 @@ pub struct SargonOS {
     pub clients: Clients,
 
     /// Optional so that we can defer integration with hosts...
-    pub interactors: RefCell<Option<Interactors>>,
+    pub interactors: RwLock<Option<Interactors>>,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -69,7 +69,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
-            interactors: RefCell::new(None),
+            interactors: RwLock::new(None),
         });
         os.clients
             .profile_state_change
@@ -94,7 +94,8 @@ impl SargonOS {
         &self,
     ) -> Option<Arc<dyn KeysDerivationInteractors>> {
         self.interactors
-            .borrow()
+            .read()
+            .unwrap()
             .as_ref()
             .map(|i| i.key_derivation.clone())
     }
@@ -127,7 +128,7 @@ impl SargonOS {
                 self.clients.secure_storage.clone(),
             ));
         let interactors = Interactors::new(derivation_interactor.clone());
-        self.interactors.borrow_mut().replace(interactors);
+        self.interactors.write().unwrap().replace(interactors);
         derivation_interactor
     }
 
@@ -179,13 +180,13 @@ impl SargonOS {
                 &host_info,
             );
 
-            // Must save to secure storage first, then add, so that 
+            // Must save to secure storage first, then add, so that
             // we easily can implement KeysDerivationInteractors that
             // can try to load the mnemonic from secure storage when
             // we are Cache filling using the FactorInstancesProvider
             self.secure_storage
-            .save_private_hd_factor_source(&bdfs)
-            .await?;
+                .save_private_hd_factor_source(&bdfs)
+                .await?;
 
             let bdfs_result = self
                 .add_factor_source(FactorSource::from(
@@ -196,8 +197,6 @@ impl SargonOS {
                 self.secure_storage.delete_profile(imported_id).await?;
                 return Err(error);
             }
-         
-         
         }
 
         let profile_to_report = self.profile_state_holder.profile()?;
@@ -382,7 +381,8 @@ impl SargonOS {
     pub async fn boot_test_with_bdfs_mnemonic(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
     ) -> Result<Arc<Self>> {
-        let test_drivers = Drivers::test();
+        let test_drivers =
+            Drivers::with_file_system(InMemoryFileSystemDriver::new());
         let bios = Bios::new(test_drivers);
         let os = Self::boot(bios).await;
         let (mut profile, bdfs) = os
