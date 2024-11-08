@@ -114,43 +114,63 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         "just consumed one, so not full"
     );
 }
-/*
+
 #[actix_rt::test]
 async fn add_factor_source() {
-    let mut os = SargonOS::new();
-    assert_eq!(os.cache_snapshot().total_number_of_factor_instances(), 0);
-    assert_eq!(os.profile_snapshot().factor_sources.len(), 0);
+    let os = SargonOS::fast_boot().await;
+    let cache = os.cache_snapshot().await;
+    assert_eq!(
+        cache.total_number_of_factor_instances(),
+        DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+    );
+    assert_eq!(os.profile().unwrap().factor_sources.len(), 1);
     let factor_source = FactorSource::sample();
     os.add_factor_source(factor_source.clone()).await.unwrap();
+    assert_eq!(os.profile().unwrap().factor_sources.len(), 2);
+    let cache = os.cache_snapshot().await;
     assert!(
-        os.cache_snapshot()
-            .is_full(NetworkID::Mainnet, factor_source.factor_source_id()),
+        cache.is_full(NetworkID::Mainnet, factor_source.id_from_hash()),
         "Should have put factors into the cache."
-    );
-    assert_eq!(
-        os.profile_snapshot().factor_sources,
-        IndexSet::just(factor_source)
     );
 }
 
 #[actix_rt::test]
 async fn adding_accounts_and_clearing_cache_in_between() {
-    let (mut os, _) = SargonOS::with_bdfs().await;
-    assert!(os.profile_snapshot().get_accounts().is_empty());
-    let (alice, stats) = os.new_mainnet_account_with_bdfs("alice").await.unwrap();
+    let os = SargonOS::fast_boot().await;
+    assert!(os
+        .profile()
+        .unwrap()
+        .accounts_on_all_networks_including_hidden()
+        .is_empty(),);
+    let (alice, stats) = os
+        .create_and_save_new_mainnet_account_with_instances_stats("alice")
+        .await
+        .unwrap();
     assert!(!stats.debug_found_in_cache.is_empty());
     assert!(stats.debug_was_cached.is_empty());
     assert!(stats.debug_was_derived.is_empty());
-    os.clear_cache();
 
-    let (bob, stats) = os.new_mainnet_account_with_bdfs("bob").await.unwrap();
+    os.clear_cache().await;
+
+    let (bob, stats) = os
+        .create_and_save_new_mainnet_account_with_instances_stats("bob")
+        .await
+        .unwrap();
     assert!(stats.debug_found_in_cache.is_empty());
     assert!(!stats.debug_was_cached.is_empty());
     assert!(!stats.debug_was_derived.is_empty());
     assert_ne!(alice, bob);
 
-    assert_eq!(os.profile_snapshot().get_accounts().len(), 2);
+    assert_eq!(
+        os.profile()
+            .unwrap()
+            .accounts_on_all_networks_including_hidden()
+            .len(),
+        2
+    );
 }
+
+/*
 
 #[actix_rt::test]
 async fn adding_personas_and_clearing_cache_in_between() {
@@ -191,7 +211,7 @@ async fn add_account_and_personas_mixed() {
     let (batman, stats) = os.new_mainnet_persona_with_bdfs("Batman").await.unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
-    let (alice, stats) = os.new_mainnet_account_with_bdfs("alice").await.unwrap();
+    let (alice, stats) = os.create_and_save_new_mainnet_account_with_instances_stats("alice").await.unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (satoshi, stats) = os.new_mainnet_persona_with_bdfs("Satoshi").await.unwrap();
@@ -199,7 +219,7 @@ async fn add_account_and_personas_mixed() {
 
     assert_ne!(batman.entity_address(), satoshi.entity_address());
 
-    let (bob, stats) = os.new_mainnet_account_with_bdfs("bob").await.unwrap();
+    let (bob, stats) = os.create_and_save_new_mainnet_account_with_instances_stats("bob").await.unwrap();
     assert!(stats.debug_was_derived.is_empty());
     assert_ne!(alice.entity_address(), bob.entity_address());
 
@@ -1038,7 +1058,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 #[actix_rt::test]
 async fn create_single_account() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
-    let (alice, stats) = os.new_mainnet_account_with_bdfs("alice").await.unwrap();
+    let (alice, stats) = os.create_and_save_new_mainnet_account_with_instances_stats("alice").await.unwrap();
     assert!(stats.debug_was_derived.is_empty(), "should have used cache");
     let (sec_accounts, stats) = os
         .securify_accounts(
