@@ -42,8 +42,30 @@ impl Profile {
         factor_instances_cache_client: &FactorInstancesCacheClient,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(FactorSourceID, Account)> {
-        let (factor_source_id, accounts) = self
-            .create_unsaved_accounts_with_factor_source(
+        self.create_unsaved_account_with_factor_source_with_derivation_outcome(
+            factor_source,
+            network_id,
+            name,
+            factor_instances_cache_client,
+            key_derivation_interactors,
+        )
+        .await
+        .map(|(x, y, _)| (x, y))
+    }
+    pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+        factor_instances_cache_client: &FactorInstancesCacheClient,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+    ) -> Result<(
+        FactorSourceID,
+        Account,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        let (factor_source_id, accounts, derivation_outcome) = self
+            .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 1,
@@ -58,7 +80,7 @@ impl Profile {
             .last()
             .expect("Should have created one account");
 
-        Ok((factor_source_id, account))
+        Ok((factor_source_id, account, derivation_outcome))
     }
 
     /// Creates many new non securified accounts **WITHOUT** adding them to Profile, using the *main* "Babylon"
@@ -97,6 +119,31 @@ impl Profile {
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
     ) -> Result<(FactorSourceID, Accounts)> {
+        self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+            factor_source,
+            network_id,
+            count,
+            factor_instances_cache_client,
+            key_derivation_interactors,
+            get_name,
+        )
+        .await
+        .map(|(x, y, _)| (x, y))
+    }
+
+    pub async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        factor_instances_cache_client: &FactorInstancesCacheClient,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+    ) -> Result<(
+        FactorSourceID,
+        Accounts,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let count = count as usize;
 
         let number_of_accounts_on_network = self
@@ -118,7 +165,7 @@ impl Profile {
             )
             .await?;
 
-        let instances_to_use_directly = outcome.to_use_directly;
+        let instances_to_use_directly = outcome.clone().to_use_directly;
 
         assert_eq!(instances_to_use_directly.len(), count);
 
@@ -141,7 +188,7 @@ impl Profile {
             })
             .collect::<Accounts>();
 
-        Ok((fsid, accounts))
+        Ok((fsid, accounts, outcome))
     }
 }
 

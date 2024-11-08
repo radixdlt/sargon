@@ -2,22 +2,17 @@ use std::ops::{Add, AddAssign};
 
 impl SargonOS {
     async fn with_bdfs() -> (Arc<Self>, FactorSource) {
-        let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = Self::boot(bios).await;
-        let (_, bdfs) = os
-            .create_new_profile_with_bdfs(None)
-            .await
-            .expect("Should create BDFS");
-
-        (os, bdfs.factor_source.into())
+        let mwp = MnemonicWithPassphrase::sample_device();
+        let os = Self::boot_test_with_bdfs_mnemonic(mwp).await.unwrap();
+        let bdfs = os.bdfs().unwrap();
+        (os, bdfs.into())
     }
 
     async fn create_and_save_new_mainnet_account_with_instances_stats(
         &self,
-        _name: DisplayName,
+        name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        todo!()
+        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(name).await
     }
 }
 
@@ -28,18 +23,20 @@ use crate::prelude::*;
 async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis_and_if_profile_is_used_a_new_account_is_created(
 ) {
     let (os, bdfs) = SargonOS::with_bdfs().await;
-    for i in 0..CACHE_FILLING_QUANTITY {
-        let name = DisplayName::new(format!("Acco {}", i)).unwrap();
-        let (acco, stats) = os
-            .create_and_save_new_mainnet_account_with_instances_stats(
-                name.clone(),
-            )
+    let cache = os.cache_snapshot().await;
+    cache.assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
+    // let name = DisplayName::new(format!("Acco {}", i)).unwrap();
+    let prefix = "Acco";
+    let stats = os
+        .batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, NetworkID::Mainnet, prefix.to_owned())
             .await
             .unwrap();
-        assert_eq!(acco.display_name, name);
-        assert_eq!(stats.debug_was_cached.len(), 0);
-        assert_eq!(stats.debug_was_derived.len(), 0);
-    }
+    assert_eq!(
+        stats.debug_was_cached.len(),
+        DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+    );
+    assert_eq!(stats.debug_was_derived.len(), 0);
+
     assert_eq!(
         os.profile()
             .unwrap()
