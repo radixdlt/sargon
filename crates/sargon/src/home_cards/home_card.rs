@@ -32,6 +32,10 @@ pub enum HomeCard {
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
     Connector,
+
+    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
+    /// Action: Redirect user to Radix Ecosystem.
+    DiscoverRadixDapps,
 }
 
 impl Identifiable for HomeCard {
@@ -62,6 +66,7 @@ impl Ord for HomeCard {
                 ContinueRadQuest => 1,
                 Dapp { .. } => 2,
                 Connector => 3,
+                DiscoverRadixDapps => 4,
             }
         }
 
