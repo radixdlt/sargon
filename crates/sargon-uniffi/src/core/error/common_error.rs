@@ -768,6 +768,9 @@ pub enum CommonError {
 
     #[error("SecurityState securified but expected unsecurified")]
     SecurityStateSecurifiedButExpectedUnsecurified = 10215,
+
+    #[error("Failed to add all personas, found duplicated persona.")]
+    UnableToAddAllPersonasDuplicatesFound = 10216,
 }
 
 #[uniffi::export]

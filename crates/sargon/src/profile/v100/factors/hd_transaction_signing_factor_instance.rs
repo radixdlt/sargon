@@ -23,9 +23,9 @@ pub trait IsEntityPath:
     + Into<DerivationPath>
     + TryFrom<DerivationPath, Error = CommonError>
 {
-    fn derivation_path(&self) -> DerivationPath {
-        self.clone().into()
-    }
+    // fn derivation_path(&self) -> DerivationPath {
+    //     self.clone().into()
+    // }
 }
 impl<
         T: NewEntityPath

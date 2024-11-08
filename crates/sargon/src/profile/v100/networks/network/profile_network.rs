@@ -174,6 +174,22 @@ impl ProfileNetwork {
             None
         }
     }
+
+    /// Returns a clone of the updated persona if found, else None.
+    pub fn update_persona<F>(
+        &mut self,
+        address: &IdentityAddress,
+        mutate: F,
+    ) -> Option<Persona>
+    where
+        F: FnMut(&mut Persona),
+    {
+        if self.personas.update_with(address, mutate) {
+            self.personas.get_id(address).cloned()
+        } else {
+            None
+        }
+    }
 }
 
 impl HasSampleValues for ProfileNetwork {

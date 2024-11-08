@@ -20,7 +20,11 @@ pub trait HasSecurityState {
 pub trait IsBaseEntity:
     HasEntityKindObjectSafe + IsNetworkAware + HasSecurityState
 {
-    type Address: IsBaseEntityAddress + PartialEq + Eq + std::hash::Hash;
+    type Address: IsBaseEntityAddress
+        + PartialEq
+        + Eq
+        + std::hash::Hash
+        + std::fmt::Debug;
 
     fn address(&self) -> Self::Address;
 
@@ -47,6 +51,8 @@ pub trait IsEntity:
     + HasEntityKind
     + std::hash::Hash
     + Eq
+    + std::fmt::Debug
+    + Clone
     + TryFrom<AccountOrPersona, Error = CommonError>
 {
     type Path: IsEntityPath;

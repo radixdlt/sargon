@@ -243,6 +243,18 @@ impl Profile {
         self.networks.update_account(address, mutate)
     }
 
+    /// Returns a clone of the updated persona if found, else None.
+    pub fn update_persona<F>(
+        &mut self,
+        address: &IdentityAddress,
+        mutate: F,
+    ) -> Option<Persona>
+    where
+        F: FnMut(&mut Persona),
+    {
+        self.networks.update_persona(address, mutate)
+    }
+
     pub fn update_last_used_of_factor_source(
         &mut self,
         id: &FactorSourceID,

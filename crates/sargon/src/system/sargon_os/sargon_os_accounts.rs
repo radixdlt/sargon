@@ -1097,16 +1097,6 @@ mod tests {
         );
     }
 
-    impl DisplayName {
-        fn random() -> Self {
-            Self::new(format!(
-                "random-{}",
-                id().to_string().drain(0..20).collect::<String>()
-            ))
-            .unwrap()
-        }
-    }
-
     #[actix_rt::test]
     async fn update_account_updates_in_memory_profile() {
         // ARRANGE

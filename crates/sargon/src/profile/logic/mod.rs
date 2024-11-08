@@ -1,4 +1,5 @@
 mod account;
+mod create_entity;
 mod gateway;
 mod persona;
 mod profile_header;
@@ -7,6 +8,7 @@ mod profile_networks;
 mod query_factor_sources;
 
 pub use account::*;
+pub use create_entity::*;
 pub use gateway::*;
 pub use persona::*;
 pub use profile_header::*;

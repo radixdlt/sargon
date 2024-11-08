@@ -144,51 +144,42 @@ impl Profile {
         Accounts,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let count = count as usize;
-
         let number_of_accounts_on_network = self
             .networks
             .get_id(network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
-        let fsid = factor_source.factor_source_id();
-
-        let outcome =
-            VirtualEntityCreatingInstanceProvider::for_many_account_vecis(
-                count,
-                factor_instances_cache_client,
-                Some(self),
+        let (factor_source_id, accounts, derivation_outcome) = self
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
                 factor_source,
                 network_id,
+                count,
+                factor_instances_cache_client,
                 key_derivation_interactors,
+                get_name,
             )
             .await?;
 
-        let instances_to_use_directly = outcome.clone().to_use_directly;
-
-        assert_eq!(instances_to_use_directly.len(), count);
-
-        let accounts = instances_to_use_directly
+        let accounts_with_appearance_ids_set = accounts
             .into_iter()
-            .map(|f| {
-                HDFactorInstanceTransactionSigning::<AccountPath>::new(f)
-                    .unwrap()
-            })
-            .map(|veci| {
-                let idx =
-                    u32::from(veci.path.index().index_in_local_key_space());
-                let name = get_name(idx);
+            .enumerate()
+            .map(|(offset, account)| {
+                let mut account = account;
                 let appearance_id =
                     AppearanceID::from_number_of_accounts_on_network(
-                        (idx as usize) + number_of_accounts_on_network,
+                        number_of_accounts_on_network + offset,
                     );
-
-                Account::new(veci, name, appearance_id)
+                account.appearance_id = appearance_id;
+                account
             })
             .collect::<Accounts>();
 
-        Ok((fsid, accounts, outcome))
+        Ok((
+            factor_source_id,
+            accounts_with_appearance_ids_set,
+            derivation_outcome,
+        ))
     }
 }
 
@@ -207,17 +198,13 @@ mod tests {
         );
 
         let cache_client = FactorInstancesCacheClient::in_memory();
-        let (secure_storage_client, storage) = SecureStorageClient::ephemeral();
+        let (secure_storage_client, _) = SecureStorageClient::ephemeral();
         secure_storage_client
             .save_private_hd_factor_source(&fs)
             .await
             .unwrap();
         let interactors =
             Arc::new(TestDerivationInteractors::with_secure_storage(
-                // IndexMap::kv(
-                //     fs.factor_source.id_from_hash(),
-                //     fs.mnemonic_with_passphrase.clone(),
-                // ),
                 secure_storage_client,
             ));
 

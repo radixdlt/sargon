@@ -20,6 +20,15 @@ pub enum EventKind {
     /// Current Gateway changed
     GatewayChangedCurrent,
 
+    /// Profile updated with a new persona.
+    PersonaAdded,
+
+    /// Profile updated with new personas.
+    PersonasAdded,
+
+    /// An existing persona has been updated
+    PersonaUpdated,
+
     /// Profile was saved.
     ProfileSaved,
 
@@ -165,7 +174,10 @@ mod tests {
                 | SecurityStructureAdded
                 | FactorSourceAdded
                 | FactorSourcesAdded
-                | FactorSourceUpdated => {
+                | FactorSourceUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated => {
                     assert!(!affects)
                 }
             })
@@ -189,7 +201,10 @@ mod tests {
                 | SecurityStructureAdded
                 | FactorSourcesAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated => assert!(!affects),
             })
     }
 
@@ -211,7 +226,10 @@ mod tests {
                 | GatewayChangedCurrent
                 | FactorSourcesAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated => assert!(!affects),
             })
     }
 
@@ -233,7 +251,10 @@ mod tests {
                 | FactorSourcesAdded
                 | SecurityStructureAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated => assert!(!affects),
             })
     }
 
@@ -254,7 +275,10 @@ mod tests {
                 | SecurityStructureAdded
                 | AccountAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated => assert!(!affects),
             })
     }
 }

@@ -7,12 +7,20 @@ impl SargonOS {
         (os, bdfs.into())
     }
 
-    async fn create_and_save_new_mainnet_account_with_instances_stats(
+    async fn create_and_save_new_mainnet_account_with_derivation_outcome(
         &self,
         name: impl AsRef<str>,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
         let display_name = DisplayName::new(name)?;
         self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
+    }
+
+    async fn create_and_save_new_mainnet_persona_with_derivation_outcome(
+        &self,
+        name: impl AsRef<str>,
+    ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
+        let display_name = DisplayName::new(name)?;
+        self.create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(display_name).await
     }
 }
 
@@ -42,7 +50,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
     );
 
     let (acco, stats) = os
-        .create_and_save_new_mainnet_account_with_instances_stats(
+        .create_and_save_new_mainnet_account_with_derivation_outcome(
             "newly derive",
         )
         .await
@@ -78,7 +86,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
 
     // and another one
     let (acco, stats) = os
-        .create_and_save_new_mainnet_account_with_instances_stats(
+        .create_and_save_new_mainnet_account_with_derivation_outcome(
             "newly derive 2",
         )
         .await
@@ -143,7 +151,7 @@ async fn adding_accounts_and_clearing_cache_in_between() {
         .accounts_on_all_networks_including_hidden()
         .is_empty(),);
     let (alice, stats) = os
-        .create_and_save_new_mainnet_account_with_instances_stats("alice")
+        .create_and_save_new_mainnet_account_with_derivation_outcome("alice")
         .await
         .unwrap();
     assert!(!stats.debug_found_in_cache.is_empty());
@@ -153,7 +161,7 @@ async fn adding_accounts_and_clearing_cache_in_between() {
     os.clear_cache().await;
 
     let (bob, stats) = os
-        .create_and_save_new_mainnet_account_with_instances_stats("bob")
+        .create_and_save_new_mainnet_account_with_derivation_outcome("bob")
         .await
         .unwrap();
     assert!(stats.debug_found_in_cache.is_empty());
@@ -170,10 +178,9 @@ async fn adding_accounts_and_clearing_cache_in_between() {
     );
 }
 
-/*
-
 #[actix_rt::test]
 async fn adding_personas_and_clearing_cache_in_between() {
+    /*
     let (mut os, _) = SargonOS::with_bdfs().await;
     assert!(os.profile_snapshot().get_personas().is_empty());
     let (batman, stats) = os.new_mainnet_persona_with_bdfs("Batman").await.unwrap();
@@ -200,7 +207,9 @@ async fn adding_personas_and_clearing_cache_in_between() {
     assert_ne!(batman, satoshi);
 
     assert_eq!(os.profile_snapshot().get_personas().len(), 2);
+    */
 }
+/*
 
 #[actix_rt::test]
 async fn add_account_and_personas_mixed() {
@@ -211,7 +220,7 @@ async fn add_account_and_personas_mixed() {
     let (batman, stats) = os.new_mainnet_persona_with_bdfs("Batman").await.unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
-    let (alice, stats) = os.create_and_save_new_mainnet_account_with_instances_stats("alice").await.unwrap();
+    let (alice, stats) = os.create_and_save_new_mainnet_account_with_derivation_outcome("alice").await.unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (satoshi, stats) = os.new_mainnet_persona_with_bdfs("Satoshi").await.unwrap();
@@ -219,7 +228,7 @@ async fn add_account_and_personas_mixed() {
 
     assert_ne!(batman.entity_address(), satoshi.entity_address());
 
-    let (bob, stats) = os.create_and_save_new_mainnet_account_with_instances_stats("bob").await.unwrap();
+    let (bob, stats) = os.create_and_save_new_mainnet_account_with_derivation_outcome("bob").await.unwrap();
     assert!(stats.debug_was_derived.is_empty());
     assert_ne!(alice.entity_address(), bob.entity_address());
 
@@ -1058,7 +1067,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 #[actix_rt::test]
 async fn create_single_account() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
-    let (alice, stats) = os.create_and_save_new_mainnet_account_with_instances_stats("alice").await.unwrap();
+    let (alice, stats) = os.create_and_save_new_mainnet_account_with_derivation_outcome("alice").await.unwrap();
     assert!(stats.debug_was_derived.is_empty(), "should have used cache");
     let (sec_accounts, stats) = os
         .securify_accounts(

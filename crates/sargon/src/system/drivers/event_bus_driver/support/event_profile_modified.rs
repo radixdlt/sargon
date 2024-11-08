@@ -9,8 +9,17 @@ pub enum EventProfileModified {
     /// New accounts with `addresses` were inserted into the active profile
     AccountsAdded { addresses: Vec<AccountAddress> },
 
+    /// A new persona with `address` was inserted into the active profile
+    PersonaAdded { address: IdentityAddress },
+
+    /// New personas with `addresses` were inserted into the active profile
+    PersonasAdded { addresses: Vec<IdentityAddress> },
+
     /// An existing account has been updated
     AccountUpdated { address: AccountAddress },
+
+    /// An existing persona has been updated
+    PersonaUpdated { address: IdentityAddress },
 
     /// Profile updated with a new factor source.
     FactorSourceAdded { id: FactorSourceID },
@@ -28,6 +37,9 @@ pub enum EventProfileModified {
 impl HasEventKind for EventProfileModified {
     fn kind(&self) -> EventKind {
         match self {
+            Self::PersonaAdded { address: _ } => EventKind::PersonaAdded,
+            Self::PersonaUpdated { address: _ } => EventKind::PersonaUpdated,
+            Self::PersonasAdded { addresses: _ } => EventKind::PersonasAdded,
             Self::AccountUpdated { address: _ } => EventKind::AccountUpdated,
             Self::AccountAdded { address: _ } => EventKind::AccountAdded,
             Self::AccountsAdded { addresses: _ } => EventKind::AccountsAdded,
@@ -103,6 +115,26 @@ mod tests {
                 addresses: vec![AccountAddress::sample()],
             },
             EventKind::AccountsAdded,
+        );
+
+        test(
+            SUT::PersonaAdded {
+                address: IdentityAddress::sample(),
+            },
+            EventKind::PersonaAdded,
+        );
+
+        test(
+            SUT::PersonaUpdated {
+                address: IdentityAddress::sample(),
+            },
+            EventKind::PersonaUpdated,
+        );
+        test(
+            SUT::PersonasAdded {
+                addresses: vec![IdentityAddress::sample()],
+            },
+            EventKind::PersonasAdded,
         );
 
         test(

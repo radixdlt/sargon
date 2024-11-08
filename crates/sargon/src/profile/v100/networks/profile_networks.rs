@@ -14,6 +14,12 @@ impl ProfileNetworks {
             .cloned()
     }
 
+    pub fn get_persona(&self, address: &IdentityAddress) -> Option<Persona> {
+        self.get_id(address.network_id())
+            .and_then(|n| n.personas.get_id(address))
+            .cloned()
+    }
+
     /// Returns a clone of the updated account if found, else None.
     pub fn update_account<F>(
         &mut self,
@@ -27,6 +33,21 @@ impl ProfileNetworks {
             _ = n.update_account(address, |a| mutate(a))
         });
         self.get_account(address)
+    }
+
+    /// Returns a clone of the updated persona if found, else None.
+    pub fn update_persona<F>(
+        &mut self,
+        address: &IdentityAddress,
+        mut mutate: F,
+    ) -> Option<Persona>
+    where
+        F: FnMut(&mut Persona),
+    {
+        self.update_with(address.network_id(), |n| {
+            _ = n.update_persona(address, |a| mutate(a))
+        });
+        self.get_persona(address)
     }
 }
 

@@ -274,7 +274,7 @@ impl SargonOS {
         // Use FactorInstancesProvider to eagerly fill cache...
 
         for factor_source in new_factors_only.iter() {
-            if !factor_source.factor_source_id().is_hash() {
+            if factor_source.factor_source_kind() != FactorSourceKind::Device {
                 continue;
             }
             let _ = self
