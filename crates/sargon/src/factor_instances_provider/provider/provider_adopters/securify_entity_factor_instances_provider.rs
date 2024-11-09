@@ -242,7 +242,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn securify_accounts_and_personas_with_override_factor() {
         /*
         // this is mostly a soundness test for the two functions `for_persona_mfa` and `for_account_mfa`

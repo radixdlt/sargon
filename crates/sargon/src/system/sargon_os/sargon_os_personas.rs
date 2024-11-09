@@ -664,7 +664,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_first_create_unsaved_persona() {
         // ARRANGE
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
@@ -685,7 +684,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_create_unsaved_persona_twice_yield_same_personas() {
         // ARRANGE
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
@@ -710,7 +708,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_first_create_and_add_persona_is_added() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -731,7 +728,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_first_create_and_add_persona_has_index_0() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -758,7 +754,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_second_create_and_add_persona_has_index_1() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -792,7 +787,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn batch_create_persona_then_n_personas_are_saved_and_have_indices_0_through_n(
     ) {
         // ARRANGE
@@ -828,7 +822,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_batch_create_and_add_persona_n_has_names_with_index_appended_to_prefix(
     ) {
         // ARRANGE
@@ -863,7 +856,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn batch_create_persona_then_n_personas_are_saved_and_have_persona_data_default(
     ) {
         // ARRANGE
@@ -889,7 +881,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn batch_create_persona_unsaved_are_not_saved() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -910,7 +901,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_create_unsaved_persona_emits_factor_source_updated() {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
@@ -937,7 +927,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_create_and_save_new_persona_emits_events() {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
@@ -1114,7 +1103,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_personas_on_current_network_non_empty() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -1135,7 +1123,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_personas_on_current_network_empty_when_switched_network() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -1158,7 +1145,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_persona_by_address_exists() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -1176,7 +1162,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn test_persona_by_address_not_exists() {
         // ARRANGE
         let os = SUT::fast_boot().await;

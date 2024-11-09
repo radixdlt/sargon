@@ -40,7 +40,7 @@ impl SargonOS {
         &self,
     ) -> Result<Account> {
         self.wrapped
-            .create_unsaved_unnamed_mainnet_account()
+            .create_unsaved_unnamed_mainnet_account_with_bdfs()
             .await
             .into_result()
     }
@@ -51,7 +51,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_unsaved_mainnet_account(name.into_internal())
+            .create_unsaved_mainnet_account_with_bdfs(name.into_internal())
             .await
             .into_result()
     }
@@ -74,7 +74,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_unsaved_account(
+            .create_unsaved_account_with_bdfs(
                 network_id.into_internal(),
                 name.into_internal(),
             )
@@ -90,7 +90,7 @@ impl SargonOS {
         &self,
     ) -> Result<Account> {
         self.wrapped
-            .create_and_save_new_unnamed_mainnet_account()
+            .create_and_save_new_unnamed_mainnet_account_with_bdfs()
             .await
             .into_result()
     }
@@ -104,7 +104,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_and_save_new_mainnet_account(name.into_internal())
+            .create_and_save_new_mainnet_account_with_bdfs(name.into_internal())
             .await
             .into_result()
     }
@@ -119,7 +119,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_and_save_new_account(
+            .create_and_save_new_account_with_bdfs(
                 network_id.into_internal(),
                 name.into_internal(),
             )
@@ -141,7 +141,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<()> {
         self.wrapped
-            .batch_create_many_accounts_then_save_once(
+            .batch_create_many_accounts_with_bdfs_then_save_once(
                 count,
                 network_id.into_internal(),
                 name_prefix,
@@ -165,7 +165,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<Vec<Account>> {
         self.wrapped
-            .batch_create_unsaved_accounts(
+            .batch_create_unsaved_accounts_with_bdfs(
                 network_id.into_internal(),
                 count,
                 name_prefix,

@@ -7,8 +7,8 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = StateEntityDetailsResponse;
 
-    #[test]
-    #[ignore] // FIXME: impl support for rest of the response atoms
+    #[test] // FIXME: impl support for rest of the response atoms
+    #[ignore]
     fn json_two_accounts() {
         let _ = fixture_and_json::<SUT>(include_str!(concat!(
             env!("FIXTURES_MODELS_GW"),
@@ -18,8 +18,8 @@ mod tests {
         // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
     }
 
-    #[test]
-    #[ignore] // FIXME: impl support for rest of the response atoms
+    #[test] // FIXME: impl support for rest of the response atoms
+    #[ignore]
     fn json_single_account_many_nfts_and_fungibles() {
         let _ = fixture_and_json::<SUT>(include_str!(concat!(
             env!("FIXTURES_MODELS_GW"),

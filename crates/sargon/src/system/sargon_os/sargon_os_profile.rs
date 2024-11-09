@@ -233,7 +233,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn create_first_account_has_networks_is_true() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -250,7 +249,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[ignore]
     async fn create_first_account_has_accounts_on_any_network() {
         // ARRANGE
         let os = SUT::fast_boot().await;
