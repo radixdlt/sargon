@@ -177,6 +177,7 @@ reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f
 
 # async-std = "1.13.0"
 async-std = "1.13.0"
+futures = "0.3.31"
 
 # Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
 # This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS

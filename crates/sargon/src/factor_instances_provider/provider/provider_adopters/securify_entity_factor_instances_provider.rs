@@ -15,13 +15,13 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_account_mfa<'a>(
-        cache_client: &FactorInstancesCacheClient,
-        profile: &'a Profile,
+    pub async fn for_account_mfa(
+        cache_client: Arc<FactorInstancesCacheClient>,
+        profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<FactorInstancesProviderOutcome> {
+    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
         Self::for_entity_mfa::<Account>(
             cache_client,
             profile,
@@ -43,13 +43,13 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_persona_mfa<'a>(
-        cache_client: &FactorInstancesCacheClient,
-        profile: &'a Profile,
+    pub async fn for_persona_mfa(
+        cache_client: Arc<FactorInstancesCacheClient>,
+        profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<FactorInstancesProviderOutcome> {
+    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
         Self::for_entity_mfa::<Persona>(
             cache_client,
             profile,
@@ -71,13 +71,13 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_entity_mfa<'a, E: IsEntity>(
-        cache_client: &FactorInstancesCacheClient,
-        profile: &'a Profile,
+    pub async fn for_entity_mfa<E: IsEntity>(
+        cache_client: Arc<FactorInstancesCacheClient>,
+        profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         addresses_of_entities: IndexSet<E::Address>,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<FactorInstancesProviderOutcome> {
+    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
         let factor_sources_to_use = matrix_of_factor_sources
             .all_factors()
             .into_iter()
@@ -114,14 +114,14 @@ impl SecurifyEntityFactorInstancesProvider {
             interactors,
         );
 
-        let outcome = provider
+        let (instances_consumer, outcome) = provider
             .provide(QuantifiedDerivationPreset::new(
                 DerivationPreset::mfa_entity_kind(entity_kind),
                 addresses_of_entities.len(),
             ))
             .await?;
 
-        Ok(outcome.into())
+        Ok((instances_consumer, outcome.into()))
     }
 }
 
@@ -140,8 +140,8 @@ mod tests {
         let cache_client = FactorInstancesCacheClient::in_memory();
 
         let _ = Sut::for_account_mfa(
-            &cache_client,
-            &Profile::sample_from([fs.clone()], [&a], []),
+            Arc::new(cache_client),
+            Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
                     .unwrap(),
@@ -166,8 +166,8 @@ mod tests {
         let cache_client = FactorInstancesCacheClient::in_memory();
 
         let _ = Sut::for_account_mfa(
-            &cache_client,
-            &Profile::sample_from([fs.clone()], [&a], []),
+            Arc::new(cache_client),
+            Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
                     .unwrap(),
@@ -220,8 +220,8 @@ mod tests {
         let cache_client = FactorInstancesCacheClient::in_memory();
 
         let _ = Sut::for_account_mfa(
-            &cache_client,
-            &profile,
+            Arc::new(cache_client),
+            Arc::new(profile),
             MatrixOfFactorSources::new(
                 PrimaryRoleWithFactorSources::override_only([fs.clone()])
                     .unwrap(),

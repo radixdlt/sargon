@@ -13,9 +13,9 @@ impl Profile {
         &self,
         network_id: NetworkID,
         name: DisplayName,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(FactorSourceID, Account)> {
+    ) -> Result<(FactorSourceID, Account, InstancesConsumer)> {
         let bdfs = self.bdfs();
         self.create_unsaved_account_with_factor_source(
             bdfs.into(),
@@ -39,9 +39,9 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(FactorSourceID, Account)> {
+    ) -> Result<(FactorSourceID, Account, InstancesConsumer)> {
         self.create_unsaved_account_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -50,21 +50,28 @@ impl Profile {
             key_derivation_interactors,
         )
         .await
-        .map(|(x, y, _)| (x, y))
+        .map(|(x, y, z, _)| (x, y, z))
     }
+
     pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(
         FactorSourceID,
         Account,
+        InstancesConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let (factor_source_id, accounts, derivation_outcome) = self
+        let (
+            factor_source_id,
+            accounts,
+            instances_consumer,
+            derivation_outcome,
+        ) = self
             .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -80,7 +87,12 @@ impl Profile {
             .last()
             .expect("Should have created one account");
 
-        Ok((factor_source_id, account, derivation_outcome))
+        Ok((
+            factor_source_id,
+            account,
+            instances_consumer,
+            derivation_outcome,
+        ))
     }
 
     /// Creates many new non securified accounts **WITHOUT** adding them to Profile, using the *main* "Babylon"
@@ -94,10 +106,10 @@ impl Profile {
         &self,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(FactorSourceID, Accounts)> {
+    ) -> Result<(FactorSourceID, Accounts, InstancesConsumer)> {
         let bdfs = self.bdfs();
         self.create_unsaved_accounts_with_factor_source(
             bdfs.into(),
@@ -115,10 +127,10 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(FactorSourceID, Accounts)> {
+    ) -> Result<(FactorSourceID, Accounts, InstancesConsumer)> {
         self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -128,7 +140,7 @@ impl Profile {
             get_name,
         )
         .await
-        .map(|(x, y, _)| (x, y))
+        .map(|(x, y, z, _)| (x, y, z))
     }
 
     pub async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
@@ -136,12 +148,13 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
     ) -> Result<(
         FactorSourceID,
         Accounts,
+        InstancesConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let number_of_accounts_on_network = self
@@ -150,7 +163,7 @@ impl Profile {
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
-        let (factor_source_id, accounts, derivation_outcome) = self
+        let (factor_source_id, accounts, instances_consumer, derivation_outcome) = self
             .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
                 factor_source,
                 network_id,
@@ -178,6 +191,7 @@ impl Profile {
         Ok((
             factor_source_id,
             accounts_with_appearance_ids_set,
+            instances_consumer,
             derivation_outcome,
         ))
     }
@@ -197,7 +211,7 @@ mod tests {
             None::<Accounts>,
         );
 
-        let cache_client = FactorInstancesCacheClient::in_memory();
+        let cache_client = Arc::new(FactorInstancesCacheClient::in_memory());
         let (secure_storage_client, _) = SecureStorageClient::ephemeral();
         secure_storage_client
             .save_private_hd_factor_source(&fs)
@@ -208,12 +222,12 @@ mod tests {
                 secure_storage_client,
             ));
 
-        let (_, accounts) = sut
+        let (_, accounts, consumer) = sut
             .create_unsaved_accounts_with_factor_source(
                 fs.factor_source.clone().into(),
                 NetworkID::Mainnet,
                 3,
-                &cache_client,
+                cache_client,
                 interactors,
                 |i| {
                     DisplayName::new(if i == 0 {
@@ -228,6 +242,7 @@ mod tests {
             )
             .await
             .unwrap();
+        consumer.consume().await.unwrap();
 
         pretty_assertions::assert_eq!(
             accounts,

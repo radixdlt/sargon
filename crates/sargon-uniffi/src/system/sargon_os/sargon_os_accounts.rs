@@ -165,7 +165,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<Vec<Account>> {
         self.wrapped
-            .batch_create_unsaved_accounts_with_bdfs(
+            .batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
                 network_id.into_internal(),
                 count,
                 name_prefix,

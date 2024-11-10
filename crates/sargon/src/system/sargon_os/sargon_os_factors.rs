@@ -206,8 +206,8 @@ impl SargonOS {
         let profile_snapshot = self.profile()?;
         let keys_derivation_interactors = self.keys_derivation_interactors();
         let outcome = CacheFiller::for_new_factor_source(
-            &self.clients.factor_instances_cache,
-            Some(&profile_snapshot),
+            Arc::new(self.clients.factor_instances_cache.clone()),
+            Arc::new(profile_snapshot),
             factor_source.clone(),
             NetworkID::Mainnet, // we care not about other networks here
             keys_derivation_interactors.clone(),

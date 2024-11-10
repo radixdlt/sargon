@@ -1,3 +1,5 @@
+use std::clone;
+use std::future::ready;
 use std::sync::{Arc, RwLock};
 
 use crate::prelude::*;
@@ -21,23 +23,23 @@ use itertools::cloned;
 /// to read "account_veci" instances, we will derive more "account_mfa" instances as well,
 /// so many that at the end of execution we will have `CACHE_FILLING_QUANTITY` instances for
 /// both "account_veci" and "account_mfa" (and same for identities).
-pub struct FactorInstancesProvider<'a, 'b> {
+pub struct FactorInstancesProvider {
     network_id: NetworkID,
     factor_sources: IndexSet<FactorSource>,
-    profile: Option<&'b Profile>,
-    cache_client: &'a FactorInstancesCacheClient,
+    profile: Option<Arc<Profile>>,
+    cache_client: Arc<FactorInstancesCacheClient>,
     interactors: Arc<dyn KeysDerivationInteractors>,
 }
 
 /// ===============
 /// PUBLIC
 /// ===============
-impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
+impl FactorInstancesProvider {
     pub fn new(
         network_id: NetworkID,
         factor_sources: IndexSet<FactorSource>,
-        profile: impl Into<Option<&'b Profile>>,
-        cache_client: &'a FactorInstancesCacheClient,
+        profile: impl Into<Option<Arc<Profile>>>,
+        cache_client: Arc<FactorInstancesCacheClient>,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Self {
         Self {
@@ -52,7 +54,8 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
     pub async fn provide(
         self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
-    ) -> Result<InternalFactorInstancesProviderOutcome> {
+    ) -> Result<(InstancesConsumer, InternalFactorInstancesProviderOutcome)>
+    {
         let mut _self = self;
 
         _self._provide(quantified_derivation_preset).await
@@ -66,8 +69,8 @@ impl CacheFiller {
     /// Saves FactorInstances into the mutable `cache` parameter and returns a
     /// copy of the instances.
     pub async fn for_new_factor_source(
-        cache_client: &FactorInstancesCacheClient,
-        profile: Option<&Profile>,
+        cache_client: Arc<FactorInstancesCacheClient>,
+        profile: impl Into<Option<Arc<Profile>>>,
         factor_source: FactorSource,
         network_id: NetworkID, // typically mainnet
         interactors: Arc<dyn KeysDerivationInteractors>,
@@ -76,7 +79,7 @@ impl CacheFiller {
             network_id,
             IndexSet::just(factor_source.clone()),
             profile,
-            cache_client,
+            cache_client.clone(),
             interactors,
         );
         let quantities = IndexMap::kv(
@@ -103,17 +106,52 @@ impl CacheFiller {
     }
 }
 
+use futures::future::{BoxFuture, Future};
+
+pub trait SendFuture: core::future::Future {
+    fn send(self) -> impl core::future::Future<Output = Self::Output> + Send
+    where
+        Self: Sized + Send,
+    {
+        self
+    }
+}
+
+impl<T: core::future::Future> SendFuture for T {}
+
+pub struct InstancesConsumer {
+    do_consume:
+        Box<dyn Fn() -> BoxFuture<'static, Result<()>> + Send + 'static>,
+}
+unsafe impl Sync for InstancesConsumer {}
+unsafe impl Send for InstancesConsumer {}
+
+impl InstancesConsumer {
+    fn new<T, F>(f: T) -> Self
+    where
+        T: Send + Sync + 'static + Fn() -> F,
+        F: Future<Output = Result<()>> + Send + 'static,
+    {
+        InstancesConsumer {
+            do_consume: Box::new(move || Box::pin(f())),
+        }
+    }
+    pub async fn consume(self) -> Result<()> {
+        (self.do_consume)().await
+    }
+}
+
 /// ===============
 /// Private
 /// ===============
-impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
+impl FactorInstancesProvider {
     async fn _provide(
         &mut self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
-    ) -> Result<InternalFactorInstancesProviderOutcome> {
+    ) -> Result<(InstancesConsumer, InternalFactorInstancesProviderOutcome)>
+    {
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
-        println!("🐉 provider: reading from cache");
         let cached = self
             .cache_client
             .get_poly_factor_with_quantities(
@@ -122,17 +160,30 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
                 network_id,
             )
             .await?;
-        println!("🐉 provider: read from cache: {:?}", cached);
 
         match cached {
             CachedInstancesWithQuantitiesOutcome::Satisfied(
                 enough_instances,
             ) => {
-                // Remove the instances which are going to be used from the cache
-                // since we only peeked at them.
-                self.cache_client.delete(&enough_instances).await?;
-                Ok(InternalFactorInstancesProviderOutcome::satisfied_by_cache(
-                    enough_instances,
+                let enough_instances_clone = enough_instances.clone();
+                let cache_client_clone = self.cache_client.clone();
+                let instances_consumer = InstancesConsumer::new(move || {
+                    let cache_client_clone_clone = cache_client_clone.clone();
+                    let enough_instances_clone_clone =
+                        enough_instances_clone.clone();
+                    async move {
+                        // Remove the instances which are going to be used from the cache
+                        // since we only peeked at them.
+                        cache_client_clone_clone
+                            .delete(enough_instances_clone_clone)
+                            .await
+                    }
+                });
+                Ok((
+                    instances_consumer,
+                    InternalFactorInstancesProviderOutcome::satisfied_by_cache(
+                        enough_instances,
+                    ),
                 ))
             }
             CachedInstancesWithQuantitiesOutcome::NotSatisfied {
@@ -160,15 +211,9 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
             FactorSourceIDFromHash,
             IndexMap<DerivationPreset, usize>,
         >,
-    ) -> Result<InternalFactorInstancesProviderOutcome> {
-        println!("🐉 provider - 🔮 derive more: START\nquantified_derivation_preset: {:?}\npf_pdp_qty_to_derive: {:?}", quantified_derivation_preset, pf_pdp_qty_to_derive);
-
+    ) -> Result<(InstancesConsumer, InternalFactorInstancesProviderOutcome)>
+    {
         let pf_newly_derived = self.derive_more(pf_pdp_qty_to_derive).await?;
-
-        println!(
-            "🐉 provider - 🔮 derived more: #{:?}",
-            pf_newly_derived.len()
-        );
 
         let Split {
             pf_to_use_directly,
@@ -179,14 +224,26 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
             &pf_newly_derived,
         );
 
-        println!(
-            "🐉 provider - 🔮 derive more, SPLIT: {:?}",
-            pf_to_use_directly
-        );
+        /*
+              let holder = AsyncFnPtr::new(move |input| {
+            let backend = Arc::new(backend);
+            async move { backend.get_data(input).await }
+        });
+        */
+        let cache_client_clone = self.cache_client.clone();
+        let pf_found_in_cache_leq_requested_clone =
+            pf_found_in_cache_leq_requested.clone();
+        let instances_consumer = InstancesConsumer::new(move || {
+            // let cache_client_clone_clone = cache_client_clone.clone();
+            // async move {
+            //     cache_client_clone_clone
+            //         .delete(&pf_found_in_cache_leq_requested_clone)
+            //         .send()
+            //         .await
+            // }
+            ready(Ok(()))
+        });
 
-        self.cache_client
-            .delete(&pf_found_in_cache_leq_requested)
-            .await?;
         self.cache_client.insert_all(&pf_to_cache).await?;
 
         let outcome = InternalFactorInstancesProviderOutcome::transpose(
@@ -196,7 +253,7 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
             pf_newly_derived,
         );
         let outcome = outcome;
-        Ok(outcome)
+        Ok((instances_consumer, outcome))
     }
 
     /// Per factor, split the instances into those to use directly and those to cache.
@@ -295,7 +352,7 @@ impl<'a, 'b> FactorInstancesProvider<'a, 'b> {
         let cache_snapshot = self.cache_client.snapshot().await?;
         let next_index_assigner = NextDerivationEntityIndexAssigner::new(
             network_id,
-            self.profile,
+            self.profile.clone(),
             cache_snapshot,
         );
 

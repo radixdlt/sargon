@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FactorInstancesCacheClient {
     file_system_client: Arc<FileSystemClient>,
 }
@@ -81,6 +81,36 @@ impl FactorInstancesCacheClient {
     }
 }
 
+#[async_trait::async_trait]
+pub trait FactorInstancesConsumer: Send + Sync {
+    async fn delete(
+        &self,
+        instances_per_factor_sources_to_delete: IndexMap<
+            FactorSourceIDFromHash,
+            FactorInstances,
+        >,
+    ) -> Result<()>;
+}
+
+unsafe impl Send for FactorInstancesCacheClient {}
+unsafe impl Sync for FactorInstancesCacheClient {}
+
+#[async_trait::async_trait]
+impl FactorInstancesConsumer for FactorInstancesCacheClient {
+    async fn delete(
+        &self,
+        instances_per_factor_sources_to_delete: IndexMap<
+            FactorSourceIDFromHash,
+            FactorInstances,
+        >,
+    ) -> Result<()> {
+        self.update_and_persist_cache(|cache| {
+            cache.delete(instances_per_factor_sources_to_delete.borrow());
+            Ok(())
+        })
+        .await
+    }
+}
 impl FactorInstancesCacheClient {
     pub async fn insert_for_factor(
         &self,
@@ -139,19 +169,6 @@ impl FactorInstancesCacheClient {
                 originally_requested_quantified_derivation_preset.borrow(),
                 network_id,
             )
-        })
-        .await
-    }
-
-    pub async fn delete(
-        &self,
-        instances_per_factor_sources_to_delete: impl Borrow<
-            IndexMap<FactorSourceIDFromHash, FactorInstances>,
-        >,
-    ) -> Result<()> {
-        self.update_and_persist_cache(|cache| {
-            cache.delete(instances_per_factor_sources_to_delete.borrow());
-            Ok(())
         })
         .await
     }
@@ -285,7 +302,7 @@ mod tests {
         let five = HDPathComponent::from(five);
         assert_eq!(max_higher_sut1, Some(five));
 
-        sut2.delete(&IndexMap::from_iter([(
+        sut2.delete(IndexMap::from_iter([(
             fsid,
             FactorInstances::from_iter([fi5.clone()]),
         )]))

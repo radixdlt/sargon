@@ -8,24 +8,25 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of entity at index
     ) -> Result<(
         FactorSourceID,
         IdentifiedVecOf<E>,
+        InstancesConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let count = count as usize;
 
         let fsid = factor_source.factor_source_id();
 
-        let outcome =
+        let (instances_consumer, outcome) =
             VirtualEntityCreatingInstanceProvider::for_many_entity_vecis(
                 count,
                 E::entity_kind(),
                 factor_instances_cache_client,
-                Some(self),
+                Arc::new(self.clone()),
                 factor_source,
                 network_id,
                 key_derivation_interactors,
@@ -54,6 +55,6 @@ impl Profile {
             })
             .collect::<IdentifiedVecOf<E>>();
 
-        Ok((fsid, entities, outcome))
+        Ok((fsid, entities, instances_consumer, outcome))
     }
 }

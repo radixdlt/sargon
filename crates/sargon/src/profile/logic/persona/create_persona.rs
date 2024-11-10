@@ -12,9 +12,9 @@ impl Profile {
         &self,
         network_id: NetworkID,
         name: DisplayName,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(FactorSourceID, Persona)> {
+    ) -> Result<(FactorSourceID, Persona, InstancesConsumer)> {
         let bdfs = self.bdfs();
         self.create_unsaved_persona_with_factor_source(
             bdfs.into(),
@@ -38,9 +38,9 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(FactorSourceID, Persona)> {
+    ) -> Result<(FactorSourceID, Persona, InstancesConsumer)> {
         self.create_unsaved_persona_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -49,21 +49,27 @@ impl Profile {
             key_derivation_interactors,
         )
         .await
-        .map(|(x, y, _)| (x, y))
+        .map(|(x, y, z, _)| (x, y, z))
     }
     pub async fn create_unsaved_persona_with_factor_source_with_derivation_outcome(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(
         FactorSourceID,
         Persona,
+        InstancesConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let (factor_source_id, personas, derivation_outcome) = self
+        let (
+            factor_source_id,
+            personas,
+            instances_consumer,
+            derivation_outcome,
+        ) = self
             .create_unsaved_personas_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -79,7 +85,12 @@ impl Profile {
             .last()
             .expect("Should have created one persona");
 
-        Ok((factor_source_id, persona, derivation_outcome))
+        Ok((
+            factor_source_id,
+            persona,
+            instances_consumer,
+            derivation_outcome,
+        ))
     }
 
     /// Creates many new non securified personas **WITHOUT** adding them to Profile, using the *main* "Babylon"
@@ -93,10 +104,10 @@ impl Profile {
         &self,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of persona at index
-    ) -> Result<(FactorSourceID, Personas)> {
+    ) -> Result<(FactorSourceID, Personas, InstancesConsumer)> {
         let bdfs = self.bdfs();
         self.create_unsaved_personas_with_factor_source(
             bdfs.into(),
@@ -114,10 +125,10 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of persona at index
-    ) -> Result<(FactorSourceID, Personas)> {
+    ) -> Result<(FactorSourceID, Personas, InstancesConsumer)> {
         self.create_unsaved_personas_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -127,7 +138,7 @@ impl Profile {
             get_name,
         )
         .await
-        .map(|(x, y, _)| (x, y))
+        .map(|(x, y, z, _)| (x, y, z))
     }
 
     pub async fn create_unsaved_personas_with_factor_source_with_derivation_outcome(
@@ -135,12 +146,13 @@ impl Profile {
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
-        factor_instances_cache_client: &FactorInstancesCacheClient,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of persona at index
     ) -> Result<(
         FactorSourceID,
         Personas,
+        InstancesConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         self.create_unsaved_entities_with_factor_source_with_derivation_outcome::<Persona>(

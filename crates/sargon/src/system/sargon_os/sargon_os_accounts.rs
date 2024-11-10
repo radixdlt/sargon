@@ -139,7 +139,7 @@ impl SargonOS {
             name,
         )
         .await
-        .map(|(x, _)| x)
+        .map(|(x, _, _)| x)
     }
 
     pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(
@@ -147,17 +147,21 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+    ) -> Result<(
+        Account,
+        InstancesConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
-        let (factor_source_id, account, derivation_outcome) = profile
+        let (factor_source_id, account, instances_consumer, derivation_outcome) = profile
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 name,
-                &self.clients.factor_instances_cache,
+                Arc::new(self.clients.factor_instances_cache.clone()),
                 key_derivation_interactors,
             )
             .await?;
@@ -167,7 +171,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((account, derivation_outcome))
+        Ok((account, instances_consumer, derivation_outcome))
     }
 
     /// Create a new mainnet Account named "Unnamed" using BDFS and adds it to the active Profile.
@@ -285,7 +289,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating account.");
-        let (account, derivation_outcome) = self
+        let (account, instances_consumer, derivation_outcome) = self
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -293,7 +297,12 @@ impl SargonOS {
             )
             .await?;
         debug!("Created account, now saving it to profile.");
+
+        // Add account to Profile...
         self.add_account(account.clone()).await?;
+        // .. if successful consume the FactorInstances from the Cache!
+        instances_consumer.consume().await?;
+
         info!(
             "Created account and saved new account into profile, address: {}",
             account.address
@@ -359,7 +368,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         debug!("Batch creating #{} accounts.", count);
-        let (accounts, derivation_outcome) = self
+        let (accounts, instances_consumer, derivation_outcome) = self
             .batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -368,7 +377,12 @@ impl SargonOS {
             )
             .await?;
         debug!("Created #{} accounts, now saving them to profile.", count);
+
+        // First try to save accounts into Profile...
         self.add_accounts(accounts).await?;
+        // ... if successful consume the FactorInstances from the Cache!
+        instances_consumer.consume().await?;
+
         info!(
             "Created account and saved #{} new accounts into profile",
             count
@@ -384,12 +398,37 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
     /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_accounts_with_bdfs(
+    pub async fn batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
         &self,
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
+        let (accounts, instances_consumer) = self
+            .batch_create_unsaved_accounts_with_bdfs(
+                network_id,
+                count,
+                name_prefix,
+            )
+            .await?;
+        instances_consumer.consume().await?;
+        Ok(accounts)
+    }
+
+    /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"
+    /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
+    ///
+    /// If you want to add them to Profile, call `add_accounts(accounts)`
+    ///
+    /// # Emits Event
+    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
+    /// `factor_source.common.last_used` is updated.
+    pub async fn batch_create_unsaved_accounts_with_bdfs(
+        &self,
+        network_id: NetworkID,
+        count: u16,
+        name_prefix: String,
+    ) -> Result<(Accounts, InstancesConsumer)> {
         let bdfs = self.bdfs()?;
         self.batch_create_unsaved_accounts_with_factor_source(
             bdfs.into(),
@@ -414,7 +453,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<Accounts> {
+    ) -> Result<(Accounts, InstancesConsumer)> {
         self.batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -422,7 +461,7 @@ impl SargonOS {
             name_prefix,
         )
         .await
-        .map(|(x, _)| x)
+        .map(|(x, y, _)| (x, y))
     }
     pub async fn batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
         &self,
@@ -430,17 +469,26 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
+    ) -> Result<(
+        Accounts,
+        InstancesConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
-        let (factor_source_id, accounts, derivation_outcome) = profile
+        let (
+            factor_source_id,
+            accounts,
+            instances_consumer,
+            derivation_outcome,
+        ) = profile
             .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 count,
-                &self.clients.factor_instances_cache,
+                Arc::new(self.clients.factor_instances_cache.clone()),
                 key_derivation_interactors,
                 |idx| {
                     DisplayName::new(format!("{} {}", name_prefix, idx))
@@ -454,7 +502,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((accounts, derivation_outcome))
+        Ok((accounts, instances_consumer, derivation_outcome))
     }
 }
 
@@ -638,16 +686,17 @@ impl SargonOS {
         let profile_snapshot = self.profile()?;
         let key_derivation_interactors = self.keys_derivation_interactors();
 
-        let outcome = SecurifyEntityFactorInstancesProvider::for_entity_mfa::<
-            E::BaseEntity,
-        >(
-            &self.clients.factor_instances_cache,
-            &profile_snapshot,
-            shield.clone(),
-            addresses_of_entities.clone(),
-            key_derivation_interactors,
-        )
-        .await?;
+        let (instances_consumer, outcome) =
+            SecurifyEntityFactorInstancesProvider::for_entity_mfa::<
+                E::BaseEntity,
+            >(
+                Arc::new(self.clients.factor_instances_cache.clone()),
+                Arc::new(profile_snapshot.clone()),
+                shield.clone(),
+                addresses_of_entities.clone(),
+                key_derivation_interactors,
+            )
+            .await?;
 
         let instance_per_factor = outcome
             .clone()
@@ -721,6 +770,9 @@ impl SargonOS {
         //     "should have used all instances, but have unused instances: {:?}",
         //     instance_per_factor
         // );
+
+        // Consume instances when we have successfully securified..
+        // instances_consumer.consume().await
 
         // Ok((updated_entities, outcome))
     }

@@ -28,7 +28,7 @@ impl SargonOS {
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
     pub async fn create_unsaved_unnamed_mainnet_persona_with_bdfs(
         &self,
-    ) -> Result<Persona> {
+    ) -> Result<(Persona, InstancesConsumer)> {
         let bdfs = self.bdfs()?;
         self.create_unsaved_unnamed_mainnet_persona_with_factor_source(
             bdfs.into(),
@@ -44,7 +44,7 @@ impl SargonOS {
     pub async fn create_unsaved_unnamed_mainnet_persona_with_factor_source(
         &self,
         factor_source: FactorSource,
-    ) -> Result<Persona> {
+    ) -> Result<(Persona, InstancesConsumer)> {
         self.create_unsaved_persona_with_factor_source(
             factor_source,
             NetworkID::Mainnet,
@@ -58,7 +58,7 @@ impl SargonOS {
     pub async fn create_unsaved_mainnet_persona_with_bdfs(
         &self,
         name: DisplayName,
-    ) -> Result<Persona> {
+    ) -> Result<(Persona, InstancesConsumer)> {
         let bdfs = self.bdfs()?;
         self.create_unsaved_mainnet_persona_with_factor_source(
             bdfs.into(),
@@ -73,7 +73,7 @@ impl SargonOS {
         &self,
         factor_source: FactorSource,
         name: DisplayName,
-    ) -> Result<Persona> {
+    ) -> Result<(Persona, InstancesConsumer)> {
         self.create_unsaved_persona_with_factor_source(
             factor_source,
             NetworkID::Mainnet,
@@ -98,7 +98,7 @@ impl SargonOS {
         &self,
         network_id: NetworkID,
         name: DisplayName,
-    ) -> Result<Persona> {
+    ) -> Result<(Persona, InstancesConsumer)> {
         let bdfs = self.bdfs()?;
         self.create_unsaved_persona_with_factor_source(
             bdfs.into(),
@@ -124,14 +124,14 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-    ) -> Result<Persona> {
+    ) -> Result<(Persona, InstancesConsumer)> {
         self.create_unsaved_persona_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
             name,
         )
         .await
-        .map(|(x, _)| x)
+        .map(|(x, y, _)| (x, y))
     }
 
     pub async fn create_unsaved_persona_with_factor_source_with_derivation_outcome(
@@ -139,17 +139,21 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-    ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
+    ) -> Result<(
+        Persona,
+        InstancesConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
-        let (factor_source_id, persona, derivation_outcome) = profile
+        let (factor_source_id, persona, instances_consumer, derivation_outcome) = profile
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 name,
-                &self.clients.factor_instances_cache,
+                Arc::new(self.clients.factor_instances_cache.clone()),
                 key_derivation_interactors,
             )
             .await?;
@@ -159,7 +163,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((persona, derivation_outcome))
+        Ok((persona, instances_consumer, derivation_outcome))
     }
 
     /// Create a new mainnet Persona named "Unnamed" using BDFS and adds it to the active Profile.
@@ -277,7 +281,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating persona.");
-        let (persona, derivation_outcome) = self
+        let (persona, instances_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -285,7 +289,12 @@ impl SargonOS {
             )
             .await?;
         debug!("Created persona, now saving it to profile.");
+
+        // First try save Persona into Profile...
         self.add_persona(persona.clone()).await?;
+        // ... if success, then delete FactorInstance from cache!
+        instances_consumer.consume().await?;
+
         info!(
             "Created persona and saved new persona into profile, address: {}",
             persona.address
@@ -351,7 +360,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         debug!("Batch creating #{} personas.", count);
-        let (personas, derivation_outcome) = self
+        let (personas, instances_consumer, derivation_outcome) = self
             .batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -360,7 +369,12 @@ impl SargonOS {
             )
             .await?;
         debug!("Created #{} personas, now saving them to profile.", count);
+
+        // First save personas into Profile...
         self.add_personas(personas).await?;
+        // ... if successful, consume FactorInstances from cache!
+        instances_consumer.consume().await?;
+
         info!(
             "Created persona and saved #{} new personas into profile",
             count
@@ -381,7 +395,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<Personas> {
+    ) -> Result<(Personas, InstancesConsumer)> {
         let bdfs = self.bdfs()?;
         self.batch_create_unsaved_personas_with_factor_source(
             bdfs.into(),
@@ -406,7 +420,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<Personas> {
+    ) -> Result<(Personas, InstancesConsumer)> {
         self.batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -414,7 +428,7 @@ impl SargonOS {
             name_prefix,
         )
         .await
-        .map(|(x, _)| x)
+        .map(|(x, y, _)| (x, y))
     }
     pub async fn batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
         &self,
@@ -422,17 +436,26 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
+    ) -> Result<(
+        Personas,
+        InstancesConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
-        let (factor_source_id, personas, derivation_outcome) = profile
+        let (
+            factor_source_id,
+            personas,
+            instances_consumer,
+            derivation_outcome,
+        ) = profile
             .create_unsaved_personas_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 count,
-                &self.clients.factor_instances_cache,
+                Arc::new(self.clients.factor_instances_cache.clone()),
                 key_derivation_interactors,
                 |idx| {
                     DisplayName::new(format!("{} {}", name_prefix, idx))
@@ -446,7 +469,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((personas, derivation_outcome))
+        Ok((personas, instances_consumer, derivation_outcome))
     }
 }
 
@@ -669,34 +692,39 @@ mod tests {
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
 
         // ACT
-        let unsaved_persona = os
+        let (mut unsaved_persona, _) = os
             .with_timeout(|x| {
                 x.create_unsaved_mainnet_persona_with_bdfs(
-                    DisplayName::new("Alice").unwrap(),
+                    DisplayName::new("Satoshi").unwrap(),
                 )
             })
             .await
             .unwrap();
 
         // ASSERT
-        assert_eq!(unsaved_persona, Persona::sample());
+        unsaved_persona.persona_data = Persona::sample().persona_data;
+        pretty_assertions::assert_eq!(unsaved_persona, Persona::sample());
         assert_eq!(os.profile().unwrap().networks[0].personas.len(), 0); // not added
     }
 
     #[actix_rt::test]
-    async fn test_create_unsaved_persona_twice_yield_same_personas() {
+    async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_consumer_is_not_used(
+    ) {
         // ARRANGE
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
 
         // ACT
-        let first = os
+        let (first, instances_consumer) = os
             .with_timeout(|x| {
                 x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
 
-        let second = os
+        // Not used!
+        drop(instances_consumer);
+
+        let (second, _) = os
             .with_timeout(|x| {
                 x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
             })
@@ -705,6 +733,34 @@ mod tests {
 
         // ASSERT
         assert_eq!(first, second);
+    }
+
+    #[actix_rt::test]
+    async fn test_create_unsaved_persona_twice_different_persona_if_instances_are_consumed(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
+
+        // ACT
+        let (first, instances_consumer) = os
+            .with_timeout(|x| {
+                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+            })
+            .await
+            .unwrap();
+
+        // Consume!
+        instances_consumer.consume().await.unwrap();
+
+        let (second, _) = os
+            .with_timeout(|x| {
+                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_ne!(first, second);
     }
 
     #[actix_rt::test]
