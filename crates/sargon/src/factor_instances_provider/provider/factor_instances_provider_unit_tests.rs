@@ -235,7 +235,6 @@ async fn adding_personas_and_clearing_cache_in_between() {
 }
 
 #[actix_rt::test]
-#[ignore] // WIP
 async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot().await;
     let bdfs = FactorSource::from(os.bdfs().unwrap());
@@ -258,7 +257,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     assert_eq!(all_accounts.len(), 3 * n);
 
-    let shield_0 = MatrixOfFactorSources::new(
+    let matrix_0 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
             .unwrap(),
         RecoveryRoleWithFactorSources::threshold_factors_only(
@@ -273,6 +272,12 @@ async fn cache_is_unchanged_in_case_of_failure() {
         .unwrap(),
     )
     .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
 
     let all_accounts = os
         .profile()
@@ -294,19 +299,27 @@ async fn cache_is_unchanged_in_case_of_failure() {
         first_half_of_accounts.len() + second_half_of_accounts.len(),
         3 * n
     );
-    /*
-    let (first_half_securified_accounts, stats) = os
-        .securify_accounts(
-            first_half_of_accounts
+
+    // let (first_half_securified_accounts, stats) = os
+    //     .securify_accounts(
+    //         first_half_of_accounts
+    //             .clone()
+    //             .into_iter()
+    //             .map(|a| a.entity_address())
+    //             .collect(),
+    //         shield_0.clone(),
+    //     )
+    //     .await
+    //     .unwrap();
+    let (security_structure_of_factor_instances_first_half, instances_consumer, stats) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        first_half_of_accounts
                 .clone()
                 .into_iter()
-                .map(|a| a.entity_address())
-                .collect(),
-            shield_0.clone(),
-        )
-        .await
-        .unwrap();
+                .map(|a| a.address())
+                .collect()
+        , shield_0.clone()).await.unwrap();
 
+    /*
     assert!(
         !stats.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"

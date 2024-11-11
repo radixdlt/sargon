@@ -38,6 +38,7 @@ macro_rules! decl_role_with_factors_additional_impl {
 }
 pub(crate) use decl_role_with_factors_additional_impl;
 
+
 macro_rules! decl_role_with_factors_with_role_kind_attrs {
     (
         $(

@@ -85,11 +85,11 @@ impl ProfileNetwork {
             .collect()
     }
 
-    pub fn contains_entity_by_address<E: IsEntity>(
+    pub fn contains_entity_by_address<A: IsEntityAddress>(
         &self,
-        entity_address: &E::Address,
+        entity_address: &A,
     ) -> bool {
-        self.get_entities_erased(E::entity_kind())
+        self.get_entities_erased(A::entity_kind())
             .into_iter()
             .any(|e| {
                 e.address()

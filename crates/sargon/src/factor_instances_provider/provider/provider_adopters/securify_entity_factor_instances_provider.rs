@@ -22,7 +22,7 @@ impl SecurifyEntityFactorInstancesProvider {
         account_addresses: IndexSet<AccountAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
-        Self::for_entity_mfa::<Account>(
+        Self::for_entity_mfa::<AccountAddress>(
             cache_client,
             profile,
             matrix_of_factor_sources,
@@ -50,7 +50,7 @@ impl SecurifyEntityFactorInstancesProvider {
         persona_addresses: IndexSet<IdentityAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
-        Self::for_entity_mfa::<Persona>(
+        Self::for_entity_mfa::<IdentityAddress>(
             cache_client,
             profile,
             matrix_of_factor_sources,
@@ -71,11 +71,11 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_entity_mfa<E: IsEntity>(
+    pub async fn for_entity_mfa<A: IsEntityAddress>(
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
-        addresses_of_entities: IndexSet<E::Address>,
+        addresses_of_entities: IndexSet<A>,
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
         let factor_sources_to_use = matrix_of_factor_sources
@@ -83,19 +83,24 @@ impl SecurifyEntityFactorInstancesProvider {
             .into_iter()
             .map(|x| x.to_owned())
             .collect::<IndexSet<FactorSource>>();
+
         let factor_sources =
             IndexSet::<FactorSource>::from_iter(profile.factor_sources.iter());
+
         assert!(
             factor_sources.is_superset(&factor_sources_to_use),
             "Missing FactorSources"
         );
+
         assert!(!addresses_of_entities.is_empty(), "No entities");
+
         assert!(
             addresses_of_entities
                 .iter()
-                .all(|e| profile.contains_entity_by_address::<E>(e)),
+                .all(|a| profile.contains_entity_by_address::<A>(a)),
             "unknown entity"
         );
+
         let network_id = addresses_of_entities.first().unwrap().network_id();
         assert!(
             addresses_of_entities
@@ -104,7 +109,7 @@ impl SecurifyEntityFactorInstancesProvider {
             "wrong network"
         );
 
-        let entity_kind = E::entity_kind();
+        let entity_kind = A::entity_kind();
 
         let provider = FactorInstancesProvider::new(
             network_id,

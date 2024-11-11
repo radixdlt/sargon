@@ -16,7 +16,11 @@ pub trait IsBaseEntityAddress:
 }
 
 pub trait IsEntityAddress:
-    IsBaseEntityAddress + HasEntityKind + AddressViaRet
+    IsBaseEntityAddress
+    + HasEntityKind
+    + AddressViaRet
+    + std::hash::Hash
+    + std::cmp::Eq
 {
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding
     /// it.
