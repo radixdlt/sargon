@@ -213,13 +213,3 @@ pub fn manifest_account_locker_claim(
     )
     .into()
 }
-
-#[uniffi::export]
-pub fn manifest_delete_account(
-    account_address: &AccountAddress,
-) -> TransactionManifest {
-    InternalTransactionManifest::delete_account(
-        &account_address.into_internal(),
-    )
-    .into()
-}

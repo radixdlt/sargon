@@ -1,12 +1,19 @@
 use crate::prelude::*;
 use radix_engine_interface::blueprints::account::{
+    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
     AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
-    ResourcePreference as ScryptoResourcePreference, ACCOUNT_SECURIFY_IDENT,
+    ResourcePreference as ScryptoResourcePreference,
+    ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT, ACCOUNT_SECURIFY_IDENT,
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
 
 impl TransactionManifest {
-    pub fn delete_account(account_address: &AccountAddress) -> Self {
+    pub fn delete_account(
+        account_address: &AccountAddress,
+        resource_preferences_to_be_removed: Vec<
+            AccountResourcePreferencesResponseItem,
+        >,
+    ) -> Self {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
 
@@ -30,8 +37,18 @@ impl TransactionManifest {
         // Push the proof to the auth zone
         builder = builder.push_to_auth_zone(owner_badge_proof);
 
-        // Make the deposit of the account owner badge allowed into the account just in case somebody
-        // had changed the account deposit rules in the past.
+        // Remove all the resource preferences from the account
+        for resource_address in resource_preferences_to_be_removed {
+            builder = builder.call_method(
+                account_address,
+                ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT,
+                ScryptoAccountRemoveResourcePreferenceInput::from(
+                    resource_address,
+                ),
+            )
+        }
+
+        // Make the deposit of the account owner badge allowed into the account
         let asset_exception = AssetException::new(
             ResourceAddress::new(owner_badge, account_address.network_id())
                 .unwrap(),
@@ -58,6 +75,16 @@ impl TransactionManifest {
     }
 }
 
+impl From<AccountResourcePreferencesResponseItem>
+    for ScryptoAccountRemoveResourcePreferenceInput
+{
+    fn from(value: AccountResourcePreferencesResponseItem) -> Self {
+        Self {
+            resource_address: value.resource_address.into(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,6 +97,9 @@ mod tests {
         manifest_eq(
             SUT::delete_account(
                 &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
+                vec![
+                    AccountResourcePreferencesResponseItem::sample_other(),
+                ],
             ),
             r#"
 CALL_METHOD
@@ -86,6 +116,11 @@ CREATE_PROOF_FROM_BUCKET_OF_ALL
 ;
 PUSH_TO_AUTHZONE
     Proof("proof1")
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "remove_resource_preference"
+    Address("resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3")
 ;
 CALL_METHOD
     Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
