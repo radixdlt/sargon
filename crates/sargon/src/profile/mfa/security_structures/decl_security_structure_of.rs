@@ -44,11 +44,8 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             #[doc = $expr: expr]
         )*
         $role: ident,
-        $(
-            #[$field_meta:meta]
-        )*
-        =>
-        $factor: ident
+        $factor: ident,
+        $($extra_field_name:ident: $extra_field_type:ty,)*
     ) => {
         paste! {
             $(
@@ -62,11 +59,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 #[doc(hidden)]
                 #[serde(skip)]
                 pub __hidden: HiddenConstructor,
-
-                $(
-                    #[$field_meta]
-                )*
-                pub role: RoleKind,
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
@@ -87,6 +79,8 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 /// single of these factor which can perform the function of this role,
                 /// disregarding of `threshold`.
                 pub override_factors: Vec<$factor>,
+
+                $($extra_field_name: $extra_field_type,)*
             }
 
             impl [< $role RoleWith $factor s >] {
@@ -98,10 +92,10 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 /// Panics if Factor elements are FactorInstances and the derivation
                 /// path contains a non-securified last path component.
                 pub fn with_factors_and_role(
-                    role: RoleKind,
+                    $($extra_field_name: $extra_field_type,)*
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
-                    override_factors: impl IntoIterator<Item = $factor>
+                    override_factors: impl IntoIterator<Item = $factor>,
                 ) -> Result<Self> {
 
                     let assert_is_securified = |factors: &Vec::<$factor>| -> Result<()> {
@@ -138,10 +132,10 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
                     Ok(Self {
                         __hidden: HiddenConstructor,
-                        role,
                         threshold_factors,
                         threshold,
                         override_factors,
+                        $($extra_field_name,)*
                     })
                 }
 
@@ -168,24 +162,25 @@ macro_rules! decl_role_with_factors {
         $role: ident,
         $factor: ident
     ) => {
+
         decl_role_with_factors_with_role_kind_attrs!(
             $(
                 #[doc = $expr]
             )*
             $role,
-            #[serde(skip)]
-            =>
-            $factor
+            $factor,
         );
 
         paste! {
+
            impl [< $role RoleWith $factor s >] {
+
                 pub fn new(
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Result<Self> {
-                    Self::with_factors_and_role(RoleKind::$role, threshold_factors, threshold, override_factors)
+                    Self::with_factors_and_role(threshold_factors, threshold, override_factors)
                 }
 
 
@@ -231,9 +226,8 @@ macro_rules! decl_role_runtime_kind_with_factors {
                 #[doc = $expr]
             )*
             $role,
-            #[doc(hidden)]
-            =>
-            $factor
+            $factor,
+            role: RoleKind,
         );
     };
 }

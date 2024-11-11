@@ -1786,7 +1786,8 @@ mod tests {
                     SignaturesCollector::test_lazy_sign_minimum_no_failures([
                         SignableWithEntities::sample([
                             sample_securified_mainnet::<E>("Alice", HierarchicalDeterministicFactorInstance::sample_fii10(), || {
-                                GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
+                                GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                                    RoleKind::Primary, [], 0,
                                     FactorSource::sample_all().into_iter().map(|f| {
                                         HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
                                             Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),

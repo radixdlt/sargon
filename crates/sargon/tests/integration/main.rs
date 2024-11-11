@@ -384,13 +384,15 @@ mod integration_tests {
                 || {
                     let i = Hardened::from_local_key_space(0u32, IsSecurified(true))
                         .unwrap();
-                    GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                        RoleKind::Primary,
                         [
                             FI::sample_mainnet_tx_account(i, *f0.factor_source_id().as_hash().unwrap()), // SKIPPED
                             FI::sample_mainnet_tx_account(i, *f1.factor_source_id().as_hash().unwrap()),
                             FI::sample_mainnet_tx_account(i, *f2.factor_source_id().as_hash().unwrap()),
                         ],
                         2,
+                        []
                     ).unwrap()
                 },
             );
@@ -401,7 +403,10 @@ mod integration_tests {
                 || {
                     let i = Hardened::from_local_key_space(1u32, IsSecurified(true))
                         .unwrap();
-                    GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                        RoleKind::Primary,
+                        [], 0,
+                        [
                         FI::sample_mainnet_tx_account(
                             i,
                             *f3.factor_source_id().as_hash().unwrap(),
@@ -416,7 +421,8 @@ mod integration_tests {
                 || {
                     let i = Hardened::from_local_key_space(2u32, IsSecurified(true))
                         .unwrap();
-                    GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                    GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                        RoleKind::Primary,
                         [FI::sample_mainnet_tx_account(
                             i,
                             *f2.factor_source_id().as_hash().unwrap(),

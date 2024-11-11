@@ -68,7 +68,7 @@ impl HDPath {
     pub fn to_bip32_string_with(&self, include_head: bool) -> String {
         self.to_string_map_with(include_head, |c| format!("{}", c))
     }
-    
+
     pub fn to_bip32_string_debug_with(&self, include_head: bool) -> String {
         self.to_string_map_with(include_head, |c| format!("{:?}", c))
     }

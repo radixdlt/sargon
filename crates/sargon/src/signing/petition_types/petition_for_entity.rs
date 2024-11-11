@@ -432,7 +432,7 @@ mod tests {
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
         let matrix =
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]).unwrap();
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0, [d0.clone(), d1.clone()]).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
             Hash::sample_third(),
@@ -456,7 +456,7 @@ mod tests {
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
         let matrix =
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0,
                 [d0.clone(), d1.clone()]
             ).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -478,9 +478,10 @@ mod tests {
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            RoleKind::Primary,
             [d0.clone(), d1.clone()],
-            2,
+            2,[]
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -504,9 +505,11 @@ mod tests {
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            RoleKind::Primary,
             [d0.clone(), d1.clone()],
             2,
+            []
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -532,9 +535,11 @@ mod tests {
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_factors_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            RoleKind::Primary,
             [d0.clone(), d1.clone()],
             1,
+            []
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -583,7 +588,8 @@ mod tests {
             Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
         );
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                RoleKind::Primary,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                 1,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
@@ -599,7 +605,8 @@ mod tests {
             Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
         );
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                RoleKind::Primary,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                 2,
                 [],
@@ -625,7 +632,8 @@ mod tests {
                 CAP26EntityKind::Account,
                 Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
             );
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                    RoleKind::Primary,
                     [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                     1,
                     [FactorSourceIDFromHash::sample_at(1)].map(&fi),

@@ -94,6 +94,20 @@ mod test {
     }
 
     #[test]
+    fn test_get_role() {
+        let test = |role: RoleKind| {
+            let sut = SUT::single_override(
+                role,
+                HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
+            );
+            assert_eq!(sut.role, role);
+        };
+        test(RoleKind::Primary);
+        test(RoleKind::Confirmation);
+        test(RoleKind::Recovery);
+    }
+
+    #[test]
     fn test_from_recovery_role() {
         let r = recovery_role();
         assert_eq!(

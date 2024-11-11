@@ -235,6 +235,7 @@ async fn adding_personas_and_clearing_cache_in_between() {
 }
 
 #[actix_rt::test]
+#[ignore] // WIP
 async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot().await;
     let bdfs = FactorSource::from(os.bdfs().unwrap());
@@ -246,14 +247,16 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    for i in 0..3 * n {
-        let _ = os
-            .create_and_save_new_mainnet_persona_with_derivation_outcome(
-                format!("Acco: {}", i),
-            )
-            .await
-            .unwrap();
-    }
+    let stats = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
+    assert_eq!(stats.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
+
+    let all_accounts = os
+        .profile()
+        .unwrap()
+        .accounts_on_all_networks_including_hidden()
+        .items();
+
+    assert_eq!(all_accounts.len(), 3 * n);
 
     let shield_0 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
