@@ -84,17 +84,18 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             }
 
             impl RoleWithFactors<$factor> for [< $role RoleWith $factor s >] {
-                    fn get_threshold_factors(&self) -> Vec<$factor> {
-                        self.threshold_factors.clone()
-                    }
-                    fn get_threshold(&self) -> u8 {
-                        self.threshold
-                    }
-                    fn get_override_factors(&self) -> Vec<$factor> {
-                        self.override_factors.clone()
-                    }
-                // type Factor = $factor;
 
+                fn get_threshold_factors(&self) -> &Vec<$factor> {
+                    &self.threshold_factors
+                }
+
+                fn get_threshold(&self) -> u8 {
+                    self.threshold
+                }
+
+                fn get_override_factors(&self) -> &Vec<$factor> {
+                    &self.override_factors
+                }
             }
 
             impl [< $role RoleWith $factor s >] {
@@ -154,11 +155,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 }
 
 
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    let mut factors = HashSet::from_iter(self.threshold_factors.iter());
-                    factors.extend(self.override_factors.iter());
-                    factors
-                }
+
             }
 
 

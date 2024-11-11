@@ -23,6 +23,7 @@ impl FactorInstances {
         let instances = instances.into_iter().collect::<IndexSet<_>>(); // remove duplicates
         self.factor_instances.extend(instances);
     }
+
     pub fn shift_remove_index(
         &mut self,
         index: usize,
@@ -31,6 +32,18 @@ impl FactorInstances {
             .shift_remove_index(index)
             .expect("correct index")
     }
+
+    pub fn shift_remove(
+        &mut self,
+        item: &HierarchicalDeterministicFactorInstance,
+    ) -> HierarchicalDeterministicFactorInstance {
+        let idx = self
+            .factor_instances
+            .get_index_of(item)
+            .expect("existing item");
+        self.shift_remove_index(idx)
+    }
+
     pub fn first(&self) -> Option<HierarchicalDeterministicFactorInstance> {
         self.factor_instances.first().cloned()
     }

@@ -84,11 +84,18 @@ impl SecurifyEntityFactorInstancesProvider {
             .map(|x| x.to_owned())
             .collect::<IndexSet<FactorSource>>();
 
-        let factor_sources =
-            IndexSet::<FactorSource>::from_iter(profile.factor_sources.iter());
+        let ids_of_factor_sources_in_profile =
+            IndexSet::<FactorSourceIDFromHash>::from_iter(
+                profile.factor_sources.iter().map(|f| f.id_from_hash()),
+            );
 
         assert!(
-            factor_sources.is_superset(&factor_sources_to_use),
+            ids_of_factor_sources_in_profile.is_superset(
+                &factor_sources_to_use
+                    .iter()
+                    .map(|f| f.id_from_hash())
+                    .collect::<IndexSet<FactorSourceIDFromHash>>()
+            ),
             "Missing FactorSources"
         );
 

@@ -25,6 +25,16 @@ pub struct FactorSourceIDFromHash {
     pub body: Exactly32Bytes,
 }
 
+impl TryFrom<FactorSourceID> for FactorSourceIDFromHash {
+    type Error = CommonError;
+
+    fn try_from(value: FactorSourceID) -> Result<Self> {
+        value
+            .into_hash()
+            .map_err(|_| CommonError::FactorSourceIDNotFromHash)
+    }
+}
+
 impl FromStr for FactorSourceIDFromHash {
     type Err = CommonError;
 

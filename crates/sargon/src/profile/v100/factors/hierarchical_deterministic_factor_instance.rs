@@ -106,7 +106,7 @@ impl HierarchicalDeterministicFactorInstance {
         )
     }
 
-    pub fn try_from(
+    pub fn try_from_id_key_path(
         factor_source_id: FactorSourceID,
         public_key: PublicKey,
         derivation_path: DerivationPath,
@@ -131,7 +131,7 @@ impl HierarchicalDeterministicFactorInstance {
 
         let badge = virtual_source.as_hierarchical_deterministic();
 
-        Self::try_from(
+        Self::try_from_id_key_path(
             factor_instance.factor_source_id,
             badge.public_key,
             badge.derivation_path.clone(),
