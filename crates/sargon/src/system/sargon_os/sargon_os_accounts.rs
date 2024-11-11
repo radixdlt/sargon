@@ -673,18 +673,48 @@ impl SargonOS {
 
 // # Securify
 impl SargonOS {
-    pub(crate) async fn securify_entities<E: IsSecurifiedEntity>(
-        &mut self,
+    pub(crate) async fn change_security_state_of_entities_to_unsubmitted_securified_without_consuming_instances_with_derivation_outcome<
+        E: IsSecurifiedEntity,
+    >(
+        &self,
         addresses_of_entities: IndexSet<
             <E::BaseEntity as IsBaseEntity>::Address,
         >,
-        shield: MatrixOfFactorSources,
-    ) -> Result<(IndexSet<E>, FactorInstancesProviderOutcome)>
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
+    ) -> Result<(
+        IndexSet<E>,
+        InstancesConsumer,
+        FactorInstancesProviderOutcome,
+    )>
+    where
+        E::BaseEntity: IsEntity,
+    {
+        todo!("hmm")
+    }
+
+    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
+        E: IsSecurifiedEntity,
+    >(
+        &self,
+        addresses_of_entities: IndexSet<
+            <E::BaseEntity as IsBaseEntity>::Address,
+        >,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
+    ) -> Result<(
+        IndexMap<
+            <E::BaseEntity as IsBaseEntity>::Address,
+            SecurityStructureOfFactorInstances,
+        >,
+        InstancesConsumer,
+        FactorInstancesProviderOutcome,
+    )>
     where
         E::BaseEntity: IsEntity,
     {
         let profile_snapshot = self.profile()?;
         let key_derivation_interactors = self.keys_derivation_interactors();
+        let matrix_of_factor_sources =
+            &security_structure_of_factor_sources.matrix_of_factors;
 
         let (instances_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::for_entity_mfa::<
@@ -692,13 +722,13 @@ impl SargonOS {
             >(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
-                shield.clone(),
+                matrix_of_factor_sources.clone(),
                 addresses_of_entities.clone(),
                 key_derivation_interactors,
             )
             .await?;
 
-        let instance_per_factor = outcome
+        let instances_per_factor_source = outcome
             .clone()
             .per_factor
             .into_iter()
@@ -708,11 +738,11 @@ impl SargonOS {
             .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
 
         assert_eq!(
-            instance_per_factor
+            instances_per_factor_source
                 .keys()
                 .cloned()
                 .collect::<HashSet<FactorSourceIDFromHash>>(),
-            shield
+            matrix_of_factor_sources
                 .all_factors()
                 .into_iter()
                 .map(|f| f.id_from_hash())
@@ -721,16 +751,19 @@ impl SargonOS {
 
         // Now we need to map the flat set of instances into many MatrixOfFactorInstances, and assign
         // one to each account
-        let updated_entities = addresses_of_entities
+        addresses_of_entities
             .clone()
             .into_iter()
             .map(|a| {
-                let entity =
-                    profile_snapshot.get_entity::<E::BaseEntity>(&a).unwrap();
+                let entity_address = a;
+
+                // 🤔 HMM something something RoleWithFactorInstances.... need a new
+                // GeneralRoleWithFactorInstances but Generic over some R: Role?
+
                 // let matrix_of_instances =
                 //     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
-                //         &mut instance_per_factor,
-                //         shield.clone(),
+                //         &mut instances_per_factor_source,
+                //         matrix_of_factor_sources.clone(),
                 //     )
                 //     .unwrap();
 

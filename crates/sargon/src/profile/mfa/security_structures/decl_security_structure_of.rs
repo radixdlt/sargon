@@ -36,15 +36,18 @@ macro_rules! decl_role_with_factors_additional_impl {
         $factor: ident
     ) => {}
 }
-
 pub(crate) use decl_role_with_factors_additional_impl;
 
-macro_rules! decl_role_with_factors {
+macro_rules! decl_role_with_factors_with_role_kind_attrs {
     (
         $(
             #[doc = $expr: expr]
         )*
         $role: ident,
+        $(
+            #[$field_meta:meta]
+        )*
+        =>
         $factor: ident
     ) => {
         paste! {
@@ -59,6 +62,11 @@ macro_rules! decl_role_with_factors {
                 #[doc(hidden)]
                 #[serde(skip)]
                 pub __hidden: HiddenConstructor,
+
+                $(
+                    #[$field_meta]
+                )*
+                pub role: RoleKind,
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
@@ -89,7 +97,8 @@ macro_rules! decl_role_with_factors {
                 ///
                 /// Panics if Factor elements are FactorInstances and the derivation
                 /// path contains a non-securified last path component.
-                pub fn new(
+                pub fn with_factors_and_role(
+                    role: RoleKind,
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
@@ -129,11 +138,56 @@ macro_rules! decl_role_with_factors {
 
                     Ok(Self {
                         __hidden: HiddenConstructor,
+                        role,
                         threshold_factors,
                         threshold,
                         override_factors,
                     })
                 }
+
+
+                pub fn all_factors(&self) -> HashSet<&$factor> {
+                    let mut factors = HashSet::from_iter(self.threshold_factors.iter());
+                    factors.extend(self.override_factors.iter());
+                    factors
+                }
+            }
+
+
+        }
+    };
+}
+
+pub(crate) use decl_role_with_factors_with_role_kind_attrs;
+
+macro_rules! decl_role_with_factors {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $role: ident,
+        $factor: ident
+    ) => {
+        decl_role_with_factors_with_role_kind_attrs!(
+            $(
+                #[doc = $expr]
+            )*
+            $role,
+            #[serde(skip)]
+            =>
+            $factor
+        );
+
+        paste! {
+           impl [< $role RoleWith $factor s >] {
+                pub fn new(
+                    threshold_factors: impl IntoIterator<Item = $factor>,
+                    threshold: u8,
+                    override_factors: impl IntoIterator<Item = $factor>
+                ) -> Result<Self> {
+                    Self::with_factors_and_role(RoleKind::$role, threshold_factors, threshold, override_factors)
+                }
+
 
                 /// # Panics
                 /// Panics if threshold > threshold_factor.len()
@@ -155,20 +209,36 @@ macro_rules! decl_role_with_factors {
                 ) -> Result<Self> {
                     Self::new([], 0, factors)
                 }
-
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    let mut factors = HashSet::from_iter(self.threshold_factors.iter());
-                    factors.extend(self.override_factors.iter());
-                    factors
-                }
             }
-
-            decl_role_with_factors_additional_impl!($role, $factor);
         }
+
+        decl_role_with_factors_additional_impl!($role, $factor);
     };
 }
 
 pub(crate) use decl_role_with_factors;
+
+macro_rules! decl_role_runtime_kind_with_factors {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $role: ident,
+        $factor: ident
+    ) => {
+        decl_role_with_factors_with_role_kind_attrs!(
+            $(
+                #[doc = $expr]
+            )*
+            $role,
+            #[doc(hidden)]
+            =>
+            $factor
+        );
+    };
+}
+
+pub(crate) use decl_role_runtime_kind_with_factors;
 
 macro_rules! decl_matrix_of_factors {
     (

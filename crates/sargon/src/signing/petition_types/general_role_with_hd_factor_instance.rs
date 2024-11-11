@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_role_with_factors!(
+decl_role_runtime_kind_with_factors!(
     /// A general depiction of each of the roles in a `MatrixOfFactorInstances`.
     /// `SignaturesCollector` can work on any `RoleKind` when dealing with a securified entity.
     General,
@@ -33,7 +33,8 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
             ),
         };
 
-        GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+        GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            role,
             threshold_factors
                 .iter()
                 .map(|f| HierarchicalDeterministicFactorInstance::try_from_factor_instance(f.clone()))
@@ -49,18 +50,20 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
 
 impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     pub fn single_override(
+        role: RoleKind,
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         assert!(factor.is_securified(), "non securified factor");
-        Self::override_only([factor])
+        Self::with_factors_and_role(role, [], 0, [factor])
         .expect("Zero threshold with zero threshold factors and one override should not fail.")
     }
 
     pub fn single_threshold(
+        role: RoleKind,
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         assert!(factor.is_securified(), "non securified factor");
-        Self::threshold_factors_only([factor], 1).expect(
+        Self::with_factors_and_role(role, [factor], 1, []).expect(
             "Single threshold with one threshold factor should not fail.",
         )
     }
@@ -79,7 +82,8 @@ mod test {
             SUT::try_from(
                 (matrix(), RoleKind::Primary)
             ).unwrap(),
-            SUT::new(
+            SUT::with_factors_and_role(
+                RoleKind::Primary,
                 [
                     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
                     ],
@@ -96,7 +100,8 @@ mod test {
             SUT::try_from(
                 (matrix(), RoleKind::Recovery)
             ).unwrap(),
-            SUT::new(
+            SUT::with_factors_and_role(
+                RoleKind::Recovery,
                 r.threshold_factors
                 .clone()
                 .into_iter()
@@ -116,7 +121,8 @@ mod test {
         let r = confirmation_role();
         assert_eq!(
             SUT::try_from((matrix(), RoleKind::Confirmation)).unwrap(),
-            SUT::new(
+            SUT::with_factors_and_role(
+                RoleKind::Confirmation,
                 r.threshold_factors
                     .clone()
                     .into_iter()

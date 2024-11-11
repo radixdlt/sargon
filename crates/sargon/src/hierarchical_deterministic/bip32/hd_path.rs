@@ -65,16 +65,10 @@ impl HDPath {
         path.into_iter().join(Self::SEPARATOR)
     }
 
-    fn to_string_map<F>(&self, map: F) -> String
-    where
-        F: Fn(&HDPathComponent) -> String,
-    {
-        self.to_string_map_with(true, map)
-    }
-
     pub fn to_bip32_string_with(&self, include_head: bool) -> String {
         self.to_string_map_with(include_head, |c| format!("{}", c))
     }
+    
     pub fn to_bip32_string_debug_with(&self, include_head: bool) -> String {
         self.to_string_map_with(include_head, |c| format!("{:?}", c))
     }

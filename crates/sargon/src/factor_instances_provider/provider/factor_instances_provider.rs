@@ -145,6 +145,24 @@ impl InstancesConsumer {
 /// Private
 /// ===============
 impl FactorInstancesProvider {
+    fn make_instances_consumer(
+        &self,
+        instances_per_factor_sources_to_delete: IndexMap<
+            FactorSourceIDFromHash,
+            FactorInstances,
+        >,
+    ) -> InstancesConsumer {
+        let instances_clone = instances_per_factor_sources_to_delete.clone();
+        let cache_client_clone = self.cache_client.clone();
+        InstancesConsumer::new(move || {
+            let cache_client_clone_clone = cache_client_clone.clone();
+            let instances_clone_clone = instances_clone.clone();
+            async move {
+                cache_client_clone_clone.delete(instances_clone_clone).await
+            }
+        })
+    }
+
     async fn _provide(
         &mut self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
@@ -165,20 +183,11 @@ impl FactorInstancesProvider {
             CachedInstancesWithQuantitiesOutcome::Satisfied(
                 enough_instances,
             ) => {
-                let enough_instances_clone = enough_instances.clone();
-                let cache_client_clone = self.cache_client.clone();
-                let instances_consumer = InstancesConsumer::new(move || {
-                    let cache_client_clone_clone = cache_client_clone.clone();
-                    let enough_instances_clone_clone =
-                        enough_instances_clone.clone();
-                    async move {
-                        // Remove the instances which are going to be used from the cache
-                        // since we only peeked at them.
-                        cache_client_clone_clone
-                            .delete(enough_instances_clone_clone)
-                            .await
-                    }
-                });
+                // When/if caller calls `instances_consumer.consume()` the `enough_instances`
+                // will be deleted from the cache, they are still present in the cache now
+                // and will continue to be present until the `consume()` is called.
+                let instances_consumer =
+                    self.make_instances_consumer(enough_instances.clone());
                 Ok((
                     instances_consumer,
                     InternalFactorInstancesProviderOutcome::satisfied_by_cache(
@@ -224,12 +233,6 @@ impl FactorInstancesProvider {
             &pf_newly_derived,
         );
 
-        /*
-              let holder = AsyncFnPtr::new(move |input| {
-            let backend = Arc::new(backend);
-            async move { backend.get_data(input).await }
-        });
-        */
         let cache_client_clone = self.cache_client.clone();
         let pf_found_in_cache_leq_requested_clone =
             pf_found_in_cache_leq_requested.clone();
