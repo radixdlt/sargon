@@ -38,7 +38,6 @@ macro_rules! decl_role_with_factors_additional_impl {
 }
 pub(crate) use decl_role_with_factors_additional_impl;
 
-
 macro_rules! decl_role_with_factors_with_role_kind_attrs {
     (
         $(
@@ -81,7 +80,21 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 /// disregarding of `threshold`.
                 pub override_factors: Vec<$factor>,
 
-                $($extra_field_name: $extra_field_type,)*
+                $(pub $extra_field_name: $extra_field_type,)*
+            }
+
+            impl RoleWithFactors<$factor> for [< $role RoleWith $factor s >] {
+                    fn get_threshold_factors(&self) -> Vec<$factor> {
+                        self.threshold_factors.clone()
+                    }
+                    fn get_threshold(&self) -> u8 {
+                        self.threshold
+                    }
+                    fn get_override_factors(&self) -> Vec<$factor> {
+                        self.override_factors.clone()
+                    }
+                // type Factor = $factor;
+
             }
 
             impl [< $role RoleWith $factor s >] {
@@ -305,6 +318,14 @@ macro_rules! decl_matrix_of_factors {
                     factors.extend(self.recovery_role.all_factors());
                     factors.extend(self.confirmation_role.all_factors());
                     factors
+                }
+
+                pub fn get_role_of_kind(&self, role_kind: RoleKind) -> &dyn RoleWithFactors<$factor> {
+                    match role_kind {
+                        RoleKind::Confirmation => &self.confirmation_role,
+                        RoleKind::Primary => &self.primary_role,
+                        RoleKind::Recovery => &self.recovery_role,
+                    }
                 }
             }
         }

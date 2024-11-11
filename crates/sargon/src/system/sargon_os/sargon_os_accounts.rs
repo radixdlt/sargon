@@ -673,6 +673,30 @@ impl SargonOS {
 
 // # Securify
 impl SargonOS {
+    /// Cfg test since a proper production ready impl should have used the
+    /// securify_entity_factor_instances_provider before consuming the instances
+    /// in the cache.
+    #[cfg(test)]
+    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_with_derivation_outcome<
+        A: IsEntityAddress,
+    >(
+        &self,
+        addresses_of_entities: IndexSet<A>,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
+    ) -> Result<(
+        IndexMap<A, SecurityStructureOfFactorInstances>,
+        FactorInstancesProviderOutcome,
+    )> {
+        let (security_structures_of_factor_instances, instances_consumer, outcome) = self
+        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+            addresses_of_entities,
+            security_structure_of_factor_sources,
+        )
+        .await?;
+        instances_consumer.consume().await?;
+        Ok((security_structures_of_factor_instances, outcome))
+    }
+
     pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
         A: IsEntityAddress,
     >(
@@ -688,7 +712,7 @@ impl SargonOS {
         let key_derivation_interactors = self.keys_derivation_interactors();
         let matrix_of_factor_sources =
             &security_structure_of_factor_sources.matrix_of_factors;
-
+        
         let (instances_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
                 Arc::new(self.clients.factor_instances_cache.clone()),
@@ -720,10 +744,17 @@ impl SargonOS {
                 .collect::<HashSet<FactorSourceIDFromHash>>()
         );
 
+        let security_structure_id = security_structure_of_factor_sources.id;
+
         let security_structures_of_factor_instances = addresses_of_entities.clone().into_iter().map(|entity_address|
         {
             let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
                 todo!()
+               let matrix_of_factor_instances = MatrixOfFactorInstances::
+                SecurityStructureOfFactorInstances::new(
+                    security_structure_id.clone(),
+                    matrix_of_factor_instances
+                )
             };
             Ok((entity_address, security_structure_of_factor_instances))
         }).collect::<Result<IndexMap<A, SecurityStructureOfFactorInstances>>>()?;
@@ -734,61 +765,7 @@ impl SargonOS {
             outcome,
         ))
 
-        // addresses_of_entities
-        //     .clone()
-        //     .into_iter()
-        //     .map(|entity_address| {
-        // let role_
-
-        // 🤔 HMM something something RoleWithFactorInstances.... need a new
-        // GeneralRoleWithFactorInstances but Generic over some R: Role?
-
-        // let matrix_of_instances =
-        //     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
-        //         &mut instances_per_factor_source,
-        //         matrix_of_factor_sources.clone(),
-        //     )
-        //     .unwrap();
-
-        // let access_controller = match entity.security_state() {
-        //     EntitySecurityState::Unsecured(_) => {
-        //         AccessController::from_unsecurified_address(a)
-        //     }
-        //     EntitySecurityState::Securified(sec) => sec.access_controller.clone(),
-        // };
-        // let veci = match entity.security_state() {
-        //     EntitySecurityState::Unsecured(veci) => Some(veci),
-        //     EntitySecurityState::Securified(sec) => {
-        //         sec.veci.clone().map(|x| x.factor_instance())
-        //     }
-        // };
-        // let sec = SecuredEntityControl::new(
-        //     matrix_of_instances,
-        //     access_controller,
-        //     veci.map(|x| VirtualEntityCreatingInstance::new(x, entity.address())),
-        // );
-
-        // E::new(entity.name(), entity.entity_address(), sec)
-        //     todo!()
-        // })
-        // .collect::<IndexSet<A>>();
-
-        // for entity in updated_entities.clone().into_iter() {
-        //     self.profile
-        //         .try_write()
-        //         .unwrap()
-        //         .update_entity::<E::BaseEntity>(entity.into())
-        // }
-        // assert!(
-        //     instance_per_factor.values().all(|x| x.is_empty()),
-        //     "should have used all instances, but have unused instances: {:?}",
-        //     instance_per_factor
-        // );
-
-        // Consume instances when we have successfully securified..
-        // instances_consumer.consume().await
-
-        // Ok((updated_entities, outcome))
+ 
     }
 }
 
