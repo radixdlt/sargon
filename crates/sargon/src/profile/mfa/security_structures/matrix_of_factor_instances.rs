@@ -6,7 +6,6 @@ impl MatrixOfFactorInstances {
         matrix_of_factor_sources: MatrixOfFactorSources,
     ) -> Result<Self> {
         let primary = fulfilling_role_of_factor_sources_with_factor_instances::<
-            PrimaryRoleWithFactorSources,
             PrimaryRoleWithFactorInstances,
         >(
             RoleKind::Primary,
@@ -74,8 +73,7 @@ impl HasRoleKindObjectSafe
 }
 
 fn fulfilling_role_of_factor_sources_with_factor_instances<
-    T: HasRoleKindObjectSafe + RoleWithFactors,
-    U: HasRoleKindObjectSafe + RoleWithFactors,
+    U: HasRoleKindObjectSafe + RoleWithFactors<FactorInstance>,
 >(
     role_kind: RoleKind,
     instances: &mut IndexMap<FactorSourceIDFromHash, FactorInstances>,
@@ -86,16 +84,16 @@ fn fulfilling_role_of_factor_sources_with_factor_instances<
         Vec<FactorInstance>,
     ) -> Result<U>,
 ) -> Result<U> {
-    let role_of_sources: T =
-        matrix_of_factor_sources.get_role_of_kind(role_kind);
-    let threshold_factors: Vec<FactorInstance> =
-        role_of_sources.get_threshold_factors();
-    let threshold: u8 = role_of_sources.get_threshold();
-    let override_factors: Vec<FactorInstance> =
-        role_of_sources.get_override_factors();
-    let role = make_role(threshold_factors, threshold, override_factors)?;
-    assert_eq!(role.get_role_kind(), role_kind);
-    Ok(role)
+    let role_of_sources = matrix_of_factor_sources.get_role_of_kind(role_kind);
+    // let threshold_factors: Vec<FactorInstance> =
+    //     role_of_sources.get_threshold_factors();
+    // let threshold: u8 = role_of_sources.get_threshold();
+    // let override_factors: Vec<FactorInstance> =
+    //     role_of_sources.get_override_factors();
+    // let role = make_role(threshold_factors, threshold, override_factors)?;
+    // assert_eq!(role.get_role_kind(), role_kind);
+    // Ok(role)
+    todo!()
 }
 
 /* impl RoleWithFactors {

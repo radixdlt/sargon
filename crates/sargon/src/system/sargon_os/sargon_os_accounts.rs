@@ -712,7 +712,7 @@ impl SargonOS {
         let key_derivation_interactors = self.keys_derivation_interactors();
         let matrix_of_factor_sources =
             &security_structure_of_factor_sources.matrix_of_factors;
-        
+
         let (instances_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
                 Arc::new(self.clients.factor_instances_cache.clone()),
@@ -723,7 +723,7 @@ impl SargonOS {
             )
             .await?;
 
-        let instances_per_factor_source = outcome
+        let mut instances_per_factor_source = outcome
             .clone()
             .per_factor
             .into_iter()
@@ -744,13 +744,15 @@ impl SargonOS {
                 .collect::<HashSet<FactorSourceIDFromHash>>()
         );
 
-        let security_structure_id = security_structure_of_factor_sources.id;
+        let security_structure_id = security_structure_of_factor_sources.id();
 
         let security_structures_of_factor_instances = addresses_of_entities.clone().into_iter().map(|entity_address|
         {
             let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
-                todo!()
-               let matrix_of_factor_instances = MatrixOfFactorInstances::
+               let matrix_of_factor_instances = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
+                &mut instances_per_factor_source,
+                matrix_of_factor_sources.clone(),
+               )?;
                 SecurityStructureOfFactorInstances::new(
                     security_structure_id.clone(),
                     matrix_of_factor_instances
@@ -764,8 +766,6 @@ impl SargonOS {
             instances_consumer,
             outcome,
         ))
-
- 
     }
 }
 
