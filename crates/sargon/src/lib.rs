@@ -132,7 +132,8 @@ pub mod prelude {
             NonFungibleData as ScryptoNonFungibleData,
             NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
             NonFungibleIdType as ScryptoNonFungibleIdType,
-            UpperBound as ScryptoUpperBound, XRD,
+            UpperBound as ScryptoUpperBound,
+            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE, XRD,
         },
         types::{
             ComponentAddress as ScryptoComponentAddress,
