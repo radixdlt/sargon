@@ -5,5 +5,5 @@ use sargon::DappToWalletInteractionSubintentExpireAtTime as InternalDappToWallet
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct DappToWalletInteractionSubintentExpireAtTime {
     /// The unix timestamp in seconds when the subintent expires.
-    pub unix_timestamp_seconds: Timestamp,
+    pub unix_timestamp_seconds: u64,
 }

@@ -55,10 +55,13 @@ impl SargonOS {
     ) -> u64 {
         match expiration {
             DappToWalletInteractionSubintentExpiration::AtTime(at_time) => {
-                at_time
-                    .unix_timestamp_seconds
-                    .duration_since(Timestamp::now_utc())
-                    .as_seconds_f64() as u64
+                let now = seconds_since_unix_epoch();
+                let expiration = at_time.unix_timestamp_seconds;
+                if expiration > now {
+                    expiration - now
+                } else {
+                    0
+                }
             }
             DappToWalletInteractionSubintentExpiration::AfterDelay(delay) => {
                 delay.expire_after_seconds
@@ -97,10 +100,8 @@ mod tests {
         // Test the case where the subintent is already expired
         let os = boot_success().await;
 
-        let timestamp = Timestamp::now_utc().sub(Duration::from_secs(100));
-        let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
-            timestamp.into(),
-        );
+        let expiration =
+            DappToWalletInteractionSubintentExpiration::AtTime(100.into());
 
         let result = os
             .create_subintent(
@@ -158,22 +159,25 @@ mod tests {
         let os = boot_always_failing().await;
 
         // Check for AtTime expiration
-        let seconds = 32423;
-        let timestamp = Timestamp::now_utc().add(Duration::from_secs(seconds));
+        let now = seconds_since_unix_epoch();
+        let pending_time = 32423;
+
         let mut expiration = DappToWalletInteractionSubintentExpiration::AtTime(
-            DappToWalletInteractionSubintentExpireAtTime::from(timestamp),
+            (now + pending_time).into(),
         );
 
         let mut result = os.expiry_time_from_now_in_seconds(expiration);
-        let diff = seconds.abs_diff(result);
+        let diff = pending_time.abs_diff(result);
         assert!(diff <= 1); // Less than 1s difference
 
         // Check for AfterDelay expiration
         expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
-            DappToWalletInteractionSubintentExpireAfterDelay::from(seconds),
+            DappToWalletInteractionSubintentExpireAfterDelay::from(
+                pending_time,
+            ),
         );
         result = os.expiry_time_from_now_in_seconds(expiration);
-        assert_eq!(result, seconds);
+        assert_eq!(result, pending_time);
     }
 
     #[actix_rt::test]

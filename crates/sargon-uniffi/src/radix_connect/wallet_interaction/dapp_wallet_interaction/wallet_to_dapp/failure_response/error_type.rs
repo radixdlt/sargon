@@ -25,4 +25,6 @@ pub enum DappWalletInteractionErrorType {
     IncompatibleVersion,
     FailedToSignAuthChallenge,
     InvalidPersonaOrAccounts,
+    ExpiredSubintent,
+    SubintentExpirationTooClose,
 }

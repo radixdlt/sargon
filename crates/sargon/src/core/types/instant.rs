@@ -67,6 +67,7 @@ impl HasSampleValues for Instant {
 mod tests {
     use super::*;
     use crate::prelude::*;
+    use std::time::Duration;
 
     #[test]
     fn into_from_scrypto() {
@@ -111,12 +112,12 @@ mod tests {
 
     #[test]
     fn from_timestamp() {
-        let timestamp = Timestamp::now_utc();
-        let seconds_since_unix_epoch = timestamp
-            .duration_since(Timestamp::UNIX_EPOCH)
-            .as_seconds_f64() as i64;
+        let timestamp = Timestamp::UNIX_EPOCH;
         let instant = Instant::from(timestamp);
+        assert_eq!(instant.seconds_since_unix_epoch, 0);
 
-        assert_eq!(instant.seconds_since_unix_epoch, seconds_since_unix_epoch);
+        let timestamp = Timestamp::UNIX_EPOCH.add(Duration::from_secs(300));
+        let instant = Instant::from(timestamp);
+        assert_eq!(instant.seconds_since_unix_epoch, 300);
     }
 }
