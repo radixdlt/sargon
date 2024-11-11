@@ -55,7 +55,9 @@ impl TransactionManifest {
 
         // Remove all the authorized depositros from the account
         for authorized_depositor in authorized_depositors_to_be_removed {
-            let input = ScryptoAccountRemoveAuthorizedDepositorInput::try_from(authorized_depositor)?;
+            let input = ScryptoAccountRemoveAuthorizedDepositorInput::try_from(
+                authorized_depositor,
+            )?;
             builder = builder.call_method(
                 account_address,
                 ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
@@ -86,7 +88,10 @@ impl TransactionManifest {
             owner_badge_bucket,
         );
 
-        Ok(TransactionManifest::sargon_built(builder, account_address.network_id()))
+        Ok(TransactionManifest::sargon_built(
+            builder,
+            account_address.network_id(),
+        ))
     }
 }
 
@@ -104,25 +109,39 @@ impl TryFrom<AccountAuthorizedDepositorsResponseItem>
     for ScryptoAccountRemoveAuthorizedDepositorInput
 {
     type Error = CommonError;
-    fn try_from(value: AccountAuthorizedDepositorsResponseItem) -> Result<Self> {
+    fn try_from(
+        value: AccountAuthorizedDepositorsResponseItem,
+    ) -> Result<Self> {
         let resource_or_non_fungible = ResourceOrNonFungible::try_from(value)?;
         Ok(resource_or_non_fungible.into())
     }
 }
 
-impl TryFrom<AccountAuthorizedDepositorsResponseItem> for ResourceOrNonFungible {
+impl TryFrom<AccountAuthorizedDepositorsResponseItem>
+    for ResourceOrNonFungible
+{
     type Error = CommonError;
-    fn try_from(value: AccountAuthorizedDepositorsResponseItem) -> Result<Self> {
+    fn try_from(
+        value: AccountAuthorizedDepositorsResponseItem,
+    ) -> Result<Self> {
         match value {
-            AccountAuthorizedDepositorsResponseItem::ResourceBadge { resource_address } => {
-                Ok(Self::Resource {
-                    value: resource_address,
-                })
-            },
-            AccountAuthorizedDepositorsResponseItem::NonFungibleBadge { resource_address, non_fungible_id } => {
-                if let Ok(non_fungible_id) = NonFungibleLocalId::from_str(&non_fungible_id) {
+            AccountAuthorizedDepositorsResponseItem::ResourceBadge {
+                resource_address,
+            } => Ok(Self::Resource {
+                value: resource_address,
+            }),
+            AccountAuthorizedDepositorsResponseItem::NonFungibleBadge {
+                resource_address,
+                non_fungible_id,
+            } => {
+                if let Ok(non_fungible_id) =
+                    NonFungibleLocalId::from_str(&non_fungible_id)
+                {
                     Ok(Self::NonFungible {
-                        value: NonFungibleGlobalId::new_unchecked(resource_address, non_fungible_id),
+                        value: NonFungibleGlobalId::new_unchecked(
+                            resource_address,
+                            non_fungible_id,
+                        ),
                     })
                 } else {
                     return Err(CommonError::InvalidNonFungibleLocalIDString);

@@ -3,8 +3,13 @@ use crate::prelude::*;
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 #[serde(tag = "badge_type")]
 pub enum AccountAuthorizedDepositorsResponseItem {
-    ResourceBadge { resource_address: ResourceAddress },
-    NonFungibleBadge { resource_address: ResourceAddress, non_fungible_id: String },
+    ResourceBadge {
+        resource_address: ResourceAddress,
+    },
+    NonFungibleBadge {
+        resource_address: ResourceAddress,
+        non_fungible_id: String,
+    },
 }
 
 impl HasSampleValues for AccountAuthorizedDepositorsResponseItem {
