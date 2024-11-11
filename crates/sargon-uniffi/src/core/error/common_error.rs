@@ -771,6 +771,9 @@ pub enum CommonError {
 
     #[error("Failed to add all personas, found duplicated persona.")]
     UnableToAddAllPersonasDuplicatesFound = 10216,
+
+    #[error("Missing Factor Mapping Instances Into RoleWithFactors.")]
+    MissingFactorMappingInstancesIntoRole = 10217,
 }
 
 #[uniffi::export]
