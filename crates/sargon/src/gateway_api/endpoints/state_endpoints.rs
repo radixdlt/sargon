@@ -29,4 +29,19 @@ impl GatewayClient {
         self.post("state/account/page/resource-preferences", request, res_id)
             .await
     }
+
+    /// Get Account authorized depositors
+    ///
+    /// Returns paginable collection of authorized depositors for given account.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/AccountAuthorizedDepositorsPage
+    pub(crate) async fn account_authorized_depositors(
+        &self,
+        request: AccountAuthorizedDepositorsRequest,
+    ) -> Result<AccountAuthorizedDepositorsResponse> {
+        self.post("state/account/page/authorized-depositors", request, res_id)
+            .await
+    }
 }

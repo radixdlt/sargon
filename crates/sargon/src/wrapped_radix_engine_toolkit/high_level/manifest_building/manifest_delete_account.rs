@@ -1,8 +1,10 @@
 use crate::prelude::*;
 use radix_engine_interface::blueprints::account::{
+    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
     AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
     AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
     ResourcePreference as ScryptoResourcePreference,
+    ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
     ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT, ACCOUNT_SECURIFY_IDENT,
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
@@ -13,7 +15,10 @@ impl TransactionManifest {
         resource_preferences_to_be_removed: Vec<
             AccountResourcePreferencesResponseItem,
         >,
-    ) -> Self {
+        authorized_depositors_to_be_removed: Vec<
+            AccountAuthorizedDepositorsResponseItem,
+        >,
+    ) -> Result<Self> {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
 
@@ -48,6 +53,16 @@ impl TransactionManifest {
             )
         }
 
+        // Remove all the authorized depositros from the account
+        for authorized_depositor in authorized_depositors_to_be_removed {
+            let input = ScryptoAccountRemoveAuthorizedDepositorInput::try_from(authorized_depositor)?;
+            builder = builder.call_method(
+                account_address,
+                ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
+                input,
+            )
+        }
+
         // Make the deposit of the account owner badge allowed into the account
         let asset_exception = AssetException::new(
             ResourceAddress::new(owner_badge, account_address.network_id())
@@ -71,7 +86,7 @@ impl TransactionManifest {
             owner_badge_bucket,
         );
 
-        TransactionManifest::sargon_built(builder, account_address.network_id())
+        Ok(TransactionManifest::sargon_built(builder, account_address.network_id()))
     }
 }
 
@@ -81,6 +96,38 @@ impl From<AccountResourcePreferencesResponseItem>
     fn from(value: AccountResourcePreferencesResponseItem) -> Self {
         Self {
             resource_address: value.resource_address.into(),
+        }
+    }
+}
+
+impl TryFrom<AccountAuthorizedDepositorsResponseItem>
+    for ScryptoAccountRemoveAuthorizedDepositorInput
+{
+    type Error = CommonError;
+    fn try_from(value: AccountAuthorizedDepositorsResponseItem) -> Result<Self> {
+        let resource_or_non_fungible = ResourceOrNonFungible::try_from(value)?;
+        Ok(resource_or_non_fungible.into())
+    }
+}
+
+impl TryFrom<AccountAuthorizedDepositorsResponseItem> for ResourceOrNonFungible {
+    type Error = CommonError;
+    fn try_from(value: AccountAuthorizedDepositorsResponseItem) -> Result<Self> {
+        match value.badge_type {
+            AccountAuthorizedDepositorBadgeType::ResourceBadge => {
+                Ok(Self::Resource {
+                    value: value.resource_address,
+                })
+            },
+            AccountAuthorizedDepositorBadgeType::NonFungibleBadge { non_fungible_id } => {
+                if let Ok(non_fungible_id) = NonFungibleLocalId::from_str(&non_fungible_id) {
+                    Ok(Self::NonFungible {
+                        value: NonFungibleGlobalId::new_unchecked(value.resource_address, non_fungible_id),
+                    })
+                } else {
+                    return Err(CommonError::InvalidNonFungibleLocalIDString);
+                }
+            }
         }
     }
 }
@@ -100,7 +147,8 @@ mod tests {
                 vec![
                     AccountResourcePreferencesResponseItem::sample_other(),
                 ],
-            ),
+                vec![AccountAuthorizedDepositorsResponseItem::sample_other()],
+            ).unwrap(),
             r#"
 CALL_METHOD
     Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
@@ -121,6 +169,13 @@ CALL_METHOD
     Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
     "remove_resource_preference"
     Address("resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3")
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "remove_authorized_depositor"
+    Enum<0u8>(
+        NonFungibleGlobalId("resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x:#1#")
+    )
 ;
 CALL_METHOD
     Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")

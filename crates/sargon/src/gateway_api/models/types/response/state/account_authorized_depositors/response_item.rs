@@ -1,30 +1,32 @@
 use crate::prelude::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
-pub struct AccountResourcePreferencesResponseItem {
+pub struct AccountAuthorizedDepositorsResponseItem {
     pub resource_address: ResourceAddress,
-    #[serde(rename = "resource_preference_rule")]
-    pub status: AccountResourcePreferenceRule,
+    #[serde(flatten)]
+    pub badge_type: AccountAuthorizedDepositorBadgeType,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
-pub enum AccountResourcePreferenceRule {
-    Allowed,
-    Disallowed,
+pub enum AccountAuthorizedDepositorBadgeType {
+    ResourceBadge,
+    NonFungibleBadge { non_fungible_id: String },
 }
 
-impl HasSampleValues for AccountResourcePreferencesResponseItem {
+impl HasSampleValues for AccountAuthorizedDepositorsResponseItem {
     fn sample() -> Self {
         Self {
             resource_address: ResourceAddress::sample_stokenet_xrd(),
-            status: AccountResourcePreferenceRule::Allowed,
+            badge_type: AccountAuthorizedDepositorBadgeType::ResourceBadge
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            resource_address: ResourceAddress::sample_stokenet_candy(),
-            status: AccountResourcePreferenceRule::Disallowed,
+            resource_address: ResourceAddress::sample_stokenet_nft_abandon(),
+            badge_type: AccountAuthorizedDepositorBadgeType::NonFungibleBadge {
+                non_fungible_id: "#1#".to_string()
+            }
         }
     }
 }
@@ -34,7 +36,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccountResourcePreferencesResponseItem;
+    type SUT = AccountAuthorizedDepositorsResponseItem;
 
     #[test]
     fn equality() {
@@ -54,7 +56,7 @@ mod tests {
             r#"
             {
                 "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-                "resource_preference_rule": "Allowed"
+                "badge_type": "ResourceBadge"
             }
             "#,
         );
@@ -64,7 +66,8 @@ mod tests {
             r##"
             {
                 "resource_address": "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3",
-                "resource_preference_rule": "Disallowed"
+                "badge_type": "NonFungibleBadge",
+                "non_fungible_id": "#1#"
             }
             "##,
         );
