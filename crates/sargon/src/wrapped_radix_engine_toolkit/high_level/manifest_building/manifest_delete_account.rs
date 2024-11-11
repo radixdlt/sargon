@@ -113,16 +113,16 @@ impl TryFrom<AccountAuthorizedDepositorsResponseItem>
 impl TryFrom<AccountAuthorizedDepositorsResponseItem> for ResourceOrNonFungible {
     type Error = CommonError;
     fn try_from(value: AccountAuthorizedDepositorsResponseItem) -> Result<Self> {
-        match value.badge_type {
-            AccountAuthorizedDepositorBadgeType::ResourceBadge => {
+        match value {
+            AccountAuthorizedDepositorsResponseItem::ResourceBadge { resource_address } => {
                 Ok(Self::Resource {
-                    value: value.resource_address,
+                    value: resource_address,
                 })
             },
-            AccountAuthorizedDepositorBadgeType::NonFungibleBadge { non_fungible_id } => {
+            AccountAuthorizedDepositorsResponseItem::NonFungibleBadge { resource_address, non_fungible_id } => {
                 if let Ok(non_fungible_id) = NonFungibleLocalId::from_str(&non_fungible_id) {
                     Ok(Self::NonFungible {
-                        value: NonFungibleGlobalId::new_unchecked(value.resource_address, non_fungible_id),
+                        value: NonFungibleGlobalId::new_unchecked(resource_address, non_fungible_id),
                     })
                 } else {
                     return Err(CommonError::InvalidNonFungibleLocalIDString);

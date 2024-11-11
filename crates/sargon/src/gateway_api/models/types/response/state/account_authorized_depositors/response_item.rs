@@ -1,32 +1,23 @@
 use crate::prelude::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
-pub struct AccountAuthorizedDepositorsResponseItem {
-    pub resource_address: ResourceAddress,
-    #[serde(flatten)]
-    pub badge_type: AccountAuthorizedDepositorBadgeType,
-}
-
-#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
-pub enum AccountAuthorizedDepositorBadgeType {
-    ResourceBadge,
-    NonFungibleBadge { non_fungible_id: String },
+#[serde(tag = "badge_type")]
+pub enum AccountAuthorizedDepositorsResponseItem {
+    ResourceBadge { resource_address: ResourceAddress },
+    NonFungibleBadge { resource_address: ResourceAddress, non_fungible_id: String },
 }
 
 impl HasSampleValues for AccountAuthorizedDepositorsResponseItem {
     fn sample() -> Self {
-        Self {
+        Self::ResourceBadge {
             resource_address: ResourceAddress::sample_stokenet_xrd(),
-            badge_type: AccountAuthorizedDepositorBadgeType::ResourceBadge
         }
     }
 
     fn sample_other() -> Self {
-        Self {
+        Self::NonFungibleBadge {
             resource_address: ResourceAddress::sample_stokenet_nft_abandon(),
-            badge_type: AccountAuthorizedDepositorBadgeType::NonFungibleBadge {
-                non_fungible_id: "#1#".to_string()
-            }
+            non_fungible_id: "#1#".to_string(),
         }
     }
 }
@@ -65,7 +56,7 @@ mod tests {
             &SUT::sample_other(),
             r##"
             {
-                "resource_address": "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3",
+                "resource_address": "resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x",
                 "badge_type": "NonFungibleBadge",
                 "non_fungible_id": "#1#"
             }
