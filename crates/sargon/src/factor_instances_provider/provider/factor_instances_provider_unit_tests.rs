@@ -234,6 +234,51 @@ async fn adding_personas_and_clearing_cache_in_between() {
     );
 }
 
+#[cfg(test)]
+impl PrimaryRoleWithFactorInstances {
+    pub fn all_hd_factors(
+        &self,
+    ) -> Vec<HierarchicalDeterministicFactorInstance> {
+        self.all_factors()
+            .into_iter()
+            .map(|f| {
+                HierarchicalDeterministicFactorInstance::try_from(f.clone())
+                    .unwrap()
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+impl RecoveryRoleWithFactorInstances {
+    pub fn all_hd_factors(
+        &self,
+    ) -> Vec<HierarchicalDeterministicFactorInstance> {
+        self.all_factors()
+            .into_iter()
+            .map(|f| {
+                HierarchicalDeterministicFactorInstance::try_from(f.clone())
+                    .unwrap()
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+impl ConfirmationRoleWithFactorInstances {
+    pub fn all_hd_factors(
+        &self,
+    ) -> Vec<HierarchicalDeterministicFactorInstance> {
+        self.all_factors()
+            .into_iter()
+            .map(|f| {
+                HierarchicalDeterministicFactorInstance::try_from(f.clone())
+                    .unwrap()
+            })
+            .collect()
+    }
+}
+
 #[actix_rt::test]
 async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot().await;
@@ -300,69 +345,65 @@ async fn cache_is_unchanged_in_case_of_failure() {
         3 * n
     );
 
-    // let (first_half_securified_accounts, stats) = os
-    //     .securify_accounts(
-    //         first_half_of_accounts
-    //             .clone()
-    //             .into_iter()
-    //             .map(|a| a.entity_address())
-    //             .collect(),
-    //         shield_0.clone(),
-    //     )
-    //     .await
-    //     .unwrap();
     let (security_structure_of_factor_instances_first_half, instances_consumer, stats) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
         first_half_of_accounts
                 .clone()
                 .into_iter()
                 .map(|a| a.address())
-                .collect()
-        , shield_0.clone()).await.unwrap();
+                .collect(),
+                shield_0.clone()).await.unwrap();
 
-    /*
+    // consume!
+    instances_consumer.consume().await.unwrap();
+
     assert!(
         !stats.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
     assert_eq!(
-        first_half_securified_accounts
+        security_structure_of_factor_instances_first_half
             .into_iter()
             .map(|a| a
-                .securified_entity_control()
-                .primary_role_instances()
+                .1
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
                 .next()
                 .unwrap()) // single factor per role text
             .collect_vec(),
         (0..CACHE_FILLING_QUANTITY / 2)
-            .map(|i| HDPathComponent::securifying_base_index(i as u32))
+            .map(|i| HDPathComponent::Securified(
+                SecurifiedU30::try_from(i as u32).unwrap()
+            ))
             .collect_vec()
     );
 
-    let cache_before_fail = os.cache_snapshot();
-    let fail_interactor = Arc::new(TestDerivationInteractors::fail()); // <--- FAIL
+    let cache_before_fail = os.cache_snapshot().await;
+    let fail_interactor: Arc<dyn KeysDerivationInteractors> =
+        Arc::new(TestDerivationInteractors::fail()); // <--- FAIL
+    let failing_interactors = Interactors::new(fail_interactor);
+    os.interactors.write().unwrap().replace(failing_interactors);
 
     let res = os
-        .securify_accounts_with_interactor(
-            fail_interactor,
+        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
             second_half_of_accounts
-                .clone()
-                .into_iter()
-                .map(|a| a.entity_address())
-                .collect(),
-            shield_0,
+            .clone()
+            .into_iter()
+            .map(|a| a.address())
+            .collect(),
+            shield_0.clone()
         )
         .await;
-
     assert!(res.is_err());
+    let cache_after_fail = os.cache_snapshot().await;
     assert_eq!(
-        os.cache_snapshot(),
-        cache_before_fail,
+        cache_after_fail.serializable_snapshot(),
+        cache_before_fail.serializable_snapshot(),
         "Cache should not have changed when failing."
     );
-    */
 }
 
 /*
