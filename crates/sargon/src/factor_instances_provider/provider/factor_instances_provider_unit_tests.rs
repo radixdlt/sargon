@@ -406,33 +406,50 @@ async fn cache_is_unchanged_in_case_of_failure() {
     );
 }
 
-/*
-
 #[actix_rt::test]
 async fn add_account_and_personas_mixed() {
-    let (mut os, _) = SargonOS::with_bdfs().await;
-    assert!(os.profile_snapshot().get_personas().is_empty());
-    assert!(os.profile_snapshot().get_accounts().is_empty());
+    let os = SargonOS::fast_boot().await;
+    let profile = os.profile().unwrap();
+    assert!(profile
+        .personas_on_all_networks_including_hidden()
+        .is_empty());
+    assert!(profile
+        .accounts_on_all_networks_including_hidden()
+        .is_empty());
 
-    let (batman, stats) = os.create_and_save_new_mainnet_persona_with_derivation_outcome("Batman").await.unwrap();
+    let (batman, stats) = os
+        .create_and_save_new_mainnet_persona_with_derivation_outcome("Batman")
+        .await
+        .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
-    let (alice, stats) = os.create_and_save_new_mainnet_account_with_derivation_outcome("alice").await.unwrap();
+    let (alice, stats) = os
+        .create_and_save_new_mainnet_account_with_derivation_outcome("alice")
+        .await
+        .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
-    let (satoshi, stats) = os.create_and_save_new_mainnet_persona_with_derivation_outcome("Satoshi").await.unwrap();
+    let (satoshi, stats) = os
+        .create_and_save_new_mainnet_persona_with_derivation_outcome("Satoshi")
+        .await
+        .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
-    assert_ne!(batman.entity_address(), satoshi.entity_address());
+    assert_ne!(batman.address(), satoshi.address());
 
-    let (bob, stats) = os.create_and_save_new_mainnet_account_with_derivation_outcome("bob").await.unwrap();
+    let (bob, stats) = os
+        .create_and_save_new_mainnet_account_with_derivation_outcome("bob")
+        .await
+        .unwrap();
     assert!(stats.debug_was_derived.is_empty());
-    assert_ne!(alice.entity_address(), bob.entity_address());
+    assert_ne!(alice.address(), bob.address());
 
-    assert_eq!(os.profile_snapshot().get_personas().len(), 2);
-    assert_eq!(os.profile_snapshot().get_accounts().len(), 2);
+    let profile = os.profile().unwrap();
+    assert_eq!(profile.personas_on_all_networks_including_hidden().len(), 2);
+    assert_eq!(profile.accounts_on_all_networks_including_hidden().len(), 2);
 }
 
+/*
 #[actix_rt::test]
 async fn adding_accounts_different_networks_different_factor_sources() {
     let mut os = SargonOS::new();
