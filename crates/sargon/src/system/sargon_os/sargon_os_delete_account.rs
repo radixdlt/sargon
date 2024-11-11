@@ -103,9 +103,8 @@ impl SargonOS {
     }
 }
 
-
 impl TryFrom<AccountAuthorizedDepositor>
-for ScryptoAccountRemoveAuthorizedDepositorInput
+    for ScryptoAccountRemoveAuthorizedDepositorInput
 {
     type Error = CommonError;
     fn try_from(value: AccountAuthorizedDepositor) -> Result<Self> {

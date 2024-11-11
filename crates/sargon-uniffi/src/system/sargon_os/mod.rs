@@ -2,6 +2,7 @@ mod pre_authorization;
 mod profile_state_holder;
 mod sargon_os;
 mod sargon_os_accounts;
+mod sargon_os_delete_account;
 mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_profile;

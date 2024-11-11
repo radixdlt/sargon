@@ -12,8 +12,12 @@ use radix_engine_interface::blueprints::account::{
 impl TransactionManifest {
     pub fn delete_account(
         account_address: &AccountAddress,
-        resource_preferences_to_be_removed: Vec<ScryptoAccountRemoveResourcePreferenceInput>,
-        authorized_depositors_to_be_removed: Vec<ScryptoAccountRemoveAuthorizedDepositorInput>,
+        resource_preferences_to_be_removed: Vec<
+            ScryptoAccountRemoveResourcePreferenceInput,
+        >,
+        authorized_depositors_to_be_removed: Vec<
+            ScryptoAccountRemoveAuthorizedDepositorInput,
+        >,
     ) -> Self {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
@@ -79,10 +83,7 @@ impl TransactionManifest {
             owner_badge_bucket,
         );
 
-        TransactionManifest::sargon_built(
-            builder,
-            account_address.network_id(),
-        )
+        TransactionManifest::sargon_built(builder, account_address.network_id())
     }
 }
 
