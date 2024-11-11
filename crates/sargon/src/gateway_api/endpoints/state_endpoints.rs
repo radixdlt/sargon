@@ -24,8 +24,8 @@ impl GatewayClient {
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/AccountResourcePreferencesPage
     pub(crate) async fn account_resource_preferences(
         &self,
-        request: AccountResourcePreferencesRequest,
-    ) -> Result<AccountResourcePreferencesResponse> {
+        request: AccountPageRequest,
+    ) -> Result<PageResponse<AccountResourcePreference>> {
         self.post("state/account/page/resource-preferences", request, res_id)
             .await
     }
@@ -39,8 +39,8 @@ impl GatewayClient {
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/AccountAuthorizedDepositorsPage
     pub(crate) async fn account_authorized_depositors(
         &self,
-        request: AccountAuthorizedDepositorsRequest,
-    ) -> Result<AccountAuthorizedDepositorsResponse> {
+        request: AccountPageRequest,
+    ) -> Result<PageResponse<AccountAuthorizedDepositor>> {
         self.post("state/account/page/authorized-depositors", request, res_id)
             .await
     }

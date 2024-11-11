@@ -1,28 +1,30 @@
 use crate::prelude::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
-#[serde(tag = "badge_type")]
-pub enum AccountAuthorizedDepositorsResponseItem {
-    ResourceBadge {
-        resource_address: ResourceAddress,
-    },
-    NonFungibleBadge {
-        resource_address: ResourceAddress,
-        non_fungible_id: String,
-    },
+pub struct AccountResourcePreference {
+    pub resource_address: ResourceAddress,
+    #[serde(rename = "resource_preference_rule")]
+    pub status: AccountResourcePreferenceRule,
 }
 
-impl HasSampleValues for AccountAuthorizedDepositorsResponseItem {
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
+pub enum AccountResourcePreferenceRule {
+    Allowed,
+    Disallowed,
+}
+
+impl HasSampleValues for AccountResourcePreference {
     fn sample() -> Self {
-        Self::ResourceBadge {
+        Self {
             resource_address: ResourceAddress::sample_stokenet_xrd(),
+            status: AccountResourcePreferenceRule::Allowed,
         }
     }
 
     fn sample_other() -> Self {
-        Self::NonFungibleBadge {
-            resource_address: ResourceAddress::sample_stokenet_nft_abandon(),
-            non_fungible_id: "#1#".to_string(),
+        Self {
+            resource_address: ResourceAddress::sample_stokenet_candy(),
+            status: AccountResourcePreferenceRule::Disallowed,
         }
     }
 }
@@ -32,7 +34,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccountAuthorizedDepositorsResponseItem;
+    type SUT = AccountResourcePreference;
 
     #[test]
     fn equality() {
@@ -52,7 +54,7 @@ mod tests {
             r#"
             {
                 "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-                "badge_type": "ResourceBadge"
+                "resource_preference_rule": "Allowed"
             }
             "#,
         );
@@ -61,9 +63,8 @@ mod tests {
             &SUT::sample_other(),
             r##"
             {
-                "resource_address": "resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x",
-                "badge_type": "NonFungibleBadge",
-                "non_fungible_id": "#1#"
+                "resource_address": "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3",
+                "resource_preference_rule": "Disallowed"
             }
             "##,
         );

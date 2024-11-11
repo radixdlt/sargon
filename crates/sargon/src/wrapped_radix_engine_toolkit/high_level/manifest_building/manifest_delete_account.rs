@@ -12,13 +12,9 @@ use radix_engine_interface::blueprints::account::{
 impl TransactionManifest {
     pub fn delete_account(
         account_address: &AccountAddress,
-        resource_preferences_to_be_removed: Vec<
-            AccountResourcePreferencesResponseItem,
-        >,
-        authorized_depositors_to_be_removed: Vec<
-            AccountAuthorizedDepositorsResponseItem,
-        >,
-    ) -> Result<Self> {
+        resource_preferences_to_be_removed: Vec<ScryptoAccountRemoveResourcePreferenceInput>,
+        authorized_depositors_to_be_removed: Vec<ScryptoAccountRemoveAuthorizedDepositorInput>,
+    ) -> Self {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
 
@@ -47,21 +43,16 @@ impl TransactionManifest {
             builder = builder.call_method(
                 account_address,
                 ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT,
-                ScryptoAccountRemoveResourcePreferenceInput::from(
-                    resource_address,
-                ),
+                resource_address,
             )
         }
 
-        // Remove all the authorized depositros from the account
+        // Remove all the authorized depositors from the account
         for authorized_depositor in authorized_depositors_to_be_removed {
-            let input = ScryptoAccountRemoveAuthorizedDepositorInput::try_from(
-                authorized_depositor,
-            )?;
             builder = builder.call_method(
                 account_address,
                 ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
-                input,
+                authorized_depositor,
             )
         }
 
@@ -88,65 +79,19 @@ impl TransactionManifest {
             owner_badge_bucket,
         );
 
-        Ok(TransactionManifest::sargon_built(
+        TransactionManifest::sargon_built(
             builder,
             account_address.network_id(),
-        ))
+        )
     }
 }
 
-impl From<AccountResourcePreferencesResponseItem>
+impl From<AccountResourcePreference>
     for ScryptoAccountRemoveResourcePreferenceInput
 {
-    fn from(value: AccountResourcePreferencesResponseItem) -> Self {
+    fn from(value: AccountResourcePreference) -> Self {
         Self {
             resource_address: value.resource_address.into(),
-        }
-    }
-}
-
-impl TryFrom<AccountAuthorizedDepositorsResponseItem>
-    for ScryptoAccountRemoveAuthorizedDepositorInput
-{
-    type Error = CommonError;
-    fn try_from(
-        value: AccountAuthorizedDepositorsResponseItem,
-    ) -> Result<Self> {
-        let resource_or_non_fungible = ResourceOrNonFungible::try_from(value)?;
-        Ok(resource_or_non_fungible.into())
-    }
-}
-
-impl TryFrom<AccountAuthorizedDepositorsResponseItem>
-    for ResourceOrNonFungible
-{
-    type Error = CommonError;
-    fn try_from(
-        value: AccountAuthorizedDepositorsResponseItem,
-    ) -> Result<Self> {
-        match value {
-            AccountAuthorizedDepositorsResponseItem::ResourceBadge {
-                resource_address,
-            } => Ok(Self::Resource {
-                value: resource_address,
-            }),
-            AccountAuthorizedDepositorsResponseItem::NonFungibleBadge {
-                resource_address,
-                non_fungible_id,
-            } => {
-                if let Ok(non_fungible_id) =
-                    NonFungibleLocalId::from_str(&non_fungible_id)
-                {
-                    Ok(Self::NonFungible {
-                        value: NonFungibleGlobalId::new_unchecked(
-                            resource_address,
-                            non_fungible_id,
-                        ),
-                    })
-                } else {
-                    return Err(CommonError::InvalidNonFungibleLocalIDString);
-                }
-            }
         }
     }
 }
@@ -164,9 +109,11 @@ mod tests {
             SUT::delete_account(
                 &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
                 vec![
-                    AccountResourcePreferencesResponseItem::sample_other(),
+                    AccountResourcePreference::sample_other().into(),
                 ],
-                vec![AccountAuthorizedDepositorsResponseItem::sample_other()],
+                vec![
+                    AccountAuthorizedDepositor::sample_other().try_into().unwrap(),
+                ],
             ).unwrap(),
             r#"
 CALL_METHOD

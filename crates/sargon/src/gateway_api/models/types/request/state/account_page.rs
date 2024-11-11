@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct AccountResourcePreferencesRequest {
+pub struct AccountPageRequest {
     /// Bech32m-encoded human readable version of the address.
     pub(crate) account_address: AccountAddress,
 
@@ -14,13 +14,13 @@ pub struct AccountResourcePreferencesRequest {
     pub(crate) limit_per_page: Option<u64>,
 }
 
-impl AccountResourcePreferencesRequest {
+impl AccountPageRequest {
     pub fn new(
         account_address: AccountAddress,
         cursor: Option<String>,
         limit_per_page: impl Into<Option<u64>>,
-    ) -> AccountResourcePreferencesRequest {
-        AccountResourcePreferencesRequest {
+    ) -> AccountPageRequest {
+        AccountPageRequest {
             account_address,
             cursor,
             limit_per_page: limit_per_page.into(),
