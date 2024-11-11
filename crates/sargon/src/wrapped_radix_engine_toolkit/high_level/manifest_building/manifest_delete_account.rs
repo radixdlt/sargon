@@ -6,15 +6,9 @@ use radix_engine_interface::blueprints::account::{
 };
 
 impl TransactionManifest {
-    pub fn delete_account(
-        account_address: &AccountAddress,
-        fee_payer_address: &AccountAddress,
-    ) -> Self {
+    pub fn delete_account(account_address: &AccountAddress) -> Self {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
-
-        // Lock fee
-        builder = builder.lock_standard_test_fee(fee_payer_address.scrypto());
 
         // We securify the account which will return an account owner badge onto the worktop.
         builder =
@@ -76,14 +70,8 @@ mod tests {
         manifest_eq(
             SUT::delete_account(
                 &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
-                &"account_tdx_2_1cx3utfwmf6s69u043yw2gtz2g76n0vk53lm4xh7qmqg0cr577smtla".into()
             ),
             r#"
-CALL_METHOD
-    Address("account_tdx_2_1cx3utfwmf6s69u043yw2gtz2g76n0vk53lm4xh7qmqg0cr577smtla")
-    "lock_fee"
-    Decimal("5000")
-;
 CALL_METHOD
     Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
     "securify"
