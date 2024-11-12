@@ -1317,18 +1317,6 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         3 * n
     );
 
-    // let (first_half_securified_personas, derivation_outcome) = os
-    //     .securify_personas(
-    //         first_half_of_personas
-    //             .clone()
-    //             .into_iter()
-    //             .map(|a| a.entity_address())
-    //             .collect(),
-    //         shield_0.clone(),
-    //     )
-    //     .await
-    //     .unwrap();
-
     let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
         first_half_of_personas.clone().into_iter().map(|a| a.address()).collect(),
@@ -1402,35 +1390,84 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
     );
 }
 
-/*
 #[actix_rt::test]
 async fn create_single_account() {
-    let (mut os, bdfs) = SargonOS::with_bdfs().await;
-    let (alice, derivation_outcome) = os.create_and_save_new_mainnet_account_with_derivation_outcome("alice").await.unwrap();
-    assert!(derivation_outcome.debug_was_derived.is_empty(), "should have used cache");
-    let (sec_accounts, derivation_outcome) = os
-        .securify_accounts(
-            IndexSet::just(alice.entity_address()),
-            MatrixOfFactorSources::new([], 0, [bdfs]),
-        )
+    let (os, bdfs) = SargonOS::with_bdfs().await;
+
+    let (alice, derivation_outcome) = os
+        .create_and_save_new_mainnet_account_with_derivation_outcome("alice")
         .await
         .unwrap();
+
+    assert!(
+        derivation_outcome.debug_was_derived.is_empty(),
+        "should have used cache"
+    );
+
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::override_only([bdfs.clone()]).unwrap(),
+        RecoveryRoleWithFactorSources::override_only([bdfs.clone()])
+            .unwrap(),
+        ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
+            .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
+
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+       IndexSet::just(alice.address()),
+        shield_0.clone(),
+    )
+    .await
+    .unwrap();
+
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
+
     assert!(
         !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
-    let alice_sec = sec_accounts.into_iter().next().unwrap();
-    assert_eq!(
-        alice_sec
-            .securified_entity_control()
-            .primary_role_instances()
-            .first()
-            .unwrap()
-            .derivation_entity_index(),
-        HDPathComponent::securifying_base_index(0)
-    );
-}
 
+
+
+    let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
+
+    let alice_matrix = alice_sec.matrix_of_factors.clone();
+
+    assert_eq!(
+        alice_matrix
+            .primary_role
+            .all_factors()
+            .into_iter()
+            .map(|f| f.factor_source_id)
+            .collect_vec(),
+        [bdfs.factor_source_id(),]
+    );
+
+    for factors_for_role in [
+        &alice_matrix.primary_role.all_hd_factors(),
+        &alice_matrix.recovery_role.all_hd_factors(),
+        &alice_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ZERO), 
+            ]
+        );
+    }
+}
+/*
 #[actix_rt::test]
 async fn securified_personas() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
