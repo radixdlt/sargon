@@ -704,6 +704,7 @@ impl SargonOS {
     }
 
     #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
         A: IsEntityAddress,
     >(
