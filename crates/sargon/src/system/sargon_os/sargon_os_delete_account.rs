@@ -129,3 +129,115 @@ impl TryFrom<AccountAuthorizedDepositor> for ResourceOrNonFungible {
         }
     }
 }
+
+#[cfg(test)]
+mod try_from_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn account_authorized_depositor() {
+        // Test a ResourceBadge
+        let resource_address = ResourceAddress::sample();
+        let depositor =
+            AccountAuthorizedDepositor::ResourceBadge { resource_address };
+        let result = ResourceOrNonFungible::try_from(depositor)
+            .expect("Expected a result");
+
+        assert_eq!(
+            result,
+            ResourceOrNonFungible::Resource {
+                value: resource_address
+            }
+        );
+
+        // Test a FungibleBadge with an integer id
+        let nft_collection_address =
+            ResourceAddress::sample_stokenet_nft_abandon();
+        let depositor = AccountAuthorizedDepositor::NonFungibleBadge {
+            resource_address: nft_collection_address,
+            non_fungible_id: "#1#".to_string(),
+        };
+
+        let result = ResourceOrNonFungible::try_from(depositor)
+            .expect("Expected a result");
+
+        assert_eq!(
+            result,
+            ResourceOrNonFungible::NonFungible {
+                value: NonFungibleGlobalId::new_unchecked(
+                    nft_collection_address,
+                    NonFungibleLocalId::integer(1)
+                )
+            }
+        );
+
+        // Test a FungibleBadge with a String id
+        let depositor = AccountAuthorizedDepositor::NonFungibleBadge {
+            resource_address: nft_collection_address,
+            non_fungible_id: "<Member_237>".to_string(),
+        };
+
+        let result = ResourceOrNonFungible::try_from(depositor)
+            .expect("Expected a result");
+
+        assert_eq!(
+            result,
+            ResourceOrNonFungible::NonFungible {
+                value: NonFungibleGlobalId::new_unchecked(
+                    nft_collection_address,
+                    NonFungibleLocalId::string("Member_237".to_string())
+                        .unwrap()
+                )
+            }
+        );
+
+        // Test a FungibleBadge with a Bytes id
+        let depositor = AccountAuthorizedDepositor::NonFungibleBadge {
+            resource_address: nft_collection_address,
+            non_fungible_id: "[deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead]".to_string(),
+        };
+
+        let result = ResourceOrNonFungible::try_from(depositor)
+            .expect("Expected a result");
+
+        assert_eq!(
+            result,
+            ResourceOrNonFungible::NonFungible {
+                value: NonFungibleGlobalId::new_unchecked(
+                    nft_collection_address,
+                    NonFungibleLocalId::bytes(Exactly32Bytes::sample_dead())
+                        .unwrap()
+                )
+            }
+        );
+
+        // Test a FungibleBadge with Ruid
+        let depositor = AccountAuthorizedDepositor::NonFungibleBadge {
+            resource_address: nft_collection_address,
+            non_fungible_id: "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}".to_string(),
+        };
+
+        let result = ResourceOrNonFungible::try_from(depositor)
+            .expect("Expected a result");
+
+        assert_eq!(result, ResourceOrNonFungible::NonFungible {
+            value: NonFungibleGlobalId::new_unchecked(
+                nft_collection_address,
+                NonFungibleLocalId::ruid(
+                    hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+                ).unwrap()
+            )
+        });
+
+        // Test a FungibleBadge with an invalid id
+        let depositor = AccountAuthorizedDepositor::NonFungibleBadge {
+            resource_address: nft_collection_address,
+            non_fungible_id: "invalid".to_string(),
+        };
+
+        let result = ResourceOrNonFungible::try_from(depositor)
+            .expect_err("Expected an error");
+
+        assert_eq!(result, CommonError::InvalidNonFungibleLocalIDString);
+    }
+}
