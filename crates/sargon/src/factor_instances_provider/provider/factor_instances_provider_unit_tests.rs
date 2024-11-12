@@ -71,21 +71,33 @@ impl SargonOS {
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
     ) -> Result<Account> {
         let mut account = self.account_by_address(account_address).unwrap();
-        let veci = match account.security_state() {
+
+        let veci: HierarchicalDeterministicFactorInstance;
+        let access_controller_address: AccessControllerAddress;
+
+        match account.security_state() {
             EntitySecurityState::Unsecured { value } => {
-                value.transaction_signing.clone()
+                veci = value.transaction_signing.clone();
+                // THIS IS COMPLETELY WRONG!
+                // The real solution should get the AccessControllerAddress on chain
+                access_controller_address =
+                    AccessControllerAddress::with_node_id_of(
+                        &account.address(),
+                    );
             }
             EntitySecurityState::Securified { value } => {
-                value.veci.clone().unwrap()
+                veci = value.veci.clone().unwrap();
+                access_controller_address =
+                    value.access_controller_address.clone();
             }
         };
-        let access_controller_address =
-            AccessControllerAddress::with_node_id_of(&account.address());
+
         let securified_control = SecuredEntityControl::new(
             veci,
             access_controller_address,
             security_structure_of_factor_instances,
         )?;
+
         account.security_state = EntitySecurityState::Securified {
             value: securified_control,
         };
@@ -96,7 +108,6 @@ impl SargonOS {
     /// Uses FactorInstancesProvider to get factor instances for the `shield`.
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
-    #[allow(non_camel_case_types)]
     async fn __OFFLINE_ONLY_securify_accounts(
         &self,
         account_addresses: IndexSet<AccountAddress>,
@@ -120,6 +131,9 @@ impl SargonOS {
                 security_structures_of_factor_instances
                     .shift_remove(&account_address)
                     .unwrap();
+
+            // Production ready code should batch update accounts, submit batch transaction to
+            // network, and then batch update all accounts in Profile.
             let account = self
                 .__OFFLINE_ONLY_securify_account_and_save_to_profile_and_secure_storage(
                     account_address,
