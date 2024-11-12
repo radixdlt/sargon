@@ -93,6 +93,7 @@ impl SargonOS {
         Ok(account)
     }
 
+    /// Uses FactorInstancesProvider to get factor instances for the `shield`.
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
     #[allow(non_camel_case_types)]
@@ -100,7 +101,7 @@ impl SargonOS {
         &self,
         account_addresses: IndexSet<AccountAddress>,
         shield: &SecurityStructureOfFactorSources,
-    ) -> Result<FactorInstancesProviderOutcome> {
+    ) -> Result<(Accounts, FactorInstancesProviderOutcome)> {
         account_addresses
             .iter()
             .for_each(|a| assert!(self.account_by_address(a.clone()).is_ok()));
@@ -113,25 +114,48 @@ impl SargonOS {
             security_structures_of_factor_instances;
         // consume!
         instances_consumer.consume().await?;
-
+        let mut accounts = IndexSet::<Account>::new();
         for account_address in account_addresses {
             let security_structure_of_factor_instances =
                 security_structures_of_factor_instances
                     .shift_remove(&account_address)
                     .unwrap();
-            let _ = self
+            let account = self
                 .__OFFLINE_ONLY_securify_account_and_save_to_profile_and_secure_storage(
                     account_address,
                     security_structure_of_factor_instances,
                 )
                 .await
                 .unwrap();
+            accounts.insert(account);
         }
 
         assert!(security_structures_of_factor_instances.is_empty());
-        Ok(derivation_outcome)
+        Ok((accounts.into_iter().collect(), derivation_outcome))
+    }
+
+    /// Uses FactorInstancesProvider to get factor instances for the `shield`.
+    /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
+    /// security state on chain
+    #[allow(non_camel_case_types)]
+    async fn __OFFLINE_ONLY_securify_account(
+        &self,
+        account_address: AccountAddress,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<(Account, FactorInstancesProviderOutcome)> {
+        let (accounts, outcome) = self
+            .__OFFLINE_ONLY_securify_accounts(
+                IndexSet::just(account_address),
+                shield,
+            )
+            .await?;
+        assert_eq!(accounts.len(), 1);
+        let account = accounts.first().unwrap().clone();
+        Ok((account, outcome))
     }
 }
+
+use sbor::prelude::indexmap::IndexSet;
 
 use crate::prelude::*;
 
@@ -143,7 +167,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         .await
         .assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
     let prefix = "Acco";
-    let derivation_outcome = os
+    let (_, derivation_outcome) = os
         .batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, NetworkID::Mainnet, prefix.to_owned())
             .await
             .unwrap();
@@ -396,7 +420,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    let derivation_outcome = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
     assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
 
     let all_accounts = os
@@ -1174,7 +1198,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    let derivation_outcome = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
 
     assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
 
@@ -1773,7 +1797,6 @@ async fn securified_personas() {
     .await
     .unwrap();
 
-    // dont forget to consume!
     instances_consumer.consume().await.unwrap();
 
     assert!(
@@ -1848,7 +1871,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
     // first create CACHE_FILLING_QUANTITY many "unnamed" accounts
 
-    let derivation_outcome = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
     assert!(derivation_outcome.debug_was_derived.is_empty());
 
     let unnamed_accounts = os
@@ -1874,7 +1897,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         matrix_0,
     );
 
-    let derivation_outcome = os
+    let (_, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
             unnamed_accounts
                 .clone()
@@ -1963,7 +1986,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         )) // <-- IMPORTANT this tests that we do not start at 0', asserts that the next index from profile analyzer
     );
 
-    let derivation_outcome = os
+    let (_, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
             IndexSet::just(alice.address()),
             &shield_0,
@@ -2001,54 +2024,84 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         );
     }
 }
-/*
+
 #[actix_rt::test]
 async fn securified_accounts_asymmetric_indices() {
-    let os = SargonOS::fast_boot().await;
-    assert_eq!(os.cache_snapshot().total_number_of_factor_instances(), 0);
+    let (os, fs_device) = SargonOS::with_bdfs().await;
+    let cache = os.cache_snapshot().await;
+    assert_eq!(
+        cache.total_number_of_factor_instances(),
+        DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+    );
 
-    let fs_device = FactorSource::sample_device();
     let fs_arculus = FactorSource::sample_arculus();
     let fs_ledger = FactorSource::sample_ledger();
 
-    os.add_factor_source(fs_device.clone()).await.unwrap();
     os.add_factor_source(fs_arculus.clone()).await.unwrap();
     os.add_factor_source(fs_ledger.clone()).await.unwrap();
 
+    let number_of_factor_sources = os.profile().unwrap().factor_sources.len();
+    assert_eq!(number_of_factor_sources, 3);
+    let cache = os.cache_snapshot().await;
     assert_eq!(
-        os.cache_snapshot().total_number_of_factor_instances(),
-        3 * 4 * CACHE_FILLING_QUANTITY
+        cache.total_number_of_factor_instances(),
+        number_of_factor_sources
+            * DerivationPreset::all().len()
+            * CACHE_FILLING_QUANTITY
     );
 
-    assert!(os.profile_snapshot().get_accounts().is_empty());
-    assert_eq!(os.profile_snapshot().factor_sources.len(), 3);
+    let profile = os.profile().unwrap();
+    assert!(profile
+        .accounts_on_all_networks_including_hidden()
+        .is_empty());
 
     let network = NetworkID::Mainnet;
 
     // first create CACHE_FILLING_QUANTITY many "unnamed" accounts
 
-    for i in 0..CACHE_FILLING_QUANTITY {
-        let (_, derivation_outcome) = os
-            .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("@{}", i))
-            .await
-            .unwrap();
-        assert!(derivation_outcome.debug_was_derived.is_empty());
-    }
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(fs_device.clone(), CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
     let unnamed_accounts = os
-        .profile_snapshot()
-        .get_accounts()
+        .profile()
+        .unwrap()
+        .accounts_on_all_networks_including_hidden()
         .into_iter()
         .collect_vec();
 
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::threshold_factors_only(
+            [fs_device.clone()],
+            1,
+        )
+        .unwrap(),
+        RecoveryRoleWithFactorSources::threshold_factors_only(
+            [fs_device.clone()],
+            1,
+        )
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [fs_device.clone()],
+            1,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
+
     let (_, derivation_outcome) = os
-        .securify_accounts(
+        .__OFFLINE_ONLY_securify_accounts(
             unnamed_accounts
                 .clone()
-                .into_iter()
-                .map(|a| a.entity_address())
+                .iter()
+                .map(|a| a.address())
                 .collect(),
-            MatrixOfFactorSources::new([fs_device.clone()], 1, []),
+            &shield_0,
         )
         .await
         .unwrap();
@@ -2059,7 +2112,11 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     let (alice, derivation_outcome) = os
-        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Alice")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            network,
+            "Alice",
+        )
         .await
         .unwrap();
     assert!(
@@ -2072,136 +2129,250 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     let (bob, _) = os
-        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Bob")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            network,
+            "Bob",
+        )
         .await
         .unwrap();
 
     let (carol, _) = os
-        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Carol")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            network,
+            "Carol",
+        )
         .await
         .unwrap();
 
     let (diana, _) = os
-        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Diana")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            network,
+            "Diana",
+        )
         .await
         .unwrap();
 
     assert_eq!(
         diana
-            .as_unsecurified()
+            .try_get_unsecured_control()
             .unwrap()
-            .veci()
-            .factor_instance()
+            .transaction_signing
             .derivation_entity_index(),
-        HDPathComponent::unsecurified_hardening_base_index(33)
+        HDPathComponent::from_local_key_space(
+            33,
+            KeySpace::Unsecurified { is_hardened: true }
+        )
+        .unwrap()
+    );
+
+    let matrix_1 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_arculus.clone(),
+        ])
+        .unwrap(),
+        RecoveryRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_arculus.clone(),
+        ])
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_arculus.clone(),
+        ])
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_1 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 1").unwrap()),
+        14,
+        matrix_1,
     );
 
     let (securified_alice, derivation_outcome) = os
-        .securify_account(
-            alice.entity_address(),
-            MatrixOfFactorSources::new([], 0, [fs_device.clone(), fs_arculus.clone()]),
-        )
+        .__OFFLINE_ONLY_securify_account(alice.address(), &shield_1)
         .await
         .unwrap();
-    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
+
+    assert!(
+        derivation_outcome.found_any_instances_in_cache_for_any_factor_source()
+    );
+    assert!(
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source()
+    );
 
     assert_eq!(
         securified_alice
-            .securified_entity_control()
-            .primary_role_instances()
+            .try_get_secured_control()
+            .unwrap()
+            .security_structure
+            .matrix_of_factors
+            .primary_role
+            .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id(), f.derivation_entity_index()))
-            .collect::<IndexMap<_, _>>(),
+            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.factor_source_id(),
-                HDPathComponent::securifying_base_index(30)
+                fs_device.id_from_hash(),
+                HDPathComponent::from_local_key_space(30, KeySpace::Securified)
+                    .unwrap()
             ),
             (
-                fs_arculus.factor_source_id(),
-                HDPathComponent::securifying_base_index(0)
+                fs_arculus.id_from_hash(),
+                HDPathComponent::from_local_key_space(0, KeySpace::Securified)
+                    .unwrap()
             ),
         ]
         .into_iter()
-        .collect::<IndexMap<_, _>>()
+        .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>()
+    );
+
+    let matrix_2 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_ledger.clone(),
+        ])
+        .unwrap(),
+        RecoveryRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_ledger.clone(),
+        ])
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_ledger.clone(),
+        ])
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_2 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 2").unwrap()),
+        14,
+        matrix_2,
     );
 
     let (securified_bob, derivation_outcome) = os
-        .securify_account(
-            bob.entity_address(),
-            MatrixOfFactorSources::new([], 0, [fs_device.clone(), fs_ledger.clone()]),
-        )
+        .__OFFLINE_ONLY_securify_account(bob.address(), &shield_1)
         .await
         .unwrap();
-    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
+
+    assert!(
+        derivation_outcome.found_any_instances_in_cache_for_any_factor_source()
+    );
+    assert!(
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source()
+    );
 
     assert_eq!(
         securified_bob
-            .securified_entity_control()
-            .primary_role_instances()
+            .try_get_secured_control()
+            .unwrap()
+            .security_structure
+            .matrix_of_factors
+            .primary_role
+            .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id(), f.derivation_entity_index()))
-            .collect::<IndexMap<_, _>>(),
+            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.factor_source_id(),
-                HDPathComponent::securifying_base_index(31)
+                fs_device.id_from_hash(),
+                HDPathComponent::from_local_key_space(31, KeySpace::Securified) // Alice used 30
+                    .unwrap()
             ),
             (
-                fs_ledger.factor_source_id(),
-                HDPathComponent::securifying_base_index(0)
+                fs_arculus.id_from_hash(),
+                HDPathComponent::from_local_key_space(0, KeySpace::Securified)
+                    .unwrap()
             ),
         ]
         .into_iter()
-        .collect::<IndexMap<_, _>>()
+        .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>()
     );
 
     let (securified_carol, derivation_outcome) = os
-        .securify_account(
-            carol.entity_address(),
-            MatrixOfFactorSources::new([], 0, [fs_device.clone(), fs_arculus.clone()]),
-        )
+        .__OFFLINE_ONLY_securify_account(carol.address(), &shield_1)
         .await
         .unwrap();
-    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
+
+    assert!(
+        derivation_outcome.found_any_instances_in_cache_for_any_factor_source()
+    );
+    assert!(
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source()
+    );
 
     assert_eq!(
         securified_carol
-            .securified_entity_control()
-            .primary_role_instances()
+            .try_get_secured_control()
+            .unwrap()
+            .security_structure
+            .matrix_of_factors
+            .primary_role
+            .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id(), f.derivation_entity_index()))
-            .collect::<IndexMap<_, _>>(),
+            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.factor_source_id(),
-                HDPathComponent::securifying_base_index(32)
+                fs_device.id_from_hash(),
+                HDPathComponent::from_local_key_space(32, KeySpace::Securified) // Alice used 30, Bob used 31
+                    .unwrap()
             ),
             (
-                fs_arculus.factor_source_id(),
-                HDPathComponent::securifying_base_index(1)
+                fs_arculus.id_from_hash(),
+                HDPathComponent::from_local_key_space(1, KeySpace::Securified) // Alice used 0
+                    .unwrap()
             ),
         ]
         .into_iter()
-        .collect::<IndexMap<_, _>>()
+        .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>()
     );
 
     // CLEAR CACHE
     os.clear_cache();
 
-    let shield_3fa = MatrixOfFactorSources::new(
-        [],
-        0,
-        [fs_device.clone(), fs_arculus.clone(), fs_ledger.clone()],
+    let matrix_3fa = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_arculus.clone(),
+            fs_ledger.clone(),
+        ])
+        .unwrap(),
+        RecoveryRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_arculus.clone(),
+            fs_ledger.clone(),
+        ])
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::override_only([
+            fs_device.clone(),
+            fs_arculus.clone(),
+            fs_ledger.clone(),
+        ])
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_3fa = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 3fa").unwrap()),
+        14,
+        matrix_3fa,
     );
+
     let (securified_diana, derivation_outcome) = os
-        .securify_account(diana.entity_address(), shield_3fa.clone())
+        .__OFFLINE_ONLY_securify_account(diana.address(), &shield_1)
         .await
         .unwrap();
-    assert!(!derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
+
+    assert!(!derivation_outcome
+        .found_any_instances_in_cache_for_any_factor_source());
     assert!(derivation_outcome.derived_any_new_instance_for_any_factor_source());
 
     let diana_mfa_device = 33;
@@ -2210,77 +2381,113 @@ async fn securified_accounts_asymmetric_indices() {
 
     assert_eq!(
         securified_diana
-            .securified_entity_control()
-            .primary_role_instances()
+            .try_get_secured_control()
+            .unwrap()
+            .security_structure
+            .matrix_of_factors
+            .primary_role
+            .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id(), f.derivation_entity_index()))
-            .collect::<IndexMap<_, _>>(),
+            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.factor_source_id(),
-                HDPathComponent::securifying_base_index(diana_mfa_device)
+                fs_device.id_from_hash(),
+                HDPathComponent::from_local_key_space(
+                    diana_mfa_device,
+                    KeySpace::Securified
+                )
+                .unwrap()
             ),
             (
-                fs_arculus.factor_source_id(),
-                HDPathComponent::securifying_base_index(diana_mfa_arculus)
+                fs_arculus.id_from_hash(),
+                HDPathComponent::from_local_key_space(
+                    diana_mfa_arculus,
+                    KeySpace::Securified
+                )
+                .unwrap()
             ),
             (
-                fs_ledger.factor_source_id(),
-                HDPathComponent::securifying_base_index(diana_mfa_ledger)
+                fs_ledger.id_from_hash(),
+                HDPathComponent::from_local_key_space(
+                    diana_mfa_ledger,
+                    KeySpace::Securified
+                )
+                .unwrap()
             ),
         ]
         .into_iter()
-        .collect::<IndexMap<_, _>>()
+        .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>()
     );
 
     // lets create 2 * CACHE_FILLING_QUANTITY many more accounts and securify them with
     // the same shield as Diana
 
     os.clear_cache(); // CLEAR CACHE
-    let mut more_unnamed_accounts = IndexSet::new();
-    for i in 0..2 * CACHE_FILLING_QUANTITY {
-        let (unnamed, _) = os
-            .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("more@{}", i))
-            .await
-            .unwrap();
-        more_unnamed_accounts.insert(unnamed.entity_address());
-    }
+
+    let (more_unnamed_accounts, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(2 * CACHE_FILLING_QUANTITY as u16, network, "more".to_owned()).await.unwrap();
 
     let (many_securified_accounts, derivation_outcome) = os
-        .securify_accounts(more_unnamed_accounts.clone(), shield_3fa.clone())
+        .__OFFLINE_ONLY_securify_accounts(
+            more_unnamed_accounts
+                .into_iter()
+                .map(|a| a.address())
+                .collect(),
+            &shield_3fa,
+        )
         .await
         .unwrap();
+
     assert!(
         derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "twice the cache size => derive more"
     );
     os.clear_cache(); // CLEAR CACHE
+
     for index in 0..many_securified_accounts.len() {
         let securified_account = many_securified_accounts
             .clone()
             .into_iter()
             .nth(index)
             .unwrap();
-        let offset = (index + 1) as HDPathComponent;
+
+        let offset = (index + 1) as u32;
+
         assert_eq!(
             securified_account
-                .securified_entity_control()
-                .primary_role_instances()
+                .try_get_secured_control()
+                .unwrap()
+                .security_structure
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
                 .into_iter()
-                .map(|f| (f.factor_source_id(), f.derivation_entity_index()))
+                .map(|f| (
+                    f.factor_source_id.clone(),
+                    f.derivation_entity_index()
+                ))
                 .collect::<IndexMap<_, _>>(),
             [
                 (
-                    fs_device.factor_source_id(),
-                    HDPathComponent::securifying_base_index(diana_mfa_device + offset)
+                    fs_device.id_from_hash(),
+                    HDPathComponent::Securified(
+                        SecurifiedU30::try_from(diana_mfa_device + offset)
+                            .unwrap()
+                    )
                 ),
                 (
-                    fs_arculus.factor_source_id(),
-                    HDPathComponent::securifying_base_index(diana_mfa_arculus + offset)
+                    fs_arculus.id_from_hash(),
+                    HDPathComponent::Securified(
+                        SecurifiedU30::try_from(diana_mfa_arculus + offset)
+                            .unwrap()
+                    )
                 ),
                 (
-                    fs_ledger.factor_source_id(),
-                    HDPathComponent::securifying_base_index(diana_mfa_ledger + offset)
+                    fs_ledger.id_from_hash(),
+                    HDPathComponent::Securified(
+                        SecurifiedU30::try_from(diana_mfa_ledger + offset)
+                            .unwrap()
+                    )
                 ),
             ]
             .into_iter()
@@ -2288,4 +2495,3 @@ async fn securified_accounts_asymmetric_indices() {
         );
     }
 }
-*/

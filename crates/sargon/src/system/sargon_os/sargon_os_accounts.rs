@@ -323,8 +323,8 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<()> {
-        self.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|_|{})
+    ) -> Result<Accounts> {
+        self.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) |x)
     }
 
     pub async fn batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(
@@ -332,7 +332,7 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+    ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
         let bdfs = self.bdfs()?;
         self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
             bdfs.into(),
@@ -357,8 +357,8 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<()> {
-        self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(factor_source, count, network_id, name_prefix).await.map(|_|{})
+    ) -> Result<Accounts> {
+        self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(factor_source, count, network_id, name_prefix).await.map(|(x, _)| x)
     }
     pub async fn batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
         &self,
@@ -366,7 +366,7 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+    ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Batch creating #{} accounts.", count);
         let (accounts, instances_consumer, derivation_outcome) = self
             .batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
@@ -379,7 +379,7 @@ impl SargonOS {
         debug!("Created #{} accounts, now saving them to profile.", count);
 
         // First try to save accounts into Profile...
-        self.add_accounts(accounts).await?;
+        self.add_accounts(accounts.clone()).await?;
         // ... if successful consume the FactorInstances from the Cache!
         instances_consumer.consume().await?;
 
@@ -387,7 +387,7 @@ impl SargonOS {
             "Created account and saved #{} new accounts into profile",
             count
         );
-        Ok(derivation_outcome)
+        Ok((accounts, derivation_outcome))
     }
 
     /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"

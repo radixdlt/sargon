@@ -315,8 +315,8 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<()> {
-        self.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|_|{})
+    ) -> Result<Personas> {
+        self.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) | x)
     }
 
     pub async fn batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(
@@ -324,7 +324,7 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+    ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
         let bdfs = self.bdfs()?;
         self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
             bdfs.into(),
@@ -349,8 +349,8 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<()> {
-        self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(factor_source, count, network_id, name_prefix).await.map(|_|{})
+    ) -> Result<Personas> {
+        self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(factor_source, count, network_id, name_prefix).await.map(|(x, _) |x )
     }
     pub async fn batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
         &self,
@@ -358,7 +358,7 @@ impl SargonOS {
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+    ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Batch creating #{} personas.", count);
         let (personas, instances_consumer, derivation_outcome) = self
             .batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
@@ -371,7 +371,7 @@ impl SargonOS {
         debug!("Created #{} personas, now saving them to profile.", count);
 
         // First save personas into Profile...
-        self.add_personas(personas).await?;
+        self.add_personas(personas.clone()).await?;
         // ... if successful, consume FactorInstances from cache!
         instances_consumer.consume().await?;
 
@@ -379,7 +379,7 @@ impl SargonOS {
             "Created persona and saved #{} new personas into profile",
             count
         );
-        Ok(derivation_outcome)
+        Ok((personas, derivation_outcome))
     }
 
     /// Creates many new non securified personas **WITHOUT** add them to Profile, using the *main* "Babylon"
