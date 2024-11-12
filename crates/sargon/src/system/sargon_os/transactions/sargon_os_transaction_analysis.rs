@@ -147,7 +147,7 @@ impl SargonOS {
                 let execution_summary = self
                     .get_transaction_execution_summary(
                         gateway_client,
-                        manifest_v1.into(),
+                        manifest_v1,
                         nonce,
                         None,
                     )
@@ -224,17 +224,18 @@ impl SargonOS {
     }
 
     #[cfg(not(tarpaulin_include))] // TBD
+    #[allow(dead_code)]
     async fn get_subintent_preview(
         &self,
         gateway_client: GatewayClient,
         manifest: TransactionManifestV2,
-        nonce: Nonce,
+        _nonce: Nonce,
     ) -> Result<TransactionPreviewResponse> {
-        let signer_public_keys =
+        let _signer_public_keys =
             self.extract_signer_public_keys(manifest.summary()?)?;
 
         // Getting the current ledger epoch
-        let epoch = gateway_client.current_epoch().await?;
+        let _epoch = gateway_client.current_epoch().await?;
 
         unimplemented!("To be defined when GW is available, likely that there will be a new endpoint with new payload definition")
     }
