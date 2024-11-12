@@ -10,8 +10,8 @@ mod signatures_outecome_types;
 mod testing;
 
 pub use authentication::*;
-pub use extractor_of_entities_requiring_auth::*;
-pub use signable_with_entities::*;
+pub(crate) use extractor_of_entities_requiring_auth::*;
+pub(crate) use signable_with_entities::*;
 
 pub use collector::*;
 pub use host_interaction::*;
@@ -20,4 +20,4 @@ pub use signables::*;
 pub use signatures_outecome_types::*;
 
 #[cfg(test)]
-pub use testing::*;
+pub(crate) use testing::*;

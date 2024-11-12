@@ -28,11 +28,11 @@ pub enum ProfileFileContents {
 }
 
 #[uniffi::export]
-pub fn new_profile_file_contents_sample() -> ProfileFileContents {
+pub(crate) fn new_profile_file_contents_sample() -> ProfileFileContents {
     InternalProfileFileContents::sample().into()
 }
 
 #[uniffi::export]
-pub fn new_profile_file_contents_sample_other() -> ProfileFileContents {
+pub(crate) fn new_profile_file_contents_sample_other() -> ProfileFileContents {
     InternalProfileFileContents::sample_other().into()
 }

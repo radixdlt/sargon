@@ -6,7 +6,7 @@ pub struct EventBusClient {
 }
 
 impl EventBusClient {
-    pub fn new(driver: Arc<dyn EventBusDriver>) -> Self {
+    pub(crate) fn new(driver: Arc<dyn EventBusDriver>) -> Self {
         Self { driver }
     }
 }

@@ -250,14 +250,15 @@ const unsafe fn unhard(value: u16) -> HDPathComponent {
     )))
 }
 
-pub const PURPOSE: HDPathComponent = unsafe { hard(44) };
-pub const GET_ID_CAP26_LOCAL: u16 = 365;
-pub const GET_ID_LAST: HDPathComponent = unsafe { hard(GET_ID_CAP26_LOCAL) };
-pub const COIN_TYPE: HDPathComponent = unsafe { hard(1022) };
-pub const BIP44_ACCOUNT: HDPathComponent = unsafe { hard(0) };
-pub const BIP44_CHANGE: HDPathComponent = unsafe { unhard(0) };
+pub(crate) const PURPOSE: HDPathComponent = unsafe { hard(44) };
+pub(crate) const GET_ID_CAP26_LOCAL: u16 = 365;
+pub(crate) const GET_ID_LAST: HDPathComponent =
+    unsafe { hard(GET_ID_CAP26_LOCAL) };
+pub(crate) const COIN_TYPE: HDPathComponent = unsafe { hard(1022) };
+pub(crate) const BIP44_ACCOUNT: HDPathComponent = unsafe { hard(0) };
+pub(crate) const BIP44_CHANGE: HDPathComponent = unsafe { unhard(0) };
 
-pub fn cap26(
+pub(crate) fn cap26(
     network_id: NetworkID,
     entity_kind: CAP26EntityKind,
     key_kind: CAP26KeyKind,

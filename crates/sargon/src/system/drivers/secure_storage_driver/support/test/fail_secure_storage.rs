@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub struct AlwaysFailSecureStorage {}
+pub(crate) struct AlwaysFailSecureStorage {}
 
 #[async_trait::async_trait]
 impl SecureStorageDriver for AlwaysFailSecureStorage {

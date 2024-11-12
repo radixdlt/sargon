@@ -29,25 +29,25 @@ impl AccountOrAddressOf {
 }
 
 impl AccountOrAddressOf {
-    pub fn sample_mainnet() -> Self {
+    pub(crate) fn sample_mainnet() -> Self {
         Self::ProfileAccount {
             value: Account::sample_mainnet_bob(),
         }
     }
 
-    pub fn sample_mainnet_other() -> Self {
+    pub(crate) fn sample_mainnet_other() -> Self {
         Self::AddressOfExternalAccount {
             value: AccountAddress::sample_mainnet_other(),
         }
     }
 
-    pub fn sample_stokenet() -> Self {
+    pub(crate) fn sample_stokenet() -> Self {
         Self::ProfileAccount {
             value: Account::sample_stokenet_nadia(),
         }
     }
 
-    pub fn sample_stokenet_other() -> Self {
+    pub(crate) fn sample_stokenet_other() -> Self {
         Self::AddressOfExternalAccount {
             value: AccountAddress::sample_stokenet_other(),
         }

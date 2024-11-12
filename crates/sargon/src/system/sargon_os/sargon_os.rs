@@ -11,11 +11,11 @@ use crate::prelude::*;
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
 pub struct SargonOS {
-    pub profile_state_holder: ProfileStateHolder,
-    pub clients: Clients,
+    pub(crate) profile_state_holder: ProfileStateHolder,
+    pub(crate) clients: Clients,
 
     /// Optional so that we can defer integration with hosts...
-    pub interactors: RwLock<Option<Interactors>>,
+    pub(crate) interactors: RwLock<Option<Interactors>>,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -280,7 +280,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    pub async fn create_new_profile_with_bdfs(
+    pub(crate) async fn create_new_profile_with_bdfs(
         &self,
         mnemonic_with_passphrase: Option<MnemonicWithPassphrase>,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
@@ -323,11 +323,11 @@ impl SargonOS {
         Ok((profile, private_bdfs))
     }
 
-    pub async fn host_id(&self) -> Result<HostId> {
+    pub(crate) async fn host_id(&self) -> Result<HostId> {
         Self::get_host_id(&self.clients).await
     }
 
-    pub async fn get_host_id(clients: &Clients) -> Result<HostId> {
+    pub(crate) async fn get_host_id(clients: &Clients) -> Result<HostId> {
         debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
 
@@ -347,18 +347,18 @@ impl SargonOS {
         }
     }
 
-    pub async fn host_info(&self) -> HostInfo {
+    pub(crate) async fn host_info(&self) -> HostInfo {
         Self::get_host_info(&self.clients).await
     }
 
-    pub async fn get_host_info(clients: &Clients) -> HostInfo {
+    pub(crate) async fn get_host_info(clients: &Clients) -> HostInfo {
         debug!("Get Host info");
         clients.host.resolve_host_info().await
     }
 }
 
 #[cfg(test)]
-pub const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
+pub(crate) const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
     std::time::Duration::from_millis(50);
 
 #[cfg(test)]

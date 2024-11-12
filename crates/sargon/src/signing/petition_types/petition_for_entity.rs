@@ -5,18 +5,18 @@ use crate::prelude::*;
 /// `{ threshold: PetitionForFactors, override: PetitionForFactors }`
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("{}", self.debug_str())]
-pub struct PetitionForEntity<ID: SignableID> {
+pub(crate) struct PetitionForEntity<ID: SignableID> {
     /// The owner of these factors
-    pub entity: AddressOfAccountOrPersona,
+    pub(crate) entity: AddressOfAccountOrPersona,
 
     /// Index and hash of transaction
-    pub payload_id: ID,
+    pub(crate) payload_id: ID,
 
     /// Petition with threshold factors
-    pub threshold_factors: Option<RefCell<PetitionForFactors<ID>>>,
+    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<ID>>>,
 
     /// Petition with override factors
-    pub override_factors: Option<RefCell<PetitionForFactors<ID>>>,
+    pub(crate) override_factors: Option<RefCell<PetitionForFactors<ID>>>,
 }
 
 impl<ID: SignableID> PetitionForEntity<ID> {
@@ -39,7 +39,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
         }
     }
 
-    pub fn new_from_entity(
+    pub(crate) fn new_from_entity(
         payload_id: ID,
         entity: AccountOrPersona,
         if_securified_select_role: RoleKind,
@@ -70,7 +70,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 
     /// Creates a new Petition from an entity which is securified, i.e. has a matrix of factors.
-    pub fn new_securified(
+    pub(crate) fn new_securified(
         payload_id: ID,
         entity: AddressOfAccountOrPersona,
         role_with_factor_instances: GeneralRoleWithHierarchicalDeterministicFactorInstances,
@@ -89,7 +89,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 
     /// Creates a new Petition from an entity which is unsecurified, i.e. has a single factor.
-    pub fn new_unsecurified(
+    pub(crate) fn new_unsecurified(
         payload_id: ID,
         entity: AddressOfAccountOrPersona,
         instance: HierarchicalDeterministicFactorInstance,
@@ -104,7 +104,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Returns `true` if signatures requirement has been fulfilled, either by
     /// override factors or by threshold factors
-    pub fn has_signatures_requirement_been_fulfilled(&self) -> bool {
+    pub(crate) fn has_signatures_requirement_been_fulfilled(&self) -> bool {
         self.status()
             == PetitionForFactorsStatus::Finished(
                 PetitionFactorsStatusFinished::Success,
@@ -113,7 +113,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Returns `true` if the transaction of this petition already has failed due
     /// to too many factors neglected
-    pub fn has_failed(&self) -> bool {
+    pub(crate) fn has_failed(&self) -> bool {
         self.status()
             == PetitionForFactorsStatus::Finished(
                 PetitionFactorsStatusFinished::Fail,
@@ -121,7 +121,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 
     /// Returns the aggregate of **all** owned factor instances from both lists, either threshold or override.
-    pub fn all_factor_instances(&self) -> IndexSet<OwnedFactorInstance> {
+    pub(crate) fn all_factor_instances(&self) -> IndexSet<OwnedFactorInstance> {
         self.access_both_list_then_form_union(|l| l.factor_instances())
             .into_iter()
             .map(|f| {
@@ -135,14 +135,16 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Returns the aggregate of all **neglected** factor instances from both lists, either threshold or override,
     /// that is, all factor instances but filtered out only those from FactorSources which have been neglected.
-    pub fn all_neglected_factor_instances(
+    pub(crate) fn all_neglected_factor_instances(
         &self,
     ) -> IndexSet<NeglectedFactorInstance> {
         self.access_both_list_then_form_union(|f| f.all_neglected())
     }
 
     /// Returns the aggregate of all **neglected** factor sources from both lists, either threshold or override.
-    pub fn all_neglected_factor_sources(&self) -> IndexSet<NeglectedFactor> {
+    pub(crate) fn all_neglected_factor_sources(
+        &self,
+    ) -> IndexSet<NeglectedFactor> {
         self.all_neglected_factor_instances()
             .into_iter()
             .map(|n| n.as_neglected_factor())
@@ -150,7 +152,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 
     /// Returrns the aggregate of all signatures from both lists, either threshold or override.
-    pub fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.access_both_list_then_form_union(|f| f.all_signatures())
     }
 
@@ -161,7 +163,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     /// Panics if this factor source has already been neglected or signed with.
     ///
     /// Or panics if the factor source is not known to this petition.
-    pub fn add_signature(&self, signature: HDSignature<ID>) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<ID>) {
         self.access_both_list(|l| l.add_signature_if_relevant(&signature), |t, o| {
             match (t, o) {
                 (Some(true), Some(true)) => {
@@ -176,7 +178,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Queries if the authorization of the entity in this transaction already is irrelevant, since
     /// too many factors have been neglected.
-    pub fn should_neglect_factors_due_to_irrelevant(
+    pub(crate) fn should_neglect_factors_due_to_irrelevant(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> bool {
@@ -194,7 +196,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Returns this petitions entity if the transaction would be invalid if the given factor sources
     /// would be neglected.
-    pub fn invalid_transaction_if_neglected_factors(
+    pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<AddressOfAccountOrPersona> {
@@ -211,7 +213,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
         }
     }
 
-    pub fn status_if_neglected_factors(
+    pub(crate) fn status_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> PetitionForFactorsStatus {
@@ -227,7 +229,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Queries if this petition references any of the factor sources in the set of ids
     /// by checking bot hteh threshold and the override factors list.
-    pub fn references_any_factor_source(
+    pub(crate) fn references_any_factor_source(
         &self,
         factor_source_ids: &IndexSet<FactorSourceIDFromHash>,
     ) -> bool {
@@ -238,7 +240,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Queries if this petition references the factor source with the given id, by
     /// checking both the threshold and override factors list.
-    pub fn references_factor_source_with_id(
+    pub(crate) fn references_factor_source_with_id(
         &self,
         id: &FactorSourceIDFromHash,
     ) -> bool {
@@ -251,7 +253,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     /// If this petitions references the neglected factor source, disregarding if it is a threshold
     /// or override factor, it will be neglected. If the factor is not known to any of the lists
     /// nothing happens.
-    pub fn neglect_if_referenced(&self, neglected: NeglectedFactor) {
+    pub(crate) fn neglect_if_referenced(&self, neglected: NeglectedFactor) {
         self.access_both_list(
             |p| p.neglect_if_referenced(neglected.clone()),
             |_, _| (),
@@ -264,7 +266,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     /// (Threshold: Finished(Fail), Override: Finished(Fail)) -> Finished(Fail) but
     /// (Threshold: Finished(Success), Override: Inprogress) -> Finished(Success) - since
     /// want to be able to finish early if the petition for this entity is already successful.
-    pub fn status(&self) -> PetitionForFactorsStatus {
+    pub(crate) fn status(&self) -> PetitionForFactorsStatus {
         use PetitionFactorsStatusFinished::*;
         use PetitionForFactorsStatus::*;
 

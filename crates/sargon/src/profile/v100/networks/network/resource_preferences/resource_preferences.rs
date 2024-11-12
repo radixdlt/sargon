@@ -19,14 +19,14 @@ impl HasSampleValues for ResourcePreferences {
 }
 
 impl ResourcePreferences {
-    pub fn sample_mainnet() -> Self {
+    pub(crate) fn sample_mainnet() -> Self {
         Self::from_iter([
             ResourceAppPreference::sample_fungible_mainnet(),
             ResourceAppPreference::sample_non_fungible_mainnet(),
         ])
     }
 
-    pub fn sample_stokenet() -> Self {
+    pub(crate) fn sample_stokenet() -> Self {
         Self::from_iter([ResourceAppPreference::sample_non_fungible_stokenet()])
     }
 }

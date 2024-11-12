@@ -12,7 +12,7 @@ use sargon::SargonOS as InternalSargonOS;
 /// phone.
 #[derive(uniffi::Object)]
 pub struct SargonOS {
-    pub wrapped: Arc<InternalSargonOS>,
+    pub(crate) wrapped: Arc<InternalSargonOS>,
 }
 
 #[uniffi::export]

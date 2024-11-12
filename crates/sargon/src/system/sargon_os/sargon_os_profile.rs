@@ -129,7 +129,7 @@ impl SargonOS {
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
+    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(&mut Profile) -> Result<R>,
     {
@@ -149,7 +149,7 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn save_existing_profile(&self) -> Result<()> {
+    pub(crate) async fn save_existing_profile(&self) -> Result<()> {
         let profile = &self.profile()?;
         self.save_profile(profile).await
     }
@@ -159,7 +159,7 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
+    pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
         let secure_storage = &self.secure_storage;
 
         secure_storage

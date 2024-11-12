@@ -50,7 +50,7 @@ use crate::prelude::*;
 pub struct Unhardened(pub U31);
 
 impl Unhardened {
-    pub const fn new(value: U31) -> Self {
+    pub(crate) const fn new(value: U31) -> Self {
         Self(value)
     }
 }

@@ -53,7 +53,7 @@ impl HasSampleValues for PlaintextMessage {
 
 impl PlaintextMessage {
     #[allow(unused)]
-    pub fn sample_binary() -> Self {
+    pub(crate) fn sample_binary() -> Self {
         Self {
             mime_type: "".to_owned(),
             message: MessageContents::BinaryMessage {

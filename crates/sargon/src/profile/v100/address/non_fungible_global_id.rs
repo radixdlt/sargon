@@ -190,7 +190,7 @@ impl HasSampleValues for NonFungibleGlobalId {
 
 impl NonFungibleGlobalId {
     #[allow(unused)]
-    pub fn sample_ruid() -> Self {
+    pub(crate) fn sample_ruid() -> Self {
         Self::new(
             NonFungibleResourceAddress::sample(),
             NonFungibleLocalId::ruid(

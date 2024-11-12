@@ -3,7 +3,7 @@ use sargon::NotarySignature as InternalNotarySignature;
 
 #[derive(Clone, Eq, Hash, PartialEq, uniffi::Record)]
 pub struct NotarySignature {
-    pub secret_magic: Signature,
+    pub(crate) secret_magic: Signature,
 }
 
 impl NotarySignature {

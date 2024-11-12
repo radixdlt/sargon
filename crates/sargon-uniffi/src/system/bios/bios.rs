@@ -4,7 +4,7 @@ use sargon::Drivers as InternalDrivers;
 
 #[derive(Debug, Clone, uniffi::Object)]
 pub struct Bios {
-    pub drivers: Arc<Drivers>,
+    pub(crate) drivers: Arc<Drivers>,
 }
 
 #[uniffi::export]

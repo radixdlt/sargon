@@ -26,12 +26,16 @@ where
 }
 
 #[cfg(test)]
-pub fn scrypto_value_with_sbor_depth(depth: usize) -> ScryptoScryptoValue {
+pub(crate) fn scrypto_value_with_sbor_depth(
+    depth: usize,
+) -> ScryptoScryptoValue {
     sbor_value_with_depth(depth)
 }
 
 #[cfg(test)]
-pub fn manifest_value_with_sbor_depth(depth: usize) -> ScryptoManifestValue {
+pub(crate) fn manifest_value_with_sbor_depth(
+    depth: usize,
+) -> ScryptoManifestValue {
     sbor_value_with_depth(depth)
 }
 

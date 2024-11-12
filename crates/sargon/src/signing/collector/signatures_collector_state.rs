@@ -6,7 +6,7 @@ pub(super) struct SignaturesCollectorState<S: Signable> {
     pub(super) petitions: RefCell<Petitions<S>>,
 }
 impl<S: Signable> SignaturesCollectorState<S> {
-    pub fn new(petitions: Petitions<S>) -> Self {
+    pub(crate) fn new(petitions: Petitions<S>) -> Self {
         Self {
             petitions: RefCell::new(petitions),
         }

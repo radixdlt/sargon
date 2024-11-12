@@ -11,5 +11,5 @@ use crate::prelude::*;
 )]
 pub struct TransactionPreviewRequestOptIns {
     /** This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. */
-    pub radix_engine_toolkit_receipt: bool,
+    pub(crate) radix_engine_toolkit_receipt: bool,
 }

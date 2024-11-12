@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// if all transactions are valid, if some are invalid, if none are invalid
 /// (but all are not yet valid).
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum PetitionsStatus {
+pub(crate) enum PetitionsStatus {
     /// All transactions are valid.
     AllAreValid,
 
@@ -17,16 +17,16 @@ pub enum PetitionsStatus {
 
 impl PetitionsStatus {
     /// returns true if all petitions are valid.
-    pub fn are_all_valid(&self) -> bool {
+    pub(crate) fn are_all_valid(&self) -> bool {
         matches!(self, Self::AllAreValid)
     }
 
     /// returns true if some petitions are invalid.
-    pub fn is_some_invalid(&self) -> bool {
+    pub(crate) fn is_some_invalid(&self) -> bool {
         matches!(self, Self::SomeIsInvalid)
     }
 
-    pub fn reducing(
+    pub(crate) fn reducing(
         statuses: impl IntoIterator<Item = PetitionForFactorsStatus>,
     ) -> Self {
         PetitionForFactorsStatus::aggregate(

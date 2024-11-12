@@ -44,8 +44,8 @@ impl Default for WhenSomeTransactionIsInvalid {
 /// Strategy to use for finishing early, i.e. stop collecting more signatures
 #[derive(Clone, Default, Copy, Debug, PartialEq, Eq)]
 pub struct SigningFinishEarlyStrategy {
-    pub when_all_transactions_are_valid: WhenAllTransactionsAreValid,
-    pub when_some_transaction_is_invalid: WhenSomeTransactionIsInvalid,
+    pub(crate) when_all_transactions_are_valid: WhenAllTransactionsAreValid,
+    pub(crate) when_some_transaction_is_invalid: WhenSomeTransactionIsInvalid,
 }
 impl SigningFinishEarlyStrategy {
     pub fn new(
@@ -59,7 +59,7 @@ impl SigningFinishEarlyStrategy {
     }
 
     #[allow(unused)]
-    pub fn r#continue() -> Self {
+    pub(crate) fn r#continue() -> Self {
         Self::new(
             WhenAllTransactionsAreValid::r#continue(),
             WhenSomeTransactionIsInvalid::r#continue(),
@@ -67,7 +67,7 @@ impl SigningFinishEarlyStrategy {
     }
 
     #[allow(unused)]
-    pub fn finish_early() -> Self {
+    pub(crate) fn finish_early() -> Self {
         Self::new(
             WhenAllTransactionsAreValid::finish_early(),
             WhenSomeTransactionIsInvalid::finish_early(),

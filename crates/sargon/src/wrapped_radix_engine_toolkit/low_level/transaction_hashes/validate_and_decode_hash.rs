@@ -11,7 +11,9 @@ fn validate_and_decode_hash_try_network<
         .map_err(|_| ())
 }
 
-pub fn validate_and_decode_hash<T: ScryptoIsTransactionHashWithStaticHrp>(
+pub(crate) fn validate_and_decode_hash<
+    T: ScryptoIsTransactionHashWithStaticHrp,
+>(
     bech32_encoded_hash: &str,
 ) -> Result<(T, NetworkID)> {
     if let Some(t) = enum_iterator::all::<NetworkID>()

@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 #[derive(Default)]
-pub struct BucketFactory {
+pub(crate) struct BucketFactory {
     next_id: std::cell::Cell<u64>,
 }
 impl BucketFactory {
-    pub fn next(&self) -> Bucket {
+    pub(crate) fn next(&self) -> Bucket {
         let next = self.next_id.get();
         let bucket = Bucket {
             name: format!("bucket_{}", next),

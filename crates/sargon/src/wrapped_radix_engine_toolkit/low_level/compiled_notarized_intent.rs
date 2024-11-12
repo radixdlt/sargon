@@ -32,7 +32,7 @@ impl CompiledNotarizedIntent {
     }
 }
 
-pub fn compile_notarized_intent(
+pub(crate) fn compile_notarized_intent(
     scrypto_notarized_intent: ScryptoNotarizedTransaction,
 ) -> Result<CompiledNotarizedIntent> {
     RET_compile_notarized_tx(&scrypto_notarized_intent)
@@ -66,7 +66,7 @@ impl HasSampleValues for CompiledNotarizedIntent {
 
 use sbor::ValueKind as ScryptoValueKind;
 #[cfg(test)]
-pub fn invalid_signed_intent() -> ScryptoSignedIntent {
+pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
     let invalid_value = ScryptoManifestValue::Tuple {
         fields: vec![ScryptoManifestValue::Array {
             element_value_kind: ScryptoValueKind::U8,

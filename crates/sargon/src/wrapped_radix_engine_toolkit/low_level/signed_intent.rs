@@ -143,7 +143,7 @@ impl SignedIntent {
     /// Utility function which uses `SignedIntent::new(<TransactionIntent>, <IntentSignatures>)`
     /// and SHOULD return `Err` if `depth > SignedIntent::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
-    pub fn test_with_sbor_depth(
+    pub(crate) fn test_with_sbor_depth(
         depth: usize,
         network_id: NetworkID,
     ) -> Result<Self> {
@@ -168,7 +168,8 @@ impl SignedIntent {
         )
     }
 
-    pub const MAX_SBOR_DEPTH: usize = TransactionIntent::MAX_SBOR_DEPTH - 1;
+    pub(crate) const MAX_SBOR_DEPTH: usize =
+        TransactionIntent::MAX_SBOR_DEPTH - 1;
 }
 
 #[cfg(test)]

@@ -11,7 +11,7 @@ use crate::prelude::*;
     derive_more::Display,
     derive_more::FromStr,
 )]
-pub struct Hash(pub ScryptoHash);
+pub struct Hash(pub(crate) ScryptoHash);
 
 impl AsRef<ScryptoHash> for Hash {
     fn as_ref(&self) -> &ScryptoHash {

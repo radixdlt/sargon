@@ -8,7 +8,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionConstruction
-    pub async fn transaction_construction(&self) -> Result<LedgerState> {
+    pub(crate) async fn transaction_construction(&self) -> Result<LedgerState> {
         self.post_empty(
             "transaction/construction",
             |response: TransactionConstructionResponse| {
@@ -26,7 +26,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionPreview
-    pub async fn transaction_preview(
+    pub(crate) async fn transaction_preview(
         &self,
         request: TransactionPreviewRequest,
     ) -> Result<TransactionPreviewResponse> {
@@ -38,7 +38,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionSubmit
-    pub async fn transaction_submit(
+    pub(crate) async fn transaction_submit(
         &self,
         request: TransactionSubmitRequest,
     ) -> Result<TransactionSubmitResponse> {
@@ -50,7 +50,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionStatus
-    pub async fn transaction_status(
+    pub(crate) async fn transaction_status(
         &self,
         request: TransactionStatusRequest,
     ) -> Result<TransactionStatusResponse> {

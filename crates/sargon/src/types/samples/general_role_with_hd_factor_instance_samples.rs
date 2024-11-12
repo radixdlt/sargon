@@ -3,7 +3,7 @@ use crate::prelude::*;
 impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
     /// Primary Role
     /// Securified { Single Threshold only }
-    pub fn r2<F>(fi: F) -> Self
+    pub(crate) fn r2<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -17,7 +17,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
 
     /// Primary Role
     /// Securified { Single Override only }
-    pub fn r3<F>(fi: F) -> Self
+    pub(crate) fn r3<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -31,7 +31,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
 
     /// Primary Role
     /// Securified { Threshold factors only #3 }
-    pub fn r4<F>(fi: F) -> Self
+    pub(crate) fn r4<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -49,7 +49,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
 
     /// Primary Role
     /// Securified { Override factors only #2 }
-    pub fn r5<F>(fi: F) -> Self
+    pub(crate) fn r5<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -67,7 +67,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
 
     /// Primary Role
     /// Securified { Threshold #3 and Override factors #2  }
-    pub fn r6<F>(fi: F) -> Self
+    pub(crate) fn r6<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -85,7 +85,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
 
     /// Primary Role
     /// Securified { Threshold only # 5/5 }
-    pub fn r7<F>(fi: F) -> Self
+    pub(crate) fn r7<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,
@@ -110,7 +110,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
 
     /// Primary Role
     /// Securified { Threshold 1/1 and Override factors #1  }
-    pub fn r8<F>(fi: F) -> Self
+    pub(crate) fn r8<F>(fi: F) -> Self
     where
         F: Fn(
             FactorSourceIDFromHash,

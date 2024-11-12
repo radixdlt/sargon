@@ -23,7 +23,7 @@ pub use manifest_summary::*;
 pub use notarized_transaction::*;
 pub use notary_signature::*;
 pub use public_key_hash::*;
-pub use sbor_depth_validation::*;
+pub(crate) use sbor_depth_validation::*;
 pub use signed_intent::*;
 pub use transaction_classes::*;
 pub use transaction_hashes::*;
@@ -31,7 +31,7 @@ pub use v1::intent_signatures::*;
 pub use v1::*;
 pub use v2::*;
 
-pub fn map_static_analysis_error(
+pub(crate) fn map_static_analysis_error(
     error: radix_transactions::manifest::static_resource_movements::StaticResourceMovementsError,
 ) -> crate::prelude::CommonError {
     crate::prelude::error!(

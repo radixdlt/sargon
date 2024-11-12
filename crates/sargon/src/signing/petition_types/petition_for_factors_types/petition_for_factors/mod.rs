@@ -12,5 +12,5 @@ use petition_for_factors_state::*;
 use petition_for_factors_state_snapshot::*;
 use petition_for_factors_sub_state::*;
 
-pub use petition_for_factors::*;
-pub use petition_for_factors_status::*;
+pub(crate) use petition_for_factors::*;
+pub(crate) use petition_for_factors_status::*;

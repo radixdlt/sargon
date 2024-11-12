@@ -15,7 +15,7 @@ impl PerRecipientNonFungibleTransfer {
 }
 
 impl PerRecipientNonFungibleTransfer {
-    pub fn sample_mainnet() -> Self {
+    pub(crate) fn sample_mainnet() -> Self {
         Self::new(
             ResourceAddress::sample_mainnet_xrd(),
             true,
@@ -26,7 +26,7 @@ impl PerRecipientNonFungibleTransfer {
         )
     }
 
-    pub fn sample_mainnet_other() -> Self {
+    pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
             ResourceAddress::sample_mainnet_candy(),
             true,
@@ -37,7 +37,7 @@ impl PerRecipientNonFungibleTransfer {
         )
     }
 
-    pub fn sample_stokenet() -> Self {
+    pub(crate) fn sample_stokenet() -> Self {
         Self::new(
             ResourceAddress::sample_stokenet_xrd(),
             false,
@@ -48,7 +48,7 @@ impl PerRecipientNonFungibleTransfer {
         )
     }
 
-    pub fn sample_stokenet_other() -> Self {
+    pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
             ResourceAddress::sample_stokenet_candy(),
             true,

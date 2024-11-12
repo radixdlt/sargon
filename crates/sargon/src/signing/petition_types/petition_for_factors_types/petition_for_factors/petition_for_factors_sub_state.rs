@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// that have signed or skipped.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("[{}]", factors.borrow().clone().into_iter().map(|f| format!("{:?}", f)).join(", "))]
-pub struct PetitionForFactorsSubState<F>
+pub(crate) struct PetitionForFactorsSubState<F>
 where
     F: FactorSourceReferencing + Debug,
 {

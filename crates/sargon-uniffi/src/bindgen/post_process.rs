@@ -54,7 +54,7 @@ fn kotlin_post_process(out_dir: &String) -> Result<(), BindgenError> {
         .and_then(|t| convert(kotlin_transform, t))
 }
 
-pub fn post_process() {
+pub(crate) fn post_process() {
     println!("🔮 sargon-bindgen | post processing...");
     let (out_dir, languages) = get_args();
 

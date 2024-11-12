@@ -1,6 +1,6 @@
 use crate::bindgen_error::BindgenError;
 
-pub fn swift_transform(
+pub(crate) fn swift_transform(
     needle: &str,
     contents: String,
 ) -> Result<String, BindgenError> {

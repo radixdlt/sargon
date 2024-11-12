@@ -9,13 +9,13 @@ use radix_engine_interface::blueprints::account::{
 
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct ThirdPartyDepositsDelta {
-    pub deposit_rule: Option<ScryptoDefaultDepositRule>,
-    pub asset_exceptions_to_be_removed: Vec<ScryptoManifestValue>,
-    pub asset_exceptions_to_add_or_update:
+    pub(crate) deposit_rule: Option<ScryptoDefaultDepositRule>,
+    pub(crate) asset_exceptions_to_be_removed: Vec<ScryptoManifestValue>,
+    pub(crate) asset_exceptions_to_add_or_update:
         Vec<ScryptoAccountSetResourcePreferenceInput>,
-    pub depositor_addresses_to_remove:
+    pub(crate) depositor_addresses_to_remove:
         Vec<ScryptoAccountRemoveAuthorizedDepositorInput>,
-    pub depositor_addresses_to_add:
+    pub(crate) depositor_addresses_to_add:
         Vec<ScryptoAccountAddAuthorizedDepositorInput>,
 }
 

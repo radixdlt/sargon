@@ -35,7 +35,7 @@ impl TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub fn empty(network_id: NetworkID) -> Self {
+    pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: Instructions::empty(network_id),
             blobs: Blobs::default(),
@@ -193,7 +193,7 @@ impl HasSampleValues for TransactionManifest {
 
 #[allow(unused)]
 impl TransactionManifest {
-    pub fn sample_mainnet_without_lock_fee() -> Self {
+    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
         let instructions = Instructions::sample_mainnet_without_lock_fee();
         Self::with_instructions_and_blobs(instructions, Blobs::default())
     }

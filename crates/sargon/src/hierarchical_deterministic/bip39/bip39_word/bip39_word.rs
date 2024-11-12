@@ -68,7 +68,7 @@ fn word_by_index(u11: U11, language: bip39::Language) -> BIP39Word {
     }
 }
 
-pub fn bip39_word_by_index(u11: U11) -> BIP39Word {
+pub(crate) fn bip39_word_by_index(u11: U11) -> BIP39Word {
     word_by_index(u11, bip39::Language::English)
 }
 

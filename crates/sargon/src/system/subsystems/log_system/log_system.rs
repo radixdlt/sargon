@@ -39,7 +39,7 @@ fn init() {
     });
 }
 
-pub fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
+pub(crate) fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
     init();
     *LOG.0.write().unwrap() = Some(logging_driver);
     rust_logger_set_level(LogFilter::Trace); // can be called from FFI later

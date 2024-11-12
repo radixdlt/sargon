@@ -67,7 +67,7 @@ impl Gateway {
 }
 
 impl Gateway {
-    pub fn declare(url: &str, id: NetworkID) -> Self {
+    pub(crate) fn declare(url: &str, id: NetworkID) -> Self {
         Self::new(url.to_string(), id).expect("Valid").clone()
     }
 }

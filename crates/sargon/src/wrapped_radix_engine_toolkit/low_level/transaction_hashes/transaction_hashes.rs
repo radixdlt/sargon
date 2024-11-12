@@ -32,7 +32,7 @@ macro_rules! decl_tx_hash {
         }
 
         impl $struct_name {
-            pub fn from_scrypto(
+            pub(crate) fn from_scrypto(
                 scrypto: $scrypto_struct_name,
                 network_id: NetworkID,
             ) -> Self {

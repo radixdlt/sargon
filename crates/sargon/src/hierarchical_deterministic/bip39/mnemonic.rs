@@ -53,7 +53,7 @@ impl Mnemonic {
         format!("Mnemonic in {} obfuscated.", self.language)
     }
 
-    pub fn from_internal(internal: bip39::Mnemonic) -> Self {
+    pub(crate) fn from_internal(internal: bip39::Mnemonic) -> Self {
         use k256::elliptic_curve::zeroize::Zeroize;
 
         let language = internal.language();

@@ -41,7 +41,7 @@ impl Default
     }
 }
 
-pub const SECURITY_QUESTIONS_TRIMMED_CHARS: &[char] = &[
+pub(crate) const SECURITY_QUESTIONS_TRIMMED_CHARS: &[char] = &[
     ' ',  // whitespace
     '\t', // whitespace
     '\n', // whitespace

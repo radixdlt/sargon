@@ -218,7 +218,7 @@ impl TransactionManifest {
 }
 
 impl TokenDefinitionMetadata {
-    pub fn for_nft_collection(index: U11) -> Self {
+    pub(crate) fn for_nft_collection(index: U11) -> Self {
         let word = bip39_word_by_index(index.clone()).word;
         let name = capitalize(word.clone());
         let base_url = "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/";

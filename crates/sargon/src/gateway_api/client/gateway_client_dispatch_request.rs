@@ -6,7 +6,7 @@ use crate::prelude::*;
 impl GatewayClient {
     /// Dispatches an HTTP `POST` request by JSON serializing the specified
     /// `request` and setting it as the `body` for the network request.
-    pub async fn post<T, U, V, F>(
+    pub(crate) async fn post<T, U, V, F>(
         &self,
         path: impl AsRef<str>,
         request: T,
@@ -38,7 +38,7 @@ impl GatewayClient {
     }
 
     /// Dispatches an HTTP `POST` request without any `body`.
-    pub async fn post_empty<U, V, F>(
+    pub(crate) async fn post_empty<U, V, F>(
         &self,
         path: impl AsRef<str>,
         map: F,
@@ -54,7 +54,7 @@ impl GatewayClient {
 }
 
 /// An identity mapping function for Result
-pub const fn res_id<T>(x: T) -> Result<T, CommonError> {
+pub(crate) const fn res_id<T>(x: T) -> Result<T, CommonError> {
     std::convert::identity::<Result<T, CommonError>>(Ok(x))
 }
 

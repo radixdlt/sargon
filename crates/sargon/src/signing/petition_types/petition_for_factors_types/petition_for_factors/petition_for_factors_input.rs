@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// The input passed to a PetitionsForFactors
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 #[debug("PetitionForFactorsInput(factors: {:#?})", self.factors)]
-pub struct PetitionForFactorsInput {
+pub(crate) struct PetitionForFactorsInput {
     /// Factors to sign with.
     pub(super) factors: IndexSet<HierarchicalDeterministicFactorInstance>,
 
@@ -54,7 +54,7 @@ impl PetitionForFactorsInput {
         Self::new(factors, 1) // we need just one, anyone, factor for threshold.
     }
 
-    pub fn reference_factor_source_with_id(
+    pub(crate) fn reference_factor_source_with_id(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> Option<&HierarchicalDeterministicFactorInstance> {

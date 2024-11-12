@@ -43,7 +43,7 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
 }
 
 impl Secp256k1PublicKey {
-    pub fn scrypto(&self) -> ScryptoSecp256k1PublicKey {
+    pub(crate) fn scrypto(&self) -> ScryptoSecp256k1PublicKey {
         self.0
     }
 

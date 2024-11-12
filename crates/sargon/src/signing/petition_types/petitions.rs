@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 #[derive(derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_str())]
-pub struct Petitions<S: Signable> {
+pub(crate) struct Petitions<S: Signable> {
     /// Lookup from factor to TXID.
     ///
     ///
@@ -16,16 +16,17 @@ pub struct Petitions<S: Signable> {
     ///
     /// Where A, B, C and D, all use the factor source, e.g. some arculus
     /// card which the user has setup as a factor (source) for all these accounts.
-    pub factor_source_to_signable_id:
+    pub(crate) factor_source_to_signable_id:
         HashMap<FactorSourceIDFromHash, IndexSet<S::ID>>,
 
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
-    pub txid_to_petition: RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
+    pub(crate) txid_to_petition:
+        RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
 }
 
 impl<S: Signable> Petitions<S> {
-    pub fn new(
+    pub(crate) fn new(
         factor_source_to_signable_ids: HashMap<
             FactorSourceIDFromHash,
             IndexSet<S::ID>,
@@ -38,7 +39,7 @@ impl<S: Signable> Petitions<S> {
         }
     }
 
-    pub fn outcome(self) -> SignaturesOutcome<S::ID> {
+    pub(crate) fn outcome(self) -> SignaturesOutcome<S::ID> {
         let txid_to_petition = self.txid_to_petition.into_inner();
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
@@ -64,7 +65,7 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub fn each_petition<T, U>(
+    pub(crate) fn each_petition<T, U>(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         each: impl Fn(&PetitionForTransaction<S>) -> T,
@@ -87,7 +88,7 @@ impl<S: Signable> Petitions<S> {
         combine(for_each)
     }
 
-    pub fn invalid_transactions_if_neglected_factors(
+    pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
@@ -102,7 +103,7 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub fn should_neglect_factors_due_to_irrelevant(
+    pub(crate) fn should_neglect_factors_due_to_irrelevant(
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> bool {
@@ -128,7 +129,7 @@ impl<S: Signable> Petitions<S> {
     /// `should_neglect_factors_due_to_irrelevant` from SignatureCollector main
     /// loop, i.e. we should not have called this method from SignaturesCollector
     /// if `should_neglect_factors_due_to_irrelevant` returned true.
-    pub fn input_for_interactor(
+    pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> MonoFactorSignRequestInput<S> {
@@ -150,7 +151,7 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub fn status(&self) -> PetitionsStatus {
+    pub(crate) fn status(&self) -> PetitionsStatus {
         self.each_petition(
             self.factor_source_to_signable_id.keys().cloned().collect(),
             |p| p.status_of_each_petition_for_entity(),
@@ -172,7 +173,7 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub fn process_batch_response(
+    pub(crate) fn process_batch_response(
         &self,
         response: SignWithFactorsOutcome<S::ID>,
     ) {

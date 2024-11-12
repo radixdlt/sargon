@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
-pub struct SignaturesCollectorPreprocessor<S: Signable> {
+pub(crate) struct SignaturesCollectorPreprocessor<S: Signable> {
     signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,
 }
 
-pub fn sort_group_factors(
+pub(crate) fn sort_group_factors(
     used_factor_sources: HashSet<FactorSource>,
 ) -> IndexSet<FactorSourcesOfKind> {
     let factors_of_kind: HashMap<FactorSourceKind, IndexSet<FactorSource>> =

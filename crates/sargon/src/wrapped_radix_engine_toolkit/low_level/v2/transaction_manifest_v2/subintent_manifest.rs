@@ -39,7 +39,7 @@ impl SubintentManifest {
 
 impl SubintentManifest {
     #[allow(dead_code)]
-    pub fn empty(network_id: NetworkID) -> Self {
+    pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: InstructionsV2::empty(network_id),
             blobs: Blobs::default(),
@@ -126,7 +126,7 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
-    pub fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
         self.instructions.instructions()
     }
 
@@ -183,7 +183,7 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
-    pub fn sample_mainnet_instructions_string() -> String {
+    pub(crate) fn sample_mainnet_instructions_string() -> String {
         include_str!(concat!(
             env!("FIXTURES_TX"),
             "resource_transfer_subintent.rtm"
@@ -199,7 +199,7 @@ impl SubintentManifest {
         .expect("Valid sample value")
     }
 
-    pub fn sample_other_simulator_instructions_string() -> String {
+    pub(crate) fn sample_other_simulator_instructions_string() -> String {
         include_str!(concat!(
             env!("FIXTURES_TX"),
             "multi_account_resource_transfer_subintent.rtm"

@@ -58,19 +58,19 @@ impl HasSampleValues for ResourceIdentifier {
 
 #[allow(unused)]
 impl ResourceIdentifier {
-    pub fn sample_fungible_mainnet() -> Self {
+    pub(crate) fn sample_fungible_mainnet() -> Self {
         Self::Fungible(ResourceAddress::sample_mainnet())
     }
 
-    pub fn sample_non_fungible_mainnet() -> Self {
+    pub(crate) fn sample_non_fungible_mainnet() -> Self {
         Self::NonFungible(ResourceAddress::sample_mainnet_other())
     }
 
-    pub fn sample_non_fungible_stokenet() -> Self {
+    pub(crate) fn sample_non_fungible_stokenet() -> Self {
         Self::NonFungible(ResourceAddress::sample_stokenet())
     }
 
-    pub fn sample_pool_unit_mainnet() -> Self {
+    pub(crate) fn sample_pool_unit_mainnet() -> Self {
         Self::PoolUnit(PoolAddress::sample())
     }
 }

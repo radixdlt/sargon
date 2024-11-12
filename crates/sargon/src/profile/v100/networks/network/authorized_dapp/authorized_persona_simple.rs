@@ -85,7 +85,7 @@ impl IsNetworkAware for AuthorizedPersonaSimple {
 }
 
 impl PersonaData {
-    pub fn shared_everything(&self) -> SharedPersonaData {
+    pub(crate) fn shared_everything(&self) -> SharedPersonaData {
         SharedPersonaData::new(
             self.name.clone().map(|x| x.id),
             SharedToDappWithPersonaIDsOfPersonaDataEntries::exactly(

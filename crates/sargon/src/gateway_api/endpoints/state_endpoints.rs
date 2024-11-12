@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 impl GatewayClient {
     /// Returns detailed information for collection of entities. Aggregate resources globally by default.
-    pub async fn state_entity_details(
+    pub(crate) async fn state_entity_details(
         &self,
         request: StateEntityDetailsRequest,
     ) -> Result<StateEntityDetailsResponse> {

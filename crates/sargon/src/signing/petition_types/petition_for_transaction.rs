@@ -4,16 +4,16 @@ use crate::prelude::*;
 /// Essentially a wrapper around `Iterator<Item = PetitionForEntity>`.
 #[derive(derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_str())]
-pub struct PetitionForTransaction<S: Signable> {
+pub(crate) struct PetitionForTransaction<S: Signable> {
     /// Transaction to sign
-    pub signable: S,
+    pub(crate) signable: S,
 
-    pub for_entities:
+    pub(crate) for_entities:
         RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::ID>>>,
 }
 
 impl<S: Signable> PetitionForTransaction<S> {
-    pub fn new(
+    pub(crate) fn new(
         signable: S,
         for_entities: HashMap<
             AddressOfAccountOrPersona,
@@ -37,7 +37,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     ///
     /// The third value in the tuple `(_, _, IndexSet<FactorSourceIDFromHash>)` contains the
     /// id of all the factor sources which was skipped.
-    pub fn outcome(self) -> PetitionTransactionOutcome<S::ID> {
+    pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S::ID> {
         let for_entities = self
             .for_entities
             .into_inner()
@@ -67,11 +67,11 @@ impl<S: Signable> PetitionForTransaction<S> {
         )
     }
 
-    pub fn has_tx_failed(&self) -> bool {
+    pub(crate) fn has_tx_failed(&self) -> bool {
         self.for_entities.borrow().values().any(|p| p.has_failed())
     }
 
-    pub fn all_relevant_factor_instances_of_source(
+    pub(crate) fn all_relevant_factor_instances_of_source(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> IndexSet<OwnedFactorInstance> {
@@ -97,7 +97,7 @@ impl<S: Signable> PetitionForTransaction<S> {
             .collect()
     }
 
-    pub fn add_signature(&self, signature: HDSignature<S::ID>) {
+    pub(crate) fn add_signature(&self, signature: HDSignature<S::ID>) {
         let for_entities = self.for_entities.borrow_mut();
         let for_entity = for_entities
             .get(&signature.owned_factor_instance().owner)
@@ -105,14 +105,14 @@ impl<S: Signable> PetitionForTransaction<S> {
         for_entity.add_signature(signature.clone());
     }
 
-    pub fn neglect_factor_source(&self, neglected: NeglectedFactor) {
+    pub(crate) fn neglect_factor_source(&self, neglected: NeglectedFactor) {
         let mut for_entities = self.for_entities.borrow_mut();
         for petition in for_entities.values_mut() {
             petition.neglect_if_referenced(neglected.clone())
         }
     }
 
-    pub fn input_for_interactor(
+    pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> TransactionSignRequestInput<S> {
@@ -127,7 +127,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         )
     }
 
-    pub fn status_of_each_petition_for_entity(
+    pub(crate) fn status_of_each_petition_for_entity(
         &self,
     ) -> Vec<PetitionForFactorsStatus> {
         self.for_entities
@@ -137,7 +137,7 @@ impl<S: Signable> PetitionForTransaction<S> {
             .collect()
     }
 
-    pub fn invalid_transaction_if_neglected_factors(
+    pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
@@ -166,7 +166,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         ))
     }
 
-    pub fn should_neglect_factors_due_to_irrelevant(
+    pub(crate) fn should_neglect_factors_due_to_irrelevant(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> bool {

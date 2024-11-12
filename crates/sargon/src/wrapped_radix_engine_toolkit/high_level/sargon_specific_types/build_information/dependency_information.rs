@@ -20,7 +20,7 @@ pub enum DependencyInformation {
 }
 
 impl DependencyInformation {
-    pub fn with_value(version: &str) -> Self {
+    pub(crate) fn with_value(version: &str) -> Self {
         let mut split = version.split('=');
         let identifier = split.next().expect("Should never fail").trim();
         let value = split.next().expect("Should never fail").trim();

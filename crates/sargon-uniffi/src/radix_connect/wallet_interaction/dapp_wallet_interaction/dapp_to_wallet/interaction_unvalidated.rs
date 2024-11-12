@@ -28,13 +28,13 @@ pub fn dapp_to_wallet_interaction_unvalidated_to_json_string(
 }
 
 #[uniffi::export]
-pub fn new_dapp_to_wallet_interaction_unvalidated_sample(
+pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample(
 ) -> DappToWalletInteractionUnvalidated {
     InternalDappToWalletInteractionUnvalidated::sample().into()
 }
 
 #[uniffi::export]
-pub fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
+pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
 ) -> DappToWalletInteractionUnvalidated {
     InternalDappToWalletInteractionUnvalidated::sample_other().into()
 }

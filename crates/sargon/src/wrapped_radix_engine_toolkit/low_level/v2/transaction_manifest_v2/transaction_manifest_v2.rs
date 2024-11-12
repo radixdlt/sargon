@@ -40,7 +40,7 @@ impl TransactionManifestV2 {
 }
 
 impl TransactionManifestV2 {
-    pub fn empty(network_id: NetworkID) -> Self {
+    pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: InstructionsV2::empty(network_id),
             blobs: Blobs::default(),
@@ -126,7 +126,7 @@ impl TransactionManifestV2 {
 }
 
 impl TransactionManifestV2 {
-    pub fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
         self.instructions.instructions()
     }
 

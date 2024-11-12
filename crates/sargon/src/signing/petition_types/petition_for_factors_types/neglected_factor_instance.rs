@@ -4,10 +4,10 @@ use crate::prelude::*;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AbstractNeglectedFactor<T> {
     /// The reason why this factor was neglected.
-    pub reason: NeglectFactorReason,
+    pub(crate) reason: NeglectFactorReason,
 
     /// The neglected factor
-    pub content: T,
+    pub(crate) content: T,
 }
 
 impl<T> AbstractNeglectedFactor<T> {
@@ -28,7 +28,7 @@ impl<T: Debug> Debug for AbstractNeglectedFactor<T> {
 impl NeglectedFactorInstance {
     /// Maps from `Neglected<HierarchicalDeterministicFactorInstance>`
     /// to `Neglected<FactorSourceIDFromHash>`,
-    pub fn as_neglected_factor(&self) -> NeglectedFactor {
+    pub(crate) fn as_neglected_factor(&self) -> NeglectedFactor {
         NeglectedFactor::new(self.reason, self.factor_source_id())
     }
 }
@@ -60,14 +60,15 @@ impl HasSampleValues for NeglectedFactorInstance {
 }
 
 /// ID to some neglected factor source, with the reason why it was neglected (skipped/failed)
-pub type NeglectedFactor = AbstractNeglectedFactor<FactorSourceIDFromHash>;
+pub(crate) type NeglectedFactor =
+    AbstractNeglectedFactor<FactorSourceIDFromHash>;
 
 /// IDs to some neglected factor source, with the reason why they were neglected (skipped/failed)
 pub type NeglectedFactors =
     AbstractNeglectedFactor<IndexSet<FactorSourceIDFromHash>>;
 
 /// A HierarchicalDeterministicFactorInstance which was rejected, with the reason why (skipped/failed)
-pub type NeglectedFactorInstance =
+pub(crate) type NeglectedFactorInstance =
     AbstractNeglectedFactor<HierarchicalDeterministicFactorInstance>;
 
 /// Reason why some FactorSource was neglected, either explicitly skipped by the user

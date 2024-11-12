@@ -128,7 +128,7 @@ impl From<ResourceOrNonFungible> for ScryptoResourceOrNonFungible {
 }
 
 #[cfg(not(tarpaulin_include))] // false negative, tested.
-pub fn to_vec_network_aware<T, U>(
+pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
 ) -> Vec<U>
@@ -142,7 +142,7 @@ where
         .collect_vec()
 }
 
-pub fn to_hashmap_network_aware_key<K, V, L, U>(
+pub(crate) fn to_hashmap_network_aware_key<K, V, L, U>(
     values: impl IntoIterator<Item = (K, V)>,
     network_id: NetworkID,
 ) -> HashMap<L, U>
@@ -157,7 +157,7 @@ where
 }
 
 #[cfg(not(tarpaulin_include))] // false negative, tested.
-pub fn filter_try_to_vec_network_aware<T, U>(
+pub(crate) fn filter_try_to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
 ) -> Vec<U>

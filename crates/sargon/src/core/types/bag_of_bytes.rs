@@ -21,7 +21,7 @@ use crate::prelude::*;
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct BagOfBytes {
-    pub bytes: Vec<u8>,
+    pub(crate) bytes: Vec<u8>,
 }
 
 impl AsRef<[u8]> for BagOfBytes {

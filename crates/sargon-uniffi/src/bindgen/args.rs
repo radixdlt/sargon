@@ -88,7 +88,7 @@ enum Commands {
     },
 }
 
-pub fn get_args() -> (String, Vec<TargetLanguage>) {
+pub(crate) fn get_args() -> (String, Vec<TargetLanguage>) {
     let cli = Cli::parse();
     match cli.command {
         Commands::Generate {

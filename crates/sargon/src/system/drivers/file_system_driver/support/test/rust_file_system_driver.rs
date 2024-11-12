@@ -12,7 +12,7 @@ impl RustFileSystemDriver {
 }
 
 #[allow(dead_code)]
-pub fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
+pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
     let path = PathBuf::from_str(&str).map_err(|_| CommonError::Unknown)?;
     if require {
         path.try_exists().map_err(|_| CommonError::Unknown)?;
