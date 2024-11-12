@@ -20,7 +20,7 @@ impl SargonOS {
         );
 
         let resource_preferences = gateway_client
-            .load_all_pages(account_address, |request| {
+            .load_all_account_pages(account_address, |request| {
                 gateway_client.account_resource_preferences(request)
             })
             .await?
@@ -29,7 +29,7 @@ impl SargonOS {
             .collect();
 
         let authorized_depositors = gateway_client
-            .load_all_pages(account_address, |request| {
+            .load_all_account_pages(account_address, |request| {
                 gateway_client.account_authorized_depositors(request)
             })
             .await?

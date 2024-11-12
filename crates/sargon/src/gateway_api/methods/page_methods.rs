@@ -3,9 +3,37 @@ use std::future::Future;
 
 impl GatewayClient {
     /// Load all pages of a paginated API call that returns a `PageResponse`.
+    /// Parameters:
+    /// - `api_call`: A function that takes an optional cursor and returns a future executing the
+    /// corresponding API call.
     ///
     /// Returns: A collection of the items from all pages.
-    pub async fn load_all_pages<T, F, Fut>(
+    pub async fn load_all_pages<T, F, Fut>(&self, api_call: F) -> Result<Vec<T>>
+    where
+        F: Fn(Option<String>) -> Fut,
+        Fut: Future<Output = Result<PageResponse<T>>>,
+    {
+        let mut items: Vec<T> = Vec::new();
+        let mut more_to_load = true;
+        let mut cursor: Option<String> = None;
+        while more_to_load {
+            let response = api_call(cursor.clone()).await?;
+            items.extend(response.items);
+            cursor = response.next_cursor;
+            more_to_load = cursor.is_some();
+        }
+
+        Ok(items)
+    }
+
+    /// Load all pages of a paginated API call that returns a `PageResponse`.
+    /// Parameters:
+    /// - `account_address`: The address of the account to load pages for.
+    /// - `api_call`: A function that takes an `AccountPageRequest` and returns a future executing
+    /// the corresponding API call.
+    ///
+    /// Returns: A collection of the items from all pages.
+    pub async fn load_all_account_pages<T, F, Fut>(
         &self,
         account_address: AccountAddress,
         api_call: F,
@@ -14,27 +42,20 @@ impl GatewayClient {
         F: Fn(AccountPageRequest) -> Fut,
         Fut: Future<Output = Result<PageResponse<T>>>,
     {
-        let mut items: Vec<T> = Vec::new();
-        let mut more_to_load = true;
-        let mut cursor: Option<String> = None;
-        while more_to_load {
+        self.load_all_pages(|cursor| {
             let request = AccountPageRequest::new(
                 account_address,
-                cursor.clone(),
+                cursor,
                 GATEWAY_PAGE_REQUEST_LIMIT,
             );
-            let response = api_call(request).await?;
-            items.extend(response.items);
-            cursor = response.next_cursor;
-            more_to_load = cursor.is_some();
-        }
-
-        Ok(items)
+            api_call(request)
+        })
+        .await
     }
 }
 
 #[cfg(test)]
-mod load_all_pages_tests {
+mod tests {
     use crate::prelude::*;
     use actix_rt::time::timeout;
 
@@ -42,7 +63,7 @@ mod load_all_pages_tests {
     type SUT = GatewayClient;
 
     #[actix_rt::test]
-    async fn one_page_only() {
+    async fn account_one_page_only() {
         // Test the case where we load only one page with two elements.
         let item_one = AccountResourcePreference::sample();
         let item_two = AccountResourcePreference::sample_other();
@@ -54,7 +75,7 @@ mod load_all_pages_tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(AccountAddress::sample(), |request| {
+            .load_all_account_pages(AccountAddress::sample(), |request| {
                 sut.account_resource_preferences(request)
             })
             .await
@@ -64,7 +85,7 @@ mod load_all_pages_tests {
     }
 
     #[actix_rt::test]
-    async fn two_pages() {
+    async fn account_two_pages() {
         // Test the case where we load two pages with one element each
         let item_one = AccountResourcePreference::sample();
         let response_one = mock_page_response(
@@ -98,7 +119,7 @@ mod load_all_pages_tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(AccountAddress::sample(), |request| {
+            .load_all_account_pages(AccountAddress::sample(), |request| {
                 sut.account_resource_preferences(request)
             })
             .await
@@ -114,8 +135,12 @@ mod load_all_pages_tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(AccountAddress::sample(), |request| {
-                sut.account_resource_preferences(request)
+            .load_all_pages(|_| {
+                sut.account_resource_preferences(AccountPageRequest::new(
+                    AccountAddress::sample(),
+                    None,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                ))
             })
             .await
             .expect_err("Expected an error");
