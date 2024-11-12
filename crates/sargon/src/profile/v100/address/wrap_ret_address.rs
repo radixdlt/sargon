@@ -127,6 +127,19 @@ macro_rules! decl_ret_wrapped_address {
                     Self::with_node_id_bytes(&generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(), network_id)
                 }
 
+                  pub fn with_node_id_of<A: IsNetworkAware + HasNodeId>(
+                    address: &A,
+                ) -> Self {
+                    Self::with_node_id(address.node_id(), address.network_id())
+                }
+
+                pub fn with_node_id(
+                    node_id: ScryptoNodeId,
+                    network_id: NetworkID
+                ) -> Self {
+                    Self::with_node_id_bytes(node_id.0.as_slice()[1..].try_into().unwrap(), network_id)
+                }
+
                 pub fn with_node_id_bytes(
                     node_id_bytes: &[u8; { ScryptoNodeId::RID_LENGTH }],
                     network_id: NetworkID

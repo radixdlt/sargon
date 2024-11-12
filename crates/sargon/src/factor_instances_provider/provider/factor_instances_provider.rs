@@ -108,17 +108,6 @@ impl CacheFiller {
 
 use futures::future::{BoxFuture, Future};
 
-pub trait SendFuture: core::future::Future {
-    fn send(self) -> impl core::future::Future<Output = Self::Output> + Send
-    where
-        Self: Sized + Send,
-    {
-        self
-    }
-}
-
-impl<T: core::future::Future> SendFuture for T {}
-
 pub struct InstancesConsumer {
     do_consume:
         Box<dyn Fn() -> BoxFuture<'static, Result<()>> + Send + 'static>,
@@ -233,19 +222,8 @@ impl FactorInstancesProvider {
             &pf_newly_derived,
         );
 
-        let cache_client_clone = self.cache_client.clone();
-        let pf_found_in_cache_leq_requested_clone =
-            pf_found_in_cache_leq_requested.clone();
-        let instances_consumer = InstancesConsumer::new(move || {
-            // let cache_client_clone_clone = cache_client_clone.clone();
-            // async move {
-            //     cache_client_clone_clone
-            //         .delete(&pf_found_in_cache_leq_requested_clone)
-            //         .send()
-            //         .await
-            // }
-            ready(Ok(()))
-        });
+        let instances_consumer = self
+            .make_instances_consumer(pf_found_in_cache_leq_requested.clone());
 
         self.cache_client.insert_all(&pf_to_cache).await?;
 
