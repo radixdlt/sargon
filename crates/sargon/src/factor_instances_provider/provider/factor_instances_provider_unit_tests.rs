@@ -15,6 +15,15 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
     }
 
+    async fn create_and_save_new_mainnet_persona(
+        &self,
+        name: impl AsRef<str>,
+    ) -> Result<Persona> {
+        self.create_and_save_new_mainnet_persona_with_derivation_outcome(name)
+            .await
+            .map(|(p, _)| p)
+    }
+
     async fn create_and_save_new_mainnet_account(
         &self,
         name: impl AsRef<str>,
@@ -22,6 +31,16 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account_with_derivation_outcome(name)
             .await
             .map(|(a, _)| a)
+    }
+
+    async fn create_and_save_new_persona_with_factor_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: impl AsRef<str>,
+    ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
+        let display_name = DisplayName::new(name)?;
+        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, display_name).await
     }
 
     async fn create_and_save_new_account_with_factor_with_derivation_outcome(
@@ -1406,8 +1425,7 @@ async fn create_single_account() {
 
     let matrix_0 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::override_only([bdfs.clone()]).unwrap(),
-        RecoveryRoleWithFactorSources::override_only([bdfs.clone()])
-            .unwrap(),
+        RecoveryRoleWithFactorSources::override_only([bdfs.clone()]).unwrap(),
         ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
             .unwrap(),
     )
@@ -1435,8 +1453,6 @@ async fn create_single_account() {
         "should have used cache"
     );
 
-
-
     let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
 
     let alice_matrix = alice_sec.matrix_of_factors.clone();
@@ -1461,40 +1477,61 @@ async fn create_single_account() {
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
-            vec![
-                HDPathComponent::Securified(SecurifiedU30::ZERO), 
-            ]
+            vec![HDPathComponent::Securified(SecurifiedU30::ZERO),]
         );
     }
 }
-/*
+
 #[actix_rt::test]
 async fn securified_personas() {
-    let (mut os, bdfs) = SargonOS::with_bdfs().await;
+    let os = SargonOS::fast_boot().await;
     let batman = os
-        .new_persona_with_bdfs(NetworkID::Mainnet, "Batman")
+        .create_and_save_new_mainnet_persona("Batman")
         .await
-        .unwrap()
-        .0;
+        .unwrap();
 
     let satoshi = os
-        .new_persona_with_bdfs(NetworkID::Mainnet, "Satoshi")
+        .create_and_save_new_mainnet_persona("Satoshi")
         .await
-        .unwrap()
-        .0;
+        .unwrap();
+
     assert_ne!(batman.address(), satoshi.address());
+    let bdfs = FactorSource::from(os.bdfs().unwrap());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
-    let yubikey = FactorSource::yubikey();
+    let passphrase = FactorSource::sample_passphrase();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
-    os.add_factor_source(yubikey.clone()).await.unwrap();
-    let shield_0 =
-        MatrixOfFactorSources::new([bdfs.clone(), ledger.clone(), arculus.clone()], 2, []);
+    os.add_factor_source(passphrase.clone()).await.unwrap();
 
-    let (securified_personas, derivation_outcome) = os
-        .securify_personas(
-            IndexSet::from_iter([batman.entity_address(), satoshi.entity_address()]),
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+        RecoveryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
+
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+            IndexSet::from_iter([batman.address(), satoshi.address()]),
             shield_0,
         )
         .await
@@ -1505,24 +1542,20 @@ async fn securified_personas() {
         "should have used cache"
     );
 
-    let batman_sec = securified_personas
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == batman.entity_address())
-        .unwrap();
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
 
-    assert_eq!(
-        batman_sec.securified_entity_control().veci.unwrap().clone(),
-        batman.as_unsecurified().unwrap().veci()
-    );
-    let batman_matrix = batman_sec.securified_entity_control().primary_role();
-    assert_eq!(batman_matrix.threshold, 2);
+    let batman_sec = security_structures_of_fis.get(&batman.address()).unwrap();
+
+    let batman_matrix = batman_sec.matrix_of_factors.clone();
+    assert_eq!(batman_matrix.primary_role.threshold, 2);
 
     assert_eq!(
         batman_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.factor_source_id())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
         [
             bdfs.factor_source_id(),
@@ -1531,43 +1564,38 @@ async fn securified_personas() {
         ]
     );
 
-    assert_eq!(
-        batman_matrix
-            .all_factors()
-            .into_iter()
-            .map(|f| f.derivation_entity_index())
-            .collect_vec(),
-        [
-            HDPathComponent::securifying_base_index(0),
-            HDPathComponent::securifying_base_index(0),
-            HDPathComponent::securifying_base_index(0)
-        ]
-    );
+    for factors_for_role in [
+        &batman_matrix.primary_role.all_hd_factors(),
+        &batman_matrix.recovery_role.all_hd_factors(),
+        &batman_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ZERO),
+                HDPathComponent::Securified(SecurifiedU30::ZERO),
+                HDPathComponent::Securified(SecurifiedU30::ZERO),
+            ]
+        );
+    }
 
     // assert satoshi
 
-    let satoshi_sec = securified_personas
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == satoshi.entity_address())
-        .unwrap();
+    let satoshi_sec =
+        security_structures_of_fis.get(&satoshi.address()).unwrap();
 
-    assert_eq!(
-        satoshi_sec
-            .securified_entity_control()
-            .veci
-            .unwrap()
-            .clone(),
-        satoshi.as_unsecurified().unwrap().veci()
-    );
-    let satoshi_matrix = satoshi_sec.securified_entity_control().primary_role();
-    assert_eq!(satoshi_matrix.threshold, 2);
+    let satoshi_matrix = satoshi_sec.matrix_of_factors.clone();
+    assert_eq!(satoshi_matrix.primary_role.threshold, 2);
 
     assert_eq!(
         satoshi_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.factor_source_id())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
         [
             bdfs.factor_source_id(),
@@ -1576,105 +1604,154 @@ async fn securified_personas() {
         ]
     );
 
-    assert_eq!(
-        satoshi_matrix
-            .all_factors()
-            .into_iter()
-            .map(|f| f.derivation_entity_index())
-            .collect_vec(),
-        [
-            HDPathComponent::securifying_base_index(1),
-            HDPathComponent::securifying_base_index(1),
-            HDPathComponent::securifying_base_index(1)
-        ]
-    );
-
+    for factors_for_role in [
+        &satoshi_matrix.primary_role.all_hd_factors(),
+        &satoshi_matrix.recovery_role.all_hd_factors(),
+        &satoshi_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ONE),
+                HDPathComponent::Securified(SecurifiedU30::ONE),
+                HDPathComponent::Securified(SecurifiedU30::ONE),
+            ]
+        );
+    }
     let hyde = os
-        .new_persona(ledger.clone(), NetworkID::Mainnet, "Mr Hyde")
+        .create_and_save_new_persona_with_factor_with_derivation_outcome(
+            ledger.clone(),
+            NetworkID::Mainnet,
+            "Mr Hyde",
+        )
         .await
         .unwrap()
         .0;
 
     assert_eq!(
-        hyde
-                .as_unsecurified()
+            hyde
+                .try_get_unsecured_control()
                 .unwrap()
-                .veci()
-                .factor_instance()
+                .transaction_signing
                 .derivation_entity_index()
-                .base_index(),
-            0,
+                .index_in_local_key_space(),
+            U31::ZERO,
             "First persona created with ledger, should have index 0, even though this ledger was used in the shield, since we are using two different KeySpaces for Securified and Unsecurified personas."
         );
 
-    let (securified_personas, derivation_outcome) = os
-        .securify_personas(
-            IndexSet::just(hyde.entity_address()),
-            MatrixOfFactorSources::new([], 0, [yubikey.clone()]),
+    let matrix_1 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::override_only([passphrase.clone()])
+            .unwrap(),
+        RecoveryRoleWithFactorSources::override_only([passphrase.clone()])
+            .unwrap(),
+        ConfirmationRoleWithFactorSources::override_only([passphrase.clone()])
+            .unwrap(),
+    )
+    .unwrap();
+
+    let shield_1 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 1").unwrap()),
+        14,
+        matrix_1,
+    );
+
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+            IndexSet::from_iter([hyde.address()]),
+            shield_1.clone(),
         )
         .await
         .unwrap();
+
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
+
     assert!(
         !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
-    let hyde_sec = securified_personas
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == hyde.entity_address())
-        .unwrap();
 
-    let hyde_matrix = hyde_sec.securified_entity_control().primary_role();
+    let hyde_sec = security_structures_of_fis.get(&hyde.address()).unwrap();
+
+    let hyde_matrix = hyde_sec.matrix_of_factors.clone();
+    assert_eq!(hyde_matrix.primary_role.get_override_factors().len(), 1);
 
     assert_eq!(
         hyde_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.factor_source_id())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
-        [yubikey.factor_source_id()]
+        [passphrase.factor_source_id(),]
     );
 
-    assert_eq!(
-        hyde_matrix
-            .all_factors()
-            .into_iter()
-            .map(|f| f.derivation_entity_index())
-            .collect_vec(),
-        [HDPathComponent::securifying_base_index(0)]
-    );
+    for factors_for_role in [
+        &hyde_matrix.primary_role.all_hd_factors(),
+        &hyde_matrix.recovery_role.all_hd_factors(),
+        &hyde_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![HDPathComponent::Securified(SecurifiedU30::ZERO),]
+        );
+    }
 
-    // Update Batmans and Satoshis's shield to only use YubiKey
+    // Update Batman's shield 1 -  only Passphrase as override factor
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        IndexSet::from_iter([batman.address()]),
+        shield_1,
+    )
+    .await
+    .unwrap();
 
-    let (securified_personas, derivation_outcome) = os
-        .securify_personas(
-            IndexSet::from_iter([batman.entity_address(), satoshi.entity_address()]),
-            MatrixOfFactorSources::new([], 0, [yubikey.clone()]),
-        )
-        .await
-        .unwrap();
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
+
     assert!(
         !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
-    let batman_sec = securified_personas
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == batman.entity_address())
-        .unwrap();
 
-    let batman_matrix = batman_sec.securified_entity_control().primary_role();
+    let batman_sec = security_structures_of_fis.get(&batman.address()).unwrap();
+
+    let batman_matrix = batman_sec.matrix_of_factors.clone();
 
     assert_eq!(
         batman_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.derivation_entity_index())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
-        [HDPathComponent::securifying_base_index(1)]
+        [passphrase.factor_source_id(),]
     );
+
+    for factors_for_role in [
+        &batman_matrix.primary_role.all_hd_factors(),
+        &batman_matrix.recovery_role.all_hd_factors(),
+        &batman_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ONE), // Hyde used `0`.
+            ]
+        );
+    }
 }
 
+/*
 #[actix_rt::test]
 async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     let os = SargonOS::fast_boot().await;
