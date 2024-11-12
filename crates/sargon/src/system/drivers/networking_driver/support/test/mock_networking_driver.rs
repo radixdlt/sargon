@@ -7,7 +7,8 @@ use std::sync::Mutex;
 #[derive(Debug)]
 pub struct MockNetworkingDriver {
     hard_coded_responses: Mutex<Vec<MockNetworkingDriverResponse>>,
-    spy: fn(NetworkRequest) -> (),
+    spy: fn(NetworkRequest, u64) -> (),
+    count: Mutex<u64>,
 }
 
 #[derive(Debug)]
@@ -39,7 +40,7 @@ impl MockNetworkingDriver {
     fn _new(
         hard_coded_status: u16,
         hard_coded_bodies: Vec<BagOfBytes>,
-        spy: fn(NetworkRequest) -> (),
+        spy: fn(NetworkRequest, u64) -> (),
     ) -> Self {
         let responses = hard_coded_bodies
             .into_iter()
@@ -51,13 +52,14 @@ impl MockNetworkingDriver {
         Self {
             hard_coded_responses: Mutex::new(responses),
             spy,
+            count: Mutex::new(0),
         }
     }
 
     pub fn with_spy(
         status: u16,
         body: impl Into<BagOfBytes>,
-        spy: fn(NetworkRequest) -> (),
+        spy: fn(NetworkRequest, u64) -> (),
     ) -> Self {
         Self::_new(status, vec![body.into()], spy)
     }
@@ -65,25 +67,33 @@ impl MockNetworkingDriver {
     pub fn with_spy_multiple_bodies(
         status: u16,
         bodies: Vec<BagOfBytes>,
-        spy: fn(NetworkRequest) -> (),
+        spy: fn(NetworkRequest, u64) -> (),
     ) -> Self {
         Self::_new(status, bodies, spy)
     }
 
     pub fn new(status: u16, body: impl Into<BagOfBytes>) -> Self {
-        Self::with_spy(status, body, |_| {})
+        Self::with_spy(status, body, |_, _| {})
     }
 
     pub fn new_with_bodies(status: u16, bodies: Vec<BagOfBytes>) -> Self {
-        Self::with_spy_multiple_bodies(status, bodies, |_| {})
+        Self::with_spy_multiple_bodies(status, bodies, |_, _| {})
     }
 
     pub fn new_with_responses(
         responses: Vec<MockNetworkingDriverResponse>,
     ) -> Self {
+        Self::new_with_responses_and_spy(responses, |_, _| {})
+    }
+
+    pub fn new_with_responses_and_spy(
+        responses: Vec<MockNetworkingDriverResponse>,
+        spy: fn(NetworkRequest, u64) -> (),
+    ) -> Self {
         Self {
             hard_coded_responses: Mutex::new(responses),
-            spy: |_| {},
+            spy,
+            count: Mutex::new(0),
         }
     }
 
@@ -109,7 +119,7 @@ impl MockNetworkingDriver {
             .map(BagOfBytes::from)
             .collect();
 
-        Self::_new(200, bodies, |_| {})
+        Self::_new(200, bodies, |_, _| {})
     }
 }
 
@@ -119,7 +129,9 @@ impl NetworkingDriver for MockNetworkingDriver {
         &self,
         request: NetworkRequest,
     ) -> Result<NetworkResponse> {
-        (self.spy)(request);
+        let mut count = self.count.lock().unwrap();
+        (self.spy)(request, *count);
+        *count += 1;
         let mut responses = self.hard_coded_responses.lock().unwrap();
         if responses.is_empty() {
             Err(CommonError::Unknown)

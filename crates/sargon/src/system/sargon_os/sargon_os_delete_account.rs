@@ -19,7 +19,7 @@ impl SargonOS {
             network_id,
         );
 
-        let resource_preferences = self
+        let resource_preferences = gateway_client
             .load_all_pages(account_address, |request| {
                 gateway_client.account_resource_preferences(request)
             })
@@ -28,7 +28,7 @@ impl SargonOS {
             .map(ScryptoAccountRemoveResourcePreferenceInput::from)
             .collect();
 
-        let authorized_depositors = self
+        let authorized_depositors = gateway_client
             .load_all_pages(account_address, |request| {
                 gateway_client.account_authorized_depositors(request)
             })
@@ -44,39 +44,6 @@ impl SargonOS {
         );
 
         Ok(manifest)
-    }
-}
-
-// ==================
-// Load all pages (Internal)
-// ==================
-impl SargonOS {
-    /// Load all pages of a paginated API call that takes an `AccountPageRequest` and returns a `PageResponse`.
-    async fn load_all_pages<T, F, Fut>(
-        &self,
-        account_address: AccountAddress,
-        api_call: F,
-    ) -> Result<Vec<T>>
-    where
-        F: Fn(AccountPageRequest) -> Fut,
-        Fut: Future<Output = Result<PageResponse<T>>>,
-    {
-        let mut items: Vec<T> = Vec::new();
-        let mut more_to_load = true;
-        let mut cursor: Option<String> = None;
-        while more_to_load {
-            let request = AccountPageRequest::new(
-                account_address,
-                cursor.clone(),
-                GATEWAY_PAGE_REQUEST_LIMIT,
-            );
-            let response = api_call(request).await?;
-            items.extend(response.items);
-            cursor = response.next_cursor;
-            more_to_load = cursor.is_some();
-        }
-
-        Ok(items)
     }
 }
 
@@ -139,17 +106,13 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn one_page_only() {
-        // Test the case where we need to load one page of `AccountResourcePreference` and `AccountAuthorizedDepositor`
-        let resource_preference = AccountResourcePreference::sample();
-        let authorized_depositor = AccountAuthorizedDepositor::ResourceBadge {
-            resource_address: ResourceAddress::sample(),
-        };
-        let os = boot_success(vec![
-            resource_preference_page(None, vec![resource_preference.clone()]),
-            authorized_depositor_page(None, vec![authorized_depositor.clone()]),
-        ])
-        .await;
+    async fn manifest() {
+        // Test the manifest is correctly built
+
+        // Simulate two empty responses for resource preferences and authorized depositors.
+        let os =
+            boot_success(vec![empty_page_response(), empty_page_response()])
+                .await;
 
         let account_address = AccountAddress::sample();
         let result = os
@@ -159,8 +122,8 @@ mod tests {
 
         let expected = TransactionManifest::delete_account(
             &account_address,
-            vec![resource_preference.into()],
-            vec![authorized_depositor.try_into().unwrap()],
+            vec![],
+            vec![],
         );
 
         assert_eq!(result, expected);
@@ -180,23 +143,11 @@ mod tests {
             .unwrap()
     }
 
-    /// Creates a mock response for a resource preference page.
-    fn resource_preference_page(
-        cursor: impl Into<Option<String>>,
-        items: Vec<AccountResourcePreference>,
-    ) -> MockNetworkingDriverResponse {
+    /// Creates a mock response for an empty PageResponse.
+    fn empty_page_response() -> MockNetworkingDriverResponse {
+        let items: Vec<AccountResourcePreference> = vec![];
         MockNetworkingDriverResponse::new_success(PageResponse::new(
-            1, cursor, items,
-        ))
-    }
-
-    /// Creates a mock response for an authorized depositor page.
-    fn authorized_depositor_page(
-        cursor: impl Into<Option<String>>,
-        items: Vec<AccountAuthorizedDepositor>,
-    ) -> MockNetworkingDriverResponse {
-        MockNetworkingDriverResponse::new_success(PageResponse::new(
-            1, cursor, items,
+            0, None, items,
         ))
     }
 

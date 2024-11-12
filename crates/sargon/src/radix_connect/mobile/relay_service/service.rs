@@ -125,66 +125,70 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_send_wallet_interaction_response() {
-        let mock_antenna = MockNetworkingDriver::with_spy(200, (), |request| {
-            // Prepare encryption keys
-            let mut encryption_key = Session::sample().encryption_key;
-            let mut decryption_key = encryption_key;
+        let mock_antenna =
+            MockNetworkingDriver::with_spy(200, (), |request, _| {
+                // Prepare encryption keys
+                let mut encryption_key = Session::sample().encryption_key;
+                let mut decryption_key = encryption_key;
 
-            // Serialize the response
-            let wallet_to_dapp_interaction_response =
-                WalletToDappInteractionResponse::sample();
-            let body = wallet_to_dapp_interaction_response
-                .serialize_to_bytes()
-                .unwrap();
+                // Serialize the response
+                let wallet_to_dapp_interaction_response =
+                    WalletToDappInteractionResponse::sample();
+                let body = wallet_to_dapp_interaction_response
+                    .serialize_to_bytes()
+                    .unwrap();
 
-            // Encrypt the response
-            let encrypted =
-                EncryptionScheme::default().encrypt(&body, &mut encryption_key);
-            let hex = hex_encode(encrypted);
-            let success_response = SuccessResponse::new(
-                SessionID::sample(),
-                KeyAgreementPublicKey::sample(),
-                hex.parse().unwrap(),
-            );
+                // Encrypt the response
+                let encrypted = EncryptionScheme::default()
+                    .encrypt(&body, &mut encryption_key);
+                let hex = hex_encode(encrypted);
+                let success_response = SuccessResponse::new(
+                    SessionID::sample(),
+                    KeyAgreementPublicKey::sample(),
+                    hex.parse().unwrap(),
+                );
 
-            let encoded = serde_json::to_vec(&success_response).unwrap();
+                let encoded = serde_json::to_vec(&success_response).unwrap();
 
-            // Request that is expected to be sent
-            let expected_request = NetworkRequest {
-                url: Url::from_str(SERVICE_PATH).unwrap(),
-                method: NetworkMethod::Post,
-                body: encoded.into(),
-                headers: HashMap::new(),
-            };
+                // Request that is expected to be sent
+                let expected_request = NetworkRequest {
+                    url: Url::from_str(SERVICE_PATH).unwrap(),
+                    method: NetworkMethod::Post,
+                    body: encoded.into(),
+                    headers: HashMap::new(),
+                };
 
-            pretty_assertions::assert_eq!(request.url, expected_request.url);
-            pretty_assertions::assert_eq!(
-                request.method,
-                expected_request.method
-            );
+                pretty_assertions::assert_eq!(
+                    request.url,
+                    expected_request.url
+                );
+                pretty_assertions::assert_eq!(
+                    request.method,
+                    expected_request.method
+                );
 
-            let sent_request: SuccessResponse =
-                serde_json::from_slice(&expected_request.body).unwrap();
-            pretty_assertions::assert_eq!(
-                sent_request.session_id,
-                success_response.session_id
-            );
-            pretty_assertions::assert_eq!(
-                sent_request.method,
-                success_response.method
-            );
+                let sent_request: SuccessResponse =
+                    serde_json::from_slice(&expected_request.body).unwrap();
+                pretty_assertions::assert_eq!(
+                    sent_request.session_id,
+                    success_response.session_id
+                );
+                pretty_assertions::assert_eq!(
+                    sent_request.method,
+                    success_response.method
+                );
 
-            let decrypted_payload = EncryptionScheme::default()
-                .decrypt(sent_request.data.bytes(), &mut decryption_key)
-                .unwrap();
-            let decoded_payload: WalletToDappInteractionResponse =
-                serde_json::from_slice(&decrypted_payload).unwrap();
+                let decrypted_payload = EncryptionScheme::default()
+                    .decrypt(sent_request.data.bytes(), &mut decryption_key)
+                    .unwrap();
+                let decoded_payload: WalletToDappInteractionResponse =
+                    serde_json::from_slice(&decrypted_payload).unwrap();
 
-            pretty_assertions::assert_eq!(
-                decoded_payload,
-                wallet_to_dapp_interaction_response
-            )
-        });
+                pretty_assertions::assert_eq!(
+                    decoded_payload,
+                    wallet_to_dapp_interaction_response
+                )
+            });
 
         let service =
             Service::new_with_networking_driver(Arc::new(mock_antenna));

@@ -17,12 +17,12 @@ pub struct AccountPageRequest {
 impl AccountPageRequest {
     pub fn new(
         account_address: AccountAddress,
-        cursor: Option<String>,
+        cursor: impl Into<Option<String>>,
         limit_per_page: impl Into<Option<u64>>,
     ) -> AccountPageRequest {
         AccountPageRequest {
             account_address,
-            cursor,
+            cursor: cursor.into(),
             limit_per_page: limit_per_page.into(),
         }
     }
