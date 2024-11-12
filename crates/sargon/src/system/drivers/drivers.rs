@@ -11,6 +11,7 @@ pub struct Drivers {
     pub file_system: Arc<dyn FileSystemDriver>,
     pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
     pub profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+    pub manifest: Arc<dyn ManifestDriver>,
 }
 
 impl Drivers {
@@ -25,6 +26,7 @@ impl Drivers {
         file_system: Arc<dyn FileSystemDriver>,
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
         profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+        manifest: Arc<dyn ManifestDriver>,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
@@ -36,6 +38,7 @@ impl Drivers {
             file_system,
             unsafe_storage,
             profile_state_change_driver,
+            manifest,
         })
     }
 }
@@ -53,6 +56,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -67,6 +71,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -83,6 +88,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -99,6 +105,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -113,6 +120,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -127,6 +135,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -141,6 +150,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -157,6 +167,7 @@ impl Drivers {
             file_system,
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -173,6 +184,7 @@ impl Drivers {
             RustFileSystemDriver::new(),
             unsafe_storage,
             RustProfileStateChangeDriver::new(),
+            ScryptoManifestDriver::new(),
         )
     }
 
@@ -189,6 +201,39 @@ impl Drivers {
             RustFileSystemDriver::new(),
             EphemeralUnsafeStorage::new(),
             profile_state_change,
+            ScryptoManifestDriver::new(),
+        )
+    }
+
+    pub fn with_manifest(
+        manifest: Arc<dyn ManifestDriver>,
+    ) -> Arc<Self> {
+        Drivers::new(
+            RustNetworkingDriver::new(),
+            EphemeralSecureStorage::new(),
+            RustEntropyDriver::new(),
+            RustHostInfoDriver::new(),
+            RustLoggingDriver::new(),
+            RustEventBusDriver::new(),
+            RustFileSystemDriver::new(),
+            EphemeralUnsafeStorage::new(),
+            RustProfileStateChangeDriver::new(),
+            manifest,
+        )
+    }
+
+    pub fn with_networking_and_manifest(networking: Arc<dyn NetworkingDriver>, manifest: Arc<dyn ManifestDriver>,) -> Arc<Self> {
+        Drivers::new(
+            networking,
+            EphemeralSecureStorage::new(),
+            RustEntropyDriver::new(),
+            RustHostInfoDriver::new(),
+            RustLoggingDriver::new(),
+            RustEventBusDriver::new(),
+            RustFileSystemDriver::new(),
+            EphemeralUnsafeStorage::new(),
+            RustProfileStateChangeDriver::new(),
+            manifest,
         )
     }
 }
@@ -254,5 +299,12 @@ mod tests {
         let d = EphemeralUnsafeStorage::new();
         let sut = SUT::with_unsafe_storage(d.clone());
         assert_eq!(Arc::as_ptr(&sut.unsafe_storage), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_manifest() {
+        let d = ScryptoManifestDriver::new();
+        let sut = SUT::with_manifest(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.manifest), Arc::as_ptr(&d));
     }
 }

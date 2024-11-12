@@ -123,7 +123,7 @@ impl TryFrom<AccountAuthorizedDepositor> for ResourceOrNonFungible {
                         ),
                     })
                 } else {
-                    return Err(CommonError::InvalidNonFungibleLocalIDString);
+                    Err(CommonError::InvalidNonFungibleLocalIDString)
                 }
             }
         }
@@ -145,34 +145,46 @@ mod tests {
         let authorized_depositor = AccountAuthorizedDepositor::ResourceBadge {
             resource_address: ResourceAddress::sample(),
         };
+        let account_address = AccountAddress::sample();
+        let expected_request = ManifestRequest::DeleteAccount(ManifestRequestDeleteAccount {
+            account_address,
+            resource_preferences_to_be_removed: vec![resource_preference.clone().into()],
+            authorized_depositors_to_be_removed: vec![authorized_depositor.clone().try_into().unwrap()],
+        });
+
         let os = boot_success(vec![
             resource_preference_page(None, vec![resource_preference.clone()]),
             authorized_depositor_page(None, vec![authorized_depositor.clone()]),
-        ])
+        ], |req| {
+            verify_request(req);
+        })
         .await;
 
-        let account_address = AccountAddress::sample();
         let result = os
             .create_delete_account_manifest(account_address)
-            .await
-            .unwrap();
+            .await;
 
-        let expected = TransactionManifest::delete_account(
-            &account_address,
-            vec![resource_preference.into()],
-            vec![authorized_depositor.try_into().unwrap()],
-        );
+        assert!(result.is_ok());
+    }
 
-        assert_eq!(result, expected);
+    fn verify_request(request: ManifestRequest) {
+        match request {
+            ManifestRequest::DeleteAccount(r) => {
+                assert_eq!(r.account_address, AccountAddress::sample());
+                assert_eq!(r.resource_preferences_to_be_removed.len(), 2);
+            },
+        }
     }
 
     /// Boots SargonOS with a mock networking driver that will return the provided responses.
     async fn boot_success(
         responses: Vec<MockNetworkingDriverResponse>,
+        spy: fn(ManifestRequest) -> (),
     ) -> Arc<SargonOS> {
         let mock_driver = MockNetworkingDriver::new_with_responses(responses);
+        let mock_manifest = MockManifestDriver::new(TransactionManifest::sample(), spy);
 
-        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+        let req = SUT::boot_test_with_networking_and_manifest_drivers(Arc::new(mock_driver), Arc::new(mock_manifest));
 
         timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await

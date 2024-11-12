@@ -8,6 +8,7 @@ mod networking_driver;
 mod profile_change_driver;
 mod secure_storage_driver;
 mod unsafe_storage_driver;
+mod manifest_driver;
 
 pub use drivers::*;
 pub use entropy_provider_driver::*;
@@ -19,3 +20,4 @@ pub use networking_driver::*;
 pub use profile_change_driver::*;
 pub use secure_storage_driver::*;
 pub use unsafe_storage_driver::*;
+pub use manifest_driver::*;

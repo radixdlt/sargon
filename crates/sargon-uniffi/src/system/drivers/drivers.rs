@@ -75,6 +75,9 @@ impl From<Drivers> for InternalDrivers {
                     wrapped: val.profile_state_change_driver,
                 },
             ),
+            manifest: Arc::new(
+                ManifestDriverAdapter::new(),
+            ),
         }
     }
 }

@@ -10,6 +10,7 @@ pub struct Clients {
     pub file_system: FileSystemClient,
     pub event_bus: EventBusClient,
     pub profile_state_change: ProfileStateChangeClient,
+    pub manifest: ManifestClient,
 }
 
 impl Clients {
@@ -26,6 +27,7 @@ impl Clients {
         let profile_change = ProfileStateChangeClient::new(
             drivers.profile_state_change_driver.clone(),
         );
+        let manifest = ManifestClient::new(drivers.manifest.clone());
         Self {
             host,
             secure_storage,
@@ -35,6 +37,7 @@ impl Clients {
             file_system,
             event_bus,
             profile_state_change: profile_change,
+            manifest,
         }
     }
 
