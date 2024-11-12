@@ -63,12 +63,12 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         .await
         .assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
     let prefix = "Acco";
-    let stats = os
+    let derivation_outcome = os
         .batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, NetworkID::Mainnet, prefix.to_owned())
             .await
             .unwrap();
-    assert_eq!(stats.debug_was_cached.len(), 0);
-    assert_eq!(stats.debug_was_derived.len(), 0);
+    assert_eq!(derivation_outcome.debug_was_cached.len(), 0);
+    assert_eq!(derivation_outcome.debug_was_derived.len(), 0);
 
     assert_eq!(
         os.profile()
@@ -78,7 +78,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         CACHE_FILLING_QUANTITY
     );
 
-    let (acco, stats) = os
+    let (acco, derivation_outcome) = os
         .create_and_save_new_mainnet_account_with_derivation_outcome(
             "newly derive",
         )
@@ -93,8 +93,14 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         CACHE_FILLING_QUANTITY + 1
     );
 
-    assert_eq!(stats.debug_was_cached.len(), CACHE_FILLING_QUANTITY);
-    assert_eq!(stats.debug_was_derived.len(), CACHE_FILLING_QUANTITY + 1);
+    assert_eq!(
+        derivation_outcome.debug_was_cached.len(),
+        CACHE_FILLING_QUANTITY
+    );
+    assert_eq!(
+        derivation_outcome.debug_was_derived.len(),
+        CACHE_FILLING_QUANTITY + 1
+    );
 
     assert_eq!(
         acco.try_get_unsecured_control()
@@ -114,7 +120,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         .assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
 
     // and another one
-    let (acco, stats) = os
+    let (acco, derivation_outcome) = os
         .create_and_save_new_mainnet_account_with_derivation_outcome(
             "newly derive 2",
         )
@@ -129,8 +135,8 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         CACHE_FILLING_QUANTITY + 2
     );
 
-    assert_eq!(stats.debug_was_cached.len(), 0);
-    assert_eq!(stats.debug_was_derived.len(), 0);
+    assert_eq!(derivation_outcome.debug_was_cached.len(), 0);
+    assert_eq!(derivation_outcome.debug_was_derived.len(), 0);
 
     assert_eq!(
         acco.try_get_unsecured_control()
@@ -179,23 +185,23 @@ async fn adding_accounts_and_clearing_cache_in_between() {
         .unwrap()
         .accounts_on_all_networks_including_hidden()
         .is_empty(),);
-    let (alice, stats) = os
+    let (alice, derivation_outcome) = os
         .create_and_save_new_mainnet_account_with_derivation_outcome("alice")
         .await
         .unwrap();
-    assert!(!stats.debug_found_in_cache.is_empty());
-    assert!(stats.debug_was_cached.is_empty());
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(!derivation_outcome.debug_found_in_cache.is_empty());
+    assert!(derivation_outcome.debug_was_cached.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
     os.clear_cache().await;
 
-    let (bob, stats) = os
+    let (bob, derivation_outcome) = os
         .create_and_save_new_mainnet_account_with_derivation_outcome("bob")
         .await
         .unwrap();
-    assert!(stats.debug_found_in_cache.is_empty());
-    assert!(!stats.debug_was_cached.is_empty());
-    assert!(!stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_found_in_cache.is_empty());
+    assert!(!derivation_outcome.debug_was_cached.is_empty());
+    assert!(!derivation_outcome.debug_was_derived.is_empty());
     assert_ne!(alice, bob);
 
     assert_eq!(
@@ -215,7 +221,7 @@ async fn adding_personas_and_clearing_cache_in_between() {
         .unwrap()
         .personas_on_all_networks_including_hidden()
         .is_empty());
-    let (batman, stats) = os
+    let (batman, derivation_outcome) = os
         .create_and_save_new_mainnet_persona_with_derivation_outcome("Batman")
         .await
         .unwrap();
@@ -230,18 +236,18 @@ async fn adding_personas_and_clearing_cache_in_between() {
         CAP26EntityKind::Identity
     );
 
-    assert!(!stats.debug_found_in_cache.is_empty());
-    assert!(stats.debug_was_cached.is_empty());
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(!derivation_outcome.debug_found_in_cache.is_empty());
+    assert!(derivation_outcome.debug_was_cached.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
     os.clear_cache().await;
 
-    let (satoshi, stats) = os
+    let (satoshi, derivation_outcome) = os
         .create_and_save_new_mainnet_persona_with_derivation_outcome("Satoshi")
         .await
         .unwrap();
-    assert!(stats.debug_found_in_cache.is_empty());
-    assert!(!stats.debug_was_cached.is_empty());
-    assert!(!stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_found_in_cache.is_empty());
+    assert!(!derivation_outcome.debug_was_cached.is_empty());
+    assert!(!derivation_outcome.debug_was_derived.is_empty());
     assert_ne!(batman, satoshi);
 
     assert_eq!(
@@ -310,8 +316,8 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    let stats = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
-    assert_eq!(stats.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
+    let derivation_outcome = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
+    assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
 
     let all_accounts = os
         .profile()
@@ -364,7 +370,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
         3 * n
     );
 
-    let (security_structure_of_factor_instances_first_half, instances_consumer, stats) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+    let (security_structure_of_factor_instances_first_half, instances_consumer, derivation_outcome) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
         first_half_of_accounts
                 .clone()
                 .into_iter()
@@ -376,7 +382,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
     instances_consumer.consume().await.unwrap();
 
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
@@ -436,31 +442,31 @@ async fn add_account_and_personas_mixed() {
         .accounts_on_all_networks_including_hidden()
         .is_empty());
 
-    let (batman, stats) = os
+    let (batman, derivation_outcome) = os
         .create_and_save_new_mainnet_persona_with_derivation_outcome("Batman")
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (alice, stats) = os
+    let (alice, derivation_outcome) = os
         .create_and_save_new_mainnet_account_with_derivation_outcome("alice")
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (satoshi, stats) = os
+    let (satoshi, derivation_outcome) = os
         .create_and_save_new_mainnet_persona_with_derivation_outcome("Satoshi")
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
     assert_ne!(batman.address(), satoshi.address());
 
-    let (bob, stats) = os
+    let (bob, derivation_outcome) = os
         .create_and_save_new_mainnet_account_with_derivation_outcome("bob")
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
     assert_ne!(alice.address(), bob.address());
 
     let profile = os.profile().unwrap();
@@ -499,7 +505,7 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         .is_empty());
     assert_eq!(profile.factor_sources.len(), 3);
 
-    let (alice, stats) = os
+    let (alice, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_device.clone(),
             NetworkID::Mainnet,
@@ -507,9 +513,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (bob, stats) = os
+    let (bob, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_device.clone(),
             NetworkID::Mainnet,
@@ -517,9 +523,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (carol, stats) = os
+    let (carol, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_device.clone(),
             NetworkID::Stokenet,
@@ -528,11 +534,11 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         .await
         .unwrap();
     assert!(
-        !stats.debug_was_derived.is_empty(),
+        !derivation_outcome.debug_was_derived.is_empty(),
         "Should have derived more, since first time Stokenet is used!"
     );
 
-    let (diana, stats) = os
+    let (diana, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_device.clone(),
             NetworkID::Stokenet,
@@ -540,9 +546,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (erin, stats) = os
+    let (erin, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_arculus.clone(),
             NetworkID::Mainnet,
@@ -550,9 +556,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (frank, stats) = os
+    let (frank, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_arculus.clone(),
             NetworkID::Mainnet,
@@ -560,9 +566,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (grace, stats) = os
+    let (grace, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_arculus.clone(),
             NetworkID::Stokenet,
@@ -571,11 +577,11 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         .await
         .unwrap();
     assert!(
-        !stats.debug_was_derived.is_empty(),
+        !derivation_outcome.debug_was_derived.is_empty(),
         "Should have derived more, since first time Stokenet is used with the Arculus!"
     );
 
-    let (helena, stats) = os
+    let (helena, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_arculus.clone(),
             NetworkID::Stokenet,
@@ -583,9 +589,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (isabel, stats) = os
+    let (isabel, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_ledger.clone(),
             NetworkID::Mainnet,
@@ -593,9 +599,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (jenny, stats) = os
+    let (jenny, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_ledger.clone(),
             NetworkID::Mainnet,
@@ -603,9 +609,9 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    let (klara, stats) = os
+    let (klara, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_ledger.clone(),
             NetworkID::Stokenet,
@@ -614,11 +620,11 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         .await
         .unwrap();
     assert!(
-        !stats.debug_was_derived.is_empty(),
+        !derivation_outcome.debug_was_derived.is_empty(),
         "Should have derived more, since first time Stokenet is used with the Ledger!"
     );
 
-    let (lisa, stats) = os
+    let (lisa, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
             fs_ledger.clone(),
             NetworkID::Stokenet,
@@ -626,7 +632,7 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         )
         .await
         .unwrap();
-    assert!(stats.debug_was_derived.is_empty());
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
     let profile = os.profile().unwrap();
     assert_eq!(
@@ -1064,44 +1070,63 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
     );
 }
 
-/*
 #[actix_rt::test]
 async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
-    let (mut os, bdfs) = SargonOS::with_bdfs().await;
-
+    let (os, bdfs) = SargonOS::with_bdfs().await;
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
-    let yubikey = FactorSource::yubikey();
+    let passphrase = FactorSource::sample_passphrase();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
-    os.add_factor_source(yubikey.clone()).await.unwrap();
+    os.add_factor_source(passphrase.clone()).await.unwrap();
 
-    let factor_sources = os.profile_snapshot().factor_sources.clone();
+    let profile = os.profile().unwrap();
+    let factor_sources = profile.factor_sources.clone();
     assert_eq!(
         factor_sources.clone().into_iter().collect_vec(),
         vec![
             bdfs.clone(),
             ledger.clone(),
             arculus.clone(),
-            yubikey.clone(),
+            passphrase.clone(),
         ]
     );
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    for i in 0..3 * n {
-        let (_account, _stats) = os
-            .new_mainnet_account_with_bdfs(format!("Acco: {}", i))
-            .await
-            .unwrap();
-    }
+    let derivation_outcome = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
 
-    let shield_0 =
-        MatrixOfFactorSources::new([bdfs.clone(), ledger.clone(), arculus.clone()], 2, []);
+    assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
+
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+        RecoveryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
 
     let all_accounts = os
-        .profile_snapshot()
-        .get_accounts()
+        .profile()
+        .unwrap()
+        .accounts_on_all_networks_including_hidden()
         .into_iter()
         .collect_vec();
 
@@ -1120,34 +1145,35 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         3 * n
     );
 
-    let (first_half_securified_accounts, stats) = os
-        .securify_accounts(
-            first_half_of_accounts
-                .clone()
-                .into_iter()
-                .map(|a| a.entity_address())
-                .collect(),
-            shield_0.clone(),
-        )
-        .await
-        .unwrap();
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        first_half_of_accounts.clone().into_iter().map(|a| a.address()).collect(),
+        shield_0.clone(),
+    )
+    .await
+    .unwrap();
+
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
+
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
     assert_eq!(
-        first_half_securified_accounts
-            .into_iter()
-            .map(|a| a
-                .securified_entity_control()
-                .primary_role_instances()
-                .into_iter()
+        security_structures_of_fis
+            .values()
+            .map(|ss| ss
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .map(|x| format!("{:?}", x))
                 .collect_vec())
             .collect_vec(),
-        [
+        vec![
             ["0^", "0^", "0^"],
             ["1^", "1^", "1^"],
             ["2^", "2^", "2^"],
@@ -1166,40 +1192,40 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         ]
     );
 
-    let (second_half_securified_accounts, stats) = os
-        .securify_accounts(
-            second_half_of_accounts
-                .clone()
-                .into_iter()
-                .map(|a| a.entity_address())
-                .collect(),
-            shield_0,
-        )
-        .await
-        .unwrap();
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        second_half_of_accounts.clone().into_iter().map(|a| a.address()).collect(),
+        shield_0.clone(),
+    )
+    .await
+    .unwrap();
+
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
 
     assert!(
-        stats.derived_any_new_instance_for_any_factor_source(),
+        derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have derived more"
     );
 
     assert!(
-        stats.found_any_instances_in_cache_for_any_factor_source(),
+        derivation_outcome.found_any_instances_in_cache_for_any_factor_source(),
         "should have found some in cache"
     );
 
     assert_eq!(
-        second_half_securified_accounts
-            .into_iter()
-            .map(|a| a
-                .securified_entity_control()
-                .primary_role_instances()
-                .into_iter()
+        security_structures_of_fis
+            .values()
+            .map(|ss| ss
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .map(|x| format!("{:?}", x))
                 .collect_vec())
             .collect_vec(),
-        [
+        vec![
             ["15^", "15^", "15^"],
             ["16^", "16^", "16^"],
             ["17^", "17^", "17^"],
@@ -1234,6 +1260,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
     );
 }
 
+/*
 #[actix_rt::test]
 async fn securify_personas_when_cache_is_half_full_single_factor_source() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
@@ -1276,7 +1303,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         3 * n
     );
 
-    let (first_half_securified_personas, stats) = os
+    let (first_half_securified_personas, derivation_outcome) = os
         .securify_personas(
             first_half_of_personas
                 .clone()
@@ -1289,7 +1316,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         .unwrap();
 
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
@@ -1311,7 +1338,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         ]
     );
 
-    let (second_half_securified_personas, stats) = os
+    let (second_half_securified_personas, derivation_outcome) = os
         .securify_personas(
             second_half_of_personas
                 .clone()
@@ -1324,7 +1351,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         .unwrap();
 
     assert!(
-        stats.derived_any_new_instance_for_any_factor_source(),
+        derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have derived more"
     );
 
@@ -1351,9 +1378,9 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 #[actix_rt::test]
 async fn create_single_account() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
-    let (alice, stats) = os.create_and_save_new_mainnet_account_with_derivation_outcome("alice").await.unwrap();
-    assert!(stats.debug_was_derived.is_empty(), "should have used cache");
-    let (sec_accounts, stats) = os
+    let (alice, derivation_outcome) = os.create_and_save_new_mainnet_account_with_derivation_outcome("alice").await.unwrap();
+    assert!(derivation_outcome.debug_was_derived.is_empty(), "should have used cache");
+    let (sec_accounts, derivation_outcome) = os
         .securify_accounts(
             IndexSet::just(alice.entity_address()),
             MatrixOfFactorSources::new([], 0, [bdfs]),
@@ -1361,7 +1388,7 @@ async fn create_single_account() {
         .await
         .unwrap();
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
     let alice_sec = sec_accounts.into_iter().next().unwrap();
@@ -1400,7 +1427,7 @@ async fn securified_personas() {
     let shield_0 =
         MatrixOfFactorSources::new([bdfs.clone(), ledger.clone(), arculus.clone()], 2, []);
 
-    let (securified_personas, stats) = os
+    let (securified_personas, derivation_outcome) = os
         .securify_personas(
             IndexSet::from_iter([batman.entity_address(), satoshi.entity_address()]),
             shield_0,
@@ -1409,7 +1436,7 @@ async fn securified_personas() {
         .unwrap();
 
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
@@ -1515,7 +1542,7 @@ async fn securified_personas() {
             "First persona created with ledger, should have index 0, even though this ledger was used in the shield, since we are using two different KeySpaces for Securified and Unsecurified personas."
         );
 
-    let (securified_personas, stats) = os
+    let (securified_personas, derivation_outcome) = os
         .securify_personas(
             IndexSet::just(hyde.entity_address()),
             MatrixOfFactorSources::new([], 0, [yubikey.clone()]),
@@ -1523,7 +1550,7 @@ async fn securified_personas() {
         .await
         .unwrap();
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
     let hyde_sec = securified_personas
@@ -1554,7 +1581,7 @@ async fn securified_personas() {
 
     // Update Batmans and Satoshis's shield to only use YubiKey
 
-    let (securified_personas, stats) = os
+    let (securified_personas, derivation_outcome) = os
         .securify_personas(
             IndexSet::from_iter([batman.entity_address(), satoshi.entity_address()]),
             MatrixOfFactorSources::new([], 0, [yubikey.clone()]),
@@ -1562,7 +1589,7 @@ async fn securified_personas() {
         .await
         .unwrap();
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
     let batman_sec = securified_personas
@@ -1609,11 +1636,11 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     // first create CACHE_FILLING_QUANTITY many "unnamed" accounts
 
     for i in 0..CACHE_FILLING_QUANTITY {
-        let (_, stats) = os
+        let (_, derivation_outcome) = os
             .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("@{}", i))
             .await
             .unwrap();
-        assert!(stats.debug_was_derived.is_empty());
+        assert!(derivation_outcome.debug_was_derived.is_empty());
     }
 
     let unnamed_accounts = os
@@ -1622,7 +1649,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         .into_iter()
         .collect_vec();
 
-    let (_, stats) = os
+    let (_, derivation_outcome) = os
         .securify_accounts(
             unnamed_accounts
                 .clone()
@@ -1635,7 +1662,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         .unwrap();
 
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
@@ -1659,16 +1686,16 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         HDPathComponent::unsecurified_hardening_base_index(30)
     );
 
-    let (alice, stats) = os
+    let (alice, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Alice")
         .await
         .unwrap();
     assert!(
-        stats.debug_found_in_cache.is_empty(),
+        derivation_outcome.debug_found_in_cache.is_empty(),
         "Cache should have been empty"
     );
     assert!(
-        !stats.debug_was_derived.is_empty(),
+        !derivation_outcome.debug_was_derived.is_empty(),
         "should have filled cache"
     );
 
@@ -1683,15 +1710,15 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     );
 
     // later when securified we want the next index in securified key space to be 30^
-    let (securified_alice, stats) = os
+    let (securified_alice, derivation_outcome) = os
         .securify_account(
             alice.entity_address(),
             MatrixOfFactorSources::new([], 0, [fs_device.clone()]),
         )
         .await
         .unwrap();
-    assert!(stats.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!stats.derived_any_new_instance_for_any_factor_source());
+    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
+    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
 
     assert_eq!(
         securified_alice
@@ -1735,11 +1762,11 @@ async fn securified_accounts_asymmetric_indices() {
     // first create CACHE_FILLING_QUANTITY many "unnamed" accounts
 
     for i in 0..CACHE_FILLING_QUANTITY {
-        let (_, stats) = os
+        let (_, derivation_outcome) = os
             .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("@{}", i))
             .await
             .unwrap();
-        assert!(stats.debug_was_derived.is_empty());
+        assert!(derivation_outcome.debug_was_derived.is_empty());
     }
 
     let unnamed_accounts = os
@@ -1748,7 +1775,7 @@ async fn securified_accounts_asymmetric_indices() {
         .into_iter()
         .collect_vec();
 
-    let (_, stats) = os
+    let (_, derivation_outcome) = os
         .securify_accounts(
             unnamed_accounts
                 .clone()
@@ -1761,20 +1788,20 @@ async fn securified_accounts_asymmetric_indices() {
         .unwrap();
 
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
-    let (alice, stats) = os
+    let (alice, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Alice")
         .await
         .unwrap();
     assert!(
-        stats.debug_found_in_cache.is_empty(),
+        derivation_outcome.debug_found_in_cache.is_empty(),
         "Cache should have been empty"
     );
     assert!(
-        !stats.debug_was_derived.is_empty(),
+        !derivation_outcome.debug_was_derived.is_empty(),
         "should have filled cache"
     );
 
@@ -1803,15 +1830,15 @@ async fn securified_accounts_asymmetric_indices() {
         HDPathComponent::unsecurified_hardening_base_index(33)
     );
 
-    let (securified_alice, stats) = os
+    let (securified_alice, derivation_outcome) = os
         .securify_account(
             alice.entity_address(),
             MatrixOfFactorSources::new([], 0, [fs_device.clone(), fs_arculus.clone()]),
         )
         .await
         .unwrap();
-    assert!(stats.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!stats.derived_any_new_instance_for_any_factor_source());
+    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
+    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
 
     assert_eq!(
         securified_alice
@@ -1834,15 +1861,15 @@ async fn securified_accounts_asymmetric_indices() {
         .collect::<IndexMap<_, _>>()
     );
 
-    let (securified_bob, stats) = os
+    let (securified_bob, derivation_outcome) = os
         .securify_account(
             bob.entity_address(),
             MatrixOfFactorSources::new([], 0, [fs_device.clone(), fs_ledger.clone()]),
         )
         .await
         .unwrap();
-    assert!(stats.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!stats.derived_any_new_instance_for_any_factor_source());
+    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
+    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
 
     assert_eq!(
         securified_bob
@@ -1865,15 +1892,15 @@ async fn securified_accounts_asymmetric_indices() {
         .collect::<IndexMap<_, _>>()
     );
 
-    let (securified_carol, stats) = os
+    let (securified_carol, derivation_outcome) = os
         .securify_account(
             carol.entity_address(),
             MatrixOfFactorSources::new([], 0, [fs_device.clone(), fs_arculus.clone()]),
         )
         .await
         .unwrap();
-    assert!(stats.found_any_instances_in_cache_for_any_factor_source());
-    assert!(!stats.derived_any_new_instance_for_any_factor_source());
+    assert!(derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
+    assert!(!derivation_outcome.derived_any_new_instance_for_any_factor_source());
 
     assert_eq!(
         securified_carol
@@ -1904,12 +1931,12 @@ async fn securified_accounts_asymmetric_indices() {
         0,
         [fs_device.clone(), fs_arculus.clone(), fs_ledger.clone()],
     );
-    let (securified_diana, stats) = os
+    let (securified_diana, derivation_outcome) = os
         .securify_account(diana.entity_address(), shield_3fa.clone())
         .await
         .unwrap();
-    assert!(!stats.found_any_instances_in_cache_for_any_factor_source());
-    assert!(stats.derived_any_new_instance_for_any_factor_source());
+    assert!(!derivation_outcome.found_any_instances_in_cache_for_any_factor_source());
+    assert!(derivation_outcome.derived_any_new_instance_for_any_factor_source());
 
     let diana_mfa_device = 33;
     let diana_mfa_arculus = 2;
@@ -1953,12 +1980,12 @@ async fn securified_accounts_asymmetric_indices() {
         more_unnamed_accounts.insert(unnamed.entity_address());
     }
 
-    let (many_securified_accounts, stats) = os
+    let (many_securified_accounts, derivation_outcome) = os
         .securify_accounts(more_unnamed_accounts.clone(), shield_3fa.clone())
         .await
         .unwrap();
     assert!(
-        stats.derived_any_new_instance_for_any_factor_source(),
+        derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "twice the cache size => derive more"
     );
     os.clear_cache(); // CLEAR CACHE
