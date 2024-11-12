@@ -1260,12 +1260,10 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
     );
 }
 
-/*
 #[actix_rt::test]
 async fn securify_personas_when_cache_is_half_full_single_factor_source() {
-    let (mut os, bdfs) = SargonOS::with_bdfs().await;
-
-    let factor_sources = os.profile_snapshot().factor_sources.clone();
+    let (os, bdfs) = SargonOS::with_bdfs().await;
+    let factor_sources = os.profile().unwrap().factor_sources.clone();
     assert_eq!(
         factor_sources.clone().into_iter().collect_vec(),
         vec![bdfs.clone(),]
@@ -1273,18 +1271,34 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    for i in 0..3 * n {
-        let _ = os
-            .create_and_save_new_mainnet_persona_with_derivation_outcome(format!("Persona: {}", i))
-            .await
-            .unwrap();
-    }
+    let derivation_outcome = os.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Persona".to_owned()).await.unwrap();
 
-    let shield_0 = MatrixOfFactorSources::new([bdfs.clone()], 1, []);
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
+            .unwrap(),
+        RecoveryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone()],
+            1,
+        )
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone()],
+            1,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
 
     let all_personas = os
-        .profile_snapshot()
-        .get_personas()
+        .profile()
+        .unwrap()
+        .personas_on_all_networks_including_hidden()
         .into_iter()
         .collect_vec();
 
@@ -1303,17 +1317,28 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         3 * n
     );
 
-    let (first_half_securified_personas, derivation_outcome) = os
-        .securify_personas(
-            first_half_of_personas
-                .clone()
-                .into_iter()
-                .map(|a| a.entity_address())
-                .collect(),
-            shield_0.clone(),
-        )
-        .await
-        .unwrap();
+    // let (first_half_securified_personas, derivation_outcome) = os
+    //     .securify_personas(
+    //         first_half_of_personas
+    //             .clone()
+    //             .into_iter()
+    //             .map(|a| a.entity_address())
+    //             .collect(),
+    //         shield_0.clone(),
+    //     )
+    //     .await
+    //     .unwrap();
+
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        first_half_of_personas.clone().into_iter().map(|a| a.address()).collect(),
+        shield_0.clone(),
+    )
+    .await
+    .unwrap();
+
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
 
     assert!(
         !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
@@ -1321,11 +1346,12 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
     );
 
     assert_eq!(
-        first_half_securified_personas
-            .into_iter()
-            .map(|a| a
-                .securified_entity_control()
-                .primary_role_instances()
+        security_structures_of_fis
+            .values()
+            .map(|ss| ss
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
                 .map(|x| format!("{:?}", x))
@@ -1333,22 +1359,21 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
                 .unwrap()) // single factor per role text
             .collect_vec(),
         [
-            "0^", "1^", "2^", "3^", "4^", "5^", "6^", "7^", "8^", "9^", "10^", "11^", "12^", "13^",
-            "14^"
+            "0^", "1^", "2^", "3^", "4^", "5^", "6^", "7^", "8^", "9^", "10^",
+            "11^", "12^", "13^", "14^"
         ]
     );
 
-    let (second_half_securified_personas, derivation_outcome) = os
-        .securify_personas(
-            second_half_of_personas
-                .clone()
-                .into_iter()
-                .map(|a| a.entity_address())
-                .collect(),
-            shield_0,
-        )
-        .await
-        .unwrap();
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        second_half_of_personas.clone().into_iter().map(|a| a.address()).collect(),
+        shield_0.clone(),
+    )
+    .await
+    .unwrap();
+
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
 
     assert!(
         derivation_outcome.derived_any_new_instance_for_any_factor_source(),
@@ -1356,11 +1381,12 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
     );
 
     assert_eq!(
-        second_half_securified_personas
-            .into_iter()
-            .map(|a| a
-                .securified_entity_control()
-                .primary_role_instances()
+        security_structures_of_fis
+            .values()
+            .map(|ss| ss
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
                 .map(|x| format!("{:?}", x))
@@ -1368,13 +1394,15 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
                 .unwrap()) // single factor per role text
             .collect_vec(),
         [
-            "15^", "16^", "17^", "18^", "19^", "20^", "21^", "22^", "23^", "24^", "25^", "26^",
-            "27^", "28^", "29^", "30^", "31^", "32^", "33^", "34^", "35^", "36^", "37^", "38^",
-            "39^", "40^", "41^", "42^", "43^", "44^"
+            "15^", "16^", "17^", "18^", "19^", "20^", "21^", "22^", "23^",
+            "24^", "25^", "26^", "27^", "28^", "29^", "30^", "31^", "32^",
+            "33^", "34^", "35^", "36^", "37^", "38^", "39^", "40^", "41^",
+            "42^", "43^", "44^"
         ]
     );
 }
 
+/*
 #[actix_rt::test]
 async fn create_single_account() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
