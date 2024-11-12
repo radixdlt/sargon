@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[allow(dead_code)]
-pub static ALL_FACTOR_SOURCE_SAMPLES: Lazy<[FactorSource; 11]> =
+pub static ALL_FACTOR_SOURCE_SAMPLES: Lazy<[FactorSource; 12]> =
     Lazy::new(|| {
         crate::types::samples::ALL_FACTOR_SOURCE_ID_SAMPLES
             .iter()

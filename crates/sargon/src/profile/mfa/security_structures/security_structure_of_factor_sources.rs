@@ -185,9 +185,8 @@ impl HasSampleValues for RecoveryRoleWithFactorSources {
     fn sample() -> Self {
         Self::new(
             [
-                FactorSource::sample_trusted_contact_frank(),
-                FactorSource::sample_trusted_contact_grace(),
-                FactorSource::sample_trusted_contact_judy(),
+                FactorSource::sample_arculus(),
+                FactorSource::sample_arculus_other(),
             ],
             2,
             [FactorSource::sample_ledger()],
@@ -196,12 +195,8 @@ impl HasSampleValues for RecoveryRoleWithFactorSources {
     }
     fn sample_other() -> Self {
         Self::new(
-            [
-                FactorSource::sample_trusted_contact_trudy(),
-                FactorSource::sample_trusted_contact_oscar(),
-                FactorSource::sample_trusted_contact_radix(),
-            ],
-            2,
+            [FactorSource::sample_arculus_other()],
+            1,
             [FactorSource::sample_ledger_other()],
         )
         .unwrap()

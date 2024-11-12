@@ -1,6 +1,4 @@
-#[cfg(test)]
 mod stateless_dummy_indices;
-#[cfg(test)]
 mod test_keys_collector;
 
 #[cfg(test)]

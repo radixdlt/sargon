@@ -148,7 +148,7 @@ fn fulfilling_role_of_factor_sources_with_factor_instances<
 
 fn try_filling_factor_list_of_role_of_factor_sources_with_factor_instances(
     instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
-    from: &Vec<FactorSource>,
+    from: &[FactorSource],
 ) -> Result<Vec<FactorInstance>> {
     from.iter()
         .map(|f| {

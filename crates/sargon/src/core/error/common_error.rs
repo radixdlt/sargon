@@ -631,9 +631,9 @@ pub enum CommonError {
     InvalidSecurityStructureID { bad_value: String } = 10177,
 
     #[error(
-        "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
+        "Invalid SecurityStructure, it references Factors not in profile, FactorSourceID {bad_value}."
     )]
-    StructureReferencesUnknownFactorSource = 10178,
+    StructureReferencesUnknownFactorSource { bad_value: String } = 10178,
 
     #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
     InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10179,

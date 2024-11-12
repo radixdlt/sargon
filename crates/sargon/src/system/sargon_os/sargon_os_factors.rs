@@ -121,8 +121,25 @@ impl SargonOS {
         Ok(ids)
     }
 
-    pub async fn debug_add_all_sample_factors(
+    pub async fn debug_add_all_sample_factor_sources(
         &self,
+    ) -> Result<Vec<FactorSourceID>> {
+        self.debug_add_all_sample_factors_with_filter(|_| true)
+            .await
+    }
+
+    pub async fn debug_add_all_sample_hd_factor_sources(
+        &self,
+    ) -> Result<Vec<FactorSourceID>> {
+        self.debug_add_all_sample_factors_with_filter(|f| {
+            f.factor_source_id().is_hash()
+        })
+        .await
+    }
+
+    pub async fn debug_add_all_sample_factors_with_filter(
+        &self,
+        filter: impl Fn(&FactorSource) -> bool,
     ) -> Result<Vec<FactorSourceID>> {
         let mwp = MnemonicWithPassphrase::sample_device();
         let id = FactorSourceIDFromHash::new_for_device(&mwp);
@@ -145,8 +162,13 @@ impl SargonOS {
             .save_mnemonic_with_passphrase(&mwp, &id)
             .await?;
 
-        self.add_factor_sources(FactorSources::sample_values_all())
-            .await
+        self.add_factor_sources(
+            FactorSources::sample_values_all()
+                .into_iter()
+                .filter(filter)
+                .collect(),
+        )
+        .await
     }
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
@@ -274,7 +296,7 @@ impl SargonOS {
         // Use FactorInstancesProvider to eagerly fill cache...
 
         for factor_source in new_factors_only.iter() {
-            if factor_source.factor_source_kind() != FactorSourceKind::Device {
+            if !factor_source.factor_source_id().is_hash() {
                 continue;
             }
             let _ = self
@@ -746,7 +768,7 @@ mod tests {
         // ACT
         let ids = os
             .with_timeout(|x| {
-                x.add_factor_sources(FactorSources::sample_values_all())
+                x.add_factor_sources(FactorSources::sample_values_all_hd())
             })
             .await
             .unwrap();
@@ -754,7 +776,7 @@ mod tests {
         // ASSERT
         assert_eq!(
             ids.clone(),
-            FactorSources::sample_values_all()
+            FactorSources::sample_values_all_hd()
                 .into_iter()
                 .map(|x| x.id())
                 .collect_vec(),
@@ -774,7 +796,7 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        os.with_timeout(|x| x.debug_add_all_sample_factors())
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
             .unwrap();
 

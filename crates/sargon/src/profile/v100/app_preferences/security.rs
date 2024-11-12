@@ -150,10 +150,11 @@ mod tests {
 
         sut.security_structures_of_factor_source_ids =
             SecurityStructuresOfFactorSourceIDs::sample();
+
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
-            {
+                        {
                 "isCloudProfileSyncEnabled": true,
                 "isDeveloperModeEnabled": false,
                 "isAdvancedLockEnabled": false,
@@ -205,24 +206,17 @@ mod tests {
                             "recoveryRole": {
                                 "thresholdFactors": [
                                     {
-                                        "discriminator": "fromAddress",
-                                        "fromAddress": {
-                                            "kind": "trustedContact",
-                                            "body": "account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank"
+                                        "discriminator": "fromHash",
+                                        "fromHash": {
+                                            "kind": "arculusCard",
+                                            "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
                                         }
                                     },
                                     {
-                                        "discriminator": "fromAddress",
-                                        "fromAddress": {
-                                            "kind": "trustedContact",
-                                            "body": "account_rdx128c4f8dnuvd73d2r3fl95ryfuavw5zjf8zr57hjw0qjagz7s7grace"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromAddress",
-                                        "fromAddress": {
-                                            "kind": "trustedContact",
-                                            "body": "account_rdx12y0389ew2xn7w02d059hhye6t0mjzqxqyavsetyg2j3p3xqyepjudy"
+                                        "discriminator": "fromHash",
+                                        "fromHash": {
+                                            "kind": "arculusCard",
+                                            "body": "3ac064d4b40f78effe7037a12f3287efc67aa87af7c6a083738eae05e28dadaf"
                                         }
                                     }
                                 ],
@@ -306,28 +300,14 @@ mod tests {
                             "recoveryRole": {
                                 "thresholdFactors": [
                                     {
-                                        "discriminator": "fromAddress",
-                                        "fromAddress": {
-                                            "kind": "trustedContact",
-                                            "body": "account_rdx1284z0gpg9vnhevn7sytdncszc7ukcrycntg7zjktqvggmwe6ctrudy"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromAddress",
-                                        "fromAddress": {
-                                            "kind": "trustedContact",
-                                            "body": "account_rdx129uc6rf5vmkj2gau7fgxlsqdg8008nca8yd57sxx4v67dyw7u0scar"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromAddress",
-                                        "fromAddress": {
-                                            "kind": "trustedContact",
-                                            "body": "account_rdx12y7uww27s250g9d3d72ey9wdp5z78zpmq5la0r0wgw4fkf6y8eerdx"
+                                        "discriminator": "fromHash",
+                                        "fromHash": {
+                                            "kind": "arculusCard",
+                                            "body": "3ac064d4b40f78effe7037a12f3287efc67aa87af7c6a083738eae05e28dadaf"
                                         }
                                     }
                                 ],
-                                "threshold": 2,
+                                "threshold": 1,
                                 "overrideFactors": [
                                     {
                                         "discriminator": "fromHash",

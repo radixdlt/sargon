@@ -69,12 +69,14 @@ impl SargonOS {
 
         let factors_only_in_structure =
             ids_in_structure.difference(&ids_of_factors_in_profile);
-        // If `structure` references factors by ID which are not present in Profile
-        let has_unknown_factors =
-            !factors_only_in_structure.collect_vec().is_empty();
 
-        if has_unknown_factors {
-            return Err(CommonError::StructureReferencesUnknownFactorSource);
+        // If `structure` references factors by ID which are not present in Profile
+        let ids_of_missing_factors = factors_only_in_structure.collect_vec();
+
+        if let Some(unknown_factor_source_id) = ids_of_missing_factors.first() {
+            return Err(CommonError::StructureReferencesUnknownFactorSource {
+                bad_value: unknown_factor_source_id.to_string(),
+            });
         }
 
         let inserted = self
@@ -112,8 +114,17 @@ mod tests {
     async fn add_structure() {
         // ARRANGE
         let os = SUT::fast_boot().await;
+        assert_eq!(
+            FactorSource::sample_security_questions().id_from_hash(),
+            FactorSourceIDFromHash::sample_security_questions()
+        );
 
-        os.with_timeout(|x| x.debug_add_all_sample_factors())
+        assert_eq!(
+            FactorSource::sample_security_questions_other().id_from_hash(),
+            FactorSourceIDFromHash::sample_security_questions_other()
+        );
+
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
             .unwrap();
 
@@ -165,10 +176,12 @@ mod tests {
             .await;
 
         // ASSERT
-        assert_eq!(
+        assert!(matches!(
             res,
-            Err(CommonError::StructureReferencesUnknownFactorSource)
-        );
+            Err(CommonError::StructureReferencesUnknownFactorSource {
+                bad_value: _
+            })
+        ));
     }
 
     #[actix_rt::test]
@@ -211,7 +224,7 @@ mod tests {
             .unwrap();
         os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
-        os.with_timeout(|x| x.debug_add_all_sample_factors())
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
             .unwrap();
 
@@ -238,7 +251,7 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
-        for fs in FactorSources::sample_values_all().into_iter() {
+        for fs in FactorSources::sample_values_all_hd().into_iter() {
             os.add_factor_source(fs).await.unwrap();
         }
 

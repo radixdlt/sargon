@@ -85,7 +85,7 @@ impl SargonOS {
         &self,
     ) -> Result<Vec<FactorSourceID>> {
         self.wrapped
-            .debug_add_all_sample_factors()
+            .debug_add_all_sample_factor_sources()
             .await
             .into_result()
     }

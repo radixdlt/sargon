@@ -754,7 +754,7 @@ impl SargonOS {
                 matrix_of_factor_sources.clone(),
                )?;
                 SecurityStructureOfFactorInstances::new(
-                    security_structure_id.clone(),
+                    security_structure_id,
                     matrix_of_factor_instances
                 )
             };

@@ -15,6 +15,16 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
     }
 
+    async fn create_and_save_new_account_with_factor_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: impl AsRef<str>,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        let display_name = DisplayName::new(name)?;
+        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(factor_source, network_id, display_name).await
+    }
+
     async fn create_and_save_new_mainnet_persona_with_derivation_outcome(
         &self,
         name: impl AsRef<str>,
@@ -26,8 +36,8 @@ impl SargonOS {
     /// TEST FUNCTION ONLY, DOES NOT USE GATEWAY
     async fn securify_accounts(
         &self,
-        account_addresses: IndexSet<AccountAddress>,
-        matrix_of_factor_sources: MatrixOfFactorSources,
+        _account_addresses: IndexSet<AccountAddress>,
+        _matrix_of_factor_sources: MatrixOfFactorSources,
     ) -> Result<()> {
         // self.change_security_state_of_entities_to_unsubmitted_securified_without_consuming_instances_with_derivation_outcome(account_addresses, shield)
         todo!("hmm should return SecurityStructureOfFactorInstances perhaps? need implementation of generic Role so we can create roles for a MatrixOfFactorSources from a list of FactorInstances provided by the FactorInstancesProvider")
@@ -449,42 +459,63 @@ async fn add_account_and_personas_mixed() {
     assert_eq!(profile.accounts_on_all_networks_including_hidden().len(), 2);
 }
 
-/*
 #[actix_rt::test]
 async fn adding_accounts_different_networks_different_factor_sources() {
-    let mut os = SargonOS::new();
-    assert_eq!(os.cache_snapshot().total_number_of_factor_instances(), 0);
+    let os = SargonOS::fast_boot().await;
+    let cache = os.cache_snapshot().await;
+    assert_eq!(
+        cache.total_number_of_factor_instances(),
+        DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+    );
 
-    let fs_device = FactorSource::device();
-    let fs_arculus = FactorSource::arculus();
-    let fs_ledger = FactorSource::ledger();
+    let fs_device = FactorSource::from(os.bdfs().unwrap());
+    let fs_arculus = FactorSource::sample_arculus();
+    let fs_ledger = FactorSource::sample_ledger();
 
     os.add_factor_source(fs_device.clone()).await.unwrap();
     os.add_factor_source(fs_arculus.clone()).await.unwrap();
     os.add_factor_source(fs_ledger.clone()).await.unwrap();
 
+    let profile = os.profile().unwrap();
+    let cache = os.cache_snapshot().await;
     assert_eq!(
-        os.cache_snapshot().total_number_of_factor_instances(),
-        3 * 4 * CACHE_FILLING_QUANTITY
+        cache.total_number_of_factor_instances(),
+        profile.factor_sources.len()
+            * DerivationPreset::all().len()
+            * CACHE_FILLING_QUANTITY
     );
 
-    assert!(os.profile_snapshot().get_accounts().is_empty());
-    assert_eq!(os.profile_snapshot().factor_sources.len(), 3);
+    assert!(profile
+        .accounts_on_all_networks_including_hidden()
+        .is_empty());
+    assert_eq!(profile.factor_sources.len(), 3);
 
     let (alice, stats) = os
-        .new_account(fs_device.clone(), NetworkID::Mainnet, "Alice")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            NetworkID::Mainnet,
+            "Alice",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (bob, stats) = os
-        .new_account(fs_device.clone(), NetworkID::Mainnet, "Bob")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            NetworkID::Mainnet,
+            "Bob",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (carol, stats) = os
-        .new_account(fs_device.clone(), NetworkID::Stokenet, "Carol")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            NetworkID::Stokenet,
+            "Carol",
+        )
         .await
         .unwrap();
     assert!(
@@ -493,25 +524,41 @@ async fn adding_accounts_different_networks_different_factor_sources() {
     );
 
     let (diana, stats) = os
-        .new_account(fs_device.clone(), NetworkID::Stokenet, "Diana")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_device.clone(),
+            NetworkID::Stokenet,
+            "Diana",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (erin, stats) = os
-        .new_account(fs_arculus.clone(), NetworkID::Mainnet, "Erin")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_arculus.clone(),
+            NetworkID::Mainnet,
+            "Erin",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (frank, stats) = os
-        .new_account(fs_arculus.clone(), NetworkID::Mainnet, "Frank")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_arculus.clone(),
+            NetworkID::Mainnet,
+            "Frank",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (grace, stats) = os
-        .new_account(fs_arculus.clone(), NetworkID::Stokenet, "Grace")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_arculus.clone(),
+            NetworkID::Stokenet,
+            "Grace",
+        )
         .await
         .unwrap();
     assert!(
@@ -520,25 +567,41 @@ async fn adding_accounts_different_networks_different_factor_sources() {
     );
 
     let (helena, stats) = os
-        .new_account(fs_arculus.clone(), NetworkID::Stokenet, "Helena")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_arculus.clone(),
+            NetworkID::Stokenet,
+            "Helena",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (isabel, stats) = os
-        .new_account(fs_ledger.clone(), NetworkID::Mainnet, "isabel")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_ledger.clone(),
+            NetworkID::Mainnet,
+            "isabel",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (jenny, stats) = os
-        .new_account(fs_ledger.clone(), NetworkID::Mainnet, "Jenny")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_ledger.clone(),
+            NetworkID::Mainnet,
+            "Jenny",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
     let (klara, stats) = os
-        .new_account(fs_ledger.clone(), NetworkID::Stokenet, "Klara")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_ledger.clone(),
+            NetworkID::Stokenet,
+            "Klara",
+        )
         .await
         .unwrap();
     assert!(
@@ -547,21 +610,31 @@ async fn adding_accounts_different_networks_different_factor_sources() {
     );
 
     let (lisa, stats) = os
-        .new_account(fs_ledger.clone(), NetworkID::Stokenet, "Lisa")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            fs_ledger.clone(),
+            NetworkID::Stokenet,
+            "Lisa",
+        )
         .await
         .unwrap();
     assert!(stats.debug_was_derived.is_empty());
 
-    assert_eq!(os.profile_snapshot().get_accounts().len(), 12);
+    let profile = os.profile().unwrap();
+    assert_eq!(
+        profile.accounts_on_all_networks_including_hidden().len(),
+        12
+    );
 
     let accounts = vec![
-        alice, bob, carol, diana, erin, frank, grace, helena, isabel, jenny, klara, lisa,
+        alice, bob, carol, diana, erin, frank, grace, helena, isabel, jenny,
+        klara, lisa,
     ];
 
-    let factor_source_count = os.profile_snapshot().factor_sources.len();
-    let network_count = os.profile_snapshot().networks.len();
+    let factor_source_count = profile.factor_sources.len();
+    let network_count = profile.networks.len();
+    let cache = os.cache_snapshot().await;
     assert_eq!(
-        os.cache_snapshot().total_number_of_factor_instances(),
+        cache.total_number_of_factor_instances(),
         network_count
             * factor_source_count
             * DerivationPreset::all().len()
@@ -571,18 +644,18 @@ async fn adding_accounts_different_networks_different_factor_sources() {
     );
 
     assert_eq!(
-        os.profile_snapshot()
-            .get_accounts()
+        profile
+            .accounts_on_all_networks_including_hidden()
             .into_iter()
-            .map(|a| a.entity_address())
+            .map(|a| a.address())
             .collect::<HashSet<AccountAddress>>(),
         accounts
             .into_iter()
-            .map(|a| a.entity_address())
+            .map(|a| a.address())
             .collect::<HashSet<AccountAddress>>()
     );
 }
-
+/*
 #[actix_rt::test]
 async fn test_securified_accounts() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
@@ -598,8 +671,8 @@ async fn test_securified_accounts() {
         .unwrap()
         .0;
     assert_ne!(alice.address(), bob.address());
-    let ledger = FactorSource::ledger();
-    let arculus = FactorSource::arculus();
+    let ledger = FactorSource::sample_ledger();
+    let arculus = FactorSource::sample_arculus();
     let yubikey = FactorSource::yubikey();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
@@ -701,7 +774,7 @@ async fn test_securified_accounts() {
     );
 
     let carol = os
-        .new_account(ledger.clone(), NetworkID::Mainnet, "Carol")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(ledger.clone(), NetworkID::Mainnet, "Carol")
         .await
         .unwrap()
         .0;
@@ -901,8 +974,8 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
 async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
 
-    let ledger = FactorSource::ledger();
-    let arculus = FactorSource::arculus();
+    let ledger = FactorSource::sample_ledger();
+    let arculus = FactorSource::sample_arculus();
     let yubikey = FactorSource::yubikey();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
@@ -1223,8 +1296,8 @@ async fn securified_personas() {
         .unwrap()
         .0;
     assert_ne!(batman.address(), satoshi.address());
-    let ledger = FactorSource::ledger();
-    let arculus = FactorSource::arculus();
+    let ledger = FactorSource::sample_ledger();
+    let arculus = FactorSource::sample_arculus();
     let yubikey = FactorSource::yubikey();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
@@ -1417,12 +1490,12 @@ async fn securified_personas() {
 
 #[actix_rt::test]
 async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
-    let mut os = SargonOS::new();
+    let os = SargonOS::fast_boot().await;
     assert_eq!(os.cache_snapshot().total_number_of_factor_instances(), 0);
 
-    let fs_device = FactorSource::device();
-    let fs_arculus = FactorSource::arculus();
-    let fs_ledger = FactorSource::ledger();
+    let fs_device = FactorSource::sample_device();
+    let fs_arculus = FactorSource::sample_arculus();
+    let fs_ledger = FactorSource::sample_ledger();
 
     os.add_factor_source(fs_device.clone()).await.unwrap();
     os.add_factor_source(fs_arculus.clone()).await.unwrap();
@@ -1442,7 +1515,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
     for i in 0..CACHE_FILLING_QUANTITY {
         let (_, stats) = os
-            .new_account(fs_device.clone(), network, format!("@{}", i))
+            .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("@{}", i))
             .await
             .unwrap();
         assert!(stats.debug_was_derived.is_empty());
@@ -1492,7 +1565,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     );
 
     let (alice, stats) = os
-        .new_account(fs_device.clone(), network, "Alice")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Alice")
         .await
         .unwrap();
     assert!(
@@ -1543,12 +1616,12 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
 #[actix_rt::test]
 async fn securified_accounts_asymmetric_indices() {
-    let mut os = SargonOS::new();
+    let os = SargonOS::fast_boot().await;
     assert_eq!(os.cache_snapshot().total_number_of_factor_instances(), 0);
 
-    let fs_device = FactorSource::device();
-    let fs_arculus = FactorSource::arculus();
-    let fs_ledger = FactorSource::ledger();
+    let fs_device = FactorSource::sample_device();
+    let fs_arculus = FactorSource::sample_arculus();
+    let fs_ledger = FactorSource::sample_ledger();
 
     os.add_factor_source(fs_device.clone()).await.unwrap();
     os.add_factor_source(fs_arculus.clone()).await.unwrap();
@@ -1568,7 +1641,7 @@ async fn securified_accounts_asymmetric_indices() {
 
     for i in 0..CACHE_FILLING_QUANTITY {
         let (_, stats) = os
-            .new_account(fs_device.clone(), network, format!("@{}", i))
+            .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("@{}", i))
             .await
             .unwrap();
         assert!(stats.debug_was_derived.is_empty());
@@ -1598,7 +1671,7 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     let (alice, stats) = os
-        .new_account(fs_device.clone(), network, "Alice")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Alice")
         .await
         .unwrap();
     assert!(
@@ -1611,17 +1684,17 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     let (bob, _) = os
-        .new_account(fs_device.clone(), network, "Bob")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Bob")
         .await
         .unwrap();
 
     let (carol, _) = os
-        .new_account(fs_device.clone(), network, "Carol")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Carol")
         .await
         .unwrap();
 
     let (diana, _) = os
-        .new_account(fs_device.clone(), network, "Diana")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, "Diana")
         .await
         .unwrap();
 
@@ -1779,7 +1852,7 @@ async fn securified_accounts_asymmetric_indices() {
     let mut more_unnamed_accounts = IndexSet::new();
     for i in 0..2 * CACHE_FILLING_QUANTITY {
         let (unnamed, _) = os
-            .new_account(fs_device.clone(), network, format!("more@{}", i))
+            .create_and_save_new_account_with_factor_with_derivation_outcome(fs_device.clone(), network, format!("more@{}", i))
             .await
             .unwrap();
         more_unnamed_accounts.insert(unnamed.entity_address());

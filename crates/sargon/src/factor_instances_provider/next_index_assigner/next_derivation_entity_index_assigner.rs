@@ -33,7 +33,7 @@ pub struct NextDerivationEntityIndexAssigner {
 }
 
 impl NextDerivationEntityIndexAssigner {
-    pub fn new<'a>(
+    pub fn new(
         network_id: NetworkID,
         profile: impl Into<Option<Arc<Profile>>>,
         cache: FactorInstancesCache,

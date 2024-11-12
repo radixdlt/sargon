@@ -270,8 +270,18 @@ impl HasSampleValues for FactorSource {
     }
 }
 impl FactorSources {
+    pub fn sample_values_all_with_filter(
+        filter: impl Fn(&FactorSource) -> bool,
+    ) -> Self {
+        Self::from_iter(
+            FactorSource::sample_values_all().into_iter().filter(filter),
+        )
+    }
     pub fn sample_values_all() -> Self {
-        Self::from_iter(FactorSource::sample_values_all())
+        Self::sample_values_all_with_filter(|_| true)
+    }
+    pub fn sample_values_all_hd() -> Self {
+        Self::sample_values_all_with_filter(|f| f.factor_source_id().is_hash())
     }
 }
 impl FactorSource {

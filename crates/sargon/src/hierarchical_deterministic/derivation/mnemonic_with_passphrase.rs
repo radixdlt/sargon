@@ -213,7 +213,7 @@ impl MnemonicWithPassphrase {
     pub fn sample_security_questions_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_security_questions_other(),
-            BIP39Passphrase::new("Questions?"),
+            BIP39Passphrase::default(),
         )
     }
 
