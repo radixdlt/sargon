@@ -167,7 +167,6 @@ impl SecureStorageClient {
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
         id: &FactorSourceIDFromHash,
     ) -> Result<()> {
-        println!("🧚‍♀️ 🧚‍♀️ 🧚‍♀️ 🧚‍♀️ SAVING fs: {}", id);
         self.save(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: *id,
@@ -192,7 +191,6 @@ impl SecureStorageClient {
             },
         )
         .await
-        .inspect_err(|e| println!("🎭 FAILED TO LOAD fs: {}, err: {:?}", id, e))
     }
 
     /// Deletes a MnemonicWithPassphrase with a `FactorSourceIDFromHash`

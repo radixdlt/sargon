@@ -322,22 +322,15 @@ impl FactorInstancesProvider {
             IndexMap<DerivationPreset, usize>,
         >,
     ) -> Result<IndexMap<FactorSourceIDFromHash, FactorInstances>> {
-        println!(
-            "🤡 derive more: pf_pdp_quantity_to_derive {:?}",
-            pf_pdp_quantity_to_derive
-        );
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
 
-        println!("🤡 derive more: creating next index assigner",);
         let cache_snapshot = self.cache_client.snapshot().await?;
         let next_index_assigner = NextDerivationEntityIndexAssigner::new(
             network_id,
             self.profile.clone(),
             cache_snapshot,
         );
-
-        println!("🤡 derive more: created next index assigner",);
 
         let pf_paths = pf_pdp_quantity_to_derive
             .into_iter()
@@ -348,20 +341,16 @@ impl FactorInstancesProvider {
                         // `qty` many paths
                         let paths = (0..qty)
                             .map(|_| {
-                                // println!("🤡 derive more: creating next...offset: {:?}", offset);
                                 let index_agnostic_path = derivation_preset
                                     .index_agnostic_path_on_network(network_id);
-                                // println!("🤡 derive more: index_agnostic_path: {:?}", index_agnostic_path);
                                 let index = next_index_assigner.next(
                                     factor_source_id,
                                     index_agnostic_path,
                                 )?;
-                                // println!("🤡 derive more: index from next_index_assigner {:?}", index);
                                 let derivation_path = DerivationPath::from((
                                     index_agnostic_path,
                                     index,
                                 ));
-                                // println!("🤡 derive more: path {:?}", derivation_path);
                                 Ok(derivation_path)
                             })
                             .collect::<Result<IndexSet<DerivationPath>>>()?;
@@ -379,8 +368,6 @@ impl FactorInstancesProvider {
             .collect::<Result<
                 IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
             >>()?;
-
-        println!("🤡 derive more: paths #{:?}", pf_paths.len());
 
         let keys_collector = KeysCollector::new(
             factor_sources,

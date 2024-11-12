@@ -947,7 +947,7 @@ async fn test_securified_accounts() {
         matrix_1,
     );
 
-    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    let (security_structures_of_fis, instances_consumer, _) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
             IndexSet::from_iter([carol.address()]),
             shield_1.clone(),
@@ -1375,7 +1375,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    let derivation_outcome = os.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Persona".to_owned()).await.unwrap();
+    let (_, _) = os.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Persona".to_owned()).await.unwrap();
 
     let matrix_0 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
@@ -2168,6 +2168,17 @@ async fn securified_accounts_asymmetric_indices() {
         .unwrap()
     );
 
+    assert_eq!(
+        HashSet::<_>::from_iter([
+            alice.address(),
+            bob.address(),
+            carol.address(),
+            diana.address()
+        ])
+        .len(),
+        4
+    );
+
     let matrix_1 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::override_only([
             fs_device.clone(),
@@ -2197,6 +2208,7 @@ async fn securified_accounts_asymmetric_indices() {
         .__OFFLINE_ONLY_securify_account(alice.address(), &shield_1)
         .await
         .unwrap();
+    assert_eq!(securified_alice.address(), alice.address());
 
     assert!(
         derivation_outcome.found_any_instances_in_cache_for_any_factor_source()
@@ -2258,9 +2270,10 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     let (securified_bob, derivation_outcome) = os
-        .__OFFLINE_ONLY_securify_account(bob.address(), &shield_1)
+        .__OFFLINE_ONLY_securify_account(bob.address(), &shield_2)
         .await
         .unwrap();
+    assert_eq!(securified_bob.address(), bob.address());
 
     assert!(
         derivation_outcome.found_any_instances_in_cache_for_any_factor_source()
@@ -2287,7 +2300,7 @@ async fn securified_accounts_asymmetric_indices() {
                     .unwrap()
             ),
             (
-                fs_arculus.id_from_hash(),
+                fs_ledger.id_from_hash(),
                 HDPathComponent::from_local_key_space(0, KeySpace::Securified)
                     .unwrap()
             ),
@@ -2336,7 +2349,7 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     // CLEAR CACHE
-    os.clear_cache();
+    os.clear_cache().await;
 
     let matrix_3fa = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::override_only([
@@ -2367,7 +2380,7 @@ async fn securified_accounts_asymmetric_indices() {
     );
 
     let (securified_diana, derivation_outcome) = os
-        .__OFFLINE_ONLY_securify_account(diana.address(), &shield_1)
+        .__OFFLINE_ONLY_securify_account(diana.address(), &shield_3fa)
         .await
         .unwrap();
 
@@ -2423,9 +2436,9 @@ async fn securified_accounts_asymmetric_indices() {
     // lets create 2 * CACHE_FILLING_QUANTITY many more accounts and securify them with
     // the same shield as Diana
 
-    os.clear_cache(); // CLEAR CACHE
+    os.clear_cache().await; // CLEAR CACHE
 
-    let (more_unnamed_accounts, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(2 * CACHE_FILLING_QUANTITY as u16, network, "more".to_owned()).await.unwrap();
+    let (more_unnamed_accounts, _) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(2 * CACHE_FILLING_QUANTITY as u16, network, "more".to_owned()).await.unwrap();
 
     let (many_securified_accounts, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
@@ -2442,7 +2455,7 @@ async fn securified_accounts_asymmetric_indices() {
         derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "twice the cache size => derive more"
     );
-    os.clear_cache(); // CLEAR CACHE
+    os.clear_cache().await; // CLEAR CACHE
 
     for index in 0..many_securified_accounts.len() {
         let securified_account = many_securified_accounts

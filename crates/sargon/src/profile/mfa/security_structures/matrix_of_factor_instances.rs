@@ -9,7 +9,7 @@ impl MatrixOfFactorInstances {
         matrix_of_factor_sources: MatrixOfFactorSources,
     ) -> Result<Self> {
         let instances = &consuming_instances.clone();
-        println!("🐁 fulfilling_matrix_of_factor_sources_with_instances:\nmatrix_of_factor_sources: {:?}\n\ninstances to consume: {:?}\n", matrix_of_factor_sources, instances);
+
         let primary = fulfilling_role_of_factor_sources_with_factor_instances(
             instances,
             &matrix_of_factor_sources,
@@ -45,10 +45,6 @@ impl MatrixOfFactorInstances {
             existing.shift_remove(&to_remove);
 
             if existing.is_empty() {
-                println!(
-                    "🧹🧹🧹 pruning {:?}, since no more instances were found",
-                    fsid
-                );
                 consuming_instances.shift_remove_entry(fsid);
             }
         }
@@ -154,14 +150,12 @@ fn try_filling_factor_list_of_role_of_factor_sources_with_factor_instances(
         .map(|f| {
             if let Some(existing) = instances.get(&f.id_from_hash()) {
                 assert!(!existing.is_empty());
-                println!("🐙 existing: {:?}", existing,);
                 let hd_instance = existing.first().ok_or(
                     CommonError::MissingFactorMappingInstancesIntoRole,
                 )?;
                 let instance = FactorInstance::from(hd_instance);
                 Ok(instance)
             } else {
-                println!("🐙 ❌ MISSING! factor: {:?}", f.id_from_hash(),);
                 Err(CommonError::MissingFactorMappingInstancesIntoRole)
             }
         })
