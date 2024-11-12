@@ -15,6 +15,15 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
     }
 
+    async fn create_and_save_new_mainnet_account(
+        &self,
+        name: impl AsRef<str>,
+    ) -> Result<Account> {
+        self.create_and_save_new_mainnet_account_with_derivation_outcome(name)
+            .await
+            .map(|(a, _)| a)
+    }
+
     async fn create_and_save_new_account_with_factor_with_derivation_outcome(
         &self,
         factor_source: FactorSource,
@@ -655,62 +664,78 @@ async fn adding_accounts_different_networks_different_factor_sources() {
             .collect::<HashSet<AccountAddress>>()
     );
 }
-/*
+
 #[actix_rt::test]
 async fn test_securified_accounts() {
-    let (mut os, bdfs) = SargonOS::with_bdfs().await;
+    let os = SargonOS::fast_boot().await;
     let alice = os
-        .new_account_with_bdfs(NetworkID::Mainnet, "Alice")
+        .create_and_save_new_mainnet_account("Alice")
         .await
-        .unwrap()
-        .0;
+        .unwrap();
 
-    let bob = os
-        .new_account_with_bdfs(NetworkID::Mainnet, "Bob")
-        .await
-        .unwrap()
-        .0;
+    let bob = os.create_and_save_new_mainnet_account("Bob").await.unwrap();
+
     assert_ne!(alice.address(), bob.address());
+    let bdfs = FactorSource::from(os.bdfs().unwrap());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
-    let yubikey = FactorSource::yubikey();
+    let passphrase = FactorSource::sample_passphrase();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
-    os.add_factor_source(yubikey.clone()).await.unwrap();
-    let shield_0 =
-        MatrixOfFactorSources::new([bdfs.clone(), ledger.clone(), arculus.clone()], 2, []);
+    os.add_factor_source(passphrase.clone()).await.unwrap();
 
-    let (securified_accounts, stats) = os
-        .securify_accounts(
-            IndexSet::from_iter([alice.entity_address(), bob.entity_address()]),
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+        RecoveryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            2,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
+
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+            IndexSet::from_iter([alice.address(), bob.address()]),
             shield_0,
         )
         .await
         .unwrap();
 
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
 
-    let alice_sec = securified_accounts
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == alice.entity_address())
-        .unwrap();
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
 
-    assert_eq!(
-        alice_sec.securified_entity_control().veci.unwrap().clone(),
-        alice.as_unsecurified().unwrap().veci()
-    );
-    let alice_matrix = alice_sec.securified_entity_control().matrix.clone();
-    assert_eq!(alice_matrix.threshold, 2);
+    let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
+
+    let alice_matrix = alice_sec.matrix_of_factors.clone();
+    assert_eq!(alice_matrix.primary_role.threshold, 2);
 
     assert_eq!(
         alice_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.factor_source_id())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
         [
             bdfs.factor_source_id(),
@@ -719,39 +744,37 @@ async fn test_securified_accounts() {
         ]
     );
 
-    assert_eq!(
-        alice_matrix
-            .all_factors()
-            .into_iter()
-            .map(|f| f.derivation_entity_index())
-            .collect_vec(),
-        [
-            HDPathComponent::securifying_base_index(0),
-            HDPathComponent::securifying_base_index(0),
-            HDPathComponent::securifying_base_index(0)
-        ]
-    );
+    for factors_for_role in [
+        &alice_matrix.primary_role.all_hd_factors(),
+        &alice_matrix.recovery_role.all_hd_factors(),
+        &alice_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ZERO),
+                HDPathComponent::Securified(SecurifiedU30::ZERO),
+                HDPathComponent::Securified(SecurifiedU30::ZERO),
+            ]
+        );
+    }
 
     // assert bob
 
-    let bob_sec = securified_accounts
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == bob.entity_address())
-        .unwrap();
+    let bob_sec = security_structures_of_fis.get(&bob.address()).unwrap();
 
-    assert_eq!(
-        bob_sec.securified_entity_control().veci.unwrap().clone(),
-        bob.as_unsecurified().unwrap().veci()
-    );
-    let bob_matrix = bob_sec.securified_entity_control().matrix.clone();
-    assert_eq!(bob_matrix.threshold, 2);
+    let bob_matrix = bob_sec.matrix_of_factors.clone();
+    assert_eq!(bob_matrix.primary_role.threshold, 2);
 
     assert_eq!(
         bob_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.factor_source_id())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
         [
             bdfs.factor_source_id(),
@@ -760,107 +783,149 @@ async fn test_securified_accounts() {
         ]
     );
 
-    assert_eq!(
-        bob_matrix
-            .all_factors()
-            .into_iter()
-            .map(|f| f.derivation_entity_index())
-            .collect_vec(),
-        [
-            HDPathComponent::securifying_base_index(1),
-            HDPathComponent::securifying_base_index(1),
-            HDPathComponent::securifying_base_index(1)
-        ]
-    );
-
+    for factors_for_role in [
+        &bob_matrix.primary_role.all_hd_factors(),
+        &bob_matrix.recovery_role.all_hd_factors(),
+        &bob_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ONE),
+                HDPathComponent::Securified(SecurifiedU30::ONE),
+                HDPathComponent::Securified(SecurifiedU30::ONE),
+            ]
+        );
+    }
     let carol = os
-        .create_and_save_new_account_with_factor_with_derivation_outcome(ledger.clone(), NetworkID::Mainnet, "Carol")
+        .create_and_save_new_account_with_factor_with_derivation_outcome(
+            ledger.clone(),
+            NetworkID::Mainnet,
+            "Carol",
+        )
         .await
         .unwrap()
         .0;
 
     assert_eq!(
             carol
-                .as_unsecurified()
+                .try_get_unsecured_control()
                 .unwrap()
-                .veci()
-                .factor_instance()
+                .transaction_signing
                 .derivation_entity_index()
-                .base_index(),
-            0,
+                .index_in_local_key_space(),
+            U31::ZERO,
             "First account created with ledger, should have index 0, even though this ledger was used in the shield, since we are using two different KeySpaces for Securified and Unsecurified accounts."
         );
 
-    let (securified_accounts, stats) = os
-        .securify_accounts(
-            IndexSet::just(carol.entity_address()),
-            MatrixOfFactorSources::new([], 0, [yubikey.clone()]),
+    let matrix_1 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::override_only([passphrase.clone()])
+            .unwrap(),
+        RecoveryRoleWithFactorSources::override_only([passphrase.clone()])
+            .unwrap(),
+        ConfirmationRoleWithFactorSources::override_only([passphrase.clone()])
+            .unwrap(),
+    )
+    .unwrap();
+
+    let shield_1 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 1").unwrap()),
+        14,
+        matrix_1,
+    );
+
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+            IndexSet::from_iter([carol.address()]),
+            shield_1.clone(),
         )
         .await
         .unwrap();
-    assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
-        "should have used cache"
-    );
-    let carol_sec = securified_accounts
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == carol.entity_address())
-        .unwrap();
 
-    let carol_matrix = carol_sec.securified_entity_control().matrix.clone();
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
+
+    let carol_sec = security_structures_of_fis.get(&carol.address()).unwrap();
+
+    let carol_matrix = carol_sec.matrix_of_factors.clone();
+    assert_eq!(carol_matrix.primary_role.get_override_factors().len(), 1);
 
     assert_eq!(
         carol_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.factor_source_id())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
-        [yubikey.factor_source_id()]
+        [passphrase.factor_source_id(),]
     );
 
-    assert_eq!(
-        carol_matrix
-            .all_factors()
-            .into_iter()
-            .map(|f| f.derivation_entity_index())
-            .collect_vec(),
-        [HDPathComponent::securifying_base_index(0)]
-    );
+    for factors_for_role in [
+        &carol_matrix.primary_role.all_hd_factors(),
+        &carol_matrix.recovery_role.all_hd_factors(),
+        &carol_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![HDPathComponent::Securified(SecurifiedU30::ZERO),]
+        );
+    }
 
-    // Update Alice's shield to only use YubiKey
+    // Update Alice's shield 1 -  only Passphrase as override factor
+    let (security_structures_of_fis, instances_consumer, derivation_outcome) = os
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        IndexSet::from_iter([alice.address()]),
+        shield_1,
+    )
+    .await
+    .unwrap();
 
-    let (securified_accounts, stats) = os
-        .securify_accounts(
-            IndexSet::from_iter([alice.entity_address(), bob.entity_address()]),
-            MatrixOfFactorSources::new([], 0, [yubikey.clone()]),
-        )
-        .await
-        .unwrap();
+    // dont forget to consume!
+    instances_consumer.consume().await.unwrap();
+
     assert!(
-        !stats.derived_any_new_instance_for_any_factor_source(),
+        !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
-    let alice_sec = securified_accounts
-        .clone()
-        .into_iter()
-        .find(|x| x.address() == alice.entity_address())
-        .unwrap();
 
-    let alice_matrix = alice_sec.securified_entity_control().matrix.clone();
+    let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
+
+    let alice_matrix = alice_sec.matrix_of_factors.clone();
 
     assert_eq!(
         alice_matrix
+            .primary_role
             .all_factors()
             .into_iter()
-            .map(|f| f.derivation_entity_index())
+            .map(|f| f.factor_source_id)
             .collect_vec(),
-        [
-                HDPathComponent::securifying_base_index(1) // Carol used `0`.
-            ]
+        [passphrase.factor_source_id(),]
     );
+
+    for factors_for_role in [
+        &alice_matrix.primary_role.all_hd_factors(),
+        &alice_matrix.recovery_role.all_hd_factors(),
+        &alice_matrix.confirmation_role.all_hd_factors(),
+    ] {
+        assert_eq!(
+            factors_for_role
+                .into_iter()
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            vec![
+                HDPathComponent::Securified(SecurifiedU30::ONE), // Carol used `0`.
+            ]
+        );
+    }
 }
 
+/*
 #[actix_rt::test]
 async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
     let (mut os, bdfs) = SargonOS::with_bdfs().await;
