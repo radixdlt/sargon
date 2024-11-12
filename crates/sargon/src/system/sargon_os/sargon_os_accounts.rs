@@ -676,6 +676,7 @@ impl SargonOS {
     /// Cfg test since a proper production ready impl should have used the
     /// securify_entity_factor_instances_provider before consuming the instances
     /// in the cache.
+    #[allow(dead_code)]
     #[cfg(test)]
     pub(crate) async fn make_security_structure_of_factor_instances_for_entities_with_derivation_outcome<
         A: IsEntityAddress,

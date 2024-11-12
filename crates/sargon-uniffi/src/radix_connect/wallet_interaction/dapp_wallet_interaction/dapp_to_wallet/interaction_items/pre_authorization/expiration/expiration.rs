@@ -22,3 +22,10 @@ pub enum DappToWalletInteractionSubintentExpiration {
     /// 100 XRD over 2 USDT will succeed. Otherwise, it would fail.
     AfterDelay(DappToWalletInteractionSubintentExpireAfterDelay),
 }
+
+#[uniffi::export]
+pub fn get_subintent_expiration_status(
+    expiration: &DappToWalletInteractionSubintentExpiration,
+) -> DappToWalletInteractionSubintentExpirationStatus {
+    expiration.into_internal().get_status().into()
+}

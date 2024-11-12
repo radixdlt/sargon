@@ -10,6 +10,8 @@ use std::cmp::Ordering;
     PartialEq,
     Eq,
     Hash,
+    Ord,
+    PartialOrd,
     derive_more::Display,
 )]
 
@@ -32,6 +34,10 @@ pub enum HomeCard {
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
     Connector,
+
+    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
+    /// Action: Redirect user to Radix Ecosystem.
+    DiscoverRadixDapps,
 }
 
 impl Identifiable for HomeCard {
@@ -49,29 +55,6 @@ impl HasSampleValues for HomeCard {
 
     fn sample_other() -> Self {
         Self::ContinueRadQuest
-    }
-}
-
-impl Ord for HomeCard {
-    fn cmp(&self, other: &Self) -> Ordering {
-        fn order_value(card: &HomeCard) -> usize {
-            use HomeCard::*;
-
-            match card {
-                StartRadQuest => 0,
-                ContinueRadQuest => 1,
-                Dapp { .. } => 2,
-                Connector => 3,
-            }
-        }
-
-        order_value(self).cmp(&order_value(other))
-    }
-}
-
-impl PartialOrd for HomeCard {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
     }
 }
 

@@ -1,6 +1,6 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.secureRandom
+import com.radixdlt.sargon.extensions.random
 import com.radixdlt.sargon.extensions.value
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -12,10 +12,10 @@ class NonceTest: SampleTestable<Nonce> {
         get() = listOf(Nonce.sample)
 
     @Test
-    fun test_secure_random() {
+    fun test_random() {
         val n = 10
         val nonceSet = List(n) {
-            Nonce.secureRandom()
+            Nonce.random()
         }.toSet()
 
         assertEquals(n, nonceSet.size)

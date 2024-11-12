@@ -5,7 +5,7 @@ impl TransactionPreviewRequest {
         manifest: TransactionManifest,
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
-        notary_public_key: PublicKey,
+        notary_public_key: Option<PublicKey>,
         nonce: Nonce,
     ) -> Self {
         let signer_public_keys = signer_public_keys
@@ -28,7 +28,7 @@ impl TransactionPreviewRequest {
                 start_epoch_inclusive,
             )
             .into(),
-            notary_public_key: Some(GWPublicKey::from(notary_public_key)),
+            notary_public_key: notary_public_key.map(GWPublicKey::from),
             notary_is_signatory: signer_public_keys.is_empty(),
             tip_percentage: 0,
             nonce: nonce.into(),
@@ -56,7 +56,7 @@ mod tests {
                 intent.clone().manifest,
                 intent.header.start_epoch_inclusive,
                 keys.clone(),
-                intent.header.notary_public_key,
+                Some(intent.header.notary_public_key),
                 intent.header.nonce,
             );
             assert_eq!(sut.flags, flags);

@@ -31,6 +31,10 @@ fn init() {
     ONCE.call_once(|| {
         log::set_logger(&LOG)
             .expect("Should always be able to install a logger.");
+        #[cfg(test)]
+        log::set_max_level(log::LevelFilter::Info);
+
+        #[cfg(not(test))]
         log::set_max_level(log::LevelFilter::Trace);
     });
 }

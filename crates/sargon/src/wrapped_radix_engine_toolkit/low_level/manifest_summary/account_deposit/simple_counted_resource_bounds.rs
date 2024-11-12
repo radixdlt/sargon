@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Represents the bounds for a simple fungible resource, which can
 /// be exact, at most, at least, between, or unknown amount.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum SimpleFungibleResourceBounds {
+pub enum SimpleCountedResourceBounds {
     Exact {
         amount: Decimal,
     },
@@ -20,7 +20,7 @@ pub enum SimpleFungibleResourceBounds {
     UnknownAmount,
 }
 
-impl SimpleFungibleResourceBounds {
+impl SimpleCountedResourceBounds {
     pub fn exact(amount: impl Into<Decimal>) -> Self {
         Self::Exact {
             amount: amount.into(),
@@ -64,9 +64,7 @@ impl SimpleFungibleResourceBounds {
     }
 }
 
-impl From<ScryptoSimpleFungibleResourceBounds>
-    for SimpleFungibleResourceBounds
-{
+impl From<ScryptoSimpleFungibleResourceBounds> for SimpleCountedResourceBounds {
     fn from(value: ScryptoSimpleFungibleResourceBounds) -> Self {
         match value {
             ScryptoSimpleFungibleResourceBounds::Exact(amount) => {
@@ -89,7 +87,7 @@ impl From<ScryptoSimpleFungibleResourceBounds>
     }
 }
 
-impl HasSampleValues for SimpleFungibleResourceBounds {
+impl HasSampleValues for SimpleCountedResourceBounds {
     fn sample() -> Self {
         Self::sample_exact()
     }
@@ -99,7 +97,7 @@ impl HasSampleValues for SimpleFungibleResourceBounds {
     }
 }
 
-impl SimpleFungibleResourceBounds {
+impl SimpleCountedResourceBounds {
     fn sample_exact() -> Self {
         Self::exact(1337)
     }
@@ -129,7 +127,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = SimpleFungibleResourceBounds;
+    type SUT = SimpleCountedResourceBounds;
 
     #[test]
     fn equality() {

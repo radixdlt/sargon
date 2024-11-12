@@ -4,31 +4,58 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SimpleResourceBounds {
     Fungible {
-        bounds: SimpleFungibleResourceBounds,
+        resource_address: ResourceAddress,
+        bounds: SimpleCountedResourceBounds,
     },
     NonFungible {
+        resource_address: ResourceAddress,
         bounds: SimpleNonFungibleResourceBounds,
     },
 }
 
 impl SimpleResourceBounds {
-    pub fn fungible(bounds: SimpleFungibleResourceBounds) -> Self {
-        Self::Fungible { bounds }
+    pub fn fungible(
+        resource_address: impl Into<ResourceAddress>,
+        bounds: SimpleCountedResourceBounds,
+    ) -> Self {
+        Self::Fungible {
+            resource_address: resource_address.into(),
+            bounds,
+        }
     }
 
-    pub fn non_fungible(bounds: SimpleNonFungibleResourceBounds) -> Self {
-        Self::NonFungible { bounds }
+    pub fn non_fungible(
+        resource_address: impl Into<ResourceAddress>,
+        bounds: SimpleNonFungibleResourceBounds,
+    ) -> Self {
+        Self::NonFungible {
+            resource_address: resource_address.into(),
+            bounds,
+        }
+    }
+
+    pub fn exact_fungible(
+        resource_address: ResourceAddress,
+        amount: impl Into<Decimal>,
+    ) -> Self {
+        Self::fungible(
+            resource_address,
+            SimpleCountedResourceBounds::exact(amount.into()),
+        )
     }
 }
 
-impl From<ScryptoSimpleResourceBounds> for SimpleResourceBounds {
-    fn from(value: ScryptoSimpleResourceBounds) -> Self {
-        match value {
+impl From<(ResourceAddress, ScryptoSimpleResourceBounds)>
+    for SimpleResourceBounds
+{
+    fn from(value: (ResourceAddress, ScryptoSimpleResourceBounds)) -> Self {
+        let (resource_address, bounds) = value;
+        match bounds {
             ScryptoSimpleResourceBounds::Fungible(bounds) => {
-                Self::fungible(bounds.into())
+                Self::fungible(resource_address, bounds.into())
             }
             ScryptoSimpleResourceBounds::NonFungible(bounds) => {
-                Self::non_fungible(bounds.into())
+                Self::non_fungible(resource_address, bounds.into())
             }
         }
     }
@@ -36,11 +63,17 @@ impl From<ScryptoSimpleResourceBounds> for SimpleResourceBounds {
 
 impl HasSampleValues for SimpleResourceBounds {
     fn sample() -> Self {
-        Self::fungible(SimpleFungibleResourceBounds::sample())
+        Self::fungible(
+            ResourceAddress::sample(),
+            SimpleCountedResourceBounds::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::non_fungible(SimpleNonFungibleResourceBounds::sample())
+        Self::non_fungible(
+            ResourceAddress::sample_other(),
+            SimpleNonFungibleResourceBounds::sample_other(),
+        )
     }
 }
 
@@ -69,7 +102,10 @@ mod tests {
                 Decimal::from(1337).into(),
             ),
         );
-        assert_eq!(SUT::from(scrypto), SUT::sample());
+        assert_eq!(
+            SUT::from((ResourceAddress::sample(), scrypto)),
+            SUT::sample()
+        );
     }
 
     #[test]
@@ -86,6 +122,18 @@ mod tests {
                 .collect(),
             },
         );
-        assert_eq!(SUT::from(scrypto), SUT::sample_other());
+        assert_eq!(
+            SUT::from((ResourceAddress::sample_mainnet_nft_other(), scrypto)),
+            SUT::non_fungible(
+                ResourceAddress::sample_mainnet_nft_other(),
+                SimpleNonFungibleResourceBounds::new(
+                    vec![
+                        NonFungibleLocalId::sample(),
+                        NonFungibleLocalId::sample_other(),
+                    ],
+                    None,
+                )
+            )
+        );
     }
 }

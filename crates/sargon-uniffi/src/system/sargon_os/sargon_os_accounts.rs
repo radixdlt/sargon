@@ -147,6 +147,7 @@ impl SargonOS {
                 name_prefix,
             )
             .await
+            .map(|_| {})
             .into_result()
     }
 

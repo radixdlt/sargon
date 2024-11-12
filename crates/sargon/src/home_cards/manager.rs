@@ -67,6 +67,7 @@ impl HomeCardsManager {
         let default_cards = HomeCards::from_iter([
             HomeCard::Connector,
             HomeCard::StartRadQuest,
+            HomeCard::DiscoverRadixDapps,
         ]);
         let updated_cards = self
             .update_cards(|write_guard| {
@@ -333,6 +334,7 @@ mod tests {
         let expected_cards = HomeCards::from_iter(vec![
             HomeCard::StartRadQuest,
             HomeCard::Connector,
+            HomeCard::DiscoverRadixDapps,
         ]);
 
         manager.wallet_created().await.unwrap();
@@ -363,6 +365,7 @@ mod tests {
         let expected_cards = HomeCards::from_iter(vec![
             HomeCard::StartRadQuest,
             HomeCard::Connector,
+            HomeCard::DiscoverRadixDapps,
         ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
@@ -404,6 +407,7 @@ mod tests {
             HomeCard::Dapp { icon_url: None },
             HomeCard::ContinueRadQuest,
             HomeCard::Connector,
+            HomeCard::DiscoverRadixDapps,
         ]);
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
@@ -442,6 +446,7 @@ mod tests {
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
+            HomeCard::DiscoverRadixDapps,
         ]);
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
         pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));

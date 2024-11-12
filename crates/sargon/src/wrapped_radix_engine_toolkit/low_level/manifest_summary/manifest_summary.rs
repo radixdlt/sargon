@@ -7,7 +7,7 @@ pub struct ManifestSummary {
     pub account_withdrawals: HashMap<AccountAddress, Vec<AccountWithdraw>>,
 
     /// The deposits done in the manifest.
-    pub account_deposits: HashMap<AccountAddress, Vec<AccountDeposit>>,
+    pub account_deposits: HashMap<AccountAddress, AccountDeposits>,
 
     /// The list of the resources of proofs that were presented in the manifest.
     pub presented_proofs: Vec<ResourceSpecifier>,
@@ -44,7 +44,7 @@ impl ManifestSummary {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         account_withdraws: impl Into<HashMap<AccountAddress, Vec<AccountWithdraw>>>,
-        account_deposits: impl Into<HashMap<AccountAddress, Vec<AccountDeposit>>>,
+        account_deposits: impl Into<HashMap<AccountAddress, AccountDeposits>>,
         presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
         withdrawn_from: impl IntoIterator<Item = AccountAddress>,
         deposited_into: impl IntoIterator<Item = AccountAddress>,
@@ -115,13 +115,6 @@ fn account_withdraw_from_scrypto(
     AccountWithdraw::from((item, network_id))
 }
 
-fn account_deposit_from_scrypto(
-    item: ScryptoAccountDeposit,
-    network_id: NetworkID,
-) -> AccountDeposit {
-    AccountDeposit::from((item, network_id))
-}
-
 impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
     fn from(value: (RetStaticAnalysis, NetworkID)) -> Self {
         let (ret, network_id) = value;
@@ -132,11 +125,16 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
             account_withdraw_from_scrypto,
         );
 
-        let account_deposits = convert_from_scrypto(
-            ret.account_deposits,
-            network_id,
-            account_deposit_from_scrypto,
-        );
+        let account_deposits: HashMap<AccountAddress, AccountDeposits> = ret
+            .account_deposits
+            .into_iter()
+            .map(|(addr, items)| {
+                (
+                    AccountAddress::from((addr, network_id)),
+                    AccountDeposits::from((items, network_id)),
+                )
+            })
+            .collect();
 
         let addresses_of_accounts_withdrawn_from =
             to_vec_network_aware(ret.accounts_withdrawn_from, network_id);

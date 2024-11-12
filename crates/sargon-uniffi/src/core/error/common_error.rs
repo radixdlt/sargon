@@ -774,6 +774,9 @@ pub enum CommonError {
 
     #[error("Missing Factor Mapping Instances Into RoleWithFactors.")]
     MissingFactorMappingInstancesIntoRole = 10217,
+
+    #[error("Subintent has already expired")]
+    SubintentExpired = 10218,
 }
 
 #[uniffi::export]

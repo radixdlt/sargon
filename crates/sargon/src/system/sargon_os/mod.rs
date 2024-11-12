@@ -1,3 +1,4 @@
+mod pre_authorization;
 mod profile_state_holder;
 mod sargon_os;
 mod sargon_os_accounts;
@@ -8,6 +9,7 @@ mod sargon_os_profile;
 mod sargon_os_security_structures;
 mod transactions;
 
+pub use pre_authorization::*;
 pub use profile_state_holder::*;
 pub use sargon_os::*;
 pub use sargon_os_accounts::*;

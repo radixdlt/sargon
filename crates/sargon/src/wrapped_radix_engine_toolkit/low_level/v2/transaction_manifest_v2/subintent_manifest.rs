@@ -240,7 +240,8 @@ mod tests {
     use crate::prelude::*;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
-        CallMethod, DropAllProofs, DropAuthZoneProofs, YieldToParent,
+        BlobProvider, CallMethod, DropAllProofs, DropAuthZoneProofs,
+        YieldToParent,
     };
     use radix_transactions::model::InstructionV1;
     use sbor::ValueKind as ScryptoValueKind;
@@ -497,7 +498,7 @@ DROP_AUTH_ZONE_PROOFS;
                     AccountAddress::sample() => vec![AccountWithdraw::amount(ResourceAddress::sample(), 1337)],
                 ),
                 hashmap!(
-                    AccountAddress::sample_other() => vec![AccountDeposit::sample()],
+                    AccountAddress::sample_other() => AccountDeposits::sample(),
                 ),
                 [],
                 [AccountAddress::sample()],
@@ -523,36 +524,23 @@ DROP_AUTH_ZONE_PROOFS;
                     a => vec![AccountWithdraw::sample()],
                 ),
                 hashmap!(
-                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(150)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") =>
+                        AccountDeposits::new_for_test(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 150)],
                             UnspecifiedResources::NonePresent,
                         )
-                    ],
-                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(50)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    ,
+                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") =>
+                        AccountDeposits::new_for_test(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 50)],
                             UnspecifiedResources::NonePresent,
                         )
-                    ],
-                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") => vec![
-                        AccountDeposit::new(
-                            vec![
-                                (ResourceAddress::sample_sim_xrd(), SimpleResourceBounds::fungible(SimpleFungibleResourceBounds::exact(Decimal::from(130)))),
-                            ]
-                            .into_iter()
-                            .collect(),
+                    ,
+                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") =>
+                        AccountDeposits::new_for_test(
+                            vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 130)],
                             UnspecifiedResources::NonePresent,
-                        )
-                    ],
+                        ),
                 ),
                 [],
                 [
@@ -601,9 +589,228 @@ DROP_AUTH_ZONE_PROOFS;
             .lock_fee_from_faucet()
             .yield_to_parent(());
 
+        let manifest = SUT::sargon_built(builder, NetworkID::Mainnet);
         assert_eq!(
-            SUT::sargon_built(builder, NetworkID::Mainnet,).manifest_string(),
+            manifest.manifest_string(),
             "CALL_METHOD\n    Address(\"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet\")\n    \"lock_fee\"\n    Decimal(\"5000\")\n;\nYIELD_TO_PARENT;\n",
+        )
+    }
+
+    #[test]
+    fn open_pre_auth_fungibles_deposit_summary() {
+        let manifest_str = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "open_subintent_fungibles.rtm"
+        ));
+
+        let network = NetworkID::Stokenet.network_definition();
+        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+            manifest_str,
+            &network,
+            BlobProvider::new(),
+        )
+        .unwrap();
+
+        let manifest: SubintentManifest =
+            (man, NetworkID::Stokenet).try_into().unwrap();
+        let summary = manifest.summary().unwrap();
+
+        pretty_assertions::assert_eq!(
+            summary.account_deposits,
+            hashmap! {
+                AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
+                    AccountDeposits::new_for_test(
+                        vec![
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tkd957yt3rwqze7elmzlphfjnmfyzkf9l5rau5ccsx9h2vs9nq3tzp", SimpleCountedResourceBounds::at_most(10)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5jcmwqx39ym7fw0hrlpnxwechr0mzlgulcfcye59qm9y9fa5uvdrd", SimpleCountedResourceBounds::between(100, 159)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck", SimpleCountedResourceBounds::exact(3)),
+                        ],
+                        UnspecifiedResources::MayBePresent,
+                    ),
+            }
+        )
+    }
+
+    #[test]
+    fn open_pre_auth_non_fungibles_no_certain_ids_deposit_summary() {
+        let manifest_str = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "open_subintent_non_fungibles_no_certain_ids.rtm"
+        ));
+
+        let network = NetworkID::Stokenet.network_definition();
+        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+            manifest_str,
+            &network,
+            BlobProvider::new(),
+        )
+        .unwrap();
+
+        let manifest: SubintentManifest =
+            (man, NetworkID::Stokenet).try_into().unwrap();
+        let summary = manifest.summary().unwrap();
+
+        pretty_assertions::assert_eq!(
+            summary.account_deposits,
+            hashmap!(
+                AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
+                    AccountDeposits::new_for_test(
+                        vec![
+                            SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::unknown_amount())),
+                            ),
+                            SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::at_least(6))),
+                            ),
+                            SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::at_most(10))),
+                            ),
+                            SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1nfn4gd24pcpnqegcq07mgvz9cea4zryytswn5vmgepnan7tjqedkxp",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::between(100, 159))),
+                            ),
+                            SimpleResourceBounds::non_fungible(
+                                "resource_tdx_2_1nt8pgfd7xj954403vfgkej25g8kcc56ldu4j3akl4vzlcfen6jcfjg",
+                                SimpleNonFungibleResourceBounds::new(Vec::new(), Some(SimpleCountedResourceBounds::exact(3))),
+                            ),
+                        ],
+                        UnspecifiedResources::MayBePresent,
+                    ),
+            )
+        );
+    }
+
+    #[test]
+    fn open_pre_auth_non_fungibles_with_certain_ids_deposit_summary() {
+        let manifest_str = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "open_subintent_non_fungibles_with_certain_ids.rtm"
+        ));
+
+        let network = NetworkID::Stokenet.network_definition();
+        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+            manifest_str,
+            &network,
+            BlobProvider::new(),
+        )
+        .unwrap();
+
+        let manifest: SubintentManifest =
+            (man, NetworkID::Stokenet).try_into().unwrap();
+        let summary = manifest.summary().unwrap();
+
+        let certain_ids_sample = vec![
+            NonFungibleLocalId::from("#0#"),
+            NonFungibleLocalId::from("#1#"),
+            NonFungibleLocalId::from("#2#"),
+        ];
+
+        let member_card_id = NonFungibleLocalId::from("<Member_103>");
+
+        pretty_assertions::assert_eq!(
+            summary.account_deposits,
+            hashmap!(
+            AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
+                AccountDeposits::new_for_test(
+                    vec![
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                            SimpleNonFungibleResourceBounds::new(vec![member_card_id], Some(SimpleCountedResourceBounds::unknown_amount())),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1n2lj0rk7pye8h2cxs347lf70ksyzwaez0mjkssccfthp6m408hfny7",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), Some(SimpleCountedResourceBounds::unknown_amount())),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1nf8g5dhl6rxvq78j6q3kdxfkl7rweychjzyv848clhezg44rn0qgy5",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), None),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1nfn4gd24pcpnqegcq07mgvz9cea4zryytswn5vmgepnan7tjqedkxp",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), Some(SimpleCountedResourceBounds::at_most(2))),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1nt8pgfd7xj954403vfgkej25g8kcc56ldu4j3akl4vzlcfen6jcfjg",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), None),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1n2q3kj4sfa6sh45kvau2f08hfhjuls7zcevwl77vjzmgf3sea0uzzu",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), Some(SimpleCountedResourceBounds::at_most(2))),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1n2rpk9w8d8kzu578jxvqr0dplctfh5clylmyqpu9kvnz7hvceh2mxe",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), Some(SimpleCountedResourceBounds::at_least(2))),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1ngu8tgxvv26rpmdwxxfd8gclnsnjeew7zdcw2p3genru58a7wkmue4",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), Some(SimpleCountedResourceBounds::exact(2))),
+                        ),
+                        SimpleResourceBounds::non_fungible(
+                            "resource_tdx_2_1nfve52p2wvx0kp0eq3xaznuvwakcu5a6aqtsjqq8x30zk4wkglxmlv",
+                            SimpleNonFungibleResourceBounds::new(certain_ids_sample.clone(), Some(SimpleCountedResourceBounds::between(2, 5))),
+                        ),
+                    ],
+                    UnspecifiedResources::MayBePresent,
+                ),
+            )
+        );
+    }
+
+    #[test]
+    fn test_multiple_deposits() {
+        let manifest_str = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "open_subintent_mix_multiple_deposits.rtm"
+        ));
+
+        let network = NetworkID::Stokenet.network_definition();
+        let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
+            manifest_str,
+            &network,
+            BlobProvider::new(),
+        )
+        .unwrap();
+
+        let manifest: SubintentManifest =
+            (man, NetworkID::Stokenet).try_into().unwrap();
+        let summary = manifest.summary().unwrap();
+
+        pretty_assertions::assert_eq!(
+            summary.account_deposits,
+            hashmap!(
+                AccountAddress::from("account_tdx_2_129rfcz44zxflyaf6d65fdvaqtk5rlvdu8nzek2nz435zknhqure2xl") =>
+                    AccountDeposits::new_for_test(
+                        vec![
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tkd957yt3rwqze7elmzlphfjnmfyzkf9l5rau5ccsx9h2vs9nq3tzp", SimpleCountedResourceBounds::at_most(10)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5jcmwqx39ym7fw0hrlpnxwechr0mzlgulcfcye59qm9y9fa5uvdrd", SimpleCountedResourceBounds::between(100, 159)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck", SimpleCountedResourceBounds::exact(3)),
+
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tkd957yt3rwqze7elmzlphfjnmfyzkf9l5rau5ccsx9h2vs9nq3tzp", SimpleCountedResourceBounds::at_most(10)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5jcmwqx39ym7fw0hrlpnxwechr0mzlgulcfcye59qm9y9fa5uvdrd", SimpleCountedResourceBounds::between(100, 159)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck", SimpleCountedResourceBounds::exact(3)),
+                        ],
+                        UnspecifiedResources::MayBePresent,
+                    ),
+                    AccountAddress::from("account_tdx_2_1288u4aka2dm8787texaeta8ruzhcr7dyckmnck5wt0llrm6x0ak7e4") => AccountDeposits::new_for_test(
+                        vec![
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", SimpleCountedResourceBounds::unknown_amount()),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1th4gzm9rk5s28yf5gud0a32m082g4x60d6na4ecsccte032y3xu785", SimpleCountedResourceBounds::at_least(6)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1tkd957yt3rwqze7elmzlphfjnmfyzkf9l5rau5ccsx9h2vs9nq3tzp", SimpleCountedResourceBounds::at_most(10)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5jcmwqx39ym7fw0hrlpnxwechr0mzlgulcfcye59qm9y9fa5uvdrd", SimpleCountedResourceBounds::between(100, 159)),
+                            SimpleResourceBounds::fungible("resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck", SimpleCountedResourceBounds::exact(3)),
+                        ],
+                        UnspecifiedResources::NonePresent,
+                    ),
+            )
         )
     }
 }

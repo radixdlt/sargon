@@ -8,7 +8,7 @@ pub enum UnspecifiedResources {
     NonePresent,
 
     /// There might be non-zero balances of unspecified resources present
-    MayBePresent { change_sources: Vec<ChangeSource> },
+    MayBePresent,
 }
 
 impl UnspecifiedResources {
@@ -16,12 +16,8 @@ impl UnspecifiedResources {
         Self::NonePresent
     }
 
-    pub fn may_be_present(
-        change_sources: impl IntoIterator<Item = ChangeSource>,
-    ) -> Self {
-        Self::MayBePresent {
-            change_sources: change_sources.into_iter().collect(),
-        }
+    pub fn may_be_present() -> Self {
+        Self::MayBePresent
     }
 }
 
@@ -29,25 +25,18 @@ impl From<ScryptoUnspecifiedResources> for UnspecifiedResources {
     fn from(value: ScryptoUnspecifiedResources) -> Self {
         match value {
             ScryptoUnspecifiedResources::NonePresent => Self::NonePresent,
-            ScryptoUnspecifiedResources::MayBePresent(sources) => {
-                Self::MayBePresent {
-                    change_sources: sources
-                        .into_iter()
-                        .map(ChangeSource::from)
-                        .collect(),
-                }
-            }
+            ScryptoUnspecifiedResources::MayBePresent(_) => Self::MayBePresent,
         }
     }
 }
 
 impl HasSampleValues for UnspecifiedResources {
     fn sample() -> Self {
-        Self::NonePresent
+        Self::none_present()
     }
 
     fn sample_other() -> Self {
-        Self::may_be_present(vec![ChangeSource::sample()])
+        Self::may_be_present()
     }
 }
 
