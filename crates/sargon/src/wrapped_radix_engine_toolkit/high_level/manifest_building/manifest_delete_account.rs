@@ -87,16 +87,6 @@ impl TransactionManifest {
     }
 }
 
-impl From<AccountResourcePreference>
-    for ScryptoAccountRemoveResourcePreferenceInput
-{
-    fn from(value: AccountResourcePreference) -> Self {
-        Self {
-            resource_address: value.resource_address.into(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -115,7 +105,7 @@ mod tests {
                 vec![
                     AccountAuthorizedDepositor::sample_other().try_into().unwrap(),
                 ],
-            ).unwrap(),
+            ),
             r#"
 CALL_METHOD
     Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")

@@ -3,6 +3,7 @@ use radix_engine_interface::blueprints::account::{
     AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
     AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
 };
+use std::future::Future;
 
 // ==================
 // Delete Account (Public)
@@ -13,13 +14,28 @@ impl SargonOS {
         account_address: AccountAddress,
     ) -> Result<TransactionManifest> {
         let network_id = account_address.network_id();
+        let gateway_client = GatewayClient::new(
+            self.clients.http_client.driver.clone(),
+            network_id,
+        );
+
         let resource_preferences = self
-            .get_account_resource_preferences(network_id, account_address)
-            .await?;
+            .load_all_pages(account_address, |request| {
+                gateway_client.account_resource_preferences(request)
+            })
+            .await?
+            .into_iter()
+            .map(ScryptoAccountRemoveResourcePreferenceInput::from)
+            .collect();
 
         let authorized_depositors = self
-            .get_account_authorized_depositors(network_id, account_address)
-            .await?;
+            .load_all_pages(account_address, |request| {
+                gateway_client.account_authorized_depositors(request)
+            })
+            .await?
+            .into_iter()
+            .map(ScryptoAccountRemoveAuthorizedDepositorInput::try_from)
+            .collect::<Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>>>()?;
 
         let manifest = TransactionManifest::delete_account(
             &account_address,
@@ -32,20 +48,20 @@ impl SargonOS {
 }
 
 // ==================
-// Delete Account (Internal)
+// Load all pages (Internal)
 // ==================
 impl SargonOS {
-    async fn get_account_resource_preferences(
+    /// Load all pages of a paginated API call that takes an `AccountPageRequest` and returns a `PageResponse`.
+    async fn load_all_pages<T, F, Fut>(
         &self,
-        network_id: NetworkID,
         account_address: AccountAddress,
-    ) -> Result<Vec<ScryptoAccountRemoveResourcePreferenceInput>> {
-        let gateway_client = GatewayClient::new(
-            self.clients.http_client.driver.clone(),
-            network_id,
-        );
-
-        let mut items: Vec<AccountResourcePreference> = Vec::new();
+        api_call: F,
+    ) -> Result<Vec<T>>
+    where
+        F: Fn(AccountPageRequest) -> Fut,
+        Fut: Future<Output = Result<PageResponse<T>>>,
+    {
+        let mut items: Vec<T> = Vec::new();
         let mut more_to_load = true;
         let mut cursor: Option<String> = None;
         while more_to_load {
@@ -54,52 +70,23 @@ impl SargonOS {
                 cursor.clone(),
                 GATEWAY_PAGE_REQUEST_LIMIT,
             );
-            let response =
-                gateway_client.account_resource_preferences(request).await?;
+            let response = api_call(request).await?;
             items.extend(response.items);
             cursor = response.next_cursor;
             more_to_load = cursor.is_some();
         }
 
-        let items = items
-            .into_iter()
-            .map(ScryptoAccountRemoveResourcePreferenceInput::from)
-            .collect();
         Ok(items)
     }
+}
 
-    async fn get_account_authorized_depositors(
-        &self,
-        network_id: NetworkID,
-        account_address: AccountAddress,
-    ) -> Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>> {
-        let gateway_client = GatewayClient::new(
-            self.clients.http_client.driver.clone(),
-            network_id,
-        );
-
-        let mut items: Vec<AccountAuthorizedDepositor> = Vec::new();
-        let mut more_to_load = true;
-        let mut cursor: Option<String> = None;
-        while more_to_load {
-            let request = AccountPageRequest::new(
-                account_address,
-                cursor.clone(),
-                GATEWAY_PAGE_REQUEST_LIMIT,
-            );
-            let response = gateway_client
-                .account_authorized_depositors(request)
-                .await?;
-            items.extend(response.items);
-            cursor = response.next_cursor;
-            more_to_load = cursor.is_some();
+impl From<AccountResourcePreference>
+    for ScryptoAccountRemoveResourcePreferenceInput
+{
+    fn from(value: AccountResourcePreference) -> Self {
+        Self {
+            resource_address: value.resource_address.into(),
         }
-
-        let items = items
-            .into_iter()
-            .map(ScryptoAccountRemoveAuthorizedDepositorInput::try_from)
-            .collect::<Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>>>()?;
-        Ok(items)
     }
 }
 
