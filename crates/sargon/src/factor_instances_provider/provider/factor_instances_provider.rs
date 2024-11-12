@@ -54,79 +54,13 @@ impl FactorInstancesProvider {
     pub async fn provide(
         self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
-    ) -> Result<(InstancesConsumer, InternalFactorInstancesProviderOutcome)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        InternalFactorInstancesProviderOutcome,
+    )> {
         let mut _self = self;
 
         _self._provide(quantified_derivation_preset).await
-    }
-}
-
-/// Uses a `FactorInstancesProvider` to fill the cache with instances for a new FactorSource.
-pub struct CacheFiller;
-impl CacheFiller {
-    /// Uses a `FactorInstancesProvider` to fill the `cache` with FactorInstances for a new FactorSource.
-    /// Saves FactorInstances into the mutable `cache` parameter and returns a
-    /// copy of the instances.
-    pub async fn for_new_factor_source(
-        cache_client: Arc<FactorInstancesCacheClient>,
-        profile: impl Into<Option<Arc<Profile>>>,
-        factor_source: FactorSource,
-        network_id: NetworkID, // typically mainnet
-        interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
-        let provider = FactorInstancesProvider::new(
-            network_id,
-            IndexSet::just(factor_source.clone()),
-            profile,
-            cache_client.clone(),
-            interactors,
-        );
-        let quantities = IndexMap::kv(
-            factor_source.id_from_hash(),
-            DerivationPreset::all()
-                .into_iter()
-                .map(|dp| (dp, CACHE_FILLING_QUANTITY))
-                .collect::<IndexMap<DerivationPreset, usize>>(),
-        );
-        let derived = provider.derive_more(quantities).await?;
-
-        cache_client.insert_all(&derived).await?;
-
-        let derived =
-            derived.get(&factor_source.id_from_hash()).unwrap().clone();
-        let outcome = InternalFactorInstancesProviderOutcomeForFactor::new(
-            factor_source.id_from_hash(),
-            derived.clone(),
-            FactorInstances::default(),
-            FactorInstances::default(),
-            derived,
-        );
-        Ok(outcome.into())
-    }
-}
-
-use futures::future::{BoxFuture, Future};
-
-pub struct InstancesConsumer {
-    do_consume:
-        Box<dyn Fn() -> BoxFuture<'static, Result<()>> + Send + 'static>,
-}
-unsafe impl Sync for InstancesConsumer {}
-unsafe impl Send for InstancesConsumer {}
-
-impl InstancesConsumer {
-    fn new<T, F>(f: T) -> Self
-    where
-        T: Send + Sync + 'static + Fn() -> F,
-        F: Future<Output = Result<()>> + Send + 'static,
-    {
-        InstancesConsumer {
-            do_consume: Box::new(move || Box::pin(f())),
-        }
-    }
-    pub async fn consume(self) -> Result<()> {
-        (self.do_consume)().await
     }
 }
 
@@ -134,16 +68,16 @@ impl InstancesConsumer {
 /// Private
 /// ===============
 impl FactorInstancesProvider {
-    fn make_instances_consumer(
+    fn make_instances_in_cache_consumer(
         &self,
         instances_per_factor_sources_to_delete: IndexMap<
             FactorSourceIDFromHash,
             FactorInstances,
         >,
-    ) -> InstancesConsumer {
+    ) -> InstancesInCacheConsumer {
         let instances_clone = instances_per_factor_sources_to_delete.clone();
         let cache_client_clone = self.cache_client.clone();
-        InstancesConsumer::new(move || {
+        InstancesInCacheConsumer::new(move || {
             let cache_client_clone_clone = cache_client_clone.clone();
             let instances_clone_clone = instances_clone.clone();
             async move {
@@ -155,8 +89,10 @@ impl FactorInstancesProvider {
     async fn _provide(
         &mut self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
-    ) -> Result<(InstancesConsumer, InternalFactorInstancesProviderOutcome)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        InternalFactorInstancesProviderOutcome,
+    )> {
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
         let cached = self
@@ -172,13 +108,13 @@ impl FactorInstancesProvider {
             CachedInstancesWithQuantitiesOutcome::Satisfied(
                 enough_instances,
             ) => {
-                // When/if caller calls `instances_consumer.consume()` the `enough_instances`
+                // When/if caller calls `instances_in_cache_consumer.consume()` the `enough_instances`
                 // will be deleted from the cache, they are still present in the cache now
                 // and will continue to be present until the `consume()` is called.
-                let instances_consumer =
-                    self.make_instances_consumer(enough_instances.clone());
+                let instances_in_cache_consumer = self
+                    .make_instances_in_cache_consumer(enough_instances.clone());
                 Ok((
-                    instances_consumer,
+                    instances_in_cache_consumer,
                     InternalFactorInstancesProviderOutcome::satisfied_by_cache(
                         enough_instances,
                     ),
@@ -209,8 +145,10 @@ impl FactorInstancesProvider {
             FactorSourceIDFromHash,
             IndexMap<DerivationPreset, usize>,
         >,
-    ) -> Result<(InstancesConsumer, InternalFactorInstancesProviderOutcome)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        InternalFactorInstancesProviderOutcome,
+    )> {
         let pf_newly_derived = self.derive_more(pf_pdp_qty_to_derive).await?;
 
         let Split {
@@ -222,8 +160,10 @@ impl FactorInstancesProvider {
             &pf_newly_derived,
         );
 
-        let instances_consumer = self
-            .make_instances_consumer(pf_found_in_cache_leq_requested.clone());
+        let instances_in_cache_consumer = self
+            .make_instances_in_cache_consumer(
+                pf_found_in_cache_leq_requested.clone(),
+            );
 
         self.cache_client.insert_all(&pf_to_cache).await?;
 
@@ -234,7 +174,7 @@ impl FactorInstancesProvider {
             pf_newly_derived,
         );
         let outcome = outcome;
-        Ok((instances_consumer, outcome))
+        Ok((instances_in_cache_consumer, outcome))
     }
 
     /// Per factor, split the instances into those to use directly and those to cache.
@@ -315,7 +255,7 @@ impl FactorInstancesProvider {
         }
     }
 
-    async fn derive_more(
+    pub(super) async fn derive_more(
         &self,
         pf_pdp_quantity_to_derive: IndexMap<
             FactorSourceIDFromHash,

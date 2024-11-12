@@ -108,6 +108,7 @@ impl SargonOS {
     }
 
     #[cfg(test)]
+    #[allow(dead_code)]
     pub(crate) async fn init_keys_derivation_interactor_with_test_interactor_with_private_hd_factor_source(
         &self,
         private_hd_factor_source: &PrivateHierarchicalDeterministicFactorSource,

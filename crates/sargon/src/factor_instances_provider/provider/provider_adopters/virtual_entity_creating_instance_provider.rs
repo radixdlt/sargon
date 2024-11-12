@@ -21,8 +21,10 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcomeForFactor)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         Self::for_entity_veci(
             CAP26EntityKind::Account,
             cache_client,
@@ -53,8 +55,10 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcomeForFactor)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         Self::for_many_entity_vecis(
             count,
             CAP26EntityKind::Account,
@@ -83,8 +87,10 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcomeForFactor)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         Self::for_entity_veci(
             CAP26EntityKind::Identity,
             cache_client,
@@ -115,8 +121,10 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcomeForFactor)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         Self::for_many_entity_vecis(
             count,
             CAP26EntityKind::Identity,
@@ -146,8 +154,10 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcomeForFactor)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         Self::for_many_entity_vecis(
             1,
             entity_kind,
@@ -180,8 +190,10 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcomeForFactor)>
-    {
+    ) -> Result<(
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let provider = FactorInstancesProvider::new(
             network_id,
             IndexSet::just(factor_source.clone()),
@@ -189,7 +201,7 @@ impl VirtualEntityCreatingInstanceProvider {
             cache_client,
             interactors,
         );
-        let (instances_consumer, outcome) = provider
+        let (instances_in_cache_consumer, outcome) = provider
             .provide(QuantifiedDerivationPreset::new(
                 DerivationPreset::veci_entity_kind(entity_kind),
                 count,
@@ -202,7 +214,7 @@ impl VirtualEntityCreatingInstanceProvider {
             .cloned()
             .expect("Expected to have instances for the factor source");
 
-        Ok((instances_consumer, outcome.into()))
+        Ok((instances_in_cache_consumer, outcome.into()))
     }
 }
 

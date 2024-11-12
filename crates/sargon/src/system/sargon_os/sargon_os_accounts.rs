@@ -149,14 +149,19 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<(
         Account,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
-        let (factor_source_id, account, instances_consumer, derivation_outcome) = profile
+        let (
+            factor_source_id,
+            account,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = profile
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -171,7 +176,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((account, instances_consumer, derivation_outcome))
+        Ok((account, instances_in_cache_consumer, derivation_outcome))
     }
 
     /// Create a new mainnet Account named "Unnamed" using BDFS and adds it to the active Profile.
@@ -289,7 +294,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating account.");
-        let (account, instances_consumer, derivation_outcome) = self
+        let (account, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -301,7 +306,7 @@ impl SargonOS {
         // Add account to Profile...
         self.add_account(account.clone()).await?;
         // .. if successful consume the FactorInstances from the Cache!
-        instances_consumer.consume().await?;
+        instances_in_cache_consumer.consume().await?;
 
         info!(
             "Created account and saved new account into profile, address: {}",
@@ -368,7 +373,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Batch creating #{} accounts.", count);
-        let (accounts, instances_consumer, derivation_outcome) = self
+        let (accounts, instances_in_cache_consumer, derivation_outcome) = self
             .batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -381,7 +386,7 @@ impl SargonOS {
         // First try to save accounts into Profile...
         self.add_accounts(accounts.clone()).await?;
         // ... if successful consume the FactorInstances from the Cache!
-        instances_consumer.consume().await?;
+        instances_in_cache_consumer.consume().await?;
 
         info!(
             "Created account and saved #{} new accounts into profile",
@@ -404,14 +409,14 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
-        let (accounts, instances_consumer) = self
+        let (accounts, instances_in_cache_consumer) = self
             .batch_create_unsaved_accounts_with_bdfs(
                 network_id,
                 count,
                 name_prefix,
             )
             .await?;
-        instances_consumer.consume().await?;
+        instances_in_cache_consumer.consume().await?;
         Ok(accounts)
     }
 
@@ -428,7 +433,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<(Accounts, InstancesConsumer)> {
+    ) -> Result<(Accounts, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs()?;
         self.batch_create_unsaved_accounts_with_factor_source(
             bdfs.into(),
@@ -453,7 +458,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<(Accounts, InstancesConsumer)> {
+    ) -> Result<(Accounts, InstancesInCacheConsumer)> {
         self.batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -471,7 +476,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<(
         Accounts,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
@@ -481,7 +486,7 @@ impl SargonOS {
         let (
             factor_source_id,
             accounts,
-            instances_consumer,
+            instances_in_cache_consumer,
             derivation_outcome,
         ) = profile
             .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
@@ -502,7 +507,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((accounts, instances_consumer, derivation_outcome))
+        Ok((accounts, instances_in_cache_consumer, derivation_outcome))
     }
 }
 
@@ -688,13 +693,13 @@ impl SargonOS {
         IndexMap<A, SecurityStructureOfFactorInstances>,
         FactorInstancesProviderOutcome,
     )> {
-        let (security_structures_of_factor_instances, instances_consumer, outcome) = self
+        let (security_structures_of_factor_instances, instances_in_cache_consumer, outcome) = self
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
             addresses_of_entities,
             security_structure_of_factor_sources,
         )
         .await?;
-        instances_consumer.consume().await?;
+        instances_in_cache_consumer.consume().await?;
         Ok((security_structures_of_factor_instances, outcome))
     }
 
@@ -707,7 +712,7 @@ impl SargonOS {
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
     ) -> Result<(
         IndexMap<A, SecurityStructureOfFactorInstances>,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcome,
     )> {
         let profile_snapshot = self.profile()?;
@@ -715,7 +720,7 @@ impl SargonOS {
         let matrix_of_factor_sources =
             &security_structure_of_factor_sources.matrix_of_factors;
 
-        let (instances_consumer, outcome) =
+        let (instances_in_cache_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
@@ -765,7 +770,7 @@ impl SargonOS {
 
         Ok((
             security_structures_of_factor_instances,
-            instances_consumer,
+            instances_in_cache_consumer,
             outcome,
         ))
     }

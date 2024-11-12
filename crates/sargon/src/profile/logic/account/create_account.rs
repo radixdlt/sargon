@@ -15,7 +15,7 @@ impl Profile {
         name: DisplayName,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(FactorSourceID, Account, InstancesConsumer)> {
+    ) -> Result<(FactorSourceID, Account, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs();
         self.create_unsaved_account_with_factor_source(
             bdfs.into(),
@@ -41,7 +41,7 @@ impl Profile {
         name: DisplayName,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(FactorSourceID, Account, InstancesConsumer)> {
+    ) -> Result<(FactorSourceID, Account, InstancesInCacheConsumer)> {
         self.create_unsaved_account_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -63,13 +63,13 @@ impl Profile {
     ) -> Result<(
         FactorSourceID,
         Account,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let (
             factor_source_id,
             accounts,
-            instances_consumer,
+            instances_in_cache_consumer,
             derivation_outcome,
         ) = self
             .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
@@ -90,7 +90,7 @@ impl Profile {
         Ok((
             factor_source_id,
             account,
-            instances_consumer,
+            instances_in_cache_consumer,
             derivation_outcome,
         ))
     }
@@ -109,7 +109,7 @@ impl Profile {
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(FactorSourceID, Accounts, InstancesConsumer)> {
+    ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs();
         self.create_unsaved_accounts_with_factor_source(
             bdfs.into(),
@@ -130,7 +130,7 @@ impl Profile {
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(FactorSourceID, Accounts, InstancesConsumer)> {
+    ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
         self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -154,7 +154,7 @@ impl Profile {
     ) -> Result<(
         FactorSourceID,
         Accounts,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let number_of_accounts_on_network = self
@@ -163,7 +163,7 @@ impl Profile {
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
-        let (factor_source_id, accounts, instances_consumer, derivation_outcome) = self
+        let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
                 factor_source,
                 network_id,
@@ -191,7 +191,7 @@ impl Profile {
         Ok((
             factor_source_id,
             accounts_with_appearance_ids_set,
-            instances_consumer,
+            instances_in_cache_consumer,
             derivation_outcome,
         ))
     }

@@ -26,23 +26,27 @@ impl log::Log for LogSystem {
     fn flush(&self) {}
 }
 
+fn get_default_level() -> LogFilter {
+    #[cfg(test)]
+    return LogFilter::Info;
+
+    #[cfg(not(test))]
+    return LogFilter::Trace;
+}
+
 fn init() {
     static ONCE: Once = Once::new();
     ONCE.call_once(|| {
         log::set_logger(&LOG)
             .expect("Should always be able to install a logger.");
-        #[cfg(test)]
-        log::set_max_level(log::LevelFilter::Info);
-
-        #[cfg(not(test))]
-        log::set_max_level(log::LevelFilter::Trace);
+        log::set_max_level(get_default_level().into());
     });
 }
 
 pub(crate) fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
     init();
     *LOG.0.write().unwrap() = Some(logging_driver);
-    rust_logger_set_level(LogFilter::Trace); // can be called from FFI later
+    rust_logger_set_level(get_default_level()); // can be called from FFI later
     debug!("Finished installing logger");
 }
 

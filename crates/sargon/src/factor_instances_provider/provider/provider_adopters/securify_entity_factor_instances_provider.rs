@@ -21,7 +21,8 @@ impl SecurifyEntityFactorInstancesProvider {
         matrix_of_factor_sources: MatrixOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         Self::for_entity_mfa::<AccountAddress>(
             cache_client,
             profile,
@@ -49,7 +50,8 @@ impl SecurifyEntityFactorInstancesProvider {
         matrix_of_factor_sources: MatrixOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         Self::for_entity_mfa::<IdentityAddress>(
             cache_client,
             profile,
@@ -77,7 +79,8 @@ impl SecurifyEntityFactorInstancesProvider {
         matrix_of_factor_sources: MatrixOfFactorSources,
         addresses_of_entities: IndexSet<A>,
         interactors: Arc<dyn KeysDerivationInteractors>,
-    ) -> Result<(InstancesConsumer, FactorInstancesProviderOutcome)> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         let factor_sources_to_use = matrix_of_factor_sources
             .all_factors()
             .into_iter()
@@ -126,14 +129,14 @@ impl SecurifyEntityFactorInstancesProvider {
             interactors,
         );
 
-        let (instances_consumer, outcome) = provider
+        let (instances_in_cache_consumer, outcome) = provider
             .provide(QuantifiedDerivationPreset::new(
                 DerivationPreset::mfa_entity_kind(entity_kind),
                 addresses_of_entities.len(),
             ))
             .await?;
 
-        Ok((instances_consumer, outcome.into()))
+        Ok((instances_in_cache_consumer, outcome.into()))
     }
 }
 

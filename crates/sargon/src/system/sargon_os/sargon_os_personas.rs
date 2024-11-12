@@ -28,7 +28,7 @@ impl SargonOS {
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
     pub async fn create_unsaved_unnamed_mainnet_persona_with_bdfs(
         &self,
-    ) -> Result<(Persona, InstancesConsumer)> {
+    ) -> Result<(Persona, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs()?;
         self.create_unsaved_unnamed_mainnet_persona_with_factor_source(
             bdfs.into(),
@@ -44,7 +44,7 @@ impl SargonOS {
     pub async fn create_unsaved_unnamed_mainnet_persona_with_factor_source(
         &self,
         factor_source: FactorSource,
-    ) -> Result<(Persona, InstancesConsumer)> {
+    ) -> Result<(Persona, InstancesInCacheConsumer)> {
         self.create_unsaved_persona_with_factor_source(
             factor_source,
             NetworkID::Mainnet,
@@ -58,7 +58,7 @@ impl SargonOS {
     pub async fn create_unsaved_mainnet_persona_with_bdfs(
         &self,
         name: DisplayName,
-    ) -> Result<(Persona, InstancesConsumer)> {
+    ) -> Result<(Persona, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs()?;
         self.create_unsaved_mainnet_persona_with_factor_source(
             bdfs.into(),
@@ -73,7 +73,7 @@ impl SargonOS {
         &self,
         factor_source: FactorSource,
         name: DisplayName,
-    ) -> Result<(Persona, InstancesConsumer)> {
+    ) -> Result<(Persona, InstancesInCacheConsumer)> {
         self.create_unsaved_persona_with_factor_source(
             factor_source,
             NetworkID::Mainnet,
@@ -98,7 +98,7 @@ impl SargonOS {
         &self,
         network_id: NetworkID,
         name: DisplayName,
-    ) -> Result<(Persona, InstancesConsumer)> {
+    ) -> Result<(Persona, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs()?;
         self.create_unsaved_persona_with_factor_source(
             bdfs.into(),
@@ -124,7 +124,7 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-    ) -> Result<(Persona, InstancesConsumer)> {
+    ) -> Result<(Persona, InstancesInCacheConsumer)> {
         self.create_unsaved_persona_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -141,14 +141,19 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<(
         Persona,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
-        let (factor_source_id, persona, instances_consumer, derivation_outcome) = profile
+        let (
+            factor_source_id,
+            persona,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = profile
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -163,7 +168,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((persona, instances_consumer, derivation_outcome))
+        Ok((persona, instances_in_cache_consumer, derivation_outcome))
     }
 
     /// Create a new mainnet Persona named "Unnamed" using BDFS and adds it to the active Profile.
@@ -281,7 +286,7 @@ impl SargonOS {
         name: DisplayName,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating persona.");
-        let (persona, instances_consumer, derivation_outcome) = self
+        let (persona, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -293,7 +298,7 @@ impl SargonOS {
         // First try save Persona into Profile...
         self.add_persona(persona.clone()).await?;
         // ... if success, then delete FactorInstance from cache!
-        instances_consumer.consume().await?;
+        instances_in_cache_consumer.consume().await?;
 
         info!(
             "Created persona and saved new persona into profile, address: {}",
@@ -360,7 +365,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Batch creating #{} personas.", count);
-        let (personas, instances_consumer, derivation_outcome) = self
+        let (personas, instances_in_cache_consumer, derivation_outcome) = self
             .batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -373,7 +378,7 @@ impl SargonOS {
         // First save personas into Profile...
         self.add_personas(personas.clone()).await?;
         // ... if successful, consume FactorInstances from cache!
-        instances_consumer.consume().await?;
+        instances_in_cache_consumer.consume().await?;
 
         info!(
             "Created persona and saved #{} new personas into profile",
@@ -395,7 +400,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<(Personas, InstancesConsumer)> {
+    ) -> Result<(Personas, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs()?;
         self.batch_create_unsaved_personas_with_factor_source(
             bdfs.into(),
@@ -420,7 +425,7 @@ impl SargonOS {
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
-    ) -> Result<(Personas, InstancesConsumer)> {
+    ) -> Result<(Personas, InstancesInCacheConsumer)> {
         self.batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -438,7 +443,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<(
         Personas,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
@@ -448,7 +453,7 @@ impl SargonOS {
         let (
             factor_source_id,
             personas,
-            instances_consumer,
+            instances_in_cache_consumer,
             derivation_outcome,
         ) = profile
             .create_unsaved_personas_with_factor_source_with_derivation_outcome(
@@ -469,7 +474,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((personas, instances_consumer, derivation_outcome))
+        Ok((personas, instances_in_cache_consumer, derivation_outcome))
     }
 }
 
@@ -708,13 +713,13 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_consumer_is_not_used(
+    async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_in_cache_consumer_is_not_used(
     ) {
         // ARRANGE
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
 
         // ACT
-        let (first, instances_consumer) = os
+        let (first, instances_in_cache_consumer) = os
             .with_timeout(|x| {
                 x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
             })
@@ -722,7 +727,7 @@ mod tests {
             .unwrap();
 
         // Not used!
-        drop(instances_consumer);
+        drop(instances_in_cache_consumer);
 
         let (second, _) = os
             .with_timeout(|x| {
@@ -742,7 +747,7 @@ mod tests {
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
 
         // ACT
-        let (first, instances_consumer) = os
+        let (first, instances_in_cache_consumer) = os
             .with_timeout(|x| {
                 x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
             })
@@ -750,7 +755,7 @@ mod tests {
             .unwrap();
 
         // Consume!
-        instances_consumer.consume().await.unwrap();
+        instances_in_cache_consumer.consume().await.unwrap();
 
         let (second, _) = os
             .with_timeout(|x| {

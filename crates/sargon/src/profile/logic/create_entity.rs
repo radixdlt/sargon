@@ -14,14 +14,14 @@ impl Profile {
     ) -> Result<(
         FactorSourceID,
         IdentifiedVecOf<E>,
-        InstancesConsumer,
+        InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let count = count as usize;
 
         let fsid = factor_source.factor_source_id();
 
-        let (instances_consumer, outcome) =
+        let (instances_in_cache_consumer, outcome) =
             VirtualEntityCreatingInstanceProvider::for_many_entity_vecis(
                 count,
                 E::entity_kind(),
@@ -55,6 +55,6 @@ impl Profile {
             })
             .collect::<IdentifiedVecOf<E>>();
 
-        Ok((fsid, entities, instances_consumer, outcome))
+        Ok((fsid, entities, instances_in_cache_consumer, outcome))
     }
 }
