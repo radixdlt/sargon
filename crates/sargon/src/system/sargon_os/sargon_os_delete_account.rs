@@ -131,11 +131,77 @@ impl TryFrom<AccountAuthorizedDepositor> for ResourceOrNonFungible {
 }
 
 #[cfg(test)]
-mod try_from_tests {
+mod tests {
     use crate::prelude::*;
+    use actix_rt::time::timeout;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn one_page_only() {
+        // Test the case where we need to load one page of `AccountResourcePreference` and `AccountAuthorizedDepositor`
+        let resource_preference = AccountResourcePreference::sample();
+        let authorized_depositor = AccountAuthorizedDepositor::ResourceBadge {
+            resource_address: ResourceAddress::sample(),
+        };
+        let os = boot_success(vec![
+            resource_preference_page(None, vec![resource_preference.clone()]),
+            authorized_depositor_page(None, vec![authorized_depositor.clone()]),
+        ])
+        .await;
+
+        let account_address = AccountAddress::sample();
+        let result = os
+            .create_delete_account_manifest(account_address)
+            .await
+            .unwrap();
+
+        let expected = TransactionManifest::delete_account(
+            &account_address,
+            vec![resource_preference.into()],
+            vec![authorized_depositor.try_into().unwrap()],
+        );
+
+        assert_eq!(result, expected);
+    }
+
+    /// Boots SargonOS with a mock networking driver that will return the provided responses.
+    async fn boot_success(
+        responses: Vec<MockNetworkingDriverResponse>,
+    ) -> Arc<SargonOS> {
+        let mock_driver = MockNetworkingDriver::new_with_responses(responses);
+
+        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+
+        timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+            .await
+            .unwrap()
+            .unwrap()
+    }
+
+    /// Creates a mock response for a resource preference page.
+    fn resource_preference_page(
+        cursor: impl Into<Option<String>>,
+        items: Vec<AccountResourcePreference>,
+    ) -> MockNetworkingDriverResponse {
+        MockNetworkingDriverResponse::new_success(PageResponse::new(
+            1, cursor, items,
+        ))
+    }
+
+    /// Creates a mock response for an authorized depositor page.
+    fn authorized_depositor_page(
+        cursor: impl Into<Option<String>>,
+        items: Vec<AccountAuthorizedDepositor>,
+    ) -> MockNetworkingDriverResponse {
+        MockNetworkingDriverResponse::new_success(PageResponse::new(
+            1, cursor, items,
+        ))
+    }
 
     #[test]
-    fn account_authorized_depositor() {
+    fn from_account_authorized_depositor() {
         // Test a ResourceBadge
         let resource_address = ResourceAddress::sample();
         let depositor =
