@@ -155,21 +155,25 @@ impl SargonOS {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
+        let cache_client =
+            Arc::new(self.clients.factor_instances_cache.clone());
 
+        let future = profile
+            .create_unsaved_account_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                name,
+                cache_client,
+                key_derivation_interactors,
+            );
+
+        let outcome = future.await?;
         let (
             factor_source_id,
             account,
             instances_in_cache_consumer,
             derivation_outcome,
-        ) = profile
-            .create_unsaved_account_with_factor_source_with_derivation_outcome(
-                factor_source,
-                network_id,
-                name,
-                Arc::new(self.clients.factor_instances_cache.clone()),
-                key_derivation_interactors,
-            )
-            .await?;
+        ) = outcome;
 
         // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
         // Change of `last_used_on` of FactorSource
@@ -860,7 +864,10 @@ mod tests {
 
         let second = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_account_with_bdfs()
+                x.create_unsaved_account_with_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Unnamed").unwrap(),
+                )
             })
             .await
             .unwrap();

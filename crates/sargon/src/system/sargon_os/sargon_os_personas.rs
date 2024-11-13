@@ -148,20 +148,21 @@ impl SargonOS {
 
         let profile = self.profile()?;
 
-        let (
-            factor_source_id,
-            persona,
-            instances_in_cache_consumer,
-            derivation_outcome,
-        ) = profile
+        let future = profile
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 name,
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 key_derivation_interactors,
-            )
-            .await?;
+            );
+
+        let (
+            factor_source_id,
+            persona,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = future.await?;
 
         // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
         // Change of `last_used_on` of FactorSource
