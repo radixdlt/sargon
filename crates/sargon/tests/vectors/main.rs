@@ -917,6 +917,25 @@ mod wallet_to_dapp_interaction_tests {
                 ),
             );
 
+        let pre_authorization_response_items = WalletToDappInteractionResponseItems::PreAuthorization(
+            WalletToDappInteractionPreAuthorizationResponseItems {
+                response: WalletToDappInteractionSubintentResponseItem {
+                    encoded_signed_partial_transaction: "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202201000121012007410001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12202000".to_string(),
+                }
+            }
+        );
+
+        let pre_authorization_response =
+            WalletToDappInteractionResponse::Success(
+                WalletToDappInteractionSuccessResponse::new(
+                    WalletInteractionId::from_str(
+                        "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+                    )
+                    .unwrap(),
+                    pre_authorization_response_items,
+                ),
+            );
+
         let responses = vec![
             authorized_request_response,
             unauthorized_request_response,
@@ -924,6 +943,7 @@ mod wallet_to_dapp_interaction_tests {
             transaction_response,
             account_proof_response,
             accounts_and_persona_proof_response,
+            pre_authorization_response,
         ];
 
         let encoded = serde_json::to_string(&responses).unwrap();
