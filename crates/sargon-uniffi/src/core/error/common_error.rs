@@ -731,6 +731,9 @@ pub enum CommonError {
 
     #[error("Subintent has already expired")]
     SubintentExpired = 10206,
+
+    #[error("Unexpected collection item aggregation")]
+    UnexpectedCollectionItemAggregation = 10207,
 }
 
 #[uniffi::export]

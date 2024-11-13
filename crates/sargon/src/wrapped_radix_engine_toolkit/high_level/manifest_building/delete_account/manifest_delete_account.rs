@@ -24,46 +24,26 @@ impl TransactionManifest {
         let bucket_factory = BucketFactory::default();
 
         // Transfer all the resources to the recipient address.
-        if let Some(transfers) = account_transfers.into() {
-            let recipient_address = &transfers.recipient;
-            // Transfer each fungible
-            for transfer in transfers.fungibles {
-                let resource_address = transfer.resource_address.scrypto();
-                let amount: ScryptoDecimal192 = transfer.amount.into();
+        if let Some(account_transfers) = account_transfers.into() {
+            let recipient_address = &account_transfers.recipient;
 
+            for transfer in account_transfers.transfers {
+                // Withdraw from account
                 builder = builder.withdraw_from_account(
                     account_address,
-                    resource_address,
-                    amount,
+                    transfer.resource_address,
+                    transfer.amount,
                 );
 
                 let bucket = &bucket_factory.next();
-                builder =
-                    builder.take_from_worktop(resource_address, amount, bucket);
-
-                builder = builder.try_deposit_or_abort(
-                    recipient_address,
-                    None,
+                // Take from worktop
+                builder = builder.take_from_worktop(
+                    transfer.resource_address,
+                    transfer.amount,
                     bucket,
                 );
-            }
 
-            // Transfer each non-fungible
-            for transfer in transfers.non_fungibles {
-                let resource_address = transfer.resource_address.scrypto();
-                let amount: ScryptoDecimal192 = transfer.amount.into();
-
-                // TODO: Confirm the following logic is correct for withdrawing non-fungibles by amount
-
-                builder = builder.withdraw_from_account(
-                    account_address,
-                    resource_address,
-                    amount,
-                );
-
-                let bucket = &bucket_factory.next();
-                builder = builder.take_from_worktop(resource_address, amount, bucket);
-
+                // Try deposit or abort
                 builder = builder.try_deposit_or_abort(
                     recipient_address,
                     None,
@@ -206,9 +186,9 @@ CALL_METHOD
     fn manifest_with_transfers() {
         let transfers = DeleteAccountTransfers::new(
             AccountAddress::sample_other(),
-            vec![FungibleResourcesCollectionItemGloballyAggregated::sample()],
             vec![
-                NonFungibleResourcesCollectionItemGloballyAggregated::sample(),
+                DeleteAccountTransfer::sample(),
+                DeleteAccountTransfer::sample_other(),
             ],
         );
         let manifest = SUT::delete_account(
@@ -222,6 +202,84 @@ CALL_METHOD
                 ],
             );
 
-        println!("{}", manifest.to_string());
+        manifest_eq(
+            manifest,
+            r#"
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "withdraw"
+    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+    Decimal("123.456")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+    Decimal("123.456")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_tdx_2_12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlwkwcf0")
+    "try_deposit_or_abort"
+    Bucket("bucket1")
+    Enum<0u8>()
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "withdraw"
+    Address("resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x")
+    Decimal("5")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x")
+    Decimal("5")
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_tdx_2_12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlwkwcf0")
+    "try_deposit_or_abort"
+    Bucket("bucket2")
+    Enum<0u8>()
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "securify"
+;
+TAKE_ALL_FROM_WORKTOP
+    Address("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk")
+    Bucket("bucket3")
+;
+CREATE_PROOF_FROM_BUCKET_OF_ALL
+    Bucket("bucket3")
+    Proof("proof1")
+;
+PUSH_TO_AUTHZONE
+    Proof("proof1")
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "remove_resource_preference"
+    Address("resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3")
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "remove_authorized_depositor"
+    Enum<0u8>(
+        NonFungibleGlobalId("resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x:#1#")
+    )
+;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "set_resource_preference"
+    Address("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk")
+    Enum<0u8>()
+;
+DROP_AUTH_ZONE_PROOFS;
+CALL_METHOD
+    Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+    "try_deposit_or_abort"
+    Bucket("bucket3")
+    Enum<0u8>()
+;
+            "#,
+        )
     }
 }

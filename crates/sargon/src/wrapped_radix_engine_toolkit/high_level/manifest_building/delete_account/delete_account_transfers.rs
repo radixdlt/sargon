@@ -1,25 +1,20 @@
 use crate::prelude::*;
 
+/// A struct detailing the transfers for a given account to be deleted.
 #[derive(Debug, PartialEq, Eq)]
 pub struct DeleteAccountTransfers {
     pub recipient: AccountAddress,
-    pub fungibles: Vec<FungibleResourcesCollectionItemGloballyAggregated>,
-    pub non_fungibles:
-        Vec<NonFungibleResourcesCollectionItemGloballyAggregated>,
+    pub transfers: Vec<DeleteAccountTransfer>,
 }
 
 impl DeleteAccountTransfers {
     pub fn new(
         recipient: AccountAddress,
-        fungibles: Vec<FungibleResourcesCollectionItemGloballyAggregated>,
-        non_fungibles: Vec<
-            NonFungibleResourcesCollectionItemGloballyAggregated,
-        >,
+        transfers: Vec<DeleteAccountTransfer>,
     ) -> DeleteAccountTransfers {
         DeleteAccountTransfers {
             recipient,
-            fungibles,
-            non_fungibles,
+            transfers,
         }
     }
 }
@@ -31,25 +26,21 @@ impl TryFrom<(FetchResourcesOutput, AccountAddress)>
     fn try_from(value: (FetchResourcesOutput, AccountAddress)) -> Result<Self> {
         let (fetch_resources_output, recipient) = value;
 
-        let fungibles: Vec<FungibleResourcesCollectionItemGloballyAggregated> =
-            fetch_resources_output
-                .fungibles
-                .into_iter()
-                .map(|item| {
-                    item.as_global().cloned().ok_or(CommonError::EntityNotFound)
-                })
-                .collect::<Result<_, _>>()?;
+        let fungibles = fetch_resources_output
+            .fungibles
+            .clone()
+            .into_iter()
+            .map(DeleteAccountTransfer::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let non_fungibles: Vec<
-            NonFungibleResourcesCollectionItemGloballyAggregated,
-        > = fetch_resources_output
+        let non_fungibles = fetch_resources_output
             .non_fungibles
             .into_iter()
-            .map(|item| {
-                item.as_global().cloned().ok_or(CommonError::EntityNotFound)
-            })
-            .collect::<Result<_, _>>()?;
+            .map(DeleteAccountTransfer::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Self::new(recipient, fungibles, non_fungibles))
+        let transfers = [fungibles, non_fungibles].concat();
+
+        Ok(Self::new(recipient, transfers))
     }
 }
