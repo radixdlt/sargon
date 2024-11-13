@@ -58,13 +58,13 @@ mod tests {
 
         let result = sut
             .load_all_pages(None, None, |cursor, _| {
-                let request = AccountResourcePreferencesRequest::new(
+                let request = AccountPageResourcePreferencesRequest::new(
                     account_address,
                     None,
                     cursor,
                     GATEWAY_PAGE_REQUEST_LIMIT,
                 );
-                sut.account_resource_preferences(request)
+                sut.account_page_resource_preferences(request)
             })
             .await
             .unwrap();
@@ -91,7 +91,7 @@ mod tests {
                     0 => {
                         // Verify the correct body is sent of first request
                         let expected_request =
-                            AccountResourcePreferencesRequest::new(
+                            AccountPageResourcePreferencesRequest::new(
                                 AccountAddress::sample(),
                                 LedgerStateSelector::sample(),
                                 None,
@@ -106,7 +106,7 @@ mod tests {
                     1 => {
                         // Verify the correct body is sent of second request
                         let expected_request =
-                            AccountResourcePreferencesRequest::new(
+                            AccountPageResourcePreferencesRequest::new(
                                 AccountAddress::sample(),
                                 LedgerStateSelector::new(1, None, None, None),
                                 "cursor_one".to_string(),
@@ -131,13 +131,13 @@ mod tests {
                 None,
                 LedgerStateSelector::sample(),
                 |cursor, ledger_state| {
-                    let request = AccountResourcePreferencesRequest::new(
+                    let request = AccountPageResourcePreferencesRequest::new(
                         account_address,
                         ledger_state,
                         cursor,
                         GATEWAY_PAGE_REQUEST_LIMIT,
                     );
-                    sut.account_resource_preferences(request)
+                    sut.account_page_resource_preferences(request)
                 },
             )
             .await
@@ -154,13 +154,13 @@ mod tests {
 
         let result = sut
             .load_all_pages(None, None, |cursor, _| {
-                let request = AccountResourcePreferencesRequest::new(
+                let request = AccountPageResourcePreferencesRequest::new(
                     AccountAddress::sample(),
                     None,
                     cursor,
                     GATEWAY_PAGE_REQUEST_LIMIT,
                 );
-                sut.account_resource_preferences(request)
+                sut.account_page_resource_preferences(request)
             })
             .await
             .expect_err("Expected an error");

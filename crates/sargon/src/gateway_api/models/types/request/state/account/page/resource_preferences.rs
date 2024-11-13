@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct AccountResourcePreferencesRequest {
+pub struct AccountPageResourcePreferencesRequest {
     /// Bech32m-encoded human readable version of the address.
     pub(crate) account_address: AccountAddress,
 
@@ -20,14 +20,14 @@ pub struct AccountResourcePreferencesRequest {
     pub(crate) limit_per_page: Option<u64>,
 }
 
-impl AccountResourcePreferencesRequest {
+impl AccountPageResourcePreferencesRequest {
     pub fn new(
         account_address: AccountAddress,
         at_ledger_state: impl Into<Option<LedgerStateSelector>>,
         cursor: impl Into<Option<String>>,
         limit_per_page: impl Into<Option<u64>>,
-    ) -> AccountResourcePreferencesRequest {
-        AccountResourcePreferencesRequest {
+    ) -> AccountPageResourcePreferencesRequest {
+        AccountPageResourcePreferencesRequest {
             account_address,
             at_ledger_state: at_ledger_state.into(),
             cursor: cursor.into(),

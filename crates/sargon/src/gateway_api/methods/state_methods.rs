@@ -100,13 +100,13 @@ impl GatewayClient {
             None,
             ledger_state_selector,
             |cursor, ledger_state_selector| {
-                let request = AccountResourcePreferencesRequest::new(
+                let request = AccountPageResourcePreferencesRequest::new(
                     account_address,
                     ledger_state_selector,
                     cursor,
                     GATEWAY_PAGE_REQUEST_LIMIT,
                 );
-                self.account_resource_preferences(request)
+                self.account_page_resource_preferences(request)
             },
         )
         .await
@@ -122,15 +122,145 @@ impl GatewayClient {
             None,
             ledger_state_selector,
             |cursor, ledger_state_selector| {
-                let request = AccountAuthorizedDepositorsRequest::new(
+                let request = AccountPageAuthorizedDepositorsRequest::new(
                     account_address,
                     ledger_state_selector,
                     cursor,
                     GATEWAY_PAGE_REQUEST_LIMIT,
                 );
-                self.account_authorized_depositors(request)
+                self.account_page_authorized_depositors(request)
             },
         )
         .await
+    }
+}
+
+impl GatewayClient {
+    pub async fn fetch_all_resources(
+        &self,
+        account_address: AccountAddress,
+        ledger_state_selector: LedgerStateSelector,
+    ) -> Result<FetchResourcesOutput> {
+        // Get entity details
+        let address = Address::from(account_address);
+        let response = self
+            .state_entity_details(
+                StateEntityDetailsRequest::address_ledger_state(
+                    address,
+                    ledger_state_selector,
+                ),
+            )
+            .await?;
+
+        // Find the corresponding entity among the response.
+        let Some(details) = response
+            .clone()
+            .items
+            .into_iter()
+            .find(|x| x.address == address)
+        else {
+            return Err(CommonError::EntityNotFound);
+        };
+
+        // Get the LedgerStateSelector from the response
+        let ledger_state_selector: Option<LedgerStateSelector> =
+            response.ledger_state.map(Into::into);
+
+        // Fetch all fungible items
+        let fungible =
+            if let Some(collection) = details.clone().fungible_resources {
+                self.fetch_all_fungible_items(
+                    collection,
+                    address,
+                    ledger_state_selector.clone(),
+                )
+                .await?
+            } else {
+                Vec::new()
+            };
+
+        // Fetch all non-fungible items
+        let non_fungible =
+            if let Some(collection) = details.clone().non_fungible_resources {
+                self.fetch_all_non_fungible_items(
+                    collection,
+                    address,
+                    ledger_state_selector.clone(),
+                )
+                .await?
+            } else {
+                Vec::new()
+            };
+
+        let output = FetchResourcesOutput::new(fungible, non_fungible);
+        Ok(output)
+    }
+
+    /// Given a `FungibleResourcesCollection`, fetches all the remaining pages to get all the
+    /// resources for the given `Address` and `LedgerStateSelector`. If there are no more pages to
+    /// load, it will return the list of items provided in the first page (this is, the collection).
+    ///
+    /// Returns: the list with all the `FungibleResourcesCollectionItem`.
+    async fn fetch_all_fungible_items(
+        &self,
+        collection: FungibleResourcesCollection,
+        address: Address,
+        ledger_state_selector: Option<LedgerStateSelector>,
+    ) -> Result<Vec<FungibleResourcesCollectionItem>> {
+        let mut items = collection.items;
+        if let Some(next_cursor) = collection.next_cursor {
+            let remaining = self
+                .load_all_pages(
+                    next_cursor,
+                    ledger_state_selector,
+                    |cursor, ledger_state_selector| {
+                        let request = StateEntityPageFungiblesRequest::new(
+                            address,
+                            ledger_state_selector,
+                            cursor,
+                            GATEWAY_PAGE_REQUEST_LIMIT,
+                        );
+                        self.state_entity_page_fungibles(request)
+                    },
+                )
+                .await?;
+            items.extend(remaining);
+        }
+
+        Ok(items)
+    }
+
+    /// Given a `NonFungibleResourcesCollection`, fetches all the remaining pages to get all the
+    /// resources for the given `Address` and `LedgerStateSelector`. If there are no more pages to
+    /// load, it will return the list of items provided in the first page (this is, the collection).
+    ///
+    /// Returns: the list with all the `NonFungibleResourcesCollectionItem`.
+    async fn fetch_all_non_fungible_items(
+        &self,
+        collection: NonFungibleResourcesCollection,
+        address: Address,
+        ledger_state_selector: Option<LedgerStateSelector>,
+    ) -> Result<Vec<NonFungibleResourcesCollectionItem>> {
+        let mut items = collection.items;
+        if let Some(next_cursor) = collection.next_cursor {
+            let remaining = self
+                .load_all_pages(
+                    next_cursor,
+                    ledger_state_selector,
+                    |cursor, ledger_state_selector| {
+                        let request = StateEntityPageNonFungiblesRequest::new(
+                            address,
+                            ledger_state_selector,
+                            cursor,
+                            GATEWAY_PAGE_REQUEST_LIMIT,
+                        );
+                        self.state_entity_page_non_fungibles(request)
+                    },
+                )
+                .await?;
+            items.extend(remaining);
+        }
+
+        Ok(items)
     }
 }

@@ -36,6 +36,13 @@ impl StateEntityDetailsRequest {
         }
     }
 
+    pub fn address_ledger_state(
+        address: Address,
+        at_ledger_state: LedgerStateSelector,
+    ) -> StateEntityDetailsRequest {
+        Self::new(vec![address], at_ledger_state, None)
+    }
+
     pub fn address_metadata(
         address: Address,
         explicit_metadata: Vec<MetadataKey>,

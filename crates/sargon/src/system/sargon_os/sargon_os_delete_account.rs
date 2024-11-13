@@ -28,7 +28,7 @@ impl SargonOS {
             .fetch_resource_preferences(
                 account_address,
                 &gateway_client,
-                &ledger_state,
+                ledger_state.clone(),
             )
             .await?;
 
@@ -36,8 +36,8 @@ impl SargonOS {
         let authorized_depositors = self
             .fetch_authorized_depositors(
                 account_address,
-                gateway_client,
-                ledger_state,
+                &gateway_client,
+                ledger_state.clone(),
             )
             .await?;
 
@@ -55,7 +55,7 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
         gateway_client: &GatewayClient,
-        ledger_state: &LedgerState,
+        ledger_state: LedgerState,
     ) -> Result<Vec<ScryptoAccountRemoveResourcePreferenceInput>> {
         let resource_preferences = gateway_client
             .fetch_all_account_resource_preferences(
@@ -73,7 +73,7 @@ impl SargonOS {
     async fn fetch_authorized_depositors(
         &self,
         account_address: AccountAddress,
-        gateway_client: GatewayClient,
+        gateway_client: &GatewayClient,
         ledger_state: LedgerState,
     ) -> Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>> {
         let authorized_depositors = gateway_client
@@ -84,6 +84,16 @@ impl SargonOS {
             .collect::<Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>>>()?;
 
         Ok(authorized_depositors)
+    }
+
+    async fn fetch_account_resources(
+        &self,
+        account_address: AccountAddress,
+        gateway_client: &GatewayClient,
+        ledger_state: LedgerState,
+    ) -> Result<Vec<String>> {
+        let result = vec!["something".to_string()];
+        Ok(result)
     }
 }
 
