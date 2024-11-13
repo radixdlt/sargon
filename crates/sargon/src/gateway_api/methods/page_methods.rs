@@ -22,11 +22,7 @@ impl GatewayClient {
                 api_call(cursor.clone(), ledger_state_selector.clone()).await?;
             items.extend(response.items);
             cursor = response.next_cursor;
-            if let Some(ledger_state) = response.ledger_state {
-                ledger_state_selector = Some(ledger_state.into());
-            } else {
-                ledger_state_selector = None;
-            }
+            ledger_state_selector = response.ledger_state.map(Into::into);
             more_to_load = cursor.is_some();
         }
 
