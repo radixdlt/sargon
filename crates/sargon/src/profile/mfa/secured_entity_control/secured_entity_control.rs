@@ -8,6 +8,7 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct SecuredEntityControl {
+    #[allow(dead_code)]
     #[doc(hidden)]
     #[serde(skip)]
     #[debug(skip)]

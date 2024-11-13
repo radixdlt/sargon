@@ -3,9 +3,12 @@ use crate::prelude::*;
 /// A collection of all `HierarchicalDeterministicFactorInstance`
 /// (Public Keys) which were derived from the referenced
 /// `FactorSource`s at the specified `DerivationPath`s
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, derive_more::Debug)]
 pub struct KeyDerivationOutcome {
-    count: usize, // hide ctor...
+    #[doc(hidden)]
+    #[debug(skip)]
+    #[allow(dead_code)]
+    __hidden: HiddenConstructor,
     pub factors_by_source: IndexMap<
         FactorSourceIDFromHash,
         IndexSet<HierarchicalDeterministicFactorInstance>,
@@ -20,7 +23,7 @@ impl KeyDerivationOutcome {
         >,
     ) -> Self {
         Self {
-            count: factors_by_source.len(),
+            __hidden: HiddenConstructor,
             factors_by_source,
         }
     }

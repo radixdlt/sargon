@@ -1,9 +1,12 @@
 use crate::prelude::*;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 pub struct AbstractSecurifiedEntity<
     E: IsBaseEntity + std::hash::Hash + Eq + Clone,
 > {
+    #[allow(dead_code)]
+    #[doc(hidden)]
+    #[debug(skip)]
     __hidden: HiddenConstructor,
     pub entity: E,
     pub securified_entity_control: SecuredEntityControl,

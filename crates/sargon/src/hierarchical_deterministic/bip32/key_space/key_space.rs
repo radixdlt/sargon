@@ -113,4 +113,20 @@ mod tests {
         assert!(!SUT::Unsecurified { is_hardened: false }
             .is_unsecurified_hardened());
     }
+
+    #[test]
+    fn test_str_round_trip() {
+        let rt = |s: &str, sut: SUT| {
+            let s_from_sut = sut.to_string();
+            assert_eq!(s_from_sut, s.to_owned());
+            let from_str_from_sut = SUT::from_str(&s_from_sut).unwrap();
+            let from_str_from_s = SUT::from_str(s).unwrap();
+            assert_eq!(from_str_from_sut, sut);
+            assert_eq!(from_str_from_sut, from_str_from_s);
+            assert_eq!(from_str_from_s, sut);
+        };
+        rt("S", SUT::Securified);
+        rt("", SUT::Unsecurified { is_hardened: false });
+        rt("H", SUT::Unsecurified { is_hardened: true });
+    }
 }

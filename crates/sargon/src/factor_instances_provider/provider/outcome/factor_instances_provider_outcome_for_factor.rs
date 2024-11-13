@@ -10,6 +10,8 @@ use crate::prelude::*;
 #[debug("{}", self.debug_string())]
 pub struct FactorInstancesProviderOutcomeForFactor {
     #[allow(dead_code)]
+    #[doc(hidden)]
+    #[debug(skip)]
     hidden: HiddenConstructor,
 
     /// The FactorSourceID of all the factor instances of this type.

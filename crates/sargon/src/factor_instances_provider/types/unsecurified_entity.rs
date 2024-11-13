@@ -63,18 +63,6 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
-    // #[test]
-    // fn unsecurified_persona_into_tagged_union() {
-    //     let sut = SUT::sample_other();
-    //     assert!(AccountOrPersona::from(sut).is_persona_entity());
-    // }
-
-    // #[test]
-    // fn unsecurified_account_into_tagged_union() {
-    //     let sut = SUT::sample();
-    //     assert!(AccountOrPersona::from(sut).is_account_entity());
-    // }
-
     #[test]
     fn network_id() {
         assert_eq!(SUT::sample_other().network_id(), NetworkID::Stokenet);

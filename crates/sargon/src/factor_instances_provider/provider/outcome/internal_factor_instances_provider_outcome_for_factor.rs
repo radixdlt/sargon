@@ -11,6 +11,8 @@ use crate::prelude::*;
 )]
 pub struct InternalFactorInstancesProviderOutcomeForFactor {
     #[allow(dead_code)]
+    #[doc(hidden)]
+    #[debug(skip)]
     hidden: HiddenConstructor,
 
     /// The FactorSourceID of all the factor instances of this type.

@@ -1,26 +1,19 @@
 use crate::prelude::*;
 use std::borrow::Borrow;
 
-pub trait AppendableCollection: FromIterator<Self::Element> {
-    type Element;
-    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T);
-}
-impl<V: Eq + std::hash::Hash> AppendableCollection for IndexSet<V> {
-    type Element = V;
-
-    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
-        self.extend(iter)
-    }
-}
-
-impl AppendableCollection for FactorInstances {
-    type Element = HierarchicalDeterministicFactorInstance;
-
-    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
-        self.extend(iter)
-    }
-}
-
+/// A map which value type conforms to `AppendableCollection`, this simplifies
+/// this kind of often used pattern:
+///
+/// ```ignore
+/// let items = ...; // to append
+/// let key = ...;
+///
+/// if let Some(existing) = self.get_mut(key) {
+///     existing.append(items);
+/// } else {
+///     self.insert(key.clone(), V::from_iter(items));
+/// }
+/// ```
 pub trait AppendableMap {
     type Key: Eq + std::hash::Hash + Clone;
     type AC: AppendableCollection;
@@ -38,6 +31,29 @@ pub trait AppendableMap {
         element: <Self::AC as AppendableCollection>::Element,
     ) {
         self.append_or_insert_to(key.borrow(), [element]);
+    }
+}
+
+/// A collection which we can append to, primlary used as a generic
+/// constraint for `AppendableMap`.
+pub trait AppendableCollection: FromIterator<Self::Element> {
+    type Element;
+    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T);
+}
+
+impl<V: Eq + std::hash::Hash> AppendableCollection for IndexSet<V> {
+    type Element = V;
+
+    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
+        self.extend(iter)
+    }
+}
+
+impl AppendableCollection for FactorInstances {
+    type Element = HierarchicalDeterministicFactorInstance;
+
+    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
+        self.extend(iter)
     }
 }
 
