@@ -53,3 +53,38 @@ impl HasSampleValues for LedgerState {
         Self::new("stokenet", 2, "2022-02-02T00:00:00Z", 2, 2)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = LedgerState;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        assert_eq_after_json_roundtrip(
+            &SUT::sample(),
+            r#"
+        {
+            "network": "stokenet",
+            "state_version": 1,
+            "proposer_round_timestamp": "2021-01-01T00:00:00Z",
+            "epoch": 1,
+            "round": 1
+        }
+        "#,
+        );
+    }
+}

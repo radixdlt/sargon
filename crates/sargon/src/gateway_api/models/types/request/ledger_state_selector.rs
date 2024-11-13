@@ -44,3 +44,53 @@ impl HasSampleValues for LedgerStateSelector {
         Self::new(2, "2022-02-02T00:00:00Z".to_string(), 2, 2)
     }
 }
+
+impl From<LedgerState> for LedgerStateSelector {
+    fn from(ledger_state: LedgerState) -> Self {
+        Self::new(ledger_state.state_version, None, None, None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = LedgerStateSelector;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        assert_eq_after_json_roundtrip(
+            &SUT::sample(),
+            r#"
+        {
+            "state_version": 1,
+            "timestamp": "2021-01-01T00:00:00Z",
+            "epoch": 1,
+            "round": 1
+        }
+        "#,
+        );
+    }
+
+    #[test]
+    fn from_ledger_state() {
+        let ledger_state = LedgerState::sample();
+        let sut = SUT::from(ledger_state.clone());
+        assert_eq!(sut.state_version, Some(ledger_state.state_version));
+        assert_eq!(sut.timestamp, None);
+        assert_eq!(sut.epoch, None);
+        assert_eq!(sut.round, None);
+    }
+}

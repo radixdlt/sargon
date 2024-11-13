@@ -19,17 +19,20 @@ impl SargonOS {
             network_id,
         );
 
-        // TODO: Fetch current Ledger state from status endpoint
+        let ledger_state = gateway_client.gateway_status().await?.ledger_state;
 
         let resource_preferences = gateway_client
-            .fetch_all_account_resource_preferences(account_address, None)
+            .fetch_all_account_resource_preferences(
+                account_address,
+                ledger_state.clone().into(),
+            )
             .await?
             .into_iter()
             .map(ScryptoAccountRemoveResourcePreferenceInput::from)
             .collect();
 
         let authorized_depositors = gateway_client
-            .fetch_all_account_authorized_depositors(account_address, None)
+            .fetch_all_account_authorized_depositors(account_address, ledger_state.into())
             .await?
             .into_iter()
             .map(ScryptoAccountRemoveAuthorizedDepositorInput::try_from)
@@ -108,9 +111,12 @@ mod tests {
         // Test the manifest is correctly built
 
         // Simulate two empty responses for resource preferences and authorized depositors.
-        let os =
-            boot_success(vec![empty_page_response(), empty_page_response()])
-                .await;
+        let os = boot_success(vec![
+            gateway_status_response(),
+            empty_page_response(),
+            empty_page_response(),
+        ])
+        .await;
 
         let account_address = AccountAddress::sample();
         let result = os
@@ -139,6 +145,13 @@ mod tests {
             .await
             .unwrap()
             .unwrap()
+    }
+
+    /// Creates a mock response for GatewayStatusResponse.
+    fn gateway_status_response() -> MockNetworkingDriverResponse {
+        MockNetworkingDriverResponse::new_success(GatewayStatusResponse {
+            ledger_state: LedgerState::sample(),
+        })
     }
 
     /// Creates a mock response for an empty PageResponse.

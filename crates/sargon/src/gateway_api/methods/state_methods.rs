@@ -92,14 +92,15 @@ impl GatewayClient {
     pub async fn fetch_all_account_resource_preferences(
         &self,
         account_address: AccountAddress,
-        at_ledger_state: Option<LedgerStateSelector>,
+        at_ledger_state: LedgerStateSelector,
     ) -> Result<Vec<AccountResourcePreference>> {
         self.load_all_pages(|response_cursor, response_ledger_state| {
-            let selector = if response_ledger_state.is_some() {
-                response_ledger_state
-            } else {
-                at_ledger_state.clone()
-            };
+            let selector =
+                if let Some(response_ledger_state) = response_ledger_state {
+                    response_ledger_state
+                } else {
+                    at_ledger_state.clone()
+                };
             let request = AccountResourcePreferencesRequest::new(
                 account_address,
                 selector,
@@ -115,14 +116,15 @@ impl GatewayClient {
     pub async fn fetch_all_account_authorized_depositors(
         &self,
         account_address: AccountAddress,
-        at_ledger_state: Option<LedgerStateSelector>,
+        at_ledger_state: LedgerStateSelector,
     ) -> Result<Vec<AccountAuthorizedDepositor>> {
         self.load_all_pages(|response_cursor, response_ledger_state| {
-            let selector = if response_ledger_state.is_some() {
-                response_ledger_state
-            } else {
-                at_ledger_state.clone()
-            };
+            let selector =
+                if let Some(response_ledger_state) = response_ledger_state {
+                    response_ledger_state
+                } else {
+                    at_ledger_state.clone()
+                };
             let request = AccountAuthorizedDepositorsRequest::new(
                 account_address,
                 selector,

@@ -23,7 +23,7 @@ impl GatewayClient {
             items.extend(response.items);
             cursor = response.next_cursor;
             if let Some(ledger_state) = response.ledger_state {
-                ledger_state_selector = Some(ledger_state.to_selector());
+                ledger_state_selector = Some(ledger_state.into());
             } else {
                 ledger_state_selector = None;
             }
@@ -31,12 +31,6 @@ impl GatewayClient {
         }
 
         Ok(items)
-    }
-}
-
-impl LedgerState {
-    pub fn to_selector(&self) -> LedgerStateSelector {
-        LedgerStateSelector::new(self.state_version, None, None, None)
     }
 }
 
