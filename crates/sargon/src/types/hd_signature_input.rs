@@ -60,7 +60,7 @@ mod tests {
     #[test]
     fn hash_of_samples() {
         assert_eq!(
-            IndexSet::<Sut>::from_iter([
+            IndexSet::<SUT>::from_iter([
                 SUT::sample(),
                 SUT::sample_other(),
                 SUT::sample(),

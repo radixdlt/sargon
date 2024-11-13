@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::<Sut>::from_iter([
+            HashSet::<SUT>::from_iter([
                 SUT::sample(),
                 SUT::sample(),
                 SUT::sample_other(),

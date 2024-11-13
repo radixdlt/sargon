@@ -409,7 +409,7 @@ mod tests {
 
     #[test]
     fn as_bip44_path() {
-        let path: Sut = BIP44LikePath::sample().into();
+        let path: SUT = BIP44LikePath::sample().into();
         assert_eq!(path.as_bip44_like().unwrap(), &BIP44LikePath::sample());
     }
 
@@ -435,7 +435,7 @@ mod tests {
 
     #[test]
     fn derivation_path_identity() {
-        let derivation_path: Sut = IdentityPath::sample().into();
+        let derivation_path: SUT = IdentityPath::sample().into();
         assert_eq!(derivation_path, derivation_path.derivation_path());
     }
 
@@ -483,7 +483,7 @@ mod tests {
     #[test]
     fn json_bip44like_account_hardened() {
         let path = BIP44LikePath::sample_other();
-        let model: Sut = path.into();
+        let model: SUT = path.into();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -498,7 +498,7 @@ mod tests {
     #[test]
     fn json_bip44like_account_unhardened() {
         let path = BIP44LikePath::sample();
-        let model: Sut = path.into();
+        let model: SUT = path.into();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -519,7 +519,7 @@ mod tests {
             "path": "m/44H/1022H/0H/0/1H"
         }
         "#;
-        let sut = serde_json::from_str::<Sut>(json).unwrap();
+        let sut = serde_json::from_str::<SUT>(json).unwrap();
         assert_eq!(
             sut,
             SUT::Bip44Like {

@@ -313,7 +313,7 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::<Sut>::from_iter([
+            HashSet::<SUT>::from_iter([
                 SUT::sample(),
                 SUT::sample(),
                 SUT::sample_other(),
@@ -430,7 +430,7 @@ mod tests {
     #[test]
     fn from_str_valid_0_unhardened() {
         assert_eq!(
-            "0".parse::<Sut>().unwrap(),
+            "0".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(0).unwrap()
         );
     }
@@ -438,7 +438,7 @@ mod tests {
     #[test]
     fn from_str_valid_1_unhardened() {
         assert_eq!(
-            "1".parse::<Sut>().unwrap(),
+            "1".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1).unwrap()
         );
     }
@@ -446,7 +446,7 @@ mod tests {
     #[test]
     fn from_str_valid_0_hardened_canonical() {
         assert_eq!(
-            "0H".parse::<Sut>().unwrap(),
+            "0H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
@@ -454,7 +454,7 @@ mod tests {
     #[test]
     fn from_str_valid_1_hardened_canonical() {
         assert_eq!(
-            "1H".parse::<Sut>().unwrap(),
+            "1H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
@@ -462,7 +462,7 @@ mod tests {
     #[test]
     fn from_str_valid_2_hardened_non_canonical() {
         assert_eq!(
-            "2'".parse::<Sut>().unwrap(),
+            "2'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
@@ -470,7 +470,7 @@ mod tests {
     #[test]
     fn from_str_valid_3_hardened_non_canonical() {
         assert_eq!(
-            "3'".parse::<Sut>().unwrap(),
+            "3'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
@@ -478,7 +478,7 @@ mod tests {
     #[test]
     fn from_str_valid_max() {
         assert_eq!(
-            "2147483647".parse::<Sut>().unwrap(),
+            "2147483647".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(U31_MAX).unwrap()
         );
     }
@@ -526,9 +526,9 @@ mod tests {
 
     #[test]
     fn from_str_invalid() {
-        assert!("".parse::<Sut>().is_err());
-        assert!("foobar".parse::<Sut>().is_err());
-        assert!("987654321987654321".parse::<Sut>().is_err());
+        assert!("".parse::<SUT>().is_err());
+        assert!("foobar".parse::<SUT>().is_err());
+        assert!("987654321987654321".parse::<SUT>().is_err());
     }
 
     #[test]
@@ -608,10 +608,10 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<Sut>(json!(""));
-        assert_json_value_fails::<Sut>(json!("^"));
-        assert_json_value_fails::<Sut>(json!("2X"));
-        assert_json_value_fails::<Sut>(json!("   "));
+        assert_json_value_fails::<SUT>(json!(""));
+        assert_json_value_fails::<SUT>(json!("^"));
+        assert_json_value_fails::<SUT>(json!("2X"));
+        assert_json_value_fails::<SUT>(json!("   "));
     }
 
     #[test]

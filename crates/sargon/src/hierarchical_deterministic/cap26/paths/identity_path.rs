@@ -241,14 +241,14 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<Sut>(json!(""));
-        assert_json_value_fails::<Sut>(json!("foobar"));
-        assert_json_value_fails::<Sut>(json!("^"));
-        assert_json_value_fails::<Sut>(json!("S"));
-        assert_json_value_fails::<Sut>(json!("2"));
-        assert_json_value_fails::<Sut>(json!("2'"));
-        assert_json_value_fails::<Sut>(json!("2X"));
-        assert_json_value_fails::<Sut>(json!("   "));
+        assert_json_value_fails::<SUT>(json!(""));
+        assert_json_value_fails::<SUT>(json!("foobar"));
+        assert_json_value_fails::<SUT>(json!("^"));
+        assert_json_value_fails::<SUT>(json!("S"));
+        assert_json_value_fails::<SUT>(json!("2"));
+        assert_json_value_fails::<SUT>(json!("2'"));
+        assert_json_value_fails::<SUT>(json!("2X"));
+        assert_json_value_fails::<SUT>(json!("   "));
     }
 
     #[test]

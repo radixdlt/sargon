@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::<Sut>::from_iter([
+            HashSet::<SUT>::from_iter([
                 SUT::sample(),
                 SUT::sample(),
                 SUT::sample_other(),
@@ -185,18 +185,18 @@ mod tests {
 
     #[test]
     fn from_str_valid_0() {
-        assert_eq!("0".parse::<Sut>().unwrap(), SUT::ZERO);
+        assert_eq!("0".parse::<SUT>().unwrap(), SUT::ZERO);
     }
 
     #[test]
     fn from_str_valid_1() {
-        assert_eq!("1".parse::<Sut>().unwrap(), SUT::ONE);
+        assert_eq!("1".parse::<SUT>().unwrap(), SUT::ONE);
     }
 
     #[test]
     fn from_str_valid_max() {
         assert_eq!(
-            "1073741823".parse::<Sut>().unwrap(),
+            "1073741823".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U30_MAX).unwrap()
         );
     }
@@ -229,13 +229,13 @@ mod tests {
 
     #[test]
     fn from_str_invalid() {
-        assert!("".parse::<Sut>().is_err());
-        assert!("foobar".parse::<Sut>().is_err());
-        assert!("1S".parse::<Sut>().is_err());
-        assert!("1^".parse::<Sut>().is_err());
-        assert!("1H".parse::<Sut>().is_err());
-        assert!("1'".parse::<Sut>().is_err());
-        assert!("987654321987654321".parse::<Sut>().is_err());
+        assert!("".parse::<SUT>().is_err());
+        assert!("foobar".parse::<SUT>().is_err());
+        assert!("1S".parse::<SUT>().is_err());
+        assert!("1^".parse::<SUT>().is_err());
+        assert!("1H".parse::<SUT>().is_err());
+        assert!("1'".parse::<SUT>().is_err());
+        assert!("987654321987654321".parse::<SUT>().is_err());
     }
 
     #[test]
@@ -293,13 +293,13 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<Sut>(json!(""));
-        assert_json_value_fails::<Sut>(json!("^"));
-        assert_json_value_fails::<Sut>(json!("S"));
-        assert_json_value_fails::<Sut>(json!("2H"));
-        assert_json_value_fails::<Sut>(json!("2'"));
-        assert_json_value_fails::<Sut>(json!("2X"));
-        assert_json_value_fails::<Sut>(json!("   "));
+        assert_json_value_fails::<SUT>(json!(""));
+        assert_json_value_fails::<SUT>(json!("^"));
+        assert_json_value_fails::<SUT>(json!("S"));
+        assert_json_value_fails::<SUT>(json!("2H"));
+        assert_json_value_fails::<SUT>(json!("2'"));
+        assert_json_value_fails::<SUT>(json!("2X"));
+        assert_json_value_fails::<SUT>(json!("   "));
     }
     #[test]
     fn add_zero() {
