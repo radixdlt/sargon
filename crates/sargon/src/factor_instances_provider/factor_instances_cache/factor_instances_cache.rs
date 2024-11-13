@@ -101,106 +101,19 @@ pub struct FactorInstancesCache {
     /// PER FactorSource PER IndexAgnosticPath FactorInstances (matching that IndexAgnosticPath)
     map: RwLock<Storage>,
 }
+
 pub type Storage = IndexMap<
     FactorSourceIDFromHash,
     IndexMap<IndexAgnosticPath, FactorInstances>,
 >;
 
-pub type DenseKeyStorage = IndexMap<
-    FactorSourceIDFromHashDenseKey,
-    IndexMap<IndexAgnosticPath, IndexSet<HierarchicalDeterministicPublicKey>>,
->;
-
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct FactorInstancesCacheSnapshot(pub DenseKeyStorage);
-impl FactorInstancesCacheSnapshot {
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-impl From<FactorInstancesCacheSnapshot> for Storage {
-    fn from(value: FactorInstancesCacheSnapshot) -> Self {
-        value
-            .0
-            .into_iter()
-            .map(|(k, v)| {
-                let key = FactorSourceIDFromHash::from(k);
-                let value = v.into_iter().map(|(l, u)| {
-                    (
-                        l,
-                        u.into_iter()
-                            .map(|x| HierarchicalDeterministicFactorInstance::new(key, x))
-                            .collect::<FactorInstances>(),
-                    )
-                }).collect::<IndexMap<IndexAgnosticPath, FactorInstances>>();
-                (key, value)
-            })
-            .collect::<Storage>()
-    }
-}
-impl From<FactorInstancesCacheSnapshot> for FactorInstancesCache {
-    fn from(value: FactorInstancesCacheSnapshot) -> Self {
+impl FactorInstancesCache {
+    pub fn with_storage(storage: Storage) -> Self {
         Self {
-            map: RwLock::new(Storage::from(value)),
+            map: RwLock::new(storage),
         }
     }
-}
-impl From<Storage> for FactorInstancesCacheSnapshot {
-    fn from(value: Storage) -> Self {
-        Self(
-            value
-                .into_iter()
-                .map(|(k, v)| {
-                    let key = FactorSourceIDFromHashDenseKey::from(k);
-                    let value = v
-                        .into_iter()
-                        .map(|(l, u)| {
-                            (
-                                    l,
-                                    u.into_iter()
-                                        .map(|x| x.hd_public_key())
-                                        .collect::<IndexSet<
-                                        HierarchicalDeterministicPublicKey,
-                                    >>(),
-                                )
-                        })
-                        .collect::<IndexMap<
-                            IndexAgnosticPath,
-                            IndexSet<HierarchicalDeterministicPublicKey>,
-                        >>();
-                    (key, value)
-                })
-                .collect::<DenseKeyStorage>(),
-        )
-    }
-}
 
-#[derive(
-    Debug,
-    PartialEq,
-    Eq,
-    Clone,
-    Hash,
-    derive_more::Display,
-    derive_more::FromStr,
-    SerializeDisplay,
-    DeserializeFromStr,
-)]
-pub struct FactorSourceIDFromHashDenseKey(FactorSourceIDFromHash);
-
-impl From<FactorSourceIDFromHash> for FactorSourceIDFromHashDenseKey {
-    fn from(value: FactorSourceIDFromHash) -> Self {
-        Self(value)
-    }
-}
-impl From<FactorSourceIDFromHashDenseKey> for FactorSourceIDFromHash {
-    fn from(value: FactorSourceIDFromHashDenseKey) -> Self {
-        value.0
-    }
-}
-
-impl FactorInstancesCache {
     pub fn clone_snapshot(&self) -> Self {
         Self {
             map: RwLock::new(self.map.read().unwrap().clone()),
