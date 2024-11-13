@@ -3,13 +3,13 @@
 use std::ops::{Add, AddAssign};
 
 impl SargonOS {
-    async fn with_bdfs() -> (Arc<Self>, FactorSource) {
+    pub(crate) async fn with_bdfs() -> (Arc<Self>, FactorSource) {
         let os = Self::fast_boot().await;
         let bdfs = os.bdfs().unwrap();
         (os, bdfs.into())
     }
 
-    async fn create_and_save_new_mainnet_account_with_derivation_outcome(
+    pub(crate) async fn create_and_save_new_mainnet_account_with_derivation_outcome(
         &self,
         name: impl AsRef<str>,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
@@ -17,7 +17,7 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
     }
 
-    async fn create_and_save_new_mainnet_persona(
+    pub(crate) async fn create_and_save_new_mainnet_persona(
         &self,
         name: impl AsRef<str>,
     ) -> Result<Persona> {
@@ -26,7 +26,7 @@ impl SargonOS {
             .map(|(p, _)| p)
     }
 
-    async fn create_and_save_new_mainnet_account(
+    pub(crate) async fn create_and_save_new_mainnet_account(
         &self,
         name: impl AsRef<str>,
     ) -> Result<Account> {
@@ -35,7 +35,7 @@ impl SargonOS {
             .map(|(a, _)| a)
     }
 
-    async fn create_and_save_new_persona_with_factor_with_derivation_outcome(
+    pub(crate) async fn create_and_save_new_persona_with_factor_with_derivation_outcome(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -45,7 +45,7 @@ impl SargonOS {
         self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, display_name).await
     }
 
-    async fn create_and_save_new_account_with_factor_with_derivation_outcome(
+    pub(crate) async fn create_and_save_new_account_with_factor_with_derivation_outcome(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -55,7 +55,7 @@ impl SargonOS {
         self.create_and_save_new_account_with_factor_source_with_derivation_outcome(factor_source, network_id, display_name).await
     }
 
-    async fn create_and_save_new_mainnet_persona_with_derivation_outcome(
+    pub(crate) async fn create_and_save_new_mainnet_persona_with_derivation_outcome(
         &self,
         name: impl AsRef<str>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
@@ -65,7 +65,7 @@ impl SargonOS {
 
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
-    async fn __OFFLINE_ONLY_securify_account_and_save_to_profile_and_secure_storage(
+    pub(crate) async fn __OFFLINE_ONLY_securify_account_and_save_to_profile_and_secure_storage(
         &self,
         account_address: AccountAddress,
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,

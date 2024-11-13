@@ -717,12 +717,16 @@ mod tests {
     async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_in_cache_consumer_is_not_used(
     ) {
         // ARRANGE
-        let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
+        let (os, bdfs) = SUT::with_bdfs().await;
 
         // ACT
         let (first, instances_in_cache_consumer) = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+                x.create_unsaved_persona_with_factor_source(
+                    bdfs.clone(),
+                    NetworkID::Mainnet,
+                    DisplayName::new("Unnamed").unwrap(),
+                )
             })
             .await
             .unwrap();
@@ -732,7 +736,10 @@ mod tests {
 
         let (second, _) = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+                x.create_unsaved_persona_with_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Unnamed").unwrap(),
+                )
             })
             .await
             .unwrap();
