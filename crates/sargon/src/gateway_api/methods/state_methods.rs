@@ -92,19 +92,13 @@ impl GatewayClient {
     pub async fn fetch_all_account_resource_preferences(
         &self,
         account_address: AccountAddress,
-        at_ledger_state: LedgerStateSelector,
+        ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountResourcePreference>> {
-        self.load_all_pages(|response_cursor, response_ledger_state| {
-            let selector =
-                if let Some(response_ledger_state) = response_ledger_state {
-                    response_ledger_state
-                } else {
-                    at_ledger_state.clone()
-                };
+        self.load_all_pages(None, ledger_state_selector, |cursor, ledger_state_selector| {
             let request = AccountResourcePreferencesRequest::new(
                 account_address,
-                selector,
-                response_cursor,
+                ledger_state_selector,
+                cursor,
                 GATEWAY_PAGE_REQUEST_LIMIT,
             );
             self.account_resource_preferences(request)
@@ -116,19 +110,13 @@ impl GatewayClient {
     pub async fn fetch_all_account_authorized_depositors(
         &self,
         account_address: AccountAddress,
-        at_ledger_state: LedgerStateSelector,
+        ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountAuthorizedDepositor>> {
-        self.load_all_pages(|response_cursor, response_ledger_state| {
-            let selector =
-                if let Some(response_ledger_state) = response_ledger_state {
-                    response_ledger_state
-                } else {
-                    at_ledger_state.clone()
-                };
+        self.load_all_pages(None, ledger_state_selector, |cursor, ledger_state_selector| {
             let request = AccountAuthorizedDepositorsRequest::new(
                 account_address,
-                selector,
-                response_cursor,
+                ledger_state_selector,
+                cursor,
                 GATEWAY_PAGE_REQUEST_LIMIT,
             );
             self.account_authorized_depositors(request)

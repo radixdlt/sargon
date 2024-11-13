@@ -159,7 +159,7 @@ mod tests {
 
         let account_address = AccountAddress::sample();
         let result = os
-            .create_delete_account_manifest(account_address)
+            .create_delete_account_manifest(account_address, None)
             .await
             .unwrap();
 

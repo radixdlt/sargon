@@ -8,15 +8,20 @@ impl GatewayClient {
     /// corresponding API call.
     ///
     /// Returns: A collection of the items from all pages.
-    pub async fn load_all_pages<T, F, Fut>(&self, api_call: F) -> Result<Vec<T>>
+    pub async fn load_all_pages<T, F, Fut>(
+        &self,
+        cursor: impl Into<Option<String>>,
+        ledger_state_selector: impl Into<Option<LedgerStateSelector>>,
+        api_call: F,
+    ) -> Result<Vec<T>>
     where
         F: Fn(Option<String>, Option<LedgerStateSelector>) -> Fut,
         Fut: Future<Output = Result<PageResponse<T>>>,
     {
         let mut items: Vec<T> = Vec::new();
         let mut more_to_load = true;
-        let mut cursor: Option<String> = None;
-        let mut ledger_state_selector: Option<LedgerStateSelector> = None;
+        let mut cursor = cursor.into();
+        let mut ledger_state_selector = ledger_state_selector.into();
         while more_to_load {
             let response =
                 api_call(cursor.clone(), ledger_state_selector.clone()).await?;
@@ -52,7 +57,7 @@ mod tests {
         let account_address = AccountAddress::sample();
 
         let result = sut
-            .load_all_pages(|cursor, _| {
+            .load_all_pages(None, None, |cursor, _| {
                 let request = AccountResourcePreferencesRequest::new(
                     account_address,
                     None,
@@ -88,7 +93,7 @@ mod tests {
                         let expected_request =
                             AccountResourcePreferencesRequest::new(
                                 AccountAddress::sample(),
-                                None,
+                                LedgerStateSelector::sample(),
                                 None,
                                 GATEWAY_PAGE_REQUEST_LIMIT,
                             );
@@ -122,7 +127,7 @@ mod tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(|cursor, ledger_state| {
+            .load_all_pages(None, LedgerStateSelector::sample(), |cursor, ledger_state| {
                 let request = AccountResourcePreferencesRequest::new(
                     account_address,
                     ledger_state,
@@ -144,7 +149,7 @@ mod tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(|cursor, _| {
+            .load_all_pages(None, None, |cursor, _| {
                 let request = AccountResourcePreferencesRequest::new(
                     AccountAddress::sample(),
                     None,
