@@ -349,15 +349,6 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn batch_create_many_personas_with_factor_source_then_save_once(
-        &self,
-        factor_source: FactorSource,
-        count: u16,
-        network_id: NetworkID,
-        name_prefix: String,
-    ) -> Result<Personas> {
-        self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(factor_source, count, network_id, name_prefix).await.map(|(x, _) |x )
-    }
     pub async fn batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
         &self,
         factor_source: FactorSource,

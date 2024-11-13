@@ -440,19 +440,6 @@ impl SargonOS {
             // tarpaulin will incorrectly flag next line is missed
             .await
     }
-
-    /// Tries to load the  `MnemonicWithPassphrase` for the main "Babylon"
-    /// `DeviceFactorSource` from secure storage.
-    pub async fn main_bdfs_mnemonic_with_passphrase(
-        &self,
-    ) -> Result<MnemonicWithPassphrase> {
-        let bdfs = self
-            .profile_state_holder
-            .access_profile_with(|p| p.bdfs())?;
-        self.mnemonic_with_passphrase_of_device_factor_source_by_id(&bdfs.id)
-            // tarpaulin will incorrectly flag next line is missed
-            .await
-    }
 }
 
 #[allow(unused)]
@@ -470,84 +457,6 @@ impl SargonOS {
             .await
             .unwrap()
     }
-
-    // pub(super) async fn new_mainnet_account_with_bdfs(
-    //     &mut self,
-    //     name: impl AsRef<str>,
-    // ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-    //     self.new_account_with_bdfs(NetworkID::Mainnet, name).await
-    // }
-
-    // pub(super) async fn new_account_with_bdfs(
-    //     &mut self,
-    //     network: NetworkID,
-    //     name: impl AsRef<str>,
-    // ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-    //     let bdfs = self.bdfs().unwrap();
-    //     self.new_account(bdfs.into(), network, name).await
-    // }
-
-    // pub(super) async fn new_account(
-    //     &mut self,
-    //     factor_source: FactorSource,
-    //     network: NetworkID,
-    //     name: impl AsRef<str>,
-    // ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-    //     // self.new_entity(factor_source, network, name).await
-    //     self.create_and_save_new_account(network_id, name)
-    // }
-    /*
-    pub(super) async fn new_entity<E: IsEntity>(
-        &mut self,
-        factor_source: FactorSource,
-        network: NetworkID,
-        name: impl AsRef<str>,
-    ) -> Result<(E, FactorInstancesProviderOutcomeForFactor)>
-    {
-        let interactors = self
-            .init_keys_derivation_interactor_if_needed()
-            .await
-            .unwrap();
-        let profile_snapshot = self.profile()?;
-        let outcome = VirtualEntityCreatingInstanceProvider::for_entity_veci(
-            E::entity_kind(),
-            &self.clients.factor_instances_cache,
-            Some(&profile_snapshot),
-            factor_source.clone(),
-            network,
-            interactors,
-        )
-        .await
-        .unwrap();
-
-        let outcome_for_factor = outcome;
-
-        let instances_to_use_directly =
-            outcome_for_factor.clone().to_use_directly.clone();
-
-        assert_eq!(instances_to_use_directly.len(), 1);
-        let instance = instances_to_use_directly.first().unwrap();
-        let veci = HDFactorInstanceTransactionSigning::<E::Path>::try_from_factor_instance(instance)?;
-        let name = name.as_ref().to_owned();
-        let display_name = DisplayName::new(name)?;
-        let entity = E::with_veci_and_name(veci, display_name);
-
-
-        // self.add_account(account)
-        // let security_state = EntitySecurityState::Unsecured(instance);
-        // let entity =
-        //     E::new(name, address, security_state, DepositRule::default());
-        // self.profile
-        //     .try_write()
-        //     .unwrap()
-        //     .insert_entities(IndexSet::just(Into::<AccountOrPersona>::into(
-        //         entity.clone(),
-        //     )))
-        //     .unwrap();
-
-        // Ok((entity, outcome_for_factor))
-    }
-    */
 }
 
 #[cfg(test)]
@@ -574,6 +483,47 @@ mod tests {
             loaded.factor_source_id(),
             FactorSourceIDFromHash::new_for_device(&mwp).into()
         );
+        assert_eq!(
+            os.factor_sources().unwrap(),
+            FactorSources::just(FactorSource::from(loaded))
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_add_debug_factor_sources() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let added = os.debug_add_all_sample_factor_sources().await.unwrap();
+
+        // ASSERT
+        assert!(os
+            .factor_sources()
+            .unwrap()
+            .into_iter()
+            .map(|f| f.id())
+            .collect::<HashSet<_>>()
+            .is_superset(&added.into_iter().collect::<HashSet<_>>()));
+    }
+
+    #[actix_rt::test]
+    async fn test_load_private_device_factor_source_by_id() {
+        // ARRANGE
+        let mwp = MnemonicWithPassphrase::sample();
+        let factor_source_id = FactorSourceIDFromHash::new_for_device(&mwp);
+        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
+
+        // ACT
+        let private = os
+            .with_timeout(|x| {
+                x.load_private_device_factor_source_by_id(&factor_source_id)
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(private.mnemonic_with_passphrase, mwp);
     }
 
     #[actix_rt::test]

@@ -360,15 +360,6 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn batch_create_many_accounts_with_factor_source_then_save_once(
-        &self,
-        factor_source: FactorSource,
-        count: u16,
-        network_id: NetworkID,
-        name_prefix: String,
-    ) -> Result<Accounts> {
-        self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(factor_source, count, network_id, name_prefix).await.map(|(x, _)| x)
-    }
     pub async fn batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
         &self,
         factor_source: FactorSource,
@@ -682,31 +673,6 @@ impl SargonOS {
 
 // # Securify
 impl SargonOS {
-    /// Cfg test since a proper production ready impl should have used the
-    /// securify_entity_factor_instances_provider before consuming the instances
-    /// in the cache.
-    #[allow(dead_code)]
-    #[cfg(test)]
-    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_with_derivation_outcome<
-        A: IsEntityAddress,
-    >(
-        &self,
-        addresses_of_entities: IndexSet<A>,
-        security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
-    ) -> Result<(
-        IndexMap<A, SecurityStructureOfFactorInstances>,
-        FactorInstancesProviderOutcome,
-    )> {
-        let (security_structures_of_factor_instances, instances_in_cache_consumer, outcome) = self
-        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            addresses_of_entities,
-            security_structure_of_factor_sources,
-        )
-        .await?;
-        instances_in_cache_consumer.consume().await?;
-        Ok((security_structures_of_factor_instances, outcome))
-    }
-
     #[allow(dead_code)]
     #[cfg(test)]
     pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
@@ -988,6 +954,71 @@ mod tests {
             .map(|i| u32::from(i.index_in_local_key_space()))
             .collect_vec();
         assert_eq!(indices, (0u32..n).collect_vec());
+    }
+
+    #[actix_rt::test]
+    async fn test_batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
+
+        // ACT
+        let network = NetworkID::Mainnet;
+        let n = 50;
+        let accounts = os
+            .with_timeout(|x| {
+                x.batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+                    network,
+                    n as u16,
+                    "acco".to_owned()
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(accounts.len(), n);
+        assert_eq!(
+            HashSet::from_iter(
+                accounts.clone().into_iter().map(|a| a.address())
+            )
+            .len(),
+            n
+        );
+
+        // First Accounts derivation entity index
+        assert_eq!(
+            accounts
+                .first()
+                .unwrap()
+                .try_get_unsecured_control()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index(),
+            HDPathComponent::from_local_key_space(
+                0,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+        );
+
+        // Last Accounts derivation entity index
+        assert_eq!(
+            accounts
+                .items()
+                .into_iter()
+                .last()
+                .unwrap()
+                .try_get_unsecured_control()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index(),
+            HDPathComponent::from_local_key_space(
+                (n as u32) - 1,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+        );
     }
 
     #[actix_rt::test]

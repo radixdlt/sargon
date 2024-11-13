@@ -87,8 +87,7 @@ impl SargonOS {
             }
             EntitySecurityState::Securified { value } => {
                 veci = value.veci.clone().unwrap();
-                access_controller_address =
-                    value.access_controller_address.clone();
+                access_controller_address = value.access_controller_address;
             }
         };
 
@@ -115,7 +114,7 @@ impl SargonOS {
     ) -> Result<(Accounts, FactorInstancesProviderOutcome)> {
         account_addresses
             .iter()
-            .for_each(|a| assert!(self.account_by_address(a.clone()).is_ok()));
+            .for_each(|a| assert!(self.account_by_address(*a).is_ok()));
 
         let (security_structures_of_factor_instances, instances_in_cache_consumer, derivation_outcome) = self.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
             account_addresses.clone(),
@@ -875,7 +874,7 @@ async fn test_securified_accounts() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![
@@ -914,7 +913,7 @@ async fn test_securified_accounts() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![
@@ -994,7 +993,7 @@ async fn test_securified_accounts() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![HDPathComponent::Securified(SecurifiedU30::ZERO),]
@@ -1039,7 +1038,7 @@ async fn test_securified_accounts() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![
@@ -1573,7 +1572,7 @@ async fn create_single_account() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![HDPathComponent::Securified(SecurifiedU30::ZERO),]
@@ -1670,7 +1669,7 @@ async fn securified_personas() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![
@@ -1710,7 +1709,7 @@ async fn securified_personas() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![
@@ -1795,7 +1794,7 @@ async fn securified_personas() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![HDPathComponent::Securified(SecurifiedU30::ZERO),]
@@ -1839,7 +1838,7 @@ async fn securified_personas() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![
@@ -2029,7 +2028,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     ] {
         assert_eq!(
             factors_for_role
-                .into_iter()
+                .iter()
                 .map(|f| f.derivation_entity_index())
                 .collect_vec(),
             vec![HDPathComponent::Securified(
@@ -2240,7 +2239,7 @@ async fn securified_accounts_asymmetric_indices() {
             .primary_role
             .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .map(|f| (f.factor_source_id, f.derivation_entity_index()))
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
@@ -2305,7 +2304,7 @@ async fn securified_accounts_asymmetric_indices() {
             .primary_role
             .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .map(|f| (f.factor_source_id, f.derivation_entity_index()))
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
@@ -2344,7 +2343,7 @@ async fn securified_accounts_asymmetric_indices() {
             .primary_role
             .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .map(|f| (f.factor_source_id, f.derivation_entity_index()))
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
@@ -2415,7 +2414,7 @@ async fn securified_accounts_asymmetric_indices() {
             .primary_role
             .all_hd_factors()
             .into_iter()
-            .map(|f| (f.factor_source_id.clone(), f.derivation_entity_index()))
+            .map(|f| (f.factor_source_id, f.derivation_entity_index()))
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
@@ -2489,10 +2488,7 @@ async fn securified_accounts_asymmetric_indices() {
                 .primary_role
                 .all_hd_factors()
                 .into_iter()
-                .map(|f| (
-                    f.factor_source_id.clone(),
-                    f.derivation_entity_index()
-                ))
+                .map(|f| (f.factor_source_id, f.derivation_entity_index()))
                 .collect::<IndexMap<_, _>>(),
             [
                 (
