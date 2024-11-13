@@ -84,7 +84,11 @@ impl SargonOS {
 
         #[cfg(test)]
         {
-            _ = os.init_keys_derivation_interactor_with_test_interactor();
+            // For tests we need the (Test)KeysDerivationInteractors to be able
+            // to access the `bdfs` from secure storage.
+            _ = os
+                .init_keys_derivation_interactor_with_test_interactor_if_needed(
+                );
         }
 
         os
@@ -107,10 +111,21 @@ impl SargonOS {
             .expect("No interactors")
     }
 
+    /// For tests we need the (Test)KeysDerivationInteractors to be able
+    /// to access the `bdfs` from secure storage.
+    ///
+    /// For PROD: We should update the SargonOS boot to require the interactors
+    /// to be created during init of SargonOS.
     #[cfg(test)]
-    pub(crate) fn init_keys_derivation_interactor_with_test_interactor(
+    pub(crate) fn init_keys_derivation_interactor_with_test_interactor_if_needed(
         &self,
     ) -> Arc<dyn KeysDerivationInteractors> {
+        {
+            if let Some(interactors) = self.interactors.read().unwrap().as_ref()
+            {
+                return interactors.key_derivation.clone();
+            }
+        }
         let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
             Arc::new(TestDerivationInteractors::with_secure_storage(
                 self.clients.secure_storage.clone(),
@@ -390,7 +405,7 @@ impl SargonOS {
             ProfileState::Loaded(profile.clone()),
         )?;
 
-        _ = os.init_keys_derivation_interactor_with_test_interactor();
+        _ = os.init_keys_derivation_interactor_with_test_interactor_if_needed();
         os.prederive_and_fill_cache_with_instances_for_factor_source(
             bdfs.factor_source.into(),
         )
