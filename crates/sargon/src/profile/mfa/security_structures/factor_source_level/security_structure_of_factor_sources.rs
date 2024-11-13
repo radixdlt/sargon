@@ -72,6 +72,7 @@ impl TryFrom<(&PrimaryRoleWithFactorSourceIDs, &FactorSources)>
         Self::new(threshold_factors, id_level.threshold, override_factors)
     }
 }
+
 impl TryFrom<(&RecoveryRoleWithFactorSourceIDs, &FactorSources)>
     for RecoveryRoleWithFactorSources
 {
@@ -89,6 +90,7 @@ impl TryFrom<(&RecoveryRoleWithFactorSourceIDs, &FactorSources)>
         Self::new(threshold_factors, id_level.threshold, override_factors)
     }
 }
+
 impl TryFrom<(&ConfirmationRoleWithFactorSourceIDs, &FactorSources)>
     for ConfirmationRoleWithFactorSources
 {
@@ -151,118 +153,6 @@ impl TryFrom<(&SecurityStructureOfFactorSourceIDs, &FactorSources)>
             id_level.number_of_epochs_until_auto_confirmation,
             matrix,
         ))
-    }
-}
-
-impl HasSampleValues for PrimaryRoleWithFactorSources {
-    fn sample() -> Self {
-        Self::new(
-            [
-                FactorSource::sample_device_babylon(),
-                FactorSource::sample_arculus(),
-                FactorSource::sample_off_device(),
-            ],
-            2,
-            [FactorSource::sample_ledger()],
-        )
-        .unwrap()
-    }
-    fn sample_other() -> Self {
-        Self::new(
-            [
-                FactorSource::sample_device_babylon_other(),
-                FactorSource::sample_arculus_other(),
-                FactorSource::sample_off_device_other(),
-            ],
-            2,
-            [FactorSource::sample_ledger_other()],
-        )
-        .unwrap()
-    }
-}
-
-impl HasSampleValues for RecoveryRoleWithFactorSources {
-    fn sample() -> Self {
-        Self::new(
-            [
-                FactorSource::sample_arculus(),
-                FactorSource::sample_arculus_other(),
-            ],
-            2,
-            [FactorSource::sample_ledger()],
-        )
-        .unwrap()
-    }
-    fn sample_other() -> Self {
-        Self::new(
-            [FactorSource::sample_arculus_other()],
-            1,
-            [FactorSource::sample_ledger_other()],
-        )
-        .unwrap()
-    }
-}
-
-impl HasSampleValues for ConfirmationRoleWithFactorSources {
-    fn sample() -> Self {
-        Self::new(
-            [],
-            0,
-            [
-                FactorSource::sample_security_questions(),
-                FactorSource::sample_ledger(),
-            ],
-        )
-        .unwrap()
-    }
-    fn sample_other() -> Self {
-        Self::new(
-            [],
-            0,
-            [
-                FactorSource::sample_security_questions_other(),
-                FactorSource::sample_ledger_other(),
-            ],
-        )
-        .unwrap()
-    }
-}
-
-impl HasSampleValues for MatrixOfFactorSources {
-    fn sample() -> Self {
-        Self::new(
-            PrimaryRoleWithFactorSources::sample(),
-            RecoveryRoleWithFactorSources::sample(),
-            ConfirmationRoleWithFactorSources::sample(),
-        )
-        .unwrap()
-    }
-    fn sample_other() -> Self {
-        Self::new(
-            PrimaryRoleWithFactorSources::sample_other(),
-            RecoveryRoleWithFactorSources::sample_other(),
-            ConfirmationRoleWithFactorSources::sample_other(),
-        )
-        .unwrap()
-    }
-}
-
-#[cfg(test)]
-mod matrix_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = MatrixOfFactorSources;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
 

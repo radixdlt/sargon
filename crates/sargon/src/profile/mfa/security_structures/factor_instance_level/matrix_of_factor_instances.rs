@@ -1,5 +1,25 @@
 use crate::prelude::*;
 
+impl HasSampleValues for MatrixOfFactorInstances {
+    fn sample() -> Self {
+        Self::new(
+            PrimaryRoleWithFactorInstances::sample(),
+            RecoveryRoleWithFactorInstances::sample(),
+            ConfirmationRoleWithFactorInstances::sample(),
+        )
+        .unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            PrimaryRoleWithFactorInstances::sample_other(),
+            RecoveryRoleWithFactorInstances::sample_other(),
+            ConfirmationRoleWithFactorInstances::sample_other(),
+        )
+        .unwrap()
+    }
+}
+
 impl MatrixOfFactorInstances {
     pub fn fulfilling_matrix_of_factor_sources_with_instances(
         consuming_instances: &mut IndexMap<
@@ -50,54 +70,6 @@ impl MatrixOfFactorInstances {
         }
 
         Ok(matrix)
-    }
-}
-
-pub trait HasRoleKind {
-    fn role_kind() -> RoleKind;
-}
-impl HasRoleKind for PrimaryRoleWithFactorInstances {
-    fn role_kind() -> RoleKind {
-        RoleKind::Primary
-    }
-}
-impl HasRoleKind for RecoveryRoleWithFactorInstances {
-    fn role_kind() -> RoleKind {
-        RoleKind::Recovery
-    }
-}
-impl HasRoleKind for ConfirmationRoleWithFactorInstances {
-    fn role_kind() -> RoleKind {
-        RoleKind::Confirmation
-    }
-}
-
-pub trait HasRoleKindObjectSafe {
-    fn get_role_kind(&self) -> RoleKind;
-}
-pub trait RoleWithFactors<Factor: std::cmp::Eq + std::hash::Hash> {
-    fn get_threshold_factors(&self) -> &Vec<Factor>;
-    fn get_threshold(&self) -> u8;
-    fn get_override_factors(&self) -> &Vec<Factor>;
-
-    fn all_factors(&self) -> IndexSet<&Factor> {
-        let mut factors =
-            IndexSet::from_iter(self.get_threshold_factors().iter());
-        factors.extend(self.get_override_factors().iter());
-        factors
-    }
-}
-
-impl<T: HasRoleKind> HasRoleKindObjectSafe for T {
-    fn get_role_kind(&self) -> RoleKind {
-        T::role_kind()
-    }
-}
-impl HasRoleKindObjectSafe
-    for GeneralRoleWithHierarchicalDeterministicFactorInstances
-{
-    fn get_role_kind(&self) -> RoleKind {
-        self.role
     }
 }
 

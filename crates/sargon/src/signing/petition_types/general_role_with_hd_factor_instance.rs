@@ -7,6 +7,14 @@ decl_role_runtime_kind_with_factors!(
     HierarchicalDeterministicFactorInstance
 );
 
+impl HasRoleKindObjectSafe
+    for GeneralRoleWithHierarchicalDeterministicFactorInstances
+{
+    fn get_role_kind(&self) -> RoleKind {
+        self.role
+    }
+}
+
 impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
     for GeneralRoleWithHierarchicalDeterministicFactorInstances
 {
