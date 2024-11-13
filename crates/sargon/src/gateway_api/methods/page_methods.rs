@@ -10,47 +10,33 @@ impl GatewayClient {
     /// Returns: A collection of the items from all pages.
     pub async fn load_all_pages<T, F, Fut>(&self, api_call: F) -> Result<Vec<T>>
     where
-        F: Fn(Option<String>) -> Fut,
+        F: Fn(Option<String>, Option<LedgerStateSelector>) -> Fut,
         Fut: Future<Output = Result<PageResponse<T>>>,
     {
         let mut items: Vec<T> = Vec::new();
         let mut more_to_load = true;
         let mut cursor: Option<String> = None;
+        let mut ledger_state_selector: Option<LedgerStateSelector> = None;
         while more_to_load {
-            let response = api_call(cursor.clone()).await?;
+            let response =
+                api_call(cursor.clone(), ledger_state_selector.clone()).await?;
             items.extend(response.items);
             cursor = response.next_cursor;
+            if let Some(ledger_state) = response.ledger_state {
+                ledger_state_selector = Some(ledger_state.to_selector());
+            } else {
+                ledger_state_selector = None;
+            }
             more_to_load = cursor.is_some();
         }
 
         Ok(items)
     }
+}
 
-    /// Load all pages of a paginated API call that returns a `PageResponse`.
-    /// Parameters:
-    /// - `account_address`: The address of the account to load pages for.
-    /// - `api_call`: A function that takes an `AccountPageRequest` and returns a future executing
-    /// the corresponding API call.
-    ///
-    /// Returns: A collection of the items from all pages.
-    pub async fn load_all_account_pages<T, F, Fut>(
-        &self,
-        account_address: AccountAddress,
-        api_call: F,
-    ) -> Result<Vec<T>>
-    where
-        F: Fn(AccountPageRequest) -> Fut,
-        Fut: Future<Output = Result<PageResponse<T>>>,
-    {
-        self.load_all_pages(|cursor| {
-            let request = AccountPageRequest::new(
-                account_address,
-                cursor,
-                GATEWAY_PAGE_REQUEST_LIMIT,
-            );
-            api_call(request)
-        })
-        .await
+impl LedgerState {
+    pub fn to_selector(&self) -> LedgerStateSelector {
+        LedgerStateSelector::new(self.state_version, None, None, None)
     }
 }
 
@@ -73,9 +59,16 @@ mod tests {
         let mock_driver =
             MockNetworkingDriver::new_with_responses(vec![response]);
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
+        let account_address = AccountAddress::sample();
 
         let result = sut
-            .load_all_account_pages(AccountAddress::sample(), |request| {
+            .load_all_pages(|cursor, _| {
+                let request = AccountResourcePreferencesRequest::new(
+                    account_address,
+                    None,
+                    cursor,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
                 sut.account_resource_preferences(request)
             })
             .await
@@ -94,32 +87,58 @@ mod tests {
         );
         let item_two = AccountResourcePreference::sample_other();
         let response_two = mock_page_response(None, vec![item_two.clone()]);
+        let account_address = AccountAddress::sample();
 
         let mock_driver = MockNetworkingDriver::new_with_responses_and_spy(
             vec![response_one, response_two],
             |request, count| {
-                // Verify the correct body is sent on each request
-                let cursor = if count == 1 {
-                    Some("cursor_one".to_string())
-                } else {
-                    None
-                };
-                // Verify the body sent matches the expected one
-                let expected_request = AccountPageRequest::new(
-                    AccountAddress::sample(),
-                    cursor,
-                    GATEWAY_PAGE_REQUEST_LIMIT,
-                );
-                let expected_body =
-                    serde_json::to_vec(&expected_request).unwrap();
+                match count {
+                    0 => {
+                        // Verify the correct body is sent of first request
+                        let expected_request =
+                            AccountResourcePreferencesRequest::new(
+                                AccountAddress::sample(),
+                                None,
+                                None,
+                                GATEWAY_PAGE_REQUEST_LIMIT,
+                            );
 
-                assert_eq!(request.body.bytes, expected_body);
+                        let expected_body =
+                            serde_json::to_vec(&expected_request).unwrap();
+
+                        assert_eq!(request.body.bytes, expected_body);
+                    }
+                    1 => {
+                        // Verify the correct body is sent of second request
+                        let expected_request =
+                            AccountResourcePreferencesRequest::new(
+                                AccountAddress::sample(),
+                                LedgerStateSelector::new(1, None, None, None),
+                                "cursor_one".to_string(),
+                                GATEWAY_PAGE_REQUEST_LIMIT,
+                            );
+
+                        let expected_body =
+                            serde_json::to_vec(&expected_request).unwrap();
+
+                        assert_eq!(request.body.bytes, expected_body);
+                    }
+                    _ => {
+                        panic!("Unexpected request count: {}", count);
+                    }
+                }
             },
         );
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_account_pages(AccountAddress::sample(), |request| {
+            .load_all_pages(|cursor, ledger_state| {
+                let request = AccountResourcePreferencesRequest::new(
+                    account_address,
+                    ledger_state,
+                    cursor,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
                 sut.account_resource_preferences(request)
             })
             .await
@@ -135,12 +154,14 @@ mod tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(|_| {
-                sut.account_resource_preferences(AccountPageRequest::new(
+            .load_all_pages(|cursor, _| {
+                let request = AccountResourcePreferencesRequest::new(
                     AccountAddress::sample(),
                     None,
+                    cursor,
                     GATEWAY_PAGE_REQUEST_LIMIT,
-                ))
+                );
+                sut.account_resource_preferences(request)
             })
             .await
             .expect_err("Expected an error");
@@ -154,7 +175,10 @@ mod tests {
         items: Vec<AccountResourcePreference>,
     ) -> MockNetworkingDriverResponse {
         MockNetworkingDriverResponse::new_success(PageResponse::new(
-            1, cursor, items,
+            LedgerState::sample(),
+            1,
+            cursor,
+            items,
         ))
     }
 }

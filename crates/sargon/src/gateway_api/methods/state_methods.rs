@@ -86,3 +86,51 @@ impl GatewayClient {
             .await
     }
 }
+
+impl GatewayClient {
+    /// Fetches all the account's resource preferences.
+    pub async fn fetch_all_account_resource_preferences(
+        &self,
+        account_address: AccountAddress,
+        at_ledger_state: Option<LedgerStateSelector>,
+    ) -> Result<Vec<AccountResourcePreference>> {
+        self.load_all_pages(|response_cursor, response_ledger_state| {
+            let selector = if response_ledger_state.is_some() {
+                response_ledger_state
+            } else {
+                at_ledger_state.clone()
+            };
+            let request = AccountResourcePreferencesRequest::new(
+                account_address,
+                selector,
+                response_cursor,
+                GATEWAY_PAGE_REQUEST_LIMIT,
+            );
+            self.account_resource_preferences(request)
+        })
+        .await
+    }
+
+    /// Fetches all the account's authorized depositors.
+    pub async fn fetch_all_account_authorized_depositors(
+        &self,
+        account_address: AccountAddress,
+        at_ledger_state: Option<LedgerStateSelector>,
+    ) -> Result<Vec<AccountAuthorizedDepositor>> {
+        self.load_all_pages(|response_cursor, response_ledger_state| {
+            let selector = if response_ledger_state.is_some() {
+                response_ledger_state
+            } else {
+                at_ledger_state.clone()
+            };
+            let request = AccountAuthorizedDepositorsRequest::new(
+                account_address,
+                selector,
+                response_cursor,
+                GATEWAY_PAGE_REQUEST_LIMIT,
+            );
+            self.account_authorized_depositors(request)
+        })
+        .await
+    }
+}

@@ -109,7 +109,7 @@ impl SargonOS {
         let pre_auth_to_review = match subintent_manifest.as_enclosed() {
             Some(manifest) => {
                 let mut instructions = manifest.instructions;
-                /// The ASSERT_WORKTOP_IS_EMPTY instruction, as it is a V2 instruction, is not allowed in the V1 manifest.
+                // The ASSERT_WORKTOP_IS_EMPTY instruction, as it is a V2 instruction, is not allowed in the V1 manifest.
                 instructions.instructions.remove(0);
                 let manifest_v2 = TransactionManifestV2::with_instructions_and_blobs_and_children(
                     instructions,

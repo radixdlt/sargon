@@ -19,19 +19,17 @@ impl SargonOS {
             network_id,
         );
 
+        // TODO: Fetch current Ledger state from status endpoint
+
         let resource_preferences = gateway_client
-            .load_all_account_pages(account_address, |request| {
-                gateway_client.account_resource_preferences(request)
-            })
+            .fetch_all_account_resource_preferences(account_address, None)
             .await?
             .into_iter()
             .map(ScryptoAccountRemoveResourcePreferenceInput::from)
             .collect();
 
         let authorized_depositors = gateway_client
-            .load_all_account_pages(account_address, |request| {
-                gateway_client.account_authorized_depositors(request)
-            })
+            .fetch_all_account_authorized_depositors(account_address, None)
             .await?
             .into_iter()
             .map(ScryptoAccountRemoveAuthorizedDepositorInput::try_from)
@@ -147,7 +145,10 @@ mod tests {
     fn empty_page_response() -> MockNetworkingDriverResponse {
         let items: Vec<AccountResourcePreference> = vec![];
         MockNetworkingDriverResponse::new_success(PageResponse::new(
-            0, None, items,
+            LedgerState::sample(),
+            0,
+            None,
+            items,
         ))
     }
 
