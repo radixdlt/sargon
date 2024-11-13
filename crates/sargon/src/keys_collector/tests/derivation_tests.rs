@@ -1,6 +1,112 @@
 #![cfg(test)]
 use crate::prelude::*;
 
+impl DerivationPath {
+    pub fn for_entity(
+        network_id: NetworkID,
+        entity_kind: CAP26EntityKind,
+        key_kind: CAP26KeyKind,
+        hardened: Hardened,
+    ) -> Self {
+        match entity_kind {
+            CAP26EntityKind::Account => DerivationPath::account(
+                AccountPath::new(network_id, key_kind, hardened),
+            ),
+            CAP26EntityKind::Identity => DerivationPath::identity(
+                IdentityPath::new(network_id, key_kind, hardened),
+            ),
+        }
+    }
+
+    pub fn hardening_global_index(
+        network_id: NetworkID,
+        entity_kind: CAP26EntityKind,
+        key_kind: CAP26KeyKind,
+        global_key_space: u32,
+    ) -> Self {
+        let index = Hardened::from_global_key_space(global_key_space).unwrap();
+        Self::for_entity(network_id, entity_kind, key_kind, index)
+    }
+
+    pub fn unsecurified_hardening_base_index(
+        network_id: NetworkID,
+        entity_kind: CAP26EntityKind,
+        key_kind: CAP26KeyKind,
+        index: u32,
+    ) -> Self {
+        let index = U30::try_from(index).unwrap();
+        let index = Hardened::Unsecurified(UnsecurifiedHardened::from(index));
+        match entity_kind {
+            CAP26EntityKind::Account => DerivationPath::account(
+                AccountPath::new(network_id, key_kind, index),
+            ),
+            CAP26EntityKind::Identity => DerivationPath::identity(
+                IdentityPath::new(network_id, key_kind, index),
+            ),
+        }
+    }
+
+    pub fn hardening_global_index_account_tx(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
+        Self::hardening_global_index(
+            network_id,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::TransactionSigning,
+            global_key_space,
+        )
+    }
+
+    pub fn hardening_global_index_account_rola(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
+        Self::hardening_global_index(
+            network_id,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::AuthenticationSigning,
+            global_key_space,
+        )
+    }
+
+    pub fn hardening_global_index_identity_tx(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
+        Self::hardening_global_index(
+            network_id,
+            CAP26EntityKind::Identity,
+            CAP26KeyKind::TransactionSigning,
+            global_key_space,
+        )
+    }
+
+    pub fn hardening_global_index_identity_rola(
+        network_id: NetworkID,
+        global_key_space: u32,
+    ) -> Self {
+        Self::hardening_global_index(
+            network_id,
+            CAP26EntityKind::Identity,
+            CAP26KeyKind::AuthenticationSigning,
+            global_key_space,
+        )
+    }
+
+    pub fn account_tx_unsecurified_hardening_base_index(
+        network_id: NetworkID,
+        index: u32,
+    ) -> Self {
+        Self::unsecurified_hardening_base_index(
+            network_id,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::TransactionSigning,
+            index,
+        )
+    }
+}
+
 mod key_derivation_tests {
 
     use super::CAP26EntityKind::*;
