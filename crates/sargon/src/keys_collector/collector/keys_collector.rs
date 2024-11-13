@@ -121,7 +121,7 @@ impl KeysCollector {
     /// In decreasing "friction order"
     async fn derive_with_factors(&self) -> Result<()> {
         for factor_sources_of_kind in self.dependencies.factors_of_kind.iter() {
-            info!(
+            debug!(
                 "Use(?) #{:?} factors of kind: {:?}",
                 &factor_sources_of_kind.factor_sources().len(),
                 &factor_sources_of_kind.kind

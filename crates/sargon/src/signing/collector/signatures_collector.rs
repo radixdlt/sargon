@@ -187,7 +187,7 @@ impl<S: Signable> SignaturesCollector<S> {
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) {
         info!(
-            "Use(?) #{:?} factors of kind: {:?}",
+            "debug(?) #{:?} factors of kind: {:?}",
             &factor_sources_of_kind.factor_sources().len(),
             &factor_sources_of_kind.kind
         );

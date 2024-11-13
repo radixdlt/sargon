@@ -28,7 +28,7 @@ impl log::Log for LogSystem {
 
 fn get_default_level() -> LogFilter {
     #[cfg(test)]
-    return LogFilter::Info;
+    return LogFilter::Off;
 
     #[cfg(not(test))]
     return LogFilter::Trace;

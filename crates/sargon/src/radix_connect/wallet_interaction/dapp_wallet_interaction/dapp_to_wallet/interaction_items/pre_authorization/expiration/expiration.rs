@@ -111,8 +111,6 @@ mod tests {
 
     #[test]
     fn status() {
-        let now = Timestamp::now_utc();
-
         // AtTime which has already expired
         let now = seconds_since_unix_epoch();
         let past = now - 30;
