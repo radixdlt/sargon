@@ -23,3 +23,35 @@ impl HasSampleValues for PrimaryRoleWithFactorInstances {
         .unwrap()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PrimaryRoleWithFactorInstances;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn primary_role_non_securified_threshold_instances_is_err() {
+        assert!(matches!(
+            SUT::threshold_factors_only(
+                [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0).into()
+                ],
+                1,
+            ),
+            Err(CommonError::IndexUnsecurifiedExpectedSecurified)
+        ));
+    }
+}
