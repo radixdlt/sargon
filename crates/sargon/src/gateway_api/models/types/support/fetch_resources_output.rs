@@ -2,18 +2,18 @@ use crate::prelude::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct FetchResourcesOutput {
-    pub fungible: Vec<FungibleResourcesCollectionItem>,
-    pub non_fungible: Vec<NonFungibleResourcesCollectionItem>,
+    pub fungibles: Vec<FungibleResourcesCollectionItem>,
+    pub non_fungibles: Vec<NonFungibleResourcesCollectionItem>,
 }
 
 impl FetchResourcesOutput {
     pub fn new(
-        fungible: Vec<FungibleResourcesCollectionItem>,
-        non_fungible: Vec<NonFungibleResourcesCollectionItem>,
+        fungibles: Vec<FungibleResourcesCollectionItem>,
+        non_fungibles: Vec<NonFungibleResourcesCollectionItem>,
     ) -> Self {
         Self {
-            fungible,
-            non_fungible,
+            fungibles,
+            non_fungibles,
         }
     }
 }

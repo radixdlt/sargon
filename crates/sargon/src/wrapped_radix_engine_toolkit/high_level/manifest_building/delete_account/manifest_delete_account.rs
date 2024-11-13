@@ -12,6 +12,7 @@ use radix_engine_interface::blueprints::account::{
 impl TransactionManifest {
     pub fn delete_account(
         account_address: &AccountAddress,
+        account_transfers: impl Into<Option<DeleteAccountTransfers>>,
         resource_preferences_to_be_removed: Vec<
             ScryptoAccountRemoveResourcePreferenceInput,
         >,
@@ -22,7 +23,56 @@ impl TransactionManifest {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
 
-        // We securify the account which will return an account owner badge onto the worktop.
+        // Transfer all the resources to the recipient address.
+        if let Some(transfers) = account_transfers.into() {
+            let recipient_address = &transfers.recipient;
+            // Transfer each fungible
+            for transfer in transfers.fungibles {
+                let resource_address = transfer.resource_address.scrypto();
+                let amount: ScryptoDecimal192 = transfer.amount.into();
+
+                builder = builder.withdraw_from_account(
+                    account_address,
+                    resource_address,
+                    amount,
+                );
+
+                let bucket = &bucket_factory.next();
+                builder =
+                    builder.take_from_worktop(resource_address, amount, bucket);
+
+                builder = builder.try_deposit_or_abort(
+                    recipient_address,
+                    None,
+                    bucket,
+                );
+            }
+
+            // Transfer each non-fungible
+            for transfer in transfers.non_fungibles {
+                let resource_address = transfer.resource_address.scrypto();
+                let amount: ScryptoDecimal192 = transfer.amount.into();
+
+                // TODO: Confirm the following logic is correct for withdrawing non-fungibles by amount
+
+                builder = builder.withdraw_from_account(
+                    account_address,
+                    resource_address,
+                    amount,
+                );
+
+                let bucket = &bucket_factory.next();
+                builder = builder.take_from_worktop(resource_address, amount, bucket);
+
+                builder = builder.try_deposit_or_abort(
+                    recipient_address,
+                    None,
+                    bucket,
+                );
+            }
+        }
+
+        // Securify the account which will return an account owner badge onto the worktop.
         builder =
             builder.call_method(account_address, ACCOUNT_SECURIFY_IDENT, ());
 
@@ -95,10 +145,11 @@ mod tests {
     type SUT = TransactionManifest;
 
     #[test]
-    fn manifest() {
+    fn manifest_without_transfers() {
         manifest_eq(
             SUT::delete_account(
                 &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
+                None,
                 vec![
                     AccountResourcePreference::sample_other().into(),
                 ],
@@ -149,5 +200,28 @@ CALL_METHOD
 ;
             "#,
         );
+    }
+
+    #[test]
+    fn manifest_with_transfers() {
+        let transfers = DeleteAccountTransfers::new(
+            AccountAddress::sample_other(),
+            vec![FungibleResourcesCollectionItemGloballyAggregated::sample()],
+            vec![
+                NonFungibleResourcesCollectionItemGloballyAggregated::sample(),
+            ],
+        );
+        let manifest = SUT::delete_account(
+                &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
+                transfers,
+                vec![
+                    AccountResourcePreference::sample_other().into(),
+                ],
+                vec![
+                    AccountAuthorizedDepositor::sample_other().try_into().unwrap(),
+                ],
+            );
+
+        println!("{}", manifest.to_string());
     }
 }

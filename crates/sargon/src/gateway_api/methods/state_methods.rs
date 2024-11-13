@@ -167,7 +167,7 @@ impl GatewayClient {
             response.ledger_state.map(Into::into);
 
         // Fetch all fungible items
-        let fungible =
+        let fungibles =
             if let Some(collection) = details.clone().fungible_resources {
                 self.fetch_all_fungible_items(
                     collection,
@@ -180,7 +180,7 @@ impl GatewayClient {
             };
 
         // Fetch all non-fungible items
-        let non_fungible =
+        let non_fungibles =
             if let Some(collection) = details.clone().non_fungible_resources {
                 self.fetch_all_non_fungible_items(
                     collection,
@@ -192,7 +192,7 @@ impl GatewayClient {
                 Vec::new()
             };
 
-        let output = FetchResourcesOutput::new(fungible, non_fungible);
+        let output = FetchResourcesOutput::new(fungibles, non_fungibles);
         Ok(output)
     }
 

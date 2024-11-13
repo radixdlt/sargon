@@ -132,6 +132,7 @@ mod tests_transform {
         };
         let mock_antenna =
             MockNetworkingDriver::with_response(StateEntityDetailsResponse {
+                ledger_state: None,
                 items: vec![StateEntityDetailsResponseItem {
                     address: Address::sample_account_stokenet(),
                     fungible_resources: None,

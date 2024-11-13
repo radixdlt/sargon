@@ -23,6 +23,16 @@ impl SargonOS {
         // Get current ledger state
         let ledger_state = gateway_client.gateway_status().await?.ledger_state;
 
+        // Fetch account transfers
+        let account_transfers = self
+            .fetch_account_transfers(
+                account_address,
+                recipient_account_address,
+                &gateway_client,
+                ledger_state.clone(),
+            )
+            .await?;
+
         // Fetch all resource preferences
         let resource_preferences = self
             .fetch_resource_preferences(
@@ -44,6 +54,7 @@ impl SargonOS {
         // Build Manifest
         let manifest = TransactionManifest::delete_account(
             &account_address,
+            account_transfers,
             resource_preferences,
             authorized_depositors,
         );
@@ -86,14 +97,27 @@ impl SargonOS {
         Ok(authorized_depositors)
     }
 
-    async fn fetch_account_resources(
+    async fn fetch_account_transfers(
         &self,
         account_address: AccountAddress,
+        recipient_account_address: Option<AccountAddress>,
         gateway_client: &GatewayClient,
         ledger_state: LedgerState,
-    ) -> Result<Vec<String>> {
-        let result = vec!["something".to_string()];
-        Ok(result)
+    ) -> Result<Option<DeleteAccountTransfers>> {
+        // If there is no recipient, there is no transfer to be made.
+        let recipient = match recipient_account_address {
+            Some(address) => address,
+            None => return Ok(None),
+        };
+
+        // Get all resources
+        let output = gateway_client
+            .fetch_all_resources(account_address, ledger_state.into())
+            .await?;
+
+        // Try to build the DeleteAccountTransfers from output and return it.
+        let transfers = DeleteAccountTransfers::try_from((output, recipient))?;
+        Ok(Some(transfers))
     }
 }
 
@@ -175,6 +199,7 @@ mod tests {
 
         let expected = TransactionManifest::delete_account(
             &account_address,
+            None,
             vec![],
             vec![],
         );
