@@ -259,44 +259,72 @@ mod tests {
 
     #[actix_rt::test]
     async fn securify_accounts_and_personas_with_override_factor() {
-        /*
         // this is mostly a soundness test for the two functions `for_persona_mfa` and `for_account_mfa`
-        // using `os` because I'm lazy. We might in fact remove `for_persona_mfa` and `for_account_mfa`
+        // using `os` to create a profile, and BDFS because I'm lazy.
+        // We might in fact remove `for_persona_mfa` and `for_account_mfa`
         // and only use the `for_entity_mfa` function... but we have these to get code coverage.
-        let (mut os, bdfs) = SargonOS::with_bdfs().await;
+        let (os, bdfs) = SargonOS::with_bdfs().await;
 
-        let (batman, stats) = os.new_mainnet_persona_with_bdfs("Batman").await.unwrap();
-        assert!(stats.debug_was_derived.is_empty());
+        let (batman, derivation_outcome) = os
+            .create_and_save_new_mainnet_persona_with_derivation_outcome(
+                "Batman",
+            )
+            .await
+            .unwrap();
+        assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        let (alice, stats) = os.new_mainnet_account_with_bdfs("alice").await.unwrap();
-        assert!(stats.debug_was_derived.is_empty());
+        let (alice, derivation_outcome) = os
+            .create_and_save_new_mainnet_account_with_derivation_outcome(
+                "alice",
+            )
+            .await
+            .unwrap();
+        assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        let shield_0 = MatrixOfFactorSources::new([], 0, [bdfs.clone()]);
-        let mut cache = os.cache_snapshot();
-        let interactors = Arc::new(TestDerivationInteractors::default());
-        let outcome = SUT::for_account_mfa(
-            &mut cache,
-            os.profile_snapshot(),
-            shield_0.clone(),
-            IndexSet::just(alice.entity_address()),
-            interactors.clone(),
+        let matrix_0 = MatrixOfFactorSources::new(
+            PrimaryRoleWithFactorSources::override_only([bdfs.clone()])
+                .unwrap(),
+            RecoveryRoleWithFactorSources::override_only([bdfs.clone()])
+                .unwrap(),
+            ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
+                .unwrap(),
+        )
+        .unwrap();
+
+        let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
+        let profile = Arc::new(os.profile().unwrap());
+        let derivation_interactors =
+            os.init_keys_derivation_interactor_with_test_interactor_if_needed();
+
+        let (instances_in_cache_consumer, outcome) = SUT::for_account_mfa(
+            cache_client.clone(),
+            profile,
+            matrix_0.clone(),
+            IndexSet::just(alice.address()),
+            derivation_interactors.clone(),
         )
         .await
         .unwrap();
-        let outcome = outcome.per_factor.get(&bdfs.factor_source_id()).unwrap();
+
+        // don't forget to consume
+        instances_in_cache_consumer.consume().await.unwrap();
+        let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
         assert_eq!(outcome.to_use_directly.len(), 1);
 
-        let outcome = SUT::for_persona_mfa(
-            &mut cache,
-            os.profile_snapshot(),
-            shield_0.clone(),
-            IndexSet::just(batman.entity_address()),
-            interactors.clone(),
+        let profile = Arc::new(os.profile().unwrap());
+        let (instances_in_cache_consumer, outcome) = SUT::for_persona_mfa(
+            cache_client.clone(),
+            profile,
+            matrix_0.clone(),
+            IndexSet::just(batman.address()),
+            derivation_interactors.clone(),
         )
         .await
         .unwrap();
-        let outcome = outcome.per_factor.get(&bdfs.factor_source_id()).unwrap();
+
+        // don't forget to consume
+        instances_in_cache_consumer.consume().await.unwrap();
+        let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
         assert_eq!(outcome.to_use_directly.len(), 1);
-        */
     }
 }

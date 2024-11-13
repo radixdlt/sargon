@@ -12,15 +12,6 @@ pub enum AccountOrPersona {
     PersonaEntity(Persona),
 }
 
-// impl IsNetworkAware for AccountOrPersona {
-//     fn network_id(&self) -> NetworkID {
-//         match self {
-//             Self::AccountEntity(account) => account.network_id,
-//             Self::PersonaEntity(persona) => persona.network_id,
-//         }
-//     }
-// }
-
 impl HasEntityKindObjectSafe for AccountOrPersona {
     fn get_entity_kind(&self) -> CAP26EntityKind {
         match self {
@@ -169,6 +160,24 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn get_entity_kind() {
+        assert_eq!(SUT::sample().get_entity_kind(), CAP26EntityKind::Account);
+        assert_eq!(
+            SUT::sample_other().get_entity_kind(),
+            CAP26EntityKind::Identity
+        );
+    }
+
+    #[test]
+    fn get_flags() {
+        assert_eq!(SUT::sample().flags(), Account::sample_mainnet().flags());
+        assert_eq!(
+            SUT::sample_other().flags(),
+            Persona::sample_mainnet_other().flags()
+        );
     }
 
     #[test]
