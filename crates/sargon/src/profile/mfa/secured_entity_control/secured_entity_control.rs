@@ -86,12 +86,23 @@ mod tests {
 
     #[test]
     fn equality() {
-        // assert_eq!(SUT::sample(), SUT::sample());
-        // assert_eq!(SUT::sample_other(), SUT::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    #[should_panic(expected = "Got securified factor instance as veci, this is a programmer error!")]
+    fn test_panics_if_veci_is_in_securified_space() {
+        _ = SUT::new(
+
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0), 
+            AccessControllerAddress::sample(),
+            SecurityStructureOfFactorInstances::sample(),   
+        );
     }
 }
