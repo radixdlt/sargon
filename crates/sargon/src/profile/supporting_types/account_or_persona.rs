@@ -28,6 +28,45 @@ impl HasSecurityState for AccountOrPersona {
         }
     }
 }
+
+impl IsKeySpaceAware for AccountOrPersona {
+    fn key_space(&self) -> KeySpace {
+        if self.security_state().is_securified() {
+            KeySpace::Securified
+        } else if self.is_unsecurified(IsHardened(true)) {
+            KeySpace::Unsecurified { is_hardened: true }
+        } else if self.is_unsecurified(IsHardened(false)) {
+            KeySpace::Unsecurified { is_hardened: false }
+        } else {
+            unreachable!("should never happen")
+        }
+    }
+}
+
+impl AccountOrPersona {
+    pub fn is_unsecurified(&self, is_hardened: IsHardened) -> bool {
+        match self.security_state() {
+            EntitySecurityState::Unsecured { value: uec } => {
+                uec.transaction_signing
+                    .derivation_path()
+                    .index()
+                    .is_hardened()
+                    == is_hardened.0
+            }
+            _ => false,
+        }
+    }
+
+    pub fn matches_key_space(&self, key_space: KeySpace) -> bool {
+        match key_space {
+            KeySpace::Securified => self.is_securified(),
+            KeySpace::Unsecurified { is_hardened } => {
+                self.is_unsecurified(IsHardened(is_hardened))
+            }
+        }
+    }
+}
+
 impl IsBaseEntity for AccountOrPersona {
     type Address = AddressOfAccountOrPersona;
 

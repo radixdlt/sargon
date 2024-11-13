@@ -1,6 +1,17 @@
 use crate::prelude::*;
 
 impl Profile {
+    /// Creates `count` many new virtual entities of type `E` on `network_id` with `factor_source` as the factor source.
+    /// Setting the names according to `get_name`, loading pre-derived FactorInstances from the
+    /// FactorInstancesCache if possible, else derives more using the FactorInstancesProvider.
+    ///
+    /// Returns the FactorSourceID, the entities, the InstancesInCacheConsumer, and the FactorInstancesProviderOutcomeForFactor.
+    ///
+    /// The `FactorInstancesProviderOutcomeForFactor` is primarily useful for testing.
+    ///
+    /// The `InstancesInCacheConsumer` SHOULD be called by the caller, once you know it
+    /// is safe to delete the instances from the cache - e.g. after having saved the new
+    /// entities into the Profile and persisted it into SecureStorage.
     pub async fn create_unsaved_entities_with_factor_source_with_derivation_outcome<
         E: IsEntity + Identifiable,
     >(
