@@ -21,6 +21,18 @@ impl HasSampleValues for MatrixOfFactorInstances {
 }
 
 impl MatrixOfFactorInstances {
+    /// Maps `MatrixOfFactorSources -> MatrixOfFactorInstances` by
+    /// "assigning" FactorInstances to each MatrixOfFactorInstances from
+    /// `consuming_instances`.
+    ///
+    /// NOTE:
+    /// **One FactorInstance might be used multiple times in the MatrixOfFactorInstances,
+    /// e.g. ones in the PrimaryRole(WithFactorInstances) and again in RecoveryRole(WithFactorInstances) or
+    /// in RecoveryRole(WithFactorInstances)**.
+    ///
+    /// However, the same FactorInstance is NEVER used in two different MatrixOfFactorInstances.
+    ///
+    ///
     pub fn fulfilling_matrix_of_factor_sources_with_instances(
         consuming_instances: &mut IndexMap<
             FactorSourceIDFromHash,
@@ -49,8 +61,8 @@ impl MatrixOfFactorInstances {
 
         let matrix = Self::new(primary, recovery, confirmation)?;
 
-        // Now that we have assigned instances, **possible the SAME INSTANCE to multiple roles**,
-        // lets delete them from the consuming_instances map.
+        // Now that we have assigned instances, **possibly the SAME INSTANCE to multiple roles**,
+        // lets delete them from the `consuming_instances` map.
         for instance in matrix.all_factors() {
             let fsid =
                 &FactorSourceIDFromHash::try_from(instance.factor_source_id)
@@ -62,9 +74,11 @@ impl MatrixOfFactorInstances {
             )
             .unwrap();
 
+            // We remove at the beginning of the list first.
             existing.shift_remove(&to_remove);
 
             if existing.is_empty() {
+                // not needed per se, but feels prudent to "prune".
                 consuming_instances.shift_remove_entry(fsid);
             }
         }
@@ -121,7 +135,6 @@ fn try_filling_factor_list_of_role_of_factor_sources_with_factor_instances(
     from.iter()
         .map(|f| {
             if let Some(existing) = instances.get(&f.id_from_hash()) {
-                assert!(!existing.is_empty());
                 let hd_instance = existing.first().ok_or(
                     CommonError::MissingFactorMappingInstancesIntoRole,
                 )?;
@@ -132,4 +145,48 @@ fn try_filling_factor_list_of_role_of_factor_sources_with_factor_instances(
             }
         })
         .collect::<Result<Vec<FactorInstance>>>()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = MatrixOfFactorInstances;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn err_if_no_instance_found_for_factor_source() {
+        assert!(matches!(
+            SUT::fulfilling_matrix_of_factor_sources_with_instances(
+                &mut IndexMap::new(),
+                MatrixOfFactorSources::sample()
+            ),
+            Err(CommonError::MissingFactorMappingInstancesIntoRole)
+        ));
+    }
+
+    #[test]
+    fn err_if_empty_instance_found_for_factor_source() {
+        assert!(matches!(
+            SUT::fulfilling_matrix_of_factor_sources_with_instances(
+                &mut IndexMap::kv(
+                    FactorSource::sample_device_babylon().id_from_hash(),
+                    FactorInstances::from_iter([])
+                ),
+                MatrixOfFactorSources::sample()
+            ),
+            Err(CommonError::MissingFactorMappingInstancesIntoRole)
+        ));
+    }
 }
