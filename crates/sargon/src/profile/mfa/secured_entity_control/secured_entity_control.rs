@@ -96,13 +96,15 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Got securified factor instance as veci, this is a programmer error!")]
+    #[should_panic(
+        expected = "Got securified factor instance as veci, this is a programmer error!"
+    )]
     fn test_panics_if_veci_is_in_securified_space() {
         _ = SUT::new(
 
-            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0), 
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
             AccessControllerAddress::sample(),
-            SecurityStructureOfFactorInstances::sample(),   
+            SecurityStructureOfFactorInstances::sample(),
         );
     }
 }
