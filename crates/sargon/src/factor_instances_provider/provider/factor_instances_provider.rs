@@ -1,10 +1,5 @@
-use std::clone;
-use std::future::ready;
-use std::sync::{Arc, RwLock};
-
 use crate::prelude::*;
 use crate::{factor_instances_provider::next_index_assigner, prelude::*};
-use itertools::cloned;
 
 /// A coordinator between a cache, an optional profile and the KeysCollector.
 ///
