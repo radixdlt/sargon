@@ -582,11 +582,12 @@ mod tests {
 
     use super::*;
 
-    type Sut = FactorInstancesCache;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorInstancesCache;
 
     #[test]
     fn non_contiguous_indices() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let fsid = FactorSourceIDFromHash::sample_at(0);
 
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
@@ -613,7 +614,7 @@ mod tests {
 
     #[test]
     fn non_contiguous_indices_securified() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let fsid = FactorSourceIDFromHash::sample_at(0);
 
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
@@ -715,7 +716,7 @@ mod tests {
 
     #[test]
     fn json() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let fsid = FactorSourceIDFromHash::sample_at(0);
 
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
@@ -825,7 +826,7 @@ mod tests {
 
     #[test]
     fn factor_source_discrepancy() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let fs0 = FactorSourceIDFromHash::sample_at(0);
         let fs1 = FactorSourceIDFromHash::sample_at(1);
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
@@ -845,7 +846,7 @@ mod tests {
 
     #[test]
     fn delete() {
-        let sut = Sut::default();
+        let sut = SUT::default();
 
         let factor_source_ids = FactorSource::sample_all()
             .into_iter()
@@ -904,7 +905,7 @@ mod tests {
 
     #[test]
     fn throws_if_same_is_added() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let fsid = FactorSourceIDFromHash::sample_at(0);
         let fi0 = HierarchicalDeterministicFactorInstance::new_for_entity(
             fsid,

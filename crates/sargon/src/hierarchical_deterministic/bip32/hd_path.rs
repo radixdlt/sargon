@@ -104,11 +104,12 @@ impl HasSampleValues for HDPath {
 mod tests {
     use super::*;
 
-    type Sut = HDPath;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = HDPath;
 
     #[test]
     fn account_path() {
-        let hdpath = Sut::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
+        let hdpath = SUT::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
         assert_eq!(hdpath, AccountPath::sample().to_hd_path());
     }
 

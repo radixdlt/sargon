@@ -67,49 +67,50 @@ impl HasSampleValues for KeySpace {
 mod tests {
     use super::*;
 
-    type Sut = KeySpace;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = KeySpace;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     pub fn is_securified() {
-        assert!(Sut::Securified.is_securified());
-        assert!(!Sut::Unsecurified { is_hardened: true }.is_securified());
-        assert!(!Sut::Unsecurified { is_hardened: false }.is_securified());
+        assert!(SUT::Securified.is_securified());
+        assert!(!SUT::Unsecurified { is_hardened: true }.is_securified());
+        assert!(!SUT::Unsecurified { is_hardened: false }.is_securified());
     }
 
     #[test]
     pub fn is_unsecurified() {
-        assert!(!Sut::Securified.is_unsecurified());
-        assert!(Sut::Unsecurified { is_hardened: true }.is_unsecurified());
-        assert!(Sut::Unsecurified { is_hardened: false }.is_unsecurified());
+        assert!(!SUT::Securified.is_unsecurified());
+        assert!(SUT::Unsecurified { is_hardened: true }.is_unsecurified());
+        assert!(SUT::Unsecurified { is_hardened: false }.is_unsecurified());
     }
 
     #[test]
     pub fn is_unsecurified_unhardened() {
-        assert!(!Sut::Securified.is_unsecurified_unhardened());
-        assert!(Sut::Unsecurified { is_hardened: false }
+        assert!(!SUT::Securified.is_unsecurified_unhardened());
+        assert!(SUT::Unsecurified { is_hardened: false }
             .is_unsecurified_unhardened());
-        assert!(!Sut::Unsecurified { is_hardened: true }
+        assert!(!SUT::Unsecurified { is_hardened: true }
             .is_unsecurified_unhardened());
     }
 
     #[test]
     pub fn is_unsecurified_hardened() {
-        assert!(!Sut::Securified.is_unsecurified_hardened());
+        assert!(!SUT::Securified.is_unsecurified_hardened());
         assert!(
-            Sut::Unsecurified { is_hardened: true }.is_unsecurified_hardened()
+            SUT::Unsecurified { is_hardened: true }.is_unsecurified_hardened()
         );
-        assert!(!Sut::Unsecurified { is_hardened: false }
+        assert!(!SUT::Unsecurified { is_hardened: false }
             .is_unsecurified_hardened());
     }
 }

@@ -145,7 +145,8 @@ mod tests {
 
     use super::*;
 
-    type Sut = SecurifyEntityFactorInstancesProvider;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurifyEntityFactorInstancesProvider;
 
     #[should_panic]
     #[actix_rt::test]
@@ -154,7 +155,7 @@ mod tests {
         let a = Account::sample();
         let cache_client = FactorInstancesCacheClient::in_memory();
 
-        let _ = Sut::for_account_mfa(
+        let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
             MatrixOfFactorSources::new(
@@ -180,7 +181,7 @@ mod tests {
         let a = Account::sample();
         let cache_client = FactorInstancesCacheClient::in_memory();
 
-        let _ = Sut::for_account_mfa(
+        let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
             MatrixOfFactorSources::new(
@@ -234,7 +235,7 @@ mod tests {
         assert_eq!(profile.networks.len(), 2);
         let cache_client = FactorInstancesCacheClient::in_memory();
 
-        let _ = Sut::for_account_mfa(
+        let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
             MatrixOfFactorSources::new(
@@ -273,7 +274,7 @@ mod tests {
         let shield_0 = MatrixOfFactorSources::new([], 0, [bdfs.clone()]);
         let mut cache = os.cache_snapshot();
         let interactors = Arc::new(TestDerivationInteractors::default());
-        let outcome = Sut::for_account_mfa(
+        let outcome = SUT::for_account_mfa(
             &mut cache,
             os.profile_snapshot(),
             shield_0.clone(),
@@ -285,7 +286,7 @@ mod tests {
         let outcome = outcome.per_factor.get(&bdfs.factor_source_id()).unwrap();
         assert_eq!(outcome.to_use_directly.len(), 1);
 
-        let outcome = Sut::for_persona_mfa(
+        let outcome = SUT::for_persona_mfa(
             &mut cache,
             os.profile_snapshot(),
             shield_0.clone(),

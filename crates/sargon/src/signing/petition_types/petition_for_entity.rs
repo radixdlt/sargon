@@ -424,7 +424,8 @@ impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PetitionForEntity<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForEntity<TransactionIntentHash>;
 
     #[test]
     fn multiple_device_as_override_skipped_both_is_invalid() {
@@ -440,7 +441,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -466,7 +467,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d0.factor_source_id()),
         );
@@ -491,7 +492,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -519,7 +520,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut
             .invalid_transaction_if_neglected_factors(IndexSet::just(
@@ -549,7 +550,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d1.factor_source_id()),
@@ -560,7 +561,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert!(!format!("{:?}", Sut::sample()).is_empty());
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
     }
 
     #[test]
@@ -568,7 +569,7 @@ mod tests {
         expected = "Programmer error! Must have at least one factors list."
     )]
     fn invalid_empty_factors() {
-        Sut::new(
+        SUT::new(
             TransactionIntentHash::sample(),
             AddressOfAccountOrPersona::sample(),
             None,
@@ -579,7 +580,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "Factor source not found in any of the lists.")]
     fn cannot_add_unrelated_signature() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         sut.add_signature(HDSignature::sample());
     }
 
@@ -643,7 +644,7 @@ mod tests {
                 .unwrap()
             },
         );
-        let sut = Sut::from_entity_with_role_kind(
+        let sut = SUT::from_entity_with_role_kind(
             entity.clone(),
             intent_hash.clone(),
             RoleKind::Primary,
@@ -667,7 +668,7 @@ mod tests {
 
     #[test]
     fn invalid_transactions_if_neglected_success() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         let signature = HDSignature::produced_signing_with_input(
             HDSignatureInput::new(
                 sut.payload_id.clone(),
@@ -696,12 +697,12 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other())
+        assert_ne!(SUT::sample(), SUT::sample_other())
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 }

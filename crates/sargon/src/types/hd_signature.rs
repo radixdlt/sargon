@@ -93,27 +93,28 @@ impl<ID: SignableID> HDSignature<ID> {
 mod tests {
     use super::*;
 
-    type Sut = HDSignature<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = HDSignature<TransactionIntentHash>;
 
     #[test]
     fn equality_of_samples() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality_of_samples() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn hash_of_samples() {
         assert_eq!(
             IndexSet::<Sut>::from_iter([
-                Sut::sample(),
-                Sut::sample_other(),
-                Sut::sample(),
-                Sut::sample_other()
+                SUT::sample(),
+                SUT::sample_other(),
+                SUT::sample(),
+                SUT::sample_other()
             ])
             .len(),
             2

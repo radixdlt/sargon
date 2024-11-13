@@ -39,14 +39,15 @@ impl<ID: SignableID> PetitionTransactionOutcome<ID> {
 mod tests {
     use super::*;
 
-    type Sut = PetitionTransactionOutcome<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionTransactionOutcome<TransactionIntentHash>;
 
     #[test]
     #[should_panic(
         expected = "Discprenacy! Mismatching intent hash found in a signature."
     )]
     fn panic() {
-        Sut::new(
+        SUT::new(
             true,
             TransactionIntentHash::sample(),
             IndexSet::just(HDSignature::sample_other()),

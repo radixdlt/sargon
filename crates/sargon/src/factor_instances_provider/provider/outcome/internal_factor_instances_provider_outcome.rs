@@ -141,13 +141,14 @@ impl InternalFactorInstancesProviderOutcome {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = InternalFactorInstancesProviderOutcome;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InternalFactorInstancesProviderOutcome;
 
     #[test]
     fn only_to_cache() {
         let i = HierarchicalDeterministicFactorInstance::fia0();
 
-        let sut = Sut::transpose(
+        let sut = SUT::transpose(
             IndexMap::kv(
                 FactorSourceIDFromHash::sample_at(0),
                 FactorInstances::just(i.clone()),
@@ -166,7 +167,7 @@ mod tests {
     fn only_to_use_directly() {
         let i = HierarchicalDeterministicFactorInstance::fia0();
 
-        let sut = Sut::transpose(
+        let sut = SUT::transpose(
             IndexMap::new(),
             IndexMap::kv(
                 FactorSourceIDFromHash::sample_at(0),
@@ -188,7 +189,7 @@ mod tests {
     fn only_found_in_cache() {
         let i = HierarchicalDeterministicFactorInstance::fia0();
 
-        let sut = Sut::transpose(
+        let sut = SUT::transpose(
             IndexMap::new(),
             IndexMap::new(),
             IndexMap::kv(
@@ -210,7 +211,7 @@ mod tests {
     fn only_newly_derived() {
         let i = HierarchicalDeterministicFactorInstance::fia0();
 
-        let sut = Sut::transpose(
+        let sut = SUT::transpose(
             IndexMap::new(),
             IndexMap::new(),
             IndexMap::new(),

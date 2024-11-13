@@ -173,53 +173,54 @@ mod tests {
 
     use super::*;
 
-    type Sut = IdentityPath;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = IdentityPath;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn display() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         assert_eq!(format!("{}", sut), "m/44H/1022H/1H/618H/1460H/0H");
     }
 
     #[test]
     fn debug() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         assert_eq!(format!("{:?}", sut), "m/44'/1022'/1'/618'/1460'/0'");
     }
 
     #[test]
     fn to_bip32_path() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         assert_eq!(format!("{}", sut), "m/44H/1022H/1H/618H/1460H/0H");
     }
 
     #[test]
     fn from_str() {
-        let sut = Sut::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
-        assert_eq!(sut, Sut::sample());
+        let sut = SUT::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
+        assert_eq!(sut, SUT::sample());
     }
 
     #[test]
     fn from_str_securified() {
-        let sut = Sut::from_str("m/44H/1022H/1H/618H/1460H/0S").unwrap();
-        assert_ne!(sut, Sut::sample());
+        let sut = SUT::from_str("m/44H/1022H/1H/618H/1460H/0S").unwrap();
+        assert_ne!(sut, SUT::sample());
     }
 
     #[test]
     fn from_str_account() {
         assert!(matches!(
-            Sut::from_str("m/44H/1022H/1H/525H/1460H/0H"),
+            SUT::from_str("m/44H/1022H/1H/525H/1460H/0H"),
             Err(CommonError::WrongEntityKind {
                 expected: CAP26EntityKind::Identity,
                 found: CAP26EntityKind::Account
@@ -229,7 +230,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
 
         assert_json_value_eq_after_roundtrip(
             &sut,
@@ -253,7 +254,7 @@ mod tests {
     #[test]
     fn is_network_aware() {
         assert_eq!(
-            Sut::new(
+            SUT::new(
                 NetworkID::Stokenet,
                 CAP26KeyKind::sample(),
                 Hardened::sample()
@@ -265,7 +266,7 @@ mod tests {
 
     #[test]
     fn is_security_aware_unsecurified() {
-        assert!(!Sut::new(
+        assert!(!SUT::new(
             NetworkID::Stokenet,
             CAP26KeyKind::sample(),
             Hardened::sample()
@@ -275,7 +276,7 @@ mod tests {
 
     #[test]
     fn is_security_aware_securified() {
-        assert!(Sut::new(
+        assert!(SUT::new(
             NetworkID::Stokenet,
             CAP26KeyKind::sample(),
             Hardened::sample_other()
@@ -285,12 +286,12 @@ mod tests {
 
     #[test]
     fn entity_kind() {
-        assert_eq!(Sut::entity_kind(), CAP26EntityKind::Identity);
+        assert_eq!(SUT::entity_kind(), CAP26EntityKind::Identity);
     }
 
     #[test]
     fn get_entity_kind() {
-        assert_eq!(Sut::sample().get_entity_kind(), CAP26EntityKind::Identity);
+        assert_eq!(SUT::sample().get_entity_kind(), CAP26EntityKind::Identity);
     }
 
     #[test]

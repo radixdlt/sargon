@@ -81,8 +81,9 @@ mod test_appendable_collection {
 
     #[test]
     fn test_append_element() {
-        type Sut = IndexMap<i8, IndexSet<u8>>;
-        let mut map = Sut::new();
+        #[allow(clippy::upper_case_acronyms)]
+        type SUT = IndexMap<i8, IndexSet<u8>>;
+        let mut map = SUT::new();
         map.append_or_insert_element_to(-3, 5);
         map.append_or_insert_element_to(-3, 6);
         map.append_or_insert_element_to(-3, 6);
@@ -90,7 +91,7 @@ mod test_appendable_collection {
         map.append_or_insert_to(-9, [64, 128]);
         assert_eq!(
             map,
-            Sut::from_iter([
+            SUT::from_iter([
                 (-3, IndexSet::<u8>::from_iter([5, 6, 42, 237])),
                 (-9, IndexSet::<u8>::from_iter([64, 128])),
             ])

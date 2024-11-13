@@ -231,11 +231,12 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
 mod tests {
     use super::*;
 
-    type Sut = NextDerivationEntityIndexProfileAnalyzingAssigner;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NextDerivationEntityIndexProfileAnalyzingAssigner;
 
     #[test]
     fn test_network_discrepancy() {
-        let sut = Sut::new(NetworkID::Mainnet, None);
+        let sut = SUT::new(NetworkID::Mainnet, None);
         assert!(matches!(
             sut.next(
                 FactorSourceIDFromHash::sample_at(0),
@@ -253,7 +254,7 @@ mod tests {
     fn test_next_account_veci_with_single_at_0_is_1() {
         let preset = DerivationPreset::AccountVeci;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -282,7 +283,7 @@ mod tests {
     fn test_next_account_veci_with_unused_factor_is_none() {
         let preset = DerivationPreset::AccountVeci;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -304,7 +305,7 @@ mod tests {
     fn test_next_account_mfa_with_single_unsecurified_is_none() {
         let preset = DerivationPreset::AccountMfa;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -326,7 +327,7 @@ mod tests {
     fn test_next_account_veci_with_single_at_8_is_9() {
         let preset = DerivationPreset::AccountVeci;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -358,7 +359,7 @@ mod tests {
     fn test_next_account_mfa_with_single_at_7_is_8() {
         let preset = DerivationPreset::AccountMfa;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -393,7 +394,7 @@ mod tests {
     fn test_next_identity_mfa_with_single_at_7_is_8() {
         let preset = DerivationPreset::IdentityMfa;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -425,7 +426,7 @@ mod tests {
     fn test_next_identity_veci_with_single_at_1_is_2() {
         let preset = DerivationPreset::IdentityVeci;
         let network_id = NetworkID::Mainnet;
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),
@@ -487,7 +488,7 @@ mod tests {
             .map(|fi| {
                 Account::new(fi, DisplayName::sample(), AppearanceID::sample())
             });
-        let sut = Sut::new(
+        let sut = SUT::new(
             network_id,
             Arc::new(Profile::sample_from(
                 FactorSource::sample_all(),

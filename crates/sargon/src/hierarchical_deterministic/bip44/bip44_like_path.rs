@@ -177,12 +177,13 @@ mod tests {
 
     use super::*;
 
-    type Sut = BIP44LikePath;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP44LikePath;
 
     #[test]
     #[should_panic]
     fn panics_if_account_is_not_hardened() {
-        _ = Sut::with_account_change_and_index(
+        _ = SUT::with_account_change_and_index(
             HDPathComponent::from_global_key_space(0).unwrap(),
             HDPathComponent::from_global_key_space(0).unwrap(),
             HDPathComponent::from_global_key_space(0).unwrap(),
@@ -192,7 +193,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn panics_if_change_is_hardened() {
-        _ = Sut::with_account_change_and_index(
+        _ = SUT::with_account_change_and_index(
             HDPathComponent::from_global_key_space(GLOBAL_OFFSET_HARDENED)
                 .unwrap(),
             HDPathComponent::from_global_key_space(GLOBAL_OFFSET_HARDENED)
@@ -203,36 +204,36 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", Sut::sample()), "m/44H/1022H/0H/0/0");
-        assert_eq!(format!("{}", Sut::sample_other()), "m/44H/1022H/0H/0/1H");
+        assert_eq!(format!("{}", SUT::sample()), "m/44H/1022H/0H/0/0");
+        assert_eq!(format!("{}", SUT::sample_other()), "m/44H/1022H/0H/0/1H");
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", Sut::sample()), "m/44'/1022'/0'/0/0");
-        assert_eq!(format!("{:?}", Sut::sample_other()), "m/44'/1022'/0'/0/1'");
+        assert_eq!(format!("{:?}", SUT::sample()), "m/44'/1022'/0'/0/0");
+        assert_eq!(format!("{:?}", SUT::sample_other()), "m/44'/1022'/0'/0/1'");
     }
 
     #[test]
     fn to_bip32_path() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         assert_eq!(format!("{}", sut), "m/44H/1022H/0H/0/0");
     }
 
     #[test]
     fn from_str_hardened() {
-        let sut = Sut::from_str("m/44H/1022H/0H/0/8H").unwrap();
+        let sut = SUT::from_str("m/44H/1022H/0H/0/8H").unwrap();
         assert_eq!(
             sut.index,
             HDPathComponent::Unsecurified(Unsecurified::Hardened(
@@ -243,7 +244,7 @@ mod tests {
 
     #[test]
     fn from_str_hardened_non_canonical() {
-        let sut = Sut::from_str("m/44'/1022'/0'/0/8'").unwrap();
+        let sut = SUT::from_str("m/44'/1022'/0'/0/8'").unwrap();
         assert_eq!(
             sut.index,
             HDPathComponent::Unsecurified(Unsecurified::Hardened(
@@ -254,7 +255,7 @@ mod tests {
 
     #[test]
     fn from_str_unhardened() {
-        let sut = Sut::from_str("m/44H/1022H/0H/0/6").unwrap();
+        let sut = SUT::from_str("m/44H/1022H/0H/0/6").unwrap();
         assert_eq!(
             sut.index,
             HDPathComponent::Unsecurified(Unsecurified::Unhardened(
@@ -265,7 +266,7 @@ mod tests {
 
     #[test]
     fn from_str_unhardened_non_canonical() {
-        let sut = Sut::from_str("m/44'/1022'/0'/0/6").unwrap();
+        let sut = SUT::from_str("m/44'/1022'/0'/0/6").unwrap();
         assert_eq!(
             sut.index,
             HDPathComponent::Unsecurified(Unsecurified::Unhardened(
@@ -276,14 +277,14 @@ mod tests {
 
     #[test]
     fn json_roundtrip_unhardened() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
 
         assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H/0H/0/0"));
         assert_json_roundtrip(&sut);
     }
     #[test]
     fn json_roundtrip_hardened() {
-        let sut = Sut::sample_other();
+        let sut = SUT::sample_other();
 
         assert_json_value_eq_after_roundtrip(
             &sut,

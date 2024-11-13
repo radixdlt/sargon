@@ -39,11 +39,12 @@ impl NextDerivationEntityIndexWithEphemeralOffsets {
 mod tests {
     use super::*;
 
-    type Sut = NextDerivationEntityIndexWithEphemeralOffsets;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NextDerivationEntityIndexWithEphemeralOffsets;
 
     #[test]
     fn test_contiguous() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let n = 4;
         let indices = (0..n)
             .map(|_| {
@@ -71,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_zero_for_each_factor_sources_first_time() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let fsids = FactorSource::sample_all()
             .into_iter()
             .map(|f| f.id_from_hash())
@@ -101,7 +102,7 @@ mod tests {
 
     #[test]
     fn test_zero_for_each_derivation_preset() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let derivation_presets = DerivationPreset::all();
         let indices = derivation_presets
             .clone()
@@ -127,7 +128,7 @@ mod tests {
 
     #[test]
     fn test_zero_for_each_network() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         let network_ids = NetworkID::all();
         let indices = network_ids
             .clone()

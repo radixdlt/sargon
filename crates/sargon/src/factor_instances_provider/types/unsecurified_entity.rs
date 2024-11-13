@@ -95,33 +95,34 @@ impl HasSampleValues for UnsecurifiedEntity {
 mod tests {
     use super::*;
 
-    type Sut = UnsecurifiedEntity;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = UnsecurifiedEntity;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     // #[test]
     // fn unsecurified_persona_into_tagged_union() {
-    //     let sut = Sut::sample_other();
+    //     let sut = SUT::sample_other();
     //     assert!(AccountOrPersona::from(sut).is_persona_entity());
     // }
 
     // #[test]
     // fn unsecurified_account_into_tagged_union() {
-    //     let sut = Sut::sample();
+    //     let sut = SUT::sample();
     //     assert!(AccountOrPersona::from(sut).is_account_entity());
     // }
 
     #[test]
     fn network_id() {
-        assert_eq!(Sut::sample_other().network_id(), NetworkID::Stokenet);
+        assert_eq!(SUT::sample_other().network_id(), NetworkID::Stokenet);
     }
 }

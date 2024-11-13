@@ -222,7 +222,8 @@ impl VirtualEntityCreatingInstanceProvider {
 mod tests {
 
     use super::*;
-    type Sut = VirtualEntityCreatingInstanceProvider;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = VirtualEntityCreatingInstanceProvider;
 
     #[actix_rt::test]
     async fn cache_is_always_filled_persona_veci_then_after_all_used_we_start_over_at_zero_if_no_profile_is_used(
@@ -231,7 +232,7 @@ mod tests {
         let bdfs = FactorSource::sample();
         let cache_client = Arc::new(FactorInstancesCacheClient::in_memory());
 
-        let (consumer, outcome) = Sut::for_persona_veci(
+        let (consumer, outcome) = SUT::for_persona_veci(
             cache_client.clone(),
             None,
             bdfs.clone(),
@@ -330,7 +331,7 @@ mod tests {
         let network = NetworkID::Mainnet;
         let bdfs = FactorSource::sample();
         let cache_client = Arc::new(FactorInstancesCacheClient::in_memory());
-        let (consumer, outcome) = Sut::for_account_veci(
+        let (consumer, outcome) = SUT::for_account_veci(
             cache_client.clone(),
             None,
             bdfs.clone(),
@@ -535,7 +536,7 @@ mod tests {
 
         // lets create another account (same network, same factor source)
 
-        let (consumer, outcome) = Sut::for_account_veci(
+        let (consumer, outcome) = SUT::for_account_veci(
             cache_client.clone(),
             None,
             bdfs.clone(),
@@ -621,7 +622,7 @@ mod tests {
         // create 29 more accounts, then we should be able to crate one more which should ONLY derive
         // more instances for ACCOUNT VECI, and not Identity Veci, Identity MFA and Account MFA, since that is
         // not needed.
-        let (consumer, outcome) = Sut::for_many_account_vecis(
+        let (consumer, outcome) = SUT::for_many_account_vecis(
             29,
             cache_client.clone(),
             None,
@@ -659,7 +660,7 @@ mod tests {
         // it. We should derive 31 instances, 30 for account veci to cache and 1 to use directly.
         // we should NOT derive more instances for Identity Veci, Identity MFA and Account MFA, since
         // that cache is already full.
-        let (consumer, outcome) = Sut::for_account_veci(
+        let (consumer, outcome) = SUT::for_account_veci(
             cache_client.clone(),
             None,
             bdfs.clone(),

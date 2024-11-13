@@ -105,7 +105,8 @@ mod tests {
     use super::*;
     use crate::DependencyInformation::Tag;
 
-    type Sut = PetitionForFactorsState<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForFactorsState<TransactionIntentHash>;
 
     impl PetitionForFactorsState<TransactionIntentHash> {
         fn test_neglect(
@@ -127,7 +128,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn skipping_twice_panics() {
-        let sut = Sut::new();
+        let sut = SUT::new();
         let fi = HierarchicalDeterministicFactorInstance::sample();
         sut.test_neglect(&fi, false);
         sut.test_neglect(&fi, false);
@@ -136,7 +137,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn signing_twice_panics() {
-        let sut = Sut::new();
+        let sut = SUT::new();
         let sig = HDSignature::sample();
         sut.add_signature(&sig);
         sut.add_signature(&sig);
@@ -145,7 +146,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn skipping_already_signed_panics() {
-        let sut = Sut::new();
+        let sut = SUT::new();
 
         let intent_hash = TransactionIntentHash::sample();
 
@@ -171,7 +172,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn signing_already_skipped_panics() {
-        let sut = Sut::new();
+        let sut = SUT::new();
 
         let intent_hash = TransactionIntentHash::sample();
         let factor_instance =

@@ -130,23 +130,24 @@ impl HasSampleValues for ConfirmationRoleWithFactorInstances {
 mod tests_primary {
     use super::*;
 
-    type Sut = PrimaryRoleWithFactorInstances;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PrimaryRoleWithFactorInstances;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn primary_role_non_securified_threshold_instances_is_err() {
         assert!(matches!(
-            Sut::threshold_factors_only(
+            SUT::threshold_factors_only(
                 [
                     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0).into()
                 ],
@@ -161,17 +162,18 @@ mod tests_primary {
 mod tests_recovery {
     use super::*;
 
-    type Sut = RecoveryRoleWithFactorInstances;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = RecoveryRoleWithFactorInstances;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
 
@@ -179,17 +181,18 @@ mod tests_recovery {
 mod tests_confirmation {
     use super::*;
 
-    type Sut = ConfirmationRoleWithFactorInstances;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ConfirmationRoleWithFactorInstances;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
 
@@ -197,16 +200,17 @@ mod tests_confirmation {
 mod tests_security_structure_of_factor_instances {
     use super::*;
 
-    type Sut = SecurityStructureOfFactorInstances;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityStructureOfFactorInstances;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

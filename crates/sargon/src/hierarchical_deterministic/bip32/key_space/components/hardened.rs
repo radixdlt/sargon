@@ -205,32 +205,33 @@ mod tests {
 
     use super::*;
 
-    type Sut = Hardened;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Hardened;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample(),);
-        assert_eq!(Sut::sample_other(), Sut::sample_other(),);
+        assert_eq!(SUT::sample(), SUT::sample(),);
+        assert_eq!(SUT::sample_other(), SUT::sample_other(),);
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other(),);
+        assert_ne!(SUT::sample(), SUT::sample_other(),);
     }
 
     #[test]
     fn ord() {
-        assert!(Sut::sample() < Sut::sample_other());
+        assert!(SUT::sample() < SUT::sample_other());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
             HashSet::<Sut>::from_iter([
-                Sut::sample(),
-                Sut::sample(),
-                Sut::sample_other(),
-                Sut::sample_other(),
+                SUT::sample(),
+                SUT::sample(),
+                SUT::sample_other(),
+                SUT::sample_other(),
             ])
             .len(),
             2
@@ -240,27 +241,27 @@ mod tests {
     #[test]
     fn unsecurified_from_local() {
         assert_eq!(
-            Sut::from_local_key_space(1, IsSecurified(false)).unwrap(),
-            Sut::from_global_key_space(GLOBAL_OFFSET_HARDENED + 1).unwrap()
+            SUT::from_local_key_space(1, IsSecurified(false)).unwrap(),
+            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED + 1).unwrap()
         );
 
         assert_eq!(
-            Sut::from_local_key_space(3, IsSecurified(false)).unwrap(),
-            Sut::from_global_key_space(GLOBAL_OFFSET_HARDENED + 3).unwrap()
+            SUT::from_local_key_space(3, IsSecurified(false)).unwrap(),
+            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED + 3).unwrap()
         );
     }
 
     #[test]
     fn securified_from_local() {
         assert_eq!(
-            Sut::from_local_key_space(0, IsSecurified(true)).unwrap(),
-            Sut::from_global_key_space(GLOBAL_OFFSET_HARDENED_SECURIFIED)
+            SUT::from_local_key_space(0, IsSecurified(true)).unwrap(),
+            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED_SECURIFIED)
                 .unwrap()
         );
 
         assert_eq!(
-            Sut::from_local_key_space(3, IsSecurified(true)).unwrap(),
-            Sut::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
+            SUT::from_local_key_space(3, IsSecurified(true)).unwrap(),
+            SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
                 .unwrap()
         );
     }
@@ -269,7 +270,7 @@ mod tests {
     fn from_str_valid_0_unsecurified() {
         assert_eq!(
             "0H".parse::<Sut>().unwrap(),
-            Sut::from_local_key_space(0, IsSecurified(false)).unwrap()
+            SUT::from_local_key_space(0, IsSecurified(false)).unwrap()
         );
     }
 
@@ -277,7 +278,7 @@ mod tests {
     fn from_str_valid_0_securified() {
         assert_eq!(
             "0S".parse::<Sut>().unwrap(),
-            Sut::from_local_key_space(0, IsSecurified(true)).unwrap()
+            SUT::from_local_key_space(0, IsSecurified(true)).unwrap()
         );
     }
 
@@ -285,7 +286,7 @@ mod tests {
     fn from_str_valid_1_securified_canonical() {
         assert_eq!(
             "1S".parse::<Sut>().unwrap(),
-            Sut::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
+            SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
                 .unwrap()
         );
     }
@@ -293,7 +294,7 @@ mod tests {
     fn from_str_valid_1_securified_non_canonical() {
         assert_eq!(
             "1^".parse::<Sut>().unwrap(),
-            Sut::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
+            SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
                 .unwrap()
         );
     }
@@ -302,7 +303,7 @@ mod tests {
     fn from_str_valid_1_hardened_canonical() {
         assert_eq!(
             "1H".parse::<Sut>().unwrap(),
-            Sut::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
+            SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
 
@@ -310,7 +311,7 @@ mod tests {
     fn from_str_valid_2_hardened_non_canonical() {
         assert_eq!(
             "2'".parse::<Sut>().unwrap(),
-            Sut::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
+            SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
 
@@ -318,7 +319,7 @@ mod tests {
     fn from_str_valid_3_hardened_non_canonical() {
         assert_eq!(
             "3'".parse::<Sut>().unwrap(),
-            Sut::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()
+            SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
 
@@ -326,7 +327,7 @@ mod tests {
     fn from_str_valid_max() {
         assert_eq!(
             "1073741823S".parse::<Sut>().unwrap(),
-            Sut::from_local_key_space(U30_MAX, IsSecurified(true)).unwrap()
+            SUT::from_local_key_space(U30_MAX, IsSecurified(true)).unwrap()
         );
     }
 
@@ -335,7 +336,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                Sut::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
+                SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
             ),
             "1H"
         );
@@ -345,7 +346,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                Sut::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
+                SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
             ),
             "2H"
         );
@@ -356,7 +357,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                Sut::from_global_key_space(
+                SUT::from_global_key_space(
                     1 + GLOBAL_OFFSET_HARDENED_SECURIFIED
                 )
                 .unwrap()
@@ -369,7 +370,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                Sut::from_global_key_space(
+                SUT::from_global_key_space(
                     2 + GLOBAL_OFFSET_HARDENED_SECURIFIED
                 )
                 .unwrap()
@@ -383,7 +384,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{:?}",
-                Sut::from_local_key_space(0, IsSecurified(false)).unwrap()
+                SUT::from_local_key_space(0, IsSecurified(false)).unwrap()
             ),
             "0'"
         );
@@ -394,7 +395,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{:?}",
-                Sut::from_local_key_space(0, IsSecurified(true)).unwrap()
+                SUT::from_local_key_space(0, IsSecurified(true)).unwrap()
             ),
             "0^"
         );
@@ -405,7 +406,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                Sut::from_local_key_space(0, IsSecurified(false)).unwrap()
+                SUT::from_local_key_space(0, IsSecurified(false)).unwrap()
             ),
             "0H"
         );
@@ -416,7 +417,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                Sut::from_local_key_space(0, IsSecurified(true)).unwrap()
+                SUT::from_local_key_space(0, IsSecurified(true)).unwrap()
             ),
             "0S"
         );
@@ -433,19 +434,19 @@ mod tests {
     #[test]
     fn from_global_valid_securified() {
         assert_eq!(
-            Sut::from_global_key_space(
+            SUT::from_global_key_space(
                 1337 + GLOBAL_OFFSET_HARDENED_SECURIFIED
             )
             .unwrap(),
-            Sut::Securified(SecurifiedU30::from_local_key_space(1337).unwrap())
+            SUT::Securified(SecurifiedU30::from_local_key_space(1337).unwrap())
         );
     }
 
     #[test]
     fn from_global_valid_unsecurified() {
         assert_eq!(
-            Sut::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED).unwrap(),
-            Sut::Unsecurified(
+            SUT::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED).unwrap(),
+            SUT::Unsecurified(
                 UnsecurifiedHardened::from_local_key_space(1337).unwrap()
             )
         );
@@ -453,13 +454,13 @@ mod tests {
 
     #[test]
     fn from_global_invalid() {
-        assert!(Sut::from_global_key_space(0).is_err());
+        assert!(SUT::from_global_key_space(0).is_err());
     }
 
     #[test]
     fn index_in_local_key_space_unsecurified() {
         assert_eq!(
-            Sut::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED)
+            SUT::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED)
                 .unwrap()
                 .index_in_local_key_space(),
             U31::from(1337)
@@ -469,7 +470,7 @@ mod tests {
     #[test]
     fn index_in_local_key_space_unsecurified_key_space() {
         assert_eq!(
-            Sut::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED)
+            SUT::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED)
                 .unwrap()
                 .key_space(),
             KeySpace::Unsecurified { is_hardened: true }
@@ -479,7 +480,7 @@ mod tests {
     #[test]
     fn index_in_local_key_space_securified_key_space() {
         assert_eq!(
-            Sut::from_global_key_space(
+            SUT::from_global_key_space(
                 1337 + GLOBAL_OFFSET_HARDENED_SECURIFIED
             )
             .unwrap()
@@ -491,15 +492,15 @@ mod tests {
     #[test]
     fn try_from_hd_path_component_securified() {
         let secu30 = SecurifiedU30::sample();
-        let sut = Sut::Securified(secu30);
+        let sut = SUT::Securified(secu30);
         let from = HDPathComponent::Securified(secu30);
-        assert_eq!(Sut::try_from(from).unwrap(), sut)
+        assert_eq!(SUT::try_from(from).unwrap(), sut)
     }
 
     #[test]
     fn index_in_local_key_space_securified() {
         assert_eq!(
-            Sut::from_global_key_space(
+            SUT::from_global_key_space(
                 1337 + GLOBAL_OFFSET_HARDENED_SECURIFIED
             )
             .unwrap()
@@ -511,7 +512,7 @@ mod tests {
     #[test]
     fn into_global_unsecurified() {
         assert_eq!(
-            Sut::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED)
+            SUT::from_global_key_space(1337 + GLOBAL_OFFSET_HARDENED)
                 .unwrap()
                 .map_to_global_key_space(),
             1337 + GLOBAL_OFFSET_HARDENED
@@ -521,7 +522,7 @@ mod tests {
     #[test]
     fn into_global_securified() {
         assert_eq!(
-            Sut::from_global_key_space(
+            SUT::from_global_key_space(
                 1337 + GLOBAL_OFFSET_HARDENED_SECURIFIED
             )
             .unwrap()
@@ -532,7 +533,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_securified() {
-        let sut = Sut::from_local_key_space(1337, IsSecurified(true)).unwrap();
+        let sut = SUT::from_local_key_space(1337, IsSecurified(true)).unwrap();
 
         assert_json_value_eq_after_roundtrip(&sut, json!("1337S"));
         assert_json_roundtrip(&sut);
@@ -541,7 +542,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_unsecurified() {
-        let sut = Sut::from_local_key_space(1337, IsSecurified(false)).unwrap();
+        let sut = SUT::from_local_key_space(1337, IsSecurified(false)).unwrap();
 
         assert_json_value_eq_after_roundtrip(&sut, json!("1337H"));
         assert_json_roundtrip(&sut);
@@ -560,25 +561,25 @@ mod tests {
     #[test]
     fn add_zero() {
         let sut =
-            Sut::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap();
+            SUT::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap();
         assert_eq!(sut.checked_add_n_to_global(0).unwrap(), sut);
     }
 
     #[test]
     fn add_zero_to_max_is_ok() {
         let sut =
-            Sut::from_global_key_space(Sut::MAX_LOCAL + GLOBAL_OFFSET_HARDENED)
+            SUT::from_global_key_space(SUT::MAX_LOCAL + GLOBAL_OFFSET_HARDENED)
                 .unwrap();
         assert_eq!(sut.checked_add_n_to_global(0).unwrap(), sut,);
     }
 
     #[test]
     fn add_max_to_zero_is_err_since_it_changes_key_space() {
-        let sut = Sut::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap();
+        let sut = SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap();
         assert_eq!(sut.index_in_local_key_space(), U31::from(0));
 
         assert!(matches!(
-            sut.checked_add_n_to_global(Sut::MAX_LOCAL),
+            sut.checked_add_n_to_global(SUT::MAX_LOCAL),
             Err(CommonError::CannotAddMoreToIndexSinceItWouldChangeKeySpace)
         ));
     }
@@ -586,22 +587,22 @@ mod tests {
     #[test]
     fn add_one() {
         let sut =
-            Sut::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap();
+            SUT::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap();
         assert_eq!(
             sut.checked_add_one_to_global().unwrap(),
-            Sut::from_global_key_space(43 + GLOBAL_OFFSET_HARDENED).unwrap()
+            SUT::from_global_key_space(43 + GLOBAL_OFFSET_HARDENED).unwrap()
         );
     }
 
     #[test]
     fn add_one_to_max_minus_1_is_max() {
-        let sut = Sut::from_global_key_space(
-            Sut::MAX_LOCAL - 1 + GLOBAL_OFFSET_HARDENED,
+        let sut = SUT::from_global_key_space(
+            SUT::MAX_LOCAL - 1 + GLOBAL_OFFSET_HARDENED,
         )
         .unwrap();
         assert_eq!(
             sut.checked_add_n_to_global(1).unwrap(),
-            Sut::from_global_key_space(Sut::MAX_LOCAL + GLOBAL_OFFSET_HARDENED)
+            SUT::from_global_key_space(SUT::MAX_LOCAL + GLOBAL_OFFSET_HARDENED)
                 .unwrap()
         );
     }
@@ -609,7 +610,7 @@ mod tests {
     #[test]
     fn addition_overflow_base_max() {
         let sut =
-            Sut::from_global_key_space(Sut::MAX_LOCAL + GLOBAL_OFFSET_HARDENED)
+            SUT::from_global_key_space(SUT::MAX_LOCAL + GLOBAL_OFFSET_HARDENED)
                 .unwrap();
         assert!(matches!(
             sut.checked_add_n_to_global(1),
@@ -620,7 +621,7 @@ mod tests {
     #[test]
     fn addition_overflow_add_max() {
         let sut =
-            Sut::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap();
-        assert!(sut.checked_add_n_to_global(Sut::MAX_LOCAL).is_err());
+            SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap();
+        assert!(sut.checked_add_n_to_global(SUT::MAX_LOCAL).is_err());
     }
 }
