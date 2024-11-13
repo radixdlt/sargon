@@ -12,6 +12,7 @@ impl SargonOS {
     pub async fn create_delete_account_manifest(
         &self,
         account_address: AccountAddress,
+        recipient_account_address: Option<AccountAddress>,
     ) -> Result<TransactionManifest> {
         let network_id = account_address.network_id();
         let gateway_client = GatewayClient::new(
@@ -19,8 +20,43 @@ impl SargonOS {
             network_id,
         );
 
+        // Get current ledger state
         let ledger_state = gateway_client.gateway_status().await?.ledger_state;
 
+        // Fetch all resource preferences
+        let resource_preferences = self
+            .fetch_resource_preferences(
+                account_address,
+                &gateway_client,
+                &ledger_state,
+            )
+            .await?;
+
+        // Fetch all authorized depositors
+        let authorized_depositors = self
+            .fetch_authorized_depositors(
+                account_address,
+                gateway_client,
+                ledger_state,
+            )
+            .await?;
+
+        // Build Manifest
+        let manifest = TransactionManifest::delete_account(
+            &account_address,
+            resource_preferences,
+            authorized_depositors,
+        );
+
+        Ok(manifest)
+    }
+
+    async fn fetch_resource_preferences(
+        &self,
+        account_address: AccountAddress,
+        gateway_client: &GatewayClient,
+        ledger_state: &LedgerState,
+    ) -> Result<Vec<ScryptoAccountRemoveResourcePreferenceInput>> {
         let resource_preferences = gateway_client
             .fetch_all_account_resource_preferences(
                 account_address,
@@ -31,6 +67,15 @@ impl SargonOS {
             .map(ScryptoAccountRemoveResourcePreferenceInput::from)
             .collect();
 
+        Ok(resource_preferences)
+    }
+
+    async fn fetch_authorized_depositors(
+        &self,
+        account_address: AccountAddress,
+        gateway_client: GatewayClient,
+        ledger_state: LedgerState,
+    ) -> Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>> {
         let authorized_depositors = gateway_client
             .fetch_all_account_authorized_depositors(account_address, ledger_state.into())
             .await?
@@ -38,13 +83,7 @@ impl SargonOS {
             .map(ScryptoAccountRemoveAuthorizedDepositorInput::try_from)
             .collect::<Result<Vec<ScryptoAccountRemoveAuthorizedDepositorInput>>>()?;
 
-        let manifest = TransactionManifest::delete_account(
-            &account_address,
-            resource_preferences,
-            authorized_depositors,
-        );
-
-        Ok(manifest)
+        Ok(authorized_depositors)
     }
 }
 
