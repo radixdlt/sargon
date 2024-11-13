@@ -10,6 +10,9 @@ use crate::prelude::*;
     Debug,
 )]
 pub struct FungibleResourcesCollectionItemGloballyAggregated {
-    pub amount: Decimal192,
+    /// Bech32m-encoded human readable version of the address.
     pub resource_address: ResourceAddress,
+
+    /// Decimal representing the amount of a related fungible resource.
+    pub amount: Decimal192,
 }

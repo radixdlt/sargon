@@ -1,14 +1,7 @@
 use crate::prelude::*;
 
-#[derive(
-    Deserialize,
-    Serialize, /* Serialize so we can test roundtrip of JSON vectors */
-    Clone,
-    PartialEq,
-    Eq,
-    Debug,
-)]
-pub struct FungibleResourcesCollection {
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
+pub struct NonFungibleResourcesCollection {
     /// Total number of items in underlying collection, fragment of which is available in `items` collection.
     pub total_count: Option<u64>,
 
@@ -16,5 +9,5 @@ pub struct FungibleResourcesCollection {
     pub next_cursor: Option<String>,
 
     /// Collection of fungible resources.
-    pub items: Vec<FungibleResourcesCollectionItem>,
+    pub items: Vec<NonFungibleResourcesCollectionItem>,
 }

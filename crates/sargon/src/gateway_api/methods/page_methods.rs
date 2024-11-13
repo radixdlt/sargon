@@ -127,15 +127,19 @@ mod tests {
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         let result = sut
-            .load_all_pages(None, LedgerStateSelector::sample(), |cursor, ledger_state| {
-                let request = AccountResourcePreferencesRequest::new(
-                    account_address,
-                    ledger_state,
-                    cursor,
-                    GATEWAY_PAGE_REQUEST_LIMIT,
-                );
-                sut.account_resource_preferences(request)
-            })
+            .load_all_pages(
+                None,
+                LedgerStateSelector::sample(),
+                |cursor, ledger_state| {
+                    let request = AccountResourcePreferencesRequest::new(
+                        account_address,
+                        ledger_state,
+                        cursor,
+                        GATEWAY_PAGE_REQUEST_LIMIT,
+                    );
+                    sut.account_resource_preferences(request)
+                },
+            )
             .await
             .unwrap();
 

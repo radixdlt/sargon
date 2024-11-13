@@ -8,9 +8,11 @@ impl GatewayClient {
         address: AccountAddress,
     ) -> Result<Option<Decimal192>> {
         let response: StateEntityDetailsResponse = self
-            .state_entity_details(StateEntityDetailsRequest::new(vec![
-                address.into()
-            ]))
+            .state_entity_details(StateEntityDetailsRequest::new(
+                vec![address.into()],
+                None,
+                None,
+            ))
             .await?;
 
         let Some(response_item) = response
@@ -62,7 +64,7 @@ impl GatewayClient {
         explicit_metadata: Vec<MetadataKey>,
     ) -> Result<EntityMetadataCollection> {
         let response = self
-            .state_entity_details(StateEntityDetailsRequest::address(
+            .state_entity_details(StateEntityDetailsRequest::address_metadata(
                 address,
                 explicit_metadata,
             ))
@@ -94,15 +96,19 @@ impl GatewayClient {
         account_address: AccountAddress,
         ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountResourcePreference>> {
-        self.load_all_pages(None, ledger_state_selector, |cursor, ledger_state_selector| {
-            let request = AccountResourcePreferencesRequest::new(
-                account_address,
-                ledger_state_selector,
-                cursor,
-                GATEWAY_PAGE_REQUEST_LIMIT,
-            );
-            self.account_resource_preferences(request)
-        })
+        self.load_all_pages(
+            None,
+            ledger_state_selector,
+            |cursor, ledger_state_selector| {
+                let request = AccountResourcePreferencesRequest::new(
+                    account_address,
+                    ledger_state_selector,
+                    cursor,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
+                self.account_resource_preferences(request)
+            },
+        )
         .await
     }
 
@@ -112,15 +118,19 @@ impl GatewayClient {
         account_address: AccountAddress,
         ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountAuthorizedDepositor>> {
-        self.load_all_pages(None, ledger_state_selector, |cursor, ledger_state_selector| {
-            let request = AccountAuthorizedDepositorsRequest::new(
-                account_address,
-                ledger_state_selector,
-                cursor,
-                GATEWAY_PAGE_REQUEST_LIMIT,
-            );
-            self.account_authorized_depositors(request)
-        })
+        self.load_all_pages(
+            None,
+            ledger_state_selector,
+            |cursor, ledger_state_selector| {
+                let request = AccountAuthorizedDepositorsRequest::new(
+                    account_address,
+                    ledger_state_selector,
+                    cursor,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
+                self.account_authorized_depositors(request)
+            },
+        )
         .await
     }
 }

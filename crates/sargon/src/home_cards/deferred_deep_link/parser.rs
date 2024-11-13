@@ -135,6 +135,7 @@ mod tests_transform {
                 items: vec![StateEntityDetailsResponseItem {
                     address: Address::sample_account_stokenet(),
                     fungible_resources: None,
+                    non_fungible_resources: None,
                     metadata: EntityMetadataCollection {
                         items: vec![EntityMetadataItem {
                             key: key.to_string(),
