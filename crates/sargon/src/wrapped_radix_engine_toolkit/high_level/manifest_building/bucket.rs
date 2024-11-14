@@ -22,8 +22,6 @@ impl ScryptoNewManifestBucket for &Bucket {
     }
 }
 
-// labelled_resolvable_with_identity_impl!(Bucket, resolver_output: ScryptoManifestBucket);
-
 impl LabelledResolvable for &Bucket {
     type ResolverOutput = ScryptoManifestBucket;
 }
@@ -36,12 +34,3 @@ impl LabelledResolveFrom<&Bucket> for ScryptoManifestBucket {
         resolver.resolve_label_into(&value.name)
     }
 }
-
-// impl ScryptoExistingManifestBucket for &Bucket {
-//     fn resolve(
-//         self,
-//         registrar: &ScryptoManifestNameRegistrar,
-//     ) -> ScryptoManifestBucket {
-//         registrar.name_lookup().bucket(self)
-//     }
-// }
