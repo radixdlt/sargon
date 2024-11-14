@@ -137,16 +137,18 @@ impl InternalFactorInstancesProviderOutcome {
         )
     }
 }
-/*
+
 #[cfg(test)]
 mod tests {
+   
     use super::*;
+    
     #[allow(clippy::upper_case_acronyms)]
     type SUT = InternalFactorInstancesProviderOutcome;
 
     #[test]
     fn only_to_cache() {
-        let i = HierarchicalDeterministicFactorInstance::fia0();
+        let i = HierarchicalDeterministicFactorInstance::sample_fia0();
 
         let sut = SUT::transpose(
             IndexMap::kv(
@@ -165,7 +167,7 @@ mod tests {
 
     #[test]
     fn only_to_use_directly() {
-        let i = HierarchicalDeterministicFactorInstance::fia0();
+        let i = HierarchicalDeterministicFactorInstance::sample_fia0();
 
         let sut = SUT::transpose(
             IndexMap::new(),
@@ -187,7 +189,7 @@ mod tests {
 
     #[test]
     fn only_found_in_cache() {
-        let i = HierarchicalDeterministicFactorInstance::fia0();
+        let i = HierarchicalDeterministicFactorInstance::sample_fia0();
 
         let sut = SUT::transpose(
             IndexMap::new(),
@@ -209,7 +211,7 @@ mod tests {
 
     #[test]
     fn only_newly_derived() {
-        let i = HierarchicalDeterministicFactorInstance::fia0();
+        let i = HierarchicalDeterministicFactorInstance::sample_fia0();
 
         let sut = SUT::transpose(
             IndexMap::new(),
@@ -229,4 +231,3 @@ mod tests {
         )
     }
 }
- */
