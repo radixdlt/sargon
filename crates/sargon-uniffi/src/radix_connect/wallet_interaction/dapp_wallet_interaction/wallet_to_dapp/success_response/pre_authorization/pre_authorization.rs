@@ -1,8 +1,14 @@
 use crate::prelude::*;
 use sargon::WalletToDappInteractionPreAuthorizationResponseItems as InternalWalletToDappInteractionPreAuthorizationResponseItems;
+use sargon::WalletToDappInteractionSubintentResponseItem as InternalWalletToDappInteractionSubintentResponseItem;
 
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct WalletToDappInteractionPreAuthorizationResponseItems {
+    pub response: WalletToDappInteractionSubintentResponseItem,
+}
+
+#[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
+pub struct WalletToDappInteractionSubintentResponseItem {
     /// A hex encoded signed partial transaction.
     pub encoded_signed_partial_transaction: String,
 }
