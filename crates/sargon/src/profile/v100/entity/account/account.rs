@@ -153,6 +153,7 @@ impl Account {
         index: u32,
         name: &str,
         is_hidden: bool,
+        is_tombstoned: bool,
     ) -> Self {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::sample();
@@ -172,40 +173,49 @@ impl Account {
         if is_hidden {
             account.flags.insert(EntityFlag::DeletedByUser);
         }
+        if is_tombstoned {
+            account.flags.insert(EntityFlag::TombstonedByUser);
+        }
         account
     }
 
-    fn sample_at_index_name(index: u32, name: &str, is_hidden: bool) -> Self {
+    fn sample_at_index_name(index: u32, name: &str, is_hidden: bool, is_tombstoned: bool) -> Self {
         Self::sample_at_index_name_network(
             NetworkID::Mainnet,
             index,
             name,
             is_hidden,
+            is_tombstoned,
         )
     }
 
     /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
     /// derivation index 0,
     pub fn sample_mainnet_alice() -> Self {
-        Self::sample_at_index_name(0, "Alice", false)
+        Self::sample_at_index_name(0, "Alice", false, false)
     }
 
     /// A `Mainnet` account named "Bob", a sample used to facilitate unit tests, with
     /// derivation index 1.
     pub fn sample_mainnet_bob() -> Self {
-        Self::sample_at_index_name(1, "Bob", false)
+        Self::sample_at_index_name(1, "Bob", false, false)
     }
 
     /// A `Mainnet` account named "Carol", a sample used to facilitate unit tests, with
     /// derivation index 2.
     pub fn sample_mainnet_carol() -> Self {
-        Self::sample_at_index_name(2, "Carol", false)
+        Self::sample_at_index_name(2, "Carol", false, false)
     }
 
     /// A HIDDEN `Mainnet` account named "Diana", a sample used to facilitate unit tests, with
     /// derivation index 3.
     pub fn sample_mainnet_diana() -> Self {
-        Self::sample_at_index_name(3, "Diana", true)
+        Self::sample_at_index_name(3, "Diana", true, false)
+    }
+
+    /// A tombestoned account named Sean, with derivation index 4.
+    pub fn sample_mainnet_sean() -> Self {
+        Self::sample_at_index_name(4, "Sean", false, true)
     }
 
     /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
@@ -241,6 +251,7 @@ impl Account {
             0,
             "Nadia",
             false,
+            false,
         )
     }
 
@@ -251,6 +262,7 @@ impl Account {
             1,
             "Olivia",
             true,
+            false,
         )
     }
 
@@ -260,6 +272,7 @@ impl Account {
             NetworkID::Stokenet,
             2,
             "Paige",
+            false,
             false,
         )
     }

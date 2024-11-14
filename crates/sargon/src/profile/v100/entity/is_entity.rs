@@ -11,4 +11,10 @@ pub trait IsEntity {
             .into_iter()
             .contains(&EntityFlag::DeletedByUser)
     }
+
+    fn is_tombstoned(&self) -> bool {
+        self.flags()
+            .into_iter()
+            .contains(&EntityFlag::TombstonedByUser)
+    }
 }

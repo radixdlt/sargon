@@ -4,7 +4,7 @@ impl Profile {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Result<Accounts> {
-        self.current_network().map(|n| n.accounts.non_hidden())
+        self.current_network().map(|n| n.accounts.visible())
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
@@ -20,7 +20,7 @@ impl Profile {
     }
 
     /// Looks up the account by account address, returns Err if the account is
-    /// unknown, will return a hidden account if queried for.
+    /// unknown, will return a hidden, or tombstoned account if queried for.
     pub fn account_by_address(
         &self,
         address: AccountAddress,
