@@ -150,7 +150,7 @@ CREATE_PROOF_FROM_BUCKET_OF_ALL
     Bucket("bucket1")
     Proof("proof1")
 ;
-PUSH_TO_AUTHZONE
+PUSH_TO_AUTH_ZONE
     Proof("proof1")
 ;
 CALL_METHOD
@@ -251,7 +251,7 @@ CREATE_PROOF_FROM_BUCKET_OF_ALL
     Bucket("bucket3")
     Proof("proof1")
 ;
-PUSH_TO_AUTHZONE
+PUSH_TO_AUTH_ZONE
     Proof("proof1")
 ;
 CALL_METHOD

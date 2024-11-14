@@ -89,7 +89,7 @@ impl SargonOS {
             instructions,
             network_id,
             blobs.clone(),
-            ChildIntents::default(),
+            ChildSubintentSpecifiers::default(),
         )?;
 
         let summary = subintent_manifest.summary()?;
@@ -114,7 +114,7 @@ impl SargonOS {
                 let manifest_v2 = TransactionManifestV2::with_instructions_and_blobs_and_children(
                     instructions,
                     blobs.clone(),
-                    ChildIntents::default(),
+                    ChildSubintentSpecifiers::default(),
                 );
 
                 let manifest_string = manifest_v2.manifest_string();

@@ -1,3 +1,5 @@
+use radix_common::crypto::verify_and_recover_secp256k1 as Scrypto_verify_and_recover_secp256k1;
+
 use crate::prelude::*;
 
 /// Represents any natively supported signature, including public key.
@@ -67,7 +69,7 @@ impl TryFrom<(ScryptoSignatureWithPublicKey, Hash)> for SignatureWithPublicKey {
         match value.0 {
             ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
                 let hash: radix_common::crypto::Hash = value.1.into();
-                let scrypto_public_key = Scrypto_recover_secp256k1(
+                let scrypto_public_key = Scrypto_verify_and_recover_secp256k1(
                     &hash, &signature,
                 )
                 .ok_or(
