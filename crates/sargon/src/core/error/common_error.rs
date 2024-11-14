@@ -774,9 +774,12 @@ pub enum CommonError {
 
     #[error("Subintent has already expired")]
     SubintentExpired = 10218,
-    
+
     #[error("Invalid FactorSourceIDFromHash String, wrong component count, expected: {expected}, found: {found}")]
-    InvalidFactorSourceIDFromHashStringWrongComponentCount { expected: u64, found: u64 } = 10219,
+    InvalidFactorSourceIDFromHashStringWrongComponentCount {
+        expected: u64,
+        found: u64,
+    } = 10219,
 }
 
 impl CommonError {

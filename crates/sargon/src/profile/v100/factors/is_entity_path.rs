@@ -8,7 +8,8 @@ pub trait IsEntityPath:
     + Clone
     + Into<DerivationPath>
     + TryFrom<DerivationPath, Error = CommonError>
-{}
+{
+}
 
 impl<
         T: NewEntityPath
@@ -19,4 +20,5 @@ impl<
             + Into<DerivationPath>
             + TryFrom<DerivationPath, Error = CommonError>,
     > IsEntityPath for T
-{}
+{
+}

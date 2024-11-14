@@ -18,7 +18,7 @@ impl HasSampleValues for HDFactorInstanceIdentityCreation {
     }
 
     fn sample_other() -> Self {
-          let hd_key = HierarchicalDeterministicPublicKey::new(
+        let hd_key = HierarchicalDeterministicPublicKey::new(
             PublicKey::sample_ed25519(),
             IdentityPath::sample_other().into(),
         );

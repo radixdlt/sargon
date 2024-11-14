@@ -4,7 +4,6 @@ use crate::prelude::*;
 pub type HDFactorInstanceAccountCreation =
     HDFactorInstanceTransactionSigning<AccountPath>;
 
-
 impl HasSampleValues for HDFactorInstanceAccountCreation {
     fn sample() -> Self {
         let hd_key = HierarchicalDeterministicPublicKey::new(
@@ -19,7 +18,7 @@ impl HasSampleValues for HDFactorInstanceAccountCreation {
     }
 
     fn sample_other() -> Self {
-          let hd_key = HierarchicalDeterministicPublicKey::new(
+        let hd_key = HierarchicalDeterministicPublicKey::new(
             PublicKey::sample_ed25519(),
             AccountPath::sample_other().into(),
         );

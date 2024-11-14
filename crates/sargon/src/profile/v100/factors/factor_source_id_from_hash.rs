@@ -254,7 +254,7 @@ mod tests {
         let s = "device";
         assert!(
             matches!(
-                SUT::from_str(s), 
+                SUT::from_str(s),
                 Err(CommonError::InvalidFactorSourceIDFromHashStringWrongComponentCount { expected: 2, found: 1 })
             )
         );
