@@ -86,43 +86,7 @@ mod tests {
 
         let mock_driver = MockNetworkingDriver::new_with_responses_and_spy(
             vec![response_one, response_two],
-            |request, count| {
-                match count {
-                    0 => {
-                        // Verify the correct body is sent of first request
-                        let expected_request =
-                            AccountPageResourcePreferencesRequest::new(
-                                AccountAddress::sample(),
-                                LedgerStateSelector::sample(),
-                                None,
-                                GATEWAY_PAGE_REQUEST_LIMIT,
-                            );
-
-                        let expected_body =
-                            serde_json::to_vec(&expected_request).unwrap();
-
-                        assert_eq!(request.body.bytes, expected_body);
-                    }
-                    1 => {
-                        // Verify the correct body is sent of second request
-                        let expected_request =
-                            AccountPageResourcePreferencesRequest::new(
-                                AccountAddress::sample(),
-                                LedgerStateSelector::new(1, None, None, None),
-                                "cursor_one".to_string(),
-                                GATEWAY_PAGE_REQUEST_LIMIT,
-                            );
-
-                        let expected_body =
-                            serde_json::to_vec(&expected_request).unwrap();
-
-                        assert_eq!(request.body.bytes, expected_body);
-                    }
-                    _ => {
-                        panic!("Unexpected request count: {}", count);
-                    }
-                }
-            },
+            spy_account_two_pages_requests(),
         );
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
@@ -144,6 +108,40 @@ mod tests {
             .unwrap();
 
         assert_eq!(result, vec![item_one, item_two]);
+    }
+
+    fn spy_account_two_pages_requests() -> fn(NetworkRequest, u64) {
+        |request, count| {
+            match count {
+                0 => {
+                    // Verify the correct body is sent on first request
+                    let expected_request =
+                        AccountPageResourcePreferencesRequest::new(
+                            AccountAddress::sample(),
+                            LedgerStateSelector::sample(),
+                            None,
+                            GATEWAY_PAGE_REQUEST_LIMIT,
+                        );
+
+                    assert_network_request(request, &expected_request);
+                }
+                1 => {
+                    // Verify the correct body is sent on second request
+                    let expected_request =
+                        AccountPageResourcePreferencesRequest::new(
+                            AccountAddress::sample(),
+                            LedgerStateSelector::new(1, None, None, None),
+                            "cursor_one".to_string(),
+                            GATEWAY_PAGE_REQUEST_LIMIT,
+                        );
+
+                    assert_network_request(request, &expected_request);
+                }
+                _ => {
+                    panic!("Unexpected request count: {}", count);
+                }
+            }
+        }
     }
 
     #[actix_rt::test]

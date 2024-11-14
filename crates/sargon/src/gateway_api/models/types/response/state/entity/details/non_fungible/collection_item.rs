@@ -5,3 +5,18 @@ use crate::prelude::*;
 pub enum NonFungibleResourcesCollectionItem {
     Global(NonFungibleResourcesCollectionItemGloballyAggregated),
 }
+
+impl HasSampleValues for NonFungibleResourcesCollectionItem {
+    fn sample() -> Self {
+        Self::Global(
+            NonFungibleResourcesCollectionItemGloballyAggregated::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::Global(
+            NonFungibleResourcesCollectionItemGloballyAggregated::sample_other(
+            ),
+        )
+    }
+}

@@ -21,3 +21,19 @@ pub struct StateEntityDetailsResponseItem {
     /// Entity metadata collection.
     pub metadata: EntityMetadataCollection,
 }
+
+impl StateEntityDetailsResponseItem {
+    pub fn new(
+        address: Address,
+        fungible_resources: impl Into<Option<FungibleResourcesCollection>>,
+        non_fungible_resources: impl Into<Option<NonFungibleResourcesCollection>>,
+        metadata: EntityMetadataCollection,
+    ) -> StateEntityDetailsResponseItem {
+        StateEntityDetailsResponseItem {
+            address,
+            fungible_resources: fungible_resources.into(),
+            non_fungible_resources: non_fungible_resources.into(),
+            metadata,
+        }
+    }
+}
