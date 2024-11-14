@@ -236,4 +236,22 @@ impl SargonOS {
             .await
             .into_result()
     }
+
+    /// Updates the profile by marking the account with `account_address` as hidden.
+    pub async fn mark_account_as_hidden(&self, account_address: AccountAddress) -> Result<()> {
+        self
+            .wrapped
+            .mark_account_as_hidden(account_address.into_internal())
+            .await
+            .into_result()
+    }
+
+    /// Updates the profile by marking the account with `account_address` as tombstoned.
+    pub async fn mark_account_as_tombstoned(&self, account_address: AccountAddress) -> Result<()> {
+        self
+            .wrapped
+            .mark_account_as_tombstoned(account_address.into_internal())
+            .await
+            .into_result()
+    }
 }

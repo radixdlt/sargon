@@ -12,6 +12,8 @@ pub enum EventProfileModified {
     /// An existing account has been updated
     AccountUpdated { address: AccountAddress },
 
+    AccountsUpdated { addresses: Vec<AccountAddress> },
+
     /// Profile updated with a new factor source.
     FactorSourceAdded { id: FactorSourceID },
 

@@ -41,7 +41,7 @@ impl SargonOS {
             NetworkID::Mainnet,
             DisplayName::new("Unnamed").unwrap(),
         )
-        .await
+            .await
     }
 
     /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
@@ -94,7 +94,7 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account(
             DisplayName::new("Unnamed").unwrap(),
         )
-        .await
+            .await
     }
 
     /// Create a new mainnet Account and adds it to the active Profile.
@@ -217,7 +217,7 @@ impl SargonOS {
         self.add_accounts_without_emitting_account_added_event(Accounts::just(
             account,
         ))
-        .await?;
+            .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -280,7 +280,7 @@ impl SargonOS {
                 Ok(())
             }
         })
-        .await?;
+            .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -291,6 +291,53 @@ impl SargonOS {
             .await;
 
         Ok(())
+    }
+
+    /// Updates the accounts `updated` by mutating current profile and persisting
+    /// the change to secure storage. Throws `UnknownAccount` error if some account
+    /// is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountsUpdated { addresses } }`
+    pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
+        self.update_profile_with(|p| {
+            let mut result = Ok(());
+            for updated_account in updated {
+                if p.update_account(
+                    &updated_account.address,
+                    |old| *old = updated_account.clone(),
+                ).is_none() {
+                    result = Err(CommonError::UnknownAccount);
+                    break;
+                }
+            }
+
+            result
+        }).await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::AccountsUpdated {
+                    addresses: updated.iter().map(|a| a.address).collect(),
+                },
+            ))
+            .await;
+
+        Ok(())
+    }
+
+    /// Updates the profile by marking the account with `account_address` as hidden.
+    pub async fn mark_account_as_hidden(&self, account_address: AccountAddress) -> Result<()> {
+        let mut account = self.account_by_address(account_address)?;
+        account.mark_as_hidden();
+        self.update_account(account).await
+    }
+
+    /// Updates the profile by marking the account with `account_address` as tombstoned.
+    pub async fn mark_account_as_tombstoned(&self, account_address: AccountAddress) -> Result<()> {
+        let mut account = self.account_by_address(account_address)?;
+        account.mark_as_tombstoned();
+        self.update_account(account).await
     }
 }
 
@@ -354,7 +401,7 @@ impl SargonOS {
                 Ok(())
             }
         })
-        .await
+            .await
     }
 }
 
@@ -518,8 +565,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn batch_create_account_then_n_accounts_are_saved_and_have_indices_0_through_n(
-    ) {
+    async fn batch_create_account_then_n_accounts_are_saved_and_have_indices_0_through_n() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -532,8 +578,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-        .await
-        .unwrap();
+            .await
+            .unwrap();
 
         // ASSERT
         let indices = os.profile().unwrap().networks[0]
@@ -553,8 +599,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_batch_create_and_add_account_n_has_names_with_index_appended_to_prefix(
-    ) {
+    async fn test_batch_create_and_add_account_n_has_names_with_index_appended_to_prefix() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -567,8 +612,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-        .await
-        .unwrap();
+            .await
+            .unwrap();
 
         // ASSERT
         let names = os.profile().unwrap().networks[0]
@@ -587,8 +632,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn batch_create_account_then_n_accounts_are_saved_and_have_appearance_id_0_through_max(
-    ) {
+    async fn batch_create_account_then_n_accounts_are_saved_and_have_appearance_id_0_through_max() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -601,8 +645,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-        .await
-        .unwrap();
+            .await
+            .unwrap();
 
         // ASSERT
         let appearance_ids = os.profile().unwrap().networks[0]
@@ -630,8 +674,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-        .await
-        .unwrap();
+            .await
+            .unwrap();
 
         // ASSERT
         assert!(os.profile().unwrap().networks[0].accounts.is_empty())
@@ -680,8 +724,8 @@ mod tests {
                 DisplayName::sample(),
             )
         })
-        .await
-        .unwrap();
+            .await
+            .unwrap();
 
         // ASSERT
         let events = event_bus_driver
@@ -710,7 +754,7 @@ mod tests {
                 "random-{}",
                 id().to_string().drain(0..20).collect::<String>()
             ))
-            .unwrap()
+                .unwrap()
         }
     }
 
@@ -935,5 +979,39 @@ mod tests {
             os.account_by_address(AccountAddress::sample_mainnet()),
             Err(CommonError::UnknownAccount)
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_mark_account_as_hidden_becomes_hidden() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        // so that we have at least one network (with one account)
+        let new_account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+        os.mark_account_as_hidden(new_account.address).await.unwrap();
+
+        // ASSERT
+        assert!(os.account_by_address(new_account.address).unwrap().is_hidden())
+    }
+
+    #[actix_rt::test]
+    async fn test_mark_account_as_tombstoned_becomes_tombstoned() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        // so that we have at least one network (with one account)
+        let new_account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+        os.mark_account_as_tombstoned(new_account.address).await.unwrap();
+
+        // ASSERT
+        assert!(os.account_by_address(new_account.address).unwrap().is_tombstoned())
     }
 }
