@@ -77,11 +77,13 @@ impl HasEntityKind for Account {
         CAP26EntityKind::Account
     }
 }
+
 impl HasSecurityState for Account {
     fn security_state(&self) -> EntitySecurityState {
         self.security_state.clone()
     }
 }
+
 impl IsBaseEntity for Account {
     type Address = AccountAddress;
 
@@ -92,6 +94,7 @@ impl IsBaseEntity for Account {
         self.flags.clone()
     }
 }
+
 impl IsEntity for Account {
     type Path = AccountPath;
     fn with_veci_and_name(
@@ -367,6 +370,15 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_err_when_try_from_persona() {
+        let persona = Persona::sample();
+        assert!(matches!(
+            SUT::try_from(AccountOrPersona::PersonaEntity(persona)),
+            Err(CommonError::ExpectedAccountButGotPersona { .. })
+        ));
     }
 
     #[test]

@@ -474,6 +474,15 @@ mod tests {
     }
 
     #[test]
+    fn test_err_when_try_from_account() {
+        let account = Account::sample();
+        assert!(matches!(
+            SUT::try_from(AccountOrPersona::AccountEntity(account)),
+            Err(CommonError::ExpectedPersonaButGotAccount { .. })
+        ));
+    }
+
+    #[test]
     fn new_with_identity_and_name() {
         let identity_address: IdentityAddress =
 			"identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw"
@@ -500,6 +509,17 @@ mod tests {
 				.parse()
 				.unwrap();
         assert_eq!(persona.id(), identity_address);
+    }
+
+    #[test]
+    fn new_with_persona_data() {
+        let persona_data = PersonaData::sample_other();
+        let sut = SUT::new(
+            HDFactorInstanceTransactionSigning::<IdentityPath>::sample(),
+            DisplayName::sample(),
+            persona_data,
+        );
+        assert_eq!(sut.persona_data, persona_data);
     }
 
     #[test]

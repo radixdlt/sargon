@@ -1,44 +1,5 @@
 use crate::prelude::*;
 
-pub trait HasKeyKind {
-    fn key_kind() -> CAP26KeyKind;
-}
-
-pub trait HasKeyKindObjectSafe {
-    fn get_key_kind(&self) -> CAP26KeyKind;
-}
-
-impl<T: HasKeyKind> HasKeyKindObjectSafe for T {
-    fn get_key_kind(&self) -> CAP26KeyKind {
-        T::key_kind()
-    }
-}
-
-pub trait IsEntityPath:
-    NewEntityPath
-    + IsNetworkAware
-    + HasEntityKind
-    + HasKeyKindObjectSafe
-    + Clone
-    + Into<DerivationPath>
-    + TryFrom<DerivationPath, Error = CommonError>
-{
-    // fn derivation_path(&self) -> DerivationPath {
-    //     self.clone().into()
-    // }
-}
-impl<
-        T: NewEntityPath
-            + Clone
-            + IsNetworkAware
-            + HasEntityKind
-            + HasKeyKindObjectSafe
-            + Into<DerivationPath>
-            + TryFrom<DerivationPath, Error = CommonError>,
-    > IsEntityPath for T
-{
-}
-
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -88,14 +49,6 @@ impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
         )
     }
 }
-
-/// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
-pub type HDFactorInstanceAccountCreation =
-    HDFactorInstanceTransactionSigning<AccountPath>;
-
-/// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
-pub type HDFactorInstanceIdentityCreation =
-    HDFactorInstanceTransactionSigning<IdentityPath>;
 
 impl<T> HDFactorInstanceTransactionSigning<T>
 where
