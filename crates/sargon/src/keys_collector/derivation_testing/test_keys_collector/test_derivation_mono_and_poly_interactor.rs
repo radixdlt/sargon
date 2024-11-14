@@ -1,6 +1,8 @@
 #![cfg(test)]
 #![allow(unused)]
 
+use std::sync::Mutex;
+
 use crate::prelude::*;
 
 /// A type impl PolyFactorKeyDerivationInteractor and MonoFactorKeyDerivationInteractor
@@ -23,6 +25,15 @@ impl Default for TestDerivationMonoAndPolyInteractor {
     }
 }
 
+pub static DERIVATION_GLOBAL_FAIL: Lazy<Mutex<bool>> =
+    Lazy::new(|| Mutex::new(false));
+pub fn get_derivation_global_fail() -> bool {
+    *DERIVATION_GLOBAL_FAIL.lock().unwrap()
+}
+pub fn set_derivation_global_fail(should_fail: bool) {
+    *DERIVATION_GLOBAL_FAIL.lock().unwrap() = should_fail;
+}
+
 impl TestDerivationMonoAndPolyInteractor {
     pub(crate) fn new(
         always_fail: bool,
@@ -42,7 +53,7 @@ impl TestDerivationMonoAndPolyInteractor {
         &self,
         request: MonoFactorKeyDerivationRequest,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-        if self.always_fail {
+        if self.always_fail || get_derivation_global_fail() {
             return Err(CommonError::Unknown);
         }
 

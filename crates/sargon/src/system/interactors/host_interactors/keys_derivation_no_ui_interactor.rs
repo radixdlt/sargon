@@ -3,12 +3,44 @@ use futures::future::ready;
 
 use crate::prelude::*;
 
-#[derive(Debug)]
-pub(crate) struct NoUIInteractorForKeyDerivation {
-    pub secure_storage_client: Arc<SecureStorageClient>,
+pub struct NoUIInteractorForKeyDerivation {
+    pub(crate) poly: Arc<dyn PolyFactorKeyDerivationInteractor>,
+    pub(crate) mono: Arc<dyn MonoFactorKeyDerivationInteractor>,
+}
+
+impl KeysDerivationInteractors for NoUIInteractorForKeyDerivation {
+    fn interactor_for(
+        &self,
+        kind: FactorSourceKind,
+    ) -> KeyDerivationInteractor {
+        match kind {
+            FactorSourceKind::Device => {
+                KeyDerivationInteractor::poly(self.poly.clone())
+            }
+            _ => KeyDerivationInteractor::mono(self.mono.clone()),
+        }
+    }
 }
 
 impl NoUIInteractorForKeyDerivation {
+    pub fn new(secure_storage_client: Arc<SecureStorageClient>) -> Self {
+        let interactor =
+            Arc::new(NoUIMonoAndPolyInteractorForKeyDerivation::new(
+                secure_storage_client.clone(),
+            ));
+        Self {
+            mono: interactor.clone(),
+            poly: interactor.clone(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct NoUIMonoAndPolyInteractorForKeyDerivation {
+    pub secure_storage_client: Arc<SecureStorageClient>,
+}
+
+impl NoUIMonoAndPolyInteractorForKeyDerivation {
     pub fn new(secure_storage_client: Arc<SecureStorageClient>) -> Self {
         Self {
             secure_storage_client,
@@ -72,7 +104,9 @@ where
 }
 
 #[async_trait::async_trait]
-impl PolyFactorKeyDerivationInteractor for NoUIInteractorForKeyDerivation {
+impl PolyFactorKeyDerivationInteractor
+    for NoUIMonoAndPolyInteractorForKeyDerivation
+{
     async fn derive(
         &self,
         request: PolyFactorKeyDerivationRequest,
@@ -87,7 +121,9 @@ impl PolyFactorKeyDerivationInteractor for NoUIInteractorForKeyDerivation {
 }
 
 #[async_trait::async_trait]
-impl MonoFactorKeyDerivationInteractor for NoUIInteractorForKeyDerivation {
+impl MonoFactorKeyDerivationInteractor
+    for NoUIMonoAndPolyInteractorForKeyDerivation
+{
     async fn derive(
         &self,
         request: MonoFactorKeyDerivationRequest,

@@ -524,21 +524,20 @@ async fn cache_is_unchanged_in_case_of_failure() {
     );
 
     let cache_before_fail = os.cache_snapshot().await;
-    let fail_interactor: Arc<dyn KeysDerivationInteractors> =
-        Arc::new(TestDerivationInteractors::fail()); // <--- FAIL
-    let failing_interactors = Interactors::new(fail_interactor);
-    os.interactors.write().unwrap().replace(failing_interactors);
+    let global_should_fail = get_derivation_global_fail();
+    set_derivation_global_fail(true);
 
     let res = os
-        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            second_half_of_accounts
-            .clone()
-            .into_iter()
-            .map(|a| a.address())
-            .collect(),
-            shield_0.clone()
-        )
-        .await;
+    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        second_half_of_accounts
+        .clone()
+        .into_iter()
+        .map(|a| a.address())
+        .collect(),
+        shield_0.clone()
+    )
+    .await;
+    set_derivation_global_fail(global_should_fail);
     assert!(res.is_err());
     let cache_after_fail = os.cache_snapshot().await;
     assert_eq!(

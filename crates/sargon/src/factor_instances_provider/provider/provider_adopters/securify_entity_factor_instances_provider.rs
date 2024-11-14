@@ -293,8 +293,7 @@ mod tests {
 
         let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
         let profile = Arc::new(os.profile().unwrap());
-        let derivation_interactors =
-            os.init_keys_derivation_interactor_with_test_interactor_if_needed();
+        let derivation_interactors = os.keys_derivation_interactors();
 
         let (instances_in_cache_consumer, outcome) = SUT::for_account_mfa(
             cache_client.clone(),

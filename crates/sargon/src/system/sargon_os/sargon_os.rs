@@ -13,9 +13,7 @@ use crate::{prelude::*, system::interactors};
 pub struct SargonOS {
     pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
-
-    /// Optional so that we can defer integration with hosts...
-    pub(crate) interactors: RwLock<Option<Interactors>>,
+    pub(crate) interactors: Interactors,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -30,24 +28,29 @@ impl Deref for SargonOS {
 
 impl SargonOS {
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
-        let os = Self::boot_with_optional_interactors(bios, None).await;
+        let clients = Clients::new(bios);
+        let secure_storage = Arc::new(clients.secure_storage.clone());
+        let derivation_interactors: Arc<dyn KeysDerivationInteractors>;
         #[cfg(test)]
         {
-            // For tests we need the (Test)KeysDerivationInteractors to be able
-            // to access the `bdfs` from secure storage.
-            _ = os
-                .init_keys_derivation_interactor_with_test_interactor_if_needed(
-                );
+            derivation_interactors = Arc::new(
+                TestDerivationInteractors::with_secure_storage(secure_storage),
+            );
         }
-        os
+        #[cfg(not(test))]
+        {
+            derivation_interactors =
+                Arc::new(NoUIInteractorForKeyDerivation::new(secure_storage));
+        }
+
+        let interactors = Interactors::new(derivation_interactors);
+        Self::boot_with_optional_interactors(clients, interactors).await
     }
 
     pub async fn boot_with_optional_interactors(
-        bios: Arc<Bios>,
-        interactors: impl Into<Option<Interactors>>,
+        clients: Clients,
+        interactors: Interactors,
     ) -> Arc<Self> {
-        let clients = Clients::new(bios);
-
         let sargon_info = SargonBuildInformation::get();
         let version = sargon_info.sargon_version;
         let ret_version = sargon_info.dependencies.radix_engine_toolkit;
@@ -85,7 +88,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
-            interactors: RwLock::new(interactors.into()),
+            interactors,
         });
         os.clients
             .profile_state_change
@@ -99,47 +102,6 @@ impl SargonOS {
         info!("Sargon os Booted with profile state: {}", profile_state);
 
         os
-    }
-
-    fn maybe_keys_derivation_interactors(
-        &self,
-    ) -> Option<Arc<dyn KeysDerivationInteractors>> {
-        self.interactors
-            .read()
-            .unwrap()
-            .as_ref()
-            .map(|i| i.key_derivation.clone())
-    }
-
-    pub(crate) fn keys_derivation_interactors(
-        &self,
-    ) -> Arc<dyn KeysDerivationInteractors> {
-        self.maybe_keys_derivation_interactors()
-            .expect("No interactors")
-    }
-
-    /// For tests we need the (Test)KeysDerivationInteractors to be able
-    /// to access the `bdfs` from secure storage.
-    ///
-    /// For PROD: We should update the SargonOS boot to require the interactors
-    /// to be created during init of SargonOS.
-    #[cfg(test)]
-    pub(crate) fn init_keys_derivation_interactor_with_test_interactor_if_needed(
-        &self,
-    ) -> Arc<dyn KeysDerivationInteractors> {
-        {
-            if let Some(interactors) = self.interactors.read().unwrap().as_ref()
-            {
-                return interactors.key_derivation.clone();
-            }
-        }
-        let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
-            Arc::new(TestDerivationInteractors::with_secure_storage(Arc::new(
-                self.clients.secure_storage.clone(),
-            )));
-        let interactors = Interactors::new(derivation_interactor.clone());
-        self.interactors.write().unwrap().replace(interactors);
-        derivation_interactor
     }
 
     pub async fn new_wallet(&self) -> Result<()> {
@@ -280,6 +242,12 @@ impl SargonOS {
         Ok(())
     }
 
+    pub(crate) fn keys_derivation_interactors(
+        &self,
+    ) -> Arc<dyn KeysDerivationInteractors> {
+        self.interactors.key_derivation.clone()
+    }
+
     pub async fn resolve_host_id(&self) -> Result<HostId> {
         self.host_id().await
     }
@@ -412,7 +380,6 @@ impl SargonOS {
             ProfileState::Loaded(profile.clone()),
         )?;
 
-        _ = os.init_keys_derivation_interactor_with_test_interactor_if_needed();
         os.prederive_and_fill_cache_with_instances_for_factor_source(
             bdfs.factor_source.into(),
         )
