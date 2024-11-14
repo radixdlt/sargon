@@ -1,26 +1,28 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ChildSubintent {
+pub struct ChildSubintentSpecifier {
     pub hash: SubintentHash,
 }
 
-impl ChildSubintent {
+impl ChildSubintentSpecifier {
     pub fn new(hash: SubintentHash) -> Self {
         Self { hash }
     }
 }
 
-impl From<ChildSubintent> for ScryptoChildSubintent {
-    fn from(value: ChildSubintent) -> Self {
-        ScryptoChildSubintent {
+impl From<ChildSubintentSpecifier> for ScryptoChildSubintentSpecifier {
+    fn from(value: ChildSubintentSpecifier) -> Self {
+        ScryptoChildSubintentSpecifier {
             hash: ScryptoSubintentHash(value.hash.hash.into()),
         }
     }
 }
 
-impl From<(ScryptoChildSubintent, NetworkID)> for ChildSubintent {
-    fn from(value: (ScryptoChildSubintent, NetworkID)) -> Self {
+impl From<(ScryptoChildSubintentSpecifier, NetworkID)>
+    for ChildSubintentSpecifier
+{
+    fn from(value: (ScryptoChildSubintentSpecifier, NetworkID)) -> Self {
         Self::new((value.0.hash, value.1).into())
     }
 }
@@ -37,7 +39,7 @@ impl From<SubintentHash> for ScryptoSubintentHash {
     }
 }
 
-impl HasSampleValues for ChildSubintent {
+impl HasSampleValues for ChildSubintentSpecifier {
     fn sample() -> Self {
         Self {
             hash: SubintentHash::sample(),
@@ -57,7 +59,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = ChildSubintent;
+    type SUT = ChildSubintentSpecifier;
 
     #[test]
     fn equality() {
@@ -73,7 +75,7 @@ mod tests {
     #[test]
     fn to_from_scrypto() {
         let roundtrip = |s: SUT, network_id: NetworkID| {
-            let scrypto: ScryptoChildSubintent = s.clone().into();
+            let scrypto: ScryptoChildSubintentSpecifier = s.clone().into();
             SUT::from((scrypto, network_id))
         };
         assert_eq!(SUT::sample(), roundtrip(SUT::sample(), NetworkID::Mainnet));

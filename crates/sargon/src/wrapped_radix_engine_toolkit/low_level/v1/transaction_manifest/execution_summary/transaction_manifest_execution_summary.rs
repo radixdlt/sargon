@@ -216,7 +216,7 @@ mod tests {
                 [acc_g2], // addresses_of_accounts_requiring_auth
                 [],               // addresses_of_identities_requiring_auth
                 [],               // newly_created_non_fungibles
-                [ReservedInstruction::AccountLockFee, ReservedInstruction::AccountUpdateSettings],
+                [ReservedInstruction::AccountLockFee],
                 [],               // presented_proofs
                 [],               // encountered_component_addresses
                 [
