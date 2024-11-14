@@ -517,7 +517,7 @@ mod tests {
         let sut = SUT::new(
             HDFactorInstanceTransactionSigning::<IdentityPath>::sample(),
             DisplayName::sample(),
-            persona_data,
+            persona_data.clone(),
         );
         assert_eq!(sut.persona_data, persona_data);
     }
