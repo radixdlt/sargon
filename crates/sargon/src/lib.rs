@@ -87,8 +87,7 @@ pub mod prelude {
             AddressBech32Encoder as ScryptoAddressBech32Encoder,
         },
         crypto::{
-            blake2b_256_hash,
-            verify_ed25519 as scrypto_verify_ed25519,
+            blake2b_256_hash, verify_ed25519 as scrypto_verify_ed25519,
             verify_secp256k1 as scrypto_verify_secp256k1,
             Ed25519PrivateKey as ScryptoEd25519PrivateKey,
             Ed25519PublicKey as ScryptoEd25519PublicKey,
@@ -203,8 +202,8 @@ pub mod prelude {
         },
         model::{
             BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs,
-            ChildSubintentSpecifiersV2 as ScryptoChildSubintentSpecifiers,
             ChildSubintentSpecifier as ScryptoChildSubintentSpecifier,
+            ChildSubintentSpecifiersV2 as ScryptoChildSubintentSpecifiers,
             InstructionV1 as ScryptoInstruction,
             InstructionV2 as ScryptoInstructionV2,
             InstructionsV1 as ScryptoInstructions,
