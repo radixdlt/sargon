@@ -5,18 +5,28 @@ use crate::prelude::*;
 /// of the resource in the account (and we don't need to specify ids for non-fungibles).
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct DeleteAccountTransfer {
+    /// The address of the resource to transfer.
     pub resource_address: ScryptoGlobalAddress,
+
+    /// The amount to transfer.
     pub amount: ScryptoDecimal192,
+
+    /// The weight of this transfer in a transaction, so that we don't exceed the maximum.
+    /// The weight of a fungible transfer is 1, regardless of the amount, while the weight of a
+    /// non-fungible transfer is the amount of items.
+    pub weight: u64,
 }
 
 impl DeleteAccountTransfer {
     fn new(
         resource_address: ScryptoGlobalAddress,
         amount: ScryptoDecimal192,
+        weight: u64,
     ) -> DeleteAccountTransfer {
         DeleteAccountTransfer {
             resource_address,
             amount,
+            weight,
         }
     }
 }
@@ -28,7 +38,7 @@ impl TryFrom<FungibleResourcesCollectionItem> for DeleteAccountTransfer {
             .as_global()
             .ok_or(CommonError::UnexpectedCollectionItemAggregation)?;
         let result =
-            Self::new(value.resource_address.scrypto(), value.amount.into());
+            Self::new(value.resource_address.scrypto(), value.amount.into(), 1);
         Ok(result)
     }
 }
@@ -39,8 +49,11 @@ impl TryFrom<NonFungibleResourcesCollectionItem> for DeleteAccountTransfer {
         let value = value
             .as_global()
             .ok_or(CommonError::UnexpectedCollectionItemAggregation)?;
-        let result =
-            Self::new(value.resource_address.scrypto(), value.amount.into());
+        let result = Self::new(
+            value.resource_address.scrypto(),
+            value.amount.into(),
+            value.amount,
+        );
         Ok(result)
     }
 }
@@ -50,6 +63,7 @@ impl HasSampleValues for DeleteAccountTransfer {
         Self::new(
             ResourceAddress::sample_stokenet_xrd().into(),
             Decimal192::sample().into(),
+            1,
         )
     }
 
@@ -57,6 +71,7 @@ impl HasSampleValues for DeleteAccountTransfer {
         Self::new(
             ResourceAddress::sample_stokenet_nft_abandon().into(),
             Decimal192::five().into(),
+            5,
         )
     }
 }

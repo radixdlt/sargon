@@ -26,6 +26,7 @@ impl TryFrom<(FetchResourcesOutput, AccountAddress)>
     fn try_from(value: (FetchResourcesOutput, AccountAddress)) -> Result<Self> {
         let (fetch_resources_output, recipient) = value;
 
+        // Convert fungibles
         let fungibles = fetch_resources_output
             .fungibles
             .clone()
@@ -33,13 +34,26 @@ impl TryFrom<(FetchResourcesOutput, AccountAddress)>
             .map(DeleteAccountTransfer::try_from)
             .collect::<Result<Vec<_>, _>>()?;
 
+        // Convert non-fungibles
         let non_fungibles = fetch_resources_output
             .non_fungibles
             .into_iter()
             .map(DeleteAccountTransfer::try_from)
             .collect::<Result<Vec<_>, _>>()?;
 
+        // Merge in one collection
         let transfers = [fungibles, non_fungibles].concat();
+
+        // Verify we don't exceed the maximum number of transfers per transaction.
+        let total_weight = transfers
+            .clone()
+            .into_iter()
+            .fold(0, |acc, x| acc + x.weight);
+        if total_weight >= MAX_TRANSFERS_PER_TRANSACTION {
+            return Err(CommonError::MaxTransfersPerTransactionReached {
+                amount: total_weight,
+            });
+        }
 
         Ok(Self::new(recipient, transfers))
     }

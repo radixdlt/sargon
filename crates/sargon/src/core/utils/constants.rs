@@ -10,3 +10,6 @@ pub const MIN_EPOCH_DIFF: u64 = 2;
 
 // Amount of items that should be requested on each page.
 pub const GATEWAY_PAGE_REQUEST_LIMIT: u64 = 25;
+
+// Max amount of transfers that can be included in one single transaction.
+pub const MAX_TRANSFERS_PER_TRANSACTION: u64 = 50;

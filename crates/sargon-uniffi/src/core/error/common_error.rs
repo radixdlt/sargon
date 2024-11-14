@@ -734,6 +734,9 @@ pub enum CommonError {
 
     #[error("Unexpected collection item aggregation")]
     UnexpectedCollectionItemAggregation = 10207,
+
+    #[error("Unable to make {amount} transfers in one single transaction")]
+    MaxTransfersPerTransactionReached { amount: u64 } = 10208,
 }
 
 #[uniffi::export]
