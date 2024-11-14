@@ -143,9 +143,10 @@ impl SubintentManifest {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary =
-            RET_statically_analyze_subintent_manifest(&self.scrypto_manifest())
-                .map_err(map_static_analysis_error)?;
+        let summary = RET_statically_analyze_and_validate_subintent_manifest(
+            &self.scrypto_manifest(),
+        )
+        .map_err(map_static_analysis_error)?;
 
         Ok(ManifestSummary::from((summary, self.network_id())))
     }

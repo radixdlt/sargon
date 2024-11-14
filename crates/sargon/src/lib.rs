@@ -172,12 +172,12 @@ pub mod prelude {
 
     pub(crate) use radix_transactions::{
         builder::{
-            ExistingManifestBucket as ScryptoExistingManifestBucket,
+            // ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
             NewManifestBucket as ScryptoNewManifestBucket,
             PartialTransactionV2Builder as ScryptoPartialTransactionV2Builder,
             ResolvableArguments as ScryptoResolvableArguments,
-            ResolvableComponentAddress as ScryptoResolvableComponentAddress,
+            // ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
         manifest::{
             compile as scrypto_compile,
@@ -257,7 +257,7 @@ pub mod prelude {
                 },
                 manifest::{
                     from_payload_bytes as RET_from_payload_bytes_manifest_v1,
-                    statically_analyze as RET_statically_analyze,
+                    statically_analyze_and_validate as RET_statically_analyze_and_validate,
                     to_payload_bytes as RET_to_payload_bytes_manifest_v1,
                 },
                 notarized_transaction::{
@@ -285,7 +285,7 @@ pub mod prelude {
                 subintent_manifest::{
                     as_enclosed as RET_subintent_manifest_as_enclosed,
                     from_payload_bytes as RET_from_payload_bytes_subintent_manifest,
-                    statically_analyze as RET_statically_analyze_subintent_manifest,
+                    statically_analyze_and_validate as RET_statically_analyze_and_validate_subintent_manifest,
                     to_payload_bytes as RET_to_payload_bytes_subintent_manifest,
                 },
                 transaction_intent::{
@@ -295,7 +295,7 @@ pub mod prelude {
                 transaction_manifest::{
                     dynamically_analyze as RET_dynamically_analyze_v2,
                     from_payload_bytes as RET_from_payload_bytes_manifest_v2,
-                    statically_analyze as RET_statically_analyze_v2,
+                    statically_analyze_and_validate as RET_statically_analyze_and_validate_v2,
                     to_payload_bytes as RET_to_payload_bytes_manifest_v2,
                 },
             },
@@ -325,7 +325,7 @@ pub mod prelude {
             Operation as RetOperation, Predicted as RetPredicted,
             ReservedInstruction as RetReservedInstruction,
             ResourceIndicator as RetResourceIndicator,
-            StaticAnalysis as RetStaticAnalysis,
+            StaticAnalysisWithResourceMovements as RetStaticAnalysisWithResourceMovements,
             TrackedPoolContribution as RetTrackedPoolContribution,
             TrackedPoolRedemption as RetTrackedPoolRedemption,
             TrackedValidatorClaim as RetTrackedValidatorClaim,

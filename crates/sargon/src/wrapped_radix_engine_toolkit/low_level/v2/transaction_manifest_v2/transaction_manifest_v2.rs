@@ -139,8 +139,9 @@ impl TransactionManifestV2 {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())
-            .map_err(map_static_analysis_error)?;
+        let summary =
+            RET_statically_analyze_and_validate_v2(&self.scrypto_manifest())
+                .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 

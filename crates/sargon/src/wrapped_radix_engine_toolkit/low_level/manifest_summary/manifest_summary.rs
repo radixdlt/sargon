@@ -102,8 +102,12 @@ fn account_withdraw_from_scrypto(
     AccountWithdraw::from((item, network_id))
 }
 
-impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
-    fn from(value: (RetStaticAnalysis, NetworkID)) -> Self {
+impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
+    for ManifestSummary
+{
+    fn from(
+        value: (RetStaticAnalysisWithResourceMovements, NetworkID),
+    ) -> Self {
         let (ret, network_id) = value;
 
         let account_withdraws = convert_from_scrypto(
