@@ -40,8 +40,8 @@ impl FromStr for FactorSourceIDFromHash {
 
     fn from_str(s: &str) -> Result<Self> {
         let parts = s.split(Self::SEPARATOR).collect_vec();
-        if parts.len() != 2 {
-            return Err(CommonError::Unknown);
+        if parts.len() != Self::STR_COMPONENTS_COUNT {
+            return Err(CommonError::InvalidFactorSourceIDFromHashStringWrongComponentCount { expected: Self::STR_COMPONENTS_COUNT as u64, found: parts.len() as u64 });
         }
         let kind = FactorSourceKind::from_str(parts[0])?;
         let body = Exactly32Bytes::from_str(parts[1])?;
@@ -50,6 +50,8 @@ impl FromStr for FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
+    pub const STR_COMPONENTS_COUNT: usize = 2;
+
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Exactly32Bytes) -> Self {
         Self { kind, body }
@@ -245,6 +247,17 @@ mod tests {
     fn from_str() {
         let s = "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a";
         assert_eq!(SUT::from_str(s).unwrap(), SUT::sample());
+    }
+
+    #[test]
+    fn from_str_err() {
+        let s = "device";
+        assert!(
+            matches!(
+                SUT::from_str(s), 
+                Err(CommonError::InvalidFactorSourceIDFromHashStringWrongComponentCount { expected: 2, found: 1 })
+            )
+        );
     }
 
     #[test]
