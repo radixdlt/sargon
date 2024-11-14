@@ -11,14 +11,14 @@ use crate::prelude::*;
 #[derive(Debug)]
 pub(crate) struct TestDerivationMonoAndPolyInteractor {
     pub always_fail: bool,
-    pub secure_storage_client: SecureStorageClient,
+    pub secure_storage_client: Arc<SecureStorageClient>,
 }
 
 impl Default for TestDerivationMonoAndPolyInteractor {
     fn default() -> Self {
         Self {
             always_fail: false,
-            secure_storage_client: SecureStorageClient::ephemeral().0,
+            secure_storage_client: Arc::new(SecureStorageClient::ephemeral().0),
         }
     }
 }
@@ -26,7 +26,7 @@ impl Default for TestDerivationMonoAndPolyInteractor {
 impl TestDerivationMonoAndPolyInteractor {
     pub(crate) fn new(
         always_fail: bool,
-        secure_storage_client: SecureStorageClient,
+        secure_storage_client: Arc<SecureStorageClient>,
     ) -> Self {
         Self {
             always_fail,
@@ -35,7 +35,7 @@ impl TestDerivationMonoAndPolyInteractor {
     }
 
     pub(crate) fn fail() -> Self {
-        Self::new(true, SecureStorageClient::always_fail())
+        Self::new(true, Arc::new(SecureStorageClient::always_fail()))
     }
 
     async fn do_derive(
@@ -46,14 +46,14 @@ impl TestDerivationMonoAndPolyInteractor {
             return Err(CommonError::Unknown);
         }
 
-        let cloned_client = Arc::new(self.secure_storage_client.clone());
-        do_derive_serially_looking_up_mnemonic_amongst_samples(
+        let cloned_client = self.secure_storage_client.clone();
+
+        __do_derive_serially_looking_up_with_secure_storage_and_extra(
             request,
-            move |id| {
-                let cloned_cloned_client = cloned_client.clone();
-                async move {
-                    cloned_cloned_client.load_mnemonic_with_passphrase(id).await
-                }
+            cloned_client,
+            async move |id| {
+                id.maybe_sample_associated_mnemonic()
+                    .ok_or(CommonError::Unknown)
             },
         )
         .await
@@ -87,51 +87,4 @@ impl MonoFactorKeyDerivationInteractor for TestDerivationMonoAndPolyInteractor {
             instances,
         ))))
     }
-}
-
-/// Derives FactorInstances for `request` using the `lookup_mnemonic` closure
-async fn __do_derive_serially_with_lookup_of_mnemonic<F>(
-    request: MonoFactorKeyDerivationRequest,
-    lookup_mnemonic: F,
-) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
-where
-    F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
-{
-    let factor_source_id = request.factor_source_id;
-    let mut out = IndexSet::<HierarchicalDeterministicFactorInstance>::new();
-
-    for path in request.derivation_paths {
-        let mnemonic = lookup_mnemonic(factor_source_id).await?;
-        let seed = mnemonic.to_seed();
-        let hd_private_key = seed.derive_private_key(&path);
-        out.insert(HierarchicalDeterministicFactorInstance::new(
-            factor_source_id,
-            hd_private_key.public_key(),
-        ));
-    }
-    Ok(out)
-}
-
-/// Uses `__do_derive_serially_with_lookup_of_mnemonic` to derive keys, providing
-/// an async closure which uses predefined samples or looks up the mnemonic using
-/// the factor source id, apart from a secondary lookup, `lookup_mnemonic`, passed
-/// as an argument, which could e.g. use secure storage client to try to load
-/// the mnemonic
-async fn do_derive_serially_looking_up_mnemonic_amongst_samples<F>(
-    request: MonoFactorKeyDerivationRequest,
-    lookup_mnemonic: F,
-) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
-where
-    F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
-{
-    __do_derive_serially_with_lookup_of_mnemonic(
-        request,
-        async move |f: FactorSourceIDFromHash| {
-            if let Some(value) = f.maybe_sample_associated_mnemonic() {
-                return Ok(value);
-            };
-            lookup_mnemonic(f).await
-        },
-    )
-    .await
 }

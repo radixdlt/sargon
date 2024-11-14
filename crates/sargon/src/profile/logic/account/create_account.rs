@@ -166,9 +166,10 @@ mod tests {
             .save_private_hd_factor_source(&fs)
             .await
             .unwrap();
+        let secure_storage_client = Arc::new(secure_storage_client);
         let interactors =
             Arc::new(TestDerivationInteractors::with_secure_storage(
-                secure_storage_client,
+                secure_storage_client.clone(),
             ));
 
         let (_, accounts, consumer) = sut

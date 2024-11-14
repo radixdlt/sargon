@@ -20,7 +20,7 @@ impl TestDerivationInteractors {
     }
 
     pub(crate) fn with_secure_storage(
-        secure_storage_client: SecureStorageClient,
+        secure_storage_client: Arc<SecureStorageClient>,
     ) -> Self {
         let interactor = Arc::new(TestDerivationMonoAndPolyInteractor::new(
             false,

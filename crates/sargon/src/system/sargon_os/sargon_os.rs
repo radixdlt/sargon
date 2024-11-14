@@ -2,7 +2,7 @@ use std::{cell::Cell, sync::Once};
 
 use sbor::prelude::indexmap::IndexMap;
 
-use crate::prelude::*;
+use crate::{prelude::*, system::interactors};
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
 /// which holds an in-memory Profile and a collection of "clients" which are
@@ -30,6 +30,22 @@ impl Deref for SargonOS {
 
 impl SargonOS {
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
+        let os = Self::boot_with_optional_interactors(bios, None).await;
+        #[cfg(test)]
+        {
+            // For tests we need the (Test)KeysDerivationInteractors to be able
+            // to access the `bdfs` from secure storage.
+            _ = os
+                .init_keys_derivation_interactor_with_test_interactor_if_needed(
+                );
+        }
+        os
+    }
+
+    pub async fn boot_with_optional_interactors(
+        bios: Arc<Bios>,
+        interactors: impl Into<Option<Interactors>>,
+    ) -> Arc<Self> {
         let clients = Clients::new(bios);
 
         let sargon_info = SargonBuildInformation::get();
@@ -69,7 +85,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
-            interactors: RwLock::new(None),
+            interactors: RwLock::new(interactors.into()),
         });
         os.clients
             .profile_state_change
@@ -81,15 +97,6 @@ impl SargonOS {
             .await;
 
         info!("Sargon os Booted with profile state: {}", profile_state);
-
-        #[cfg(test)]
-        {
-            // For tests we need the (Test)KeysDerivationInteractors to be able
-            // to access the `bdfs` from secure storage.
-            _ = os
-                .init_keys_derivation_interactor_with_test_interactor_if_needed(
-                );
-        }
 
         os
     }
@@ -127,9 +134,9 @@ impl SargonOS {
             }
         }
         let derivation_interactor: Arc<dyn KeysDerivationInteractors> =
-            Arc::new(TestDerivationInteractors::with_secure_storage(
+            Arc::new(TestDerivationInteractors::with_secure_storage(Arc::new(
                 self.clients.secure_storage.clone(),
-            ));
+            )));
         let interactors = Interactors::new(derivation_interactor.clone());
         self.interactors.write().unwrap().replace(interactors);
         derivation_interactor
