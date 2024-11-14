@@ -75,3 +75,58 @@ impl HasSampleValues for DeleteAccountTransfer {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DeleteAccountTransfer;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn from_fungible_resources_collection_item() {
+        let resource_address = ResourceAddress::sample();
+        let amount = Decimal192::sample();
+        let item = FungibleResourcesCollectionItem::Global(
+            FungibleResourcesCollectionItemGloballyAggregated::new(
+                resource_address,
+                amount,
+            ),
+        );
+        let result = DeleteAccountTransfer::try_from(item).unwrap();
+        assert_eq!(result.resource_address, resource_address.scrypto());
+        assert_eq!(result.amount, amount.into());
+        assert_eq!(result.weight, 1);
+
+        // TODO: Add test that returns `UnexpectedCollectionItemAggregation` whenever we support `FungibleResourcesCollectionItem::Vault`
+    }
+
+    #[test]
+    fn from_non_fungible_resources_collection_item() {
+        let resource_address = ResourceAddress::sample();
+        let amount = 5;
+        let item = NonFungibleResourcesCollectionItem::Global(
+            NonFungibleResourcesCollectionItemGloballyAggregated::new(
+                resource_address,
+                amount,
+            ),
+        );
+        let result = DeleteAccountTransfer::try_from(item).unwrap();
+        assert_eq!(result.resource_address, resource_address.scrypto());
+        assert_eq!(result.amount, amount.into());
+        assert_eq!(result.weight, 5);
+
+        // TODO: Add test that returns `UnexpectedCollectionItemAggregation` whenever we support `NonFungibleResourcesCollectionItem::Vault`
+    }
+}

@@ -58,3 +58,41 @@ impl TryFrom<(FetchResourcesOutput, AccountAddress)>
         Ok(Self::new(recipient, transfers))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DeleteAccountTransfers;
+
+    #[test]
+    fn from_fetch_resources_output_and_recipient() {
+        // Test the case where the total weight of the transfers is less than the maximum.
+        let fungible = FungibleResourcesCollectionItem::sample();
+        let non_fungible = NonFungibleResourcesCollectionItem::sample();
+        let output = FetchResourcesOutput::new(
+            vec![fungible.clone()],
+            vec![non_fungible.clone()],
+        );
+        let recipient = AccountAddress::sample();
+
+        let result = SUT::try_from((output, recipient)).unwrap();
+        assert_eq!(result.recipient, recipient);
+        assert_eq!(
+            result.transfers,
+            vec![
+                fungible.try_into().unwrap(),
+                non_fungible.try_into().unwrap()
+            ]
+        );
+
+        // Test the case where the total weight of the transfers is over the maximum.
+        let non_fungible = NonFungibleResourcesCollectionItem::Global(
+            NonFungibleResourcesCollectionItemGloballyAggregated::new(
+                ResourceAddress::sample(),
+                50,
+            ),
+        );
+    }
+}

@@ -308,20 +308,18 @@ mod fetch_all_resources_tests {
     }
 
     fn spy_no_more_pages_to_load_requests() -> fn(NetworkRequest, u64) {
-        |request, count| {
-            match count {
-                0 => {
-                    let expected_request =
-                        StateEntityDetailsRequest::address_ledger_state(
-                            AccountAddress::sample().into(),
-                            LedgerStateSelector::sample(),
-                        );
+        |request, count| match count {
+            0 => {
+                let expected_request =
+                    StateEntityDetailsRequest::address_ledger_state(
+                        AccountAddress::sample().into(),
+                        LedgerStateSelector::sample(),
+                    );
 
-                    assert_network_request(request, &expected_request);
-                }
-                _ => {
-                    panic!("Unexpected request count: {}", count);
-                }
+                assert_network_request(request, &expected_request);
+            }
+            _ => {
+                panic!("Unexpected request count: {}", count);
             }
         }
     }
@@ -349,7 +347,8 @@ mod fetch_all_resources_tests {
 
         // Mock the fungibles page response
         let fungible_two = FungibleResourcesCollectionItem::sample_other();
-        let fungibles_page_response = mock_fungibles_page_response(vec![fungible_two.clone()]);
+        let fungibles_page_response =
+            mock_fungibles_page_response(vec![fungible_two.clone()]);
 
         // Mock the non-fungibles page response
         let non_fungible_two =
@@ -359,7 +358,11 @@ mod fetch_all_resources_tests {
 
         // Mock the driver and verify the 3 expected requests are made to the GW
         let mock_driver = MockNetworkingDriver::new_with_responses_and_spy(
-            vec![entity_details_response, fungibles_page_response, non_fungibles_page_response],
+            vec![
+                entity_details_response,
+                fungibles_page_response,
+                non_fungibles_page_response,
+            ],
             spy_more_pages_to_load_requests(),
         );
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
@@ -371,46 +374,45 @@ mod fetch_all_resources_tests {
             .unwrap();
 
         assert_eq!(result.fungibles, vec![fungible_one, fungible_two]);
-        assert_eq!(result.non_fungibles, vec![non_fungible_one, non_fungible_two]);
+        assert_eq!(
+            result.non_fungibles,
+            vec![non_fungible_one, non_fungible_two]
+        );
     }
 
     fn spy_more_pages_to_load_requests() -> fn(NetworkRequest, u64) {
-        |request, count| {
-            match count {
-                0 => {
-                    let expected_request =
-                        StateEntityDetailsRequest::address_ledger_state(
-                            AccountAddress::sample().into(),
-                            LedgerStateSelector::sample(),
-                        );
+        |request, count| match count {
+            0 => {
+                let expected_request =
+                    StateEntityDetailsRequest::address_ledger_state(
+                        AccountAddress::sample().into(),
+                        LedgerStateSelector::sample(),
+                    );
 
-                    assert_network_request(request, &expected_request);
-                }
-                1 => {
-                    let expected_request =
-                        StateEntityPageFungiblesRequest::new(
-                            AccountAddress::sample().into(),
-                            LedgerStateSelector::from(LedgerState::sample()),
-                            "next_fungible_cursor".to_string(),
-                            GATEWAY_PAGE_REQUEST_LIMIT,
-                        );
+                assert_network_request(request, &expected_request);
+            }
+            1 => {
+                let expected_request = StateEntityPageFungiblesRequest::new(
+                    AccountAddress::sample().into(),
+                    LedgerStateSelector::from(LedgerState::sample()),
+                    "next_fungible_cursor".to_string(),
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
 
-                    assert_network_request(request, &expected_request);
-                }
-                2 => {
-                    let expected_request =
-                        StateEntityPageNonFungiblesRequest::new(
-                            AccountAddress::sample().into(),
-                            LedgerStateSelector::from(LedgerState::sample()),
-                            "next_non_fungible_cursor".to_string(),
-                            GATEWAY_PAGE_REQUEST_LIMIT,
-                        );
+                assert_network_request(request, &expected_request);
+            }
+            2 => {
+                let expected_request = StateEntityPageNonFungiblesRequest::new(
+                    AccountAddress::sample().into(),
+                    LedgerStateSelector::from(LedgerState::sample()),
+                    "next_non_fungible_cursor".to_string(),
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
 
-                    assert_network_request(request, &expected_request);
-                }
-                _ => {
-                    panic!("Unexpected request count: {}", count);
-                }
+                assert_network_request(request, &expected_request);
+            }
+            _ => {
+                panic!("Unexpected request count: {}", count);
             }
         }
     }
@@ -431,7 +433,9 @@ mod fetch_all_resources_tests {
             vec![],
         );
 
-        let mock_driver = MockNetworkingDriver::new_with_responses(vec![entity_details_response]);
+        let mock_driver = MockNetworkingDriver::new_with_responses(vec![
+            entity_details_response,
+        ]);
         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
 
         // Execute the request and check the result is a failure

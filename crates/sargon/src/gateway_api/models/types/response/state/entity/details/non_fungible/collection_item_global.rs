@@ -9,18 +9,24 @@ pub struct NonFungibleResourcesCollectionItemGloballyAggregated {
     pub amount: u64,
 }
 
+impl NonFungibleResourcesCollectionItemGloballyAggregated {
+    pub fn new(
+        resource_address: ResourceAddress,
+        amount: u64,
+    ) -> NonFungibleResourcesCollectionItemGloballyAggregated {
+        NonFungibleResourcesCollectionItemGloballyAggregated {
+            resource_address,
+            amount,
+        }
+    }
+}
+
 impl HasSampleValues for NonFungibleResourcesCollectionItemGloballyAggregated {
     fn sample() -> Self {
-        Self {
-            resource_address: ResourceAddress::sample_stokenet_nft_abandon(),
-            amount: 5,
-        }
+        Self::new(ResourceAddress::sample_stokenet_nft_abandon(), 5)
     }
 
     fn sample_other() -> Self {
-        Self {
-            resource_address: ResourceAddress::sample_stokenet_nft_other(),
-            amount: 10,
-        }
+        Self::new(ResourceAddress::sample_stokenet_nft_other(), 10)
     }
 }
