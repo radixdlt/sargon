@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub struct SubintentManifest {
     pub instructions: InstructionsV2,
     pub blobs: Blobs,
-    pub children: ChildIntents,
+    pub children: ChildSubintentSpecifiers,
 }
 
 impl SubintentManifest {
@@ -13,7 +13,7 @@ impl SubintentManifest {
         instructions_string: impl AsRef<str>,
         network_id: NetworkID,
         blobs: Blobs,
-        children: ChildIntents,
+        children: ChildSubintentSpecifiers,
     ) -> Result<Self> {
         InstructionsV2::new(instructions_string, network_id).map(
             |instructions| Self {
@@ -27,7 +27,7 @@ impl SubintentManifest {
     pub fn with_instructions_and_blobs_and_children(
         instructions: InstructionsV2,
         blobs: Blobs,
-        children: ChildIntents,
+        children: ChildSubintentSpecifiers,
     ) -> Self {
         Self {
             instructions,
@@ -43,7 +43,7 @@ impl SubintentManifest {
         Self {
             instructions: InstructionsV2::empty(network_id),
             blobs: Blobs::default(),
-            children: ChildIntents::empty(),
+            children: ChildSubintentSpecifiers::empty(),
         }
     }
 }
@@ -221,7 +221,7 @@ impl HasSampleValues for SubintentManifest {
         Self {
             instructions: Self::sample_mainnet_instructions(),
             blobs: Blobs::default(),
-            children: ChildIntents::empty(),
+            children: ChildSubintentSpecifiers::empty(),
         }
     }
 
@@ -229,7 +229,7 @@ impl HasSampleValues for SubintentManifest {
         Self {
             instructions: Self::sample_simulator_other_instructions(),
             blobs: Blobs::default(),
-            children: ChildIntents::empty(),
+            children: ChildSubintentSpecifiers::empty(),
         }
     }
 }
@@ -289,14 +289,14 @@ mod tests {
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
         ];
-        let children = vec![
-            ScryptoChildSubintent {
+        let children = IndexSet::from_iter([
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample().into(),
             },
-            ScryptoChildSubintent {
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample_other().into(),
             },
-        ];
+        ]);
         let scrypto = ScryptoSubintentManifestV2 {
             instructions: ins.clone(),
             blobs: Default::default(),
@@ -319,14 +319,14 @@ mod tests {
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
         ];
-        let children = vec![
-            ScryptoChildSubintent {
+        let children = IndexSet::from_iter([
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample().into(),
             },
-            ScryptoChildSubintent {
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample_other().into(),
             },
-        ];
+        ]);
         let scrypto = ScryptoSubintentManifestV2 {
             instructions: instructions.clone(),
             blobs: Default::default(),
@@ -344,14 +344,14 @@ mod tests {
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
         ];
-        let children = vec![
-            ScryptoChildSubintent {
+        let children = IndexSet::from_iter([
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample().into(),
             },
-            ScryptoChildSubintent {
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample_other().into(),
             },
-        ];
+        ]);
         let scrypto = ScryptoTransactionManifestV2 {
             instructions: ins.clone(),
             blobs: Default::default(),
@@ -429,7 +429,7 @@ DROP_AUTH_ZONE_PROOFS;
                 instructions_str,
                 NetworkID::Simulator,
                 Blobs::default(),
-                ChildIntents::empty()
+                ChildSubintentSpecifiers::empty()
             )
             .unwrap()
             .instructions_string(),
@@ -450,7 +450,7 @@ DROP_AUTH_ZONE_PROOFS;
                 instructions_str,
                 NetworkID::Mainnet,
                 Blobs::default(),
-                ChildIntents::empty()
+                ChildSubintentSpecifiers::empty()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Simulator,
@@ -472,7 +472,7 @@ DROP_AUTH_ZONE_PROOFS;
                 instructions_str,
                 NetworkID::Stokenet,
                 Blobs::default(),
-                ChildIntents::empty()
+                ChildSubintentSpecifiers::empty()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Mainnet,
@@ -576,7 +576,7 @@ DROP_AUTH_ZONE_PROOFS;
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ChildIntents::empty(),
+            ChildSubintentSpecifiers::empty(),
         )
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();
