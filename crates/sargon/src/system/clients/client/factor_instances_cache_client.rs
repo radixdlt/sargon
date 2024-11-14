@@ -2,6 +2,11 @@ use std::borrow::Borrow;
 
 use crate::prelude::*;
 
+/// A client which manages the cache of factor instances, by saving and loading from FileSystem
+/// using a `FileSystemClient`.
+///
+/// This cache does not keep any state in memory, in order to avoid the possibility of
+/// inconsistencies between the cache and the actual state of the filesystem.
 #[derive(Debug, Clone)]
 pub struct FactorInstancesCacheClient {
     file_system_client: Arc<FileSystemClient>,
@@ -81,23 +86,8 @@ impl FactorInstancesCacheClient {
     }
 }
 
-#[async_trait::async_trait]
-pub trait FactorInstancesConsumer: Send + Sync {
-    async fn delete(
-        &self,
-        instances_per_factor_sources_to_delete: IndexMap<
-            FactorSourceIDFromHash,
-            FactorInstances,
-        >,
-    ) -> Result<()>;
-}
-
-unsafe impl Send for FactorInstancesCacheClient {}
-unsafe impl Sync for FactorInstancesCacheClient {}
-
-#[async_trait::async_trait]
-impl FactorInstancesConsumer for FactorInstancesCacheClient {
-    async fn delete(
+impl FactorInstancesCacheClient {
+    pub async fn delete(
         &self,
         instances_per_factor_sources_to_delete: IndexMap<
             FactorSourceIDFromHash,
@@ -110,8 +100,7 @@ impl FactorInstancesConsumer for FactorInstancesCacheClient {
         })
         .await
     }
-}
-impl FactorInstancesCacheClient {
+
     pub async fn insert_for_factor(
         &self,
         factor_source_id: FactorSourceIDFromHash,
@@ -238,9 +227,6 @@ impl FactorInstancesCacheClient {
 
 #[cfg(test)]
 mod tests {
-    use std::any::Any;
-
-    use sbor::prelude::indexmap::IndexMap;
 
     use super::*;
 
