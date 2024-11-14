@@ -172,12 +172,10 @@ pub mod prelude {
 
     pub(crate) use radix_transactions::{
         builder::{
-            // ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
             NewManifestBucket as ScryptoNewManifestBucket,
             PartialTransactionV2Builder as ScryptoPartialTransactionV2Builder,
             ResolvableArguments as ScryptoResolvableArguments,
-            // ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
         manifest::{
             compile as scrypto_compile,
