@@ -34,7 +34,7 @@ impl GatewayClient {
 
     /// Get page of Global Entity Non-Fungible Resource Balances
     ///
-    /// Returns the total amount of each non-fungible resource owned by a given global entity.
+    /// Returns the total amount of each non_fungible resource owned by a given global entity.
     /// Result can be aggregated globally or per vault.
     /// The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
     ///
@@ -65,15 +65,16 @@ impl GatewayClient {
             NonFungibleResourcesCollectionItemVaultAggregatedVaultItem,
         >,
     > {
-        self.post("state/entity/page/non-fungible-vaults/", request, res_id)
+        self.post("state/entity/page/non_fungible-vaults/", request, res_id)
             .await
     }
 
     /// Get page of Non-Fungibles in Vault
     ///
-    // Returns all non-fungible IDs of a given non-fungible resource owned by a given entity.
-    // The returned response is in a paginated format, ordered by the resource's first appearance
-    // on the ledger.
+    /// Returns all non_fungible IDs of a given non_fungible resource owned by a given entity.
+    /// The returned response is in a paginated format, ordered by the resource's first appearance
+    /// on the ledger.
+    ///
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleIdsPage
@@ -81,7 +82,7 @@ impl GatewayClient {
         &self,
         request: StateEntityPageNonFungibleVaultIdsRequest,
     ) -> Result<PageResponse<NonFungibleLocalId>> {
-        self.post("state/entity/page/non-fungible-vault/ids", request, res_id)
+        self.post("state/entity/page/non_fungible-vault/ids", request, res_id)
             .await
     }
 }
@@ -114,6 +115,23 @@ impl GatewayClient {
         request: AccountPageAuthorizedDepositorsRequest,
     ) -> Result<PageResponse<AccountAuthorizedDepositor>> {
         self.post("state/account/page/authorized-depositors", request, res_id)
+            .await
+    }
+}
+
+impl GatewayClient {
+    /// Get Non-Fungible Location
+    ///
+    /// Returns location of a given non-fungible ID.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleLocation
+    pub(crate) async fn state_non_fungible_location(
+        &self,
+        request: StateNonFungibleLocationRequest,
+    ) -> Result<StateNonFungibleLocationResponse> {
+        self.post("/state/non-fungible/location", request, res_id)
             .await
     }
 }

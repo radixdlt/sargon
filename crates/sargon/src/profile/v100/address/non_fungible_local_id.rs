@@ -116,6 +116,14 @@ impl std::fmt::Display for NonFungibleLocalId {
     }
 }
 
+impl From<AccountAddress> for NonFungibleLocalId {
+    fn from(value: AccountAddress) -> Self {
+        Self::bytes(value.node_id().0).expect(
+            "NonFungibleLocalId bytes size is always NodeId::Length (30)",
+        )
+    }
+}
+
 impl From<ScryptoBytesNonFungibleLocalId> for NonEmptyMax64Bytes {
     fn from(value: ScryptoBytesNonFungibleLocalId) -> Self {
         Self::try_from(value.value()).expect("Should not be possible, since ScryptoBytesNonFungibleLocalId have validated length")

@@ -50,7 +50,7 @@ impl StateEntityPageNonFungibleVaultsRequest {
 pub struct StateEntityNonFungibleResourceVaultsPageOptIns {
     /// if set to `true`, first page of non fungible ids are returned for each
     /// non fungible resource, with cursor which can be later used at
-    /// `/state/entity/page/non-fungible-vault/ids` endpoint.
+    /// `/state/entity/page/non_fungible-vault/ids` endpoint.
     pub(crate) non_fungible_include_nfids: Option<bool>,
 }
 

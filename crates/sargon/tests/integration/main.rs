@@ -33,8 +33,13 @@ mod integration_tests {
 
         assert!(
             gateway_client
-                .check_account_is_deleted(account_address)
+                .check_account_is_deleted(
+                    NetworkID::Stokenet,
+                    vec![account_address]
+                )
                 .await
+                .unwrap()
+                .first()
                 .unwrap()
                 .1
         )

@@ -12,21 +12,13 @@ impl SargonOS {
         let accounts = self.accounts_on_current_network()?;
 
         let network_id = self.profile_state_holder.current_network_id()?;
-        let gateway_client = GatewayClient::new(
-            self.clients.http_client.driver.clone(),
-            network_id,
-        );
 
-        let active_account_addresses =
-            accounts.iter().map(|a| a.address).collect::<Vec<_>>();
-        let on_ledger_checks = active_account_addresses
-            .iter()
-            .map(|address| {
-                gateway_client.check_account_is_deleted(address.clone())
-            })
-            .collect_vec();
-        let account_addresses_with_deleted_status =
-            try_join_all(on_ledger_checks).await?;
+        let account_addresses_with_deleted_status = self
+            .check_accounts_deleted_on_ledger(
+                network_id,
+                accounts.iter().map(|a| a.address),
+            )
+            .await?;
 
         let account_addresses_to_tombstone =
             account_addresses_with_deleted_status
@@ -49,5 +41,24 @@ impl SargonOS {
         }
 
         Ok(is_any_account_tombstoned)
+    }
+
+    /// Queries all `account_addresses` on ledger and checks reports which one is deleted.
+    ///
+    /// Returns an array of the account addresses along with a `bool` being true if that account
+    /// is deleted
+    pub async fn check_accounts_deleted_on_ledger(
+        &self,
+        network_id: NetworkID,
+        account_addresses: impl IntoIterator<Item = AccountAddress>,
+    ) -> Result<Vec<(AccountAddress, bool)>> {
+        let gateway_client = GatewayClient::new(
+            self.clients.http_client.driver.clone(),
+            network_id,
+        );
+
+        gateway_client
+            .check_account_is_deleted(network_id, account_addresses)
+            .await
     }
 }
