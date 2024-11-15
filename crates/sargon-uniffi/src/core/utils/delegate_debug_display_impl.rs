@@ -3,7 +3,7 @@ use crate::prelude::*;
 macro_rules! delegate_display_debug_into {
     ($external_type:ty, $internal_type:ty) => {
         delegate_display_into!($external_type, $internal_type);
-        
+
         delegate_debug_into!($external_type, $internal_type);
     };
 }
@@ -30,6 +30,6 @@ macro_rules! delegate_debug_into {
     };
 }
 
+pub(crate) use delegate_debug_into;
 pub(crate) use delegate_display_debug_into;
 pub(crate) use delegate_display_into;
-pub(crate) use delegate_debug_into;
