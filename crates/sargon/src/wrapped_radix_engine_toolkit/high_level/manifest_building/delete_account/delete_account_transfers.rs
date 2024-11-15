@@ -82,7 +82,7 @@ mod tests {
         assert_eq!(
             result.transfers,
             vec![
-                fungible.try_into().unwrap(),
+                fungible.clone().try_into().unwrap(),
                 non_fungible.try_into().unwrap()
             ]
         );
@@ -93,6 +93,17 @@ mod tests {
                 ResourceAddress::sample(),
                 50,
             ),
+        );
+
+        let output = FetchResourcesOutput::new(
+            vec![fungible.clone()],
+            vec![non_fungible.clone()],
+        );
+        let result =
+            SUT::try_from((output, recipient)).expect_err("Expected error");
+        assert_eq!(
+            result,
+            CommonError::MaxTransfersPerTransactionReached { amount: 51 }
         );
     }
 }
