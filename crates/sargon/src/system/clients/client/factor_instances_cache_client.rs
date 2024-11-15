@@ -1,5 +1,7 @@
 use std::borrow::Borrow;
 
+use async_std::path::PathBuf;
+
 use crate::prelude::*;
 
 /// A client which manages the cache of factor instances, by saving and loading from FileSystem
@@ -51,10 +53,8 @@ impl FactorInstancesCacheClient {
     async fn load_from_file(
         &self,
     ) -> Result<Option<FactorInstancesCacheSnapshot>> {
-        let maybe_json = self
-            .file_system_client
-            .load_from_file(Self::CACHE_FILE)
-            .await?;
+        let path = self.path().await?;
+        let maybe_json = self.file_system_client.load_from_file(path).await?;
 
         let Some(json) = maybe_json else {
             return Ok(None);
@@ -66,15 +66,23 @@ impl FactorInstancesCacheClient {
         Ok(Some(deserialized))
     }
 
+    async fn path(&self) -> Result<String> {
+        let dir = self.file_system_client.writable_app_dir_path().await?;
+        let path = PathBuf::from(dir)
+            .join(Self::CACHE_FILE)
+            .to_string_lossy()
+            .to_string();
+        Ok(path)
+    }
+
     async fn save_to_file(
         &self,
         cache_snapshot: FactorInstancesCacheSnapshot,
     ) -> Result<()> {
+        let path = self.path().await?;
         let json = cache_snapshot.serialize_to_bytes()?;
 
-        self.file_system_client
-            .save_to_file(Self::CACHE_FILE, &json)
-            .await
+        self.file_system_client.save_to_file(path, &json).await
     }
 }
 

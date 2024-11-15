@@ -25,6 +25,10 @@ pub(crate) fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
 
 #[allow(dead_code)]
 impl FileSystemClient {
+    pub async fn writable_app_dir_path(&self) -> Result<String> {
+        self.driver.writable_app_dir_path().await
+    }
+
     pub async fn load_from_file(
         &self,
         path: impl AsRef<Path>,

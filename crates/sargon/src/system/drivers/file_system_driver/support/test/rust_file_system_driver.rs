@@ -20,8 +20,20 @@ pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
     Ok(path)
 }
 
+impl RustFileSystemDriver {
+    fn tmp_dir() -> PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../target/tmp")
+            .into()
+    }
+}
+
 #[async_trait::async_trait]
 impl FileSystemDriver for RustFileSystemDriver {
+    async fn writable_app_dir_path(&self) -> Result<String> {
+        Ok(Self::tmp_dir().to_string_lossy().to_string())
+    }
+
     async fn load_from_file(&self, path: String) -> Result<Option<BagOfBytes>> {
         let path_buf = path_from_str(path.clone(), true)?;
         match fs::read(path_buf) {
@@ -71,8 +83,7 @@ mod tests {
     }
 
     fn file_in_tmp() -> String {
-        let dir_path =
-            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/tmp");
+        let dir_path = SUT::tmp_dir();
         file_in_dir(dir_path)
     }
 

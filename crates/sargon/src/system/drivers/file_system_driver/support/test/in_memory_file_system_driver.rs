@@ -17,6 +17,10 @@ impl InMemoryFileSystemDriver {
 
 #[async_trait::async_trait]
 impl FileSystemDriver for InMemoryFileSystemDriver {
+    async fn writable_app_dir_path(&self) -> Result<String> {
+        Ok("".to_string())
+    }
+
     async fn load_from_file(&self, path: String) -> Result<Option<BagOfBytes>> {
         let data = self.in_memory_data.read().unwrap();
         Ok(data.get(&path).cloned())
