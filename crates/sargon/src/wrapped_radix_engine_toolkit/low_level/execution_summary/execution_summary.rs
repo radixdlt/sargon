@@ -110,6 +110,37 @@ impl ExecutionSummary {
     }
 }
 
+impl ExecutionSummary {
+    pub fn classify_delete_accounts_if_present(&mut self) {
+        if self.detailed_classification.is_empty() {
+            let deleted_accounts: Vec<AccountAddress> = self
+                .deposits
+                .iter()
+                .filter_map(|deposit| {
+                    let (account_address, resources) = deposit;
+
+                    resources
+                        .iter()
+                        .filter_map(|resource| {
+                            resource.get_non_fungible_indicator()
+                        })
+                        .flat_map(|indicator| indicator.ids())
+                        .any(|id| id.derives_account_address(&account_address))
+                        .then_some(account_address.clone())
+                })
+                .collect();
+
+            if !deleted_accounts.is_empty() {
+                self.detailed_classification.push(
+                    DetailedManifestClass::DeleteAccounts {
+                        account_addresses: deleted_accounts,
+                    },
+                );
+            }
+        }
+    }
+}
+
 fn addresses_of_accounts_from_ret(
     ret: IndexMap<ScryptoComponentAddress, Vec<RetResourceIndicator>>,
     network_id: NetworkID,
@@ -135,7 +166,7 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
             to_vec_network_aware(ret.newly_created_non_fungibles, n);
         newly_created_non_fungibles.sort();
 
-        Self::new(
+        let mut summary = Self::new(
             addresses_of_accounts_from_ret(ret.account_withdraws, n),
             addresses_of_accounts_from_ret(ret.account_deposits, n),
             to_vec_network_aware(ret.accounts_requiring_auth, n),
@@ -155,7 +186,11 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
             ret.fee_locks,
             ret.fee_summary,
             (ret.new_entities, n),
-        )
+        );
+
+        summary.classify_delete_accounts_if_present();
+
+        summary
     }
 }
 

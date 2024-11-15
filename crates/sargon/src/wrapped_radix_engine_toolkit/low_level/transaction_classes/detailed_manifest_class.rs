@@ -87,10 +87,10 @@ pub enum DetailedManifestClass {
         pool_redemptions: Vec<TrackedPoolRedemption>,
     },
 
-    /// A manifest that deletes an account.
-    DeleteAccount {
-        /// The address of the account that is being deleted
-        account_address: AccountAddress,
+    /// A manifest that deletes accounts.
+    DeleteAccounts {
+        /// The addresses of the accounts that are being deleted
+        account_addresses: Vec<AccountAddress>,
     },
 }
 

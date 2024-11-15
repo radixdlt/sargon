@@ -54,6 +54,33 @@ impl NonFungibleLocalId {
         NonEmptyMax64Bytes::try_from(bytes.as_ref())
             .map(|value| Self::Bytes { value })
     }
+
+    pub fn as_bytes(&self) -> Option<NonEmptyMax64Bytes> {
+        if let NonFungibleLocalId::Bytes { value } = self {
+            Some(value.clone())
+        } else {
+            None
+        }
+    }
+}
+
+impl NonFungibleLocalId {
+    pub(crate) fn derives_account_address(
+        &self,
+        account_address: &AccountAddress,
+    ) -> bool {
+        self.as_bytes()
+            .map(|local_id_bytes| {
+                let bytes = local_id_bytes.bag_of_bytes.bytes();
+                if bytes.len() == ScryptoNodeId::LENGTH {
+                    bytes[..ScryptoNodeId::LENGTH]
+                        == account_address.node_id().0
+                } else {
+                    false
+                }
+            })
+            .unwrap_or(false)
+    }
 }
 
 impl NonFungibleLocalId {
