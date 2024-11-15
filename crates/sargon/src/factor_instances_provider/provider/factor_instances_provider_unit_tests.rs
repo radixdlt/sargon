@@ -537,11 +537,25 @@ async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot_bdfs_and_interactor(
         mnemonic_with_passphrase,
         fail_interactor,
+        false,
     )
     .await;
     os.set_cache(cache_before_fail.serializable_snapshot())
         .await;
-    os.set_profile(profile).await.unwrap();
+    os.import_profile(profile.clone()).await.unwrap();
+
+    assert_eq!(
+        os.profile()
+            .unwrap()
+            .accounts_on_all_networks_including_hidden(),
+        profile.accounts_on_all_networks_including_hidden()
+    );
+    let c = os.cache_snapshot().await;
+    assert_eq!(
+        c.serializable_snapshot(),
+        cache_before_fail.serializable_snapshot()
+    );
+    assert_eq!(os.bdfs().unwrap().id_from_hash(), bdfs.id_from_hash());
 
     let res = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(

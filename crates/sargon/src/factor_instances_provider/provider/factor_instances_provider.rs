@@ -119,6 +119,7 @@ impl FactorInstancesProvider {
                 quantities_to_derive,
                 partial_instances,
             } => {
+                warn!("NotSatisfied, quantities_to_derive: {:?}, partial_instances: {:?}", quantities_to_derive, partial_instances);
                 self.derive_more_and_cache(
                     quantified_derivation_preset,
                     partial_instances,

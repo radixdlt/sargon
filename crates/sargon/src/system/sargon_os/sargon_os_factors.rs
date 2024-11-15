@@ -450,8 +450,15 @@ impl SargonOS {
         self.clients.factor_instances_cache.clear().await.unwrap();
     }
 
-    pub(crate) async fn set_cache(&self, cache_snapshot: FactorInstancesCacheSnapshot) {
-        self.clients.factor_instances_cache.set_cache(cache_snapshot).await.unwrap();
+    pub(crate) async fn set_cache(
+        &self,
+        cache_snapshot: FactorInstancesCacheSnapshot,
+    ) {
+        self.clients
+            .factor_instances_cache
+            .set_cache(cache_snapshot)
+            .await
+            .unwrap();
     }
 
     pub(crate) async fn cache_snapshot(&self) -> FactorInstancesCache {

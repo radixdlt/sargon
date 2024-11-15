@@ -23,7 +23,6 @@ impl Default for TestDerivationMonoAndPolyInteractor {
     }
 }
 
-
 impl TestDerivationMonoAndPolyInteractor {
     pub(crate) fn new(
         always_fail: bool,
@@ -43,7 +42,7 @@ impl TestDerivationMonoAndPolyInteractor {
         &self,
         request: MonoFactorKeyDerivationRequest,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-        if self.always_fail  {
+        if self.always_fail {
             return Err(CommonError::Unknown);
         }
 

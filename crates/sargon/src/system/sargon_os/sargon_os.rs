@@ -355,6 +355,7 @@ impl SargonOS {
     pub async fn boot_test_with_bdfs_mnemonic_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
         derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
             Drivers::with_file_system(InMemoryFileSystemDriver::new());
@@ -389,10 +390,12 @@ impl SargonOS {
             ProfileState::Loaded(profile.clone()),
         )?;
 
-        os.prederive_and_fill_cache_with_instances_for_factor_source(
-            bdfs.factor_source.into(),
-        )
-        .await?;
+        if pre_derive_factor_instance_for_bdfs {
+            os.prederive_and_fill_cache_with_instances_for_factor_source(
+                bdfs.factor_source.into(),
+            )
+            .await?;
+        }
 
         Ok(os)
     }
@@ -404,10 +407,12 @@ impl SargonOS {
     pub async fn fast_boot_bdfs_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
         derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactor(
             bdfs_mnemonic,
             derivation_interactor,
+            pre_derive_factor_instance_for_bdfs,
         );
 
         actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
@@ -419,11 +424,12 @@ impl SargonOS {
     pub async fn fast_boot_bdfs(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
     ) -> Arc<Self> {
-        Self::fast_boot_bdfs_and_interactor(bdfs_mnemonic, None).await
+        Self::fast_boot_bdfs_and_interactor(bdfs_mnemonic, None, true).await
     }
 
     pub async fn boot_test() -> Result<Arc<Self>> {
-        Self::boot_test_with_bdfs_mnemonic_and_interactor(None, None).await
+        Self::boot_test_with_bdfs_mnemonic_and_interactor(None, None, true)
+            .await
     }
 
     /// Boot the SargonOS with a mocked networking driver.
