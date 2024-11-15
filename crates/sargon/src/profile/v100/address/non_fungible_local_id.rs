@@ -476,10 +476,12 @@ mod tests {
     #[test]
     fn test_derives_account_address() {
         let local_id = SUT::try_from(
-            "[51f3033e8c2b32e398fecd57bbc8ea470bd575ae3a772e42e0a90e675b47]",
+            "[511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc]",
         )
         .unwrap();
-        let account_address = AccountAddress::try_from_bech32("account_rdx128esx05v9view8x87e4tmhj82gu9a2adw8fmjushq4y8xwk68vgsuw0").unwrap();
+        let account_address = AccountAddress::try_from_bech32(
+            "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
+        ).unwrap();
 
         assert!(local_id.derives_account_address(account_address));
     }

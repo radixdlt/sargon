@@ -32,7 +32,7 @@ impl SargonOS {
             account_addresses_with_deleted_status
                 .iter()
                 .filter_map(|(account_address, is_deleted)| {
-                    if is_deleted {
+                    if *is_deleted {
                         Some(account_address.clone())
                     } else {
                         None
@@ -40,11 +40,13 @@ impl SargonOS {
                 })
                 .collect_vec();
 
-        if (!account_addresses_to_tombstone.is_empty()) {
+        let any_account_tombstoned = !account_addresses_to_tombstone.is_empty();
+
+        if any_account_tombstoned {
             self.mark_accounts_as_tombstoned(account_addresses_to_tombstone)
                 .await?;
         }
 
-        Ok(!account_addresses_to_tombstone.is_empty())
+        Ok(any_account_tombstoned)
     }
 }

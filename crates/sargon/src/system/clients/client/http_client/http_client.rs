@@ -56,9 +56,6 @@ impl HttpClient {
         U: for<'a> Deserialize<'a>,
     {
         let response = self.execute_network_request(request).await?;
-        let decoded = String::from_utf8(response.clone().bytes).unwrap();
-        println!("{}", decoded);
-
         self.model_from_response(response)
     }
 
