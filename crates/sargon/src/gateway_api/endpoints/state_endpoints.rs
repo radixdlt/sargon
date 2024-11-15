@@ -62,8 +62,19 @@ impl GatewayClient {
         &self,
         request: AccountPageResourcePreferencesRequest,
     ) -> Result<PageResponse<AccountResourcePreference>> {
-        self.post("state/account/page/resource-preferences", request, res_id)
+        // The GW is currently returning a 404 when this endpoint is called with a virtual account.
+        // This is a temporary workaround until the GW is fixed.
+        // More info on thread: https://rdxworks.slack.com/archives/C06EBEA0SGY/p1731686360114749
+        match self
+            .post("state/account/page/resource-preferences", request, res_id)
             .await
+        {
+            Ok(response) => Ok(response),
+            Err(CommonError::NetworkResponseBadCode { code: 404 }) => {
+                Ok(PageResponse::empty())
+            }
+            Err(e) => Err(e),
+        }
     }
 
     /// Get Account authorized depositors
@@ -77,7 +88,18 @@ impl GatewayClient {
         &self,
         request: AccountPageAuthorizedDepositorsRequest,
     ) -> Result<PageResponse<AccountAuthorizedDepositor>> {
-        self.post("state/account/page/authorized-depositors", request, res_id)
+        // The GW is currently returning a 404 when this endpoint is called with a virtual account.
+        // This is a temporary workaround until the GW is fixed.
+        // More info on thread: https://rdxworks.slack.com/archives/C06EBEA0SGY/p1731686360114749
+        match self
+            .post("state/account/page/authorized-depositors", request, res_id)
             .await
+        {
+            Ok(response) => Ok(response),
+            Err(CommonError::NetworkResponseBadCode { code: 404 }) => {
+                Ok(PageResponse::empty())
+            }
+            Err(e) => Err(e),
+        }
     }
 }

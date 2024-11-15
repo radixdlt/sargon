@@ -22,4 +22,13 @@ impl<T> PageResponse<T> {
             items,
         }
     }
+
+    /// Create an empty PageResponse.
+    /// Note: this is used to simulate a success response on some specific endpoints that are returning a 404 when
+    /// requested for a virtual account. Ideally, the Gateway API should return a 200 with an empty array.
+    /// Once it happens, this method should be removed.
+    /// More info on thread: https://rdxworks.slack.com/archives/C06EBEA0SGY/p1731686360114749
+    pub fn empty() -> Self {
+        Self::new(None, None, None, vec![])
+    }
 }

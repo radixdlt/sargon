@@ -413,8 +413,8 @@ pub enum CommonError {
     )]
     InvalidNotarizedIntentFailedToEncode { underlying: String } = 10111,
 
-    #[error("Networking response bad code")]
-    NetworkResponseBadCode = 10112,
+    #[error("Networking response bad code: {code}")]
+    NetworkResponseBadCode { code: u16 } = 10112,
 
     #[error("Networking response body was empty")]
     NetworkResponseEmptyBody = 10113,
