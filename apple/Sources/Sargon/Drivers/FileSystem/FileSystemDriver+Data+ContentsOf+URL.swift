@@ -44,27 +44,59 @@ extension FileSystem {
 		_ io: @Sendable (URL) throws -> T
 	) throws -> T {
 		let url = URL(file: path)
+        #if os(iOS)
 		guard url.startAccessingSecurityScopedResource() else {
 			throw CommonError.NotPermissionToAccessFile(path: path)
 		}
 		defer { url.stopAccessingSecurityScopedResource() }
+        #endif
 		return try io(url)
 	}
 }
 
 extension FileSystem: FileSystemDriver {
-	
+    public func writableAppDirPath() async throws -> String {
+#if os(iOS)
+        try fileManager.url(
+            for: .cachesDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        ).absoluteString
+#elseif os(macOS)
+        URL.temporaryDirectory.path()
+#else
+        fatalError("Unsupported OS")
+#endif
+    }
+    
 	public func loadFromFile(path: String) async throws -> BagOfBytes? {
-		try with(path: path) {
-			try Data(contentsOf: $0)
+        let fileExists = fileManager.fileExists(atPath: path)
+        return try with(path: path) {
+            do {
+                return try Data(contentsOf: $0)
+            } catch {
+                if fileExists {
+                    throw error
+                } else {
+                    return nil
+                }
+            }
 		}
 	}
 	
-	public func saveToFile(path: String, data: BagOfBytes) async throws {
-		try with(path: path) {
-			try data.write(to: $0)
-		}
-	}
+    public func saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Bool) async throws {
+        if fileManager.fileExists(atPath: path) {
+            if !isAllowedToOverwrite {
+                throw CommonError.FileAlreadyExists(path: path)
+            }
+        } else {
+            fileManager.createFile(atPath: path, contents: nil)
+        }
+        try with(path: path) {
+            try data.write(to: $0)
+        }
+    }
 	
 	public func deleteFile(path: String) async throws {
 		try with(path: path) {

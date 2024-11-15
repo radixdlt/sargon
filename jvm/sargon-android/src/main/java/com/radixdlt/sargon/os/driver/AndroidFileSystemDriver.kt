@@ -27,7 +27,9 @@ class AndroidFileSystemDriver(
         }.logFailure().getOrNull()?.toBagOfBytes()
     }
 
-    override suspend fun saveToFile(path: String, data: BagOfBytes) {
+    override suspend fun writableAppDirPath(): String = directory.absolutePath
+
+    override suspend fun saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Boolean) {
         withContext(dispatcher) {
             runCatching {
                 val fileToSave = path.toFile()
@@ -37,6 +39,10 @@ class AndroidFileSystemDriver(
                         fileToSave.parentFile?.mkdirs()
                     }
                     fileToSave.createNewFile()
+                } else if (!isAllowedToOverwrite) {
+                    throw CommonException.FileAlreadyExists(
+                        path = path
+                    )
                 }
 
                 context.contentResolver.openOutputStream(

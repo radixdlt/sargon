@@ -59,8 +59,8 @@ final class TestOSTests: OSTest {
 	}
 	
 	func test_create_account_returned() async throws {
-		let sut = await TestOS()
-		try await sut.os.newWallet()
+        let sut = await TestOS()
+        try await sut.os.newWallet()
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		XCTAssertEqual(account.displayName, displayName)
@@ -68,7 +68,7 @@ final class TestOSTests: OSTest {
 	}
 	
 	func test_create_account_returned_can_be_looked_up() async throws {
-		let sut = await TestOS()
+        let sut = await TestOS.init()
 		try await sut.os.newWallet()
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
@@ -109,7 +109,7 @@ final class TestOSTests: OSTest {
 		let creatingDevice = profile.header.creatingDevice
 		let newCreatingDevice = DeviceInfo.sampleOther
 		XCTAssertNotEqual(newCreatingDevice, creatingDevice)
-		profile.header.creatingDevice = newCreatingDevice // mutate profile
+		profile.header.creatingDevice = newCreatingDevice // mutate profile 
 		try await sut.os.setProfile(profile: profile)
 		XCTAssertEqual(try sut.os.profile().header.creatingDevice, newCreatingDevice) // assert change worked
 	}

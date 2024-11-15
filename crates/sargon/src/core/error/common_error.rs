@@ -780,6 +780,12 @@ pub enum CommonError {
         expected: u64,
         found: u64,
     } = 10219,
+
+    #[error("File already exists, path: {path}")]
+    FileAlreadyExists { path: String } = 10220,
+
+    #[error("Failed to canonicalize path: {path}")]
+    FailedToCanonicalize { path: String } = 10221,
 }
 
 impl CommonError {

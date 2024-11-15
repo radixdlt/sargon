@@ -18,7 +18,9 @@ impl InMemoryFileSystemDriver {
 #[async_trait::async_trait]
 impl FileSystemDriver for InMemoryFileSystemDriver {
     async fn writable_app_dir_path(&self) -> Result<String> {
-        Ok("".to_string())
+        Ok(RustFileSystemDriver::tmp_dir()
+            .to_string_lossy()
+            .to_string())
     }
 
     async fn load_from_file(&self, path: String) -> Result<Option<BagOfBytes>> {
@@ -26,8 +28,17 @@ impl FileSystemDriver for InMemoryFileSystemDriver {
         Ok(data.get(&path).cloned())
     }
 
-    async fn save_to_file(&self, path: String, data: BagOfBytes) -> Result<()> {
-        self.in_memory_data.write().unwrap().insert(path, data);
+    async fn save_to_file(
+        &self,
+        path: String,
+        data: BagOfBytes,
+        is_allowed_to_overwrite: bool,
+    ) -> Result<()> {
+        let mut binding = self.in_memory_data.write().unwrap();
+        if !is_allowed_to_overwrite && binding.contains_key(&path) {
+            return Err(CommonError::FileAlreadyExists { path });
+        }
+        binding.insert(path, data);
         Ok(())
     }
 
@@ -52,10 +63,26 @@ mod tests {
         let file = "dummy".to_owned();
 
         let data = BagOfBytes::sample();
-        sut.save_to_file(file.clone(), data.clone()).await.unwrap();
+        sut.save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
         let loaded = sut.load_from_file(file.clone()).await.unwrap().unwrap();
         assert_eq!(loaded, data);
         assert!(sut.delete_file(file.clone()).await.is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn test_save_skip_overwrite_fails_for_existing_file() {
+        let sut = SUT::new();
+        let file = "dummy".to_owned();
+
+        let data = BagOfBytes::sample();
+        sut.save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
+
+        let res = sut.save_to_file(file.clone(), data, false).await;
+        assert!(matches!(res, Err(CommonError::FileAlreadyExists { .. })));
     }
 
     #[actix_rt::test]

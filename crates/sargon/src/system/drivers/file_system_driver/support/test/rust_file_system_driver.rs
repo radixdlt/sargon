@@ -21,9 +21,11 @@ pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
 }
 
 impl RustFileSystemDriver {
-    fn tmp_dir() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../target/tmp")
+    pub(crate) fn tmp_dir() -> PathBuf {
+        fs::canonicalize(
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/tmp"),
+        )
+        .unwrap()
     }
 }
 
@@ -44,8 +46,18 @@ impl FileSystemDriver for RustFileSystemDriver {
         }
     }
 
-    async fn save_to_file(&self, path: String, data: BagOfBytes) -> Result<()> {
+    async fn save_to_file(
+        &self,
+        path: String,
+        data: BagOfBytes,
+        is_allowed_to_overwrite: bool,
+    ) -> Result<()> {
         let path_buf = path_from_str(path.clone(), false)?;
+        if let Ok(true) = fs::exists(path_buf.clone())
+            && !is_allowed_to_overwrite
+        {
+            return Err(CommonError::FileAlreadyExists { path });
+        }
         fs::write(path_buf, data.as_ref())
             .map_err(|_| CommonError::FailedToSaveFile { path })?;
         Ok(())
@@ -96,10 +108,26 @@ mod tests {
         let file = file_in_tmp();
 
         let data = contents();
-        sut.save_to_file(file.clone(), data.clone()).await.unwrap();
+        sut.save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
         let loaded = sut.load_from_file(file.clone()).await.unwrap().unwrap();
         assert_eq!(loaded, data);
         assert!(sut.delete_file(file.clone()).await.is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn test_save_skip_overwrite_fails_for_existing_file() {
+        let sut = SUT::new();
+        let file = file_in_tmp();
+
+        let data = contents();
+        sut.save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
+
+        let res = sut.save_to_file(file.clone(), data, false).await;
+        assert!(matches!(res, Err(CommonError::FileAlreadyExists { .. })));
     }
 
     #[actix_rt::test]
@@ -132,7 +160,7 @@ mod tests {
     async fn test_save_to_root_is_err() {
         let sut = SUT::new();
         let path = file_in_dir(Path::new("/"));
-        let res = sut.save_to_file(path.clone(), contents()).await;
+        let res = sut.save_to_file(path.clone(), contents(), true).await;
         assert_eq!(res, Err(CommonError::FailedToSaveFile { path }));
     }
 

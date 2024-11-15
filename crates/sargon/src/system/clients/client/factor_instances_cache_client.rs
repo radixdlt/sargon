@@ -54,6 +54,7 @@ impl FactorInstancesCacheClient {
         &self,
     ) -> Result<Option<FactorInstancesCacheSnapshot>> {
         let path = self.path().await?;
+
         let maybe_json = self.file_system_client.load_from_file(path).await?;
 
         let Some(json) = maybe_json else {
@@ -68,11 +69,11 @@ impl FactorInstancesCacheClient {
 
     async fn path(&self) -> Result<String> {
         let dir = self.file_system_client.writable_app_dir_path().await?;
-        let path = PathBuf::from(dir)
-            .join(Self::CACHE_FILE)
-            .to_string_lossy()
-            .to_string();
-        Ok(path)
+        let path = PathBuf::from(dir).join(Self::CACHE_FILE);
+        let path_str = path.to_string_lossy().to_string();
+        let path_str =
+            self.file_system_client.create_if_needed(path_str).await?;
+        Ok(path_str)
     }
 
     async fn save_to_file(
@@ -82,7 +83,9 @@ impl FactorInstancesCacheClient {
         let path = self.path().await?;
         let json = cache_snapshot.serialize_to_bytes()?;
 
-        self.file_system_client.save_to_file(path, &json).await
+        self.file_system_client
+            .save_to_file(path, &json, true)
+            .await
     }
 }
 
