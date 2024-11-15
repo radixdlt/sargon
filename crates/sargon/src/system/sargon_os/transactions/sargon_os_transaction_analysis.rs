@@ -149,7 +149,7 @@ impl SargonOS {
                         manifest_v1.into(),
                         nonce,
                         None,
-                        false
+                        false,
                     )
                     .await?;
 
@@ -221,22 +221,23 @@ impl SargonOS {
             .radix_engine_toolkit_receipt
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
-        let execution_summary = manifest.execution_summary(engine_toolkit_receipt)?;
+        let execution_summary =
+            manifest.execution_summary(engine_toolkit_receipt)?;
 
         let forbidden_manifest_class = execution_summary
-        .detailed_classification
-        .iter()
-        .find(|classification| classification.is_forbidden());
+            .detailed_classification
+            .iter()
+            .find(|classification| classification.is_forbidden());
 
-    if let Some(forbidden_manifest_class) = forbidden_manifest_class
-        && !are_instructions_originating_from_host
-    {
-        return Err(CommonError::ForbiddenManifestClass {
-            class: forbidden_manifest_class.clone(),
-        });
-    }
+        if let Some(forbidden_manifest_class) = forbidden_manifest_class
+            && !are_instructions_originating_from_host
+        {
+            return Err(CommonError::ForbiddenManifestClass {
+                class: forbidden_manifest_class.clone(),
+            });
+        }
 
-    Ok(execution_summary)
+        Ok(execution_summary)
     }
 
     #[cfg(not(tarpaulin_include))] // TBD
