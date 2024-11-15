@@ -7,8 +7,9 @@ decl_vec_samples_for!(EntityFlags, EntityFlag);
 /// user has marked it as deleted or not.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum EntityFlag {
-    /// The entity is marked as deleted by user. Entity should still be kept in Profile
-    DeletedByUser,
+    /// The entity is marked as hidden by user. Entity should still be kept in Profile
+    /// The user can "unhide" the entity and continue involving it in transactions on ledger.
+    HiddenByUser,
 
     /// The entity is marked as tombstoned by the user. Entity should still be kept in Profile
     /// Such an entity cannot be involved in any transaction anymore.

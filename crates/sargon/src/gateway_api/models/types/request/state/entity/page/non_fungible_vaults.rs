@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct StateEntityNonFungibleResourceVaultsPageRequest {
+pub struct StateEntityPageNonFungibleVaultsRequest {
     /// Bech32m-encoded human readable version of the address.
     pub(crate) address: Address,
 
@@ -26,7 +26,7 @@ pub struct StateEntityNonFungibleResourceVaultsPageRequest {
     pub(crate) opt_ins: Option<StateEntityNonFungibleResourceVaultsPageOptIns>,
 }
 
-impl StateEntityNonFungibleResourceVaultsPageRequest {
+impl StateEntityPageNonFungibleVaultsRequest {
     pub fn new(
         address: Address,
         resource_address: ResourceAddress,
@@ -34,8 +34,8 @@ impl StateEntityNonFungibleResourceVaultsPageRequest {
         cursor: impl Into<Option<String>>,
         limit_per_page: impl Into<Option<u64>>,
         opt_ins: impl Into<Option<StateEntityNonFungibleResourceVaultsPageOptIns>>,
-    ) -> StateEntityNonFungibleResourceVaultsPageRequest {
-        StateEntityNonFungibleResourceVaultsPageRequest {
+    ) -> Self {
+        Self {
             address,
             resource_address,
             at_ledger_state: at_ledger_state.into(),
@@ -55,8 +55,8 @@ pub struct StateEntityNonFungibleResourceVaultsPageOptIns {
 }
 
 impl StateEntityNonFungibleResourceVaultsPageOptIns {
-    pub fn include() -> StateEntityNonFungibleResourceVaultsPageOptIns {
-        StateEntityNonFungibleResourceVaultsPageOptIns {
+    pub fn include() -> Self {
+        Self {
             non_fungible_include_nfids: Some(true),
         }
     }

@@ -70,7 +70,7 @@ impl GatewayClient {
         // Get the vaults that hold the owner badge in this account_address
         let vaults = self
             .state_entity_page_non_fungible_vaults(
-                StateEntityNonFungibleResourceVaultsPageRequest::new(
+                StateEntityPageNonFungibleVaultsRequest::new(
                     Address::Account(account_address),
                     owner_badge_resource_address,
                     None,
@@ -81,39 +81,38 @@ impl GatewayClient {
             )
             .await?;
 
-        if let Some(vault) = vaults.items.first() {
-            let ledger_state_selector =
-                Some(LedgerStateSelector::from(vaults.ledger_state));
+        let Some(vault) = vaults.items.first() else {
+            return Ok((account_address, false));
+        };
+        let ledger_state_selector =
+            Some(LedgerStateSelector::from(vaults.ledger_state));
 
-            // When such vault exists, load all NF IDs
-            let ids = self
-                .load_all_pages(
-                    None,
-                    ledger_state_selector.clone(),
-                    |cursor, ledger_state_selector| {
-                        self.state_entity_page_non_fungible_vaults_ids(
-                            StateEntityNonFungibleIdsPageRequest::new(
-                                Address::from(account_address),
-                                vault.vault_address,
-                                owner_badge_resource_address,
-                                ledger_state_selector,
-                                cursor,
-                                None,
-                            ),
-                        )
-                    },
-                )
-                .await?;
+        // When such vault exists, load all NF IDs
+        let ids = self
+            .load_all_pages(
+                None,
+                ledger_state_selector.clone(),
+                |cursor, ledger_state_selector| {
+                    self.state_entity_page_non_fungible_vault_ids(
+                        StateEntityPageNonFungibleVaultIdsRequest::new(
+                            Address::from(account_address),
+                            vault.vault_address,
+                            owner_badge_resource_address,
+                            ledger_state_selector,
+                            cursor,
+                            None,
+                        ),
+                    )
+                },
+            )
+            .await?;
 
-            // Check if any id derives the account address.
-            // If that is the case, then this account means that it was swallowed its key
-            let swallows_badge = ids
-                .iter()
-                .any(|id| id.derives_account_address(account_address));
-            Ok((account_address, swallows_badge))
-        } else {
-            Ok((account_address, false))
-        }
+        // Check if any id derives the account address.
+        // If that is the case, then it means this account has swallowed its key
+        let swallows_badge = ids
+            .iter()
+            .any(|id| id.derives_account_address(account_address));
+        Ok((account_address, swallows_badge))
     }
 }
 

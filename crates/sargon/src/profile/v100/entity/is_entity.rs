@@ -7,9 +7,7 @@ pub trait IsEntity {
     fn flags(&self) -> EntityFlags;
 
     fn is_hidden(&self) -> bool {
-        self.flags()
-            .into_iter()
-            .contains(&EntityFlag::DeletedByUser)
+        self.flags().into_iter().contains(&EntityFlag::HiddenByUser)
     }
 
     fn is_tombstoned(&self) -> bool {

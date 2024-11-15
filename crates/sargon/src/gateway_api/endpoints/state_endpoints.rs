@@ -49,9 +49,17 @@ impl GatewayClient {
             .await
     }
 
+    /// Get page of Global Entity Non-Fungible Resource Vaults
+    /// Returns vaults for non fungible resource owned by a given global entity.
+    /// The returned response is in a paginated format, ordered by the resource's first
+    /// appearance on the ledger.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleResourceVaultPage
     pub(crate) async fn state_entity_page_non_fungible_vaults(
         &self,
-        request: StateEntityNonFungibleResourceVaultsPageRequest,
+        request: StateEntityPageNonFungibleVaultsRequest,
     ) -> Result<
         PageResponse<
             NonFungibleResourcesCollectionItemVaultAggregatedVaultItem,
@@ -61,9 +69,17 @@ impl GatewayClient {
             .await
     }
 
-    pub(crate) async fn state_entity_page_non_fungible_vaults_ids(
+    /// Get page of Non-Fungibles in Vault
+    ///
+    // Returns all non-fungible IDs of a given non-fungible resource owned by a given entity.
+    // The returned response is in a paginated format, ordered by the resource's first appearance
+    // on the ledger.
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleIdsPage
+    pub(crate) async fn state_entity_page_non_fungible_vault_ids(
         &self,
-        request: StateEntityNonFungibleIdsPageRequest,
+        request: StateEntityPageNonFungibleVaultIdsRequest,
     ) -> Result<PageResponse<NonFungibleLocalId>> {
         self.post("state/entity/page/non-fungible-vault/ids", request, res_id)
             .await

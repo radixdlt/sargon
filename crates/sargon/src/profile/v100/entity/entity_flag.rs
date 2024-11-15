@@ -21,7 +21,10 @@ use crate::prelude::*;
 pub enum EntityFlag {
     /// The entity is marked as hidden by user. Entity should still be kept in Profile
     /// The user can "unhide" the entity and continue involving it in transactions on ledger.
-    DeletedByUser,
+    ///
+    /// For compatibility, it is still serialised as `deletedByUser`
+    #[serde(rename = "deletedByUser")]
+    HiddenByUser,
 
     /// The entity is marked as tombstoned by the user. Entity should still be kept in Profile
     /// Such an entity cannot be involved in any transaction anymore.
@@ -32,7 +35,7 @@ pub enum EntityFlag {
 
 impl HasSampleValues for EntityFlag {
     fn sample() -> Self {
-        Self::DeletedByUser
+        Self::HiddenByUser
     }
 
     fn sample_other() -> Self {
@@ -59,12 +62,12 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_deleted() {
+    fn json_roundtrip_hidden() {
         assert_json_value_eq_after_roundtrip(
-            &SUT::DeletedByUser,
+            &SUT::HiddenByUser,
             json!("deletedByUser"),
         );
-        assert_json_roundtrip(&SUT::DeletedByUser);
+        assert_json_roundtrip(&SUT::HiddenByUser);
     }
 
     #[test]
@@ -78,13 +81,13 @@ mod tests {
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", SUT::DeletedByUser), "DeletedByUser");
+        assert_eq!(format!("{}", SUT::HiddenByUser), "HiddenByUser");
         assert_eq!(format!("{}", SUT::TombstonedByUser), "TombstonedByUser");
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", SUT::DeletedByUser), "DeletedByUser");
+        assert_eq!(format!("{:?}", SUT::HiddenByUser), "HiddenByUser");
         assert_eq!(format!("{:?}", SUT::TombstonedByUser), "TombstonedByUser");
     }
 }

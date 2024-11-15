@@ -10,13 +10,13 @@ pub struct PageResponse<T> {
 
 impl<T> PageResponse<T> {
     pub fn new(
-        ledger_state: impl Into<LedgerState>,
+        ledger_state: LedgerState,
         total_count: impl Into<Option<u64>>,
         next_cursor: impl Into<Option<String>>,
         items: Vec<T>,
     ) -> Self {
         Self {
-            ledger_state: ledger_state.into(),
+            ledger_state,
             total_count: total_count.into(),
             next_cursor: next_cursor.into(),
             items,

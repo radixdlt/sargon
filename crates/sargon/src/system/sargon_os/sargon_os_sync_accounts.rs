@@ -40,13 +40,14 @@ impl SargonOS {
                 })
                 .collect_vec();
 
-        let any_account_tombstoned = !account_addresses_to_tombstone.is_empty();
+        let is_any_account_tombstoned =
+            !account_addresses_to_tombstone.is_empty();
 
-        if any_account_tombstoned {
+        if is_any_account_tombstoned {
             self.mark_accounts_as_tombstoned(account_addresses_to_tombstone)
                 .await?;
         }
 
-        Ok(any_account_tombstoned)
+        Ok(is_any_account_tombstoned)
     }
 }

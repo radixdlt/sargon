@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct StateEntityNonFungibleIdsPageRequest {
+pub struct StateEntityPageNonFungibleVaultIdsRequest {
     /// Bech32m-encoded human readable version of the address.
     pub(crate) address: Address,
 
@@ -26,7 +26,7 @@ pub struct StateEntityNonFungibleIdsPageRequest {
     pub(crate) limit_per_page: Option<u64>,
 }
 
-impl StateEntityNonFungibleIdsPageRequest {
+impl StateEntityPageNonFungibleVaultIdsRequest {
     pub fn new(
         address: Address,
         vault_address: VaultAddress,
@@ -34,8 +34,8 @@ impl StateEntityNonFungibleIdsPageRequest {
         at_ledger_state: impl Into<Option<LedgerStateSelector>>,
         cursor: impl Into<Option<String>>,
         limit_per_page: impl Into<Option<u64>>,
-    ) -> StateEntityNonFungibleIdsPageRequest {
-        StateEntityNonFungibleIdsPageRequest {
+    ) -> Self {
+        Self {
             address,
             vault_address,
             resource_address,

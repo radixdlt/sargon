@@ -171,7 +171,7 @@ impl Account {
             AppearanceID::try_from(index as u8).unwrap(),
         );
         if is_hidden {
-            account.flags.insert(EntityFlag::DeletedByUser);
+            account.flags.insert(EntityFlag::HiddenByUser);
         }
         if is_tombstoned {
             account.flags.insert(EntityFlag::TombstonedByUser);
@@ -218,9 +218,9 @@ impl Account {
         Self::sample_at_index_name(3, "Diana", true, false)
     }
 
-    /// A tombestoned account named Sean, with derivation index 4.
-    pub fn sample_mainnet_sean() -> Self {
-        Self::sample_at_index_name(4, "Sean", false, true)
+    /// A tombestoned account named Erin, with derivation index 4.
+    pub fn sample_mainnet_erin() -> Self {
+        Self::sample_at_index_name(4, "Erin", false, true)
     }
 
     /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
