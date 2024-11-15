@@ -29,8 +29,6 @@ pub enum EntityFlag {
     /// The entity is marked as tombstoned by the user. Entity should still be kept in Profile
     /// Such an entity cannot be involved in any transaction anymore.
     TombstonedByUser,
-    /// Just a temporary placeholder value used by Sample Values.
-    PlaceholderSampleValueFlag,
 }
 
 impl HasSampleValues for EntityFlag {
@@ -39,7 +37,7 @@ impl HasSampleValues for EntityFlag {
     }
 
     fn sample_other() -> Self {
-        Self::PlaceholderSampleValueFlag
+        Self::TombstonedByUser
     }
 }
 
