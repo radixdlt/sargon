@@ -24,7 +24,6 @@ impl RustFileSystemDriver {
     fn tmp_dir() -> PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../target/tmp")
-            .into()
     }
 }
 
