@@ -524,8 +524,24 @@ async fn cache_is_unchanged_in_case_of_failure() {
     );
 
     let cache_before_fail = os.cache_snapshot().await;
-    let global_should_fail = get_derivation_global_fail();
-    set_derivation_global_fail(true);
+    let profile = os.profile().unwrap();
+    let mnemonic_with_passphrase = os
+        .secure_storage
+        .load_mnemonic_with_passphrase(bdfs.id_from_hash())
+        .await
+        .unwrap();
+
+    let fail_interactor: Arc<dyn KeysDerivationInteractors> =
+        Arc::new(TestDerivationInteractors::fail()); // <--- FAIL
+
+    let os = SargonOS::fast_boot_bdfs_and_interactor(
+        mnemonic_with_passphrase,
+        fail_interactor,
+    )
+    .await;
+    os.set_cache(cache_before_fail.serializable_snapshot())
+        .await;
+    os.set_profile(profile).await.unwrap();
 
     let res = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -537,7 +553,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
         shield_0.clone()
     )
     .await;
-    set_derivation_global_fail(global_should_fail);
+
     assert!(res.is_err());
     let cache_after_fail = os.cache_snapshot().await;
     assert_eq!(

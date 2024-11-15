@@ -44,10 +44,10 @@ impl SargonOS {
         }
 
         let interactors = Interactors::new(derivation_interactors);
-        Self::boot_with_optional_interactors(clients, interactors).await
+        Self::boot_with_interactors(clients, interactors).await
     }
 
-    pub async fn boot_with_optional_interactors(
+    pub async fn boot_with_interactors(
         clients: Clients,
         interactors: Interactors,
     ) -> Arc<Self> {
@@ -352,17 +352,26 @@ impl SargonOS {
             .unwrap()
     }
 
-    pub async fn boot_test() -> Result<Arc<Self>> {
-        Self::boot_test_with_bdfs_mnemonic(None).await
-    }
-
-    pub async fn boot_test_with_bdfs_mnemonic(
+    pub async fn boot_test_with_bdfs_mnemonic_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
     ) -> Result<Arc<Self>> {
         let test_drivers =
             Drivers::with_file_system(InMemoryFileSystemDriver::new());
         let bios = Bios::new(test_drivers);
-        let os = Self::boot(bios).await;
+        let clients = Clients::new(bios);
+
+        let derivation_interactor = derivation_interactor.into();
+        let derivation_interactors: Arc<dyn KeysDerivationInteractors> =
+            derivation_interactor.unwrap_or_else(|| {
+                Arc::new(TestDerivationInteractors::with_secure_storage(
+                    Arc::new(clients.secure_storage.clone()),
+                ))
+            });
+
+        let interactors = Interactors::new(derivation_interactors);
+
+        let os = Self::boot_with_interactors(clients, interactors).await;
         let (mut profile, bdfs) = os
             .create_new_profile_with_bdfs(bdfs_mnemonic.into())
             .await?;
@@ -392,15 +401,29 @@ impl SargonOS {
         Self::fast_boot_bdfs(None).await
     }
 
-    pub async fn fast_boot_bdfs(
+    pub async fn fast_boot_bdfs_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
     ) -> Arc<Self> {
-        let req = Self::boot_test_with_bdfs_mnemonic(bdfs_mnemonic);
+        let req = Self::boot_test_with_bdfs_mnemonic_and_interactor(
+            bdfs_mnemonic,
+            derivation_interactor,
+        );
 
         actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await
             .unwrap()
             .unwrap()
+    }
+
+    pub async fn fast_boot_bdfs(
+        bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+    ) -> Arc<Self> {
+        Self::fast_boot_bdfs_and_interactor(bdfs_mnemonic, None).await
+    }
+
+    pub async fn boot_test() -> Result<Arc<Self>> {
+        Self::boot_test_with_bdfs_mnemonic_and_interactor(None, None).await
     }
 
     /// Boot the SargonOS with a mocked networking driver.
