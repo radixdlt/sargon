@@ -45,9 +45,74 @@ jobs:
           components: ${{ env.RUST_COMPONENTS }}
           target: aarch64-apple-ios-sim
 
-      - name: Run iOS build script
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute release tag
+        id: tags
         run: |
-          rustup target add aarch64-apple-darwin aarch64-apple-ios aarch64-apple-ios-sim
-          sh ./scripts/ios/release.sh
+          LAST_TAG=`git tag --sort=creatordate | tail -1`
+          NEXT_TAG=$(echo ${LAST_TAG} | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
+
+          echo "NEXT_TAG=$NEXT_TAG" >> "$GITHUB_OUTPUT"
+          echo "LAST_TAG=$LAST_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build artifacts
+        id: build
+        run: |
+          echo "🚢 Switch 'useLocalFramework' to 'false' in Package.swift for release"
+          sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
+
+          # output is: "<CHKSUM>;<$XCFRAME_ZIP_PATH>"
+          OUTPUT_OF_BUILD=`sh scripts/ios/build-sargon.sh --release-tag $NEXT_TAG | tail -n 1` || exit $?
+          if [[ "$OUTPUT_OF_BUILD" == "BUILT_WITHOUT_RELEASE" ]]; then
+              echo "Error, failed to build, did you forget to pass '--release' to build script? Otherwise check if build-sargon.sh has recently been changed (to something incorrect...)"
+              exit 1;
+          fi
+          CHECKSUM=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 1` || exit $?
+          XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
+
+          echo "🚢  CHECKSUM: $CHECKSUM"
+          echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
+
+          echo "🚢 Ensuring Sargon build for release - that it will work for e.g. iOS wallet to archive."
+          sed -i '' 's/let useLocalFramework = false/let useLocalFramework = true/' Package.swift
+          swift build -c release || exit $?
+          echo "🚢 Swift Sargon builds for release ✅"
+
+          echo "XCFRAME_ZIP_PATH=$XCFRAME_ZIP_PATH" >> "$GITHUB_OUTPUT"
+        env:
+          NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
+
+      - name: Push release tag
+        run: |
+          # We have .gitigored Sargon.swift because we dont need it in git history, but we
+          # need it for this release, so we must FORCE add it (since it is ignored).
+          echo "🚢  Staging changed files"
+          git add --force Package.swift apple/Sources/UniFFI/Sargon.swift
+
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          echo "🚢  Git commiting changes"
+          git status
+          git commit -m "Release of '$NEXT_TAG'" \
+                     -m "Updated Package.swift with new checksum and path to zip on Github, and maybe apple/Sources/UniFFI/Sargon.swift." \
+                     -m "This commit is not merged into main branch (and need not be)." \
+                     --no-verify
+
+          echo "🚢 🏷️ 📡 Pushing tag: $NEXT_TAG, but only tag, not commit."
+          git push origin $NEXT_TAG
+        env:
+          NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        run: |
+          # This MUST match whatever you we have declared in Package.swift
+          SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip"
+
+          GH_RELEASE_TITLE="v$NEXT_TAG"
+          gh release create $NEXT_TAG '$XCFRAME_ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
+        env:
+          LAST_TAG: ${{ steps.tags.outputs.LAST_TAG }}
+          NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
+          XCFRAME_ZIP_PATH: ${{ steps.build.outputs.XCFRAME_ZIP_PATH }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
