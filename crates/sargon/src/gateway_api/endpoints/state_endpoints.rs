@@ -57,7 +57,6 @@ impl GatewayClient {
             NonFungibleResourcesCollectionItemVaultAggregatedVaultItem,
         >,
     > {
-        //Result<StateEntityNonFungibleResourceVaultsPageResponse> { TODO ask
         self.post("state/entity/page/non-fungible-vaults/", request, res_id)
             .await
     }
