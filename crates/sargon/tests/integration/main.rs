@@ -25,6 +25,22 @@ mod integration_tests {
     }
 
     #[actix_rt::test]
+    async fn test_account_deleted() {
+        let gateway_client = new_gateway_client(NetworkID::Stokenet);
+        let account_address = AccountAddress::try_from_bech32(
+            "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
+        ).unwrap();
+
+        assert!(
+            gateway_client
+                .check_account_is_deleted(account_address)
+                .await
+                .unwrap()
+                .1
+        )
+    }
+
+    #[actix_rt::test]
     async fn test_xrd_balance_of_account_or_zero_is_zero_for_unknown_mainnet() {
         let network_id = NetworkID::Mainnet;
         let gateway_client = new_gateway_client(network_id);

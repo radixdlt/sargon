@@ -1,6 +1,17 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq)]
+#[derive(
+    Clone,
+    Debug,
+    Hash,
+    Ord,
+    PartialOrd,
+    PartialEq,
+    Eq,
+    EnumAsInner,
+    SerializeDisplay,
+    DeserializeFromStr,
+)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -50,6 +61,25 @@ impl NonFungibleLocalId {
         Self::Bytes {
             value: NonEmptyMax64Bytes::generate(),
         }
+    }
+}
+
+impl NonFungibleLocalId {
+    pub(crate) fn derives_account_address(
+        &self,
+        account_address: AccountAddress,
+    ) -> bool {
+        self.as_bytes()
+            .map(|local_id_bytes| {
+                let bytes = local_id_bytes.bag_of_bytes.bytes();
+                if bytes.len() == ScryptoNodeId::LENGTH {
+                    bytes[..ScryptoNodeId::LENGTH]
+                        == account_address.node_id().0
+                } else {
+                    false
+                }
+            })
+            .unwrap_or(false)
     }
 }
 
@@ -237,7 +267,7 @@ mod tests {
 
     #[test]
     fn to_user_facing_string_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().to_user_facing_string(), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
     }
@@ -267,7 +297,7 @@ mod tests {
 
     #[test]
     fn formatted_raw_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Raw), "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}");
     }
@@ -302,7 +332,7 @@ mod tests {
 
     #[test]
     fn formatted_default_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Default), "dead...3210");
     }
@@ -332,7 +362,7 @@ mod tests {
 
     #[test]
     fn formatted_full_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Full), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
     }
@@ -437,9 +467,20 @@ mod tests {
             SUT::ruid(
                 hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
             )
-            .unwrap()
-            .to_string(),
+                .unwrap()
+                .to_string(),
             "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
         );
+    }
+
+    #[test]
+    fn test_derives_account_address() {
+        let local_id = SUT::try_from(
+            "[51f3033e8c2b32e398fecd57bbc8ea470bd575ae3a772e42e0a90e675b47]",
+        )
+        .unwrap();
+        let account_address = AccountAddress::try_from_bech32("account_rdx128esx05v9view8x87e4tmhj82gu9a2adw8fmjushq4y8xwk68vgsuw0").unwrap();
+
+        assert!(local_id.derives_account_address(account_address));
     }
 }

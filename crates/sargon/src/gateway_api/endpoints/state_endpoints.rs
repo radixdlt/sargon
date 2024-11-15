@@ -48,6 +48,27 @@ impl GatewayClient {
         self.post("state/entity/page/non-fungibles/", request, res_id)
             .await
     }
+
+    pub(crate) async fn state_entity_page_non_fungible_vaults(
+        &self,
+        request: StateEntityNonFungibleResourceVaultsPageRequest,
+    ) -> Result<
+        PageResponse<
+            NonFungibleResourcesCollectionItemVaultAggregatedVaultItem,
+        >,
+    > {
+        //Result<StateEntityNonFungibleResourceVaultsPageResponse> { TODO ask
+        self.post("state/entity/page/non-fungible-vaults/", request, res_id)
+            .await
+    }
+
+    pub(crate) async fn state_entity_page_non_fungible_vaults_ids(
+        &self,
+        request: StateEntityNonFungibleIdsPageRequest,
+    ) -> Result<PageResponse<NonFungibleLocalId>> {
+        self.post("state/entity/page/non-fungible-vault/ids", request, res_id)
+            .await
+    }
 }
 
 impl GatewayClient {

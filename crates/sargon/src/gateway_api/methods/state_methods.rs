@@ -54,6 +54,67 @@ impl GatewayClient {
             .await
             .map(|x| x.unwrap_or(Decimal192::zero()))
     }
+
+    /// Looks up on ledger whether this `account_address` is deleted, by looking up the NFTs
+    /// it owns and checking if its owner badge is one of them.
+    pub async fn check_account_is_deleted(
+        &self,
+        account_address: AccountAddress,
+    ) -> Result<(AccountAddress, bool)> {
+        // Construct the owner badge resource address
+        let owner_badge_resource_address = ResourceAddress::new(
+            SCRYPTO_ACCOUNT_OWNER_BADGE,
+            account_address.network_id(),
+        )?;
+
+        // Get the vaults that hold the owner badge in this account_address
+        let vaults = self
+            .state_entity_page_non_fungible_vaults(
+                StateEntityNonFungibleResourceVaultsPageRequest::new(
+                    Address::Account(account_address),
+                    owner_badge_resource_address,
+                    None,
+                    None,
+                    None,
+                    None,
+                ),
+            )
+            .await?;
+
+        if let Some(vault) = vaults.items.first() {
+            let ledger_state_selector =
+                Some(LedgerStateSelector::from(vaults.ledger_state));
+
+            // When such vault exists, load all NF IDs
+            let ids = self
+                .load_all_pages(
+                    None,
+                    ledger_state_selector.clone(),
+                    |cursor, ledger_state_selector| {
+                        self.state_entity_page_non_fungible_vaults_ids(
+                            StateEntityNonFungibleIdsPageRequest::new(
+                                Address::from(account_address),
+                                vault.vault_address,
+                                owner_badge_resource_address,
+                                ledger_state_selector,
+                                cursor,
+                                None,
+                            ),
+                        )
+                    },
+                )
+                .await?;
+
+            // Check if any id derives the account address.
+            // If that is the case, then this account means that it was swallowed its key
+            let swallows_badge = ids
+                .iter()
+                .any(|id| id.derives_account_address(account_address));
+            Ok((account_address, swallows_badge))
+        } else {
+            Ok((account_address, false))
+        }
+    }
 }
 
 impl GatewayClient {

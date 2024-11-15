@@ -179,7 +179,12 @@ impl Account {
         account
     }
 
-    fn sample_at_index_name(index: u32, name: &str, is_hidden: bool, is_tombstoned: bool) -> Self {
+    fn sample_at_index_name(
+        index: u32,
+        name: &str,
+        is_hidden: bool,
+        is_tombstoned: bool,
+    ) -> Self {
         Self::sample_at_index_name_network(
             NetworkID::Mainnet,
             index,

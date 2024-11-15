@@ -27,7 +27,7 @@ mod tests {
         let values = &[
             Account::sample_mainnet_bob(),
             Account::sample_mainnet_diana(), // This account is hidden
-            Account::sample_mainnet_sean(), // This account is tombstoned
+            Account::sample_mainnet_sean(),  // This account is tombstoned
         ];
         let sut = SUT::from_iter(values.clone());
 

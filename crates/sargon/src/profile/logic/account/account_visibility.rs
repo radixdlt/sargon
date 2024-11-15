@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
 impl Account {
-
     /// Marks the account as hidden
     pub fn mark_as_hidden(&mut self) {
         self.flags.insert_flag(EntityFlag::DeletedByUser);

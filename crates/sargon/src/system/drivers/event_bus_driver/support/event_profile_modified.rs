@@ -4,27 +4,43 @@ use crate::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum EventProfileModified {
     /// A new account with `address` was inserted into the active profile
-    AccountAdded { address: AccountAddress },
+    AccountAdded {
+        address: AccountAddress,
+    },
 
     /// New accounts with `addresses` were inserted into the active profile
-    AccountsAdded { addresses: Vec<AccountAddress> },
+    AccountsAdded {
+        addresses: Vec<AccountAddress>,
+    },
 
     /// An existing account has been updated
-    AccountUpdated { address: AccountAddress },
+    AccountUpdated {
+        address: AccountAddress,
+    },
 
-    AccountsUpdated { addresses: Vec<AccountAddress> },
+    AccountsUpdated {
+        addresses: Vec<AccountAddress>,
+    },
 
     /// Profile updated with a new factor source.
-    FactorSourceAdded { id: FactorSourceID },
+    FactorSourceAdded {
+        id: FactorSourceID,
+    },
 
     /// Profile updated with many new factor sources.
-    FactorSourcesAdded { ids: Vec<FactorSourceID> },
+    FactorSourcesAdded {
+        ids: Vec<FactorSourceID>,
+    },
 
     /// An existing factor source has been updated
-    FactorSourceUpdated { id: FactorSourceID },
+    FactorSourceUpdated {
+        id: FactorSourceID,
+    },
 
     /// Profile updated with a new Security Structure.
-    SecurityStructureAdded { id: SecurityStructureID },
+    SecurityStructureAdded {
+        id: SecurityStructureID,
+    },
 }
 
 impl HasEventKind for EventProfileModified {
@@ -43,6 +59,7 @@ impl HasEventKind for EventProfileModified {
             Self::SecurityStructureAdded { id: _ } => {
                 EventKind::SecurityStructureAdded
             }
+            Self::AccountsUpdated { addresses: _ } => EventKind::AccountUpdated,
         }
     }
 }

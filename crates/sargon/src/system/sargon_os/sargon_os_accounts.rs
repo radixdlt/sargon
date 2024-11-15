@@ -41,7 +41,7 @@ impl SargonOS {
             NetworkID::Mainnet,
             DisplayName::new("Unnamed").unwrap(),
         )
-            .await
+        .await
     }
 
     /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
@@ -94,7 +94,7 @@ impl SargonOS {
         self.create_and_save_new_mainnet_account(
             DisplayName::new("Unnamed").unwrap(),
         )
-            .await
+        .await
     }
 
     /// Create a new mainnet Account and adds it to the active Profile.
@@ -217,7 +217,7 @@ impl SargonOS {
         self.add_accounts_without_emitting_account_added_event(Accounts::just(
             account,
         ))
-            .await?;
+        .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -280,7 +280,7 @@ impl SargonOS {
                 Ok(())
             }
         })
-            .await?;
+        .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -302,18 +302,20 @@ impl SargonOS {
     pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
         self.update_profile_with(|p| {
             let mut result = Ok(());
-            for updated_account in updated {
-                if p.update_account(
-                    &updated_account.address,
-                    |old| *old = updated_account.clone(),
-                ).is_none() {
+            for updated_account in updated.clone() {
+                if p.update_account(&updated_account.address, |old| {
+                    *old = updated_account.clone()
+                })
+                .is_none()
+                {
                     result = Err(CommonError::UnknownAccount);
                     break;
                 }
             }
 
             result
-        }).await?;
+        })
+        .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -327,17 +329,38 @@ impl SargonOS {
     }
 
     /// Updates the profile by marking the account with `account_address` as hidden.
-    pub async fn mark_account_as_hidden(&self, account_address: AccountAddress) -> Result<()> {
+    pub async fn mark_account_as_hidden(
+        &self,
+        account_address: AccountAddress,
+    ) -> Result<()> {
         let mut account = self.account_by_address(account_address)?;
         account.mark_as_hidden();
         self.update_account(account).await
     }
 
     /// Updates the profile by marking the account with `account_address` as tombstoned.
-    pub async fn mark_account_as_tombstoned(&self, account_address: AccountAddress) -> Result<()> {
+    pub async fn mark_account_as_tombstoned(
+        &self,
+        account_address: AccountAddress,
+    ) -> Result<()> {
         let mut account = self.account_by_address(account_address)?;
         account.mark_as_tombstoned();
         self.update_account(account).await
+    }
+
+    /// Updates the profile by marking the account with `account_addresses` as tombstoned.
+    pub async fn mark_accounts_as_tombstoned(
+        &self,
+        account_addresses: Vec<AccountAddress>,
+    ) -> Result<()> {
+        let mut accounts = account_addresses
+            .iter()
+            .filter_map(|a| self.account_by_address(a.clone()).ok())
+            .collect_vec();
+
+        accounts.iter_mut().for_each(|a| a.mark_as_tombstoned());
+
+        self.update_accounts(Accounts::from(accounts)).await
     }
 }
 
@@ -409,7 +432,7 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use std::{future::Future, time::Duration};
+    use std::{future::join, future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -565,7 +588,8 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn batch_create_account_then_n_accounts_are_saved_and_have_indices_0_through_n() {
+    async fn batch_create_account_then_n_accounts_are_saved_and_have_indices_0_through_n(
+    ) {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -578,8 +602,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-            .await
-            .unwrap();
+        .await
+        .unwrap();
 
         // ASSERT
         let indices = os.profile().unwrap().networks[0]
@@ -599,7 +623,8 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_batch_create_and_add_account_n_has_names_with_index_appended_to_prefix() {
+    async fn test_batch_create_and_add_account_n_has_names_with_index_appended_to_prefix(
+    ) {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -612,8 +637,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-            .await
-            .unwrap();
+        .await
+        .unwrap();
 
         // ASSERT
         let names = os.profile().unwrap().networks[0]
@@ -632,7 +657,8 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn batch_create_account_then_n_accounts_are_saved_and_have_appearance_id_0_through_max() {
+    async fn batch_create_account_then_n_accounts_are_saved_and_have_appearance_id_0_through_max(
+    ) {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -645,8 +671,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-            .await
-            .unwrap();
+        .await
+        .unwrap();
 
         // ASSERT
         let appearance_ids = os.profile().unwrap().networks[0]
@@ -674,8 +700,8 @@ mod tests {
                 "test".to_owned(),
             )
         })
-            .await
-            .unwrap();
+        .await
+        .unwrap();
 
         // ASSERT
         assert!(os.profile().unwrap().networks[0].accounts.is_empty())
@@ -724,8 +750,8 @@ mod tests {
                 DisplayName::sample(),
             )
         })
-            .await
-            .unwrap();
+        .await
+        .unwrap();
 
         // ASSERT
         let events = event_bus_driver
@@ -754,7 +780,7 @@ mod tests {
                 "random-{}",
                 id().to_string().drain(0..20).collect::<String>()
             ))
-                .unwrap()
+            .unwrap()
         }
     }
 
@@ -992,10 +1018,15 @@ mod tests {
             .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
             .await
             .unwrap();
-        os.mark_account_as_hidden(new_account.address).await.unwrap();
+        os.mark_account_as_hidden(new_account.address)
+            .await
+            .unwrap();
 
         // ASSERT
-        assert!(os.account_by_address(new_account.address).unwrap().is_hidden())
+        assert!(os
+            .account_by_address(new_account.address)
+            .unwrap()
+            .is_hidden())
     }
 
     #[actix_rt::test]
@@ -1009,9 +1040,64 @@ mod tests {
             .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
             .await
             .unwrap();
-        os.mark_account_as_tombstoned(new_account.address).await.unwrap();
+        os.mark_account_as_tombstoned(new_account.address)
+            .await
+            .unwrap();
 
         // ASSERT
-        assert!(os.account_by_address(new_account.address).unwrap().is_tombstoned())
+        assert!(os
+            .account_by_address(new_account.address)
+            .unwrap()
+            .is_tombstoned())
+    }
+
+    #[actix_rt::test]
+    async fn test_mark_accounts_as_tombstoned_become_tombstoned() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let new_accounts: Vec<Account> = os
+            .with_timeout(|x| {
+                join_all(vec![
+                    x.create_and_save_new_mainnet_account(
+                        DisplayName::new("rip").unwrap(),
+                    ),
+                    x.create_and_save_new_mainnet_account(
+                        DisplayName::new("rip").unwrap(),
+                    ),
+                    x.create_and_save_new_mainnet_account(
+                        DisplayName::new("alive").unwrap(),
+                    ),
+                ])
+            })
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+
+        let account_addresses_to_tombstone = new_accounts
+            .iter()
+            .filter(|a| a.display_name.value == "rip")
+            .map(|a| a.address)
+            .collect_vec();
+        os.with_timeout(|x| {
+            x.mark_accounts_as_tombstoned(
+                account_addresses_to_tombstone.clone(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert!(os
+            .accounts_on_current_network()
+            .unwrap()
+            .iter()
+            .all(|a| a.display_name.value != "rip"));
+        assert!(account_addresses_to_tombstone.iter().all(|address| os
+            .account_by_address(address.clone())
+            .unwrap()
+            .is_tombstoned()))
     }
 }
