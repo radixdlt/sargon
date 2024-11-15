@@ -418,6 +418,37 @@ mod fetch_all_resources_tests {
     }
 
     #[actix_rt::test]
+    async fn entity_with_no_resources() {
+        // Test the case where the `state/entity/details` returns an entity with no resources.
+
+        // Mock the entity details response
+        let account = AccountAddress::sample();
+        let item = StateEntityDetailsResponseItem::new(
+            account.into(),
+            None,
+            None,
+            EntityMetadataCollection::empty(),
+        );
+        let response = MockNetworkingDriverResponse::new_success(
+            StateEntityDetailsResponse::new(LedgerState::sample(), vec![item]),
+        );
+
+        // Mock the driver
+        let mock_driver =
+            MockNetworkingDriver::new_with_responses(vec![response]);
+        let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
+
+        // Execute the request and check the result has two empty collections
+        let result = sut
+            .fetch_all_resources(account, LedgerStateSelector::sample())
+            .await
+            .unwrap();
+
+        assert!(result.fungibles.is_empty());
+        assert!(result.non_fungibles.is_empty());
+    }
+
+    #[actix_rt::test]
     async fn entity_not_found() {
         // Test the case where the `state/entity/details` doesn't return the entity we are looking for.
 
@@ -433,6 +464,7 @@ mod fetch_all_resources_tests {
             vec![],
         );
 
+        // Mock the driver
         let mock_driver = MockNetworkingDriver::new_with_responses(vec![
             entity_details_response,
         ]);
