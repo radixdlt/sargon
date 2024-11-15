@@ -282,7 +282,7 @@ mod fetch_all_resources_tests {
         let fungible = FungibleResourcesCollectionItem::sample();
         let non_fungible = NonFungibleResourcesCollectionItem::sample();
         let entity_details_response = mock_entity_details_response(
-            account.clone(),
+            account,
             None,
             None,
             vec![fungible.clone()],
@@ -337,7 +337,7 @@ mod fetch_all_resources_tests {
         let non_fungible_one = NonFungibleResourcesCollectionItem::sample();
         let non_fungible_cursor = "next_non_fungible_cursor".to_string();
         let entity_details_response = mock_entity_details_response(
-            account.clone(),
+            account,
             ledger_state,
             fungible_cursor,
             vec![fungible_one.clone()],

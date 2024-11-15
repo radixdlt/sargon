@@ -5,7 +5,7 @@ impl GatewayClient {
     /// Load all pages of a paginated API call that returns a `PageResponse`.
     /// Parameters:
     /// - `api_call`: A function that takes an optional cursor and returns a future executing the
-    /// corresponding API call.
+    ///   corresponding API call.
     ///
     /// Returns: A collection of the items from all pages.
     pub async fn load_all_pages<T, F, Fut>(

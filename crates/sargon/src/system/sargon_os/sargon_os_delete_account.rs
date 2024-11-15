@@ -164,7 +164,7 @@ impl TryFrom<AccountAuthorizedDepositor> for ResourceOrNonFungible {
                         ),
                     })
                 } else {
-                    return Err(CommonError::InvalidNonFungibleLocalIDString);
+                    Err(CommonError::InvalidNonFungibleLocalIDString)
                 }
             }
         }
@@ -290,7 +290,7 @@ mod tests {
             ResourceOrNonFungible::NonFungible {
                 value: NonFungibleGlobalId::new_unchecked(
                     nft_collection_address,
-                    NonFungibleLocalId::string("Member_237".to_string())
+                    NonFungibleLocalId::string("Member_237")
                         .unwrap()
                 )
             }
