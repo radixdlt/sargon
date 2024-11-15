@@ -112,31 +112,37 @@ impl ExecutionSummary {
 
 impl ExecutionSummary {
     pub fn classify_delete_accounts_if_present(&mut self) {
-        if self.detailed_classification.is_empty() {
-            let deleted_accounts: Vec<AccountAddress> = self
-                .deposits
-                .iter()
-                .filter_map(|deposit| {
-                    let (account_address, resources) = deposit;
+        // Only try to classify if RET analysis didn't yield any classification
+        if !self.detailed_classification.is_empty() {
+            return;
+        }
 
-                    resources
-                        .iter()
-                        .filter_map(|resource| {
-                            resource.get_non_fungible_indicator()
-                        })
-                        .flat_map(|indicator| indicator.ids())
-                        .any(|id| id.derives_account_address(&account_address))
-                        .then_some(account_address.clone())
-                })
-                .collect();
+        let deleted_accounts: Vec<AccountAddress> = self
+            .deposits
+            .iter()
+            .filter_map(|deposit| {
+                let (account_address, resources) = deposit;
 
-            if !deleted_accounts.is_empty() {
-                self.detailed_classification.push(
-                    DetailedManifestClass::DeleteAccounts {
-                        account_addresses: deleted_accounts,
-                    },
-                );
-            }
+                resources
+                    .iter()
+                    .filter_map(|resource| {
+                        resource.get_non_fungible_indicator()
+                    })
+                    .flat_map(|indicator| indicator.ids())
+                    // Find the account badge in the list of deposits
+                    .any(|id| {
+                        id.derives_account_address(account_address.clone())
+                    })
+                    .then_some(account_address.clone())
+            })
+            .collect();
+
+        if !deleted_accounts.is_empty() {
+            self.detailed_classification.push(
+                DetailedManifestClass::DeleteAccounts {
+                    account_addresses: deleted_accounts,
+                },
+            );
         }
     }
 }
