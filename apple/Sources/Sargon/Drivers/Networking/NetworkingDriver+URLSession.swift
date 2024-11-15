@@ -25,7 +25,6 @@ extension URLSession: NetworkingDriver {
 			throw SargonError.NetworkRequestGenericFailure(
 				underlying: String(describing: error))
 		}
-        print(String.init(data: response.0, encoding: .utf8));
 		return try NetworkResponse(response: response)
 	}
 }
