@@ -94,3 +94,5 @@ pub enum DetailedManifestClass {
         account_addresses: Vec<AccountAddress>,
     },
 }
+
+delegate_debug_into!(DetailedManifestClass, InternalDetailedManifestClass);

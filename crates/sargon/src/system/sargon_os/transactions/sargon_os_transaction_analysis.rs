@@ -65,6 +65,17 @@ impl SargonOS {
             )
             .await?;
 
+        let forbidden_manifest_class = execution_summary
+        .detailed_classification
+        .iter()
+        .find(|classification| classification.is_forbidden());
+
+        if let Some(forbidden_manifest_class) = forbidden_manifest_class && !are_instructions_originating_from_host {
+            return Err(
+                CommonError::ForbiddenManifestClass { class: forbidden_manifest_class.clone() }
+            )
+        }
+
         Ok(TransactionToReview {
             transaction_manifest,
             execution_summary,

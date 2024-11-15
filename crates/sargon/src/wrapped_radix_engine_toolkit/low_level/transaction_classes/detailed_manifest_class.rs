@@ -94,6 +94,29 @@ pub enum DetailedManifestClass {
     },
 }
 
+impl DetailedManifestClass {
+    pub(crate) fn is_forbidden(&self) -> bool {
+        match self {
+            DetailedManifestClass::DeleteAccounts { account_addresses: _ } => true,
+            _ => false,
+        }
+    }
+
+    pub fn name(&self) -> String {
+        match self {
+            DetailedManifestClass::General => "General".to_string(),
+            DetailedManifestClass::Transfer { is_one_to_one: _ } => "Transfer".to_string(),
+            DetailedManifestClass::PoolContribution { pool_addresses: _, pool_contributions: _ } => "PoolContribution".to_string(),
+            DetailedManifestClass::PoolRedemption { pool_addresses: _, pool_redemptions: _ } => "PoolRedemption".to_string(),
+            DetailedManifestClass::ValidatorStake { validator_addresses: _, validator_stakes: _ } => "ValidatorStake".to_string(),
+            DetailedManifestClass::ValidatorUnstake { validator_addresses: _, claims_non_fungible_data: _ } => "ValidatorUnstake".to_string(),
+            DetailedManifestClass::ValidatorClaim { validator_addresses: _, validator_claims: _ } => "ValidatorClaim".to_string(),
+            DetailedManifestClass::AccountDepositSettingsUpdate { resource_preferences_updates: _, deposit_mode_updates: _, authorized_depositors_added: _, authorized_depositors_removed: _ } => "AccountDepositSettingsUpdate".to_string(),
+            DetailedManifestClass::DeleteAccounts { account_addresses: _ } => "DeleteAccounts".to_string(),
+        }
+    }
+}
+
 impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
     fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
         let n = value.1;
