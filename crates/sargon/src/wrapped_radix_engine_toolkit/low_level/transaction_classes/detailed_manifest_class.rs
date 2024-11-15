@@ -86,6 +86,12 @@ pub enum DetailedManifestClass {
         /// The redemptions observed in the transaction
         pool_redemptions: Vec<TrackedPoolRedemption>,
     },
+
+    /// A manifest that deletes an account.
+    DeleteAccount {
+        /// The address of the account that is being deleted
+        account_address: AccountAddress,
+    },
 }
 
 impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {

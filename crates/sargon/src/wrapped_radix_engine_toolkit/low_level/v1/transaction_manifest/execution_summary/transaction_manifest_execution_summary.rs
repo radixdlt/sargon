@@ -39,10 +39,8 @@ impl TransactionManifest {
                     }
                 })?;
 
-        Ok(ExecutionSummary::from((
-            ret_dynamic_analysis,
-            self.network_id(),
-        )))
+        let summary = ExecutionSummary::from((ret_dynamic_analysis, self.network_id()));
+        Ok(summary)
     }
 }
 
