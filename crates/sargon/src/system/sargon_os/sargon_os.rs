@@ -104,8 +104,21 @@ impl SargonOS {
         os
     }
 
-    pub async fn new_wallet(&self) -> Result<()> {
-        let (profile, bdfs) = self.create_new_profile_with_bdfs(None).await?;
+    pub async fn new_wallet(
+        &self,
+        should_prederive_instances: bool,
+    ) -> Result<()> {
+        self.new_wallet_with_mnemonic(None, should_prederive_instances)
+            .await
+    }
+
+    pub async fn new_wallet_with_mnemonic(
+        &self,
+        mnemonic: Option<MnemonicWithPassphrase>,
+        should_prederive_instances: bool,
+    ) -> Result<()> {
+        let (profile, bdfs) =
+            self.create_new_profile_with_bdfs(mnemonic).await?;
 
         self.secure_storage
             .save_private_hd_factor_source(&bdfs)
@@ -117,6 +130,13 @@ impl SargonOS {
                 .delete_mnemonic(&bdfs.factor_source.id)
                 .await?;
             return Err(error);
+        }
+
+        if should_prederive_instances {
+            self.prederive_and_fill_cache_with_instances_for_factor_source(
+                bdfs.clone().factor_source.into(),
+            )
+            .await?;
         }
 
         info!("Saved new Profile and BDFS, finish creating wallet");
@@ -373,29 +393,19 @@ impl SargonOS {
         let interactors = Interactors::new(derivation_interactors);
 
         let os = Self::boot_with_interactors(clients, interactors).await;
-        let (mut profile, bdfs) = os
-            .create_new_profile_with_bdfs(bdfs_mnemonic.into())
-            .await?;
+        os.new_wallet_with_mnemonic(
+            bdfs_mnemonic.into(),
+            pre_derive_factor_instance_for_bdfs,
+        )
+        .await?;
 
-        // Append Mainnet network since initial profile has no network
-        profile
-            .networks
-            .append(ProfileNetwork::new_empty_on(NetworkID::Mainnet));
-
-        os.secure_storage
-            .save_private_hd_factor_source(&bdfs)
-            .await?;
-        os.secure_storage.save_profile(&profile).await?;
-        os.profile_state_holder.replace_profile_state_with(
-            ProfileState::Loaded(profile.clone()),
-        )?;
-
-        if pre_derive_factor_instance_for_bdfs {
-            os.prederive_and_fill_cache_with_instances_for_factor_source(
-                bdfs.factor_source.into(),
-            )
-            .await?;
-        }
+        os.update_profile_with(|p| {
+            // Append Mainnet network since initial profile has no network
+            p.networks
+                .append(ProfileNetwork::new_empty_on(NetworkID::Mainnet));
+            Ok(())
+        })
+        .await?;
 
         Ok(os)
     }
@@ -571,7 +581,7 @@ mod tests {
         let bios = Bios::new(test_drivers);
         let os = SUT::boot(bios).await;
 
-        os.new_wallet().await.unwrap();
+        os.new_wallet(false).await.unwrap();
 
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();
@@ -678,7 +688,7 @@ mod tests {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
         let os = SUT::boot(bios).await;
-        os.new_wallet().await.unwrap();
+        os.new_wallet(false).await.unwrap();
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();
 

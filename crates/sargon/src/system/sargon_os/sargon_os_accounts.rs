@@ -1116,7 +1116,7 @@ mod tests {
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
             .unwrap();
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
         os.with_timeout(|x| {
@@ -1144,7 +1144,7 @@ mod tests {
             .unwrap();
 
         // ACT
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
         os.with_timeout(|x| {
             x.create_and_save_new_account_with_bdfs(
                 NetworkID::Mainnet,
@@ -1234,7 +1234,7 @@ mod tests {
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
             .unwrap();
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         let mut account = Account::sample();
         os.with_timeout(|x| x.add_account(account.clone()))

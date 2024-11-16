@@ -22,6 +22,27 @@ impl SargonOS {
         self.wrapped.factor_sources().into_result()
     }
 
+    pub async fn factor_instances_in_cache(
+        &self,
+    ) -> HashMap<
+        FactorSourceIDFromHash,
+        Vec<Vec<HierarchicalDeterministicFactorInstance>>,
+    > {
+        self.wrapped
+            .factor_instances_in_cache()
+            .await
+            .into_iter()
+            .map(|(k, v)| {
+                (
+                    k.into(),
+                    v.into_iter()
+                        .map(|x| x.into_iter().map(Into::into).collect())
+                        .collect(),
+                )
+            })
+            .collect()
+    }
+
     /// Updates the factor source `updated` by mutating current profile and persisting
     /// the change to secure storage. Throws `UpdateFactorSourceMutateFailed` error if the
     /// factor source is not found.

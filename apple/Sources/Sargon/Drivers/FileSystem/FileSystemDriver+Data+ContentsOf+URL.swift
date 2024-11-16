@@ -44,12 +44,12 @@ extension FileSystem {
 		_ io: @Sendable (URL) throws -> T
 	) throws -> T {
 		let url = URL(file: path)
-        #if os(iOS)
-		guard url.startAccessingSecurityScopedResource() else {
-			throw CommonError.NotPermissionToAccessFile(path: path)
-		}
-		defer { url.stopAccessingSecurityScopedResource() }
-        #endif
+         #if os(macOS)
+		 guard url.startAccessingSecurityScopedResource() else {
+		 	throw CommonError.NotPermissionToAccessFile(path: path)
+		 }
+		 defer { url.stopAccessingSecurityScopedResource() }
+         #endif
 		return try io(url)
 	}
 }
@@ -71,8 +71,8 @@ extension FileSystem: FileSystemDriver {
     }
     
 	public func loadFromFile(path: String) async throws -> BagOfBytes? {
-        let fileExists = fileManager.fileExists(atPath: path)
         return try with(path: path) {
+            let fileExists = fileManager.fileExists(atPath: $0.path())
             do {
                 return try Data(contentsOf: $0)
             } catch {
@@ -86,14 +86,15 @@ extension FileSystem: FileSystemDriver {
 	}
 	
     public func saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Bool) async throws {
-        if fileManager.fileExists(atPath: path) {
-            if !isAllowedToOverwrite {
-                throw CommonError.FileAlreadyExists(path: path)
-            }
-        } else {
-            fileManager.createFile(atPath: path, contents: nil)
-        }
+     
         try with(path: path) {
+            if fileManager.fileExists(atPath: $0.path()) {
+                if !isAllowedToOverwrite {
+                    throw CommonError.FileAlreadyExists(path: path)
+                }
+            } else {
+                fileManager.createFile(atPath: $0.path(), contents: nil)
+            }
             try data.write(to: $0)
         }
     }

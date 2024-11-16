@@ -440,6 +440,50 @@ impl SargonOS {
             // tarpaulin will incorrectly flag next line is missed
             .await
     }
+
+    pub async fn factor_instances_in_cache(
+        &self,
+    ) -> IndexMap<
+        FactorSourceIDFromHash,
+        Vec<IndexSet<HierarchicalDeterministicFactorInstance>>,
+    > {
+        let cache = self.cache_snapshot().await;
+        let cache = cache.serializable_snapshot();
+        cache
+            .0
+            .into_iter()
+            .map(|(k, v)| {
+                let fsid = FactorSourceIDFromHash::from(k);
+                let vec_of_sets: Vec<
+                    IndexSet<HierarchicalDeterministicFactorInstance>,
+                > = v
+                    .into_iter()
+                    .map(|(_, x)| {
+                        x.into_iter()
+                            .map(|y| {
+                                HierarchicalDeterministicFactorInstance::new(
+                                    fsid, y,
+                                )
+                            })
+                            .collect::<IndexSet<_>>()
+                    })
+                    .collect_vec();
+
+                (fsid, vec_of_sets)
+            })
+            .collect::<IndexMap<
+                FactorSourceIDFromHash,
+                Vec<IndexSet<HierarchicalDeterministicFactorInstance>>,
+            >>()
+    }
+
+    pub(crate) async fn cache_snapshot(&self) -> FactorInstancesCache {
+        self.clients
+            .factor_instances_cache
+            .snapshot()
+            .await
+            .unwrap()
+    }
 }
 
 #[allow(unused)]
@@ -459,14 +503,6 @@ impl SargonOS {
             .set_cache(cache_snapshot)
             .await
             .unwrap();
-    }
-
-    pub(crate) async fn cache_snapshot(&self) -> FactorInstancesCache {
-        self.clients
-            .factor_instances_cache
-            .snapshot()
-            .await
-            .unwrap()
     }
 }
 
@@ -724,7 +760,7 @@ mod tests {
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
             .unwrap();
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
         let ids = os
