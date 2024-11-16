@@ -68,7 +68,9 @@ impl TryInto<Account> for Persona {
     type Error = CommonError;
 
     fn try_into(self) -> Result<Account> {
-        Err(CommonError::ExpectedAccountButGotPersona { address: self.address().to_string() })
+        Err(CommonError::ExpectedAccountButGotPersona {
+            address: self.address().to_string(),
+        })
     }
 }
 
@@ -76,6 +78,8 @@ impl TryInto<Persona> for Account {
     type Error = CommonError;
 
     fn try_into(self) -> Result<Persona> {
-        Err(CommonError::ExpectedPersonaButGotAccount { address: self.address().to_string() })
+        Err(CommonError::ExpectedPersonaButGotAccount {
+            address: self.address().to_string(),
+        })
     }
 }

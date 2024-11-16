@@ -7,8 +7,6 @@ decl_identified_vec_of!(
     Account
 );
 
-
-
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
