@@ -73,11 +73,13 @@ class FakeFileSystemDriver: FileSystemDriver {
         return storage[path]
     }
 
-    override suspend fun saveToFile(path: String, data: BagOfBytes) {
+    override suspend fun saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Boolean) {
         storage[path] = data
     }
 
     override suspend fun deleteFile(path: String) {
         storage.remove(path)
     }
+
+    override suspend fun writableAppDirPath(): String = "fake"
 }
