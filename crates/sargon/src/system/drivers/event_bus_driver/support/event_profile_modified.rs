@@ -12,6 +12,9 @@ pub enum EventProfileModified {
     /// An existing account has been updated
     AccountUpdated { address: AccountAddress },
 
+    /// Existing accounts have been updated
+    AccountsUpdated { addresses: Vec<AccountAddress> },
+
     /// A new persona with `address` was inserted into the active profile
     PersonaAdded { address: IdentityAddress },
 
@@ -20,6 +23,9 @@ pub enum EventProfileModified {
 
     /// An existing persona has been updated
     PersonaUpdated { address: IdentityAddress },
+
+    /// Existing personas have been updated
+    PersonasUpdated { addresses: Vec<IdentityAddress> },
 
     /// Profile updated with a new factor source.
     FactorSourceAdded { id: FactorSourceID },
@@ -39,6 +45,12 @@ impl HasEventKind for EventProfileModified {
         match self {
             Self::PersonaAdded { address: _ } => EventKind::PersonaAdded,
             Self::PersonaUpdated { address: _ } => EventKind::PersonaUpdated,
+            Self::PersonasUpdated { addresses: _ } => {
+                EventKind::PersonasUpdated
+            }
+            Self::AccountsUpdated { addresses: _ } => {
+                EventKind::AccountsUpdated
+            }
             Self::PersonasAdded { addresses: _ } => EventKind::PersonasAdded,
             Self::AccountUpdated { address: _ } => EventKind::AccountUpdated,
             Self::AccountAdded { address: _ } => EventKind::AccountAdded,

@@ -5,14 +5,6 @@ decl_identified_vec_of!(
     Persona
 );
 
-impl OnSameNetworkValidating for Personas {
-    type Element = Persona;
-
-    fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-}
-
 impl HasSampleValues for Personas {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

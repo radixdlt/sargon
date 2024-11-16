@@ -15,6 +15,9 @@ pub enum EventKind {
     /// An existing account has been updated
     AccountUpdated,
 
+    /// Existing accounts have been updated
+    AccountsUpdated,
+
     /// SargonOS did boot.
     Booted,
 
@@ -29,6 +32,9 @@ pub enum EventKind {
 
     /// An existing persona has been updated
     PersonaUpdated,
+
+    /// Existing personas have been updated
+    PersonasUpdated,
 
     /// Profile was saved.
     ProfileSaved,

@@ -100,6 +100,35 @@ impl TryFrom<AccountOrPersona> for Persona {
 
 impl IsEntity for Persona {
     type Path = IdentityPath;
+
+    fn profile_modified_event_updated_poly(
+        addresses: IndexSet<Self::Address>,
+    ) -> EventProfileModified {
+        EventProfileModified::PersonasUpdated {
+            addresses: addresses.into_iter().collect_vec(),
+        }
+    }
+
+    fn profile_modified_event_updated_mono(
+        address: Self::Address,
+    ) -> EventProfileModified {
+        EventProfileModified::PersonaUpdated { address }
+    }
+
+    fn profile_modified_event_added_poly(
+        addresses: IndexSet<Self::Address>,
+    ) -> EventProfileModified {
+        EventProfileModified::PersonasAdded {
+            addresses: addresses.into_iter().collect_vec(),
+        }
+    }
+
+    fn profile_modified_event_added_mono(
+        address: Self::Address,
+    ) -> EventProfileModified {
+        EventProfileModified::PersonaAdded { address }
+    }
+
     fn with_veci_and_name(
         veci: HDFactorInstanceTransactionSigning<Self::Path>,
         name: DisplayName,

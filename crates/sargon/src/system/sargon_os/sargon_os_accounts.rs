@@ -523,18 +523,20 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_account(&self, account: Account) -> Result<()> {
-        let address = account.address;
+        self.add_entity(account).await
+    }
 
-        debug!("Adding account address: {} to profile", address);
+    pub async fn add_entity<E: IsEntity>(&self, entity: E) -> Result<()> {
+        let address = entity.address();
 
-        self.add_accounts_without_emitting_account_added_event(Accounts::just(
-            account,
-        ))
-        .await?;
+        debug!("Adding entity with address: {} to profile", address);
+
+        self.add_entities_without_emitting_event(IdentifiedVecOf::just(entity))
+            .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountAdded { address },
+                E::profile_modified_event_added_mono(address),
             ))
             .await;
 
@@ -554,18 +556,27 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
-        let addresses = accounts
+        self.add_entities(accounts).await
+    }
+
+    pub async fn add_entities<E>(
+        &self,
+        entities: IdentifiedVecOf<E>,
+    ) -> Result<()>
+    where
+        E: IsEntity,
+    {
+        let addresses = entities
             .clone()
             .into_iter()
-            .map(|a| a.address)
-            .collect_vec();
+            .map(|a| a.address())
+            .collect::<IndexSet<_>>();
 
-        self.add_accounts_without_emitting_account_added_event(accounts)
-            .await?;
+        self.add_entities_without_emitting_event(entities).await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountsAdded { addresses },
+                E::profile_modified_event_added_poly(addresses),
             ))
             .await;
 
@@ -608,47 +619,95 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    /// Adds the `accounts` to active profile and **saves** the updated profile to
-    /// secure storage, without emitting `Event::AccountAdded`, but we DO emit
+    /// Adds the `entities` to active profile and **saves** the updated profile to
+    /// secure storage, without emitting any `Event`, but we DO emit
     /// `Event::ProfileSaved`.`
     ///
-    /// Returns `Ok(())` if the `accounts` were new and successfully added. If
-    /// saving failed or if the accounts were already present in Profile, an
+    /// Returns `Ok(())` if the `entities` were new and successfully added. If
+    /// saving failed or if the entities were already present in Profile, an
     /// error is returned.
     ///
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    async fn add_accounts_without_emitting_account_added_event(
+    async fn add_entities_without_emitting_event<E: IsEntity>(
         &self,
-        accounts: Accounts,
+        entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
-        if accounts.is_empty() {
-            warn!("Tried to add empty accounts...");
+        if entities.is_empty() {
+            warn!("Tried to add empty entities...");
             return Ok(());
         }
 
-        let number_of_accounts_to_add = accounts.len();
+        let entity_kind = E::entity_kind();
+        let number_of_entities_to_add = entities.len();
 
-        let network_id = accounts
+        let network_id = entities
             .assert_elements_on_same_network()?
-            .expect("Should have handled empty accounts case already.");
+            .expect("Should have handled empty entities case already.");
 
-        debug!("Adding #{} accounts to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_accounts_to_add, network_id);
+        debug!("Adding #{} entities to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_entities_to_add, network_id);
+
+        let to_accounts = || -> Accounts {
+            entities
+                .clone()
+                .into_iter()
+                .map(|e| {
+                    TryInto::<Account>::try_into(e.clone())
+                        .map_err(|_| {
+                            CommonError::ExpectedAccountButGotPersona {
+                                address: e.address().to_string(),
+                            }
+                        })
+                        .unwrap()
+                })
+                .collect::<Accounts>()
+        };
+
+        let to_personas = || -> Personas {
+            entities
+                .clone()
+                .into_iter()
+                .map(|e| {
+                    TryInto::<Persona>::try_into(e.clone())
+                        .map_err(|_| {
+                            CommonError::ExpectedPersonaButGotAccount {
+                                address: e.address().to_string(),
+                            }
+                        })
+                        .unwrap()
+                })
+                .collect::<Personas>()
+        };
 
         self.update_profile_with(|p| {
             let networks = &mut p.networks;
 
             if networks.contains_id(network_id) {
-                debug!("Profile already contained network to add #{} account(s) to, network_id: {}", number_of_accounts_to_add, network_id);
+                debug!("Profile already contained network to add #{} entities to, network_id: {}", number_of_entities_to_add, network_id);
                 networks
                     .try_try_update_with(&network_id, |network| {
-                        let count_before = network.accounts.len();
-                        debug!("Profile Network to add #{} account(s) to contains #{} accounts (before adding).", number_of_accounts_to_add, count_before);
-                        network.accounts.extend(accounts.clone());
-                        let count_after = network.accounts.len();
+                        let count_before = match entity_kind {
+                            CAP26EntityKind::Account => network.accounts.len(),
+                            CAP26EntityKind::Identity => network.personas.len(),
+                        };
+                        debug!("Profile Network to add #{} entities to contains #{} entities (before adding).", number_of_entities_to_add, count_before);
+                        // network.accounts.extend(accounts.clone());
+                        match entity_kind {
+                            CAP26EntityKind::Account => {
+                                network.accounts.extend(to_accounts());
+                            }
+                            CAP26EntityKind::Identity => {
+                                network.personas.extend(to_personas());
+                            }
+                        }
+
+                        let count_after = match entity_kind {
+                            CAP26EntityKind::Account => network.accounts.len(),
+                            CAP26EntityKind::Identity => network.personas.len(),
+                        };
                         debug!("Profile Network now contains: #{} accounts", count_after);
-                        if network.accounts.len() == count_before + number_of_accounts_to_add {
+                        if network.accounts.len() == count_before + number_of_entities_to_add {
                             Ok(())
                         } else {
                             Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
@@ -656,13 +715,26 @@ impl SargonOS {
                     })
             } else {
                 debug!("No Profile Network exists with ID {}, creating it...", network_id);
-                let network = ProfileNetwork::new(
-                    network_id,
-                    accounts.clone(),
-                    Personas::default(),
-                    AuthorizedDapps::default(),
-                    ResourcePreferences::default(),
-                );
+                let network = match entity_kind {
+                    CAP26EntityKind::Account => {
+                        ProfileNetwork::new(
+                            network_id,
+                            to_accounts(),
+                            Personas::default(),
+                            AuthorizedDapps::default(),
+                            ResourcePreferences::default(),
+                        )
+                    }
+                    CAP26EntityKind::Identity => {
+                        ProfileNetwork::new(
+                            network_id,
+                            Accounts::default(),
+                            to_personas(),
+                            AuthorizedDapps::default(),
+                            ResourcePreferences::default(),
+                        )
+                    }
+                };
                 networks.append(network);
                 Ok(())
             }
