@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait HasSecurityState {
+pub trait HasSecurityState: HasFactorInstances {
     fn security_state(&self) -> EntitySecurityState;
     fn try_get_secured_control(&self) -> Result<SecuredEntityControl> {
         self.security_state()
@@ -14,5 +14,18 @@ pub trait HasSecurityState {
             .as_unsecured()
             .cloned()
             .ok_or(CommonError::SecurityStateSecurifiedButExpectedUnsecurified)
+    }
+}
+
+impl<T: HasSecurityState> HasFactorInstances for T {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        match self.security_state() {
+            EntitySecurityState::Securified { value } => {
+                value.unique_factor_instances()
+            }
+            EntitySecurityState::Unsecured { value } => {
+                value.unique_factor_instances()
+            }
+        }
     }
 }

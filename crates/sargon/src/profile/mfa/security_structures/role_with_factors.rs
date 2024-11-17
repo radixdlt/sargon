@@ -12,3 +12,7 @@ pub trait RoleWithFactors<Factor: std::cmp::Eq + std::hash::Hash> {
         factors
     }
 }
+
+pub trait HasFactorInstances {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance>;
+}

@@ -6,6 +6,12 @@ impl HasRoleKind for ConfirmationRoleWithFactorInstances {
     }
 }
 
+impl HasFactorInstances for ConfirmationRoleWithFactorInstances {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.unique_factors()
+    }
+}
+
 impl HasSampleValues for ConfirmationRoleWithFactorInstances {
     fn sample() -> Self {
         Self::new([HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(27).into()], 1, [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(13).into()])

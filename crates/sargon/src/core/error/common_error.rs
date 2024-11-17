@@ -786,6 +786,13 @@ pub enum CommonError {
 
     #[error("Failed to canonicalize path: {path}")]
     FailedToCanonicalize { path: String } = 10221,
+
+    #[error("Factor Instances discrepancy in address_of_entity1: {address_of_entity1}, address_of_entity2: {address_of_entity2}, factor source id: {factor_source_id}")]
+    FactorInstancesDiscrepancy {
+        address_of_entity1: String,
+        address_of_entity2: String,
+        factor_source_id: String,
+    } = 10222,
 }
 
 impl CommonError {

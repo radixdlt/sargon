@@ -1,4 +1,28 @@
+use sbor::prelude::indexmap::IndexSet;
+
 use crate::prelude::*;
+
+impl HasFactorInstances for MatrixOfFactorInstances {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        let mut set = IndexSet::new();
+        set.extend(
+            self.primary_role
+                .all_factors()
+                .into_iter().cloned(),
+        );
+        set.extend(
+            self.recovery_role
+                .all_factors()
+                .into_iter().cloned(),
+        );
+        set.extend(
+            self.confirmation_role
+                .all_factors()
+                .into_iter().cloned(),
+        );
+        set
+    }
+}
 
 impl HasSampleValues for MatrixOfFactorInstances {
     fn sample() -> Self {

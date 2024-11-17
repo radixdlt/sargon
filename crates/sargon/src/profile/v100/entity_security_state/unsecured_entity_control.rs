@@ -1,3 +1,5 @@
+use sbor::prelude::indexmap::IndexSet;
+
 use crate::prelude::*;
 
 /// Basic security control of an unsecured entity. When said entity
@@ -14,6 +16,19 @@ pub struct UnsecuredEntityControl {
     /// The factor instance which can be used for ROLA.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+}
+
+impl HasFactorInstances for UnsecuredEntityControl {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        let mut set = IndexSet::new();
+        set.insert(self.transaction_signing.factor_instance());
+        if let Some(authentication_signing) =
+            self.authentication_signing.as_ref()
+        {
+            set.insert(authentication_signing.factor_instance());
+        }
+        set
+    }
 }
 
 impl UnsecuredEntityControl {

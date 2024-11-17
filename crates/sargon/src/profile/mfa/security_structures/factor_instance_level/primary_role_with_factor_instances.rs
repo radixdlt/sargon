@@ -6,6 +6,12 @@ impl HasRoleKind for PrimaryRoleWithFactorInstances {
     }
 }
 
+impl HasFactorInstances for PrimaryRoleWithFactorInstances {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.unique_factors()
+    }
+}
+
 impl HasSampleValues for PrimaryRoleWithFactorInstances {
     fn sample() -> Self {
         Self::new([HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0).into()], 1, [HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0).into()])

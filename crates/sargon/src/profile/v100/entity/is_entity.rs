@@ -43,6 +43,7 @@ pub trait IsEntity:
     + TryFrom<AccountOrPersona, Error = CommonError>
     + TryInto<Account>
     + TryInto<Persona>
+    + Into<AccountOrPersona>
 {
     type Path: IsEntityPath;
 

@@ -34,6 +34,14 @@ pub struct SecuredEntityControl {
     pub security_structure: SecurityStructureOfFactorInstances,
 }
 
+impl HasFactorInstances for SecuredEntityControl {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_structure
+            .matrix_of_factors
+            .unique_factor_instances()
+    }
+}
+
 impl SecuredEntityControl {
     /// # Panics
     /// Panics if veci is not unsecurified

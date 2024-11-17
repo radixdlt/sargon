@@ -83,6 +83,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 $(pub $extra_field_name: $extra_field_type,)*
             }
 
+
             impl RoleWithFactors<$factor> for [< $role RoleWith $factor s >] {
 
                 fn get_threshold_factors(&self) -> &Vec<$factor> {
@@ -99,6 +100,11 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             }
 
             impl [< $role RoleWith $factor s >] {
+
+                pub fn unique_factors(&self) -> IndexSet<$factor> {
+                    self.all_factors().into_iter().map(|x| x.clone()).collect()
+                }
+
                 // # Panics
                 /// Panics if threshold > threshold_factor.len()
                 ///
@@ -153,12 +159,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                         $($extra_field_name,)*
                     })
                 }
-
-
-
             }
-
-
         }
     };
 }

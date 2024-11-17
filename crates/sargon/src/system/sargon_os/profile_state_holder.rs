@@ -1,3 +1,5 @@
+use async_std::sync::RwLockWriteGuard;
+
 use crate::prelude::*;
 use std::{borrow::Borrow, sync::RwLock};
 
@@ -18,16 +20,15 @@ pub enum ProfileState {
 }
 
 #[derive(Debug)]
-#[allow(dead_code)]
 pub struct ProfileStateHolder {
     // This is pub(crate) for testing purposes only, i.e. causing the RwLock to be poisoned.
-    pub(crate) profile_state: RwLock<ProfileState>,
+    pub(crate) state: RwLock<ProfileState>,
 }
 
 impl ProfileStateHolder {
-    pub fn new(profile_state: ProfileState) -> Self {
+    pub fn new(state: ProfileState) -> Self {
         Self {
-            profile_state: RwLock::new(profile_state),
+            state: RwLock::new(state),
         }
     }
 }
@@ -107,7 +108,7 @@ impl ProfileStateHolder {
     where
         F: Fn(&Profile) -> T,
     {
-        let guard = self.profile_state.read().expect(
+        let guard = self.state.read().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
 
@@ -125,7 +126,7 @@ impl ProfileStateHolder {
     where
         F: Fn(&Profile) -> Result<T>,
     {
-        let guard = self.profile_state.read().expect(
+        let guard = self.state.read().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
 
@@ -144,12 +145,23 @@ impl ProfileStateHolder {
         &self,
         profile_state: ProfileState,
     ) -> Result<()> {
-        let mut lock = self.profile_state.write().expect(
+        let mut lock = self.state.write().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
-
+        Self::assert_factor_instances_valid(&profile_state)?;
         *lock = profile_state;
         Ok(())
+    }
+
+    pub(crate) fn assert_factor_instances_valid(
+        profile_state: &ProfileState,
+    ) -> Result<()> {
+        match profile_state {
+            ProfileState::Loaded(profile) => {
+                profile.assert_factor_instances_valid()
+            }
+            _ => Ok(()),
+        }
     }
 
     /// Updates the in-memory profile held by this `ProfileStateHolder`, you might
@@ -159,14 +171,21 @@ impl ProfileStateHolder {
     where
         F: Fn(&mut Profile) -> Result<R>,
     {
-        let mut guard = self.profile_state.write().expect(
+        let mut guard = self.state.write().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
 
         let state = &mut *guard;
 
         match state {
-            ProfileState::Loaded(ref mut profile) => mutate(profile),
+            ProfileState::Loaded(ref mut profile) => {
+                let backup = profile.clone();
+                mutate(profile)
+                    .and_then(|r| {
+                        profile.assert_factor_instances_valid().map(|_| r)
+                    })
+                    .inspect_err(|_| *profile = backup)
+            }
             _ => Err(CommonError::ProfileStateNotLoaded {
                 current_state: state.to_string(),
             }),
@@ -186,7 +205,7 @@ mod tests {
         let state = ProfileState::None;
         assert_eq!(
             ProfileStateHolder::new(state.clone())
-                .profile_state
+                .state
                 .try_read()
                 .unwrap()
                 .to_owned(),
@@ -202,7 +221,7 @@ mod tests {
             });
         assert_eq!(
             ProfileStateHolder::new(state.clone())
-                .profile_state
+                .state
                 .try_read()
                 .unwrap()
                 .to_owned(),
@@ -215,7 +234,7 @@ mod tests {
         let state = ProfileState::Loaded(Profile::sample());
         assert_eq!(
             ProfileStateHolder::new(state.clone())
-                .profile_state
+                .state
                 .try_read()
                 .unwrap()
                 .to_owned(),

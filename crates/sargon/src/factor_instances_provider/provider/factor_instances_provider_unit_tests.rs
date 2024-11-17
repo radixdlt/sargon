@@ -65,7 +65,7 @@ impl SargonOS {
 
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
-    pub(crate) async fn __OFFLINE_ONLY_securify_account_and_save_to_profile_and_secure_storage(
+    pub(crate) fn __OFFLINE_ONLY_securify_account_without_saving(
         &self,
         account_address: AccountAddress,
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
@@ -100,7 +100,7 @@ impl SargonOS {
         account.security_state = EntitySecurityState::Securified {
             value: securified_control,
         };
-        self.update_account(account.clone()).await?;
+
         Ok(account)
     }
 
@@ -124,27 +124,30 @@ impl SargonOS {
             security_structures_of_factor_instances;
         // consume!
         instances_in_cache_consumer.consume().await?;
-        let mut accounts = IndexSet::<Account>::new();
-        for account_address in account_addresses {
-            let security_structure_of_factor_instances =
-                security_structures_of_factor_instances
-                    .shift_remove(&account_address)
-                    .unwrap();
 
-            // Production ready code should batch update accounts, submit batch transaction to
-            // network, and then batch update all accounts in Profile.
-            let account = self
-                .__OFFLINE_ONLY_securify_account_and_save_to_profile_and_secure_storage(
+        let securified_accounts = account_addresses
+            .into_iter()
+            .map(|account_address| {
+                let security_structure_of_factor_instances =
+                    security_structures_of_factor_instances
+                        .shift_remove(&account_address)
+                        .unwrap();
+
+                // Production ready code should batch update accounts, submit batch transaction to
+                // network, and then batch update all accounts in Profile.
+                self.__OFFLINE_ONLY_securify_account_without_saving(
                     account_address,
                     security_structure_of_factor_instances,
                 )
-                .await
-                .unwrap();
-            accounts.insert(account);
-        }
+            })
+            .collect::<Result<Accounts>>()?;
 
         assert!(security_structures_of_factor_instances.is_empty());
-        Ok((accounts.into_iter().collect(), derivation_outcome))
+        self.update_entities(securified_accounts.clone()).await?;
+        Ok((
+            securified_accounts.into_iter().collect(),
+            derivation_outcome,
+        ))
     }
 
     /// Uses FactorInstancesProvider to get factor instances for the `shield`.
