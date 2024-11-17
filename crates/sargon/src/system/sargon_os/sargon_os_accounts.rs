@@ -1,5 +1,8 @@
 use std::{borrow::Borrow, sync::RwLockWriteGuard};
 
+use radix_common::address;
+use sbor::prelude::indexmap::IndexSet;
+
 use crate::prelude::*;
 
 // ==================
@@ -474,17 +477,33 @@ impl SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
+        self.batch_create_unsaved_entities_with_factor_source_with_derivation_outcome(factor_source, network_id, count, name_prefix).await
+    }
+
+    pub async fn batch_create_unsaved_entities_with_factor_source_with_derivation_outcome<
+        E: IsEntity,
+    >(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        name_prefix: String,
+    ) -> Result<(
+        IdentifiedVecOf<E>,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let key_derivation_interactors = self.keys_derivation_interactors();
 
         let profile = self.profile()?;
 
         let (
             factor_source_id,
-            accounts,
+            entities,
             instances_in_cache_consumer,
             derivation_outcome,
         ) = profile
-            .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
                 count,
@@ -502,7 +521,7 @@ impl SargonOS {
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((accounts, instances_in_cache_consumer, derivation_outcome))
+        Ok((entities, instances_in_cache_consumer, derivation_outcome))
     }
 }
 
@@ -528,19 +547,8 @@ impl SargonOS {
 
     pub async fn add_entity<E: IsEntity>(&self, entity: E) -> Result<()> {
         let address = entity.address();
-
         debug!("Adding entity with address: {} to profile", address);
-
-        self.add_entities_without_emitting_event(IdentifiedVecOf::just(entity))
-            .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                E::profile_modified_event_added_mono(address),
-            ))
-            .await;
-
-        Ok(())
+        self.add_entities(IdentifiedVecOf::just(entity)).await
     }
 
     /// Adds the `accounts` to active profile and **saves** the updated profile to
@@ -558,30 +566,6 @@ impl SargonOS {
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
         self.add_entities(accounts).await
     }
-
-    pub async fn add_entities<E>(
-        &self,
-        entities: IdentifiedVecOf<E>,
-    ) -> Result<()>
-    where
-        E: IsEntity,
-    {
-        let addresses = entities
-            .clone()
-            .into_iter()
-            .map(|a| a.address())
-            .collect::<IndexSet<_>>();
-
-        self.add_entities_without_emitting_event(entities).await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                E::profile_modified_event_added_poly(addresses),
-            ))
-            .await;
-
-        Ok(())
-    }
 }
 
 // ==================
@@ -595,26 +579,57 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountUpdated { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
-        self.update_profile_with(|p| {
-            if p.update_account(&updated.address, |old| *old = updated.clone())
-                .is_none()
-            {
-                Err(CommonError::UnknownAccount)
-            } else {
-                Ok(())
-            }
-        })
-        .await?;
+        self.update_entity(updated).await
+    }
 
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountUpdated {
-                    address: updated.address,
-                },
-            ))
-            .await;
+    pub async fn update_entity<E: IsEntity>(&self, updated: E) -> Result<()> {
+        self.update_entities(IdentifiedVecOf::just(updated)).await
+    }
 
+    pub async fn update_entities<E: IsEntity>(
+        &self,
+        updated: IdentifiedVecOf<E>,
+    ) -> Result<()> {
+        let addresses = updated
+            .clone()
+            .into_iter()
+            .map(|e| e.address())
+            .collect::<IndexSet<_>>();
+        self.update_profile_with(|p| p.update_entities(updated.clone()))
+            .await?;
+
+        if let Some(event) = E::profile_modified_event(true, addresses) {
+            self.event_bus
+                .emit(EventNotification::profile_modified(event))
+                .await;
+        }
         Ok(())
+    }
+}
+
+impl<E: IsEntity> IdentifiedVecOf<E> {
+    pub fn to_accounts(self) -> Result<Accounts> {
+        self.into_iter()
+            .map(|e| {
+                TryInto::<Account>::try_into(e.clone()).map_err(|_| {
+                    CommonError::ExpectedAccountButGotPersona {
+                        address: e.address().to_string(),
+                    }
+                })
+            })
+            .collect::<Result<Accounts>>()
+    }
+
+    pub fn to_personas(self) -> Result<Personas> {
+        self.into_iter()
+            .map(|e| {
+                TryInto::<Persona>::try_into(e.clone()).map_err(|_| {
+                    CommonError::ExpectedPersonaButGotAccount {
+                        address: e.address().to_string(),
+                    }
+                })
+            })
+            .collect::<Result<Personas>>()
     }
 }
 
@@ -630,7 +645,7 @@ impl SargonOS {
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    async fn add_entities_without_emitting_event<E: IsEntity>(
+    async fn add_entities<E: IsEntity>(
         &self,
         entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
@@ -648,37 +663,11 @@ impl SargonOS {
 
         debug!("Adding #{} entities to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_entities_to_add, network_id);
 
-        let to_accounts = || -> Accounts {
-            entities
-                .clone()
-                .into_iter()
-                .map(|e| {
-                    TryInto::<Account>::try_into(e.clone())
-                        .map_err(|_| {
-                            CommonError::ExpectedAccountButGotPersona {
-                                address: e.address().to_string(),
-                            }
-                        })
-                        .unwrap()
-                })
-                .collect::<Accounts>()
-        };
+        let to_accounts =
+            || -> Accounts { entities.clone().to_accounts().unwrap() };
 
-        let to_personas = || -> Personas {
-            entities
-                .clone()
-                .into_iter()
-                .map(|e| {
-                    TryInto::<Persona>::try_into(e.clone())
-                        .map_err(|_| {
-                            CommonError::ExpectedPersonaButGotAccount {
-                                address: e.address().to_string(),
-                            }
-                        })
-                        .unwrap()
-                })
-                .collect::<Personas>()
-        };
+        let to_personas =
+            || -> Personas { entities.clone().to_personas().unwrap() };
 
         self.update_profile_with(|p| {
             let networks = &mut p.networks;
@@ -739,7 +728,18 @@ impl SargonOS {
                 Ok(())
             }
         })
-        .await
+        .await?;
+
+        if let Some(event) = E::profile_modified_event(
+            false,
+            entities.clone().into_iter().map(|e| e.address()).collect(),
+        ) {
+            self.event_bus
+                .emit(EventNotification::profile_modified(event))
+                .await;
+        }
+
+        Ok(())
     }
 }
 

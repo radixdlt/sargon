@@ -98,32 +98,27 @@ impl IsBaseEntity for Account {
 impl IsEntity for Account {
     type Path = AccountPath;
 
-    fn profile_modified_event_updated_poly(
+    fn profile_modified_event(
+        is_update: bool,
         addresses: IndexSet<Self::Address>,
-    ) -> EventProfileModified {
-        EventProfileModified::AccountsUpdated {
-            addresses: addresses.into_iter().collect_vec(),
+    ) -> Option<EventProfileModified> {
+        let address = addresses.iter().last().cloned()?;
+        let addresses = addresses.clone().into_iter().collect_vec();
+        let is_many = addresses.len() > 1;
+        match (is_update, is_many) {
+            (true, true) => {
+                Some(EventProfileModified::AccountsUpdated { addresses })
+            }
+            (false, true) => {
+                Some(EventProfileModified::AccountsAdded { addresses })
+            }
+            (true, false) => {
+                Some(EventProfileModified::AccountUpdated { address })
+            }
+            (false, false) => {
+                Some(EventProfileModified::AccountAdded { address })
+            }
         }
-    }
-
-    fn profile_modified_event_updated_mono(
-        address: Self::Address,
-    ) -> EventProfileModified {
-        EventProfileModified::AccountUpdated { address }
-    }
-
-    fn profile_modified_event_added_poly(
-        addresses: IndexSet<Self::Address>,
-    ) -> EventProfileModified {
-        EventProfileModified::AccountsAdded {
-            addresses: addresses.into_iter().collect_vec(),
-        }
-    }
-
-    fn profile_modified_event_added_mono(
-        address: Self::Address,
-    ) -> EventProfileModified {
-        EventProfileModified::AccountAdded { address }
     }
 
     fn with_veci_and_name(

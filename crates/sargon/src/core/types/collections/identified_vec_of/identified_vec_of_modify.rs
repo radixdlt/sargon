@@ -162,6 +162,42 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
         *existing = mutated;
         Ok(true)
     }
+
+    pub fn update_items(
+        &mut self,
+        items: impl IntoIterator<Item = V>,
+    ) -> Result<()> {
+        let backup = self.clone();
+        match self.update_items_with_outcome(items) {
+            IdentifiableVecOfUpdateItemsOutcome::NoNewItemInserted => Ok(()),
+            IdentifiableVecOfUpdateItemsOutcome::NewItemInserted => {
+                *self = backup;
+                Err(CommonError::Unknown)
+            }
+        }
+    }
+    fn update_items_with_outcome(
+        &mut self,
+        items: impl IntoIterator<Item = V>,
+    ) -> IdentifiableVecOfUpdateItemsOutcome {
+        let len_before = self.len();
+        let items = items.into_iter().map(|i| (i.id(), i)).collect_vec();
+        self.0.extend(items);
+        let len_after = self.len();
+        if len_before < len_after {
+            IdentifiableVecOfUpdateItemsOutcome::NewItemInserted
+        } else {
+            IdentifiableVecOfUpdateItemsOutcome::NoNewItemInserted
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IdentifiableVecOfUpdateItemsOutcome {
+    /// We only updated existing items, no new item were inserted
+    NoNewItemInserted,
+    /// Some of the items were not known, they were newly inserted
+    NewItemInserted,
 }
 
 #[cfg(test)]

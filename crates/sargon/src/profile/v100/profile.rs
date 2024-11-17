@@ -231,6 +231,13 @@ impl Profile {
         self.header.id
     }
 
+    pub fn update_entities<E: IsEntity>(
+        &mut self,
+        updated_entities: IdentifiedVecOf<E>,
+    ) -> Result<()> {
+        self.networks.update_entities(updated_entities)
+    }
+
     /// Returns a clone of the updated account if found, else None.
     pub fn update_account<F>(
         &mut self,

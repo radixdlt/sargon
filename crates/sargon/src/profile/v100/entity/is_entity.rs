@@ -46,18 +46,10 @@ pub trait IsEntity:
 {
     type Path: IsEntityPath;
 
-    fn profile_modified_event_updated_poly(
+    fn profile_modified_event(
+        is_update: bool,
         addresses: IndexSet<Self::Address>,
-    ) -> EventProfileModified;
-    fn profile_modified_event_updated_mono(
-        address: Self::Address,
-    ) -> EventProfileModified;
-    fn profile_modified_event_added_poly(
-        addresses: IndexSet<Self::Address>,
-    ) -> EventProfileModified;
-    fn profile_modified_event_added_mono(
-        address: Self::Address,
-    ) -> EventProfileModified;
+    ) -> Option<EventProfileModified>;
 
     fn with_veci_and_name(
         veci: HDFactorInstanceTransactionSigning<Self::Path>,

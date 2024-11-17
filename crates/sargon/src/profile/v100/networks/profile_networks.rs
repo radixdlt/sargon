@@ -20,6 +20,17 @@ impl ProfileNetworks {
             .cloned()
     }
 
+    pub fn update_entities<E: IsEntity>(
+        &mut self,
+        updated_entities: IdentifiedVecOf<E>,
+    ) -> Result<()> {
+        let network =
+            updated_entities.assert_elements_not_empty_and_on_same_network()?;
+        self.try_try_update_with(&network, |n| {
+            n.update_entities(updated_entities.clone())
+        })
+    }
+
     /// Returns a clone of the updated account if found, else None.
     pub fn update_account<F>(
         &mut self,
