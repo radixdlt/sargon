@@ -174,6 +174,30 @@ impl ProfileNetwork {
             None
         }
     }
+
+    pub(crate) fn hide_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> Option<Account> {
+        let account = self.update_account(account_address, |account| {
+            account.mark_as_hidden();
+        });
+        self.authorized_dapps
+            .remove_referenced_account(account_address);
+        account
+    }
+
+    pub(crate) fn tombstone_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> Option<Account> {
+        let account = self.update_account(account_address, |account| {
+            account.mark_as_tombstoned();
+        });
+        self.authorized_dapps
+            .remove_referenced_account(account_address);
+        account
+    }
 }
 
 impl HasSampleValues for ProfileNetwork {

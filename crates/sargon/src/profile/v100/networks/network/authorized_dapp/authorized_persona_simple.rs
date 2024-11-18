@@ -1,3 +1,5 @@
+use radix_engine_interface::blueprints::account;
+
 use crate::prelude::*;
 
 /// Simple data representation of a Persona the user has shared with a Dapp.
@@ -34,6 +36,21 @@ pub struct AuthorizedPersonaSimple {
 
     /// ID to PersonaData entries to user has shared with a Dapp.
     pub shared_persona_data: SharedPersonaData,
+}
+
+impl AuthorizedPersonaSimple {
+    /// Removes the referenced account for this dApp
+    pub(crate) fn remove_shared_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> bool {
+        if let Some(shared_accounts) = self.shared_accounts.as_mut() {
+            shared_accounts.remove_entry(&account_address);
+            true
+        } else {
+            false
+        }
+    }
 }
 
 impl AuthorizedPersonaSimple {

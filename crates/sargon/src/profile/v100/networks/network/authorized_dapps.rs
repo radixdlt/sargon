@@ -5,6 +5,17 @@ decl_identified_vec_of!(
     AuthorizedDapp
 );
 
+impl AuthorizedDapps {
+    pub(crate) fn remove_referenced_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) {
+        self.update_all_with(|dapp| {
+            dapp.remove_referenced_account(account_address);
+        })
+    }
+}
+
 impl HasSampleValues for AuthorizedDapps {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

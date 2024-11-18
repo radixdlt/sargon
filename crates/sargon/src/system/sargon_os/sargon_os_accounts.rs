@@ -331,9 +331,18 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
     ) -> Result<()> {
-        let mut account = self.account_by_address(account_address)?;
-        account.mark_as_hidden();
-        self.update_account(account).await
+        self.update_profile_with(|profile| {
+            profile.networks.hide_account(&account_address);
+            Ok(())
+        })
+        .await?;
+
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(self.profile()?))
+            .await;
+
+        Ok(())
     }
 
     /// Updates the profile by marking the account with `account_address` as tombstoned.
@@ -341,9 +350,18 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
     ) -> Result<()> {
-        let mut account = self.account_by_address(account_address)?;
-        account.mark_as_tombstoned();
-        self.update_account(account).await
+        self.update_profile_with(|profile| {
+            profile.networks.tombstone_account(&account_address);
+            Ok(())
+        })
+        .await?;
+
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(self.profile()?))
+            .await;
+
+        Ok(())
     }
 
     /// Updates the profile by marking the account with `account_addresses` as tombstoned.
@@ -351,14 +369,18 @@ impl SargonOS {
         &self,
         account_addresses: Vec<AccountAddress>,
     ) -> Result<()> {
-        let mut accounts = account_addresses
-            .iter()
-            .map(|ad| self.account_by_address(ad.clone()))
-            .collect::<Result<Vec<Account>>>()?;
+        self.update_profile_with(move |profile| {
+            profile.networks.tombstone_accounts(&account_addresses);
+            Ok(())
+        })
+        .await?;
 
-        accounts.iter_mut().for_each(|a| a.mark_as_tombstoned());
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(self.profile()?))
+            .await;
 
-        self.update_accounts(Accounts::from(accounts)).await
+        Ok(())
     }
 }
 
