@@ -350,7 +350,10 @@ mod transaction_preview_analysis_tests {
             )
             .await;
 
-        assert_eq!(result, Err(CommonError::NetworkResponseBadCode))
+        assert_eq!(
+            result,
+            Err(CommonError::NetworkResponseBadCode { code: 500 })
+        )
     }
 
     #[actix_rt::test]

@@ -85,6 +85,6 @@ mod tests {
             .await
             .expect_err("Expected an error");
 
-        assert_eq!(result, CommonError::NetworkResponseBadCode);
+        assert_eq!(result, CommonError::NetworkResponseBadCode { code: 500 });
     }
 }

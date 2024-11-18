@@ -345,3 +345,32 @@ mod tests {
         assert_eq!(result, CommonError::InvalidNonFungibleLocalIDString);
     }
 }
+
+#[cfg(test)]
+mod integration_tests {
+    use crate::prelude::*;
+    use actix_rt::time::timeout;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn delete_account_manifest_from_empty_account() {
+        // This test verifies that we can correctly create a manifest for the deletion of a virtual account.
+        let request = SUT::boot_test();
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, request)
+            .await
+            .unwrap()
+            .unwrap();
+
+        // Empty/virtual account
+        let account_address = AccountAddress::try_from_bech32("account_tdx_2_12856d8p4llz8rs97hx964c5mqyewgwz620awgzuwxhfqgxvyd8n9a7").unwrap();
+
+        let result = os
+            .create_delete_account_manifest(account_address, None)
+            .await;
+
+        assert!(result.is_ok());
+    }
+}
