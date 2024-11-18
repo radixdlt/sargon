@@ -347,8 +347,8 @@ impl SargonOS {
     ) -> Result<()> {
         let mut accounts = account_addresses
             .iter()
-            .filter_map(|a| self.account_by_address(a.clone()).ok())
-            .collect_vec();
+            .map(|ad| self.account_by_address(ad.clone()))
+            .collect::<Result<Vec<Account>>>()?;
 
         accounts.iter_mut().for_each(|a| a.mark_as_tombstoned());
 
