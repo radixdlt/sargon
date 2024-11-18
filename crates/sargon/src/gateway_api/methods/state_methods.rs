@@ -173,20 +173,21 @@ impl GatewayClient {
         account_address: AccountAddress,
         ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountResourcePreference>> {
-        let result = self.load_all_pages(
-            None,
-            ledger_state_selector,
-            |cursor, ledger_state_selector| {
-                let request = AccountPageResourcePreferencesRequest::new(
-                    account_address,
-                    ledger_state_selector,
-                    cursor,
-                    GATEWAY_PAGE_REQUEST_LIMIT,
-                );
-                self.account_page_resource_preferences(request)
-            },
-        )
-        .await;
+        let result = self
+            .load_all_pages(
+                None,
+                ledger_state_selector,
+                |cursor, ledger_state_selector| {
+                    let request = AccountPageResourcePreferencesRequest::new(
+                        account_address,
+                        ledger_state_selector,
+                        cursor,
+                        GATEWAY_PAGE_REQUEST_LIMIT,
+                    );
+                    self.account_page_resource_preferences(request)
+                },
+            )
+            .await;
         match result {
             Ok(response) => Ok(response),
             Err(CommonError::NetworkResponseBadCode { code: 404 }) => {
