@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, derive_more::Debug)]
+#[derive(Clone, derive_more::Debug, PartialEq, Eq)]
 #[debug(
     "InternalFactorInstancesProviderOutcomeForFactor[ factor: {:?}\n\n\t⚡️ to_use_directly: {:?}\n\n\t➡️💾to_cache: {:?}\n\n\t💾➡️found_in_cache: {:?}\n\n\t🔮derived: {:?}\n\n]\n",
     factor_source_id,
@@ -49,6 +49,8 @@ pub struct InternalFactorInstancesProviderOutcomeForFactor {
 }
 
 impl InternalFactorInstancesProviderOutcomeForFactor {
+    /// # Panics
+    /// Panics if not all FactorInstances were derived from `factor_source_id`
     pub fn new(
         factor_source_id: FactorSourceIDFromHash,
         to_cache: FactorInstances,
@@ -98,5 +100,118 @@ impl InternalFactorInstancesProviderOutcomeForFactor {
             found_in_cache,
             newly_derived,
         )
+    }
+}
+
+impl HasSampleValues for InternalFactorInstancesProviderOutcomeForFactor {
+    fn sample() -> Self {
+        Self::new(FactorSourceIDFromHash::sample_at(0),    FactorInstances::new(IndexSet::from_iter([
+    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(2),
+])),    FactorInstances::new(IndexSet::from_iter([
+    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
+])),    FactorInstances::new(IndexSet::from_iter([
+    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
+])),    FactorInstances::new(IndexSet::from_iter([
+    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(1),
+    HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(2),
+])))
+    }
+
+    fn sample_other() -> Self {
+        Self::new(FactorSourceIDFromHash::sample_at(1),    FactorInstances::new(IndexSet::from_iter([
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(2),
+        ])),    FactorInstances::new(IndexSet::from_iter([
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(0),
+        ])),    FactorInstances::new(IndexSet::from_iter([
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(0),
+        ])),    FactorInstances::new(IndexSet::from_iter([
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(1),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(2),
+        ])))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InternalFactorInstancesProviderOutcomeForFactor;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    #[should_panic]
+    fn wrong_factor_source_id_to_cache() {
+        _ = SUT::new(
+            FactorSourceIDFromHash::sample_at(1),
+            FactorInstances::sample(),
+            FactorInstances::default(),
+            FactorInstances::default(),
+            FactorInstances::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn wrong_factor_source_id_to_use_dir() {
+        _ = SUT::new(
+            FactorSourceIDFromHash::sample_at(1),
+            FactorInstances::default(),
+            FactorInstances::sample(),
+            FactorInstances::default(),
+            FactorInstances::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn wrong_factor_source_id_found_in_cache() {
+        _ = SUT::new(
+            FactorSourceIDFromHash::sample_at(1),
+            FactorInstances::default(),
+            FactorInstances::default(),
+            FactorInstances::sample(),
+            FactorInstances::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn wrong_factor_source_id_newly_derived() {
+        _ = SUT::new(
+            FactorSourceIDFromHash::sample_at(1),
+            FactorInstances::default(),
+            FactorInstances::default(),
+            FactorInstances::default(),
+            FactorInstances::sample(),
+        );
+    }
+
+    #[test]
+    fn debug_string() {
+        assert_eq!(
+            format!("{:?}", SUT::sample()),
+            format!("{:?}", SUT::sample())
+        );
+
+        assert_eq!(
+            format!("{:?}", SUT::sample_other()),
+            format!("{:?}", SUT::sample_other())
+        );
+
+        assert_ne!(
+            format!("{:?}", SUT::sample()),
+            format!("{:?}", SUT::sample_other())
+        );
     }
 }

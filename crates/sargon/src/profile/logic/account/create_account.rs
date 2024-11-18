@@ -44,33 +44,6 @@ impl Profile {
         ))
     }
 
-    /// Creates many new non securified accounts **WITHOUT** adding them to Profile, using the *main* "Babylon"
-    /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
-    ///
-    /// If you want to add the accounts to Profile, call `add_accounts(accounts)`
-    ///
-    /// Returns a tuple `(FactorSourceID, Accounts)` where FactorSourceID is the ID
-    /// of the FactorSource used to create the accounts.
-    pub async fn create_unsaved_accounts_with_bdfs(
-        &self,
-        network_id: NetworkID,
-        count: u16,
-        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
-        get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
-        let bdfs = self.bdfs();
-        self.create_unsaved_accounts_with_factor_source(
-            bdfs.into(),
-            network_id,
-            count,
-            factor_instances_cache_client,
-            key_derivation_interactors,
-            get_name,
-        )
-        .await
-    }
-
     pub async fn create_unsaved_accounts_with_factor_source(
         &self,
         factor_source: FactorSource,

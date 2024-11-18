@@ -671,7 +671,7 @@ impl SargonOS {
 
         self.update_profile_with(|p| {
             let networks = &mut p.networks;
-
+            let networks_backup = networks.clone();
             if networks.contains_id(network_id) {
                 debug!("Profile already contained network to add #{} entities to, network_id: {}", number_of_entities_to_add, network_id);
                 networks
@@ -696,6 +696,7 @@ impl SargonOS {
                             CAP26EntityKind::Identity => network.personas.len(),
                         };
                         debug!("Profile Network now contains: #{} accounts", count_after);
+
                         if network.accounts.len() == count_before + number_of_entities_to_add {
                             Ok(())
                         } else {
@@ -724,9 +725,13 @@ impl SargonOS {
                         )
                     }
                 };
+
                 networks.append(network);
                 Ok(())
             }
+            .and_then(|_| {
+                p.assert_factor_instances_valid().inspect_err(|_| { p.networks = networks_backup; })
+            })
         })
         .await?;
 
@@ -1372,6 +1377,89 @@ mod tests {
             result,
             Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
         )
+    }
+
+    #[actix_rt::test]
+    async fn add_account_new_network_works() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let account = Account::sample();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        assert_eq!(os.profile().unwrap().networks.len(), 1);
+
+        // ACT
+        os.with_timeout(|x| {
+            x.add_accounts(Accounts::just(Account::sample_stokenet()))
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile().unwrap().networks.len(), 2);
+    }
+
+    #[actix_rt::test]
+    async fn add_account_new_network_but_same_factor_instance_as_existing_throws(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let account = Account::sample();
+        let fsid = account
+            .try_get_unsecured_control()
+            .unwrap()
+            .transaction_signing
+            .factor_source_id
+            .to_string();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        let mut account_same_fi_new_network = account.clone();
+        let other_network = NetworkID::Stokenet;
+        account_same_fi_new_network.address =
+            account.address().map_to_network(other_network);
+        account_same_fi_new_network.network_id = other_network;
+
+        assert_eq!(
+            account_same_fi_new_network.address.network_id(),
+            other_network
+        );
+        assert_eq!(
+            account_same_fi_new_network.address.node_id(),
+            account.address().node_id()
+        );
+
+        let profile_snapshot_before_failing_op = os.profile().unwrap();
+        let res = os
+            .with_timeout(|x| {
+                x.add_accounts(Accounts::just(
+                    account_same_fi_new_network.clone(),
+                ))
+            })
+            .await;
+
+        // ASSERT
+        assert!(res.is_err());
+
+        let err = CommonError::FactorInstancesDiscrepancy {
+            address_of_entity1: account.address().to_string(),
+            address_of_entity2: account_same_fi_new_network
+                .address()
+                .to_string(),
+            factor_source_id: fsid,
+        };
+        pretty_assertions::assert_eq!(res, Err(err));
+        let profile_snapshot_after_failing_op = os.profile().unwrap();
+        assert_eq!(
+            profile_snapshot_after_failing_op,
+            profile_snapshot_before_failing_op
+        );
     }
 
     #[actix_rt::test]

@@ -120,10 +120,6 @@ impl FactorInstancesCache {
         }
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.map.read().unwrap().is_empty()
-    }
-
     pub fn serializable_snapshot(&self) -> FactorInstancesCacheSnapshot {
         FactorInstancesCacheSnapshot::from(self.map.read().unwrap().clone())
     }
@@ -419,12 +415,6 @@ impl FactorInstancesCache {
     fn factor_source_ids(&self) -> IndexSet<FactorSourceIDFromHash> {
         self.map.read().unwrap().keys().cloned().collect()
     }
-    pub fn insert(
-        &self,
-        pf_instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
-    ) {
-        self.insert_all(pf_instances).expect("works")
-    }
 
     /// Reads out the instance of `factor_source_id` without mutating the cache.
     pub fn peek_all_instances_of_factor_source(
@@ -546,6 +536,17 @@ mod tests {
         assert!(sut
             .insert_for_factor(&fsid, &FactorInstances::from_iter([fi2]))
             .unwrap());
+    }
+
+    #[test]
+    fn insert_all_factor_source_id_discrepancy_is_err() {
+        let sut = SUT::default();
+        assert!(sut
+            .insert_all(&IndexMap::kv(
+                FactorSourceIDFromHash::sample_passphrase_other(),
+                FactorInstances::sample()
+            ))
+            .is_err())
     }
 
     #[test]

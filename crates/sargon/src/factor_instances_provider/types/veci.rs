@@ -19,12 +19,22 @@ impl VirtualEntityCreatingInstance {
     ) -> Self {
         assert!(
             !factor_instance.is_securified(),
-            "factor instance not in unsecurified space"
+            "FactorInstance is in Securified KeySpace, but expected Unsecurified."
         );
+
         assert!(
             address.matches_public_key(factor_instance.public_key()),
             "Discrepancy! PublicKeys does not match, this is a programmer error!"
         );
+
+        assert_eq!(factor_instance.derivation_path().get_entity_kind(), address.get_entity_kind(), "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds.");
+
+        assert_eq!(
+            factor_instance.derivation_path().network_id(),
+            address.network_id(),
+            "Discrepancy! Network mismatch between derivation path of factor instance and address."
+        );
+
         Self {
             address,
             factor_instance,
@@ -37,14 +47,6 @@ impl VirtualEntityCreatingInstance {
 
     pub fn factor_instance(&self) -> HierarchicalDeterministicFactorInstance {
         self.factor_instance.clone()
-    }
-
-    pub fn hd_public_key(&self) -> HierarchicalDeterministicPublicKey {
-        self.factor_instance().public_key
-    }
-
-    pub fn public_key(&self) -> PublicKey {
-        self.hd_public_key().public_key
     }
 
     fn with_factor_instance_on_network(
@@ -98,5 +100,54 @@ mod test_instance {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "FactorInstance is in Securified KeySpace, but expected Unsecurified."
+    )]
+    fn panics_if_factor_is_securified() {
+        let _ = SUT::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0), AddressOfAccountOrPersona::sample_account_mainnet());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy! PublicKeys does not match, this is a programmer error!"
+    )]
+    fn panics_if_public_key_does_not_match() {
+        let _ = SUT::new(
+            HierarchicalDeterministicFactorInstance::sample(),
+            AddressOfAccountOrPersona::sample(),
+        );
+    }
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds."
+    )]
+    fn panics_if_derivation_path_of_factor_and_address_has_mismatching_entity_kind(
+    ) {
+        let fi = HierarchicalDeterministicFactorInstance::sample();
+        assert_eq!(
+            fi.derivation_path().get_entity_kind(),
+            CAP26EntityKind::Account
+        );
+        let identity_address = IdentityAddress::new(
+            fi.public_key(),
+            fi.derivation_path().network_id(),
+        );
+        let _ = SUT::new(fi, identity_address.into());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy! Network mismatch between derivation path of factor instance and address."
+    )]
+    fn panics_if_derivation_path_of_factor_and_address_has_mismatching_network()
+    {
+        let _ = SUT::with_factor_instance_on_network(
+            HierarchicalDeterministicFactorInstance::sample(),
+            CAP26EntityKind::Account,
+            NetworkID::Nergalnet,
+        );
     }
 }

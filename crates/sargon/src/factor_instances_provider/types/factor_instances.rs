@@ -53,6 +53,7 @@ impl FactorInstances {
         (Self::from(head), Self::from(tail))
     }
 }
+
 impl From<&[HierarchicalDeterministicFactorInstance]> for FactorInstances {
     fn from(value: &[HierarchicalDeterministicFactorInstance]) -> Self {
         Self::from(
@@ -62,6 +63,7 @@ impl From<&[HierarchicalDeterministicFactorInstance]> for FactorInstances {
         )
     }
 }
+
 impl From<IndexSet<HierarchicalDeterministicFactorInstance>>
     for FactorInstances
 {
@@ -79,6 +81,7 @@ impl From<FactorInstances>
         value.factor_instances()
     }
 }
+
 impl FactorInstances {
     pub fn append(
         &mut self,

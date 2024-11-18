@@ -118,23 +118,21 @@ fn fulfilling_role_of_factor_sources_with_factor_instances<
     let role_of_sources = matrix_of_factor_sources.get_role_of_kind(role_kind);
     let threshold: u8 = role_of_sources.get_threshold();
 
-    let threshold_factor_instances =
+    // Threshold factors
+    let ti =
         try_filling_factor_list_of_role_of_factor_sources_with_factor_instances(
             consuming_instances,
             role_of_sources.get_threshold_factors()
         )?;
 
-    let override_factor_instances =
+    // Override factors
+    let oi =
     try_filling_factor_list_of_role_of_factor_sources_with_factor_instances(
         consuming_instances,
         role_of_sources.get_override_factors()
     )?;
 
-    let role = make_role(
-        threshold_factor_instances,
-        threshold,
-        override_factor_instances,
-    )?;
+    let role = make_role(ti, threshold, oi)?;
 
     assert_eq!(role.get_role_kind(), role_kind);
     Ok(role)

@@ -275,23 +275,20 @@ impl FactorInstancesProvider {
                     .into_iter()
                     .map(|(derivation_preset, qty)| {
                         // `qty` many paths
-                        let paths = (0..qty)
+                        (0..qty)
                             .map(|_| {
                                 let index_agnostic_path = derivation_preset
                                     .index_agnostic_path_on_network(network_id);
-                                let index = next_index_assigner.next(
-                                    factor_source_id,
-                                    index_agnostic_path,
-                                )?;
-                                let derivation_path = DerivationPath::from((
-                                    index_agnostic_path,
-                                    index,
-                                ));
-                                Ok(derivation_path)
+                                next_index_assigner
+                                    .next(factor_source_id, index_agnostic_path)
+                                    .map(|index| {
+                                        DerivationPath::from((
+                                            index_agnostic_path,
+                                            index,
+                                        ))
+                                    })
                             })
-                            .collect::<Result<IndexSet<DerivationPath>>>()?;
-
-                        Ok(paths)
+                            .collect::<Result<IndexSet<DerivationPath>>>()
                     })
                     .collect::<Result<Vec<IndexSet<DerivationPath>>>>()?;
 
@@ -305,13 +302,11 @@ impl FactorInstancesProvider {
                 IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
             >>()?;
 
-        let keys_collector = KeysCollector::new(
-            factor_sources,
-            pf_paths.clone(),
-            self.interactors.clone(),
-        )?;
+        let interactor = self.interactors.clone();
+        let collector =
+            KeysCollector::new(factor_sources, pf_paths.clone(), interactor)?;
 
-        let pf_derived = keys_collector.collect_keys().await.factors_by_source;
+        let pf_derived = collector.collect_keys().await.factors_by_source;
 
         let mut pf_instances =
             IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();

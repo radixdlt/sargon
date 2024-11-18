@@ -710,7 +710,7 @@ mod tests {
         assert_eq!(account.display_name.value, "Alice");
         assert!(sut
             .update_account(&account.address, |a| a.display_name =
-                DisplayName::new("Satoshi").unwrap())
+                DisplayName::new("Bob").unwrap())
             .is_some());
 
         assert_eq!(
@@ -718,6 +718,37 @@ mod tests {
                 .get_id(NetworkID::Mainnet)
                 .unwrap()
                 .accounts
+                .get_at_index(0)
+                .unwrap()
+                .display_name
+                .value,
+            "Bob"
+        );
+    }
+
+    #[test]
+    fn update_name_of_persona() {
+        let mut sut = SUT::sample();
+        let persona = sut
+            .networks
+            .get_id(NetworkID::Mainnet)
+            .unwrap()
+            .personas
+            .get_at_index(0)
+            .unwrap()
+            .clone();
+
+        assert_eq!(persona.display_name.value, "Batman");
+        assert!(sut
+            .update_persona(&persona.address, |a| a.display_name =
+                DisplayName::new("Satoshi").unwrap())
+            .is_some());
+
+        assert_eq!(
+            sut.networks
+                .get_id(NetworkID::Mainnet)
+                .unwrap()
+                .personas
                 .get_at_index(0)
                 .unwrap()
                 .display_name

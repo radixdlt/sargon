@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// `debug_was_cached`.
 /// Furthermore all fields except `to_use_directly` are renamed to `debug_*` to make it clear they are only included for debugging purposes,
 /// in fact, they are all put behind `#[cfg(test)]`
-#[derive(Clone, derive_more::Debug)]
+#[derive(Clone, derive_more::Debug, PartialEq, Eq)]
 #[debug("{}", self.debug_string())]
 pub struct FactorInstancesProviderOutcomeForFactor {
     #[allow(dead_code)]
@@ -51,6 +51,7 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     #[cfg(test)]
     pub debug_was_derived: FactorInstances,
 }
+
 #[allow(dead_code)]
 impl FactorInstancesProviderOutcomeForFactor {
     #[cfg(test)]
@@ -99,5 +100,67 @@ impl From<InternalFactorInstancesProviderOutcomeForFactor>
         };
 
         _self
+    }
+}
+
+impl HasSampleValues for FactorInstancesProviderOutcomeForFactor {
+    fn sample() -> Self {
+        Self::from(InternalFactorInstancesProviderOutcomeForFactor::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::from(
+            InternalFactorInstancesProviderOutcomeForFactor::sample_other(),
+        )
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorInstancesProviderOutcomeForFactor;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn debug_string_for_tests() {
+        assert_eq!(
+            SUT::sample().debug_string_for_tests(),
+            SUT::sample().debug_string_for_tests()
+        );
+        assert_eq!(
+            SUT::sample_other().debug_string_for_tests(),
+            SUT::sample_other().debug_string_for_tests()
+        );
+        assert_ne!(
+            SUT::sample().debug_string_for_tests(),
+            SUT::sample_other().debug_string_for_tests()
+        );
+    }
+
+    #[test]
+    fn debug_string_no_test() {
+        assert_eq!(
+            SUT::sample().debug_string_no_test(),
+            SUT::sample().debug_string_no_test()
+        );
+        assert_eq!(
+            SUT::sample_other().debug_string_no_test(),
+            SUT::sample_other().debug_string_no_test()
+        );
+        assert_ne!(
+            SUT::sample().debug_string_no_test(),
+            SUT::sample_other().debug_string_no_test()
+        );
     }
 }

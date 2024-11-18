@@ -116,12 +116,19 @@ impl SargonOS {
             .iter()
             .for_each(|a| assert!(self.account_by_address(*a).is_ok()));
 
-        let (security_structures_of_factor_instances, instances_in_cache_consumer, derivation_outcome) = self.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
+        let outcome = self.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
             account_addresses.clone(),
                     shield.clone()).await?;
 
+        let (
+            security_structures_of_factor_instances,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = outcome;
+
         let mut security_structures_of_factor_instances =
             security_structures_of_factor_instances;
+
         // consume!
         instances_in_cache_consumer.consume().await?;
 
@@ -143,7 +150,9 @@ impl SargonOS {
             .collect::<Result<Accounts>>()?;
 
         assert!(security_structures_of_factor_instances.is_empty());
+
         self.update_entities(securified_accounts.clone()).await?;
+
         Ok((
             securified_accounts.into_iter().collect(),
             derivation_outcome,
@@ -577,6 +586,102 @@ async fn cache_is_unchanged_in_case_of_failure() {
         cache_after_fail.serializable_snapshot(),
         cache_before_fail.serializable_snapshot(),
         "Cache should not have changed when failing."
+    );
+}
+
+#[actix_rt::test]
+async fn test_assert_factor_instances_invalid() {
+    let os = SargonOS::fast_boot().await;
+    let alice = os
+        .create_and_save_new_mainnet_account_with_bdfs(DisplayName::sample())
+        .await
+        .unwrap();
+    let bob = os
+        .create_and_save_new_mainnet_account_with_bdfs(
+            DisplayName::sample_other(),
+        )
+        .await
+        .unwrap();
+
+    let bdfs = FactorSource::from(os.bdfs().unwrap());
+    let matrix_0 = MatrixOfFactorSources::new(
+        PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
+            .unwrap(),
+        RecoveryRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone()],
+            1,
+        )
+        .unwrap(),
+        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [bdfs.clone()],
+            1,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
+        14,
+        matrix_0,
+    );
+
+    let (security_structure_of_fis, _, _) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(IndexSet::from_iter([alice.address()]), shield_0.clone()).await.unwrap();
+
+    let security_structure_of_fi =
+        security_structure_of_fis.values().next().unwrap().clone();
+
+    let securified_alice = os
+        .__OFFLINE_ONLY_securify_account_without_saving(
+            alice.address(),
+            security_structure_of_fi.clone(),
+        )
+        .unwrap();
+
+    os.update_entities(Accounts::just(securified_alice.clone()))
+        .await
+        .unwrap();
+
+    // Since we did not call `consume` on the instances consumer, the same factor instances will be used => collision!
+    let securified_bob = os
+        .__OFFLINE_ONLY_securify_account_without_saving(
+            bob.address(),
+            security_structure_of_fi.clone(), // Oh noes! Same Structure as Alice!
+        )
+        .unwrap();
+
+    let profile_snapshot_before_failing_op = os.profile().unwrap();
+    let res = os.update_entities(Accounts::just(securified_bob)).await;
+    assert!(res.is_err());
+
+    let err = CommonError::FactorInstancesDiscrepancy {
+        address_of_entity1: alice.address().to_string(),
+        address_of_entity2: bob.address().to_string(),
+        factor_source_id: bdfs.factor_source_id().to_string(),
+    };
+    pretty_assertions::assert_eq!(res, Err(err));
+    let profile_snapshot_after_failing_op = os.profile().unwrap();
+    assert_eq!(
+        profile_snapshot_after_failing_op,
+        profile_snapshot_before_failing_op
+    );
+
+    let mut fake_frank = securified_alice.clone();
+    fake_frank.address = AccountAddress::sample_frank();
+
+    let profile_snapshot_before_failing_op = os.profile().unwrap();
+    let res = os.add_account(fake_frank.clone()).await;
+    assert!(res.is_err());
+    let err = CommonError::FactorInstancesDiscrepancy {
+        address_of_entity1: alice.address().to_string(),
+        address_of_entity2: fake_frank.address().to_string(),
+        factor_source_id: bdfs.factor_source_id().to_string(),
+    };
+    pretty_assertions::assert_eq!(res, Err(err));
+    let profile_snapshot_after_failing_op = os.profile().unwrap();
+    assert_eq!(
+        profile_snapshot_after_failing_op,
+        profile_snapshot_before_failing_op
     );
 }
 
