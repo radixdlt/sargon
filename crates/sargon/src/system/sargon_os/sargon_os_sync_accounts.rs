@@ -58,7 +58,7 @@ impl SargonOS {
         );
 
         gateway_client
-            .check_account_is_deleted(network_id, account_addresses)
+            .check_accounts_are_deleted(network_id, account_addresses)
             .await
     }
 }

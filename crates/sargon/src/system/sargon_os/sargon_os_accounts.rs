@@ -294,26 +294,18 @@ impl SargonOS {
     }
 
     /// Updates the accounts `updated` by mutating current profile and persisting
-    /// the change to secure storage. Throws `UnknownAccount` error if some account
-    /// is not found.
+    /// the change to secure storage.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountsUpdated { addresses } }`
     pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
         self.update_profile_with(|p| {
-            let mut result = Ok(());
             for updated_account in updated.clone() {
-                if p.update_account(&updated_account.address, |old| {
+                p.update_account(&updated_account.address, |old| {
                     *old = updated_account.clone()
-                })
-                .is_none()
-                {
-                    result = Err(CommonError::UnknownAccount);
-                    break;
-                }
+                });
             }
-
-            result
+            Ok(())
         })
         .await?;
 

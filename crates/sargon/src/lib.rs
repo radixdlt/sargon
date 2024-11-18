@@ -52,7 +52,7 @@ pub mod prelude {
     pub(crate) use derive_more::derive::{
         AsRef, Debug as MoreDebug, Deref, Display,
     };
-    pub(crate) use futures::future::{join_all, try_join_all};
+    pub(crate) use futures::future::join_all;
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cell::RefCell;
     pub(crate) use std::cmp::Ordering;

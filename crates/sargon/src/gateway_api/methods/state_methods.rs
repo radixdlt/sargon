@@ -57,7 +57,7 @@ impl GatewayClient {
 
     /// Looks up on ledger whether this `account_address` is deleted, by looking up the NFTs
     /// it owns and checking if its owner badge is one of them.
-    pub async fn check_account_is_deleted(
+    pub async fn check_accounts_are_deleted(
         &self,
         network_id: NetworkID,
         account_addresses: impl IntoIterator<Item = AccountAddress>,
