@@ -648,7 +648,7 @@ impl SargonOS {
     ) -> Result<()> {
         let mut accounts = account_addresses
             .iter()
-            .map(|ad| self.account_by_address(ad.clone()))
+            .map(|ad| self.account_by_address(*ad))
             .collect::<Result<Vec<Account>>>()?;
 
         accounts.iter_mut().for_each(|a| a.mark_as_tombstoned());
@@ -1711,7 +1711,7 @@ mod tests {
             .iter()
             .all(|a| a.display_name.value != "rip"));
         assert!(account_addresses_to_tombstone.iter().all(|address| os
-            .account_by_address(address.clone())
+            .account_by_address(*address)
             .unwrap()
             .is_tombstoned()))
     }

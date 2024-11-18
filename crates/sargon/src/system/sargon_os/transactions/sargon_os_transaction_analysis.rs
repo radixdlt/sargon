@@ -235,7 +235,7 @@ impl SargonOS {
             && !are_instructions_originating_from_host
         {
             return Err(CommonError::ReservedManifestClass {
-                class: reserved_manifest_class.clone(),
+                class: reserved_manifest_class.kind(),
             });
         }
 

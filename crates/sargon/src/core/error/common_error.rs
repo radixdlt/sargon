@@ -736,7 +736,7 @@ pub enum CommonError {
     MaxTransfersPerTransactionReached { amount: u64 } = 10208,
 
     #[error("Transaction Manifest class is reserved: {class}")]
-    ReservedManifestClass { class: DetailedManifestClass } = 10209,
+    ReservedManifestClass { class: DetailedManifestClassKind } = 10209,
 
     #[error("FactorInstancesProvider did not derive enough factors")]
     FactorInstancesProviderDidNotDeriveEnoughFactors = 10210,
