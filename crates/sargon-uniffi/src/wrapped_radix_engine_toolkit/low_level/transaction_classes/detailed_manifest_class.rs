@@ -95,4 +95,7 @@ pub enum DetailedManifestClass {
     },
 }
 
-delegate_debug_into!(DetailedManifestClass, InternalDetailedManifestClass);
+delegate_display_debug_into!(
+    DetailedManifestClass,
+    InternalDetailedManifestClass
+);

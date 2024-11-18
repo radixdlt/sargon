@@ -735,7 +735,7 @@ pub enum CommonError {
     #[error("Unable to make {amount} transfers in one single transaction")]
     MaxTransfersPerTransactionReached { amount: u64 } = 10208,
 
-    #[error("Transaction Manifest class is forbidden: {}", class.name())]
+    #[error("Transaction Manifest class is forbidden: {class}")]
     ForbiddenManifestClass { class: DetailedManifestClass } = 10209,
 }
 
