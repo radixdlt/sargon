@@ -41,6 +41,9 @@ jobs:
           echo "NEXT_TAG=$NEXT_TAG" >> "$GITHUB_OUTPUT"
           echo "LAST_TAG=$LAST_TAG" >> "$GITHUB_OUTPUT"
 
+          echo "🚢  NEXT_TAG: $NEXT_TAG"
+          echo "🚢  LAST_TAG: $LAST_TAG"
+
       - name: Build artifacts
         id: build
         run: |
