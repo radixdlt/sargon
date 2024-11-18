@@ -267,7 +267,7 @@ mod tests {
     type SUT = DetailedManifestClass;
 
     #[test]
-    fn is_forbidden_classifcation() {
+    fn is_forbidden_classification() {
         let general = SUT::General;
         let delete_accounts = SUT::DeleteAccounts {
             account_addresses: Vec::<_>::sample(),
