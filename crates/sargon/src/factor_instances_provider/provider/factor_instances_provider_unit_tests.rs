@@ -651,7 +651,7 @@ async fn test_assert_factor_instances_invalid() {
         .unwrap();
 
     let profile_snapshot_before_failing_op = os.profile().unwrap();
-    let res = os.update_entities(Accounts::just(securified_bob)).await;
+    let res = os.update_accounts(Accounts::just(securified_bob)).await;
     assert!(res.is_err());
 
     let err = CommonError::FactorInstancesDiscrepancy {

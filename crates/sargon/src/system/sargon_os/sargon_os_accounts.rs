@@ -587,6 +587,16 @@ impl SargonOS {
         self.update_entity(updated).await
     }
 
+    /// Updates the accounts `updated` by mutating current profile and persisting
+    /// the change to secure storage. Throws `UnknownAccount` error if any of the account
+    /// is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountsUpdated { addresses } }`
+    pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
+        self.update_entities(updated).await
+    }
+
     pub async fn update_entity<E: IsEntity>(&self, updated: E) -> Result<()> {
         self.update_entities(IdentifiedVecOf::just(updated)).await
     }

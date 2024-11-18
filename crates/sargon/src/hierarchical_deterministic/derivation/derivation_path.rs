@@ -496,6 +496,18 @@ mod tests {
     }
 
     #[test]
+    fn invalid_json() {
+        let json = r#"
+        {
+            "scheme": "so invalid",
+            "path": "this is not a path"
+        }
+        "#;
+        let sut = serde_json::from_str::<SUT>(json);
+        assert!(sut.is_err());
+    }
+
+    #[test]
     fn json_bip44like_account_unhardened() {
         let path = BIP44LikePath::sample();
         let model: SUT = path.into();
@@ -526,5 +538,16 @@ mod tests {
                 value: BIP44LikePath::sample_other()
             }
         );
+    }
+
+    #[test]
+    fn bip44_network_id() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn bip44_get_entity_kind() {
+        assert_eq!(SUT::sample().get_entity_kind(), CAP26EntityKind::Account);
     }
 }

@@ -200,6 +200,47 @@ mod tests {
         .unwrap();
     }
 
+    #[should_panic(expected = "Missing FactorSources")]
+    #[actix_rt::test]
+    async fn mfa_panics_if_factor_source_missing() {
+        let fs = FactorSource::sample_at(0);
+        let network = NetworkID::Mainnet;
+
+        let mainnet_account = Account::new(HDFactorInstanceTransactionSigning::new(HierarchicalDeterministicFactorInstance::new_for_entity_on_network(
+            network,
+            fs.id_from_hash(),
+            CAP26EntityKind::Account,
+            Hardened::Unsecurified(
+                UnsecurifiedHardened::try_from(0u32).unwrap(),
+            ),
+        )).unwrap(), DisplayName::sample(), AppearanceID::sample());
+
+        let profile = Profile::sample_from(
+            [], // <---- missing factor source => should_panic
+            [&mainnet_account],
+            [],
+        );
+        let cache_client = FactorInstancesCacheClient::in_memory();
+
+        let _ = SUT::for_account_mfa(
+            Arc::new(cache_client),
+            Arc::new(profile),
+            MatrixOfFactorSources::new(
+                PrimaryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                RecoveryRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
+                    .unwrap(),
+            )
+            .unwrap(),
+            IndexSet::from_iter([mainnet_account.address()]),
+            Arc::new(TestDerivationInteractors::default()),
+        )
+        .await
+        .unwrap();
+    }
+
     #[should_panic]
     #[actix_rt::test]
     async fn mfa_panics_if_wrong_network() {

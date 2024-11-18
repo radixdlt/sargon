@@ -218,4 +218,33 @@ mod tests {
         sut.zeroize();
         assert_ne!(sut, SUT::sample());
     }
+
+    #[test]
+    fn new_olympia_with_mnemonic_with_passphrase() {
+        let sut = SUT::new_olympia_with_mnemonic_with_passphrase(
+            MnemonicWithPassphrase::sample(),
+            &HostInfo::sample(),
+        );
+        assert_eq!(
+            sut.factor_source.common.crypto_parameters,
+            FactorSourceCryptoParameters::olympia()
+        );
+    }
+
+    #[test]
+    fn new_babylon_with_entropy_bytes() {
+        let is_main = false;
+        let sut = SUT::new_babylon_with_entropy_bytes(
+            is_main,
+            NonEmptyMax32Bytes::from_bytes(&[0xff; 32]),
+            &HostInfo::sample(),
+        )
+        .unwrap();
+        assert_eq!(sut.mnemonic_with_passphrase.mnemonic.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote");
+    }
+
+    #[test]
+    fn non_sensitive() {
+        assert_eq!(format!("{:?}", SUT::sample().non_sensitive()), "\"12 words device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a\"");
+    }
 }

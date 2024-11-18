@@ -414,4 +414,9 @@ mod tests {
         let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".parse().unwrap();
         assert_ne!(a, b);
     }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
 }

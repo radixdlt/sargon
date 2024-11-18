@@ -759,6 +759,32 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
+    fn delete_panics_for_unknown() {
+        let sut = SUT::default();
+        let instances = FactorInstances::sample();
+        assert_eq!(instances.len(), 2);
+        let factor_source_ids = instances
+            .clone()
+            .into_iter()
+            .map(|fi| fi.factor_source_id())
+            .collect::<IndexSet<_>>();
+        assert_eq!(factor_source_ids.len(), 1);
+        let fsid = factor_source_ids.into_iter().next().unwrap();
+        sut.insert_for_factor(
+            &fsid,
+            &instances
+                .clone()
+                .into_iter()
+                .take(1)
+                .collect::<FactorInstances>(),
+        )
+        .unwrap();
+
+        sut.delete(&IndexMap::kv(fsid, instances));
+    }
+
+    #[test]
     fn delete() {
         let sut = SUT::default();
 

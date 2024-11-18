@@ -525,6 +525,16 @@ impl SargonOS {
     pub async fn update_persona(&self, updated: Persona) -> Result<()> {
         self.update_entity(updated).await
     }
+
+    /// Updates the personas `updated` by mutating current profile and persisting
+    /// the change to secure storage. Throws `UnknownPersona` error if any of the persona
+    /// is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonasUpdated { addresses } }`
+    pub async fn update_personas(&self, updated: Personas) -> Result<()> {
+        self.update_entities(updated).await
+    }
 }
 
 #[cfg(test)]
@@ -998,6 +1008,48 @@ mod tests {
             .recorded()
             .iter()
             .any(|e| e.event.kind() == EventKind::PersonaUpdated));
+    }
+
+    #[actix_rt::test]
+    async fn test_update_personas_emits() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        let mut persona = Persona::sample();
+        let mut persona2 = Persona::sample_other();
+        os.with_timeout(|x| {
+            x.add_personas(Personas::from_iter([
+                persona.clone(),
+                persona2.clone(),
+            ]))
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        persona.display_name = DisplayName::random();
+        persona2.display_name = DisplayName::random();
+        os.with_timeout(|x| {
+            x.update_personas(Personas::from_iter([
+                persona.clone(),
+                persona2.clone(),
+            ]))
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert!(event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::PersonasUpdated));
     }
 
     #[actix_rt::test]

@@ -74,23 +74,7 @@ impl From<IndexSet<HierarchicalDeterministicFactorInstance>>
     }
 }
 
-impl From<FactorInstances>
-    for IndexSet<HierarchicalDeterministicFactorInstance>
-{
-    fn from(value: FactorInstances) -> Self {
-        value.factor_instances()
-    }
-}
-
 impl FactorInstances {
-    pub fn append(
-        &mut self,
-        instances: impl Into<IndexSet<HierarchicalDeterministicFactorInstance>>,
-    ) {
-        let to_append: IndexSet<_> = instances.into();
-        self.factor_instances.extend(to_append);
-    }
-
     pub fn is_empty(&self) -> bool {
         self.factor_instances.is_empty()
     }
