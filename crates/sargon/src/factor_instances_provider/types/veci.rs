@@ -76,10 +76,17 @@ impl HasSampleValues for VirtualEntityCreatingInstance {
         )
     }
     fn sample_other() -> Self {
+        let network_id = NetworkID::Stokenet;
+        let entity_kind = CAP26EntityKind::Identity;
         Self::with_factor_instance_on_network(
-            HierarchicalDeterministicFactorInstance::sample_other(),
-            CAP26EntityKind::Identity,
-            NetworkID::Stokenet,
+            HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network(
+                network_id,
+                CAP26KeyKind::TransactionSigning,
+                entity_kind,
+                0,
+            ),
+            entity_kind,
+            network_id,
         )
     }
 }

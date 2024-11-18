@@ -197,18 +197,82 @@ impl HierarchicalDeterministicFactorInstance {
         Self::sample_with_key_kind(CAP26KeyKind::TransactionSigning, 1)
     }
 
+    /// Identity
+    /// A sample used to facilitate unit tests.
+    pub fn sample_transaction_signing_0_identity() -> Self {
+        Self::sample_with_key_kind_identity(CAP26KeyKind::TransactionSigning, 0)
+    }
+
+    /// Identity
+    /// A sample used to facilitate unit tests.
+    pub fn sample_transaction_signing_1_identity() -> Self {
+        Self::sample_with_key_kind_identity(CAP26KeyKind::TransactionSigning, 1)
+    }
+
     /// A sample used to facilitate unit tests.
     pub fn sample_auth_signing() -> Self {
         Self::sample_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0)
     }
 
+    /// Account
     /// A sample used to facilitate unit tests.
     fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {
-        let path = AccountPath::new(
+        Self::sample_with_key_kind_entity_kind(
+            key_kind,
+            CAP26EntityKind::Account,
+            index,
+        )
+    }
+
+    /// Identity
+    /// A sample used to facilitate unit tests.
+    fn sample_with_key_kind_identity(
+        key_kind: CAP26KeyKind,
+        index: u32,
+    ) -> Self {
+        Self::sample_with_key_kind_entity_kind(
+            key_kind,
+            CAP26EntityKind::Identity,
+            index,
+        )
+    }
+
+    /// A sample used to facilitate unit tests.
+    fn sample_with_key_kind_entity_kind(
+        key_kind: CAP26KeyKind,
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        Self::sample_with_key_kind_entity_kind_on_network(
             NetworkID::Mainnet,
             key_kind,
-            UnsecurifiedHardened::from_local_key_space(index).unwrap(),
-        );
+            entity_kind,
+            index,
+        )
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub(crate) fn sample_with_key_kind_entity_kind_on_network(
+        network_id: NetworkID,
+        key_kind: CAP26KeyKind,
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        let path = match entity_kind {
+            CAP26EntityKind::Account => DerivationPath::from(AccountPath::new(
+                network_id,
+                key_kind,
+                UnsecurifiedHardened::from_local_key_space(index).unwrap(),
+            )),
+            CAP26EntityKind::Identity => {
+                DerivationPath::from(IdentityPath::new(
+                    network_id,
+                    key_kind,
+                    UnsecurifiedHardened::from_local_key_space(index).unwrap(),
+                ))
+            }
+        };
+
         let mwp = MnemonicWithPassphrase::sample();
         let seed = mwp.to_seed();
         let private_key = seed.derive_private_key(&path);
@@ -224,29 +288,24 @@ impl HierarchicalDeterministicFactorInstance {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = HierarchicalDeterministicFactorInstance;
+
     #[test]
     fn equality() {
-        assert_eq!(
-            HierarchicalDeterministicFactorInstance::sample(),
-            HierarchicalDeterministicFactorInstance::sample()
-        );
-        assert_eq!(
-            HierarchicalDeterministicFactorInstance::sample_other(),
-            HierarchicalDeterministicFactorInstance::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            HierarchicalDeterministicFactorInstance::sample(),
-            HierarchicalDeterministicFactorInstance::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = HierarchicalDeterministicFactorInstance::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -282,7 +341,7 @@ mod tests {
     #[test]
     fn key_kind_bip44_is_tx() {
         let derivation_path: DerivationPath = BIP44LikePath::sample().into();
-        let sut = HierarchicalDeterministicFactorInstance::new(
+        let sut = SUT::new(
             FactorSourceIDFromHash::sample(),
             HierarchicalDeterministicPublicKey::new(
                 PublicKey::sample_ed25519(),
@@ -293,9 +352,29 @@ mod tests {
     }
 
     #[test]
+    fn test_sample_identity() {
+        assert_eq!(
+            SUT::sample_transaction_signing_0_identity()
+                .derivation_path()
+                .get_entity_kind(),
+            CAP26EntityKind::Identity
+        );
+        assert_eq!(
+            SUT::sample_transaction_signing_1_identity()
+                .derivation_path()
+                .get_entity_kind(),
+            CAP26EntityKind::Identity
+        );
+        assert_ne!(
+            SUT::sample_transaction_signing_0_identity(),
+            SUT::sample_transaction_signing_1_identity()
+        )
+    }
+
+    #[test]
     fn key_kind_identity() {
         let derivation_path: DerivationPath = IdentityPath::sample().into();
-        let sut = HierarchicalDeterministicFactorInstance::new(
+        let sut = SUT::new(
             FactorSourceIDFromHash::sample(),
             HierarchicalDeterministicPublicKey::new(
                 PublicKey::sample_ed25519(),
@@ -308,9 +387,7 @@ mod tests {
     #[test]
     fn sample_auth() {
         assert_eq!(
-            HierarchicalDeterministicFactorInstance::sample_auth_signing()
-                .derivation_path()
-                .to_string(),
+            SUT::sample_auth_signing().derivation_path().to_string(),
             "m/44H/1022H/1H/525H/1678H/0H"
         );
     }

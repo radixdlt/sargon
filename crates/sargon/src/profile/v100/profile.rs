@@ -738,10 +738,10 @@ mod tests {
             .unwrap()
             .clone();
 
-        assert_eq!(persona.display_name.value, "Batman");
+        assert_eq!(persona.display_name.value, "Satoshi");
         assert!(sut
             .update_persona(&persona.address, |a| a.display_name =
-                DisplayName::new("Satoshi").unwrap())
+                DisplayName::new("Batman").unwrap())
             .is_some());
 
         assert_eq!(
@@ -753,7 +753,7 @@ mod tests {
                 .unwrap()
                 .display_name
                 .value,
-            "Satoshi"
+            "Batman"
         );
     }
 
