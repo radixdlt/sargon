@@ -6,6 +6,17 @@ pub struct EntityMetadataCollection {
 }
 
 impl EntityMetadataCollection {
+    pub fn new(items: Vec<EntityMetadataItem>) -> EntityMetadataCollection {
+        EntityMetadataCollection { items }
+    }
+
+    #[cfg(test)]
+    pub fn empty() -> EntityMetadataCollection {
+        EntityMetadataCollection::new(vec![])
+    }
+}
+
+impl EntityMetadataCollection {
     fn get_value(&self, key: MetadataKey) -> Option<MetadataTypedValue> {
         let item = self
             .items

@@ -1,5 +1,17 @@
 use crate::prelude::*;
 
+impl StateEntityDetailsResponse {
+    pub fn new(
+        ledger_state: impl Into<Option<LedgerState>>,
+        items: Vec<StateEntityDetailsResponseItem>,
+    ) -> Self {
+        Self {
+            ledger_state: ledger_state.into(),
+            items,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

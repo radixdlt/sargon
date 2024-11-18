@@ -1,3 +1,9 @@
+// only used here...
+use radix_rust::{
+    labelled_resolvable_with_identity_impl, LabelResolver, LabelledResolvable,
+    LabelledResolveFrom,
+};
+
 use crate::prelude::*;
 
 #[derive(Clone)]
@@ -17,11 +23,15 @@ impl ScryptoNewManifestBucket for &Bucket {
     }
 }
 
-impl ScryptoExistingManifestBucket for &Bucket {
-    fn resolve(
-        self,
-        registrar: &ScryptoManifestNameRegistrar,
-    ) -> ScryptoManifestBucket {
-        registrar.name_lookup().bucket(self)
+impl LabelledResolvable for &Bucket {
+    type ResolverOutput = ScryptoManifestBucket;
+}
+
+impl LabelledResolveFrom<&Bucket> for ScryptoManifestBucket {
+    fn labelled_resolve_from(
+        value: &Bucket,
+        resolver: &impl LabelResolver<Self::ResolverOutput>,
+    ) -> Self {
+        resolver.resolve_label_into(&value.name)
     }
 }

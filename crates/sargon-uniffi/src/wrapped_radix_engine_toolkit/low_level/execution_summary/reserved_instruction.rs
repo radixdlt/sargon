@@ -9,5 +9,4 @@ pub enum ReservedInstruction {
     AccountSecurify,
     IdentitySecurify,
     AccessControllerMethod,
-    AccountUpdateSettings,
 }

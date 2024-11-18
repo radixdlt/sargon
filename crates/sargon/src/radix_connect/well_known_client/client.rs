@@ -79,7 +79,7 @@ mod tests {
     async fn test_get_well_known_file_correct_request_made() {
         // ARRANGE
         let mock_antenna_with_spy =
-            MockNetworkingDriver::with_spy(200, vec![], |_| {
+            MockNetworkingDriver::with_spy(200, vec![], |_, _| {
                 let request = NetworkRequest::get_well_known(
                     Url::from_str(TEST_ORIGIN).unwrap(),
                 );

@@ -144,8 +144,9 @@ impl TransactionManifest {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary = RET_statically_analyze(&self.scrypto_manifest())
-            .map_err(map_static_analysis_error)?;
+        let summary =
+            RET_statically_analyze_and_validate(&self.scrypto_manifest())
+                .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
@@ -357,11 +358,12 @@ DROP_AUTH_ZONE_PROOFS;
     }
 
     #[test]
-    fn non_sensical_manifest_does_not_crash() {
+    #[should_panic(
+        expected = "Account withdraw output should not have unspecified resources"
+    )] // https://github.com/radixdlt/radixdlt-scrypto/blob/develop/radix-transactions/src/manifest/static_resource_movements/types.rs#L1386
+    fn non_sensical_manifest_panics() {
         // We are passing in an account address instead of resource address as argument
-        // to "withdraw", which does not make any sense. In an earlier version of RET
-        // this caused `summary` call to crash. But the PR adding this test bumps RET to
-        // a version which does not crash. Does not hurt to keep this unit test around.
+        // to "withdraw", which does not make any sense.
         let non_sensical = r#"
 CALL_METHOD
   Address("account_tdx_2_1c90qdw5e3t3tjyd8axt3zg9zezhhhymt2mr8y4l0k2285mfwhczhdt")
@@ -386,11 +388,7 @@ BURN_RESOURCE
             Blobs::default(),
         )
         .unwrap();
-        let summary = manifest.summary();
-        matches!(
-            summary,
-            Err(CommonError::FailedToGenerateManifestSummary { .. })
-        );
+        let _ = manifest.summary();
     }
 
     #[test]

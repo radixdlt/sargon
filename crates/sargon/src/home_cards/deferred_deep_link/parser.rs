@@ -132,9 +132,11 @@ mod tests_transform {
         };
         let mock_antenna =
             MockNetworkingDriver::with_response(StateEntityDetailsResponse {
+                ledger_state: None,
                 items: vec![StateEntityDetailsResponseItem {
                     address: Address::sample_account_stokenet(),
                     fungible_resources: None,
+                    non_fungible_resources: None,
                     metadata: EntityMetadataCollection {
                         items: vec![EntityMetadataItem {
                             key: key.to_string(),

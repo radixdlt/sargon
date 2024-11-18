@@ -1,5 +1,5 @@
-mod opt_ins;
-mod request;
+mod details;
+mod page;
 
-pub use opt_ins::*;
-pub use request::*;
+pub use details::*;
+pub use page::*;

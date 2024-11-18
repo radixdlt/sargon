@@ -55,28 +55,25 @@ mod tests {
 
     #[test]
     fn default_does_not_contain_deleted_by_user() {
-        assert!(!SUT::default().contains_by_id(&EntityFlag::DeletedByUser));
+        assert!(!SUT::default().contains_by_id(&EntityFlag::HiddenByUser));
     }
 
     #[test]
     fn new_with_f_contains_f() {
-        assert!(SUT::just(EntityFlag::DeletedByUser)
-            .contains_by_id(&EntityFlag::DeletedByUser));
+        assert!(SUT::just(EntityFlag::HiddenByUser)
+            .contains_by_id(&EntityFlag::HiddenByUser));
     }
 
     #[test]
     fn remove_existing_flag() {
-        assert!(SUT::just(EntityFlag::DeletedByUser)
-            .remove_flag(&EntityFlag::DeletedByUser)
+        assert!(SUT::just(EntityFlag::HiddenByUser)
+            .remove_flag(&EntityFlag::HiddenByUser)
             .is_some());
     }
 
     #[test]
     fn remove_non_existing_flag() {
-        assert_eq!(
-            SUT::default().remove_flag(&EntityFlag::DeletedByUser),
-            None
-        );
+        assert_eq!(SUT::default().remove_flag(&EntityFlag::HiddenByUser), None);
         // does not exist
     }
 
@@ -84,8 +81,8 @@ mod tests {
     fn new_with_duplicates_of_f_contains_only_f() {
         assert_eq!(
             SUT::from_iter([
-                EntityFlag::DeletedByUser,
-                EntityFlag::DeletedByUser
+                EntityFlag::HiddenByUser,
+                EntityFlag::HiddenByUser
             ])
             .len(),
             1
@@ -95,13 +92,13 @@ mod tests {
     #[test]
     fn new_empty_insert_f_contains_f() {
         let mut sut = SUT::default();
-        sut.insert_flag(EntityFlag::DeletedByUser);
-        assert!(sut.contains_by_id(&EntityFlag::DeletedByUser));
+        sut.insert_flag(EntityFlag::HiddenByUser);
+        assert!(sut.contains_by_id(&EntityFlag::HiddenByUser));
     }
 
     #[test]
     fn json_roundtrip_non_empty() {
-        let model = SUT::just(EntityFlag::DeletedByUser);
+        let model = SUT::just(EntityFlag::HiddenByUser);
 
         assert_json_value_eq_after_roundtrip(
             &model,
