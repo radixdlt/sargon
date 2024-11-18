@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 decl_ret_wrapped_address!(
-    /// Addresses to a specific locker, owned by a dApp, holding assets, either fungible or non-fungible,
+    /// Addresses to a specific locker, owned by a dApp, holding assets, either fungible or non_fungible,
     /// that can be claimed by destined account addresses.
     /// Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
     /// e.g.:

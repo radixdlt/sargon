@@ -27,7 +27,8 @@ impl GatewayClient {
                 api_call(cursor.clone(), ledger_state_selector.clone()).await?;
             items.extend(response.items);
             cursor = response.next_cursor;
-            ledger_state_selector = response.ledger_state.map(Into::into);
+            ledger_state_selector =
+                Some(LedgerStateSelector::from(response.ledger_state));
             more_to_load = cursor.is_some();
         }
 

@@ -12,6 +12,9 @@ pub enum EventProfileModified {
     /// An existing account has been updated
     AccountUpdated { address: AccountAddress },
 
+    /// Existing accounts have been updated
+    AccountsUpdated { addresses: Vec<AccountAddress> },
+
     /// Profile updated with a new factor source.
     FactorSourceAdded { id: FactorSourceID },
 
@@ -41,6 +44,7 @@ impl HasEventKind for EventProfileModified {
             Self::SecurityStructureAdded { id: _ } => {
                 EventKind::SecurityStructureAdded
             }
+            Self::AccountsUpdated { addresses: _ } => EventKind::AccountUpdated,
         }
     }
 }

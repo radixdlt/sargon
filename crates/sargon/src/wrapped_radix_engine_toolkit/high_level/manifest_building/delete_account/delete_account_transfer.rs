@@ -13,7 +13,7 @@ pub struct DeleteAccountTransfer {
 
     /// The weight of this transfer in a transaction, so that we don't exceed the maximum.
     /// The weight of a fungible transfer is 1, regardless of the amount, while the weight of a
-    /// non-fungible transfer is the amount of items.
+    /// non_fungible transfer is the amount of items.
     pub weight: u64,
 }
 

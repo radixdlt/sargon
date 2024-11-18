@@ -2,12 +2,14 @@ package com.radixdlt.sargon.samples
 
 import com.radixdlt.sargon.EntityFlag
 import com.radixdlt.sargon.annotation.UsesSampleValues
+import com.radixdlt.sargon.newEntityFlagSample
+import com.radixdlt.sargon.newEntityFlagSampleOther
 
 @UsesSampleValues
 val EntityFlag.Companion.sample: Sample<EntityFlag>
     get() = object: Sample<EntityFlag> {
-        override fun invoke(): EntityFlag = EntityFlag.DELETED_BY_USER
+        override fun invoke(): EntityFlag = newEntityFlagSample()
 
-        override fun other(): EntityFlag = EntityFlag.PLACEHOLDER_SAMPLE_VALUE_FLAG
+        override fun other(): EntityFlag = newEntityFlagSampleOther()
 
     }
