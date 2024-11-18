@@ -31,18 +31,15 @@ mod integration_tests {
             "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
         ).unwrap();
 
-        assert!(
-            gateway_client
-                .check_accounts_are_deleted(
-                    NetworkID::Stokenet,
-                    vec![account_address]
-                )
-                .await
-                .unwrap()
-                .first()
-                .unwrap()
-                .1
-        )
+        let result = gateway_client
+            .check_accounts_are_deleted(
+                NetworkID::Stokenet,
+                vec![account_address],
+            )
+            .await
+            .unwrap();
+
+        assert!(result.get(&account_address).unwrap())
     }
 
     #[actix_rt::test]

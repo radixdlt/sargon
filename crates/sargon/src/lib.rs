@@ -31,7 +31,7 @@ pub mod prelude {
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub use radix_rust::prelude::{
-        BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
+        indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
     };
 
     pub(crate) use ::hex::decode as hex_decode;

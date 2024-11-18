@@ -61,7 +61,7 @@ impl GatewayClient {
         &self,
         network_id: NetworkID,
         account_addresses: impl IntoIterator<Item = AccountAddress>,
-    ) -> Result<Vec<(AccountAddress, bool)>> {
+    ) -> Result<IndexMap<AccountAddress, bool>> {
         // Construct the owner badge resource address
         let owner_badge_resource_address =
             ResourceAddress::new(SCRYPTO_ACCOUNT_OWNER_BADGE, network_id)?;
@@ -69,11 +69,14 @@ impl GatewayClient {
         // Break accounts into chunks
         let account_address_chunks = account_addresses
             .into_iter()
-            .chunks(GATEWAY_CHUNK_NON_FUNGIBLES as usize);
+            .chunks(GATEWAY_CHUNK_NON_FUNGIBLES as usize)
+            .into_iter()
+            .map(|c| c.collect_vec())
+            .collect_vec();
 
-        let mut result = Vec::<(AccountAddress, bool)>::new();
+        let mut result = IndexMap::<AccountAddress, bool>::new();
 
-        for chunk in &account_address_chunks {
+        for chunk in account_address_chunks.into_iter() {
             // Construct supposed badges for each account
             let badges_of_account_addresses = chunk
                 .into_iter()
@@ -118,12 +121,12 @@ impl GatewayClient {
                 |(badge, account_address)| {
                     if let Some(location) = locations.get(badge) {
                         // The account is deleted if the parent of the badge is the account address
-                        result.push((
+                        result.insert(
                             *account_address,
                             location == account_address,
-                        ));
+                        );
                     } else {
-                        result.push((*account_address, false));
+                        result.insert(*account_address, false);
                     }
                 },
             );

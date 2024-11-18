@@ -51,7 +51,7 @@ impl SargonOS {
         &self,
         network_id: NetworkID,
         account_addresses: impl IntoIterator<Item = AccountAddress>,
-    ) -> Result<Vec<(AccountAddress, bool)>> {
+    ) -> Result<IndexMap<AccountAddress, bool>> {
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
             network_id,
@@ -151,10 +151,10 @@ mod tests {
         // ASSERT
         assert_eq!(
             accounts_status,
-            vec![
-                (account_address_deleted, true),
-                (account_address_not_deleted, false),
-            ]
+            indexmap!(
+                account_address_deleted => true,
+                account_address_not_deleted => false,
+            )
         )
     }
 
