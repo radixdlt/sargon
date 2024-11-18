@@ -365,7 +365,7 @@ mod integration_tests {
             .unwrap();
 
         // Empty/virtual account
-        let account_address = AccountAddress::try_from_bech32("account_tdx_2_12856d8p4llz8rs97hx964c5mqyewgwz620awgzuwxhfqgxvyd8n9a7".to_string()).unwrap();
+        let account_address = AccountAddress::try_from_bech32("account_tdx_2_12856d8p4llz8rs97hx964c5mqyewgwz620awgzuwxhfqgxvyd8n9a7").unwrap();
 
         let result = os
             .create_delete_account_manifest(account_address, None)
