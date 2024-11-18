@@ -6,6 +6,7 @@ use radix_engine_interface::blueprints::account::{
     ResourcePreference as ScryptoResourcePreference,
     ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
     ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT, ACCOUNT_SECURIFY_IDENT,
+    ACCOUNT_SET_DEFAULT_DEPOSIT_RULE_IDENT,
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
 
@@ -102,6 +103,13 @@ impl TransactionManifest {
             ScryptoAccountSetResourcePreferenceInput::from(asset_exception),
         );
 
+        // Set the default deposit rule to reject all deposits
+        builder = builder.call_method(
+            account_address,
+            ACCOUNT_SET_DEFAULT_DEPOSIT_RULE_IDENT,
+            (ScryptoDefaultDepositRule::Reject,),
+        );
+
         // We've changed the account deposit rules, so now we can drop all the proofs in the auth zone (which
         // is pretty much a single proof of the account owner badge).
         builder = builder.drop_auth_zone_proofs();
@@ -170,6 +178,11 @@ CALL_METHOD
     "set_resource_preference"
     Address("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk")
     Enum<0u8>()
+;
+CALL_METHOD
+Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+"set_default_deposit_rule"
+Enum<1u8>()
 ;
 DROP_AUTH_ZONE_PROOFS;
 CALL_METHOD
@@ -271,6 +284,11 @@ CALL_METHOD
     "set_resource_preference"
     Address("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk")
     Enum<0u8>()
+;
+CALL_METHOD
+Address("account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg")
+"set_default_deposit_rule"
+Enum<1u8>()
 ;
 DROP_AUTH_ZONE_PROOFS;
 CALL_METHOD

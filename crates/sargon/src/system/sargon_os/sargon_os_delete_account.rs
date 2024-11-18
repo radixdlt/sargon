@@ -290,8 +290,7 @@ mod tests {
             ResourceOrNonFungible::NonFungible {
                 value: NonFungibleGlobalId::new_unchecked(
                     nft_collection_address,
-                    NonFungibleLocalId::string("Member_237")
-                        .unwrap()
+                    NonFungibleLocalId::string("Member_237").unwrap()
                 )
             }
         );
