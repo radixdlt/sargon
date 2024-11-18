@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - DO-2781/github-action-refactor
 
 permissions:
   id-token: write
@@ -72,6 +71,7 @@ jobs:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
 
       - name: Push release tag
+        if: github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
 
@@ -91,7 +91,7 @@ jobs:
                      --no-verify
 
           echo "🚢 🏷️ 📡 Pushing tag: $NEXT_TAG, but only tag, not commit."
-          # git push origin $NEXT_TAG
+          git push origin $NEXT_TAG
         env:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
