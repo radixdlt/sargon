@@ -224,16 +224,16 @@ impl SargonOS {
         let execution_summary =
             manifest.execution_summary(engine_toolkit_receipt)?;
 
-        let forbidden_manifest_class = execution_summary
+        let reserved_manifest_class = execution_summary
             .detailed_classification
             .iter()
-            .find(|classification| classification.is_forbidden());
+            .find(|classification| classification.is_reserved());
 
-        if let Some(forbidden_manifest_class) = forbidden_manifest_class
+        if let Some(reserved_manifest_class) = reserved_manifest_class
             && !are_instructions_originating_from_host
         {
-            return Err(CommonError::ForbiddenManifestClass {
-                class: forbidden_manifest_class.clone(),
+            return Err(CommonError::ReservedManifestClass {
+                class: reserved_manifest_class.clone(),
             });
         }
 

@@ -104,7 +104,8 @@ pub enum DetailedManifestClass {
 }
 
 impl DetailedManifestClass {
-    pub(crate) fn is_forbidden(&self) -> bool {
+    /// Checks the manifest class is reserved for Wallet interactions only
+    pub(crate) fn is_reserved(&self) -> bool {
         match self {
             DetailedManifestClass::DeleteAccounts {
                 account_addresses: _,
@@ -267,13 +268,13 @@ mod tests {
     type SUT = DetailedManifestClass;
 
     #[test]
-    fn is_forbidden_classification() {
+    fn is_reserved_classification() {
         let general = SUT::General;
         let delete_accounts = SUT::DeleteAccounts {
             account_addresses: Vec::<_>::sample(),
         };
 
-        pretty_assertions::assert_eq!(general.is_forbidden(), false);
-        pretty_assertions::assert_eq!(delete_accounts.is_forbidden(), true);
+        pretty_assertions::assert_eq!(general.is_reserved(), false);
+        pretty_assertions::assert_eq!(delete_accounts.is_reserved(), true);
     }
 }
