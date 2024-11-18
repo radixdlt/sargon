@@ -263,15 +263,14 @@ impl Profile {
                                 .factor_source_id
                                 .to_string(),
                         });
-                    } 
+                    }
                 }
                 instances_per_entity.insert(entity.address(), to_check);
                 Ok(())
             };
             let mut check_entities =
                 |entities: &IdentifiedVecOf<AccountOrPersona>| -> Result<()> {
-                    entities
-                        .into_iter().try_for_each(&mut check)
+                    entities.into_iter().try_for_each(&mut check)
                 };
             check_entities(&network.accounts.erased())?;
             check_entities(&network.personas.erased())?;
