@@ -583,7 +583,7 @@ pub enum CommonError {
     ExpectedNonEmptyCollection = 10161,
 
     #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10162,
+    UnableToAddAllEntitiesDuplicatesFound = 10162,
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
     ProfileUsedOnOtherDevice {
@@ -796,6 +796,9 @@ pub enum CommonError {
         address_of_entity2: String,
         factor_source_id: String,
     } = 10222,
+
+    #[error("Failed to add all accounts, found duplicated accounts.")]
+    UnableToAddAllAccountsDuplicatesFound = 10223,
 }
 
 #[uniffi::export]

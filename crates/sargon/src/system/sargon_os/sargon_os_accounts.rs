@@ -564,7 +564,12 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
-        self.add_entities(accounts).await
+        self.add_entities(accounts).await.map_err(|e| match e {
+            CommonError::UnableToAddAllEntitiesDuplicatesFound => {
+                CommonError::UnableToAddAllAccountsDuplicatesFound
+            }
+            _ => e,
+        })
     }
 }
 
@@ -645,7 +650,7 @@ impl SargonOS {
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    async fn add_entities<E: IsEntity>(
+    pub async fn add_entities<E: IsEntity>(
         &self,
         entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
@@ -681,7 +686,7 @@ impl SargonOS {
                             CAP26EntityKind::Identity => network.personas.len(),
                         };
                         debug!("Profile Network to add #{} entities to contains #{} entities (before adding).", number_of_entities_to_add, count_before);
-                        // network.accounts.extend(accounts.clone());
+
                         match entity_kind {
                             CAP26EntityKind::Account => {
                                 network.accounts.extend(to_accounts());
@@ -695,12 +700,12 @@ impl SargonOS {
                             CAP26EntityKind::Account => network.accounts.len(),
                             CAP26EntityKind::Identity => network.personas.len(),
                         };
-                        debug!("Profile Network now contains: #{} accounts", count_after);
+                        debug!("Profile Network now contains: #{} entities", count_after);
 
-                        if network.accounts.len() == count_before + number_of_entities_to_add {
+                        if count_after == count_before + number_of_entities_to_add {
                             Ok(())
                         } else {
-                            Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
+                            Err(CommonError::UnableToAddAllEntitiesDuplicatesFound)
                         }
                     })
             } else {

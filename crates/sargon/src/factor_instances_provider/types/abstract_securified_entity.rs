@@ -33,12 +33,13 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     AbstractSecurifiedEntity<E>
 {
     pub fn new(entity: E) -> Result<Self> {
-        let securified_entity_control = entity.try_get_secured_control()?;
-        Ok(Self {
-            __hidden: HiddenConstructor,
-            entity,
-            securified_entity_control,
-        })
+        entity
+            .try_get_secured_control()
+            .map(|securified_entity_control| Self {
+                __hidden: HiddenConstructor,
+                entity,
+                securified_entity_control,
+            })
     }
 
     pub fn address(&self) -> AddressOfAccountOrPersona {

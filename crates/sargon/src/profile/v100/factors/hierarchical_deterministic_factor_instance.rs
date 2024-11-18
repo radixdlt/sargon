@@ -187,11 +187,13 @@ impl HasSampleValues for HierarchicalDeterministicFactorInstance {
 }
 
 impl HierarchicalDeterministicFactorInstance {
+    /// Account | Mainnet | Transaction Signing
     /// A sample used to facilitate unit tests.
     pub fn sample_transaction_signing_0() -> Self {
         Self::sample_with_key_kind(CAP26KeyKind::TransactionSigning, 0)
     }
 
+    /// Account | Mainnet | Transaction Signing
     /// A sample used to facilitate unit tests.
     pub fn sample_transaction_signing_1() -> Self {
         Self::sample_with_key_kind(CAP26KeyKind::TransactionSigning, 1)
@@ -214,7 +216,7 @@ impl HierarchicalDeterministicFactorInstance {
         Self::sample_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0)
     }
 
-    /// Account
+    /// Account | Mainnet
     /// A sample used to facilitate unit tests.
     fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {
         Self::sample_with_key_kind_entity_kind(

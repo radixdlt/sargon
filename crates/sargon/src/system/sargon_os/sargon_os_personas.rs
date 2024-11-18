@@ -487,22 +487,7 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::PersonasAdded { addresses } }`
     pub async fn add_persona(&self, persona: Persona) -> Result<()> {
-        let address = persona.address;
-
-        debug!("Adding persona with address: {} to profile", address);
-
-        self.add_personas_without_emitting_persona_added_event(Personas::just(
-            persona,
-        ))
-        .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::PersonaAdded { address },
-            ))
-            .await;
-
-        Ok(())
+        self.add_entity(persona).await
     }
 
     /// Adds the `personas` to active profile and **saves** the updated profile to
@@ -518,22 +503,12 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::PersonasAdded { addresses } }`
     pub async fn add_personas(&self, personas: Personas) -> Result<()> {
-        let addresses = personas
-            .clone()
-            .into_iter()
-            .map(|a| a.address)
-            .collect_vec();
-
-        self.add_personas_without_emitting_persona_added_event(personas)
-            .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::PersonasAdded { addresses },
-            ))
-            .await;
-
-        Ok(())
+        self.add_entities(personas).await.map_err(|e| match e {
+            CommonError::UnableToAddAllEntitiesDuplicatesFound => {
+                CommonError::UnableToAddAllPersonasDuplicatesFound
+            }
+            _ => e,
+        })
     }
 }
 
@@ -548,90 +523,7 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaUpdated { address } }`
     pub async fn update_persona(&self, updated: Persona) -> Result<()> {
-        self.update_profile_with(|p| {
-            if p.update_persona(&updated.address, |old| *old = updated.clone())
-                .is_none()
-            {
-                Err(CommonError::UnknownPersona)
-            } else {
-                Ok(())
-            }
-        })
-        .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::PersonaUpdated {
-                    address: updated.address,
-                },
-            ))
-            .await;
-
-        Ok(())
-    }
-}
-
-impl SargonOS {
-    /// Adds the `personas` to active profile and **saves** the updated profile to
-    /// secure storage, without emitting `Event::PersonaAdded`, but we DO emit
-    /// `Event::ProfileSaved`.`
-    ///
-    /// Returns `Ok(())` if the `personas` were new and successfully added. If
-    /// saving failed or if the personas were already present in Profile, an
-    /// error is returned.
-    ///
-    /// # Emits
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    async fn add_personas_without_emitting_persona_added_event(
-        &self,
-        personas: Personas,
-    ) -> Result<()> {
-        if personas.is_empty() {
-            warn!("Tried to add empty personas...");
-            return Ok(());
-        }
-
-        let number_of_personas_to_add = personas.len();
-
-        let network_id = personas
-            .assert_elements_on_same_network()?
-            .expect("Should have handled empty personas case already.");
-
-        debug!("Adding #{} personas to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_personas_to_add, network_id);
-
-        self.update_profile_with(|p| {
-            let networks = &mut p.networks;
-
-            if networks.contains_id(network_id) {
-                debug!("Profile already contained network to add #{} persona(s) to, network_id: {}", number_of_personas_to_add, network_id);
-                networks
-                    .try_try_update_with(&network_id, |network| {
-                        let count_before = network.personas.len();
-                        debug!("Profile Network to add #{} persona(s) to contains #{} personas (before adding).", number_of_personas_to_add, count_before);
-                        network.personas.extend(personas.clone());
-                        let count_after = network.personas.len();
-                        debug!("Profile Network now contains: #{} personas", count_after);
-                        if network.personas.len() == count_before + number_of_personas_to_add {
-                            Ok(())
-                        } else {
-                            Err(CommonError::UnableToAddAllPersonasDuplicatesFound)
-                        }
-                    })
-            } else {
-                debug!("No Profile Network exists with ID {}, creating it...", network_id);
-                let network = ProfileNetwork::new(
-                    network_id,
-                    Accounts::default(),
-                    personas.clone(),
-                    AuthorizedDapps::default(),
-                    ResourcePreferences::default(),
-                );
-                networks.append(network);
-                Ok(())
-            }
-        })
-        .await
+        self.update_entity(updated).await
     }
 }
 
@@ -1132,6 +1024,25 @@ mod tests {
 
         // ASSERT
         assert!(result.is_ok())
+    }
+
+    #[actix_rt::test]
+    async fn add_two_personas() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| {
+            x.add_personas(Personas::from_iter([
+                Persona::sample(),
+                Persona::sample_other(),
+            ]))
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile().unwrap().networks[0].personas.len(), 2)
     }
 
     #[actix_rt::test]
