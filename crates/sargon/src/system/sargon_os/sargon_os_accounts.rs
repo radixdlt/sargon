@@ -299,6 +299,12 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountsUpdated { addresses } }`
     pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
+        // Pre-validate that all received `updated` accounts exist in profile
+        let _ = updated
+            .iter()
+            .map(|a| self.account_by_address(a.address.clone()))
+            .collect::<Result<Vec<_>>>()?;
+
         self.update_profile_with(|p| {
             for updated_account in updated.clone() {
                 p.update_account(&updated_account.address, |old| {
