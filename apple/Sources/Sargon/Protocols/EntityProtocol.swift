@@ -33,7 +33,7 @@ extension EntityBaseProtocol {
 	public var networkID: NetworkID { networkId }
 	
 	public var isHidden: Bool {
-		flags.contains(.deletedByUser)
+		flags.contains(.hiddenByUser)
 	}
 	
 	public var virtualHierarchicalDeterministicFactorInstances: Set<HierarchicalDeterministicFactorInstance> {

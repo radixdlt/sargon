@@ -8,7 +8,6 @@ pub enum ReservedInstruction {
     AccountSecurify,
     IdentitySecurify,
     AccessControllerMethod,
-    AccountUpdateSettings,
 }
 
 impl From<RetReservedInstruction> for ReservedInstruction {
@@ -19,9 +18,6 @@ impl From<RetReservedInstruction> for ReservedInstruction {
             RetReservedInstruction::IdentitySecurify => Self::IdentitySecurify,
             RetReservedInstruction::AccessControllerMethod => {
                 Self::AccessControllerMethod
-            }
-            RetReservedInstruction::AccountUpdateSettings => {
-                Self::AccountUpdateSettings
             }
         }
     }

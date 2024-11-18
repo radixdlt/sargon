@@ -1,4 +1,5 @@
 mod assert_json;
+mod assert_network_request;
 mod error;
 mod has_sample_values;
 mod hash;
@@ -9,6 +10,7 @@ mod unsafe_id_stepper;
 mod utils;
 
 pub use assert_json::*;
+pub use assert_network_request::*;
 pub use error::*;
 pub use has_sample_values::*;
 pub use hash::*;

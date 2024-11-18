@@ -85,7 +85,7 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 		XCTAssertTrue(
 			SUT.sampleValues.flatMap(
 				\.flags
-			).contains(.deletedByUser)
+			).contains(.hiddenByUser)
 		)
 	}
 }

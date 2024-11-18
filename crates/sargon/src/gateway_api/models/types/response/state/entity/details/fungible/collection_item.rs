@@ -13,3 +13,15 @@ use crate::prelude::*;
 pub enum FungibleResourcesCollectionItem {
     Global(FungibleResourcesCollectionItemGloballyAggregated),
 }
+
+impl HasSampleValues for FungibleResourcesCollectionItem {
+    fn sample() -> Self {
+        Self::Global(FungibleResourcesCollectionItemGloballyAggregated::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::Global(
+            FungibleResourcesCollectionItemGloballyAggregated::sample_other(),
+        )
+    }
+}

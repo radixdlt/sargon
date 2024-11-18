@@ -22,6 +22,7 @@ macro_rules! address_union {
                 PartialEq,
                 Eq,
                 Hash,
+                EnumAsInner,
                 derive_more::Display,
                 derive_more::Debug,
                 SerializeDisplay,

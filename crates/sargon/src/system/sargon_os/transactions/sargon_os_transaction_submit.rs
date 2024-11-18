@@ -36,7 +36,7 @@ mod tests {
         let body = serde_json::to_vec(&response).unwrap();
 
         let mock_driver =
-            MockNetworkingDriver::with_spy(200, body, |request| {
+            MockNetworkingDriver::with_spy(200, body, |request, _| {
                 // Verify the body sent matches the expected one
                 let sent_request = TransactionSubmitRequest::new(
                     NotarizedTransaction::sample(),
@@ -85,6 +85,6 @@ mod tests {
             .await
             .expect_err("Expected an error");
 
-        assert_eq!(result, CommonError::NetworkResponseBadCode);
+        assert_eq!(result, CommonError::NetworkResponseBadCode { code: 500 });
     }
 }

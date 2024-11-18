@@ -2,46 +2,58 @@ use crate::prelude::*;
 
 /// Represents a collection of child subintents.
 ///
-/// This struct is used to manage a list of `ChildSubintent` instances, providing
+/// This struct is used to manage a list of `ChildSubintentSpecifier` instances, providing
 /// methods for creation, conversion, and sample values for testing purposes.
 ///
 /// # Fields
-/// - `children`: A vector of `ChildSubintent` instances.
+/// - `children`: A vector of `ChildSubintentSpecifier` instances.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ChildIntents {
-    pub children: Vec<ChildSubintent>,
+pub struct ChildSubintentSpecifiers {
+    pub children: Vec<ChildSubintentSpecifier>,
 }
 
-impl ChildIntents {
-    pub fn new(children: impl IntoIterator<Item = ChildSubintent>) -> Self {
+impl ChildSubintentSpecifiers {
+    pub fn new(
+        children: impl IntoIterator<Item = ChildSubintentSpecifier>,
+    ) -> Self {
         Self {
             children: children.into_iter().collect(),
         }
     }
 }
 
-impl Default for ChildIntents {
+impl Default for ChildSubintentSpecifiers {
     fn default() -> Self {
         Self::new([])
     }
 }
 
-impl From<ChildIntents> for Vec<ScryptoChildSubintent> {
-    fn from(value: ChildIntents) -> Self {
+impl From<ChildSubintentSpecifiers>
+    for IndexSet<ScryptoChildSubintentSpecifier>
+{
+    fn from(value: ChildSubintentSpecifiers) -> Self {
         value.children.into_iter().map(Into::into).collect()
     }
 }
 
-impl From<ChildIntents> for ScryptoChildIntents {
-    fn from(value: ChildIntents) -> Self {
-        ScryptoChildIntents {
-            children: value.into(),
+impl From<ChildSubintentSpecifiers> for ScryptoChildSubintentSpecifiers {
+    fn from(value: ChildSubintentSpecifiers) -> Self {
+        ScryptoChildSubintentSpecifiers {
+            children: value
+                .children
+                .into_iter()
+                .map(ScryptoChildSubintentSpecifier::from)
+                .collect(),
         }
     }
 }
 
-impl From<(Vec<ScryptoChildSubintent>, NetworkID)> for ChildIntents {
-    fn from(value: (Vec<ScryptoChildSubintent>, NetworkID)) -> Self {
+impl From<(IndexSet<ScryptoChildSubintentSpecifier>, NetworkID)>
+    for ChildSubintentSpecifiers
+{
+    fn from(
+        value: (IndexSet<ScryptoChildSubintentSpecifier>, NetworkID),
+    ) -> Self {
         Self::new(
             value
                 .0
@@ -52,19 +64,19 @@ impl From<(Vec<ScryptoChildSubintent>, NetworkID)> for ChildIntents {
     }
 }
 
-impl ChildIntents {
+impl ChildSubintentSpecifiers {
     pub(crate) fn empty() -> Self {
         Self::default()
     }
 }
 
-impl HasSampleValues for ChildIntents {
+impl HasSampleValues for ChildSubintentSpecifiers {
     fn sample() -> Self {
-        Self::new([ChildSubintent::sample()])
+        Self::new([ChildSubintentSpecifier::sample()])
     }
 
     fn sample_other() -> Self {
-        Self::new([ChildSubintent::sample_other()])
+        Self::new([ChildSubintentSpecifier::sample_other()])
     }
 }
 
@@ -74,7 +86,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = ChildIntents;
+    type SUT = ChildSubintentSpecifiers;
 
     #[test]
     fn equality() {
@@ -96,7 +108,7 @@ mod tests {
     #[test]
     fn to_from_scrypto() {
         let roundtrip = |s: SUT, network_id: NetworkID| {
-            let scrypto: ScryptoChildIntents = s.clone().into();
+            let scrypto: ScryptoChildSubintentSpecifiers = s.clone().into();
             SUT::from((scrypto.children, network_id))
         };
         assert_eq!(SUT::sample(), roundtrip(SUT::sample(), NetworkID::Mainnet));

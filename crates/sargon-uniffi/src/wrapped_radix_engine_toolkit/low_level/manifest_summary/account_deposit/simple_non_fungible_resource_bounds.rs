@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use sargon::SimpleNonFungibleResourceBounds as InternalSimpleNonFungibleResourceBounds;
 
-/// Represents the bounds for a simple non-fungible resource, which can be either exact or not exact.
+/// Represents the bounds for a simple non_fungible resource, which can be either exact or not exact.
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct SimpleNonFungibleResourceBounds {
     pub certain_ids: Vec<NonFungibleLocalId>,

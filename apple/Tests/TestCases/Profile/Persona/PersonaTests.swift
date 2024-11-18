@@ -31,7 +31,7 @@ final class PersonaTests: EntityProtocolTest<Persona> {
 	
 	func test_hidden() {
 		let sut = SUT.sampleMainnetTuring.flags
-		XCTAssertEqual(sut, [.deletedByUser])
+		XCTAssertEqual(sut, [.hiddenByUser])
 	}
 	
 	func test_new() {

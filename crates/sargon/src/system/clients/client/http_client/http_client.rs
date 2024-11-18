@@ -26,7 +26,9 @@ impl HttpClient {
 
         // Check for valid status code
         if !(200..=299).contains(&response.status_code) {
-            return Err(CommonError::NetworkResponseBadCode);
+            return Err(CommonError::NetworkResponseBadCode {
+                code: response.status_code,
+            });
         }
 
         Ok(response.body)
@@ -113,7 +115,10 @@ mod tests {
             SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(result, Err(CommonError::NetworkResponseBadCode))
+        assert_eq!(
+            result,
+            Err(CommonError::NetworkResponseBadCode { code: 404 })
+        )
     }
 
     #[actix_rt::test]
@@ -137,7 +142,7 @@ mod tests {
     #[actix_rt::test]
     async fn spy_headers() {
         let mock_networking_driver =
-            MockNetworkingDriver::with_spy(200, (), |request| {
+            MockNetworkingDriver::with_spy(200, (), |request, _| {
                 assert_eq!(
                     request
                         .headers

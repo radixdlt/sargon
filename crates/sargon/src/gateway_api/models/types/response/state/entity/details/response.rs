@@ -13,5 +13,9 @@ use crate::prelude::*;
     Debug,
 )]
 pub struct StateEntityDetailsResponse {
+    /// The ledger state against which the response was generated.
+    pub ledger_state: Option<LedgerState>,
+
+    /// The details for the requested entities.
     pub items: Vec<StateEntityDetailsResponseItem>,
 }
