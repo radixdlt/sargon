@@ -971,6 +971,68 @@ mod tests {
         );
     }
 
+    #[test]
+    fn account_delete() {
+        let instructions_string =
+            include_str!(concat!(env!("FIXTURES_TX"), "account_delete.rtm"));
+
+        let receipt = deserialize_receipt(include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "account_delete.dat"
+        )));
+
+        let transaction_manifest = TransactionManifest::new(
+            instructions_string,
+            NetworkID::Stokenet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
+
+        let acc: AccountAddress = "account_tdx_2_12xy65ekdcrehj24t0ks5lvvqcvr48qgac4efq3phecp0xyetze5nyy".into();
+        let badge_address: ResourceAddress = "resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk".into();
+        let badge_id = NonFungibleLocalId::bytes(
+            NonEmptyMax64Bytes::from_hex(
+                "5189aa66cdc0f3792aab7da14fb180c30753811dc572904437ce02f3132b",
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        let global_badge_address = NonFungibleGlobalId::new(
+            NonFungibleResourceAddress::new(badge_address.clone()).unwrap(),
+            badge_id.clone(),
+        );
+
+        let expected_summary = SUT::new(
+            [], // No withdrawals
+            [(
+                acc.clone(),
+                vec![ResourceIndicator::non_fungible(
+                    badge_address,
+                    NonFungibleResourceIndicator::by_all(
+                        PredictedDecimal::new(1, 1),
+                        PredictedNonFungibleLocalIds::new([badge_id], 1),
+                    ),
+                )],
+            )],
+            vec![acc.clone()], // addresses_of_accounts_requiring_auth
+            [],                // addresses_of_identities_requiring_auth
+            [global_badge_address], // newly_created_non_fungibles
+            [ReservedInstruction::AccountSecurify], // reserved_instructions
+            [],                // presented_proofs
+            [],
+            [DetailedManifestClass::DeleteAccounts {
+                account_addresses: vec![acc.clone()],
+            }],
+            FeeLocks::default(),
+            FeeSummary::new("0.21017315", "0.04175875", "0.1564025852", 0),
+            NewEntities::default(),
+        );
+
+        pretty_assertions::assert_eq!(sut, expected_summary)
+    }
+
     fn deserialize_receipt(
         value: impl AsRef<str>,
     ) -> ScryptoSerializableToolkitTransactionReceipt {
