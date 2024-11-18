@@ -530,6 +530,7 @@ mod fetch_all_resources_tests {
             None,
             None,
             EntityMetadataCollection::empty(),
+            None,
         );
         let response = MockNetworkingDriverResponse::new_success(
             StateEntityDetailsResponse::new(LedgerState::sample(), vec![item]),
@@ -605,6 +606,7 @@ mod fetch_all_resources_tests {
             fungible_collection,
             non_fungible_collection,
             EntityMetadataCollection::empty(),
+            None,
         );
         MockNetworkingDriverResponse::new_success(
             StateEntityDetailsResponse::new(ledger_state, vec![item]),

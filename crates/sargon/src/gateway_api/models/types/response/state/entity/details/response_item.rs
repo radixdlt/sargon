@@ -20,6 +20,9 @@ pub struct StateEntityDetailsResponseItem {
 
     /// Entity metadata collection.
     pub metadata: EntityMetadataCollection,
+
+    /// More details of this entity.
+    pub details: Option<StateEntityDetailsResponseItemDetails>,
 }
 
 impl StateEntityDetailsResponseItem {
@@ -28,12 +31,14 @@ impl StateEntityDetailsResponseItem {
         fungible_resources: impl Into<Option<FungibleResourcesCollection>>,
         non_fungible_resources: impl Into<Option<NonFungibleResourcesCollection>>,
         metadata: EntityMetadataCollection,
+        details: impl Into<Option<StateEntityDetailsResponseItemDetails>>,
     ) -> StateEntityDetailsResponseItem {
         StateEntityDetailsResponseItem {
             address,
             fungible_resources: fungible_resources.into(),
             non_fungible_resources: non_fungible_resources.into(),
             metadata,
+            details: details.into(),
         }
     }
 }
