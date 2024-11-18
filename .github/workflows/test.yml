@@ -186,7 +186,7 @@ jobs:
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
-    runs-on: macos-14-xlarge
+    runs-on: macos-15-xlarge
     timeout-minutes: 20
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -274,7 +274,7 @@ jobs:
 
   # Code Coverage uses Tarpaulin and uploads to CodeCov.io
   code-coverage:
-    runs-on: macos-14-xlarge
+    runs-on: macos-15-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
