@@ -25,6 +25,21 @@ impl ResourceIndicator {
             } => *resource_address,
         }
     }
+
+    pub fn get_non_fungible_indicator(
+        &self,
+    ) -> Option<NonFungibleResourceIndicator> {
+        match self {
+            ResourceIndicator::Fungible {
+                resource_address: _,
+                indicator: _,
+            } => None,
+            ResourceIndicator::NonFungible {
+                resource_address: _,
+                indicator,
+            } => Some(indicator.clone()),
+        }
+    }
 }
 
 impl ResourceIndicator {

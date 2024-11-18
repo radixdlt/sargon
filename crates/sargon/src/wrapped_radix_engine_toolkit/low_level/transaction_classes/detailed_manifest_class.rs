@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// The execution summary process not only determines the class of the manifest,
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, derive_more::Display)]
 pub enum DetailedManifestClass {
     /// A general manifest that involves any amount of arbitrary components
     /// and packages where nothing more concrete can be said about the manifest
@@ -11,9 +11,11 @@ pub enum DetailedManifestClass {
     ///
     /// No additional information is required beyond what the execution summary
     /// will provide.
+    #[display("General")]
     General,
 
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
+    #[display("Transfer")]
     Transfer {
         /// When `true`, then this is a one-to-one transfer and the wallet can
         /// regard this as a "simple transfer" and communicate this information
@@ -23,6 +25,7 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest where XRD is claimed from one or more validators.
+    #[display("ValidatorClaim")]
     ValidatorClaim {
         /// The addresses of validators in the transaction
         validator_addresses: Vec<ValidatorAddress>,
@@ -31,6 +34,7 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest where XRD is staked to one or more validators.
+    #[display("ValidatorStake")]
     ValidatorStake {
         /// The addresses of validators in the transaction
         validator_addresses: Vec<ValidatorAddress>,
@@ -39,6 +43,7 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest where XRD is unstaked from one or more validators.
+    #[display("ValidatorUnstake")]
     ValidatorUnstake {
         /// The addresses of validators in the transaction
         validator_addresses: Vec<ValidatorAddress>,
@@ -48,6 +53,7 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest that updated the deposit settings of the account.
+    #[display("AccountDepositSettingsUpdate")]
     AccountDepositSettingsUpdate {
         /// Updates to the resource preferences of the account deposit settings.
         /// account_address -> (resource_address -> Update<new_preference>)
@@ -69,6 +75,7 @@ pub enum DetailedManifestClass {
     /// A manifest that contributed some amount of resources to a liquidity
     /// pool that can be a one-resource pool, two-resource pool, or a
     /// multi-resource pool.
+    #[display("PoolContribution")]
     PoolContribution {
         /// The addresses of the pools in the transaction
         pool_addresses: Vec<PoolAddress>,
@@ -79,6 +86,7 @@ pub enum DetailedManifestClass {
     /// A manifest that redeemed resources from a liquidity pool. Similar to
     /// contributions, this can be any of the three pool blueprints available
     /// in the pool package.
+    #[display("PoolRedemption")]
     PoolRedemption {
         /// The addresses of the pools in the transaction
         pool_addresses: Vec<PoolAddress>,
@@ -86,6 +94,25 @@ pub enum DetailedManifestClass {
         /// The redemptions observed in the transaction
         pool_redemptions: Vec<TrackedPoolRedemption>,
     },
+
+    /// A manifest that deletes accounts.
+    #[display("DeleteAccounts")]
+    DeleteAccounts {
+        /// The addresses of the accounts that are being deleted
+        account_addresses: Vec<AccountAddress>,
+    },
+}
+
+impl DetailedManifestClass {
+    /// Checks the manifest class is reserved for Wallet interactions only
+    pub(crate) fn is_reserved(&self) -> bool {
+        match self {
+            DetailedManifestClass::DeleteAccounts {
+                account_addresses: _,
+            } => true,
+            _ => false,
+        }
+    }
 }
 
 impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
@@ -230,5 +257,24 @@ impl HasSampleValues for DetailedManifestClass {
         Self::Transfer {
             is_one_to_one: false,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DetailedManifestClass;
+
+    #[test]
+    fn is_reserved_classification() {
+        let general = SUT::General;
+        let delete_accounts = SUT::DeleteAccounts {
+            account_addresses: Vec::<_>::sample(),
+        };
+
+        pretty_assertions::assert_eq!(general.is_reserved(), false);
+        pretty_assertions::assert_eq!(delete_accounts.is_reserved(), true);
     }
 }
