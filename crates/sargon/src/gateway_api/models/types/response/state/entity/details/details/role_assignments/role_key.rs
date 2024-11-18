@@ -3,30 +3,32 @@ use crate::prelude::*;
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct RoleKey {
     pub name: String,
+    pub module: ObjectModuleId,
 }
 
 impl RoleKey {
-    pub fn new(name: String) -> Self {
-        Self { name }
+    pub fn new(name: String, module: ObjectModuleId) -> Self {
+        Self { name, module }
+    }
+
+    const DEPOSITOR: &str = "depositor";
+    const WITHDRAWER: &str = "withdrawer";
+
+    pub fn main_depositor() -> Self {
+        Self::new(Self::DEPOSITOR.to_string(), ObjectModuleId::Main)
+    }
+
+    pub fn main_withdrawer() -> Self {
+        Self::new(Self::WITHDRAWER.to_string(), ObjectModuleId::Main)
     }
 }
 
 impl HasSampleValues for RoleKey {
     fn sample() -> Self {
-        Self::sample_depositor()
+        Self::main_depositor()
     }
 
     fn sample_other() -> Self {
-        Self::sample_withdrawer()
-    }
-}
-
-impl RoleKey {
-    pub fn sample_depositor() -> Self {
-        Self::new("depositor".to_string())
-    }
-
-    pub fn sample_withdrawer() -> Self {
-        Self::new("withdrawer".to_string())
+        Self::main_withdrawer()
     }
 }

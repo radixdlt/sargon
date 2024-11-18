@@ -20,40 +20,70 @@ impl ComponentEntityRoleAssignmentEntry {
 
 impl HasSampleValues for ComponentEntityRoleAssignmentEntry {
     fn sample() -> Self {
-        Self::sample_depositor_allow_all()
+        Self::sample_depositor_explicit_allow_all()
     }
 
     fn sample_other() -> Self {
-        Self::sample_withdrawer_deny_all()
+        Self::sample_withdrawer_explicit_deny_all()
     }
 }
 
 impl ComponentEntityRoleAssignmentEntry {
-    pub fn sample_depositor_allow_all() -> Self {
+    pub fn sample_depositor_explicit_allow_all() -> Self {
         Self::new(
-            RoleKey::sample_depositor(),
-            ComponentEntityRoleAssignmentEntryAssignment::sample_allow_all(),
+            RoleKey::main_depositor(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_allow_all(),
         )
     }
 
-    pub fn sample_depositor_deny_all() -> Self {
+    pub fn sample_depositor_explicit_deny_all() -> Self {
         Self::new(
-            RoleKey::sample_depositor(),
-            ComponentEntityRoleAssignmentEntryAssignment::sample_deny_all(),
+            RoleKey::main_depositor(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_deny_all(),
         )
     }
 
-    pub fn sample_withdrawer_allow_all() -> Self {
+    pub fn sample_withdrawer_explicit_allow_all() -> Self {
         Self::new(
-            RoleKey::sample_withdrawer(),
-            ComponentEntityRoleAssignmentEntryAssignment::sample_allow_all(),
+            RoleKey::main_withdrawer(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_allow_all(),
         )
     }
 
-    pub fn sample_withdrawer_deny_all() -> Self {
+    pub fn sample_withdrawer_explicit_deny_all() -> Self {
         Self::new(
-            RoleKey::sample_withdrawer(),
-            ComponentEntityRoleAssignmentEntryAssignment::sample_deny_all(),
+            RoleKey::main_withdrawer(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_deny_all(),
+        )
+    }
+
+    pub fn sample_depositor_owner_allow_all() -> Self {
+        Self::new(
+            RoleKey::main_depositor(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_owner_allow_all(),
+        )
+    }
+
+    pub fn sample_withdrawer_owner_allow_all() -> Self {
+        Self::new(
+            RoleKey::main_withdrawer(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_owner_allow_all(),
+        )
+    }
+
+    pub fn sample_depositor_owner_deny_all() -> Self {
+        Self::new(
+            RoleKey::main_depositor(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_owner_deny_all(
+            ),
+        )
+    }
+
+    pub fn sample_withdrawer_owner_deny_all() -> Self {
+        Self::new(
+            RoleKey::main_withdrawer(),
+            ComponentEntityRoleAssignmentEntryAssignment::sample_owner_deny_all(
+            ),
         )
     }
 }
