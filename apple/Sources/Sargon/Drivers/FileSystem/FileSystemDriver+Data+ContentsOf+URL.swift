@@ -44,30 +44,41 @@ extension FileSystem {
 		_ io: @Sendable (URL) throws -> T
 	) throws -> T {
 		let url = URL(file: path)
-         #if os(macOS)
 		 guard url.startAccessingSecurityScopedResource() else {
 		 	throw CommonError.NotPermissionToAccessFile(path: path)
 		 }
 		 defer { url.stopAccessingSecurityScopedResource() }
-         #endif
 		return try io(url)
 	}
 }
 
+extension FileSystem {
+	private static func appDirPathNotNecessarilyExisting(fileManager: FileManager) throws -> String {
+#if os(iOS)
+		return try fileManager.urls(
+			for: .cachesDirectory,
+			in: .userDomainMask
+		).first!.path()
+#elseif os(macOS)
+		URL.temporaryDirectory.path()
+#else
+		fatalError("Unsupported OS")
+#endif
+	}
+}
 extension FileSystem: FileSystemDriver {
     public func writableAppDirPath() async throws -> String {
-#if os(iOS)
-        try fileManager.url(
-            for: .cachesDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true
-        ).absoluteString
-#elseif os(macOS)
-        URL.temporaryDirectory.path()
-#else
-        fatalError("Unsupported OS")
-#endif
+		try with(path: Self.appDirPathNotNecessarilyExisting(fileManager: fileManager)) {
+			let directoryExists = fileManager.fileExists(atPath: $0.path())
+			if !directoryExists {
+				do {
+					try fileManager.createDirectory(at: $0, withIntermediateDirectories: true)
+				} catch {
+					log.error("👻❌ Failed to create dir, \(error) ❌")
+				}
+			}
+			return $0.path()
+		}
     }
     
 	public func loadFromFile(path: String) async throws -> BagOfBytes? {
