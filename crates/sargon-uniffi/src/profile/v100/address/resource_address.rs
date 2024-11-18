@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 decl_ret_wrapped_address!(
-    /// Addresses identifying an asset, either fungible (Token) or non-fungible (NFT), on the Radix network, e.g.
+    /// Addresses identifying an asset, either fungible (Token) or non_fungible (NFT), on the Radix network, e.g.
     /// `"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"`
     /// Being the unique identifier of the Radix Token, the Rad, on mainnet.
     ///

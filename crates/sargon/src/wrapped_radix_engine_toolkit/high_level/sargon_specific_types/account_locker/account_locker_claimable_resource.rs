@@ -9,7 +9,7 @@ pub enum AccountLockerClaimableResource {
         resource_address: ResourceAddress,
         amount: Decimal192,
     },
-    /// A non-fungible resource with the total number of items that can be claimed
+    /// A non_fungible resource with the total number of items that can be claimed
     NonFungible {
         resource_address: ResourceAddress,
         number_of_items: u64,
@@ -31,7 +31,7 @@ impl AccountLockerClaimableResource {
     /// If the resource is fungible, it will be returned as is,
     /// because it's always considered to be a single item regardless of the amount.
     ///
-    /// If the resource is non-fungible, the number of items will be clamped to the given maximum.
+    /// If the resource is non_fungible, the number of items will be clamped to the given maximum.
     pub fn coerce_number_of_items_at_most(&self, maximum: u64) -> Self {
         assert!(maximum > 0, "Invalid input, maximum must be greater than 0");
         match self {

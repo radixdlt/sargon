@@ -292,6 +292,74 @@ impl SargonOS {
 
         Ok(())
     }
+
+    /// Updates the accounts `updated` by mutating current profile and persisting
+    /// the change to secure storage.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountsUpdated { addresses } }`
+    pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
+        // Pre-validate that all received `updated` accounts exist in profile
+        let _ = updated
+            .iter()
+            .map(|a| self.account_by_address(a.address.clone()))
+            .collect::<Result<Vec<_>>>()?;
+
+        self.update_profile_with(|p| {
+            for updated_account in updated.clone() {
+                p.update_account(&updated_account.address, |old| {
+                    *old = updated_account.clone()
+                });
+            }
+            Ok(())
+        })
+        .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::AccountsUpdated {
+                    addresses: updated.iter().map(|a| a.address).collect(),
+                },
+            ))
+            .await;
+
+        Ok(())
+    }
+
+    /// Updates the profile by marking the account with `account_address` as hidden.
+    pub async fn mark_account_as_hidden(
+        &self,
+        account_address: AccountAddress,
+    ) -> Result<()> {
+        let mut account = self.account_by_address(account_address)?;
+        account.mark_as_hidden();
+        self.update_account(account).await
+    }
+
+    /// Updates the profile by marking the account with `account_address` as tombstoned.
+    pub async fn mark_account_as_tombstoned(
+        &self,
+        account_address: AccountAddress,
+    ) -> Result<()> {
+        let mut account = self.account_by_address(account_address)?;
+        account.mark_as_tombstoned();
+        self.update_account(account).await
+    }
+
+    /// Updates the profile by marking the account with `account_addresses` as tombstoned.
+    pub async fn mark_accounts_as_tombstoned(
+        &self,
+        account_addresses: Vec<AccountAddress>,
+    ) -> Result<()> {
+        let mut accounts = account_addresses
+            .iter()
+            .map(|ad| self.account_by_address(ad.clone()))
+            .collect::<Result<Vec<Account>>>()?;
+
+        accounts.iter_mut().for_each(|a| a.mark_as_tombstoned());
+
+        self.update_accounts(Accounts::from(accounts)).await
+    }
 }
 
 impl SargonOS {
@@ -354,7 +422,7 @@ impl SargonOS {
                 Ok(())
             }
         })
-        .await
+            .await
     }
 }
 
@@ -362,7 +430,7 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use std::{future::Future, time::Duration};
+    use std::{future::join, future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -935,5 +1003,99 @@ mod tests {
             os.account_by_address(AccountAddress::sample_mainnet()),
             Err(CommonError::UnknownAccount)
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_mark_account_as_hidden_becomes_hidden() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        // so that we have at least one network (with one account)
+        let new_account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+        os.mark_account_as_hidden(new_account.address)
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(os
+            .account_by_address(new_account.address)
+            .unwrap()
+            .is_hidden())
+    }
+
+    #[actix_rt::test]
+    async fn test_mark_account_as_tombstoned_becomes_tombstoned() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        // so that we have at least one network (with one account)
+        let new_account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+        os.mark_account_as_tombstoned(new_account.address)
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(os
+            .account_by_address(new_account.address)
+            .unwrap()
+            .is_tombstoned())
+    }
+
+    #[actix_rt::test]
+    async fn test_mark_accounts_as_tombstoned_become_tombstoned() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let new_accounts: Vec<Account> = os
+            .with_timeout(|x| {
+                join_all(vec![
+                    x.create_and_save_new_mainnet_account(
+                        DisplayName::new("rip").unwrap(),
+                    ),
+                    x.create_and_save_new_mainnet_account(
+                        DisplayName::new("rip").unwrap(),
+                    ),
+                    x.create_and_save_new_mainnet_account(
+                        DisplayName::new("alive").unwrap(),
+                    ),
+                ])
+            })
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+
+        let account_addresses_to_tombstone = new_accounts
+            .iter()
+            .filter(|a| a.display_name.value == "rip")
+            .map(|a| a.address)
+            .collect_vec();
+        os.with_timeout(|x| {
+            x.mark_accounts_as_tombstoned(
+                account_addresses_to_tombstone.clone(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert!(os
+            .accounts_on_current_network()
+            .unwrap()
+            .iter()
+            .all(|a| a.display_name.value != "rip"));
+        assert!(account_addresses_to_tombstone.iter().all(|address| os
+            .account_by_address(address.clone())
+            .unwrap()
+            .is_tombstoned()))
     }
 }

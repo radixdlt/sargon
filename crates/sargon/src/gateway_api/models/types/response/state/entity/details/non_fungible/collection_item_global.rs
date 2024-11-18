@@ -5,7 +5,7 @@ pub struct NonFungibleResourcesCollectionItemGloballyAggregated {
     /// Bech32m-encoded human readable version of the address.
     pub resource_address: ResourceAddress,
 
-    /// The total amount of non-fungible IDs across all vaults.
+    /// The total amount of non_fungible IDs across all vaults.
     pub amount: u64,
 }
 

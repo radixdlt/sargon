@@ -54,6 +54,83 @@ impl GatewayClient {
             .await
             .map(|x| x.unwrap_or(Decimal192::zero()))
     }
+
+    /// Looks up on ledger whether this `account_address` is deleted, by looking up the NFTs
+    /// it owns and checking if its owner badge is one of them.
+    pub async fn check_accounts_are_deleted(
+        &self,
+        network_id: NetworkID,
+        account_addresses: impl IntoIterator<Item = AccountAddress>,
+    ) -> Result<Vec<(AccountAddress, bool)>> {
+        // Construct the owner badge resource address
+        let owner_badge_resource_address =
+            ResourceAddress::new(SCRYPTO_ACCOUNT_OWNER_BADGE, network_id)?;
+
+        // Break accounts into chunks
+        let account_address_chunks = account_addresses
+            .into_iter()
+            .chunks(GATEWAY_CHUNK_NON_FUNGIBLES as usize);
+
+        let mut result = Vec::<(AccountAddress, bool)>::new();
+
+        for chunk in &account_address_chunks {
+            // Construct supposed badges for each account
+            let badges_of_account_addresses = chunk
+                .into_iter()
+                .map(|a| (NonFungibleLocalId::from(a), a))
+                .collect::<IndexMap<NonFungibleLocalId, AccountAddress>>();
+
+            // Query the location of the badges
+            let non_fungible_ids_location = self
+                .state_non_fungible_location(
+                    StateNonFungibleLocationRequest::new(
+                        owner_badge_resource_address.clone(),
+                        badges_of_account_addresses
+                            .keys()
+                            .cloned()
+                            .collect_vec(),
+                        None,
+                    ),
+                )
+                .await?
+                .non_fungible_ids;
+
+            // Extract for each badge the parent address entity (if exists)
+            let locations = non_fungible_ids_location
+                .iter()
+                .filter_map(|location| {
+                    let id = location.clone().non_fungible_id;
+                    let parent = location
+                        .owning_vault_global_ancestor_address
+                        .map(|a| a.as_account().cloned())
+                        .unwrap_or(None);
+
+                    if let Some(account_address) = parent {
+                        Some((id, account_address))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<HashMap<NonFungibleLocalId, AccountAddress>>();
+
+            // Collect the chunk of addresses along with the information if the account is deleted
+            badges_of_account_addresses.iter().for_each(
+                |(badge, account_address)| {
+                    if let Some(location) = locations.get(badge) {
+                        // The account is deleted if the parent of the badge is the account address
+                        result.push((
+                            *account_address,
+                            location == account_address,
+                        ));
+                    } else {
+                        result.push((*account_address, false));
+                    }
+                },
+            );
+        }
+
+        Ok(result)
+    }
 }
 
 impl GatewayClient {
@@ -179,7 +256,7 @@ impl GatewayClient {
                 Vec::new()
             };
 
-        // Fetch all non-fungible items
+        // Fetch all non_fungible items
         let non_fungibles =
             if let Some(collection) = details.clone().non_fungible_resources {
                 self.fetch_all_non_fungible_items(

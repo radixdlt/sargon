@@ -9,7 +9,7 @@ pub enum AccountLockerClaimableResource {
         resource_address: ResourceAddress,
         amount: Decimal192,
     },
-    /// A non-fungible resource with the total number of items that can be claimed
+    /// A non_fungible resource with the total number of items that can be claimed
     NonFungible {
         resource_address: ResourceAddress,
         number_of_items: u64,

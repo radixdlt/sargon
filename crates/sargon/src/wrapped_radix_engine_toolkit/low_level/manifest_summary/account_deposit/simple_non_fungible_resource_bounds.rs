@@ -4,9 +4,9 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SimpleNonFungibleResourceBounds {
-    /// The IDs of the non-fungible resources that are certain to be deposited.
+    /// The IDs of the non_fungible resources that are certain to be deposited.
     pub certain_ids: Vec<NonFungibleLocalId>,
-    /// The additional amount of non-fungible resources that may be deposited.
+    /// The additional amount of non_fungible resources that may be deposited.
     pub additional_amount: Option<SimpleCountedResourceBounds>,
 }
 
