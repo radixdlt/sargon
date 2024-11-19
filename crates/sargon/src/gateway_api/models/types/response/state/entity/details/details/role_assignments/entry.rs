@@ -70,20 +70,4 @@ impl ComponentEntityRoleAssignmentEntry {
             ComponentEntityRoleAssignmentEntryAssignment::sample_owner_allow_all(),
         )
     }
-
-    pub fn sample_depositor_owner_deny_all() -> Self {
-        Self::new(
-            RoleKey::main_depositor(),
-            ComponentEntityRoleAssignmentEntryAssignment::sample_owner_deny_all(
-            ),
-        )
-    }
-
-    pub fn sample_withdrawer_owner_deny_all() -> Self {
-        Self::new(
-            RoleKey::main_withdrawer(),
-            ComponentEntityRoleAssignmentEntryAssignment::sample_owner_deny_all(
-            ),
-        )
-    }
 }

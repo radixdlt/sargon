@@ -123,7 +123,7 @@ impl SargonOS {
 
         // Filter transferable resources
         let transferable_resources = gateway_client
-            .filter_transferrable_resources(resources)
+            .filter_transferable_resources(resources)
             .await?;
 
         // Try to build the DeleteAccountTransfers from output and return it.

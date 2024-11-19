@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// A helper struct to grpup all the resources of a given account.
+/// A helper struct to group all the resources of a given account.
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct FetchResourcesOutput {
     pub fungibles: Vec<FungibleResourcesCollectionItem>,

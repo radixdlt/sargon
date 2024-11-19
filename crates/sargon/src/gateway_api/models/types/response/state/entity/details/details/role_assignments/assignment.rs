@@ -40,8 +40,4 @@ impl ComponentEntityRoleAssignmentEntryAssignment {
     pub fn sample_owner_allow_all() -> Self {
         Self::new(RoleAssignmentResolution::Owner, ExplicitRule::AllowAll)
     }
-
-    pub fn sample_owner_deny_all() -> Self {
-        Self::new(RoleAssignmentResolution::Owner, ExplicitRule::DenyAll)
-    }
 }

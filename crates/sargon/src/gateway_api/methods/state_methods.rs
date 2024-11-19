@@ -368,7 +368,7 @@ impl GatewayClient {
 }
 
 impl GatewayClient {
-    pub async fn filter_transferrable_resources(
+    pub async fn filter_transferable_resources(
         &self,
         output: FetchResourcesOutput,
     ) -> Result<FetchTransferableResourcesOutput> {
@@ -697,5 +697,135 @@ mod fetch_all_resources_tests {
             None,
             items,
         ))
+    }
+}
+
+#[cfg(test)]
+mod filter_transferable_tests {
+    use crate::prelude::*;
+    use actix_rt::time::timeout;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = GatewayClient;
+
+    #[actix_rt::test]
+    async fn filter_resources() {
+        // Test the case where all resources are transferable
+
+        // Mock the resources
+        let fungible_transferable = FungibleResourcesCollectionItem::sample();
+        let fungible_not_transferable =
+            FungibleResourcesCollectionItem::sample_other();
+        let non_fungible_transferable =
+            NonFungibleResourcesCollectionItem::sample();
+        let non_fungible_not_transferable =
+            NonFungibleResourcesCollectionItem::sample_other();
+        let output = FetchResourcesOutput::new(
+            vec![
+                fungible_transferable.clone(),
+                fungible_not_transferable.clone(),
+            ],
+            vec![
+                non_fungible_transferable.clone(),
+                non_fungible_not_transferable.clone(),
+            ],
+        );
+
+        // Mock the entity details response
+        let entity_details_response = mock_entity_details_response(vec![
+            (
+                fungible_transferable.clone().resource_address(),
+                fungible_details(true),
+            ),
+            (
+                fungible_not_transferable.clone().resource_address(),
+                fungible_details(false),
+            ),
+            (
+                non_fungible_transferable.clone().resource_address(),
+                non_fungible_details(true),
+            ),
+            (
+                non_fungible_not_transferable.clone().resource_address(),
+                non_fungible_details(false),
+            ),
+        ]);
+
+        // Mock the driver and verify only 1 request is made to the GW
+        let mock_driver = MockNetworkingDriver::new_with_responses(vec![
+            entity_details_response,
+        ]);
+        let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
+
+        // Execute the request and check the result
+        let result = sut.filter_transferable_resources(output).await.unwrap();
+
+        assert_eq!(result.fungibles, vec![fungible_transferable]);
+        assert_eq!(result.non_fungibles, vec![non_fungible_transferable]);
+        assert_eq!(
+            result.non_transferable_resources,
+            vec![
+                fungible_not_transferable.resource_address(),
+                non_fungible_not_transferable.resource_address()
+            ]
+        );
+    }
+
+    /// Creates a `MockNetworkingDriverResponse` for a `StateEntityDetailsResponse`.
+    fn mock_entity_details_response(
+        address_details: Vec<(
+            ResourceAddress,
+            StateEntityDetailsResponseItemDetails,
+        )>,
+    ) -> MockNetworkingDriverResponse {
+        let mut items: Vec<StateEntityDetailsResponseItem> = vec![];
+        for item in address_details {
+            items.push(StateEntityDetailsResponseItem::new(
+                item.0.into(),
+                None,
+                None,
+                EntityMetadataCollection::empty(),
+                item.1,
+            ));
+        }
+        MockNetworkingDriverResponse::new_success(
+            StateEntityDetailsResponse::new(LedgerState::sample(), items),
+        )
+    }
+
+    fn fungible_details(
+        is_transferable: bool,
+    ) -> StateEntityDetailsResponseItemDetails {
+        if is_transferable {
+            StateEntityDetailsResponseItemDetails::FungibleResource(
+                StateEntityDetailsResponseFungibleResourceDetails::new(
+                    ComponentEntityRoleAssignments::sample(),
+                ),
+            )
+        } else {
+            StateEntityDetailsResponseItemDetails::FungibleResource(
+                StateEntityDetailsResponseFungibleResourceDetails::new(
+                    ComponentEntityRoleAssignments::sample_other(),
+                ),
+            )
+        }
+    }
+
+    fn non_fungible_details(
+        is_transferable: bool,
+    ) -> StateEntityDetailsResponseItemDetails {
+        if is_transferable {
+            StateEntityDetailsResponseItemDetails::NonFungibleResource(
+                StateEntityDetailsResponseNonFungibleResourceDetails::new(
+                    ComponentEntityRoleAssignments::sample(),
+                ),
+            )
+        } else {
+            StateEntityDetailsResponseItemDetails::NonFungibleResource(
+                StateEntityDetailsResponseNonFungibleResourceDetails::new(
+                    ComponentEntityRoleAssignments::sample_other(),
+                ),
+            )
+        }
     }
 }
