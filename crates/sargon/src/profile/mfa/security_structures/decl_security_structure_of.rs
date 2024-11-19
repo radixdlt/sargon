@@ -85,7 +85,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
 
             impl RoleWithFactors<$factor> for [< $role RoleWith $factor s >] {
-
                 fn get_threshold_factors(&self) -> &Vec<$factor> {
                     &self.threshold_factors
                 }
@@ -99,13 +98,29 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 }
             }
 
+
             impl [< $role RoleWith $factor s >] {
+
+                fn validate_is_canonical(&self) -> Result<(), FactorRulesViolation> {
+                    todo!()
+                }
+
+                fn validate(&self, enforce_canonical: bool) -> Result<(), FactorRulesViolation> {
+                    if enforce_canonical {
+                        self.validate_is_canonical()?;
+                    }
+                    Ok(())
+                }
 
                 pub fn unique_factors(&self) -> IndexSet<$factor> {
                     self.all_factors().into_iter().map(|x| x.clone()).collect()
                 }
 
-                // # Panics
+                /// If `enforce_canonical` is true, then the factors
+                /// must adhere to even stricter rules, such as no
+                /// threshold factors for Recovery and Confirmation roles.
+                ///
+                /// # Panics
                 /// Panics if threshold > threshold_factor.len()
                 ///
                 /// Panics if the same factor is present in both lists
@@ -117,6 +132,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>,
+                    enforce_canonical: bool,
                 ) -> Result<Self> {
 
                     let assert_is_securified = |factors: &Vec::<$factor>| -> Result<()> {
@@ -151,13 +167,16 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                         return Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
                     }
 
-                    Ok(Self {
+                    let unvalidated = Self {
                         __hidden: HiddenConstructor,
                         threshold_factors,
                         threshold,
                         override_factors,
                         $($extra_field_name,)*
-                    })
+                    };
+
+                    unvalidated.validate(enforce_canonical).map_err(|e| CommonError::from(e))?;
+                    Ok(unvalidated)
                 }
             }
         }
@@ -183,7 +202,15 @@ macro_rules! decl_role_with_factors {
             $factor,
         );
 
+
         paste! {
+
+
+            impl HasMfaRole for [< $role RoleWith $factor s >] {
+                fn mfa_role() -> RoleKind {
+                    RoleKind::$role
+                }
+            }
 
            impl [< $role RoleWith $factor s >] {
 
@@ -192,7 +219,7 @@ macro_rules! decl_role_with_factors {
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Result<Self> {
-                    Self::with_factors_and_role(threshold_factors, threshold, override_factors)
+                    Self::with_factors_and_role(threshold_factors, threshold, override_factors, false /* TODO dont forget to change to `true`! */)
                 }
 
 
@@ -241,6 +268,15 @@ macro_rules! decl_role_runtime_kind_with_factors {
             $factor,
             role: RoleKind,
         );
+
+        paste! {
+            impl HasMfaRoleObjectSafe for [< $role RoleWith $factor s >] {
+                fn get_mfa_role(&self) -> RoleKind {
+                    self.role
+                }
+            }
+        }
+
     };
 }
 

@@ -1,5 +1,18 @@
 use crate::prelude::*;
 
+pub trait HasMfaRole {
+    fn mfa_role() -> RoleKind;
+}
+
+pub trait HasMfaRoleObjectSafe {
+    fn get_mfa_role(&self) -> RoleKind;
+}
+
+impl<T: HasMfaRole> HasMfaRoleObjectSafe for T {
+    fn get_mfa_role(&self) -> RoleKind {
+        T::mfa_role()
+    }
+}
 pub trait RoleWithFactors<Factor: std::cmp::Eq + std::hash::Hash> {
     fn get_threshold_factors(&self) -> &Vec<Factor>;
     fn get_threshold(&self) -> u8;

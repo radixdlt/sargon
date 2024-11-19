@@ -52,6 +52,7 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
                 .iter()
                 .map(|f| HierarchicalDeterministicFactorInstance::try_from_factor_instance(f.clone()))
                 .collect::<Result<Vec<HierarchicalDeterministicFactorInstance>>>()?,
+                false
         )
     }
 }
@@ -62,7 +63,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         assert!(factor.is_securified(), "non securified factor");
-        Self::with_factors_and_role(role, [], 0, [factor])
+        Self::with_factors_and_role(role, [], 0, [factor], false)
         .expect("Zero threshold with zero threshold factors and one override should not fail.")
     }
 
@@ -71,7 +72,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         assert!(factor.is_securified(), "non securified factor");
-        Self::with_factors_and_role(role, [factor], 1, []).expect(
+        Self::with_factors_and_role(role, [factor], 1, [], false).expect(
             "Single threshold with one threshold factor should not fail.",
         )
     }
@@ -96,7 +97,8 @@ mod test {
                     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0)
                     ],
                 1,
-                []
+                [],
+                false
             ).unwrap()
         )
     }
@@ -133,7 +135,8 @@ mod test {
                 })
                 .collect_vec(),
                 1,
-                []
+                [],
+                false
             ).unwrap()
         )
     }
@@ -161,7 +164,8 @@ mod test {
                         HierarchicalDeterministicFactorInstance::try_from_factor_instance(f)
                             .unwrap()
                     })
-                    .collect_vec()
+                    .collect_vec(),
+                    false
             )
             .unwrap()
         )

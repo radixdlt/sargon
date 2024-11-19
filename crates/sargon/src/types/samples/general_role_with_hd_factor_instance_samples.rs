@@ -43,6 +43,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             [F::sample_at(0), F::sample_at(3), F::sample_at(5)].map(fi),
             2,
             [],
+            false
         )
         .unwrap()
     }
@@ -61,6 +62,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             [],
             0,
             [F::sample_at(1), F::sample_at(4)].map(&fi),
+            false
         )
         .unwrap()
     }
@@ -79,6 +81,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             [F::sample_at(0), F::sample_at(3), F::sample_at(5)].map(&fi),
             2,
             [F::sample_at(1), F::sample_at(4)].map(&fi),
+            false
         )
         .unwrap()
     }
@@ -104,6 +107,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             .map(&fi),
             5,
             [],
+            false
         )
         .unwrap()
     }
@@ -122,6 +126,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
             [F::sample_at(1)].map(&fi),
             1,
             [F::sample_at(8)].map(&fi),
+            false
         )
         .unwrap()
     }
