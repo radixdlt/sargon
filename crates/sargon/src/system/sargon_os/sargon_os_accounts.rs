@@ -335,14 +335,7 @@ impl SargonOS {
             profile.networks.hide_account(&account_address);
             Ok(())
         })
-        .await?;
-
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(self.profile()?))
-            .await;
-
-        Ok(())
+        .await
     }
 
     /// Updates the profile by marking the account with `account_address` as tombstoned.
@@ -354,14 +347,7 @@ impl SargonOS {
             profile.networks.tombstone_account(&account_address);
             Ok(())
         })
-        .await?;
-
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(self.profile()?))
-            .await;
-
-        Ok(())
+        .await
     }
 
     /// Updates the profile by marking the account with `account_addresses` as tombstoned.
@@ -373,14 +359,7 @@ impl SargonOS {
             profile.networks.tombstone_accounts(&account_addresses);
             Ok(())
         })
-        .await?;
-
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(self.profile()?))
-            .await;
-
-        Ok(())
+        .await
     }
 }
 
