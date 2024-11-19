@@ -76,6 +76,10 @@ macro_rules! declare_shared_with_dapp {
                 let ids_str = self.ids.iter().map(|v| v.to_string()).join(", ");
                 format!("{} - shared ids: [{}]", self.request, ids_str)
             }
+
+            pub fn remove_entry(&mut self, id: &<$id as Identifiable>::ID) -> Option<$id> {
+                self.ids.remove_id(id)
+            }
         }
 
         #[cfg(test)]
