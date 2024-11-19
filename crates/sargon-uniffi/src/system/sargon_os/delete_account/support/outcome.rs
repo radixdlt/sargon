@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use sargon::CreateDeleteAccountManifestResult as InternalCreateDeleteAccountManifestResult;
+use sargon::CreateDeleteAccountManifestOutcome as InternalCreateDeleteAccountManifestOutcome;
 
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
-pub struct CreateDeleteAccountManifestResult {
+pub struct CreateDeleteAccountManifestOutcome {
     pub manifest: TransactionManifest,
     pub non_transferable_resources: Vec<ResourceAddress>,
 }

@@ -13,7 +13,7 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
         recipient_account_address: Option<AccountAddress>,
-    ) -> Result<CreateDeleteAccountManifestResult> {
+    ) -> Result<CreateDeleteAccountManifestOutcome> {
         let network_id = account_address.network_id();
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -60,7 +60,7 @@ impl SargonOS {
         );
 
         // Build result
-        let result = CreateDeleteAccountManifestResult::new(
+        let result = CreateDeleteAccountManifestOutcome::new(
             manifest,
             account_transfers
                 .map_or_else(Vec::new, |t| t.non_transferable_resources),

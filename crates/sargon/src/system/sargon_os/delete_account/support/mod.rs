@@ -1,3 +1,3 @@
-mod result;
+mod outcome;
 
-pub use result::*;
+pub use outcome::*;
