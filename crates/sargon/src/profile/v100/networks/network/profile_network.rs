@@ -188,7 +188,7 @@ impl ProfileNetwork {
         account
     }
 
-    /// Tombostones the account associated with the `account_address`
+    /// Tombstones the account associated with the `account_address`
     pub(crate) fn tombstone_account(
         &mut self,
         account_address: &AccountAddress,

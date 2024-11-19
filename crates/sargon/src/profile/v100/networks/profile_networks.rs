@@ -39,7 +39,7 @@ impl ProfileNetworks {
         })
     }
 
-    /// Tombostones the account associated with the `account_address`
+    /// Tombstones the account associated with the `account_address`
     pub(crate) fn tombstone_account(
         &mut self,
         account_address: &AccountAddress,
@@ -49,7 +49,7 @@ impl ProfileNetworks {
         })
     }
 
-    /// Tombostones the accounts
+    /// Tombstones the accounts
     pub(crate) fn tombstone_accounts(
         &mut self,
         account_addresses: &Vec<AccountAddress>,
