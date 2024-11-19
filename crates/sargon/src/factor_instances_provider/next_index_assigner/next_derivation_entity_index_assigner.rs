@@ -105,15 +105,21 @@ mod tests {
         let profile = Arc::new(Profile::sample());
         let bdfs = profile.bdfs();
         let cache = FactorInstancesCache::default();
-        let sut =
-            SUT::new(network_id, profile, cache);
+        let sut = SUT::new(network_id, profile, cache);
 
         let factor_source_id = bdfs.id_from_hash();
         let index_agnostic_path = IndexAgnosticPath::sample();
 
         let result = sut.next(factor_source_id, index_agnostic_path);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), HDPathComponent::from_local_key_space(2, index_agnostic_path.key_space).unwrap());
+        assert_eq!(
+            result.unwrap(),
+            HDPathComponent::from_local_key_space(
+                2,
+                index_agnostic_path.key_space
+            )
+            .unwrap()
+        );
     }
 
     #[test]
@@ -123,15 +129,20 @@ mod tests {
         let arculus = FactorSource::sample_arculus();
         profile.factor_sources.insert(arculus.clone());
         let cache = FactorInstancesCache::default();
-        let sut =
-            SUT::new(network_id, Arc::new(profile), cache);
+        let sut = SUT::new(network_id, Arc::new(profile), cache);
 
         let factor_source_id = arculus.id_from_hash();
         let index_agnostic_path = IndexAgnosticPath::sample();
 
         let result = sut.next(factor_source_id, index_agnostic_path);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), HDPathComponent::from_local_key_space(0, index_agnostic_path.key_space).unwrap());
+        assert_eq!(
+            result.unwrap(),
+            HDPathComponent::from_local_key_space(
+                0,
+                index_agnostic_path.key_space
+            )
+            .unwrap()
+        );
     }
-
 }

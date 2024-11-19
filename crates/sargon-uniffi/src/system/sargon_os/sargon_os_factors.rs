@@ -1,5 +1,7 @@
 use crate::prelude::*;
 use sargon::DeviceFactorSourceType as InternalDeviceFactorSourceType;
+use sargon::HasIndexInLocalKeySpace;
+use sargon::HierarchicalDeterministicFactorInstance as InternalHierarchicalDeterministicFactorInstance;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -7,6 +9,35 @@ use sargon::DeviceFactorSourceType as InternalDeviceFactorSourceType;
 pub enum DeviceFactorSourceType {
     Babylon { is_main: bool },
     Olympia,
+}
+
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct FactorInstanceForDebugPurposes {
+    pub derivation_path_full: String,
+    pub index_agnostic_derivation_path: String,
+    pub public_key_hex: String,
+    pub factor_source_id: String,
+    pub derivation_entity_index: u32,
+    pub factor_source_kind: FactorSourceKind,
+}
+impl From<InternalHierarchicalDeterministicFactorInstance>
+    for FactorInstanceForDebugPurposes
+{
+    fn from(x: InternalHierarchicalDeterministicFactorInstance) -> Self {
+        Self {
+            derivation_path_full: x.derivation_path().to_string(),
+            index_agnostic_derivation_path: x
+                .derivation_path()
+                .agnostic()
+                .to_string(),
+            derivation_entity_index: u32::from(
+                x.derivation_entity_index().index_in_local_key_space(),
+            ),
+            public_key_hex: x.public_key().to_hex(),
+            factor_source_id: x.factor_source_id.clone().to_string(),
+            factor_source_kind: x.factor_source_id.kind.into(),
+        }
+    }
 }
 
 #[uniffi::export]
@@ -22,12 +53,10 @@ impl SargonOS {
         self.wrapped.factor_sources().into_result()
     }
 
-    pub async fn factor_instances_in_cache(
+    pub async fn __debug_factor_instances_in_cache(
         &self,
-    ) -> HashMap<
-        FactorSourceIDFromHash,
-        Vec<Vec<HierarchicalDeterministicFactorInstance>>,
-    > {
+    ) -> HashMap<FactorSourceIDFromHash, Vec<Vec<FactorInstanceForDebugPurposes>>>
+    {
         self.wrapped
             .factor_instances_in_cache()
             .await
@@ -36,7 +65,11 @@ impl SargonOS {
                 (
                     k.into(),
                     v.into_iter()
-                        .map(|x| x.into_iter().map(Into::into).collect())
+                        .map(|x| {
+                            x.into_iter()
+                                .map(FactorInstanceForDebugPurposes::from)
+                                .collect()
+                        })
                         .collect(),
                 )
             })
