@@ -413,8 +413,8 @@ pub enum CommonError {
     )]
     InvalidNotarizedIntentFailedToEncode { underlying: String } = 10111,
 
-    #[error("Networking response bad code")]
-    NetworkResponseBadCode = 10112,
+    #[error("Networking response bad code: {code}")]
+    NetworkResponseBadCode { code: u16 } = 10112,
 
     #[error("Networking response body was empty")]
     NetworkResponseEmptyBody = 10113,
@@ -731,6 +731,15 @@ pub enum CommonError {
 
     #[error("Subintent has already expired")]
     SubintentExpired = 10206,
+
+    #[error("Unexpected collection item aggregation")]
+    UnexpectedCollectionItemAggregation = 10207,
+
+    #[error("Unable to make {amount} transfers in one single transaction")]
+    MaxTransfersPerTransactionReached { amount: u64 } = 10208,
+
+    #[error("Transaction Manifest class is reserved: {class}")]
+    ReservedManifestClass { class: DetailedManifestClass } = 10209,
 }
 
 #[uniffi::export]

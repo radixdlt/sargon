@@ -6,7 +6,7 @@ impl ProfileNetwork {
     }
 
     pub fn accounts_non_hidden(&self) -> Accounts {
-        self.accounts.non_hidden()
+        self.accounts.visible()
     }
 }
 

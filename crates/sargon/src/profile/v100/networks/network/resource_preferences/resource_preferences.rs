@@ -114,7 +114,7 @@ mod tests {
             result
         );
 
-        // Test hiding some non-fungible and pool unit, and unhiding one of the fungibles
+        // Test hiding some non_fungible and pool unit, and unhiding one of the fungibles
         let non_fungible =
             ResourceIdentifier::NonFungible(ResourceAddress::sample_other());
         sut.unhide_resource(fungible_one);

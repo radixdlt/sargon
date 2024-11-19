@@ -7,7 +7,7 @@ use radix_transactions::manifest::KnownManifestObjectNames;
 pub struct TransactionManifestV2 {
     pub instructions: InstructionsV2,
     pub blobs: Blobs,
-    pub children: ChildIntents,
+    pub children: ChildSubintentSpecifiers,
 }
 
 impl TransactionManifestV2 {
@@ -15,7 +15,7 @@ impl TransactionManifestV2 {
         instructions_string: impl AsRef<str>,
         network_id: NetworkID,
         blobs: Blobs,
-        children: ChildIntents,
+        children: ChildSubintentSpecifiers,
     ) -> Result<Self> {
         InstructionsV2::new(instructions_string, network_id).map(
             |instructions| Self {
@@ -29,7 +29,7 @@ impl TransactionManifestV2 {
     pub fn with_instructions_and_blobs_and_children(
         instructions: InstructionsV2,
         blobs: Blobs,
-        children: ChildIntents,
+        children: ChildSubintentSpecifiers,
     ) -> Self {
         Self {
             instructions,
@@ -44,7 +44,7 @@ impl TransactionManifestV2 {
         Self {
             instructions: InstructionsV2::empty(network_id),
             blobs: Blobs::default(),
-            children: ChildIntents::empty(),
+            children: ChildSubintentSpecifiers::empty(),
         }
     }
 }
@@ -139,8 +139,9 @@ impl TransactionManifestV2 {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())
-            .map_err(map_static_analysis_error)?;
+        let summary =
+            RET_statically_analyze_and_validate_v2(&self.scrypto_manifest())
+                .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
@@ -175,7 +176,7 @@ impl HasSampleValues for TransactionManifestV2 {
         Self {
             instructions: InstructionsV2::sample(),
             blobs: Blobs::default(),
-            children: ChildIntents::empty(),
+            children: ChildSubintentSpecifiers::empty(),
         }
     }
 
@@ -183,7 +184,7 @@ impl HasSampleValues for TransactionManifestV2 {
         Self {
             instructions: InstructionsV2::sample_other(),
             blobs: Blobs::default(),
-            children: ChildIntents::empty(),
+            children: ChildSubintentSpecifiers::empty(),
         }
     }
 }
@@ -242,14 +243,14 @@ mod tests {
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
         ];
-        let children = vec![
-            ScryptoChildSubintent {
+        let children = IndexSet::from_iter([
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample().into(),
             },
-            ScryptoChildSubintent {
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample_other().into(),
             },
-        ];
+        ]);
         let scrypto = ScryptoTransactionManifestV2 {
             instructions: ins.clone(),
             blobs: Default::default(),
@@ -272,14 +273,14 @@ mod tests {
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
         ];
-        let children = vec![
-            ScryptoChildSubintent {
+        let children = IndexSet::from_iter([
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample().into(),
             },
-            ScryptoChildSubintent {
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample_other().into(),
             },
-        ];
+        ]);
         let scrypto = ScryptoTransactionManifestV2 {
             instructions: instructions.clone(),
             blobs: Default::default(),
@@ -297,14 +298,14 @@ mod tests {
             ScryptoInstructionV2::DropAllProofs(DropAllProofs),
             ScryptoInstructionV2::DropAuthZoneProofs(DropAuthZoneProofs),
         ];
-        let children = vec![
-            ScryptoChildSubintent {
+        let children = IndexSet::from_iter([
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample().into(),
             },
-            ScryptoChildSubintent {
+            ScryptoChildSubintentSpecifier {
                 hash: SubintentHash::sample_other().into(),
             },
-        ];
+        ]);
         let scrypto = ScryptoTransactionManifestV2 {
             instructions: ins.clone(),
             blobs: Default::default(),
@@ -381,7 +382,7 @@ DROP_AUTH_ZONE_PROOFS;
                 instructions_str,
                 NetworkID::Simulator,
                 Blobs::default(),
-                ChildIntents::empty()
+                ChildSubintentSpecifiers::empty()
             )
             .unwrap()
             .instructions_string(),
@@ -402,7 +403,7 @@ DROP_AUTH_ZONE_PROOFS;
                 instructions_str,
                 NetworkID::Mainnet,
                 Blobs::default(),
-                ChildIntents::empty()
+                ChildSubintentSpecifiers::empty()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Simulator,
@@ -424,7 +425,7 @@ DROP_AUTH_ZONE_PROOFS;
                 instructions_str,
                 NetworkID::Stokenet,
                 Blobs::default(),
-                ChildIntents::empty()
+                ChildSubintentSpecifiers::empty()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Mainnet,
@@ -528,7 +529,7 @@ DROP_AUTH_ZONE_PROOFS;
             instructions_string,
             NetworkID::Stokenet,
             Blobs::default(),
-            ChildIntents::empty(),
+            ChildSubintentSpecifiers::empty(),
         )
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();

@@ -4,6 +4,7 @@
 #![allow(unused_imports)]
 #![allow(internal_features)]
 #![feature(iter_repeat_n)]
+#![feature(future_join)]
 
 mod core;
 mod gateway_api;
@@ -30,7 +31,7 @@ pub mod prelude {
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub use radix_rust::prelude::{
-        BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
+        indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
     };
 
     pub(crate) use ::hex::decode as hex_decode;
@@ -51,6 +52,7 @@ pub mod prelude {
     pub(crate) use derive_more::derive::{
         AsRef, Debug as MoreDebug, Deref, Display,
     };
+    pub(crate) use futures::future::join_all;
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cell::RefCell;
     pub(crate) use std::cmp::Ordering;
@@ -116,8 +118,10 @@ pub mod prelude {
         },
         network::NetworkDefinition as ScryptoNetworkDefinition,
         prelude::{
-            recover_secp256k1 as Scrypto_recover_secp256k1,
             AllowedIds as ScryptoAllowedIds,
+            DynamicComponentAddress as ScryptoDynamicComponentAddress,
+            DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
+            DynamicResourceAddress as ScryptoDynamicResourceAddress,
             FromPublicKey as ScryptoFromPublicKey, Instant as ScryptoInstant,
             LowerBound as ScryptoLowerBound,
             ManifestAddress as ScryptoManifestAddress,
@@ -132,7 +136,8 @@ pub mod prelude {
             NonFungibleData as ScryptoNonFungibleData,
             NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
             NonFungibleIdType as ScryptoNonFungibleIdType,
-            UpperBound as ScryptoUpperBound, XRD,
+            UpperBound as ScryptoUpperBound,
+            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE, XRD,
         },
         types::{
             ComponentAddress as ScryptoComponentAddress,
@@ -169,12 +174,10 @@ pub mod prelude {
 
     pub(crate) use radix_transactions::{
         builder::{
-            ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
             NewManifestBucket as ScryptoNewManifestBucket,
             PartialTransactionV2Builder as ScryptoPartialTransactionV2Builder,
             ResolvableArguments as ScryptoResolvableArguments,
-            ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
         manifest::{
             compile as scrypto_compile,
@@ -199,11 +202,8 @@ pub mod prelude {
         },
         model::{
             BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs,
-            ChildIntentsV2 as ScryptoChildIntents,
-            ChildSubintent as ScryptoChildSubintent,
-            DynamicComponentAddress as ScryptoDynamicComponentAddress,
-            DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
-            DynamicResourceAddress as ScryptoDynamicResourceAddress,
+            ChildSubintentSpecifier as ScryptoChildSubintentSpecifier,
+            ChildSubintentSpecifiersV2 as ScryptoChildSubintentSpecifiers,
             InstructionV1 as ScryptoInstruction,
             InstructionV2 as ScryptoInstructionV2,
             InstructionsV1 as ScryptoInstructions,
@@ -257,7 +257,7 @@ pub mod prelude {
                 },
                 manifest::{
                     from_payload_bytes as RET_from_payload_bytes_manifest_v1,
-                    statically_analyze as RET_statically_analyze,
+                    statically_analyze_and_validate as RET_statically_analyze_and_validate,
                     to_payload_bytes as RET_to_payload_bytes_manifest_v1,
                 },
                 notarized_transaction::{
@@ -285,7 +285,7 @@ pub mod prelude {
                 subintent_manifest::{
                     as_enclosed as RET_subintent_manifest_as_enclosed,
                     from_payload_bytes as RET_from_payload_bytes_subintent_manifest,
-                    statically_analyze as RET_statically_analyze_subintent_manifest,
+                    statically_analyze_and_validate as RET_statically_analyze_and_validate_subintent_manifest,
                     to_payload_bytes as RET_to_payload_bytes_subintent_manifest,
                 },
                 transaction_intent::{
@@ -295,7 +295,7 @@ pub mod prelude {
                 transaction_manifest::{
                     dynamically_analyze as RET_dynamically_analyze_v2,
                     from_payload_bytes as RET_from_payload_bytes_manifest_v2,
-                    statically_analyze as RET_statically_analyze_v2,
+                    statically_analyze_and_validate as RET_statically_analyze_and_validate_v2,
                     to_payload_bytes as RET_to_payload_bytes_manifest_v2,
                 },
             },
@@ -325,7 +325,7 @@ pub mod prelude {
             Operation as RetOperation, Predicted as RetPredicted,
             ReservedInstruction as RetReservedInstruction,
             ResourceIndicator as RetResourceIndicator,
-            StaticAnalysis as RetStaticAnalysis,
+            StaticAnalysisWithResourceMovements as RetStaticAnalysisWithResourceMovements,
             TrackedPoolContribution as RetTrackedPoolContribution,
             TrackedPoolRedemption as RetTrackedPoolRedemption,
             TrackedValidatorClaim as RetTrackedValidatorClaim,

@@ -1,6 +1,17 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq)]
+#[derive(
+    Clone,
+    Debug,
+    Hash,
+    Ord,
+    PartialOrd,
+    PartialEq,
+    Eq,
+    EnumAsInner,
+    SerializeDisplay,
+    DeserializeFromStr,
+)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -54,6 +65,25 @@ impl NonFungibleLocalId {
 }
 
 impl NonFungibleLocalId {
+    pub(crate) fn derives_account_address(
+        &self,
+        account_address: AccountAddress,
+    ) -> bool {
+        self.as_bytes()
+            .map(|local_id_bytes| {
+                let bytes = local_id_bytes.bag_of_bytes.bytes();
+                if bytes.len() == ScryptoNodeId::LENGTH {
+                    bytes[..ScryptoNodeId::LENGTH]
+                        == account_address.node_id().0
+                } else {
+                    false
+                }
+            })
+            .unwrap_or(false)
+    }
+}
+
+impl NonFungibleLocalId {
     pub fn formatted(&self, format: AddressFormat) -> String {
         match format {
             AddressFormat::Default => match self {
@@ -83,6 +113,14 @@ impl NonFungibleLocalId {
 impl std::fmt::Display for NonFungibleLocalId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.scrypto())
+    }
+}
+
+impl From<AccountAddress> for NonFungibleLocalId {
+    fn from(value: AccountAddress) -> Self {
+        Self::bytes(value.node_id().0).expect(
+            "NonFungibleLocalId bytes size is always NodeId::Length (30)",
+        )
     }
 }
 
@@ -237,7 +275,7 @@ mod tests {
 
     #[test]
     fn to_user_facing_string_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().to_user_facing_string(), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
     }
@@ -267,7 +305,7 @@ mod tests {
 
     #[test]
     fn formatted_raw_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Raw), "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}");
     }
@@ -302,7 +340,7 @@ mod tests {
 
     #[test]
     fn formatted_default_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Default), "dead...3210");
     }
@@ -332,7 +370,7 @@ mod tests {
 
     #[test]
     fn formatted_full_variant_ruid() {
-        assert_eq!( SUT::ruid(
+        assert_eq!(SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Full), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
     }
@@ -437,9 +475,35 @@ mod tests {
             SUT::ruid(
                 hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
             )
-            .unwrap()
-            .to_string(),
+                .unwrap()
+                .to_string(),
             "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
         );
+    }
+
+    #[test]
+    fn test_derives_account_address() {
+        let local_id = SUT::try_from(
+            "[511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc]",
+        )
+        .unwrap();
+        let account_address = AccountAddress::try_from_bech32(
+            "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
+        ).unwrap();
+
+        assert!(local_id.derives_account_address(account_address));
+    }
+
+    #[test]
+    fn test_byte_id_not_deriving_account_address() {
+        let local_id = SUT::try_from(
+            "[511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc]",
+        )
+            .unwrap();
+        let account_address = AccountAddress::try_from_bech32(
+            "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
+        ).unwrap();
+
+        assert!(!local_id.derives_account_address(account_address));
     }
 }

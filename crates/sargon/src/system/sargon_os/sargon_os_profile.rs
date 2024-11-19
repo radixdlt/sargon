@@ -51,16 +51,16 @@ impl SargonOS {
             })
             .await?;
         } else {
-            self.profile_state_holder
-                .replace_profile_state_with(ProfileState::Loaded(profile))?;
+            self.profile_state_holder.replace_profile_state_with(
+                ProfileState::Loaded(profile.clone()),
+            )?;
             self.save_existing_profile().await?;
-        };
 
-        let updated_profile = self.profile()?;
-        self.clients
-            .profile_state_change
-            .emit(ProfileState::Loaded(updated_profile))
-            .await;
+            self.clients
+                .profile_state_change
+                .emit(ProfileState::Loaded(profile))
+                .await;
+        };
 
         Ok(())
     }
@@ -134,13 +134,19 @@ impl SargonOS {
         F: Fn(&mut Profile) -> Result<R>,
     {
         let res = self.profile_state_holder.update_profile_with(mutate)?;
-        self.profile_state_holder.update_profile_with(|p| {
+        let profile = self.profile_state_holder.update_profile_with(|p| {
             p.update_header(None);
-            Ok(())
+            Ok(p.clone())
         })?;
         self.save_existing_profile()
             // tarpaulin will incorrectly flag next line is missed
             .await?;
+
+        self.clients
+            .profile_state_change
+            .emit(ProfileState::Loaded(profile))
+            .await;
+
         Ok(res)
     }
 

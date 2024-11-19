@@ -62,6 +62,7 @@ impl SargonOS {
                 transaction_manifest.clone(),
                 nonce,
                 Some(notary_public_key),
+                are_instructions_originating_from_host,
             )
             .await?;
 
@@ -89,7 +90,7 @@ impl SargonOS {
             instructions,
             network_id,
             blobs.clone(),
-            ChildIntents::default(),
+            ChildSubintentSpecifiers::default(),
         )?;
 
         let summary = subintent_manifest.summary()?;
@@ -109,12 +110,12 @@ impl SargonOS {
         let pre_auth_to_review = match subintent_manifest.as_enclosed() {
             Some(manifest) => {
                 let mut instructions = manifest.instructions;
-                /// The ASSERT_WORKTOP_IS_EMPTY instruction, as it is a V2 instruction, is not allowed in the V1 manifest.
+                // The ASSERT_WORKTOP_IS_EMPTY instruction, as it is a V2 instruction, is not allowed in the V1 manifest.
                 instructions.instructions.remove(0);
                 let manifest_v2 = TransactionManifestV2::with_instructions_and_blobs_and_children(
                     instructions,
                     blobs.clone(),
-                    ChildIntents::default(),
+                    ChildSubintentSpecifiers::default(),
                 );
 
                 let manifest_string = manifest_v2.manifest_string();
@@ -148,6 +149,7 @@ impl SargonOS {
                         manifest_v1.into(),
                         nonce,
                         None,
+                        false,
                     )
                     .await?;
 
@@ -193,6 +195,7 @@ impl SargonOS {
         manifest: TransactionManifest,
         nonce: Nonce,
         notary_public_key: Option<PublicKey>,
+        are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
         let signer_public_keys =
             self.extract_signer_public_keys(manifest.summary()?)?;
@@ -218,7 +221,23 @@ impl SargonOS {
             .radix_engine_toolkit_receipt
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
-        manifest.execution_summary(engine_toolkit_receipt)
+        let execution_summary =
+            manifest.execution_summary(engine_toolkit_receipt)?;
+
+        let reserved_manifest_class = execution_summary
+            .detailed_classification
+            .iter()
+            .find(|classification| classification.is_reserved());
+
+        if let Some(reserved_manifest_class) = reserved_manifest_class
+            && !are_instructions_originating_from_host
+        {
+            return Err(CommonError::ReservedManifestClass {
+                class: reserved_manifest_class.clone(),
+            });
+        }
+
+        Ok(execution_summary)
     }
 
     #[cfg(not(tarpaulin_include))] // TBD
@@ -331,7 +350,10 @@ mod transaction_preview_analysis_tests {
             )
             .await;
 
-        assert_eq!(result, Err(CommonError::NetworkResponseBadCode))
+        assert_eq!(
+            result,
+            Err(CommonError::NetworkResponseBadCode { code: 500 })
+        )
     }
 
     #[actix_rt::test]

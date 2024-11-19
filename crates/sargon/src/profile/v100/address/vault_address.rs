@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 decl_ret_wrapped_address!(
-    /// Addresses to a specific vault, owned by a user, holding asset of one kind, either fungible or non-fungible.
+    /// Addresses to a specific vault, owned by a user, holding asset of one kind, either fungible or non_fungible.
     /// Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
     /// `"internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"`
     ///
