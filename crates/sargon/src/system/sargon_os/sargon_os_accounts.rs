@@ -2068,16 +2068,12 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        assert!(
-            !os.account_by_address(Account::sample_mainnet_carol().address)
-                .unwrap()
-                .is_tombstoned()
-        );
+        assert!(!os
+            .account_by_address(Account::sample_mainnet_carol().address)
+            .unwrap()
+            .is_tombstoned());
         assert!([account.address, other_account.address].iter().all(
-            |address| os
-                .account_by_address(*address)
-                .unwrap()
-                .is_tombstoned()
+            |address| os.account_by_address(*address).unwrap().is_tombstoned()
         ));
 
         let expected_authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
