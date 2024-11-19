@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// A struct detailing the transfers for a given account to be deleted.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct DeleteAccountTransfers {
     /// The recipient account to which the resources are going to be transferred.
     pub recipient: AccountAddress,
@@ -24,15 +24,6 @@ impl DeleteAccountTransfers {
             transfers,
             non_transferable_resources,
         }
-    }
-}
-
-impl DeleteAccountTransfers {
-    pub async fn build(
-        output: FetchResourcesOutput,
-        recipient: AccountAddress,
-    ) -> Result<Self> {
-        Err(CommonError::Unknown)
     }
 }
 

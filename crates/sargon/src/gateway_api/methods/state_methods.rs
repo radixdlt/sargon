@@ -367,6 +367,68 @@ impl GatewayClient {
     }
 }
 
+impl GatewayClient {
+    pub async fn filter_transferrable_resources(
+        &self,
+        output: FetchResourcesOutput,
+    ) -> Result<FetchTransferableResourcesOutput> {
+        let mut non_transferable_resources = Vec::new();
+
+        // Chunk the addresses to avoid exceeding the GW limit
+        let chunked_addresses: Vec<Vec<ResourceAddress>> = output
+            .resource_addresses()
+            .chunks(GATEWAY_CHUNK_ADDRESSES as usize)
+            .map(|chunk| chunk.to_vec())
+            .collect();
+
+        // Loop over the chunks
+        for resource_addresses in chunked_addresses {
+            // Fetch the details
+            let addresses: Vec<Address> =
+                resource_addresses.iter().map(|&a| a.into()).collect();
+            let response = self
+                .state_entity_details(StateEntityDetailsRequest::new(
+                    addresses, None, None,
+                ))
+                .await?;
+
+            // Filter those that cannot be transferred and append them to the list
+            let cannot_be_transferred: Vec<ResourceAddress> = response
+                .items
+                .into_iter()
+                .filter(|item| !item.can_be_transferred())
+                .filter_map(|item| item.address.as_resource().cloned())
+                .collect();
+            non_transferable_resources.extend(cannot_be_transferred);
+        }
+
+        // Filter out the fungible and non-fungible items that cannot be transferred
+        let fungible: Vec<FungibleResourcesCollectionItem> = output
+            .fungibles
+            .into_iter()
+            .filter(|item| {
+                !non_transferable_resources.contains(&item.resource_address())
+            })
+            .collect();
+
+        let non_fungible: Vec<NonFungibleResourcesCollectionItem> = output
+            .non_fungibles
+            .into_iter()
+            .filter(|item| {
+                !non_transferable_resources.contains(&item.resource_address())
+            })
+            .collect();
+
+        // Build result
+        let result = FetchTransferableResourcesOutput::new(
+            fungible,
+            non_fungible,
+            non_transferable_resources,
+        );
+        Ok(result)
+    }
+}
+
 #[cfg(test)]
 mod fetch_all_resources_tests {
     use crate::prelude::*;

@@ -12,7 +12,7 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
         recipient_account_address: Option<AccountAddress>,
-    ) -> Result<TransactionManifest> {
+    ) -> Result<DeleteAccountResult> {
         self.wrapped
             .create_delete_account_manifest(
                 account_address.into_internal(),

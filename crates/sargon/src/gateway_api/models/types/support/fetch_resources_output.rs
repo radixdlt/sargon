@@ -18,3 +18,37 @@ impl FetchResourcesOutput {
         }
     }
 }
+
+impl FetchResourcesOutput {
+    pub fn resource_addresses(&self) -> Vec<ResourceAddress> {
+        self.fungibles
+            .iter()
+            .map(|item| item.resource_address())
+            .chain(
+                self.non_fungibles
+                    .iter()
+                    .map(|item| item.resource_address()),
+            )
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FetchResourcesOutput;
+
+    #[test]
+    fn resource_addresses() {
+        let fungible = FungibleResourcesCollectionItem::sample();
+        let non_fungible = NonFungibleResourcesCollectionItem::sample();
+        let sut = SUT::new(vec![fungible.clone()], vec![non_fungible.clone()]);
+
+        assert_eq!(
+            sut.resource_addresses(),
+            vec![fungible.resource_address(), non_fungible.resource_address()]
+        );
+    }
+}
