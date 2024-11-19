@@ -111,12 +111,20 @@ impl SargonOS {
         };
 
         // Get all resources
-        let output = gateway_client
+        let resources = gateway_client
             .fetch_all_resources(account_address, ledger_state.into())
             .await?;
 
+        // Filter transferable resources
+        let transferable_resources = gateway_client
+            .filter_transferrable_resources(resources)
+            .await?;
+
         // Try to build the DeleteAccountTransfers from output and return it.
-        let transfers = DeleteAccountTransfers::try_from((output, recipient))?;
+        let transfers = DeleteAccountTransfers::try_from((
+            transferable_resources,
+            recipient,
+        ))?;
         Ok(Some(transfers))
     }
 }

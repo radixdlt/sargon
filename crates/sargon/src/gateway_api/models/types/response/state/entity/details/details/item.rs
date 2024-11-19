@@ -35,8 +35,7 @@ impl StateEntityDetailsResponseItemDetails {
 
         if depositor.assignment.resolution == RoleAssignmentResolution::Owner {
             // No need to check for withdrawer, as its `resolution` will be the same.
-            return role_assignments.owner.explicit_rule
-                == ExplicitRule::AllowAll;
+            return role_assignments.owner.rule == ExplicitRule::AllowAll;
         }
 
         let Some(withdrawer) = role_assignments
@@ -77,6 +76,7 @@ mod tests {
     type SUT = StateEntityDetailsResponseItemDetails;
 
     #[test]
+    #[allow(non_snake_case)]
     fn can_be_transferred() {
         type Assignments = ComponentEntityRoleAssignments;
 
@@ -228,58 +228,24 @@ mod tests {
         // Note: we aren't using `assert_eq_after_json_roundtrip` to verify the roundtrip because there
         // are multiple fields that we aren't parsing, so we can't compare the entire struct.
 
-        let sut = SUT::FungibleResource(
-            StateEntityDetailsResponseFungibleResourceDetails::new(
-                ComponentEntityRoleAssignments::sample_allow_all(),
-            ),
-        );
-        let json = r#"
-{
-  "type": "FungibleResource",
-  "role_assignments": {
-    "entries": [
-      {
-        "role_key": {
-          "module": "Main",
-          "name": "depositor"
-        },
-        "assignment": {
-          "resolution": "Explicit",
-          "explicit_rule": {
-            "type": "AllowAll"
-          }
-        },
-        "updater_roles": [
-          {
-            "module": "Main",
-            "name": "depositor_updater"
-          }
-        ]
-      },
-      {
-        "role_key": {
-          "module": "Main",
-          "name": "withdrawer"
-        },
-        "assignment": {
-          "resolution": "Explicit",
-          "explicit_rule": {
-            "type": "AllowAll"
-          }
-        },
-        "updater_roles": [
-          {
-            "module": "Main",
-            "name": "withdrawer_updater"
-          }
-        ]
-      }
-    ]
-  }
-}
-        "#;
+        // Fungible Resource (XRD)
+        let result = fixture_and_json::<SUT>(include_str!(concat!(
+            env!("FIXTURES_MODELS_GW"),
+            "state/response_entity_details_details__fungible_resource.json"
+        )))
+        .unwrap()
+        .0;
 
-        let result: SUT = serde_json::from_str(json).unwrap();
-        assert_eq!(result, sut);
+        assert!(matches!(result, SUT::FungibleResource(_)));
+
+        // Non-Fungible Resource (XRD)
+        let result = fixture_and_json::<SUT>(include_str!(concat!(
+            env!("FIXTURES_MODELS_GW"),
+            "state/response_entity_details_details__non_fungible_resource.json"
+        )))
+        .unwrap()
+        .0;
+
+        assert!(matches!(result, SUT::NonFungibleResource(_)));
     }
 }

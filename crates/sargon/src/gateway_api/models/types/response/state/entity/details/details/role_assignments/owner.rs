@@ -2,12 +2,12 @@ use crate::prelude::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct ComponentEntityRoleAssignmentOwner {
-    pub explicit_rule: ExplicitRule,
+    pub rule: ExplicitRule,
 }
 
 impl ComponentEntityRoleAssignmentOwner {
-    pub fn new(explicit_rule: ExplicitRule) -> Self {
-        Self { explicit_rule }
+    pub fn new(rule: ExplicitRule) -> Self {
+        Self { rule }
     }
 }
 

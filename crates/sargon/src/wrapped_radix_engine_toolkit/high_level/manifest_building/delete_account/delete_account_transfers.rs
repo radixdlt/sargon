@@ -3,31 +3,50 @@ use crate::prelude::*;
 /// A struct detailing the transfers for a given account to be deleted.
 #[derive(Debug, PartialEq, Eq)]
 pub struct DeleteAccountTransfers {
+    /// The recipient account to which the resources are going to be transferred.
     pub recipient: AccountAddress,
+
+    /// The transfers to be made.
     pub transfers: Vec<DeleteAccountTransfer>,
+
+    /// The resources that cannot be transferred
+    pub non_transferable_resources: Vec<ResourceAddress>,
 }
 
 impl DeleteAccountTransfers {
     pub fn new(
         recipient: AccountAddress,
         transfers: Vec<DeleteAccountTransfer>,
+        non_transferable_resources: Vec<ResourceAddress>,
     ) -> DeleteAccountTransfers {
         DeleteAccountTransfers {
             recipient,
             transfers,
+            non_transferable_resources,
         }
     }
 }
 
-impl TryFrom<(FetchResourcesOutput, AccountAddress)>
+impl DeleteAccountTransfers {
+    pub async fn build(
+        output: FetchResourcesOutput,
+        recipient: AccountAddress,
+    ) -> Result<Self> {
+        Err(CommonError::Unknown)
+    }
+}
+
+impl TryFrom<(FetchTransferableResourcesOutput, AccountAddress)>
     for DeleteAccountTransfers
 {
     type Error = CommonError;
-    fn try_from(value: (FetchResourcesOutput, AccountAddress)) -> Result<Self> {
-        let (fetch_resources_output, recipient) = value;
+    fn try_from(
+        value: (FetchTransferableResourcesOutput, AccountAddress),
+    ) -> Result<Self> {
+        let (output, recipient) = value;
 
         // Convert fungibles
-        let fungibles = fetch_resources_output
+        let fungibles = output
             .fungibles
             .clone()
             .into_iter()
@@ -35,7 +54,7 @@ impl TryFrom<(FetchResourcesOutput, AccountAddress)>
             .collect::<Result<Vec<_>, _>>()?;
 
         // Convert non-fungibles
-        let non_fungibles = fetch_resources_output
+        let non_fungibles = output
             .non_fungibles
             .into_iter()
             .map(DeleteAccountTransfer::try_from)
@@ -55,7 +74,11 @@ impl TryFrom<(FetchResourcesOutput, AccountAddress)>
             });
         }
 
-        Ok(Self::new(recipient, transfers))
+        Ok(Self::new(
+            recipient,
+            transfers,
+            output.non_transferable_resources,
+        ))
     }
 }
 
@@ -71,9 +94,11 @@ mod tests {
         // Test the case where the total weight of the transfers is less than the maximum.
         let fungible = FungibleResourcesCollectionItem::sample();
         let non_fungible = NonFungibleResourcesCollectionItem::sample();
-        let output = FetchResourcesOutput::new(
+        let non_transferable_resources = vec![ResourceAddress::sample()];
+        let output = FetchTransferableResourcesOutput::new(
             vec![fungible.clone()],
             vec![non_fungible.clone()],
+            non_transferable_resources.clone(),
         );
         let recipient = AccountAddress::sample();
 
@@ -86,6 +111,10 @@ mod tests {
                 non_fungible.try_into().unwrap()
             ]
         );
+        assert_eq!(
+            result.non_transferable_resources,
+            non_transferable_resources
+        );
 
         // Test the case where the total weight of the transfers is over the maximum.
         let non_fungible = NonFungibleResourcesCollectionItem::Global(
@@ -95,9 +124,10 @@ mod tests {
             ),
         );
 
-        let output = FetchResourcesOutput::new(
+        let output = FetchTransferableResourcesOutput::new(
             vec![fungible.clone()],
             vec![non_fungible.clone()],
+            vec![],
         );
         let result =
             SUT::try_from((output, recipient)).expect_err("Expected error");
