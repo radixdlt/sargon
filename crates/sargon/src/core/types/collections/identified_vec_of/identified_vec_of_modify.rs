@@ -99,9 +99,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
         true
     }
 
-    /// Returns `false` if no element of `id` was found, otherwise if found, this
-    /// existing element gets updated by `mutate` closure and this function returns
-    /// `true`.
+    /// Updates in place each item by `mutate`.
     #[cfg(not(tarpaulin_include))] // false negative
     #[inline]
     pub fn update_all_with<F>(&mut self, mut mutate: F)

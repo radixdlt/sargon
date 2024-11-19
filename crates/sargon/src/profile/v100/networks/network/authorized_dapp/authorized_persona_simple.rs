@@ -37,7 +37,7 @@ pub struct AuthorizedPersonaSimple {
 }
 
 impl AuthorizedPersonaSimple {
-    /// Removes the referenced account for this dApp
+    /// Removes the referenced account from the shared accounts
     pub(crate) fn remove_shared_account(
         &mut self,
         account_address: &AccountAddress,

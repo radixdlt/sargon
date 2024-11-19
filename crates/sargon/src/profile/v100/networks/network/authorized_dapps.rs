@@ -6,6 +6,7 @@ decl_identified_vec_of!(
 );
 
 impl AuthorizedDapps {
+    /// Remove referenced account from all the dApps
     pub(crate) fn remove_referenced_account(
         &mut self,
         account_address: &AccountAddress,
