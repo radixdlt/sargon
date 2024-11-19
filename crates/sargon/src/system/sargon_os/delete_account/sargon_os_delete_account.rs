@@ -13,7 +13,7 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
         recipient_account_address: Option<AccountAddress>,
-    ) -> Result<DeleteAccountResult> {
+    ) -> Result<CreateDeleteAccountManifestResult> {
         let network_id = account_address.network_id();
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -60,7 +60,7 @@ impl SargonOS {
         );
 
         // Build result
-        let result = DeleteAccountResult::new(
+        let result = CreateDeleteAccountManifestResult::new(
             manifest,
             account_transfers
                 .map_or_else(Vec::new, |t| t.non_transferable_resources),
@@ -412,8 +412,11 @@ mod integration_tests {
             .await
             .unwrap();
 
-        assert_eq!(result.non_transferable_resources, vec![
+        assert_eq!(
+            result.non_transferable_resources,
+            vec![
             "resource_tdx_2_1nt72qwswkjkaayfwgyy0d2un8wvpjlq2dg5lq54382wlmf6yly8vz5".parse().unwrap(), // RadQuest Hero Badge
-        ]);
+        ]
+        );
     }
 }

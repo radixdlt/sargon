@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct DeleteAccountResult {
+pub struct CreateDeleteAccountManifestResult {
     pub manifest: TransactionManifest,
     pub non_transferable_resources: Vec<ResourceAddress>,
 }
 
-impl DeleteAccountResult {
+impl CreateDeleteAccountManifestResult {
     pub fn new(
         manifest: TransactionManifest,
         non_transferable_resources: Vec<ResourceAddress>,
@@ -18,7 +18,7 @@ impl DeleteAccountResult {
     }
 }
 
-impl HasSampleValues for DeleteAccountResult {
+impl HasSampleValues for CreateDeleteAccountManifestResult {
     fn sample() -> Self {
         Self::new(TransactionManifest::sample(), vec![])
     }
