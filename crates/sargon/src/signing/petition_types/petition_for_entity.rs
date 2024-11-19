@@ -435,7 +435,9 @@ mod tests {
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
         let matrix =
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0, [d0.clone(), d1.clone()]).unwrap();
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0, [d0.clone(), d1.clone()],
+            false, /* TODO: MFA-Rules: change to `true` */
+        ).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
             Hash::sample_third(),
@@ -460,7 +462,7 @@ mod tests {
 
         let matrix =
             GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0,
-                [d0.clone(), d1.clone()]
+                [d0.clone(), d1.clone()],false, /* TODO: MFA-Rules: change to `true` */
             ).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
@@ -484,7 +486,7 @@ mod tests {
         let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
             RoleKind::Primary,
             [d0.clone(), d1.clone()],
-            2,[]
+            2,[],false, /* TODO: MFA-Rules: change to `true` */
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -512,7 +514,7 @@ mod tests {
             RoleKind::Primary,
             [d0.clone(), d1.clone()],
             2,
-            []
+            [],false, /* TODO: MFA-Rules: change to `true` */
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -542,7 +544,7 @@ mod tests {
             RoleKind::Primary,
             [d0.clone(), d1.clone()],
             1,
-            []
+            [],false, /* TODO: MFA-Rules: change to `true` */
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -595,7 +597,7 @@ mod tests {
                 RoleKind::Primary,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                 1,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
+                [FactorSourceIDFromHash::sample_at(0)].map(&fi),false, /* TODO: MFA-Rules: change to `true` */
             ),
             Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
         );
@@ -612,7 +614,7 @@ mod tests {
                 RoleKind::Primary,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                 2,
-                [],
+                [],false, /* TODO: MFA-Rules: change to `true` */
             ),
             Err(
                 CommonError::InvalidSecurityStructureThresholdExceedsFactors {
@@ -639,7 +641,7 @@ mod tests {
                     RoleKind::Primary,
                     [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                     1,
-                    [FactorSourceIDFromHash::sample_at(1)].map(&fi),
+                    [FactorSourceIDFromHash::sample_at(1)].map(&fi),false, /* TODO: MFA-Rules: change to `true` */
                 )
                 .unwrap()
             },

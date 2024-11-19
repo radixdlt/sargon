@@ -101,11 +101,50 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
             impl [< $role RoleWith $factor s >] {
 
+                fn validate_is_canonical_primary(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+                fn validate_is_canonical_recovery(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+                fn validate_is_canonical_confirmation(&self) -> Result<(), FactorRulesViolation> {
+                   Ok(())
+                }
+
                 fn validate_is_canonical(&self) -> Result<(), FactorRulesViolation> {
-                    todo!()
+                    let role = self.get_mfa_role();
+                    match role {
+                        RoleKind::Primary => self.validate_is_canonical_primary(),
+                        RoleKind::Recovery => self.validate_is_canonical_recovery(),
+                        RoleKind::Confirmation => self.validate_is_canonical_confirmation(),
+                    }
+                }
+
+                fn validate_primary(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+                fn validate_recovery(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+                fn validate_confirmation(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+                fn validate_all_roles(&self) -> Result<(), FactorRulesViolation> {
+                    let role = self.get_mfa_role();
+                    match role {
+                        RoleKind::Primary => self.validate_primary(),
+                        RoleKind::Recovery => self.validate_recovery(),
+                        RoleKind::Confirmation => self.validate_confirmation(),
+                    }
                 }
 
                 fn validate(&self, enforce_canonical: bool) -> Result<(), FactorRulesViolation> {
+                    self.validate_all_roles()?;
                     if enforce_canonical {
                         self.validate_is_canonical()?;
                     }
@@ -333,17 +372,40 @@ macro_rules! decl_matrix_of_factors {
             }
 
             impl [< MatrixOf $factor s >] {
+
+
+                fn validate_is_canonical(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+                fn validate_all_roles(&self) -> Result<(), FactorRulesViolation> {
+                    Ok(())
+                }
+
+
+                fn validate(&self, enforce_canonical: bool) -> Result<(), FactorRulesViolation> {
+                    self.validate_all_roles()?;
+                    if enforce_canonical {
+                        self.validate_is_canonical()?;
+                    }
+                    Ok(())
+                }
+
                 pub fn new(
                     primary_role: [< PrimaryRoleWith $factor s >],
                     recovery_role: [< RecoveryRoleWith $factor s >],
                     confirmation_role: [< ConfirmationRoleWith $factor s >],
+                    enforce_canonical: bool,
                 ) -> Result<Self> {
-                    Ok(Self {
+                    let unvalidated = Self {
                         __hidden: HiddenConstructor,
                         primary_role,
                         recovery_role,
                         confirmation_role,
-                    })
+                    };
+                    unvalidated.validate(enforce_canonical).map_err(|e| CommonError::from(e))?;
+                    let validated = unvalidated;
+                    Ok(validated)
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {

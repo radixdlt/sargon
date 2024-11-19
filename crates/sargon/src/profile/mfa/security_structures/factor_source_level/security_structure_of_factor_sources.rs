@@ -132,7 +132,12 @@ impl TryFrom<(&MatrixOfFactorSourceIDs, &FactorSources)>
             factor_sources,
         ))?;
 
-        Self::new(primary_role, recovery_role, confirmation_role)
+        Self::new(
+            primary_role,
+            recovery_role,
+            confirmation_role,
+            false, /* TODO: MFA-Rules: change to `true` */
+        )
     }
 }
 

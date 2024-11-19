@@ -9,7 +9,7 @@ pub enum FactorRulesViolation {
 }
 
 impl From<FactorRulesViolation> for CommonError {
-    fn from(err: FactorRulesViolation) -> Self {
+    fn from(_err: FactorRulesViolation) -> Self {
         todo!()
     }
 }

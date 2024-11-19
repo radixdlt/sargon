@@ -18,6 +18,7 @@ impl HasSampleValues for MatrixOfFactorInstances {
             PrimaryRoleWithFactorInstances::sample(),
             RecoveryRoleWithFactorInstances::sample(),
             ConfirmationRoleWithFactorInstances::sample(),
+            false, /* TODO: MFA-Rules: change to `true` */
         )
         .unwrap()
     }
@@ -27,6 +28,7 @@ impl HasSampleValues for MatrixOfFactorInstances {
             PrimaryRoleWithFactorInstances::sample_other(),
             RecoveryRoleWithFactorInstances::sample_other(),
             ConfirmationRoleWithFactorInstances::sample_other(),
+            false, /* TODO: MFA-Rules: change to `true` */
         )
         .unwrap()
     }
@@ -71,7 +73,12 @@ impl MatrixOfFactorInstances {
                 ConfirmationRoleWithFactorInstances::new,
             )?;
 
-        let matrix = Self::new(primary, recovery, confirmation)?;
+        let matrix = Self::new(
+            primary,
+            recovery,
+            confirmation,
+            false, /* TODO: MFA-Rules: change to `true` */
+        )?;
 
         // Now that we have assigned instances, **possibly the SAME INSTANCE to multiple roles**,
         // lets delete them from the `consuming_instances` map.

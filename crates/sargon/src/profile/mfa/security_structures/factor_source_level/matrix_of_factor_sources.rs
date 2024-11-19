@@ -1,13 +1,12 @@
 use crate::prelude::*;
 
-
-
 impl HasSampleValues for MatrixOfFactorSources {
     fn sample() -> Self {
         Self::new(
             PrimaryRoleWithFactorSources::sample(),
             RecoveryRoleWithFactorSources::sample(),
             ConfirmationRoleWithFactorSources::sample(),
+            false, /* TODO: MFA-Rules: change to `true` */
         )
         .unwrap()
     }
@@ -16,6 +15,7 @@ impl HasSampleValues for MatrixOfFactorSources {
             PrimaryRoleWithFactorSources::sample_other(),
             RecoveryRoleWithFactorSources::sample_other(),
             ConfirmationRoleWithFactorSources::sample_other(),
+            false, /* TODO: MFA-Rules: change to `true` */
         )
         .unwrap()
     }

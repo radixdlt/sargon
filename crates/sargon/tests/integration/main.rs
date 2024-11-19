@@ -410,7 +410,9 @@ mod integration_tests {
                             FI::sample_mainnet_tx_account(i, *f2.factor_source_id().as_hash().unwrap()),
                         ],
                         2,
-                        []
+                        [],
+                        false, /* TODO: MFA-Rules: change to `true` */
+
                     ).unwrap()
                 },
             );
@@ -428,8 +430,8 @@ mod integration_tests {
                         FI::sample_mainnet_tx_account(
                             i,
                             *f3.factor_source_id().as_hash().unwrap(),
-                        )
-                    ]).unwrap()
+                        ),
+                    ], false, /* TODO: MFA-Rules: change to `true` */).unwrap()
                 },
             );
 
@@ -450,6 +452,8 @@ mod integration_tests {
                             i,
                             *f4.factor_source_id().as_hash().unwrap(),
                         )],
+                        false, /* TODO: MFA-Rules: change to `true` */
+
                     ).unwrap()
                 },
             );

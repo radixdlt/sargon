@@ -395,7 +395,7 @@ mod encrypted_profile_tests {
                         .map(|x| x.security_state)
                         .for_each(test);
 
-                    Ok(())
+                    Ok::<(), CommonError>(())
                 })?;
             Ok(())
         }
