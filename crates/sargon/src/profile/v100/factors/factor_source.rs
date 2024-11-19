@@ -64,6 +64,12 @@ impl IsMaybeKeySpaceAware for FactorSource {
     }
 }
 
+impl HasFactorSourceKindObjectSafe for FactorSource {
+    fn get_factor_source_kind(&self) -> FactorSourceKind {
+        self.factor_source_id().get_factor_source_kind()
+    }
+}
+
 impl BaseIsFactorSource for FactorSource {
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         match self {
@@ -104,24 +110,6 @@ impl BaseIsFactorSource for FactorSource {
             }
             FactorSource::TrustedContact { value } => value.common_properties(),
             FactorSource::Passphrase { value } => value.common_properties(),
-        }
-    }
-
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        match self {
-            FactorSource::Device { value } => value.factor_source_kind(),
-            FactorSource::Ledger { value } => value.factor_source_kind(),
-            FactorSource::SecurityQuestions { value } => {
-                value.factor_source_kind()
-            }
-            FactorSource::ArculusCard { value } => value.factor_source_kind(),
-            FactorSource::OffDeviceMnemonic { value } => {
-                value.factor_source_kind()
-            }
-            FactorSource::TrustedContact { value } => {
-                value.factor_source_kind()
-            }
-            FactorSource::Passphrase { value } => value.factor_source_kind(),
         }
     }
 
@@ -179,7 +167,10 @@ impl PartialOrd for FactorSource {
 }
 impl Ord for FactorSource {
     fn cmp(&self, other: &Self) -> Ordering {
-        match self.factor_source_kind().cmp(&other.factor_source_kind()) {
+        match self
+            .get_factor_source_kind()
+            .cmp(&other.get_factor_source_kind())
+        {
             Ordering::Equal => {}
             ord => return ord,
         }
@@ -431,7 +422,7 @@ mod tests {
     #[test]
     fn factor_source_kind_device() {
         assert_eq!(
-            SUT::sample_device().factor_source_kind(),
+            SUT::sample_device().get_factor_source_kind(),
             FactorSourceKind::Device
         );
     }
@@ -452,7 +443,7 @@ mod tests {
     #[test]
     fn factor_source_kind_ledger() {
         assert_eq!(
-            SUT::sample_ledger().factor_source_kind(),
+            SUT::sample_ledger().get_factor_source_kind(),
             FactorSourceKind::LedgerHQHardwareWallet
         );
     }
@@ -460,7 +451,7 @@ mod tests {
     #[test]
     fn factor_source_kind_security_questions() {
         assert_eq!(
-            SUT::sample_security_questions().factor_source_kind(),
+            SUT::sample_security_questions().get_factor_source_kind(),
             FactorSourceKind::SecurityQuestions
         );
     }
@@ -468,7 +459,7 @@ mod tests {
     #[test]
     fn factor_source_kind_arculus_card() {
         assert_eq!(
-            SUT::sample_arculus().factor_source_kind(),
+            SUT::sample_arculus().get_factor_source_kind(),
             FactorSourceKind::ArculusCard
         );
     }
@@ -476,7 +467,7 @@ mod tests {
     #[test]
     fn factor_source_kind_off_device_mnemonic() {
         assert_eq!(
-            SUT::sample_off_device().factor_source_kind(),
+            SUT::sample_off_device().get_factor_source_kind(),
             FactorSourceKind::OffDeviceMnemonic
         );
     }
@@ -484,7 +475,7 @@ mod tests {
     #[test]
     fn factor_source_kind_trusted_contact() {
         assert_eq!(
-            SUT::sample_trusted_contact_frank().factor_source_kind(),
+            SUT::sample_trusted_contact_frank().get_factor_source_kind(),
             FactorSourceKind::TrustedContact
         );
     }
@@ -492,7 +483,7 @@ mod tests {
     #[test]
     fn factor_source_kind_passphrase() {
         assert_eq!(
-            SUT::sample_passphrase().factor_source_kind(),
+            SUT::sample_passphrase().get_factor_source_kind(),
             FactorSourceKind::Passphrase
         );
     }

@@ -12,7 +12,9 @@ pub struct FactorInstances {
     #[serde(skip)]
     #[debug(skip)]
     __hidden: HiddenConstructor,
-    factor_instances: IndexSet<HierarchicalDeterministicFactorInstance>,
+    /// **MUST NOT** be a set, we MUST allow for duplicates since the same factor instance can be used multiple times in
+    /// different roles!!!
+    factor_instances: Vec<HierarchicalDeterministicFactorInstance>,
 }
 
 impl FactorInstances {
@@ -20,7 +22,7 @@ impl FactorInstances {
         &mut self,
         instances: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
     ) {
-        let instances = instances.into_iter().collect::<IndexSet<_>>(); // remove duplicates
+        let instances = instances.into_iter().collect_vec();
         self.factor_instances.extend(instances);
     }
 
@@ -28,9 +30,7 @@ impl FactorInstances {
         &mut self,
         index: usize,
     ) -> HierarchicalDeterministicFactorInstance {
-        self.factor_instances
-            .shift_remove_index(index)
-            .expect("correct index")
+        self.factor_instances.remove(index)
     }
 
     pub fn shift_remove(
@@ -39,7 +39,8 @@ impl FactorInstances {
     ) -> HierarchicalDeterministicFactorInstance {
         let idx = self
             .factor_instances
-            .get_index_of(item)
+            .iter()
+            .position(|x| x == item)
             .expect("existing item");
         self.shift_remove_index(idx)
     }
@@ -56,20 +57,12 @@ impl FactorInstances {
 
 impl From<&[HierarchicalDeterministicFactorInstance]> for FactorInstances {
     fn from(value: &[HierarchicalDeterministicFactorInstance]) -> Self {
-        Self::from(
-            IndexSet::<HierarchicalDeterministicFactorInstance>::from_iter(
-                value.iter().cloned(),
-            ),
-        )
+        Self::from_iter(value.iter().cloned())
     }
 }
 
-impl From<IndexSet<HierarchicalDeterministicFactorInstance>>
-    for FactorInstances
-{
-    fn from(
-        instances: IndexSet<HierarchicalDeterministicFactorInstance>,
-    ) -> Self {
+impl From<Vec<HierarchicalDeterministicFactorInstance>> for FactorInstances {
+    fn from(instances: Vec<HierarchicalDeterministicFactorInstance>) -> Self {
         Self::new(instances)
     }
 }
@@ -86,7 +79,7 @@ impl FactorInstances {
 
 impl IntoIterator for FactorInstances {
     type Item = HierarchicalDeterministicFactorInstance;
-    type IntoIter = <IndexSet<HierarchicalDeterministicFactorInstance> as IntoIterator>::IntoIter;
+    type IntoIter = <Vec<HierarchicalDeterministicFactorInstance> as IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
         self.factor_instances().into_iter()
@@ -105,7 +98,7 @@ impl FromIterator<HierarchicalDeterministicFactorInstance> for FactorInstances {
 
 impl FactorInstances {
     pub fn new(
-        factor_instances: IndexSet<HierarchicalDeterministicFactorInstance>,
+        factor_instances: Vec<HierarchicalDeterministicFactorInstance>,
     ) -> Self {
         Self {
             __hidden: HiddenConstructor,
@@ -116,29 +109,29 @@ impl FactorInstances {
     pub fn just(
         factor_instance: HierarchicalDeterministicFactorInstance,
     ) -> Self {
-        Self::new(IndexSet::just(factor_instance))
+        Self::new(vec![factor_instance])
     }
 
     pub fn factor_instances(
         &self,
-    ) -> IndexSet<HierarchicalDeterministicFactorInstance> {
+    ) -> Vec<HierarchicalDeterministicFactorInstance> {
         self.factor_instances.clone()
     }
 }
 
 impl HasSampleValues for FactorInstances {
     fn sample() -> Self {
-        Self::new(IndexSet::from_iter([
+        Self::from_iter([
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(1),
-        ]))
+        ])
     }
 
     fn sample_other() -> Self {
-        Self::new(IndexSet::from_iter([
+        Self::from_iter([
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(2),
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(3),
-        ]))
+        ])
     }
 }
 

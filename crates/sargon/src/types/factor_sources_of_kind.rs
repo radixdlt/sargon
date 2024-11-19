@@ -19,10 +19,10 @@ impl FactorSourcesOfKind {
 
         if let Some(factor_source) = factor_sources
             .iter()
-            .find(|f| f.factor_source_kind() != kind)
+            .find(|f| f.get_factor_source_kind() != kind)
         {
             return Err(CommonError::InvalidFactorSourceKind {
-                bad_value: factor_source.factor_source_kind().to_string(),
+                bad_value: factor_source.get_factor_source_kind().to_string(),
             });
         }
 

@@ -419,7 +419,9 @@ mod encrypted_profile_tests {
                 .factor_sources
                 .clone()
                 .into_iter()
-                .filter(|x| x.factor_source_kind() == FactorSourceKind::Device)
+                .filter(|x| {
+                    x.get_factor_source_kind() == FactorSourceKind::Device
+                })
                 .map(|x| x.factor_source_id())
                 .collect::<HashSet<FactorSourceID>>();
 

@@ -146,13 +146,21 @@ impl FactorInstancesCache {
         let mut binding = self.map.write().unwrap();
         if let Some(existing_for_factor) = binding.get_mut(factor_source_id) {
             for (agnostic_path, instances) in instances_by_agnostic_path {
-                let instances = instances.factor_instances();
+                let instances = IndexSet::<
+                    HierarchicalDeterministicFactorInstance,
+                >::from_iter(
+                    instances.factor_instances().into_iter()
+                );
 
                 if let Some(existing_for_path) =
                     existing_for_factor.get_mut(&agnostic_path)
                 {
                     if let Some(fi) = instances
-                        .intersection(&existing_for_path.factor_instances())
+                        .intersection(&IndexSet::<
+                            HierarchicalDeterministicFactorInstance,
+                        >::from_iter(
+                            existing_for_path.factor_instances().into_iter(),
+                        ))
                         .next()
                     {
                         return Err(
@@ -189,7 +197,7 @@ impl FactorInstancesCache {
                 } else {
                     existing_for_factor.insert(
                         agnostic_path,
-                        FactorInstances::from(instances),
+                        FactorInstances::from_iter(instances.into_iter()),
                     );
                 }
             }
@@ -368,7 +376,9 @@ impl FactorInstancesCache {
                 let existing_for_path = existing_for_factor
                     .get(&index_agnostic_path)
                     .expect("expected to delete")
-                    .factor_instances();
+                    .factor_instances()
+                    .into_iter()
+                    .collect::<IndexSet<_>>();
 
                 if !existing_for_path.is_superset(&instances_to_delete) {
                     panic!("Programmer error! Some of the factors to delete were not in cache!");
@@ -826,8 +836,11 @@ mod tests {
                 })
                 .collect::<IndexSet<_>>();
 
-            sut.insert_for_factor(&fsid, &FactorInstances::from(instances))
-                .unwrap();
+            sut.insert_for_factor(
+                &fsid,
+                &FactorInstances::from_iter(instances.into_iter()),
+            )
+            .unwrap();
         }
 
         sut.delete(&to_delete);

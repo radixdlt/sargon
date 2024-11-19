@@ -41,8 +41,8 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
         })
     }
 }
-impl IsFactorSource for DeviceFactorSource {
-    fn kind() -> FactorSourceKind {
+impl HasFactorSourceKind for DeviceFactorSource {
+    fn factor_source_kind() -> FactorSourceKind {
         FactorSourceKind::Device
     }
 }
@@ -51,9 +51,9 @@ impl BaseIsFactorSource for DeviceFactorSource {
         self.common.clone()
     }
 
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
-    }
+    // fn factor_source_kind(&self) -> FactorSourceKind {
+    //     self.id.kind
+    // }
 
     fn factor_source_id(&self) -> FactorSourceID {
         self.clone().id.into()
@@ -282,7 +282,7 @@ mod tests {
 
     #[test]
     fn static_kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::Device);
+        assert_eq!(SUT::factor_source_kind(), FactorSourceKind::Device);
     }
 
     #[test]

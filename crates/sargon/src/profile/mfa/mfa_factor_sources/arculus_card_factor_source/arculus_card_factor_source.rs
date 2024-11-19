@@ -87,18 +87,14 @@ impl TryFrom<FactorSource> for ArculusCardFactorSource {
         }
     }
 }
-impl IsFactorSource for ArculusCardFactorSource {
-    fn kind() -> FactorSourceKind {
+impl HasFactorSourceKind for ArculusCardFactorSource {
+    fn factor_source_kind() -> FactorSourceKind {
         FactorSourceKind::ArculusCard
     }
 }
 impl BaseIsFactorSource for ArculusCardFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
-    }
-
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -166,7 +162,7 @@ mod tests {
 
     #[test]
     fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::ArculusCard);
+        assert_eq!(SUT::factor_source_kind(), FactorSourceKind::ArculusCard);
     }
 
     #[test]
@@ -186,6 +182,6 @@ mod tests {
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+        assert_eq!(SUT::sample().get_factor_source_kind(), SUT::sample().id.kind);
     }
 }

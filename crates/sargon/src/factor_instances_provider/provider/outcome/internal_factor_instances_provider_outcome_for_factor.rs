@@ -105,29 +105,29 @@ impl InternalFactorInstancesProviderOutcomeForFactor {
 
 impl HasSampleValues for InternalFactorInstancesProviderOutcomeForFactor {
     fn sample() -> Self {
-        Self::new(FactorSourceIDFromHash::sample_at(0),    FactorInstances::new(IndexSet::from_iter([
+        Self::new(FactorSourceIDFromHash::sample_at(0),    FactorInstances::from_iter([
     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(2),
-])),    FactorInstances::new(IndexSet::from_iter([
+]),    FactorInstances::from_iter([
     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
-])),    FactorInstances::new(IndexSet::from_iter([
+]),    FactorInstances::from_iter([
     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
-])),    FactorInstances::new(IndexSet::from_iter([
+]),    FactorInstances::from_iter([
     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(1),
     HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(2),
-])))
+]))
     }
 
     fn sample_other() -> Self {
-        Self::new(FactorSourceIDFromHash::sample_at(1),    FactorInstances::new(IndexSet::from_iter([
+        Self::new(FactorSourceIDFromHash::sample_at(1),    FactorInstances::from_iter([
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(2),
-        ])),    FactorInstances::new(IndexSet::from_iter([
+        ]),    FactorInstances::from_iter([
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(0),
-        ])),    FactorInstances::new(IndexSet::from_iter([
+        ]),    FactorInstances::from_iter([
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(0),
-        ])),    FactorInstances::new(IndexSet::from_iter([
+        ]),    FactorInstances::from_iter([
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(1),
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(2),
-        ])))
+        ]))
     }
 }
 

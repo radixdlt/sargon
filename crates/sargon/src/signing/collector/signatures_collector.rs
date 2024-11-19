@@ -523,7 +523,7 @@ mod tests {
     fn factor_source_kinds_order() {
         let kinds = FactorSource::sample_all()
             .into_iter()
-            .map(|f| f.factor_source_kind())
+            .map(|f| f.get_factor_source_kind())
             .collect::<IndexSet<_>>();
         let mut kinds = kinds.into_iter().collect_vec();
         kinds.sort();

@@ -101,16 +101,30 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
             impl [< $role RoleWith $factor s >] {
 
+                fn all_factors_of_kind(&self, kind: FactorSourceKind) -> Vec<&$factor> {
+                    self.all_factors().into_iter().filter(|f| f.get_factor_source_kind() == kind).collect_vec()
+                }
+
+
                 fn validate_is_canonical_primary(&self) -> Result<(), FactorRulesViolation> {
+                    if self.all_factors_of_kind(FactorSourceKind::Device).len() > 1 {
+                        return Err(FactorRulesViolation::NonCanonicalPrimaryRoleContainsMultipleDeviceFactors)
+                    }
                     Ok(())
                 }
 
                 fn validate_is_canonical_recovery(&self) -> Result<(), FactorRulesViolation> {
+                    if !self.threshold_factors.is_empty() {
+                        return Err(FactorRulesViolation::NonCanonicalRecoveryRoleContainsThresholdFactors)
+                    }
                     Ok(())
                 }
 
                 fn validate_is_canonical_confirmation(&self) -> Result<(), FactorRulesViolation> {
-                   Ok(())
+                    if !self.threshold_factors.is_empty() {
+                        return Err(FactorRulesViolation::NonCanonicalConfirmationRoleContainsThresholdFactors)
+                    }
+                    Ok(())
                 }
 
                 fn validate_is_canonical(&self) -> Result<(), FactorRulesViolation> {
@@ -408,8 +422,8 @@ macro_rules! decl_matrix_of_factors {
                     Ok(validated)
                 }
 
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    let mut factors = HashSet::new();
+                pub fn all_factors(&self) -> Vec<&$factor> {
+                    let mut factors = Vec::new();
                     factors.extend(self.primary_role.all_factors());
                     factors.extend(self.recovery_role.all_factors());
                     factors.extend(self.confirmation_role.all_factors());
@@ -473,7 +487,7 @@ macro_rules! decl_security_structure_of {
                     }
                 }
 
-                pub fn all_factors(&self) -> HashSet<&$factor> {
+                pub fn all_factors(&self) -> Vec<&$factor> {
                     self.matrix_of_factors.all_factors()
                 }
             }

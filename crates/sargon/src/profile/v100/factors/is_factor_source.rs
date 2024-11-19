@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
 pub trait BaseIsFactorSource:
-    Into<FactorSource> + TryFrom<FactorSource> + Clone
+    Into<FactorSource>
+    + TryFrom<FactorSource>
+    + Clone
+    + HasFactorSourceKindObjectSafe
 {
-    fn factor_source_kind(&self) -> FactorSourceKind;
     fn factor_source_id(&self) -> FactorSourceID;
 
     fn id_from_hash(&self) -> FactorSourceIDFromHash {
@@ -21,6 +23,12 @@ pub trait BaseIsFactorSource:
     }
 }
 
-pub trait IsFactorSource: BaseIsFactorSource {
-    fn kind() -> FactorSourceKind;
+impl<T: IsFactorSource> HasFactorSourceKindObjectSafe for T {
+    fn get_factor_source_kind(&self) -> FactorSourceKind {
+        Into::<FactorSource>::into(self.clone()).get_factor_source_kind()
+    }
 }
+
+pub trait IsFactorSource: BaseIsFactorSource + HasFactorSourceKind {}
+
+impl<T: BaseIsFactorSource + HasFactorSourceKind> IsFactorSource for T {}

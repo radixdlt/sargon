@@ -1,5 +1,31 @@
 use crate::prelude::*;
 
+pub trait HasFactorSourceKind {
+    fn factor_source_kind() -> FactorSourceKind;
+}
+
+pub trait HasFactorSourceKindObjectSafe {
+    fn get_factor_source_kind(&self) -> FactorSourceKind;
+}
+
+impl HasFactorSourceKindObjectSafe for FactorSourceKind {
+    fn get_factor_source_kind(&self) -> FactorSourceKind {
+        *self
+    }
+}
+
+impl HasFactorSourceKindObjectSafe for FactorInstance {
+    fn get_factor_source_kind(&self) -> FactorSourceKind {
+        self.factor_source_id.get_factor_source_kind()
+    }
+}
+
+impl HasFactorSourceKindObjectSafe for HierarchicalDeterministicFactorInstance {
+    fn get_factor_source_kind(&self) -> FactorSourceKind {
+        self.factor_source_id.kind
+    }
+}
+
 /// The **kind** (or "type") of FactorSource describes how it is used.
 #[derive(
     Serialize,

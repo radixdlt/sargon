@@ -17,7 +17,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         assert_eq!(
             factor_source.factor_source_id(),
             FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-                factor_source.factor_source_kind(),
+                factor_source.get_factor_source_kind(),
                 &mnemonic_with_passphrase
             )
             .into()

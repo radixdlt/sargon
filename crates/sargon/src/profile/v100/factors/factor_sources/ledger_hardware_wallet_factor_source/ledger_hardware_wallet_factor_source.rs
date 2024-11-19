@@ -77,18 +77,14 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
         }
     }
 }
-impl IsFactorSource for LedgerHardwareWalletFactorSource {
-    fn kind() -> FactorSourceKind {
+impl HasFactorSourceKind for LedgerHardwareWalletFactorSource {
+    fn factor_source_kind() -> FactorSourceKind {
         FactorSourceKind::LedgerHQHardwareWallet
     }
 }
 impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
-    }
-
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -120,7 +116,10 @@ mod tests {
 
     #[test]
     fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::LedgerHQHardwareWallet);
+        assert_eq!(
+            SUT::factor_source_kind(),
+            FactorSourceKind::LedgerHQHardwareWallet
+        );
     }
 
     #[test]
@@ -176,6 +175,9 @@ mod tests {
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+        assert_eq!(
+            SUT::sample().get_factor_source_kind(),
+            SUT::sample().id.kind
+        );
     }
 }

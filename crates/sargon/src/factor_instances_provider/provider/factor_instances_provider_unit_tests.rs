@@ -393,7 +393,7 @@ impl PrimaryRoleWithFactorInstances {
     pub fn all_hd_factors(
         &self,
     ) -> Vec<HierarchicalDeterministicFactorInstance> {
-        self.all_factors()
+        self.unique_factor_instances()
             .into_iter()
             .map(|f| {
                 HierarchicalDeterministicFactorInstance::try_from(f.clone())
@@ -408,7 +408,7 @@ impl RecoveryRoleWithFactorInstances {
     pub fn all_hd_factors(
         &self,
     ) -> Vec<HierarchicalDeterministicFactorInstance> {
-        self.all_factors()
+        self.unique_factor_instances()
             .into_iter()
             .map(|f| {
                 HierarchicalDeterministicFactorInstance::try_from(f.clone())
@@ -423,7 +423,7 @@ impl ConfirmationRoleWithFactorInstances {
     pub fn all_hd_factors(
         &self,
     ) -> Vec<HierarchicalDeterministicFactorInstance> {
-        self.all_factors()
+        self.unique_factor_instances()
             .into_iter()
             .map(|f| {
                 HierarchicalDeterministicFactorInstance::try_from(f.clone())
@@ -996,7 +996,7 @@ async fn test_securified_accounts() {
     assert_eq!(
         alice_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1035,7 +1035,7 @@ async fn test_securified_accounts() {
     assert_eq!(
         bob_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1120,7 +1120,7 @@ async fn test_securified_accounts() {
     assert_eq!(
         carol_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1165,7 +1165,7 @@ async fn test_securified_accounts() {
     assert_eq!(
         alice_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1703,7 +1703,7 @@ async fn create_single_account() {
     assert_eq!(
         alice_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1797,7 +1797,7 @@ async fn securified_personas() {
     assert_eq!(
         batman_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1837,7 +1837,7 @@ async fn securified_personas() {
     assert_eq!(
         satoshi_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1927,7 +1927,7 @@ async fn securified_personas() {
     assert_eq!(
         hyde_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
@@ -1971,7 +1971,7 @@ async fn securified_personas() {
     assert_eq!(
         batman_matrix
             .primary_role
-            .all_factors()
+            .unique_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),

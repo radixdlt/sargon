@@ -355,8 +355,8 @@ impl Profile {
             .maybe_update_with(factor_source_id, |f| {
                 S::try_from(f.clone())
                     .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                        expected: S::kind(),
-                        found: f.factor_source_kind(),
+                        expected: S::factor_source_kind(),
+                        found: f.get_factor_source_kind(),
                     })
                     .and_then(|element| {
                         mutate(element).map(|modified| modified.into())

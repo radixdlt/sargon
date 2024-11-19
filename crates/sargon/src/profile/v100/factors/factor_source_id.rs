@@ -34,6 +34,15 @@ pub enum FactorSourceID {
     },
 }
 
+impl HasFactorSourceKindObjectSafe for FactorSourceID {
+    fn get_factor_source_kind(&self) -> FactorSourceKind {
+        match self {
+            FactorSourceID::Hash { value } => value.kind,
+            FactorSourceID::Address { value } => value.kind,
+        }
+    }
+}
+
 /// A bit hacky... but used to make it possible for us to validate FactorInstance
 /// in RoleWithFactor...
 impl IsMaybeKeySpaceAware for FactorSourceID {

@@ -77,16 +77,12 @@ impl TryFrom<FactorSource> for PassphraseFactorSource {
     }
 }
 
-impl IsFactorSource for PassphraseFactorSource {
-    fn kind() -> FactorSourceKind {
+impl HasFactorSourceKind for PassphraseFactorSource {
+    fn factor_source_kind() -> FactorSourceKind {
         FactorSourceKind::Passphrase
     }
 }
 impl BaseIsFactorSource for PassphraseFactorSource {
-    fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
-    }
-
     fn factor_source_id(&self) -> FactorSourceID {
         self.clone().id.into()
     }
@@ -152,7 +148,7 @@ mod tests {
 
     #[test]
     fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::Passphrase);
+        assert_eq!(SUT::factor_source_kind(), FactorSourceKind::Passphrase);
     }
 
     #[test]
@@ -172,6 +168,9 @@ mod tests {
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+        assert_eq!(
+            SUT::sample().get_factor_source_kind(),
+            SUT::sample().id.kind
+        );
     }
 }

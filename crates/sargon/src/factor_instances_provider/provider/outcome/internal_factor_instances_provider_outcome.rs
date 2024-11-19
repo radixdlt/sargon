@@ -46,18 +46,18 @@ impl InternalFactorInstancesProviderOutcome {
             factor_source_id: FactorSourceIDFromHash,
 
             /// Might be empty
-            pub to_cache: IndexSet<HierarchicalDeterministicFactorInstance>,
+            pub to_cache: Vec<HierarchicalDeterministicFactorInstance>,
             /// Might be empty
             pub to_use_directly:
-                IndexSet<HierarchicalDeterministicFactorInstance>,
+            Vec<HierarchicalDeterministicFactorInstance>,
 
             /// LESS IMPORTANT - for tests...
             /// might overlap with `to_use_directly`
             pub found_in_cache:
-                IndexSet<HierarchicalDeterministicFactorInstance>,
+            Vec<HierarchicalDeterministicFactorInstance>,
             /// might overlap with `to_cache` and `to_use_directly`
             pub newly_derived:
-                IndexSet<HierarchicalDeterministicFactorInstance>,
+            Vec<HierarchicalDeterministicFactorInstance>,
         }
         impl Builder {
             fn build(self) -> InternalFactorInstancesProviderOutcomeForFactor {
@@ -77,10 +77,10 @@ impl InternalFactorInstancesProviderOutcome {
             fn new(factor_source_id: FactorSourceIDFromHash) -> Self {
                 Self {
                     factor_source_id,
-                    to_cache: IndexSet::new(),
-                    to_use_directly: IndexSet::new(),
-                    found_in_cache: IndexSet::new(),
-                    newly_derived: IndexSet::new(),
+                    to_cache: Vec::new(),
+                    to_use_directly: Vec::new(),
+                    found_in_cache: Vec::new(),
+                    newly_derived: Vec::new(),
                 }
             }
         }

@@ -194,7 +194,7 @@ impl FactorInstancesProvider {
             .into_iter()
             .map(|f| f.id_from_hash())
             .map(|factor_source_id| {
-                let mut merged = IndexSet::new();
+                let mut merged = Vec::new();
                 let from_cache = pf_found_in_cache_leq_requested
                     .get(&factor_source_id)
                     .cloned()
