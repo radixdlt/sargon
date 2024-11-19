@@ -1,5 +1,3 @@
-use radix_engine_interface::blueprints::account;
-
 use crate::prelude::*;
 
 /// Simple data representation of a Persona the user has shared with a Dapp.

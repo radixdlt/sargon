@@ -29,6 +29,7 @@ impl ProfileNetworks {
         self.get_account(address)
     }
 
+    /// Hides the account associated with the `account_address`
     pub(crate) fn hide_account(
         &mut self,
         account_address: &AccountAddress,
@@ -38,6 +39,7 @@ impl ProfileNetworks {
         })
     }
 
+    /// Tombostones the account associated with the `account_address`
     pub(crate) fn tombstone_account(
         &mut self,
         account_address: &AccountAddress,
@@ -47,6 +49,7 @@ impl ProfileNetworks {
         })
     }
 
+    /// Tombostones the accounts
     pub(crate) fn tombstone_accounts(
         &mut self,
         account_addresses: &Vec<AccountAddress>,

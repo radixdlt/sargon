@@ -175,6 +175,7 @@ impl ProfileNetwork {
         }
     }
 
+    /// Hides the account associated with the `account_address`
     pub(crate) fn hide_account(
         &mut self,
         account_address: &AccountAddress,
@@ -187,6 +188,7 @@ impl ProfileNetwork {
         account
     }
 
+    /// Tombostones the account associated with the `account_address`
     pub(crate) fn tombstone_account(
         &mut self,
         account_address: &AccountAddress,
