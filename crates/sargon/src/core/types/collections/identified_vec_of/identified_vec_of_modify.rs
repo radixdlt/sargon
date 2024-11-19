@@ -99,6 +99,18 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
         true
     }
 
+    /// Updates in place each item by `mutate`.
+    #[cfg(not(tarpaulin_include))] // false negative
+    #[inline]
+    pub fn update_all_with<F>(&mut self, mut mutate: F)
+    where
+        F: FnMut(&mut V),
+    {
+        for item in self.0.values_mut() {
+            mutate(item)
+        }
+    }
+
     /// Tries to mutate the value identified by `id`, if no such value exists
     /// an error is returned, the mutation is failable, if your return an `Err`
     /// in `mutate`, this method propagates that error.
