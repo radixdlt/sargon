@@ -44,10 +44,12 @@ extension FileSystem {
 		_ io: @Sendable (URL) throws -> T
 	) throws -> T {
 		let url = URL(file: path)
+#if os(macOS)
 		 guard url.startAccessingSecurityScopedResource() else {
 		 	throw CommonError.NotPermissionToAccessFile(path: path)
 		 }
 		 defer { url.stopAccessingSecurityScopedResource() }
+        #endif
 		return try io(url)
 	}
 }
