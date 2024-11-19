@@ -45,15 +45,13 @@ impl KeysCollector {
         debug!("Init KeysCollector");
         let all_factor_sources_in_profile =
             all_factor_sources_in_profile.into();
-        let (state, factors) =
-            preprocessor.preprocess(all_factor_sources_in_profile)?;
 
-        let dependencies = KeysCollectorDependencies::new(interactors, factors);
-
-        Ok(Self {
-            dependencies,
-            state: RwLock::new(state),
-        })
+        preprocessor
+            .preprocess(all_factor_sources_in_profile)
+            .map(|(s, f)| Self {
+                dependencies: KeysCollectorDependencies::new(interactors, f),
+                state: RwLock::new(s),
+            })
     }
 }
 

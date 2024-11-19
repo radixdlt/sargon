@@ -66,16 +66,25 @@ extension FileSystem {
 #endif
 	}
 }
+
+#if DEBUG
+extension FileSystem {
+	public func deleteFactorInstancesCache() async throws {
+		try with(path: Self.appDirPathNotNecessarilyExisting(fileManager: fileManager)) {
+			let path = $0.appending(component: "radix_babylon_wallet_pre_derived_public_keys_cache.json")
+			try self.fileManager.removeItem(at: path)
+		}
+	}
+}
+#endif
+
 extension FileSystem: FileSystemDriver {
+	
     public func writableAppDirPath() async throws -> String {
 		try with(path: Self.appDirPathNotNecessarilyExisting(fileManager: fileManager)) {
 			let directoryExists = fileManager.fileExists(atPath: $0.path())
 			if !directoryExists {
-				do {
-					try fileManager.createDirectory(at: $0, withIntermediateDirectories: true)
-				} catch {
-					log.error("👻❌ Failed to create dir, \(error) ❌")
-				}
+				try fileManager.createDirectory(at: $0, withIntermediateDirectories: true)
 			}
 			return $0.path()
 		}
@@ -97,16 +106,8 @@ extension FileSystem: FileSystemDriver {
 	}
 	
     public func saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Bool) async throws {
-     
         try with(path: path) {
-            if fileManager.fileExists(atPath: $0.path()) {
-                if !isAllowedToOverwrite {
-                    throw CommonError.FileAlreadyExists(path: path)
-                }
-            } else {
-                fileManager.createFile(atPath: $0.path(), contents: nil)
-            }
-            try data.write(to: $0)
+			try data.write(to: $0, options: isAllowedToOverwrite ? [] : [.withoutOverwriting])
         }
     }
 	

@@ -661,11 +661,10 @@ impl<E: IsEntity> IdentifiedVecOf<E> {
     pub fn to_accounts(self) -> Result<Accounts> {
         self.into_iter()
             .map(|e| {
-                TryInto::<Account>::try_into(e.clone()).map_err(|_| {
-                    CommonError::ExpectedAccountButGotPersona {
+                Account::try_from(Into::<AccountOrPersona>::into(e.clone()))
+                    .map_err(|_| CommonError::ExpectedAccountButGotPersona {
                         address: e.address().to_string(),
-                    }
-                })
+                    })
             })
             .collect::<Result<Accounts>>()
     }
@@ -673,11 +672,10 @@ impl<E: IsEntity> IdentifiedVecOf<E> {
     pub fn to_personas(self) -> Result<Personas> {
         self.into_iter()
             .map(|e| {
-                TryInto::<Persona>::try_into(e.clone()).map_err(|_| {
-                    CommonError::ExpectedPersonaButGotAccount {
+                Persona::try_from(Into::<AccountOrPersona>::into(e.clone()))
+                    .map_err(|_| CommonError::ExpectedPersonaButGotAccount {
                         address: e.address().to_string(),
-                    }
-                })
+                    })
             })
             .collect::<Result<Personas>>()
     }

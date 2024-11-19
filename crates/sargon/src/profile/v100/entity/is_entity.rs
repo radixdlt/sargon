@@ -45,8 +45,6 @@ pub trait IsEntity:
     + std::fmt::Debug
     + Clone
     + TryFrom<AccountOrPersona, Error = CommonError>
-    + TryInto<Account>
-    + TryInto<Persona>
     + Into<AccountOrPersona>
 {
     type Path: IsEntityPath;
@@ -60,23 +58,4 @@ pub trait IsEntity:
         veci: HDFactorInstanceTransactionSigning<Self::Path>,
         name: DisplayName,
     ) -> Self;
-}
-impl TryInto<Account> for Persona {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<Account> {
-        Err(CommonError::ExpectedAccountButGotPersona {
-            address: self.address().to_string(),
-        })
-    }
-}
-
-impl TryInto<Persona> for Account {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<Persona> {
-        Err(CommonError::ExpectedPersonaButGotAccount {
-            address: self.address().to_string(),
-        })
-    }
 }
