@@ -197,6 +197,32 @@ impl ProfileNetwork {
         }
     }
 
+    /// Hides the account associated with the `account_address`
+    pub(crate) fn hide_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> Option<Account> {
+        let account = self.update_account(account_address, |account| {
+            account.mark_as_hidden();
+        });
+        self.authorized_dapps
+            .remove_referenced_account(account_address);
+        account
+    }
+
+    /// Tombstones the account associated with the `account_address`
+    pub(crate) fn tombstone_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> Option<Account> {
+        let account = self.update_account(account_address, |account| {
+            account.mark_as_tombstoned();
+        });
+        self.authorized_dapps
+            .remove_referenced_account(account_address);
+        account
+    }
+
     /// Returns a clone of the updated persona if found, else None.
     pub fn update_persona<F>(
         &mut self,

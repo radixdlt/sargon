@@ -37,6 +37,21 @@ pub struct AuthorizedPersonaSimple {
 }
 
 impl AuthorizedPersonaSimple {
+    /// Removes the referenced account from the shared accounts
+    pub(crate) fn remove_shared_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> bool {
+        if let Some(shared_accounts) = self.shared_accounts.as_mut() {
+            shared_accounts.remove_entry(account_address);
+            true
+        } else {
+            false
+        }
+    }
+}
+
+impl AuthorizedPersonaSimple {
     pub fn description(&self) -> String {
         format!(
             r#"

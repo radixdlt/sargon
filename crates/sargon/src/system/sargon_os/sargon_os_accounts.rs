@@ -626,9 +626,11 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
     ) -> Result<()> {
-        let mut account = self.account_by_address(account_address)?;
-        account.mark_as_hidden();
-        self.update_account(account).await
+        self.update_profile_with(|profile| {
+            profile.networks.hide_account(&account_address);
+            Ok(())
+        })
+        .await
     }
 
     /// Updates the profile by marking the account with `account_address` as tombstoned.
@@ -636,9 +638,11 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
     ) -> Result<()> {
-        let mut account = self.account_by_address(account_address)?;
-        account.mark_as_tombstoned();
-        self.update_account(account).await
+        self.update_profile_with(|profile| {
+            profile.networks.tombstone_account(&account_address);
+            Ok(())
+        })
+        .await
     }
 
     /// Updates the profile by marking the account with `account_addresses` as tombstoned.
@@ -646,14 +650,11 @@ impl SargonOS {
         &self,
         account_addresses: Vec<AccountAddress>,
     ) -> Result<()> {
-        let mut accounts = account_addresses
-            .iter()
-            .map(|ad| self.account_by_address(*ad))
-            .collect::<Result<Vec<Account>>>()?;
-
-        accounts.iter_mut().for_each(|a| a.mark_as_tombstoned());
-
-        self.update_accounts(Accounts::from(accounts)).await
+        self.update_profile_with(move |profile| {
+            profile.networks.tombstone_accounts(&account_addresses);
+            Ok(())
+        })
+        .await
     }
 }
 
@@ -876,6 +877,7 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
+    use futures::future::Shared;
     use std::{future::join, future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]
@@ -1620,48 +1622,343 @@ mod tests {
     async fn test_mark_account_as_hidden_becomes_hidden() {
         // ARRANGE
         let os = SUT::fast_boot().await;
+        let account = Account::sample_mainnet();
+
+        let authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
+        [
+			{
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
+				"displayName": "Radix Dashboard",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "exactly",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					},
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+                                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			},
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
+				"displayName": "Gumball Club",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+                                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			}
+        ]
+            "#
+        ).unwrap();
 
         // ACT
         // so that we have at least one network (with one account)
-        let new_account = os
-            .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
-            })
-            .await
-            .unwrap();
-        os.mark_account_as_hidden(new_account.address)
+        os.with_timeout(|os| os.add_account(account.clone()))
             .await
             .unwrap();
 
+        os.with_timeout(|os| {
+            os.update_profile_with(|profile| {
+                profile.networks.update_with(NetworkID::Mainnet, |network| {
+                    network.authorized_dapps = authorized_dapps.clone();
+                });
+                Ok(())
+            })
+        })
+        .await
+        .unwrap();
+
+        os.mark_account_as_hidden(account.address).await.unwrap();
+
         // ASSERT
-        assert!(os
-            .account_by_address(new_account.address)
+        assert!(os.account_by_address(account.address).unwrap().is_hidden());
+
+        let expected_authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
+			[
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
+				"displayName": "Radix Dashboard",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "exactly",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					},
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			},
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
+				"displayName": "Gumball Club",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			}
+        ]
+            "#
+        ).unwrap();
+
+        let updated_authorized_dapps = os
+            .profile()
             .unwrap()
-            .is_hidden())
+            .clone()
+            .current_network()
+            .unwrap()
+            .authorized_dapps
+            .clone();
+        pretty_assertions::assert_eq!(
+            updated_authorized_dapps,
+            expected_authorized_dapps
+        )
     }
 
     #[actix_rt::test]
     async fn test_mark_account_as_tombstoned_becomes_tombstoned() {
         // ARRANGE
         let os = SUT::fast_boot().await;
+        let account = Account::sample_mainnet();
+
+        let authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
+        [
+			{
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
+				"displayName": "Radix Dashboard",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "exactly",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					},
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+                                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			},
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
+				"displayName": "Gumball Club",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+                                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			}
+        ]
+            "#
+        ).unwrap();
 
         // ACT
         // so that we have at least one network (with one account)
-        let new_account = os
-            .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
-            })
+        os.with_timeout(|os| os.add_account(account.clone()))
             .await
             .unwrap();
-        os.mark_account_as_tombstoned(new_account.address)
+
+        os.with_timeout(|os| {
+            os.update_profile_with(|profile| {
+                profile.networks.update_with(NetworkID::Mainnet, |network| {
+                    network.authorized_dapps = authorized_dapps.clone();
+                });
+                Ok(())
+            })
+        })
+        .await
+        .unwrap();
+
+        os.mark_account_as_tombstoned(account.address)
             .await
             .unwrap();
 
         // ASSERT
         assert!(os
-            .account_by_address(new_account.address)
+            .account_by_address(account.address)
             .unwrap()
-            .is_tombstoned())
+            .is_tombstoned());
+
+        let expected_authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
+			[
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
+				"displayName": "Radix Dashboard",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "exactly",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					},
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			},
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
+				"displayName": "Gumball Club",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 2
+							},
+							"ids": [
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			}
+        ]
+            "#
+        ).unwrap();
+
+        let updated_authorized_dapps = os
+            .profile()
+            .unwrap()
+            .clone()
+            .current_network()
+            .unwrap()
+            .authorized_dapps
+            .clone();
+        pretty_assertions::assert_eq!(
+            updated_authorized_dapps,
+            expected_authorized_dapps
+        )
     }
 
     #[actix_rt::test]
@@ -1669,48 +1966,193 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
-        // ACT
-        let new_accounts: Vec<Account> = os
-            .with_timeout(|x| {
-                join_all(vec![
-                    x.create_and_save_new_mainnet_account_with_bdfs(
-                        DisplayName::new("rip").unwrap(),
-                    ),
-                    x.create_and_save_new_mainnet_account_with_bdfs(
-                        DisplayName::new("rip").unwrap(),
-                    ),
-                    x.create_and_save_new_mainnet_account_with_bdfs(
-                        DisplayName::new("alive").unwrap(),
-                    ),
-                ])
-            })
-            .await
-            .into_iter()
-            .collect::<Result<Vec<_>, _>>()
-            .unwrap();
+        let account = Account::sample_mainnet();
+        let other_account = Account::sample_mainnet_other();
 
-        let account_addresses_to_tombstone = new_accounts
-            .iter()
-            .filter(|a| a.display_name.value == "rip")
-            .map(|a| a.address)
-            .collect_vec();
+        let authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
+        [
+			{
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
+				"displayName": "Radix Dashboard",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "exactly",
+								"quantity": 3
+							},
+							"ids": [
+								"account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7",
+                                "account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv"
+							]
+						},
+						"sharedPersonaData": {}
+					},
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 3
+							},
+							"ids": [
+                                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7",
+                                "account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			},
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
+				"displayName": "Gumball Club",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 3
+							},
+							"ids": [
+                                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+								"account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7",
+                                "account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			}
+        ]
+            "#
+        ).unwrap();
+
+        // ACT
         os.with_timeout(|x| {
-            x.mark_accounts_as_tombstoned(
-                account_addresses_to_tombstone.clone(),
-            )
+            join_all(vec![
+                x.add_account(account.clone()),
+                x.add_account(other_account.clone()),
+                x.add_account(Account::sample_mainnet_carol()),
+            ])
+        })
+        .await;
+
+        os.with_timeout(|os| {
+            os.update_profile_with(|profile| {
+                profile.networks.update_with(NetworkID::Mainnet, |network| {
+                    network.authorized_dapps = authorized_dapps.clone();
+                });
+                Ok(())
+            })
+        })
+        .await
+        .unwrap();
+
+        os.with_timeout(|x| {
+            x.mark_accounts_as_tombstoned(vec![
+                account.address,
+                other_account.address,
+            ])
         })
         .await
         .unwrap();
 
         // ASSERT
-        assert!(os
-            .accounts_on_current_network()
+        assert!(
+            !os.account_by_address(Account::sample_mainnet_carol().address)
+                .unwrap()
+                .is_tombstoned()
+        );
+        assert!([account.address, other_account.address].iter().all(
+            |address| os
+                .account_by_address(*address)
+                .unwrap()
+                .is_tombstoned()
+        ));
+
+        let expected_authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"
+			[
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
+				"displayName": "Radix Dashboard",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "exactly",
+								"quantity": 3
+							},
+							"ids": [
+								"account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv"
+							]
+						},
+						"sharedPersonaData": {}
+					},
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 3
+							},
+							"ids": [
+								"account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			},
+            {
+				"networkID": 1,
+				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
+				"displayName": "Gumball Club",
+				"referencesToAuthorizedPersonas": [
+					{
+						"identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
+						"lastLogin": "2024-01-31T14:23:45.000Z",
+						"sharedAccounts": {
+							"request": {
+								"quantifier": "atLeast",
+								"quantity": 3
+							},
+							"ids": [
+								"account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv"
+							]
+						},
+						"sharedPersonaData": {}
+					}
+				]
+			}
+        ]
+            "#
+        ).unwrap();
+
+        let updated_authorized_dapps = os
+            .profile()
             .unwrap()
-            .iter()
-            .all(|a| a.display_name.value != "rip"));
-        assert!(account_addresses_to_tombstone.iter().all(|address| os
-            .account_by_address(*address)
+            .clone()
+            .current_network()
             .unwrap()
-            .is_tombstoned()))
+            .authorized_dapps
+            .clone();
+        pretty_assertions::assert_eq!(
+            updated_authorized_dapps,
+            expected_authorized_dapps
+        )
     }
 }

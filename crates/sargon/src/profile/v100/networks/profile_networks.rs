@@ -46,6 +46,36 @@ impl ProfileNetworks {
         self.get_account(address)
     }
 
+    /// Hides the account associated with the `account_address`
+    pub(crate) fn hide_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> bool {
+        self.update_with(account_address.network_id(), |n| {
+            n.hide_account(account_address);
+        })
+    }
+
+    /// Tombstones the account associated with the `account_address`
+    pub(crate) fn tombstone_account(
+        &mut self,
+        account_address: &AccountAddress,
+    ) -> bool {
+        self.update_with(account_address.network_id(), |n| {
+            n.tombstone_account(account_address);
+        })
+    }
+
+    /// Tombstones the accounts
+    pub(crate) fn tombstone_accounts(
+        &mut self,
+        account_addresses: &Vec<AccountAddress>,
+    ) {
+        for account_address in account_addresses {
+            self.tombstone_account(account_address);
+        }
+    }
+
     /// Returns a clone of the updated persona if found, else None.
     pub fn update_persona<F>(
         &mut self,
