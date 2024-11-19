@@ -86,7 +86,9 @@ impl MatrixOfFactorInstances {
             let fsid =
                 &FactorSourceIDFromHash::try_from(instance.factor_source_id)
                     .unwrap();
-            let existing = consuming_instances.get_mut(fsid).unwrap();
+            let Some(existing) = consuming_instances.get_mut(fsid) else {
+                continue;
+            };
 
             let to_remove = HierarchicalDeterministicFactorInstance::try_from(
                 instance.clone(),
@@ -94,7 +96,7 @@ impl MatrixOfFactorInstances {
             .unwrap();
 
             // We remove at the beginning of the list first.
-            existing.shift_remove(&to_remove);
+            let _ = existing.shift_remove_if_present(&to_remove);
 
             if existing.is_empty() {
                 // not needed per se, but feels prudent to "prune".

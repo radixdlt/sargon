@@ -1421,6 +1421,24 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         "should have used cache"
     );
 
+    let expected = vec![
+        ["0^", "0^", "0^"],
+        ["1^", "1^", "1^"],
+        ["2^", "2^", "2^"],
+        ["3^", "3^", "3^"],
+        ["4^", "4^", "4^"],
+        ["5^", "5^", "5^"],
+        ["6^", "6^", "6^"],
+        ["7^", "7^", "7^"],
+        ["8^", "8^", "8^"],
+        ["9^", "9^", "9^"],
+        ["10^", "10^", "10^"],
+        ["11^", "11^", "11^"],
+        ["12^", "12^", "12^"],
+        ["13^", "13^", "13^"],
+        ["14^", "14^", "14^"]
+    ];
+
     assert_eq!(
         security_structures_of_fis
             .values()
@@ -1433,23 +1451,37 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
                 .map(|x| format!("{:?}", x))
                 .collect_vec())
             .collect_vec(),
-        vec![
-            ["0^", "0^", "0^"],
-            ["1^", "1^", "1^"],
-            ["2^", "2^", "2^"],
-            ["3^", "3^", "3^"],
-            ["4^", "4^", "4^"],
-            ["5^", "5^", "5^"],
-            ["6^", "6^", "6^"],
-            ["7^", "7^", "7^"],
-            ["8^", "8^", "8^"],
-            ["9^", "9^", "9^"],
-            ["10^", "10^", "10^"],
-            ["11^", "11^", "11^"],
-            ["12^", "12^", "12^"],
-            ["13^", "13^", "13^"],
-            ["14^", "14^", "14^"]
-        ]
+    expected.clone()
+    );
+
+    assert_eq!(
+        security_structures_of_fis
+            .values()
+            .map(|ss| ss
+                .matrix_of_factors
+                .confirmation_role
+                .all_hd_factors()
+                .iter()
+                .map(|f| f.derivation_entity_index())
+                .map(|x| format!("{:?}", x))
+                .collect_vec())
+            .collect_vec(),
+            expected.clone()
+    );
+
+    assert_eq!(
+        security_structures_of_fis
+            .values()
+            .map(|ss| ss
+                .matrix_of_factors
+                .recovery_role
+                .all_hd_factors()
+                .iter()
+                .map(|f| f.derivation_entity_index())
+                .map(|x| format!("{:?}", x))
+                .collect_vec())
+            .collect_vec(),
+            expected.clone()
     );
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os

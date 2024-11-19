@@ -33,16 +33,14 @@ impl FactorInstances {
         self.factor_instances.remove(index)
     }
 
-    pub fn shift_remove(
+    pub fn shift_remove_if_present(
         &mut self,
         item: &HierarchicalDeterministicFactorInstance,
-    ) -> HierarchicalDeterministicFactorInstance {
-        let idx = self
-            .factor_instances
+    ) -> Option<HierarchicalDeterministicFactorInstance> {
+        self.factor_instances
             .iter()
             .position(|x| x == item)
-            .expect("existing item");
-        self.shift_remove_index(idx)
+            .map(|idx| self.shift_remove_index(idx))
     }
 
     pub fn first(&self) -> Option<HierarchicalDeterministicFactorInstance> {
