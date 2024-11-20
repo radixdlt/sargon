@@ -68,7 +68,7 @@ pub enum FactorRulesViolationRoleInIsolation {
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
-pub enum FactorRulesViolation {
+pub enum FactorRulesViolationOfStructure {
     #[error(transparent)]
     RoleInIsolation(#[from] FactorRulesViolationRoleInIsolation),
     #[error(transparent)]
@@ -82,21 +82,21 @@ pub enum FactorRulesViolationRolesCombined {
     Unknown,
 }
 
-impl From<FactorsInvalidReason<FactorRulesViolationPrimaryRoleInIsolation>>
-    for FactorsInvalidReason<FactorRulesViolationRoleInIsolation>
-{
-    fn from(
-        _err: FactorsInvalidReason<FactorRulesViolationPrimaryRoleInIsolation>,
-    ) -> Self {
-        todo!()
-    }
-}
-
 impl From<FactorsInvalidReason<FactorRulesViolationRoleInIsolation>>
     for CommonError
 {
     fn from(
         _err: FactorsInvalidReason<FactorRulesViolationRoleInIsolation>,
+    ) -> Self {
+        todo!()
+    }
+}
+
+impl From<FactorsInvalidReason<FactorRulesViolationOfStructure>>
+    for CommonError
+{
+    fn from(
+        _err: FactorsInvalidReason<FactorRulesViolationOfStructure>,
     ) -> Self {
         todo!()
     }
@@ -127,7 +127,24 @@ pub type RolesCombinedValidation =
     AbstractFactorRulesValidation<FactorRulesViolationRolesCombined>;
 
 pub type FactorRulesValidation =
-    AbstractFactorRulesValidation<FactorRulesViolation>;
+    AbstractFactorRulesValidation<FactorRulesViolationOfStructure>;
+
+pub trait AllowNotYetValid {
+    fn allow_not_yet_valid(self) -> Self;
+}
+impl<E: Debug> AllowNotYetValid for AbstractFactorRulesValidation<E> {
+    fn allow_not_yet_valid(self) -> Self {
+        match self {
+            Ok(_) => Ok(()),
+            Err(e) => match e {
+                FactorsInvalidReason::ForeverInvalid { violation } => {
+                    Err(FactorsInvalidReason::ForeverInvalid { violation })
+                }
+                FactorsInvalidReason::NotYetValid { .. } => Ok(()),
+            },
+        }
+    }
+}
 
 pub trait MapToRolesInIsolationValidation {
     fn into_roles(self) -> RolesInIsolationValidation;
@@ -160,6 +177,43 @@ impl<T: Debug + Into<FactorRulesViolationRoleInIsolation>>
                     })
                 }
             },
+        }
+    }
+}
+
+pub trait MapToStructureValidation {
+    fn into_structure(self) -> FactorRulesValidation;
+}
+impl<T: Debug + Into<FactorRulesViolationOfStructure>> MapToStructureValidation
+    for AbstractFactorRulesValidation<T>
+{
+    fn into_structure(self) -> FactorRulesValidation {
+        match self {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                match e {
+                    FactorsInvalidReason::<T>::ForeverInvalid { violation } => {
+                        Err(FactorsInvalidReason::<
+                            FactorRulesViolationOfStructure,
+                        >::ForeverInvalid {
+                            violation:
+                                Into::<FactorRulesViolationOfStructure>::into(
+                                    violation,
+                                ),
+                        })
+                    }
+                    FactorsInvalidReason::<T>::NotYetValid { violation } => {
+                        Err(FactorsInvalidReason::<
+                            FactorRulesViolationOfStructure,
+                        >::NotYetValid {
+                            violation:
+                                Into::<FactorRulesViolationOfStructure>::into(
+                                    violation,
+                                ),
+                        })
+                    }
+                }
+            }
         }
     }
 }

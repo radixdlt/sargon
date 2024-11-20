@@ -18,7 +18,7 @@ impl HasSampleValues for MatrixOfFactorInstances {
             PrimaryRoleWithFactorInstances::sample(),
             RecoveryRoleWithFactorInstances::sample(),
             ConfirmationRoleWithFactorInstances::sample(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }
@@ -28,7 +28,7 @@ impl HasSampleValues for MatrixOfFactorInstances {
             PrimaryRoleWithFactorInstances::sample_other(),
             RecoveryRoleWithFactorInstances::sample_other(),
             ConfirmationRoleWithFactorInstances::sample_other(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }
@@ -77,7 +77,7 @@ impl MatrixOfFactorInstances {
             primary,
             recovery,
             confirmation,
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )?;
 
         // Now that we have assigned instances, **possibly the SAME INSTANCE to multiple roles**,

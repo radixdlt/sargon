@@ -154,7 +154,7 @@ impl Persona {
                 override_factors.clone(),
             )
             .unwrap(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap();
         let address =

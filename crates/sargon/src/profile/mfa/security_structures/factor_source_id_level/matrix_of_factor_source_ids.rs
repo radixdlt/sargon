@@ -6,7 +6,7 @@ impl From<MatrixOfFactorSources> for MatrixOfFactorSourceIDs {
             value.primary_role.into(),
             value.recovery_role.into(),
             value.confirmation_role.into(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }
@@ -18,7 +18,7 @@ impl HasSampleValues for MatrixOfFactorSourceIDs {
             PrimaryRoleWithFactorSourceIDs::sample(),
             RecoveryRoleWithFactorSourceIDs::sample(),
             ConfirmationRoleWithFactorSourceIDs::sample(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }
@@ -27,7 +27,7 @@ impl HasSampleValues for MatrixOfFactorSourceIDs {
             PrimaryRoleWithFactorSourceIDs::sample_other(),
             RecoveryRoleWithFactorSourceIDs::sample_other(),
             ConfirmationRoleWithFactorSourceIDs::sample_other(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }

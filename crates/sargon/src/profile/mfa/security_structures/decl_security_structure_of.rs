@@ -389,7 +389,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     Ok(())
                 }
 
-                fn validate(&self) -> RolesInIsolationValidation {
+                fn validate_strict(&self) -> RolesInIsolationValidation {
                     let role = self.get_mfa_role();
                     match role {
                         RoleKind::Primary => self.validate_primary().into_roles()?,
@@ -399,13 +399,45 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     Ok(())
                 }
 
+                fn validate(&self, allow_not_yet_valid: bool) -> RolesInIsolationValidation {
+                    let strict = self.validate_strict();
+                    if allow_not_yet_valid {
+                        strict.allow_not_yet_valid()
+                    } else {
+                        strict
+                    }
+                }
+
+                fn add_factor_to_list_without_validation(&mut self, factor: &$factor, list_kind: FactorListKind) {
+                    match list_kind {
+                        FactorListKind::Threshold => {
+                            self.threshold_factors.push(factor.clone())
+                        }
+                        FactorListKind::Override => {
+                            self.override_factors.push(factor.clone())
+                        }
+                    }
+                }
+
+                pub fn validation_state_if_add_factor_to_list(&self, factor: &$factor, list_kind: FactorListKind, allow_not_yet_valid: bool) -> RolesInIsolationValidation {
+                    let mut copy = self.clone();
+                    copy.add_factor_to_list_without_validation(factor, list_kind);
+                    copy.validate(allow_not_yet_valid)
+                }
+
+                /// Only mutates `self` if validation passes, and validation is conditional on `allow_not_yet_valid`
+                pub fn add_factor_to_list(&mut self, factor: &$factor, list_kind: FactorListKind, allow_not_yet_valid: bool) -> RolesInIsolationValidation {
+                    self.validation_state_if_add_factor_to_list(factor, list_kind, allow_not_yet_valid)?;
+                    self.add_factor_to_list_without_validation(factor, list_kind);
+                    Ok(())
+                }
+
                 pub fn unique_factors(&self) -> IndexSet<$factor> {
                     self.all_factors().into_iter().map(|x| x.clone()).collect()
                 }
 
-                /// If `enforce_canonical` is true, then the factors
-                /// must adhere to even stricter rules, such as no
-                /// threshold factors for Recovery and Confirmation roles.
+
+                /// If `validation` is not `Skip`, we require the structure of factors to be valid.
                 ///
                 /// # Panics
                 /// Panics if threshold > threshold_factor.len()
@@ -419,7 +451,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>,
-                    should_validate: bool,
+                    validation: FactorRolesValidation,
                 ) -> Result<Self> {
 
                     let assert_is_securified = |factors: &Vec::<$factor>| -> Result<()> {
@@ -462,17 +494,31 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                         $($extra_field_name,)*
                     };
 
-                    if should_validate {
-                        unvalidated.validate().map_err(|e| CommonError::from(e))?;
-                        let validated = unvalidated;
-                        Ok(validated)
-                    } else {
-                        Ok(unvalidated)
+
+                    match validation {
+                        FactorRolesValidation::Skip => Ok(unvalidated),
+                        FactorRolesValidation::Validate { allow_not_yet_valid } => {
+                            unvalidated.validate(allow_not_yet_valid).map_err(|e| CommonError::from(e))?;
+                            let validated = unvalidated;
+                            Ok(validated)
+                        }
                     }
                 }
             }
         }
     };
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum FactorRolesValidation {
+    /// Skips validation completely
+    Skip,
+
+    /// Perform validation on the factors
+    Validate {
+        /// If `allow_not_yet_valid` we map `NotYetValid` to `Ok(())`
+        allow_not_yet_valid: bool,
+    },
 }
 
 pub(crate) use decl_role_with_factors_with_role_kind_attrs;
@@ -511,7 +557,7 @@ macro_rules! decl_role_with_factors {
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Result<Self> {
-                    Self::with_factors_and_role(threshold_factors, threshold, override_factors, false /* TODO dont forget to change to `true`! */)
+                    Self::with_factors_and_role(threshold_factors, threshold, override_factors, FactorRolesValidation::Skip /* TODO: MFA-Rules: change to `Validate` */)
                 }
 
 
@@ -626,29 +672,34 @@ macro_rules! decl_matrix_of_factors {
 
             impl [< MatrixOf $factor s >] {
 
-
-                fn validate_is_canonical(&self) -> RolesCombinedValidation {
+                fn validate_roles_in_isolation(&self) -> RolesInIsolationValidation {
                     Ok(())
                 }
 
-                fn validate_all_roles(&self) -> RolesCombinedValidation {
+                fn validate_roles_combined(&self) -> RolesCombinedValidation {
                     Ok(())
                 }
 
+                fn validate_strict(&self) -> FactorRulesValidation {
+                    self.validate_roles_in_isolation().into_structure()?;
+                    self.validate_roles_combined().into_structure()?;
+                    Ok(())
+                }
 
-                fn validate(&self, enforce_canonical: bool) -> RolesCombinedValidation {
-                    self.validate_all_roles()?;
-                    if enforce_canonical {
-                        self.validate_is_canonical()?;
+                fn validate(&self, allow_not_yet_valid: bool) -> FactorRulesValidation {
+                    let strict = self.validate_strict();
+                    if allow_not_yet_valid {
+                        strict.allow_not_yet_valid()
+                    } else {
+                        strict
                     }
-                    Ok(())
                 }
 
                 pub fn new(
                     primary_role: [< PrimaryRoleWith $factor s >],
                     recovery_role: [< RecoveryRoleWith $factor s >],
                     confirmation_role: [< ConfirmationRoleWith $factor s >],
-                    enforce_canonical: bool,
+                    validation: FactorRolesValidation,
                 ) -> Result<Self> {
                     let unvalidated = Self {
                         __hidden: HiddenConstructor,
@@ -656,9 +707,15 @@ macro_rules! decl_matrix_of_factors {
                         recovery_role,
                         confirmation_role,
                     };
-                    unvalidated.validate(enforce_canonical).map_err(|e| CommonError::from(e))?;
-                    let validated = unvalidated;
-                    Ok(validated)
+                    match validation {
+                        FactorRolesValidation::Skip => return Ok(unvalidated),
+                        FactorRolesValidation::Validate { allow_not_yet_valid } => {
+                            unvalidated.validate(allow_not_yet_valid).map_err(|e| CommonError::from(e))?;
+                            let validated = unvalidated;
+                            Ok(validated)
+                        }
+                    }
+
                 }
 
                 pub fn all_factors(&self) -> Vec<&$factor> {

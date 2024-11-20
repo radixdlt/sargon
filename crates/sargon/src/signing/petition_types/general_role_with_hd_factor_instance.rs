@@ -182,7 +182,7 @@ mod test {
             .unwrap(),
             recovery_role(),
             confirmation_role(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap();
 
@@ -197,7 +197,7 @@ mod test {
             primary_role(),
             recovery_role(),
             confirmation_role(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }

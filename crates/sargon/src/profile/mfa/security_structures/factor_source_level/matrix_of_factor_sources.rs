@@ -6,7 +6,7 @@ impl HasSampleValues for MatrixOfFactorSources {
             PrimaryRoleWithFactorSources::sample(),
             RecoveryRoleWithFactorSources::sample(),
             ConfirmationRoleWithFactorSources::sample(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }
@@ -15,7 +15,7 @@ impl HasSampleValues for MatrixOfFactorSources {
             PrimaryRoleWithFactorSources::sample_other(),
             RecoveryRoleWithFactorSources::sample_other(),
             ConfirmationRoleWithFactorSources::sample_other(),
-            false, /* TODO: MFA-Rules: change to `true` */
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
         .unwrap()
     }

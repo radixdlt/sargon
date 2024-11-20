@@ -411,7 +411,7 @@ mod integration_tests {
                         ],
                         2,
                         [],
-                        false, /* TODO: MFA-Rules: change to `true` */
+                        FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
 
                     ).unwrap()
                 },
@@ -431,7 +431,7 @@ mod integration_tests {
                             i,
                             *f3.factor_source_id().as_hash().unwrap(),
                         ),
-                    ], false, /* TODO: MFA-Rules: change to `true` */).unwrap()
+                    ], FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */).unwrap()
                 },
             );
 
@@ -452,7 +452,7 @@ mod integration_tests {
                             i,
                             *f4.factor_source_id().as_hash().unwrap(),
                         )],
-                        false, /* TODO: MFA-Rules: change to `true` */
+                        FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
 
                     ).unwrap()
                 },
