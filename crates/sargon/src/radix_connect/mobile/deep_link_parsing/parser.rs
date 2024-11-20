@@ -200,6 +200,7 @@ impl SampleRequestParams {
                     None,
                     None,
                     None,
+                    None
                 )
             ),
             DappToWalletInteractionMetadataUnvalidated::new(
