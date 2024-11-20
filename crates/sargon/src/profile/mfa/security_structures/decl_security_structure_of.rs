@@ -124,9 +124,12 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     self.number_of_factors_of_kind_in_list_of_kind(factor_source_kind, None)
                 }
 
-                /// Any of the threshold or the override factors list contains a factor of the given kind.
                 fn contains_factor_of_kind_in_list_of_kind(&self, factor_source_kind: FactorSourceKind, list_kind: impl Into<Option<FactorListKind>>) -> bool {
                     self.number_of_factors_of_kind_in_list_of_kind(factor_source_kind, list_kind) > 0
+                }
+
+                fn contains_factor_of_kind_in_any_list(&self, factor_source_kind: FactorSourceKind) -> bool {
+                    self.contains_factor_of_kind_in_list_of_kind(factor_source_kind, None)
                 }
 
                 fn factor_list_kind_of_factor_of_kind(&self, kind: FactorSourceKind) -> Option<FactorListKind> {
@@ -152,28 +155,109 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     Ok(())
                 }
 
+                /// Validates the **Recovery** role for `Device` FactorSourceKind.
                 fn validate_device_recovery(&self) -> RecoveryRoleInIsolationValidation {
-                    todo!()
+                    self.validate_recovery_contains_no_threshold_factors()
+                    // No further validation needed
                 }
+
+                /// Validates the **Confirmation** role for `Device` FactorSourceKind.
                 fn validate_device_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
-                    todo!()
+                    self.validate_confirmation_contains_no_threshold_factors()
+                    // No further validation needed
                 }
 
-                fn validate_ledger_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
-                fn validate_ledger_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
-                fn validate_ledger_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+                /// Validates the **Primary** role for `Ledger` FactorSourceKind.
+                ///
+                /// It is OK to use Ledger in Primary role (any list, without further restrictions).
+                fn validate_ledger_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    Ok(())
+                    // No further validation needed
+                }
 
-                fn validate_arculus_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
-                fn validate_arculus_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
-                fn validate_arculus_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+                /// Validates the **Recovery** role for `Ledger` FactorSourceKind.
+                ///
+                /// It is OK to use Ledger in Recovery role (in override list).
+                fn validate_ledger_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    self.validate_recovery_contains_no_threshold_factors()
+                    // No further validation needed
+                }
 
-                fn validate_security_questions_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
-                fn validate_security_questions_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
-                fn validate_security_questions_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+                /// Validates the **Confirmation** role for `Ledger` FactorSourceKind.
+                ///
+                /// It is OK to use Ledger in Confirmation role (in override list).
+                fn validate_ledger_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    self.validate_confirmation_contains_no_threshold_factors()
+                    // No further validation needed
+                }
 
+                /// Validates the **Primary** role for `Arculus` FactorSourceKind.
+                ///
+                /// It is OK to use Arculus in Primary role (any list, without further restrictions).
+                fn validate_arculus_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    Ok(())
+                    // No further validation needed
+                }
 
-                fn validate_passphrase_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
-                fn validate_passphrase_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+                /// Validates the **Recovery** role for `Arculus` FactorSourceKind.
+                ///
+                /// It is OK to use Arculus in Recovery role (in override list).
+                fn validate_arculus_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    self.validate_recovery_contains_no_threshold_factors()
+                    // No further validation needed
+                }
+
+                /// Validates the **Confirmation** role for `Arculus` FactorSourceKind.
+                ///
+                /// It is OK to use Arculus in Confirmation role (in override list).
+                fn validate_arculus_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    self.validate_confirmation_contains_no_threshold_factors()
+                    // No further validation needed
+                }
+
+                /// Validates the **Primary** role for `SecurityQuestions` FactorSourceKind.
+                ///
+                /// It is NOT OK to use SecurityQuestions in Primary role (any list).
+                fn validate_security_questions_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    if self.contains_factor_of_kind_in_any_list(FactorSourceKind::SecurityQuestions) {
+                        return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationPrimaryRoleInIsolation::SecurityQuestionsCannotBeUsed
+                        })
+                    }
+                    Ok(())
+                }
+
+                /// Validates the **Recovery** role for `SecurityQuestions` FactorSourceKind.
+                ///
+                /// It is NOT OK to use SecurityQuestions in Recovery role (any list).
+                fn validate_security_questions_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    self.validate_recovery_contains_no_threshold_factors()?;
+                    if self.contains_factor_of_kind_in_any_list(FactorSourceKind::SecurityQuestions) {
+                        return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationRecoveryRoleInIsolation::SecurityQuestionsCannotBeUsed
+                        })
+                    }
+                    Ok(())
+
+                }
+
+                /// Validates the **Confirmation** role for `SecurityQuestions` FactorSourceKind.
+                ///
+                /// It is OK to use SecurityQuestions in Confirmation role (in override list).
+                fn validate_security_questions_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    self.validate_confirmation_contains_no_threshold_factors()
+                    // No further validation needed
+                }
+
+                /// Validates the **Primary** role for `Passphrase` FactorSourceKind.
+                ///
+                /// It is conditionally OK to use Passphrase in Primary if and only if:
+                /// * It is used in Threshold list
+                /// * The Threshold list contains at least one other kind than Passphrase
+                /// * The Threshold is at least 2
+                ///
+                /// The validation error returned is of type `NotYetValid`, meaning that
+                /// the state can become valid if another FactorSource is added to the Threshold list.
                 fn validate_passphrase_primary(&self) -> PrimaryRoleInIsolationValidation {
                     if let Some(list_kind) = self.factor_list_kind_of_factor_of_kind(FactorSourceKind::Passphrase) {
                         match list_kind {
@@ -201,42 +285,101 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     Ok(())
                 }
 
-                fn validate_off_device_mnemonic_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
-                fn validate_off_device_mnemonic_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
-                fn validate_off_device_mnemonic_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+                /// Validates the **Recovery** role for `Passphrase` FactorSourceKind.
+                ///
+                /// It is NOT OK to use Passphrase in Recovery role (any list).
+                fn validate_passphrase_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    self.validate_recovery_contains_no_threshold_factors()?;
+                    if self.contains_factor_of_kind_in_any_list(FactorSourceKind::Passphrase) {
+                        return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationRecoveryRoleInIsolation::PassphraseCannotBeUsed
+                        })
+                    }
+                    Ok(())
+                }
+
+                /// Validates the **Confirmation** role for `Passphrase` FactorSourceKind.
+                ///
+                /// It is OK to use Passphrase in Confirmation role (in override list).
+                fn validate_passphrase_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    self.validate_confirmation_contains_no_threshold_factors()
+                    // No further validation needed
+                }
+
+                /// Validates the **Primary** role for `OffDeviceMnemonic` FactorSourceKind.
+                ///
+                /// It is OK to use OffDeviceMnemonic in Primary role (any list, without further restrictions).
+                fn validate_off_device_mnemonic_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    Ok(())
+                 }
+
+                /// Validates the **Recovery** role for `OffDeviceMnemonic` FactorSourceKind.
+                ///
+                /// It is OK to use OffDeviceMnemonic in Recovery role (in override list).
+                fn validate_off_device_mnemonic_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    self.validate_recovery_contains_no_threshold_factors()
+                    // No further validation needed
+                 }
+
+                /// Validates the **Confirmation** role for `OffDeviceMnemonic` FactorSourceKind.
+                ///
+                /// It is OK to use OffDeviceMnemonic in Confirmation role (in override list).
+                fn validate_off_device_mnemonic_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    self.validate_confirmation_contains_no_threshold_factors()
+                    // No further validation needed
+                 }
 
                 fn validate_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    assert!(self.get_mfa_role() == RoleKind::Recovery, "Wrong role kind, called validation for Primary but role is {:?}", self.get_mfa_role());
+
                     self.validate_device_primary()?;
                     self.validate_ledger_primary()?;
                     self.validate_arculus_primary()?;
                     self.validate_security_questions_primary()?;
                     self.validate_passphrase_primary()?;
                     self.validate_off_device_mnemonic_primary()?;
+
                     Ok(())
                 }
 
-
-                fn validate_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                fn validate_recovery_contains_no_threshold_factors(&self) -> RecoveryRoleInIsolationValidation {
                     if !self.threshold_factors.is_empty() {
                         return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
                             violation: FactorRulesViolationRecoveryRoleInIsolation::RoleContainsThresholdFactors
                         })
                     }
+                    Ok(())
+                }
+
+                fn validate_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    assert!(self.get_mfa_role() == RoleKind::Recovery, "Wrong role kind, called validation for Recovery but role is {:?}", self.get_mfa_role());
+
+                    self.validate_recovery_contains_no_threshold_factors()?;
+
                     self.validate_device_recovery()?;
                     self.validate_ledger_recovery()?;
                     self.validate_arculus_recovery()?;
                     self.validate_security_questions_recovery()?;
                     self.validate_passphrase_recovery()?;
                     self.validate_off_device_mnemonic_recovery()?;
+
                     Ok(())
                 }
 
-                fn validate_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                fn validate_confirmation_contains_no_threshold_factors(&self) -> ConfirmationRoleInIsolationValidation {
                     if !self.threshold_factors.is_empty() {
                         return ConfirmationRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
                             violation: FactorRulesViolationConfirmationRoleInIsolation::RoleContainsThresholdFactors
                         })
                     }
+                    Ok(())
+                }
+
+                fn validate_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    assert!(self.get_mfa_role() == RoleKind::Confirmation, "Wrong role kind, called validation for Confirmation but role is {:?}", self.get_mfa_role());
+
+                    self.validate_confirmation_contains_no_threshold_factors()?;
+
                     self.validate_device_confirmation()?;
                     self.validate_ledger_confirmation()?;
                     self.validate_arculus_confirmation()?;

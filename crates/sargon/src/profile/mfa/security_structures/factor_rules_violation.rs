@@ -34,12 +34,21 @@ pub enum FactorRulesViolationPrimaryRoleInIsolation {
 
     #[error("Passphrase cannot be in override.")]
     PassphraseCannotBeInOverride,
+
+    #[error("Security Questions cannot be used.")]
+    SecurityQuestionsCannotBeUsed,
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum FactorRulesViolationRecoveryRoleInIsolation {
     #[error("Contains Threshold Factors which is not allowed.")]
     RoleContainsThresholdFactors,
+
+    #[error("Security Questions cannot be used.")]
+    SecurityQuestionsCannotBeUsed,
+
+    #[error("Passphrase cannot be used.")]
+    PassphraseCannotBeUsed,
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
