@@ -31,30 +31,25 @@ impl DeleteAccountTransfer {
     }
 }
 
-impl TryFrom<FungibleResourcesCollectionItem> for DeleteAccountTransfer {
-    type Error = CommonError;
-    fn try_from(value: FungibleResourcesCollectionItem) -> Result<Self> {
-        let value = value
-            .as_global()
-            .ok_or(CommonError::UnexpectedCollectionItemAggregation)?;
-        let result =
-            Self::new(value.resource_address.scrypto(), value.amount.into(), 1);
-        Ok(result)
+impl From<FungibleResourcesCollectionItemGloballyAggregated>
+    for DeleteAccountTransfer
+{
+    fn from(value: FungibleResourcesCollectionItemGloballyAggregated) -> Self {
+        Self::new(value.resource_address.scrypto(), value.amount.into(), 1)
     }
 }
 
-impl TryFrom<NonFungibleResourcesCollectionItem> for DeleteAccountTransfer {
-    type Error = CommonError;
-    fn try_from(value: NonFungibleResourcesCollectionItem) -> Result<Self> {
-        let value = value
-            .as_global()
-            .ok_or(CommonError::UnexpectedCollectionItemAggregation)?;
-        let result = Self::new(
+impl From<NonFungibleResourcesCollectionItemGloballyAggregated>
+    for DeleteAccountTransfer
+{
+    fn from(
+        value: NonFungibleResourcesCollectionItemGloballyAggregated,
+    ) -> Self {
+        Self::new(
             value.resource_address.scrypto(),
             value.amount.into(),
             value.amount,
-        );
-        Ok(result)
+        )
     }
 }
 
@@ -98,35 +93,27 @@ mod tests {
     fn from_fungible_resources_collection_item() {
         let resource_address = ResourceAddress::sample();
         let amount = Decimal192::sample();
-        let item = FungibleResourcesCollectionItem::Global(
-            FungibleResourcesCollectionItemGloballyAggregated::new(
-                resource_address,
-                amount,
-            ),
+        let item = FungibleResourcesCollectionItemGloballyAggregated::new(
+            resource_address,
+            amount,
         );
-        let result = DeleteAccountTransfer::try_from(item).unwrap();
+        let result = DeleteAccountTransfer::from(item);
         assert_eq!(result.resource_address, resource_address.scrypto());
         assert_eq!(result.amount, amount.into());
         assert_eq!(result.weight, 1);
-
-        // TODO: Add test that returns `UnexpectedCollectionItemAggregation` whenever we support `FungibleResourcesCollectionItem::Vault`
     }
 
     #[test]
     fn from_non_fungible_resources_collection_item() {
         let resource_address = ResourceAddress::sample();
         let amount = 5;
-        let item = NonFungibleResourcesCollectionItem::Global(
-            NonFungibleResourcesCollectionItemGloballyAggregated::new(
-                resource_address,
-                amount,
-            ),
+        let item = NonFungibleResourcesCollectionItemGloballyAggregated::new(
+            resource_address,
+            amount,
         );
-        let result = DeleteAccountTransfer::try_from(item).unwrap();
+        let result = DeleteAccountTransfer::from(item);
         assert_eq!(result.resource_address, resource_address.scrypto());
         assert_eq!(result.amount, amount.into());
         assert_eq!(result.weight, 5);
-
-        // TODO: Add test that returns `UnexpectedCollectionItemAggregation` whenever we support `NonFungibleResourcesCollectionItem::Vault`
     }
 }

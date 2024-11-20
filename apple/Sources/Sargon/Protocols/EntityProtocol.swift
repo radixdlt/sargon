@@ -32,6 +32,10 @@ extension EntityBaseProtocol {
 	public var id: ID { address }
 	public var networkID: NetworkID { networkId }
 	
+	public var isDeleted: Bool {
+		flags.contains(.tombstonedByUser)
+	}
+
 	public var isHidden: Bool {
 		flags.contains(.hiddenByUser)
 	}
