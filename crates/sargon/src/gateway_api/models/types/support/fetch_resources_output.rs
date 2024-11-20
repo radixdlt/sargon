@@ -9,12 +9,12 @@ pub struct FetchResourcesOutput {
 
 impl FetchResourcesOutput {
     pub fn new(
-        fungibles: Vec<FungibleResourcesCollectionItem>,
-        non_fungibles: Vec<NonFungibleResourcesCollectionItem>,
+        fungibles: impl IntoIterator<Item = FungibleResourcesCollectionItem>,
+        non_fungibles: impl IntoIterator<Item = NonFungibleResourcesCollectionItem>,
     ) -> Self {
         Self {
-            fungibles,
-            non_fungibles,
+            fungibles: Vec::from_iter(fungibles),
+            non_fungibles: Vec::from_iter(non_fungibles),
         }
     }
 }
@@ -44,7 +44,7 @@ mod tests {
     fn resource_addresses() {
         let fungible = FungibleResourcesCollectionItem::sample();
         let non_fungible = NonFungibleResourcesCollectionItem::sample();
-        let sut = SUT::new(vec![fungible.clone()], vec![non_fungible.clone()]);
+        let sut = SUT::new([fungible.clone()], [non_fungible.clone()]);
 
         assert_eq!(
             sut.resource_addresses(),

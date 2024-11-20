@@ -9,9 +9,12 @@ pub struct ComponentEntityRoleAssignments {
 impl ComponentEntityRoleAssignments {
     pub fn new(
         owner: ComponentEntityRoleAssignmentOwner,
-        entries: Vec<ComponentEntityRoleAssignmentEntry>,
+        entries: impl IntoIterator<Item = ComponentEntityRoleAssignmentEntry>,
     ) -> Self {
-        Self { owner, entries }
+        Self {
+            owner,
+            entries: Vec::from_iter(entries),
+        }
     }
 }
 
@@ -29,7 +32,7 @@ impl ComponentEntityRoleAssignments {
     pub fn sample_allow_all() -> Self {
         Self::new(
             ComponentEntityRoleAssignmentOwner::sample_protected(),
-            vec![
+            [
                 ComponentEntityRoleAssignmentEntry::sample_depositor_explicit_allow_all(
                 ),
                 ComponentEntityRoleAssignmentEntry::sample_withdrawer_explicit_allow_all(
@@ -41,7 +44,7 @@ impl ComponentEntityRoleAssignments {
     pub fn sample_deny_all() -> Self {
         Self::new(
             ComponentEntityRoleAssignmentOwner::sample_protected(),
-            vec![
+            [
                 ComponentEntityRoleAssignmentEntry::sample_depositor_explicit_deny_all(),
                 ComponentEntityRoleAssignmentEntry::sample_withdrawer_explicit_deny_all(
                 ),

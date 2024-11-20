@@ -46,9 +46,15 @@ impl StateEntityDetailsResponseItemDetails {
             return false;
         };
 
-        depositor.assignment.explicit_rule == Some(ExplicitRule::AllowAll)
-            && withdrawer.assignment.explicit_rule
-                == Some(ExplicitRule::AllowAll)
+        let allows_all =
+            |role_assignment: &ComponentEntityRoleAssignmentEntry| {
+                role_assignment.assignment.explicit_rule
+                    == Some(ExplicitRule::AllowAll)
+            };
+        let depositor_allows_all = allows_all(&depositor);
+        let withdrawer_allows_all = allows_all(&withdrawer);
+        // Both depositor and withdrawer must allow
+        depositor_allows_all && withdrawer_allows_all
     }
 
     fn role_assignments(&self) -> Option<ComponentEntityRoleAssignments> {
@@ -70,7 +76,6 @@ impl StateEntityDetailsResponseItemDetails {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = StateEntityDetailsResponseItemDetails;
@@ -89,15 +94,15 @@ mod tests {
 
         // Define a few assignments combinations that cannot be transferred
         // Naming will be like this: <resolution>__<assignments>
-        let explicit__empty = Assignments::new(explicit.clone(), vec![]);
+        let explicit__empty = Assignments::new(explicit.clone(), []);
         let explicit__only_depositor = Assignments::new(
             explicit.clone(),
-            vec![
+            [
                 ComponentEntityRoleAssignmentEntry::sample_depositor_explicit_allow_all(
                 ),
             ],
         );
-        let explicit__depositor_allow_withdrawer_deny = Assignments::new(explicit.clone(), vec![
+        let explicit__depositor_allow_withdrawer_deny = Assignments::new(explicit.clone(), [
             ComponentEntityRoleAssignmentEntry::new(
                 RoleKey::main_depositor(),
                 ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_allow_all(
@@ -108,7 +113,7 @@ mod tests {
                 ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_deny_all(),
             ),
         ]);
-        let explicit__depositor_deny_withdrawer_allow = Assignments::new(explicit.clone(), vec![
+        let explicit__depositor_deny_withdrawer_allow = Assignments::new(explicit.clone(), [
             ComponentEntityRoleAssignmentEntry::new(
                 RoleKey::main_depositor(),
                 ComponentEntityRoleAssignmentEntryAssignment::sample_explicit_deny_all(),
@@ -122,7 +127,7 @@ mod tests {
         let owner__deny_all =
             Assignments::new(
                 owner_deny_all.clone(),
-                vec![
+                [
                     ComponentEntityRoleAssignmentEntry::sample_depositor_owner_allow_all(),
                     ComponentEntityRoleAssignmentEntry::sample_withdrawer_owner_allow_all(),
         ],
@@ -131,7 +136,7 @@ mod tests {
         // Define a few assignments combinations that can be transferred
         let explicit__allow_all = Assignments::sample_allow_all();
         let owner__allow_all =
-            Assignments::new(owner_allow_all.clone(), vec![
+            Assignments::new(owner_allow_all.clone(), [
                 ComponentEntityRoleAssignmentEntry::sample_depositor_owner_allow_all(),
                 ComponentEntityRoleAssignmentEntry::sample_withdrawer_owner_allow_all(),
             ]);

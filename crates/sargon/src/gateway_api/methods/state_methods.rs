@@ -375,17 +375,17 @@ impl GatewayClient {
         let mut non_transferable_resources = Vec::new();
 
         // Chunk the addresses to avoid exceeding the GW limit
-        let chunked_addresses: Vec<Vec<ResourceAddress>> = output
+        let chunked_addresses = output
             .resource_addresses()
-            .chunks(GATEWAY_CHUNK_ADDRESSES as usize)
+            .chunks(GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES as usize)
             .map(|chunk| chunk.to_vec())
-            .collect();
+            .collect::<Vec<Vec<_>>>();
 
         // Loop over the chunks
         for resource_addresses in chunked_addresses {
             // Fetch the details
-            let addresses: Vec<Address> =
-                resource_addresses.iter().map(|&a| a.into()).collect();
+            let addresses =
+                resource_addresses.into_iter().map(Address::from).collect();
             let response = self
                 .state_entity_details(StateEntityDetailsRequest::new(
                     addresses, None, None,
@@ -393,31 +393,31 @@ impl GatewayClient {
                 .await?;
 
             // Filter those that cannot be transferred and append them to the list
-            let cannot_be_transferred: Vec<ResourceAddress> = response
+            let cannot_be_transferred = response
                 .items
                 .into_iter()
                 .filter(|item| !item.can_be_transferred())
                 .filter_map(|item| item.address.as_resource().cloned())
-                .collect();
+                .collect::<Vec<_>>();
             non_transferable_resources.extend(cannot_be_transferred);
         }
 
         // Filter out the fungible and non-fungible items that cannot be transferred
-        let fungible: Vec<FungibleResourcesCollectionItem> = output
+        let fungible = output
             .fungibles
             .into_iter()
             .filter(|item| {
                 !non_transferable_resources.contains(&item.resource_address())
             })
-            .collect();
+            .collect::<Vec<_>>();
 
-        let non_fungible: Vec<NonFungibleResourcesCollectionItem> = output
+        let non_fungible = output
             .non_fungibles
             .into_iter()
             .filter(|item| {
                 !non_transferable_resources.contains(&item.resource_address())
             })
-            .collect();
+            .collect::<Vec<_>>();
 
         // Build result
         let result = FetchTransferableResourcesOutput::new(
@@ -721,18 +721,18 @@ mod filter_transferable_tests {
         let non_fungible_not_transferable =
             NonFungibleResourcesCollectionItem::sample_other();
         let output = FetchResourcesOutput::new(
-            vec![
+            [
                 fungible_transferable.clone(),
                 fungible_not_transferable.clone(),
             ],
-            vec![
+            [
                 non_fungible_transferable.clone(),
                 non_fungible_not_transferable.clone(),
             ],
         );
 
         // Mock the entity details response
-        let entity_details_response = mock_entity_details_response(vec![
+        let entity_details_response = mock_entity_details_response([
             (
                 fungible_transferable.clone().resource_address(),
                 fungible_details(true),
@@ -773,10 +773,9 @@ mod filter_transferable_tests {
 
     /// Creates a `MockNetworkingDriverResponse` for a `StateEntityDetailsResponse`.
     fn mock_entity_details_response(
-        address_details: Vec<(
-            ResourceAddress,
-            StateEntityDetailsResponseItemDetails,
-        )>,
+        address_details: impl IntoIterator<
+            Item = (ResourceAddress, StateEntityDetailsResponseItemDetails),
+        >,
     ) -> MockNetworkingDriverResponse {
         let mut items: Vec<StateEntityDetailsResponseItem> = vec![];
         for item in address_details {
