@@ -13,7 +13,7 @@ impl SargonOS {
         &self,
         account_address: AccountAddress,
         recipient_account_address: Option<AccountAddress>,
-    ) -> Result<TransactionManifest> {
+    ) -> Result<CreateDeleteAccountManifestOutcome> {
         let network_id = account_address.network_id();
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -54,12 +54,18 @@ impl SargonOS {
         // Build Manifest
         let manifest = TransactionManifest::delete_account(
             &account_address,
-            account_transfers,
+            account_transfers.clone(),
             resource_preferences,
             authorized_depositors,
         );
 
-        Ok(manifest)
+        // Build result
+        let result = CreateDeleteAccountManifestOutcome::new(
+            manifest,
+            account_transfers
+                .map_or_else(Vec::new, |t| t.non_transferable_resources),
+        );
+        Ok(result)
     }
 
     async fn fetch_resource_preferences(
@@ -111,12 +117,20 @@ impl SargonOS {
         };
 
         // Get all resources
-        let output = gateway_client
+        let resources = gateway_client
             .fetch_all_resources(account_address, ledger_state.into())
             .await?;
 
+        // Filter transferable resources
+        let transferable_resources = gateway_client
+            .filter_transferable_resources(resources)
+            .await?;
+
         // Try to build the DeleteAccountTransfers from output and return it.
-        let transfers = DeleteAccountTransfers::try_from((output, recipient))?;
+        let transfers = DeleteAccountTransfers::try_from((
+            transferable_resources,
+            recipient,
+        ))?;
         Ok(Some(transfers))
     }
 }
@@ -204,7 +218,8 @@ mod tests {
             vec![],
         );
 
-        assert_eq!(result, expected);
+        assert_eq!(result.manifest, expected);
+        assert!(result.non_transferable_resources.is_empty());
     }
 
     /// Boots SargonOS with a mock networking driver that will return the provided responses.
@@ -355,7 +370,7 @@ mod integration_tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn delete_account_manifest_from_empty_account() {
+    async fn empty_account() {
         // This test verifies that we can correctly create a manifest for the deletion of a virtual account.
         let request = SUT::boot_test();
 
@@ -372,5 +387,36 @@ mod integration_tests {
             .await;
 
         assert!(result.is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn account_with_non_transferable_assets() {
+        // This test verifies that we can correctly create a manifest for the deletion of an account with non-transferable assets.
+        let request = SUT::boot_test();
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, request)
+            .await
+            .unwrap()
+            .unwrap();
+
+        // Account with RadQuest Hero Badge
+        let account_address = AccountAddress::try_from_bech32("account_tdx_2_129ty2n42x82qe6unxxpq8m8avjqaff54zfpfpepaaqn2tapqwnc0vw").unwrap();
+
+        let recipient_address = AccountAddress::sample_stokenet();
+
+        let result = os
+            .create_delete_account_manifest(
+                account_address,
+                recipient_address.into(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            result.non_transferable_resources,
+            vec![
+            "resource_tdx_2_1nt72qwswkjkaayfwgyy0d2un8wvpjlq2dg5lq54382wlmf6yly8vz5".parse().unwrap(), // RadQuest Hero Badge
+        ]
+        );
     }
 }

@@ -20,3 +20,11 @@ impl HasSampleValues for NonFungibleResourcesCollectionItem {
         )
     }
 }
+
+impl NonFungibleResourcesCollectionItem {
+    pub fn resource_address(&self) -> ResourceAddress {
+        match self {
+            Self::Global(item) => item.resource_address,
+        }
+    }
+}
