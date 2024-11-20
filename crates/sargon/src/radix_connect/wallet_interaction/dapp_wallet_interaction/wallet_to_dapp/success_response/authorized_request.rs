@@ -64,7 +64,8 @@ impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
             WalletToDappInteractionAccountsRequestResponseItem::sample(),
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(),
+            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(
+            ),
         )
     }
 
