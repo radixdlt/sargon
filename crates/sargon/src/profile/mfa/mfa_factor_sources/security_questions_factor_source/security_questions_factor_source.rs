@@ -426,7 +426,10 @@ mod tests {
 
     #[test]
     fn kind() {
-        assert_eq!(SUT::factor_source_kind(), FactorSourceKind::SecurityQuestions);
+        assert_eq!(
+            SUT::factor_source_kind(),
+            FactorSourceKind::SecurityQuestions
+        );
     }
 
     #[test]

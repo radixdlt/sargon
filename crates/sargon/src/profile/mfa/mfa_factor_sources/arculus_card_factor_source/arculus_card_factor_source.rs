@@ -182,6 +182,9 @@ mod tests {
 
     #[test]
     fn factor_source_kind() {
-        assert_eq!(SUT::sample().get_factor_source_kind(), SUT::sample().id.kind);
+        assert_eq!(
+            SUT::sample().get_factor_source_kind(),
+            SUT::sample().id.kind
+        );
     }
 }

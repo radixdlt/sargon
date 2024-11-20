@@ -48,16 +48,13 @@ impl InternalFactorInstancesProviderOutcome {
             /// Might be empty
             pub to_cache: Vec<HierarchicalDeterministicFactorInstance>,
             /// Might be empty
-            pub to_use_directly:
-            Vec<HierarchicalDeterministicFactorInstance>,
+            pub to_use_directly: Vec<HierarchicalDeterministicFactorInstance>,
 
             /// LESS IMPORTANT - for tests...
             /// might overlap with `to_use_directly`
-            pub found_in_cache:
-            Vec<HierarchicalDeterministicFactorInstance>,
+            pub found_in_cache: Vec<HierarchicalDeterministicFactorInstance>,
             /// might overlap with `to_cache` and `to_use_directly`
-            pub newly_derived:
-            Vec<HierarchicalDeterministicFactorInstance>,
+            pub newly_derived: Vec<HierarchicalDeterministicFactorInstance>,
         }
         impl Builder {
             fn build(self) -> InternalFactorInstancesProviderOutcomeForFactor {

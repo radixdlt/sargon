@@ -18,7 +18,8 @@ impl Profile {
             .and_then(|f| {
                 f.clone().try_into().map_err(|_| {
                     CommonError::CastFactorSourceWrongKind {
-                        expected: <F as HasFactorSourceKind>::factor_source_kind(),
+                        expected:
+                            <F as HasFactorSourceKind>::factor_source_kind(),
                         found: f.get_factor_source_kind(),
                     }
                 })
