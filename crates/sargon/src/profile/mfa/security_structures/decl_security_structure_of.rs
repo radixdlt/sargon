@@ -142,13 +142,39 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     }
                 }
 
-
-                fn validate_primary(&self) -> PrimaryRoleInIsolationValidation {
+                /// Validates the **Primary** role for `Device` FactorSourceKind.
+                fn validate_device_primary(&self) -> PrimaryRoleInIsolationValidation {
                     if self.number_of_factors_of_kind_in_any_list(FactorSourceKind::Device) > 1 {
                         return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
                             violation: FactorRulesViolationPrimaryRoleInIsolation::MultipleDeviceFactors
                         })
                     }
+                    Ok(())
+                }
+
+                fn validate_device_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    todo!()
+                }
+                fn validate_device_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    todo!()
+                }
+
+                fn validate_ledger_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
+                fn validate_ledger_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
+                fn validate_ledger_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+
+                fn validate_arculus_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
+                fn validate_arculus_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
+                fn validate_arculus_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+
+                fn validate_security_questions_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
+                fn validate_security_questions_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
+                fn validate_security_questions_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+
+
+                fn validate_passphrase_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
+                fn validate_passphrase_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+                fn validate_passphrase_primary(&self) -> PrimaryRoleInIsolationValidation {
                     if let Some(list_kind) = self.factor_list_kind_of_factor_of_kind(FactorSourceKind::Passphrase) {
                         match list_kind {
                             FactorListKind::Threshold => {
@@ -175,12 +201,33 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     Ok(())
                 }
 
+                fn validate_off_device_mnemonic_primary(&self) -> PrimaryRoleInIsolationValidation { todo!() }
+                fn validate_off_device_mnemonic_recovery(&self) -> RecoveryRoleInIsolationValidation { todo!() }
+                fn validate_off_device_mnemonic_confirmation(&self) -> ConfirmationRoleInIsolationValidation { todo!() }
+
+                fn validate_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    self.validate_device_primary()?;
+                    self.validate_ledger_primary()?;
+                    self.validate_arculus_primary()?;
+                    self.validate_security_questions_primary()?;
+                    self.validate_passphrase_primary()?;
+                    self.validate_off_device_mnemonic_primary()?;
+                    Ok(())
+                }
+
+
                 fn validate_recovery(&self) -> RecoveryRoleInIsolationValidation {
                     if !self.threshold_factors.is_empty() {
                         return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
                             violation: FactorRulesViolationRecoveryRoleInIsolation::RoleContainsThresholdFactors
                         })
                     }
+                    self.validate_device_recovery()?;
+                    self.validate_ledger_recovery()?;
+                    self.validate_arculus_recovery()?;
+                    self.validate_security_questions_recovery()?;
+                    self.validate_passphrase_recovery()?;
+                    self.validate_off_device_mnemonic_recovery()?;
                     Ok(())
                 }
 
@@ -190,10 +237,14 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                             violation: FactorRulesViolationConfirmationRoleInIsolation::RoleContainsThresholdFactors
                         })
                     }
+                    self.validate_device_confirmation()?;
+                    self.validate_ledger_confirmation()?;
+                    self.validate_arculus_confirmation()?;
+                    self.validate_security_questions_confirmation()?;
+                    self.validate_passphrase_confirmation()?;
+                    self.validate_off_device_mnemonic_confirmation()?;
                     Ok(())
                 }
-
-
 
                 fn validate(&self) -> RolesInIsolationValidation {
                     let role = self.get_mfa_role();
