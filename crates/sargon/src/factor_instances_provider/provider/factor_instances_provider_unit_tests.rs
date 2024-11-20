@@ -1420,23 +1420,6 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
         "should have used cache"
     );
-    let expected = vec![
-        ["0^", "0^", "0^"],
-        ["1^", "1^", "1^"],
-        ["2^", "2^", "2^"],
-        ["3^", "3^", "3^"],
-        ["4^", "4^", "4^"],
-        ["5^", "5^", "5^"],
-        ["6^", "6^", "6^"],
-        ["7^", "7^", "7^"],
-        ["8^", "8^", "8^"],
-        ["9^", "9^", "9^"],
-        ["10^", "10^", "10^"],
-        ["11^", "11^", "11^"],
-        ["12^", "12^", "12^"],
-        ["13^", "13^", "13^"],
-        ["14^", "14^", "14^"],
-    ];
 
     let expected = vec![
         ["0^", "0^", "0^"],

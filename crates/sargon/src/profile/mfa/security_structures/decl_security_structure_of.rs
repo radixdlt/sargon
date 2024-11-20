@@ -105,59 +105,65 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     self.all_factors().into_iter().filter(|f| f.get_factor_source_kind() == kind).collect_vec()
                 }
 
-
-                fn validate_is_canonical_primary(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_is_canonical_primary(&self) -> PrimaryRoleInIsolationValidation {
                     if self.all_factors_of_kind(FactorSourceKind::Device).len() > 1 {
-                        return Err(FactorRulesViolation::NonCanonicalPrimaryRoleContainsMultipleDeviceFactors)
+                        return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationPrimaryRoleInIsolation::NonCanonicalRoleContainsMultipleDeviceFactors
+                        })
                     }
                     Ok(())
                 }
 
-                fn validate_is_canonical_recovery(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_is_canonical_recovery(&self) -> RecoveryRoleInIsolationValidation {
                     if !self.threshold_factors.is_empty() {
-                        return Err(FactorRulesViolation::NonCanonicalRecoveryRoleContainsThresholdFactors)
+                        return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationRecoveryRoleInIsolation::NonCanonicalRoleContainsThresholdFactors
+                        })
                     }
                     Ok(())
                 }
 
-                fn validate_is_canonical_confirmation(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_is_canonical_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
                     if !self.threshold_factors.is_empty() {
-                        return Err(FactorRulesViolation::NonCanonicalConfirmationRoleContainsThresholdFactors)
+                        return ConfirmationRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationConfirmationRoleInIsolation::NonCanonicalRoleContainsThresholdFactors
+                        })
                     }
                     Ok(())
                 }
 
-                fn validate_is_canonical(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_is_canonical(&self) -> RolesInIsolationValidation {
                     let role = self.get_mfa_role();
                     match role {
-                        RoleKind::Primary => self.validate_is_canonical_primary(),
-                        RoleKind::Recovery => self.validate_is_canonical_recovery(),
-                        RoleKind::Confirmation => self.validate_is_canonical_confirmation(),
+                        RoleKind::Primary => self.validate_is_canonical_primary().into_roles(),
+                        RoleKind::Recovery => self.validate_is_canonical_recovery().into_roles(),
+                        RoleKind::Confirmation => self.validate_is_canonical_confirmation().into_roles(),
                     }
                 }
 
-                fn validate_primary(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_primary(&self) -> PrimaryRoleInIsolationValidation {
                     Ok(())
                 }
 
-                fn validate_recovery(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_recovery(&self) -> RecoveryRoleInIsolationValidation {
                     Ok(())
                 }
 
-                fn validate_confirmation(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
                     Ok(())
                 }
 
-                fn validate_all_roles(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_all_roles(&self) -> RolesInIsolationValidation {
                     let role = self.get_mfa_role();
                     match role {
-                        RoleKind::Primary => self.validate_primary(),
-                        RoleKind::Recovery => self.validate_recovery(),
-                        RoleKind::Confirmation => self.validate_confirmation(),
+                        RoleKind::Primary => self.validate_primary().into_roles()?,
+                        RoleKind::Recovery => self.validate_recovery().into_roles()?,
+                        RoleKind::Confirmation => self.validate_confirmation().into_roles()?,
                     }
+                    Ok(())
                 }
 
-                fn validate(&self, enforce_canonical: bool) -> Result<(), FactorRulesViolation> {
+                fn validate(&self, enforce_canonical: bool) -> RolesInIsolationValidation {
                     self.validate_all_roles()?;
                     if enforce_canonical {
                         self.validate_is_canonical()?;
@@ -388,16 +394,16 @@ macro_rules! decl_matrix_of_factors {
             impl [< MatrixOf $factor s >] {
 
 
-                fn validate_is_canonical(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_is_canonical(&self) -> RolesCombinedValidation {
                     Ok(())
                 }
 
-                fn validate_all_roles(&self) -> Result<(), FactorRulesViolation> {
+                fn validate_all_roles(&self) -> RolesCombinedValidation {
                     Ok(())
                 }
 
 
-                fn validate(&self, enforce_canonical: bool) -> Result<(), FactorRulesViolation> {
+                fn validate(&self, enforce_canonical: bool) -> RolesCombinedValidation {
                     self.validate_all_roles()?;
                     if enforce_canonical {
                         self.validate_is_canonical()?;
