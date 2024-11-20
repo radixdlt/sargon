@@ -72,10 +72,12 @@ impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
         Self::new(
             WalletToDappInteractionAuthRequestResponseItem::sample_other(),
             WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
-            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
+            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
+            ),
             WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
             WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
-            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample_other(),
+            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample_other(
+            ),
         )
     }
 }
