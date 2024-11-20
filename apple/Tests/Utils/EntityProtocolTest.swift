@@ -39,6 +39,10 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 	func test_is_hidden() {
 		XCTAssertFalse(SUT.sample.isHidden)
 	}
+
+	func test_is_deleted() {
+		XCTAssertFalse(SUT.sample.isDeleted)
+	}
 	
 	func test_hasAuthenticationSigningKey() {
 		eachSample { sut in

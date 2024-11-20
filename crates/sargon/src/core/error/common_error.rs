@@ -729,8 +729,9 @@ pub enum CommonError {
     #[error("Subintent has already expired")]
     SubintentExpired = 10206,
 
-    #[error("Unexpected collection item aggregation")]
-    UnexpectedCollectionItemAggregation = 10207,
+    #[error("UNKNOWN ERROR (FREE_TO_USE)")]
+    #[allow(non_camel_case_types)]
+    FREE_TO_USE = 10207,
 
     #[error("Unable to make {amount} transfers in one single transaction")]
     MaxTransfersPerTransactionReached { amount: u64 } = 10208,
