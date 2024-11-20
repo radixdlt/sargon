@@ -23,20 +23,29 @@ pub type AbstractFactorRulesValidation<E> =
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum FactorRulesViolationPrimaryRoleInIsolation {
-    #[error("Non-Canonical Primary Role: contains multiple Device Factors which is not allowed.")]
-    NonCanonicalRoleContainsMultipleDeviceFactors,
+    #[error("Multiple Device Factors")]
+    MultipleDeviceFactors,
+
+    #[error("Threshold Factors must contain at least one other kind than Passphrase.")]
+    ThresholdFactorsMustContainAtLeastOneOtherKindThanPassphrase,
+
+    #[error("Threshold must be at least 2 when Passphrase is used.")]
+    ThresholdMustBeAtLeastTwoWhenPassphraseIsUsed,
+
+    #[error("Passphrase cannot be in override.")]
+    PassphraseCannotBeInOverride,
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum FactorRulesViolationRecoveryRoleInIsolation {
-    #[error("Non-Canonical Recovery Role: contains Threshold Factors which is not allowed.")]
-    NonCanonicalRoleContainsThresholdFactors,
+    #[error("Contains Threshold Factors which is not allowed.")]
+    RoleContainsThresholdFactors,
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum FactorRulesViolationConfirmationRoleInIsolation {
-    #[error("Non-Canonical Confirmation Role: contains Threshold Factors which is not allowed.")]
-    NonCanonicalRoleContainsThresholdFactors,
+    #[error("Contains Threshold Factors which is not allowed.")]
+    RoleContainsThresholdFactors,
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]

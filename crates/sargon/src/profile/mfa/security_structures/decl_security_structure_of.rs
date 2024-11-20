@@ -100,73 +100,107 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
 
             impl [< $role RoleWith $factor s >] {
-
-                fn all_factors_of_kind(&self, kind: FactorSourceKind) -> Vec<&$factor> {
-                    self.all_factors().into_iter().filter(|f| f.get_factor_source_kind() == kind).collect_vec()
-                }
-
-                fn validate_is_canonical_primary(&self) -> PrimaryRoleInIsolationValidation {
-                    if self.all_factors_of_kind(FactorSourceKind::Device).len() > 1 {
-                        return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
-                            violation: FactorRulesViolationPrimaryRoleInIsolation::NonCanonicalRoleContainsMultipleDeviceFactors
-                        })
-                    }
-                    Ok(())
-                }
-
-                fn validate_is_canonical_recovery(&self) -> RecoveryRoleInIsolationValidation {
-                    if !self.threshold_factors.is_empty() {
-                        return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
-                            violation: FactorRulesViolationRecoveryRoleInIsolation::NonCanonicalRoleContainsThresholdFactors
-                        })
-                    }
-                    Ok(())
-                }
-
-                fn validate_is_canonical_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
-                    if !self.threshold_factors.is_empty() {
-                        return ConfirmationRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
-                            violation: FactorRulesViolationConfirmationRoleInIsolation::NonCanonicalRoleContainsThresholdFactors
-                        })
-                    }
-                    Ok(())
-                }
-
-                fn validate_is_canonical(&self) -> RolesInIsolationValidation {
-                    let role = self.get_mfa_role();
-                    match role {
-                        RoleKind::Primary => self.validate_is_canonical_primary().into_roles(),
-                        RoleKind::Recovery => self.validate_is_canonical_recovery().into_roles(),
-                        RoleKind::Confirmation => self.validate_is_canonical_confirmation().into_roles(),
+                fn with_factor_list_of_kind<T>(&self, list_kind: impl Into<Option<FactorListKind>>, access: impl Fn(Vec<&$factor>) -> T) -> T {
+                    match list_kind.into() {
+                        None => access(self.all_factors()),
+                        Some(FactorListKind::Threshold) => access(self.threshold_factors.iter().collect()),
+                        Some(FactorListKind::Override) => access(self.override_factors.iter().collect()),
                     }
                 }
+
+                fn all_factors_of_kind_in_list_of_kind(&self, factor_source_kind: FactorSourceKind, list_kind: impl Into<Option<FactorListKind>>) -> Vec<$factor> {
+                    self.with_factor_list_of_kind(list_kind, |factors| factors.into_iter().filter(|f| f.get_factor_source_kind() == factor_source_kind).map(|x| x.clone()).collect())
+                }
+
+                fn all_factors_of_kind_in_any_list(&self, factor_source_kind: FactorSourceKind) -> Vec<$factor> {
+                    self.all_factors_of_kind_in_list_of_kind(factor_source_kind, None)
+                }
+
+                fn number_of_factors_of_kind_in_list_of_kind(&self, factor_source_kind: FactorSourceKind, list_kind: impl Into<Option<FactorListKind>>) -> usize {
+                    self.all_factors_of_kind_in_list_of_kind(factor_source_kind, list_kind).len()
+                }
+
+                fn number_of_factors_of_kind_in_any_list(&self, factor_source_kind: FactorSourceKind) -> usize {
+                    self.number_of_factors_of_kind_in_list_of_kind(factor_source_kind, None)
+                }
+
+                /// Any of the threshold or the override factors list contains a factor of the given kind.
+                fn contains_factor_of_kind_in_list_of_kind(&self, factor_source_kind: FactorSourceKind, list_kind: impl Into<Option<FactorListKind>>) -> bool {
+                    self.number_of_factors_of_kind_in_list_of_kind(factor_source_kind, list_kind) > 0
+                }
+
+                fn factor_list_kind_of_factor_of_kind(&self, kind: FactorSourceKind) -> Option<FactorListKind> {
+                    let found_in_threshold = self.contains_factor_of_kind_in_list_of_kind(kind, FactorListKind::Threshold);
+                    let found_in_override = self.contains_factor_of_kind_in_list_of_kind(kind, FactorListKind::Threshold);
+                    assert!(!(found_in_threshold && found_in_override), "Invalid, factor cannot be in both lists!");
+                    if found_in_threshold {
+                        Some(FactorListKind::Threshold)
+                    } else if found_in_override {
+                        Some(FactorListKind::Override)
+                    } else {
+                        None
+                    }
+                }
+
 
                 fn validate_primary(&self) -> PrimaryRoleInIsolationValidation {
+                    if self.number_of_factors_of_kind_in_any_list(FactorSourceKind::Device) > 1 {
+                        return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationPrimaryRoleInIsolation::MultipleDeviceFactors
+                        })
+                    }
+                    if let Some(list_kind) = self.factor_list_kind_of_factor_of_kind(FactorSourceKind::Passphrase) {
+                        match list_kind {
+                            FactorListKind::Threshold => {
+                                let threshold_factors_contains_other_kinds_than_passphrase = self.with_factor_list_of_kind(list_kind, |fs| fs.iter().filter(|f| f.get_factor_source_kind() != FactorSourceKind::Passphrase).count() >= 1);
+                                if !threshold_factors_contains_other_kinds_than_passphrase {
+                                    return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::NotYetValid {
+                                        violation: FactorRulesViolationPrimaryRoleInIsolation::ThresholdFactorsMustContainAtLeastOneOtherKindThanPassphrase
+                                    })
+                                }
+                                if self.threshold < 2 {
+                                    return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::NotYetValid {
+                                        violation: FactorRulesViolationPrimaryRoleInIsolation::ThresholdMustBeAtLeastTwoWhenPassphraseIsUsed
+                                    })
+                                }
+
+                            }
+                            FactorListKind::Override => {
+                                return PrimaryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                                    violation: FactorRulesViolationPrimaryRoleInIsolation::PassphraseCannotBeInOverride
+                                })
+                            }
+                        }
+                    }
                     Ok(())
                 }
 
                 fn validate_recovery(&self) -> RecoveryRoleInIsolationValidation {
+                    if !self.threshold_factors.is_empty() {
+                        return RecoveryRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationRecoveryRoleInIsolation::RoleContainsThresholdFactors
+                        })
+                    }
                     Ok(())
                 }
 
                 fn validate_confirmation(&self) -> ConfirmationRoleInIsolationValidation {
+                    if !self.threshold_factors.is_empty() {
+                        return ConfirmationRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationConfirmationRoleInIsolation::RoleContainsThresholdFactors
+                        })
+                    }
                     Ok(())
                 }
 
-                fn validate_all_roles(&self) -> RolesInIsolationValidation {
+
+
+                fn validate(&self) -> RolesInIsolationValidation {
                     let role = self.get_mfa_role();
                     match role {
                         RoleKind::Primary => self.validate_primary().into_roles()?,
                         RoleKind::Recovery => self.validate_recovery().into_roles()?,
                         RoleKind::Confirmation => self.validate_confirmation().into_roles()?,
-                    }
-                    Ok(())
-                }
-
-                fn validate(&self, enforce_canonical: bool) -> RolesInIsolationValidation {
-                    self.validate_all_roles()?;
-                    if enforce_canonical {
-                        self.validate_is_canonical()?;
                     }
                     Ok(())
                 }
@@ -191,7 +225,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>,
-                    enforce_canonical: bool,
+                    should_validate: bool,
                 ) -> Result<Self> {
 
                     let assert_is_securified = |factors: &Vec::<$factor>| -> Result<()> {
@@ -234,8 +268,13 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                         $($extra_field_name,)*
                     };
 
-                    unvalidated.validate(enforce_canonical).map_err(|e| CommonError::from(e))?;
-                    Ok(unvalidated)
+                    if should_validate {
+                        unvalidated.validate().map_err(|e| CommonError::from(e))?;
+                        let validated = unvalidated;
+                        Ok(validated)
+                    } else {
+                        Ok(unvalidated)
+                    }
                 }
             }
         }
