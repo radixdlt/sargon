@@ -729,14 +729,11 @@ pub enum CommonError {
     #[error("Subintent has already expired")]
     SubintentExpired = 10206,
 
-    #[error("Unexpected collection item aggregation")]
-    UnexpectedCollectionItemAggregation = 10207,
-
     #[error("Unable to make {amount} transfers in one single transaction")]
-    MaxTransfersPerTransactionReached { amount: u64 } = 10208,
+    MaxTransfersPerTransactionReached { amount: u64 } = 10207,
 
     #[error("Transaction Manifest class is reserved: {class}")]
-    ReservedManifestClass { class: DetailedManifestClass } = 10209,
+    ReservedManifestClass { class: DetailedManifestClass } = 10208,
 }
 
 impl CommonError {

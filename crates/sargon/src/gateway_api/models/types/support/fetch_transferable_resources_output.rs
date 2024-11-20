@@ -4,10 +4,11 @@ use crate::prelude::*;
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct FetchTransferableResourcesOutput {
     /// The list of fungible resources that can be transferred.
-    pub fungibles: Vec<FungibleResourcesCollectionItem>,
+    pub fungibles: Vec<FungibleResourcesCollectionItemGloballyAggregated>,
 
     /// The list of non-fungible resources that can be transferred.
-    pub non_fungibles: Vec<NonFungibleResourcesCollectionItem>,
+    pub non_fungibles:
+        Vec<NonFungibleResourcesCollectionItemGloballyAggregated>,
 
     /// The list of non-transferable resources.
     pub non_transferable_resources: Vec<ResourceAddress>,
@@ -15,8 +16,10 @@ pub struct FetchTransferableResourcesOutput {
 
 impl FetchTransferableResourcesOutput {
     pub fn new(
-        fungibles: Vec<FungibleResourcesCollectionItem>,
-        non_fungibles: Vec<NonFungibleResourcesCollectionItem>,
+        fungibles: Vec<FungibleResourcesCollectionItemGloballyAggregated>,
+        non_fungibles: Vec<
+            NonFungibleResourcesCollectionItemGloballyAggregated,
+        >,
         non_transferable_resources: Vec<ResourceAddress>,
     ) -> Self {
         Self {

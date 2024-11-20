@@ -41,15 +41,15 @@ impl TryFrom<(FetchTransferableResourcesOutput, AccountAddress)>
             .fungibles
             .clone()
             .into_iter()
-            .map(DeleteAccountTransfer::try_from)
-            .collect::<Result<Vec<_>, _>>()?;
+            .map(DeleteAccountTransfer::from)
+            .collect::<Vec<_>>();
 
         // Convert non-fungibles
         let non_fungibles = output
             .non_fungibles
             .into_iter()
-            .map(DeleteAccountTransfer::try_from)
-            .collect::<Result<Vec<_>, _>>()?;
+            .map(DeleteAccountTransfer::from)
+            .collect::<Vec<_>>();
 
         // Merge in one collection
         let transfers = [fungibles, non_fungibles].concat();
@@ -83,8 +83,10 @@ mod tests {
     #[test]
     fn from_fetch_resources_output_and_recipient() {
         // Test the case where the total weight of the transfers is less than the maximum.
-        let fungible = FungibleResourcesCollectionItem::sample();
-        let non_fungible = NonFungibleResourcesCollectionItem::sample();
+        let fungible =
+            FungibleResourcesCollectionItemGloballyAggregated::sample();
+        let non_fungible =
+            NonFungibleResourcesCollectionItemGloballyAggregated::sample();
         let non_transferable_resources = vec![ResourceAddress::sample()];
         let output = FetchTransferableResourcesOutput::new(
             vec![fungible.clone()],
@@ -108,12 +110,11 @@ mod tests {
         );
 
         // Test the case where the total weight of the transfers is over the maximum.
-        let non_fungible = NonFungibleResourcesCollectionItem::Global(
+        let non_fungible =
             NonFungibleResourcesCollectionItemGloballyAggregated::new(
                 ResourceAddress::sample(),
                 50,
-            ),
-        );
+            );
 
         let output = FetchTransferableResourcesOutput::new(
             vec![fungible.clone()],

@@ -406,16 +406,20 @@ impl GatewayClient {
         let fungible = output
             .fungibles
             .into_iter()
+            .filter_map(|item| item.as_global().cloned())
             .filter(|item| {
-                !non_transferable_resources.contains(&item.resource_address())
+                !(non_transferable_resources.contains(&item.resource_address)
+                    || item.amount.is_zero())
             })
             .collect::<Vec<_>>();
 
         let non_fungible = output
             .non_fungibles
             .into_iter()
+            .filter_map(|item| item.as_global().cloned())
             .filter(|item| {
-                !non_transferable_resources.contains(&item.resource_address())
+                !(non_transferable_resources.contains(&item.resource_address)
+                    || item.amount == 0)
             })
             .collect::<Vec<_>>();
 
@@ -716,18 +720,33 @@ mod filter_transferable_tests {
         let fungible_transferable = FungibleResourcesCollectionItem::sample();
         let fungible_not_transferable =
             FungibleResourcesCollectionItem::sample_other();
+        let fungible_zero_amount = FungibleResourcesCollectionItem::Global(
+            FungibleResourcesCollectionItemGloballyAggregated::new(
+                ResourceAddress::sample_stokenet_gum(),
+                Decimal192::zero(),
+            ),
+        );
         let non_fungible_transferable =
             NonFungibleResourcesCollectionItem::sample();
         let non_fungible_not_transferable =
             NonFungibleResourcesCollectionItem::sample_other();
+        let non_fungible_zero_amount =
+            NonFungibleResourcesCollectionItem::Global(
+                NonFungibleResourcesCollectionItemGloballyAggregated::new(
+                    ResourceAddress::sample_stokenet_nft_gc_membership(),
+                    0,
+                ),
+            );
         let output = FetchResourcesOutput::new(
             [
                 fungible_transferable.clone(),
                 fungible_not_transferable.clone(),
+                fungible_zero_amount.clone(),
             ],
             [
                 non_fungible_transferable.clone(),
                 non_fungible_not_transferable.clone(),
+                non_fungible_zero_amount.clone(),
             ],
         );
 
@@ -760,8 +779,14 @@ mod filter_transferable_tests {
         // Execute the request and check the result
         let result = sut.filter_transferable_resources(output).await.unwrap();
 
-        assert_eq!(result.fungibles, vec![fungible_transferable]);
-        assert_eq!(result.non_fungibles, vec![non_fungible_transferable]);
+        assert_eq!(
+            result.fungibles,
+            vec![fungible_transferable.as_global().unwrap().clone()]
+        );
+        assert_eq!(
+            result.non_fungibles,
+            vec![non_fungible_transferable.as_global().unwrap().clone()]
+        );
         assert_eq!(
             result.non_transferable_resources,
             vec![
