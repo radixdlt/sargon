@@ -70,8 +70,6 @@ jobs:
           sed -i '' 's/let useLocalFramework = false/let useLocalFramework = true/' Package.swift
           swift build -c release || exit $?
           echo "🚢 Swift Sargon builds for release ✅"
-
-          echo "XCFRAME_ZIP_PATH=$XCFRAME_ZIP_PATH" >> "$GITHUB_OUTPUT"
         env:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
 
@@ -105,13 +103,13 @@ jobs:
       - name: Create release
         if: github.ref == 'refs/heads/main'
         run: |
-          # This MUST match whatever you we have declared in Package.swift
-          SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip"
+          set -eux
+
+          ls -l target/swift/*.zip
 
           GH_RELEASE_TITLE="v$NEXT_TAG"
-          gh release create $NEXT_TAG '$XCFRAME_ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
+          gh release create $NEXT_TAG target/swift/libsargon-rs.xcframework.zip --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
         env:
           LAST_TAG: ${{ steps.tags.outputs.LAST_TAG }}
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
-          XCFRAME_ZIP_PATH: ${{ steps.build.outputs.XCFRAME_ZIP_PATH }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
