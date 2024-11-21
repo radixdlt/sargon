@@ -5,19 +5,16 @@ use crate::prelude::*;
 // ==================
 #[uniffi::export]
 impl SargonOS {
-    /// Polls the state of a `PreAuthorization` until we can determine the parent Transaction's status.
-    /// This means, we will first poll the subintent status, and once it has been submitted we
-    /// will continue polling the
+    /// Polls the status of a `SubintentHash` until it is either `Success` or `Expired`.
     pub async fn poll_pre_authorization_status(
         &self,
         intent_hash: SubintentHash,
-        expiration: Option<DappToWalletInteractionSubintentExpiration>,
-    ) -> Result<TransactionStatus> {
-        let expiration = expiration.map(|exp| exp.into_internal());
+        expiration: DappToWalletInteractionSubintentExpiration,
+    ) -> Result<PreAuthorizationStatus> {
         self.wrapped
             .poll_pre_authorization_status(
                 intent_hash.into_internal(),
-                expiration,
+                expiration.into_internal(),
             )
             .await
             .into_result()

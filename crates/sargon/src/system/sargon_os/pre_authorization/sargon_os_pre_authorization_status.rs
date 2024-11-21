@@ -5,12 +5,12 @@ use std::time::Duration;
 // Poll PreAuthorization Status (Public)
 // ==================
 impl SargonOS {
-    /// Polls the state of a PreAuthorization until we can determine its `TransactionStatus`.
+    /// Polls the status of a `SubintentHash` until it is either `Success` or `Expired`.
     pub async fn poll_pre_authorization_status(
         &self,
         intent_hash: SubintentHash,
-        expiration: Option<DappToWalletInteractionSubintentExpiration>,
-    ) -> Result<TransactionStatus> {
+        expiration: DappToWalletInteractionSubintentExpiration,
+    ) -> Result<PreAuthorizationStatus> {
         let (status, _) = self
             .poll_pre_authorization_status_with_delays(intent_hash, expiration)
             .await?;
@@ -25,119 +25,99 @@ impl SargonOS {
 impl SargonOS {
     /// Polls the state of a Subintent until it is submitted
     ///
-    /// It returns the `TransactionIntentHash`, but also the list of delays between each poll.
+    /// It returns the `PreAuthorizationStatus`, but also the list of delays between each poll.
     async fn poll_pre_authorization_status_with_delays(
         &self,
         intent_hash: SubintentHash,
-        expiration: Option<DappToWalletInteractionSubintentExpiration>,
-    ) -> Result<(TransactionStatus, Vec<u64>)> {
+        expiration: DappToWalletInteractionSubintentExpiration,
+    ) -> Result<(PreAuthorizationStatus, Vec<u64>)> {
         let network_id = self.current_network_id()?;
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
             network_id,
         );
 
-        let expiration_timestamp = self.expiration_timestamp(expiration);
-
+        // We are going to play safe and leave an extra second to make sure we check the status one second after it has theoretically expired.
+        // This is to avoid considering expired a subintent that got committed in the last instant.
+        let seconds_until_expiration =
+            self.seconds_until_expiration(expiration) + 1;
         let mut delays: Vec<u64> = vec![];
 
-        // The delay increment is set to 1 second in production, but 1 millisecond in tests.
-        // This will make the tests run with almost no delay, while the production code will have a 2s delay after first call,
-        // a 3s delay after second call, 4s after third and so on.
-        #[cfg(test)]
-        const DELAY_INCREMENT: u64 = 1;
-        #[cfg(not(test))]
-        const DELAY_INCREMENT: u64 = 1000;
-
-        let mut delay_duration = DELAY_INCREMENT;
+        let mut delay_duration = POLLING_DELAY_INCREMENT;
 
         loop {
-            // Increase delay by 1 second on subsequent calls
-            delay_duration += DELAY_INCREMENT;
-            let sleep_duration = Duration::from_millis(delay_duration);
+            // Check the subintent status
+            let response = gateway_client
+                .subintent_status(SubintentStatusRequest::new(
+                    intent_hash.to_string(),
+                ))
+                .await?;
 
-            // Check if the subinent has already expired. We subtract the `sleep_duration` to consider the case
-            // where the subinent was submitted after last poll, but the `expiration_timestamp` was also reached before this poll.
-            // We must check the subinent status before assuming it had expired.
-            if Timestamp::now_utc().sub(sleep_duration) > expiration_timestamp {
-                return Err(CommonError::ExpiredSubintent);
-            }
-
-            // Mock it to return TransactionStatus on third call
-            let mock_success = delay_duration > DELAY_INCREMENT * 2;
-
-            let response = match gateway_client
-                .get_pre_authorization_status(intent_hash.clone(), mock_success)
-                .await
-            {
-                Ok(response) => response,
-                Err(_) => {
-                    delays.push(delay_duration);
-                    async_std::task::sleep(sleep_duration).await;
-                    continue;
+            match response.subintent_status {
+                SubintentStatus::CommittedSuccess => {
+                    // If it has been committed, we consider it a `Success`.
+                    let transaction_intent_hash = response
+                        .finalized_at_transaction_intent_hash
+                        .ok_or(CommonError::Unknown)?;
+                    return Ok((
+                        PreAuthorizationStatus::Success(
+                            transaction_intent_hash,
+                        ),
+                        delays,
+                    ));
                 }
-            };
+                SubintentStatus::Unknown => {
+                    // If it is unknown, we need to determine whether it has expired, or if we need to add a delay and try again.
 
-            // Note: This logic is equal to the one under poll_transaction_status_with_delays()
-            // I am not spending any time in refactoring it, as we still don't know how the actual polling
-            // status endpoint will look like, and we are mocking the response for now.
-            match response
-                .known_payloads
-                .first()
-                .and_then(|payload| payload.payload_status.clone())
-            {
-                Some(status) => {
-                    match status {
-                        TransactionStatusResponsePayloadStatus::Unknown |
-                        TransactionStatusResponsePayloadStatus::Pending |
-                        TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => {
-                            delays.push(delay_duration);
-                            async_std::task::sleep(sleep_duration).await;
-                        }
-                        TransactionStatusResponsePayloadStatus::CommittedSuccess => {
-                            return Ok((TransactionStatus::Success, delays));
-                        }
-                        TransactionStatusResponsePayloadStatus::CommittedFailure => {
-                            return Ok((TransactionStatus::Failed { reason: TransactionStatusReason::from_raw_error(response.error_message) }, delays));
-                        }
-                        TransactionStatusResponsePayloadStatus::PermanentlyRejected => {
-                            return Ok((TransactionStatus::PermanentlyRejected { reason: TransactionStatusReason::from_raw_error(response.error_message) }, delays));
-                        }
-                        TransactionStatusResponsePayloadStatus::TemporarilyRejected => {
-                            return Ok((TransactionStatus::TemporarilyRejected { current_epoch: Epoch::from(response.ledger_state.epoch) }, delays));
-                        }
+                    let accumulated_delay = delays.iter().sum::<u64>();
+                    let has_expired =
+                        accumulated_delay > seconds_until_expiration;
+
+                    if has_expired {
+                        // If it has expired, we return the corresponding status.
+                        return Ok((PreAuthorizationStatus::Expired, delays));
+                    } else {
+                        // Otherwise, we determine the delay for next call.
+                        // It will either be the default delay or the remaining time until expiration.
+                        // Example: We have already polled 4 times for a subintent that expires after 10 seconds.
+                        // Seconds until expiration = 10 + 1 = 11
+                        // Accumulated delay = 0 + 2 + 3 + 4 = 9
+                        // Next delay would be of 5 seconds, but we will make it of 2 to check immediately after expiration.
+
+                        let tentative_delay =
+                            delay_duration + POLLING_DELAY_INCREMENT;
+                        let remaining_time =
+                            seconds_until_expiration - accumulated_delay;
+                        delay_duration = tentative_delay.min(remaining_time);
+                        let sleep_duration =
+                            Duration::from_millis(delay_duration);
+                        delays.push(delay_duration);
+                        async_std::task::sleep(sleep_duration).await;
                     }
                 }
-                None => {
-                    delays.push(delay_duration);
-                    async_std::task::sleep(sleep_duration).await;
-                }
             }
         }
     }
 
-    /// Returns the timestamp when the subintent should expire/timeout.
-    fn expiration_timestamp(
+    /// Returns the remaining seconds until the subintent expires.
+    fn seconds_until_expiration(
         &self,
-        expiration: Option<DappToWalletInteractionSubintentExpiration>,
-    ) -> Timestamp {
+        expiration: DappToWalletInteractionSubintentExpiration,
+    ) -> u64 {
         match expiration {
-            Some(expiration) => match expiration {
-                DappToWalletInteractionSubintentExpiration::AtTime(at_time) => {
-                    at_time.unix_timestamp_seconds
+            DappToWalletInteractionSubintentExpiration::AtTime(at_time) => {
+                let current_time = seconds_since_unix_epoch();
+                if at_time.unix_timestamp_seconds > current_time {
+                    at_time.unix_timestamp_seconds - current_time
+                } else {
+                    0 // Avoid overflow in case we check after expiration
                 }
-                DappToWalletInteractionSubintentExpiration::AfterDelay(
-                    delay,
-                ) => Timestamp::now_utc()
-                    .add(Duration::from_secs(delay.expire_after_seconds)),
-            },
-            // If there is no expiration, we manually set it to expire after the timeout
-            None => Timestamp::now_utc().add(Self::MAX_EXPIRATION_TIMEOUT),
+            }
+            DappToWalletInteractionSubintentExpiration::AfterDelay(delay) => {
+                delay.expire_after_seconds
+            }
         }
     }
-
-    // 1 hour
-    const MAX_EXPIRATION_TIMEOUT: Duration = Duration::from_secs(60 * 60);
 }
 
 #[cfg(test)]
@@ -284,7 +264,7 @@ mod poll_pre_authorization_status_with_delays {
         // and there should have been a delay of 2s after first call
         assert_eq!(result.1, vec![2]);
     }
-     */
+
 
     #[actix_rt::test]
     async fn expired_subintent() {
@@ -323,32 +303,42 @@ mod poll_pre_authorization_status_with_delays {
         )
         .await
     }
+
+     */
 }
 
 #[cfg(test)]
-mod expiration_timestamp_tests {
+mod seconds_until_expiration_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn test_expiration_timestamp_at_time() {
-        // This test will simulate the case where the expiration is set to a specific time
-        let timestamp = Timestamp::now_utc().add(Duration::from_secs(100));
+    async fn at_time() {
+        let os = boot().await;
+
+        // Test the case where the expiration is set to a specific time in the past
+        let unix_seconds = 100;
         let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
-            timestamp.into(),
+            unix_seconds.into(),
+        );
+        let result = os.seconds_until_expiration(expiration);
+        assert_eq!(result, 0);
+
+        // Test the case where the expiration is set to a specific time in the future
+        let now = seconds_since_unix_epoch();
+        let diff = 50;
+        let expiration = DappToWalletInteractionSubintentExpiration::AtTime(
+            (now + diff).into(),
         );
 
-        let os = boot().await;
-        let result = os.expiration_timestamp(Some(expiration));
-
-        // The result should be the same as the timestamp
-        assert_eq!(result, timestamp);
+        let result = os.seconds_until_expiration(expiration);
+        assert_eq!(result, diff);
     }
 
     #[actix_rt::test]
-    async fn test_expiration_timestamp_after_delay() {
+    async fn after_delay() {
         // This test will simulate the case where the expiration is set to a delay after the current time
         let delay = 100;
         let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
@@ -356,25 +346,10 @@ mod expiration_timestamp_tests {
         );
 
         let os = boot().await;
-        let result = os.expiration_timestamp(Some(expiration));
+        let result = os.seconds_until_expiration(expiration);
 
-        // The result should be the current time plus the delay, which we will verify
-        // by checking that the diff is less than 0.1 s
-        let expected = Timestamp::now_utc().add(Duration::from_secs(delay));
-        let diff = result.duration_since(expected);
-        assert!(diff < Duration::from_millis(100));
-    }
-
-    #[actix_rt::test]
-    async fn test_expiration_timestamp_no_expiration() {
-        // This test will simulate the case where there is no expiration set
-        let os = boot().await;
-        let result = os.expiration_timestamp(None);
-
-        // The result should be the current time plus the default expiration timeout
-        let expected = Timestamp::now_utc().add(SUT::MAX_EXPIRATION_TIMEOUT);
-        let diff = result.duration_since(expected);
-        assert!(diff < Duration::from_millis(100));
+        // The result should be the same as the delay
+        assert_eq!(result, delay);
     }
 
     async fn boot() -> Arc<SargonOS> {

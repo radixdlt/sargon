@@ -35,20 +35,11 @@ impl SargonOS {
             network_id,
         );
         let mut delays: Vec<u64> = vec![];
-
-        // The delay increment is set to 1 second in production, but 1 millisecond in tests.
-        // This will make the tests run with almost no delay, while the production code will have a 2s delay after first call,
-        // a 3s delay after second call, 4s after third and so on.
-        #[cfg(test)]
-        const DELAY_INCREMENT: u64 = 1;
-        #[cfg(not(test))]
-        const DELAY_INCREMENT: u64 = 1000;
-
-        let mut delay_duration = DELAY_INCREMENT;
+        let mut delay_duration = POLLING_DELAY_INCREMENT;
 
         loop {
             // Increase delay by 1 second on subsequent calls
-            delay_duration += DELAY_INCREMENT;
+            delay_duration += POLLING_DELAY_INCREMENT;
             let sleep_duration = Duration::from_millis(delay_duration);
 
             let response = match gateway_client

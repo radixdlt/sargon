@@ -56,4 +56,18 @@ impl GatewayClient {
     ) -> Result<TransactionStatusResponse> {
         self.post("transaction/status", request, res_id).await
     }
+
+    /// Get Subintent Status
+    ///
+    /// Returns if the given subintent has been finalized.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionSubintentStatus
+    pub(crate) async fn subintent_status(
+        &self,
+        request: SubintentStatusRequest,
+    ) -> Result<SubintentStatusResponse> {
+        self.post("transaction/status", request, res_id).await
+    }
 }

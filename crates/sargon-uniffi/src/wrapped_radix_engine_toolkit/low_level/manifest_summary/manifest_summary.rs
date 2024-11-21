@@ -13,9 +13,6 @@ pub struct ManifestSummary {
     /// The list of the resources of proofs that were presented in the manifest.
     pub presented_proofs: Vec<ResourceSpecifier>,
 
-    /// The list of the resources of proofs that were presented in the manifest.
-    pub presented_proofs: Vec<ResourceSpecifier>,
-
     /// Addresses of accounts withdrawn from in the manifest.
     pub addresses_of_accounts_withdrawn_from: Vec<AccountAddress>,
 
