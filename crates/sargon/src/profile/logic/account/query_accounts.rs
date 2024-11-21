@@ -63,6 +63,8 @@ impl Profile {
         self.get_entities_of_kind_on_network_in_key_space(
             entity_kind,
             network_id,
+            // We don't support unhardened paths really. CAP26 dictates all path components are hardened.
+            // And all out BIP44 LIKE paths from Olymlia are (contrary to BIP44) in fact hardened
             KeySpace::Unsecurified { is_hardened: true },
         )
         .into_iter()

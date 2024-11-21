@@ -20,6 +20,10 @@ pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub proof_of_ownership:
+        Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
 }
 
 impl WalletToDappInteractionAuthorizedRequestResponseItems {
@@ -37,6 +41,9 @@ impl WalletToDappInteractionAuthorizedRequestResponseItems {
         one_time_persona_data: impl Into<
             Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
         >,
+        proof_of_ownership: impl Into<
+            Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
+        >,
     ) -> Self {
         Self {
             auth,
@@ -44,6 +51,7 @@ impl WalletToDappInteractionAuthorizedRequestResponseItems {
             ongoing_persona_data: ongoing_persona_data.into(),
             one_time_accounts: one_time_accounts.into(),
             one_time_persona_data: one_time_persona_data.into(),
+            proof_of_ownership: proof_of_ownership.into(),
         }
     }
 }
@@ -56,6 +64,8 @@ impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
             WalletToDappInteractionAccountsRequestResponseItem::sample(),
             WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
+            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample(
+            ),
         )
     }
 
@@ -66,7 +76,8 @@ impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
             WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
             ),
             WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
-            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
+            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
+            WalletToDappInteractionProofOfOwnershipRequestResponseItem::sample_other(
             ),
         )
     }

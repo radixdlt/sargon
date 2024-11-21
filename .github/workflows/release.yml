@@ -70,8 +70,6 @@ jobs:
           sed -i '' 's/let useLocalFramework = false/let useLocalFramework = true/' Package.swift
           swift build -c release || exit $?
           echo "🚢 Swift Sargon builds for release ✅"
-
-          echo "XCFRAME_ZIP_PATH=$XCFRAME_ZIP_PATH" >> "$GITHUB_OUTPUT"
         env:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
 
@@ -79,6 +77,9 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
+
+          echo "🚢  Setting 'useLocalFramework = false' for release"
+          sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
 
           # We have .gitigored Sargon.swift because we dont need it in git history, but we
           # need it for this release, so we must FORCE add it (since it is ignored).
@@ -96,6 +97,7 @@ jobs:
                      --no-verify
 
           echo "🚢 🏷️ 📡 Pushing tag: $NEXT_TAG, but only tag, not commit."
+          git tag $NEXT_TAG
           git push origin $NEXT_TAG
         env:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
@@ -104,13 +106,18 @@ jobs:
       - name: Create release
         if: github.ref == 'refs/heads/main'
         run: |
-          # This MUST match whatever you we have declared in Package.swift
-          SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip"
+          set -eux
 
-          GH_RELEASE_TITLE="v$NEXT_TAG"
-          gh release create $NEXT_TAG '$XCFRAME_ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
+          ls -l target/swift/*.zip
+
+          # This MUST match whatever you we have declared in Package.swift
+          ARTIFACT_FILE=libsargon-rs.xcframework.zip
+
+          # Moving the artifact to the current directory.
+          mv target/swift/$ARTIFACT_FILE .
+
+          gh release create $NEXT_TAG $ARTIFACT_FILE --generate-notes --notes-start-tag $LAST_TAG --title "v$NEXT_TAG"
         env:
           LAST_TAG: ${{ steps.tags.outputs.LAST_TAG }}
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
-          XCFRAME_ZIP_PATH: ${{ steps.build.outputs.XCFRAME_ZIP_PATH }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
