@@ -116,7 +116,14 @@
           "discriminator" : "success",
           "interactionId" : "2916ad16-52a0-4564-a611-4971883c1322",
           "items" : {
-            "discriminator" : "unauthorizedRequest",
+            "discriminator" : "authorizedRequest",
+            "auth" : {
+              "discriminator" : "usePersona",
+              "persona" : {
+                "identityAddress" : "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+                "label" : "alfz_psf"
+              }
+            },
             "proofOfOwnership": {
               "challenge": "4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c",
               "proofs": [
@@ -136,7 +143,14 @@
           "discriminator" : "success",
           "interactionId" : "17d530f6-0cb6-4122-8540-64e46a2e0f84",
           "items" : {
-            "discriminator" : "unauthorizedRequest",
+            "discriminator" : "authorizedRequest",
+            "auth" : {
+              "discriminator" : "usePersona",
+              "persona" : {
+                "identityAddress" : "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+                "label" : "pao13"
+              }
+            },
             "proofOfOwnership": {
               "challenge": "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
               "proofs": [
