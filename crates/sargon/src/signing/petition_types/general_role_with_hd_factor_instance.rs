@@ -6,6 +6,7 @@ decl_role_runtime_kind_with_factors!(
     General,
     HierarchicalDeterministicFactorInstance
 );
+pub type GeneralRoleWithHierarchicalDeterministicFactorInstances = GeneralRoleWithHierarchicalDeterministicFactorInstancesBuilt;
 
 impl HasRoleKindObjectSafe
     for GeneralRoleWithHierarchicalDeterministicFactorInstances
