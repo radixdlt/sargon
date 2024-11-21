@@ -1,7 +1,6 @@
 use std::{borrow::Borrow, sync::RwLockWriteGuard};
 
 use radix_common::address;
-use sbor::prelude::indexmap::IndexSet;
 
 use crate::prelude::*;
 
