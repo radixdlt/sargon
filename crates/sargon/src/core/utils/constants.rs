@@ -19,3 +19,10 @@ pub const GATEWAY_CHUNK_NON_FUNGIBLES: u64 = 100;
 
 // Max amount of addresses to be queried in one request to `/state/entity/details/`.
 pub const GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES: u64 = 20;
+
+// Maximum number of characters allowed for an entity name
+pub const ENTITY_NAME_MAX_LENGTH: u64 = 30;
+
+// Minimum XRD balance required for a fee payer to execute an account deletion transaction.
+// Includes a safety margin above the estimated 3 XRD fee for maximum resource transfer.
+pub const MIN_REQUIRED_XRD_FOR_ACCOUNT_DELETION: f64 = 4.0;
