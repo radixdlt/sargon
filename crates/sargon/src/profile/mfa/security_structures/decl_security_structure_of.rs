@@ -382,7 +382,35 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     Ok(())
                 }
 
+                fn validate_basic_threshold_leq_threshold_factors_list_len(&self) -> BasicsRoleInIsolationValidation {
+                    if self.get_threshold_factors().len() < self.threshold as usize {
+                        return BasicsRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                            violation: FactorRulesViolationRoleInIsolationBasics::ThresholdGreaterThanLengthOfThresholdFactorsList
+                        })
+                    }
+                    Ok(())
+                }
+                fn validate_basic_factor_not_in_both_lists(&self) -> BasicsRoleInIsolationValidation {
+                    if !HashSet::<_>::from_iter(self.get_threshold_factors())
+                        .intersection(&HashSet::<_>::from_iter(self.get_override_factors()))
+                        .collect_vec()
+                        .is_empty() {
+                            return BasicsRoleInIsolationValidation::Err(FactorsInvalidReason::ForeverInvalid {
+                                violation: FactorRulesViolationRoleInIsolationBasics::FactorUsedInBothLists
+                            })
+                    }
+                    Ok(())
+                }
+
+                fn validate_basics(&self) -> BasicsRoleInIsolationValidation {
+                    self.validate_basic_factor_not_in_both_lists()?;
+                    self.validate_basic_threshold_leq_threshold_factors_list_len()?;
+                    Ok(())
+                }
+
                 fn validate_strict(&self) -> RolesInIsolationValidation {
+                    self.validate_basics().into_roles()?;
+
                     let role = self.get_mfa_role();
                     match role {
                         RoleKind::Primary => self.validate_primary().into_roles()?,
@@ -432,11 +460,12 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
                 /// If `validation` is not `Skip`, we require the structure of factors to be valid.
                 ///
+                /// # Throws
+                /// Throws if `threshold > threshold_factor.len()`
+                ///
+                /// Throws if the same factor is present in both lists
+                ///
                 /// # Panics
-                /// Panics if `threshold > threshold_factor.len()`
-                ///
-                /// Panics if the same factor is present in both lists
-                ///
                 /// Panics if Factor elements are FactorInstances and the derivation
                 /// path contains a non-securified last path component.
                 pub fn with_factors_and_role(
@@ -459,25 +488,10 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
 
                     let threshold_factors = threshold_factors.into_iter().collect_vec();
-
-                    if threshold_factors.len() < threshold as usize {
-                        return Err(CommonError::InvalidSecurityStructureThresholdExceedsFactors {
-                            threshold,
-                            factors: threshold_factors.len() as u8
-                        })
-                    }
-
                     let override_factors = override_factors.into_iter().collect_vec();
 
                     assert_is_securified(&threshold_factors)?;
                     assert_is_securified(&override_factors)?;
-
-                    if !HashSet::<$factor>::from_iter(threshold_factors.clone())
-                            .intersection(&HashSet::<$factor>::from_iter(override_factors.clone()))
-                            .collect_vec()
-                            .is_empty() {
-                        return Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
-                    }
 
                     let unvalidated = Self {
                         threshold_factors,
@@ -485,7 +499,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                         override_factors,
                         $($extra_field_name,)*
                     };
-
 
                     match validation {
                         FactorRolesValidation::Skip => Ok(unvalidated),

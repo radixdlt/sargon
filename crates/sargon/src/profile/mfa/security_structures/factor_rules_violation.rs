@@ -58,11 +58,25 @@ pub enum FactorRulesViolationConfirmationRoleInIsolation {
 }
 
 #[derive(Clone, Debug, ThisError, PartialEq)]
+pub enum FactorRulesViolationRoleInIsolationBasics {
+    #[error("Factor used in both override and threshold factor lists.")]
+    FactorUsedInBothLists,
+
+    #[error("Threshold greater than length of Threshold Factors list.")]
+    ThresholdGreaterThanLengthOfThresholdFactorsList,
+}
+
+#[derive(Clone, Debug, ThisError, PartialEq)]
 pub enum FactorRulesViolationRoleInIsolation {
     #[error(transparent)]
+    Basics(#[from] FactorRulesViolationRoleInIsolationBasics),
+
+    #[error(transparent)]
     Primary(#[from] FactorRulesViolationPrimaryRoleInIsolation),
+
     #[error(transparent)]
     Recovery(#[from] FactorRulesViolationRecoveryRoleInIsolation),
+
     #[error(transparent)]
     Confirmation(#[from] FactorRulesViolationConfirmationRoleInIsolation),
 }
@@ -71,6 +85,7 @@ pub enum FactorRulesViolationRoleInIsolation {
 pub enum FactorRulesViolationOfStructure {
     #[error(transparent)]
     RoleInIsolation(#[from] FactorRulesViolationRoleInIsolation),
+
     #[error(transparent)]
     CombinedRulesViolation(#[from] FactorRulesViolationRolesCombined),
 }
@@ -111,11 +126,15 @@ impl From<FactorsInvalidReason<FactorRulesViolationRolesCombined>>
         todo!()
     }
 }
+pub type BasicsRoleInIsolationValidation =
+    AbstractFactorRulesValidation<FactorRulesViolationRoleInIsolationBasics>;
 
 pub type PrimaryRoleInIsolationValidation =
     AbstractFactorRulesValidation<FactorRulesViolationPrimaryRoleInIsolation>;
+
 pub type RecoveryRoleInIsolationValidation =
     AbstractFactorRulesValidation<FactorRulesViolationRecoveryRoleInIsolation>;
+
 pub type ConfirmationRoleInIsolationValidation = AbstractFactorRulesValidation<
     FactorRulesViolationConfirmationRoleInIsolation,
 >;
