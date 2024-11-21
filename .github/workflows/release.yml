@@ -113,8 +113,7 @@ jobs:
           # Moving the artifact to the current directory.
           mv target/swift/$ARTIFACT_FILE .
 
-          GH_RELEASE_TITLE="v$NEXT_TAG"
-          gh release create $NEXT_TAG $ARTIFACT_FILE --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
+          gh release create $NEXT_TAG $ARTIFACT_FILE --generate-notes --notes-start-tag $LAST_TAG --title "v$NEXT_TAG"
         env:
           LAST_TAG: ${{ steps.tags.outputs.LAST_TAG }}
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
