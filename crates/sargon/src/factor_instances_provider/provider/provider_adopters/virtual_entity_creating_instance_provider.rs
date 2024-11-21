@@ -125,6 +125,7 @@ impl VirtualEntityCreatingInstanceProvider {
         FactorInstancesProviderOutcomeForFactor,
     )> {
         let provider = FactorInstancesProvider::new(
+            DerivationPurpose::new_veci_of_kind(entity_kind),
             network_id,
             IndexSet::just(factor_source.clone()),
             profile,

@@ -45,6 +45,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
         )*
         $role: ident,
         $factor: ident,
+        $type_suffix: ident,
         $($extra_field_name:ident: $extra_field_type:ty,)*
     ) => {
         paste! {
@@ -55,7 +56,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
             )]
             #[serde(rename_all = "camelCase")]
-            pub struct [< $role RoleWith $factor s >] {
+            pub struct [< $role RoleWith $factor s $type_suffix >] {
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
@@ -81,7 +82,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             }
 
 
-            impl RoleWithFactors<$factor> for [< $role RoleWith $factor s >] {
+            impl RoleWithFactors<$factor> for [< $role RoleWith $factor s $type_suffix >] {
                 fn get_threshold_factors(&self) -> &Vec<$factor> {
                     &self.threshold_factors
                 }
@@ -96,7 +97,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             }
 
 
-            impl [< $role RoleWith $factor s >] {
+            impl [< $role RoleWith $factor s $type_suffix >] {
                 fn with_factor_list_of_kind<T>(&self, list_kind: impl Into<Option<FactorListKind>>, access: impl Fn(Vec<&$factor>) -> T) -> T {
                     match list_kind.into() {
                         None => access(self.all_factors()),
@@ -516,13 +517,14 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
 
 pub(crate) use decl_role_with_factors_with_role_kind_attrs;
 
-macro_rules! decl_role_with_factors {
+macro_rules! decl_role_with_factors_builder_or_built {
     (
         $(
             #[doc = $expr: expr]
         )*
         $role: ident,
-        $factor: ident
+        $factor: ident,
+        $type_suffix: ident
     ) => {
 
         decl_role_with_factors_with_role_kind_attrs!(
@@ -531,26 +533,32 @@ macro_rules! decl_role_with_factors {
             )*
             $role,
             $factor,
+            $type_suffix,
         );
 
 
         paste! {
 
 
-            impl HasMfaRole for [< $role RoleWith $factor s >] {
+            impl HasMfaRole for [< $role RoleWith $factor s $type_suffix >] {
                 fn mfa_role() -> RoleKind {
                     RoleKind::$role
                 }
             }
 
-           impl [< $role RoleWith $factor s >] {
+           impl [< $role RoleWith $factor s $type_suffix >] {
 
                 pub fn new(
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
                     override_factors: impl IntoIterator<Item = $factor>
                 ) -> Result<Self> {
-                    Self::with_factors_and_role(threshold_factors, threshold, override_factors, FactorRolesValidation::Skip /* TODO: MFA-Rules: change to `Validate` */)
+                    Self::with_factors_and_role(
+                        threshold_factors,
+                        threshold,
+                        override_factors,
+                        FactorRolesValidation::Skip /* TODO: MFA-Rules: change to `Validate` */
+                    )
                 }
 
 
@@ -581,6 +589,26 @@ macro_rules! decl_role_with_factors {
     };
 }
 
+pub(crate) use decl_role_with_factors_builder_or_built;
+
+macro_rules! decl_role_with_factors {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $role: ident,
+        $factor: ident
+    ) => {
+        decl_role_with_factors_builder_or_built!(
+            $(
+                #[doc = $expr]
+            )*
+            role,
+            factor
+        );
+    };
+}
+
 pub(crate) use decl_role_with_factors;
 
 macro_rules! decl_role_runtime_kind_with_factors {
@@ -597,11 +625,12 @@ macro_rules! decl_role_runtime_kind_with_factors {
             )*
             $role,
             $factor,
+            Built,
             role: RoleKind,
         );
 
         paste! {
-            impl HasMfaRoleObjectSafe for [< $role RoleWith $factor s >] {
+            impl HasMfaRoleObjectSafe for [< $role RoleWith $factor s Built >] {
                 fn get_mfa_role(&self) -> RoleKind {
                     self.role
                 }
@@ -613,31 +642,35 @@ macro_rules! decl_role_runtime_kind_with_factors {
 
 pub(crate) use decl_role_runtime_kind_with_factors;
 
-macro_rules! decl_matrix_of_factors {
+macro_rules! decl_matrix_of_factors_builder_or_built {
     (
         $(
             #[doc = $expr: expr]
         )*
-        $factor: ident
+        $factor: ident,
+        $type_suffix: ident
     ) => {
         paste! {
 
-            decl_role_with_factors!(
+            decl_role_with_factors_builder_or_built!(
                 /// PrimaryRole is used for Signing Transactions.
                 Primary,
-                $factor
+                $factor,
+                $type_suffix
             );
 
-            decl_role_with_factors!(
+            decl_role_with_factors_builder_or_built!(
                 /// RecoveryRole is used to recover lost access to an entity.
                 Recovery,
-                $factor
+                $factor,
+                $type_suffix
             );
 
-            decl_role_with_factors!(
+            decl_role_with_factors_builder_or_built!(
                 /// ConfirmationRole is used to confirm recovery.
                 Confirmation,
-                $factor
+                $factor,
+                $type_suffix
             );
 
             $(
@@ -647,20 +680,20 @@ macro_rules! decl_matrix_of_factors {
                 Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
             )]
             #[serde(rename_all = "camelCase")]
-            pub struct [< MatrixOf $factor s >] {
+            pub struct [< MatrixOf $factor s $type_suffix >] {
 
                 /// Used for Signing transactions
-                pub primary_role: [< PrimaryRoleWith $factor s >],
+                pub primary_role: [< PrimaryRoleWith $factor s $type_suffix >],
 
                 /// Used to initiate recovery - resetting the used Security Shield
                 /// of an entity.
-                pub recovery_role: [< RecoveryRoleWith $factor s >],
+                pub recovery_role: [< RecoveryRoleWith $factor s $type_suffix >],
 
                 /// To confirm recovery.
-                pub confirmation_role: [< ConfirmationRoleWith $factor s >],
+                pub confirmation_role: [< ConfirmationRoleWith $factor s $type_suffix >],
             }
 
-            impl [< MatrixOf $factor s >] {
+            impl [< MatrixOf $factor s $type_suffix >] {
 
                 fn validate_roles_in_isolation(&self) -> RolesInIsolationValidation {
                     Ok(())
@@ -686,9 +719,9 @@ macro_rules! decl_matrix_of_factors {
                 }
 
                 pub fn new(
-                    primary_role: [< PrimaryRoleWith $factor s >],
-                    recovery_role: [< RecoveryRoleWith $factor s >],
-                    confirmation_role: [< ConfirmationRoleWith $factor s >],
+                    primary_role: [< PrimaryRoleWith $factor s $type_suffix >],
+                    recovery_role: [< RecoveryRoleWith $factor s $type_suffix >],
+                    confirmation_role: [< ConfirmationRoleWith $factor s $type_suffix >],
                     validation: FactorRolesValidation,
                 ) -> Result<Self> {
                     let unvalidated = Self {
@@ -727,17 +760,71 @@ macro_rules! decl_matrix_of_factors {
     };
 }
 
+pub(crate) use decl_matrix_of_factors_builder_or_built;
+
+macro_rules! decl_matrix_of_factors_built {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $factor: ident
+    ) => {
+        decl_matrix_of_factors_builder_or_built!(
+            $(
+                #[doc = $expr]
+            )*
+            $factor,
+            Built
+        );
+    };
+}
+macro_rules! decl_matrix_of_factors_builder {
+    (
+        $factor: ident
+    ) => {
+        decl_matrix_of_factors_builder_or_built!($factor, Builder);
+    };
+}
+pub(crate) use decl_matrix_of_factors_builder;
+pub(crate) use decl_matrix_of_factors_built;
+
+macro_rules! decl_matrix_of_factors {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $factor: ident
+    ) => {
+        decl_matrix_of_factors_built!(
+            $(
+                #[doc = $expr]
+            )*
+            $factor
+        );
+        decl_matrix_of_factors_builder!(
+            $factor
+        );
+    };
+}
+
 pub(crate) use decl_matrix_of_factors;
 
-macro_rules! decl_security_structure_of {
+macro_rules! decl_security_structure_of_builder_or_built {
     (
         $(
             #[doc = $expr: expr]
         )*
         $factor: ident,
+        $type_suffix: ident
     ) => {
 
-        decl_matrix_of_factors!($factor);
+        decl_matrix_of_factors_builder_or_built!(
+            $(
+                #[doc = $expr]
+            )*
+            $factor,
+            $type_suffix
+        );
 
         paste! {
 
@@ -748,7 +835,7 @@ macro_rules! decl_security_structure_of {
                 Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash,
             )]
             #[serde(rename_all = "camelCase")]
-            pub struct [< SecurityStructureOf $factor s >] {
+            pub struct [< SecurityStructureOf $factor s $type_suffix >] {
                 /// Metadata of this Security Structure, such as globally unique and
                 /// stable identifier, creation date and user chosen label (name).
                 pub metadata: SecurityStructureMetadata,
@@ -760,11 +847,11 @@ macro_rules! decl_security_structure_of {
 
                 /// The structure of factors to use for certain roles, Primary, Recovery
                 /// and Confirmation role.
-                pub matrix_of_factors: [< MatrixOf $factor s >],
+                pub matrix_of_factors: [< MatrixOf $factor s $type_suffix >],
             }
 
-            impl [< SecurityStructureOf $factor s >] {
-                pub fn new(metadata: SecurityStructureMetadata, number_of_epochs_until_auto_confirmation: u64, matrix_of_factors: [< MatrixOf $factor s >]) -> Self {
+            impl [< SecurityStructureOf $factor s $type_suffix >] {
+                pub fn new(metadata: SecurityStructureMetadata, number_of_epochs_until_auto_confirmation: u64, matrix_of_factors: [< MatrixOf $factor s $type_suffix >]) -> Self {
                     Self {
                         metadata,
                         number_of_epochs_until_auto_confirmation,
@@ -779,5 +866,45 @@ macro_rules! decl_security_structure_of {
         }
     };
 }
+pub(crate) use decl_security_structure_of_builder_or_built;
 
+pub trait FactorBuilder {
+    type Built;
+    fn build(self) -> Result<Self::Built>;
+}
+
+macro_rules! decl_security_structure_of {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $factor: ident,
+    ) => {
+        decl_security_structure_of_builder_or_built!(
+            $(
+                #[doc = $expr]
+            )*
+            $factor,
+            Builder
+        );
+        decl_security_structure_of_builder_or_built!(
+            $(
+                #[doc = $expr]
+            )*
+            $factor,
+            Built
+        );
+       
+        paste! {
+            pub type [< SecurityStructureOf $factor s >] = [< SecurityStructureOf $factor s Built >];
+            impl FactorBuilder for [< SecurityStructureOf $factor s Builder >] {
+                type Built = [< SecurityStructureOf $factor s Built >];
+                fn build(self) -> Result<Self::Built> {
+                    todo!();
+                }
+            }
+        }
+
+    };
+}
 pub(crate) use decl_security_structure_of;

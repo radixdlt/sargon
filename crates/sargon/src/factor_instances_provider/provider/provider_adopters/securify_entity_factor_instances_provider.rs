@@ -122,6 +122,7 @@ impl SecurifyEntityFactorInstancesProvider {
         let entity_kind = A::entity_kind();
 
         let provider = FactorInstancesProvider::new(
+            DerivatinPurpose::securify_entities(entity_kind),
             network_id,
             factor_sources_to_use,
             profile,
