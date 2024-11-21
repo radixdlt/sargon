@@ -894,7 +894,7 @@ macro_rules! decl_security_structure_of {
             $factor,
             Built
         );
-       
+
         paste! {
             pub type [< SecurityStructureOf $factor s >] = [< SecurityStructureOf $factor s Built >];
             impl FactorBuilder for [< SecurityStructureOf $factor s Builder >] {

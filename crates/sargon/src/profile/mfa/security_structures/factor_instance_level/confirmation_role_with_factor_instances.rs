@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 impl HasRoleKind for ConfirmationRoleWithFactorInstances {
     fn role_kind() -> RoleKind {
         RoleKind::Confirmation

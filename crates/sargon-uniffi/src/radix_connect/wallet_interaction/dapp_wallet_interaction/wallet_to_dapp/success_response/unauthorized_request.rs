@@ -7,6 +7,4 @@ pub struct WalletToDappInteractionUnauthorizedRequestResponseItems {
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
     pub one_time_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
-    pub proof_of_ownership:
-        Option<WalletToDappInteractionProofOfOwnershipRequestResponseItem>,
 }

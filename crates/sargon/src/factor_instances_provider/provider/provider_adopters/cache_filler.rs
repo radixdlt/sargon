@@ -15,7 +15,6 @@ impl CacheFiller {
         interactors: Arc<dyn KeysDerivationInteractors>,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         let provider = FactorInstancesProvider::new(
-            DerivatinPurpose::PreDeriveKeysToFillCache,
             network_id,
             IndexSet::just(factor_source.clone()),
             profile,
