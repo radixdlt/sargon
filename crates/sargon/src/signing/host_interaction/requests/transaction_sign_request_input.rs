@@ -6,14 +6,14 @@ use crate::prelude::*;
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub struct TransactionSignRequestInput<S: Signable> {
     /// Compiled Intent
-    payload: S::Payload,
+    pub payload: S::Payload,
 
     /// ID of factor to use to sign
-    pub(crate) factor_source_id: FactorSourceIDFromHash,
+    pub factor_source_id: FactorSourceIDFromHash,
 
     /// The derivation paths to use to derive the private keys to sign with. The
     /// `factor_source_id` of each item must match `factor_source_id`.
-    owned_factor_instances: Vec<OwnedFactorInstance>,
+    pub owned_factor_instances: Vec<OwnedFactorInstance>,
 }
 
 impl<S: Signable> TransactionSignRequestInput<S> {
