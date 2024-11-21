@@ -17,16 +17,19 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     /// The FactorSourceID of all the factor instances of this type.
     pub factor_source_id: FactorSourceIDFromHash,
 
-    /// FactorInstances which are not saved into the cache.
+    /// FactorInstances which have either been read from the cache or newly
+    /// derived or a mix of both. These fulfills the "original request" - e.g.
+    /// "Derive 5 new VECIs for 5 new virtual Accounts".
     ///
-    /// Might be empty
+    /// Might be empty (in the case of CacheFiller / Pre-Derive FactorInstances for a
+    /// new FactorSource being added)
     pub to_use_directly: FactorInstances,
 
-    /// FactorInstances which were saved into the cache
-    ///
+    /// FactorInstances which are saved into the cache.
     /// Might be empty
     ///
-    /// Useful for unit tests.
+    /// Never ever overlaps with `to_use_directly`.
+    /// Might overlap with `newly_derived`.
     #[cfg(test)]
     pub debug_was_cached: FactorInstances,
 
