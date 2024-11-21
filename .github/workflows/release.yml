@@ -96,6 +96,7 @@ jobs:
                      --no-verify
 
           echo "🚢 🏷️ 📡 Pushing tag: $NEXT_TAG, but only tag, not commit."
+          git tag $NEXT_TAG
           git push origin $NEXT_TAG
         env:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
