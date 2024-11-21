@@ -20,7 +20,7 @@ impl FactorInstances {
         &mut self,
         instances: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
     ) {
-        self.factor_instances.extend(instances.into_iter());
+        self.factor_instances.extend(instances);
     }
 
     pub fn shift_remove_index(
