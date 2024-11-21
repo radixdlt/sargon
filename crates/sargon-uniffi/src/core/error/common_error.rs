@@ -809,6 +809,12 @@ pub enum CommonError {
 
     #[error("Failed to add all accounts, found duplicated accounts.")]
     UnableToAddAllAccountsDuplicatesFound = 10226,
+
+    #[error("Invalid Index Agnostic Path, wrong length")]
+    InvalidIndexAgnosticPathWrongLength = 10227,
+
+    #[error("Invalid Index Agnostic Path, does not end with suffix")]
+    InvalidIndexAgnosticPathDoesNotEndWithSuffix = 10228,
 }
 
 #[uniffi::export]

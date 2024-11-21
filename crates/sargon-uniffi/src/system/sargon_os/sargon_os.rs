@@ -29,10 +29,10 @@ impl SargonOS {
 
     pub async fn new_wallet(
         &self,
-        should_prederive_instances: bool,
+        should_pre_derive_instances: bool,
     ) -> Result<()> {
         self.wrapped
-            .new_wallet(should_prederive_instances)
+            .new_wallet(should_pre_derive_instances)
             .await
             .into_result()
     }

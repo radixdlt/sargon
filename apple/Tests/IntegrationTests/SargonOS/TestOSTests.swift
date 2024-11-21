@@ -37,7 +37,7 @@ final class TestOSTests: OSTest {
 		let bus = EventBus()
 		let drivers = Drivers.withEventBus(bus)
 		let sut = await TestOS(bios: .init(drivers: drivers))
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let n = 3
 		
 		let task = Task {
@@ -60,7 +60,7 @@ final class TestOSTests: OSTest {
 	
 	func test_create_account_returned() async throws {
         let sut = await TestOS()
-        try await sut.os.newWallet(shouldPrederiveInstances: false)
+        try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		XCTAssertEqual(account.displayName, displayName)
@@ -69,7 +69,7 @@ final class TestOSTests: OSTest {
 	
 	func test_create_account_returned_can_be_looked_up() async throws {
         let sut = await TestOS.init()
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		let lookedUp = try sut.accountByAddress(account.address)
@@ -78,20 +78,20 @@ final class TestOSTests: OSTest {
 	
 	func test_lookup_throws_for_unknown_accounts() async throws {
 		let sut = await TestOS()
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		XCTAssertThrowsError(try sut.accountByAddress(.sample))
 	}
 	
 	func test_new_profile_has_preset_gateways() async throws {
 		let sut = await TestOS()
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let gateways = try sut.gateways
 		XCTAssertEqual(gateways, .preset)
 	}
 	
 	func test_if_replace_profile_throws() async throws {
 		let sut = await TestOS()
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		var profile = try sut.os.profile()
 		profile.header.id = ProfileID() // mutate profile
 		do {
@@ -104,7 +104,7 @@ final class TestOSTests: OSTest {
 	
 	func test_we_can_mutate_profile_in_swift_and_save_then_profile_is_updated() async throws {
 		let sut = await TestOS()
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		var profile = try sut.os.profile()
 		let creatingDevice = profile.header.creatingDevice
 		let newCreatingDevice = DeviceInfo.sampleOther
@@ -116,7 +116,7 @@ final class TestOSTests: OSTest {
 	
 	func test_batch_create_many_accounts() async throws {
 		let sut = await TestOS()
-		try await sut.os.newWallet(shouldPrederiveInstances: false)
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let n: UInt16 = 4
 		try await sut.batchCreateAccounts(count: n, namePrefix: "Unnamed")
 		XCTAssertEqual(try sut.accountsOnCurrentNetwork.map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })

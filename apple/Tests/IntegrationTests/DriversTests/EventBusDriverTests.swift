@@ -20,7 +20,7 @@ class EventBusDriverTests: DriverTest<EventBus> {
 		
 		let bios = BIOS(drivers: .withEventBus(sut))
 		let os = await TestOS(bios: bios)
-		try await os.os.newWallet(shouldPrederiveInstances: false)
+		try await os.os.newWallet(shouldPreDeriveInstances: false)
 
 		try await os.createAccount()
 		let notifications = await task.value
