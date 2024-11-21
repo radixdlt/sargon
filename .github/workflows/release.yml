@@ -111,7 +111,7 @@ jobs:
           ARTIFACT_FILE=libsargon-rs.xcframework.zip
 
           # Moving the artifact to the current directory.
-          cp target/swift/$ARTIFACT_FILE .
+          mv target/swift/$ARTIFACT_FILE .
 
           GH_RELEASE_TITLE="v$NEXT_TAG"
           gh release create $NEXT_TAG $ARTIFACT_FILE --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
