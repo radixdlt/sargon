@@ -40,7 +40,11 @@ impl SargonOS {
         loop {
             // Increase delay by 1 second on subsequent calls
             delay_duration += POLLING_DELAY_INCREMENT;
-            let sleep_duration = Duration::from_millis(delay_duration);
+
+            #[cfg(test)]
+            let sleep_duration = Duration::from_millis(delay_duration); // make it faster for tests
+            #[cfg(not(test))]
+            let sleep_duration = Duration::from_secs(delay_duration);
 
             let response = match gateway_client
                 .get_transaction_status(intent_hash.clone())
