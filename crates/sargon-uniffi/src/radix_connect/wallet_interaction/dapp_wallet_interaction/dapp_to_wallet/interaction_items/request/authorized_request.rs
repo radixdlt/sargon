@@ -12,4 +12,6 @@ pub struct DappToWalletInteractionAuthorizedRequestItems {
     pub one_time_accounts: Option<DappToWalletInteractionAccountsRequestItem>,
     pub one_time_persona_data:
         Option<DappToWalletInteractionPersonaDataRequestItem>,
+    pub proof_of_ownership:
+        Option<DappToWalletInteractionProofOfOwnershipRequestItem>,
 }
