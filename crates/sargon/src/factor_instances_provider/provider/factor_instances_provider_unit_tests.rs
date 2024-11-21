@@ -2184,8 +2184,13 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     );
 
     assert!(
-        !derivation_outcome.debug_was_derived.is_empty(),
+        !derivation_outcome.debug_was_cached.is_empty(),
         "should have filled cache"
+    );
+
+    assert!(
+        !derivation_outcome.debug_was_derived.is_empty(),
+        "should derived more since cache was empty"
     );
 
     assert_eq!(
@@ -2338,6 +2343,10 @@ async fn securified_accounts_asymmetric_indices() {
     );
     assert!(
         !derivation_outcome.debug_was_derived.is_empty(),
+        "should have filled cache"
+    );
+    assert!(
+        !derivation_outcome.debug_was_cached.is_empty(),
         "should have filled cache"
     );
 

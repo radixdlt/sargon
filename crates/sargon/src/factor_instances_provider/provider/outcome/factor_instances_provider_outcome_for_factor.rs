@@ -30,7 +30,7 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     #[cfg(test)]
     pub debug_was_cached: FactorInstances,
 
-    /// FactorInstances which was found in the cache before the operation was
+    /// FactorInstances which were found in the cache before the operation was
     /// executed.
     ///
     /// Might be empty
@@ -41,13 +41,13 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     #[cfg(test)]
     pub debug_found_in_cache: FactorInstances,
 
-    /// FactorInstances which was derived.
+    /// FactorInstances which were derived.
     ///
     /// Might be empty
     ///
     /// Useful for unit tests.
     ///
-    /// Might overlap with `to_cache` and `to_use_directly`
+    /// Might overlap with `debug_was_cached` and `to_use_directly`
     #[cfg(test)]
     pub debug_was_derived: FactorInstances,
 }

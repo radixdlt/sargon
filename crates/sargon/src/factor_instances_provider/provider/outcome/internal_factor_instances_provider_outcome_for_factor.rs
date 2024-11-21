@@ -18,17 +18,17 @@ pub struct InternalFactorInstancesProviderOutcomeForFactor {
     /// The FactorSourceID of all the factor instances of this type.
     pub factor_source_id: FactorSourceIDFromHash,
 
-    /// FactorInstances which are saved into the cache
-    ///
-    /// Might be empty
-    pub to_cache: FactorInstances,
-
     /// FactorInstances which are not saved into the cache.
     ///
     /// Might be empty
     pub to_use_directly: FactorInstances,
 
-    /// FactorInstances which was found in the cache before the operation was
+    /// FactorInstances which are saved into the cache
+    ///
+    /// Might be empty
+    pub to_cache: FactorInstances,
+
+    /// FactorInstances which were found in the cache before the operation was
     /// executed.
     ///
     /// Might be empty
@@ -38,7 +38,7 @@ pub struct InternalFactorInstancesProviderOutcomeForFactor {
     /// Might overlap with `to_use_directly`
     pub found_in_cache: FactorInstances,
 
-    /// FactorInstances which was newly derived.
+    /// FactorInstances which were newly derived.
     ///
     /// Might be empty
     ///
