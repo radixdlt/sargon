@@ -8,12 +8,6 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct SecuredEntityControl {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    #[serde(skip)]
-    #[debug(skip)]
-    pub __hidden: HiddenConstructor,
-
     /// Virtual Entity Creation (Factor)Instance
     ///
     /// Optional since if we recovered this SecuredEntityControl part of
@@ -58,7 +52,6 @@ impl SecuredEntityControl {
             }
         };
         Ok(Self {
-            __hidden: HiddenConstructor,
             veci,
             access_controller_address,
             security_structure,
