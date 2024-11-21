@@ -40,12 +40,13 @@ impl FactorSourcesOfKind {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = FactorSourcesOfKind;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSourcesOfKind;
 
     #[test]
     fn invalid_empty() {
         assert_eq!(
-            Sut::new(FactorSourceKind::Device, []),
+            SUT::new(FactorSourceKind::Device, []),
             Err(CommonError::FactorSourcesOfKindEmptyFactors)
         );
     }
@@ -53,7 +54,7 @@ mod tests {
     #[test]
     fn invalid_single_element() {
         assert_eq!(
-            Sut::new(
+            SUT::new(
                 FactorSourceKind::Device,
                 [FactorSource::sample_arculus()]
             ),
@@ -66,7 +67,7 @@ mod tests {
     #[test]
     fn invalid_two_two() {
         assert_eq!(
-            Sut::new(
+            SUT::new(
                 FactorSourceKind::Device,
                 [
                     FactorSource::sample_arculus(),
@@ -85,7 +86,7 @@ mod tests {
     fn valid_one() {
         let sources =
             IndexSet::<FactorSource>::just(FactorSource::sample_device());
-        let sut = Sut::new(FactorSourceKind::Device, sources.clone()).unwrap();
+        let sut = SUT::new(FactorSourceKind::Device, sources.clone()).unwrap();
         assert_eq!(sut.factor_sources(), sources);
     }
 
@@ -96,7 +97,7 @@ mod tests {
             FactorSource::sample_ledger_other(),
         ]);
         let sut =
-            Sut::new(FactorSourceKind::LedgerHQHardwareWallet, sources.clone())
+            SUT::new(FactorSourceKind::LedgerHQHardwareWallet, sources.clone())
                 .unwrap();
         assert_eq!(sut.factor_sources(), sources);
         assert_eq!(sut.factor_sources().len(), 2);
@@ -109,7 +110,7 @@ mod tests {
             FactorSource::sample_ledger(),
         ]);
         let sut =
-            Sut::new(FactorSourceKind::LedgerHQHardwareWallet, sources.clone())
+            SUT::new(FactorSourceKind::LedgerHQHardwareWallet, sources.clone())
                 .unwrap();
         assert_eq!(sut.factor_sources(), sources);
         assert_eq!(sut.factor_sources().len(), 1);

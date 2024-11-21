@@ -32,7 +32,7 @@ impl SargonOS {
                 account_addresses.iter().map(|a| a.into_internal()),
             )
             .await
-            .map_err(|internal| CommonError::from(internal))?;
+            .map_err(CommonError::from)?;
 
         Ok(result
             .into_iter()

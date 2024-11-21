@@ -89,7 +89,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-          echo "🚢  Git commiting changes"
+          echo "🚢  Git committing changes"
           git status
           git commit -m "Release of '$NEXT_TAG'" \
                      -m "Updated Package.swift with new checksum and path to zip on Github, and maybe apple/Sources/UniFFI/Sargon.swift." \

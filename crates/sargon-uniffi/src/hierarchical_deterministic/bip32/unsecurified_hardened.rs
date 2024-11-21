@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::UnsecurifiedHardened as InternalUnsecurifiedHardened;
 
 use sargon::{
-    FromGlobalKeySpace, FromLocalKeySpace, IsInLocalKeySpace,
+    FromGlobalKeySpace, FromLocalKeySpace, HasIndexInLocalKeySpace,
     IsMappableToGlobalKeySpace, ToBIP32Str,
 };
 

@@ -8,6 +8,51 @@ impl ProfileNetwork {
     pub fn accounts_non_hidden(&self) -> Accounts {
         self.accounts.visible()
     }
+
+    pub fn get_entities_erased(
+        &self,
+        entity_kind: CAP26EntityKind,
+    ) -> IndexSet<AccountOrPersona> {
+        match entity_kind {
+            CAP26EntityKind::Account => self
+                .accounts
+                .items()
+                .into_iter()
+                .map(AccountOrPersona::from)
+                .collect::<IndexSet<_>>(),
+            CAP26EntityKind::Identity => self
+                .personas
+                .items()
+                .into_iter()
+                .map(AccountOrPersona::from)
+                .collect::<IndexSet<_>>(),
+        }
+    }
+
+    pub fn get_entities_of_kind_in_key_space(
+        &self,
+        entity_kind: CAP26EntityKind,
+        key_space: KeySpace,
+    ) -> IndexSet<AccountOrPersona> {
+        self.get_entities_erased(entity_kind)
+            .into_iter()
+            .filter(|e| e.matches_key_space(key_space))
+            .collect()
+    }
+
+    pub fn contains_entity_by_address<A: IsEntityAddress>(
+        &self,
+        entity_address: &A,
+    ) -> bool {
+        self.get_entities_erased(A::entity_kind())
+            .into_iter()
+            .any(|e| {
+                e.address()
+                    == Into::<AddressOfAccountOrPersona>::into(
+                        entity_address.clone(),
+                    )
+            })
+    }
 }
 
 #[cfg(test)]

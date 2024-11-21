@@ -40,6 +40,7 @@ impl TransactionManifestV2 {
 }
 
 impl TransactionManifestV2 {
+    #[allow(dead_code)]
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
             instructions: InstructionsV2::empty(network_id),

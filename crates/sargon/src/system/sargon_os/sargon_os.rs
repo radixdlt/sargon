@@ -1,6 +1,8 @@
-use std::sync::Once;
+use std::{cell::Cell, sync::Once};
 
-use crate::prelude::*;
+use sbor::prelude::indexmap::IndexMap;
+
+use crate::{prelude::*, system::interactors};
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
 /// which holds an in-memory Profile and a collection of "clients" which are
@@ -8,10 +10,10 @@ use crate::prelude::*;
 /// during app launch, enabling the  Sargon "Operating System" to e.g read/write
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
-#[derive(Debug)]
 pub struct SargonOS {
     pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
+    pub(crate) interactors: Interactors,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -27,7 +29,28 @@ impl Deref for SargonOS {
 impl SargonOS {
     pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
         let clients = Clients::new(bios);
+        let secure_storage = Arc::new(clients.secure_storage.clone());
+        let derivation_interactors: Arc<dyn KeysDerivationInteractors>;
+        #[cfg(test)]
+        {
+            derivation_interactors = Arc::new(
+                TestDerivationInteractors::with_secure_storage(secure_storage),
+            );
+        }
+        #[cfg(not(test))]
+        {
+            derivation_interactors =
+                Arc::new(NoUIInteractorForKeyDerivation::new(secure_storage));
+        }
 
+        let interactors = Interactors::new(derivation_interactors);
+        Self::boot_with_interactors(clients, interactors).await
+    }
+
+    pub async fn boot_with_interactors(
+        clients: Clients,
+        interactors: Interactors,
+    ) -> Arc<Self> {
         let sargon_info = SargonBuildInformation::get();
         let version = sargon_info.sargon_version;
         let ret_version = sargon_info.dependencies.radix_engine_toolkit;
@@ -65,6 +88,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
+            interactors,
         });
         os.clients
             .profile_state_change
@@ -76,11 +100,25 @@ impl SargonOS {
             .await;
 
         info!("Sargon os Booted with profile state: {}", profile_state);
+
         os
     }
 
-    pub async fn new_wallet(&self) -> Result<()> {
-        let (profile, bdfs) = self.create_new_profile_with_bdfs(None).await?;
+    pub async fn new_wallet(
+        &self,
+        should_pre_derive_instances: bool,
+    ) -> Result<()> {
+        self.new_wallet_with_mnemonic(None, should_pre_derive_instances)
+            .await
+    }
+
+    pub async fn new_wallet_with_mnemonic(
+        &self,
+        mnemonic: Option<MnemonicWithPassphrase>,
+        should_pre_derive_instances: bool,
+    ) -> Result<()> {
+        let (profile, bdfs) =
+            self.create_new_profile_with_bdfs(mnemonic).await?;
 
         self.secure_storage
             .save_private_hd_factor_source(&bdfs)
@@ -92,6 +130,13 @@ impl SargonOS {
                 .delete_mnemonic(&bdfs.factor_source.id)
                 .await?;
             return Err(error);
+        }
+
+        if should_pre_derive_instances {
+            self.pre_derive_and_fill_cache_with_instances_for_factor_source(
+                bdfs.clone().factor_source.into(),
+            )
+            .await?;
         }
 
         info!("Saved new Profile and BDFS, finish creating wallet");
@@ -127,6 +172,14 @@ impl SargonOS {
                 &host_info,
             );
 
+            // Must save to secure storage first, then add, so that
+            // we easily can implement KeysDerivationInteractors that
+            // can try to load the mnemonic from secure storage when
+            // we are Cache filling using the FactorInstancesProvider
+            self.secure_storage
+                .save_private_hd_factor_source(&bdfs)
+                .await?;
+
             let bdfs_result = self
                 .add_factor_source(FactorSource::from(
                     bdfs.clone().factor_source,
@@ -136,9 +189,6 @@ impl SargonOS {
                 self.secure_storage.delete_profile(imported_id).await?;
                 return Err(error);
             }
-            self.secure_storage
-                .save_private_hd_factor_source(&bdfs)
-                .await?;
         }
 
         let profile_to_report = self.profile_state_holder.profile()?;
@@ -210,6 +260,12 @@ impl SargonOS {
             .emit(ProfileState::None)
             .await;
         Ok(())
+    }
+
+    pub(crate) fn keys_derivation_interactors(
+        &self,
+    ) -> Arc<dyn KeysDerivationInteractors> {
+        self.interactors.key_derivation.clone()
     }
 
     pub async fn resolve_host_id(&self) -> Result<HostId> {
@@ -316,32 +372,40 @@ impl SargonOS {
             .unwrap()
     }
 
-    pub async fn boot_test() -> Result<Arc<Self>> {
-        Self::boot_test_with_bdfs_mnemonic(None).await
-    }
-
-    pub async fn boot_test_with_bdfs_mnemonic(
+    pub async fn boot_test_with_bdfs_mnemonic_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
-        let test_drivers = Drivers::test();
+        let test_drivers =
+            Drivers::with_file_system(InMemoryFileSystemDriver::new());
         let bios = Bios::new(test_drivers);
-        let os = Self::boot(bios).await;
-        let (mut profile, bdfs) = os
-            .create_new_profile_with_bdfs(bdfs_mnemonic.into())
-            .await?;
+        let clients = Clients::new(bios);
 
-        // Append Mainnet network since initial profile has no network
-        profile
-            .networks
-            .append(ProfileNetwork::new_empty_on(NetworkID::Mainnet));
+        let derivation_interactor = derivation_interactor.into();
+        let derivation_interactors: Arc<dyn KeysDerivationInteractors> =
+            derivation_interactor.unwrap_or_else(|| {
+                Arc::new(TestDerivationInteractors::with_secure_storage(
+                    Arc::new(clients.secure_storage.clone()),
+                ))
+            });
 
-        os.secure_storage
-            .save_private_hd_factor_source(&bdfs)
-            .await?;
-        os.secure_storage.save_profile(&profile).await?;
-        os.profile_state_holder.replace_profile_state_with(
-            ProfileState::Loaded(profile.clone()),
-        )?;
+        let interactors = Interactors::new(derivation_interactors);
+
+        let os = Self::boot_with_interactors(clients, interactors).await;
+        os.new_wallet_with_mnemonic(
+            bdfs_mnemonic.into(),
+            pre_derive_factor_instance_for_bdfs,
+        )
+        .await?;
+
+        os.update_profile_with(|p| {
+            // Append Mainnet network since initial profile has no network
+            p.networks
+                .append(ProfileNetwork::new_empty_on(NetworkID::Mainnet));
+            Ok(())
+        })
+        .await?;
 
         Ok(os)
     }
@@ -350,15 +414,32 @@ impl SargonOS {
         Self::fast_boot_bdfs(None).await
     }
 
-    pub async fn fast_boot_bdfs(
+    pub async fn fast_boot_bdfs_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
-        let req = Self::boot_test_with_bdfs_mnemonic(bdfs_mnemonic);
+        let req = Self::boot_test_with_bdfs_mnemonic_and_interactor(
+            bdfs_mnemonic,
+            derivation_interactor,
+            pre_derive_factor_instance_for_bdfs,
+        );
 
         actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await
             .unwrap()
             .unwrap()
+    }
+
+    pub async fn fast_boot_bdfs(
+        bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+    ) -> Arc<Self> {
+        Self::fast_boot_bdfs_and_interactor(bdfs_mnemonic, None, true).await
+    }
+
+    pub async fn boot_test() -> Result<Arc<Self>> {
+        Self::boot_test_with_bdfs_mnemonic_and_interactor(None, None, true)
+            .await
     }
 
     /// Boot the SargonOS with a mocked networking driver.
@@ -500,7 +581,7 @@ mod tests {
         let bios = Bios::new(test_drivers);
         let os = SUT::boot(bios).await;
 
-        os.new_wallet().await.unwrap();
+        os.new_wallet(false).await.unwrap();
 
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();
@@ -581,7 +662,7 @@ mod tests {
         let other_hd =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let invalid_account = Account::new(
-            other_hd.derive_entity_creation_factor_instance(
+            other_hd._derive_entity_creation_factor_instance(
                 NetworkID::Mainnet,
                 HDPathComponent::unsecurified_hardened(0).unwrap(),
             ),
@@ -607,7 +688,7 @@ mod tests {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
         let os = SUT::boot(bios).await;
-        os.new_wallet().await.unwrap();
+        os.new_wallet(false).await.unwrap();
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();
 

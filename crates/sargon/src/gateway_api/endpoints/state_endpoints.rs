@@ -57,6 +57,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleResourceVaultPage
+    #[allow(dead_code)]
     pub(crate) async fn state_entity_page_non_fungible_vaults(
         &self,
         request: StateEntityPageNonFungibleVaultsRequest,
@@ -78,6 +79,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleIdsPage
+    #[allow(dead_code)]
     pub(crate) async fn state_entity_page_non_fungible_vault_ids(
         &self,
         request: StateEntityPageNonFungibleVaultIdsRequest,

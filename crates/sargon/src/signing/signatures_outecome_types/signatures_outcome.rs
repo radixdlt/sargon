@@ -157,14 +157,15 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
 mod tests {
 
     use super::*;
-    type Sut = SignaturesOutcome<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SignaturesOutcome<TransactionIntentHash>;
 
     #[test]
     #[should_panic(
         expected = "Discrepancy, found intent hash in both successful and failed transactions, this is a programmer error."
     )]
     fn new_panics_if_intent_hash_is_in_both_failed_and_success_collection() {
-        Sut::new(
+        SUT::new(
             MaybeSignedTransactions::sample(),
             MaybeSignedTransactions::sample(),
             [],
@@ -176,7 +177,7 @@ mod tests {
         expected = "Discrepancy, found failed transactions but no neglected factor sources, this is a programmer error."
     )]
     fn new_panics_if_failed_tx_is_not_empty_but_neglected_is() {
-        Sut::new(
+        SUT::new(
             MaybeSignedTransactions::empty(),
             MaybeSignedTransactions::sample(),
             [],

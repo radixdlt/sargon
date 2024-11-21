@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// The execution summary process not only determines the class of the manifest,
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, derive_more::Display)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
 pub enum DetailedManifestClass {
     /// A general manifest that involves any amount of arbitrary components
     /// and packages where nothing more concrete can be said about the manifest
@@ -11,11 +11,9 @@ pub enum DetailedManifestClass {
     ///
     /// No additional information is required beyond what the execution summary
     /// will provide.
-    #[display("General")]
     General,
 
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
-    #[display("Transfer")]
     Transfer {
         /// When `true`, then this is a one-to-one transfer and the wallet can
         /// regard this as a "simple transfer" and communicate this information
@@ -25,7 +23,6 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest where XRD is claimed from one or more validators.
-    #[display("ValidatorClaim")]
     ValidatorClaim {
         /// The addresses of validators in the transaction
         validator_addresses: Vec<ValidatorAddress>,
@@ -34,7 +31,6 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest where XRD is staked to one or more validators.
-    #[display("ValidatorStake")]
     ValidatorStake {
         /// The addresses of validators in the transaction
         validator_addresses: Vec<ValidatorAddress>,
@@ -43,7 +39,6 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest where XRD is unstaked from one or more validators.
-    #[display("ValidatorUnstake")]
     ValidatorUnstake {
         /// The addresses of validators in the transaction
         validator_addresses: Vec<ValidatorAddress>,
@@ -53,7 +48,6 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest that updated the deposit settings of the account.
-    #[display("AccountDepositSettingsUpdate")]
     AccountDepositSettingsUpdate {
         /// Updates to the resource preferences of the account deposit settings.
         /// account_address -> (resource_address -> Update<new_preference>)
@@ -75,7 +69,6 @@ pub enum DetailedManifestClass {
     /// A manifest that contributed some amount of resources to a liquidity
     /// pool that can be a one-resource pool, two-resource pool, or a
     /// multi-resource pool.
-    #[display("PoolContribution")]
     PoolContribution {
         /// The addresses of the pools in the transaction
         pool_addresses: Vec<PoolAddress>,
@@ -86,7 +79,6 @@ pub enum DetailedManifestClass {
     /// A manifest that redeemed resources from a liquidity pool. Similar to
     /// contributions, this can be any of the three pool blueprints available
     /// in the pool package.
-    #[display("PoolRedemption")]
     PoolRedemption {
         /// The addresses of the pools in the transaction
         pool_addresses: Vec<PoolAddress>,
@@ -96,7 +88,6 @@ pub enum DetailedManifestClass {
     },
 
     /// A manifest that deletes accounts.
-    #[display("DeleteAccounts")]
     DeleteAccounts {
         /// The addresses of the accounts that are being deleted
         account_addresses: Vec<AccountAddress>,
@@ -104,14 +95,49 @@ pub enum DetailedManifestClass {
 }
 
 impl DetailedManifestClass {
+    pub fn kind(&self) -> DetailedManifestClassKind {
+        match self {
+            Self::General => DetailedManifestClassKind::General,
+            Self::Transfer { .. } => DetailedManifestClassKind::Transfer,
+            Self::ValidatorClaim { .. } => {
+                DetailedManifestClassKind::ValidatorClaim
+            }
+            Self::ValidatorStake { .. } => {
+                DetailedManifestClassKind::ValidatorStake
+            }
+            Self::ValidatorUnstake { .. } => {
+                DetailedManifestClassKind::ValidatorUnstake
+            }
+            Self::AccountDepositSettingsUpdate { .. } => {
+                DetailedManifestClassKind::AccountDepositSettingsUpdate
+            }
+            Self::PoolContribution { .. } => {
+                DetailedManifestClassKind::PoolContribution
+            }
+            Self::PoolRedemption { .. } => {
+                DetailedManifestClassKind::PoolRedemption
+            }
+            Self::DeleteAccounts { .. } => {
+                DetailedManifestClassKind::DeleteAccounts
+            }
+        }
+    }
+
+    pub fn description(&self) -> String {
+        self.kind().to_string()
+    }
+}
+
+impl std::fmt::Display for DetailedManifestClass {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.description())
+    }
+}
+
+impl DetailedManifestClass {
     /// Checks the manifest class is reserved for Wallet interactions only
     pub(crate) fn is_reserved(&self) -> bool {
-        match self {
-            DetailedManifestClass::DeleteAccounts {
-                account_addresses: _,
-            } => true,
-            _ => false,
-        }
+        self.kind() == DetailedManifestClassKind::DeleteAccounts
     }
 }
 
@@ -276,5 +302,70 @@ mod tests {
 
         pretty_assertions::assert_eq!(general.is_reserved(), false);
         pretty_assertions::assert_eq!(delete_accounts.is_reserved(), true);
+    }
+
+    #[test]
+    fn kind() {
+        let test = |s: SUT, exp: DetailedManifestClassKind| {
+            assert_eq!(s.kind(), exp);
+        };
+
+        test(SUT::General, DetailedManifestClassKind::General);
+        test(
+            SUT::Transfer {
+                is_one_to_one: false,
+            },
+            DetailedManifestClassKind::Transfer,
+        );
+        test(
+            SUT::ValidatorClaim {
+                validator_addresses: Vec::<_>::sample(),
+                validator_claims: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::ValidatorClaim,
+        );
+        test(
+            SUT::ValidatorStake {
+                validator_addresses: Vec::<_>::sample(),
+                validator_stakes: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::ValidatorStake,
+        );
+        test(
+            SUT::ValidatorUnstake {
+                validator_addresses: Vec::<_>::sample(),
+                claims_non_fungible_data: HashMap::<_, _>::sample(),
+            },
+            DetailedManifestClassKind::ValidatorUnstake,
+        );
+        test(
+            SUT::AccountDepositSettingsUpdate {
+                resource_preferences_updates: HashMap::<_, _>::sample(),
+                deposit_mode_updates: HashMap::<_, _>::sample(),
+                authorized_depositors_added: HashMap::<_, _>::sample(),
+                authorized_depositors_removed: HashMap::<_, _>::sample(),
+            },
+            DetailedManifestClassKind::AccountDepositSettingsUpdate,
+        );
+        test(
+            SUT::PoolContribution {
+                pool_addresses: Vec::<_>::sample(),
+                pool_contributions: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::PoolContribution,
+        );
+        test(
+            SUT::PoolRedemption {
+                pool_addresses: Vec::<_>::sample(),
+                pool_redemptions: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::PoolRedemption,
+        );
+        test(
+            SUT::DeleteAccounts {
+                account_addresses: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::DeleteAccounts,
+        );
     }
 }

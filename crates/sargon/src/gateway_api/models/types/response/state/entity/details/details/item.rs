@@ -18,7 +18,7 @@ impl StateEntityDetailsResponseItemDetails {
     /// for the ("Main", "depositor") & ("Main", "withdrawer") roles.
     /// Once we have them, we first check if the assignments are `Explicit` or `Owner`.
     /// - If they are `Explicit`, the entity will be transferable if both the depositor & withdrawer
-    /// have `AllowAll` rules.
+    ///     have `AllowAll` rules.
     /// - If they are `Owner`, the entity will be transferable if the owner has `AllowAll` rule.
     pub fn can_be_transferred(&self) -> bool {
         let Some(role_assignments) = self.role_assignments() else {

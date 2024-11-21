@@ -31,18 +31,17 @@ decl_ret_wrapped_address!(
     identity
 );
 
-impl EntityAddress for IdentityAddress {
-    /// Identifies that IdentityAddresses uses the `EntityType::Identity`, which are used
-    /// to validate the HRP (`"identity_"`) and is also used when forming HD derivation
-    /// paths as per CAP26.
-    fn abstract_entity_type() -> AbstractEntityType {
-        AbstractEntityType::Identity
+impl HasEntityKind for IdentityAddress {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Identity
     }
 }
+impl IsBaseEntityAddress for IdentityAddress {}
+impl IsEntityAddress for IdentityAddress {}
 
 impl IdentityAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key, network_id)
+        <Self as IsEntityAddress>::from_public_key(public_key, network_id)
     }
 }
 

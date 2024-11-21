@@ -199,12 +199,12 @@ impl<S: Signable> HasSampleValues for PetitionForTransaction<S> {
     fn sample() -> Self {
         let account = Account::sample_securified_mainnet(
             "Grace",
-            AccountAddress::sample_other(),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0),
             || {
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(
                 HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                     CAP26EntityKind::Account,
-                    Hardened::from_local_key_space_unsecurified(6u32).unwrap(),
+                    Hardened::from_local_key_space(6u32, IsSecurified(true)).unwrap(),
                 ))
             },
         );
@@ -250,22 +250,23 @@ mod tests {
 
     use super::*;
 
-    type Sut = PetitionForTransaction<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForTransaction<TransactionIntent>;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn debug() {
-        assert!(!format!("{:?}", Sut::sample()).is_empty());
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
     }
 
     #[test]
@@ -290,7 +291,7 @@ mod tests {
             .unwrap(),
         );
 
-        let sut = Sut::new(
+        let sut = SUT::new(
             intent,
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),
@@ -334,7 +335,7 @@ mod tests {
             .unwrap(),
         );
 
-        let sut = Sut::new(
+        let sut = SUT::new(
             intent.clone(),
             HashMap::just((
                 AddressOfAccountOrPersona::from(account.address),

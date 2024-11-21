@@ -7,9 +7,10 @@ pub struct Clients {
     pub entropy: EntropyClient,
     pub http_client: HttpClient,
     pub unsafe_storage: UnsafeStorageClient,
-    pub file_system: FileSystemClient,
+    pub file_system: Arc<FileSystemClient>,
     pub event_bus: EventBusClient,
     pub profile_state_change: ProfileStateChangeClient,
+    pub factor_instances_cache: FactorInstancesCacheClient,
 }
 
 impl Clients {
@@ -21,11 +22,14 @@ impl Clients {
         let http_client = HttpClient::new(drivers.networking.clone());
         let unsafe_storage =
             UnsafeStorageClient::new(drivers.unsafe_storage.clone());
-        let file_system = FileSystemClient::new(drivers.file_system.clone());
+        let file_system =
+            Arc::new(FileSystemClient::new(drivers.file_system.clone()));
         let event_bus = EventBusClient::new(drivers.event_bus.clone());
         let profile_change = ProfileStateChangeClient::new(
             drivers.profile_state_change_driver.clone(),
         );
+        let factor_instances_cache =
+            FactorInstancesCacheClient::new(file_system.clone());
         Self {
             host,
             secure_storage,
@@ -35,6 +39,7 @@ impl Clients {
             file_system,
             event_bus,
             profile_state_change: profile_change,
+            factor_instances_cache,
         }
     }
 

@@ -1,4 +1,6 @@
-use std::sync::RwLockWriteGuard;
+use std::{borrow::Borrow, sync::RwLockWriteGuard};
+
+use radix_common::address;
 
 use crate::prelude::*;
 
@@ -34,22 +36,60 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_account(
+    pub async fn create_unsaved_unnamed_mainnet_account_with_bdfs(
         &self,
     ) -> Result<Account> {
-        self.create_unsaved_account(
+        let bdfs = self.bdfs()?;
+        self.create_unsaved_unnamed_mainnet_account_with_factor_source(
+            bdfs.into(),
+        )
+        .await
+    }
+
+    /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
+    /// index of the next account for the selected factor_source.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
+    pub async fn create_unsaved_unnamed_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<Account> {
+        self.create_unsaved_account_with_factor_source(
+            factor_source,
             NetworkID::Mainnet,
             DisplayName::new("Unnamed").unwrap(),
         )
         .await
     }
 
-    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
-    pub async fn create_unsaved_mainnet_account(
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using
+    /// the specified `factor_source`.
+    pub async fn create_unsaved_mainnet_account_with_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_unsaved_account(NetworkID::Mainnet, name).await
+        let bdfs = self.bdfs()?;
+        self.create_unsaved_mainnet_account_with_factor_source(
+            bdfs.into(),
+            name,
+        )
+        .await
+    }
+
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using
+    /// the specified `factor_source`.
+    pub async fn create_unsaved_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_unsaved_account_with_factor_source(
+            factor_source,
+            NetworkID::Mainnet,
+            name,
+        )
+        .await
     }
 
     /// Creates a new non securified account **WITHOUT** adding it to Profile,
@@ -64,71 +104,224 @@ impl SargonOS {
     /// of the factor source has been updated.
     ///
     /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_account(
+    pub async fn create_unsaved_account_with_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
+        let bdfs = self.bdfs()?;
+        self.create_unsaved_account_with_factor_source(
+            bdfs.into(),
+            network_id,
+            name,
+        )
+        .await
+    }
+
+    /// Creates a new non securified account **WITHOUT** adding it to Profile,
+    /// using specified factor source and the "next" index for this FactorSource
+    ///
+    /// If you want to add it to Profile, call `os.add_account(account)`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage, since the `last_used_on` date
+    /// of the factor source has been updated.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    pub async fn create_unsaved_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_unsaved_account_with_factor_source_with_derivation_outcome(
+            factor_source,
+            network_id,
+            name,
+        )
+        .await
+        .map(|(x, _, _)| x)
+    }
+
+    pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<(
+        Account,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        let key_derivation_interactors = self.keys_derivation_interactors();
+
         let profile = self.profile()?;
+        let cache_client =
+            Arc::new(self.clients.factor_instances_cache.clone());
 
-        let (factor_source_id, account) = profile
-            .create_unsaved_account(network_id, name, async move |fs| {
-                self.load_private_device_factor_source(&fs).await
-            })
-            .await?;
+        let future = profile
+            .create_unsaved_account_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                name,
+                cache_client,
+                key_derivation_interactors,
+            );
 
+        let outcome = future.await?;
+        let (
+            factor_source_id,
+            account,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = outcome;
+
+        // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
         // Change of `last_used_on` of FactorSource
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok(account)
+        Ok((account, instances_in_cache_consumer, derivation_outcome))
     }
 
-    /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
+    /// Create a new mainnet Account named "Unnamed" using BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_account(
+    pub async fn create_and_save_new_unnamed_mainnet_account_with_bdfs(
         &self,
     ) -> Result<Account> {
-        self.create_and_save_new_mainnet_account(
+        let bdfs = self.bdfs()?;
+        self.create_and_save_new_unnamed_mainnet_account_with_factor_source(
+            bdfs.into(),
+        )
+        .await
+    }
+
+    /// Create a new mainnet Account named "Unnamed" using selected factor source and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_unnamed_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<Account> {
+        self.create_and_save_new_mainnet_account_with_factor_source(
+            factor_source,
             DisplayName::new("Unnamed").unwrap(),
         )
         .await
     }
 
-    /// Create a new mainnet Account and adds it to the active Profile.
+    /// Create a new mainnet Account using the BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_mainnet_account(
+    pub async fn create_and_save_new_mainnet_account_with_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_account(NetworkID::Mainnet, name)
-            .await
+        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
+    }
+
+    pub async fn create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(
+        &self,
+        name: DisplayName,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        let bdfs = self.bdfs()?;
+        self.create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
+            bdfs.into(),
+            name,
+        )
+        .await
+    }
+
+    /// Create a new mainnet Account using the selected factor source and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(factor_source, name).await.map(|(x, _)| x)
+    }
+
+    pub async fn create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        name: DisplayName,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(
+            factor_source,
+            NetworkID::Mainnet,
+            name,
+        )
+        .await
     }
 
     /// Create a new Account and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account(
+    pub async fn create_and_save_new_account_with_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
+        let bdfs = self.bdfs()?;
+        self.create_and_save_new_account_with_factor_source(
+            bdfs.into(),
+            network_id,
+            name,
+        )
+        .await
+    }
+
+    /// Create a new Account and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(factor_source, network_id, name).await.map(|(x, _)| x)
+    }
+
+    pub async fn create_and_save_new_account_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating account.");
-        let account = self.create_unsaved_account(network_id, name).await?;
+        let (account, instances_in_cache_consumer, derivation_outcome) = self
+            .create_unsaved_account_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                name,
+            )
+            .await?;
         debug!("Created account, now saving it to profile.");
+
+        // Add account to Profile...
         self.add_account(account.clone()).await?;
+        // .. if successful consume the FactorInstances from the Cache!
+        instances_in_cache_consumer.consume().await?;
+
         info!(
             "Created account and saved new account into profile, address: {}",
             account.address
         );
-        Ok(account)
+        Ok((account, derivation_outcome))
     }
 
+    /// Creates account using BDFS
     /// The account names will be `<name_prefix> <index>`
     ///
     /// # Emits Event
@@ -136,23 +329,67 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn batch_create_many_accounts_then_save_once(
+    pub async fn batch_create_many_accounts_with_bdfs_then_save_once(
         &self,
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
-    ) -> Result<()> {
+    ) -> Result<Accounts> {
+        self.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) |x)
+    }
+
+    pub async fn batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(
+        &self,
+        count: u16,
+        network_id: NetworkID,
+        name_prefix: String,
+    ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
+        let bdfs = self.bdfs()?;
+        self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
+            bdfs.into(),
+            count,
+            network_id,
+            name_prefix,
+        )
+        .await
+    }
+
+    /// Creates account using specified factor source.
+    /// The account names will be `<name_prefix> <index>`
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    ///
+    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    pub async fn batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
+        &self,
+        factor_source: FactorSource,
+        count: u16,
+        network_id: NetworkID,
+        name_prefix: String,
+    ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Batch creating #{} accounts.", count);
-        let accounts = self
-            .batch_create_unsaved_accounts(network_id, count, name_prefix)
+        let (accounts, instances_in_cache_consumer, derivation_outcome) = self
+            .batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                count,
+                name_prefix,
+            )
             .await?;
         debug!("Created #{} accounts, now saving them to profile.", count);
-        self.add_accounts(accounts).await?;
+
+        // First try to save accounts into Profile...
+        self.add_accounts(accounts.clone()).await?;
+        // ... if successful consume the FactorInstances from the Cache!
+        instances_in_cache_consumer.consume().await?;
+
         info!(
             "Created account and saved #{} new accounts into profile",
             count
         );
-        Ok(())
+        Ok((accounts, derivation_outcome))
     }
 
     /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"
@@ -163,33 +400,127 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
     /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_accounts(
+    pub async fn batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
         &self,
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
-        let profile = self.profile()?;
-
-        let (factor_source_id, accounts) = profile
-            .create_unsaved_accounts(
+        let (accounts, instances_in_cache_consumer) = self
+            .batch_create_unsaved_accounts_with_bdfs(
                 network_id,
                 count,
+                name_prefix,
+            )
+            .await?;
+        instances_in_cache_consumer.consume().await?;
+        Ok(accounts)
+    }
+
+    /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"
+    /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
+    ///
+    /// If you want to add them to Profile, call `add_accounts(accounts)`
+    ///
+    /// # Emits Event
+    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
+    /// `factor_source.common.last_used` is updated.
+    pub async fn batch_create_unsaved_accounts_with_bdfs(
+        &self,
+        network_id: NetworkID,
+        count: u16,
+        name_prefix: String,
+    ) -> Result<(Accounts, InstancesInCacheConsumer)> {
+        let bdfs = self.bdfs()?;
+        self.batch_create_unsaved_accounts_with_factor_source(
+            bdfs.into(),
+            network_id,
+            count,
+            name_prefix,
+        )
+        .await
+    }
+
+    /// Creates many new non securified accounts **WITHOUT** add them to Profile, using selected factor source
+    ///  and the "next" indices for this FactorSource as derivation paths.
+    ///
+    /// If you want to add them to Profile, call `add_accounts(accounts)`
+    ///
+    /// # Emits Event
+    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
+    /// `factor_source.common.last_used` is updated.
+    pub async fn batch_create_unsaved_accounts_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        name_prefix: String,
+    ) -> Result<(Accounts, InstancesInCacheConsumer)> {
+        self.batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+            factor_source,
+            network_id,
+            count,
+            name_prefix,
+        )
+        .await
+        .map(|(x, y, _)| (x, y))
+    }
+    pub async fn batch_create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        name_prefix: String,
+    ) -> Result<(
+        Accounts,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        self.batch_create_unsaved_entities_with_factor_source_with_derivation_outcome(factor_source, network_id, count, name_prefix).await
+    }
+
+    pub async fn batch_create_unsaved_entities_with_factor_source_with_derivation_outcome<
+        E: IsEntity,
+    >(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        name_prefix: String,
+    ) -> Result<(
+        IdentifiedVecOf<E>,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        let key_derivation_interactors = self.keys_derivation_interactors();
+
+        let profile = self.profile()?;
+
+        let (
+            factor_source_id,
+            entities,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = profile
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                count,
+                Arc::new(self.clients.factor_instances_cache.clone()),
+                key_derivation_interactors,
                 |idx| {
                     DisplayName::new(format!("{} {}", name_prefix, idx))
                         .expect("Should not use a long name_prefix")
                 },
-                async move |fs| {
-                    self.load_private_device_factor_source(&fs).await
-                },
             )
             .await?;
 
+        // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
         // Change of `last_used_on` of FactorSource
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok(accounts)
+        Ok((entities, instances_in_cache_consumer, derivation_outcome))
     }
 }
 
@@ -210,22 +541,13 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_account(&self, account: Account) -> Result<()> {
-        let address = account.address;
+        self.add_entity(account).await
+    }
 
-        debug!("Adding account address: {} to profile", address);
-
-        self.add_accounts_without_emitting_account_added_event(Accounts::just(
-            account,
-        ))
-        .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountAdded { address },
-            ))
-            .await;
-
-        Ok(())
+    pub async fn add_entity<E: IsEntity>(&self, entity: E) -> Result<()> {
+        let address = entity.address();
+        debug!("Adding entity with address: {} to profile", address);
+        self.add_entities(IdentifiedVecOf::just(entity)).await
     }
 
     /// Adds the `accounts` to active profile and **saves** the updated profile to
@@ -241,22 +563,12 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
-        let addresses = accounts
-            .clone()
-            .into_iter()
-            .map(|a| a.address)
-            .collect_vec();
-
-        self.add_accounts_without_emitting_account_added_event(accounts)
-            .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountsAdded { addresses },
-            ))
-            .await;
-
-        Ok(())
+        self.add_entities(accounts).await.map_err(|e| match e {
+            CommonError::UnableToAddAllEntitiesDuplicatesFound => {
+                CommonError::UnableToAddAllAccountsDuplicatesFound
+            }
+            _ => e,
+        })
     }
 }
 
@@ -271,58 +583,40 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountUpdated { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
-        self.update_profile_with(|p| {
-            if p.update_account(&updated.address, |old| *old = updated.clone())
-                .is_none()
-            {
-                Err(CommonError::UnknownAccount)
-            } else {
-                Ok(())
-            }
-        })
-        .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountUpdated {
-                    address: updated.address,
-                },
-            ))
-            .await;
-
-        Ok(())
+        self.update_entity(updated).await
     }
 
     /// Updates the accounts `updated` by mutating current profile and persisting
-    /// the change to secure storage.
+    /// the change to secure storage. Throws `UnknownAccount` error if any of the account
+    /// is not found.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountsUpdated { addresses } }`
     pub async fn update_accounts(&self, updated: Accounts) -> Result<()> {
-        // Pre-validate that all received `updated` accounts exist in profile
-        let _ = updated
-            .iter()
-            .map(|a| self.account_by_address(a.address.clone()))
-            .collect::<Result<Vec<_>>>()?;
+        self.update_entities(updated).await
+    }
 
-        self.update_profile_with(|p| {
-            for updated_account in updated.clone() {
-                p.update_account(&updated_account.address, |old| {
-                    *old = updated_account.clone()
-                });
-            }
-            Ok(())
-        })
-        .await?;
+    pub async fn update_entity<E: IsEntity>(&self, updated: E) -> Result<()> {
+        self.update_entities(IdentifiedVecOf::just(updated)).await
+    }
 
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::AccountsUpdated {
-                    addresses: updated.iter().map(|a| a.address).collect(),
-                },
-            ))
-            .await;
+    pub async fn update_entities<E: IsEntity>(
+        &self,
+        updated: IdentifiedVecOf<E>,
+    ) -> Result<()> {
+        let addresses = updated
+            .clone()
+            .into_iter()
+            .map(|e| e.address())
+            .collect::<IndexSet<_>>();
+        self.update_profile_with(|p| p.update_entities(updated.clone()))
+            .await?;
 
+        if let Some(event) = E::profile_modified_event(true, addresses) {
+            self.event_bus
+                .emit(EventNotification::profile_modified(event))
+                .await;
+        }
         Ok(())
     }
 
@@ -363,67 +657,218 @@ impl SargonOS {
     }
 }
 
+impl<E: IsEntity> IdentifiedVecOf<E> {
+    pub fn to_accounts(self) -> Result<Accounts> {
+        self.into_iter()
+            .map(|e| {
+                Account::try_from(Into::<AccountOrPersona>::into(e.clone()))
+                    .map_err(|_| CommonError::ExpectedAccountButGotPersona {
+                        address: e.address().to_string(),
+                    })
+            })
+            .collect::<Result<Accounts>>()
+    }
+
+    pub fn to_personas(self) -> Result<Personas> {
+        self.into_iter()
+            .map(|e| {
+                Persona::try_from(Into::<AccountOrPersona>::into(e.clone()))
+                    .map_err(|_| CommonError::ExpectedPersonaButGotAccount {
+                        address: e.address().to_string(),
+                    })
+            })
+            .collect::<Result<Personas>>()
+    }
+}
+
 impl SargonOS {
-    /// Adds the `accounts` to active profile and **saves** the updated profile to
-    /// secure storage, without emitting `Event::AccountAdded`, but we DO emit
+    /// Adds the `entities` to active profile and **saves** the updated profile to
+    /// secure storage, without emitting any `Event`, but we DO emit
     /// `Event::ProfileSaved`.`
     ///
-    /// Returns `Ok(())` if the `accounts` were new and successfully added. If
-    /// saving failed or if the accounts were already present in Profile, an
+    /// Returns `Ok(())` if the `entities` were new and successfully added. If
+    /// saving failed or if the entities were already present in Profile, an
     /// error is returned.
     ///
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    async fn add_accounts_without_emitting_account_added_event(
+    pub async fn add_entities<E: IsEntity>(
         &self,
-        accounts: Accounts,
+        entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
-        if accounts.is_empty() {
-            warn!("Tried to add empty accounts...");
+        if entities.is_empty() {
+            warn!("Tried to add empty entities...");
             return Ok(());
         }
 
-        let number_of_accounts_to_add = accounts.len();
+        let entity_kind = E::entity_kind();
+        let number_of_entities_to_add = entities.len();
 
-        let network_id = accounts
+        let network_id = entities
             .assert_elements_on_same_network()?
-            .expect("Should have handled empty accounts case already.");
+            .expect("Should have handled empty entities case already.");
 
-        debug!("Adding #{} accounts to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_accounts_to_add, network_id);
+        debug!("Adding #{} entities to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_entities_to_add, network_id);
+
+        let to_accounts =
+            || -> Accounts { entities.clone().to_accounts().unwrap() };
+
+        let to_personas =
+            || -> Personas { entities.clone().to_personas().unwrap() };
 
         self.update_profile_with(|p| {
             let networks = &mut p.networks;
-
+            let networks_backup = networks.clone();
             if networks.contains_id(network_id) {
-                debug!("Profile already contained network to add #{} account(s) to, network_id: {}", number_of_accounts_to_add, network_id);
+                debug!("Profile already contained network to add #{} entities to, network_id: {}", number_of_entities_to_add, network_id);
                 networks
                     .try_try_update_with(&network_id, |network| {
-                        let count_before = network.accounts.len();
-                        debug!("Profile Network to add #{} account(s) to contains #{} accounts (before adding).", number_of_accounts_to_add, count_before);
-                        network.accounts.extend(accounts.clone());
-                        let count_after = network.accounts.len();
-                        debug!("Profile Network now contains: #{} accounts", count_after);
-                        if network.accounts.len() == count_before + number_of_accounts_to_add {
+                        let count_before = match entity_kind {
+                            CAP26EntityKind::Account => network.accounts.len(),
+                            CAP26EntityKind::Identity => network.personas.len(),
+                        };
+                        debug!("Profile Network to add #{} entities to contains #{} entities (before adding).", number_of_entities_to_add, count_before);
+
+                        match entity_kind {
+                            CAP26EntityKind::Account => {
+                                network.accounts.extend(to_accounts());
+                            }
+                            CAP26EntityKind::Identity => {
+                                network.personas.extend(to_personas());
+                            }
+                        }
+
+                        let count_after = match entity_kind {
+                            CAP26EntityKind::Account => network.accounts.len(),
+                            CAP26EntityKind::Identity => network.personas.len(),
+                        };
+                        debug!("Profile Network now contains: #{} entities", count_after);
+
+                        if count_after == count_before + number_of_entities_to_add {
                             Ok(())
                         } else {
-                            Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
+                            Err(CommonError::UnableToAddAllEntitiesDuplicatesFound)
                         }
                     })
             } else {
                 debug!("No Profile Network exists with ID {}, creating it...", network_id);
-                let network = ProfileNetwork::new(
-                    network_id,
-                    accounts.clone(),
-                    Personas::default(),
-                    AuthorizedDapps::default(),
-                    ResourcePreferences::default(),
-                );
+                let network = match entity_kind {
+                    CAP26EntityKind::Account => {
+                        ProfileNetwork::new(
+                            network_id,
+                            to_accounts(),
+                            Personas::default(),
+                            AuthorizedDapps::default(),
+                            ResourcePreferences::default(),
+                        )
+                    }
+                    CAP26EntityKind::Identity => {
+                        ProfileNetwork::new(
+                            network_id,
+                            Accounts::default(),
+                            to_personas(),
+                            AuthorizedDapps::default(),
+                            ResourcePreferences::default(),
+                        )
+                    }
+                };
+
                 networks.append(network);
                 Ok(())
             }
+            .and_then(|_| {
+                p.assert_factor_instances_valid().inspect_err(|_| { p.networks = networks_backup; })
+            })
         })
-            .await
+        .await?;
+
+        if let Some(event) = E::profile_modified_event(
+            false,
+            entities.clone().into_iter().map(|e| e.address()).collect(),
+        ) {
+            self.event_bus
+                .emit(EventNotification::profile_modified(event))
+                .await;
+        }
+
+        Ok(())
+    }
+}
+
+// # Securify
+impl SargonOS {
+    #[allow(dead_code)]
+    #[cfg(test)]
+    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
+        A: IsEntityAddress,
+    >(
+        &self,
+        addresses_of_entities: IndexSet<A>,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
+    ) -> Result<(
+        IndexMap<A, SecurityStructureOfFactorInstances>,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcome,
+    )> {
+        let profile_snapshot = self.profile()?;
+        let key_derivation_interactors = self.keys_derivation_interactors();
+        let matrix_of_factor_sources =
+            &security_structure_of_factor_sources.matrix_of_factors;
+
+        let (instances_in_cache_consumer, outcome) =
+            SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
+                Arc::new(self.clients.factor_instances_cache.clone()),
+                Arc::new(profile_snapshot.clone()),
+                matrix_of_factor_sources.clone(),
+                addresses_of_entities.clone(),
+                key_derivation_interactors,
+            )
+            .await?;
+
+        let mut instances_per_factor_source = outcome
+            .clone()
+            .per_factor
+            .into_iter()
+            .map(|(k, outcome_per_factor)| {
+                (k, outcome_per_factor.to_use_directly)
+            })
+            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+
+        assert_eq!(
+            instances_per_factor_source
+                .keys()
+                .cloned()
+                .collect::<HashSet<FactorSourceIDFromHash>>(),
+            matrix_of_factor_sources
+                .all_factors()
+                .into_iter()
+                .map(|f| f.id_from_hash())
+                .collect::<HashSet<FactorSourceIDFromHash>>()
+        );
+
+        let security_structure_id = security_structure_of_factor_sources.id();
+
+        let security_structures_of_factor_instances = addresses_of_entities.clone().into_iter().map(|entity_address|
+        {
+            let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
+               let matrix_of_factor_instances = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
+                &mut instances_per_factor_source,
+                matrix_of_factor_sources.clone(),
+               )?;
+                SecurityStructureOfFactorInstances::new(
+                    security_structure_id,
+                    matrix_of_factor_instances
+                )
+            };
+            Ok((entity_address, security_structure_of_factor_instances))
+        }).collect::<Result<IndexMap<A, SecurityStructureOfFactorInstances>>>()?;
+
+        Ok((
+            security_structures_of_factor_instances,
+            instances_in_cache_consumer,
+            outcome,
+        ))
     }
 }
 
@@ -484,7 +929,7 @@ mod tests {
         // ACT
         let unsaved_account = os
             .with_timeout(|x| {
-                x.create_unsaved_mainnet_account(
+                x.create_unsaved_mainnet_account_with_bdfs(
                     DisplayName::new("Alice").unwrap(),
                 )
             })
@@ -503,12 +948,19 @@ mod tests {
 
         // ACT
         let first = os
-            .with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_unsaved_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
         let second = os
-            .with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_unsaved_account_with_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Unnamed").unwrap(),
+                )
+            })
             .await
             .unwrap();
 
@@ -523,7 +975,9 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -541,7 +995,9 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -565,12 +1021,16 @@ mod tests {
 
         // ACT
         let _ = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
         let second = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -596,7 +1056,7 @@ mod tests {
         // ACT
         let n: u32 = 3;
         os.with_timeout(|x| {
-            x.batch_create_many_accounts_then_save_once(
+            x.batch_create_many_accounts_with_bdfs_then_save_once(
                 n as u16,
                 NetworkID::Mainnet,
                 "test".to_owned(),
@@ -623,6 +1083,71 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
+
+        // ACT
+        let network = NetworkID::Mainnet;
+        let n = 50;
+        let accounts = os
+            .with_timeout(|x| {
+                x.batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+                    network,
+                    n as u16,
+                    "acco".to_owned()
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(accounts.len(), n);
+        assert_eq!(
+            HashSet::from_iter(
+                accounts.clone().into_iter().map(|a| a.address())
+            )
+            .len(),
+            n
+        );
+
+        // First Accounts derivation entity index
+        assert_eq!(
+            accounts
+                .first()
+                .unwrap()
+                .try_get_unsecured_control()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index(),
+            HDPathComponent::from_local_key_space(
+                0,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+        );
+
+        // Last Accounts derivation entity index
+        assert_eq!(
+            accounts
+                .items()
+                .into_iter()
+                .last()
+                .unwrap()
+                .try_get_unsecured_control()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index(),
+            HDPathComponent::from_local_key_space(
+                (n as u32) - 1,
+                KeySpace::Unsecurified { is_hardened: true },
+            )
+            .unwrap(),
+        );
+    }
+
+    #[actix_rt::test]
     async fn test_batch_create_and_add_account_n_has_names_with_index_appended_to_prefix(
     ) {
         // ARRANGE
@@ -631,7 +1156,7 @@ mod tests {
         // ACT
         let n: u32 = 3;
         os.with_timeout(|x| {
-            x.batch_create_many_accounts_then_save_once(
+            x.batch_create_many_accounts_with_bdfs_then_save_once(
                 n as u16,
                 NetworkID::Mainnet,
                 "test".to_owned(),
@@ -665,7 +1190,7 @@ mod tests {
         // ACT
         let n = AppearanceID::all().len() as u32 * 2;
         os.with_timeout(|x| {
-            x.batch_create_many_accounts_then_save_once(
+            x.batch_create_many_accounts_with_bdfs_then_save_once(
                 n as u16,
                 NetworkID::Mainnet,
                 "test".to_owned(),
@@ -694,7 +1219,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.batch_create_unsaved_accounts(
+            x.batch_create_unsaved_accounts_with_bdfs(
                 NetworkID::Mainnet,
                 3,
                 "test".to_owned(),
@@ -717,12 +1242,14 @@ mod tests {
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
             .unwrap();
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
-        os.with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.create_unsaved_unnamed_mainnet_account_with_bdfs()
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         assert!(event_bus_driver
@@ -743,9 +1270,9 @@ mod tests {
             .unwrap();
 
         // ACT
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
         os.with_timeout(|x| {
-            x.create_and_save_new_account(
+            x.create_and_save_new_account_with_bdfs(
                 NetworkID::Mainnet,
                 DisplayName::sample(),
             )
@@ -772,16 +1299,6 @@ mod tests {
                 AccountAdded
             ]
         );
-    }
-
-    impl DisplayName {
-        fn random() -> Self {
-            Self::new(format!(
-                "random-{}",
-                id().to_string().drain(0..20).collect::<String>()
-            ))
-            .unwrap()
-        }
     }
 
     #[actix_rt::test]
@@ -843,7 +1360,7 @@ mod tests {
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
             .unwrap();
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         let mut account = Account::sample();
         os.with_timeout(|x| x.add_account(account.clone()))
@@ -912,6 +1429,89 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn add_account_new_network_works() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let account = Account::sample();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        assert_eq!(os.profile().unwrap().networks.len(), 1);
+
+        // ACT
+        os.with_timeout(|x| {
+            x.add_accounts(Accounts::just(Account::sample_stokenet()))
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile().unwrap().networks.len(), 2);
+    }
+
+    #[actix_rt::test]
+    async fn add_account_new_network_but_same_factor_instance_as_existing_throws(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let account = Account::sample();
+        let fsid = account
+            .try_get_unsecured_control()
+            .unwrap()
+            .transaction_signing
+            .factor_source_id
+            .to_string();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        let mut account_same_fi_new_network = account.clone();
+        let other_network = NetworkID::Stokenet;
+        account_same_fi_new_network.address =
+            account.address().map_to_network(other_network);
+        account_same_fi_new_network.network_id = other_network;
+
+        assert_eq!(
+            account_same_fi_new_network.address.network_id(),
+            other_network
+        );
+        assert_eq!(
+            account_same_fi_new_network.address.node_id(),
+            account.address().node_id()
+        );
+
+        let profile_snapshot_before_failing_op = os.profile().unwrap();
+        let res = os
+            .with_timeout(|x| {
+                x.add_accounts(Accounts::just(
+                    account_same_fi_new_network.clone(),
+                ))
+            })
+            .await;
+
+        // ASSERT
+        assert!(res.is_err());
+
+        let err = CommonError::FactorInstancesDiscrepancy {
+            address_of_entity1: account.address().to_string(),
+            address_of_entity2: account_same_fi_new_network
+                .address()
+                .to_string(),
+            factor_source_id: fsid,
+        };
+        pretty_assertions::assert_eq!(res, Err(err));
+        let profile_snapshot_after_failing_op = os.profile().unwrap();
+        assert_eq!(
+            profile_snapshot_after_failing_op,
+            profile_snapshot_before_failing_op
+        );
+    }
+
+    #[actix_rt::test]
     async fn test_accounts_on_current_network_empty() {
         let os = SUT::fast_boot().await;
         assert_eq!(os.accounts_on_current_network().unwrap(), Accounts::new());
@@ -924,7 +1524,9 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -941,7 +1543,9 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         let _ = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -962,7 +1566,9 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -980,7 +1586,9 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -996,7 +1604,9 @@ mod tests {
         // ACT
         // so that we have at least one network (with one account)
         let _ = os
-            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .with_timeout(|x| {
+                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            })
             .await
             .unwrap();
 
@@ -1457,17 +2067,12 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        assert_eq!(
-            os.account_by_address(Account::sample_mainnet_carol().address)
-                .unwrap()
-                .is_tombstoned(),
-            false
-        );
-        assert!(vec![account.address, other_account.address].iter().all(
-            |address| os
-                .account_by_address(address.clone())
-                .unwrap()
-                .is_tombstoned()
+        assert!(!os
+            .account_by_address(Account::sample_mainnet_carol().address)
+            .unwrap()
+            .is_tombstoned());
+        assert!([account.address, other_account.address].iter().all(
+            |address| os.account_by_address(*address).unwrap().is_tombstoned()
         ));
 
         let expected_authorized_dapps: AuthorizedDapps = serde_json::from_str(r#"

@@ -64,14 +64,15 @@ impl<S: Signable> PolyFactorSignRequest<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PolyFactorSignRequest<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PolyFactorSignRequest<TransactionIntent>;
 
     #[test]
     #[should_panic(
         expected = "Invalid input, per_factor_source must not be empty, this is a programmer error."
     )]
     fn panics_if_per_factor_source_is_empty() {
-        Sut::new(FactorSourceKind::Device, IndexMap::new(), IndexSet::new());
+        SUT::new(FactorSourceKind::Device, IndexMap::new(), IndexSet::new());
     }
 
     #[test]
@@ -79,7 +80,7 @@ mod tests {
         expected = "Discrepancy! All factor sources must be of the same kind, this is a programmer error."
     )]
     fn panics_if_wrong_factor_source_kind() {
-        Sut::new(
+        SUT::new(
             FactorSourceKind::ArculusCard,
             IndexMap::just((
                 FactorSourceIDFromHash::sample(),

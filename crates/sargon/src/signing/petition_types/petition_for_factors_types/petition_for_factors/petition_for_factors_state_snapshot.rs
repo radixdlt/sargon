@@ -76,21 +76,22 @@ impl<ID: SignableID> HasSampleValues for PetitionForFactorsStateSnapshot<ID> {
 mod tests {
     use super::*;
 
-    type Sut = PetitionForFactorsStateSnapshot<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForFactorsStateSnapshot<TransactionIntentHash>;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other())
+        assert_ne!(SUT::sample(), SUT::sample_other())
     }
 
     #[test]
     fn debug() {
-        assert!(!format!("{:?}", Sut::sample()).is_empty());
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
     }
 }

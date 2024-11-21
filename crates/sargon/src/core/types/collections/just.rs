@@ -24,6 +24,20 @@ impl<K: std::hash::Hash + Eq, V> Just<(K, V)> for HashMap<K, V> {
     }
 }
 
+pub trait JustKV<Key, Value> {
+    fn kv(key: Key, value: Value) -> Self;
+}
+impl<K: std::hash::Hash + Eq, V> JustKV<K, V> for IndexMap<K, V> {
+    fn kv(key: K, value: V) -> Self {
+        Self::from_iter([(key, value)])
+    }
+}
+impl<K: std::hash::Hash + Eq, V> JustKV<K, V> for HashMap<K, V> {
+    fn kv(key: K, value: V) -> Self {
+        Self::from_iter([(key, value)])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

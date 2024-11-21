@@ -7,6 +7,18 @@ pub trait AddressViaRet: Sized {
     ) -> Result<Self>;
 }
 
+pub trait HasNodeId {
+    fn node_id(&self) -> ScryptoNodeId;
+
+    fn matches_public_key(&self, public_key: impl Into<PublicKey>) -> bool {
+        let mut calculated_node_id: [u8; ScryptoNodeId::LENGTH] =
+            hash_of(public_key.into().to_bytes()).0.lower_bytes();
+        let node_id = self.node_id().0;
+        calculated_node_id[0] = node_id[0]; // dummy
+        calculated_node_id == node_id
+    }
+}
+
 pub trait IsAddress:
     IsNetworkAware
     + Serialize
@@ -119,6 +131,19 @@ macro_rules! decl_ret_wrapped_address {
                     Self::with_node_id_bytes(&generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(), network_id)
                 }
 
+                  pub fn with_node_id_of<A: IsNetworkAware + HasNodeId>(
+                    address: &A,
+                ) -> Self {
+                    Self::with_node_id(address.node_id(), address.network_id())
+                }
+
+                pub fn with_node_id(
+                    node_id: ScryptoNodeId,
+                    network_id: NetworkID
+                ) -> Self {
+                    Self::with_node_id_bytes(node_id.0.as_slice()[1..].try_into().unwrap(), network_id)
+                }
+
                 pub fn with_node_id_bytes(
                     node_id_bytes: &[u8; { ScryptoNodeId::RID_LENGTH }],
                     network_id: NetworkID
@@ -139,10 +164,6 @@ macro_rules! decl_ret_wrapped_address {
                 pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
-                }
-
-                pub(crate) fn node_id(&self) -> ScryptoNodeId {
-                    self.0.node_id()
                 }
 
                 /// Returns a new address, with the same node_id, but using `network_id` as
@@ -227,6 +248,12 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            impl HasNodeId for [< $address_type:camel Address >] {
+                fn node_id(&self) -> ScryptoNodeId {
+                    self.0.node_id()
+                }
+            }
+
             impl AddressViaRet for [< $address_type:camel Address >] {
                 fn new(
                     node_id: impl Into<ScryptoNodeId>,
@@ -240,6 +267,7 @@ macro_rules! decl_ret_wrapped_address {
                     })
                     .map(|i| [< $address_type:camel Address >]::from(i))
                 }
+
 
 
             }

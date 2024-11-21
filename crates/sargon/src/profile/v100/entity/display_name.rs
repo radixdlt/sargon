@@ -79,6 +79,17 @@ impl HasSampleValues for DisplayName {
 }
 
 #[cfg(test)]
+impl DisplayName {
+    pub fn random() -> Self {
+        Self::new(format!(
+            "random-{}",
+            id().to_string().drain(0..20).collect::<String>()
+        ))
+        .unwrap()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 

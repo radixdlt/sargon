@@ -130,10 +130,8 @@ impl ExecutionSummary {
                     })
                     .flat_map(|indicator| indicator.ids())
                     // Find the account badge in the list of deposits
-                    .any(|id| {
-                        id.derives_account_address(account_address.clone())
-                    })
-                    .then_some(account_address.clone())
+                    .any(|id| id.derives_account_address(*account_address))
+                    .then_some(*account_address)
             })
             .collect();
 

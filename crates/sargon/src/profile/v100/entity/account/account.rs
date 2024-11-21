@@ -72,35 +72,73 @@ pub struct Account {
     pub on_ledger_settings: OnLedgerSettings,
 }
 
-impl IsEntity for Account {
+impl HasEntityKind for Account {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Account
+    }
+}
+
+impl HasSecurityState for Account {
+    fn security_state(&self) -> EntitySecurityState {
+        self.security_state.clone()
+    }
+}
+
+impl IsBaseEntity for Account {
+    type Address = AccountAddress;
+
+    fn address(&self) -> Self::Address {
+        self.address
+    }
     fn flags(&self) -> EntityFlags {
         self.flags.clone()
     }
 }
 
-impl IsNetworkAware for Account {
-    fn network_id(&self) -> NetworkID {
-        self.network_id
-    }
-}
+impl IsEntity for Account {
+    type Path = AccountPath;
 
-impl Account {
-    pub fn new(
-        account_creating_factor_instance: HDFactorInstanceAccountCreation,
-        display_name: DisplayName,
-        appearance_id: AppearanceID,
+    fn profile_modified_event(
+        is_update: bool,
+        addresses: IndexSet<Self::Address>,
+    ) -> Option<EventProfileModified> {
+        let address = addresses.iter().last().cloned()?;
+        let addresses = addresses.clone().into_iter().collect_vec();
+        let is_many = addresses.len() > 1;
+        match (is_update, is_many) {
+            (true, true) => {
+                Some(EventProfileModified::AccountsUpdated { addresses })
+            }
+            (false, true) => {
+                Some(EventProfileModified::AccountsAdded { addresses })
+            }
+            (true, false) => {
+                Some(EventProfileModified::AccountUpdated { address })
+            }
+            (false, false) => {
+                Some(EventProfileModified::AccountAdded { address })
+            }
+        }
+    }
+
+    fn with_veci_and_name(
+        veci: HDFactorInstanceTransactionSigning<Self::Path>,
+        name: DisplayName,
     ) -> Self {
         let address =
             AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-                account_creating_factor_instance.clone(),
+                veci.clone(),
             );
+        let appearance_id = AppearanceID::from_number_of_accounts_on_network(
+            u32::from(veci.path.index().index_in_local_key_space()) as usize,
+        );
         Self {
-            network_id: account_creating_factor_instance.network_id(),
+            network_id: veci.network_id(),
             address,
-            display_name,
+            display_name: name,
             security_state:
                 UnsecuredEntityControl::with_entity_creating_factor_instance(
-                    account_creating_factor_instance,
+                    veci,
                 )
                 .into(),
             appearance_id,
@@ -110,11 +148,41 @@ impl Account {
     }
 }
 
+impl Account {
+    pub fn new(
+        account_creating_factor_instance: HDFactorInstanceAccountCreation,
+        display_name: DisplayName,
+        appearance_id: AppearanceID,
+    ) -> Self {
+        let mut self_ = Self::with_veci_and_name(
+            account_creating_factor_instance,
+            display_name,
+        );
+        self_.appearance_id = appearance_id;
+        self_
+    }
+}
+
 impl Identifiable for Account {
     type ID = AccountAddress;
 
     fn id(&self) -> Self::ID {
         self.address
+    }
+}
+
+impl TryFrom<AccountOrPersona> for Account {
+    type Error = CommonError;
+
+    fn try_from(value: AccountOrPersona) -> Result<Self> {
+        match value {
+            AccountOrPersona::AccountEntity(a) => Ok(a),
+            AccountOrPersona::PersonaEntity(p) => {
+                Err(CommonError::ExpectedAccountButGotPersona {
+                    address: p.address.to_string(),
+                })
+            }
+        }
     }
 }
 
@@ -159,7 +227,7 @@ impl Account {
         let derivation_index =
             HDPathComponent::unsecurified_hardened(index).unwrap();
         let account_creating_factor_instance = private_hd_factor_source
-            .derive_entity_creation_factor_instance(
+            ._derive_entity_creation_factor_instance(
                 network_id,
                 derivation_index,
             );
@@ -339,6 +407,15 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_err_when_try_from_persona() {
+        let persona = Persona::sample();
+        assert!(matches!(
+            SUT::try_from(AccountOrPersona::PersonaEntity(persona)),
+            Err(CommonError::ExpectedAccountButGotPersona { .. })
+        ));
     }
 
     #[test]

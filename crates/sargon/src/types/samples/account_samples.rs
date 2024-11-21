@@ -1,3 +1,5 @@
+use radix_common::address;
+
 use crate::prelude::*;
 
 static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
@@ -15,10 +17,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Carla | 2 | Securified { Single Threshold only }
         Account::sample_securified_mainnet(
             "Carla",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(2u32).unwrap();
+                    Hardened::from_local_key_space(2u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r2(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -30,10 +32,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // David | 3 | Securified { Single Override only }
         Account::sample_securified_mainnet(
             "David",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(3),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(3u32).unwrap();
+                Hardened::from_local_key_space(3u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r3(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -45,10 +47,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Emily | 4 | Securified { Threshold factors only #3 }
         Account::sample_securified_mainnet(
             "Emily",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(4),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(4u32).unwrap();
+                Hardened::from_local_key_space(4u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r4(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -60,10 +62,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Frank | 5 | Securified { Override factors only #2 }
         Account::sample_securified_mainnet(
             "Frank",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(5),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(5u32).unwrap();
+                Hardened::from_local_key_space(5u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r5(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -75,10 +77,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Grace | 6 | Securified { Threshold #3 and Override factors #2  }
         Account::sample_securified_mainnet(
             "Grace",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(6),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(6u32).unwrap();
+                Hardened::from_local_key_space(6u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -90,10 +92,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Ida | 7 | Securified { Threshold only # 5/5 }
         Account::sample_securified_mainnet(
             "Ida",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_fia11(),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(7u32).unwrap();
+                    Hardened::from_local_key_space(7u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r7(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -110,10 +112,10 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Klara | 9 |  Securified { Threshold 1/1 and Override factors #1  }
         Account::sample_securified_mainnet(
             "Klara",
-            AccountAddress::random(NetworkID::Mainnet),
+            HierarchicalDeterministicFactorInstance::sample_fia12(),
             || {
                 let idx =
-                    Hardened::from_local_key_space_unsecurified(9u32).unwrap();
+                Hardened::from_local_key_space(9u32, IsSecurified(true)).unwrap();
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::r8(
                     HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
@@ -151,7 +153,7 @@ impl Account {
 
     pub fn sample_securified_mainnet(
         name: impl AsRef<str>,
-        address: AccountAddress,
+        veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
         let role = make_role();
@@ -187,22 +189,24 @@ impl Account {
                 override_factors.clone(),
             )
             .unwrap(),
-        );
-
+        )
+        .unwrap();
+        let network_id = NetworkID::Mainnet;
+        let address =
+            AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
         Self {
-            network_id: NetworkID::Mainnet,
+            network_id,
             address,
             display_name: DisplayName::new(name).unwrap(),
-            security_state: SecuredEntityControl {
-                access_controller_address:
-                    AccessControllerAddress::sample_from_account_address(
-                        address,
-                    ),
-                security_structure: SecurityStructureOfFactorInstances {
+            security_state: SecuredEntityControl::new(
+                Some(veci.clone()),
+                AccessControllerAddress::sample_from_account_address(address),
+                SecurityStructureOfFactorInstances {
                     security_structure_id: SecurityStructureID::sample(),
                     matrix_of_factors: matrix,
                 },
-            }
+            )
+            .unwrap()
             .into(),
             appearance_id: Default::default(),
             flags: Default::default(),
@@ -216,5 +220,23 @@ impl Account {
 
     pub fn sample_all() -> Vec<Account> {
         ALL_ACCOUNT_SAMPLES.to_vec()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unique_addresses() {
+        let accounts_addresses = Account::sample_all()
+            .into_iter()
+            .map(|a| a.address)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accounts_addresses.len(),
+            HashSet::<AccountAddress>::from_iter(accounts_addresses.clone())
+                .len()
+        );
     }
 }

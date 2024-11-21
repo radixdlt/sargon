@@ -1,5 +1,25 @@
 use crate::prelude::*;
 
+use sargon::HiddenConstructor as InternalHiddenConstructor;
+
+#[derive(
+    Clone, Default, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
+)]
+pub struct HiddenConstructor;
+
+impl From<InternalHiddenConstructor> for HiddenConstructor {
+    fn from(_value: InternalHiddenConstructor) -> Self {
+        HiddenConstructor
+    }
+}
+#[allow(clippy::from_over_into)]
+impl Into<InternalHiddenConstructor> for HiddenConstructor {
+    #[allow(clippy::from_over_into)]
+    fn into(self) -> InternalHiddenConstructor {
+        InternalHiddenConstructor
+    }
+}
+
 macro_rules! decl_role_with_factors {
     (
         $(
@@ -18,7 +38,6 @@ macro_rules! decl_role_with_factors {
                 Clone,  PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
             )]
             pub struct [< $role RoleWith $factor s >] {
-
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
                 ///

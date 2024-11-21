@@ -14,6 +14,18 @@ pub trait OnSameNetworkValidating:
             .and_then(|x| x.ok_or(CommonError::ExpectedNonEmptyCollection))
     }
 
+    fn assert_elements_on_same_network(&self) -> Result<Option<NetworkID>>;
+}
+
+impl<T: IsNetworkAware, U: Clone + IntoIterator<Item = T>>
+    OnSameNetworkValidating for U
+{
+    type Element = T;
+
+    fn is_empty(&self) -> bool {
+        self.clone().into_iter().next().is_none()
+    }
+
     fn assert_elements_on_same_network(&self) -> Result<Option<NetworkID>> {
         if self.is_empty() {
             return Ok(None);
