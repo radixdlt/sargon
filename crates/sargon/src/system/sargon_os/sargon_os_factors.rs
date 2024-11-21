@@ -218,7 +218,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    pub async fn prederive_and_fill_cache_with_instances_for_factor_source(
+    pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
@@ -300,7 +300,7 @@ impl SargonOS {
                 continue;
             }
             let _ = self
-                .prederive_and_fill_cache_with_instances_for_factor_source(
+                .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,
                 )
                 .await?;

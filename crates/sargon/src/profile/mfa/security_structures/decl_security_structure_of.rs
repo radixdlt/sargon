@@ -56,9 +56,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< $role RoleWith $factor s >] {
-                #[doc(hidden)]
-                #[serde(skip)]
-                pub __hidden: HiddenConstructor,
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
@@ -440,7 +437,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 /// If `validation` is not `Skip`, we require the structure of factors to be valid.
                 ///
                 /// # Panics
-                /// Panics if threshold > threshold_factor.len()
+                /// Panics if `threshold > threshold_factor.len()`
                 ///
                 /// Panics if the same factor is present in both lists
                 ///
@@ -487,7 +484,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     }
 
                     let unvalidated = Self {
-                        __hidden: HiddenConstructor,
                         threshold_factors,
                         threshold,
                         override_factors,
@@ -562,7 +558,7 @@ macro_rules! decl_role_with_factors {
 
 
                 /// # Panics
-                /// Panics if threshold > threshold_factor.len()
+                /// Panics if `threshold > factors.len()`
                 ///
                 /// Panics if Factor elements are FactorInstances and the derivation
                 /// path contains a non-securified last path component.
@@ -655,9 +651,6 @@ macro_rules! decl_matrix_of_factors {
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< MatrixOf $factor s >] {
-                #[doc(hidden)]
-                #[serde(skip)]
-                pub __hidden: HiddenConstructor,
 
                 /// Used for Signing transactions
                 pub primary_role: [< PrimaryRoleWith $factor s >],
@@ -702,7 +695,6 @@ macro_rules! decl_matrix_of_factors {
                     validation: FactorRolesValidation,
                 ) -> Result<Self> {
                     let unvalidated = Self {
-                        __hidden: HiddenConstructor,
                         primary_role,
                         recovery_role,
                         confirmation_role,

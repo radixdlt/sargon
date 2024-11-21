@@ -1,4 +1,6 @@
-use crate::prelude::*;
+use crate::{
+    factor_instances_provider::factor_instances_cache::FICStorage, prelude::*,
+};
 
 pub type DenseKeyStorage = IndexMap<
     FactorSourceIDFromHashDenseKey,
@@ -13,7 +15,7 @@ impl FactorInstancesCacheSnapshot {
         self.0.is_empty()
     }
 }
-impl From<FactorInstancesCacheSnapshot> for Storage {
+impl From<FactorInstancesCacheSnapshot> for FICStorage {
     fn from(value: FactorInstancesCacheSnapshot) -> Self {
         value
             .0
@@ -30,16 +32,16 @@ impl From<FactorInstancesCacheSnapshot> for Storage {
                 }).collect::<IndexMap<IndexAgnosticPath, FactorInstances>>();
                 (key, value)
             })
-            .collect::<Storage>()
+            .collect::<FICStorage>()
     }
 }
 impl From<FactorInstancesCacheSnapshot> for FactorInstancesCache {
     fn from(value: FactorInstancesCacheSnapshot) -> Self {
-        Self::with_storage(Storage::from(value))
+        Self::with_storage(FICStorage::from(value))
     }
 }
-impl From<Storage> for FactorInstancesCacheSnapshot {
-    fn from(value: Storage) -> Self {
+impl From<FICStorage> for FactorInstancesCacheSnapshot {
+    fn from(value: FICStorage) -> Self {
         Self(
             value
                 .into_iter()

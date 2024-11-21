@@ -8,12 +8,6 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct SecuredEntityControl {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    #[serde(skip)]
-    #[debug(skip)]
-    pub __hidden: HiddenConstructor,
-
     /// Virtual Entity Creation (Factor)Instance
     ///
     /// Optional since if we recovered this SecuredEntityControl part of
@@ -44,7 +38,8 @@ impl HasFactorInstances for SecuredEntityControl {
 
 impl SecuredEntityControl {
     /// # Panics
-    /// Panics if veci is not unsecurified
+    /// Panics if veci is securified, i.e. the FactorInstances is in fact
+    /// not a "VECI".
     pub fn new(
         veci: impl Into<Option<HierarchicalDeterministicFactorInstance>>,
         access_controller_address: AccessControllerAddress,
@@ -57,7 +52,6 @@ impl SecuredEntityControl {
             }
         };
         Ok(Self {
-            __hidden: HiddenConstructor,
             veci,
             access_controller_address,
             security_structure,

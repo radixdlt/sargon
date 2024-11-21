@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// A type for preprocessing of input data for the `KeysCollector`.
 ///
-/// It analyzes the derivation paths and factor sources to determine the
+/// It analyzes the derivation paths and factor sources to determine
 /// which factor sources are used to derive keys, and in what order.
 pub(crate) struct KeysCollectorPreprocessor {
     derivation_paths:

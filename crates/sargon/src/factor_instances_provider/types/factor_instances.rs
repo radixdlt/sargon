@@ -22,7 +22,6 @@ impl FactorInstances {
         &mut self,
         instances: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
     ) {
-        let instances = instances.into_iter().collect_vec();
         self.factor_instances.extend(instances);
     }
 

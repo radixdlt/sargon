@@ -26,14 +26,19 @@ impl FromStr for KeySpace {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        if s == Self::Securified.to_string() {
-            Ok(Self::Securified)
-        } else if s == (Self::Unsecurified { is_hardened: false }).to_string() {
-            Ok(Self::Unsecurified { is_hardened: false })
-        } else if s == (Self::Unsecurified { is_hardened: true }).to_string() {
-            Ok(Self::Unsecurified { is_hardened: true })
-        } else {
-            Err(CommonError::Unknown)
+        match s {
+            s if s == Self::Securified.to_string() => Ok(Self::Securified),
+            s if s
+                == (Self::Unsecurified { is_hardened: false }).to_string() =>
+            {
+                Ok(Self::Unsecurified { is_hardened: false })
+            }
+            s if s
+                == (Self::Unsecurified { is_hardened: true }).to_string() =>
+            {
+                Ok(Self::Unsecurified { is_hardened: true })
+            }
+            _ => Err(CommonError::Unknown),
         }
     }
 }

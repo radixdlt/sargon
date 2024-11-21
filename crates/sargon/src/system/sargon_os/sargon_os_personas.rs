@@ -21,8 +21,7 @@ impl SargonOS {
         self.profile_state_holder.persona_by_address(address)
     }
 
-    /// Creates a new unsaved mainnet persona named "Unnamed {N}", where `N` is the
-    /// index of the next persona for the BDFS.
+    /// Creates a new unsaved mainnet persona named "Unnamed".
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
@@ -456,7 +455,7 @@ impl SargonOS {
                 key_derivation_interactors,
                 |idx| {
                     DisplayName::new(format!("{} {}", name_prefix, idx))
-                        .expect("Should not use a long name_prefix")
+                        .expect("Should have used a non empty name.")
                 },
             )
             .await?;

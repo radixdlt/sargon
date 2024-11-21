@@ -234,6 +234,15 @@ mod tests {
     }
 
     #[test]
+    fn update_items_new_items() {
+        let mut sut = SUT::sample_other();
+        let sut_backup = sut.clone();
+        let res = sut.update_items(vec![User::carol(), User::david()]);
+        assert_eq!(res, Err(CommonError::Unknown));
+        assert_eq!(sut, sut_backup); // not changed
+    }
+
+    #[test]
     fn append_new() {
         let mut sut = SUT::sample_other();
         assert_eq!(sut.append(User::carol()), (true, 3));

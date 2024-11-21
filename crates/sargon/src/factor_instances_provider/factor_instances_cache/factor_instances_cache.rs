@@ -15,7 +15,7 @@ use crate::prelude::*;
 /// you can think of the implementation to not be:
 /// `IndexMap<FactorSourceIDFromHash, IndexMap<IndexAgnosticPath, FactorInstances>>`
 /// but actually:
-/// IndexMap<FactorSourceIDFromHash, IndexMap<NetworkID, IndexMap<DerivationPreset, FactorInstances>>>`,
+/// `IndexMap<FactorSourceIDFromHash, IndexMap<NetworkID, IndexMap<DerivationPreset, FactorInstances>>>`,
 /// in fact it could be, but not sure it is more readable. But for the sake of visualizing
 /// the cache we use that structure.
 ///
@@ -81,34 +81,29 @@ use crate::prelude::*;
 /// ]
 /// ```
 ///
-/// This is the "in-memory" form of the cache. We would need to impl `Serde` for
-/// it in Sargon.
-///
 /// We use `IndexMap` instead of `HashMap` for future proofing when we serialize,
 /// deserialize this cache, we want the JSON values to have stable ordering. Note
 /// that the only truly **important** ordering is that of `FactorInstances` values,
 /// which are ordered since it is a newtype around `IndexSet<HierarchicalDeterministicFactorInstance>`.
 ///
 ///
-/// The Serde impl of `IndexAgnosticPath` could be:
-/// `"<Network>/<EntityKind>/<KeyKind>/<KeySpace>"` as a string, e.g:
-/// `"1/A/TX/U"`, where `U` is "Unsecurified" KeySpace.
-/// Or if we don't wanna use such a "custom" one we can use `525`/`616`
-/// discriminator for EntityKind and `1460`/`1678` for KeyKind:
-/// "1/525/1460/U".
+/// The Serde impl of `IndexAgnosticPath` is this:
+/// `1H/618H/1460H/S?"`, where `S` is "Securified" KeySpace, the `?` denotes
+/// that we do not know the index. For unsecurified KeySpace "H" is used for hardened
+/// and "" (theoretically - not used) for unhardened.
 #[derive(Debug, Default)]
 pub struct FactorInstancesCache {
     /// PER FactorSource PER IndexAgnosticPath FactorInstances (matching that IndexAgnosticPath)
-    map: RwLock<Storage>,
+    map: RwLock<FICStorage>,
 }
 
-pub type Storage = IndexMap<
+pub(super) type FICStorage = IndexMap<
     FactorSourceIDFromHash,
     IndexMap<IndexAgnosticPath, FactorInstances>,
 >;
 
 impl FactorInstancesCache {
-    pub fn with_storage(storage: Storage) -> Self {
+    pub fn with_storage(storage: FICStorage) -> Self {
         Self {
             map: RwLock::new(storage),
         }
@@ -611,7 +606,7 @@ mod tests {
             "#,
         );
 
-        let storage = Storage::kv(element.factor_source_id, inner);
+        let storage = FICStorage::kv(element.factor_source_id, inner);
         let cache_snapshot =
             FactorInstancesCacheSnapshot::from(storage.clone());
 

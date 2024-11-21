@@ -29,11 +29,13 @@ impl FromStr for IndexAgnosticPath {
     fn from_str(s: &str) -> Result<Self> {
         let parts: Vec<&str> = s.split(HDPath::SEPARATOR).collect();
         if parts.len() != 4 {
-            return Err(CommonError::Unknown);
+            return Err(CommonError::InvalidIndexAgnosticPathWrongLength);
         }
         let key_space_component = parts[3];
         if !key_space_component.ends_with(Self::COMPONENT_SUFFIX) {
-            return Err(CommonError::Unknown);
+            return Err(
+                CommonError::InvalidIndexAgnosticPathDoesNotEndWithSuffix,
+            );
         }
         let key_space_component =
             key_space_component.replace(Self::COMPONENT_SUFFIX, "");
@@ -289,9 +291,34 @@ mod tests {
     }
 
     #[test]
-    fn from_str() {
+    fn from_str_valid() {
         let sut: SUT = "2H/618H/1460H/S?".parse().unwrap();
         assert_eq!(sut, SUT::sample_other());
+    }
+
+    #[test]
+    fn from_str_invalid_no_suffix() {
+        let res = "1H/618H/1460H/S".parse::<SUT>();
+        assert_eq!(
+            res,
+            Err(CommonError::InvalidIndexAgnosticPathDoesNotEndWithSuffix)
+        );
+    }
+
+    #[test]
+    fn from_str_invalid_length() {
+        let test = |s: &str| {
+            let result: Result<SUT> = s.parse();
+            assert_eq!(
+                result,
+                Err(CommonError::InvalidIndexAgnosticPathWrongLength)
+            );
+        };
+        test("1H");
+        test("1H/");
+        test("1H/618H/");
+        test("1H/618H");
+        test("1H/618H/1460H");
     }
 
     #[test]

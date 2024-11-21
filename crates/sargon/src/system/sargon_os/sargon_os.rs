@@ -106,16 +106,16 @@ impl SargonOS {
 
     pub async fn new_wallet(
         &self,
-        should_prederive_instances: bool,
+        should_pre_derive_instances: bool,
     ) -> Result<()> {
-        self.new_wallet_with_mnemonic(None, should_prederive_instances)
+        self.new_wallet_with_mnemonic(None, should_pre_derive_instances)
             .await
     }
 
     pub async fn new_wallet_with_mnemonic(
         &self,
         mnemonic: Option<MnemonicWithPassphrase>,
-        should_prederive_instances: bool,
+        should_pre_derive_instances: bool,
     ) -> Result<()> {
         let (profile, bdfs) =
             self.create_new_profile_with_bdfs(mnemonic).await?;
@@ -132,8 +132,8 @@ impl SargonOS {
             return Err(error);
         }
 
-        if should_prederive_instances {
-            self.prederive_and_fill_cache_with_instances_for_factor_source(
+        if should_pre_derive_instances {
+            self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 bdfs.clone().factor_source.into(),
             )
             .await?;
