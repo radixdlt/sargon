@@ -7,7 +7,7 @@ mod petition_status;
 mod petitions;
 mod role_kind;
 
-pub(crate) use factor_list_kind::*;
+pub use factor_list_kind::*;
 pub(crate) use petition_for_entity::*;
 pub(crate) use petition_for_transaction::*;
 pub(crate) use petition_status::*;

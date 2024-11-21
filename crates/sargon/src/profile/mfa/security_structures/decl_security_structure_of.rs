@@ -109,10 +109,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                     self.with_factor_list_of_kind(list_kind, |factors| factors.into_iter().filter(|f| f.get_factor_source_kind() == factor_source_kind).map(|x| x.clone()).collect())
                 }
 
-                fn all_factors_of_kind_in_any_list(&self, factor_source_kind: FactorSourceKind) -> Vec<$factor> {
-                    self.all_factors_of_kind_in_list_of_kind(factor_source_kind, None)
-                }
-
                 fn number_of_factors_of_kind_in_list_of_kind(&self, factor_source_kind: FactorSourceKind, list_kind: impl Into<Option<FactorListKind>>) -> usize {
                     self.all_factors_of_kind_in_list_of_kind(factor_source_kind, list_kind).len()
                 }
@@ -503,18 +499,6 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
             }
         }
     };
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum FactorRolesValidation {
-    /// Skips validation completely
-    Skip,
-
-    /// Perform validation on the factors
-    Validate {
-        /// If `allow_not_yet_valid` we map `NotYetValid` to `Ok(())`
-        allow_not_yet_valid: bool,
-    },
 }
 
 pub(crate) use decl_role_with_factors_with_role_kind_attrs;

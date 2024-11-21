@@ -52,7 +52,7 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
                 .iter()
                 .map(|f| HierarchicalDeterministicFactorInstance::try_from_factor_instance(f.clone()))
                 .collect::<Result<Vec<HierarchicalDeterministicFactorInstance>>>()?,
-                false
+                FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
         )
     }
 }
@@ -63,7 +63,7 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         assert!(factor.is_securified(), "non securified factor");
-        Self::with_factors_and_role(role, [], 0, [factor], false)
+        Self::with_factors_and_role(role, [], 0, [factor], FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */)
         .expect("Zero threshold with zero threshold factors and one override should not fail.")
     }
 
@@ -72,7 +72,13 @@ impl GeneralRoleWithHierarchicalDeterministicFactorInstances {
         factor: HierarchicalDeterministicFactorInstance,
     ) -> Self {
         assert!(factor.is_securified(), "non securified factor");
-        Self::with_factors_and_role(role, [factor], 1, [], false).expect(
+        Self::with_factors_and_role(
+            role,
+            [factor],
+        1,
+            [],
+            FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
+        ).expect(
             "Single threshold with one threshold factor should not fail.",
         )
     }
@@ -98,7 +104,7 @@ mod test {
                     ],
                 1,
                 [],
-                false
+                FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
             ).unwrap()
         )
     }
@@ -136,7 +142,7 @@ mod test {
                 .collect_vec(),
                 1,
                 [],
-                false
+                FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
             ).unwrap()
         )
     }
@@ -165,7 +171,7 @@ mod test {
                             .unwrap()
                     })
                     .collect_vec(),
-                    false
+                    FactorRolesValidation::Skip, /* TODO: MFA-Rules: change to `Validate` */
             )
             .unwrap()
         )
