@@ -1,5 +1,3 @@
-use sbor::prelude::indexmap::IndexSet;
-
 use crate::prelude::*;
 
 /// Basic security control of an unsecured entity. When said entity

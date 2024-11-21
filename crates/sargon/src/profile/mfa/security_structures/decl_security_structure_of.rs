@@ -106,7 +106,7 @@ macro_rules! decl_role_with_factors_with_role_kind_attrs {
                 }
 
                 // # Panics
-                /// Panics if threshold > threshold_factor.len()
+                /// Panics if `threshold > threshold_factor.len()`
                 ///
                 /// Panics if the same factor is present in both lists
                 ///
@@ -197,7 +197,7 @@ macro_rules! decl_role_with_factors {
 
 
                 /// # Panics
-                /// Panics if threshold > threshold_factor.len()
+                /// Panics if `threshold > factors.len()`
                 ///
                 /// Panics if Factor elements are FactorInstances and the derivation
                 /// path contains a non-securified last path component.

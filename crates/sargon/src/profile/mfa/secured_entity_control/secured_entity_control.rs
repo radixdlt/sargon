@@ -44,7 +44,8 @@ impl HasFactorInstances for SecuredEntityControl {
 
 impl SecuredEntityControl {
     /// # Panics
-    /// Panics if veci is not unsecurified
+    /// Panics if veci is securified, i.e. the FactorInstances is in fact
+    /// not a "VECI".
     pub fn new(
         veci: impl Into<Option<HierarchicalDeterministicFactorInstance>>,
         access_controller_address: AccessControllerAddress,

@@ -8,11 +8,11 @@ use super::{
 use SignaturesCollectingContinuation::*;
 
 /// A coordinator which gathers signatures from several factor sources of different
-/// kinds, in increasing friction order, for many transactions and for
+/// kinds, in decreasing friction order, for many transactions and for
 /// potentially multiple entities and for many factor instances (derivation paths)
 /// for each transaction.
 ///
-/// By increasing friction order we mean, the quickest and easiest to use FactorSourceKind
+/// By decreasing friction order we mean, the quickest and easiest to use FactorSourceKind
 /// is last; namely `DeviceFactorSource`, and the most tedious FactorSourceKind is
 /// first; namely `LedgerFactorSource`, which user might also lack access to.
 pub struct SignaturesCollector<S: Signable> {

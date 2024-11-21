@@ -20,8 +20,7 @@ impl FactorInstances {
         &mut self,
         instances: impl IntoIterator<Item = HierarchicalDeterministicFactorInstance>,
     ) {
-        let instances = instances.into_iter().collect::<IndexSet<_>>(); // remove duplicates
-        self.factor_instances.extend(instances);
+        self.factor_instances.extend(instances.into_iter());
     }
 
     pub fn shift_remove_index(
