@@ -15,6 +15,19 @@ pub struct FactorInstance {
     pub badge: FactorInstanceBadge,
 }
 
+// TODO: It looks like we wont need the `FactorInstanceBadge` type, i.e. that we wont
+// have to handle the scenario of some Instances being physical - not HD, so when
+// we have flattened this `FactorInstance` to only work with `HierarchicalDeterministicFactorInstance`
+// we can update this implementation to be `IsKeySpaceAware` instead of `IsMaybeKeySpaceAware`.
+impl IsMaybeKeySpaceAware for FactorInstance {
+    fn maybe_key_space(&self) -> Option<KeySpace> {
+        match self.badge.clone() {
+            FactorInstanceBadge::Virtual { value } => Some(value.key_space()),
+            FactorInstanceBadge::Physical { .. } => None,
+        }
+    }
+}
+
 impl FactorInstance {
     pub fn new(
         factor_source_id: FactorSourceID,
@@ -39,8 +52,45 @@ impl FactorInstance {
             },
         )
     }
+
+    pub fn try_as_hd_factor_instances(
+        &self,
+    ) -> Result<HierarchicalDeterministicFactorInstance> {
+        HierarchicalDeterministicFactorInstance::try_from_factor_instance(
+            self.clone(),
+        )
+    }
 }
 
+impl From<HierarchicalDeterministicFactorInstance> for FactorInstance {
+    fn from(value: HierarchicalDeterministicFactorInstance) -> Self {
+        Self::with_hierarchical_deterministic_public_key(
+            value.factor_source_id().into(),
+            value.hd_public_key(),
+        )
+    }
+}
+
+impl FactorInstance {
+    pub fn sample_mainnet_account_securified_fs0_idx_0() -> Self {
+        HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0).into()
+    }
+    pub fn sample_mainnet_account_securified_fs0_idx_1() -> Self {
+        HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(1).into()
+    }
+    pub fn sample_mainnet_account_securified_fs0_idx_2() -> Self {
+        HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(2).into()
+    }
+    pub fn sample_mainnet_account_securified_fs1_idx_0() -> Self {
+        HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(0).into()
+    }
+    pub fn sample_mainnet_account_securified_fs1_idx_1() -> Self {
+        HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(1).into()
+    }
+    pub fn sample_mainnet_account_securified_fs1_idx_2() -> Self {
+        HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_1_securified_at_index(2).into()
+    }
+}
 impl HasSampleValues for FactorInstance {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -60,23 +110,36 @@ impl HasSampleValues for FactorInstance {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorInstance;
+
     #[test]
     fn equality() {
-        assert_eq!(FactorInstance::sample(), FactorInstance::sample());
-        assert_eq!(
-            FactorInstance::sample_other(),
-            FactorInstance::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(FactorInstance::sample(), FactorInstance::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_securified() {
+        let suts = vec![
+            SUT::sample_mainnet_account_securified_fs0_idx_0(),
+            SUT::sample_mainnet_account_securified_fs0_idx_1(),
+            SUT::sample_mainnet_account_securified_fs0_idx_2(),
+            SUT::sample_mainnet_account_securified_fs1_idx_0(),
+            SUT::sample_mainnet_account_securified_fs1_idx_1(),
+            SUT::sample_mainnet_account_securified_fs1_idx_2(),
+        ];
+        assert_eq!(HashSet::<SUT>::from_iter(suts.clone()).len(), 6);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = FactorInstance::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

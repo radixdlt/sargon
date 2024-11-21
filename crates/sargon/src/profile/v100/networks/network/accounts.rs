@@ -7,14 +7,6 @@ decl_identified_vec_of!(
     Account
 );
 
-impl OnSameNetworkValidating for Accounts {
-    type Element = Account;
-
-    fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-}
-
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

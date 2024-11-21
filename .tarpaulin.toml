@@ -1,5 +1,10 @@
 [all]
 exclude-files = [
+    # Skip Uniffi crate, we rely on `crates/sargon` AND hosts being tested
+    "crates/sargon-uniffi/*",
+    # Skip Uniffi crate, we rely on hosts being tested
+    "crates/sargon-uniffi-conversion-macros/*",
+
     "crates/sargon/src/lib.rs",
     # Too many false negatives (macro usage)
     "crates/sargon/src/profile/v100/address/non_fungible_resource_address.rs",

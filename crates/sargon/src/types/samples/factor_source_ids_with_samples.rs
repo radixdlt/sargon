@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub(crate) static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
-    [FactorSourceIDFromHash; 11],
+    [FactorSourceIDFromHash; 12],
 > = Lazy::new(|| {
     [
         FactorSourceIDFromHash::sample_device(),
@@ -15,6 +15,7 @@ pub(crate) static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
         FactorSourceIDFromHash::sample_off_device_other(),
         FactorSourceIDFromHash::sample_security_questions(),
         FactorSourceIDFromHash::sample_device_other(),
+        FactorSourceIDFromHash::sample_security_questions_other(),
     ]
 });
 
@@ -63,8 +64,20 @@ pub(crate) static MNEMONIC_BY_ID_MAP: Lazy<
             MnemonicWithPassphrase::sample_security_questions(),
         ),
         (
+            FactorSourceIDFromHash::sample_security_questions_other(),
+            MnemonicWithPassphrase::sample_security_questions_other(),
+        ),
+        (
             FactorSourceIDFromHash::sample_device_other(),
             MnemonicWithPassphrase::sample_device_other(),
+        ),
+        (
+            FactorSourceIDFromHash::sample_device_12_words(),
+            MnemonicWithPassphrase::sample_device_12_words(),
+        ),
+        (
+            FactorSourceIDFromHash::sample_device_12_words_other(),
+            MnemonicWithPassphrase::sample_device_12_words_other(),
         ),
     ])
 });
@@ -74,10 +87,39 @@ impl FactorSourceIDFromHash {
         ALL_FACTOR_SOURCE_ID_SAMPLES[index]
     }
 
+    pub fn maybe_sample_associated_mnemonic(
+        &self,
+    ) -> Option<MnemonicWithPassphrase> {
+        MNEMONIC_BY_ID_MAP.get(self).cloned()
+    }
+
     pub fn sample_associated_mnemonic(&self) -> MnemonicWithPassphrase {
-        MNEMONIC_BY_ID_MAP
-            .get(self)
+        self.maybe_sample_associated_mnemonic()
             .expect("Sample mnemonic with passphrase for id {} not found")
-            .clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stable_id_of_security_questions() {
+        assert_eq!(
+            FactorSource::sample_security_questions_other().id_from_hash(),
+            FactorSourceIDFromHash::sample_security_questions_other(),
+        );
+    }
+
+    #[test]
+    fn test_id_of_sample_factors_matches_keyed_values_id() {
+        for (key, value) in MNEMONIC_BY_ID_MAP.iter() {
+            let kind = key.kind;
+            let id_of_keyed_value =
+                FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                    kind, value,
+                );
+            assert_eq!(key, &id_of_keyed_value);
+        }
     }
 }

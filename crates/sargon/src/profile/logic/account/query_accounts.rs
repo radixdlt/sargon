@@ -7,6 +7,14 @@ impl Profile {
         self.current_network().map(|n| n.accounts.visible())
     }
 
+    /// Returns **ALL** accounts - including hidden/deleted ones, on **ALL** networks.
+    pub fn accounts_on_all_networks_including_hidden(&self) -> Accounts {
+        self.networks
+            .iter()
+            .flat_map(|n| n.accounts.clone().into_iter())
+            .collect::<Accounts>()
+    }
+
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,
@@ -31,6 +39,80 @@ impl Profile {
             }
         }
         Err(CommonError::UnknownAccount)
+    }
+
+    pub fn get_entities_of_kind_on_network_in_key_space(
+        &self,
+        entity_kind: CAP26EntityKind,
+        network_id: NetworkID,
+        key_space: KeySpace,
+    ) -> IndexSet<AccountOrPersona> {
+        self.networks
+            .get_id(network_id)
+            .map(|n| {
+                n.get_entities_of_kind_in_key_space(entity_kind, key_space)
+            })
+            .unwrap_or_default()
+    }
+
+    pub fn get_unsecurified_entities_of_kind_on_network(
+        &self,
+        entity_kind: CAP26EntityKind,
+        network_id: NetworkID,
+    ) -> IndexSet<UnsecurifiedEntity> {
+        self.get_entities_of_kind_on_network_in_key_space(
+            entity_kind,
+            network_id,
+            // We don't support unhardened paths really. CAP26 dictates all path components are hardened.
+            // And all out BIP44 LIKE paths from Olymlia are (contrary to BIP44) in fact hardened
+            KeySpace::Unsecurified { is_hardened: true },
+        )
+        .into_iter()
+        .map(|e: AccountOrPersona| {
+            let factor_instance = match e.security_state() {
+                EntitySecurityState::Unsecured { value: uec } => {
+                    uec.transaction_signing.clone()
+                }
+                _ => unreachable!(
+                    "Should already have filtered out securified entities"
+                ),
+            };
+            UnsecurifiedEntity::new(e.address(), factor_instance)
+        })
+        .collect()
+    }
+
+    pub fn unsecurified_accounts_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<UnsecurifiedEntity> {
+        self.get_unsecurified_entities_of_kind_on_network(
+            CAP26EntityKind::Account,
+            network_id,
+        )
+    }
+
+    pub fn get_securified_entities_of_kind_on_network<
+        E: IsSecurifiedEntity + HasEntityKind + TryFrom<AccountOrPersona>,
+    >(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<E> {
+        self.get_entities_of_kind_on_network_in_key_space(
+            E::entity_kind(),
+            network_id,
+            KeySpace::Securified,
+        )
+        .into_iter()
+        .flat_map(|x| E::try_from(x).ok())
+        .collect()
+    }
+
+    pub fn securified_accounts_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<SecurifiedAccount> {
+        self.get_securified_entities_of_kind_on_network(network_id)
     }
 }
 

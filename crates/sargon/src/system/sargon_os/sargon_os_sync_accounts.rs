@@ -25,7 +25,7 @@ impl SargonOS {
                 .iter()
                 .filter_map(|(account_address, is_deleted)| {
                     if *is_deleted {
-                        Some(account_address.clone())
+                        Some(*account_address)
                     } else {
                         None
                     }
@@ -172,8 +172,8 @@ mod tests {
             non_fungible_ids: deleted_account_addresses
                 .iter()
                 .map(|a| {
-                    let local_id = NonFungibleLocalId::from(a.clone());
-                    let parent = Address::from(a.clone());
+                    let local_id = NonFungibleLocalId::from(*a);
+                    let parent = Address::from(*a);
                     StateNonFungibleLocationResponseItem {
                         non_fungible_id: local_id,
                         is_burned: false,

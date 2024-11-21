@@ -78,6 +78,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "🚢  Setting 'useLocalFramework = false' for release"
+          sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
+
           # We have .gitigored Sargon.swift because we dont need it in git history, but we
           # need it for this release, so we must FORCE add it (since it is ignored).
           echo "🚢  Staging changed files"
@@ -86,7 +89,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-          echo "🚢  Git commiting changes"
+          echo "🚢  Git committing changes"
           git status
           git commit -m "Release of '$NEXT_TAG'" \
                      -m "Updated Package.swift with new checksum and path to zip on Github, and maybe apple/Sources/UniFFI/Sargon.swift." \
@@ -113,8 +116,7 @@ jobs:
           # Moving the artifact to the current directory.
           mv target/swift/$ARTIFACT_FILE .
 
-          GH_RELEASE_TITLE="v$NEXT_TAG"
-          gh release create $NEXT_TAG $ARTIFACT_FILE --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'
+          gh release create $NEXT_TAG $ARTIFACT_FILE --generate-notes --notes-start-tag $LAST_TAG --title "v$NEXT_TAG"
         env:
           LAST_TAG: ${{ steps.tags.outputs.LAST_TAG }}
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}

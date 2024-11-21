@@ -461,7 +461,9 @@ mod tests {
         let q3 = Q::first_school();
         let a3 = "c";
 
+        #[allow(clippy::upper_case_acronyms)]
         type QAS = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers;
+        #[allow(clippy::upper_case_acronyms)]
         type QA = Security_NOT_PRODUCTION_READY_QuestionAndAnswer;
         let qas = QAS::from_iter([
             QA::new(q0, a0),

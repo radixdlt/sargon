@@ -65,32 +65,33 @@ impl HasSampleValues for U30 {
 mod tests {
     use super::*;
 
-    type Sut = U30;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = U30;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample(),);
-        assert_eq!(Sut::sample_other(), Sut::sample_other(),);
+        assert_eq!(SUT::sample(), SUT::sample(),);
+        assert_eq!(SUT::sample_other(), SUT::sample_other(),);
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other(),);
+        assert_ne!(SUT::sample(), SUT::sample_other(),);
     }
 
     #[test]
     fn ord() {
-        assert!(Sut::sample() < Sut::sample_other());
+        assert!(SUT::sample() < SUT::sample_other());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::<Sut>::from_iter([
-                Sut::sample(),
-                Sut::sample(),
-                Sut::sample_other(),
-                Sut::sample_other(),
+            HashSet::<SUT>::from_iter([
+                SUT::sample(),
+                SUT::sample(),
+                SUT::sample_other(),
+                SUT::sample_other(),
             ])
             .len(),
             2
@@ -99,72 +100,72 @@ mod tests {
 
     #[test]
     fn try_from_valid() {
-        assert_eq!(*Sut::try_from(0u32).unwrap(), 0);
-        assert_eq!(*Sut::try_from(1u32).unwrap(), 1);
-        assert_eq!(*Sut::try_from(Sut::MAX - 1).unwrap(), Sut::MAX - 1);
-        assert_eq!(*Sut::try_from(Sut::MAX).unwrap(), Sut::MAX);
+        assert_eq!(*SUT::try_from(0u32).unwrap(), 0);
+        assert_eq!(*SUT::try_from(1u32).unwrap(), 1);
+        assert_eq!(*SUT::try_from(SUT::MAX - 1).unwrap(), SUT::MAX - 1);
+        assert_eq!(*SUT::try_from(SUT::MAX).unwrap(), SUT::MAX);
     }
 
     #[test]
     fn try_from_overflow() {
-        assert!(Sut::try_from(Sut::MAX + 1).is_err());
+        assert!(SUT::try_from(SUT::MAX + 1).is_err());
     }
 
     #[test]
     fn add_zero() {
-        let sut = Sut::new(42);
-        assert_eq!(sut.checked_add(&Sut::ZERO).unwrap(), sut);
+        let sut = SUT::new(42);
+        assert_eq!(sut.checked_add(&SUT::ZERO).unwrap(), sut);
     }
 
     #[test]
     fn add_zero_to_max_is_ok() {
-        let sut = Sut::try_from(Sut::MAX).unwrap();
-        assert_eq!(sut.checked_add(&Sut::ZERO).unwrap(), sut,);
+        let sut = SUT::try_from(SUT::MAX).unwrap();
+        assert_eq!(sut.checked_add(&SUT::ZERO).unwrap(), sut,);
     }
 
     #[test]
     fn add_max_to_zero_is_ok() {
-        let sut = Sut::ZERO;
+        let sut = SUT::ZERO;
         assert_eq!(
-            sut.checked_add_n(Sut::MAX).unwrap(),
-            Sut::try_from(Sut::MAX).unwrap()
+            sut.checked_add_n(SUT::MAX).unwrap(),
+            SUT::try_from(SUT::MAX).unwrap()
         );
     }
 
     #[test]
     fn add_one() {
-        let sut = Sut::new(42);
-        assert_eq!(sut.checked_add_one().unwrap(), Sut::new(43));
+        let sut = SUT::new(42);
+        assert_eq!(sut.checked_add_one().unwrap(), SUT::new(43));
     }
 
     #[test]
     fn add_one_to_max_minus_1_is_max() {
-        let sut = Sut::try_from(Sut::MAX - 1).unwrap();
+        let sut = SUT::try_from(SUT::MAX - 1).unwrap();
         assert_eq!(
-            sut.checked_add(&Sut::ONE).unwrap(),
-            Sut::try_from(Sut::MAX).unwrap()
+            sut.checked_add(&SUT::ONE).unwrap(),
+            SUT::try_from(SUT::MAX).unwrap()
         );
     }
 
     #[test]
     fn add_one_to_two() {
-        assert_eq!(Sut::TWO.checked_add(&Sut::ONE).unwrap(), Sut::THREE);
+        assert_eq!(SUT::TWO.checked_add(&SUT::ONE).unwrap(), SUT::THREE);
     }
 
     #[test]
     fn addition_overflow_base_max() {
-        let sut = Sut::try_from(Sut::MAX).unwrap();
+        let sut = SUT::try_from(SUT::MAX).unwrap();
         assert!(matches!(
-            sut.checked_add(&Sut::ONE),
+            sut.checked_add(&SUT::ONE),
             Err(CommonError::IndexOverflow)
         ));
     }
 
     #[test]
     fn addition_overflow_add_max() {
-        let sut = Sut::ONE;
+        let sut = SUT::ONE;
         assert!(matches!(
-            sut.checked_add(&Sut::try_from(Sut::MAX).unwrap()),
+            sut.checked_add(&SUT::try_from(SUT::MAX).unwrap()),
             Err(CommonError::IndexOverflow)
         ));
     }

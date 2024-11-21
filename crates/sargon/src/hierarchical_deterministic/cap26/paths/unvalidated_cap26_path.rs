@@ -36,13 +36,11 @@ impl TryFrom<HDPath> for UnvalidatedCAP26Path {
                 bad_value: u32::from(components[1].index_in_local_key_space()),
             });
         }
-        let network_id =
-            NetworkID::try_from(components[2].index_in_local_key_space())?;
-        let entity_kind = CAP26EntityKind::try_from(
-            components[3].index_in_local_key_space(),
-        )?;
-        let key_kind =
-            CAP26KeyKind::try_from(components[4].index_in_local_key_space())?;
+        let network_id = NetworkID::try_from(components[2])?;
+
+        let entity_kind = CAP26EntityKind::try_from(components[3])?;
+        let key_kind = CAP26KeyKind::try_from(components[4])?;
+
         let hardened = Hardened::try_from(components[5])?;
 
         Ok(UnvalidatedCAP26Path {
@@ -58,18 +56,19 @@ impl TryFrom<HDPath> for UnvalidatedCAP26Path {
 mod tests {
     use super::*;
 
-    type Sut = UnvalidatedCAP26Path;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = UnvalidatedCAP26Path;
 
     #[test]
     fn from_str_invalid_purpose() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44/1022H/1H/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)
         ));
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/43H/1022H/1H/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::BIP44PurposeNotFound { bad_value: _ })
@@ -79,13 +78,13 @@ mod tests {
     #[test]
     fn from_str_invalid_cointype() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022/1H/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)
         ));
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/55555H/1H/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::CoinTypeNotFound { bad_value: _ })
@@ -95,14 +94,14 @@ mod tests {
     #[test]
     fn from_str_invalid_network_id_unknown() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/5555/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)
         ));
 
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/200H/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::UnknownNetworkID { bad_value: _ })
@@ -112,14 +111,14 @@ mod tests {
     #[test]
     fn from_str_invalid_network_id_too_large() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/5555/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)
         ));
 
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/5555H/525H/1460H/0H").unwrap()
             ),
             Err(CommonError::InvalidNetworkIDExceedsLimit { bad_value: 5555 })
@@ -129,13 +128,13 @@ mod tests {
     #[test]
     fn from_str_invalid_entity_kind() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/1H/525/1460H/0H").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)
         ));
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/1H/333H/1460H/0H").unwrap()
             ),
             Err(CommonError::InvalidEntityKind { bad_value: _ })
@@ -145,14 +144,14 @@ mod tests {
     #[test]
     fn from_str_invalid_key_kind() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/1H/525H/1460/0H").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)
         ));
 
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/1H/525H/22H/0H").unwrap()
             ),
             Err(CommonError::InvalidKeyKind { bad_value: _ })
@@ -162,7 +161,7 @@ mod tests {
     #[test]
     fn from_str_invalid_index_not_hardened() {
         assert!(matches!(
-            Sut::try_from(
+            SUT::try_from(
                 HDPath::from_str("m/44H/1022H/1H/525/1460H/0").unwrap()
             ),
             Err(CommonError::NotAllComponentsAreHardened)

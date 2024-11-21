@@ -68,7 +68,8 @@ impl PetitionForFactorsStatus {
 mod tests {
     use super::*;
 
-    type Sut = PetitionForFactorsStatus;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForFactorsStatus;
     use super::PetitionFactorsStatusFinished::*;
     use super::PetitionForFactorsStatus::*;
 
@@ -77,7 +78,7 @@ mod tests {
         let invalid = Some(1);
         let irrelevant = None;
         assert_eq!(
-            Sut::aggregate(
+            SUT::aggregate(
                 vec![InProgress, Finished(Fail), Finished(Success)],
                 irrelevant,
                 invalid,
@@ -92,7 +93,7 @@ mod tests {
         let pending = Some(1);
         let irrelevant = None;
         assert_eq!(
-            Sut::aggregate(
+            SUT::aggregate(
                 vec![InProgress, Finished(Success), Finished(Success)],
                 irrelevant,
                 irrelevant,
@@ -107,7 +108,7 @@ mod tests {
         let valid = Some(1);
         let irrelevant = None;
         assert_eq!(
-            Sut::aggregate(
+            SUT::aggregate(
                 vec![Finished(Success), Finished(Success)],
                 valid,
                 irrelevant,

@@ -36,16 +36,16 @@ macro_rules! decl_role_with_factors_additional_impl {
         $factor: ident
     ) => {}
 }
-
 pub(crate) use decl_role_with_factors_additional_impl;
 
-macro_rules! decl_role_with_factors {
+macro_rules! decl_role_with_factors_with_role_kind_attrs {
     (
         $(
             #[doc = $expr: expr]
         )*
         $role: ident,
-        $factor: ident
+        $factor: ident,
+        $($extra_field_name:ident: $extra_field_type:ty,)*
     ) => {
         paste! {
             $(
@@ -76,18 +76,57 @@ macro_rules! decl_role_with_factors {
                 /// single of these factor which can perform the function of this role,
                 /// disregarding of `threshold`.
                 pub override_factors: Vec<$factor>,
+
+                $(pub $extra_field_name: $extra_field_type,)*
+            }
+
+
+            impl RoleWithFactors<$factor> for [< $role RoleWith $factor s >] {
+
+                fn get_threshold_factors(&self) -> &Vec<$factor> {
+                    &self.threshold_factors
+                }
+
+                fn get_threshold(&self) -> u8 {
+                    self.threshold
+                }
+
+                fn get_override_factors(&self) -> &Vec<$factor> {
+                    &self.override_factors
+                }
             }
 
             impl [< $role RoleWith $factor s >] {
+
+                pub fn unique_factors(&self) -> IndexSet<$factor> {
+                    self.all_factors().into_iter().map(|x| x.clone()).collect()
+                }
+
                 // # Panics
-                /// Panics if threshold > threshold_factor.len()
+                /// Panics if `threshold > threshold_factor.len()`
                 ///
                 /// Panics if the same factor is present in both lists
-                pub fn new(
+                ///
+                /// Panics if Factor elements are FactorInstances and the derivation
+                /// path contains a non-securified last path component.
+                pub fn with_factors_and_role(
+                    $($extra_field_name: $extra_field_type,)*
                     threshold_factors: impl IntoIterator<Item = $factor>,
                     threshold: u8,
-                    override_factors: impl IntoIterator<Item = $factor>
+                    override_factors: impl IntoIterator<Item = $factor>,
                 ) -> Result<Self> {
+
+                    let assert_is_securified = |factors: &Vec::<$factor>| -> Result<()> {
+                        let trait_objects: Vec<&dyn IsMaybeKeySpaceAware> = factors.iter().map(|x| x as &dyn IsMaybeKeySpaceAware).collect();
+                        if trait_objects.iter()
+                        .filter_map(|x| x.maybe_key_space())
+                        .any(|x| x != KeySpace::Securified) {
+                            return Err(crate::CommonError::IndexUnsecurifiedExpectedSecurified)
+                        }
+                        Ok(())
+                    };
+
+
                     let threshold_factors = threshold_factors.into_iter().collect_vec();
 
                     if threshold_factors.len() < threshold as usize {
@@ -98,6 +137,9 @@ macro_rules! decl_role_with_factors {
                     }
 
                     let override_factors = override_factors.into_iter().collect_vec();
+
+                    assert_is_securified(&threshold_factors)?;
+                    assert_is_securified(&override_factors)?;
 
                     if !HashSet::<$factor>::from_iter(threshold_factors.clone())
                             .intersection(&HashSet::<$factor>::from_iter(override_factors.clone()))
@@ -110,22 +152,95 @@ macro_rules! decl_role_with_factors {
                         threshold_factors,
                         threshold,
                         override_factors,
+                        $($extra_field_name,)*
                     })
                 }
-
-                pub fn all_factors(&self) -> HashSet<&$factor> {
-                    let mut factors = HashSet::from_iter(self.threshold_factors.iter());
-                    factors.extend(self.override_factors.iter());
-                    factors
-                }
             }
-
-            decl_role_with_factors_additional_impl!($role, $factor);
         }
     };
 }
 
+pub(crate) use decl_role_with_factors_with_role_kind_attrs;
+
+macro_rules! decl_role_with_factors {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $role: ident,
+        $factor: ident
+    ) => {
+
+        decl_role_with_factors_with_role_kind_attrs!(
+            $(
+                #[doc = $expr]
+            )*
+            $role,
+            $factor,
+        );
+
+        paste! {
+
+           impl [< $role RoleWith $factor s >] {
+
+                pub fn new(
+                    threshold_factors: impl IntoIterator<Item = $factor>,
+                    threshold: u8,
+                    override_factors: impl IntoIterator<Item = $factor>
+                ) -> Result<Self> {
+                    Self::with_factors_and_role(threshold_factors, threshold, override_factors)
+                }
+
+
+                /// # Panics
+                /// Panics if `threshold > factors.len()`
+                ///
+                /// Panics if Factor elements are FactorInstances and the derivation
+                /// path contains a non-securified last path component.
+                pub fn threshold_factors_only(
+                    factors: impl IntoIterator<Item = $factor>,
+                    threshold: u8,
+                ) -> Result<Self> {
+                    Self::new(factors, threshold, [])
+                }
+
+                /// # Panics
+                /// Panics if Factor elements are FactorInstances and the derivation
+                /// path contains a non-securified last path component.
+                pub fn override_only(
+                    factors: impl IntoIterator<Item = $factor>,
+                ) -> Result<Self> {
+                    Self::new([], 0, factors)
+                }
+            }
+        }
+
+        decl_role_with_factors_additional_impl!($role, $factor);
+    };
+}
+
 pub(crate) use decl_role_with_factors;
+
+macro_rules! decl_role_runtime_kind_with_factors {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $role: ident,
+        $factor: ident
+    ) => {
+        decl_role_with_factors_with_role_kind_attrs!(
+            $(
+                #[doc = $expr]
+            )*
+            $role,
+            $factor,
+            role: RoleKind,
+        );
+    };
+}
+
+pub(crate) use decl_role_runtime_kind_with_factors;
 
 macro_rules! decl_matrix_of_factors {
     (
@@ -162,6 +277,7 @@ macro_rules! decl_matrix_of_factors {
             )]
             #[serde(rename_all = "camelCase")]
             pub struct [< MatrixOf $factor s >] {
+
                 /// Used for Signing transactions
                 pub primary_role: [< PrimaryRoleWith $factor s >],
 
@@ -178,12 +294,12 @@ macro_rules! decl_matrix_of_factors {
                     primary_role: [< PrimaryRoleWith $factor s >],
                     recovery_role: [< RecoveryRoleWith $factor s >],
                     confirmation_role: [< ConfirmationRoleWith $factor s >],
-                ) -> Self {
-                    Self {
+                ) -> Result<Self> {
+                    Ok(Self {
                         primary_role,
                         recovery_role,
                         confirmation_role,
-                    }
+                    })
                 }
 
                 pub fn all_factors(&self) -> HashSet<&$factor> {
@@ -192,6 +308,14 @@ macro_rules! decl_matrix_of_factors {
                     factors.extend(self.recovery_role.all_factors());
                     factors.extend(self.confirmation_role.all_factors());
                     factors
+                }
+
+                pub fn get_role_of_kind(&self, role_kind: RoleKind) -> &dyn RoleWithFactors<$factor> {
+                    match role_kind {
+                        RoleKind::Confirmation => &self.confirmation_role,
+                        RoleKind::Primary => &self.primary_role,
+                        RoleKind::Recovery => &self.recovery_role,
+                    }
                 }
             }
         }

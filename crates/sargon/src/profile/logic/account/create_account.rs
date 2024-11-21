@@ -1,32 +1,33 @@
 use crate::prelude::*;
-use std::future::Future;
+use std::{future::Future, pin::Pin};
 
 impl Profile {
-    /// Creates a new non securified account **WITHOUT** adding it to Profile, using the *main* "Babylon"
-    /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
-    ///
-    /// If you want to add it to Profile, call `add_account(account)`
-    ///
-    /// Returns a tuple `(FactorSourceID, Account)` where FactorSourceID is the ID
-    /// of the FactorSource used to create the account.
-    pub async fn create_unsaved_account<F, Fut>(
+    pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(
         &self,
+        factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
-        load_private_device_factor_source: F,
-    ) -> Result<(FactorSourceID, Account)>
-    where
-        F: FnOnce(DeviceFactorSource) -> Fut,
-        Fut: Future<
-            Output = Result<PrivateHierarchicalDeterministicFactorSource>,
-        >,
-    {
-        let (factor_source_id, accounts) = self
-            .create_unsaved_accounts(
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+    ) -> Result<(
+        FactorSourceID,
+        Account,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        let (
+            factor_source_id,
+            accounts,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = self
+            .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+                factor_source,
                 network_id,
                 1,
+                factor_instances_cache_client,
+                key_derivation_interactors,
                 |_| name.clone(),
-                load_private_device_factor_source,
             )
             .await?;
 
@@ -35,75 +36,86 @@ impl Profile {
             .last()
             .expect("Should have created one account");
 
-        Ok((factor_source_id, account))
+        Ok((
+            factor_source_id,
+            account,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ))
     }
 
-    /// Creates many new non securified accounts **WITHOUT** adding them to Profile, using the *main* "Babylon"
-    /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
-    ///
-    /// If you want to add the accounts to Profile, call `add_accounts(accounts)`
-    ///
-    /// Returns a tuple `(FactorSourceID, Accounts)` where FactorSourceID is the ID
-    /// of the FactorSource used to create the accounts.
-    pub async fn create_unsaved_accounts<F, Fut>(
+    pub async fn create_unsaved_accounts_with_factor_source(
         &self,
+        factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
-        load_private_device_factor_source: F,
-    ) -> Result<(FactorSourceID, Accounts)>
-    where
-        F: FnOnce(DeviceFactorSource) -> Fut,
-        Fut: Future<
-            Output = Result<PrivateHierarchicalDeterministicFactorSource>,
-        >,
-    {
-        let index = self
-            .next_derivation_index_for_entity(EntityKind::Account, network_id);
+    ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
+        self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+            factor_source,
+            network_id,
+            count,
+            factor_instances_cache_client,
+            key_derivation_interactors,
+            get_name,
+        )
+        .await
+        .map(|(x, y, z, _)| (x, y, z))
+    }
 
-        assert!((index as i64) - (count as i64) < (u32::MAX as i64)); // unlikely edge case
-
-        let bdfs = self.bdfs();
-        let count = count as u32;
-
+    pub async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
+        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+    ) -> Result<(
+        FactorSourceID,
+        Accounts,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
         let number_of_accounts_on_network = self
             .networks
             .get_id(network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
-        let indices = index..index + count;
-        let indices = indices
-            .into_iter()
-            .map(|i| Unsecurified::from_local_key_space(i, IsHardened(true)))
-            .collect::<Result<Vec<Unsecurified>>>()?;
-        let indices =
-            indices.into_iter().map(HDPathComponent::from).collect_vec();
+        let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
+                factor_source,
+                network_id,
+                count,
+                factor_instances_cache_client,
+                key_derivation_interactors,
+                get_name,
+            )
+            .await?;
 
-        let factor_instances = load_private_device_factor_source(bdfs.clone())
-            .await
-            .map(|p| {
-                assert_eq!(p.factor_source, bdfs);
-                p.derive_entity_creation_factor_instances::<AccountPath>(
-                    network_id, indices,
-                )
-            })?;
-
-        let accounts = factor_instances
+        let accounts_with_appearance_ids_set = accounts
             .into_iter()
-            .map(|f: HDFactorInstanceTransactionSigning<AccountPath>| {
-                let idx = u32::from(f.path.index().index_in_local_key_space());
-                let name = get_name(idx);
+            .enumerate()
+            .map(|(offset, account)| {
+                let mut account = account;
                 let appearance_id =
                     AppearanceID::from_number_of_accounts_on_network(
-                        (idx as usize) + number_of_accounts_on_network,
+                        number_of_accounts_on_network + offset,
                     );
-
-                Account::new(f, name, appearance_id)
+                account.appearance_id = appearance_id;
+                account
             })
             .collect::<Accounts>();
 
-        Ok((bdfs.factor_source_id(), accounts))
+        Ok((
+            factor_source_id,
+            accounts_with_appearance_ids_set,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ))
     }
 }
 
@@ -113,18 +125,33 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_create_unsaved_accounts() {
+        let fs = PrivateHierarchicalDeterministicFactorSource::sample();
         let sut = Profile::from_device_factor_source(
-            PrivateHierarchicalDeterministicFactorSource::sample()
-                .factor_source,
+            fs.factor_source.clone(),
             HostId::sample(),
             HostInfo::sample(),
             None::<Accounts>,
         );
 
-        let (_, accounts) = sut
-            .create_unsaved_accounts(
+        let cache_client = Arc::new(FactorInstancesCacheClient::in_memory());
+        let (secure_storage_client, _) = SecureStorageClient::ephemeral();
+        secure_storage_client
+            .save_private_hd_factor_source(&fs)
+            .await
+            .unwrap();
+        let secure_storage_client = Arc::new(secure_storage_client);
+        let interactors =
+            Arc::new(TestDerivationInteractors::with_secure_storage(
+                secure_storage_client.clone(),
+            ));
+
+        let (_, accounts, consumer) = sut
+            .create_unsaved_accounts_with_factor_source(
+                fs.factor_source.clone().into(),
                 NetworkID::Mainnet,
                 3,
+                cache_client,
+                interactors,
                 |i| {
                     DisplayName::new(if i == 0 {
                         "Alice"
@@ -135,12 +162,10 @@ mod tests {
                     })
                     .unwrap()
                 },
-                async move |_| {
-                    Ok(PrivateHierarchicalDeterministicFactorSource::sample())
-                },
             )
             .await
             .unwrap();
+        consumer.consume().await.unwrap();
 
         pretty_assertions::assert_eq!(
             accounts,

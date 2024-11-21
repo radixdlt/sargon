@@ -14,11 +14,26 @@ pub enum EventKind {
     /// An existing account has been updated
     AccountUpdated,
 
+    /// Existing accounts have been updated
+    AccountsUpdated,
+
     /// SargonOS did boot.
     Booted,
 
     /// Current Gateway changed
     GatewayChangedCurrent,
+
+    /// Profile updated with a new persona.
+    PersonaAdded,
+
+    /// Profile updated with new personas.
+    PersonasAdded,
+
+    /// An existing persona has been updated
+    PersonaUpdated,
+
+    /// Existing personas have been updated
+    PersonasUpdated,
 
     /// Profile was saved.
     ProfileSaved,
@@ -64,6 +79,27 @@ impl EventKind {
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
+                | AccountsUpdated
+                | GatewayChangedCurrent
+        )
+    }
+
+    /// If hosts should fetch persona list due to an action which triggered the
+    /// event of this kind to be emitted.
+    ///
+    /// E.g. if a persona was saved into Profile, an event with the kind
+    /// `EventKind::PersonaAdded` will be emitted, which hosts SHOULD react to
+    /// and thus fetch the persona list and possibly update UI.
+    pub fn affects_current_personas(&self) -> bool {
+        use EventKind::*;
+        matches!(
+            *self,
+            Booted
+                | ProfileImported
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated
+                | PersonasUpdated
                 | GatewayChangedCurrent
         )
     }
@@ -159,13 +195,47 @@ mod tests {
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
+                | AccountsUpdated
                 | GatewayChangedCurrent => assert!(affects),
                 ProfileUsedOnOtherDevice
                 | ProfileSaved
                 | SecurityStructureAdded
                 | FactorSourceAdded
                 | FactorSourcesAdded
-                | FactorSourceUpdated => {
+                | FactorSourceUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonasUpdated
+                | PersonaUpdated => {
+                    assert!(!affects)
+                }
+            })
+    }
+
+    #[test]
+    fn test_event_kind_affects_current_personas() {
+        use EventKind::*;
+        SUT::all()
+            .into_iter()
+            .map(|sut| (sut, sut.affects_current_personas()))
+            .for_each(|(sut, affects)| match sut {
+                Booted
+                | ProfileImported
+                | PersonaAdded
+                | PersonasAdded
+                | PersonasUpdated
+                | PersonaUpdated
+                | GatewayChangedCurrent => assert!(affects),
+                ProfileUsedOnOtherDevice
+                | ProfileSaved
+                | SecurityStructureAdded
+                | FactorSourceAdded
+                | FactorSourcesAdded
+                | FactorSourceUpdated
+                | AccountAdded
+                | AccountsAdded
+                | AccountUpdated
+                | AccountsUpdated => {
                     assert!(!affects)
                 }
             })
@@ -189,7 +259,12 @@ mod tests {
                 | SecurityStructureAdded
                 | FactorSourcesAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | AccountsUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonasUpdated
+                | PersonaUpdated => assert!(!affects),
             })
     }
 
@@ -211,7 +286,12 @@ mod tests {
                 | GatewayChangedCurrent
                 | FactorSourcesAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | AccountsUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated
+                | PersonasUpdated => assert!(!affects),
             })
     }
 
@@ -233,7 +313,12 @@ mod tests {
                 | FactorSourcesAdded
                 | SecurityStructureAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | AccountsUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated
+                | PersonasUpdated => assert!(!affects),
             })
     }
 
@@ -254,7 +339,12 @@ mod tests {
                 | SecurityStructureAdded
                 | AccountAdded
                 | AccountsAdded
-                | AccountUpdated => assert!(!affects),
+                | AccountUpdated
+                | AccountsUpdated
+                | PersonaAdded
+                | PersonasAdded
+                | PersonaUpdated
+                | PersonasUpdated => assert!(!affects),
             })
     }
 }

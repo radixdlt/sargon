@@ -6,6 +6,10 @@ pub trait BaseIsFactorSource:
     fn factor_source_kind(&self) -> FactorSourceKind;
     fn factor_source_id(&self) -> FactorSourceID;
 
+    fn id_from_hash(&self) -> FactorSourceIDFromHash {
+        FactorSourceIDFromHash::try_from(self.factor_source_id()).unwrap()
+    }
+
     fn common_properties(&self) -> FactorSourceCommon;
     fn set_common_properties(&mut self, updated: FactorSourceCommon);
 

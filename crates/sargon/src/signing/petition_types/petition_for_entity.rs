@@ -394,11 +394,11 @@ impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
                 "Grace",
-                AccountAddress::sample_other(),
+                HierarchicalDeterministicFactorInstance::sample_fii10(),
                 || {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                         CAP26EntityKind::Account,
-                        Hardened::from_local_key_space_unsecurified(6u32).unwrap(),
+                        Hardened::from_local_key_space(6u32, IsSecurified(true)).unwrap(),
                     ))
                 },
             ),
@@ -424,27 +424,24 @@ impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = PetitionForEntity<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForEntity<TransactionIntentHash>;
 
     #[test]
     fn multiple_device_as_override_skipped_both_is_invalid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
         let matrix =
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only([d0.clone(), d1.clone()]);
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0, [d0.clone(), d1.clone()]).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -456,25 +453,21 @@ mod tests {
 
     #[test]
     fn multiple_device_as_override_skipped_one_is_valid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
         let matrix =
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(RoleKind::Primary, [], 0,
                 [d0.clone(), d1.clone()]
-            );
+            ).unwrap();
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
         let tx = TransactionIntentHash::new(
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d0.factor_source_id()),
         );
@@ -483,18 +476,15 @@ mod tests {
 
     #[test]
     fn multiple_device_as_threshold_skipped_both_is_invalid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            RoleKind::Primary,
             [d0.clone(), d1.clone()],
-            2,
+            2,[]
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -502,7 +492,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -513,18 +503,16 @@ mod tests {
 
     #[test]
     fn two_device_as_threshold_of_2_skipped_one_is_invalid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            RoleKind::Primary,
             [d0.clone(), d1.clone()],
             2,
+            []
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -532,7 +520,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut
             .invalid_transaction_if_neglected_factors(IndexSet::just(
@@ -545,18 +533,16 @@ mod tests {
 
     #[test]
     fn two_device_as_threshold_of_1_skipped_one_is_valid() {
-        let d0 = HierarchicalDeterministicFactorInstance::sample_fi0(
-            CAP26EntityKind::Account,
-        );
-        let d1 = HierarchicalDeterministicFactorInstance::sample_fi10(
-            CAP26EntityKind::Account,
-        );
+        let d0 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let d1 = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_securified_at_index(0);
         assert_eq!(d0.factor_source_id.kind, FactorSourceKind::Device);
         assert_eq!(d1.factor_source_id.kind, FactorSourceKind::Device);
 
-        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::threshold_only(
+        let matrix = GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+            RoleKind::Primary,
             [d0.clone(), d1.clone()],
             1,
+            []
         ).unwrap();
 
         let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
@@ -564,7 +550,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = Sut::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx.clone(), entity, matrix);
 
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d1.factor_source_id()),
@@ -575,7 +561,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert!(!format!("{:?}", Sut::sample()).is_empty());
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
     }
 
     #[test]
@@ -583,7 +569,7 @@ mod tests {
         expected = "Programmer error! Must have at least one factors list."
     )]
     fn invalid_empty_factors() {
-        Sut::new(
+        SUT::new(
             TransactionIntentHash::sample(),
             AddressOfAccountOrPersona::sample(),
             None,
@@ -594,7 +580,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "Factor source not found in any of the lists.")]
     fn cannot_add_unrelated_signature() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         sut.add_signature(HDSignature::sample());
     }
 
@@ -602,10 +588,11 @@ mod tests {
     fn factor_should_not_be_used_in_both_lists() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            Hardened::from_local_key_space_unsecurified(0).unwrap(),
+            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
         );
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                RoleKind::Primary,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                 1,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
@@ -618,10 +605,11 @@ mod tests {
     fn threshold_should_not_be_bigger_than_threshold_factors() {
         let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
             CAP26EntityKind::Account,
-            Hardened::from_local_key_space_unsecurified(0).unwrap(),
+            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
         );
         assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                RoleKind::Primary,
                 [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                 2,
                 [],
@@ -641,13 +629,14 @@ mod tests {
         let intent_hash = TransactionIntentHash::sample();
         let entity = Account::sample_securified_mainnet(
             "Alice",
-            AccountAddress::sample(),
+            HierarchicalDeterministicFactorInstance::sample_fii10(),
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                 CAP26EntityKind::Account,
-                Hardened::from_local_key_space_unsecurified(0).unwrap(),
+                Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
             );
-                GeneralRoleWithHierarchicalDeterministicFactorInstances::new(
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                    RoleKind::Primary,
                     [FactorSourceIDFromHash::sample_at(0)].map(&fi),
                     1,
                     [FactorSourceIDFromHash::sample_at(1)].map(&fi),
@@ -655,7 +644,7 @@ mod tests {
                 .unwrap()
             },
         );
-        let sut = Sut::from_entity_with_role_kind(
+        let sut = SUT::from_entity_with_role_kind(
             entity.clone(),
             intent_hash.clone(),
             RoleKind::Primary,
@@ -666,7 +655,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::from(entity.address),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
+                    Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
                     FactorSourceIDFromHash::sample_at(0),
                 ),
             ),
@@ -679,14 +668,14 @@ mod tests {
 
     #[test]
     fn invalid_transactions_if_neglected_success() {
-        let sut = Sut::sample();
+        let sut = SUT::sample();
         let signature = HDSignature::produced_signing_with_input(
             HDSignatureInput::new(
                 sut.payload_id.clone(),
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                        Hardened::from_local_key_space_unsecurified(6).unwrap(),
+                        Hardened::from_local_key_space(6, IsSecurified(true)).unwrap(),
                         FactorSourceIDFromHash::sample_at(1),
                     ),
                 ),
@@ -708,12 +697,12 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other())
+        assert_ne!(SUT::sample(), SUT::sample_other())
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 }

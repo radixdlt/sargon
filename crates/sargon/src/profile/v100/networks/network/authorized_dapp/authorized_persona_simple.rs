@@ -43,7 +43,7 @@ impl AuthorizedPersonaSimple {
         account_address: &AccountAddress,
     ) -> bool {
         if let Some(shared_accounts) = self.shared_accounts.as_mut() {
-            shared_accounts.remove_entry(&account_address);
+            shared_accounts.remove_entry(account_address);
             true
         } else {
             false

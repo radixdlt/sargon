@@ -35,15 +35,16 @@ mod tests {
 
     use super::*;
 
-    type Sut = GetIDPath;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = GetIDPath;
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", Sut::default()), "m/44H/1022H/365H");
+        assert_eq!(format!("{}", SUT::default()), "m/44H/1022H/365H");
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", Sut::default()), "m/44'/1022'/365'");
+        assert_eq!(format!("{:?}", SUT::default()), "m/44'/1022'/365'");
     }
 }

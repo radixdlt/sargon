@@ -87,7 +87,7 @@ impl GatewayClient {
             let non_fungible_ids_location = self
                 .state_non_fungible_location(
                     StateNonFungibleLocationRequest::new(
-                        owner_badge_resource_address.clone(),
+                        owner_badge_resource_address,
                         badges_of_account_addresses
                             .keys()
                             .cloned()
@@ -108,11 +108,7 @@ impl GatewayClient {
                         .map(|a| a.as_account().cloned())
                         .unwrap_or(None);
 
-                    if let Some(account_address) = parent {
-                        Some((id, account_address))
-                    } else {
-                        None
-                    }
+                    parent.map(|account_address| (id, account_address))
                 })
                 .collect::<HashMap<NonFungibleLocalId, AccountAddress>>();
 

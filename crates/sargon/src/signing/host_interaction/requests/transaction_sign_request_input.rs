@@ -79,17 +79,18 @@ impl<S: Signable> HasSampleValues for TransactionSignRequestInput<S> {
 mod tests_batch_req {
     use super::*;
 
-    type Sut = TransactionSignRequestInput<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = TransactionSignRequestInput<TransactionIntent>;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -97,7 +98,7 @@ mod tests_batch_req {
         expected = "Invalid input, `owned_factor_instances` must not be empty."
     )]
     fn panics_if_owned_factors_is_empty() {
-        Sut::new(
+        SUT::new(
             CompiledTransactionIntent::sample(),
             FactorSourceIDFromHash::sample(),
             IndexSet::new(),
@@ -109,7 +110,7 @@ mod tests_batch_req {
         expected = "Discrepancy! Mismatch between FactorSourceID of owned factor instances and specified FactorSourceID, this is a programmer error."
     )]
     fn panics_mismatch_factor_source_id() {
-        Sut::new(
+        SUT::new(
             CompiledTransactionIntent::sample_other(),
             FactorSourceIDFromHash::sample_other(),
             IndexSet::just(OwnedFactorInstance::sample_other()),

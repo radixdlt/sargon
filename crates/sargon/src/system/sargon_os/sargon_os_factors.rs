@@ -1,4 +1,6 @@
-use crate::prelude::*;
+use std::borrow::Borrow;
+
+use crate::{prelude::*, profile};
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -119,8 +121,25 @@ impl SargonOS {
         Ok(ids)
     }
 
-    pub async fn debug_add_all_sample_factors(
+    pub async fn debug_add_all_sample_factor_sources(
         &self,
+    ) -> Result<Vec<FactorSourceID>> {
+        self.debug_add_all_sample_factors_with_filter(|_| true)
+            .await
+    }
+
+    pub async fn debug_add_all_sample_hd_factor_sources(
+        &self,
+    ) -> Result<Vec<FactorSourceID>> {
+        self.debug_add_all_sample_factors_with_filter(|f| {
+            f.factor_source_id().is_hash()
+        })
+        .await
+    }
+
+    pub async fn debug_add_all_sample_factors_with_filter(
+        &self,
+        filter: impl Fn(&FactorSource) -> bool,
     ) -> Result<Vec<FactorSourceID>> {
         let mwp = MnemonicWithPassphrase::sample_device();
         let id = FactorSourceIDFromHash::new_for_device(&mwp);
@@ -143,8 +162,13 @@ impl SargonOS {
             .save_mnemonic_with_passphrase(&mwp, &id)
             .await?;
 
-        self.add_factor_sources(FactorSources::sample_values_all())
-            .await
+        self.add_factor_sources(
+            FactorSources::sample_values_all()
+                .into_iter()
+                .filter(filter)
+                .collect(),
+        )
+        .await
     }
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
@@ -182,8 +206,9 @@ impl SargonOS {
     /// SecureStorage fails.
     pub async fn load_private_device_factor_source_by_id(
         &self,
-        id: &FactorSourceIDFromHash,
+        id: impl Borrow<FactorSourceIDFromHash>,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
+        let id = id.borrow();
         let device_factor_source = self
             .profile_state_holder
             .try_access_profile_with(|p| p.device_factor_source_by_id(id))?;
@@ -193,6 +218,43 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+        if !factor_source.factor_source_id().is_hash() {
+            panic!("Unsupported FactorSource which is not HD.")
+        }
+        let profile_snapshot = self.profile()?;
+        let keys_derivation_interactors = self.keys_derivation_interactors();
+        let outcome = CacheFiller::for_new_factor_source(
+            Arc::new(self.clients.factor_instances_cache.clone()),
+            Arc::new(profile_snapshot),
+            factor_source.clone(),
+            NetworkID::Mainnet, // we care not about other networks here
+            keys_derivation_interactors.clone(),
+        )
+        .await?;
+
+        assert_eq!(outcome.factor_source_id, factor_source.id_from_hash());
+
+        #[cfg(test)]
+        {
+            assert_eq!(outcome.debug_found_in_cache.len(), 0);
+
+            assert_eq!(
+                outcome.debug_was_cached.len(),
+                DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+            );
+
+            assert_eq!(
+                outcome.debug_was_derived.len(),
+                DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+            );
+        }
+        Ok(outcome)
+    }
+
     /// Adds all factor sources to Profile.
     ///
     /// # Emits Event
@@ -230,6 +292,19 @@ impl SargonOS {
         let is_any_of_new_factors_main_bdfs =
             new_factors_only.iter().any(|x| x.is_main_bdfs());
         let id_of_old_bdfs = self.bdfs()?.factor_source_id();
+
+        // Use FactorInstancesProvider to eagerly fill cache...
+
+        for factor_source in new_factors_only.iter() {
+            if !factor_source.factor_source_id().is_hash() {
+                continue;
+            }
+            let _ = self
+                .pre_derive_and_fill_cache_with_instances_for_factor_source(
+                    factor_source,
+                )
+                .await?;
+        }
 
         self.update_profile_with(|p| {
             p.factor_sources.extend(new_factors_only.clone());
@@ -366,17 +441,68 @@ impl SargonOS {
             .await
     }
 
-    /// Tries to load the  `MnemonicWithPassphrase` for the main "Babylon"
-    /// `DeviceFactorSource` from secure storage.
-    pub async fn main_bdfs_mnemonic_with_passphrase(
+    pub async fn factor_instances_in_cache(
         &self,
-    ) -> Result<MnemonicWithPassphrase> {
-        let bdfs = self
-            .profile_state_holder
-            .access_profile_with(|p| p.bdfs())?;
-        self.mnemonic_with_passphrase_of_device_factor_source_by_id(&bdfs.id)
-            // tarpaulin will incorrectly flag next line is missed
+    ) -> IndexMap<
+        FactorSourceIDFromHash,
+        Vec<IndexSet<HierarchicalDeterministicFactorInstance>>,
+    > {
+        let cache = self.cache_snapshot().await;
+        let cache = cache.serializable_snapshot();
+        cache
+            .0
+            .into_iter()
+            .map(|(k, v)| {
+                let fsid = FactorSourceIDFromHash::from(k);
+                let vec_of_sets: Vec<
+                    IndexSet<HierarchicalDeterministicFactorInstance>,
+                > = v
+                    .into_iter()
+                    .map(|(_, x)| {
+                        x.into_iter()
+                            .map(|y| {
+                                HierarchicalDeterministicFactorInstance::new(
+                                    fsid, y,
+                                )
+                            })
+                            .collect::<IndexSet<_>>()
+                    })
+                    .collect_vec();
+
+                (fsid, vec_of_sets)
+            })
+            .collect::<IndexMap<
+                FactorSourceIDFromHash,
+                Vec<IndexSet<HierarchicalDeterministicFactorInstance>>,
+            >>()
+    }
+
+    pub(crate) async fn cache_snapshot(&self) -> FactorInstancesCache {
+        self.clients
+            .factor_instances_cache
+            .snapshot()
             .await
+            .unwrap()
+    }
+}
+
+#[allow(unused)]
+#[cfg(test)]
+impl SargonOS {
+    pub(crate) async fn clear_cache(&self) {
+        println!("💣 CLEAR CACHE");
+        self.clients.factor_instances_cache.clear().await.unwrap();
+    }
+
+    pub(crate) async fn set_cache(
+        &self,
+        cache_snapshot: FactorInstancesCacheSnapshot,
+    ) {
+        self.clients
+            .factor_instances_cache
+            .set_cache(cache_snapshot)
+            .await
+            .unwrap();
     }
 }
 
@@ -389,6 +515,44 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn test_bdfs() {
+        // ARRANGE
+        let mwp = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
+
+        // ACT
+        let loaded = os.bdfs().unwrap();
+
+        // ASSERT
+        assert_eq!(
+            loaded.factor_source_id(),
+            FactorSourceIDFromHash::new_for_device(&mwp).into()
+        );
+        assert_eq!(
+            os.factor_sources().unwrap(),
+            FactorSources::just(FactorSource::from(loaded))
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_add_debug_factor_sources() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let added = os.debug_add_all_sample_factor_sources().await.unwrap();
+
+        // ASSERT
+        assert!(os
+            .factor_sources()
+            .unwrap()
+            .into_iter()
+            .map(|f| f.id())
+            .collect::<HashSet<_>>()
+            .is_superset(&added.into_iter().collect::<HashSet<_>>()));
+    }
 
     #[actix_rt::test]
     async fn test_load_private_device_factor_source_by_id() {
@@ -407,22 +571,6 @@ mod tests {
 
         // ASSERT
         assert_eq!(private.mnemonic_with_passphrase, mwp);
-    }
-
-    #[actix_rt::test]
-    async fn test_bdfs() {
-        // ARRANGE
-        let mwp = MnemonicWithPassphrase::sample();
-        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
-
-        // ACT
-        let loaded = os.bdfs().unwrap();
-
-        // ASSERT
-        assert_eq!(
-            loaded.factor_source_id(),
-            FactorSourceIDFromHash::new_for_device(&mwp).into()
-        );
     }
 
     #[actix_rt::test]
@@ -612,12 +760,12 @@ mod tests {
         let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
             .await
             .unwrap();
-        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
         let ids = os
             .with_timeout(|x| {
-                x.add_factor_sources(FactorSources::sample_values_all())
+                x.add_factor_sources(FactorSources::sample_values_all_hd())
             })
             .await
             .unwrap();
@@ -625,7 +773,7 @@ mod tests {
         // ASSERT
         assert_eq!(
             ids.clone(),
-            FactorSources::sample_values_all()
+            FactorSources::sample_values_all_hd()
                 .into_iter()
                 .map(|x| x.id())
                 .collect_vec(),
@@ -645,7 +793,7 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        os.with_timeout(|x| x.debug_add_all_sample_factors())
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
             .unwrap();
 

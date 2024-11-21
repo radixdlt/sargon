@@ -99,10 +99,7 @@ mod tests {
         assert_eq!(result.recipient, recipient);
         assert_eq!(
             result.transfers,
-            vec![
-                fungible.clone().try_into().unwrap(),
-                non_fungible.try_into().unwrap()
-            ]
+            vec![fungible.clone().into(), non_fungible.into()]
         );
         assert_eq!(
             result.non_transferable_resources,

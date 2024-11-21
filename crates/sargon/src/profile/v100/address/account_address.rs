@@ -30,7 +30,10 @@ impl AccountAddress {
         public_key: impl Into<PublicKey>,
         network_id: NetworkID,
     ) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key.into(), network_id)
+        <Self as IsEntityAddress>::from_public_key(
+            public_key.into(),
+            network_id,
+        )
     }
 
     /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
@@ -42,15 +45,13 @@ impl AccountAddress {
             == ScryptoEntityType::GlobalPreallocatedSecp256k1Account
     }
 }
-
-impl EntityAddress for AccountAddress {
-    /// Identifies that AccountAddress uses the `EntityType::Account`, which are used
-    /// to validate the HRP (`"account_"`) and is also used when forming HD derivation
-    /// paths as per CAP26.
-    fn abstract_entity_type() -> AbstractEntityType {
-        AbstractEntityType::Account
+impl HasEntityKind for AccountAddress {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Account
     }
 }
+impl IsBaseEntityAddress for AccountAddress {}
+impl IsEntityAddress for AccountAddress {}
 
 impl HasSampleValues for AccountAddress {
     /// A sample used to facilitate unit tests.

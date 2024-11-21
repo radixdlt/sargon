@@ -74,8 +74,125 @@ impl HierarchicalDeterministicFactorInstance {
         Self::sample_fi10(CAP26EntityKind::Account)
     }
 
+    /// 9 | Unsecurified { Device } (fs10)
+    pub fn sample_fi11(entity_kind: CAP26EntityKind) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(10),
+            entity_kind,
+            Hardened::from_local_key_space_unsecurified(9u32).unwrap(),
+        )
+    }
+
+    /// 10 | Unsecurified { Device } (fs10)
+    pub fn sample_fi12(entity_kind: CAP26EntityKind) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(10),
+            entity_kind,
+            Hardened::from_local_key_space_unsecurified(10u32).unwrap(),
+        )
+    }
+
+    /// Account: 9 | Unsecurified { Device } (fs10)
+    pub fn sample_fia11() -> Self {
+        Self::sample_fi11(CAP26EntityKind::Account)
+    }
+
+    /// 10 | Unsecurified { Device } (fs10)
+    pub fn sample_fia12() -> Self {
+        Self::sample_fi12(CAP26EntityKind::Account)
+    }
+
     /// Identity: 8 | Unsecurified { Device } (fs10)
     pub fn sample_fii10() -> Self {
         Self::sample_fi10(CAP26EntityKind::Identity)
+    }
+
+    pub fn sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(0),
+            entity_kind,
+            Hardened::from_local_key_space(index, IsSecurified(true)).unwrap(),
+        )
+    }
+
+    pub fn sample_mainnet_entity_device_factor_fs_10_securified_at_index(
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(10),
+            entity_kind,
+            Hardened::from_local_key_space(index, IsSecurified(true)).unwrap(),
+        )
+    }
+
+    pub fn sample_mainnet_entity_device_factor_fs_1_securified_at_index(
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(1),
+            entity_kind,
+            Hardened::from_local_key_space(index, IsSecurified(true)).unwrap(),
+        )
+    }
+
+    pub fn sample_mainnet_account_device_factor_fs_0_securified_at_index(
+        index: u32,
+    ) -> Self {
+        Self::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+            CAP26EntityKind::Account,
+            index,
+        )
+    }
+
+    pub fn sample_mainnet_account_device_factor_fs_10_securified_at_index(
+        index: u32,
+    ) -> Self {
+        Self::sample_mainnet_entity_device_factor_fs_10_securified_at_index(
+            CAP26EntityKind::Account,
+            index,
+        )
+    }
+
+    pub fn sample_mainnet_account_device_factor_fs_1_securified_at_index(
+        index: u32,
+    ) -> Self {
+        Self::sample_mainnet_entity_device_factor_fs_1_securified_at_index(
+            CAP26EntityKind::Account,
+            index,
+        )
+    }
+
+    pub fn sample_mainnet_entity_device_factor_fs_10_unsecurified_at_index(
+        entity_kind: CAP26EntityKind,
+        index: u32,
+    ) -> Self {
+        Self::new_for_entity(
+            FactorSourceIDFromHash::sample_at(10),
+            entity_kind,
+            Hardened::from_local_key_space_unsecurified(index).unwrap(),
+        )
+    }
+
+    pub fn sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(
+        index: u32,
+    ) -> Self {
+        Self::sample_mainnet_entity_device_factor_fs_10_unsecurified_at_index(
+            CAP26EntityKind::Account,
+            index,
+        )
+    }
+
+    pub fn sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(
+        index: u32,
+    ) -> Self {
+        Self::sample_mainnet_entity_device_factor_fs_10_unsecurified_at_index(
+            CAP26EntityKind::Identity,
+            index,
+        )
     }
 }

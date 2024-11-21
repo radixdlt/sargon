@@ -44,27 +44,74 @@ extension FileSystem {
 		_ io: @Sendable (URL) throws -> T
 	) throws -> T {
 		let url = URL(file: path)
-		guard url.startAccessingSecurityScopedResource() else {
-			throw CommonError.NotPermissionToAccessFile(path: path)
-		}
-		defer { url.stopAccessingSecurityScopedResource() }
+#if os(macOS)
+		 guard url.startAccessingSecurityScopedResource() else {
+		 	throw CommonError.NotPermissionToAccessFile(path: path)
+		 }
+		 defer { url.stopAccessingSecurityScopedResource() }
+        #endif
 		return try io(url)
 	}
 }
 
+extension FileSystem {
+	private static func appDirPathNotNecessarilyExisting(fileManager: FileManager) throws -> String {
+#if os(iOS)
+		return try fileManager.urls(
+			for: .cachesDirectory,
+			in: .userDomainMask
+		).first!.path()
+#elseif os(macOS)
+		URL.temporaryDirectory.path()
+#else
+		fatalError("Unsupported OS")
+#endif
+	}
+}
+
+#if DEBUG
+extension FileSystem {
+	public func deleteFactorInstancesCache() async throws {
+		try with(path: Self.appDirPathNotNecessarilyExisting(fileManager: fileManager)) {
+			let path = $0.appending(component: "radix_babylon_wallet_pre_derived_public_keys_cache.json")
+			try self.fileManager.removeItem(at: path)
+		}
+	}
+}
+#endif
+
 extension FileSystem: FileSystemDriver {
 	
+    public func writableAppDirPath() async throws -> String {
+		try with(path: Self.appDirPathNotNecessarilyExisting(fileManager: fileManager)) {
+			let directoryExists = fileManager.fileExists(atPath: $0.path())
+			if !directoryExists {
+				try fileManager.createDirectory(at: $0, withIntermediateDirectories: true)
+			}
+			return $0.path()
+		}
+    }
+    
 	public func loadFromFile(path: String) async throws -> BagOfBytes? {
-		try with(path: path) {
-			try Data(contentsOf: $0)
+        return try with(path: path) {
+            let fileExists = fileManager.fileExists(atPath: $0.path())
+            do {
+                return try Data(contentsOf: $0)
+            } catch {
+                if fileExists {
+                    throw error
+                } else {
+                    return nil
+                }
+            }
 		}
 	}
 	
-	public func saveToFile(path: String, data: BagOfBytes) async throws {
-		try with(path: path) {
-			try data.write(to: $0)
-		}
-	}
+    public func saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Bool) async throws {
+        try with(path: path) {
+			try data.write(to: $0, options: isAllowedToOverwrite ? [] : [.withoutOverwriting])
+        }
+    }
 	
 	public func deleteFile(path: String) async throws {
 		try with(path: path) {
