@@ -107,12 +107,14 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+    #[allow(clippy::upper_case_acronyms)]
+    type TSR = TransactionStatusResponse;
 
     #[actix_rt::test]
     async fn poll_status_success() {
         // This test will simulate the case where the first response is a `CommittedSuccess`
         let result =
-            simulate_poll_status(vec![sample_committed_success()]).await;
+            simulate_poll_status(vec![TSR::sample_committed_success()]).await;
 
         // Result should be `Success`
         assert_eq!(result.0, TransactionStatus::Success);
@@ -125,9 +127,9 @@ mod tests {
         // This test will simulate the case where the first response is empty (no payload status),
         // the second is `Pending` and the third is a `CommittedFailure`
         let result = simulate_poll_status(vec![
-            sample_empty(),
-            sample_pending(),
-            sample_committed_failure(None),
+            TSR::sample_empty(),
+            TSR::sample_pending(),
+            TSR::sample_committed_failure(None),
         ])
         .await;
 
@@ -147,8 +149,10 @@ mod tests {
         // This test will simulate the case where the first response is `Unknown`,
         // while the second response is a `PermanentlyRejected`
         let result = simulate_poll_status(vec![
-            sample_unknown(),
-            sample_permanently_rejected(Some("AssertionFailed".to_owned())),
+            TSR::sample_unknown(),
+            TSR::sample_permanently_rejected(Some(
+                "AssertionFailed".to_owned(),
+            )),
         ])
         .await;
 
@@ -169,8 +173,8 @@ mod tests {
         // This test will simulate the case where the first response is `Unknown`,
         // while the second response is a `PermanentlyRejected`
         let result = simulate_poll_status(vec![
-            sample_commit_pending_outcome_unknown(),
-            sample_temporarily_rejected(),
+            TSR::sample_commit_pending_outcome_unknown(),
+            TSR::sample_temporarily_rejected(),
         ])
         .await;
 
@@ -191,7 +195,7 @@ mod tests {
         let responses = vec![
             MockNetworkingDriverResponse::new_failing(),
             MockNetworkingDriverResponse::new_success(
-                sample_committed_success(),
+                TSR::sample_committed_success(),
             ),
         ];
 
@@ -236,85 +240,5 @@ mod tests {
         os.poll_transaction_status_with_delays(TransactionIntentHash::sample())
             .await
             .unwrap()
-    }
-
-    // Helper functions to create sample responses
-
-    fn sample_empty() -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        }
-    }
-
-    fn sample_unknown() -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![
-                TransactionStatusResponsePayloadItem::sample_unknown(),
-            ],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        }
-    }
-
-    fn sample_pending() -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![
-                TransactionStatusResponsePayloadItem::sample_pending(),
-            ],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        }
-    }
-
-    fn sample_commit_pending_outcome_unknown() -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_commit_pending_outcome_unknown()],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        }
-    }
-
-    fn sample_committed_success() -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![
-                TransactionStatusResponsePayloadItem::sample_committed_success(
-                ),
-            ],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        }
-    }
-
-    fn sample_committed_failure(
-        error_message: Option<String>,
-    ) -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![
-                TransactionStatusResponsePayloadItem::sample_committed_failure(
-                ),
-            ],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message,
-        }
-    }
-
-    fn sample_permanently_rejected(
-        error_message: Option<String>,
-    ) -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_committed_permanently_rejected()],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message,
-        }
-    }
-
-    fn sample_temporarily_rejected() -> TransactionStatusResponse {
-        TransactionStatusResponse {
-            known_payloads: vec![TransactionStatusResponsePayloadItem::sample_temporarily_rejected()],
-            ledger_state: LedgerState::sample_stokenet(),
-            error_message: None,
-        }
     }
 }
