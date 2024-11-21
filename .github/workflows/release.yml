@@ -78,6 +78,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "🚢  Setting 'useLocalFramework = false' for release"
+          sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
+
           # We have .gitigored Sargon.swift because we dont need it in git history, but we
           # need it for this release, so we must FORCE add it (since it is ignored).
           echo "🚢  Staging changed files"
