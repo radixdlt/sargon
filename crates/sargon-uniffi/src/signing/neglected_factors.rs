@@ -4,7 +4,7 @@ use sargon::NeglectFactorReason as InternalNeglectFactorReason;
 type InternalNeglectedFactors = sargon::AbstractNeglectedFactor<sargon::IndexSet<InternalFactorSourceIDFromHash>>;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
-struct NeglectedFactors {
+pub struct NeglectedFactors {
     /// The reason why this factor was neglected.
     pub reason: NeglectFactorReason,
 
