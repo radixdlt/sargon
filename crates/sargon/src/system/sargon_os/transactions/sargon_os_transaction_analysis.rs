@@ -1,10 +1,3 @@
-use std::sync::RwLockWriteGuard;
-
-use radix_engine_toolkit::functions::transaction_v2::{
-    subintent_manifest, transaction_manifest,
-};
-use radix_transactions::{manifest::BlobProvider, model::TransactionPayload};
-
 use crate::prelude::*;
 
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
