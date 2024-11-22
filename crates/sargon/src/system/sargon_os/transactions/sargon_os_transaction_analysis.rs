@@ -1,6 +1,8 @@
 use std::sync::RwLockWriteGuard;
 
-use radix_engine_toolkit::functions::transaction_v2::{subintent_manifest, transaction_manifest};
+use radix_engine_toolkit::functions::transaction_v2::{
+    subintent_manifest, transaction_manifest,
+};
 use radix_transactions::{manifest::BlobProvider, model::TransactionPayload};
 
 use crate::prelude::*;
@@ -85,7 +87,7 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        intent_discrimnator: IntentDiscriminator
+        intent_discrimnator: IntentDiscriminator,
     ) -> Result<PreAuthToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
         let subintent_manifest = SubintentManifest::new(
@@ -109,14 +111,17 @@ impl SargonOS {
             );
         }
 
-        let pre_auth_to_review = match subintent_manifest.as_enclosed_scrypto() {
+        let pre_auth_to_review = match subintent_manifest.as_enclosed_scrypto()
+        {
             Some(manifest) => {
-                let execution_summary = self.get_transaction_execution_summary_v2(
-                    network_id, 
-                    manifest, 
-                    intent_discrimnator, 
-                    false // PreAuth transaction cannot be sent by the Host itself
-                ).await?;
+                let execution_summary = self
+                    .get_transaction_execution_summary_v2(
+                        network_id,
+                        manifest,
+                        intent_discrimnator,
+                        false, // PreAuth transaction cannot be sent by the Host itself
+                    )
+                    .await?;
 
                 PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
                     manifest: subintent_manifest,
@@ -158,11 +163,11 @@ impl SargonOS {
         let response = gateway_client.transaction_preview(request).await?;
 
         Self::extract_execution_summary(
-            &manifest, 
+            &manifest,
             Some(response.receipt),
-             response.radix_engine_toolkit_receipt,
-              manifest.network_id(), 
-              are_instructions_originating_from_host
+            response.radix_engine_toolkit_receipt,
+            manifest.network_id(),
+            are_instructions_originating_from_host,
         )
     }
 
@@ -173,11 +178,11 @@ impl SargonOS {
         discriminator: IntentDiscriminator,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        let summary = RET_statically_analyze_and_validate_v2(&manifest).map_err(map_static_analysis_error)?;
+        let summary = RET_statically_analyze_and_validate_v2(&manifest)
+            .map_err(map_static_analysis_error)?;
 
-        let signer_public_keys =
-        self.extract_signer_public_keys(
-            ManifestSummary::from((summary, network_id.clone()))
+        let signer_public_keys = self.extract_signer_public_keys(
+            ManifestSummary::from((summary, network_id.clone())),
         )?;
 
         let gateway_client = GatewayClient::new(
@@ -188,24 +193,22 @@ impl SargonOS {
         let epoch = gateway_client.current_epoch().await?;
 
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
-            manifest.clone(), 
-            epoch, 
+            manifest.clone(),
+            epoch,
             signer_public_keys,
-             PublicKey::sample(), 
-             discriminator, 
-             network_id
+            PublicKey::sample(),
+            discriminator,
+            network_id,
         )?;
-        
 
         let response = gateway_client.transaction_preview_v2(request).await?;
 
-
         Self::extract_execution_summary(
-            &manifest, 
+            &manifest,
             response.receipt,
-             response.radix_engine_toolkit_receipt,
-              network_id, 
-              are_instructions_originating_from_host
+            response.radix_engine_toolkit_receipt,
+            network_id,
+            are_instructions_originating_from_host,
         )
     }
 }
@@ -233,36 +236,40 @@ impl SargonOS {
 
     fn extract_execution_summary(
         manifest: &dyn DynamicallyAnalyzableManifest,
-        receipt: Option<TransactionReceipt>, 
-        engine_toolkit_receipt: Option<ScryptoSerializableToolkitTransactionReceipt>, 
+        receipt: Option<TransactionReceipt>,
+        engine_toolkit_receipt: Option<
+            ScryptoSerializableToolkitTransactionReceipt,
+        >,
         network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        let receipt = receipt.ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
-    
-            if receipt.status != TransactionReceiptStatus::Succeeded {
-                return Err(Self::map_failed_transaction_preview(receipt));
-            };
+        let receipt = receipt
+            .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
-        
-        let engine_toolkit_receipt = engine_toolkit_receipt.ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
+        if receipt.status != TransactionReceiptStatus::Succeeded {
+            return Err(Self::map_failed_transaction_preview(receipt));
+        };
 
-        let execution_summary = manifest.execution_summary(engine_toolkit_receipt, network_id)?;
+        let engine_toolkit_receipt = engine_toolkit_receipt
+            .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
-    let reserved_manifest_class = execution_summary
-        .detailed_classification
-        .iter()
-        .find(|classification| classification.is_reserved());
+        let execution_summary =
+            manifest.execution_summary(engine_toolkit_receipt, network_id)?;
 
-    if let Some(reserved_manifest_class) = reserved_manifest_class
-        && !are_instructions_originating_from_host
-    {
-        return Err(CommonError::ReservedManifestClass {
-            class: reserved_manifest_class.kind().clone(),
-        });
-    }
+        let reserved_manifest_class = execution_summary
+            .detailed_classification
+            .iter()
+            .find(|classification| classification.is_reserved());
 
-    Ok(execution_summary)
+        if let Some(reserved_manifest_class) = reserved_manifest_class
+            && !are_instructions_originating_from_host
+        {
+            return Err(CommonError::ReservedManifestClass {
+                class: reserved_manifest_class.kind().clone(),
+            });
+        }
+
+        Ok(execution_summary)
     }
 
     fn map_failed_transaction_preview(

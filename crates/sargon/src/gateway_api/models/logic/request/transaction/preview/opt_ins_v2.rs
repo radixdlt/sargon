@@ -1,16 +1,15 @@
-
 use crate::prelude::*;
 
 impl TransactionPreviewRequestOptInsV2 {
     pub fn new(
         core_api_receipt: bool,
         radix_engine_toolkit_receipt: bool,
-        logs: bool
+        logs: bool,
     ) -> Self {
         Self {
             core_api_receipt,
             radix_engine_toolkit_receipt,
-            logs
+            logs,
         }
     }
 }

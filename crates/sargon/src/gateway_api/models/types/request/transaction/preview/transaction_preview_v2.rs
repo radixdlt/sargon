@@ -31,7 +31,7 @@ pub(crate) struct TransactionPreviewRequestV2 {
 pub(crate) struct PreviewTransactionV2 {
     #[serde(rename = "type")]
     pub(crate) transaction_type: PreviewTransactionTypeV2,
-    pub(crate) preview_transaction_hex: String
+    pub(crate) preview_transaction_hex: String,
 }
 
 #[derive(
@@ -43,5 +43,5 @@ pub(crate) struct PreviewTransactionV2 {
     Eq,
 )]
 pub(crate) enum PreviewTransactionTypeV2 {
-    Compiled
+    Compiled,
 }

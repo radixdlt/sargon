@@ -3,7 +3,10 @@ use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
 impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
-    fn ret_dynamically_analyze(&self, receipt: &ScryptoRuntimeToolkitTransactionReceipt) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
+    fn ret_dynamically_analyze(
+        &self,
+        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
+    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
         RET_dynamically_analyze_v2(&self, &receipt)
     }
 }
