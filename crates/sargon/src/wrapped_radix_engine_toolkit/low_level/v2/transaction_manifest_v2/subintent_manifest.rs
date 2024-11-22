@@ -157,6 +157,10 @@ impl SubintentManifest {
         (enclosed_manifest, self.network_id()).try_into().ok()
     }
 
+    pub fn as_enclosed_scrypto(&self) -> Option<ScryptoTransactionManifestV2> {
+        RET_subintent_manifest_as_enclosed(&self.scrypto_manifest())
+    }
+
     pub fn network_id(&self) -> NetworkID {
         self.instructions.network_id
     }

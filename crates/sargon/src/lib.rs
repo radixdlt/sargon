@@ -178,6 +178,7 @@ pub mod prelude {
             NewManifestBucket as ScryptoNewManifestBucket,
             PartialTransactionV2Builder as ScryptoPartialTransactionV2Builder,
             ResolvableArguments as ScryptoResolvableArguments,
+            TransactionV2Builder as ScryptoTransactionV2Builder,
         },
         manifest::{
             compile as scrypto_compile,
@@ -234,6 +235,7 @@ pub mod prelude {
             TransactionHashBech32Decoder as ScryptoTransactionHashBech32Decoder,
             TransactionHashBech32Encoder as ScryptoTransactionHashBech32Encoder,
             TransactionHeaderV1 as ScryptoTransactionHeader,
+            TransactionHeaderV2 as ScryptoTransactionHeaderV2,
             TransactionIntentHash as ScryptoTransactionIntentHash,
         },
         prelude::{
@@ -330,6 +332,7 @@ pub mod prelude {
             TrackedPoolRedemption as RetTrackedPoolRedemption,
             TrackedValidatorClaim as RetTrackedValidatorClaim,
             TrackedValidatorStake as RetTrackedValidatorStake,
+            TransactionTypesError as RetTransactionTypesError,
             Update as RetUpdate,
         },
     };

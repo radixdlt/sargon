@@ -11,6 +11,7 @@ mod sbor_depth_validation;
 mod signed_intent;
 mod transaction_classes;
 mod transaction_hashes;
+mod transaction_receipt;
 mod v1;
 mod v2;
 
@@ -27,6 +28,7 @@ pub(crate) use sbor_depth_validation::*;
 pub use signed_intent::*;
 pub use transaction_classes::*;
 pub use transaction_hashes::*;
+pub use transaction_receipt::*;
 pub use v1::intent_signatures::*;
 pub use v1::*;
 pub use v2::*;

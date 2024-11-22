@@ -33,6 +33,21 @@ impl GatewayClient {
         self.post("transaction/preview", request, res_id).await
     }
 
+    /// Previews V2 transaction against the network - aka "dry run" of transaction.
+    ///
+    /// Previews are used for [`execution_summary`][TransactionManifest::execution_summary], which the iOS/Android wallet app
+    /// uses to present the "review transaction" screen to the user.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionPreviewV2
+    pub(crate) async fn transaction_preview_v2(
+        &self,
+        request: TransactionPreviewRequestV2,
+    ) -> Result<TransactionPreviewResponseV2> {
+        self.post("transaction/preview-v2", request, res_id).await
+    }
+
     /// Submits a signed transaction payload to the network.
     ///
     /// See [the Gateway API docs for details][doc].

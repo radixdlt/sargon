@@ -2,6 +2,43 @@ use crate::prelude::*;
 use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
+impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
+    fn ret_dynamically_analyze(&self, receipt: &ScryptoRuntimeToolkitTransactionReceipt) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
+        RET_dynamically_analyze_v2(&self, &receipt)
+    }
+}
+
+trait TransactionManifestV2Extension {
+    fn build_preview_transaction(
+        &self,
+        notary_public_key: PublicKey,
+        intent_discriminator: IntentDiscriminator,
+        epoch: Epoch,
+        signer_public_keys: impl IntoIterator<Item = PublicKey>,
+        network_id: NetworkID
+    ) -> PreviewTransactionV2 {
+        let signer_public_keys =  signer_public_keys.into_iter().map(ScryptoPublicKey::from).collect();
+        let mut transaction_v2_builder = ScryptoTransactionV2Builder::new();
+        let header = ScryptoTransactionHeaderV2 {
+            notary_public_key: notary_public_key.into(),
+            notary_is_signatory: signer_public_keys.is_empty(),
+            tip_basis_points: 0
+        };
+        let intent_header = ScryptoIntentHeaderV2 {
+            network_id: network_id.discriminant(),
+            start_epoch_inclusive: epoch.into(),
+            end_epoch_exclusive: epoch.adding(10).into(),
+            min_proposer_timestamp_inclusive: None,
+            max_proposer_timestamp_exclusive: None,
+            intent_discriminator: intent_discriminator.0
+        };
+        transaction_v2_builder = transaction_v2_builder.manifest(self.clone());
+        transaction_v2_builder = transaction_v2_builder.transaction_header(header);
+        transaction_v2_builder = transaction_v2_builder.intent_header(intent_header);
+        transaction_v2_builder.build_preview_transaction(signer_public_keys);
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.manifest_string())]
 pub struct TransactionManifestV2 {
