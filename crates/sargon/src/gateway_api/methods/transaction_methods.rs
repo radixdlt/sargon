@@ -52,7 +52,7 @@ impl GatewayClient {
         intent: TransactionIntent,
         signer_public_keys: Vec<PublicKey>,
     ) -> Result<Option<ScryptoSerializableToolkitTransactionReceipt>> {
-        let request = TransactionPreviewRequest::new_transaction_analysis_v1(
+        let request = TransactionPreviewRequest::new_transaction_analysis(
             intent.manifest,
             intent.header.start_epoch_inclusive,
             signer_public_keys,

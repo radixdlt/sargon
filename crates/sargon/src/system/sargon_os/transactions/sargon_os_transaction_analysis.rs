@@ -134,24 +134,36 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    fn extract_signer_public_keys(
+    async fn get_transaction_execution_summary(
         &self,
-        manifest_summary: ManifestSummary,
-    ) -> Result<IndexSet<PublicKey>> {
-        // Extracting the entities requiring auth to check if the notary is signatory
-        let profile = self.profile_state_holder.profile()?;
-        let signable_summary =
-            SignableManifestSummary::new(manifest_summary.clone());
+        gateway_client: GatewayClient,
+        manifest: TransactionManifest,
+        nonce: Nonce,
+        notary_public_key: Option<PublicKey>,
+        are_instructions_originating_from_host: bool,
+    ) -> Result<ExecutionSummary> {
+        let signer_public_keys =
+            self.extract_signer_public_keys(manifest.summary()?)?;
 
-        // Extracting the signers public keys
-        Ok(ExtractorOfInstancesRequiredToSignTransactions::extract(
-            &profile,
-            vec![signable_summary],
-            RoleKind::Primary,
-        )?
-        .iter()
-        .map(|i| i.public_key.public_key)
-        .collect::<IndexSet<PublicKey>>())
+        // Getting the current ledger epoch
+        let epoch = gateway_client.current_epoch().await?;
+
+        let request = TransactionPreviewRequest::new_transaction_analysis(
+            manifest.clone(),
+            epoch,
+            signer_public_keys,
+            notary_public_key,
+            nonce,
+        );
+        let response = gateway_client.transaction_preview(request).await?;
+
+        Self::extract_execution_summary(
+            &manifest, 
+            Some(response.receipt),
+             response.radix_engine_toolkit_receipt,
+              manifest.network_id(), 
+              are_instructions_originating_from_host
+        )
     }
 
     async fn get_transaction_execution_summary_v2(
@@ -182,24 +194,58 @@ impl SargonOS {
              PublicKey::sample(), 
              discriminator, 
              network_id
-        );
+        )?;
         
 
         let response = gateway_client.transaction_preview_v2(request).await?;
 
 
-        let receipt = response
-        .receipt
-        .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
+        Self::extract_execution_summary(
+            &manifest, 
+            response.receipt,
+             response.radix_engine_toolkit_receipt,
+              network_id, 
+              are_instructions_originating_from_host
+        )
+    }
+}
+
+impl SargonOS {
+    fn extract_signer_public_keys(
+        &self,
+        manifest_summary: ManifestSummary,
+    ) -> Result<IndexSet<PublicKey>> {
+        // Extracting the entities requiring auth to check if the notary is signatory
+        let profile = self.profile_state_holder.profile()?;
+        let signable_summary =
+            SignableManifestSummary::new(manifest_summary.clone());
+
+        // Extracting the signers public keys
+        Ok(ExtractorOfInstancesRequiredToSignTransactions::extract(
+            &profile,
+            vec![signable_summary],
+            RoleKind::Primary,
+        )?
+        .iter()
+        .map(|i| i.public_key.public_key)
+        .collect::<IndexSet<PublicKey>>())
+    }
+
+    fn extract_execution_summary(
+        manifest: &dyn DynamicallyAnalyzableManifest,
+        receipt: Option<TransactionReceipt>, 
+        engine_toolkit_receipt: Option<ScryptoSerializableToolkitTransactionReceipt>, 
+        network_id: NetworkID,
+        are_instructions_originating_from_host: bool,
+    ) -> Result<ExecutionSummary> {
+        let receipt = receipt.ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
     
             if receipt.status != TransactionReceiptStatus::Succeeded {
                 return Err(Self::map_failed_transaction_preview(receipt));
             };
 
         
-        let engine_toolkit_receipt = response
-        .radix_engine_toolkit_receipt
-        .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
+        let engine_toolkit_receipt = engine_toolkit_receipt.ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
         let execution_summary = manifest.execution_summary(engine_toolkit_receipt, network_id)?;
 
@@ -212,79 +258,11 @@ impl SargonOS {
         && !are_instructions_originating_from_host
     {
         return Err(CommonError::ReservedManifestClass {
-            class: reserved_manifest_class.clone(),
+            class: reserved_manifest_class.kind().clone(),
         });
     }
 
     Ok(execution_summary)
-    }
-
-    async fn get_transaction_execution_summary(
-        &self,
-        gateway_client: GatewayClient,
-        manifest: TransactionManifest,
-        nonce: Nonce,
-        notary_public_key: Option<PublicKey>,
-        are_instructions_originating_from_host: bool,
-    ) -> Result<ExecutionSummary> {
-        let signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary()?)?;
-
-        // Getting the current ledger epoch
-        let epoch = gateway_client.current_epoch().await?;
-
-        let request = TransactionPreviewRequest::new_transaction_analysis_v1(
-            manifest.clone(),
-            epoch,
-            signer_public_keys,
-            notary_public_key,
-            nonce,
-        );
-        let response = gateway_client.transaction_preview(request).await?;
-
-        // Checking the transaction receipt status and mapping the response
-        if response.receipt.status != TransactionReceiptStatus::Succeeded {
-            return Err(Self::map_failed_transaction_preview(response.receipt));
-        };
-
-        let engine_toolkit_receipt = response
-            .radix_engine_toolkit_receipt
-            .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
-
-        let execution_summary =
-            manifest.execution_summary(engine_toolkit_receipt)?;
-
-        let reserved_manifest_class = execution_summary
-            .detailed_classification
-            .iter()
-            .find(|classification| classification.is_reserved());
-
-        if let Some(reserved_manifest_class) = reserved_manifest_class
-            && !are_instructions_originating_from_host
-        {
-            return Err(CommonError::ReservedManifestClass {
-                class: reserved_manifest_class.kind(),
-            });
-        }
-
-        Ok(execution_summary)
-    }
-
-    #[cfg(not(tarpaulin_include))] // TBD
-    #[allow(dead_code)]
-    async fn get_subintent_preview(
-        &self,
-        gateway_client: GatewayClient,
-        manifest: TransactionManifestV2,
-        _nonce: Nonce,
-    ) -> Result<TransactionPreviewResponse> {
-        let _signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary()?)?;
-
-        // Getting the current ledger epoch
-        let _epoch = gateway_client.current_epoch().await?;
-
-        unimplemented!("To be defined when GW is available, likely that there will be a new endpoint with new payload definition")
     }
 
     fn map_failed_transaction_preview(

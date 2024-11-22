@@ -12,7 +12,7 @@ pub(crate) struct TransactionPreviewRequestV2 {
     /**
      * A hex-encoded, compiled RawPreviewTransaction.
      */
-    pub(crate) preview_transaction: PreviewTransaction,
+    pub(crate) preview_transaction: PreviewTransactionV2,
 
     pub(crate) flags: TransactionPreviewRequestFlags,
 
@@ -28,9 +28,9 @@ pub(crate) struct TransactionPreviewRequestV2 {
     PartialEq,
     Eq,
 )]
-pub(crate) struct PreviewTransaction {
+pub(crate) struct PreviewTransactionV2 {
     #[serde(rename = "type")]
-    pub(crate) transaction_type: PreviewTransactionType,
+    pub(crate) transaction_type: PreviewTransactionTypeV2,
     pub(crate) preview_transaction_hex: String
 }
 
@@ -42,6 +42,6 @@ pub(crate) struct PreviewTransaction {
     PartialEq,
     Eq,
 )]
-pub(crate) enum PreviewTransactionType {
+pub(crate) enum PreviewTransactionTypeV2 {
     Compiled
 }

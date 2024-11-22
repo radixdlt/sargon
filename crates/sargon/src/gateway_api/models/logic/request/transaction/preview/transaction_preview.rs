@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl TransactionPreviewRequest {
-    pub fn new_transaction_analysis_v1(
+    pub fn new_transaction_analysis(
         manifest: TransactionManifest,
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
@@ -52,7 +52,7 @@ mod tests {
             let header = intent.header;
             let keys = vec![PublicKey::sample(), PublicKey::sample_other()];
             let flags = TransactionPreviewRequestFlags::default();
-            let sut = SUT::new_transaction_analysis_v1(
+            let sut = SUT::new_transaction_analysis(
                 intent.clone().manifest,
                 intent.header.start_epoch_inclusive,
                 keys.clone(),

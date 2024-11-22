@@ -2,6 +2,19 @@ use crate::prelude::*;
 use radix_transactions::model::TransactionPayload;
 
 impl TransactionPreviewRequestV2 {
+    pub fn new_with_encoded_preview(encoded_preview: String) -> Self {
+        Self {
+            preview_transaction: PreviewTransactionV2 {
+                transaction_type: PreviewTransactionTypeV2::Compiled,
+                preview_transaction_hex: encoded_preview,
+            },
+            flags: TransactionPreviewRequestFlags::default(),
+            opt_ins: TransactionPreviewRequestOptInsV2::default(),
+        }
+    }
+}
+
+impl TransactionPreviewRequestV2 {
     pub fn new_transaction_analysis(
         manifest: ScryptoTransactionManifestV2,
         start_epoch_inclusive: Epoch,
@@ -9,7 +22,7 @@ impl TransactionPreviewRequestV2 {
         notary_public_key: PublicKey,
         discriminator: IntentDiscriminator,
         network_id: NetworkID,
-    ) -> Self {
+    ) -> Result<Self> {
         let signer_public_keys = signer_public_keys
         .into_iter()
         .map(ScryptoPublicKey::from)
@@ -38,15 +51,14 @@ impl TransactionPreviewRequestV2 {
             transaction_v2_builder = transaction_v2_builder.transaction_header(header);
             transaction_v2_builder = transaction_v2_builder.intent_header(intent_header);
 
-            let preview = transaction_v2_builder.build_preview_transaction(signer_public_keys);
+            let preview_transaction = transaction_v2_builder.build_preview_transaction(signer_public_keys);
+            let encoded_preview_transaction = preview_transaction
+            .to_raw()
+            .map_err(|err| {
+                CommonError::FailedToEncodeTransactionPreviewV2 { underlying: format!("{:?}", err) }
+            })?
+            .to_hex();
     
-            Self {
-                preview_transaction: PreviewTransaction {
-                    transaction_type: PreviewTransactionType::Compiled,
-                    preview_transaction_hex: preview.to_raw().unwrap().to_hex(),
-                },
-                flags: TransactionPreviewRequestFlags::default(),
-                opt_ins: TransactionPreviewRequestOptInsV2 { core_api_receipt: true, radix_engine_toolkit_receipt: true, logs: false }
-            }
+            Ok(Self::new_with_encoded_preview(encoded_preview_transaction))
     }
 }
