@@ -1,10 +1,46 @@
 use crate::prelude::*;
 
 /// A discriminator of an `HDPathComponent`.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Debug,
+    derive_more::Display,
+)]
 pub enum KeySpace {
+    #[debug("{}", if *is_hardened { UnsecurifiedHardened::NON_CANONICAL_SUFFIX } else { "" })]
+    #[display("{}", if *is_hardened { UnsecurifiedHardened::CANONICAL_SUFFIX } else { "" })]
     Unsecurified { is_hardened: bool },
+
+    #[debug("{}", SecurifiedU30::NON_CANONICAL_SUFFIX)]
+    #[display("{}", SecurifiedU30::CANONICAL_SUFFIX)]
     Securified,
+}
+
+impl FromStr for KeySpace {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            s if s == Self::Securified.to_string() => Ok(Self::Securified),
+            s if s
+                == (Self::Unsecurified { is_hardened: false }).to_string() =>
+            {
+                Ok(Self::Unsecurified { is_hardened: false })
+            }
+            s if s
+                == (Self::Unsecurified { is_hardened: true }).to_string() =>
+            {
+                Ok(Self::Unsecurified { is_hardened: true })
+            }
+            _ => Err(CommonError::Unknown),
+        }
+    }
 }
 
 impl KeySpace {
@@ -36,49 +72,66 @@ impl HasSampleValues for KeySpace {
 mod tests {
     use super::*;
 
-    type Sut = KeySpace;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = KeySpace;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     pub fn is_securified() {
-        assert!(Sut::Securified.is_securified());
-        assert!(!Sut::Unsecurified { is_hardened: true }.is_securified());
-        assert!(!Sut::Unsecurified { is_hardened: false }.is_securified());
+        assert!(SUT::Securified.is_securified());
+        assert!(!SUT::Unsecurified { is_hardened: true }.is_securified());
+        assert!(!SUT::Unsecurified { is_hardened: false }.is_securified());
     }
 
     #[test]
     pub fn is_unsecurified() {
-        assert!(!Sut::Securified.is_unsecurified());
-        assert!(Sut::Unsecurified { is_hardened: true }.is_unsecurified());
-        assert!(Sut::Unsecurified { is_hardened: false }.is_unsecurified());
+        assert!(!SUT::Securified.is_unsecurified());
+        assert!(SUT::Unsecurified { is_hardened: true }.is_unsecurified());
+        assert!(SUT::Unsecurified { is_hardened: false }.is_unsecurified());
     }
 
     #[test]
     pub fn is_unsecurified_unhardened() {
-        assert!(!Sut::Securified.is_unsecurified_unhardened());
-        assert!(Sut::Unsecurified { is_hardened: false }
+        assert!(!SUT::Securified.is_unsecurified_unhardened());
+        assert!(SUT::Unsecurified { is_hardened: false }
             .is_unsecurified_unhardened());
-        assert!(!Sut::Unsecurified { is_hardened: true }
+        assert!(!SUT::Unsecurified { is_hardened: true }
             .is_unsecurified_unhardened());
     }
 
     #[test]
     pub fn is_unsecurified_hardened() {
-        assert!(!Sut::Securified.is_unsecurified_hardened());
+        assert!(!SUT::Securified.is_unsecurified_hardened());
         assert!(
-            Sut::Unsecurified { is_hardened: true }.is_unsecurified_hardened()
+            SUT::Unsecurified { is_hardened: true }.is_unsecurified_hardened()
         );
-        assert!(!Sut::Unsecurified { is_hardened: false }
+        assert!(!SUT::Unsecurified { is_hardened: false }
             .is_unsecurified_hardened());
+    }
+
+    #[test]
+    fn test_str_round_trip() {
+        let rt = |s: &str, sut: SUT| {
+            let s_from_sut = sut.to_string();
+            assert_eq!(s_from_sut, s.to_owned());
+            let from_str_from_sut = SUT::from_str(&s_from_sut).unwrap();
+            let from_str_from_s = SUT::from_str(s).unwrap();
+            assert_eq!(from_str_from_sut, sut);
+            assert_eq!(from_str_from_sut, from_str_from_s);
+            assert_eq!(from_str_from_s, sut);
+        };
+        rt("S", SUT::Securified);
+        rt("", SUT::Unsecurified { is_hardened: false });
+        rt("H", SUT::Unsecurified { is_hardened: true });
     }
 }

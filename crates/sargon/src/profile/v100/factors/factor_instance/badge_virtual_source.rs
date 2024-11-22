@@ -9,6 +9,16 @@ pub enum FactorInstanceBadgeVirtualSource {
     },
 }
 
+impl IsKeySpaceAware for FactorInstanceBadgeVirtualSource {
+    fn key_space(&self) -> KeySpace {
+        match self {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                value,
+            } => value.key_space(),
+        }
+    }
+}
+
 impl FactorInstanceBadgeVirtualSource {
     pub fn as_hierarchical_deterministic(
         &self,

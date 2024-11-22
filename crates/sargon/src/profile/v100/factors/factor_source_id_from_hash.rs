@@ -1,3 +1,5 @@
+use itertools::join;
+
 use crate::prelude::*;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
@@ -23,11 +25,39 @@ pub struct FactorSourceIDFromHash {
     pub body: Exactly32Bytes,
 }
 
+impl TryFrom<FactorSourceID> for FactorSourceIDFromHash {
+    type Error = CommonError;
+
+    fn try_from(value: FactorSourceID) -> Result<Self> {
+        value
+            .into_hash()
+            .map_err(|_| CommonError::FactorSourceIDNotFromHash)
+    }
+}
+
+impl FromStr for FactorSourceIDFromHash {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let parts = s.split(Self::SEPARATOR).collect_vec();
+        if parts.len() != Self::STR_COMPONENTS_COUNT {
+            return Err(CommonError::InvalidFactorSourceIDFromHashStringWrongComponentCount { expected: Self::STR_COMPONENTS_COUNT as u64, found: parts.len() as u64 });
+        }
+        let kind = FactorSourceKind::from_str(parts[0])?;
+        let body = Exactly32Bytes::from_str(parts[1])?;
+        Ok(Self::new(kind, body))
+    }
+}
+
 impl FactorSourceIDFromHash {
+    pub const STR_COMPONENTS_COUNT: usize = 2;
+
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Exactly32Bytes) -> Self {
         Self { kind, body }
     }
+
+    pub const SEPARATOR: &str = ":";
 
     pub fn from_mnemonic_with_passphrase(
         factor_source_kind: FactorSourceKind,
@@ -101,7 +131,9 @@ impl FactorSourceIDFromHash {
 
 impl FactorSourceIDFromHash {
     pub fn to_canonical_string(&self) -> String {
-        format!("{}:{}", self.kind.discriminant(), self.body)
+        [self.kind.discriminant(), self.body.to_string()]
+            .into_iter()
+            .join(Self::SEPARATOR)
     }
 }
 
@@ -124,6 +156,16 @@ impl FactorSourceIDFromHash {
 
     pub fn sample_device_other() -> Self {
         Self::new_for_device(&MnemonicWithPassphrase::sample_device_other())
+    }
+
+    pub fn sample_device_12_words() -> Self {
+        Self::new_for_device(&MnemonicWithPassphrase::sample_device_12_words())
+    }
+
+    pub fn sample_device_12_words_other() -> Self {
+        Self::new_for_device(
+            &MnemonicWithPassphrase::sample_device_12_words_other(),
+        )
     }
 
     pub fn sample_ledger() -> Self {
@@ -199,6 +241,41 @@ mod tests {
             format!("{}", SUT::sample()),
             "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
         );
+    }
+
+    #[test]
+    fn from_str() {
+        let s = "device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a";
+        assert_eq!(SUT::from_str(s).unwrap(), SUT::sample());
+    }
+
+    #[test]
+    fn from_str_err() {
+        let s = "device";
+        assert!(
+            matches!(
+                SUT::from_str(s),
+                Err(CommonError::InvalidFactorSourceIDFromHashStringWrongComponentCount { expected: 2, found: 1 })
+            )
+        );
+    }
+
+    #[test]
+    fn str_roundtrip() {
+        let test = |sut: SUT| {
+            let s = sut.to_string();
+            let back_again = SUT::from_str(&s).unwrap();
+            assert_eq!(sut, back_again);
+        };
+        test(SUT::sample());
+        test(SUT::sample_other());
+        test(SUT::new_for_arculus(
+            &MnemonicWithPassphrase::sample_arculus(),
+        ));
+        test(SUT::new_for_ledger(&MnemonicWithPassphrase::sample_ledger()));
+        test(SUT::new_for_security_questions(
+            &MnemonicWithPassphrase::sample_security_questions(),
+        ));
     }
 
     #[test]

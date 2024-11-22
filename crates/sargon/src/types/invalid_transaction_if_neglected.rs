@@ -59,14 +59,15 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = InvalidTransactionIfNeglected<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InvalidTransactionIfNeglected<TransactionIntentHash>;
 
     #[test]
     #[should_panic(
         expected = "'entities_which_would_fail_auth' must not be empty, this type is not useful if it is empty."
     )]
     fn panics_if_empty() {
-        Sut::new(TransactionIntentHash::sample(), IndexSet::new());
+        SUT::new(TransactionIntentHash::sample(), IndexSet::new());
     }
 
     #[test]
@@ -74,7 +75,7 @@ mod tests {
         expected = "entities_which_would_fail_auth must not contain duplicates."
     )]
     fn panics_if_duplicates() {
-        Sut::new(
+        SUT::new(
             TransactionIntentHash::sample(),
             [
                 AddressOfAccountOrPersona::sample(),
@@ -89,7 +90,7 @@ mod tests {
             AddressOfAccountOrPersona::sample(),
             AddressOfAccountOrPersona::sample_other(),
         ];
-        let sut = Sut::new(TransactionIntentHash::sample(), entities);
+        let sut = SUT::new(TransactionIntentHash::sample(), entities);
         assert_eq!(
             sut.entities_which_would_fail_auth(),
             IndexSet::<_>::from_iter(entities.into_iter())

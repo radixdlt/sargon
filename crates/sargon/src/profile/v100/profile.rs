@@ -225,10 +225,64 @@ impl Profile {
     }
 }
 
+impl<T: IsEntity> IdentifiedVecOf<T> {
+    pub fn erased(&self) -> IdentifiedVecOf<AccountOrPersona> {
+        self.items()
+            .into_iter()
+            .map(Into::<AccountOrPersona>::into)
+            .collect()
+    }
+}
+
 impl Profile {
     /// Returns the unique ID of this Profile (just an alias for `header.id`).
     pub fn id(&self) -> ProfileID {
         self.header.id
+    }
+
+    /// Checks ALL FactorInstances for ALL Personas and Accounts on ALL networks,
+    /// returns Err(CommonError::FactorInstancesDiscrepancy { .. }) if the same
+    /// FactorInstances is used between any entity.
+    pub fn assert_factor_instances_valid(&self) -> Result<()> {
+        let mut instances_per_entity = IndexMap::<
+            AddressOfAccountOrPersona,
+            IndexSet<FactorInstance>,
+        >::new();
+        for network in self.networks.iter() {
+            let mut check = |entity: AccountOrPersona| -> Result<()> {
+                let to_check = entity.unique_factor_instances();
+                for (e, existing) in instances_per_entity.iter() {
+                    let intersection = existing
+                        .intersection(&to_check)
+                        .collect::<IndexSet<_>>();
+                    if let Some(duplicate) = intersection.first() {
+                        return Err(CommonError::FactorInstancesDiscrepancy {
+                            address_of_entity1: e.to_string(),
+                            address_of_entity2: entity.address().to_string(),
+                            factor_source_id: duplicate
+                                .factor_source_id
+                                .to_string(),
+                        });
+                    }
+                }
+                instances_per_entity.insert(entity.address(), to_check);
+                Ok(())
+            };
+            let mut check_entities =
+                |entities: &IdentifiedVecOf<AccountOrPersona>| -> Result<()> {
+                    entities.into_iter().try_for_each(&mut check)
+                };
+            check_entities(&network.accounts.erased())?;
+            check_entities(&network.personas.erased())?;
+        }
+        Ok(())
+    }
+
+    pub fn update_entities<E: IsEntity>(
+        &mut self,
+        updated_entities: IdentifiedVecOf<E>,
+    ) -> Result<()> {
+        self.networks.update_entities(updated_entities)
     }
 
     /// Returns a clone of the updated account if found, else None.
@@ -241,6 +295,18 @@ impl Profile {
         F: FnMut(&mut Account),
     {
         self.networks.update_account(address, mutate)
+    }
+
+    /// Returns a clone of the updated persona if found, else None.
+    pub fn update_persona<F>(
+        &mut self,
+        address: &IdentityAddress,
+        mutate: F,
+    ) -> Option<Persona>
+    where
+        F: FnMut(&mut Persona),
+    {
+        self.networks.update_persona(address, mutate)
     }
 
     pub fn update_last_used_of_factor_source(
@@ -644,7 +710,7 @@ mod tests {
         assert_eq!(account.display_name.value, "Alice");
         assert!(sut
             .update_account(&account.address, |a| a.display_name =
-                DisplayName::new("Satoshi").unwrap())
+                DisplayName::new("Bob").unwrap())
             .is_some());
 
         assert_eq!(
@@ -656,7 +722,38 @@ mod tests {
                 .unwrap()
                 .display_name
                 .value,
-            "Satoshi"
+            "Bob"
+        );
+    }
+
+    #[test]
+    fn update_name_of_persona() {
+        let mut sut = SUT::sample();
+        let persona = sut
+            .networks
+            .get_id(NetworkID::Mainnet)
+            .unwrap()
+            .personas
+            .get_at_index(0)
+            .unwrap()
+            .clone();
+
+        assert_eq!(persona.display_name.value, "Satoshi");
+        assert!(sut
+            .update_persona(&persona.address, |a| a.display_name =
+                DisplayName::new("Batman").unwrap())
+            .is_some());
+
+        assert_eq!(
+            sut.networks
+                .get_id(NetworkID::Mainnet)
+                .unwrap()
+                .personas
+                .get_at_index(0)
+                .unwrap()
+                .display_name
+                .value,
+            "Batman"
         );
     }
 

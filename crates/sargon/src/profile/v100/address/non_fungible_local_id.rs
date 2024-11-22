@@ -483,10 +483,9 @@ mod tests {
 
     #[test]
     fn test_derives_account_address() {
-        let local_id = SUT::try_from(
+        let local_id = SUT::from(
             "[511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc]",
-        )
-        .unwrap();
+        );
         let account_address = AccountAddress::try_from_bech32(
             "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
         ).unwrap();
@@ -496,10 +495,9 @@ mod tests {
 
     #[test]
     fn test_byte_id_not_deriving_account_address() {
-        let local_id = SUT::try_from(
+        let local_id = SUT::from(
             "[511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc511dc6eee81feec3439609a650807168995ff4bc0c04986e0f089f0bc7fc]",
-        )
-            .unwrap();
+        );
         let account_address = AccountAddress::try_from_bech32(
             "account_tdx_2_12ywudmhgrlhvxsukpxn9pqr3dzv4la9upszfsms0pz0sh3lu6erxux"
         ).unwrap();

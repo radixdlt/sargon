@@ -244,9 +244,11 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        os.with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         assert!(os.has_any_network().unwrap());
@@ -258,9 +260,11 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        os.with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         assert!(os.has_any_account_on_any_network().unwrap());

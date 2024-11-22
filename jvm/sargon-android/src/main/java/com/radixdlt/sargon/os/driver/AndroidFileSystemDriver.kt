@@ -3,6 +3,7 @@ package com.radixdlt.sargon.os.driver
 import android.content.Context
 import android.net.Uri
 import com.radixdlt.sargon.BagOfBytes
+import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.FileSystemDriver
 import com.radixdlt.sargon.extensions.logFailure
 import com.radixdlt.sargon.extensions.toBagOfBytes
@@ -27,7 +28,9 @@ class AndroidFileSystemDriver(
         }.logFailure().getOrNull()?.toBagOfBytes()
     }
 
-    override suspend fun saveToFile(path: String, data: BagOfBytes) {
+    override suspend fun writableAppDirPath(): String = directory.absolutePath
+
+    override suspend fun saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Boolean) {
         withContext(dispatcher) {
             runCatching {
                 val fileToSave = path.toFile()
@@ -37,6 +40,10 @@ class AndroidFileSystemDriver(
                         fileToSave.parentFile?.mkdirs()
                     }
                     fileToSave.createNewFile()
+                } else if (!isAllowedToOverwrite) {
+                    throw CommonException.FileAlreadyExists(
+                        path = path
+                    )
                 }
 
                 context.contentResolver.openOutputStream(

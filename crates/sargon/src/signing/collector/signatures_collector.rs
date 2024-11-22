@@ -8,11 +8,11 @@ use super::{
 use SignaturesCollectingContinuation::*;
 
 /// A coordinator which gathers signatures from several factor sources of different
-/// kinds, in increasing friction order, for many transactions and for
+/// kinds, in decreasing friction order, for many transactions and for
 /// potentially multiple entities and for many factor instances (derivation paths)
 /// for each transaction.
 ///
-/// By increasing friction order we mean, the quickest and easiest to use FactorSourceKind
+/// By decreasing friction order we mean, the quickest and easiest to use FactorSourceKind
 /// is last; namely `DeviceFactorSource`, and the most tedious FactorSourceKind is
 /// first; namely `LedgerFactorSource`, which user might also lack access to.
 pub struct SignaturesCollector<S: Signable> {
@@ -186,7 +186,7 @@ impl<S: Signable> SignaturesCollector<S> {
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) {
-        info!(
+        debug!(
             "Use(?) #{:?} factors of kind: {:?}",
             &factor_sources_of_kind.factor_sources().len(),
             &factor_sources_of_kind.kind
@@ -604,7 +604,7 @@ mod tests {
                     DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        Hardened::from_local_key_space(6, IsSecurified(false))
+                        Hardened::from_local_key_space(6, IsSecurified(true))
                             .unwrap()
                     )),
                     5
@@ -1297,7 +1297,7 @@ mod tests {
                     vec![DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        Hardened::from_local_key_space(0, IsSecurified(false))
+                        Hardened::from_local_key_space(0, IsSecurified(false)) // unsecurified account at `0`.
                             .unwrap()
                     ))]
                 )
@@ -1456,19 +1456,16 @@ mod tests {
 
             fn sample_securified_mainnet<E: IsEntity + 'static>(
                 name: impl AsRef<str>,
+                veci: HierarchicalDeterministicFactorInstance,
                 make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
             ) -> AccountOrPersona {
                 if TypeId::of::<Account>() == TypeId::of::<E>() {
                     AccountOrPersona::from(Account::sample_securified_mainnet(
-                        name,
-                        AccountAddress::sample(),
-                        make_role,
+                        name, veci, make_role,
                     ))
                 } else {
                     AccountOrPersona::from(Persona::sample_securified_mainnet(
-                        name,
-                        IdentityAddress::sample(),
-                        make_role,
+                        name, veci, make_role,
                     ))
                 }
             }
@@ -1788,15 +1785,16 @@ mod tests {
                 let collector =
                     SignaturesCollector::test_lazy_sign_minimum_no_failures([
                         SignableWithEntities::sample([
-                            sample_securified_mainnet::<E>("Alice", || {
-                                GeneralRoleWithHierarchicalDeterministicFactorInstances::override_only(
+                            sample_securified_mainnet::<E>("Alice", HierarchicalDeterministicFactorInstance::sample_fii10(), || {
+                                GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                                    RoleKind::Primary, [], 0,
                                     FactorSource::sample_all().into_iter().map(|f| {
                                         HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                                            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
+                                            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
                                             *f.factor_source_id().as_hash().unwrap(),
                                         )
                                     }),
-                                )
+                                ).unwrap()
                             }),
                         ]),
                     ]);

@@ -254,17 +254,18 @@ impl<ID: SignableID> HasSampleValues for MaybeSignedTransactions<ID> {
 mod tests {
     use super::*;
 
-    type Sut = MaybeSignedTransactions<TransactionIntentHash>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = MaybeSignedTransactions<TransactionIntentHash>;
 
     #[test]
     fn equality_of_samples() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality_of_samples() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -272,7 +273,7 @@ mod tests {
         expected = "Discrepancy, some signature in signatures to add found in existing set."
     )]
     fn panics_when_adding_same_signature() {
-        let mut sut = Sut::sample();
+        let mut sut = SUT::sample();
         let tx = TransactionIntentHash::sample();
         let input = HDSignatureInput::new(
             tx.clone(),
@@ -294,7 +295,7 @@ mod tests {
         expected = "Discrepancy between intent hash and signature intent hash."
     )]
     fn panics_when_intent_hash_key_does_not_match_signature() {
-        let mut sut = Sut::sample();
+        let mut sut = SUT::sample();
         let tx = TransactionIntentHash::sample();
 
         let input = HDSignatureInput::new(
@@ -320,7 +321,7 @@ mod tests {
         expected = "Discrepancy, the same signer has been used twice."
     )]
     fn panics_when_same_signer_used_twice() {
-        let mut sut = Sut::empty();
+        let mut sut = SUT::empty();
         let factor_instance = OwnedFactorInstance::sample();
         let tx = TransactionIntentHash::sample();
         let input = HDSignatureInput::new(tx.clone(), factor_instance.clone());

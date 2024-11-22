@@ -14,6 +14,23 @@ impl ProfileNetworks {
             .cloned()
     }
 
+    pub fn get_persona(&self, address: &IdentityAddress) -> Option<Persona> {
+        self.get_id(address.network_id())
+            .and_then(|n| n.personas.get_id(address))
+            .cloned()
+    }
+
+    pub fn update_entities<E: IsEntity>(
+        &mut self,
+        updated_entities: IdentifiedVecOf<E>,
+    ) -> Result<()> {
+        let network =
+            updated_entities.assert_elements_not_empty_and_on_same_network()?;
+        self.try_try_update_with(&network, |n| {
+            n.update_entities(updated_entities.clone())
+        })
+    }
+
     /// Returns a clone of the updated account if found, else None.
     pub fn update_account<F>(
         &mut self,
@@ -55,8 +72,23 @@ impl ProfileNetworks {
         account_addresses: &Vec<AccountAddress>,
     ) {
         for account_address in account_addresses {
-            self.tombstone_account(&account_address);
+            self.tombstone_account(account_address);
         }
+    }
+
+    /// Returns a clone of the updated persona if found, else None.
+    pub fn update_persona<F>(
+        &mut self,
+        address: &IdentityAddress,
+        mut mutate: F,
+    ) -> Option<Persona>
+    where
+        F: FnMut(&mut Persona),
+    {
+        self.update_with(address.network_id(), |n| {
+            _ = n.update_persona(address, |a| mutate(a))
+        });
+        self.get_persona(address)
     }
 }
 

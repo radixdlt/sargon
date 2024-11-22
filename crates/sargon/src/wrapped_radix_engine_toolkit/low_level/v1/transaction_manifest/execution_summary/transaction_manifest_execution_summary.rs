@@ -1005,14 +1005,14 @@ mod tests {
         )
         .unwrap();
         let global_badge_address = NonFungibleGlobalId::new(
-            NonFungibleResourceAddress::new(badge_address.clone()).unwrap(),
+            NonFungibleResourceAddress::new(badge_address).unwrap(),
             badge_id.clone(),
         );
 
         let expected_summary = SUT::new(
             [], // No withdrawals
             [(
-                acc.clone(),
+                acc,
                 vec![ResourceIndicator::non_fungible(
                     badge_address,
                     NonFungibleResourceIndicator::by_all(
@@ -1021,14 +1021,14 @@ mod tests {
                     ),
                 )],
             )],
-            vec![acc.clone()], // addresses_of_accounts_requiring_auth
-            [],                // addresses_of_identities_requiring_auth
+            vec![acc], // addresses_of_accounts_requiring_auth
+            [],        // addresses_of_identities_requiring_auth
             [global_badge_address], // newly_created_non_fungibles
             [ReservedInstruction::AccountSecurify], // reserved_instructions
-            [],                // presented_proofs
+            [],        // presented_proofs
             [],
             [DetailedManifestClass::DeleteAccounts {
-                account_addresses: vec![acc.clone()],
+                account_addresses: vec![acc],
             }],
             FeeLocks::default(),
             FeeSummary::new("0.21017315", "0.04175875", "0.1564025852", 0),

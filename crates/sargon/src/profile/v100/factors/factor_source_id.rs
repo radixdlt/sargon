@@ -34,6 +34,14 @@ pub enum FactorSourceID {
     },
 }
 
+/// A bit hacky... but used to make it possible for us to validate FactorSourceID
+/// in RoleWithFactor...
+impl IsMaybeKeySpaceAware for FactorSourceID {
+    fn maybe_key_space(&self) -> Option<KeySpace> {
+        None
+    }
+}
+
 impl From<FactorSourceIDFromHash> for FactorSourceID {
     fn from(val: FactorSourceIDFromHash) -> Self {
         FactorSourceID::Hash { value: val }

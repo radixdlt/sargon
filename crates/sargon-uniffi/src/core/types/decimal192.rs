@@ -133,8 +133,8 @@ pub fn decimal_formatted_plain(
 /// by the underlying Decimal from Scrypto.
 ///
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// extern crate sargon_uniffi;
+/// use sargon_uniffi::prelude::*;
 ///
 /// assert!(new_decimal_from_f32(208050.17).to_string() == "208050.17");
 ///
@@ -150,8 +150,8 @@ pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
 /// by the underlying Decimal from Scrypto.
 ///
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// extern crate sargon_uniffi;
+/// use sargon_uniffi::prelude::*;
 ///
 /// assert!(new_decimal_from_f64(208050.17).is_ok());
 ///

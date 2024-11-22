@@ -61,16 +61,88 @@ pub struct Persona {
     /// uploaded to the Radix Network.
     pub persona_data: PersonaData,
 }
+impl HasEntityKind for Persona {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Identity
+    }
+}
 
-impl IsEntity for Persona {
+impl HasSecurityState for Persona {
+    fn security_state(&self) -> EntitySecurityState {
+        self.security_state.clone()
+    }
+}
+impl IsBaseEntity for Persona {
+    type Address = IdentityAddress;
+
+    fn address(&self) -> Self::Address {
+        self.address
+    }
     fn flags(&self) -> EntityFlags {
         self.flags.clone()
     }
 }
 
-impl IsNetworkAware for Persona {
-    fn network_id(&self) -> NetworkID {
-        self.network_id
+impl TryFrom<AccountOrPersona> for Persona {
+    type Error = CommonError;
+
+    fn try_from(value: AccountOrPersona) -> Result<Self> {
+        match value {
+            AccountOrPersona::PersonaEntity(p) => Ok(p),
+            AccountOrPersona::AccountEntity(a) => {
+                Err(CommonError::ExpectedPersonaButGotAccount {
+                    address: a.address.to_string(),
+                })
+            }
+        }
+    }
+}
+
+impl IsEntity for Persona {
+    type Path = IdentityPath;
+
+    fn profile_modified_event(
+        is_update: bool,
+        addresses: IndexSet<Self::Address>,
+    ) -> Option<EventProfileModified> {
+        let address = addresses.iter().last().cloned()?;
+        let addresses = addresses.clone().into_iter().collect_vec();
+        let is_many = addresses.len() > 1;
+        match (is_update, is_many) {
+            (true, true) => {
+                Some(EventProfileModified::PersonasUpdated { addresses })
+            }
+            (false, true) => {
+                Some(EventProfileModified::PersonasAdded { addresses })
+            }
+            (true, false) => {
+                Some(EventProfileModified::PersonaUpdated { address })
+            }
+            (false, false) => {
+                Some(EventProfileModified::PersonaAdded { address })
+            }
+        }
+    }
+    fn with_veci_and_name(
+        veci: HDFactorInstanceTransactionSigning<Self::Path>,
+        name: DisplayName,
+    ) -> Self {
+        let address =
+            IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
+                veci.clone(),
+            );
+        Self {
+            network_id: veci.network_id(),
+            address,
+            display_name: name,
+            security_state:
+                UnsecuredEntityControl::with_entity_creating_factor_instance(
+                    veci,
+                )
+                .into(),
+            flags: EntityFlags::default(),
+            persona_data: PersonaData::default(),
+        }
     }
 }
 
@@ -81,22 +153,14 @@ impl Persona {
         display_name: DisplayName,
         persona_data: impl Into<Option<PersonaData>>,
     ) -> Self {
-        let address =
-            IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
-                persona_creating_factor_instance.clone(),
-            );
-        Self {
-            network_id: persona_creating_factor_instance.network_id(),
-            address,
+        let mut self_ = Self::with_veci_and_name(
+            persona_creating_factor_instance,
             display_name,
-            security_state:
-                UnsecuredEntityControl::with_entity_creating_factor_instance(
-                    persona_creating_factor_instance,
-                )
-                .into(),
-            flags: EntityFlags::default(),
-            persona_data: persona_data.into().unwrap_or_default(),
+        );
+        if let Some(persona_data) = persona_data.into() {
+            self_.persona_data = persona_data;
         }
+        self_
     }
 }
 
@@ -143,7 +207,7 @@ impl Persona {
         );
 
         let mut persona = Self::new(
-            private_hd_factor_source.derive_entity_creation_factor_instance(
+            private_hd_factor_source._derive_entity_creation_factor_instance(
                 network_id,
                 HDPathComponent::Unsecurified(Unsecurified::Hardened(
                     UnsecurifiedHardened::from_local_key_space(index).unwrap(),
@@ -433,6 +497,15 @@ mod tests {
     }
 
     #[test]
+    fn test_err_when_try_from_account() {
+        let account = Account::sample();
+        assert!(matches!(
+            SUT::try_from(AccountOrPersona::AccountEntity(account)),
+            Err(CommonError::ExpectedPersonaButGotAccount { .. })
+        ));
+    }
+
+    #[test]
     fn new_with_identity_and_name() {
         let identity_address: IdentityAddress =
 			"identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw"
@@ -459,6 +532,17 @@ mod tests {
 				.parse()
 				.unwrap();
         assert_eq!(persona.id(), identity_address);
+    }
+
+    #[test]
+    fn new_with_persona_data() {
+        let persona_data = PersonaData::sample_other();
+        let sut = SUT::new(
+            HDFactorInstanceTransactionSigning::<IdentityPath>::sample(),
+            DisplayName::sample(),
+            persona_data.clone(),
+        );
+        assert_eq!(sut.persona_data, persona_data);
     }
 
     #[test]

@@ -21,7 +21,8 @@ impl SargonOS {
     /// 1. Extracting the transaction signers.
     /// 2. Executing the transaction preview GW request.
     /// 3. Running the execution summary with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_transaction_preview(
         &self,
         instructions: String,
@@ -78,7 +79,8 @@ impl SargonOS {
     /// 3. If open, the manifest with its summary is returned.
     /// 4. If enclosed, it extracts the transaction signers and then transaction preview GW request is executed.
     /// 3. The execution summary is created with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_pre_auth_preview(
         &self,
         instructions: String,
@@ -261,7 +263,7 @@ impl SargonOS {
             && !are_instructions_originating_from_host
         {
             return Err(CommonError::ReservedManifestClass {
-                class: reserved_manifest_class.clone(),
+                class: reserved_manifest_class.kind(),
             });
         }
 
@@ -269,17 +271,18 @@ impl SargonOS {
     }
 
     #[cfg(not(tarpaulin_include))] // TBD
+    #[allow(dead_code)]
     async fn get_subintent_preview(
         &self,
         gateway_client: GatewayClient,
         manifest: TransactionManifestV2,
-        nonce: Nonce,
+        _nonce: Nonce,
     ) -> Result<TransactionPreviewResponse> {
-        let signer_public_keys =
+        let _signer_public_keys =
             self.extract_signer_public_keys(manifest.summary()?)?;
 
         // Getting the current ledger epoch
-        let epoch = gateway_client.current_epoch().await?;
+        let _epoch = gateway_client.current_epoch().await?;
 
         unimplemented!("To be defined when GW is available, likely that there will be a new endpoint with new payload definition")
     }

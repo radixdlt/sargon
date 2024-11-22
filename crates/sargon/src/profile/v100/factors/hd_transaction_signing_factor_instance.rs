@@ -1,34 +1,5 @@
 use crate::prelude::*;
 
-pub trait HasKeyKind {
-    fn key_kind(&self) -> CAP26KeyKind;
-}
-
-pub trait IsEntityPath:
-    NewEntityPath
-    + IsNetworkAware
-    + HasEntityKind
-    + HasKeyKind
-    + Clone
-    + Into<DerivationPath>
-    + TryFrom<DerivationPath, Error = CommonError>
-{
-    fn derivation_path(&self) -> DerivationPath {
-        self.clone().into()
-    }
-}
-impl<
-        T: NewEntityPath
-            + Clone
-            + IsNetworkAware
-            + HasEntityKind
-            + HasKeyKind
-            + Into<DerivationPath>
-            + TryFrom<DerivationPath, Error = CommonError>,
-    > IsEntityPath for T
-{
-}
-
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -39,7 +10,7 @@ pub struct HDFactorInstanceTransactionSigning<T: IsEntityPath> {
 }
 
 impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
-    fn try_from_factor_instance(
+    pub fn try_from_factor_instance(
         value: HierarchicalDeterministicFactorInstance,
     ) -> Result<Self> {
         T::try_from(value
@@ -52,7 +23,7 @@ impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
                 }
             })
             .and_then(|p: T| {
-                if !p.key_kind().is_transaction_signing() {
+                if !p.get_key_kind().is_transaction_signing() {
                     Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
                 } else {
                     Ok(p)
@@ -78,14 +49,6 @@ impl<T: IsEntityPath> HDFactorInstanceTransactionSigning<T> {
         )
     }
 }
-
-/// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
-pub type HDFactorInstanceAccountCreation =
-    HDFactorInstanceTransactionSigning<AccountPath>;
-
-/// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
-pub type HDFactorInstanceIdentityCreation =
-    HDFactorInstanceTransactionSigning<IdentityPath>;
 
 impl<T> HDFactorInstanceTransactionSigning<T>
 where
@@ -127,7 +90,7 @@ mod tests {
             HDFactorInstanceAccountCreation::new(hd_fi)
                 .unwrap()
                 .path
-                .key_kind(),
+                .get_key_kind(),
             CAP26KeyKind::TransactionSigning
         );
     }
@@ -180,7 +143,7 @@ mod tests {
             HDFactorInstanceIdentityCreation::new(hd_fi)
                 .unwrap()
                 .path
-                .key_kind(),
+                .get_key_kind(),
             CAP26KeyKind::TransactionSigning
         );
     }

@@ -579,8 +579,8 @@ pub enum CommonError {
     #[error("Expected collection to not be empty")]
     ExpectedNonEmptyCollection = 10161,
 
-    #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10162,
+    #[error("Failed to add all entities, found duplicated entity.")]
+    UnableToAddAllEntitiesDuplicatesFound = 10162,
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
     ProfileUsedOnOtherDevice {
@@ -631,9 +631,9 @@ pub enum CommonError {
     InvalidSecurityStructureID { bad_value: String } = 10177,
 
     #[error(
-        "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
+        "Invalid SecurityStructure, it references Factors not in profile, FactorSourceID {bad_value}."
     )]
-    StructureReferencesUnknownFactorSource = 10178,
+    StructureReferencesUnknownFactorSource { bad_value: String } = 10178,
 
     #[error("Invalid Questions and Answers count, expected: {expected}, found: {found}")]
     InvalidQuestionsAndAnswersCount { expected: u16, found: u16 } = 10179,
@@ -729,14 +729,89 @@ pub enum CommonError {
     #[error("Subintent has already expired")]
     SubintentExpired = 10206,
 
-    #[error("Unexpected collection item aggregation")]
-    UnexpectedCollectionItemAggregation = 10207,
+    #[error("UNKNOWN ERROR (FREE_TO_USE)")]
+    #[allow(non_camel_case_types)]
+    FREE_TO_USE = 10207,
 
     #[error("Unable to make {amount} transfers in one single transaction")]
     MaxTransfersPerTransactionReached { amount: u64 } = 10208,
 
     #[error("Transaction Manifest class is reserved: {class}")]
-    ReservedManifestClass { class: DetailedManifestClass } = 10209,
+    ReservedManifestClass { class: DetailedManifestClassKind } = 10209,
+
+    #[error("FactorInstancesProvider did not derive enough factors")]
+    FactorInstancesProviderDidNotDeriveEnoughFactors = 10210,
+
+    #[error("FactorInstancesCache already contains FactorInstance")]
+    CacheAlreadyContainsFactorInstance { derivation_path: String } = 10211,
+
+    #[error("Expected Persona but Got Account, address of account {address}")]
+    ExpectedPersonaButGotAccount { address: String } = 10212,
+
+    #[error(
+        "Account not securified, but was expected to be, address {address}"
+    )]
+    AccountNotSecurified { address: String } = 10213,
+
+    #[error(
+        "Account not securified, but was expected to be, address {address}"
+    )]
+    PersonaNotSecurified { address: String } = 10214,
+
+    #[error(
+        "Entity of kind {entity_kind}, on wrong network: {wrong_network}, expected: {expected_network}"
+    )]
+    EntityOnWrongNetwork {
+        entity_kind: String,
+        wrong_network: NetworkID,
+        expected_network: NetworkID,
+    } = 10215,
+
+    #[error("SecurityState not securified")]
+    SecurityStateNotSecurified = 10216,
+
+    #[error("SecurityState securified but expected unsecurified")]
+    SecurityStateSecurifiedButExpectedUnsecurified = 10217,
+
+    #[error("Failed to add all personas, found duplicated persona.")]
+    UnableToAddAllPersonasDuplicatesFound = 10218,
+
+    #[error("Missing Factor Mapping Instances Into RoleWithFactors.")]
+    MissingFactorMappingInstancesIntoRole = 10219,
+
+    #[error("FactorSource Discrepancy")]
+    FactorSourceDiscrepancy = 10220,
+
+    #[error("Expected Account but Got Persona, address of persona {address}")]
+    ExpectedAccountButGotPersona { address: String } = 10221,
+
+    #[error("Invalid FactorSourceIDFromHash String, wrong component count, expected: {expected}, found: {found}")]
+    InvalidFactorSourceIDFromHashStringWrongComponentCount {
+        expected: u64,
+        found: u64,
+    } = 10222,
+
+    #[error("File already exists, path: {path}")]
+    FileAlreadyExists { path: String } = 10223,
+
+    #[error("Failed to canonicalize path: {path}")]
+    FailedToCanonicalize { path: String } = 10224,
+
+    #[error("Factor Instances discrepancy in address_of_entity1: {address_of_entity1}, address_of_entity2: {address_of_entity2}, factor source id: {factor_source_id}")]
+    FactorInstancesDiscrepancy {
+        address_of_entity1: String,
+        address_of_entity2: String,
+        factor_source_id: String,
+    } = 10225,
+
+    #[error("Failed to add all accounts, found duplicated accounts.")]
+    UnableToAddAllAccountsDuplicatesFound = 10226,
+
+    #[error("Invalid Index Agnostic Path, wrong length")]
+    InvalidIndexAgnosticPathWrongLength = 10227,
+
+    #[error("Invalid Index Agnostic Path, does not end with suffix")]
+    InvalidIndexAgnosticPathDoesNotEndWithSuffix = 10228,
 }
 
 impl CommonError {

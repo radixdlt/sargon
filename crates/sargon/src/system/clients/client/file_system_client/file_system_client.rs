@@ -25,7 +25,45 @@ pub(crate) fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
 
 #[allow(dead_code)]
 impl FileSystemClient {
-    async fn load_from_file(
+    pub async fn create_if_needed(
+        &self,
+        path: impl AsRef<Path>,
+    ) -> Result<String> {
+        if self.load_from_file(path.as_ref()).await.is_ok() {
+            return path_to_string(path);
+        }
+        let res = self
+            .save_to_file(path.as_ref(), BagOfBytes::default(), false)
+            .await;
+
+        let path_str = path.as_ref().to_string_lossy().to_string();
+        match res {
+            Ok(_) => {}
+            Err(CommonError::FileAlreadyExists { .. }) => {}
+            Err(e) => {
+                error!(
+                    "Failed to create path '{:?}', error: '{:?}'",
+                    path_str, e
+                );
+                return Err(e);
+            }
+        }
+        fs::canonicalize(path.as_ref())
+            .map_err(|e| {
+                error!(
+                    "Failed to canonicalize path: {:?}, error: {:?}",
+                    path_str, e
+                );
+                CommonError::FailedToCanonicalize { path: path_str }
+            })
+            .map(|p| p.to_string_lossy().to_string())
+    }
+
+    pub async fn writable_app_dir_path(&self) -> Result<String> {
+        self.driver.writable_app_dir_path().await
+    }
+
+    pub async fn load_from_file(
         &self,
         path: impl AsRef<Path>,
     ) -> Result<Option<BagOfBytes>> {
@@ -36,15 +74,16 @@ impl FileSystemClient {
             .await
     }
 
-    async fn save_to_file(
+    pub async fn save_to_file(
         &self,
         path: impl AsRef<Path>,
         data: impl AsRef<[u8]>,
+        is_allowed_to_overwrite: bool,
     ) -> Result<()> {
         let path = path_to_string(path.as_ref())?;
         let data = BagOfBytes::from(data.as_ref());
         self.driver
-            .save_to_file(path, data)
+            .save_to_file(path, data, is_allowed_to_overwrite)
             // tarpaulin will incorrectly flag next line is missed
             .await
     }
@@ -55,6 +94,16 @@ impl FileSystemClient {
             .delete_file(path)
             // tarpaulin will incorrectly flag next line is missed
             .await
+    }
+}
+
+#[cfg(test)]
+impl FileSystemClient {
+    pub fn test() -> Self {
+        Self::new(RustFileSystemDriver::new())
+    }
+    pub fn in_memory() -> Self {
+        Self::new(InMemoryFileSystemDriver::new())
     }
 }
 
@@ -94,31 +143,73 @@ mod tests {
         make_contents("second")
     }
 
-    impl FileSystemClient {
-        pub(crate) fn test() -> Self {
-            Self::new(RustFileSystemDriver::new())
-        }
-    }
-
     #[actix_rt::test]
     async fn test_create_load_delete() {
         let sut = SUT::test();
         let file = file_in_tmp();
 
         let data = contents();
-        sut.save_to_file(file.clone(), data.clone()).await.unwrap();
+        sut.save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
         let loaded = sut.load_from_file(file.clone()).await.unwrap().unwrap();
         assert_eq!(loaded, data);
 
         // Assert can be updated
         let new_data = other_contents();
-        sut.save_to_file(file.clone(), new_data.clone())
+        sut.save_to_file(file.clone(), new_data.clone(), true)
             .await
             .unwrap();
         let loaded = sut.load_from_file(file.clone()).await.unwrap().unwrap();
         assert_eq!(loaded, new_data);
 
         assert!(sut.delete_file(file.clone()).await.is_ok());
+    }
+
+    #[actix_rt::test]
+    async fn test_fails_for_when_not_allowed_to_overwrite_an_already_exists() {
+        let sut = SUT::test();
+        let file = file_in_tmp();
+        let data = contents();
+
+        sut.save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
+
+        let res = sut.save_to_file(file.clone(), data.clone(), false).await;
+
+        assert!(matches!(res, Err(CommonError::FileAlreadyExists { .. })));
+    }
+
+    #[actix_rt::test]
+    async fn test_create_load_delete_in_memory_shared() {
+        let client1 = Arc::new(SUT::in_memory());
+        let file = file_in_tmp();
+
+        let data = contents();
+        client1
+            .save_to_file(file.clone(), data.clone(), true)
+            .await
+            .unwrap();
+        let loaded =
+            client1.load_from_file(file.clone()).await.unwrap().unwrap();
+        assert_eq!(loaded, data);
+
+        // Assert can be updated
+        let client2 = client1.clone();
+        let new_data = other_contents();
+        client2
+            .save_to_file(file.clone(), new_data.clone(), true)
+            .await
+            .unwrap();
+
+        let loaded_from_client2 =
+            client2.load_from_file(file.clone()).await.unwrap().unwrap();
+        assert_eq!(loaded_from_client2, new_data);
+
+        let loaded_from_client1 =
+            client1.load_from_file(file.clone()).await.unwrap().unwrap();
+        assert_eq!(loaded_from_client1, new_data);
     }
 
     #[actix_rt::test]
@@ -151,7 +242,7 @@ mod tests {
     async fn test_save_to_root_is_err() {
         let sut = SUT::test();
         let path = file_in_dir(Path::new("/"));
-        let res = sut.save_to_file(path.clone(), contents()).await;
+        let res = sut.save_to_file(path.clone(), contents(), true).await;
         assert_eq!(
             res,
             Err(CommonError::FailedToSaveFile {

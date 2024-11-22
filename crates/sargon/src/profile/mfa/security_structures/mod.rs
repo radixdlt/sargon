@@ -1,17 +1,15 @@
 mod decl_security_structure_of;
-mod security_structure_id;
+mod factor_instance_level;
+mod factor_source_id_level;
+mod factor_source_level;
+mod has_role_kind;
+mod role_with_factors;
 mod security_structure_metadata;
-mod security_structure_of_factor_instances;
-mod security_structure_of_factor_source_ids;
-mod security_structure_of_factor_sources;
-mod security_structures_of_factor_source_ids;
-mod security_structures_of_factor_sources;
 
-pub use decl_security_structure_of::*;
-pub use security_structure_id::*;
+pub(crate) use decl_security_structure_of::*;
+pub use factor_instance_level::*;
+pub use factor_source_id_level::*;
+pub use factor_source_level::*;
+pub use has_role_kind::*;
+pub use role_with_factors::*;
 pub use security_structure_metadata::*;
-pub use security_structure_of_factor_instances::*;
-pub use security_structure_of_factor_source_ids::*;
-pub use security_structure_of_factor_sources::*;
-pub use security_structures_of_factor_source_ids::*;
-pub use security_structures_of_factor_sources::*;

@@ -78,11 +78,12 @@ impl SigningFinishEarlyStrategy {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = SigningFinishEarlyStrategy;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SigningFinishEarlyStrategy;
 
     #[test]
     fn test_continue() {
-        let sut = Sut::r#continue();
+        let sut = SUT::r#continue();
         assert_eq!(
             sut.when_all_transactions_are_valid.0,
             SignaturesCollectingContinuation::Continue
@@ -95,7 +96,7 @@ mod tests {
 
     #[test]
     fn test_finish_early() {
-        let sut = Sut::finish_early();
+        let sut = SUT::finish_early();
         assert_eq!(
             sut.when_all_transactions_are_valid.0,
             SignaturesCollectingContinuation::FinishEarly
@@ -108,7 +109,7 @@ mod tests {
 
     #[test]
     fn test_default_is_finish_when_valid_continue_if_invalid() {
-        let sut = Sut::default();
+        let sut = SUT::default();
         assert_eq!(
             sut.when_all_transactions_are_valid.0,
             SignaturesCollectingContinuation::FinishEarly

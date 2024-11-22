@@ -147,6 +147,7 @@ mod tests_transform {
                             },
                         }],
                     },
+                    details: None,
                 }],
             });
         SUT::new(GatewayClient::new(

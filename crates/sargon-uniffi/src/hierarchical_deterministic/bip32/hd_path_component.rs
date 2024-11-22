@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use sargon::HDPathComponent as InternalHDPathComponent;
+use sargon::{
+    HDPathComponent as InternalHDPathComponent, HasIndexInLocalKeySpace,
+    IsKeySpaceAware,
+};
 
 use sargon::{
     FromGlobalKeySpace, FromLocalKeySpace, IsInLocalKeySpace,

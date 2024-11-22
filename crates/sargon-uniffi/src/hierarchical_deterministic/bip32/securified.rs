@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::SecurifiedU30 as InternalSecurifiedU30;
+use sargon::{HasIndexInLocalKeySpace, SecurifiedU30 as InternalSecurifiedU30};
 
 use sargon::{
     FromGlobalKeySpace, FromLocalKeySpace, IsInLocalKeySpace,

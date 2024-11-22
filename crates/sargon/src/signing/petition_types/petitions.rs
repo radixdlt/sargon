@@ -243,21 +243,22 @@ impl<S: Signable> HasSampleValues for Petitions<S> {
 mod tests {
     use super::*;
 
-    type Sut = Petitions<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Petitions<TransactionIntent>;
 
     #[test]
     fn equality_of_samples() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality_of_samples() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn debug() {
-        assert!(!format!("{:?}", Sut::sample()).is_empty());
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
     }
 }

@@ -35,7 +35,8 @@ impl SargonOS {
     /// 3. If open, the manifest with its summary is returned.
     /// 4. If enclosed, it extracts the transaction signers and then transaction preview GW request is executed.
     /// 3. The execution summary is created with the manifest and receipt.
-    /// Maps relevant errors to ensure proper handling by the hosts.
+    ///
+    ///     Maps relevant errors to ensure proper handling by the hosts.
     pub async fn analyse_pre_auth_preview(
         &self,
         instructions: String,

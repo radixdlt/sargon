@@ -60,17 +60,18 @@ impl<S: Signable> HasSampleValues for MonoFactorSignRequestInput<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Sut = MonoFactorSignRequestInput<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = MonoFactorSignRequestInput<TransactionIntent>;
 
     #[test]
     fn equality() {
-        assert_eq!(Sut::sample(), Sut::sample());
-        assert_eq!(Sut::sample_other(), Sut::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Sut::sample(), Sut::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -78,7 +79,7 @@ mod tests {
         expected = "Invalid input. No transaction to sign, this is a programmer error."
     )]
     fn panics_if_per_transaction_is_empty() {
-        Sut::new(FactorSourceIDFromHash::sample(), IndexSet::new());
+        SUT::new(FactorSourceIDFromHash::sample(), IndexSet::new());
     }
 
     #[test]
@@ -86,7 +87,7 @@ mod tests {
         expected = "Discprepancy! Input for one of the transactions has a mismatching FactorSourceID, this is a programmer error."
     )]
     fn panics_if_factor_source_mismatch() {
-        Sut::new(
+        SUT::new(
             FactorSourceIDFromHash::sample_other(),
             IndexSet::just(TransactionSignRequestInput::sample_other()),
         );
