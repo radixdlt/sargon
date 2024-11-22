@@ -2,6 +2,15 @@ use crate::prelude::*;
 use radix_common::prelude::ManifestBucket;
 use radix_transactions::manifest::KnownManifestObjectNames;
 
+impl StaticallyAnalyzableManifest for ScryptoTransactionManifestV2 {
+    fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
+        let summary = RET_statically_analyze_and_validate_v2(self)
+            .map_err(map_static_analysis_error)?;
+        Ok(ManifestSummary::from((summary, network_id)))
+    }
+}
+
+/// TBD - Probably could be entirely removed.
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.manifest_string())]
 pub struct TransactionManifestV2 {

@@ -1,8 +1,3 @@
-use std::sync::RwLockWriteGuard;
-
-use radix_engine_toolkit::functions::transaction_v2::subintent_manifest;
-use radix_transactions::manifest::BlobProvider;
-
 use crate::prelude::*;
 
 /// This is part of an error message returned **by Gateway**, indicating the deposits are denied for the account.
@@ -32,37 +27,21 @@ impl SargonOS {
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
-        let gateway_client = GatewayClient::new(
-            self.clients.http_client.driver.clone(),
-            network_id,
-        );
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
 
-        let summary = transaction_manifest.summary()?;
-
-        // Transactions created outside of the Wallet are not allowed to use reserved instructions
-        if !are_instructions_originating_from_host
-            && !summary.reserved_instructions.is_empty()
-        {
-            return Err(
-                CommonError::ReservedInstructionsNotAllowedInManifest {
-                    reserved_instructions: summary
-                        .reserved_instructions
-                        .iter()
-                        .map(|i| i.to_string())
-                        .collect(),
-                },
-            );
-        }
+        transaction_manifest.validate_instructions(
+            network_id,
+            are_instructions_originating_from_host,
+        )?;
 
         // Get the execution summary
         let execution_summary = self
-            .get_transaction_execution_summary(
-                gateway_client,
+            .get_execution_summary(
+                network_id,
                 transaction_manifest.clone(),
                 nonce,
-                Some(notary_public_key),
+                notary_public_key,
                 are_instructions_originating_from_host,
             )
             .await?;
@@ -86,6 +65,7 @@ impl SargonOS {
         instructions: String,
         blobs: Blobs,
         nonce: Nonce,
+        notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview> {
         let network_id = self.profile_state_holder.current_network_id()?;
         let subintent_manifest = SubintentManifest::new(
@@ -95,62 +75,20 @@ impl SargonOS {
             ChildSubintentSpecifiers::default(),
         )?;
 
-        let summary = subintent_manifest.summary()?;
+        let summary = subintent_manifest.validated_summary(
+            network_id,
+            false, // PreAuth transaction cannot be sent by the Host itself
+        )?;
 
-        if !summary.reserved_instructions.is_empty() {
-            return Err(
-                CommonError::ReservedInstructionsNotAllowedInManifest {
-                    reserved_instructions: summary
-                        .reserved_instructions
-                        .iter()
-                        .map(|i| i.to_string())
-                        .collect(),
-                },
-            );
-        }
-
-        let pre_auth_to_review = match subintent_manifest.as_enclosed() {
+        let pre_auth_to_review = match subintent_manifest.as_enclosed_scrypto()
+        {
             Some(manifest) => {
-                let mut instructions = manifest.instructions;
-                // The ASSERT_WORKTOP_IS_EMPTY instruction, as it is a V2 instruction, is not allowed in the V1 manifest.
-                instructions.instructions.remove(0);
-                let manifest_v2 = TransactionManifestV2::with_instructions_and_blobs_and_children(
-                    instructions,
-                    blobs.clone(),
-                    ChildSubintentSpecifiers::default(),
-                );
-
-                let manifest_string = manifest_v2.manifest_string();
-                let network_definition = network_id.network_definition();
-                let scrypto_manifest_v1: ScryptoTransactionManifest =
-                    scrypto_compile_manifest(
-                        &manifest_string,
-                        &network_definition,
-                        BlobProvider::new_with_blobs(
-                            blobs
-                                .blobs()
-                                .into_iter()
-                                .map(|b| b.0.bytes)
-                                .collect(),
-                        ),
-                    )
-                    .map_err(|e| {
-                        CommonError::from_scrypto_compile_error(e, network_id)
-                    })?;
-
-                let manifest_v1: TransactionManifest =
-                    (scrypto_manifest_v1, network_id).try_into()?;
-
-                let gateway_client = GatewayClient::new(
-                    self.clients.http_client.driver.clone(),
-                    network_id,
-                );
                 let execution_summary = self
-                    .get_transaction_execution_summary(
-                        gateway_client,
-                        manifest_v1,
+                    .get_execution_summary(
+                        network_id,
+                        manifest,
                         nonce,
-                        None,
+                        notary_public_key,
                         false,
                     )
                     .await?;
@@ -171,6 +109,43 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    async fn get_execution_summary<T: PreviewableManifest>(
+        &self,
+        network_id: NetworkID,
+        manifest: T,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
+        are_instructions_originating_from_host: bool,
+    ) -> Result<ExecutionSummary> {
+        let signer_public_keys =
+            self.extract_signer_public_keys(manifest.summary(network_id)?)?;
+
+        let gateway_client = GatewayClient::new(
+            self.clients.http_client.driver.clone(),
+            network_id,
+        );
+
+        let epoch = gateway_client.current_epoch().await?;
+
+        let receipts = manifest
+            .fetch_preview(
+                &gateway_client,
+                network_id,
+                epoch,
+                signer_public_keys,
+                notary_public_key,
+                nonce,
+            )
+            .await?;
+
+        Self::extract_execution_summary(
+            &manifest,
+            receipts,
+            network_id,
+            are_instructions_originating_from_host,
+        )
+    }
+
     fn extract_signer_public_keys(
         &self,
         manifest_summary: ManifestSummary,
@@ -191,40 +166,26 @@ impl SargonOS {
         .collect::<IndexSet<PublicKey>>())
     }
 
-    async fn get_transaction_execution_summary(
-        &self,
-        gateway_client: GatewayClient,
-        manifest: TransactionManifest,
-        nonce: Nonce,
-        notary_public_key: Option<PublicKey>,
+    fn extract_execution_summary(
+        manifest: &dyn DynamicallyAnalyzableManifest,
+        receipts: PreviewResponseReceipts,
+        network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        let signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary()?)?;
+        let receipt = receipts
+            .receipt
+            .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
-        // Getting the current ledger epoch
-        let epoch = gateway_client.current_epoch().await?;
-
-        let request = TransactionPreviewRequest::new_transaction_analysis_v1(
-            manifest.clone(),
-            epoch,
-            signer_public_keys,
-            notary_public_key,
-            nonce,
-        );
-        let response = gateway_client.transaction_preview(request).await?;
-
-        // Checking the transaction receipt status and mapping the response
-        if response.receipt.status != TransactionReceiptStatus::Succeeded {
-            return Err(Self::map_failed_transaction_preview(response));
+        if receipt.status != TransactionReceiptStatus::Succeeded {
+            return Err(Self::map_failed_transaction_preview(receipt));
         };
 
-        let engine_toolkit_receipt = response
-            .radix_engine_toolkit_receipt
+        let engine_toolkit_receipt = receipts
+            .engine_toolkit_receipt
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
         let execution_summary =
-            manifest.execution_summary(engine_toolkit_receipt)?;
+            manifest.execution_summary(engine_toolkit_receipt, network_id)?;
 
         let reserved_manifest_class = execution_summary
             .detailed_classification
@@ -235,35 +196,17 @@ impl SargonOS {
             && !are_instructions_originating_from_host
         {
             return Err(CommonError::ReservedManifestClass {
-                class: reserved_manifest_class.kind(),
+                class: reserved_manifest_class.kind().clone(),
             });
         }
 
         Ok(execution_summary)
     }
 
-    #[cfg(not(tarpaulin_include))] // TBD
-    #[allow(dead_code)]
-    async fn get_subintent_preview(
-        &self,
-        gateway_client: GatewayClient,
-        manifest: TransactionManifestV2,
-        _nonce: Nonce,
-    ) -> Result<TransactionPreviewResponse> {
-        let _signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary()?)?;
-
-        // Getting the current ledger epoch
-        let _epoch = gateway_client.current_epoch().await?;
-
-        unimplemented!("To be defined when GW is available, likely that there will be a new endpoint with new payload definition")
-    }
-
     fn map_failed_transaction_preview(
-        response: TransactionPreviewResponse,
+        receipt: TransactionReceipt,
     ) -> CommonError {
-        let message = response
-            .receipt
+        let message = receipt
             .error_message
             .unwrap_or_else(|| "Unknown reason".to_string());
 
@@ -281,6 +224,80 @@ impl SargonOS {
             }
         }
     }
+}
+
+trait PreviewableManifest:
+    DynamicallyAnalyzableManifest + StaticallyAnalyzableManifest
+{
+    async fn fetch_preview(
+        &self,
+        gateway_client: &GatewayClient,
+        network_id: NetworkID,
+        start_epoch_inclusive: Epoch,
+        signer_public_keys: impl IntoIterator<Item = PublicKey>,
+        notary_public_key: PublicKey,
+        nonce: Nonce,
+    ) -> Result<PreviewResponseReceipts>;
+}
+
+impl PreviewableManifest for ScryptoTransactionManifestV2 {
+    async fn fetch_preview(
+        &self,
+        gateway_client: &GatewayClient,
+        network_id: NetworkID,
+        start_epoch_inclusive: Epoch,
+        signer_public_keys: impl IntoIterator<Item = PublicKey>,
+        notary_public_key: PublicKey,
+        nonce: Nonce,
+    ) -> Result<PreviewResponseReceipts> {
+        let request = TransactionPreviewRequestV2::new_transaction_analysis(
+            self.clone(),
+            start_epoch_inclusive,
+            signer_public_keys,
+            notary_public_key,
+            nonce,
+            network_id,
+        )?;
+
+        let response = gateway_client.transaction_preview_v2(request).await?;
+
+        Ok(PreviewResponseReceipts {
+            receipt: response.receipt,
+            engine_toolkit_receipt: response.radix_engine_toolkit_receipt,
+        })
+    }
+}
+
+impl PreviewableManifest for TransactionManifest {
+    async fn fetch_preview(
+        &self,
+        gateway_client: &GatewayClient,
+        _network_id: NetworkID,
+        start_epoch_inclusive: Epoch,
+        signer_public_keys: impl IntoIterator<Item = PublicKey>,
+        notary_public_key: PublicKey,
+        nonce: Nonce,
+    ) -> Result<PreviewResponseReceipts> {
+        let request = TransactionPreviewRequest::new_transaction_analysis(
+            self.clone(),
+            start_epoch_inclusive,
+            signer_public_keys,
+            Some(notary_public_key),
+            nonce,
+        );
+        let response = gateway_client.transaction_preview(request).await?;
+
+        Ok(PreviewResponseReceipts {
+            receipt: Some(response.receipt),
+            engine_toolkit_receipt: response.radix_engine_toolkit_receipt,
+        })
+    }
+}
+
+struct PreviewResponseReceipts {
+    receipt: Option<TransactionReceipt>,
+    engine_toolkit_receipt:
+        Option<ScryptoSerializableToolkitTransactionReceipt>,
 }
 
 #[cfg(test)]
@@ -734,6 +751,7 @@ mod transaction_preview_analysis_tests {
                 subintent_manifest.manifest_string(),
                 Blobs::default(),
                 Nonce::sample(),
+                PublicKey::sample(),
             )
             .await
             .unwrap();
@@ -747,40 +765,96 @@ mod transaction_preview_analysis_tests {
         )
     }
 
-    // Disabled temporary as v1 analysis is used for now.
-    // #[actix_rt::test]
-    // async fn analyse_open_enclosed_auth_preview() {
-    //     let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
+    #[actix_rt::test]
+    async fn analyse_open_enclosed_auth_preview() {
+        let responses = vec![
+            to_bag_of_bytes(
+                TransactionConstructionResponse {
+                    ledger_state: LedgerState {
+                        network: "".to_string(),
+                        state_version: 0,
+                        proposer_round_timestamp: "".to_string(),
+                        epoch: 0,
+                        round: 0,
+                    }
+                }
+            ),
+            to_bag_of_bytes(
+            TransactionPreviewResponseV2 {
+                at_ledger_state_version: 0,
+                receipt: Some(TransactionReceipt {
+                    status: TransactionReceiptStatus::Succeeded,
+                    error_message: None,
+                }),
+                radix_engine_toolkit_receipt: Some(ScryptoSerializableToolkitTransactionReceipt::CommitSuccess {
+                    state_updates_summary: RETStateUpdatesSummary {
+                        new_entities: IndexSet::new(),
+                        metadata_updates: IndexMap::new(),
+                        non_fungible_data_updates: IndexMap::new(),
+                        newly_minted_non_fungibles: IndexSet::new(),
+                    },
+                    worktop_changes: IndexMap::new(),
+                    fee_summary: RETFeeSummary {
+                        execution_fees_in_xrd: ScryptoDecimal192::zero().into(),
+                        finalization_fees_in_xrd: ScryptoDecimal192::zero().into(),
+                        storage_fees_in_xrd: ScryptoDecimal192::zero().into(),
+                        royalty_fees_in_xrd: ScryptoDecimal192::zero().into(),
+                    },
+                    locked_fees: RETLockedFees {
+                        contingent: ScryptoDecimal192::zero().into(),
+                        non_contingent: ScryptoDecimal192::zero().into(),
+                    },
+                }),
+                logs: None,
+            }
+        )];
+        let os =
+            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
+                .await;
 
-    //     let scrypto_subintent_manifest =
-    //         ScryptoSubintentManifestV2Builder::new_subintent_v2()
-    //             .assert_worktop_is_empty()
-    //             .drop_all_proofs()
-    //             .yield_to_parent(())
-    //             .build();
+        let scrypto_subintent_manifest =
+            ScryptoSubintentManifestV2Builder::new_subintent_v2()
+                .assert_worktop_is_empty()
+                .drop_all_proofs()
+                .yield_to_parent(())
+                .build();
 
-    //     let subintent_manifest: SubintentManifest =
-    //         (scrypto_subintent_manifest, NetworkID::Mainnet)
-    //             .try_into()
-    //             .unwrap();
+        let subintent_manifest: SubintentManifest =
+            (scrypto_subintent_manifest, NetworkID::Mainnet)
+                .try_into()
+                .unwrap();
 
-    //     let result = os
-    //         .analyse_pre_auth_preview(
-    //             subintent_manifest.manifest_string(),
-    //             Blobs::default(),
-    //             Nonce::sample(),
-    //         )
-    //         .await
-    //         .unwrap();
+        let result = os
+            .analyse_pre_auth_preview(
+                subintent_manifest.manifest_string(),
+                Blobs::default(),
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await
+            .unwrap();
 
-    //     assert_eq!(
-    //         result,
-    //         PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
-    //             manifest: subintent_manifest.clone(),
-    //             summary: ExecutionSummary::sample_stokenet(),
-    //         })
-    //     )
-    // }
+        pretty_assertions::assert_eq!(
+            result,
+            PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
+                manifest: subintent_manifest,
+                summary: ExecutionSummary::new(
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [DetailedManifestClass::General],
+                    FeeLocks::default(),
+                    FeeSummary::new("0", "0", "0", 0,),
+                    NewEntities::default()
+                )
+            })
+        )
+    }
 
     async fn prepare_os(
         mock_networking_driver: MockNetworkingDriver,

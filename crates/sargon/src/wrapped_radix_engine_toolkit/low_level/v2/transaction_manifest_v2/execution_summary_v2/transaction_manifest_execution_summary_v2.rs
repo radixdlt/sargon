@@ -1,46 +1,11 @@
 use crate::prelude::*;
 
-impl TransactionManifestV2 {
-    /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt`.
-    ///
-    /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
-    pub fn execution_summary(
+impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
+    fn ret_dynamically_analyze(
         &self,
-        engine_toolkit_receipt: ScryptoSerializableToolkitTransactionReceipt,
-    ) -> Result<ExecutionSummary> {
-        let network_definition = self.network_id().network_definition();
-        let runtime_receipt = engine_toolkit_receipt
-            .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
-                &network_definition,
-            ))
-            .map_err(|e| {
-                error!("Failed to decode engine toolkit receipt  {:?}", e);
-                CommonError::FailedToDecodeEngineToolkitReceipt
-            })?;
-
-        self.execution_summary_with_receipt(runtime_receipt)
-    }
-
-    pub fn execution_summary_with_receipt(
-        &self,
-        receipt: ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<ExecutionSummary> {
-        let ret_dynamic_analysis =
-            RET_dynamically_analyze_v2(&self.scrypto_manifest(), &receipt)
-                .map_err(|e| {
-                    error!(
-                        "Failed to get execution summary from RET, error: {:?}",
-                        e
-                    );
-                    CommonError::ExecutionSummaryFail {
-                        underlying: format!("{:?}", e),
-                    }
-                })?;
-
-        Ok(ExecutionSummary::from((
-            ret_dynamic_analysis,
-            self.network_id(),
-        )))
+        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
+    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
+        RET_dynamically_analyze_v2(self, receipt)
     }
 }
 
@@ -55,8 +20,13 @@ mod tests {
             reason: "whatever".to_owned(),
         };
 
+        let manifest = ScryptoTransactionManifestV2Builder::new_v2()
+            .assert_worktop_is_empty()
+            .drop_all_proofs()
+            .build();
+
         assert_eq!(
-            TransactionManifestV2::sample().execution_summary(wrong_receipt),
+            manifest.execution_summary(wrong_receipt, NetworkID::Mainnet),
             Err(CommonError::ExecutionSummaryFail {
                 underlying: "InvalidReceipt".to_owned()
             })

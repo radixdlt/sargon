@@ -812,6 +812,9 @@ pub enum CommonError {
 
     #[error("Invalid Index Agnostic Path, does not end with suffix")]
     InvalidIndexAgnosticPathDoesNotEndWithSuffix = 10228,
+
+    #[error("Failed to encode transaction preview v2 - '{underlying}'")]
+    FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
 }
 
 impl CommonError {

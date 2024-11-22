@@ -34,6 +34,15 @@ impl TransactionManifest {
     }
 }
 
+impl StaticallyAnalyzableManifest for TransactionManifest {
+    fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
+        let summary =
+            RET_statically_analyze_and_validate(&self.scrypto_manifest())
+                .map_err(map_static_analysis_error)?;
+        Ok(ManifestSummary::from((summary, network_id)))
+    }
+}
+
 impl TransactionManifest {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
@@ -144,10 +153,7 @@ impl TransactionManifest {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary =
-            RET_statically_analyze_and_validate(&self.scrypto_manifest())
-                .map_err(map_static_analysis_error)?;
-        Ok(ManifestSummary::from((summary, self.network_id())))
+        StaticallyAnalyzableManifest::summary(self, self.network_id())
     }
 
     pub fn network_id(&self) -> NetworkID {

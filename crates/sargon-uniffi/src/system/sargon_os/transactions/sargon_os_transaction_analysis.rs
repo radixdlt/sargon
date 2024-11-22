@@ -42,12 +42,14 @@ impl SargonOS {
         instructions: String,
         blobs: Blobs,
         nonce: Nonce,
+        notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview> {
         self.wrapped
             .analyse_pre_auth_preview(
                 instructions,
                 blobs.into_internal(),
                 nonce.into_internal(),
+                notary_public_key.into_internal(),
             )
             .await
             .into_result()

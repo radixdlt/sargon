@@ -10,39 +10,20 @@ impl TransactionManifest {
         &self,
         engine_toolkit_receipt: ScryptoSerializableToolkitTransactionReceipt,
     ) -> Result<ExecutionSummary> {
-        let network_definition = self.network_id().network_definition();
-        let runtime_receipt = engine_toolkit_receipt
-            .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
-                &network_definition,
-            ))
-            .map_err(|e| {
-                error!("Failed to decode engine toolkit receipt  {:?}", e);
-                CommonError::FailedToDecodeEngineToolkitReceipt
-            })?;
-
-        self.execution_summary_with_receipt(runtime_receipt)
-    }
-
-    fn execution_summary_with_receipt(
-        &self,
-        receipt: ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<ExecutionSummary> {
-        let ret_dynamic_analysis =
-            RET_dynamically_analyze(&self.scrypto_manifest(), &receipt)
-                .map_err(|e| {
-                    error!(
-                        "Failed to get execution summary from RET, error: {:?}",
-                        e
-                    );
-                    CommonError::ExecutionSummaryFail {
-                        underlying: format!("{:?}", e),
-                    }
-                })?;
-
-        Ok(ExecutionSummary::from((
-            ret_dynamic_analysis,
+        DynamicallyAnalyzableManifest::execution_summary(
+            self,
+            engine_toolkit_receipt,
             self.network_id(),
-        )))
+        )
+    }
+}
+
+impl DynamicallyAnalyzableManifest for TransactionManifest {
+    fn ret_dynamically_analyze(
+        &self,
+        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
+    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
+        RET_dynamically_analyze(&self.scrypto_manifest(), receipt)
     }
 }
 
@@ -59,13 +40,13 @@ mod tests {
 
     #[test]
     fn failure_if_receipt_result_is_abort() {
-        let wrong_receipt = ScryptoRuntimeToolkitTransactionReceipt::Abort {
-            reason: "whatever".to_owned(),
-        };
+        let wrong_receipt =
+            ScryptoSerializableToolkitTransactionReceipt::Abort {
+                reason: "whatever".to_owned(),
+            };
 
         assert_eq!(
-            TransactionManifest::sample()
-                .execution_summary_with_receipt(wrong_receipt),
+            TransactionManifest::sample().execution_summary(wrong_receipt),
             Err(CommonError::ExecutionSummaryFail {
                 underlying: "InvalidReceipt".to_owned()
             })
