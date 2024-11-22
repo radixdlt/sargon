@@ -42,7 +42,6 @@ pub(crate) struct PreviewTransaction {
     PartialEq,
     Eq,
 )]
-#[serde(rename_all = "lowercase")]
 pub(crate) enum PreviewTransactionType {
     Compiled
 }

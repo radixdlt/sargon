@@ -164,43 +164,26 @@ impl SargonOS {
         let signer_public_keys =
         self.extract_signer_public_keys(
             ManifestSummary::from((summary, network_id.clone()))
-        )?
-        .into_iter()
-        .map(ScryptoPublicKey::from);
+        )?;
 
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
             network_id,
         );
+
         let epoch = gateway_client.current_epoch().await?;
 
-        let mut transaction_v2_builder = ScryptoTransactionV2Builder::new();
-        let header = ScryptoTransactionHeaderV2 {
-            notary_public_key: PublicKey::sample().into(),
-            notary_is_signatory: true,
-            tip_basis_points: 0
-        };
-        let intent_header = ScryptoIntentHeaderV2 {
-            network_id: network_id.discriminant(),
-            start_epoch_inclusive: epoch.into(),
-            end_epoch_exclusive: epoch.adding(10).into(),
-            min_proposer_timestamp_inclusive: None,
-            max_proposer_timestamp_exclusive: None,
-            intent_discriminator: discriminator.0
-        };
-        transaction_v2_builder = transaction_v2_builder.manifest(manifest.clone());
-        transaction_v2_builder = transaction_v2_builder.transaction_header(header);
-        transaction_v2_builder = transaction_v2_builder.intent_header(intent_header);
-        let preview = transaction_v2_builder.build_preview_transaction(signer_public_keys);
+        let request = TransactionPreviewRequestV2::new_transaction_analysis(
+            manifest.clone(), 
+            epoch, 
+            signer_public_keys,
+             PublicKey::sample(), 
+             discriminator, 
+             network_id
+        );
+        
 
-        let response = gateway_client.transaction_preview_v2(TransactionPreviewRequestV2 {
-            preview_transaction: PreviewTransaction {
-                transaction_type: PreviewTransactionType::Compiled,
-                preview_transaction_hex: preview.to_raw().unwrap().to_hex(),
-            },
-            flags: TransactionPreviewRequestFlags::default(),
-            opt_ins: TransactionPreviewRequestOptInsV2 { core_api_receipt: true, radix_engine_toolkit_receipt: true, logs: false }
-        }).await?;
+        let response = gateway_client.transaction_preview_v2(request).await?;
 
 
         let receipt = response
