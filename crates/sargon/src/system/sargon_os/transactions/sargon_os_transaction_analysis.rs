@@ -124,9 +124,8 @@ impl SargonOS {
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        let signer_public_keys = self.extract_signer_public_keys(
-            manifest.summary(network_id)?,
-        )?;
+        let signer_public_keys =
+            self.extract_signer_public_keys(manifest.summary(network_id)?)?;
 
         let gateway_client = GatewayClient::new(
             self.clients.http_client.driver.clone(),
@@ -176,7 +175,7 @@ impl SargonOS {
 
     fn extract_execution_summary(
         manifest: &dyn DynamicallyAnalyzableManifest,
-        receipts: PreviewReponseReceipts,
+        receipts: PreviewResponseReceipts,
         network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
@@ -245,7 +244,7 @@ trait PreviewableManifest:
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
-    ) -> Result<PreviewReponseReceipts>;
+    ) -> Result<PreviewResponseReceipts>;
 }
 
 impl PreviewableManifest for ScryptoTransactionManifestV2 {
@@ -257,7 +256,7 @@ impl PreviewableManifest for ScryptoTransactionManifestV2 {
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
-    ) -> Result<PreviewReponseReceipts> {
+    ) -> Result<PreviewResponseReceipts> {
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
             self.clone(),
             start_epoch_inclusive,
@@ -269,7 +268,7 @@ impl PreviewableManifest for ScryptoTransactionManifestV2 {
 
         let response = gateway_client.transaction_preview_v2(request).await?;
 
-        Ok(PreviewReponseReceipts {
+        Ok(PreviewResponseReceipts {
             receipt: response.receipt,
             engine_toolkit_receipt: response.radix_engine_toolkit_receipt,
         })
@@ -285,7 +284,7 @@ impl PreviewableManifest for TransactionManifest {
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
-    ) -> Result<PreviewReponseReceipts> {
+    ) -> Result<PreviewResponseReceipts> {
         let request = TransactionPreviewRequest::new_transaction_analysis(
             self.clone(),
             start_epoch_inclusive,
@@ -295,14 +294,14 @@ impl PreviewableManifest for TransactionManifest {
         );
         let response = gateway_client.transaction_preview(request).await?;
 
-        Ok(PreviewReponseReceipts {
+        Ok(PreviewResponseReceipts {
             receipt: Some(response.receipt),
             engine_toolkit_receipt: response.radix_engine_toolkit_receipt,
         })
     }
 }
 
-struct PreviewReponseReceipts {
+struct PreviewResponseReceipts {
     receipt: Option<TransactionReceipt>,
     engine_toolkit_receipt:
         Option<ScryptoSerializableToolkitTransactionReceipt>,

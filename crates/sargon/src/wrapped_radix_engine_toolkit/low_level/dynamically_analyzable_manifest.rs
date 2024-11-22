@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Describes a manifest that can be statically analyzed
 pub trait DynamicallyAnalyzableManifest {
-    /// Performe the ret analysis
+    /// Perform the ret analysis
     fn ret_dynamically_analyze(
         &self,
         receipt: &ScryptoRuntimeToolkitTransactionReceipt,

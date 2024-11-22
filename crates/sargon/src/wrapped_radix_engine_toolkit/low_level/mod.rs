@@ -1,7 +1,7 @@
 mod address_conversion;
 mod compiled_notarized_intent;
 mod compiled_transaction_intent;
-mod dynamicaly_analyzable_manifest;
+mod dynamically_analyzable_manifest;
 mod execution_summary;
 mod intent_signature;
 mod manifest_summary;
@@ -20,7 +20,7 @@ mod v2;
 pub use address_conversion::*;
 pub use compiled_notarized_intent::*;
 pub use compiled_transaction_intent::*;
-pub use dynamicaly_analyzable_manifest::*;
+pub use dynamically_analyzable_manifest::*;
 pub use execution_summary::*;
 pub use intent_signature::*;
 pub use manifest_summary::*;
