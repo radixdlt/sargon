@@ -1,16 +1,15 @@
 use crate::prelude::*;
 
-/// A collection of **many** factor sources to use to sign, transactions with multiple keys
-/// (derivations paths).
-#[derive(derive_more::Debug, Clone)]
-#[debug("per_factor_source: {:#?}", per_factor_source)]
-pub struct PolyFactorSignRequest<S: Signable> {
+#[derive(Debug)]
+pub struct SignRequest<S: Signable> {
     factor_source_kind: FactorSourceKind,
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.
-    pub per_factor_source:
-        IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<S>>,
+    pub per_factor_source: IndexMap<
+        FactorSourceIDFromHash,
+        IndexSet<TransactionSignRequestInput<S>>,
+    >,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
@@ -18,7 +17,7 @@ pub struct PolyFactorSignRequest<S: Signable> {
         IndexSet<InvalidTransactionIfNeglected<S::ID>>,
 }
 
-impl<S: Signable> PolyFactorSignRequest<S> {
+impl<S: Signable> SignRequest<S> {
     /// # Panics
     /// Panics if `per_factor_source` is empty
     ///
@@ -27,7 +26,7 @@ impl<S: Signable> PolyFactorSignRequest<S> {
         factor_source_kind: FactorSourceKind,
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
-            MonoFactorSignRequestInput<S>,
+            IndexSet<TransactionSignRequestInput<S>>,
         >,
         invalid_transactions_if_neglected: IndexSet<
             InvalidTransactionIfNeglected<S::ID>,
@@ -36,12 +35,6 @@ impl<S: Signable> PolyFactorSignRequest<S> {
         assert!(
             !per_factor_source.is_empty(),
             "Invalid input, per_factor_source must not be empty, this is a programmer error."
-        );
-        assert!(
-            per_factor_source
-                .values()
-                .all(|f| f.factor_source_id.kind == factor_source_kind),
-            "Discrepancy! All factor sources must be of the same kind, this is a programmer error."
         );
 
         Self {
@@ -65,7 +58,7 @@ impl<S: Signable> PolyFactorSignRequest<S> {
 mod tests {
     use super::*;
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = PolyFactorSignRequest<TransactionIntent>;
+    type SUT = SignRequest<TransactionIntent>;
 
     #[test]
     #[should_panic(
@@ -84,7 +77,9 @@ mod tests {
             FactorSourceKind::ArculusCard,
             IndexMap::just((
                 FactorSourceIDFromHash::sample(),
-                MonoFactorSignRequestInput::sample(),
+                IndexSet::just(
+                    TransactionSignRequestInput::<TransactionIntent>::sample(),
+                ),
             )),
             IndexSet::new(),
         );

@@ -2,7 +2,8 @@ use crate::prelude::*;
 use sargon::HierarchicalDeterministicFactorInstance as InternalHierarchicalDeterministicFactorInstance;
 use sargon::Owned as InternalOwned;
 
-type InternalOwnedFactorInstance = InternalOwned<InternalHierarchicalDeterministicFactorInstance>;
+type InternalOwnedFactorInstance =
+    InternalOwned<InternalHierarchicalDeterministicFactorInstance>;
 
 /// Concrete implementation of `sargon::Owned<HierarchicalDeterministicFactorInstance>`.
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
@@ -26,7 +27,7 @@ impl From<OwnedFactorInstance> for InternalOwnedFactorInstance {
     fn from(value: OwnedFactorInstance) -> Self {
         Self::new(
             value.owner.into_internal(),
-            value.factor_instance.into_internal()
+            value.factor_instance.into_internal(),
         )
     }
 }

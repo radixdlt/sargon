@@ -132,7 +132,7 @@ impl<S: Signable> Petitions<S> {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput<S> {
+    ) -> IndexSet<TransactionSignRequestInput<S>> {
         self.each_petition(
             IndexSet::just(*factor_source_id),
             |p| {
@@ -142,12 +142,7 @@ impl<S: Signable> Petitions<S> {
                     Some(p.input_for_interactor(factor_source_id))
                 }
             },
-            |i| {
-                MonoFactorSignRequestInput::new(
-                    *factor_source_id,
-                    i.into_iter().flatten().collect::<IndexSet<_>>(),
-                )
-            },
+            |i| i.into_iter().flatten().collect::<IndexSet<_>>(),
         )
     }
 

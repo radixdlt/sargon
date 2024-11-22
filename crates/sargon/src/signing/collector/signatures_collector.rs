@@ -30,7 +30,7 @@ impl<S: Signable> SignaturesCollector<S> {
     pub fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = S>,
-        interactors: Arc<dyn SignInteractors<S>>,
+        interactor: Arc<dyn SignInteractor<S>>,
         profile: &Profile,
         role_kind: RoleKind,
     ) -> Result<Self> {
@@ -38,7 +38,7 @@ impl<S: Signable> SignaturesCollector<S> {
             finish_early_strategy,
             IndexSet::from_iter(profile.factor_sources.iter()),
             transactions,
-            interactors,
+            interactor,
             role_kind,
             |i| SignableWithEntities::extracting_from_profile(&i, profile),
         )
@@ -60,7 +60,7 @@ impl<S: Signable> SignaturesCollector<S> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
-        interactors: Arc<dyn SignInteractors<S>>,
+        interactor: Arc<dyn SignInteractor<S>>,
         role_kind: RoleKind,
     ) -> Self {
         debug!("Init SignaturesCollector");
@@ -70,7 +70,7 @@ impl<S: Signable> SignaturesCollector<S> {
 
         let dependencies = SignaturesCollectorDependencies::new(
             finish_early_strategy,
-            interactors,
+            interactor,
             factors,
         );
         let state = SignaturesCollectorState::new(petitions);
@@ -85,7 +85,7 @@ impl<S: Signable> SignaturesCollector<S> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = S>,
-        interactors: Arc<dyn SignInteractors<S>>,
+        interactor: Arc<dyn SignInteractor<S>>,
         role_kind: RoleKind,
         extract_signers: F,
     ) -> Result<Self>
@@ -102,7 +102,7 @@ impl<S: Signable> SignaturesCollector<S> {
             finish_early_strategy,
             all_factor_sources_in_profile,
             transactions,
-            interactors,
+            interactor,
             role_kind,
         );
 
@@ -192,68 +192,53 @@ impl<S: Signable> SignaturesCollector<S> {
             &factor_sources_of_kind.kind
         );
 
-        let interactor = self
-            .dependencies
-            .interactors
-            .interactor_for(factor_sources_of_kind.kind);
-        let factor_sources = factor_sources_of_kind.factor_sources();
-        match interactor {
-            // PolyFactor Interactor: Many Factor Sources at once
-            SignInteractor::PolyFactor(interactor) => {
+        let kind = factor_sources_of_kind.kind;
+        if kind == FactorSourceKind::Device {
+            debug!("Creating poly request for interactor");
+            let request =
+                self.request_for_parallel_interactor(factor_sources_of_kind);
+            if !request.invalid_transactions_if_neglected.is_empty() {
+                info!(
+                    "If factors {:?} are neglected, invalid TXs: {:?}",
+                    request.per_factor_source.keys(),
+                    request.invalid_transactions_if_neglected
+                )
+            }
+            debug!("Dispatching poly request to interactor: {:?}", request);
+            let response = self.dependencies.interactor.sign(request).await;
+            debug!("Got response from poly interactor: {:?}", response);
+            self.process_batch_response(response);
+        } else {
+            let factor_sources = factor_sources_of_kind.factor_sources();
+            for factor_source in factor_sources {
                 // Prepare the request for the interactor
-                debug!("Creating poly request for interactor");
-                let request = self
-                    .request_for_parallel_interactor(factor_sources_of_kind);
+                debug!("Creating mono request for interactor");
+                let factor_source_id =
+                    factor_source.factor_source_id().as_hash().cloned().expect(
+                        "Signature Collector only works with HD FactorSources.",
+                    );
+
+                let request =
+                    self.request_for_serial_interactor(kind, &factor_source_id);
+
                 if !request.invalid_transactions_if_neglected.is_empty() {
                     info!(
-                        "If factors {:?} are neglected, invalid TXs: {:?}",
-                        request.per_factor_source.keys(),
+                        "If factor {:?} are neglected, invalid TXs: {:?}",
+                        factor_source_id,
                         request.invalid_transactions_if_neglected
                     )
                 }
-                debug!("Dispatching poly request to interactor: {:?}", request);
-                let response = interactor.sign(request).await;
-                debug!("Got response from poly interactor: {:?}", response);
+
+                debug!("Dispatching mono request to interactor: {:?}", request);
+                // Produce the results from the interactor
+                let response = self.dependencies.interactor.sign(request).await;
+                debug!("Got response from mono interactor: {:?}", response);
+
+                // Report the results back to the collector
                 self.process_batch_response(response);
-            }
 
-            // MonoFactor Interactor: One Factor Sources at a time
-            // After each factor source we pass the result to the collector
-            // updating its internal state so that we state about being able
-            // to skip the next factor source or not.
-            SignInteractor::MonoFactor(interactor) => {
-                for factor_source in factor_sources {
-                    // Prepare the request for the interactor
-                    debug!("Creating mono request for interactor");
-                    let request = self.request_for_serial_interactor(
-                        factor_source
-                            .factor_source_id()
-                            .as_hash()
-                            .expect("Signature Collector only works with HD FactorSources.")
-                    );
-
-                    if !request.invalid_transactions_if_neglected.is_empty() {
-                        info!(
-                            "If factor {:?} are neglected, invalid TXs: {:?}",
-                            request.input.factor_source_id,
-                            request.invalid_transactions_if_neglected
-                        )
-                    }
-
-                    debug!(
-                        "Dispatching mono request to interactor: {:?}",
-                        request
-                    );
-                    // Produce the results from the interactor
-                    let response = interactor.sign(request).await;
-                    debug!("Got response from mono interactor: {:?}", response);
-
-                    // Report the results back to the collector
-                    self.process_batch_response(response);
-
-                    if self.continuation() == FinishEarly {
-                        break;
-                    }
+                if self.continuation() == FinishEarly {
+                    break;
                 }
             }
         }
@@ -279,7 +264,7 @@ impl<S: Signable> SignaturesCollector<S> {
     fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput<S> {
+    ) -> IndexSet<TransactionSignRequestInput<S>> {
         self.state
             .borrow()
             .petitions
@@ -289,24 +274,29 @@ impl<S: Signable> SignaturesCollector<S> {
 
     fn request_for_serial_interactor(
         &self,
+        factor_source_kind: FactorSourceKind,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequest<S> {
+    ) -> SignRequest<S> {
         let batch_signing_request = self.input_for_interactor(factor_source_id);
 
-        MonoFactorSignRequest::new(
-            batch_signing_request,
-            self.invalid_transactions_if_neglected_factor_sources(
-                IndexSet::just(*factor_source_id),
-            )
+        let invalid_transactions_if_neglected = self
+            .invalid_transactions_if_neglected_factor_sources(IndexSet::just(
+                *factor_source_id,
+            ))
             .into_iter()
-            .collect::<IndexSet<_>>(),
+            .collect::<IndexSet<_>>();
+
+        SignRequest::new(
+            factor_source_kind,
+            IndexMap::just((factor_source_id.clone(), batch_signing_request)),
+            invalid_transactions_if_neglected,
         )
     }
 
     fn request_for_parallel_interactor(
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
-    ) -> PolyFactorSignRequest<S> {
+    ) -> SignRequest<S> {
         let factor_source_ids = factor_sources_of_kind
             .factor_sources()
             .iter()
@@ -320,7 +310,10 @@ impl<S: Signable> SignaturesCollector<S> {
             .clone()
             .iter()
             .map(|fid| (*fid, self.input_for_interactor(fid)))
-            .collect::<IndexMap<FactorSourceIDFromHash, MonoFactorSignRequestInput<S>>>();
+            .collect::<IndexMap<
+                FactorSourceIDFromHash,
+                IndexSet<TransactionSignRequestInput<S>>,
+            >>();
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(
@@ -328,7 +321,7 @@ impl<S: Signable> SignaturesCollector<S> {
             );
 
         // Prepare the request for the interactor
-        PolyFactorSignRequest::new(
+        SignRequest::new(
             factor_sources_of_kind.kind,
             per_factor_source,
             invalid_transactions_if_neglected,
@@ -396,9 +389,7 @@ mod tests {
                 [&Account::sample_at(0)],
                 [],
             )],
-            Arc::new(TestSignatureCollectingInteractors::new(
-                SimulatedUser::prudent_no_fail(),
-            )),
+            Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(IndexSet::new(), [], []),
             RoleKind::Primary,
         );
@@ -413,9 +404,7 @@ mod tests {
                 [],
                 [&Persona::sample_at(0)],
             )],
-            Arc::new(TestSignatureCollectingInteractors::new(
-                SimulatedUser::prudent_no_fail(),
-            )),
+            Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(IndexSet::new(), [], []),
             RoleKind::Primary,
         );
@@ -433,9 +422,7 @@ mod tests {
                 [],
                 [&persona],
             )],
-            Arc::new(TestSignatureCollectingInteractors::new(
-                SimulatedUser::prudent_no_fail(),
-            )),
+            Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(factors_sources, [], [&persona]),
             RoleKind::Primary,
         )
@@ -462,7 +449,7 @@ mod tests {
                 WhenSomeTransactionIsInvalid(Continue),
             ),
             [t0.clone(), t1.clone()],
-            Arc::new(TestSignatureCollectingInteractors::new(
+            Arc::new(TestSignInteractor::new(
                 SimulatedUser::prudent_with_failures(
                     SimulatedFailures::with_simulated_failures([
                         FactorSourceIDFromHash::sample_at(1),
@@ -499,7 +486,7 @@ mod tests {
                     WhenSomeTransactionIsInvalid::default(),
                 ),
                 [t0.clone()],
-                Arc::new(TestSignatureCollectingInteractors::new(
+                Arc::new(TestSignInteractor::new(
                     SimulatedUser::prudent_no_fail(),
                 )),
                 &profile,
@@ -573,9 +560,7 @@ mod tests {
         let collector = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
             [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
-            Arc::new(TestSignatureCollectingInteractors::new(
-                SimulatedUser::prudent_no_fail(),
-            )),
+            Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &profile,
             RoleKind::Primary,
         )
@@ -826,7 +811,7 @@ mod tests {
             let collector = SignaturesCollector::new(
                 SigningFinishEarlyStrategy::default(),
                 [t0.clone(), t1.clone(), t2.clone()],
-                Arc::new(TestSignatureCollectingInteractors::new(sim)),
+                Arc::new(TestSignInteractor::new(sim)),
                 &profile,
                 RoleKind::Primary,
             )
@@ -969,9 +954,7 @@ mod tests {
             let collector = SignaturesCollector::new(
                 SigningFinishEarlyStrategy::default(),
                 [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
-                Arc::new(TestSignatureCollectingInteractors::new(
-                    vector.simulated_user,
-                )),
+                Arc::new(TestSignInteractor::new(vector.simulated_user)),
                 &profile,
                 RoleKind::Primary,
             )
@@ -1059,7 +1042,7 @@ mod tests {
                 let collector = SignaturesCollector::new(
                     SigningFinishEarlyStrategy::default(),
                     all_transactions,
-                    Arc::new(TestSignatureCollectingInteractors::new(
+                    Arc::new(TestSignInteractor::new(
                         SimulatedUser::prudent_with_failures(
                             SimulatedFailures::with_simulated_failures([
                                 FactorSourceIDFromHash::sample_at(1),
@@ -1121,7 +1104,7 @@ mod tests {
                 let collector = SignaturesCollector::new(
                     SigningFinishEarlyStrategy::default(),
                     all_transactions,
-                    Arc::new(TestSignatureCollectingInteractors::new(
+                    Arc::new(TestSignInteractor::new(
                         SimulatedUser::prudent_with_failures(
                             SimulatedFailures::with_simulated_failures([
                                 FactorSourceIDFromHash::sample_at(0),
@@ -1204,19 +1187,17 @@ mod tests {
                 let collector = SignaturesCollector::new(
                     SigningFinishEarlyStrategy::default(),
                     [tx0.clone(), tx1.clone()],
-                    Arc::new(TestSignatureCollectingInteractors::new(
-                        SimulatedUser::with_spy(
-                            move |kind, invalid| {
-                                let tuple = (kind, invalid);
-                                let mut x = RefCell::borrow_mut(&tuples_clone);
-                                x.push(tuple)
-                            },
-                            SimulatedUserMode::Prudent,
-                            SimulatedFailures::with_simulated_failures([
-                                FactorSourceIDFromHash::sample_at(2), // will cause any TX with a7 to fail
-                            ]),
-                        ),
-                    )),
+                    Arc::new(TestSignInteractor::new(SimulatedUser::with_spy(
+                        move |kind, invalid| {
+                            let tuple = (kind, invalid);
+                            let mut x = RefCell::borrow_mut(&tuples_clone);
+                            x.push(tuple)
+                        },
+                        SimulatedUserMode::Prudent,
+                        SimulatedFailures::with_simulated_failures([
+                            FactorSourceIDFromHash::sample_at(2), // will cause any TX with a7 to fail
+                        ]),
+                    ))),
                     &profile,
                     RoleKind::Primary,
                 )
@@ -1376,7 +1357,7 @@ mod tests {
                         HierarchicalDeterministicFactorInstance::new_for_entity(
                             FactorSourceIDFromHash::sample_at(0),
                             CAP26EntityKind::Account,
-                            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap()
+                            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
                         ),
                     ),
                     Account::sample_unsecurified_mainnet(
@@ -1384,7 +1365,7 @@ mod tests {
                         HierarchicalDeterministicFactorInstance::new_for_entity(
                             FactorSourceIDFromHash::sample_at(0),
                             CAP26EntityKind::Account,
-                            Hardened::from_local_key_space(1, IsSecurified(false)).unwrap()
+                            Hardened::from_local_key_space(1, IsSecurified(false)).unwrap(),
                         ),
                     ),
                 ])]);

@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::TransactionSignRequestInput as InternalTransactionSignRequestInput;
 use sargon::TransactionIntent as InternalTransactionIntent;
+use sargon::TransactionSignRequestInput as InternalTransactionSignRequestInput;
 
 type InternalTransactionSignRequestInputForTransactionIntent =
     InternalTransactionSignRequestInput<InternalTransactionIntent>;
@@ -19,17 +19,24 @@ pub struct TransactionSignRequestInputForTransactionIntent {
 }
 
 impl TransactionSignRequestInputForTransactionIntent {
-    pub fn into_internal(&self) -> InternalTransactionSignRequestInputForTransactionIntent {
+    pub fn into_internal(
+        &self,
+    ) -> InternalTransactionSignRequestInputForTransactionIntent {
         self.clone().into()
     }
 }
 
-impl From<InternalTransactionSignRequestInputForTransactionIntent> for TransactionSignRequestInputForTransactionIntent {
-    fn from(value: InternalTransactionSignRequestInputForTransactionIntent) -> Self {
+impl From<InternalTransactionSignRequestInputForTransactionIntent>
+    for TransactionSignRequestInputForTransactionIntent
+{
+    fn from(
+        value: InternalTransactionSignRequestInputForTransactionIntent,
+    ) -> Self {
         Self {
             payload: value.payload.into(),
             factor_source_id: value.factor_source_id.into(),
-            owned_factor_instances: value.owned_factor_instances
+            owned_factor_instances: value
+                .owned_factor_instances
                 .iter()
                 .map(|instance| instance.clone().into())
                 .collect(),
@@ -37,22 +44,29 @@ impl From<InternalTransactionSignRequestInputForTransactionIntent> for Transacti
     }
 }
 
-impl From<TransactionSignRequestInputForTransactionIntent> for InternalTransactionSignRequestInputForTransactionIntent {
+impl From<TransactionSignRequestInputForTransactionIntent>
+    for InternalTransactionSignRequestInputForTransactionIntent
+{
     fn from(value: TransactionSignRequestInputForTransactionIntent) -> Self {
         InternalTransactionSignRequestInputForTransactionIntent {
             payload: value.payload.into_internal(),
             factor_source_id: value.factor_source_id.into_internal(),
-            owned_factor_instances: value.owned_factor_instances.into_internal(),
+            owned_factor_instances: value
+                .owned_factor_instances
+                .into_internal(),
         }
     }
 }
 
 #[uniffi::export]
-pub fn new_transaction_sign_request_input_for_transaction_intent_sample() -> TransactionSignRequestInputForTransactionIntent {
+pub fn new_transaction_sign_request_input_for_transaction_intent_sample(
+) -> TransactionSignRequestInputForTransactionIntent {
     InternalTransactionSignRequestInputForTransactionIntent::sample().into()
 }
 
 #[uniffi::export]
-pub fn new_transaction_sign_request_input_for_transaction_intent_sample_other() -> TransactionSignRequestInputForTransactionIntent {
-    InternalTransactionSignRequestInputForTransactionIntent::sample_other().into()
+pub fn new_transaction_sign_request_input_for_transaction_intent_sample_other(
+) -> TransactionSignRequestInputForTransactionIntent {
+    InternalTransactionSignRequestInputForTransactionIntent::sample_other()
+        .into()
 }

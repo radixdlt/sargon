@@ -282,32 +282,63 @@ mod integration_tests {
         use radix_common::prelude::indexmap::IndexSet;
         use std::sync::Arc;
 
-        struct TestLazySignMinimumInteractors;
         struct TestLazySignMinimumInteractor;
 
+        impl TestLazySignMinimumInteractor {
+            async fn sign_mono(
+                &self,
+                factor_source_id: FactorSourceIDFromHash,
+                request: &SignRequest<TransactionIntent>,
+                transactions_to_sign: &IndexSet<
+                    TransactionSignRequestInput<TransactionIntent>,
+                >,
+            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+                if request.invalid_transactions_if_neglected.is_empty() {
+                    return SignWithFactorsOutcome::Neglected(
+                        NeglectedFactors::new(
+                            NeglectFactorReason::UserExplicitlySkipped,
+                            IndexSet::just(factor_source_id),
+                        ),
+                    );
+                }
+
+                let signatures = transactions_to_sign
+                    .iter()
+                    .map(|per_transaction| {
+                        per_transaction
+                            .signature_inputs()
+                            .iter()
+                            .map(|x| HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(x.clone()))
+                            .collect::<IndexSet<_>>()
+                    })
+                    .flatten()
+                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
+
+                SignWithFactorsOutcome::Signed {
+                    produced_signatures: SignResponse::with_signatures(
+                        signatures,
+                    ),
+                }
+            }
+        }
+
         #[async_trait::async_trait]
-        impl PolyFactorSignInteractor<TransactionIntent>
-            for TestLazySignMinimumInteractor
-        {
+        impl SignInteractor<TransactionIntent> for TestLazySignMinimumInteractor {
             async fn sign(
                 &self,
-                request: PolyFactorSignRequest<TransactionIntent>,
+                request: SignRequest<TransactionIntent>,
             ) -> SignWithFactorsOutcome<TransactionIntentHash> {
                 let mut signatures =
                     IndexSet::<HDSignature<TransactionIntentHash>>::new();
-                for (_, req) in request.per_factor_source.iter() {
-                    let resp = <Self as MonoFactorSignInteractor<
-                        TransactionIntent,
-                    >>::sign(
-                        self,
-                        MonoFactorSignRequest::new(
-                            req.clone(),
-                            request.invalid_transactions_if_neglected.clone(),
-                        ),
-                    )
-                    .await;
 
-                    match resp {
+                for (factor_source_id, inputs) in
+                    request.per_factor_source.iter()
+                {
+                    let result = self
+                        .sign_mono(factor_source_id.clone(), &request, inputs)
+                        .await;
+
+                    match result {
                         SignWithFactorsOutcome::Signed {
                             produced_signatures,
                         } => {
@@ -332,57 +363,6 @@ mod integration_tests {
                 SignWithFactorsOutcome::signed(SignResponse::with_signatures(
                     signatures,
                 ))
-            }
-        }
-
-        #[async_trait::async_trait]
-        impl MonoFactorSignInteractor<TransactionIntent>
-            for TestLazySignMinimumInteractor
-        {
-            async fn sign(
-                &self,
-                request: MonoFactorSignRequest<TransactionIntent>,
-            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
-                if request.invalid_transactions_if_neglected.is_empty() {
-                    return SignWithFactorsOutcome::Neglected(
-                        NeglectedFactors::new(
-                            NeglectFactorReason::UserExplicitlySkipped,
-                            IndexSet::just(request.input.factor_source_id),
-                        ),
-                    );
-                }
-                let signatures = request
-                    .input
-                    .per_transaction
-                    .into_iter()
-                    .flat_map(|r| {
-                        r.signature_inputs()
-                            .iter()
-                            .map(|x| HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(x.clone()))
-                            .collect::<IndexSet<_>>()
-                    })
-                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
-                SignWithFactorsOutcome::Signed {
-                    produced_signatures: SignResponse::with_signatures(
-                        signatures,
-                    ),
-                }
-            }
-        }
-
-        impl SignInteractors<TransactionIntent> for TestLazySignMinimumInteractors {
-            fn interactor_for(
-                &self,
-                kind: FactorSourceKind,
-            ) -> SignInteractor<TransactionIntent> {
-                match kind {
-                    FactorSourceKind::Device => SignInteractor::mono(Arc::new(
-                        TestLazySignMinimumInteractor,
-                    )),
-                    _ => SignInteractor::poly(Arc::new(
-                        TestLazySignMinimumInteractor,
-                    )),
-                }
             }
         }
 
@@ -486,7 +466,7 @@ mod integration_tests {
             let collector = SignaturesCollector::new(
                 SigningFinishEarlyStrategy::default(),
                 transactions,
-                Arc::new(TestLazySignMinimumInteractors),
+                Arc::new(TestLazySignMinimumInteractor),
                 &profile,
                 RoleKind::Primary,
             )

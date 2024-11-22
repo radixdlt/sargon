@@ -2,34 +2,32 @@
 
 use crate::prelude::*;
 
-pub(crate) struct TestSigningParallelInteractor {
-    simulated_user: SimulatedUser,
+pub(crate) struct TestSignInteractor {
+    pub(crate) simulated_user: SimulatedUser,
 }
 
-impl TestSigningParallelInteractor {
+impl TestSignInteractor {
     pub(crate) fn new(simulated_user: SimulatedUser) -> Self {
         Self { simulated_user }
     }
 }
 
 #[async_trait::async_trait]
-impl IsTestInteractor for TestSigningParallelInteractor {
+impl IsTestInteractor for TestSignInteractor {
     fn simulated_user(&self) -> SimulatedUser {
         self.simulated_user.clone()
     }
 }
 
 #[async_trait::async_trait]
-impl PolyFactorSignInteractor<TransactionIntent>
-    for TestSigningParallelInteractor
-{
+impl SignInteractor<TransactionIntent> for TestSignInteractor {
     async fn sign(
         &self,
-        request: PolyFactorSignRequest<TransactionIntent>,
+        request: SignRequest<TransactionIntent>,
     ) -> SignWithFactorsOutcome<TransactionIntentHash> {
         self.simulated_user.spy_on_request_before_handled(
-            request.clone().factor_source_kind(),
-            request.clone().invalid_transactions_if_neglected,
+            request.factor_source_kind(),
+            request.invalid_transactions_if_neglected.clone(),
         );
         let ids = request
             .per_factor_source
@@ -43,15 +41,14 @@ impl PolyFactorSignInteractor<TransactionIntent>
 
         match self
             .simulated_user
-            .sign_or_skip(request.invalid_transactions_if_neglected)
+            .sign_or_skip(request.invalid_transactions_if_neglected.clone())
         {
             SigningUserInput::Sign => {
                 let signatures = request
                     .per_factor_source
                     .iter()
                     .flat_map(|(_, v)| {
-                        v.per_transaction
-                            .iter()
+                        v.iter()
                             .flat_map(|x| {
                                 x.signature_inputs()
                                     .iter()
