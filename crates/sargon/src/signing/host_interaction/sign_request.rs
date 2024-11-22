@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct SignRequest<S: Signable> {
-    factor_source_kind: FactorSourceKind,
+    pub factor_source_kind: FactorSourceKind,
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.

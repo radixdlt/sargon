@@ -35,8 +35,8 @@ impl From<InternalTransactionSignRequestInputForSubintent>
             factor_source_id: value.factor_source_id.into(),
             owned_factor_instances: value
                 .owned_factor_instances
-                .iter()
-                .map(|instance| instance.clone().into())
+                .into_iter()
+                .map(|instance| instance.into())
                 .collect(),
         }
     }

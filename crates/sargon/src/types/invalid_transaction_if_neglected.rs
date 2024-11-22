@@ -11,7 +11,7 @@ pub struct InvalidTransactionIfNeglected<ID: SignableID> {
     pub signable_id: ID,
 
     /// The entities in the transaction which would fail auth.
-    entities_which_would_fail_auth: Vec<AddressOfAccountOrPersona>,
+    pub entities_which_would_fail_auth: Vec<AddressOfAccountOrPersona>,
 }
 
 impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
