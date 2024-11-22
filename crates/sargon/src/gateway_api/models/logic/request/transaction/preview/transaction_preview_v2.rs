@@ -20,15 +20,13 @@ impl TransactionPreviewRequestV2 {
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: PublicKey,
-        discriminator: IntentDiscriminator,
+        nonce: Nonce,
         network_id: NetworkID,
     ) -> Result<Self> {
         let signer_public_keys = signer_public_keys
             .into_iter()
             .map(ScryptoPublicKey::from)
             .collect_vec();
-
-        let mut transaction_v2_builder = ScryptoTransactionV2Builder::new();
 
         let header = ScryptoTransactionHeaderV2 {
             notary_public_key: notary_public_key.into(),
@@ -44,17 +42,15 @@ impl TransactionPreviewRequestV2 {
             .into(),
             min_proposer_timestamp_inclusive: None,
             max_proposer_timestamp_exclusive: None,
-            intent_discriminator: discriminator.0,
+            intent_discriminator: nonce.0 as u64,
         };
 
-        transaction_v2_builder = transaction_v2_builder.manifest(manifest);
-        transaction_v2_builder =
-            transaction_v2_builder.transaction_header(header);
-        transaction_v2_builder =
-            transaction_v2_builder.intent_header(intent_header);
-
-        let preview_transaction = transaction_v2_builder
+        let preview_transaction = ScryptoTransactionV2Builder::new()
+            .manifest(manifest)
+            .transaction_header(header)
+            .intent_header(intent_header)
             .build_preview_transaction(signer_public_keys);
+
         let encoded_preview_transaction = preview_transaction
             .to_raw()
             .map_err(|err| CommonError::FailedToEncodeTransactionPreviewV2 {

@@ -37,6 +37,17 @@ impl SubintentManifest {
     }
 }
 
+impl StaticallyAnalyzableManifest for SubintentManifest {
+    fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
+        let summary = RET_statically_analyze_and_validate_subintent_manifest(
+            &self.scrypto_manifest(),
+        )
+        .map_err(map_static_analysis_error)?;
+
+        Ok(ManifestSummary::from((summary, network_id)))
+    }
+}
+
 impl SubintentManifest {
     #[allow(dead_code)]
     pub(crate) fn empty(network_id: NetworkID) -> Self {
@@ -143,17 +154,11 @@ impl SubintentManifest {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary = RET_statically_analyze_and_validate_subintent_manifest(
-            &self.scrypto_manifest(),
-        )
-        .map_err(map_static_analysis_error)?;
-
-        Ok(ManifestSummary::from((summary, self.network_id())))
+        StaticallyAnalyzableManifest::summary(self, self.network_id())
     }
 
     pub fn as_enclosed(&self) -> Option<TransactionManifestV2> {
-        let enclosed_manifest =
-            RET_subintent_manifest_as_enclosed(&self.scrypto_manifest())?;
+        let enclosed_manifest = self.as_enclosed_scrypto()?;
         (enclosed_manifest, self.network_id()).try_into().ok()
     }
 
