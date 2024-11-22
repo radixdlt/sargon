@@ -14,7 +14,7 @@ struct NeglectedFactors {
 
 impl NeglectedFactors {
 
-    fn into_internal(&self) -> InternalNeglectedFactors {
+    pub fn into_internal(&self) -> InternalNeglectedFactors {
         self.clone().into()
     }
 

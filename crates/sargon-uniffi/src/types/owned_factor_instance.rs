@@ -14,6 +14,14 @@ pub struct OwnedFactorInstance {
     pub factor_instance: HierarchicalDeterministicFactorInstance,
 }
 
+impl OwnedFactorInstance {
+
+    pub fn into_internal(&self) -> InternalOwnedFactorInstance {
+        self.clone().into()
+    }
+
+}
+
 impl From<InternalOwnedFactorInstance> for OwnedFactorInstance {
     fn from(value: InternalOwnedFactorInstance) -> Self {
         Self {

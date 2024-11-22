@@ -1,7 +1,11 @@
-mod transaction_sign_request_input_for_subintent;
-mod invalid_transaction_if_neglected_for_subintent;
-mod sign_request_for_subintent;
+mod transaction_sign_request;
+mod invalid_transaction_if_neglected;
+mod sign_request;
+mod hd_signature_input;
+mod hd_signature;
 
-pub use transaction_sign_request_input_for_subintent::*;
-pub use invalid_transaction_if_neglected_for_subintent::*;
-pub use sign_request_for_subintent::*;
+pub use transaction_sign_request::*;
+pub use invalid_transaction_if_neglected::*;
+pub use sign_request::*;
+pub use hd_signature_input::*;
+pub use hd_signature::*;
