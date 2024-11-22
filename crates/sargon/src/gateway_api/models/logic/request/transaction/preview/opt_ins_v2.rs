@@ -42,6 +42,6 @@ mod tests {
         let sut = SUT::default();
         assert!(sut.core_api_receipt);
         assert!(sut.radix_engine_toolkit_receipt);
-        assert!(sut.logs);
+        assert!(!sut.logs);
     }
 }
