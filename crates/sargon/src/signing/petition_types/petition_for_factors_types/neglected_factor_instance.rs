@@ -4,10 +4,10 @@ use crate::prelude::*;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AbstractNeglectedFactor<T> {
     /// The reason why this factor was neglected.
-    pub(crate) reason: NeglectFactorReason,
+    pub reason: NeglectFactorReason,
 
     /// The neglected factor
-    pub(crate) content: T,
+    pub content: T,
 }
 
 impl<T> AbstractNeglectedFactor<T> {
