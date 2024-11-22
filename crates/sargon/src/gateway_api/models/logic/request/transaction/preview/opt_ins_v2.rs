@@ -20,6 +20,16 @@ impl Default for TransactionPreviewRequestOptInsV2 {
     }
 }
 
+impl HasSampleValues for TransactionPreviewRequestOptInsV2 {
+    fn sample() -> Self {
+        TransactionPreviewRequestOptInsV2::new(false, false, false)
+    }
+
+    fn sample_other() -> Self {
+        TransactionPreviewRequestOptInsV2::new(true, true, true)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

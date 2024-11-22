@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Describes a manifest that can be statically analyzed
+/// Describes a manifest that can be dynamically analyzed
 pub trait DynamicallyAnalyzableManifest {
     /// Perform the ret analysis
     fn ret_dynamically_analyze(
@@ -8,7 +8,7 @@ pub trait DynamicallyAnalyzableManifest {
         receipt: &ScryptoRuntimeToolkitTransactionReceipt,
     ) -> Result<RetDynamicAnalysis, RetTransactionTypesError>;
 
-    /// Get the execution summary an given network from a given transaction receipt
+    /// Get the execution summary on an given network from a given transaction receipt
     fn execution_summary(
         &self,
         engine_toolkit_receipt: ScryptoSerializableToolkitTransactionReceipt,
