@@ -13,7 +13,6 @@ mod signed_intent;
 mod statically_analyzable_manifest;
 mod transaction_classes;
 mod transaction_hashes;
-mod transaction_receipt;
 mod v1;
 mod v2;
 
@@ -32,7 +31,6 @@ pub use signed_intent::*;
 pub use statically_analyzable_manifest::*;
 pub use transaction_classes::*;
 pub use transaction_hashes::*;
-pub use transaction_receipt::*;
 pub use v1::intent_signatures::*;
 pub use v1::*;
 pub use v2::*;
