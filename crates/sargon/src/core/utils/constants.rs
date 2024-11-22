@@ -23,3 +23,7 @@ pub const GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES: u64 = 20;
 /// Minimum XRD balance required for a fee payer to execute an account deletion transaction.
 /// Includes a safety margin above the estimated 3 XRD fee for maximum resource transfer.
 pub const MIN_REQUIRED_XRD_FOR_ACCOUNT_DELETION: f64 = 4.0;
+
+/// The delay increment among polling requests is set to 1 second.
+/// This means that there will be a 2s delay after first call, a 3s delay after second call, 4s after third and so on.
+pub const POLLING_DELAY_INCREMENT_IN_SECONDS: u64 = 1;

@@ -11,6 +11,7 @@ mod sargon_os_sync_accounts;
 mod transactions;
 
 pub use delete_account::*;
+pub use pre_authorization::*;
 pub use profile_state_holder::*;
 pub use sargon_os::*;
 pub use sargon_os_accounts::*;
