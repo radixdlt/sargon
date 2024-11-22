@@ -68,6 +68,7 @@ impl GatewayClient {
         &self,
         request: SubintentStatusRequest,
     ) -> Result<SubintentStatusResponse> {
-        self.post("transaction/status", request, res_id).await
+        self.post("transaction/subintent-status", request, res_id)
+            .await
     }
 }

@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
-// TODO: Uncomment the following line once we don't need to mock response of GatewayClient::get_pre_authorization_status()
-//#[cfg(test)]
+#[cfg(test)]
 impl LedgerState {
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {

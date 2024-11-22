@@ -10,10 +10,9 @@ impl SargonOS {
         &self,
         intent_hash: TransactionIntentHash,
     ) -> Result<TransactionStatus> {
-        let (status, _) = self
-            .poll_transaction_status_with_delays(intent_hash)
-            .await?;
-        Ok(status)
+        self.poll_transaction_status_with_delays(intent_hash)
+            .await
+            .map(|(status, _)| status)
     }
 }
 
@@ -35,11 +34,11 @@ impl SargonOS {
             network_id,
         );
         let mut delays: Vec<u64> = vec![];
-        let mut delay_duration = POLLING_DELAY_INCREMENT;
+        let mut delay_duration = POLLING_DELAY_INCREMENT_IN_SECONDS;
 
         loop {
             // Increase delay by 1 second on subsequent calls
-            delay_duration += POLLING_DELAY_INCREMENT;
+            delay_duration += POLLING_DELAY_INCREMENT_IN_SECONDS;
 
             #[cfg(test)]
             let sleep_duration = Duration::from_millis(delay_duration); // make it faster for tests

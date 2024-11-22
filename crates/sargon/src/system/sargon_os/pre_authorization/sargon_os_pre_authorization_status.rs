@@ -11,11 +11,9 @@ impl SargonOS {
         intent_hash: SubintentHash,
         expiration: DappToWalletInteractionSubintentExpiration,
     ) -> Result<PreAuthorizationStatus> {
-        let (status, _) = self
-            .poll_pre_authorization_status_with_delays(intent_hash, expiration)
-            .await?;
-
-        Ok(status)
+        self.poll_pre_authorization_status_with_delays(intent_hash, expiration)
+            .await
+            .map(|(status, _)| status)
     }
 }
 
@@ -41,66 +39,73 @@ impl SargonOS {
         // This is to avoid considering expired a subintent that got committed in the last instant.
         let seconds_until_expiration =
             self.seconds_until_expiration(expiration) + 1;
-        let mut delays: Vec<u64> = vec![];
+        let mut delays = Vec::new();
 
-        let mut delay_duration = POLLING_DELAY_INCREMENT;
+        let mut delay_duration = POLLING_DELAY_INCREMENT_IN_SECONDS;
 
         loop {
-            // Check the subintent status
-            let response = gateway_client
-                .subintent_status(SubintentStatusRequest::new(
-                    intent_hash.to_string(),
-                ))
-                .await?;
+            // Check the subintent status and default to `Unknown` if the request fails.
+            let (subintent_status, transaction_intent_hash) =
+                match gateway_client
+                    .subintent_status(SubintentStatusRequest::new(
+                        intent_hash.to_string(),
+                    ))
+                    .await
+                {
+                    Ok(response) => (
+                        response.subintent_status,
+                        response.finalized_at_transaction_intent_hash,
+                    ),
+                    Err(_) => (SubintentStatus::Unknown, None),
+                };
 
-            match response.subintent_status {
+            match subintent_status {
                 SubintentStatus::CommittedSuccess => {
                     // If it has been committed, we consider it a `Success`.
-                    let transaction_intent_hash = response
-                        .finalized_at_transaction_intent_hash
-                        .ok_or(CommonError::Unknown)?;
+                    let intent_hash = match transaction_intent_hash {
+                        Some(hash) => {
+                            TransactionIntentHash::from_bech32(&hash)?
+                        }
+                        None => return Err(CommonError::Unknown),
+                    };
                     return Ok((
-                        PreAuthorizationStatus::Success(
-                            transaction_intent_hash,
-                        ),
+                        PreAuthorizationStatus::Success { intent_hash },
                         delays,
                     ));
                 }
                 SubintentStatus::Unknown => {
                     // If it is unknown, we need to determine whether it has expired, or if we need to add a delay and try again.
-
-                    let accumulated_delay = delays.iter().sum::<u64>();
-                    let has_expired =
-                        accumulated_delay >= seconds_until_expiration;
-
-                    if has_expired {
-                        // If it has expired, we return the corresponding status.
-                        return Ok((PreAuthorizationStatus::Expired, delays));
-                    } else {
-                        // Otherwise, we determine the delay before next call.
-                        // This will either be the default delay or the remaining time until expiration (whatever is less).
-                        // Example: We have already polled 4 times for a subintent that expires after 10 seconds.
-                        // Seconds until expiration = 10 + 1 = 11
-                        // Accumulated delay = 0 + 2 + 3 + 4 = 9
-                        // Next polling should be in 5 seconds, but instead we will make it in 2 to check immediately after expiration.
-
-                        let tentative_delay =
-                            delay_duration + POLLING_DELAY_INCREMENT;
-                        let remaining_time =
-                            seconds_until_expiration - accumulated_delay;
-                        delay_duration = tentative_delay.min(remaining_time);
-                        delays.push(delay_duration);
-
-                        #[cfg(test)]
-                        let sleep_duration =
-                            Duration::from_millis(delay_duration);
-                        #[cfg(not(test))]
-                        let sleep_duration =
-                            Duration::from_secs(delay_duration);
-
-                        async_std::task::sleep(sleep_duration).await;
-                    }
                 }
+            }
+
+            // Check the accumulated delay to determine if the subintent has expired
+            let accumulated_delay = delays.iter().sum::<u64>();
+            let has_expired = accumulated_delay >= seconds_until_expiration;
+
+            if has_expired {
+                // If it has expired, we return the corresponding status.
+                return Ok((PreAuthorizationStatus::Expired, delays));
+            } else {
+                // Otherwise, we determine the delay before next call.
+                // This will either be the default delay or the remaining time until expiration (whatever is less).
+                // Example: We have already polled 4 times for a subintent that expires after 10 seconds.
+                // Seconds until expiration = 10 + 1 = 11
+                // Accumulated delay = 0 + 2 + 3 + 4 = 9
+                // Next polling should be in 5 seconds, but instead we will make it in 2 to check immediately after expiration.
+
+                let tentative_delay =
+                    delay_duration + POLLING_DELAY_INCREMENT_IN_SECONDS;
+                let remaining_time =
+                    seconds_until_expiration - accumulated_delay;
+                delay_duration = tentative_delay.min(remaining_time);
+                delays.push(delay_duration);
+
+                #[cfg(test)]
+                let sleep_duration = Duration::from_millis(delay_duration);
+                #[cfg(not(test))]
+                let sleep_duration = Duration::from_secs(delay_duration);
+
+                async_std::task::sleep(sleep_duration).await;
             }
         }
     }
@@ -141,21 +146,18 @@ mod poll_pre_authorization_status_with_delays {
     async fn success_on_third_poll() {
         // This test will simulate the case where the first two polls return `Unknown`,
         // while the third one returns `CommittedSuccess`.
+
+        let intent_hash = TransactionIntentHash::sample_other();
         let result = simulate_poll_status(
             2,
-            SSR::sample_committed_success(),
+            SSR::committed_success(intent_hash.to_string()),
             expiration_after_delay(10),
         )
         .await
         .unwrap();
 
-        // The result is Success with the mocked TransactionIntentHash
-        assert_eq!(
-            result.0,
-            PreAuthorizationStatus::Success(
-                TransactionIntentHash::sample().to_string()
-            )
-        );
+        // The result is Success with the expected TransactionIntentHash
+        assert_eq!(result.0, PreAuthorizationStatus::Success { intent_hash });
 
         // and there should have been a delay of 2s after first call, and 3s after the second call
         assert_eq!(result.1, vec![2, 3]);
@@ -173,13 +175,8 @@ mod poll_pre_authorization_status_with_delays {
         .await
         .unwrap();
 
-        // The result is Success with the mocked TransactionIntentHash
-        assert_eq!(
-            result.0,
-            PreAuthorizationStatus::Success(
-                TransactionIntentHash::sample().to_string()
-            )
-        );
+        // The result is Success
+        assert!(matches!(result.0, PreAuthorizationStatus::Success { .. }));
 
         // and delays should have been incrementing as expected until the last one (which is reduced to the remaining time)
         assert_eq!(result.1, vec![2, 3, 4]);
@@ -197,13 +194,8 @@ mod poll_pre_authorization_status_with_delays {
         .await
         .unwrap();
 
-        // The result is Success with the mocked TransactionIntentHash
-        assert_eq!(
-            result.0,
-            PreAuthorizationStatus::Success(
-                TransactionIntentHash::sample().to_string()
-            )
-        );
+        // The result is Success
+        assert!(matches!(result.0, PreAuthorizationStatus::Success { .. }));
 
         // and delays should have been incrementing as expected until the last one (which is reduced to the remaining time)
         assert_eq!(result.1, vec![2, 3, 4, 2]);
@@ -221,7 +213,7 @@ mod poll_pre_authorization_status_with_delays {
         .await
         .unwrap();
 
-        // The result is Success with the mocked TransactionIntentHash
+        // The result is Expired
         assert_eq!(result.0, PreAuthorizationStatus::Expired);
 
         // and delays should have been incrementing as expected until the last one (which is reduced to the remaining time)
@@ -229,12 +221,12 @@ mod poll_pre_authorization_status_with_delays {
     }
 
     #[actix_rt::test]
-    async fn corrupt_success() {
+    async fn success_without_transaction_intent_hash() {
         // This test will simulate the case where the GW returns a corrupted `CommittedSuccess` response
         // that is missing the TX id.
         let result = simulate_poll_status(
             0,
-            SSR::sample_committed_success_corrupt(),
+            SSR::committed_success(None),
             expiration_after_delay(10),
         )
         .await
@@ -245,9 +237,34 @@ mod poll_pre_authorization_status_with_delays {
     }
 
     #[actix_rt::test]
-    async fn failure() {
-        // This test will simulate the case where the GW returns a failure response
-        let mock_driver = MockNetworkingDriver::new_always_failing();
+    async fn success_with_invalid_transaction_intent_hash() {
+        // This test will simulate the case where the GW returns a corrupted `CommittedSuccess` response
+        // that is missing the TX id.
+        let result = simulate_poll_status(
+            0,
+            SSR::committed_success("not an intent hash".to_string()),
+            expiration_after_delay(10),
+        )
+        .await
+        .expect_err("Expected an error");
+
+        // The result an Unknown error
+        assert_eq!(result, CommonError::FailedToBech32DecodeTransactionHashAfterHavingTestedAllNetworkID { bad_value: "not an intent hash".to_string() });
+    }
+
+    #[actix_rt::test]
+    async fn failure_then_success() {
+        // This test will simulate the case where the GW returns a failure response on first two polls,
+        // while the third response is a `CommittedSuccess`
+        let responses = vec![
+            MockNetworkingDriverResponse::new_failing(),
+            MockNetworkingDriverResponse::new_failing(),
+            MockNetworkingDriverResponse::new_success(
+                SSR::sample_committed_success(),
+            ),
+        ];
+
+        let mock_driver = MockNetworkingDriver::new_with_responses(responses);
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
 
         let os =
@@ -262,10 +279,13 @@ mod poll_pre_authorization_status_with_delays {
                 expiration_after_delay(10),
             )
             .await
-            .expect_err("Expected an error");
+            .unwrap();
 
-        // The result an Unknown error
-        assert_eq!(result, CommonError::NetworkResponseBadCode { code: 500 });
+        // The result is Success
+        assert!(matches!(result.0, PreAuthorizationStatus::Success { .. }));
+
+        // and delays should have been 2 and 3 seconds
+        assert_eq!(result.1, vec![2, 3]);
     }
 
     // Creates a `MockNetworkingDriver` that returns Unknown `SubintentStatusResponse` for the first `unknown_count` calls,
