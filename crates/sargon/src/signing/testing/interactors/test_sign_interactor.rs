@@ -2,29 +2,35 @@
 
 use crate::prelude::*;
 
-pub(crate) struct TestSignInteractor {
-    pub(crate) simulated_user: SimulatedUser,
+pub(crate) struct TestSignInteractor<ID: SignableID> {
+    pub(crate) simulated_user: SimulatedUser<ID>,
 }
 
-impl TestSignInteractor {
-    pub(crate) fn new(simulated_user: SimulatedUser) -> Self {
+unsafe impl <ID: SignableID> Sync for TestSignInteractor<ID> {}
+unsafe impl <ID: SignableID> Send for TestSignInteractor<ID> {}
+
+unsafe impl <S: Signable> Sync for SignRequest<S> {}
+unsafe impl <S: Signable> Send for SignRequest<S> {}
+
+impl <ID: SignableID> TestSignInteractor<ID> {
+    pub(crate) fn new(simulated_user: SimulatedUser<ID>) -> Self {
         Self { simulated_user }
     }
 }
 
 #[async_trait::async_trait]
-impl IsTestInteractor for TestSignInteractor {
-    fn simulated_user(&self) -> SimulatedUser {
+impl <ID: SignableID> IsTestInteractor<ID> for TestSignInteractor<ID> {
+    fn simulated_user(&self) -> SimulatedUser<ID> {
         self.simulated_user.clone()
     }
 }
 
-#[async_trait::async_trait]
-impl SignInteractor<TransactionIntent> for TestSignInteractor {
-    async fn sign(
+impl <ID: SignableID> TestSignInteractor<ID> {
+
+    fn sign_payload<S: Signable>(
         &self,
-        request: SignRequest<TransactionIntent>,
-    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+        request: SignRequest<S>,
+    ) -> SignWithFactorsOutcome<ID> {
         self.simulated_user.spy_on_request_before_handled(
             request.factor_source_kind(),
             request.invalid_transactions_if_neglected.clone(),
@@ -55,9 +61,9 @@ impl SignInteractor<TransactionIntent> for TestSignInteractor {
                                     .map(|y| HDSignature::produced_signing_with_input(y.clone()))
                                     .collect_vec()
                             })
-                            .collect::<IndexSet<HDSignature<TransactionIntentHash>>>()
+                            .collect::<IndexSet<HDSignature<S::ID>>>()
                     })
-                    .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
+                    .collect::<IndexSet<HDSignature<S::ID>>>();
 
                 let signatures = signatures
                     .into_iter()
@@ -76,5 +82,16 @@ impl SignInteractor<TransactionIntent> for TestSignInteractor {
                 SignWithFactorsOutcome::user_skipped_factors(ids)
             }
         }
+    }
+
+}
+
+#[async_trait::async_trait]
+impl SignInteractor<TransactionIntent> for TestSignInteractor<TransactionIntentHash> {
+    async fn sign(
+        &self,
+        request: SignRequest<TransactionIntent>,
+    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+        self.sign_payload(request)
     }
 }

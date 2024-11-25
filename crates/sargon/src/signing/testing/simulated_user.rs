@@ -10,11 +10,11 @@ pub(crate) enum SigningUserInput {
 
 #[derive(Clone, derive_more::Debug)]
 #[debug("SimulatedUser(mode: {mode:?}, failures: {failures:?})")]
-pub(crate) struct SimulatedUser {
+pub(crate) struct SimulatedUser<ID: SignableID> {
     spy_on_request: Arc<
         dyn Fn(
             FactorSourceKind,
-            IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
+            IndexSet<InvalidTransactionIfNeglected<ID>>,
         ),
     >,
     mode: SimulatedUserMode,
@@ -22,11 +22,11 @@ pub(crate) struct SimulatedUser {
     failures: Option<SimulatedFailures>,
 }
 
-impl SimulatedUser {
+impl <ID: SignableID> SimulatedUser<ID> {
     pub(crate) fn with_spy(
         spy_on_request: impl Fn(
                 FactorSourceKind,
-                IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
+                IndexSet<InvalidTransactionIfNeglected<ID>>,
             ) + 'static,
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
@@ -96,7 +96,7 @@ impl SimulatedUserMode {
     }
 }
 
-impl SimulatedUser {
+impl <ID: SignableID> SimulatedUser<ID> {
     pub(crate) fn prudent_no_fail() -> Self {
         Self::new(SimulatedUserMode::Prudent, None)
     }
@@ -123,8 +123,8 @@ impl SimulatedUser {
     }
 }
 
-unsafe impl Sync for SimulatedUser {}
-unsafe impl Send for SimulatedUser {}
+unsafe impl <ID: SignableID> Sync for SimulatedUser<ID> {}
+unsafe impl <ID: SignableID> Send for SimulatedUser<ID> {}
 
 /// A very lazy user that defers all boring work such as signing stuff for as long
 /// as possible. Ironically, this sometimes leads to user signing more than she
@@ -138,12 +138,12 @@ pub(crate) enum Laziness {
     AlwaysSkip,
 }
 
-impl SimulatedUser {
+impl <ID: SignableID> SimulatedUser<ID> {
     pub(crate) fn spy_on_request_before_handled(
         &self,
         factor_source_kind: FactorSourceKind,
         invalid_tx_if_skipped: IndexSet<
-            InvalidTransactionIfNeglected<TransactionIntentHash>,
+            InvalidTransactionIfNeglected<ID>,
         >,
     ) {
         (self.spy_on_request)(
@@ -155,7 +155,7 @@ impl SimulatedUser {
     pub(crate) fn sign_or_skip(
         &self,
         invalid_tx_if_skipped: impl IntoIterator<
-            Item = InvalidTransactionIfNeglected<TransactionIntentHash>,
+            Item = InvalidTransactionIfNeglected<ID>,
         >,
     ) -> SigningUserInput {
         let invalid_tx_if_skipped = invalid_tx_if_skipped

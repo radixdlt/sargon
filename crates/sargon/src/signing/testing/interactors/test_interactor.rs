@@ -3,8 +3,8 @@
 use crate::prelude::*;
 
 #[async_trait::async_trait]
-pub(crate) trait IsTestInteractor: Sync {
-    fn simulated_user(&self) -> SimulatedUser;
+pub(crate) trait IsTestInteractor<ID: SignableID>: Sync {
+    fn simulated_user(&self) -> SimulatedUser<ID>;
 
     fn should_simulate_failure(
         &self,
