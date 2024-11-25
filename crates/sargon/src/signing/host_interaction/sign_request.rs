@@ -37,6 +37,13 @@ impl<S: Signable> SignRequest<S> {
             "Invalid input, per_factor_source must not be empty, this is a programmer error."
         );
 
+        assert!(
+            per_factor_source
+                .keys()
+                .all(|f| f.kind == factor_source_kind),
+            "Discrepancy! All factor sources must be of the same kind, this is a programmer error."
+        );
+
         Self {
             factor_source_kind,
             per_factor_source,

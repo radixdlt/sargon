@@ -8,10 +8,22 @@ pub struct Interactors {
     /// FactorInstancesProvider for all operations involving new keys, such as account creation
     /// and securifying entities (mapping SecurityStructureOfFactorSource -> SecurityStructureOfFactorInstances).
     pub key_derivation: Arc<dyn KeysDerivationInteractors>,
+    //
+    // pub transaction_sign: Arc<dyn SignInteractor<TransactionIntent>>,
+    //
+    // pub subintent_sign: Arc<dyn SignInteractor<Subintent>>
 }
 
 impl Interactors {
-    pub fn new(key_derivation: Arc<dyn KeysDerivationInteractors>) -> Self {
-        Self { key_derivation }
+    pub fn new(
+        key_derivation: Arc<dyn KeysDerivationInteractors>,
+        // transaction_sign: Arc<dyn SignInteractor<TransactionIntent>>,
+        // subintent_sign: Arc<dyn SignInteractor<TransactionIntent>>
+    ) -> Self {
+        Self {
+            key_derivation,
+            // transaction_sign,
+            // subintent_sign
+        }
     }
 }
