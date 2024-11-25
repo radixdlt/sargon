@@ -778,7 +778,7 @@ mod tests {
         use super::*;
 
         async fn multi_accounts_multi_personas_all_single_factor_controlled_with_sim_user(
-            sim: SimulatedUser<TransactionIntentHash>,
+            sim: SimulatedUser<TransactionIntent>,
         ) {
             let factor_sources = &FactorSource::sample_all();
             let a0 = Account::sample_at(0);
@@ -910,7 +910,7 @@ mod tests {
 
         #[derive(Clone, Debug)]
         struct Vector {
-            simulated_user: SimulatedUser<TransactionIntentHash>,
+            simulated_user: SimulatedUser<TransactionIntent>,
             expected: Expected,
         }
         #[derive(Clone, Debug, PartialEq, Eq)]

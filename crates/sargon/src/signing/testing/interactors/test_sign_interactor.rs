@@ -2,35 +2,35 @@
 
 use crate::prelude::*;
 
-pub(crate) struct TestSignInteractor<ID: SignableID> {
-    pub(crate) simulated_user: SimulatedUser<ID>,
+pub(crate) struct TestSignInteractor<S: Signable> {
+    pub(crate) simulated_user: SimulatedUser<S>,
 }
 
-unsafe impl <ID: SignableID> Sync for TestSignInteractor<ID> {}
-unsafe impl <ID: SignableID> Send for TestSignInteractor<ID> {}
+unsafe impl <S: Signable> Sync for TestSignInteractor<S> {}
+unsafe impl <S: Signable> Send for TestSignInteractor<S> {}
 
 unsafe impl <S: Signable> Sync for SignRequest<S> {}
 unsafe impl <S: Signable> Send for SignRequest<S> {}
 
-impl <ID: SignableID> TestSignInteractor<ID> {
-    pub(crate) fn new(simulated_user: SimulatedUser<ID>) -> Self {
+impl <S: Signable> TestSignInteractor<S> {
+    pub(crate) fn new(simulated_user: SimulatedUser<S>) -> Self {
         Self { simulated_user }
     }
 }
 
 #[async_trait::async_trait]
-impl <ID: SignableID> IsTestInteractor<ID> for TestSignInteractor<ID> {
-    fn simulated_user(&self) -> SimulatedUser<ID> {
+impl <S: Signable> IsTestInteractor<S> for TestSignInteractor<S> {
+    fn simulated_user(&self) -> SimulatedUser<S> {
         self.simulated_user.clone()
     }
 }
 
-impl <ID: SignableID> TestSignInteractor<ID> {
+impl <S: Signable> TestSignInteractor<S> {
 
-    fn sign_payload<S: Signable>(
+    fn sign_payload(
         &self,
         request: SignRequest<S>,
-    ) -> SignWithFactorsOutcome<ID> {
+    ) -> SignWithFactorsOutcome<S::ID> {
         self.simulated_user.spy_on_request_before_handled(
             request.factor_source_kind(),
             request.invalid_transactions_if_neglected.clone(),
@@ -87,11 +87,11 @@ impl <ID: SignableID> TestSignInteractor<ID> {
 }
 
 #[async_trait::async_trait]
-impl SignInteractor<TransactionIntent> for TestSignInteractor<TransactionIntentHash> {
+impl <S: Signable> SignInteractor<S> for TestSignInteractor<S> {
     async fn sign(
         &self,
-        request: SignRequest<TransactionIntent>,
-    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+        request: SignRequest<S>,
+    ) -> SignWithFactorsOutcome<S::ID> {
         self.sign_payload(request)
     }
 }

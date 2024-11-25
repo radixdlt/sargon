@@ -24,7 +24,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
         transactions: impl IntoIterator<
             Item = SignableWithEntities<S>,
         >,
-        simulated_user: SimulatedUser<S::ID>,
+        simulated_user: SimulatedUser<S>,
         role_kind: RoleKind,
     ) -> Self {
         Self::new_test_with(
