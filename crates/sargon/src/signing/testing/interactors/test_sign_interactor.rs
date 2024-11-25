@@ -25,9 +25,9 @@ impl <S: Signable> IsTestInteractor<S> for TestSignInteractor<S> {
     }
 }
 
-impl <S: Signable> TestSignInteractor<S> {
-
-    fn sign_payload(
+#[async_trait::async_trait]
+impl <S: Signable> SignInteractor<S> for TestSignInteractor<S> {
+    async fn sign(
         &self,
         request: SignRequest<S>,
     ) -> SignWithFactorsOutcome<S::ID> {
@@ -82,16 +82,5 @@ impl <S: Signable> TestSignInteractor<S> {
                 SignWithFactorsOutcome::user_skipped_factors(ids)
             }
         }
-    }
-
-}
-
-#[async_trait::async_trait]
-impl <S: Signable> SignInteractor<S> for TestSignInteractor<S> {
-    async fn sign(
-        &self,
-        request: SignRequest<S>,
-    ) -> SignWithFactorsOutcome<S::ID> {
-        self.sign_payload(request)
     }
 }
