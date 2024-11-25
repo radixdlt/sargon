@@ -6,5 +6,5 @@ mod testing;
 pub use host_interactors::*;
 pub use interactors::*;
 
-// #[cfg(test)]
+#[cfg(test)]
 pub use testing::*;

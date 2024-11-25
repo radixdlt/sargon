@@ -13,7 +13,7 @@ use crate::{prelude::*, system::interactors};
 pub struct SargonOS {
     pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
-    pub(crate) interactors: Interactors,
+    pub(crate) interactor: Arc<dyn HostInteractor>,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -27,30 +27,11 @@ impl Deref for SargonOS {
 }
 
 impl SargonOS {
-    pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
-        let clients = Clients::new(bios);
-        let secure_storage = Arc::new(clients.secure_storage.clone());
-        let derivation_interactors: Arc<dyn KeysDerivationInteractors>;
-        #[cfg(test)]
-        {
-            derivation_interactors = Arc::new(
-                TestDerivationInteractors::with_secure_storage(secure_storage),
-            );
-        }
-        #[cfg(not(test))]
-        {
-            derivation_interactors =
-                Arc::new(NoUIInteractorForKeyDerivation::new(secure_storage));
-        }
-
-        let interactors = Interactors::new(derivation_interactors);
-        Self::boot_with_interactors(clients, interactors).await
-    }
-
-    pub async fn boot_with_interactors(
-        clients: Clients,
-        interactors: Interactors,
+    pub async fn boot(
+        bios: Arc<Bios>,
+        interactor: Arc<dyn HostInteractor>
     ) -> Arc<Self> {
+        let clients = Clients::new(bios);
         let sargon_info = SargonBuildInformation::get();
         let version = sargon_info.sargon_version;
         let ret_version = sargon_info.dependencies.radix_engine_toolkit;
@@ -88,7 +69,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
-            interactors,
+            interactor,
         });
         os.clients
             .profile_state_change
@@ -271,7 +252,7 @@ impl SargonOS {
     pub(crate) fn keys_derivation_interactors(
         &self,
     ) -> Arc<dyn KeysDerivationInteractors> {
-        self.interactors.key_derivation.clone()
+        self.interactor.clone() as Arc<dyn KeysDerivationInteractors>
     }
 
     pub async fn resolve_host_id(&self) -> Result<HostId> {
@@ -386,7 +367,7 @@ impl SargonOS {
         let test_drivers =
             Drivers::with_file_system(InMemoryFileSystemDriver::new());
         let bios = Bios::new(test_drivers);
-        let clients = Clients::new(bios);
+        let clients = Clients::new(bios.clone());
 
         let derivation_interactor = derivation_interactor.into();
         let derivation_interactors: Arc<dyn KeysDerivationInteractors> =
@@ -396,9 +377,11 @@ impl SargonOS {
                 ))
             });
 
-        let interactors = Interactors::new(derivation_interactors);
+        let host_interactor = TestHostInteractor::new_with_derivation_interactor(
+            derivation_interactors
+        );
 
-        let os = Self::boot_with_interactors(clients, interactors).await;
+        let os = Self::boot(bios, Arc::new(host_interactor)).await;
         os.new_wallet_with_mnemonic(
             bdfs_mnemonic.into(),
             pre_derive_factor_instance_for_bdfs,
@@ -455,7 +438,10 @@ impl SargonOS {
     ) -> Result<Arc<Self>> {
         let drivers = Drivers::with_networking(networking);
         let bios = Bios::new(drivers);
-        let os = Self::boot(bios).await;
+        let os = Self::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios))
+        ).await;
 
         let (mut profile, bdfs) = os.create_new_profile_with_bdfs(None).await?;
 
@@ -487,6 +473,8 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
+
+
     #[actix_rt::test]
     async fn test_new_profile_is_active_profile() {
         // ARRANGE (and ACT)
@@ -514,9 +502,13 @@ mod tests {
         let bios = Bios::new(drivers);
 
         // ACT
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot(
+                bios.clone(),
+                Arc::new(TestHostInteractor::new_from_bios(bios))
+            )
+        ).await.unwrap();
 
         // ASSERT
         let active_profile = os.profile();
@@ -529,7 +521,10 @@ mod tests {
         // ARRANGE
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios.clone()).await;
+        let os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
         let (first_profile, first_bdfs) =
             os.create_new_profile_with_bdfs(None).await.unwrap();
 
@@ -548,7 +543,10 @@ mod tests {
             .unwrap();
 
         // ACT
-        let new_os = SUT::boot(bios.clone()).await;
+        let new_os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
 
         // ASSERT
         assert!(new_os.profile().is_err());
@@ -585,7 +583,10 @@ mod tests {
     async fn test_new_wallet() {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
 
         os.new_wallet(false).await.unwrap();
 
@@ -626,7 +627,10 @@ mod tests {
     async fn test_new_wallet_through_derived_bdfs() {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
 
         os.new_wallet_with_derived_bdfs(
             PrivateHierarchicalDeterministicFactorSource::sample(),
@@ -644,7 +648,10 @@ mod tests {
     async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
 
         os.new_wallet_with_derived_bdfs(
             PrivateHierarchicalDeterministicFactorSource::sample(),
@@ -663,7 +670,10 @@ mod tests {
     ) {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
 
         let other_hd =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
@@ -693,7 +703,10 @@ mod tests {
     async fn test_delete_wallet() {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let os = SUT::boot(
+            bios.clone(),
+            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        ).await;
         os.new_wallet(false).await.unwrap();
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();

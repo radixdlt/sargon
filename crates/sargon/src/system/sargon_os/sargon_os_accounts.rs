@@ -1239,9 +1239,13 @@ mod tests {
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let bios = Bios::new(drivers);
 
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot(
+                bios.clone(),
+                Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+            )
+        ).await.unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
@@ -1265,9 +1269,13 @@ mod tests {
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let bios = Bios::new(drivers);
 
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot(
+                bios.clone(),
+                Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+            )
+        ).await.unwrap();
 
         // ACT
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
@@ -1357,9 +1365,13 @@ mod tests {
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let bios = Bios::new(drivers);
 
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot(
+                bios.clone(),
+                Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+            )
+        ).await.unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         let mut account = Account::sample();
