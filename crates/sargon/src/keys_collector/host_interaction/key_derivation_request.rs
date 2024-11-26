@@ -7,7 +7,8 @@ pub struct KeyDerivationRequest {
 }
 
 impl KeyDerivationRequest {
-    pub(crate) fn new(
+
+    pub fn new(
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
             IndexSet<DerivationPath>,

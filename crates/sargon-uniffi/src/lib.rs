@@ -10,6 +10,7 @@ mod home_cards;
 mod profile;
 mod radix_connect;
 mod signing;
+mod keys_collector;
 mod system;
 mod types;
 mod wrapped_radix_engine_toolkit;
@@ -22,6 +23,7 @@ pub mod prelude {
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::signing::*;
+    pub use crate::keys_collector::*;
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
