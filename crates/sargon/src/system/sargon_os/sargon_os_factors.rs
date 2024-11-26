@@ -227,7 +227,7 @@ impl SargonOS {
             panic!("Unsupported FactorSource which is not HD.")
         }
         let profile_snapshot = self.profile()?;
-        let keys_derivation_interactors = self.keys_derivation_interactors();
+        let keys_derivation_interactors = self.keys_derivation_interactor();
         let outcome = CacheFiller::for_new_factor_source(
             Arc::new(self.clients.factor_instances_cache.clone()),
             Arc::new(profile_snapshot),

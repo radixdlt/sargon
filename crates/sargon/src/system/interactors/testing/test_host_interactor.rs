@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub struct TestHostInteractor {
     transaction_signing: Arc<dyn SignInteractor<TransactionIntent>>,
     subintent_signing: Arc<dyn SignInteractor<Subintent>>,
-    key_derivation: Arc<dyn KeysDerivationInteractors>,
+    key_derivation: Arc<dyn KeyDerivationInteractor>,
 }
 
 impl TestHostInteractor {
@@ -13,7 +13,8 @@ impl TestHostInteractor {
         let clients = Clients::new(bios);
 
         Self::new_with_derivation_interactor(
-            Arc::new(TestDerivationInteractors::with_secure_storage(
+            Arc::new(TestDerivationInteractor::new(
+                false,
                 Arc::new(clients.secure_storage.clone()),
             ))
         )
@@ -22,7 +23,7 @@ impl TestHostInteractor {
     pub fn new(
         transaction_signing: Arc<dyn SignInteractor<TransactionIntent>>,
         subintent_signing: Arc<dyn SignInteractor<Subintent>>,
-        key_derivation: Arc<dyn KeysDerivationInteractors>,
+        key_derivation: Arc<dyn KeyDerivationInteractor>,
     ) -> Self {
         Self {
             transaction_signing,
@@ -32,7 +33,7 @@ impl TestHostInteractor {
     }
 
     pub fn new_with_derivation_interactor(
-        key_derivation: Arc<dyn KeysDerivationInteractors>,
+        key_derivation: Arc<dyn KeyDerivationInteractor>,
     ) -> Self {
         Self::new(
             Arc::new(TestSignInteractor::<TransactionIntent>::new(
@@ -69,8 +70,11 @@ impl SignInteractor<Subintent> for TestHostInteractor {
 }
 
 #[async_trait::async_trait]
-impl KeysDerivationInteractors for TestHostInteractor {
-    fn interactor_for(&self, kind: FactorSourceKind) -> KeyDerivationInteractor {
-        self.key_derivation.interactor_for(kind)
+impl KeyDerivationInteractor for TestHostInteractor {
+    async fn derive(
+        &self,
+        request: KeyDerivationRequest
+    ) -> Result<KeyDerivationResponse> {
+        self.key_derivation.derive(request).await
     }
 }

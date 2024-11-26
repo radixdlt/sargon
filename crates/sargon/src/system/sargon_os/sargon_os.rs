@@ -249,10 +249,10 @@ impl SargonOS {
         Ok(())
     }
 
-    pub(crate) fn keys_derivation_interactors(
+    pub(crate) fn keys_derivation_interactor(
         &self,
-    ) -> Arc<dyn KeysDerivationInteractors> {
-        self.interactor.clone() as Arc<dyn KeysDerivationInteractors>
+    ) -> Arc<dyn KeyDerivationInteractor> {
+        self.interactor.clone() as Arc<dyn KeyDerivationInteractor>
     }
 
     pub async fn resolve_host_id(&self) -> Result<HostId> {
@@ -361,7 +361,7 @@ impl SargonOS {
 
     pub async fn boot_test_with_bdfs_mnemonic_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
-        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
@@ -369,16 +369,15 @@ impl SargonOS {
         let bios = Bios::new(test_drivers);
         let clients = Clients::new(bios.clone());
 
-        let derivation_interactor = derivation_interactor.into();
-        let derivation_interactors: Arc<dyn KeysDerivationInteractors> =
-            derivation_interactor.unwrap_or_else(|| {
-                Arc::new(TestDerivationInteractors::with_secure_storage(
-                    Arc::new(clients.secure_storage.clone()),
-                ))
-            });
+        let keys_derivation_interactor = derivation_interactor.into().unwrap_or_else(|| {
+            Arc::new(TestDerivationInteractor::new(
+                false,
+                Arc::new(clients.secure_storage.clone()),
+            ))
+        });
 
         let host_interactor = TestHostInteractor::new_with_derivation_interactor(
-            derivation_interactors
+            keys_derivation_interactor
         );
 
         let os = Self::boot(bios, Arc::new(host_interactor)).await;
@@ -405,7 +404,7 @@ impl SargonOS {
 
     pub async fn fast_boot_bdfs_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
-        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactor(

@@ -23,7 +23,7 @@ pub struct FactorInstancesProvider {
     factor_sources: IndexSet<FactorSource>,
     profile: Option<Arc<Profile>>,
     cache_client: Arc<FactorInstancesCacheClient>,
-    interactors: Arc<dyn KeysDerivationInteractors>,
+    interactor: Arc<dyn KeyDerivationInteractor>,
 }
 
 /// ===============
@@ -35,14 +35,14 @@ impl FactorInstancesProvider {
         factor_sources: IndexSet<FactorSource>,
         profile: impl Into<Option<Arc<Profile>>>,
         cache_client: Arc<FactorInstancesCacheClient>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Self {
         Self {
             network_id,
             factor_sources,
             profile: profile.into(),
             cache_client,
-            interactors,
+            interactor,
         }
     }
 
@@ -302,7 +302,7 @@ impl FactorInstancesProvider {
                 IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
             >>()?;
 
-        let interactor = self.interactors.clone();
+        let interactor = self.interactor.clone();
         let collector =
             KeysCollector::new(factor_sources, pf_paths.clone(), interactor)?;
 

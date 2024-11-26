@@ -154,7 +154,7 @@ impl SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let key_derivation_interactors = self.keys_derivation_interactors();
+        let key_derivation_interactors = self.keys_derivation_interactor();
 
         let profile = self.profile()?;
         let cache_client =
@@ -492,7 +492,7 @@ impl SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let key_derivation_interactors = self.keys_derivation_interactors();
+        let key_derivation_interactors = self.keys_derivation_interactor();
 
         let profile = self.profile()?;
 
@@ -812,7 +812,7 @@ impl SargonOS {
         FactorInstancesProviderOutcome,
     )> {
         let profile_snapshot = self.profile()?;
-        let key_derivation_interactors = self.keys_derivation_interactors();
+        let key_derivation_interactors = self.keys_derivation_interactor();
         let matrix_of_factor_sources =
             &security_structure_of_factor_sources.matrix_of_factors;
 

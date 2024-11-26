@@ -143,7 +143,7 @@ impl SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let key_derivation_interactors = self.keys_derivation_interactors();
+        let key_derivation_interactors = self.keys_derivation_interactor();
 
         let profile = self.profile()?;
 
@@ -437,7 +437,7 @@ impl SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        let key_derivation_interactors = self.keys_derivation_interactors();
+        let key_derivation_interactors = self.keys_derivation_interactor();
 
         let profile = self.profile()?;
 
