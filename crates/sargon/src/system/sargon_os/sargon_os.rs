@@ -27,11 +27,22 @@ impl Deref for SargonOS {
 }
 
 impl SargonOS {
+
     pub async fn boot(
         bios: Arc<Bios>,
         interactor: Arc<dyn HostInteractor>
     ) -> Arc<Self> {
         let clients = Clients::new(bios);
+        Self::boot_with_clients_and_interactor(
+            clients,
+            interactor,
+        ).await
+    }
+
+    pub(crate) async fn boot_with_clients_and_interactor(
+        clients: Clients,
+        interactor: Arc<dyn HostInteractor>
+    ) -> Arc<Self> {
         let sargon_info = SargonBuildInformation::get();
         let version = sargon_info.sargon_version;
         let ret_version = sargon_info.dependencies.radix_engine_toolkit;
@@ -380,7 +391,7 @@ impl SargonOS {
             keys_derivation_interactor
         );
 
-        let os = Self::boot(bios, Arc::new(host_interactor)).await;
+        let os = Self::boot_with_clients_and_interactor(clients, Arc::new(host_interactor)).await;
         os.new_wallet_with_mnemonic(
             bdfs_mnemonic.into(),
             pre_derive_factor_instance_for_bdfs,
@@ -437,9 +448,12 @@ impl SargonOS {
     ) -> Result<Arc<Self>> {
         let drivers = Drivers::with_networking(networking);
         let bios = Bios::new(drivers);
-        let os = Self::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios))
+        let clients = Clients::new(bios);
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+
+        let os = Self::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
 
         let (mut profile, bdfs) = os.create_new_profile_with_bdfs(None).await?;
@@ -498,14 +512,14 @@ mod tests {
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
         let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
+        let clients = Clients::new(Bios::new(drivers));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
         // ACT
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot(
-                bios.clone(),
-                Arc::new(TestHostInteractor::new_from_bios(bios))
+            SUT::boot_with_clients_and_interactor(
+                clients,
+                interactor
             )
         ).await.unwrap();
 
@@ -518,11 +532,13 @@ mod tests {
     async fn test_boot_when_existing_profile_with_no_networks_profile_state_considered_none(
     ) {
         // ARRANGE
-        let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(
+            &clients
+        ));
+        let os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
         let (first_profile, first_bdfs) =
             os.create_new_profile_with_bdfs(None).await.unwrap();
@@ -542,9 +558,11 @@ mod tests {
             .unwrap();
 
         // ACT
-        let new_os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let new_os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
 
         // ASSERT
@@ -581,10 +599,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
 
         os.new_wallet(false).await.unwrap();
@@ -625,10 +644,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
 
         os.new_wallet_with_derived_bdfs(
@@ -646,10 +666,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
 
         os.new_wallet_with_derived_bdfs(
@@ -668,10 +689,11 @@ mod tests {
     async fn test_new_wallet_through_derived_bdfs_with_accounts_derived_from_other_hd_factor_source(
     ) {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
 
         let other_hd =
@@ -701,10 +723,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_delete_wallet() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(
-            bios.clone(),
-            Arc::new(TestHostInteractor::new_from_bios(bios.clone()))
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let os = SUT::boot_with_clients_and_interactor(
+            clients,
+            interactor
         ).await;
         os.new_wallet(false).await.unwrap();
         let profile = os.profile().unwrap();

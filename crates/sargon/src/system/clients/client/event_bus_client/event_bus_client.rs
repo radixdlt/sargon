@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EventBusClient {
     driver: Arc<dyn EventBusDriver>,
 }

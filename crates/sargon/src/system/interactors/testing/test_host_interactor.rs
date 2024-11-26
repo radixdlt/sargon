@@ -8,10 +8,7 @@ pub struct TestHostInteractor {
 
 impl TestHostInteractor {
 
-    // TODO this should be deleted
-    pub fn new_from_bios(bios: Arc<Bios>) -> Self {
-        let clients = Clients::new(bios);
-
+    pub fn new_from_clients(clients: &Clients) -> Self {
         Self::new_with_derivation_interactor(
             Arc::new(TestDerivationInteractor::new(
                 false,
