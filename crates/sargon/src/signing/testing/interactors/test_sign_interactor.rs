@@ -6,9 +6,6 @@ pub(crate) struct TestSignInteractor<S: Signable> {
     pub(crate) simulated_user: SimulatedUser<S>,
 }
 
-unsafe impl <S: Signable> Sync for TestSignInteractor<S> {}
-unsafe impl <S: Signable> Send for TestSignInteractor<S> {}
-
 unsafe impl <S: Signable> Sync for SignRequest<S> {}
 unsafe impl <S: Signable> Send for SignRequest<S> {}
 
@@ -18,7 +15,6 @@ impl <S: Signable> TestSignInteractor<S> {
     }
 }
 
-#[async_trait::async_trait]
 impl <S: Signable> IsTestInteractor<S> for TestSignInteractor<S> {
     fn simulated_user(&self) -> SimulatedUser<S> {
         self.simulated_user.clone()

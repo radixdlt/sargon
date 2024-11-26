@@ -6,9 +6,6 @@ pub struct TestHostInteractor {
     key_derivation: Arc<dyn KeysDerivationInteractors>,
 }
 
-unsafe impl Send for TestHostInteractor {}
-unsafe impl Sync for TestHostInteractor {}
-
 impl TestHostInteractor {
 
     // TODO this should be deleted
