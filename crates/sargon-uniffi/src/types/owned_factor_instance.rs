@@ -15,11 +15,9 @@ pub struct OwnedFactorInstance {
 }
 
 impl OwnedFactorInstance {
-
     pub fn into_internal(&self) -> InternalOwnedFactorInstance {
         self.clone().into()
     }
-
 }
 
 impl From<InternalOwnedFactorInstance> for OwnedFactorInstance {

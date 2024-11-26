@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 use sargon::NeglectFactorReason as InternalNeglectFactorReason;
-type InternalNeglectedFactors = sargon::AbstractNeglectedFactor<sargon::IndexSet<InternalFactorSourceIDFromHash>>;
+type InternalNeglectedFactors = sargon::AbstractNeglectedFactor<
+    sargon::IndexSet<InternalFactorSourceIDFromHash>,
+>;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct NeglectedFactors {
@@ -13,11 +15,9 @@ pub struct NeglectedFactors {
 }
 
 impl NeglectedFactors {
-
     pub fn into_internal(&self) -> InternalNeglectedFactors {
         self.clone().into()
     }
-
 }
 
 impl From<InternalNeglectedFactors> for NeglectedFactors {
@@ -33,16 +33,19 @@ impl From<NeglectedFactors> for InternalNeglectedFactors {
     fn from(value: NeglectedFactors) -> Self {
         Self::new(
             value.reason.into_internal(),
-            value.factors.into_iter().map(|id| id.into_internal()).collect::<sargon::IndexSet::<_>>(),
+            value
+                .factors
+                .into_iter()
+                .map(|id| id.into_internal())
+                .collect::<sargon::IndexSet<_>>(),
         )
     }
 }
 
-
 /// Reason why some FactorSource was neglected, either explicitly skipped by the user
 /// or implicitly neglected due to failure.
 #[derive(
-    Clone, Copy, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum
+    Clone, Copy, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
 )]
 pub enum NeglectFactorReason {
     /// A FactorSource got neglected since user explicitly skipped it.

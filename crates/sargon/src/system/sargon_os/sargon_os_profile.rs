@@ -290,15 +290,15 @@ mod tests {
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let clients = Clients::new(Bios::new(drivers));
-        let interactors = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let interactors =
+            Arc::new(TestHostInteractor::new_from_clients(&clients));
 
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(
-                clients,
-                interactors
-            )
-        ).await.unwrap();
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
 
         let p = Profile::sample();
 
@@ -501,11 +501,11 @@ mod tests {
         // ARRANGE
         let test_drivers = Drivers::test();
         let clients = Clients::new(Bios::new(test_drivers));
-        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
-        let os = SargonOS::boot_with_clients_and_interactor(
-            clients,
-            interactor
-        ).await;
+        let interactor =
+            Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let os =
+            SargonOS::boot_with_clients_and_interactor(clients, interactor)
+                .await;
 
         // ACT
         let _ = os.with_timeout(|x| x.set_profile(Profile::sample())).await;

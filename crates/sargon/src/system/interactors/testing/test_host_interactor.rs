@@ -7,14 +7,13 @@ pub struct TestHostInteractor {
 }
 
 impl TestHostInteractor {
-
     pub fn new_from_clients(clients: &Clients) -> Self {
-        Self::new_with_derivation_interactor(
-            Arc::new(TestDerivationInteractor::new(
+        Self::new_with_derivation_interactor(Arc::new(
+            TestDerivationInteractor::new(
                 false,
                 Arc::new(clients.secure_storage.clone()),
-            ))
-        )
+            ),
+        ))
     }
 
     pub fn new(
@@ -34,12 +33,12 @@ impl TestHostInteractor {
     ) -> Self {
         Self::new(
             Arc::new(TestSignInteractor::<TransactionIntent>::new(
-                SimulatedUser::prudent_no_fail()
+                SimulatedUser::prudent_no_fail(),
             )),
             Arc::new(TestSignInteractor::<Subintent>::new(
-                SimulatedUser::prudent_no_fail()
+                SimulatedUser::prudent_no_fail(),
             )),
-            key_derivation
+            key_derivation,
         )
     }
 }
@@ -70,7 +69,7 @@ impl SignInteractor<Subintent> for TestHostInteractor {
 impl KeyDerivationInteractor for TestHostInteractor {
     async fn derive(
         &self,
-        request: KeyDerivationRequest
+        request: KeyDerivationRequest,
     ) -> Result<KeyDerivationResponse> {
         self.key_derivation.derive(request).await
     }

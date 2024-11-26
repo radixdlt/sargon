@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
-type InternalHdSignatureForTransactionIntent = sargon::HDSignature<InternalTransactionIntentHash>;
+type InternalHdSignatureForTransactionIntent =
+    sargon::HDSignature<InternalTransactionIntentHash>;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HdSignatureForTransactionIntent {
@@ -19,14 +20,14 @@ pub struct HdSignatureForTransactionIntent {
 }
 
 impl HdSignatureForTransactionIntent {
-
     pub fn into_internal(&self) -> InternalHdSignatureForTransactionIntent {
         self.clone().into()
     }
-
 }
 
-impl From<InternalHdSignatureForTransactionIntent> for HdSignatureForTransactionIntent {
+impl From<InternalHdSignatureForTransactionIntent>
+    for HdSignatureForTransactionIntent
+{
     fn from(value: InternalHdSignatureForTransactionIntent) -> Self {
         Self {
             input: value.input.into(),
@@ -35,7 +36,9 @@ impl From<InternalHdSignatureForTransactionIntent> for HdSignatureForTransaction
     }
 }
 
-impl From<HdSignatureForTransactionIntent> for InternalHdSignatureForTransactionIntent {
+impl From<HdSignatureForTransactionIntent>
+    for InternalHdSignatureForTransactionIntent
+{
     fn from(value: HdSignatureForTransactionIntent) -> Self {
         Self {
             input: value.input.into_internal(),

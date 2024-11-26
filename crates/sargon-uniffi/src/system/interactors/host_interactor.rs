@@ -1,19 +1,22 @@
 use crate::prelude::*;
 use sargon::HostInteractor as InternalHostInteractor;
-use sargon::SignInteractor as InternalSignInteractor;
-use sargon::TransactionIntent as InternalTransactionIntent;
-use sargon::TransactionIntentHash as InternalTransactionIntentHash;
-use sargon::Subintent as InternalSubintent;
-use sargon::SubintentHash as InternalSubintentHash;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
 use sargon::Result as InternalResult;
+use sargon::SignInteractor as InternalSignInteractor;
+use sargon::Subintent as InternalSubintent;
+use sargon::SubintentHash as InternalSubintentHash;
+use sargon::TransactionIntent as InternalTransactionIntent;
+use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
-type InternalSignRequestForTransactionIntent = sargon::SignRequest<InternalTransactionIntent>;
-type InternalSignWithFactorsOutcomeForTransactionIntent = sargon::SignWithFactorsOutcome<InternalTransactionIntentHash>;
+type InternalSignRequestForTransactionIntent =
+    sargon::SignRequest<InternalTransactionIntent>;
+type InternalSignWithFactorsOutcomeForTransactionIntent =
+    sargon::SignWithFactorsOutcome<InternalTransactionIntentHash>;
 type InternalSignRequestForSubintent = sargon::SignRequest<InternalSubintent>;
-type InternalSignWithFactorsOutcomeForSubintent = sargon::SignWithFactorsOutcome<InternalSubintentHash>;
+type InternalSignWithFactorsOutcomeForSubintent =
+    sargon::SignWithFactorsOutcome<InternalSubintentHash>;
 
 /// Sargon os
 #[uniffi::export(with_foreign)]
@@ -33,7 +36,6 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
         &self,
         request: KeyDerivationRequest,
     ) -> Result<KeyDerivationResponse>;
-
 }
 
 #[derive(Debug)]
@@ -42,32 +44,32 @@ pub struct HostInteractorAdapter {
 }
 
 impl HostInteractorAdapter {
-
     pub fn new(wrapped: Arc<dyn HostInteractor>) -> Self {
         Self { wrapped }
     }
-
 }
 
 impl InternalHostInteractor for HostInteractorAdapter {}
 
 #[async_trait::async_trait]
-impl InternalSignInteractor<InternalTransactionIntent> for HostInteractorAdapter {
-    async fn sign(&self, request: InternalSignRequestForTransactionIntent) -> InternalSignWithFactorsOutcomeForTransactionIntent {
-        self.wrapped
-            .sign_transactions(request.into())
-            .await
-            .into()
+impl InternalSignInteractor<InternalTransactionIntent>
+    for HostInteractorAdapter
+{
+    async fn sign(
+        &self,
+        request: InternalSignRequestForTransactionIntent,
+    ) -> InternalSignWithFactorsOutcomeForTransactionIntent {
+        self.wrapped.sign_transactions(request.into()).await.into()
     }
 }
 
 #[async_trait::async_trait]
 impl InternalSignInteractor<InternalSubintent> for HostInteractorAdapter {
-    async fn sign(&self, request: InternalSignRequestForSubintent) -> InternalSignWithFactorsOutcomeForSubintent {
-        self.wrapped
-            .sign_subintents(request.into())
-            .await
-            .into()
+    async fn sign(
+        &self,
+        request: InternalSignRequestForSubintent,
+    ) -> InternalSignWithFactorsOutcomeForSubintent {
+        self.wrapped.sign_subintents(request.into()).await.into()
     }
 }
 
@@ -75,7 +77,7 @@ impl InternalSignInteractor<InternalSubintent> for HostInteractorAdapter {
 impl InternalKeyDerivationInteractor for HostInteractorAdapter {
     async fn derive(
         &self,
-        request: InternalKeyDerivationRequest
+        request: InternalKeyDerivationRequest,
     ) -> InternalResult<InternalKeyDerivationResponse> {
         self.wrapped
             .derive_keys(request.into())

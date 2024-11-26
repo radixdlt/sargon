@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 
-impl <S: Signable + 'static> SignaturesCollector<S> {
+impl<S: Signable + 'static> SignaturesCollector<S> {
     pub(crate) fn new_test_with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,
@@ -21,9 +21,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
     pub(crate) fn new_test(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
         simulated_user: SimulatedUser<S>,
         role_kind: RoleKind,
     ) -> Self {
@@ -39,9 +37,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
     pub(crate) fn test_prudent_with_factors_and_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::new_test(
             finish_early_strategy,
@@ -54,9 +50,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
 
     pub(crate) fn test_prudent_with_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::test_prudent_with_factors_and_finish_early(
             finish_early_strategy,
@@ -66,9 +60,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
     }
 
     pub(crate) fn test_prudent(
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::test_prudent_with_finish_early(
             SigningFinishEarlyStrategy::default(),
@@ -77,9 +69,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
     }
 
     pub(crate) fn test_prudent_with_failures(
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
         simulated_failures: SimulatedFailures,
     ) -> Self {
         Self::new_test(
@@ -93,9 +83,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
 
     pub(crate) fn test_lazy_sign_minimum_no_failures_with_factors(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::new_test(
             SigningFinishEarlyStrategy::default(),
@@ -107,9 +95,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
     }
 
     pub(crate) fn test_lazy_sign_minimum_no_failures(
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::test_lazy_sign_minimum_no_failures_with_factors(
             FactorSource::sample_all(),
@@ -119,9 +105,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
 
     pub(crate) fn test_lazy_always_skip_with_factors(
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::new_test(
             SigningFinishEarlyStrategy::default(),
@@ -133,9 +117,7 @@ impl <S: Signable + 'static> SignaturesCollector<S> {
     }
 
     pub(crate) fn test_lazy_always_skip(
-        transactions: impl IntoIterator<
-            Item = SignableWithEntities<S>,
-        >,
+        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::test_lazy_always_skip_with_factors(
             FactorSource::sample_all(),

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
-type InternalSignWithFactorsOutcomeForTransactionIntent
-    = sargon::SignWithFactorsOutcome<InternalTransactionIntentHash>;
+type InternalSignWithFactorsOutcomeForTransactionIntent =
+    sargon::SignWithFactorsOutcome<InternalTransactionIntentHash>;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum SignWithFactorsOutcomeForTransactionIntent {
@@ -18,42 +18,42 @@ pub enum SignWithFactorsOutcomeForTransactionIntent {
 }
 
 impl SignWithFactorsOutcomeForTransactionIntent {
-    pub fn into_internal(&self) -> InternalSignWithFactorsOutcomeForTransactionIntent {
+    pub fn into_internal(
+        &self,
+    ) -> InternalSignWithFactorsOutcomeForTransactionIntent {
         self.clone().into()
     }
 }
 
-impl From<
-    InternalSignWithFactorsOutcomeForTransactionIntent
-> for SignWithFactorsOutcomeForTransactionIntent {
+impl From<InternalSignWithFactorsOutcomeForTransactionIntent>
+    for SignWithFactorsOutcomeForTransactionIntent
+{
     fn from(value: InternalSignWithFactorsOutcomeForTransactionIntent) -> Self {
         match value {
             InternalSignWithFactorsOutcomeForTransactionIntent::Signed {
-                produced_signatures
-            } => {
-                SignWithFactorsOutcomeForTransactionIntent::Signed {
-                    produced_signatures: produced_signatures.into(),
-                }
-            }
-            InternalSignWithFactorsOutcomeForTransactionIntent::Neglected(factors) => {
-                SignWithFactorsOutcomeForTransactionIntent::Neglected(factors.into())
-            }
+                produced_signatures,
+            } => SignWithFactorsOutcomeForTransactionIntent::Signed {
+                produced_signatures: produced_signatures.into(),
+            },
+            InternalSignWithFactorsOutcomeForTransactionIntent::Neglected(
+                factors,
+            ) => SignWithFactorsOutcomeForTransactionIntent::Neglected(
+                factors.into(),
+            ),
         }
     }
 }
 
-impl From<
-    SignWithFactorsOutcomeForTransactionIntent
-> for InternalSignWithFactorsOutcomeForTransactionIntent {
+impl From<SignWithFactorsOutcomeForTransactionIntent>
+    for InternalSignWithFactorsOutcomeForTransactionIntent
+{
     fn from(value: SignWithFactorsOutcomeForTransactionIntent) -> Self {
         match value {
             SignWithFactorsOutcomeForTransactionIntent::Signed {
-                produced_signatures
-            } => {
-                Self::Signed {
-                    produced_signatures: produced_signatures.into_internal(),
-                }
-            }
+                produced_signatures,
+            } => Self::Signed {
+                produced_signatures: produced_signatures.into_internal(),
+            },
             SignWithFactorsOutcomeForTransactionIntent::Neglected(factors) => {
                 Self::Neglected(factors.into_internal())
             }

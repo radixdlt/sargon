@@ -66,7 +66,7 @@ impl TestDerivationInteractor {
 impl KeyDerivationInteractor for TestDerivationInteractor {
     async fn derive(
         &self,
-        request: KeyDerivationRequest
+        request: KeyDerivationRequest,
     ) -> Result<KeyDerivationResponse> {
         let mut pairs = IndexMap::new();
         for (k, r) in request.per_factor_source {

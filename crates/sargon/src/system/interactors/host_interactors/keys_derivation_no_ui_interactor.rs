@@ -12,7 +12,7 @@ pub struct NoUIInteractorForKeyDerivation {
 impl KeyDerivationInteractor for NoUIInteractorForKeyDerivation {
     async fn derive(
         &self,
-        request: KeyDerivationRequest
+        request: KeyDerivationRequest,
     ) -> Result<KeyDerivationResponse> {
         let mut pairs = IndexMap::new();
         for (k, r) in request.per_factor_source {
@@ -26,14 +26,14 @@ impl KeyDerivationInteractor for NoUIInteractorForKeyDerivation {
 impl NoUIInteractorForKeyDerivation {
     pub fn new(secure_storage_client: Arc<SecureStorageClient>) -> Self {
         Self {
-            secure_storage_client
+            secure_storage_client,
         }
     }
 
     async fn do_derive(
         &self,
         factor_source_id: FactorSourceIDFromHash,
-        derivation_paths: IndexSet<DerivationPath>
+        derivation_paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         __do_derive_serially_looking_up_with_secure_storage_and_extra(
             factor_source_id,
@@ -41,7 +41,7 @@ impl NoUIInteractorForKeyDerivation {
             self.secure_storage_client.clone(),
             |_| ready(Err(CommonError::Unknown)),
         )
-            .await
+        .await
     }
 }
 
@@ -56,7 +56,10 @@ where
 {
     let mnemonic = lookup_mnemonic(factor_source_id).await?;
     let keys = mnemonic
-        ._derive_entity_creation_factor_instances(factor_source_id, derivation_paths)
+        ._derive_entity_creation_factor_instances(
+            factor_source_id,
+            derivation_paths,
+        )
         .into_iter()
         .map(HierarchicalDeterministicFactorInstance::from)
         .collect::<IndexSet<_>>();
@@ -87,7 +90,7 @@ where
             }
             let cloned_cloned_client = cloned_client.clone();
             cloned_cloned_client.load_mnemonic_with_passphrase(id).await
-        }
+        },
     )
     .await
 }

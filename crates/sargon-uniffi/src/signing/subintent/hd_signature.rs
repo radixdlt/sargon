@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use sargon::SubintentHash as InternalSubintentHash;
 
-type InternalHdSignatureForSubintent = sargon::HDSignature<InternalSubintentHash>;
+type InternalHdSignatureForSubintent =
+    sargon::HDSignature<InternalSubintentHash>;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HdSignatureForSubintent {
@@ -19,11 +20,9 @@ pub struct HdSignatureForSubintent {
 }
 
 impl HdSignatureForSubintent {
-
     pub fn into_internal(&self) -> InternalHdSignatureForSubintent {
         self.clone().into()
     }
-
 }
 
 impl From<InternalHdSignatureForSubintent> for HdSignatureForSubintent {

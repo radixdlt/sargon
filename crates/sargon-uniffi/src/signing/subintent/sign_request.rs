@@ -15,13 +15,12 @@ pub struct SignRequestForSubintent {
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
-    pub invalid_transactions_if_neglected: Vec<InvalidTransactionIfNeglectedForSubintent>,
+    pub invalid_transactions_if_neglected:
+        Vec<InvalidTransactionIfNeglectedForSubintent>,
 }
 
 impl SignRequestForSubintent {
-    pub fn into_internal(
-        &self,
-    ) -> InternalSignRequest<InternalSubintent> {
+    pub fn into_internal(&self) -> InternalSignRequest<InternalSubintent> {
         self.clone().into()
     }
 }
@@ -34,7 +33,10 @@ impl From<InternalSignRequest<InternalSubintent>> for SignRequestForSubintent {
                 .per_factor_source
                 .into_iter()
                 .map(|(id, transactions)| {
-                    (id.into(), transactions.into_iter().map(|t| t.into()).collect())
+                    (
+                        id.into(),
+                        transactions.into_iter().map(|t| t.into()).collect(),
+                    )
                 })
                 .collect(),
             invalid_transactions_if_neglected: value
@@ -54,7 +56,13 @@ impl From<SignRequestForSubintent> for InternalSignRequest<InternalSubintent> {
                 .per_factor_source
                 .iter()
                 .map(|(id, transactions)| {
-                    (id.into_internal(), transactions.iter().map(|t| t.into_internal()).collect())
+                    (
+                        id.into_internal(),
+                        transactions
+                            .iter()
+                            .map(|t| t.into_internal())
+                            .collect(),
+                    )
                 })
                 .collect(),
             invalid_transactions_if_neglected: value

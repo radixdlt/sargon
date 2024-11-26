@@ -140,11 +140,10 @@ mod tests {
             .await
             .unwrap();
         let secure_storage_client = Arc::new(secure_storage_client);
-        let interactors =
-            Arc::new(TestDerivationInteractor::new(
-                false,
-                secure_storage_client.clone(),
-            ));
+        let interactors = Arc::new(TestDerivationInteractor::new(
+            false,
+            secure_storage_client.clone(),
+        ));
 
         let (_, accounts, consumer) = sut
             .create_unsaved_accounts_with_factor_source(

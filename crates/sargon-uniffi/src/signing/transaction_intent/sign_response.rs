@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
-use sargon::IndexSet;
 use sargon::IndexMap;
+use sargon::IndexSet;
+use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
 type InternalSignResponse = sargon::SignResponse<InternalTransactionIntentHash>;
 
@@ -12,15 +12,14 @@ type InternalSignResponse = sargon::SignResponse<InternalTransactionIntentHash>;
 /// Radix network.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SignResponseForTransactionIntent {
-    pub signatures: HashMap<FactorSourceIDFromHash, Vec<HdSignatureForTransactionIntent>>,
+    pub signatures:
+        HashMap<FactorSourceIDFromHash, Vec<HdSignatureForTransactionIntent>>,
 }
 
 impl SignResponseForTransactionIntent {
-
     pub fn into_internal(&self) -> InternalSignResponse {
         self.clone().into()
     }
-
 }
 
 impl From<InternalSignResponse> for SignResponseForTransactionIntent {
@@ -29,8 +28,11 @@ impl From<InternalSignResponse> for SignResponseForTransactionIntent {
             signatures: value
                 .signatures
                 .into_iter()
-                .map(|(id, signatures)|  {
-                    (id.into(), signatures.into_iter().map(|s| s.into()).collect())
+                .map(|(id, signatures)| {
+                    (
+                        id.into(),
+                        signatures.into_iter().map(|s| s.into()).collect(),
+                    )
                 })
                 .collect(),
         }
@@ -40,17 +42,16 @@ impl From<InternalSignResponse> for SignResponseForTransactionIntent {
 impl From<SignResponseForTransactionIntent> for InternalSignResponse {
     fn from(value: SignResponseForTransactionIntent) -> Self {
         Self {
-            signatures: IndexMap::from_iter(
-                value
-                    .signatures
-                    .into_iter()
-                    .map(|(id, signatures)| {
-                        (
-                            id.into_internal(),
-                            IndexSet::from_iter(signatures.into_iter().map(|s| s.into_internal()))
-                        )
-                    })
-            ),
+            signatures: IndexMap::from_iter(value.signatures.into_iter().map(
+                |(id, signatures)| {
+                    (
+                        id.into_internal(),
+                        IndexSet::from_iter(
+                            signatures.into_iter().map(|s| s.into_internal()),
+                        ),
+                    )
+                },
+            )),
         }
     }
 }

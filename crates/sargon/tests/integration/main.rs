@@ -285,12 +285,13 @@ mod integration_tests {
         pub struct TestTransactionSignInteractor;
 
         impl TestTransactionSignInteractor {
-
             async fn sign_mono(
                 &self,
                 factor_source_id: FactorSourceIDFromHash,
                 request: &SignRequest<TransactionIntent>,
-                transactions_to_sign: &IndexSet<TransactionSignRequestInput<TransactionIntent>>,
+                transactions_to_sign: &IndexSet<
+                    TransactionSignRequestInput<TransactionIntent>,
+                >,
             ) -> SignWithFactorsOutcome<TransactionIntentHash> {
                 if request.invalid_transactions_if_neglected.is_empty() {
                     return SignWithFactorsOutcome::Neglected(
@@ -319,15 +320,20 @@ mod integration_tests {
                     ),
                 }
             }
-
         }
 
         #[async_trait::async_trait]
         impl SignInteractor<TransactionIntent> for TestTransactionSignInteractor {
-            async fn sign(&self, request: SignRequest<TransactionIntent>) -> SignWithFactorsOutcome<TransactionIntentHash> {
-                let mut signatures = IndexSet::<HDSignature<TransactionIntentHash>>::new();
+            async fn sign(
+                &self,
+                request: SignRequest<TransactionIntent>,
+            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+                let mut signatures =
+                    IndexSet::<HDSignature<TransactionIntentHash>>::new();
 
-                for (factor_source_id, inputs) in request.per_factor_source.iter() {
+                for (factor_source_id, inputs) in
+                    request.per_factor_source.iter()
+                {
                     let result = self
                         .sign_mono(factor_source_id.clone(), &request, inputs)
                         .await;
@@ -354,7 +360,9 @@ mod integration_tests {
                         }
                     }
                 }
-                SignWithFactorsOutcome::signed(SignResponse::with_signatures(signatures))
+                SignWithFactorsOutcome::signed(SignResponse::with_signatures(
+                    signatures,
+                ))
             }
         }
 

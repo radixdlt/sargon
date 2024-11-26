@@ -1238,15 +1238,15 @@ mod tests {
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let clients = Clients::new(Bios::new(drivers));
-        let interactors = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let interactors =
+            Arc::new(TestHostInteractor::new_from_clients(&clients));
 
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(
-                clients,
-                interactors
-            )
-        ).await.unwrap();
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
@@ -1269,14 +1269,14 @@ mod tests {
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let clients = Clients::new(Bios::new(drivers));
-        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let interactor =
+            Arc::new(TestHostInteractor::new_from_clients(&clients));
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(
-                clients,
-                interactor
-            )
-        ).await.unwrap();
+            SUT::boot_with_clients_and_interactor(clients, interactor),
+        )
+        .await
+        .unwrap();
 
         // ACT
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
@@ -1365,14 +1365,14 @@ mod tests {
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let clients = Clients::new(Bios::new(drivers));
-        let interactor = Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let interactor =
+            Arc::new(TestHostInteractor::new_from_clients(&clients));
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(
-                clients,
-                interactor
-            )
-        ).await.unwrap();
+            SUT::boot_with_clients_and_interactor(clients, interactor),
+        )
+        .await
+        .unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         let mut account = Account::sample();

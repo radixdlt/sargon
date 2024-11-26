@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::SubintentHash as InternalSubintentHash;
 use sargon::InvalidTransactionIfNeglected as InternalInvalidTransactionIfNeglected;
+use sargon::SubintentHash as InternalSubintentHash;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct InvalidTransactionIfNeglectedForSubintent {
@@ -21,10 +21,12 @@ impl InvalidTransactionIfNeglectedForSubintent {
     }
 }
 
-impl From<
-    InternalInvalidTransactionIfNeglected<InternalSubintentHash>
-> for InvalidTransactionIfNeglectedForSubintent {
-    fn from(value: InternalInvalidTransactionIfNeglected<InternalSubintentHash>) -> Self {
+impl From<InternalInvalidTransactionIfNeglected<InternalSubintentHash>>
+    for InvalidTransactionIfNeglectedForSubintent
+{
+    fn from(
+        value: InternalInvalidTransactionIfNeglected<InternalSubintentHash>,
+    ) -> Self {
         Self {
             subintent_hash: value.signable_id.into(),
             entities_which_would_fail_auth: value
@@ -36,9 +38,9 @@ impl From<
     }
 }
 
-impl From<
-    InvalidTransactionIfNeglectedForSubintent
-> for InternalInvalidTransactionIfNeglected<InternalSubintentHash> {
+impl From<InvalidTransactionIfNeglectedForSubintent>
+    for InternalInvalidTransactionIfNeglected<InternalSubintentHash>
+{
     fn from(value: InvalidTransactionIfNeglectedForSubintent) -> Self {
         Self {
             signable_id: value.subintent_hash.into_internal(),

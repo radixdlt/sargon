@@ -13,6 +13,7 @@ import com.radixdlt.sargon.os.driver.FakeHostInfoDriver
 import com.radixdlt.sargon.os.driver.FakeLoggingDriver
 import com.radixdlt.sargon.os.driver.FakeSecureStorageDriver
 import com.radixdlt.sargon.os.driver.FakeUnsafeStorageDriver
+import com.radixdlt.sargon.os.interactor.FakeHostInteractor
 import io.mockk.mockk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -28,6 +29,7 @@ class SargonOsManagerTest {
     private val okHttpClient = mockk<OkHttpClient>()
     private val eventBusDriver = AndroidEventBusDriver
     private val profileStateChangeDriver = AndroidProfileStateChangeDriver
+    private val hostInteractor = FakeHostInteractor()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher + Job())
@@ -36,6 +38,7 @@ class SargonOsManagerTest {
     fun testBoot() = runTest(testDispatcher) {
         val manager = SargonOsManager.factory(
             bios = bios(),
+            hostInteractor = hostInteractor,
             applicationScope = testScope,
             defaultDispatcher = testDispatcher
         )
@@ -52,6 +55,7 @@ class SargonOsManagerTest {
 
         val newManager = SargonOsManager.factory(
             bios = bios(),
+            hostInteractor = hostInteractor,
             applicationScope = testScope,
             defaultDispatcher = testDispatcher
         )

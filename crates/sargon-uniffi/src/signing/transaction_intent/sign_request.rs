@@ -15,7 +15,8 @@ pub struct SignRequestForTransactionIntent {
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
-    pub invalid_transactions_if_neglected: Vec<InvalidTransactionIfNeglectedForTransactionIntent>,
+    pub invalid_transactions_if_neglected:
+        Vec<InvalidTransactionIfNeglectedForTransactionIntent>,
 }
 
 impl SignRequestForTransactionIntent {
@@ -26,7 +27,9 @@ impl SignRequestForTransactionIntent {
     }
 }
 
-impl From<InternalSignRequest<InternalTransactionIntent>> for SignRequestForTransactionIntent {
+impl From<InternalSignRequest<InternalTransactionIntent>>
+    for SignRequestForTransactionIntent
+{
     fn from(value: InternalSignRequest<InternalTransactionIntent>) -> Self {
         Self {
             factor_source_kind: value.factor_source_kind.into(),
@@ -34,7 +37,10 @@ impl From<InternalSignRequest<InternalTransactionIntent>> for SignRequestForTran
                 .per_factor_source
                 .into_iter()
                 .map(|(id, transactions)| {
-                    (id.into(), transactions.into_iter().map(|t| t.into()).collect())
+                    (
+                        id.into(),
+                        transactions.into_iter().map(|t| t.into()).collect(),
+                    )
                 })
                 .collect(),
             invalid_transactions_if_neglected: value
@@ -46,7 +52,9 @@ impl From<InternalSignRequest<InternalTransactionIntent>> for SignRequestForTran
     }
 }
 
-impl From<SignRequestForTransactionIntent> for InternalSignRequest<InternalTransactionIntent> {
+impl From<SignRequestForTransactionIntent>
+    for InternalSignRequest<InternalTransactionIntent>
+{
     fn from(value: SignRequestForTransactionIntent) -> Self {
         Self {
             factor_source_kind: value.factor_source_kind.into_internal(),
@@ -54,7 +62,13 @@ impl From<SignRequestForTransactionIntent> for InternalSignRequest<InternalTrans
                 .per_factor_source
                 .iter()
                 .map(|(id, transactions)| {
-                    (id.into_internal(), transactions.iter().map(|t| t.into_internal()).collect())
+                    (
+                        id.into_internal(),
+                        transactions
+                            .iter()
+                            .map(|t| t.into_internal())
+                            .collect(),
+                    )
                 })
                 .collect(),
             invalid_transactions_if_neglected: value

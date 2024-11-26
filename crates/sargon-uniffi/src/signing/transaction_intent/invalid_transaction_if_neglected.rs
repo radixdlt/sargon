@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 use sargon::InvalidTransactionIfNeglected as InternalInvalidTransactionIfNeglected;
+use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct InvalidTransactionIfNeglectedForTransactionIntent {
@@ -16,15 +16,20 @@ pub struct InvalidTransactionIfNeglectedForTransactionIntent {
 impl InvalidTransactionIfNeglectedForTransactionIntent {
     pub fn into_internal(
         &self,
-    ) -> InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash> {
+    ) -> InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>
+    {
         self.clone().into()
     }
 }
 
-impl From<
-    InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>
-> for InvalidTransactionIfNeglectedForTransactionIntent {
-    fn from(value: InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>) -> Self {
+impl From<InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>>
+    for InvalidTransactionIfNeglectedForTransactionIntent
+{
+    fn from(
+        value: InternalInvalidTransactionIfNeglected<
+            InternalTransactionIntentHash,
+        >,
+    ) -> Self {
         Self {
             intent_hash: value.signable_id.into(),
             entities_which_would_fail_auth: value
@@ -36,9 +41,9 @@ impl From<
     }
 }
 
-impl From<
-    InvalidTransactionIfNeglectedForTransactionIntent
-> for InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash> {
+impl From<InvalidTransactionIfNeglectedForTransactionIntent>
+    for InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>
+{
     fn from(value: InvalidTransactionIfNeglectedForTransactionIntent) -> Self {
         Self {
             signable_id: value.intent_hash.into_internal(),

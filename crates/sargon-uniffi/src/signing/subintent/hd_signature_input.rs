@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use sargon::SubintentHash as InternalSubintentHash;
-type InternalHDSignatureInputForSubintent = sargon::HDSignatureInput<InternalSubintentHash>;
+type InternalHDSignatureInputForSubintent =
+    sargon::HDSignatureInput<InternalSubintentHash>;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HDSignatureInputForSubintent {
@@ -19,7 +20,9 @@ impl HDSignatureInputForSubintent {
     }
 }
 
-impl From<InternalHDSignatureInputForSubintent> for HDSignatureInputForSubintent {
+impl From<InternalHDSignatureInputForSubintent>
+    for HDSignatureInputForSubintent
+{
     fn from(value: InternalHDSignatureInputForSubintent) -> Self {
         Self {
             subintent_hash: value.payload_id.into(),
@@ -28,7 +31,9 @@ impl From<InternalHDSignatureInputForSubintent> for HDSignatureInputForSubintent
     }
 }
 
-impl From<HDSignatureInputForSubintent> for InternalHDSignatureInputForSubintent {
+impl From<HDSignatureInputForSubintent>
+    for InternalHDSignatureInputForSubintent
+{
     fn from(value: HDSignatureInputForSubintent) -> Self {
         Self::new(
             value.subintent_hash.into_internal(),

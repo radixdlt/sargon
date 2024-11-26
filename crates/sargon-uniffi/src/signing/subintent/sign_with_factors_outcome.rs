@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use sargon::SubintentHash as InternalSubintentHash;
 
-type InternalSignWithFactorsOutcomeForSubintent
-    = sargon::SignWithFactorsOutcome<InternalSubintentHash>;
+type InternalSignWithFactorsOutcomeForSubintent =
+    sargon::SignWithFactorsOutcome<InternalSubintentHash>;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum SignWithFactorsOutcomeForSubintent {
@@ -23,18 +23,16 @@ impl SignWithFactorsOutcomeForSubintent {
     }
 }
 
-impl From<
-    InternalSignWithFactorsOutcomeForSubintent
-> for SignWithFactorsOutcomeForSubintent {
+impl From<InternalSignWithFactorsOutcomeForSubintent>
+    for SignWithFactorsOutcomeForSubintent
+{
     fn from(value: InternalSignWithFactorsOutcomeForSubintent) -> Self {
         match value {
             InternalSignWithFactorsOutcomeForSubintent::Signed {
-                produced_signatures
-            } => {
-                SignWithFactorsOutcomeForSubintent::Signed {
-                    produced_signatures: produced_signatures.into(),
-                }
-            }
+                produced_signatures,
+            } => SignWithFactorsOutcomeForSubintent::Signed {
+                produced_signatures: produced_signatures.into(),
+            },
             InternalSignWithFactorsOutcomeForSubintent::Neglected(factors) => {
                 SignWithFactorsOutcomeForSubintent::Neglected(factors.into())
             }
@@ -42,18 +40,16 @@ impl From<
     }
 }
 
-impl From<
-    SignWithFactorsOutcomeForSubintent
-> for InternalSignWithFactorsOutcomeForSubintent {
+impl From<SignWithFactorsOutcomeForSubintent>
+    for InternalSignWithFactorsOutcomeForSubintent
+{
     fn from(value: SignWithFactorsOutcomeForSubintent) -> Self {
         match value {
             SignWithFactorsOutcomeForSubintent::Signed {
-                produced_signatures
-            } => {
-                Self::Signed {
-                    produced_signatures: produced_signatures.into_internal(),
-                }
-            }
+                produced_signatures,
+            } => Self::Signed {
+                produced_signatures: produced_signatures.into_internal(),
+            },
             SignWithFactorsOutcomeForSubintent::Neglected(factors) => {
                 Self::Neglected(factors.into_internal())
             }
