@@ -185,10 +185,11 @@ impl ProfileStateHolder {
         let state = &mut *guard;
 
         match state {
-            ProfileState::Loaded(ref mut profile) => mutate(profile).map(|r| {
-                profile.diagnostics_for_factor_instances_valid(is_android);
-                r
-            }),
+            ProfileState::Loaded(ref mut profile) => {
+                mutate(profile).inspect(|_| {
+                    profile.diagnostics_for_factor_instances_valid(is_android);
+                })
+            }
             _ => Err(CommonError::ProfileStateNotLoaded {
                 current_state: state.to_string(),
             }),

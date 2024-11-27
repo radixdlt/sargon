@@ -419,7 +419,7 @@ impl Profile {
     // https://github.com/pointfreeco/swift-issue-reporting
     // which will cause execution to halt with a runtime issue, which will be great
     // for debugging and finding issues!
-    // Maybe android host can raise an exception?
+    // Maybe android host can raise an exception..?
     pub fn diagnostics_for_factor_instances_valid(&self, is_android: bool) {
         self.diagnostics_for_factor_instances_valid_with_handler(
             is_android,
