@@ -31,6 +31,10 @@ impl SignedSubintent {
         )
         .expect("Compiling after initialization is always valid")
     }
+
+    pub fn decompiling(compiled: Vec<u8>) -> Result<Self> {
+        decompile_signed_subintent(compiled)
+    }
 }
 
 fn into_scrypto(
@@ -56,6 +60,30 @@ fn into_scrypto(
     }
 }
 
+fn from_scrypto(
+    signed_partial_transaction: ScryptoSignedPartialTransaction,
+) -> Result<SignedSubintent> {
+    let subintent = Subintent::try_from(
+        signed_partial_transaction
+            .partial_transaction
+            .root_subintent,
+    )?;
+    let intent_signatures_v1 = ScryptoIntentSignatures {
+        signatures: signed_partial_transaction
+            .root_subintent_signatures
+            .signatures,
+    };
+    let subintent_signatures = IntentSignatures::try_from((
+        intent_signatures_v1,
+        subintent.hash().hash,
+    ))?;
+    let signed_subintnet = SignedSubintent {
+        subintent,
+        subintent_signatures,
+    };
+    Ok(signed_subintnet)
+}
+
 fn compile_signed_subintent_with(
     subintent: &Subintent,
     subintent_signatures: &IntentSignatures,
@@ -78,6 +106,24 @@ fn compile_signed_subintent(
             },
         }
     })
+}
+
+fn decompile_signed_subintent(
+    signed_subintent: Vec<u8>,
+) -> Result<SignedSubintent> {
+    let result = RET_decompile_signed_partial_tx(&signed_subintent).map_err(
+        |e| match e {
+            sbor::DecodeError::MaxDepthExceeded(max) => {
+                CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                    max: max as u16,
+                }
+            }
+            _ => CommonError::InvalidSignedIntentFailedToEncode {
+                underlying: format!("{:?}", e),
+            },
+        },
+    )?;
+    from_scrypto(result)
 }
 
 impl From<SignedSubintent> for ScryptoSignedPartialTransaction {

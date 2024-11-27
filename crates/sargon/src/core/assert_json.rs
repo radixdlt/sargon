@@ -172,3 +172,12 @@ where
     let json = json_string.parse::<serde_json::Value>().unwrap();
     assert_json_value_fails::<T>(json)
 }
+
+#[cfg(not(tarpaulin_include))]
+pub fn assert_json_eq_ignore_whitespace(json1: &str, json2: &str) {
+    let value1: Value =
+        serde_json::from_str(json1).expect("Invalid JSON in json1");
+    let value2: Value =
+        serde_json::from_str(json2).expect("Invalid JSON in json2");
+    assert_eq!(value1, value2, "JSON strings do not match");
+}
