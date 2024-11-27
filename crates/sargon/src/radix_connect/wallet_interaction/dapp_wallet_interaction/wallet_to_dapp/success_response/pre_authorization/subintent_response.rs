@@ -55,7 +55,7 @@ impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
         let wrapped = Wrapper::deserialize(deserializer)?;
         let decoded = hex_decode(wrapped.encoded_signed_partial_transaction)
             .map_err(de::Error::custom)?;
-        SignedSubintent::decompiled(decoded)
+        SignedSubintent::decompiling(decoded)
             .map_err(de::Error::custom)
             .map(Self::new)
     }
@@ -91,14 +91,29 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_eq_after_json_roundtrip(
-            &SUT::sample_other(),
-            r#"
-            {
-                "signedPartialTransaction": "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202200202000",
-                "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn"
-            }
-            "#,
-        );
+        assert_json_roundtrip(&SUT::sample());
+        assert_json_roundtrip(&SUT::sample_other());
+    }
+
+    #[test]
+    fn json_failures() {
+        // Test without signedPartialTransaction
+        let json = r#"
+        {
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn"
+        }
+        "#;
+        let result = serde_json::from_str::<SUT>(json);
+        assert!(result.is_err());
+
+        // Test with invalid signedPartialTransaction
+        let json = r#"
+        {
+            "signedPartialTransaction": "invalid",
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn"
+        }
+        "#;
+        let result = serde_json::from_str::<SUT>(json);
+        assert!(result.is_err());
     }
 }

@@ -32,7 +32,7 @@ impl SignedSubintent {
         .expect("Compiling after initialization is always valid")
     }
 
-    pub fn decompiled(compiled: Vec<u8>) -> Result<Self> {
+    pub fn decompiling(compiled: Vec<u8>) -> Result<Self> {
         decompile_signed_subintent(compiled)
     }
 }
