@@ -20,23 +20,7 @@ impl Profile {
         })
     }
 
-    // pub fn get_entity_by_addess<E: IsEntity>(
-    //     &self,
-    //     entity_address: &E::Address,
-    // ) -> Option<E>
-    // where
-    //     E::Address: Into<AddressOfAccountOrPersona>,
-    // {
-    //     self.networks
-    //         .iter()
-    //         .map(|n: ProfileNetwork| {
-    //             n.get_entity_by_address::<E>(entity_address)
-    //         })
-    //         .next()
-    //         .flatten()
-    // }
-
-    pub fn get_entity_by_addess(
+    pub fn get_entity_by_address(
         &self,
         entity_address: &AddressOfAccountOrPersona,
     ) -> Option<AccountOrPersona> {
