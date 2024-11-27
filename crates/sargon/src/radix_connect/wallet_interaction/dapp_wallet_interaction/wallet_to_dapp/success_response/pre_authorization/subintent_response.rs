@@ -53,11 +53,11 @@ impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
             encoded_signed_partial_transaction: String,
         }
         let wrapped = Wrapper::deserialize(deserializer)?;
-        SignedSubintent::decompiled(
-            wrapped.encoded_signed_partial_transaction.into_bytes(),
-        )
-        .map_err(de::Error::custom)
-        .map(Self::new)
+        let decoded = hex_decode(wrapped.encoded_signed_partial_transaction)
+            .map_err(de::Error::custom)?;
+        SignedSubintent::decompiled(decoded)
+            .map_err(de::Error::custom)
+            .map(Self::new)
     }
 }
 
