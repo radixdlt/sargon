@@ -11,6 +11,9 @@ pub struct WalletToDappInteractionPreAuthorizationResponseItems {
 pub struct WalletToDappInteractionSubintentResponseItem {
     /// A hex encoded signed partial transaction.
     pub encoded_signed_partial_transaction: String,
+
+    /// The hash of the generated subintent.
+    pub subintent_hash: String,
 }
 
 #[uniffi::export]
