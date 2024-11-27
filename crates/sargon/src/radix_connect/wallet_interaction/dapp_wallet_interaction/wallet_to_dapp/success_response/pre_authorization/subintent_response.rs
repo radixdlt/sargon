@@ -1,24 +1,63 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSubintentResponseItem {
-    /// A hex encoded signed partial transaction.
-    #[serde(rename = "signedPartialTransaction")]
-    pub encoded_signed_partial_transaction: String,
-
-    /// The hash of the generated subintent.
-    #[serde(rename = "subintentHash")]
-    pub subintent_hash: String,
+    /// A signed subintent
+    pub signed_subintent: SignedSubintent,
 }
 
 impl WalletToDappInteractionSubintentResponseItem {
     pub fn new(signed_subintent: SignedSubintent) -> Self {
-        Self {
-            encoded_signed_partial_transaction: hex_encode(
-                signed_subintent.compiled(),
-            ),
-            subintent_hash: signed_subintent.subintent.hash().to_string(),
+        Self { signed_subintent }
+    }
+
+    fn encoded_signed_partial_transaction(&self) -> String {
+        let bytes = self.signed_subintent.compiled();
+        hex_encode(&bytes)
+    }
+
+    fn subintent_hash(&self) -> SubintentHash {
+        self.signed_subintent.subintent.hash()
+    }
+}
+
+impl Serialize for WalletToDappInteractionSubintentResponseItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct(
+            "WalletToDappInteractionSubintentResponseItem",
+            2,
+        )?;
+        state.serialize_field(
+            "signedPartialTransaction",
+            &self.encoded_signed_partial_transaction(),
+        )?;
+        state.serialize_field(
+            "subintentHash",
+            &self.subintent_hash().to_string(),
+        )?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        #[derive(Deserialize, Serialize)]
+        struct Wrapper {
+            #[serde(rename = "signedPartialTransaction")]
+            encoded_signed_partial_transaction: String,
         }
+        let wrapped = Wrapper::deserialize(deserializer)?;
+        SignedSubintent::decompiled(
+            wrapped.encoded_signed_partial_transaction.into_bytes(),
+        )
+        .map_err(de::Error::custom)
+        .map(Self::new)
     }
 }
 

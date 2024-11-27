@@ -9,11 +9,8 @@ pub struct WalletToDappInteractionPreAuthorizationResponseItems {
 
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct WalletToDappInteractionSubintentResponseItem {
-    /// A hex encoded signed partial transaction.
-    pub encoded_signed_partial_transaction: String,
-
-    /// The hash of the generated subintent.
-    pub subintent_hash: String,
+    /// A signed subintent
+    pub signed_subintent: SignedSubintent,
 }
 
 #[uniffi::export]
