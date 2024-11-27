@@ -248,12 +248,34 @@ impl Identifiable for DuplicateInstances {
         self.factor_instance.clone()
     }
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct DuplicateInstancesWithKnownOs {
+    pub duplicate_instances: DuplicateInstances,
+    pub is_android: bool,
+}
+
 impl DuplicateInstances {
-    // DOCUMENT THIS HEAVILY!
-    // Bug in Android introduced in PR, date, commit, what bug was
-    // solved in PR, date, commit
-    // This bug in Android prevents us from having the strict validation
-    // we want.... bla bla bla such doc!
+    /// In 2024, for cirka 6 months, the Android host had a bug where Personas
+    /// was created with Account DerivationPath => same FactorInstance (PublicKey)
+    /// was used between Personas and Accounts!
+    ///
+    /// The bug was introduced in [Android Host PR][badpr], in 2024-07-11.
+    /// The bug was fixed in [Android Host PR][goodpr], in 2024-11-27.
+    ///
+    /// However, even though the bug was fixed after less than 5 months, we have
+    /// end users which are in this bad state (shared instances between Personas and Acccounts).
+    ///
+    /// Thus for this type, `DuplicateInstances`, we should not always throw it as
+    /// an err (with `into_error`) for in all contexts. Rather we need to be more
+    /// "lenient" if the `DuplicateInstances` was caused by this unfortunate Android bug.
+    ///
+    /// What identified this bug was the `assert_factor_instances_valid`
+    /// which was introduced [in Sargon in the big `FactorInstancesProvider` PR][identpr].
+    ///
+    /// [identpr]: https://github.com/radixdlt/sargon/pull/254/files#r1860748013
+    /// [badpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1042
+    /// [goodpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1256
     fn is_unfortunate_android_bug(&self) -> bool {
         let Ok(instance) = self.factor_instance.try_as_hd_factor_instances()
         else {
@@ -298,6 +320,9 @@ impl Profile {
         self.header.id
     }
 
+    /// Like `check_for_duplicated_instances` but does not check all entities in profile against
+    /// all entities in profile, instead checks `instances_of_new_entities` against all entities
+    /// in profile. Also this is throwing.
     pub fn assert_new_factor_instances_not_already_used(
         &self,
         instances_of_new_entities: IndexMap<
@@ -340,7 +365,7 @@ impl Profile {
     }
 
     /// Checks ALL FactorInstances for ALL Personas and Accounts on ALL networks,
-    /// returns Err(CommonError::FactorInstancesDiscrepancy { .. }) if the same
+    /// returns `Some(DuplicateInstances)`` if the same
     /// FactorInstances is used between any entity.
     pub fn check_for_duplicated_instances(&self) -> Option<DuplicateInstances> {
         let whole_profile = self.instances_of_each_entities_on_all_networks();
@@ -355,16 +380,13 @@ impl Profile {
     ) -> IdentifiedVecOf<DuplicateInstances> {
         let mut instances_per_entity =
             self.instances_of_each_entities_on_all_networks();
-        // .into_iter()
-        // .map(|(k, v)| (k.address(), v))
-        // .collect::<IndexMap<AddressOfAccountOrPersona, IndexSet<_>>>();
 
         let mut duplicates = IdentifiedVecOf::<DuplicateInstances>::new();
 
         let mut check =
             |entity: AccountOrPersona, to_check: IndexSet<FactorInstance>| {
                 for (e, existing) in instances_per_entity.iter() {
-                    if *e == entity {
+                    if e.address() == entity.address() {
                         continue;
                     }
                     let intersection = existing
@@ -390,32 +412,50 @@ impl Profile {
         duplicates
     }
 
+    // TODO: Sometimes later it would be nice to remove this method
+    // and only use `diagnostics_for_factor_instances_valid_with_handler` and then
+    // send a handler from SargonOS which has access to some new driver which
+    // can use Swift Issue Reporting API:
+    // https://github.com/pointfreeco/swift-issue-reporting
+    // which will cause execution to halt with a runtime issue, which will be great
+    // for debugging and finding issues!
+    // Maybe android host can raise an exception?
     pub fn diagnostics_for_factor_instances_valid(&self, is_android: bool) {
-        let Some(duplicates) = self.check_for_duplicated_instances() else {
+        self.diagnostics_for_factor_instances_valid_with_handler(
+            is_android,
+            |_| {},
+        );
+    }
+
+    fn diagnostics_for_factor_instances_valid_with_handler(
+        &self,
+        is_android: bool,
+        on_duplicate: impl Fn(DuplicateInstancesWithKnownOs),
+    ) {
+        let Some(duplicate_instances) = self.check_for_duplicated_instances()
+        else {
             return;
         };
 
-        if duplicates.is_unfortunate_android_bug() && is_android {
+        // Android had a bug for some months in 2024 which resulted in
+        // Personas having same PublicKey as Accounts. If that is the case
+        // don't `error!` but use `warn!`, if host is known to be Android.
+        // For full details see `is_unfortunate_android_bug`
+        if duplicate_instances.is_unfortunate_android_bug() && is_android {
             warn!(
                 "Duplicated FactorInstances found {:?} but due to Android bug",
-                duplicates
+                duplicate_instances
             );
         } else {
-            error!("Duplicated FactorInstances found {:?}", duplicates);
+            error!(
+                "Duplicated FactorInstances found {:?}",
+                duplicate_instances
+            );
         }
-    }
-    pub fn validate_factor_instances_has_no_duplicates(&self) -> Result<()> {
-        let Some(duplicate_instances) = self.check_for_duplicated_instances()
-        else {
-            return Ok(());
-        };
-
-        // DOCUMENT a bit
-        if duplicate_instances.is_unfortunate_android_bug() {
-            return Ok(());
-        }
-
-        Err(duplicate_instances.into_error())
+        on_duplicate(DuplicateInstancesWithKnownOs {
+            duplicate_instances,
+            is_android,
+        })
     }
 
     pub fn update_entities<E: IsEntity>(
