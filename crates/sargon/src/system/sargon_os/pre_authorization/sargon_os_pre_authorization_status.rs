@@ -305,17 +305,18 @@ mod seconds_until_expiration_tests {
     async fn seconds_until() {
         let os = boot().await;
 
+        let seconds = 100;
         // Test the case where the expiration is set to a specific time in the past
         let expiration_timestamp =
-            Timestamp::now_utc().sub(Duration::from_secs(100));
+            Timestamp::now_utc().sub(Duration::from_secs(seconds));
         let result = os.seconds_until_expiration(expiration_timestamp);
         assert_eq!(result, 0);
 
         // Test the case where the expiration is set to a specific time in the future
         let expiration_timestamp =
-            Timestamp::now_utc().add(Duration::from_secs(100));
+            Timestamp::now_utc().add(Duration::from_secs(seconds));
         let result = os.seconds_until_expiration(expiration_timestamp);
-        assert_eq!(result, 100);
+        assert!(seconds - result <= 1); // Less than 1s difference, needed since the test is not instant and 1s may have passed.
     }
 
     async fn boot() -> Arc<SargonOS> {
