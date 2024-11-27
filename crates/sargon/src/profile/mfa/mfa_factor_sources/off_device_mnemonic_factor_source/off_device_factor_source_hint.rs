@@ -25,6 +25,7 @@ impl OffDeviceMnemonicHint {
 
 impl HasSampleValues for OffDeviceMnemonicHint {
     fn sample() -> Self {
+        // https://xkcd.com/936/
         Self::new(DisplayName::new("Story about a horse").unwrap())
     }
 

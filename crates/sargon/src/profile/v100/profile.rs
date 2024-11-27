@@ -1,3 +1,5 @@
+use indexmap::IndexSet;
+
 use crate::prelude::*;
 
 /// The canonical representation of a users accounts, personas,
@@ -234,13 +236,18 @@ impl<T: IsEntity> IdentifiedVecOf<T> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DuplicateInstances {
     entity1: AccountOrPersona,
     entity2: AccountOrPersona,
     factor_instance: FactorInstance,
 }
-
+impl Identifiable for DuplicateInstances {
+    type ID = FactorInstance;
+    fn id(&self) -> Self::ID {
+        self.factor_instance.clone()
+    }
+}
 impl DuplicateInstances {
     // DOCUMENT THIS HEAVILY!
     // Bug in Android introduced in PR, date, commit, what bug was
@@ -293,61 +300,94 @@ impl Profile {
 
     pub fn assert_new_factor_instances_not_already_used(
         &self,
-        instances_of_new_entities: IndexMap<AddressOfAccountOrPersona, IndexSet<FactorInstance>>,
+        instances_of_new_entities: IndexMap<
+            AccountOrPersona,
+            IndexSet<FactorInstance>,
+        >,
     ) -> Result<()> {
-        todo!()
+        let Some(duplicate_instances) = self
+            .find_all_duplicate_instances_matching_against(
+                instances_of_new_entities,
+            )
+            .into_iter()
+            .next()
+        else {
+            return Ok(());
+        };
+
+        Err(duplicate_instances.into_error())
+    }
+
+    pub fn all_entities_on_all_networks(&self) -> IndexSet<AccountOrPersona> {
+        self.networks
+            .iter()
+            .flat_map(|n| {
+                let mut entities = IndexSet::<AccountOrPersona>::new();
+                entities.extend(n.accounts.erased());
+                entities.extend(n.personas.erased());
+                entities
+            })
+            .collect::<IndexSet<_>>()
+    }
+
+    pub fn instances_of_each_entities_on_all_networks(
+        &self,
+    ) -> IndexMap<AccountOrPersona, IndexSet<FactorInstance>> {
+        self.all_entities_on_all_networks()
+            .into_iter()
+            .map(|e| (e.clone(), e.unique_factor_instances()))
+            .collect()
     }
 
     /// Checks ALL FactorInstances for ALL Personas and Accounts on ALL networks,
     /// returns Err(CommonError::FactorInstancesDiscrepancy { .. }) if the same
     /// FactorInstances is used between any entity.
     pub fn check_for_duplicated_instances(&self) -> Option<DuplicateInstances> {
-        todo!()
+        let whole_profile = self.instances_of_each_entities_on_all_networks();
+        self.find_all_duplicate_instances_matching_against(whole_profile)
+            .into_iter()
+            .next()
     }
 
     pub fn find_all_duplicate_instances_matching_against(
         &self,
-        against: IndexMap<AddressOfAccountOrPersona, IndexSet<FactorInstance>>,
-    ) -> Option<DuplicateInstances> {
-        let mut instances_per_entity = IndexMap::<
-            AddressOfAccountOrPersona,
-            IndexSet<FactorInstance>,
-        >::new();
-        for network in self.networks.iter() {
-            let mut check =
-                |entity: AccountOrPersona| -> Option<DuplicateInstances> {
-                    let to_check = entity.unique_factor_instances();
-                    for (e, existing) in instances_per_entity.iter() {
-                        let intersection = existing
-                            .intersection(&to_check)
-                            .collect::<IndexSet<_>>();
-                        if let Some(duplicate) = intersection.first() {
-                            let entity1 = self.get_entity_by_addess(e).unwrap();
-                            return Some(DuplicateInstances {
-                                entity1,
-                                entity2: entity.clone(),
-                                factor_instance: (*duplicate).clone(),
-                            });
-                        }
-                    }
-                    instances_per_entity.insert(entity.address(), to_check);
-                    None
-                };
-            let mut check_entities =
-                |entities: &IdentifiedVecOf<AccountOrPersona>| -> Option<DuplicateInstances> {
-                    entities.into_iter().flat_map(&mut check).next()
-                };
+        against: IndexMap<AccountOrPersona, IndexSet<FactorInstance>>,
+    ) -> IdentifiedVecOf<DuplicateInstances> {
+        let mut instances_per_entity =
+            self.instances_of_each_entities_on_all_networks();
+        // .into_iter()
+        // .map(|(k, v)| (k.address(), v))
+        // .collect::<IndexMap<AddressOfAccountOrPersona, IndexSet<_>>>();
 
-            if let Some(duplicate) = check_entities(&network.accounts.erased())
-            {
-                return Some(duplicate);
+        let mut duplicates = IdentifiedVecOf::<DuplicateInstances>::new();
+
+        let mut check =
+            |entity: AccountOrPersona, to_check: IndexSet<FactorInstance>| {
+                for (e, existing) in instances_per_entity.iter() {
+                    if *e == entity {
+                        continue;
+                    }
+                    let intersection = existing
+                        .intersection(&to_check)
+                        .collect::<IndexSet<_>>();
+
+                    intersection.into_iter().for_each(|duplicate| {
+                        let duplicate = DuplicateInstances {
+                            entity1: e.clone(),
+                            entity2: entity.clone(),
+                            factor_instance: (*duplicate).clone(),
+                        };
+                        duplicates.insert(duplicate);
+                    });
+                }
+                instances_per_entity.insert(entity.clone(), to_check);
             };
-            if let Some(duplicate) = check_entities(&network.personas.erased())
-            {
-                return Some(duplicate);
-            };
+
+        for (entity, instances) in against {
+            check(entity, instances)
         }
-        None
+
+        duplicates
     }
 
     pub fn diagnostics_for_factor_instances_valid(&self, is_android: bool) {
@@ -365,16 +405,17 @@ impl Profile {
         }
     }
     pub fn validate_factor_instances_has_no_duplicates(&self) -> Result<()> {
-        let Some(duplicates) = self.check_for_duplicated_instances() else {
+        let Some(duplicate_instances) = self.check_for_duplicated_instances()
+        else {
             return Ok(());
         };
 
         // DOCUMENT a bit
-        if duplicates.is_unfortunate_android_bug() {
+        if duplicate_instances.is_unfortunate_android_bug() {
             return Ok(());
         }
 
-        Err(duplicates.into_error())
+        Err(duplicate_instances.into_error())
     }
 
     pub fn update_entities<E: IsEntity>(

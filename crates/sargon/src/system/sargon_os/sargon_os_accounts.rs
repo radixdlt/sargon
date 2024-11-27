@@ -719,11 +719,11 @@ impl SargonOS {
             .iter()
             .map(|e| {
                 (
-                    Into::<AddressOfAccountOrPersona>::into(e.address()),
+                    Into::<AccountOrPersona>::into(e.clone()),
                     e.unique_factor_instances(),
                 )
             })
-            .collect::<IndexMap<AddressOfAccountOrPersona, IndexSet<_>>>();
+            .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
 
         let to_accounts =
             || -> Accounts { entities.clone().to_accounts().unwrap() };
