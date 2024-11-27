@@ -1,14 +1,24 @@
 use crate::prelude::*;
+use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSubintentResponseItem {
     /// A signed subintent
     pub signed_subintent: SignedSubintent,
+
+    /// The timestamp at which the subintent expires
+    pub expiration_timestamp: Timestamp,
 }
 
 impl WalletToDappInteractionSubintentResponseItem {
-    pub fn new(signed_subintent: SignedSubintent) -> Self {
-        Self { signed_subintent }
+    pub fn new(
+        signed_subintent: SignedSubintent,
+        expiration_timestamp: Timestamp,
+    ) -> Self {
+        Self {
+            signed_subintent,
+            expiration_timestamp,
+        }
     }
 
     fn encoded_signed_partial_transaction(&self) -> String {
@@ -19,6 +29,12 @@ impl WalletToDappInteractionSubintentResponseItem {
     fn subintent_hash(&self) -> SubintentHash {
         self.signed_subintent.subintent.hash()
     }
+
+    fn expiration_timestamp_seconds(&self) -> u64 {
+        self.expiration_timestamp
+            .duration_since(Timestamp::UNIX_EPOCH)
+            .as_seconds_f64() as u64
+    }
 }
 
 impl Serialize for WalletToDappInteractionSubintentResponseItem {
@@ -28,7 +44,7 @@ impl Serialize for WalletToDappInteractionSubintentResponseItem {
     {
         let mut state = serializer.serialize_struct(
             "WalletToDappInteractionSubintentResponseItem",
-            2,
+            3,
         )?;
         state.serialize_field(
             "signedPartialTransaction",
@@ -37,6 +53,10 @@ impl Serialize for WalletToDappInteractionSubintentResponseItem {
         state.serialize_field(
             "subintentHash",
             &self.subintent_hash().to_string(),
+        )?;
+        state.serialize_field(
+            "expirationTimestamp",
+            &self.expiration_timestamp_seconds(),
         )?;
         state.end()
     }
@@ -51,23 +71,28 @@ impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
         struct Wrapper {
             #[serde(rename = "signedPartialTransaction")]
             encoded_signed_partial_transaction: String,
+
+            #[serde(rename = "expirationTimestamp")]
+            expiration_timestamp_seconds: u64,
         }
         let wrapped = Wrapper::deserialize(deserializer)?;
         let decoded = hex_decode(wrapped.encoded_signed_partial_transaction)
             .map_err(de::Error::custom)?;
+        let expiration_timestamp = Timestamp::UNIX_EPOCH
+            .add(Duration::from_secs(wrapped.expiration_timestamp_seconds));
         SignedSubintent::decompiling(decoded)
             .map_err(de::Error::custom)
-            .map(Self::new)
+            .map(|s| Self::new(s, expiration_timestamp))
     }
 }
 
 impl HasSampleValues for WalletToDappInteractionSubintentResponseItem {
     fn sample() -> Self {
-        Self::new(SignedSubintent::sample())
+        Self::new(SignedSubintent::sample(), Timestamp::sample())
     }
 
     fn sample_other() -> Self {
-        Self::new(SignedSubintent::sample_other())
+        Self::new(SignedSubintent::sample_other(), Timestamp::sample_other())
     }
 }
 
@@ -90,9 +115,34 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip() {
+    fn json_success() {
+        // Test roundtrip for sample (whose timestamp doesn't include milliseconds).
         assert_json_roundtrip(&SUT::sample());
-        assert_json_roundtrip(&SUT::sample_other());
+
+        // Test encoding of sample_other (whose timestamp includes 123 milliseconds).
+        let result =
+            serde_json::to_string_pretty(&SUT::sample_other()).unwrap();
+        let json = r#"
+        {
+            "signedPartialTransaction": "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202200202000",
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+            "expirationTimestamp": 1703438036
+        }
+        "#;
+        assert_json_eq_ignore_whitespace(&result, json);
+
+        // Test decoding of JSON
+        let result = serde_json::from_str::<SUT>(json).unwrap();
+        let sample_other = SUT::sample_other();
+        assert_ne!(result, sample_other);
+        assert_eq!(result.signed_subintent, sample_other.signed_subintent); // same signedPartialTransaction
+        assert_eq!(
+            sample_other
+                .expiration_timestamp
+                .duration_since(result.expiration_timestamp)
+                .whole_milliseconds(),
+            123
+        ); // only difference in expiration_timestamp are the 123 milliseconds
     }
 
     #[test]
@@ -100,7 +150,8 @@ mod tests {
         // Test without signedPartialTransaction
         let json = r#"
         {
-            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn"
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+            "expirationTimestamp": 1730999831257
         }
         "#;
         let result = serde_json::from_str::<SUT>(json);
@@ -110,6 +161,17 @@ mod tests {
         let json = r#"
         {
             "signedPartialTransaction": "invalid",
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+            "expirationTimestamp": 1730999831257
+        }
+        "#;
+        let result = serde_json::from_str::<SUT>(json);
+        assert!(result.is_err());
+
+        // Test without expirationTimestamp
+        let json = r#"
+        {
+            "signedPartialTransaction": "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202200202000",
             "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn"
         }
         "#;

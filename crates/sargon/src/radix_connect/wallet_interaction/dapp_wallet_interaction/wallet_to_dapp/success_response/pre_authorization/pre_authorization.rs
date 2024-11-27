@@ -7,10 +7,14 @@ pub struct WalletToDappInteractionPreAuthorizationResponseItems {
 }
 
 impl WalletToDappInteractionPreAuthorizationResponseItems {
-    pub fn new(signed_subintent: SignedSubintent) -> Self {
+    pub fn new(
+        signed_subintent: SignedSubintent,
+        expiration_timestamp: Timestamp,
+    ) -> Self {
         Self {
             response: WalletToDappInteractionSubintentResponseItem::new(
                 signed_subintent,
+                expiration_timestamp,
             ),
         }
     }
@@ -51,8 +55,7 @@ mod tests {
 
     #[test]
     fn new() {
-        let signed_subintent = SignedSubintent::sample();
-        let sut = SUT::new(signed_subintent);
+        let sut = SUT::new(SignedSubintent::sample(), Timestamp::sample());
         assert_eq!(sut, SUT::sample());
     }
 }
