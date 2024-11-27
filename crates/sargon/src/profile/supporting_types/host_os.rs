@@ -1,10 +1,12 @@
+use enum_as_inner::EnumAsInner;
+
 use crate::HasSampleValues;
 use std::fmt::{Display, Formatter, Pointer};
 
 /// Describes the type of the Host machine and its version. Currently, as it stands at runtime
 /// the possible values will be IOS or Android. Other is in place to facilitate unit tests
 /// and to make sargon host agnostic.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumAsInner)]
 pub enum HostOS {
     IOS {
         version: String,

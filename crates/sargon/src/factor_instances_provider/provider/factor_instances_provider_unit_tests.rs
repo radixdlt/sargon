@@ -151,6 +151,7 @@ impl SargonOS {
 
         assert!(security_structures_of_factor_instances.is_empty());
 
+        // Assert that none of the NEW FactorInstances collid with the existing ones
         self.update_entities(securified_accounts.clone()).await?;
 
         Ok((

@@ -51,7 +51,9 @@ impl SargonOS {
             })
             .await?;
         } else {
+            let is_android = self.is_android().await;
             self.profile_state_holder.replace_profile_state_with(
+                is_android,
                 ProfileState::Loaded(profile.clone()),
             )?;
             self.save_existing_profile().await?;
@@ -94,9 +96,11 @@ impl SargonOS {
             "Saved imported profile into secure storage, id: {}",
             imported_id
         );
-
-        self.profile_state_holder
-            .replace_profile_state_with(ProfileState::Loaded(profile))?;
+        let is_android = self.is_android().await;
+        self.profile_state_holder.replace_profile_state_with(
+            is_android,
+            ProfileState::Loaded(profile),
+        )?;
         debug!(
             "Replaced held profile with imported one, id: {}",
             imported_id
@@ -133,11 +137,17 @@ impl SargonOS {
     where
         F: Fn(&mut Profile) -> Result<R>,
     {
-        let res = self.profile_state_holder.update_profile_with(mutate)?;
-        let profile = self.profile_state_holder.update_profile_with(|p| {
-            p.update_header(None);
-            Ok(p.clone())
-        })?;
+        let is_android = self.is_android().await;
+
+        let res = self
+            .profile_state_holder
+            .update_profile_with_known_os_by(is_android, mutate)?;
+        let profile = self
+            .profile_state_holder
+            .update_profile_with_known_os_by(is_android, |p| {
+                p.update_header(None);
+                Ok(p.clone())
+            })?;
         self.save_existing_profile()
             // tarpaulin will incorrectly flag next line is missed
             .await?;
@@ -210,8 +220,9 @@ impl SargonOS {
         &self,
     ) -> Result<()> {
         self.delete_profile_and_mnemonics().await?;
+        let is_android = self.is_android().await;
         self.profile_state_holder
-            .replace_profile_state_with(ProfileState::None)?;
+            .replace_profile_state_with(is_android, ProfileState::None)?;
         Ok(())
     }
 }

@@ -53,6 +53,32 @@ impl ProfileNetwork {
                     )
             })
     }
+
+    // pub fn get_entity_by_address<E: IsEntity>(
+    //     &self,
+    //     entity_address: &E::Address,
+    // ) -> Option<E>
+    // where
+    //     E::Address: Into<AddressOfAccountOrPersona>,
+    // {
+    //     self.get_entities_erased(E::entity_kind())
+    //         .into_iter()
+    //         .find(|e| {
+    //             Into::<AddressOfAccountOrPersona>::into(entity_address.clone())
+    //                 == e.address()
+    //         })
+    //         .map(|e| E::try_from(e).ok())
+    //         .flatten()
+    // }
+
+    pub fn get_entity_by_address(
+        &self,
+        entity_address: &AddressOfAccountOrPersona,
+    ) -> Option<AccountOrPersona> {
+        self.get_entities_erased(entity_address.get_entity_kind())
+            .into_iter()
+            .find(|a| a.address() == *entity_address)
+    }
 }
 
 #[cfg(test)]

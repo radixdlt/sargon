@@ -234,48 +234,147 @@ impl<T: IsEntity> IdentifiedVecOf<T> {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct DuplicateInstances {
+    entity1: AccountOrPersona,
+    entity2: AccountOrPersona,
+    factor_instance: FactorInstance,
+}
+
+impl DuplicateInstances {
+    // DOCUMENT THIS HEAVILY!
+    // Bug in Android introduced in PR, date, commit, what bug was
+    // solved in PR, date, commit
+    // This bug in Android prevents us from having the strict validation
+    // we want.... bla bla bla such doc!
+    fn is_unfortunate_android_bug(&self) -> bool {
+        let Ok(instance) = self.factor_instance.try_as_hd_factor_instances()
+        else {
+            return false;
+        };
+        if instance.is_securified() {
+            // The android bug only concerned unsecurified FactorInstances
+            return false;
+        }
+
+        if instance.get_key_kind() != CAP26KeyKind::TransactionSigning {
+            // The android bug only happened for transaction signing keys
+            return false;
+        }
+
+        let one_is_account_one_is_persona1 = self.entity1.is_persona_entity()
+            && self.entity2.is_account_entity();
+        let one_is_account_one_is_persona2 = self.entity1.is_account_entity()
+            && self.entity2.is_persona_entity();
+        let one_is_account_one_is_persona =
+            one_is_account_one_is_persona1 || one_is_account_one_is_persona2;
+        if !one_is_account_one_is_persona {
+            // The Android bug was that the same public key was used between an account and a persona
+            return false;
+        }
+
+        true
+    }
+
+    fn into_error(self) -> CommonError {
+        CommonError::FactorInstancesDiscrepancy {
+            address_of_entity1: self.entity1.address().to_string(),
+            address_of_entity2: self.entity2.address().to_string(),
+            factor_source_id: self.factor_instance.factor_source_id.to_string(),
+        }
+    }
+}
+
 impl Profile {
     /// Returns the unique ID of this Profile (just an alias for `header.id`).
     pub fn id(&self) -> ProfileID {
         self.header.id
     }
 
+    pub fn assert_new_factor_instances_not_already_used(
+        &self,
+        instances_of_new_entities: IndexMap<AddressOfAccountOrPersona, IndexSet<FactorInstance>>,
+    ) -> Result<()> {
+        todo!()
+    }
+
     /// Checks ALL FactorInstances for ALL Personas and Accounts on ALL networks,
     /// returns Err(CommonError::FactorInstancesDiscrepancy { .. }) if the same
     /// FactorInstances is used between any entity.
-    pub fn assert_factor_instances_valid(&self) -> Result<()> {
+    pub fn check_for_duplicated_instances(&self) -> Option<DuplicateInstances> {
+        todo!()
+    }
+
+    pub fn find_all_duplicate_instances_matching_against(
+        &self,
+        against: IndexMap<AddressOfAccountOrPersona, IndexSet<FactorInstance>>,
+    ) -> Option<DuplicateInstances> {
         let mut instances_per_entity = IndexMap::<
             AddressOfAccountOrPersona,
             IndexSet<FactorInstance>,
         >::new();
         for network in self.networks.iter() {
-            let mut check = |entity: AccountOrPersona| -> Result<()> {
-                let to_check = entity.unique_factor_instances();
-                for (e, existing) in instances_per_entity.iter() {
-                    let intersection = existing
-                        .intersection(&to_check)
-                        .collect::<IndexSet<_>>();
-                    if let Some(duplicate) = intersection.first() {
-                        return Err(CommonError::FactorInstancesDiscrepancy {
-                            address_of_entity1: e.to_string(),
-                            address_of_entity2: entity.address().to_string(),
-                            factor_source_id: duplicate
-                                .factor_source_id
-                                .to_string(),
-                        });
+            let mut check =
+                |entity: AccountOrPersona| -> Option<DuplicateInstances> {
+                    let to_check = entity.unique_factor_instances();
+                    for (e, existing) in instances_per_entity.iter() {
+                        let intersection = existing
+                            .intersection(&to_check)
+                            .collect::<IndexSet<_>>();
+                        if let Some(duplicate) = intersection.first() {
+                            let entity1 = self.get_entity_by_addess(e).unwrap();
+                            return Some(DuplicateInstances {
+                                entity1,
+                                entity2: entity.clone(),
+                                factor_instance: (*duplicate).clone(),
+                            });
+                        }
                     }
-                }
-                instances_per_entity.insert(entity.address(), to_check);
-                Ok(())
-            };
-            let mut check_entities =
-                |entities: &IdentifiedVecOf<AccountOrPersona>| -> Result<()> {
-                    entities.into_iter().try_for_each(&mut check)
+                    instances_per_entity.insert(entity.address(), to_check);
+                    None
                 };
-            check_entities(&network.accounts.erased())?;
-            check_entities(&network.personas.erased())?;
+            let mut check_entities =
+                |entities: &IdentifiedVecOf<AccountOrPersona>| -> Option<DuplicateInstances> {
+                    entities.into_iter().flat_map(&mut check).next()
+                };
+
+            if let Some(duplicate) = check_entities(&network.accounts.erased())
+            {
+                return Some(duplicate);
+            };
+            if let Some(duplicate) = check_entities(&network.personas.erased())
+            {
+                return Some(duplicate);
+            };
         }
-        Ok(())
+        None
+    }
+
+    pub fn diagnostics_for_factor_instances_valid(&self, is_android: bool) {
+        let Some(duplicates) = self.check_for_duplicated_instances() else {
+            return;
+        };
+
+        if duplicates.is_unfortunate_android_bug() && is_android {
+            warn!(
+                "Duplicated FactorInstances found {:?} but due to Android bug",
+                duplicates
+            );
+        } else {
+            error!("Duplicated FactorInstances found {:?}", duplicates);
+        }
+    }
+    pub fn validate_factor_instances_has_no_duplicates(&self) -> Result<()> {
+        let Some(duplicates) = self.check_for_duplicated_instances() else {
+            return Ok(());
+        };
+
+        // DOCUMENT a bit
+        if duplicates.is_unfortunate_android_bug() {
+            return Ok(());
+        }
+
+        Err(duplicates.into_error())
     }
 
     pub fn update_entities<E: IsEntity>(

@@ -143,31 +143,38 @@ impl ProfileStateHolder {
     /// Sets the `ProfileState` held by this `ProfileStateHolder` to the latest `profile_state`.
     pub(super) fn replace_profile_state_with(
         &self,
+        is_android: bool,
         profile_state: ProfileState,
     ) -> Result<()> {
         let mut lock = self.state.write().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
-        Self::assert_factor_instances_valid(&profile_state)?;
+        Self::diagnostics_for_factor_instances_valid(
+            &profile_state,
+            is_android,
+        );
         *lock = profile_state;
         Ok(())
     }
 
-    pub(crate) fn assert_factor_instances_valid(
+    pub(crate) fn diagnostics_for_factor_instances_valid(
         profile_state: &ProfileState,
-    ) -> Result<()> {
-        match profile_state {
-            ProfileState::Loaded(profile) => {
-                profile.assert_factor_instances_valid()
-            }
-            _ => Ok(()),
-        }
+        is_android: bool,
+    ) {
+        let Some(profile) = profile_state.as_loaded() else {
+            return;
+        };
+        profile.diagnostics_for_factor_instances_valid(is_android);
     }
 
     /// Updates the in-memory profile held by this `ProfileStateHolder`, you might
     /// wanna also persist the change in the `SargonOS` by saving it to secure
     /// storage.
-    pub(super) fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
+    pub(super) fn update_profile_with_known_os_by<F, R>(
+        &self,
+        is_android: bool,
+        mutate: F,
+    ) -> Result<R>
     where
         F: Fn(&mut Profile) -> Result<R>,
     {
@@ -178,18 +185,24 @@ impl ProfileStateHolder {
         let state = &mut *guard;
 
         match state {
-            ProfileState::Loaded(ref mut profile) => {
-                let backup = profile.clone();
-                mutate(profile)
-                    .and_then(|r| {
-                        profile.assert_factor_instances_valid().map(|_| r)
-                    })
-                    .inspect_err(|_| *profile = backup)
-            }
+            ProfileState::Loaded(ref mut profile) => mutate(profile).map(|r| {
+                profile.diagnostics_for_factor_instances_valid(is_android);
+                r
+            }),
             _ => Err(CommonError::ProfileStateNotLoaded {
                 current_state: state.to_string(),
             }),
         }
+    }
+}
+
+#[cfg(test)]
+impl ProfileStateHolder {
+    pub(crate) fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
+    where
+        F: Fn(&mut Profile) -> Result<R>,
+    {
+        self.update_profile_with_known_os_by(false, mutate)
     }
 }
 
