@@ -1,3 +1,5 @@
+use enum_as_inner::EnumAsInner;
+
 use crate::HasSampleValues;
 use std::fmt::{Display, Formatter, Pointer};
 
