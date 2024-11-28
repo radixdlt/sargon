@@ -9,10 +9,10 @@ impl SargonOS {
     pub async fn poll_pre_authorization_status(
         &self,
         intent_hash: SubintentHash,
-        expiration_timetsamp: Timestamp,
+        expiration_timestamp: Instant,
     ) -> Result<PreAuthorizationStatus> {
         let seconds_until_expiration =
-            self.seconds_until_expiration(expiration_timetsamp);
+            self.seconds_until_expiration(expiration_timestamp);
         self.poll_pre_authorization_status_with_delays(
             intent_hash,
             seconds_until_expiration,
@@ -115,10 +115,14 @@ impl SargonOS {
     }
 
     /// Returns the remaining seconds until the subintent expires.
-    fn seconds_until_expiration(&self, expiration_timestamp: Timestamp) -> u64 {
-        expiration_timestamp
-            .duration_since(Timestamp::now_utc())
-            .as_seconds_f64() as u64
+    fn seconds_until_expiration(&self, expiration_timestamp: Instant) -> u64 {
+        let expiration = expiration_timestamp.seconds_since_unix_epoch as u64;
+        let now = seconds_since_unix_epoch();
+        if expiration > now {
+            expiration - now
+        } else {
+            0
+        }
     }
 }
 
@@ -309,13 +313,13 @@ mod seconds_until_expiration_tests {
         // Test the case where the expiration is set to a specific time in the past
         let expiration_timestamp =
             Timestamp::now_utc().sub(Duration::from_secs(seconds));
-        let result = os.seconds_until_expiration(expiration_timestamp);
+        let result = os.seconds_until_expiration(expiration_timestamp.into());
         assert_eq!(result, 0);
 
         // Test the case where the expiration is set to a specific time in the future
         let expiration_timestamp =
             Timestamp::now_utc().add(Duration::from_secs(seconds));
-        let result = os.seconds_until_expiration(expiration_timestamp);
+        let result = os.seconds_until_expiration(expiration_timestamp.into());
         assert!(seconds - result <= 1); // Less than 1s difference, needed since the test is not instant and 1s may have passed.
     }
 

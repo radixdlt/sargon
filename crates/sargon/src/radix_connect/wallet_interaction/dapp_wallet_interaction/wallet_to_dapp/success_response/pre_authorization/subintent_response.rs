@@ -85,7 +85,8 @@ impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
         let wrapped = Wrapper::deserialize(deserializer)?;
         let decoded = hex_decode(wrapped.encoded_signed_partial_transaction)
             .map_err(de::Error::custom)?;
-        let expiration_timestamp = Instant::from(wrapped.expiration_timestamp_seconds);
+        let expiration_timestamp =
+            Instant::from(wrapped.expiration_timestamp_seconds);
         SignedSubintent::decompiling(decoded)
             .map_err(de::Error::custom)
             .map(|s| Self::new(s, expiration_timestamp))
@@ -158,7 +159,6 @@ mod tests {
         "#;
         let result = serde_json::from_str::<SUT>(json);
         assert!(result.is_err());
-
     }
 
     #[test]
