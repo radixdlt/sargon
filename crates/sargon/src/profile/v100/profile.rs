@@ -274,13 +274,23 @@ impl Profile {
     /// Like `check_for_duplicated_instances` but does not check all entities in profile against
     /// all entities in profile, instead checks `instances_of_new_entities` against all entities
     /// in profile. Also this is throwing.
-    pub fn assert_new_factor_instances_not_already_used(
+    pub fn assert_new_factor_instances_not_already_used<
+        E: Into<AccountOrPersona>
+            + Clone
+            + std::fmt::Debug
+            + std::cmp::Eq
+            + Identifiable,
+    >(
         &self,
-        instances_of_new_entities: IndexMap<
-            AccountOrPersona,
-            IndexSet<FactorInstance>,
-        >,
+        entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
+        let instances_of_new_entities = entities
+            .items()
+            .into_iter()
+            .map(Into::<AccountOrPersona>::into)
+            .map(|e| (e.clone(), e.unique_factor_instances()))
+            .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
+
         let Some(duplicate_instances) = self
             .find_all_duplicate_instances_matching_against(
                 instances_of_new_entities,

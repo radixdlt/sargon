@@ -151,7 +151,12 @@ impl SargonOS {
 
         assert!(security_structures_of_factor_instances.is_empty());
 
-        // Assert that none of the NEW FactorInstances collid with the existing ones
+        // Assert that none of the NEW FactorInstances collide with the existing ones
+        self.profile()
+            .unwrap()
+            .assert_new_factor_instances_not_already_used(
+                securified_accounts.clone(),
+            )?;
         self.update_entities(securified_accounts.clone()).await?;
 
         Ok((
@@ -654,9 +659,8 @@ async fn test_assert_factor_instances_invalid() {
     let res = os
         .profile()
         .unwrap()
-        .assert_new_factor_instances_not_already_used(IndexMap::kv(
-            securified_bob.clone().into(),
-            securified_bob.unique_factor_instances(),
+        .assert_new_factor_instances_not_already_used(Accounts::just(
+            securified_bob.clone(),
         ));
     assert!(res.is_err());
 

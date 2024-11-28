@@ -715,16 +715,6 @@ impl SargonOS {
 
         debug!("Adding #{} entities to Profile Network with ID: {} - or creating a Profile Network if it does not exist", number_of_entities_to_add, network_id);
 
-        let instances_of_new_entities = entities
-            .iter()
-            .map(|e| {
-                (
-                    Into::<AccountOrPersona>::into(e.clone()),
-                    e.unique_factor_instances(),
-                )
-            })
-            .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
-
         let to_accounts =
             || -> Accounts { entities.clone().to_accounts().unwrap() };
 
@@ -792,7 +782,7 @@ impl SargonOS {
                 Ok(())
             }
             .and_then(|_| {
-                p.assert_new_factor_instances_not_already_used(instances_of_new_entities.clone()).inspect_err(|_| { p.networks = networks_backup; })
+                p.assert_new_factor_instances_not_already_used(entities.clone()).inspect_err(|_| { p.networks = networks_backup; })
             })
         })
         .await?;
