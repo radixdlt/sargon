@@ -73,7 +73,7 @@ pub enum FactorSourceKind {
     ///  * Mine
     ///  * Off device
     ///  * Hierarchical deterministic (IKM -> HKDF -> Mnemonic)
-    Passphrase,
+    Password,
 }
 
 delegate_display_debug_into!(FactorSourceKind, InternalFactorSourceKind);

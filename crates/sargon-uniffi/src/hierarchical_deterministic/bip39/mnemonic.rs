@@ -118,11 +118,11 @@ pub fn new_mnemonic_sample_arculus_other() -> Mnemonic {
 }
 
 #[uniffi::export]
-pub fn new_mnemonic_sample_passphrase() -> Mnemonic {
-    InternalMnemonic::sample_passphrase().into()
+pub fn new_mnemonic_sample_password() -> Mnemonic {
+    InternalMnemonic::sample_password().into()
 }
 
 #[uniffi::export]
-pub fn new_mnemonic_sample_passphrase_other() -> Mnemonic {
-    InternalMnemonic::sample_passphrase_other().into()
+pub fn new_mnemonic_sample_password_other() -> Mnemonic {
+    InternalMnemonic::sample_password_other().into()
 }

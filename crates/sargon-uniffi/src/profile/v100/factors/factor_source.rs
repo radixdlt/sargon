@@ -30,8 +30,8 @@ pub enum FactorSource {
         value: TrustedContactFactorSource,
     },
 
-    Passphrase {
-        value: PassphraseFactorSource,
+    Password {
+        value: PasswordFactorSource,
     },
 }
 

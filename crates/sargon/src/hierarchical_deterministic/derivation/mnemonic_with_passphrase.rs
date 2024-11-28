@@ -217,16 +217,16 @@ impl MnemonicWithPassphrase {
         )
     }
 
-    pub(crate) fn sample_passphrase() -> Self {
+    pub(crate) fn sample_password() -> Self {
         Self::with_passphrase(
-            Mnemonic::sample_passphrase(),
+            Mnemonic::sample_password(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_passphrase_other() -> Self {
+    pub(crate) fn sample_password_other() -> Self {
         Self::with_passphrase(
-            Mnemonic::sample_security_questions_other(),
+            Mnemonic::sample_password_other(),
             BIP39Passphrase::new("Pass phrase"),
         )
     }

@@ -49,10 +49,10 @@ pub enum FactorSource {
         value: TrustedContactFactorSource,
     },
 
-    Passphrase {
-        #[serde(rename = "passphrase")]
-        #[display("Passphrase({value})")]
-        value: PassphraseFactorSource,
+    Password {
+        #[serde(rename = "password")]
+        #[display("Password({value})")]
+        value: PasswordFactorSource,
     },
 }
 
@@ -85,7 +85,7 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::TrustedContact { value } => {
                 value.set_common_properties(updated)
             }
-            FactorSource::Passphrase { value } => {
+            FactorSource::Password { value } => {
                 value.set_common_properties(updated)
             }
         }
@@ -103,7 +103,7 @@ impl BaseIsFactorSource for FactorSource {
                 value.common_properties()
             }
             FactorSource::TrustedContact { value } => value.common_properties(),
-            FactorSource::Passphrase { value } => value.common_properties(),
+            FactorSource::Password { value } => value.common_properties(),
         }
     }
 
@@ -121,7 +121,7 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::TrustedContact { value } => {
                 value.factor_source_kind()
             }
-            FactorSource::Passphrase { value } => value.factor_source_kind(),
+            FactorSource::Password { value } => value.factor_source_kind(),
         }
     }
 
@@ -137,7 +137,7 @@ impl BaseIsFactorSource for FactorSource {
                 value.factor_source_id()
             }
             FactorSource::TrustedContact { value } => value.factor_source_id(),
-            FactorSource::Passphrase { value } => value.factor_source_id(),
+            FactorSource::Password { value } => value.factor_source_id(),
         }
     }
 }
@@ -250,8 +250,8 @@ impl Serialize for FactorSource {
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }
-            FactorSource::Passphrase { value } => {
-                let discriminant = "passphrase";
+            FactorSource::Password { value } => {
+                let discriminant = "password";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }
@@ -304,8 +304,8 @@ impl FactorSource {
             Self::sample_trusted_contact_radix(),
             Self::sample_security_questions(),
             Self::sample_security_questions_other(),
-            Self::sample_passphrase(),
-            Self::sample_passphrase_other(),
+            Self::sample_password(),
+            Self::sample_password_other(),
         ]
     }
     pub fn sample_device() -> Self {
@@ -372,12 +372,12 @@ impl FactorSource {
         )
     }
 
-    pub fn sample_passphrase() -> Self {
-        Self::from(PassphraseFactorSource::sample())
+    pub fn sample_password() -> Self {
+        Self::from(PasswordFactorSource::sample())
     }
 
-    pub fn sample_passphrase_other() -> Self {
-        Self::from(PassphraseFactorSource::sample_other())
+    pub fn sample_password_other() -> Self {
+        Self::from(PasswordFactorSource::sample_other())
     }
 }
 
@@ -490,10 +490,10 @@ mod tests {
     }
 
     #[test]
-    fn factor_source_kind_passphrase() {
+    fn factor_source_kind_password() {
         assert_eq!(
-            SUT::sample_passphrase().factor_source_kind(),
-            FactorSourceKind::Passphrase
+            SUT::sample_password().factor_source_kind(),
+            FactorSourceKind::Password
         );
     }
 

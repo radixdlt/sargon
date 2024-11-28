@@ -533,7 +533,7 @@ mod tests {
             IndexSet::<FactorSourceKind>::from_iter([
                 FactorSourceKind::LedgerHQHardwareWallet,
                 FactorSourceKind::ArculusCard,
-                FactorSourceKind::Passphrase,
+                FactorSourceKind::Password,
                 FactorSourceKind::SecurityQuestions,
                 FactorSourceKind::OffDeviceMnemonic,
                 FactorSourceKind::Device,
@@ -1036,7 +1036,7 @@ mod tests {
                         signed_factor_source_kinds:
                             IndexSet::<FactorSourceKind>::from_iter([
                                 FactorSourceKind::ArculusCard,
-                                FactorSourceKind::Passphrase,
+                                FactorSourceKind::Password,
                             ]),
                         expected_neglected_factor_source_count: 1,
                     },
@@ -1335,7 +1335,7 @@ mod tests {
                             IndexSet::<FactorSourceKind>::from_iter([
                                 FactorSourceKind::LedgerHQHardwareWallet,
                                 FactorSourceKind::ArculusCard,
-                                FactorSourceKind::Passphrase,
+                                FactorSourceKind::Password,
                             ]),
                         expected_neglected_factor_source_count: 0,
                     },
@@ -1351,7 +1351,7 @@ mod tests {
                         signed_factor_source_kinds:
                             IndexSet::<FactorSourceKind>::from_iter([
                                 FactorSourceKind::ArculusCard,
-                                FactorSourceKind::Passphrase,
+                                FactorSourceKind::Password,
                                 FactorSourceKind::Device,
                             ]),
                         expected_neglected_factor_source_count: 2,

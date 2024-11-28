@@ -42,9 +42,17 @@ impl FactorSource {
                 ),
             )
             .into(),
-            FactorSourceKind::Passphrase => {
-                PassphraseFactorSource::new(*id).into()
-            }
+            FactorSourceKind::Password => PasswordFactorSource::new(
+                *id,
+                PasswordFactorSourceHint::new(
+                    DisplayName::new(format!(
+                        "Password @ {}",
+                        id.body.to_hex()
+                    ))
+                    .unwrap(),
+                ),
+            )
+            .into(),
             FactorSourceKind::SecurityQuestions => {
                 let sealed_mnemonic = SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic::new_by_encrypting(
                     id.sample_associated_mnemonic().mnemonic,
