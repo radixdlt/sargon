@@ -430,7 +430,7 @@ impl Profile {
     fn diagnostics_for_factor_instances_valid_with_handler(
         &self,
         is_android: bool,
-        on_duplicate: impl Fn(DuplicateInstancesWithKnownOs),
+        mut on_duplicate: impl FnMut(DuplicateInstancesWithKnownOs),
     ) {
         let Some(duplicate_instances) = self.check_for_duplicated_instances()
         else {
@@ -624,6 +624,53 @@ impl HasSampleValues for Profile {
 }
 
 #[cfg(test)]
+impl Profile {
+    fn with_android_bug_with_shared_pubkey_between_account_and_persona() -> Self
+    {
+        let mwp = MnemonicWithPassphrase::sample_device();
+        let mut sut = Profile::from_mnemonic_with_passphrase(
+            mwp.clone(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
+        let seed = mwp.clone().to_seed();
+        let fsid = FactorSourceIDFromHash::new_for_device(&mwp);
+        let path = AccountPath::sample();
+        let public_key = seed
+            .derive_ed25519_private_key(path.clone().to_hd_path())
+            .public_key();
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            fsid,
+            HierarchicalDeterministicPublicKey::new(
+                public_key.clone().into(),
+                path.into(),
+            ),
+        );
+        let veci = HDFactorInstanceAccountCreation::new(hd_fi.clone()).unwrap();
+        let account =
+            Account::new(veci, DisplayName::sample(), AppearanceID::sample());
+        let mut persona = Persona::sample();
+        persona.address =
+            IdentityAddress::new(public_key.into(), NetworkID::Mainnet);
+        persona.security_state = EntitySecurityState::Unsecured {
+            value: UnsecuredEntityControl::new(hd_fi, None).unwrap(),
+        };
+        assert_eq!(
+            account.unique_factor_instances(),
+            persona.unique_factor_instances()
+        );
+        sut.networks = ProfileNetworks::just(ProfileNetwork::new(
+            NetworkID::Mainnet,
+            Accounts::just(account),
+            Personas::just(persona),
+            AuthorizedDapps::default(),
+            ResourcePreferences::default(),
+        ));
+        sut
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -639,6 +686,78 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn unfortunate_android_bug_detection() {
+        let sut = SUT::with_android_bug_with_shared_pubkey_between_account_and_persona();
+
+        #[derive(Debug)]
+        struct NotAndroidLog;
+        impl LoggingDriver for NotAndroidLog {
+            fn log(&self, level: LogLevel, msg: String) {
+                assert_eq!(level, LogLevel::Error);
+                assert!(msg.contains("Duplicated FactorInstances found"));
+                assert!(!msg.contains("due to Android bug"));
+            }
+        }
+        install_logger(Arc::new(NotAndroidLog));
+        let accounts = sut.accounts_on_current_network().unwrap();
+        let acc = accounts.first().unwrap();
+        let factor_instance = acc
+            .unique_factor_instances()
+            .into_iter()
+            .next()
+            .clone()
+            .unwrap();
+        let duplicate_instances = DuplicateInstances {
+            entity1: acc.clone().into(),
+            entity2: sut
+                .personas_on_current_network()
+                .unwrap()
+                .first()
+                .unwrap()
+                .clone()
+                .into(),
+            factor_instance,
+        };
+
+        let mut detected = Option::<DuplicateInstancesWithKnownOs>::None;
+
+        sut.diagnostics_for_factor_instances_valid_with_handler(false, |d| {
+            detected = Some(d)
+        });
+
+        pretty_assertions::assert_eq!(
+            detected,
+            Some(DuplicateInstancesWithKnownOs {
+                is_android: false,
+                duplicate_instances: duplicate_instances.clone()
+            })
+        );
+
+        #[derive(Debug)]
+        struct IsAndroidLog;
+        impl LoggingDriver for IsAndroidLog {
+            fn log(&self, level: LogLevel, msg: String) {
+                assert_eq!(level, LogLevel::Warn);
+                assert!(msg.contains("Duplicated FactorInstances found"));
+                assert!(msg.contains("due to Android bug"));
+            }
+        }
+        install_logger(Arc::new(IsAndroidLog));
+
+        sut.diagnostics_for_factor_instances_valid_with_handler(true, |d| {
+            detected = Some(d)
+        });
+
+        assert_eq!(
+            detected,
+            Some(DuplicateInstancesWithKnownOs {
+                is_android: true,
+                duplicate_instances: duplicate_instances.clone()
+            })
+        );
     }
 
     #[test]
