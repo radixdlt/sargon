@@ -1,5 +1,3 @@
-use indexmap::IndexSet;
-
 use crate::prelude::*;
 
 /// The canonical representation of a users accounts, personas,
@@ -236,10 +234,24 @@ impl<T: IsEntity> IdentifiedVecOf<T> {
     }
 }
 
+/// Analysis has identified that `entity1` and `entity2` have the same `FactorInstance`
+/// in common. Either a `TransactionSigning` instance or an `AuthenticationSigning` instance.
+/// Either in `EntitySecurityState::Unsecure` or in `EntitySecurityState::Secure`
+///
+/// Where: `entity1.address() != entity2.address()`
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct DuplicateInstances {
+    /// One of the entities containing `factor_instance`
+    ///
+    /// `entity1.address() != entity2.address()`
     pub(crate) entity1: AccountOrPersona,
+
+    /// The other entity containing `factor_instance`
+    ///
+    /// `entity1.address() != entity2.address()`
     pub(crate) entity2: AccountOrPersona,
+
+    /// The FactorInstance which is shared between `entity1` and `entity2`
     pub(crate) factor_instance: FactorInstance,
 }
 impl Identifiable for DuplicateInstances {
@@ -249,9 +261,12 @@ impl Identifiable for DuplicateInstances {
     }
 }
 
+/// Like `DuplicateInstances` but also contains a flag if the current OS is Android.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct DuplicateInstancesWithKnownOs {
+    /// The duplicated instances found
     pub(crate) duplicate_instances: DuplicateInstances,
+    /// If HostInfo driver returns that the current OS is Android
     pub(crate) is_android: bool,
 }
 
@@ -304,6 +319,8 @@ impl Profile {
         Err(duplicate_instances.into_error())
     }
 
+    /// Returns ALL entities on ALL network, both account and persona, mixed.
+    /// Including hidden/deleted entities.
     pub fn all_entities_on_all_networks(&self) -> IndexSet<AccountOrPersona> {
         self.networks
             .iter()
@@ -316,6 +333,8 @@ impl Profile {
             .collect::<IndexSet<_>>()
     }
 
+    /// Returns ALL FactorInstances for ALL Personas and Accounts on ALL networks as keys
+    /// and their factor instances as values.
     pub fn instances_of_each_entities_on_all_networks(
         &self,
     ) -> IndexMap<AccountOrPersona, IndexSet<FactorInstance>> {
@@ -337,6 +356,8 @@ impl Profile {
             .next()
     }
 
+    /// Returns a list of `DuplicateInstances` where the same `FactorInstance` is used between
+    /// entities in this profile, matched against `against`.
     fn find_all_duplicate_instances_matching_against(
         &self,
         against: IndexMap<AccountOrPersona, IndexSet<FactorInstance>>,
@@ -349,6 +370,7 @@ impl Profile {
         let mut check =
             |entity: AccountOrPersona, to_check: IndexSet<FactorInstance>| {
                 for (e, existing) in instances_per_entity.iter() {
+                    // We don't want to compare an entity against itself
                     if e.address() == entity.address() {
                         continue;
                     }
