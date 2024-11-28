@@ -668,6 +668,49 @@ impl Profile {
         ));
         sut
     }
+
+    fn with_instance_collision_not_android_bug() -> Self {
+        let mwp = MnemonicWithPassphrase::sample_device();
+        let mut sut = Profile::from_mnemonic_with_passphrase(
+            mwp.clone(),
+            HostId::sample(),
+            HostInfo::sample(),
+        );
+        let seed = mwp.clone().to_seed();
+        let fsid = FactorSourceIDFromHash::new_for_device(&mwp);
+        let path = AccountPath::sample();
+        let public_key = seed
+            .derive_ed25519_private_key(path.clone().to_hd_path())
+            .public_key();
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            fsid,
+            HierarchicalDeterministicPublicKey::new(
+                public_key.clone().into(),
+                path.into(),
+            ),
+        );
+        let veci = HDFactorInstanceAccountCreation::new(hd_fi.clone()).unwrap();
+        let account =
+            Account::new(veci, DisplayName::sample(), AppearanceID::sample());
+
+        let mut account2 = Account::sample_other();
+        account2.security_state = EntitySecurityState::Unsecured {
+            value: UnsecuredEntityControl::new(hd_fi, None).unwrap(),
+        };
+
+        assert_eq!(
+            account.unique_factor_instances(),
+            account2.unique_factor_instances()
+        );
+        sut.networks = ProfileNetworks::just(ProfileNetwork::new(
+            NetworkID::Mainnet,
+            Accounts::from_iter([account, account2]),
+            Personas::default(),
+            AuthorizedDapps::default(),
+            ResourcePreferences::default(),
+        ));
+        sut
+    }
 }
 
 #[cfg(test)]
@@ -728,6 +771,11 @@ mod tests {
             detected = Some(d)
         });
 
+        assert!(detected
+            .clone()
+            .unwrap()
+            .duplicate_instances
+            .is_unfortunate_android_bug());
         pretty_assertions::assert_eq!(
             detected,
             Some(DuplicateInstancesWithKnownOs {
@@ -751,6 +799,80 @@ mod tests {
             detected = Some(d)
         });
 
+        assert!(detected
+            .clone()
+            .unwrap()
+            .duplicate_instances
+            .is_unfortunate_android_bug());
+
+        assert_eq!(
+            detected,
+            Some(DuplicateInstancesWithKnownOs {
+                is_android: true,
+                duplicate_instances: duplicate_instances.clone()
+            })
+        );
+    }
+
+    #[test]
+    fn instance_detection_not_android_bug() {
+        let sut = SUT::with_instance_collision_not_android_bug();
+
+        #[derive(Debug)]
+        struct NotAndroidLog;
+        impl LoggingDriver for NotAndroidLog {
+            fn log(&self, level: LogLevel, msg: String) {
+                assert_eq!(level, LogLevel::Error);
+                assert!(msg.contains("Duplicated FactorInstances found"));
+                assert!(!msg.contains("due to Android bug"));
+            }
+        }
+        install_logger(Arc::new(NotAndroidLog));
+        let accounts = sut.accounts_on_current_network().unwrap();
+        let acc1 = accounts.clone().first().unwrap().clone();
+        let acc2 = accounts.items().into_iter().rev().next().unwrap();
+
+        let factor_instance = acc1
+            .unique_factor_instances()
+            .into_iter()
+            .next()
+            .clone()
+            .unwrap();
+
+        let duplicate_instances = DuplicateInstances {
+            entity1: acc1.into(),
+            entity2: acc2.into(),
+            factor_instance,
+        };
+
+        let mut detected = Option::<DuplicateInstancesWithKnownOs>::None;
+
+        sut.diagnostics_for_factor_instances_valid_with_handler(false, |d| {
+            detected = Some(d)
+        });
+
+        assert!(!detected
+            .clone()
+            .unwrap()
+            .duplicate_instances
+            .is_unfortunate_android_bug());
+        pretty_assertions::assert_eq!(
+            detected,
+            Some(DuplicateInstancesWithKnownOs {
+                is_android: false,
+                duplicate_instances: duplicate_instances.clone()
+            })
+        );
+
+        sut.diagnostics_for_factor_instances_valid_with_handler(true, |d| {
+            detected = Some(d)
+        });
+
+        assert!(!detected
+            .clone()
+            .unwrap()
+            .duplicate_instances
+            .is_unfortunate_android_bug());
         assert_eq!(
             detected,
             Some(DuplicateInstancesWithKnownOs {
