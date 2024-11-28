@@ -19,8 +19,6 @@ impl Profile {
             n.contains_entity_by_address::<A>(entity_address)
         })
     }
-
-
 }
 
 #[cfg(test)]
