@@ -53,15 +53,6 @@ impl ProfileNetwork {
                     )
             })
     }
-
-    pub fn get_entity_by_address(
-        &self,
-        entity_address: &AddressOfAccountOrPersona,
-    ) -> Option<AccountOrPersona> {
-        self.get_entities_erased(entity_address.get_entity_kind())
-            .into_iter()
-            .find(|a| a.address() == *entity_address)
-    }
 }
 
 #[cfg(test)]

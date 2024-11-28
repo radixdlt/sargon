@@ -20,16 +20,7 @@ impl Profile {
         })
     }
 
-    pub fn get_entity_by_address(
-        &self,
-        entity_address: &AddressOfAccountOrPersona,
-    ) -> Option<AccountOrPersona> {
-        self.networks
-            .iter()
-            .map(|n: ProfileNetwork| n.get_entity_by_address(entity_address))
-            .next()
-            .flatten()
-    }
+
 }
 
 #[cfg(test)]
