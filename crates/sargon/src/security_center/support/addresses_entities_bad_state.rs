@@ -23,6 +23,16 @@ impl AddressesOfEntitiesInBadState {
             hidden_personas,
         }
     }
+
+    pub fn empty() -> Self {
+        Self::new(Accounts::new(), Accounts::new(), Personas::new(), Personas::new())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.accounts.is_empty()
+            && self.hidden_accounts.is_empty()
+            && self.personas.is_empty() // if it only contains hidden_personas, we don't consider it empty
+    }
 }
 
 impl HasSampleValues for AddressesOfEntitiesInBadState {
@@ -42,5 +52,36 @@ impl HasSampleValues for AddressesOfEntitiesInBadState {
             personas: Personas::new(),
             hidden_personas: Personas::sample_other(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AddressesOfEntitiesInBadState;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn is_empty() {
+        let sut = SUT::sample();
+        assert!(!sut.is_empty());
+
+        let sut = SUT::empty();
+        assert!(sut.is_empty());
+
+        let sut = SUT::new(Accounts::new(), Accounts::new(), Personas::new(), Personas::sample());
+        assert!(sut.is_empty());
     }
 }
