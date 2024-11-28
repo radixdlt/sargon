@@ -326,7 +326,7 @@ impl Profile {
 
     /// Returns ALL FactorInstances for ALL Personas and Accounts on ALL networks as keys
     /// and their factor instances as values.
-    pub fn instances_of_each_entities_on_all_networks(
+    pub fn instances_of_each_entity_on_all_networks(
         &self,
     ) -> IndexMap<AccountOrPersona, IndexSet<FactorInstance>> {
         self.all_entities_on_all_networks()
@@ -341,7 +341,7 @@ impl Profile {
     pub(crate) fn check_for_duplicated_instances(
         &self,
     ) -> Option<DuplicateInstances> {
-        let whole_profile = self.instances_of_each_entities_on_all_networks();
+        let whole_profile = self.instances_of_each_entity_on_all_networks();
         self.find_all_duplicate_instances_matching_against(whole_profile)
             .into_iter()
             .next()
@@ -354,7 +354,7 @@ impl Profile {
         against: IndexMap<AccountOrPersona, IndexSet<FactorInstance>>,
     ) -> IdentifiedVecOf<DuplicateInstances> {
         let mut instances_per_entity =
-            self.instances_of_each_entities_on_all_networks();
+            self.instances_of_each_entity_on_all_networks();
 
         let mut duplicates = IdentifiedVecOf::<DuplicateInstances>::new();
 
