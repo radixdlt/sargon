@@ -1,35 +1,98 @@
 use crate::prelude::*;
+use std::time::Duration;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSubintentResponseItem {
-    /// A hex encoded signed partial transaction.
-    #[serde(rename = "signedPartialTransaction")]
-    pub encoded_signed_partial_transaction: String,
+    /// A signed subintent
+    pub signed_subintent: SignedSubintent,
+
+    /// The timestamp at which the subintent expires
+    pub expiration_timestamp: Timestamp,
 }
 
 impl WalletToDappInteractionSubintentResponseItem {
-    pub fn new(signed_subintent: SignedSubintent) -> Self {
-        let bytes = signed_subintent.compiled();
-        let encoded_signed_partial_transaction = hex_encode(&bytes);
+    pub fn new(
+        signed_subintent: SignedSubintent,
+        expiration_timestamp: Timestamp,
+    ) -> Self {
         Self {
-            encoded_signed_partial_transaction,
+            signed_subintent,
+            expiration_timestamp,
         }
+    }
+
+    fn encoded_signed_partial_transaction(&self) -> String {
+        let bytes = self.signed_subintent.compiled();
+        hex_encode(&bytes)
+    }
+
+    fn subintent_hash(&self) -> SubintentHash {
+        self.signed_subintent.subintent.hash()
+    }
+
+    fn expiration_timestamp_seconds(&self) -> u64 {
+        self.expiration_timestamp
+            .duration_since(Timestamp::UNIX_EPOCH)
+            .as_seconds_f64() as u64
+    }
+}
+
+impl Serialize for WalletToDappInteractionSubintentResponseItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct(
+            "WalletToDappInteractionSubintentResponseItem",
+            3,
+        )?;
+        state.serialize_field(
+            "signedPartialTransaction",
+            &self.encoded_signed_partial_transaction(),
+        )?;
+        state.serialize_field(
+            "subintentHash",
+            &self.subintent_hash().to_string(),
+        )?;
+        state.serialize_field(
+            "expirationTimestamp",
+            &self.expiration_timestamp_seconds(),
+        )?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        #[derive(Deserialize, Serialize)]
+        struct Wrapper {
+            #[serde(rename = "signedPartialTransaction")]
+            encoded_signed_partial_transaction: String,
+
+            #[serde(rename = "expirationTimestamp")]
+            expiration_timestamp_seconds: u64,
+        }
+        let wrapped = Wrapper::deserialize(deserializer)?;
+        let decoded = hex_decode(wrapped.encoded_signed_partial_transaction)
+            .map_err(de::Error::custom)?;
+        let expiration_timestamp = Timestamp::UNIX_EPOCH
+            .add(Duration::from_secs(wrapped.expiration_timestamp_seconds));
+        SignedSubintent::decompiling(decoded)
+            .map_err(de::Error::custom)
+            .map(|s| Self::new(s, expiration_timestamp))
     }
 }
 
 impl HasSampleValues for WalletToDappInteractionSubintentResponseItem {
     fn sample() -> Self {
-        Self {
-            encoded_signed_partial_transaction:
-            "4d220e03210221012105210607010a872c0100000000000a912c01000000000022010105008306670000000022010105e8860667000000000a15cd5b070000000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f205261646978212020002022054103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c086c6f636b5f6665652101850000fda0c4277708000000000000000000000000000000004103800051c9a978fb5bfa066a3e5658251ee3304fb9bf58c35b61f8c10e0e7b91840c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a480000000000000000000000000000004103800051ac224ee242c339b5ea5f1ae567f0520a6ffa24b52a10b8e6cd96a8347f0c147472795f6465706f7369745f6f725f61626f727421028100000000220000600121002021002022030001210120074101069ff73da4b2c861c340558d0d7ee44bfb8f221f4ba7f8d74a9e9d82c1acd2f951afd718faddb24a11062a508ad6edf31c519f88973688eaf04fc0cd944bebdc00012101200741007a324555c61268211c4dae7c63a5f94f3be523d7b0b93426685c8767d74907fb348775142bb6e1ac6d236acf795b672b7c94114e4198caec995d86d1327d5c060001210120074100fb65235bc47969a6b4421b8495641e9bec403103df5fa4ed7a123df0dc97f1734822bc9e609e00aa13698ba3227a61a8aff23fcc0f188eed9f29da155aa5c894202000".to_owned(),
-        }
+        Self::new(SignedSubintent::sample(), Timestamp::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            encoded_signed_partial_transaction:
-            "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202201000121012007410001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12202000".to_owned(),
-        }
+        Self::new(SignedSubintent::sample_other(), Timestamp::sample_other())
     }
 }
 
@@ -52,9 +115,67 @@ mod tests {
     }
 
     #[test]
-    fn new() {
-        let signed_subintent = SignedSubintent::sample();
-        let sut = SUT::new(signed_subintent);
-        assert_eq!(sut, SUT::sample());
+    fn json_success() {
+        // Test roundtrip for sample (whose timestamp doesn't include milliseconds).
+        assert_json_roundtrip(&SUT::sample());
+
+        // Test encoding of sample_other (whose timestamp includes 123 milliseconds).
+        let result =
+            serde_json::to_string_pretty(&SUT::sample_other()).unwrap();
+        let json = r#"
+        {
+            "signedPartialTransaction": "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202200202000",
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+            "expirationTimestamp": 1703438036
+        }
+        "#;
+        assert_json_eq_ignore_whitespace(&result, json);
+
+        // Test decoding of JSON
+        let result = serde_json::from_str::<SUT>(json).unwrap();
+        let sample_other = SUT::sample_other();
+        assert_ne!(result, sample_other);
+        assert_eq!(result.signed_subintent, sample_other.signed_subintent); // same signedPartialTransaction
+        assert_eq!(
+            sample_other
+                .expiration_timestamp
+                .duration_since(result.expiration_timestamp)
+                .whole_milliseconds(),
+            123
+        ); // only difference in expiration_timestamp are the 123 milliseconds
+    }
+
+    #[test]
+    fn json_failures() {
+        // Test without signedPartialTransaction
+        let json = r#"
+        {
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+            "expirationTimestamp": 1730999831257
+        }
+        "#;
+        let result = serde_json::from_str::<SUT>(json);
+        assert!(result.is_err());
+
+        // Test with invalid signedPartialTransaction
+        let json = r#"
+        {
+            "signedPartialTransaction": "invalid",
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+            "expirationTimestamp": 1730999831257
+        }
+        "#;
+        let result = serde_json::from_str::<SUT>(json);
+        assert!(result.is_err());
+
+        // Test without expirationTimestamp
+        let json = r#"
+        {
+            "signedPartialTransaction": "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202200202000",
+            "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn"
+        }
+        "#;
+        let result = serde_json::from_str::<SUT>(json);
+        assert!(result.is_err());
     }
 }
