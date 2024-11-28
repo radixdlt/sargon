@@ -20,11 +20,6 @@ impl HostInfoClient {
         )
     }
 
-    pub async fn is_android(&self) -> bool {
-        let host_os = self.driver.host_os().await;
-        host_os.is_android()
-    }
-
     pub async fn resolve_host_info(&self) -> HostInfo {
         let host_device_name = self.driver.host_device_name().await;
         let host_device_model = self.driver.host_device_model().await;

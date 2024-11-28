@@ -600,10 +600,6 @@ impl SargonOS {
         self.update_entities(IdentifiedVecOf::just(updated)).await
     }
 
-    pub async fn is_android(&self) -> bool {
-        self.clients.host.is_android().await
-    }
-
     pub async fn update_entities<E: IsEntity>(
         &self,
         updated: IdentifiedVecOf<E>,

@@ -261,15 +261,6 @@ impl Identifiable for DuplicateInstances {
     }
 }
 
-/// Like `DuplicateInstances` but also contains a flag if the current OS is Android.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct DuplicateInstancesWithKnownOs {
-    /// The duplicated instances found
-    pub(crate) duplicate_instances: DuplicateInstances,
-    /// If HostInfo driver returns that the current OS is Android
-    pub(crate) is_android: bool,
-}
-
 impl DuplicateInstances {
     pub(crate) fn into_error(self) -> CommonError {
         CommonError::FactorInstancesDiscrepancy {

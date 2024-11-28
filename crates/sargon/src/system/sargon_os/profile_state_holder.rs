@@ -143,38 +143,29 @@ impl ProfileStateHolder {
     /// Sets the `ProfileState` held by this `ProfileStateHolder` to the latest `profile_state`.
     pub(super) fn replace_profile_state_with(
         &self,
-        is_android: bool,
         profile_state: ProfileState,
     ) -> Result<()> {
         let mut lock = self.state.write().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
-        Self::diagnostics_for_factor_instances_valid(
-            &profile_state,
-            is_android,
-        );
+        Self::diagnostics_for_factor_instances_valid(&profile_state);
         *lock = profile_state;
         Ok(())
     }
 
     pub(crate) fn diagnostics_for_factor_instances_valid(
         profile_state: &ProfileState,
-        is_android: bool,
     ) {
         let Some(profile) = profile_state.as_loaded() else {
             return;
         };
-        profile.diagnostics_for_factor_instances_valid(is_android);
+        profile.diagnostics_for_factor_instances_valid();
     }
 
     /// Updates the in-memory profile held by this `ProfileStateHolder`, you might
     /// wanna also persist the change in the `SargonOS` by saving it to secure
     /// storage.
-    pub(super) fn update_profile_with_known_os_by<F, R>(
-        &self,
-        is_android: bool,
-        mutate: F,
-    ) -> Result<R>
+    pub(super) fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(&mut Profile) -> Result<R>,
     {
@@ -187,23 +178,13 @@ impl ProfileStateHolder {
         match state {
             ProfileState::Loaded(ref mut profile) => {
                 mutate(profile).inspect(|_| {
-                    profile.diagnostics_for_factor_instances_valid(is_android);
+                    profile.diagnostics_for_factor_instances_valid();
                 })
             }
             _ => Err(CommonError::ProfileStateNotLoaded {
                 current_state: state.to_string(),
             }),
         }
-    }
-}
-
-#[cfg(test)]
-impl ProfileStateHolder {
-    pub(crate) fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
-    where
-        F: Fn(&mut Profile) -> Result<R>,
-    {
-        self.update_profile_with_known_os_by(false, mutate)
     }
 }
 
