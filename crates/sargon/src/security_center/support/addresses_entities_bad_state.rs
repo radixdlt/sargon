@@ -3,18 +3,18 @@ use crate::prelude::*;
 /// A struct that represents the addresses of entities in a bad state.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddressesOfEntitiesInBadState {
-    pub accounts: Accounts,
-    pub hidden_accounts: Accounts,
-    pub personas: Personas,
-    pub hidden_personas: Personas,
+    pub accounts: Vec<AccountAddress>,
+    pub hidden_accounts: Vec<AccountAddress>,
+    pub personas: Vec<IdentityAddress>,
+    pub hidden_personas: Vec<IdentityAddress>,
 }
 
 impl AddressesOfEntitiesInBadState {
     pub fn new(
-        accounts: Accounts,
-        hidden_accounts: Accounts,
-        personas: Personas,
-        hidden_personas: Personas,
+        accounts: Vec<AccountAddress>,
+        hidden_accounts: Vec<AccountAddress>,
+        personas: Vec<IdentityAddress>,
+        hidden_personas: Vec<IdentityAddress>,
     ) -> Self {
         Self {
             accounts,
@@ -25,12 +25,7 @@ impl AddressesOfEntitiesInBadState {
     }
 
     pub fn empty() -> Self {
-        Self::new(
-            Accounts::new(),
-            Accounts::new(),
-            Personas::new(),
-            Personas::new(),
-        )
+        Self::new(Vec::new(), Vec::new(), Vec::new(), Vec::new())
     }
 
     pub fn is_empty(&self) -> bool {
@@ -43,19 +38,19 @@ impl AddressesOfEntitiesInBadState {
 impl HasSampleValues for AddressesOfEntitiesInBadState {
     fn sample() -> Self {
         Self {
-            accounts: Accounts::sample(),
-            hidden_accounts: Accounts::new(),
-            personas: Personas::sample(),
-            hidden_personas: Personas::new(),
+            accounts: Vec::<_>::sample(),
+            hidden_accounts: Vec::new(),
+            personas: Vec::<_>::sample(),
+            hidden_personas: Vec::new(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            accounts: Accounts::new(),
-            hidden_accounts: Accounts::sample_other(),
-            personas: Personas::new(),
-            hidden_personas: Personas::sample_other(),
+            accounts: Vec::new(),
+            hidden_accounts: Vec::sample_other(),
+            personas: Vec::new(),
+            hidden_personas: Vec::sample_other(),
         }
     }
 }
@@ -86,12 +81,7 @@ mod tests {
         let sut = SUT::empty();
         assert!(sut.is_empty());
 
-        let sut = SUT::new(
-            Accounts::new(),
-            Accounts::new(),
-            Personas::new(),
-            Personas::sample(),
-        );
+        let sut = SUT::new(Vec::new(), Vec::new(), Vec::new(), Vec::sample());
         assert!(sut.is_empty());
     }
 }

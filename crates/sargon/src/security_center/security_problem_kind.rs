@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq)]
-
 /// An enum describing the different types of Security Problems the Wallet can encounter.
 pub enum SecurityProblemKind {
     SecurityFactors,
