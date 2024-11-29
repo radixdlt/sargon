@@ -92,7 +92,7 @@ impl IsFactorSource for ArculusCardFactorSource {
         FactorSourceKind::ArculusCard
     }
 }
-impl BaseIsFactorSource for ArculusCardFactorSource {
+impl BaseBaseIsFactorSource for ArculusCardFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }

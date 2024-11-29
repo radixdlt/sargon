@@ -92,7 +92,7 @@ impl IsFactorSource for OffDeviceMnemonicFactorSource {
         FactorSourceKind::OffDeviceMnemonic
     }
 }
-impl BaseIsFactorSource for OffDeviceMnemonicFactorSource {
+impl BaseBaseIsFactorSource for OffDeviceMnemonicFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }

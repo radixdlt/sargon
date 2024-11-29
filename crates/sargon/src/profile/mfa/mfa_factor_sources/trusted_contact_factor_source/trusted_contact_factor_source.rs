@@ -71,7 +71,7 @@ impl IsFactorSource for TrustedContactFactorSource {
         FactorSourceKind::TrustedContact
     }
 }
-impl BaseIsFactorSource for TrustedContactFactorSource {
+impl BaseBaseIsFactorSource for TrustedContactFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }

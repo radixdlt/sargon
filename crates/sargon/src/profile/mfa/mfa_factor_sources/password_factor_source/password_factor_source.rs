@@ -93,7 +93,8 @@ impl IsFactorSource for PasswordFactorSource {
         FactorSourceKind::Password
     }
 }
-impl BaseIsFactorSource for PasswordFactorSource {
+
+impl BaseBaseIsFactorSource for PasswordFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind
     }

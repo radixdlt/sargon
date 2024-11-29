@@ -46,7 +46,7 @@ impl IsFactorSource for DeviceFactorSource {
         FactorSourceKind::Device
     }
 }
-impl BaseIsFactorSource for DeviceFactorSource {
+impl BaseBaseIsFactorSource for DeviceFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }

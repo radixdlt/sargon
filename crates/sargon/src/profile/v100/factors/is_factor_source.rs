@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-pub trait BaseIsFactorSource:
-    Into<FactorSource> + TryFrom<FactorSource> + Clone
-{
+pub trait BaseBaseIsFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind;
     fn factor_source_id(&self) -> FactorSourceID;
 
@@ -21,6 +19,20 @@ pub trait BaseIsFactorSource:
     }
 
     fn name(&self) -> String;
+}
+
+pub trait BaseIsFactorSource:
+    BaseBaseIsFactorSource + Into<FactorSource> + TryFrom<FactorSource> + Clone
+{
+}
+
+impl<
+        T: BaseBaseIsFactorSource
+            + Into<FactorSource>
+            + TryFrom<FactorSource>
+            + Clone,
+    > BaseIsFactorSource for T
+{
 }
 
 pub trait IsFactorSource: BaseIsFactorSource {

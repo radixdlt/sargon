@@ -64,93 +64,57 @@ impl IsMaybeKeySpaceAware for FactorSource {
     }
 }
 
-impl BaseIsFactorSource for FactorSource {
-    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
+impl FactorSource {
+    fn map_get<'a, R, F>(&'a self, map: F) -> R
+    where
+        F: Fn(&'a dyn BaseBaseIsFactorSource) -> R,
+    {
         match self {
-            FactorSource::Device { value } => {
-                value.set_common_properties(updated)
-            }
-            FactorSource::Ledger { value } => {
-                value.set_common_properties(updated)
-            }
-            FactorSource::SecurityQuestions { value } => {
-                value.set_common_properties(updated)
-            }
-            FactorSource::ArculusCard { value } => {
-                value.set_common_properties(updated)
-            }
-            FactorSource::OffDeviceMnemonic { value } => {
-                value.set_common_properties(updated)
-            }
-            FactorSource::TrustedContact { value } => {
-                value.set_common_properties(updated)
-            }
-            FactorSource::Password { value } => {
-                value.set_common_properties(updated)
-            }
+            FactorSource::Device { ref value } => map(value),
+            FactorSource::ArculusCard { ref value } => map(value),
+            FactorSource::Ledger { ref value } => map(value),
+            FactorSource::OffDeviceMnemonic { ref value } => map(value),
+            FactorSource::SecurityQuestions { ref value } => map(value),
+            FactorSource::TrustedContact { ref value } => map(value),
+            FactorSource::Password { ref value } => map(value),
         }
+    }
+
+    fn map_set<'a, F>(&'a mut self, mut map: F)
+    where
+        F: FnMut(&'a mut dyn BaseBaseIsFactorSource),
+    {
+        match self {
+            FactorSource::Device { ref mut value } => map(value),
+            FactorSource::ArculusCard { ref mut value } => map(value),
+            FactorSource::Ledger { ref mut value } => map(value),
+            FactorSource::OffDeviceMnemonic { ref mut value } => map(value),
+            FactorSource::SecurityQuestions { ref mut value } => map(value),
+            FactorSource::TrustedContact { ref mut value } => map(value),
+            FactorSource::Password { ref mut value } => map(value),
+        }
+    }
+}
+
+impl BaseBaseIsFactorSource for FactorSource {
+    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
+        self.map_set(|v| v.set_common_properties(updated.clone()));
     }
 
     fn common_properties(&self) -> FactorSourceCommon {
-        match self {
-            FactorSource::Device { value } => value.common_properties(),
-            FactorSource::Ledger { value } => value.common_properties(),
-            FactorSource::SecurityQuestions { value } => {
-                value.common_properties()
-            }
-            FactorSource::ArculusCard { value } => value.common_properties(),
-            FactorSource::OffDeviceMnemonic { value } => {
-                value.common_properties()
-            }
-            FactorSource::TrustedContact { value } => value.common_properties(),
-            FactorSource::Password { value } => value.common_properties(),
-        }
+        self.map_get(|v| v.common_properties())
     }
 
     fn factor_source_kind(&self) -> FactorSourceKind {
-        match self {
-            FactorSource::Device { value } => value.factor_source_kind(),
-            FactorSource::Ledger { value } => value.factor_source_kind(),
-            FactorSource::SecurityQuestions { value } => {
-                value.factor_source_kind()
-            }
-            FactorSource::ArculusCard { value } => value.factor_source_kind(),
-            FactorSource::OffDeviceMnemonic { value } => {
-                value.factor_source_kind()
-            }
-            FactorSource::TrustedContact { value } => {
-                value.factor_source_kind()
-            }
-            FactorSource::Password { value } => value.factor_source_kind(),
-        }
+        self.map_get(|v| v.factor_source_kind())
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
-        match self {
-            FactorSource::Device { value } => value.factor_source_id(),
-            FactorSource::Ledger { value } => value.factor_source_id(),
-            FactorSource::SecurityQuestions { value } => {
-                value.factor_source_id()
-            }
-            FactorSource::ArculusCard { value } => value.factor_source_id(),
-            FactorSource::OffDeviceMnemonic { value } => {
-                value.factor_source_id()
-            }
-            FactorSource::TrustedContact { value } => value.factor_source_id(),
-            FactorSource::Password { value } => value.factor_source_id(),
-        }
+        self.map_get(|v| v.factor_source_id())
     }
 
     fn name(&self) -> String {
-        match self {
-            FactorSource::Device { value } => value.name(),
-            FactorSource::Ledger { value } => value.name(),
-            FactorSource::SecurityQuestions { value } => value.name(),
-            FactorSource::ArculusCard { value } => value.name(),
-            FactorSource::OffDeviceMnemonic { value } => value.name(),
-            FactorSource::TrustedContact { value } => value.name(),
-            FactorSource::Password { value } => value.name(),
-        }
+        self.map_get(|v| v.name())
     }
 }
 

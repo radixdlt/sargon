@@ -82,7 +82,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
         FactorSourceKind::LedgerHQHardwareWallet
     }
 }
-impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
+impl BaseBaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }

@@ -261,7 +261,7 @@ impl IsFactorSource for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
         FactorSourceKind::SecurityQuestions
     }
 }
-impl BaseIsFactorSource
+impl BaseBaseIsFactorSource
     for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
 {
     fn common_properties(&self) -> FactorSourceCommon {
