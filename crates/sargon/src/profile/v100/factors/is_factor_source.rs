@@ -19,6 +19,8 @@ pub trait BaseIsFactorSource:
     fn supports_olympia(&self) -> bool {
         self.common_properties().supports_olympia()
     }
+
+    fn name(&self) -> String;
 }
 
 pub trait IsFactorSource: BaseIsFactorSource {

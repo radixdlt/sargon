@@ -15,11 +15,18 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 #[display("{label} {device_name} {model}")]
 pub struct DeviceFactorSourceHint {
+    /// A user-assigned name for the device, intended to help users
+    /// differentiate between multiple devices.
     ///
+    /// Example: "My Phone"
     #[serde(default = "label_default")]
-    pub label: DisplayName,
+    pub label: String,
 
-    /// "iPhone RED"
+    /// The name of the device as provided by the system.
+    ///
+    /// To maintain compatibility, this field is still serialized as `name`
+    ///
+    /// Example: "iPhone RED"
     #[serde(rename = "name")]
     pub device_name: String,
 
@@ -61,7 +68,7 @@ impl DeviceFactorSourceHint {
     /// Instantiates a new DeviceFactorSourceHint from the specified name, model,
     ///  system version, app version and mnemonic word count.
     pub fn new(
-        label: DisplayName,
+        label: impl AsRef<str>,
         device_name: impl AsRef<str>,
         model: impl AsRef<str>,
         system_version: impl Into<Option<String>>,
@@ -70,7 +77,7 @@ impl DeviceFactorSourceHint {
         word_count: BIP39WordCount,
     ) -> Self {
         Self {
-            label,
+            label: label.as_ref().to_owned(),
             device_name: device_name.as_ref().to_owned(),
             model: model.as_ref().to_owned(),
             system_version: system_version.into(),
@@ -98,7 +105,7 @@ impl HasSampleValues for DeviceFactorSourceHint {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
         Self::new(
-            DisplayName::new("New Phone").unwrap(),
+            "New Phone",
             "Unknown Device Name",
             "iPhone",
             None,
@@ -110,7 +117,7 @@ impl HasSampleValues for DeviceFactorSourceHint {
 
     fn sample_other() -> Self {
         Self::new(
-            DisplayName::new("Old Phone").unwrap(),
+            "Old Phone",
             "Android",
             "Samsung Galaxy S23 Ultra",
             None,
@@ -125,7 +132,7 @@ impl DeviceFactorSourceHint {
     /// A sample used to facilitate unit tests.
     pub fn sample_iphone_unknown() -> Self {
         Self::new(
-            DisplayName::new("Unknown Phone").unwrap(),
+            "Unknown Phone",
             "Unknown Device Name",
             "iPhone",
             None,
@@ -136,8 +143,8 @@ impl DeviceFactorSourceHint {
     }
 }
 
-fn label_default() -> DisplayName {
-    DisplayName::new("My Phone").unwrap()
+fn label_default() -> String {
+    "My Phone".to_owned()
 }
 
 #[cfg(test)]
@@ -186,7 +193,7 @@ mod tests {
     #[test]
     fn json_app_version_and_system_version_set() {
         let sut = SUT::new(
-            DisplayName::new("New Phone").unwrap(),
+            "New Phone".to_owned(),
             "My precious",
             "iPhone 15 Pro",
             "17.4.1".to_owned(),

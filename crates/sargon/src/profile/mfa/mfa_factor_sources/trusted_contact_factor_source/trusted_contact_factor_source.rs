@@ -87,6 +87,10 @@ impl BaseIsFactorSource for TrustedContactFactorSource {
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
     }
+
+    fn name(&self) -> String {
+        self.contact.name.value.clone()
+    }
 }
 impl TrustedContactFactorSource {
     fn new_sample(name: &str, email: &str, address: AccountAddress) -> Self {

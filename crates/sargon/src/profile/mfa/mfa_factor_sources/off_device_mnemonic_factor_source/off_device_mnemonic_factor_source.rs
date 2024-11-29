@@ -108,6 +108,10 @@ impl BaseIsFactorSource for OffDeviceMnemonicFactorSource {
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
     }
+
+    fn name(&self) -> String {
+        self.hint.display_name.value.clone()
+    }
 }
 
 #[cfg(test)]

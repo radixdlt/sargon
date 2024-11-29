@@ -5,5 +5,5 @@ use sargon::PasswordFactorSourceHint as InternalPasswordFactorSourceHint;
 /// it and another one.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct PasswordFactorSourceHint {
-    pub label: DisplayName,
+    pub label: String,
 }

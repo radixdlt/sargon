@@ -14,22 +14,24 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct PasswordFactorSourceHint {
-    pub label: DisplayName,
+    pub label: String,
 }
 
 impl PasswordFactorSourceHint {
-    pub fn new(label: DisplayName) -> Self {
-        Self { label }
+    pub fn new(label: impl AsRef<str>) -> Self {
+        Self {
+            label: label.as_ref().to_owned(),
+        }
     }
 }
 
 impl HasSampleValues for PasswordFactorSourceHint {
     fn sample() -> Self {
-        Self::new(DisplayName::new("Password 1").unwrap())
+        Self::new("Password 1")
     }
 
     fn sample_other() -> Self {
-        Self::new(DisplayName::new("Password 2").unwrap())
+        Self::new("Password 2")
     }
 }
 

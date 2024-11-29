@@ -62,6 +62,10 @@ impl BaseIsFactorSource for DeviceFactorSource {
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
     }
+
+    fn name(&self) -> String {
+        self.hint.label.clone()
+    }
 }
 
 impl DeviceFactorSource {

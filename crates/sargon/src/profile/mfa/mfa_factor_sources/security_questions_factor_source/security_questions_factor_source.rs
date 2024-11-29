@@ -279,6 +279,10 @@ impl BaseIsFactorSource
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
     }
+
+    fn name(&self) -> String {
+        "NOT IMPLEMENTED".to_owned()
+    }
 }
 
 #[cfg(test)]

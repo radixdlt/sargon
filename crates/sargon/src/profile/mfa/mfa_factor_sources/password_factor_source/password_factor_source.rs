@@ -109,6 +109,10 @@ impl BaseIsFactorSource for PasswordFactorSource {
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
     }
+
+    fn name(&self) -> String {
+        self.hint.label.clone()
+    }
 }
 
 #[cfg(test)]

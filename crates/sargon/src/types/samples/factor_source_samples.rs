@@ -45,11 +45,7 @@ impl FactorSource {
             FactorSourceKind::Password => PasswordFactorSource::new(
                 *id,
                 PasswordFactorSourceHint::new(
-                    DisplayName::new(format!(
-                        "Password @ {}",
-                        id.body.to_hex()
-                    ))
-                    .unwrap(),
+                    format!("Password @ {}", id.body.to_hex()).as_str(),
                 ),
             )
             .into(),
@@ -84,11 +80,7 @@ impl FactorSource {
                 *id,
                 FactorSourceCommon::sample(),
                 DeviceFactorSourceHint::new(
-                    DisplayName::new(format!(
-                        "Device Display Name @ {}",
-                        id.body.to_hex()
-                    ))
-                    .unwrap(),
+                    format!("Device Label @ {}", id.body.to_hex()),
                     format!("Device Name @ {}", id.body.to_hex()),
                     format!("Device Model @ {}", id.body.to_hex()),
                     None,

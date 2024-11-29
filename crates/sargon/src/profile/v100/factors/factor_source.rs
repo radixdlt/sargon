@@ -140,6 +140,18 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::Password { value } => value.factor_source_id(),
         }
     }
+
+    fn name(&self) -> String {
+        match self {
+            FactorSource::Device { value } => value.name(),
+            FactorSource::Ledger { value } => value.name(),
+            FactorSource::SecurityQuestions { value } => value.name(),
+            FactorSource::ArculusCard { value } => value.name(),
+            FactorSource::OffDeviceMnemonic { value } => value.name(),
+            FactorSource::TrustedContact { value } => value.name(),
+            FactorSource::Password { value } => value.name(),
+        }
+    }
 }
 
 impl Identifiable for FactorSource {
@@ -409,6 +421,16 @@ mod tests {
         assert_eq!(
             SUT::sample_other().common_properties(),
             LedgerHardwareWalletFactorSource::sample().common
+        )
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), DeviceFactorSource::sample().name());
+
+        assert_eq!(
+            SUT::sample_other().name(),
+            LedgerHardwareWalletFactorSource::sample().name()
         )
     }
 
