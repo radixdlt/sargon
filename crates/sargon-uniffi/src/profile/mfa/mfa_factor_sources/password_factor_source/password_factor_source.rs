@@ -4,8 +4,8 @@ use sargon::PasswordFactorSource as InternalPasswordFactorSource;
 
 /// NOT IMPLEMENTED NOR USED YET
 ///
-/// A passphrase based FactorSource is essentially a Input Key Material based Mnemonic,
-/// user needs to input the passphrase - key material - every time they use this factor source
+/// A password based FactorSource is essentially a Input Key Material based Mnemonic,
+/// user needs to input the password - key material - every time they use this factor source
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct PasswordFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
