@@ -25,7 +25,7 @@ final class PasswordFactorSourceTests: SpecificFactorSourceTest<PasswordFactorSo
 					mnemonic: .samplePassword,
 					passphrase: ""
 				),
-				hint: .init(displayName: "Password 1")
+				hint: .init(label: "Password 1")
 			).id,
 			SUT.sample.id
 		)

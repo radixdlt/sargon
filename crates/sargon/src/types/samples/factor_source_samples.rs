@@ -84,6 +84,11 @@ impl FactorSource {
                 *id,
                 FactorSourceCommon::sample(),
                 DeviceFactorSourceHint::new(
+                    DisplayName::new(format!(
+                        "Device Display Name @ {}",
+                        id.body.to_hex()
+                    ))
+                    .unwrap(),
                     format!("Device Name @ {}", id.body.to_hex()),
                     format!("Device Model @ {}", id.body.to_hex()),
                     None,

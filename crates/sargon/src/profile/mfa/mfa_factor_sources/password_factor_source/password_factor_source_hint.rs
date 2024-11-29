@@ -14,12 +14,12 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct PasswordFactorSourceHint {
-    pub display_name: DisplayName,
+    pub label: DisplayName,
 }
 
 impl PasswordFactorSourceHint {
-    pub fn new(display_name: DisplayName) -> Self {
-        Self { display_name }
+    pub fn new(label: DisplayName) -> Self {
+        Self { label }
     }
 }
 

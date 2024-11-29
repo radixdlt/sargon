@@ -150,7 +150,7 @@ mod tests {
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
-                    "displayName": "Password 1"
+                    "label": "Password 1"
                 }
             }
             "#,

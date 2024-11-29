@@ -5,8 +5,10 @@ use sargon::DeviceFactorSourceHint as InternalDeviceFactorSourceHint;
 /// it and another one.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct DeviceFactorSourceHint {
+    pub label: DisplayName,
+
     /// "iPhone RED"
-    pub name: String,
+    pub device_name: String,
 
     /// "iPhone SE 2nd gen"
     pub model: String,
