@@ -9,19 +9,19 @@ import XCTest
 final class NonFungibleLocalIDTests: IdentifiableByStringProtocolTest<NonFungibleLocalID> {
 	// MARK: LocalID String
 	func test_valid_local_id_string_from_string() {
-		XCTAssertEqual(try SUT("<foo>"), SUT.str(value: "foo"))
+		XCTAssertEqual(SUT("<foo>"), SUT.str(value: "foo"))
 	}
 
 	func test_valid_local_id_string_from_integer() {
-		XCTAssertEqual(try SUT("#666#"), SUT.integer(value: 666))
+		XCTAssertEqual(SUT("#666#"), SUT.integer(value: 666))
 	}
 
 	func test_valid_local_id_string_from_ruid() {
-		XCTAssertEqual(try SUT("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"), SUT.ruid(value: .sample))
+		XCTAssertEqual(SUT("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"), SUT.ruid(value: .sample))
 	}
 
 	func test_valid_local_id_string_from_bytes() {
-		XCTAssertEqual(try SUT("[acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced]"), SUT.bytes(value: NonEmptyMax64Bytes(bagOfBytes: Data.sampleAced)))
+		XCTAssertEqual(SUT("[acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced]"), SUT.bytes(value: NonEmptyMax64Bytes(bagOfBytes: Data.sampleAced)))
 	}
 
 	// MARK: Integer
@@ -45,11 +45,13 @@ final class NonFungibleLocalIDTests: IdentifiableByStringProtocolTest<NonFungibl
 	}
 
 	func test_init_string_fails_when_given_user_facing_string() throws {
-		XCTAssertThrowsError(try SUT("x"))
+		// swiftformat:disable redundantInit
+		XCTAssertThrowsError(try SUT.init("x"))
 	}
 
 	func test_init_string_succeeds_when_given_raw_string() throws {
-		XCTAssertNoThrow(try SUT("<x>"))
+		// swiftformat:disable redundantInit
+		XCTAssertNoThrow(try SUT.init("<x>"))
 	}
 
 	func test_from_stringID_fails_when_given_raw_string() throws {

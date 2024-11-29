@@ -25,14 +25,16 @@ final class NonFungibleGlobalIDTests: IdentifiableByStringProtocolTest<NonFungib
 
 	func test_valid_from_str() {
 		XCTAssertEqual(
-			try SUT("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"),
+			// swiftformat:disable redundantInit
+			try SUT.init("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"),
 			SUT.sample
 		)
 	}
 
 	func test_invalid_from_str() {
 		XCTAssertThrowsError(
-			try SUT("super invalid string!!!!")
+			// swiftformat:disable redundantInit
+			try SUT.init("super invalid string!!!!")
 		)
 	}
 
