@@ -76,7 +76,7 @@ impl SargonOS {
             signable.signed(
                 IntentSignatures::new(intent_signatures)
             ).map(|signed| {
-                SignedOutcome::Completed(signed)
+                SignedOutcome::Signed(signed)
             }).unwrap_or_else(|error| {
                 error!("Could not construct intent signatures due to error: {error}");
                 SignedOutcome::Rejected
@@ -88,10 +88,10 @@ impl SargonOS {
 }
 
 /// Outcome of a single singable signing
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, EnumAsInner)]
 pub enum SignedOutcome<S: Signable> {
     /// The user has provided all needed signatures, the signable is considered signed
-    Completed(S::Signed),
+    Signed(S::Signed),
 
     /// The user has not provided all needed signatures, thus rejecting the signing process
     Rejected
@@ -111,18 +111,14 @@ mod test {
 
         let (signable, entities) = get_signable_with_entities::<TransactionIntent>(&sut.profile().unwrap());
 
-        let signed = sut.sign_transaction(
+        let outcome = sut.sign_transaction(
             signable.clone(),
             RoleKind::Primary,
         ).await;
+        let signed = outcome.as_signed().unwrap();
 
-        match signed {
-            SignedOutcome::Completed(signed) => {
-                assert_eq!(signable, Into::<TransactionIntent>::into(signed.clone()));
-                assert_eq!(entities.len(), IntoIterator::into_iter(signed).count());
-            }
-            SignedOutcome::Rejected => { panic!("Expected signed outcome, received rejected") }
-        }
+        assert_eq!(signable, signed.intent);
+        assert_eq!(entities.len(), signed.intent_signatures.signatures.len());
     }
 
     #[actix_rt::test]
@@ -132,18 +128,14 @@ mod test {
 
         let (signable, entities) = get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
-        let signed = sut.sign_subintent(
+        let outcome = sut.sign_subintent(
             signable.clone(),
             RoleKind::Primary,
         ).await;
+        let signed = outcome.as_signed().unwrap();
 
-        match signed {
-            SignedOutcome::Completed(signed) => {
-                assert_eq!(signable, Into::<Subintent>::into(signed.clone()));
-                assert_eq!(entities.len(), IntoIterator::into_iter(signed).count());
-            }
-            SignedOutcome::Rejected => { panic!("Expected signed outcome, received rejected") }
-        }
+        assert_eq!(signable, signed.subintent);
+        assert_eq!(entities.len(), signed.subintent_signatures.signatures.len());
     }
 
 
