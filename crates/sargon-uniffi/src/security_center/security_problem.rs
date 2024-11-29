@@ -35,9 +35,7 @@ pub enum SecurityProblem {
     },
 }
 
-impl SecurityProblem {
-    #[uniffi::method]
-    pub fn kind(&self) -> SecurityProblemKind {
-        self.into_internal().kind().into()
-    }
+#[uniffi::export]
+pub fn security_problem_kind(value: &SecurityProblem) -> SecurityProblemKind {
+    value.into_internal().kind().into()
 }
