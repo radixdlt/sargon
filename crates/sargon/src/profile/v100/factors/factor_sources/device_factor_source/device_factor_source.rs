@@ -314,4 +314,9 @@ mod tests {
             BIP39WordCount::TwentyFour
         );
     }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "My Phone");
+    }
 }

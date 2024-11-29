@@ -493,4 +493,9 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Questions: #0, #1, #2, #3, #4, #5");
+    }
 }

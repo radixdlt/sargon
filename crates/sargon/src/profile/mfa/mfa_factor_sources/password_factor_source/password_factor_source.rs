@@ -193,4 +193,9 @@ mod tests {
     fn factor_source_kind() {
         assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
     }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Password 1");
+    }
 }

@@ -193,7 +193,7 @@ mod tests {
     #[test]
     fn json_app_version_and_system_version_set() {
         let sut = SUT::new(
-            "New Phone".to_owned(),
+            "New Phone",
             "My precious",
             "iPhone 15 Pro",
             "17.4.1".to_owned(),

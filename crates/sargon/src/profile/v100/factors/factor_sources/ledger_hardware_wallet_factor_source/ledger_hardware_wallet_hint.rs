@@ -15,7 +15,10 @@ pub struct LedgerHardwareWalletHint {
     /// A user-assigned name for the ledger, intended to help users
     /// differentiate between multiple ledgers.
     ///
+    /// To maintain compatibility, this field is still serialized as `name`
+    ///
     /// E.g. "Orange, scratched"
+    #[serde(rename = "name")]
     pub label: String,
 
     /// E.g. `nanoS+`
@@ -72,7 +75,7 @@ mod tests {
             &model,
             r#"
             {
-                "label": "Orange, scratched",
+                "name": "Orange, scratched",
                 "model": "nanoS+"
             }
             "#,

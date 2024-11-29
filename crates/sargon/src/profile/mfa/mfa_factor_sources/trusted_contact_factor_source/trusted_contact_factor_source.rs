@@ -212,4 +212,9 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Spending Account");
+    }
 }
