@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-05.
-//
-
 import Foundation
 import SargonUniFFI
 
@@ -26,48 +19,45 @@ extension BIOS {
 
 public final class TestOS {
 	public let os: SargonOS
-	
+
 	public init(os: SargonOS) {
 		self.os = os
 	}
-	
+
 	public convenience init(bios: BIOS) async {
 		let os = await SargonOS.boot(bios: bios)
 		self.init(os: os)
 	}
-	
-	
 }
+
 extension TestOS: SargonOSProtocol {}
 
 // MARK: Private
 extension TestOS {
 	private func nextAccountName() -> DisplayName {
-			let index = (try? accountsForDisplayOnCurrentNetwork.count) ?? 0
-			return DisplayName(value: "Unnamed \(index)")
+		let index = (try? accountsForDisplayOnCurrentNetwork.count) ?? 0
+		return DisplayName(value: "Unnamed \(index)")
 	}
 }
 
 // MARK: Public
 extension TestOS {
-	
 	@discardableResult
 	public func createAccount(
 		named name: String? = nil
 	) async throws -> Self {
-		
 		let accountName = try name.map {
 			try DisplayName(
 				validating: $0
 			)
 		} ?? nextAccountName()
-	
+
 		let _ = try await os.createAccount(
 			named: accountName
 		)
 		return self
 	}
-	
+
 	@discardableResult
 	public func batchCreateAccounts(
 		count: UInt16,
@@ -77,6 +67,5 @@ extension TestOS {
 		return self
 	}
 }
-
 
 #endif // DEBUG

@@ -1,8 +1,9 @@
 import SargonUniFFI
 
+// MARK: - Account + EntityBaseProtocol
 extension Account: EntityBaseProtocol {
 	public typealias EntityAddress = AccountAddress
-	
+
 	public var asGeneral: AccountOrPersona {
 		.account(self)
 	}
@@ -14,18 +15,19 @@ extension Account {
 	}
 }
 
+// MARK: - Account + EntityProtocol
 extension Account: EntityProtocol {
 	public static let kind: EntityKind = .account
-	
+
 	public static func extract(from someEntity: some EntityBaseProtocol) -> Self? {
 		guard case let .accountEntity(account) = someEntity.asGeneral else { return nil }
 		return account
 	}
-	
+
 	public struct ExtraProperties: SargonModel {
 		public var appearanceID: AppearanceID
 		public let onLedgerSettings: OnLedgerSettings
-		
+
 		public init(
 			appearanceID: AppearanceID,
 			onLedgerSettings: OnLedgerSettings = .default
@@ -34,7 +36,7 @@ extension Account: EntityProtocol {
 			self.onLedgerSettings = onLedgerSettings
 		}
 	}
-	
+
 	public init(
 		networkID: NetworkID,
 		address: AccountAddress,
@@ -52,14 +54,13 @@ extension Account: EntityProtocol {
 			onLedgerSettings: extraProperties.onLedgerSettings
 		)
 	}
-	
+
 	public static func deriveVirtualAddress(
 		networkID: NetworkID,
 		factorInstance: HierarchicalDeterministicFactorInstance
 	) -> AccountAddress {
 		AccountAddress(publicKey: factorInstance.publicKey.publicKey, networkID: networkID)
 	}
-	
 }
 
 #if DEBUG

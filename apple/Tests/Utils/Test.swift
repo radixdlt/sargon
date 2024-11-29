@@ -4,23 +4,23 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+// MARK: - TestCase
 class TestCase: XCTestCase {
-	
 	class func shouldEnableRustLog() -> Bool {
 		false
 	}
-	
-	class override func setUp() {
+
+	override class func setUp() {
 //		if shouldEnableRustLog() {
-//			
+//
 //		}
 		super.setUp()
 	}
-	
+
 	override func setUp() {
 		self.continueAfterFailure = false
 	}
-	
+
 	func openFile(
 		subPath: String,
 		_ fileName: String,
@@ -29,11 +29,10 @@ class TestCase: XCTestCase {
 		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(4).joined(separator: "/")
 
 		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/crates/sargon/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
-		
+
 		return try Data(contentsOf: fileURL)
-	  
 	}
-	
+
 	func jsonFixture<T: Decodable>(
 		as: T.Type = T.self,
 		file fileName: String,
@@ -43,7 +42,7 @@ class TestCase: XCTestCase {
 		let model: T = try decode(json)
 		return (model, json)
 	}
-	
+
 	func jsonFixture<T>(
 		as: T.Type = T.self,
 		file fileName: String,
@@ -53,7 +52,7 @@ class TestCase: XCTestCase {
 		let model: T = try decode(json)
 		return (model, json)
 	}
-	
+
 	func jsonString<T>(
 		as: T.Type = T.self,
 		file fileName: String,
@@ -64,18 +63,18 @@ class TestCase: XCTestCase {
 		let model: T = try decode(jsonString)
 		return (model, jsonString)
 	}
-	
 }
 
+// MARK: - Test
 class Test<SUT_: SargonModel>: TestCase {
 	typealias SUT = SUT_
-	
+
 	func eachSample(
 		_ test: (SUT) throws -> Void
 	) rethrows {
 		try SUT.sampleValues.forEach(test)
 	}
-	
+
 	func test_equality() throws {
 		XCTAssertNoDifference(SUT.sample, SUT.sample)
 	}
@@ -83,11 +82,11 @@ class Test<SUT_: SargonModel>: TestCase {
 	func test_inequality() throws {
 		XCTAssertNotEqual(SUT.sample, SUT.sampleOther)
 	}
-	
+
 	func test_hashable() {
 		XCTAssertNoDifference(Set([SUT.sample, SUT.sample]).count, 1)
 		XCTAssertNoDifference(Set([SUT.sampleOther, SUT.sampleOther]).count, 1)
-		
+
 		var set = Set<SUT>()
 		SUT.sampleValues.forEach { set.insert($0) }
 		SUT.sampleValues.forEach { set.insert($0) } // duplicates removed.

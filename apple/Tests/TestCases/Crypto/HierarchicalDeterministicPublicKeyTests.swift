@@ -4,6 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class HierarchicalDeterministicPublicKeyTests: Test<HierarchicalDeterministicPublicKey> {
-}
-
+final class HierarchicalDeterministicPublicKeyTests: Test<HierarchicalDeterministicPublicKey> {}

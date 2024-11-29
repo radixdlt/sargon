@@ -4,10 +4,10 @@ extension ComponentAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newComponentAddress(bech32: bech32String)
 	}
-    
-    public func formatted(_ format: AddressFormat = .default) -> String {
-        componentAddressFormatted(address: self, format: format)
-    }
+
+	public func formatted(_ format: AddressFormat = .default) -> String {
+		componentAddressFormatted(address: self, format: format)
+	}
 
 	/// The bech32 encoded string for this address.
 	public var address: String {
@@ -22,7 +22,7 @@ extension ComponentAddress {
 	public var isGlobal: Bool {
 		componentAddressIsGlobal(address: self)
 	}
-	
+
 	/// If the `EntityType == .InternalGenericComponent`
 	public var isInternal: Bool {
 		componentAddressIsInternal(address: self)
@@ -31,11 +31,10 @@ extension ComponentAddress {
 
 #if DEBUG
 extension ComponentAddress {
-	
 	public static func random(networkID: NetworkID) -> Self {
 		newComponentAddressRandom(networkId: networkID)
 	}
-	
+
 	public func mapTo(networkID: NetworkID) -> Self {
 		componentAddressMapToNetwork(address: self, networkId: networkID)
 	}

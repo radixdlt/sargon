@@ -4,5 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class PackageAddressTests: AddressTest<PackageAddress> {
-}
+final class PackageAddressTests: AddressTest<PackageAddress> {}

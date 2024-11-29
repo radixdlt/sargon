@@ -1,13 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-03.
-//
-
 import Foundation
-import SargonUniFFI
 import os
+import SargonUniFFI
 
 /// A public globally accessible `Logger` with `category` "Swift" which
 /// Swift Sargon uses, and which iOS wallet can use too, it uses the
@@ -22,18 +15,18 @@ extension LoggingDriver where Self == Log {
 	public static var shared: Self { Self.shared }
 }
 
+// MARK: - Log
 /// A `LoggingDriver` actor capable of logging on behalf of
 /// Rust Sargon core, that is, when we write e.g. `debug!("hey Swift from Rust");`
 /// in Rust code, that message will in fact be logged by a `os.Logger` held by this `Log`
 /// actor.
 public final actor Log {
-	
 	/// The `Logger` to which Rust delegates logged messages.
-	nonisolated fileprivate let rustLogger: Logger
-	
-	///The `Logger` Swift Sargon uses to log messages, accessed
-	///using global variable `log` (aliasa for `Log.shared.swiftLogger`).
-	nonisolated internal let swiftLogger: Logger
+	private nonisolated let rustLogger: Logger
+
+	/// The `Logger` Swift Sargon uses to log messages, accessed
+	/// using global variable `log` (aliasa for `Log.shared.swiftLogger`).
+	nonisolated let swiftLogger: Logger
 
 	private init(
 		subsystem: String = "Sargon",
@@ -49,15 +42,14 @@ public final actor Log {
 			category: swiftCategory
 		)
 	}
-	
+
 	/// LoggingDriver singleton, a shared actor.
 	public static let shared = Log()
-
 }
 
-// MARK: `LoggingDriver` conformance.
+// MARK: LoggingDriver
 extension Log: LoggingDriver {
-	nonisolated public func log(
+	public nonisolated func log(
 		level: LogLevel,
 		msg: String
 	) {
@@ -93,23 +85,25 @@ public func logSystemDiagnosis() {
 	print("logSystemDiagnosis - RUST")
 	rustLoggerLogAtEveryLevel()
 	print("logSystemDiagnosis - Swift")
-	levels.forEach { level in
+	for level in levels {
 		log.log(level: .init(sargonLogLevel: level), "Swift test: '\(String(describing: level))'")
 	}
 }
 
+// MARK: - LogFilter + CaseIterable
 extension LogFilter: CaseIterable {
 	public static let allCases: [Self] = rustLoggerGetAllFilters()
 }
 
+// MARK: - LogLevel + CaseIterable
 extension LogLevel: CaseIterable {
 	public static let allCases: [Self] = rustLoggerGetAllLevels()
 }
 
+// MARK: - Logger + @unchecked Sendable
 extension Logger: @unchecked Sendable {}
 
 extension OSLogType {
-	
 	/// Rust has 5 log levels, so does Swift.
 	///
 	/// The mapping might look a bit strange since we do NOT map `error` -> `error`,
@@ -118,14 +112,14 @@ extension OSLogType {
 	/// serious to Swift.
 	init(sargonLogLevel sargon: Sargon.LogLevel) {
 		switch sargon {
-		case .error: 
+		case .error:
 			// yes this is correct we dont map `error` -> `error`.
 			self = .fault
 		case .warn:
 			// Swift does not have warn, we use error, and we use Swifts fault for Rust error.
 			self = .error
 		case .info: self = .info
-		case .debug: 
+		case .debug:
 			// yes this is correct we dont map `debug` -> `debug`.
 			self = .default
 		case .trace:
@@ -135,9 +129,7 @@ extension OSLogType {
 	}
 }
 
-
 extension OSLogType {
-	
 	init(sargonFilterLevel sargon: Sargon.LogFilter) {
 		if let level = LogLevel(rawValue: sargon.rawValue) {
 			self.init(sargonLogLevel: level)
@@ -146,4 +138,3 @@ extension OSLogType {
 		}
 	}
 }
-

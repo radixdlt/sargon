@@ -1,13 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-05.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - SargonOSAlreadyBooted
 struct SargonOSAlreadyBooted: LocalizedError {
 	var errorDescription: String? {
 		"Radix Wallet core already initialized, should not have been initialized twice. This is a Radix developer error."
@@ -15,14 +9,13 @@ struct SargonOSAlreadyBooted: LocalizedError {
 }
 
 extension SargonOS {
-	
 	public nonisolated(unsafe) static var shared: SargonOS {
-		guard let shared = Self._shared else {
+		guard let shared = _shared else {
 			fatalError("`SargonOS.shared` not created, create it with `SargonOS.creatingShared:bootingWith` and pass it a `BIOS`.")
 		}
 		return shared
 	}
-	
+
 	/// Can be access later with `OS.shared`
 	@discardableResult
 	public static func creatingShared(
@@ -33,14 +26,12 @@ extension SargonOS {
 			isEmulatingFreshInstall: false
 		)
 	}
-	
 }
 
 extension SargonOS {
-	
 	/// Can be access later with `OS.shared`
 	@discardableResult
-	internal static func _creatingShared(
+	static func _creatingShared(
 		bootingWith bios: BIOS,
 		isEmulatingFreshInstall: Bool
 	) async throws -> SargonOS {
@@ -51,8 +42,6 @@ extension SargonOS {
 		Self._shared = shared
 		return shared
 	}
-	
-	internal nonisolated(unsafe) static var _shared: SargonOS!
-	
-}
 
+	nonisolated(unsafe) static var _shared: SargonOS!
+}

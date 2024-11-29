@@ -1,29 +1,24 @@
-//
-//  HdPathComponent+Swiftified.swift
-//  Sargon
-//
-//  Created by Alexander Cyon on 2024-10-25.
-//
-
 import SargonUniFFI
 
+// MARK: - HdPathComponent + BaseHDPathComponentProtocol
 extension HdPathComponent: BaseHDPathComponentProtocol {}
 
-
+// MARK: - HdPathComponent + CustomDebugStringConvertible
 extension HdPathComponent: CustomDebugStringConvertible {
-    public var debugDescription: String {
-        toBIP32String()
-    }
+	public var debugDescription: String {
+		toBIP32String()
+	}
 }
 
+// MARK: - HdPathComponent + CustomStringConvertible
 extension HdPathComponent: CustomStringConvertible {
-    public var description: String {
-        toBIP32StringDebug()
-    }
+	public var description: String {
+		toBIP32StringDebug()
+	}
 }
 
 extension HdPathComponent {
-    public func asHardened() throws -> Hardened {
-        try hdPathComponentToHardened(component: self)
-    }
+	public func asHardened() throws -> Hardened {
+		try hdPathComponentToHardened(component: self)
+	}
 }

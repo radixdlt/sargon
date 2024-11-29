@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension ResourceSpecifier {
-    public var resourceAddress: ResourceAddress {
-        resourceSpecifierGetAddress(specifier: self)
-    }
+	public var resourceAddress: ResourceAddress {
+		resourceSpecifierGetAddress(specifier: self)
+	}
 }

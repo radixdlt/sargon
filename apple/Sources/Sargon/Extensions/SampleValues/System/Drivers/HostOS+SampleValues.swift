@@ -7,4 +7,3 @@ extension HostOs {
 	public static let sampleOther: Self = newHostOsSampleOther()
 }
 #endif // DEBUG
-

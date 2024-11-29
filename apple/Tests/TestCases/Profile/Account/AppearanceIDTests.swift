@@ -9,19 +9,18 @@ final class AppearanceIDTests: Test<AppearanceID> {
 		XCTAssertEqual(SUT.sample.id, 0)
 		XCTAssertEqual(SUT.sampleOther.id, 11)
 	}
-	
+
 	func test_all_cases_returns_actual_values_not_samples() {
 		XCTAssertEqual(SUT.allCases.count, 12)
 	}
-	
-	
-	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more
 	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
 	/// a test directly.
 	func testJSONRoundtripAllSamples() throws {
 		try eachSampleCodableRoundtripTest()
 	}
-	
+
 	func test_from_number_of_accounts() {
 		func doTest(_ count: Int, expected: SUT) {
 			XCTAssertEqual(SUT.fromNumberOfAccounts(count), expected)

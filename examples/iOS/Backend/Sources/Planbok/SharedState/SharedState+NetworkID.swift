@@ -1,21 +1,20 @@
-import Sargon
+import ComposableArchitecture
 import Dependencies
 import Foundation
-import ComposableArchitecture
+import Sargon
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static var network: Self {
-		Self.sharedNetwork
+		sharedNetwork
 	}
 }
 
 extension PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static let sharedNetwork = Self(
 		SargonKey(
-            mapping: { try $0.currentNetworkID },
+			mapping: { try $0.currentNetworkID },
 			fetchIf: \.affectsCurrentNetwork
 		),
 		.default
 	)
 }
-

@@ -4,5 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class MatrixOfFactorSourcesTests: Test<MatrixOfFactorSources> {
-}
+final class MatrixOfFactorSourcesTests: Test<MatrixOfFactorSources> {}

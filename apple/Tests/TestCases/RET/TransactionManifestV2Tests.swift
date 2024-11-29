@@ -7,7 +7,6 @@ import SargonUniFFI
 import XCTest
 
 final class TransactionManifestV2Tests: Test<TransactionManifestV2> {
-
 	func test_manifest_string() {
 		let manifest = SUT.sample
 		XCTAssert(manifest.manifestString.contains("CALL_METHOD"))

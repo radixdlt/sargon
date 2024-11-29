@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-15.
-//
-
 import Foundation
 import SargonUniFFI
 
@@ -18,15 +11,17 @@ extension EventProfileModified {
 extension Event {
 	public var profileModified: EventProfileModified? {
 		switch self {
-		case let .profileModified(change): return change
-		default: return nil
+		case let .profileModified(change): change
+		default: nil
 		}
 	}
+
 	public var addressOfNewAccount: AccountAddress? {
 		profileModified?.addedAccount
 	}
 }
 
+// MARK: - EventNotification + Comparable
 extension EventNotification: Comparable {
 	/// `EventNotification` are made `Comparable` by
 	/// sorting on `timestamp`.
@@ -36,7 +31,6 @@ extension EventNotification: Comparable {
 }
 
 extension Event {
-	
 	/// Discriminant of the `Event`.
 	public var kind: EventKind {
 		eventKind(event: self)

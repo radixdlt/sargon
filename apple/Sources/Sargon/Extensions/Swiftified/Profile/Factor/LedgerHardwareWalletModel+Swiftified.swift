@@ -1,20 +1,17 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-22.
-//
-
 import Foundation
 
+// MARK: - LedgerHardwareWalletModel + SargonModel
 extension LedgerHardwareWalletModel: SargonModel {}
+
+// MARK: - LedgerHardwareWalletModel + CustomStringConvertible
 extension LedgerHardwareWalletModel: CustomStringConvertible {
-    public var description: String {
-        toString()
-    }
+	public var description: String {
+		toString()
+	}
 }
+
 extension LedgerHardwareWalletModel {
-    public var rawValue: String {
-        toString()
-    }
+	public var rawValue: String {
+		toString()
+	}
 }

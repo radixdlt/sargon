@@ -1,138 +1,125 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-05-05.
-//
-
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 import SwiftUI
 
+// MARK: - ManageFactorSourcesFeature
 @Reducer
 public struct ManageFactorSourcesFeature {
-
 	@Dependency(FactorSourcesClient.self) var factorsClient
-	
-    @ObservableState
-    public struct State: Equatable {
+
+	@ObservableState
+	public struct State: Equatable {
 		@SharedReader(.factorSources) var factorSources
-    }
-    
-    @CasePathable
-    public enum Action: ViewAction {
-        
-        @CasePathable
-        public enum ViewAction {
+	}
+
+	@CasePathable
+	public enum Action: ViewAction {
+		@CasePathable
+		public enum ViewAction {
 			case addAllSampleValuesTapped
-			
-            case deviceButtonTapped
-            case ledgerButtonTapped
-            case arculusButtonTapped
-            case offDeviceButtonTapped
-            case securityQuestionsButtonTapped
-            case trustedContactButtonTapped
-        }
-        
-        case view(ViewAction)
-        
-        @CasePathable
-        public enum DelegateAction {
-            case navigate(Navigate)
-            
-            @CasePathable
-            public enum Navigate {
+
+			case deviceButtonTapped
+			case ledgerButtonTapped
+			case arculusButtonTapped
+			case offDeviceButtonTapped
+			case securityQuestionsButtonTapped
+			case trustedContactButtonTapped
+		}
+
+		case view(ViewAction)
+
+		@CasePathable
+		public enum DelegateAction {
+			case navigate(Navigate)
+
+			@CasePathable
+			public enum Navigate {
 				case toFactor(kind: FactorSourceKind)
-            }
-        }
-        
-        case delegate(DelegateAction)
-    }
-    
-    public init() {}
-    
-    public var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            switch action {
+			}
+		}
+
+		case delegate(DelegateAction)
+	}
+
+	public init() {}
+
+	public var body: some ReducerOf<Self> {
+		Reduce { _, action in
+			switch action {
 			case .view(.addAllSampleValuesTapped):
-				return .run { send in
+				.run { _ in
 					try await factorsClient.addAllSampleFactors()
 				}
-				
-            case .view(.deviceButtonTapped):
-				return .send(.delegate(.navigate(.toFactor(kind: .device))))
-			
+
+			case .view(.deviceButtonTapped):
+				.send(.delegate(.navigate(.toFactor(kind: .device))))
+
 			case .view(.ledgerButtonTapped):
-				return .send(.delegate(.navigate(.toFactor(kind: .ledgerHqHardwareWallet))))
-		  
+				.send(.delegate(.navigate(.toFactor(kind: .ledgerHqHardwareWallet))))
+
 			case .view(.arculusButtonTapped):
-				return .send(.delegate(.navigate(.toFactor(kind: .arculusCard))))
-		  
+				.send(.delegate(.navigate(.toFactor(kind: .arculusCard))))
+
 			case .view(.offDeviceButtonTapped):
-				return .send(.delegate(.navigate(.toFactor(kind: .offDeviceMnemonic))))
-		  
+				.send(.delegate(.navigate(.toFactor(kind: .offDeviceMnemonic))))
+
 			case .view(.securityQuestionsButtonTapped):
-				return .send(.delegate(.navigate(.toFactor(kind: .securityQuestions))))
-		  
+				.send(.delegate(.navigate(.toFactor(kind: .securityQuestions))))
+
 			case .view(.trustedContactButtonTapped):
-				return .send(.delegate(.navigate(.toFactor(kind: .trustedContact))))
-        
-            default:
-                return .none
-                
-            }
-        }
-    }
+				.send(.delegate(.navigate(.toFactor(kind: .trustedContact))))
+
+			default:
+				.none
+			}
+		}
+	}
 }
 
+// MARK: ManageFactorSourcesFeature.View
 extension ManageFactorSourcesFeature {
-    
-    @ViewAction(for: ManageFactorSourcesFeature.self)
-    public struct View: SwiftUI.View {
-        
-        @Bindable public var store: StoreOf<ManageFactorSourcesFeature>
-        
-        public var body: some SwiftUI.View {
-            VStack {
-                Text("FactorSources").font(.largeTitle)
+	@ViewAction(for: ManageFactorSourcesFeature.self)
+	public struct View: SwiftUI.View {
+		@Bindable public var store: StoreOf<ManageFactorSourcesFeature>
+
+		public var body: some SwiftUI.View {
+			VStack {
+				Text("FactorSources").font(.largeTitle)
 				Text("You have #\(store.state.factorSources.count) factor sources")
 				Text("of #\(Set(store.state.factorSources.map(\.kind)).count) different kinds.")
-        
+
 				Button("ADD ALL SAMPLE FACTORS") {
 					send(.addAllSampleValuesTapped)
 				}
-				
+
 				Spacer()
-				
+
 				Button("Device") {
 					send(.deviceButtonTapped)
 				}
-				
+
 				Button("Ledger") {
 					send(.ledgerButtonTapped)
 				}
-				
+
 				Button("Arculus") {
 					send(.arculusButtonTapped)
 				}
-				
+
 				Button("Off Device Mnemonic") {
 					send(.offDeviceButtonTapped)
 				}
-				
+
 				Button("Security Questions") {
 					send(.securityQuestionsButtonTapped)
 				}
-				
+
 				Button("Trusted Contact") {
 					send(.trustedContactButtonTapped)
 				}
-                
-            }
-            .padding(.bottom, 100)
-        }
-    }
-    
+			}
+			.padding(.bottom, 100)
+		}
+	}
 }
-

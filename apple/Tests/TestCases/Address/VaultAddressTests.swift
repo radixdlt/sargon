@@ -9,7 +9,7 @@ final class VaultAddressTests: AddressTest<VaultAddress> {
 		XCTAssertTrue(SUT.sampleMainnetFungible.isFungible)
 		XCTAssertFalse(SUT.sampleMainnetNonFungible.isFungible)
 	}
-	
+
 	func test_is_non_fungible() {
 		XCTAssertFalse(SUT.sampleMainnetFungible.isNonFungible)
 		XCTAssertTrue(SUT.sampleMainnetNonFungible.isNonFungible)

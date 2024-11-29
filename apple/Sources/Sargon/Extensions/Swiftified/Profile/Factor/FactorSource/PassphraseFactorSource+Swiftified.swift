@@ -1,18 +1,15 @@
-//
-//  PassphraseFactorSource+Swiftified.swift
-//
-//
-//  Created by Michael Bakogiannis on 7/10/24.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - PassphraseFactorSource + SargonModel
 extension PassphraseFactorSource: SargonModel {}
+
+// MARK: - PassphraseFactorSource + Identifiable
 extension PassphraseFactorSource: Identifiable {
 	public typealias ID = FactorSourceIDFromHash
 }
 
+// MARK: - PassphraseFactorSource + FactorSourceProtocol
 extension PassphraseFactorSource: FactorSourceProtocol {
 	public static let kind: FactorSourceKind = .passphrase
 

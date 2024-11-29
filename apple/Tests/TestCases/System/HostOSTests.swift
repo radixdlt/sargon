@@ -4,7 +4,6 @@ import SargonUniFFI
 import XCTest
 
 final class HostOSTests: Test<HostOs> {
-	
 	func testGetName() {
 		let sut = SUT.sample
 
@@ -22,5 +21,4 @@ final class HostOSTests: Test<HostOs> {
 
 		XCTAssertEqual(sut.version(), "iOS 17.4.1")
 	}
-
 }

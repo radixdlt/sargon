@@ -1,12 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-24.
-//
-
 import Foundation
 
+// MARK: - FactorSourceIDProtocol
 public protocol FactorSourceIDProtocol: SargonModel & CustomStringConvertible {
 	var asGeneral: FactorSourceID { get }
 	func toString() -> String
@@ -18,6 +12,7 @@ extension FactorSourceIDProtocol {
 	}
 }
 
+// MARK: - FactorSourceIDSpecificProtocol
 public protocol FactorSourceIDSpecificProtocol: FactorSourceIDProtocol & Codable {
 	static func extract(from someFactorSourceID: some FactorSourceIDProtocol) -> Self?
 }

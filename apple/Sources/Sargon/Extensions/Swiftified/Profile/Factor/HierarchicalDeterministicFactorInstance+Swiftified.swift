@@ -1,13 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-23.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - HierarchicalDeterministicFactorInstance + SargonModel
 extension HierarchicalDeterministicFactorInstance: SargonModel {}
 
 extension HierarchicalDeterministicFactorInstance {
@@ -28,4 +22,3 @@ extension HierarchicalDeterministicFactorInstance {
 		)
 	}
 }
-

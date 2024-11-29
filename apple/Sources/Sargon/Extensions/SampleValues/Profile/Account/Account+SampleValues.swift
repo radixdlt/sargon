@@ -10,12 +10,12 @@ extension Account {
 	public static let sampleStokenetNadia: Self = newAccountSampleStokenetNadia()
 	public static let sampleStokenetOlivia: Self = newAccountSampleStokenetOlivia()
 	public static let sampleStokenetPaige: Self = newAccountSampleStokenetPaige()
-	
+
 	public static let sampleMainnet = Self.sampleMainnetAlice
 	public static let sampleMainnetOther = Self.sampleMainnetBob
 	public static let sampleMainnetThird = Self.sampleMainnetCarol
 	public static let sampleMainnetFourth = Self.sampleMainnetDiana
-	
+
 	public static let sampleStokenet = Self.sampleStokenetNadia
 	public static let sampleStokenetOther = Self.sampleStokenetOlivia
 	public static let sampleStokenetThird = Self.sampleStokenetPaige

@@ -1,12 +1,12 @@
 import Foundation
 import SargonUniFFI
 
+// MARK: - TransactionManifest + CustomStringConvertible
 extension TransactionManifest: CustomStringConvertible {
 	public var description: String { instructionsString }
 }
 
 extension TransactionManifest {
-	
 	public init(instructionsString: String, networkID: NetworkID, blobs: Blobs = []) throws {
 		self = try newTransactionManifestFromInstructionsStringAndBlobs(
 			instructionsString: instructionsString,
@@ -23,21 +23,21 @@ extension TransactionManifest {
 		transactionManifestInstructionsString(manifest: self)
 	}
 
-    public var blobs: Blobs {
-        transactionManifestBlobs(manifest: self)
-    }
+	public var blobs: Blobs {
+		transactionManifestBlobs(manifest: self)
+	}
 
-    public var involvedPoolAddresses: [PoolAddress] {
-        transactionManifestInvolvedPoolAddresses(manifest: self)
-    }
-    
-    public var involvedResourceAddresses: [ResourceAddress] {
-        transactionManifestInvolvedResourceAddresses(manifest: self)
-    }
-    
-    public var summary: ManifestSummary {
-        get throws {
-            try transactionManifestSummary(manifest: self)
-        }
-    }
+	public var involvedPoolAddresses: [PoolAddress] {
+		transactionManifestInvolvedPoolAddresses(manifest: self)
+	}
+
+	public var involvedResourceAddresses: [ResourceAddress] {
+		transactionManifestInvolvedResourceAddresses(manifest: self)
+	}
+
+	public var summary: ManifestSummary {
+		get throws {
+			try transactionManifestSummary(manifest: self)
+		}
+	}
 }

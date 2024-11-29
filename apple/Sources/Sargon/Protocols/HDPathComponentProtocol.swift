@@ -1,18 +1,12 @@
-//
-//  HDPathComponentModels.swift.swift
-//  Sargon
-//
-//  Created by Alexander Cyon on 2024-10-24.
-//
-
+// MARK: - BaseHDPathComponentProtocol
 public protocol BaseHDPathComponentProtocol: SargonModel {
-    init(globalKeySpace: UInt32) throws
-    func indexInLocalKeySpace() -> UInt32
-    func indexInGlobalKeySpace() -> UInt32
+	init(globalKeySpace: UInt32) throws
+	func indexInLocalKeySpace() -> UInt32
+	func indexInGlobalKeySpace() -> UInt32
 }
 
+// MARK: - HDPathComponentProtocol
 public protocol HDPathComponentProtocol: BaseHDPathComponentProtocol {
 	static var globalOffset: UInt32 { get }
-    init(localKeySpace: UInt32) throws
+	init(localKeySpace: UInt32) throws
 }
-

@@ -1,13 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-22.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - AppPreferences + SargonModel
 extension AppPreferences: SargonModel {}
 
 extension AppPreferences {

@@ -11,7 +11,7 @@ final class NetworkDefinitionTests: Test<NetworkDefinition> {
 			.mainnet
 		)
 	}
-	
+
 	func test_lookup_stokenet() throws {
 		try XCTAssertEqual(
 			NetworkDefinition.lookupBy(logicalName: "stokenet").id,

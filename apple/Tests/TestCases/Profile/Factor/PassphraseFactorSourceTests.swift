@@ -1,10 +1,3 @@
-//
-//  PassphraseFactorSourceTests.swift
-//
-//
-//  Created by Michael Bakogiannis on 2024-10-14.
-//
-
 import CustomDump
 import Foundation
 import Sargon
@@ -48,7 +41,6 @@ final class PassphraseFactorSourceTests: SpecificFactorSourceTest<PassphraseFact
 		}
 	}
 
-
 	func test_other_wrong() {
 		XCTAssertNil(SUT.extract(from: DeviceFactorSource.sample))
 	}
@@ -70,7 +62,6 @@ final class PassphraseFactorSourceTests: SpecificFactorSourceTest<PassphraseFact
 		XCTAssertTrue(sut.supportsBabylon)
 		XCTAssertFalse(sut.supportsOlympia)
 	}
-
 
 	func test_extract_wrong_throws() throws {
 		try eachSample { sut in

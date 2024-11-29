@@ -1,5 +1,6 @@
 import SargonUniFFI
 
+// MARK: - NonFungibleResourceAddress + AddressProtocol
 extension NonFungibleResourceAddress: AddressProtocol {}
 
 extension NonFungibleResourceAddress {
@@ -7,4 +8,3 @@ extension NonFungibleResourceAddress {
 		.resource(asResourceAddress)
 	}
 }
-

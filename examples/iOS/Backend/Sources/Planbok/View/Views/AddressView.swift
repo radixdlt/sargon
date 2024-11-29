@@ -1,5 +1,5 @@
-import SargonUniFFI
 import Sargon
+import SargonUniFFI
 
 // MARK: - AddressView
 public struct AddressView<Address: AddressProtocol>: SwiftUI.View {
@@ -17,5 +17,4 @@ public struct AddressView<Address: AddressProtocol>: SwiftUI.View {
 			.multilineTextAlignment(.leading)
 			.minimumScaleFactor(0.5)
 	}
-	
 }

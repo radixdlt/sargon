@@ -1,6 +1,7 @@
 import Foundation
 import SargonUniFFI
 
+// MARK: - PublicKeyHash + SargonModel
 extension PublicKeyHash: SargonModel {}
 
 extension PublicKeyHash {
@@ -9,6 +10,7 @@ extension PublicKeyHash {
 	}
 }
 
+// MARK: - PublicKeyHash + ToDataProtocol
 extension PublicKeyHash: ToDataProtocol {
 	public var data: Data {
 		switch self {

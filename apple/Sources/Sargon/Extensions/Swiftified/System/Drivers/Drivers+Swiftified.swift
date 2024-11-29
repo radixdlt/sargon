@@ -1,16 +1,8 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-03.
-//
-
 import Foundation
 import SargonUniFFI
 
-
+// MARK: - Drivers + @unchecked Sendable
 extension Drivers: @unchecked Sendable {}
-
 
 extension Drivers {
 	public convenience init(
@@ -24,7 +16,7 @@ extension Drivers {
 			secureStorageDriver: secureStorageDriver
 		)
 	}
-	
+
 	public convenience init(
 		appVersion: String,
 		userDefaultsSuite: String,
@@ -41,7 +33,6 @@ extension Drivers {
 }
 
 extension Drivers {
-	
 	public convenience init(
 		secureStorage: SecureStorageDriver,
 		hostInfo: HostInfoDriver,
@@ -56,7 +47,7 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
-            profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared
 		)
 	}
 }
