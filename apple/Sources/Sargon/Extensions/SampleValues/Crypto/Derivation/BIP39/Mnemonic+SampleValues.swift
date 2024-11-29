@@ -4,7 +4,7 @@ import SargonUniFFI
 extension Mnemonic {
 	public static let sample: Self = newMnemonicSample()
 	public static let sampleOther: Self = newMnemonicSampleOther()
-	
+
 	public static let sampleDevice: Self = newMnemonicSampleDevice()
 	public static let sampleDeviceOther: Self = newMnemonicSampleDeviceOther()
 	public static let sampleDevice12Words: Self = newMnemonicSampleDevice12Words()
@@ -20,8 +20,8 @@ extension Mnemonic {
 	public static let samplePassphrase: Self = newMnemonicSamplePassphrase()
 	public static let samplePassphraseOther: Self = newMnemonicSamplePassphraseOther()
 
-    public static let sample24ZooVote: Self = try! Self(phrase: "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote")
-	
+	public static let sample24ZooVote: Self = try! Self(phrase: "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote")
+
 	public static let sampleValues: [Self] = [
 		.sampleDevice,
 		.sampleDeviceOther,
@@ -36,7 +36,7 @@ extension Mnemonic {
 		.sampleSecurityQuestions,
 		.sampleSecurityQuestionsOther,
 		.samplePassphrase,
-		.samplePassphraseOther
+		.samplePassphraseOther,
 	]
 }
 #endif // DEBUG

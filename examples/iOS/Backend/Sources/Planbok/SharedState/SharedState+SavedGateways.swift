@@ -1,27 +1,19 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-26.
-//
-
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static var savedGateways: Self {
-		Self.sharedSavedGateways
+		sharedSavedGateways
 	}
 }
 
 extension PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static let sharedSavedGateways = Self(
 		SargonKey(
-            mapping: { try $0.gateways },
+			mapping: { try $0.gateways },
 			fetchIf: \.affectsSavedGateways
 		),
-			.default
+		.default
 	)
-	
 }

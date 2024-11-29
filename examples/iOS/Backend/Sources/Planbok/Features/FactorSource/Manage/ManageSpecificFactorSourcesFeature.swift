@@ -1,14 +1,14 @@
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 import SwiftUI
 
+// MARK: - EditLabelOffDeviceMnemonicFactor
 @Reducer
 public struct EditLabelOffDeviceMnemonicFactor {
-	
 	@Dependency(FactorSourcesClient.self) var factorSourcesClient
 	@Dependency(\.dismiss) var dismiss
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public let factorSource: OffDeviceMnemonicFactorSource
@@ -16,12 +16,13 @@ public struct EditLabelOffDeviceMnemonicFactor {
 		public var displayName: DisplayName? {
 			try? DisplayName(validating: label)
 		}
+
 		public init(factorSource: OffDeviceMnemonicFactorSource) {
 			self.factorSource = factorSource
 			self.label = factorSource.hint.displayName.value
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action: ViewAction {
 		@CasePathable
@@ -29,9 +30,10 @@ public struct EditLabelOffDeviceMnemonicFactor {
 			case labelChanged(String)
 			case confirmButtonTapped
 		}
+
 		case view(ViewAction)
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
@@ -42,8 +44,8 @@ public struct EditLabelOffDeviceMnemonicFactor {
 				guard let displayName = state.displayName else {
 					return .none
 				}
-	
-				return .run { [factorSource = state.factorSource] send in
+
+				return .run { [factorSource = state.factorSource] _ in
 					var factorSource = factorSource
 					factorSource.hint.displayName = displayName
 					try await factorSourcesClient.updateFactorSource(factorSource.asGeneral)
@@ -53,15 +55,17 @@ public struct EditLabelOffDeviceMnemonicFactor {
 		}
 	}
 }
+
 extension EditLabelOffDeviceMnemonicFactor {
 	public typealias HostingFeature = Self
-	
+
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
 		@Bindable public var store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
+
 		public var body: some SwiftUI.View {
 			VStack {
 				LabeledTextField(label: "", text: $store.label.sending(\.view.labelChanged))
@@ -73,18 +77,17 @@ extension EditLabelOffDeviceMnemonicFactor {
 			}
 		}
 	}
-	
 }
 
+// MARK: - ManageSpecificFactorSourcesFeature
 @Reducer
 public struct ManageSpecificFactorSourcesFeature {
-	
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case decryptSecurityQuestions(DecryptSecurityQuestionsFeatureCoordinator)
 		case editLabelOffDeviceMnemonicFactor(EditLabelOffDeviceMnemonicFactor)
 	}
-	
+
 	@ObservableState
 	public struct State {
 		@SharedReader(.factorSources) var factorSources
@@ -92,35 +95,34 @@ public struct ManageSpecificFactorSourcesFeature {
 		@Presents var destination: Destination.State?
 		public let kind: FactorSourceKind
 	}
-	
+
 	@CasePathable
 	public enum Action: ViewAction {
-		
 		@CasePathable
 		public enum ViewAction {
 			case addNewButtonTapped
 			case factorSourceActionButtonTapped(FactorSource)
 		}
-		
+
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
-		
+
 		@CasePathable
 		public enum DelegateAction {
 			case addNew(FactorSourceKind)
 		}
-		
+
 		case delegate(DelegateAction)
 	}
-	
+
 	public init() {}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			case .view(.addNewButtonTapped):
 				return .send(.delegate(.addNew(state.kind)))
-		
+
 			case let .view(.factorSourceActionButtonTapped(factorSource)):
 				if let securityQuestions = factorSource.asSecurityQuestions {
 					state.destination = .decryptSecurityQuestions(
@@ -141,7 +143,6 @@ public struct ManageSpecificFactorSourcesFeature {
 
 			default:
 				return .none
-				
 			}
 		}
 		.ifLet(\.$destination, action: \.destination)
@@ -150,23 +151,23 @@ public struct ManageSpecificFactorSourcesFeature {
 
 extension ManageSpecificFactorSourcesFeature {
 	public typealias HostingFeature = Self
-	
+
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
-		
 		@Bindable public var store: StoreOf<HostingFeature>
-		
+
 		public var kind: FactorSourceKind {
 			store.kind
 		}
+
 		public var factors: IdentifiedArrayOf<FactorSource> {
 			store.factorSources.filter(kind: kind)
 		}
-		
+
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("\(kind) Factors").font(.largeTitle)
-		
+
 				if factors.isEmpty {
 					Text("You have no factors")
 				} else {
@@ -180,9 +181,9 @@ extension ManageSpecificFactorSourcesFeature {
 						}
 					}
 				}
-				
+
 				Spacer()
-		   
+
 				Button("Add New") {
 					send(.addNewButtonTapped)
 				}
@@ -206,6 +207,4 @@ extension ManageSpecificFactorSourcesFeature {
 			}
 		}
 	}
-	
 }
-

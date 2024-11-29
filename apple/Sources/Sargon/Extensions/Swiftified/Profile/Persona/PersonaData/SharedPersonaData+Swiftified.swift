@@ -1,13 +1,7 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-04-23.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - SharedPersonaData + SargonModel
 extension SharedPersonaData: SargonModel {}
 
 extension SharedPersonaData {
@@ -16,15 +10,14 @@ extension SharedPersonaData {
 		emailAddresses: nil,
 		phoneNumbers: nil
 	)
-	
+
 	public var entryIDs: Set<PersonaDataEntryID> {
 		var ids: [PersonaDataEntryID] = [
-			name
+			name,
 		].compactMap { $0 }
 		ids.append(contentsOf: emailAddresses?.ids ?? [])
 		ids.append(contentsOf: phoneNumbers?.ids ?? [])
-		
+
 		return Set(ids)
 	}
-	
 }

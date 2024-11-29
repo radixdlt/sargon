@@ -1,15 +1,10 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-28.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - AuthorizedDappDetailed + SargonModel
 extension AuthorizedDappDetailed: SargonModel {}
 
+// MARK: - AuthorizedDappDetailed + Identifiable
 extension AuthorizedDappDetailed: Identifiable {
 	public typealias ID = DappDefinitionAddress
 	public var id: ID {

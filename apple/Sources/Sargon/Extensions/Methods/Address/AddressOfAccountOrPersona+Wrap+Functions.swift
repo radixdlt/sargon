@@ -13,12 +13,10 @@ extension AddressOfAccountOrPersona {
 	public var networkID: NetworkId {
 		addressOfAccountOrPersonaNetworkId(address: self)
 	}
-	
+
 	public func formatted(_ format: AddressFormat) -> String {
 		addressOfAccountOrPersonaFormatted(address: self, format: format)
 	}
-	
-
 }
 
 #if DEBUG
@@ -26,7 +24,7 @@ extension AddressOfAccountOrPersona {
 	public static func random(networkID: NetworkID) -> Self {
 		.account(newAccountAddressRandom(networkId: networkID))
 	}
-	
+
 	public func mapTo(networkID: NetworkID) -> Self {
 		addressOfAccountOrPersonaMapToNetwork(address: self, networkId: networkID)
 	}

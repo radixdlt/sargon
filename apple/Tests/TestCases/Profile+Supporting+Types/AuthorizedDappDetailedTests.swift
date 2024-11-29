@@ -10,7 +10,7 @@ final class AuthorizedDappDetailedTests: Test<AuthorizedDappDetailed> {
 			XCTAssertEqual(sut.id, sut.dappDefinitionAddress)
 		}
 	}
-	
+
 	func test_show_deposits() {
 		var sut = SUT.sample
 		XCTAssertTrue(sut.isDepositsVisible)

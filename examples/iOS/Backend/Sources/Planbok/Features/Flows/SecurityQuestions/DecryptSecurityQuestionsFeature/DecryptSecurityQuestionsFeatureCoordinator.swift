@@ -1,27 +1,27 @@
-import SwiftUI
-import Sargon
 import ComposableArchitecture
+import Sargon
+import SwiftUI
 
+// MARK: - DecryptSecurityQuestionsFeatureCoordinator
 @Reducer
 public struct DecryptSecurityQuestionsFeatureCoordinator {
-	
 	@Dependency(FactorSourcesClient.self) var factorSourcesClient
 	@Dependency(OverlayWindowClient.self) var overlayWindowClient
-	
+
 	@Reducer(state: .equatable)
 	public enum Path {
 		case answerQuestion(AnswerSecurityQuestionFeature)
 	}
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		@Shared(.questions) var questions
 		@Shared(.pendingAnswers) var pendingAnswers
-		
+
 		public let securityQuestionsFactorSource: SecurityQuestionsNotProductionReadyFactorSource
 		public var firstQuestion: AnswerSecurityQuestionFeature.State
 		public var path = StackState<Path.State>()
-		
+
 		public init(securityQuestionsFactorSource: SecurityQuestionsNotProductionReadyFactorSource) {
 			self.securityQuestionsFactorSource = securityQuestionsFactorSource
 			self.firstQuestion = AnswerSecurityQuestionFeature.State(index: 0, answer: "")
@@ -31,21 +31,21 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 			self.pendingAnswers = []
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action {
 		@CasePathable
 		public enum DelegateAction {
 			case done
 		}
-		
+
 		case path(StackAction<Path.State, Path.Action>)
 		case firstQuestion(AnswerSecurityQuestionFeature.Action)
 		case delegate(DelegateAction)
 	}
-	
+
 	public init() {}
-	
+
 	func nextStep(_ state: inout State, nextIndex indexOfNextQuestionToAnswer: Int) -> EffectOf<Self> {
 		if indexOfNextQuestionToAnswer < state.questions.count {
 			state.path.append(.answerQuestion(
@@ -56,12 +56,12 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 			return .none
 		} else {
 			precondition(state.pendingAnswers.count == state.questions.count)
-			let answersToQuestionsArray = state.pendingAnswers.map({
+			let answersToQuestionsArray = state.pendingAnswers.map {
 				let question = state.questions[id: $0.id]!
 				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.answer)
-			})
+			}
 			let answersToQuestions = answersToQuestionsArray.asIdentified()
-		
+
 			do {
 				let mnemonic = try factorSourcesClient.decryptSecurityQuestionsFactor(
 					answersToQuestions,
@@ -77,51 +77,48 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 			}
 		}
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.firstQuestion, action: \.firstQuestion) {
 			AnswerSecurityQuestionFeature()
 		}
 		Reduce { state, action in
 			switch action {
-				
-			case .path(let pathAction):
+			case let .path(pathAction):
 				switch pathAction {
-
 				case let .element(id: _, action: .answerQuestion(.delegate(.done(index)))):
-					return nextStep(&state, nextIndex: index + 1)
-					
+					nextStep(&state, nextIndex: index + 1)
 				case .popFrom(id: _):
-					return .none
+					.none
 				case .push(id: _, state: _):
-					return .none
+					.none
 				default:
-					return .none
+					.none
 				}
-				
+
 			case let .firstQuestion(.delegate(.done(index))):
-				return nextStep(&state, nextIndex: index + 1)
-			
+				nextStep(&state, nextIndex: index + 1)
+
 			case .firstQuestion:
-				return .none
-		
+				.none
+
 			case .delegate:
-				return .none
-				
+				.none
 			}
 		}
 		.forEach(\.path, action: \.path)
 	}
 }
 
+// MARK: DecryptSecurityQuestionsFeatureCoordinator.View
 extension DecryptSecurityQuestionsFeatureCoordinator {
 	public struct View: SwiftUI.View {
 		@Bindable var store: StoreOf<DecryptSecurityQuestionsFeatureCoordinator>
-		
+
 		public init(store: StoreOf<DecryptSecurityQuestionsFeatureCoordinator>) {
 			self.store = store
 		}
-		
+
 		public var body: some SwiftUI.View {
 			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				AnswerSecurityQuestionFeature.View(

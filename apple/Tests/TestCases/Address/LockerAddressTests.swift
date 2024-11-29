@@ -4,5 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class LockerAddressTests: AddressTest<LockerAddress> {
-}
+final class LockerAddressTests: AddressTest<LockerAddress> {}

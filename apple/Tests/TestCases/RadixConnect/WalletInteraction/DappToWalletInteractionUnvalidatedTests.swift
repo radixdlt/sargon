@@ -12,7 +12,7 @@ final class DappToWalletInteractionUnvalidatedTests: Test<DappToWalletInteractio
 //			let decoded = try SUT(jsonString: json)
 //			XCTAssertEqual(decoded, sut)
 //		}
-//		
+//
 //		try SUT.sampleValues.forEach { sample in
 //			let json = sample.toJSONString()
 //			try doTest(sut: sample, json: json)

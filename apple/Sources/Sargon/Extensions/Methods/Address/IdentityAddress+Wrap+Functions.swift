@@ -11,10 +11,10 @@ extension IdentityAddress {
 			networkId: networkID
 		)
 	}
-    
-    public func formatted(_ format: AddressFormat = .default) -> String {
-        identityAddressFormatted(address: self, format: format)
-    }
+
+	public func formatted(_ format: AddressFormat = .default) -> String {
+		identityAddressFormatted(address: self, format: format)
+	}
 
 	/// The bech32 encoded string for this address.
 	public var address: String {
@@ -24,17 +24,14 @@ extension IdentityAddress {
 	public var networkID: NetworkId {
 		identityAddressNetworkId(address: self)
 	}
-	
-
 }
 
 #if DEBUG
 extension IdentityAddress {
-	
 	public static func random(networkID: NetworkID) -> Self {
 		newIdentityAddressRandom(networkId: networkID)
 	}
-	
+
 	public func mapTo(networkID: NetworkID) -> Self {
 		identityAddressMapToNetwork(address: self, networkId: networkID)
 	}

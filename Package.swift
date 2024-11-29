@@ -4,7 +4,7 @@
 import PackageDescription
 
 var swiftSettings: [SwiftSetting] = [
-	.enableExperimentalFeature("StrictConcurrency")
+	.enableExperimentalFeature("StrictConcurrency"),
 ]
 
 let sargonBinaryTargetName = "SargonCoreRS"
@@ -24,7 +24,7 @@ if useLocalFramework {
 	binaryTarget = .binaryTarget(
 		name: sargonBinaryTargetName,
 		url:
-			"https://github.com/radixdlt/sargon/releases/download/\(releaseTag)/libsargon-rs.xcframework.zip",
+		"https://github.com/radixdlt/sargon/releases/download/\(releaseTag)/libsargon-rs.xcframework.zip",
 		checksum: releaseChecksum
 	)
 }
@@ -38,22 +38,22 @@ let package = Package(
 		.library(
 			name: "Sargon",
 			targets: ["Sargon"]
-		)
+		),
 	],
 	dependencies: [
-        // We use XCTestDynamicOverlay to have different `description` of e.g. Decimal192
+		// We use XCTestDynamicOverlay to have different `description` of e.g. Decimal192
 		// for tests vs not tests (we use a .test `Locale`)
 		.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.1.2"),
-		
+
 		// `XCTAssertNoDifference` used in test
 		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
 
-        // Hopefully only temporary! We use `SwiftJSON` to be able to mark some Sargon models
-        // as `Swift.Codable`. See the SargonObjectCodable protocol for details.
-        // In the future hopefully no JSON coding happens in wallets,
-        // i.e. Sargon does ALL JSON coding, then we can remove this.
+		// Hopefully only temporary! We use `SwiftJSON` to be able to mark some Sargon models
+		// as `Swift.Codable`. See the SargonObjectCodable protocol for details.
+		// In the future hopefully no JSON coding happens in wallets,
+		// i.e. Sargon does ALL JSON coding, then we can remove this.
 		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
-		
+
 		// Multicast / Share of notifications in EventBus
 		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.3"),
 	],
@@ -70,7 +70,7 @@ let package = Package(
 				.target(name: "SargonUniFFI"),
 				"SwiftyJSON",
 				.product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
-				"AsyncExtensions"
+				"AsyncExtensions",
 			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings

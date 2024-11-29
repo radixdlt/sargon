@@ -1,16 +1,9 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-13.
-//
-
 import Foundation
 import SargonUniFFI
 
 extension URL {
 	public init(validating string: String) throws {
-		guard let url = Self.init(string: string) else {
+		guard let url = Self(string: string) else {
 			throw SargonError.InvalidUrl(badValue: string)
 		}
 		self = url

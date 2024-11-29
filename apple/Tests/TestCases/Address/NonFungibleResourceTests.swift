@@ -4,5 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class NonFungibleResourceAddressTests: AddressTest<NonFungibleResourceAddress> {
-}
+final class NonFungibleResourceAddressTests: AddressTest<NonFungibleResourceAddress> {}

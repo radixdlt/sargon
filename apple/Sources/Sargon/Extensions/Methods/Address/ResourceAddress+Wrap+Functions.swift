@@ -13,10 +13,10 @@ extension ResourceAddress {
 	public var networkID: NetworkId {
 		resourceAddressNetworkId(address: self)
 	}
-    
-    public func formatted(_ format: AddressFormat = .default) -> String {
-        resourceAddressFormatted(address: self, format: format)
-    }
+
+	public func formatted(_ format: AddressFormat = .default) -> String {
+		resourceAddressFormatted(address: self, format: format)
+	}
 
 	/// If this is an address of a **fungible** resource or not.
 	public var isFungible: Bool {
@@ -27,21 +27,19 @@ extension ResourceAddress {
 	public var isNonFungible: Bool {
 		resourceAddressIsNonFungible(address: self)
 	}
-	
+
 	/// Returns the XRD resource on network identified by `networkID`.
 	public static func xrd(on networkID: NetworkID) -> Self {
 		xrdAddressOfNetwork(networkId: networkID)
 	}
-
 }
 
 #if DEBUG
 extension ResourceAddress {
-	
 	public static func random(networkID: NetworkID) -> Self {
 		newResourceAddressRandom(networkId: networkID)
 	}
-	
+
 	public func mapTo(networkID: NetworkID) -> Self {
 		resourceAddressMapToNetwork(address: self, networkId: networkID)
 	}

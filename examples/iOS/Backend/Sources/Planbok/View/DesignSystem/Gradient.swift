@@ -4,7 +4,6 @@ extension AppearanceID {
 	}
 }
 
-
 extension LinearGradient {
 	public init(appearanceID: AppearanceID) {
 		self.init(
@@ -14,9 +13,6 @@ extension LinearGradient {
 		)
 	}
 }
-
-
-
 
 extension LinearGradient {
 	/// Namespace only

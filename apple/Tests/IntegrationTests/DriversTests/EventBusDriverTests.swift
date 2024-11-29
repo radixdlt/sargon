@@ -4,12 +4,12 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+// MARK: - EventBusDriverTests
 class EventBusDriverTests: DriverTest<EventBus> {
-	
 	func test() async throws {
 		let sut = SUT()
-		
-		let expectedEvents = Array<EventKind>([.booted, .profileSaved, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
+
+		let expectedEvents = [EventKind]([.booted, .profileSaved, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
 		let task = Task {
 			var notifications = Set<EventNotification>()
 			for await notification in await sut.notifications().prefix(expectedEvents.count) {
@@ -17,7 +17,7 @@ class EventBusDriverTests: DriverTest<EventBus> {
 			}
 			return notifications
 		}
-		
+
 		let bios = BIOS(drivers: .withEventBus(sut))
 		let os = await TestOS(bios: bios)
 		try await os.os.newWallet(shouldPreDeriveInstances: false)
@@ -26,7 +26,6 @@ class EventBusDriverTests: DriverTest<EventBus> {
 		let notifications = await task.value
 		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
 	}
-	
 }
 
 extension HostInfoDriver where Self == AppleHostInfoDriver {
@@ -42,11 +41,7 @@ extension SecureStorageDriver where Self == Insecure︕！TestOnly︕！Ephemera
 	}
 }
 
-
-
-
 extension Drivers {
-	
 	static func withNetworking(_ networking: some NetworkingDriver) -> Drivers {
 		Drivers(
 			networking: networking,
@@ -60,7 +55,7 @@ extension Drivers {
 			profileStateChangeDriver: .shared
 		)
 	}
-	
+
 	static func withSecureStorage(_ secureStorage: some SecureStorageDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
@@ -72,10 +67,9 @@ extension Drivers {
 			fileSystem: .shared,
 			unsafeStorage: .shared,
 			profileStateChangeDriver: .shared
-
 		)
 	}
-	
+
 	static func withEntropyProvider(_ entropyProvider: some EntropyProviderDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
@@ -89,7 +83,7 @@ extension Drivers {
 			profileStateChangeDriver: .shared
 		)
 	}
-	
+
 	static func withHostInfo(_ hostInfo: some HostInfoDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
@@ -103,7 +97,7 @@ extension Drivers {
 			profileStateChangeDriver: .shared
 		)
 	}
-	
+
 	static func withLogging(_ logging: some LoggingDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
@@ -117,7 +111,7 @@ extension Drivers {
 			profileStateChangeDriver: .shared
 		)
 	}
-	
+
 	static func withEventBus(_ eventBus: some EventBusDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
@@ -131,7 +125,7 @@ extension Drivers {
 			profileStateChangeDriver: .shared
 		)
 	}
-	
+
 	static func withFileSystem(_ fileSystem: some FileSystemDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
@@ -145,7 +139,7 @@ extension Drivers {
 			profileStateChangeDriver: .shared
 		)
 	}
-	
+
 	static func withUnsafeStorage(_ unsafeStorage: some UnsafeStorageDriver) -> Drivers {
 		Drivers(
 			networking: .shared,

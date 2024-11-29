@@ -5,10 +5,9 @@ import SargonUniFFI
 import XCTest
 
 final class ProfileTests: Test<Profile> {
-    
-        func test_description_and_debug() {
-            XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
-        }
+	func test_description_and_debug() {
+		XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
+	}
 
 	func test_profile_description_equals() throws {
 		XCTAssertNoDifference(SUT.sample.description, SUT.sample.description)
@@ -17,7 +16,8 @@ final class ProfileTests: Test<Profile> {
 	func test_debug_description_equals() throws {
 		XCTAssertNoDifference(SUT.sample.debugDescription, SUT.sample.debugDescription)
 		XCTAssertNoDifference(
-			SUT.sampleOther.debugDescription, SUT.sampleOther.debugDescription)
+			SUT.sampleOther.debugDescription, SUT.sampleOther.debugDescription
+		)
 	}
 
 	func test_id_is_header_id() {
@@ -36,7 +36,7 @@ final class ProfileTests: Test<Profile> {
 		)
 		XCTAssertNoDifference(decrypted, sut)
 	}
-	
+
 	func test_encryption_roundtrip_string() throws {
 		let password = "ultra secret"
 		let sut = SUT.sample
@@ -73,15 +73,14 @@ final class ProfileTests: Test<Profile> {
 		}
 		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.toJSONString() }))
 		vectors.append(vector)
-		
+
 		vectors.forEach(doTest)
 	}
 
 	func test_analyze_file_encrypted_profile() {
-	
 		var vectors = SUT.sampleValues
 		vectors.append(vector.model)
-		
+
 		let passwords = ["Mellon", "open sesame", "REINDEER FLOTILLA", "swordfish"]
 		func doTest(_ index: Int, _ sut: SUT) {
 			let password = passwords[index % passwords.count]
@@ -91,7 +90,7 @@ final class ProfileTests: Test<Profile> {
 				.encryptedProfile
 			)
 		}
-		
+
 		vectors.enumerated().forEach(doTest)
 	}
 
@@ -102,7 +101,7 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("encryptedSnapshot"))
 		XCTAssertTrue(jsonString.contains("version"))
 	}
-	
+
 	func test_json_roundtrip() throws {
 		func doTest(_ sut: SUT, _ json: String) throws {
 			let encoded = sut.toJSONString(prettyPrinted: false)
@@ -116,8 +115,7 @@ final class ProfileTests: Test<Profile> {
 		// vectors.append(vector)
 		try vectors.forEach(doTest)
 	}
-	
-	
+
 	// Macbook Pro M2: 0.06 (10x speedup vs BagOfBytes)
 	func test_performance_json_encoding_string() throws {
 		let (sut, _) = vector
@@ -125,7 +123,7 @@ final class ProfileTests: Test<Profile> {
 			let _ = sut.toJSONString()
 		}
 	}
-	
+
 	// Macbook Pro M2: 0.1 (2.5x speedup vs BagOfBytes)
 	func test_performance_json_decoding_string() throws {
 		let (_, jsonString) = vector
@@ -133,22 +131,20 @@ final class ProfileTests: Test<Profile> {
 			let _ = try! SUT(jsonString: jsonString)
 		}
 	}
-	
-	lazy var vector: (model: Profile, jsonString: String) = {
-		try! jsonString(
-			as: SUT.self,
-			file: "huge_profile_1000_accounts",
-			decode: { try Profile(jsonString: $0) }
-		)
-	}()
 
-    func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_not_present() {
+	lazy var vector: (model: Profile, jsonString: String) = try! jsonString(
+		as: SUT.self,
+		file: "huge_profile_1000_accounts",
+		decode: { try Profile(jsonString: $0) }
+	)
+
+	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_not_present() {
 		eachSample { sut in
 			XCTAssertFalse(
 				SUT.checkIfProfileJsonStringContainsLegacyP2PLinks(jsonString: sut.toJSONString())
 			)
 		}
-    }
+	}
 
 	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
 		let json = try openFile(subPath: "vector", "only_plaintext_profile_snapshot_version_100", extension: "json")
@@ -169,7 +165,7 @@ final class ProfileTests: Test<Profile> {
 			SUT.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: json, password: "babylon")
 		)
 	}
-	
+
 	func test_check_if_encrypted_profile_json_string_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
 		let json = try openFile(subPath: "vector", "profile_encrypted_by_password_of_babylon", extension: "json")
 		let jsonString = try XCTUnwrap(String(data: json, encoding: .utf8))

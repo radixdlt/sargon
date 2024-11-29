@@ -6,5 +6,5 @@
 // DISADVANTAGE:
 // Here in Sargon we can refer to symbols inside of `SargonUniFFI` without having to do `import SargonUniFFI` in some file `Foo.swift`
 // unfortunately since Xcode 15 the `@_exported import SargonUniFFI` only helps with COMPILATION but NOT code HIGHLIGHTING, meaning that
-// we get no code highlighting of those `SargonUniFFI` symbols inside of `Foo.swift`. 
+// we get no code highlighting of those `SargonUniFFI` symbols inside of `Foo.swift`.
 @_exported import SargonUniFFI

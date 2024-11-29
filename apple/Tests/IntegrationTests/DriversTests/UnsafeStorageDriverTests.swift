@@ -4,9 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-
 class UnsafeStorageDriverTests: DriverTest<UnsafeStorage> {
-	
 	func test_crud() async throws {
 		let sut = SUT()
 		let key = UnsafeStorage.Key.factorSourceUserHasWrittenDown

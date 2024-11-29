@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 #if os(iOS)
 typealias PlatformSpecificColor = UIColor
 extension UIColor {
@@ -227,8 +226,4 @@ extension Color {
 			opacity: opacity
 		)
 	}
-
-
-
 }
-

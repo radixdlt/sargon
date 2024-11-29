@@ -1,12 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Michael Bakogiannis on 24/7/24.
-//
-
 import Foundation
 
+// MARK: - HostOs + SargonModel
 extension HostOs: SargonModel {}
 
 extension HostOs {

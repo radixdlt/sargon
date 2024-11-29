@@ -1,5 +1,5 @@
-import SargonUniFFI
 import Foundation
+import SargonUniFFI
 
 extension PersonaDataIdentifiedPhoneNumber {
 	public func embed() -> AnyIdentifiedPersonaEntry {
@@ -43,7 +43,6 @@ struct PersonaFieldCollectionValueWithIDNotFound: Swift.Error {
 public typealias PersonaDataEntryID = UUID
 
 extension PersonaData.Entry {
-	
 	public func extract<F>(
 		_ type: F.Type = F.self
 	) -> F? where F: PersonaDataEntryProtocol {

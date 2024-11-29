@@ -1,10 +1,3 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-06-01.
-//
-
 import Foundation
 import Sargon
 import SwiftUI
@@ -45,6 +38,7 @@ extension TrustedContactFactorSourceContact {
 		.frame(maxWidth: .infinity)
 	}
 }
+
 extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 	public func display(
 		action: (() -> Void)?
@@ -59,6 +53,7 @@ extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 		.frame(maxWidth: .infinity)
 	}
 }
+
 extension OffDeviceMnemonicHint {
 	public func display(
 		action: (() -> Void)? = nil
@@ -73,6 +68,7 @@ extension OffDeviceMnemonicHint {
 		.frame(maxWidth: .infinity)
 	}
 }
+
 extension ArculusCardHint {
 	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {
@@ -83,6 +79,7 @@ extension ArculusCardHint {
 		.frame(maxWidth: .infinity)
 	}
 }
+
 extension DeviceFactorSourceHint {
 	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {

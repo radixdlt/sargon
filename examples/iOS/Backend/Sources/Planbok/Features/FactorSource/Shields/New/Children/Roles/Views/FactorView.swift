@@ -1,20 +1,13 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-07.
-//
-
 import Foundation
-import SwiftUI
 import Sargon
+import SwiftUI
 
+// MARK: - FactorView
 public struct FactorView: SwiftUI.View {
-
 	public let factor: Factor
 	public let pickAction: (() -> Void)?
 	public let removeAction: (() -> Void)?
-	
+
 	public init(
 		factor: Factor,
 		pickAction: (() -> Void)? = nil,
@@ -24,13 +17,13 @@ public struct FactorView: SwiftUI.View {
 		self.pickAction = pickAction
 		self.removeAction = removeAction
 	}
-	
+
 	public init(
 		_ factorSource: FactorSource
 	) {
 		self.init(factor: Factor(factorSource: factorSource))
 	}
-	
+
 	public var body: some SwiftUI.View {
 		HStack {
 			if let pickAction {
@@ -40,10 +33,9 @@ public struct FactorView: SwiftUI.View {
 			} else {
 				label
 			}
-			
-			
+
 			Spacer()
-			
+
 			if let removeAction {
 				Button(action: removeAction, label: {
 					Image(systemName: "plus").rotationEffect(.degrees(45))
@@ -51,12 +43,11 @@ public struct FactorView: SwiftUI.View {
 			}
 		}
 	}
-	
+
 	@ViewBuilder
 	private var label: some View {
 		HStack(alignment: .top) {
 			if let factorSource = factor.factorSource {
-				
 				Image(systemName: factorSource.kind.image)
 					.resizable()
 					.imageScale(.large)
@@ -64,7 +55,7 @@ public struct FactorView: SwiftUI.View {
 					.frame(width: 40)
 					.rotationEffect(.degrees(factorSource.kind.rotationDegrees))
 					.offset(y: factorSource.kind.rotationDegrees > 0 ? 10 : 0)
-				
+
 				VStack(alignment: .leading) {
 					Text("\(factorSource.kind.title)")
 					if let subtitle = factorSource.kind.subtitle {
@@ -88,21 +79,21 @@ public struct FactorView: SwiftUI.View {
 extension FactorSourceKind {
 	public var image: String {
 		switch self {
-		case .device: return "lock.iphone"
-		case .ledgerHqHardwareWallet: return "mediastick"
-		case .arculusCard: return "key.radiowaves.forward"
-		case .trustedContact: return "figure.child.and.lock"
-		case .securityQuestions: return "person.crop.circle.badge.questionmark"
-		case .offDeviceMnemonic: return "key"
+		case .device: "lock.iphone"
+		case .ledgerHqHardwareWallet: "mediastick"
+		case .arculusCard: "key.radiowaves.forward"
+		case .trustedContact: "figure.child.and.lock"
+		case .securityQuestions: "person.crop.circle.badge.questionmark"
+		case .offDeviceMnemonic: "key"
 		}
 	}
+
 	public var rotationDegrees: CGFloat {
 		switch self {
-		case .ledgerHqHardwareWallet: return 90
-		default: return 0
+		case .ledgerHqHardwareWallet: 90
+		default: 0
 		}
 	}
-	
 }
 
 #Preview {

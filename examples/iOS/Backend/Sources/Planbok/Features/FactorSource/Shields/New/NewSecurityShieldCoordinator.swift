@@ -1,24 +1,16 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-06.
-//
-
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 
+// MARK: - NewSecurityShieldCoordinator
 @Reducer
 public struct NewSecurityShieldCoordinator {
-		
 	@Reducer(state: .equatable)
 	public enum Path {
 		case roleFactors(RoleFactorsFeature)
 		case nameShield(NameNewShieldFeature)
 	}
-	
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		@Shared(.newShieldDraft) var newShieldDraft
@@ -28,20 +20,20 @@ public struct NewSecurityShieldCoordinator {
 			self.intro = IntroWhatIsShieldFeature.State()
 			if let preset {
 				newShieldDraft = .init(copyAndEdit: preset)
-				
+
 				// skip intro
 				HostingFeature.next(&self)
 			}
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action {
 		case path(StackAction<Path.State, Path.Action>)
 		case intro(IntroWhatIsShieldFeature.Action)
-	
+
 		case delegate(DelegateAction)
-		
+
 		public enum DelegateAction {
 			case done
 		}
@@ -54,22 +46,22 @@ public struct NewSecurityShieldCoordinator {
 	) -> EffectOf<Self> {
 		let nextRole: Role? = switch lastRole {
 		case .none:
-				.primary
+			.primary
 		case .primary:
-				.recovery
+			.recovery
 		case .recovery:
-				.confirmation
+			.confirmation
 		case .confirmation:
 			nil
 		}
-		if let nextRole  {
+		if let nextRole {
 			state.path.append(.roleFactors(RoleFactorsFeature.State(role: nextRole)))
 		} else {
 			state.path.append(.nameShield(NameNewShieldFeature.State()))
 		}
 		return .none
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.intro, action: \.intro) {
 			IntroWhatIsShieldFeature()
@@ -77,22 +69,22 @@ public struct NewSecurityShieldCoordinator {
 		Reduce { state, action in
 			switch action {
 			case .intro(.delegate(.continue)):
-				return Self.next(&state)
+				Self.next(&state)
 
 			case let .path(.element(id: _, action: .roleFactors(.delegate(.continue(role))))):
-				return Self.next(lastRole: role, &state)
-				
+				Self.next(lastRole: role, &state)
+
 			case .path(.element(id: _, action: .nameShield(.delegate(.done)))):
-				return .send(.delegate(.done))
-				
+				.send(.delegate(.done))
+
 			case .path:
-				return .none
+				.none
 
 			case .intro:
-				return .none
+				.none
+
 			case .delegate:
-				return .none
-				
+				.none
 			}
 		}
 		.forEach(\.path, action: \.path)
@@ -101,12 +93,13 @@ public struct NewSecurityShieldCoordinator {
 
 extension NewSecurityShieldCoordinator {
 	public typealias HostingFeature = Self
-	
+
 	public struct View: SwiftUI.View {
 		@Bindable public var store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
+
 		public var body: some SwiftUI.View {
 			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				IntroWhatIsShieldFeature.View(

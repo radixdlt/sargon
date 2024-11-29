@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-03.
-//
-
 import Foundation
 import SargonUniFFI
 
@@ -24,14 +17,13 @@ extension Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage: SecureStorag
 	public func loadData(key: SecureStorageKey) async throws -> Data? {
 		dictionary[key]
 	}
-	
+
 	public func saveData(key: SecureStorageKey, data: Data) async throws {
 		dictionary[key] = data
 	}
-	
+
 	public func deleteDataForKey(key: SecureStorageKey) async throws {
 		dictionary.removeValue(forKey: key)
 	}
-	
 }
 #endif

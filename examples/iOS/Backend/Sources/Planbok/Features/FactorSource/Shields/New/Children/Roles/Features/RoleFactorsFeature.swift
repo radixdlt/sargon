@@ -1,18 +1,10 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-06-06.
-//
-
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 
+// MARK: - RoleFactorsFeature
 @Reducer
 public struct RoleFactorsFeature {
-	
-	
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case pickFactorSourceCoordinator(PickFactorSourceCoordinator)
@@ -26,48 +18,45 @@ public struct RoleFactorsFeature {
 		public var thresholdFactorsBuilder: FactorsBuilderFeature.State
 		public var overrideFactorsBuilder: FactorsBuilderFeature.State
 		public let role: Role
-		
+
 		@Presents var destination: Destination.State?
-		
+
 		public var daysUntilAutoConfirm: UInt16 {
 			newShieldDraft.numberOfDaysUntilAutoConfirmation
 		}
-		
+
 		public init(role: Role) {
 			self.role = role
 			self.thresholdFactorsBuilder = FactorsBuilderFeature.State(mode: .threshold, role: role)
 			self.overrideFactorsBuilder = FactorsBuilderFeature.State(mode: .override, role: role)
 		}
-		
+
 		var canProceed: Bool {
 			newShieldDraft.isValidRole(role)
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action: ViewAction {
-		
 		@CasePathable
 		public enum ViewAction {
 			case confirmButtonTapped
 			case changeDaysUntilAutoConfirmButtonTapped
-        }
-        
-        public enum DelegateAction {
+		}
+
+		public enum DelegateAction {
 			case `continue`(role: Role)
-        }
-		
+		}
+
 		case destination(PresentationAction<Destination.Action>)
-		
-        
-        case view(ViewAction)
+
+		case view(ViewAction)
 		case delegate(DelegateAction)
-		
+
 		case thresholdFactorsBuilder(FactorsBuilderFeature.Action)
 		case overrideFactorsBuilder(FactorsBuilderFeature.Action)
-		
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.thresholdFactorsBuilder, action: \.thresholdFactorsBuilder) {
 			FactorsBuilderFeature()
@@ -77,44 +66,41 @@ public struct RoleFactorsFeature {
 		}
 		Reduce { state, action in
 			switch action {
-				
 			case .view(.changeDaysUntilAutoConfirmButtonTapped):
 				state.destination = .setDaysUntilAutoConfirm(SetDaysUntilAutoConfirm.State())
 				return .none
-				
+
 			case .view(.confirmButtonTapped):
 				return .send(.delegate(.continue(role: state.role)))
-                
+
 			case .thresholdFactorsBuilder(.delegate(.pickFactor)), .overrideFactorsBuilder(.delegate(.pickFactor)):
 				state.destination = .pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(role: state.role))
 				return .none
-				
-				
+
 			case .thresholdFactorsBuilder(.delegate(.setThreshold)):
 				state.destination = .setFactorThreshold(SetFactorThresholdFeature.State(
 					role: state.role
 				))
 				return .none
-				
 
 			case .destination(.presented(.setFactorThreshold(.delegate(.confirm)))):
 				state.destination = nil
 				return .none
-				
+
 			case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
 				state.destination = nil
 				return .none
-				
+
 			case .destination(.presented(.setDaysUntilAutoConfirm(.delegate(.done)))):
 				state.destination = nil
 				return .none
 
 			case .thresholdFactorsBuilder:
 				return .none
-		
+
 			case .overrideFactorsBuilder:
 				return .none
-				
+
 			case .destination:
 				return .none
 
@@ -128,31 +114,30 @@ public struct RoleFactorsFeature {
 
 extension RoleFactorsFeature {
 	public typealias HostingFeature = Self
-	
+
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
-		
 		@Bindable public var store: StoreOf<HostingFeature>
-		
+
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
-		
+
 		public var body: some SwiftUI.View {
 			ScrollView {
 				VStack(alignment: .center, spacing: 20) {
 					Text("\(store.role.title)").font(.largeTitle)
-					
+
 					Text("These factors are required to \(store.role.actionDetailed)")
 						.foregroundStyle(Color.app.gray2)
-					
+
 					FactorsBuilderFeature.View(
 						store: store.scope(
 							state: \.thresholdFactorsBuilder,
 							action: \.thresholdFactorsBuilder
 						)
 					)
-					
+
 					FactorsBuilderFeature.View(
 						store: store.scope(
 							state: \.overrideFactorsBuilder,
@@ -191,7 +176,7 @@ extension RoleFactorsFeature {
 						.buttonStyle(.plain)
 						.frame(maxWidth: .infinity)
 					}
-					
+
 					Button("Confirm") {
 						send(.confirmButtonTapped)
 					}
@@ -219,9 +204,6 @@ extension RoleFactorsFeature {
 		}
 	}
 }
-
-
-
 
 #Preview {
 	RoleFactorsFeature.View(

@@ -1,27 +1,23 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-15.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - Persona + EntityBaseProtocol
 extension Persona: EntityBaseProtocol {
 	public typealias EntityAddress = IdentityAddress
-	
+
 	public var asGeneral: AccountOrPersona {
 		.persona(self)
 	}
 }
+
+// MARK: - Persona + EntityProtocol
 extension Persona: EntityProtocol {
 	public static let kind: EntityKind = .persona
 	public static func extract(from someEntity: some EntityBaseProtocol) -> Self? {
 		guard case let .personaEntity(persona) = someEntity.asGeneral else { return nil }
 		return persona
 	}
-	
+
 	/// Ephemeral, only used as arg passed to init.
 	public struct ExtraProperties: SargonModel {
 		public var personaData: PersonaData
@@ -29,7 +25,7 @@ extension Persona: EntityProtocol {
 			self.personaData = personaData
 		}
 	}
-	
+
 	public init(
 		networkID: NetworkID,
 		address: IdentityAddress,
@@ -46,7 +42,7 @@ extension Persona: EntityProtocol {
 			personaData: extraProperties.personaData
 		)
 	}
-	
+
 	public static func deriveVirtualAddress(
 		networkID: NetworkID,
 		factorInstance: HierarchicalDeterministicFactorInstance

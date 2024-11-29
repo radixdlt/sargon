@@ -20,7 +20,6 @@ public enum ExportableProfileFile: FileDocument, Sendable, Hashable {
 	case encrypted(Data)
 }
 
-
 extension ExportableProfileFile {
 	public static let readableContentTypes: [UTType] = [.profile]
 

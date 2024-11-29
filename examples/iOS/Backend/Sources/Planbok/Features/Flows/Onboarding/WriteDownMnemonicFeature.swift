@@ -1,39 +1,34 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-02-16.
-//
-
-import Foundation
 import ComposableArchitecture
+import Foundation
 import Sargon
 
+// MARK: - WriteDownMnemonicFeature
 @Reducer
 public struct WriteDownMnemonicFeature {
-
 	@Dependency(MnemonicClient.self) var mnemonicClient
-	
+
 	public init() {}
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public var mnemonic: String?
-		public init() {
-		}
+		public init() {}
 	}
-	
+
 	public enum Action: ViewAction {
 		public enum DelegateAction {
 			case done
 		}
+
 		public enum ViewAction {
 			case revealMnemonicButtonTapped
 			case continueButtonTapped
 		}
+
 		public enum InternalAction {
 			case loadedPrivateHDFactor(PrivateHierarchicalDeterministicFactorSource)
 		}
+
 		case delegate(DelegateAction)
 		case view(ViewAction)
 		case `internal`(InternalAction)
@@ -45,13 +40,12 @@ public struct WriteDownMnemonicFeature {
 			case let .internal(.loadedPrivateHDFactor(privateHDFactor)):
 				state.mnemonic = privateHDFactor.mnemonicWithPassphrase.mnemonic.phrase
 				return .none
-				
 			case .view(.revealMnemonicButtonTapped):
 				return .run { send in
 					let id = try SargonOS.shared.profile().factorSources.first!.id.extract(as: FactorSourceIdFromHash.self)
 					let privateHDFactor = try await mnemonicClient.loadMnemonic(id)
 					await send(.internal(.loadedPrivateHDFactor(privateHDFactor)))
-				} catch: { error, send in
+				} catch: { error, _ in
 					fatalError("error \(error)")
 				}
 			case .view(.continueButtonTapped):
@@ -63,12 +57,12 @@ public struct WriteDownMnemonicFeature {
 	}
 }
 
+// MARK: WriteDownMnemonicFeature.View
 extension WriteDownMnemonicFeature {
-	
 	@ViewAction(for: WriteDownMnemonicFeature.self)
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<WriteDownMnemonicFeature>
-		
+
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("Write down your mnemonic on a piece of paper and put it in a safe")
@@ -90,5 +84,4 @@ extension WriteDownMnemonicFeature {
 			.padding()
 		}
 	}
-	
 }

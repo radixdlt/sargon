@@ -1,19 +1,12 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-01.
-//
-
-import Foundation
 import ComposableArchitecture
+import Foundation
 import Sargon
 
+// MARK: - NewHWFactorSourceFeature
 @Reducer
 public struct NewHWFactorSourceFeature {
-	
 	@Dependency(FactorSourcesClient.self) var factorSourcesClient
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public let kind: FactorSourceKind
@@ -23,7 +16,7 @@ public struct NewHWFactorSourceFeature {
 			self.inputMnemonic = .init()
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action {
 		case `internal`(InternalAction)
@@ -32,34 +25,35 @@ public struct NewHWFactorSourceFeature {
 		public enum InternalAction {
 			case inputMnemonic(InputMnemonicFeature.Action)
 		}
+
 		@CasePathable
 		public enum DelegateAction {
 			case createdAndSavedNewFactorSource
 		}
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.inputMnemonic, action: \.internal.inputMnemonic) {
 			InputMnemonicFeature()
 		}
-		
+
 		Reduce { state, action in
 			switch action {
 			case let .internal(.inputMnemonic(.delegate(.confirmed(mnemonicWithPassphrase)))):
-				return .run { [kind = state.kind] send in
+				.run { [kind = state.kind] send in
 					let factorSource = try await factorSourcesClient.createHWFactorSource(mnemonicWithPassphrase, kind)
 					try await factorSourcesClient.addFactorSource(factorSource)
 					await send(.delegate(.createdAndSavedNewFactorSource))
 				}
+
 			case .delegate:
-				return .none
-				
+				.none
+
 			case .internal:
-				return .none
+				.none
 			}
 		}
 	}
-	
 }
 
 extension NewHWFactorSourceFeature {
@@ -69,6 +63,7 @@ extension NewHWFactorSourceFeature {
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
+
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("New \(store.state.kind) Factor")

@@ -1,12 +1,11 @@
-
+// MARK: - LabeledTextField
 public struct LabeledTextField<Trailing: SwiftUI.View>: SwiftUI.View {
-	
 	public let label: LocalizedStringKey
 	public let placeholder: LocalizedStringKey
 	@Binding public var text: String
 	public let hint: LocalizedStringKey?
 	public let trailingView: Trailing
-	
+
 	init(
 		label: LocalizedStringKey,
 		text: Binding<String>,
@@ -21,6 +20,7 @@ public struct LabeledTextField<Trailing: SwiftUI.View>: SwiftUI.View {
 		self.trailingView = trailingView()
 	}
 }
+
 extension LabeledTextField where Trailing == EmptyView {
 	public init(
 		label: LocalizedStringKey,
@@ -37,7 +37,7 @@ extension LabeledTextField {
 		VStack(alignment: .leading) {
 			Text(label)
 				.padding(.leading, 5)
-			
+
 			HStack {
 				TextField(placeholder, text: $text)
 					.autocorrectionDisabled()
@@ -46,7 +46,7 @@ extension LabeledTextField {
 
 				trailingView
 			}
-			
+
 			Text(hint ?? "")
 				.font(.footnote)
 				.padding(.leading, 5)

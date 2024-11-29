@@ -1,13 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-07.
-//
-
 import Foundation
 import Sargon
 
+// MARK: - FactorSourceKind + Identifiable
 extension FactorSourceKind: Identifiable {
 	public typealias ID = String
 	public var id: ID {
@@ -15,23 +9,25 @@ extension FactorSourceKind: Identifiable {
 	}
 }
 
+// MARK: - FactorSourceKind + CaseIterable
 extension FactorSourceKind: CaseIterable {
 	// FIXME: MOVE Into Rust Sargon!
-	public static let allCases: [Self]  =  [
+	public static let allCases: [Self] = [
 		.device,
 		.arculusCard,
 		.ledgerHqHardwareWallet,
 		.offDeviceMnemonic,
 		.trustedContact,
-		.securityQuestions
+		.securityQuestions,
 	]
 }
 
+// MARK: - FactorSourceKindUnavailabilityReason
 // FIXME: MOVE Into Rust Sargon!
 public enum FactorSourceKindUnavailabilityReason: Hashable, Sendable {
 	case canNeverBeUsedForRole(Role)
 	case exceededLimitOfKindPerRoleReached(exceededLimit: UInt8, Role)
-	
+
 	public func toString(kind: FactorSourceKind) -> String {
 		switch self {
 		case let .canNeverBeUsedForRole(role): "Cannot be used as \(role)"
@@ -41,7 +37,6 @@ public enum FactorSourceKindUnavailabilityReason: Hashable, Sendable {
 }
 
 extension FactorSourceKind {
-	
 	// FIXME: MOVE Into Rust Sargon!
 	public func unavailabilityForRole(_ role: Role, usedFactorsForRole: FactorSources) -> FactorSourceKindUnavailabilityReason? {
 		guard canBeUsedForRole(role) else {
@@ -56,47 +51,47 @@ extension FactorSourceKind {
 			return nil // free to use
 		}
 	}
-	
+
 	// FIXME: MOVE Into Rust Sargon!
 	private func limitOfFactorSourceKindFor(role: Role) -> UInt8? {
 		switch self {
-		case .device: return 1
-		default: return nil
+		case .device: 1
+		default: nil
 		}
 	}
-	
+
 	// FIXME: MOVE Into Rust Sargon!
 	private func canBeUsedForRole(_ role: Role) -> Bool {
 		switch self {
 		case .device:
-			return role == .primary
+			role == .primary
 		case .securityQuestions:
-			return role == .confirmation
+			role == .confirmation
 		case .offDeviceMnemonic:
-			return role != .primary
+			role != .primary
 		case .trustedContact:
-			return role != .primary
-		default: return true
+			role != .primary
+		default: true
 		}
 	}
 }
 
 extension FactorSourceKind {
-
 	public var title: String {
 		switch self {
-		case .device: return "This Phone"
-        case .arculusCard: return "Arculus Card"
-        case .ledgerHqHardwareWallet: return "Ledger Hardware Wallet"
-        case .trustedContact: return "Trusted Contact"
-        case .securityQuestions: return "Security Questions"
-        case .offDeviceMnemonic: return "Password"
+		case .device: "This Phone"
+		case .arculusCard: "Arculus Card"
+		case .ledgerHqHardwareWallet: "Ledger Hardware Wallet"
+		case .trustedContact: "Trusted Contact"
+		case .securityQuestions: "Security Questions"
+		case .offDeviceMnemonic: "Password"
 		}
 	}
+
 	public var subtitle: String? {
 		switch self {
-		case .device: return "Face ID / PIN"
-		default: return nil
+		case .device: "Face ID / PIN"
+		default: nil
 		}
 	}
 }

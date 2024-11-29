@@ -5,18 +5,16 @@ import SargonUniFFI
 import XCTest
 
 class EntropyProviderDriverTests: DriverTest<EntropyProvider> {
-	
 	func test() {
 		let sut = SUT()
 		let n = 10
 		XCTAssertEqual(
-			Set((0..<n)
+			Set((0 ..< n)
 				.map { _ in
 					sut.generateSecureRandomBytes()
 				})
-			.count,
+				.count,
 			n
 		)
 	}
-	
 }
