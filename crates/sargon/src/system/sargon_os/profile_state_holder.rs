@@ -148,20 +148,18 @@ impl ProfileStateHolder {
         let mut lock = self.state.write().expect(
             "Stop execution due to the profile state lock being poisoned",
         );
-        Self::assert_factor_instances_valid(&profile_state)?;
+        Self::diagnostics_for_factor_instances_valid(&profile_state);
         *lock = profile_state;
         Ok(())
     }
 
-    pub(crate) fn assert_factor_instances_valid(
+    pub(crate) fn diagnostics_for_factor_instances_valid(
         profile_state: &ProfileState,
-    ) -> Result<()> {
-        match profile_state {
-            ProfileState::Loaded(profile) => {
-                profile.assert_factor_instances_valid()
-            }
-            _ => Ok(()),
-        }
+    ) {
+        let Some(profile) = profile_state.as_loaded() else {
+            return;
+        };
+        profile.diagnostics_for_factor_instances_valid();
     }
 
     /// Updates the in-memory profile held by this `ProfileStateHolder`, you might
@@ -179,12 +177,9 @@ impl ProfileStateHolder {
 
         match state {
             ProfileState::Loaded(ref mut profile) => {
-                let backup = profile.clone();
-                mutate(profile)
-                    .and_then(|r| {
-                        profile.assert_factor_instances_valid().map(|_| r)
-                    })
-                    .inspect_err(|_| *profile = backup)
+                mutate(profile).inspect(|_| {
+                    profile.diagnostics_for_factor_instances_valid();
+                })
             }
             _ => Err(CommonError::ProfileStateNotLoaded {
                 current_state: state.to_string(),

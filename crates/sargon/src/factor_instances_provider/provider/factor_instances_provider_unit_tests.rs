@@ -151,6 +151,12 @@ impl SargonOS {
 
         assert!(security_structures_of_factor_instances.is_empty());
 
+        // Assert that none of the NEW FactorInstances collide with the existing ones
+        self.profile()
+            .unwrap()
+            .assert_new_factor_instances_not_already_used(
+                securified_accounts.clone(),
+            )?;
         self.update_entities(securified_accounts.clone()).await?;
 
         Ok((
@@ -650,8 +656,12 @@ async fn test_assert_factor_instances_invalid() {
         )
         .unwrap();
 
-    let profile_snapshot_before_failing_op = os.profile().unwrap();
-    let res = os.update_accounts(Accounts::just(securified_bob)).await;
+    let res = os
+        .profile()
+        .unwrap()
+        .assert_new_factor_instances_not_already_used(Accounts::just(
+            securified_bob.clone(),
+        ));
     assert!(res.is_err());
 
     let err = CommonError::FactorInstancesDiscrepancy {
@@ -660,11 +670,6 @@ async fn test_assert_factor_instances_invalid() {
         factor_source_id: bdfs.factor_source_id().to_string(),
     };
     pretty_assertions::assert_eq!(res, Err(err));
-    let profile_snapshot_after_failing_op = os.profile().unwrap();
-    assert_eq!(
-        profile_snapshot_after_failing_op,
-        profile_snapshot_before_failing_op
-    );
 
     let mut fake_frank = securified_alice.clone();
     fake_frank.address = AccountAddress::sample_frank();

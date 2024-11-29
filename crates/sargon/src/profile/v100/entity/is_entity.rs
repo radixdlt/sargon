@@ -9,6 +9,7 @@ pub trait IsBaseEntity:
         + Eq
         + std::hash::Hash
         + std::fmt::Display
+        + Into<AddressOfAccountOrPersona>
         + std::fmt::Debug;
 
     fn address(&self) -> Self::Address;

@@ -778,7 +778,7 @@ impl SargonOS {
                 Ok(())
             }
             .and_then(|_| {
-                p.assert_factor_instances_valid().inspect_err(|_| { p.networks = networks_backup; })
+                p.assert_new_factor_instances_not_already_used(entities.clone()).inspect_err(|_| { p.networks = networks_backup; })
             })
         })
         .await?;

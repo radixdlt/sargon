@@ -94,7 +94,6 @@ impl SargonOS {
             "Saved imported profile into secure storage, id: {}",
             imported_id
         );
-
         self.profile_state_holder
             .replace_profile_state_with(ProfileState::Loaded(profile))?;
         debug!(

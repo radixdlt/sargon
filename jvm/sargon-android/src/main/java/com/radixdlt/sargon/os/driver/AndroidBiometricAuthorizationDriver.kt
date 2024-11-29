@@ -63,7 +63,7 @@ class BiometricsHandler(
             .launchIn(activity.lifecycleScope)
     }
 
-    internal suspend fun askForBiometrics(): Result<Unit> {
+    suspend fun askForBiometrics(): Result<Unit> {
         // Suspend until an activity is subscribed to this channel and is at least started
         biometricRequestsChannel.send(Unit)
 
