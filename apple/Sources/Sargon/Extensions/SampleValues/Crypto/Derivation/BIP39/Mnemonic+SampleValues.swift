@@ -36,7 +36,7 @@ extension Mnemonic {
 		.sampleSecurityQuestions,
 		.sampleSecurityQuestionsOther,
 		.samplePassword,
-		.samplePasswordOther
+		.samplePasswordOther,
 	]
 }
 #endif // DEBUG
