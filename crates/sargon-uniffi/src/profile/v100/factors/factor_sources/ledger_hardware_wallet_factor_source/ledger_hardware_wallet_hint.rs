@@ -5,7 +5,7 @@ use sargon::LedgerHardwareWalletHint as InternalLedgerHardwareWalletHint;
 pub struct LedgerHardwareWalletHint {
     /// A user-assigned name for the ledger, intended to help users
     /// differentiate between multiple ledgers.
-    /// 
+    ///
     /// E.g. "Orange, scratched"
     pub label: String,
 

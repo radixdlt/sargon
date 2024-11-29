@@ -5,7 +5,7 @@ use sargon::ArculusCardHint as InternalArculusCardHint;
 pub struct ArculusCardHint {
     /// A user-assigned name for the arculus card, intended to help users
     /// differentiate between multiple arculus cards.
-    /// 
+    ///
     /// E.g. "Black" or "Silver"
     pub label: String,
 
