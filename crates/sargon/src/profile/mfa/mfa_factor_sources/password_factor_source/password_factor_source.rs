@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 /// NOT IMPLEMENTED NOR USED YET
 ///
-/// A passphrase based FactorSource is essentially a Input Key Material based Mnemonic,
-/// user needs to input the passphrase - key material - every time they use this factor source
+/// A password based FactorSource is essentially a Input Key Material based Mnemonic,
+/// user needs to input the password - key material - every time they use this factor source
 #[derive(
     Serialize,
     Deserialize,
@@ -16,7 +16,7 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{id}")]
-pub struct PassphraseFactorSource {
+pub struct PasswordFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
     pub id: FactorSourceIDFromHash,
@@ -24,65 +24,77 @@ pub struct PassphraseFactorSource {
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     pub common: FactorSourceCommon,
+
+    /// Properties describing a PasswordFactorSource to help user
+    /// disambiguate between it and another one.
+    pub hint: PasswordFactorSourceHint,
 }
 
-impl PassphraseFactorSource {
-    /// Instantiates a new `PassphraseFactorSource`
-    pub fn new(id: FactorSourceIDFromHash) -> Self {
+impl PasswordFactorSource {
+    /// Instantiates a new `PasswordFactorSource`
+    pub fn new(
+        id: FactorSourceIDFromHash,
+        hint: PasswordFactorSourceHint,
+    ) -> Self {
         Self {
             id,
             common: FactorSourceCommon::new_bdfs(false),
+            hint,
         }
     }
 }
 
-impl From<PassphraseFactorSource> for FactorSource {
-    fn from(value: PassphraseFactorSource) -> Self {
-        FactorSource::Passphrase { value }
+impl From<PasswordFactorSource> for FactorSource {
+    fn from(value: PasswordFactorSource) -> Self {
+        FactorSource::Password { value }
     }
 }
 
-fn new_passphrase_with_mwp(
+fn new_password_with_mwp(
     mwp: MnemonicWithPassphrase,
-) -> PassphraseFactorSource {
-    let id = FactorSourceIDFromHash::new_for_passphrase(&mwp);
-    let mut source = PassphraseFactorSource::new(id);
+    hint: PasswordFactorSourceHint,
+) -> PasswordFactorSource {
+    let id = FactorSourceIDFromHash::new_for_password(&mwp);
+    let mut source = PasswordFactorSource::new(id, hint);
     source.common.last_used_on = Timestamp::sample();
     source.common.added_on = Timestamp::sample();
     source
 }
 
-impl HasSampleValues for PassphraseFactorSource {
+impl HasSampleValues for PasswordFactorSource {
     fn sample() -> Self {
-        new_passphrase_with_mwp(MnemonicWithPassphrase::sample_passphrase())
+        new_password_with_mwp(
+            MnemonicWithPassphrase::sample_password(),
+            PasswordFactorSourceHint::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        new_passphrase_with_mwp(
-            MnemonicWithPassphrase::sample_passphrase_other(),
+        new_password_with_mwp(
+            MnemonicWithPassphrase::sample_password_other(),
+            PasswordFactorSourceHint::sample_other(),
         )
     }
 }
 
-impl TryFrom<FactorSource> for PassphraseFactorSource {
+impl TryFrom<FactorSource> for PasswordFactorSource {
     type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self> {
         match value {
-            FactorSource::Passphrase { value } => Ok(value),
-            _ => {
-                Err(Self::Error::ExpectedPassphraseFactorSourceGotSomethingElse)
-            }
+            FactorSource::Password { value } => Ok(value),
+            _ => Err(Self::Error::ExpectedPasswordFactorSourceGotSomethingElse),
         }
     }
 }
 
-impl IsFactorSource for PassphraseFactorSource {
+impl IsFactorSource for PasswordFactorSource {
     fn kind() -> FactorSourceKind {
-        FactorSourceKind::Passphrase
+        FactorSourceKind::Password
     }
 }
-impl BaseIsFactorSource for PassphraseFactorSource {
+
+impl BaseBaseIsFactorSource for PasswordFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind
     }
@@ -98,6 +110,10 @@ impl BaseIsFactorSource for PassphraseFactorSource {
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
     }
+
+    fn name(&self) -> String {
+        self.hint.label.clone()
+    }
 }
 
 #[cfg(test)]
@@ -105,7 +121,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = PassphraseFactorSource;
+    type SUT = PasswordFactorSource;
 
     #[test]
     fn equality() {
@@ -126,7 +142,7 @@ mod tests {
             r#"
             {
                 "id": {
-                    "kind": "passphrase",
+                    "kind": "password",
                     "body": "181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9"
                 },
                 "common": {
@@ -137,6 +153,9 @@ mod tests {
                     },
                     "flags": [],
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
+                },
+                "hint": {
+                    "label": "Password 1"
                 }
             }
             "#,
@@ -152,7 +171,7 @@ mod tests {
 
     #[test]
     fn kind() {
-        assert_eq!(SUT::kind(), FactorSourceKind::Passphrase);
+        assert_eq!(SUT::kind(), FactorSourceKind::Password);
     }
 
     #[test]
@@ -161,7 +180,7 @@ mod tests {
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
             SUT::try_from(factor_source),
-            Err(CommonError::ExpectedPassphraseFactorSourceGotSomethingElse)
+            Err(CommonError::ExpectedPasswordFactorSourceGotSomethingElse)
         );
     }
 
@@ -173,5 +192,10 @@ mod tests {
     #[test]
     fn factor_source_kind() {
         assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Password 1");
     }
 }

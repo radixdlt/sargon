@@ -14,12 +14,14 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct OffDeviceMnemonicHint {
-    pub display_name: DisplayName,
+    /// A user-assigned name for the passphrase, intended to help users
+    /// differentiate between multiple passphrases.
+    pub label: DisplayName,
 }
 
 impl OffDeviceMnemonicHint {
-    pub fn new(display_name: DisplayName) -> Self {
-        Self { display_name }
+    pub fn new(label: DisplayName) -> Self {
+        Self { label }
     }
 }
 

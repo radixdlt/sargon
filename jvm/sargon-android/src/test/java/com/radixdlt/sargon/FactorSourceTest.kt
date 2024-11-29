@@ -9,6 +9,7 @@ import com.radixdlt.sargon.extensions.kind
 import com.radixdlt.sargon.extensions.olympia
 import com.radixdlt.sargon.extensions.supportsBabylon
 import com.radixdlt.sargon.extensions.supportsOlympia
+import com.radixdlt.sargon.extensions.name
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import com.radixdlt.sargon.samples.sampleMainnet
@@ -136,6 +137,14 @@ class FactorSourceTest : SampleTestable<FactorSource> {
     }
 
     @Test
+    fun testName() {
+        assertEquals(
+            "My Phone",
+            FactorSource.sample().name
+        )
+    }
+
+    @Test
     fun testNewBabylonIsMain() {
         assertTrue(
             FactorSource.Device.babylon(
@@ -215,7 +224,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
                 flags = emptyList()
             ),
             hint = ArculusCardHint(
-                name = "My Arculus",
+                label = "My Arculus",
                 model = ArculusCardModel.ARCULUS_COLD_STORAGE_WALLET
             )
         )
@@ -237,7 +246,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
                 flags = emptyList()
             ),
             hint = OffDeviceMnemonicHint(
-                displayName = DisplayName("My mnemonic stored somewhere")
+                label = DisplayName("My mnemonic stored somewhere")
             )
         )
     )

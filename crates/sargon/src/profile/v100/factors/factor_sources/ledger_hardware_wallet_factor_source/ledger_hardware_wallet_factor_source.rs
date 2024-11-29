@@ -82,7 +82,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
         FactorSourceKind::LedgerHQHardwareWallet
     }
 }
-impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
+impl BaseBaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }
@@ -97,6 +97,10 @@ impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
 
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
+    }
+
+    fn name(&self) -> String {
+        self.hint.label.clone()
     }
 }
 
@@ -177,5 +181,10 @@ mod tests {
     #[test]
     fn factor_source_kind() {
         assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Orange, scratched");
     }
 }

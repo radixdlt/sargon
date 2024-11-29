@@ -92,7 +92,7 @@ impl IsFactorSource for ArculusCardFactorSource {
         FactorSourceKind::ArculusCard
     }
 }
-impl BaseIsFactorSource for ArculusCardFactorSource {
+impl BaseBaseIsFactorSource for ArculusCardFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }
@@ -107,6 +107,10 @@ impl BaseIsFactorSource for ArculusCardFactorSource {
 
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
+    }
+
+    fn name(&self) -> String {
+        self.hint.label.clone()
     }
 }
 
@@ -149,7 +153,7 @@ mod tests {
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
-                    "name": "Silver",
+                    "label": "Silver",
                     "model": "arculusColdStorageWallet"
                 }
             }
@@ -187,5 +191,10 @@ mod tests {
     #[test]
     fn factor_source_kind() {
         assert_eq!(SUT::sample().factor_source_kind(), SUT::sample().id.kind);
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Silver");
     }
 }

@@ -25,4 +25,8 @@ final class FactorSourceTests: FactorSourceTest<FactorSource> {
 		XCTAssertEqual(SUT.sample.factorSourceKind, .device)
 		XCTAssertEqual(SUT.sampleOther.factorSourceKind, .ledgerHqHardwareWallet)
 	}
+
+	func test_name() {
+		XCTAssertEqual(SUT.sample.name, "My Phone")
+	}
 }

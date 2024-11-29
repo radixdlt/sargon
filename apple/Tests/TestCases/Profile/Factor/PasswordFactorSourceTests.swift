@@ -4,8 +4,8 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class PassphraseFactorSourceTests: SpecificFactorSourceTest<PassphraseFactorSource> {
-	func test_id_of_passphrase() {
+final class PasswordFactorSourceTests: SpecificFactorSourceTest<PasswordFactorSource> {
+	func test_id_of_password() {
 		eachSample { sut in
 			XCTAssertEqual(sut.id.description, FactorSourceID.hash(value: sut.id).description)
 		}
@@ -15,9 +15,10 @@ final class PassphraseFactorSourceTests: SpecificFactorSourceTest<PassphraseFact
 		XCTAssertEqual(
 			SUT(
 				mnemonicWithPassphrase: .init(
-					mnemonic: .samplePassphrase,
+					mnemonic: .samplePassword,
 					passphrase: ""
-				)
+				),
+				hint: .init(label: "Password 1")
 			).id,
 			SUT.sample.id
 		)
@@ -31,13 +32,13 @@ final class PassphraseFactorSourceTests: SpecificFactorSourceTest<PassphraseFact
 
 	func test_kind() {
 		eachSample { sut in
-			XCTAssertEqual(sut.factorSourceKind, .passphrase)
+			XCTAssertEqual(sut.factorSourceKind, .password)
 		}
 	}
 
 	func test_as() {
 		eachSample { sut in
-			XCTAssertEqual(sut.asGeneral.asPassphrase, sut)
+			XCTAssertEqual(sut.asGeneral.asPassword, sut)
 		}
 	}
 
@@ -53,7 +54,7 @@ final class PassphraseFactorSourceTests: SpecificFactorSourceTest<PassphraseFact
 
 	func test_as_general() {
 		eachSample { sut in
-			XCTAssertEqual(sut.asGeneral, FactorSource.passphrase(value: sut))
+			XCTAssertEqual(sut.asGeneral, FactorSource.password(value: sut))
 		}
 	}
 

@@ -944,10 +944,10 @@ async fn test_securified_accounts() {
     let bdfs = FactorSource::from(os.bdfs().unwrap());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
-    let passphrase = FactorSource::sample_passphrase();
+    let password = FactorSource::sample_password();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
-    os.add_factor_source(passphrase.clone()).await.unwrap();
+    os.add_factor_source(password.clone()).await.unwrap();
 
     let matrix_0 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::threshold_factors_only(
@@ -1087,11 +1087,11 @@ async fn test_securified_accounts() {
         );
 
     let matrix_1 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([passphrase.clone()])
+        PrimaryRoleWithFactorSources::override_only([password.clone()])
             .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([passphrase.clone()])
+        RecoveryRoleWithFactorSources::override_only([password.clone()])
             .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([passphrase.clone()])
+        ConfirmationRoleWithFactorSources::override_only([password.clone()])
             .unwrap(),
     )
     .unwrap();
@@ -1125,7 +1125,7 @@ async fn test_securified_accounts() {
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
-        [passphrase.factor_source_id(),]
+        [password.factor_source_id(),]
     );
 
     for factors_for_role in [
@@ -1170,7 +1170,7 @@ async fn test_securified_accounts() {
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
-        [passphrase.factor_source_id(),]
+        [password.factor_source_id(),]
     );
 
     for factors_for_role in [
@@ -1334,10 +1334,10 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
     let (os, bdfs) = SargonOS::with_bdfs().await;
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
-    let passphrase = FactorSource::sample_passphrase();
+    let password = FactorSource::sample_password();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
-    os.add_factor_source(passphrase.clone()).await.unwrap();
+    os.add_factor_source(password.clone()).await.unwrap();
 
     let profile = os.profile().unwrap();
     let factor_sources = profile.factor_sources.clone();
@@ -1347,7 +1347,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             bdfs.clone(),
             ledger.clone(),
             arculus.clone(),
-            passphrase.clone(),
+            password.clone(),
         ]
     );
 
@@ -1802,10 +1802,10 @@ async fn securified_personas() {
     let bdfs = FactorSource::from(os.bdfs().unwrap());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
-    let passphrase = FactorSource::sample_passphrase();
+    let password = FactorSource::sample_password();
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
-    os.add_factor_source(passphrase.clone()).await.unwrap();
+    os.add_factor_source(password.clone()).await.unwrap();
 
     let matrix_0 = MatrixOfFactorSources::new(
         PrimaryRoleWithFactorSources::threshold_factors_only(
@@ -1946,11 +1946,11 @@ async fn securified_personas() {
         );
 
     let matrix_1 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([passphrase.clone()])
+        PrimaryRoleWithFactorSources::override_only([password.clone()])
             .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([passphrase.clone()])
+        RecoveryRoleWithFactorSources::override_only([password.clone()])
             .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([passphrase.clone()])
+        ConfirmationRoleWithFactorSources::override_only([password.clone()])
             .unwrap(),
     )
     .unwrap();
@@ -1989,7 +1989,7 @@ async fn securified_personas() {
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
-        [passphrase.factor_source_id(),]
+        [password.factor_source_id(),]
     );
 
     for factors_for_role in [
@@ -2033,7 +2033,7 @@ async fn securified_personas() {
             .into_iter()
             .map(|f| f.factor_source_id)
             .collect_vec(),
-        [passphrase.factor_source_id(),]
+        [password.factor_source_id(),]
     );
 
     for factors_for_role in [

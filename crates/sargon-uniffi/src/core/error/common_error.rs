@@ -661,8 +661,8 @@ pub enum CommonError {
     #[error("Empty FactorSources list")]
     FactorSourcesOfKindEmptyFactors = 10184,
 
-    #[error("Expected Passphrase factor source got something else")]
-    ExpectedPassphraseFactorSourceGotSomethingElse = 10185,
+    #[error("Expected Password factor source got something else")]
+    ExpectedPasswordFactorSourceGotSomethingElse = 10185,
 
     #[error("Unknown persona.")]
     UnknownPersona = 10186,

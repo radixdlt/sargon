@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::BaseBaseIsFactorSource;
 use sargon::BaseIsFactorSource;
 use sargon::FactorSource as InternalFactorSource;
 
@@ -30,8 +31,8 @@ pub enum FactorSource {
         value: TrustedContactFactorSource,
     },
 
-    Passphrase {
-        value: PassphraseFactorSource,
+    Password {
+        value: PasswordFactorSource,
     },
 }
 
@@ -48,6 +49,11 @@ pub fn factor_source_supports_olympia(factor_source: &FactorSource) -> bool {
 #[uniffi::export]
 pub fn factor_source_supports_babylon(factor_source: &FactorSource) -> bool {
     factor_source.into_internal().supports_babylon()
+}
+
+#[uniffi::export]
+pub fn factor_source_name(factor_source: &FactorSource) -> String {
+    factor_source.into_internal().name()
 }
 
 #[uniffi::export]

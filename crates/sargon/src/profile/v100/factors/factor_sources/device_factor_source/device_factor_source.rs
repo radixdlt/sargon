@@ -46,7 +46,7 @@ impl IsFactorSource for DeviceFactorSource {
         FactorSourceKind::Device
     }
 }
-impl BaseIsFactorSource for DeviceFactorSource {
+impl BaseBaseIsFactorSource for DeviceFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }
@@ -61,6 +61,10 @@ impl BaseIsFactorSource for DeviceFactorSource {
 
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
+    }
+
+    fn name(&self) -> String {
+        self.hint.label.clone()
     }
 }
 
@@ -309,5 +313,10 @@ mod tests {
             SUT::sample().hint.mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "My Phone");
     }
 }
