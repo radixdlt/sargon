@@ -19,6 +19,11 @@ pub trait Signable:
         + From<Self>
         + HasSampleValues;
 
+    type Signed: Clone
+        + Debug
+        + Into<Self>
+        + IntoIterator<Item = SignatureWithPublicKey>;
+
     /// A function that extracts the involved entities that require signing.
     fn entities_requiring_signing(
         &self,
@@ -33,6 +38,8 @@ pub trait Signable:
     fn get_id(&self) -> Self::ID {
         self.get_payload().into()
     }
+
+    fn signed(&self, intent_signatures: IntentSignatures) -> Result<Self::Signed>;
 
     /// Returns a sample `Signable` that its summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.

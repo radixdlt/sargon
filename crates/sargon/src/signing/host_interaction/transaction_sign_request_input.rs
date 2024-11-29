@@ -5,7 +5,7 @@ use crate::prelude::*;
 /// is `intent_hash`.
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub struct TransactionSignRequestInput<S: Signable> {
-    /// Compiled Intent
+    /// Payload to sign
     pub payload: S::Payload,
 
     /// ID of factor to use to sign

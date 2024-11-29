@@ -31,6 +31,15 @@ impl HasSampleValues for SignableManifestSummary {
     }
 }
 
+impl IntoIterator for SignableManifestSummary {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        panic!("Manifest summary cannot be actually signed")
+    }
+}
+
 impl SignableID for Exactly32Bytes {}
 
 impl From<SignableManifestSummary> for Exactly32Bytes {
@@ -48,6 +57,7 @@ impl std::hash::Hash for SignableManifestSummary {
 impl Signable for SignableManifestSummary {
     type ID = Exactly32Bytes;
     type Payload = Self;
+    type Signed = Self;
 
     fn entities_requiring_signing(
         &self,
@@ -61,6 +71,10 @@ impl Signable for SignableManifestSummary {
     }
 
     fn get_payload(&self) -> Self::Payload {
+        panic!("Manifest summary cannot be actually signed")
+    }
+
+    fn signed(&self, _: IntentSignatures) -> Result<Self::Signed> {
         panic!("Manifest summary cannot be actually signed")
     }
 

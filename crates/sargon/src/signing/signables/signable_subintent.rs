@@ -6,6 +6,8 @@ impl Signable for Subintent {
 
     type Payload = CompiledSubintent;
 
+    type Signed = SignedSubintent;
+
     fn entities_requiring_signing(
         &self,
         profile: &Profile,
@@ -13,6 +15,13 @@ impl Signable for Subintent {
         let summary = self.manifest.summary().unwrap();
 
         ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
+    }
+
+    fn signed(&self, intent_signatures: IntentSignatures) -> Result<Self::Signed> {
+        SignedSubintent::new(
+            self.clone(),
+            intent_signatures
+        )
     }
 
     fn sample_entity_addresses_with_pub_key_hashes(
@@ -38,6 +47,27 @@ impl Signable for Subintent {
         let manifest = SubintentManifest::sargon_built(builder, network_id);
 
         Self::new(IntentHeaderV2::sample(), manifest, MessageV2::None).unwrap()
+    }
+}
+
+impl Into<Subintent> for SignedSubintent {
+    fn into(self) -> Subintent {
+        self.subintent
+    }
+}
+
+impl IntoIterator for SignedSubintent {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self
+            .subintent_signatures
+            .signatures
+            .into_iter()
+            .map(|s| s.0)
+            .collect_vec()
+            .into_iter()
     }
 }
 

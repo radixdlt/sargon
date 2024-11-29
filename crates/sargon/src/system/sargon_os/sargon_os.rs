@@ -256,6 +256,18 @@ impl SargonOS {
         Ok(())
     }
 
+    pub(crate) fn sign_transactions_interactor(
+        &self,
+    ) -> Arc<dyn SignInteractor<TransactionIntent>> {
+        self.interactor.clone() as Arc<dyn SignInteractor<TransactionIntent>>
+    }
+
+    pub(crate) fn sign_subintents_interactor(
+        &self,
+    ) -> Arc<dyn SignInteractor<Subintent>> {
+        self.interactor.clone() as Arc<dyn SignInteractor<Subintent>>
+    }
+
     pub(crate) fn keys_derivation_interactor(
         &self,
     ) -> Arc<dyn KeyDerivationInteractor> {
