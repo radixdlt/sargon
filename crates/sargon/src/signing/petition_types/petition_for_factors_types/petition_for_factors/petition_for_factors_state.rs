@@ -3,7 +3,8 @@ use std::cell::Ref;
 use super::*;
 use crate::prelude::*;
 
-
+#[derive(derive_more::Debug)]
+#[debug("PetitionForFactorsState(signed: {:?}, neglected: {:?})", self.all_signatures(), self.all_neglected())]
 pub(crate) struct PetitionForFactorsState<ID: SignableID> {
     /// Factors that have signed.
     signed: RwLock<PetitionForFactorsSubState<HDSignature<ID>>>,
@@ -11,13 +12,6 @@ pub(crate) struct PetitionForFactorsState<ID: SignableID> {
     /// Neglected factors, either due to user explicitly skipping, or due
     /// implicitly neglected to failure.
     neglected: RwLock<PetitionForFactorsSubState<NeglectedFactorInstance>>,
-}
-
-// TODO delete
-impl <ID: SignableID> Clone for PetitionForFactorsState<ID> {
-    fn clone(&self) -> Self {
-        self.cloned()
-    }
 }
 
 impl <ID: SignableID> PartialEq for PetitionForFactorsState<ID> {
@@ -28,12 +22,6 @@ impl <ID: SignableID> PartialEq for PetitionForFactorsState<ID> {
 }
 
 impl <ID: SignableID> Eq for PetitionForFactorsState<ID> {}
-
-impl <ID: SignableID> Debug for PetitionForFactorsState<ID> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "PetitionForFactorsState(signed: {:?}, neglected: {:?})", self.all_signatures(), self.all_neglected())
-    }
-}
 
 
 impl<ID: SignableID> PetitionForFactorsState<ID> {

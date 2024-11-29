@@ -3,20 +3,13 @@ use crate::prelude::*;
 /// A sub-state of `PetitionForFactorsState` which can be used to track factors
 /// that have signed or skipped.
 #[derive(derive_more::Debug)]
-#[debug("[{}]", factors.read().unwrap().clone().into_iter().map(|f| format!("{:?}", f)).join(", "))]
+#[debug("[{}]", self.snapshot().into_iter().map(|f| format!("{:?}", f)).join(", "))]
 pub(crate) struct PetitionForFactorsSubState<F>
 where
     F: FactorSourceReferencing + Debug,
 {
     /// Factors that have signed or skipped
     factors: RwLock<IndexSet<F>>,
-}
-
-// TODO remove
-impl <F: FactorSourceReferencing + Debug> Clone for PetitionForFactorsSubState<F> {
-    fn clone(&self) -> Self {
-        self.cloned()
-    }
 }
 
 impl <F: FactorSourceReferencing + Debug> PartialEq for PetitionForFactorsSubState<F> {
