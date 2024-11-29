@@ -15,6 +15,7 @@ import com.radixdlt.sargon.TrustedContactFactorSource
 import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
 import com.radixdlt.sargon.factorSourceSupportsBabylon
 import com.radixdlt.sargon.factorSourceSupportsOlympia
+import com.radixdlt.sargon.factorSourceName
 import com.radixdlt.sargon.newDeviceFactorSourceBabylon
 import com.radixdlt.sargon.newDeviceFactorSourceOlympia
 
@@ -74,6 +75,9 @@ val FactorSource.supportsOlympia: Boolean
 
 val FactorSource.supportsBabylon: Boolean
     get() = factorSourceSupportsBabylon(factorSource = this)
+
+val FactorSource.name: String
+    get() = factorSourceName(factorSource = this)
 
 val DeviceFactorSource.kind: FactorSourceKind
     get() = FactorSourceKind.DEVICE

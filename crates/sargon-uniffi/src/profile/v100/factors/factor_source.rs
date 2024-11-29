@@ -51,6 +51,11 @@ pub fn factor_source_supports_babylon(factor_source: &FactorSource) -> bool {
 }
 
 #[uniffi::export]
+pub fn factor_source_name(factor_source: &FactorSource) -> String {
+    factor_source.into_internal().name()
+}
+
+#[uniffi::export]
 pub fn new_factor_source_sample() -> FactorSource {
     InternalFactorSource::sample().into()
 }

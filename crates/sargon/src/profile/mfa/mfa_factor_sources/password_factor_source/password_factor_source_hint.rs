@@ -14,6 +14,8 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct PasswordFactorSourceHint {
+    /// A user-assigned name for the password, intended to help users
+    /// differentiate between multiple passwords.
     pub label: String,
 }
 

@@ -281,7 +281,15 @@ impl BaseIsFactorSource
     }
 
     fn name(&self) -> String {
-        "NOT IMPLEMENTED".to_owned()
+        let ids = self
+            .sealed_mnemonic
+            .security_questions
+            .items()
+            .into_iter()
+            .map(|q| q.id())
+            .map(|id| format!("#{:?}", id))
+            .join(", ");
+        format!("Questions: {}", ids)
     }
 }
 

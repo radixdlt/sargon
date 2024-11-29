@@ -9,6 +9,7 @@ import com.radixdlt.sargon.extensions.kind
 import com.radixdlt.sargon.extensions.olympia
 import com.radixdlt.sargon.extensions.supportsBabylon
 import com.radixdlt.sargon.extensions.supportsOlympia
+import com.radixdlt.sargon.extensions.supportsName
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import com.radixdlt.sargon.samples.sampleMainnet
@@ -132,6 +133,14 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         assertEquals(
             sequrityQuestions,
             sequrityQuestions.value.asGeneral()
+        )
+    }
+
+    @Test
+    fun testName() {
+        assertEquals(
+            "My Phone",
+            FactorSource.sample().name
         )
     }
 
