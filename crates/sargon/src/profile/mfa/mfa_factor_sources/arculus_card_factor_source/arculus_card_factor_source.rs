@@ -153,7 +153,7 @@ mod tests {
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
-                    "name": "Silver",
+                    "label": "Silver",
                     "model": "arculusColdStorageWallet"
                 }
             }
