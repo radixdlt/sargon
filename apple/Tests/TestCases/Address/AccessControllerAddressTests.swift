@@ -4,5 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AccessControllerAddressTests: AddressTest<AccessControllerAddress> {
-}
+final class AccessControllerAddressTests: AddressTest<AccessControllerAddress> {}

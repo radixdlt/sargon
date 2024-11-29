@@ -1,6 +1,7 @@
 import Foundation
 import SargonUniFFI
 
+// MARK: - ByteHexEncodingErrors
 enum ByteHexEncodingErrors: Error {
 	case incorrectHexValue
 	case incorrectString
@@ -11,9 +12,9 @@ let char0 = UInt8(UnicodeScalar("0").value)
 
 private func htoi(_ value: UInt8) throws -> UInt8 {
 	switch value {
-	case char0...char0 + 9:
+	case char0 ... char0 + 9:
 		return value - char0
-	case charA...charA + 5:
+	case charA ... charA + 5:
 		return value - charA + 10
 	default:
 		throw ByteHexEncodingErrors.incorrectHexValue
@@ -21,7 +22,7 @@ private func htoi(_ value: UInt8) throws -> UInt8 {
 }
 
 private func itoh(_ value: UInt8) -> UInt8 {
-	return (value > 9) ? (charA + value - 10) : (char0 + value)
+	(value > 9) ? (charA + value - 10) : (char0 + value)
 }
 
 extension DataProtocol {
@@ -30,7 +31,7 @@ extension DataProtocol {
 		var hexChars = [UInt8](repeating: 0, count: hexLen)
 		var offset = 0
 
-		self.regions.forEach { (_) in
+		for _ in self.regions {
 			for i in self {
 				hexChars[Int(offset * 2)] = itoh((i >> 4) & 0xF)
 				hexChars[Int(offset * 2 + 1)] = itoh(i & 0xF)

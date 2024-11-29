@@ -11,4 +11,3 @@ final class FactorSourceIDTests: FactorSourceIDTest<FactorSourceID> {
 		}
 	}
 }
-	

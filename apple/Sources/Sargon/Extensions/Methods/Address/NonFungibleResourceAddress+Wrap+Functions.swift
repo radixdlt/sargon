@@ -13,29 +13,24 @@ extension NonFungibleResourceAddress {
 	public var networkID: NetworkId {
 		nonFungibleResourceAddressNetworkId(address: self)
 	}
-    
-    public var asResourceAddress: ResourceAddress {
-        nonFungibleResourceAddressAsResourceAddress(address: self)
-    }
-    
-    public func formatted(_ format: AddressFormat = .default) -> String {
-        asResourceAddress.formatted(format)
-    }
-	
 
-	
+	public var asResourceAddress: ResourceAddress {
+		nonFungibleResourceAddressAsResourceAddress(address: self)
+	}
+
+	public func formatted(_ format: AddressFormat = .default) -> String {
+		asResourceAddress.formatted(format)
+	}
 }
 
 #if DEBUG
 extension NonFungibleResourceAddress {
-	
 	public static func random(networkID: NetworkID) -> Self {
 		newNonFungibleResourceAddressRandom(networkId: networkID)
 	}
-	
+
 	public func mapTo(networkID: NetworkID) -> Self {
 		nonFungibleResourceAddressMapToNetwork(address: self, networkId: networkID)
 	}
-	
 }
 #endif // DEBUG

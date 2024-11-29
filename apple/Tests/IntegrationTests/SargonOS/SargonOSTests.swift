@@ -6,12 +6,12 @@ import XCTest
 
 final class SargonOSTests: OSTest {
 	typealias SUT = SargonOS
-	
+
 	override func setUp() {
 		super.setUp()
 		SUT._shared = nil
 	}
-	
+
 	func test() async throws {
 		let _ = await SUT.boot(
 			bios: .init(
@@ -19,7 +19,7 @@ final class SargonOSTests: OSTest {
 			)
 		)
 	}
-	
+
 	func test_set_shared() async throws {
 		let sut = try await SUT.creatingShared(
 			bootingWith: BIOS.test(
@@ -30,7 +30,7 @@ final class SargonOSTests: OSTest {
 		)
 		XCTAssertTrue(SUT.shared === sut)
 	}
-	
+
 	func test_boot_twice_throws() async throws {
 		let bios = BIOS.test(
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
@@ -45,7 +45,7 @@ final class SargonOSTests: OSTest {
 			XCTAssertEqual(err.errorDescription, "Radix Wallet core already initialized, should not have been initialized twice. This is a Radix developer error.")
 		} catch { XCTFail("Wrong error type, expected: \(SargonOSAlreadyBooted.self)") }
 	}
-	
+
 	func test_boot_twice_does_not_throws_when_emulating_fresh_install() async throws {
 		let bios = BIOS.test(
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
@@ -57,6 +57,4 @@ final class SargonOSTests: OSTest {
 		XCTAssertFalse(first === second)
 		XCTAssertTrue(SUT.shared === second)
 	}
-	
 }
-

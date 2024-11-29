@@ -184,6 +184,25 @@ jobs:
       - name: Run rust tests
         run: cargo nextest run --all
 
+  # Swift formatting
+  check-swift-format:
+    name: "Swift format"
+    if: >
+      ( github.event.action == 'opened' && github.event.pull_request.draft == false ) ||
+      ( github.event.pull_request.draft == false && github.event.action == 'synchronize' ) ||
+      ( github.event.action == 'ready_for_review' ) ||
+      ( github.event_name == 'push' && github.ref == 'refs/heads/main' )
+    runs-on: macos-15-xlarge
+
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: "Run Lint"
+        run: |
+          brew update
+          brew upgrade swiftformat
+          swiftformat . --lint  
+
   # Swift testing on macOS (Apple Silicon)
   test-swift:
     runs-on: macos-15-xlarge

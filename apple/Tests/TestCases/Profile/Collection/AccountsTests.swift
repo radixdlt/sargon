@@ -2,17 +2,18 @@ import CustomDump
 import Foundation
 @testable import Sargon
 import SargonUniFFI
-import XCTest
 import SwiftyJSON
+import XCTest
 
 final class AccountsTests: CollectionTest<Account> {
 	override class func sample() -> SUT {
 		SUT.sample
 	}
+
 	override class func sampleOther() -> SUT {
 		SUT.sampleOther
 	}
-	
+
 	/// Have to omit this test... obviously... since it crashes.
 	/// We can have this test implemented when swift-testing is stable to be used,
 	/// and we will use "exit tests" to test it:
@@ -31,7 +32,7 @@ final class AccountsTests: CollectionTest<Account> {
 		json["profileNetworks.accounts"] = [Account.sample, Account.sample]
 		XCTAssertThrowsError(try Profile(jsonData: json.rawData()))
 	}
-	
+
 	func test_json_decoding_of_profile_fails_if_accounts_contains_duplicated_ids() throws {
 		var json = JSON(Profile.sample)
 		let a = Account.sample

@@ -1,14 +1,8 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-07.
-//
-
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 
+// MARK: - MatrixOfFactorsForRole
 public struct MatrixOfFactorsForRole: Hashable, Sendable {
 	public let role: Role
 	public var thresholdFactors: Factors
@@ -20,31 +14,35 @@ public struct MatrixOfFactorsForRole: Hashable, Sendable {
 		self.thresholdFactors = thresholdFactors
 		self.overrideFactors = overrideFactors
 	}
+
 	init<R>(roleWithFactors: R) where R: RoleFromDraft {
-		let thresholdFactors = roleWithFactors.thresholdFactors.map { Factor.init(factorSource: $0) }.asIdentified()
+		let thresholdFactors = roleWithFactors.thresholdFactors.map { Factor(factorSource: $0) }.asIdentified()
 		self.init(
 			role: R.role,
 			thresholdFactors: thresholdFactors,
 			threshold: .init(count: roleWithFactors.threshold, thresholdFactorsCount: thresholdFactors.count),
-			overrideFactors: roleWithFactors.overrideFactors.map { Factor.init(factorSource: $0) }.asIdentified()
+			overrideFactors: roleWithFactors.overrideFactors.map { Factor(factorSource: $0) }.asIdentified()
 		)
 	}
+
 	var usedFactorSources: FactorSources {
 		var all: FactorSources = []
 		all.append(contentsOf: thresholdFactors.compactMap(\.factorSource))
 		all.append(contentsOf: overrideFactors.compactMap(\.factorSource))
 		return all
 	}
+
 	var thresholdFactorSources: [FactorSource] {
 		thresholdFactors.compactMap(\.factorSource)
 	}
+
 	var overrideFactorsSources: [FactorSource] {
 		overrideFactors.compactMap(\.factorSource)
 	}
 }
 
+// MARK: - RoleFromDraft
 public protocol RoleFromDraft {
-	
 	var thresholdFactors: [FactorSource] { get }
 	/**
 	 * How many threshold factors that must be used to perform some function with this role.
@@ -56,16 +54,16 @@ public protocol RoleFromDraft {
 	 * disregarding of `threshold`.
 	 */
 	var overrideFactors: [FactorSource] { get }
-	
+
 	static var role: Role { get }
 	init(thresholdFactors: [FactorSource], threshold: UInt8, overrideFactors: [FactorSource])
 	init?(draft: MatrixOfFactorsForRole)
 }
+
 extension RoleFromDraft {
-	
 	public init?(draft: MatrixOfFactorsForRole) {
 		precondition(draft.role == Self.role)
-		if draft.thresholdFactorSources.isEmpty && draft.overrideFactorsSources.isEmpty {
+		if draft.thresholdFactorSources.isEmpty, draft.overrideFactorsSources.isEmpty {
 			return nil
 		}
 		if !draft.threshold.isValid(thresholdFactorCount: draft.thresholdFactorSources.count) {
@@ -84,37 +82,43 @@ extension RoleFromDraft {
 			overrideFactors: draft.overrideFactorsSources
 		)
 	}
-	
-	
 }
+
+// MARK: - PrimaryRoleWithFactorSources + RoleFromDraft
 extension PrimaryRoleWithFactorSources: RoleFromDraft {
 	public static let role: Role = .primary
 }
+
+// MARK: - RecoveryRoleWithFactorSources + RoleFromDraft
 extension RecoveryRoleWithFactorSources: RoleFromDraft {
 	public static let role: Role = .recovery
 }
+
+// MARK: - ConfirmationRoleWithFactorSources + RoleFromDraft
 extension ConfirmationRoleWithFactorSources: RoleFromDraft {
 	public static let role: Role = .confirmation
 }
 
-
-
+// MARK: - NewShieldDraft
 public struct NewShieldDraft: Hashable, Sendable {
 	public let copyOf: Shield?
 	public var numberOfDaysUntilAutoConfirmation: UInt16 = 14
 	private var primary: MatrixOfFactorsForRole
 	private var recovery: MatrixOfFactorsForRole
 	private var confirmation: MatrixOfFactorsForRole
-	
+
 	private var _primaryRole: PrimaryRoleWithFactorSources? {
 		PrimaryRoleWithFactorSources(draft: primary)
 	}
+
 	private var _recoveryRole: RecoveryRoleWithFactorSources? {
 		RecoveryRoleWithFactorSources(draft: recovery)
 	}
+
 	private var _confirmationRole: ConfirmationRoleWithFactorSources? {
 		ConfirmationRoleWithFactorSources(draft: confirmation)
 	}
+
 	public var matrixOfFactors: MatrixOfFactorSources? {
 		guard
 			let primary = _primaryRole,
@@ -137,9 +141,9 @@ public struct NewShieldDraft: Hashable, Sendable {
 		allUsed.append(contentsOf: confirmation.usedFactorSources)
 		return allUsed
 	}
-	
+
 	public var pendingFactorID: Factor.ID?
-	
+
 	public func isValidRole(_ role: Role) -> Bool {
 		switch role {
 		case .confirmation: self._confirmationRole != nil
@@ -147,7 +151,7 @@ public struct NewShieldDraft: Hashable, Sendable {
 		case .primary: self._primaryRole != nil
 		}
 	}
-	
+
 	public mutating func removeFactor(_ factor: Factor, role: Role) {
 		if factor.id == pendingFactorID {
 			pendingFactorID = nil // not really possible in UI, but prudent.
@@ -162,6 +166,7 @@ public struct NewShieldDraft: Hashable, Sendable {
 			self[role].overrideFactors.remove(factor)
 		}
 	}
+
 	public mutating func pickedFactorSource(_ factorSource: FactorSource, role: Role) {
 		guard let pendingFactorID else {
 			assertionFailure("Expected pending...")
@@ -176,14 +181,14 @@ public struct NewShieldDraft: Hashable, Sendable {
 		}
 		self.pendingFactorID = nil
 	}
-	
+
 	public init() {
 		self.copyOf = nil
 		self.primary = MatrixOfFactorsForRole(role: .primary)
 		self.recovery = MatrixOfFactorsForRole(role: .recovery)
 		self.confirmation = MatrixOfFactorsForRole(role: .confirmation)
 	}
-	
+
 	public init(copyAndEdit preset: Shield) {
 		self.copyOf = preset
 		self.primary = .init(roleWithFactors: preset.matrixOfFactors.primaryRole)
@@ -195,9 +200,9 @@ public struct NewShieldDraft: Hashable, Sendable {
 	public subscript(role: Role) -> MatrixOfFactorsForRole {
 		get {
 			switch role {
-			case .primary: return self.primary
-			case .recovery: return self.recovery
-			case .confirmation: return self.confirmation
+			case .primary: self.primary
+			case .recovery: self.recovery
+			case .confirmation: self.confirmation
 			}
 		}
 		set {
@@ -218,6 +223,3 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<InMemoryKey<N
 		)
 	}
 }
-
-
-

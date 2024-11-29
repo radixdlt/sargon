@@ -1,34 +1,27 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-07.
-//
-
-import Foundation
-import SwiftUI
-import Sargon
 import ComposableArchitecture
+import Foundation
+import Sargon
+import SwiftUI
 
+// MARK: - FactorsBuilderFeature
 @Reducer
 public struct FactorsBuilderFeature {
-	
 	@ObservableState
 	public struct State: Equatable {
 		public enum Mode: Sendable, Hashable {
 			case threshold, override
 		}
-		
+
 		@Shared(.newShieldDraft) var newShieldDraft
-		
+
 		public let mode: Mode
 		public let role: Role
-		
+
 		public init(mode: Mode, role: Role) {
 			self.mode = mode
 			self.role = role
 		}
-		
+
 		public var threshold: FactorThreshold {
 			get {
 				if mode == .threshold {
@@ -43,14 +36,13 @@ public struct FactorsBuilderFeature {
 			}
 		}
 
-		
 		public var matrixOfFactorsForRole: MatrixOfFactorsForRole {
 			get { newShieldDraft[role] }
 			set {
 				newShieldDraft[role] = newValue
 			}
 		}
-		
+
 		public var factors: Factors {
 			get {
 				switch mode {
@@ -66,9 +58,10 @@ public struct FactorsBuilderFeature {
 					matrixOfFactorsForRole.overrideFactors = newValue
 				case .threshold:
 					matrixOfFactorsForRole.thresholdFactors = newValue
-				}			}
+				}
+			}
 		}
-		
+
 		public var pickedFactorID: Factor.ID? {
 			get {
 				newShieldDraft.pendingFactorID
@@ -77,7 +70,7 @@ public struct FactorsBuilderFeature {
 				newShieldDraft.pendingFactorID = newValue
 			}
 		}
-		
+
 		public var title: LocalizedStringKey {
 			switch mode {
 			case .override:
@@ -86,15 +79,14 @@ public struct FactorsBuilderFeature {
 				"Threshold Factors"
 			}
 		}
-		
+
 		public var canChangeThreshold: Bool {
 			mode == .threshold
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action: ViewAction {
-		
 		@CasePathable
 		public enum ViewAction {
 			case titleButtonTapped
@@ -104,62 +96,61 @@ public struct FactorsBuilderFeature {
 			case changeThresholdButtonTapped
 			case factorsChanged(Factors)
 		}
-		
+
 		public enum DelegateAction {
 			case pickFactor
 			case setThreshold
 		}
-		
+
 		case view(ViewAction)
 		case delegate(DelegateAction)
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
-		
 			case .view(.titleButtonTapped):
 				log.info("Title button tapped, show important info!")
 				return .none
-				
+
 			case .view(.appendFactorButtonTapped):
 				state.factors.append(Factor())
 				return .none
-		
+
 			case let .view(.pickFactorButtonTapped(factor)):
 				state.pickedFactorID = factor.id
 				return .send(.delegate(.pickFactor))
-				
+
 			case let .view(.removeButtonTapped(toRemove)):
 				state.newShieldDraft.removeFactor(toRemove, role: state.role)
 				return .none
-				
+
 			case .view(.changeThresholdButtonTapped):
 				assert(state.mode == .threshold)
 				return .send(.delegate(.setThreshold))
-				
+
 			case let .view(.factorsChanged(new)):
 				state.factors = new
 				return .none
-				
+
 			case .delegate:
 				return .none
 			}
 		}
 	}
 }
+
 extension FactorsBuilderFeature {
 	public typealias HostingFeature = Self
-	
+
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
-		
 		@Bindable public var store: StoreOf<HostingFeature>
-		
+
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
-		
+
 		public var body: some SwiftUI.View {
 			VStack(spacing: 0) {
 				HStack {
@@ -175,9 +166,9 @@ extension FactorsBuilderFeature {
 					Spacer()
 				}
 				.padding()
-				
+
 				Divider().background(Color.app.gray2)
-				
+
 				VStack(spacing: 10) {
 					ForEach(store.factors) { factor in
 						FactorView(
@@ -191,7 +182,7 @@ extension FactorsBuilderFeature {
 					}
 					.padding(.horizontal)
 					.padding(.top, 10)
-					
+
 					Button("Add factors") {
 						send(.appendFactorButtonTapped)
 					}
@@ -200,10 +191,9 @@ extension FactorsBuilderFeature {
 				}
 				.frame(maxWidth: .infinity, minHeight: 50)
 				.background(Color.app.gray5)
-				
-				
+
 				Divider().background(Color.app.gray3)
-				
+
 				Button(action: {
 					send(.changeThresholdButtonTapped)
 				}, label: {
@@ -218,7 +208,6 @@ extension FactorsBuilderFeature {
 				})
 				.padding()
 				.disabled(!store.canChangeThreshold)
-				
 			}
 			.foregroundStyle(Color.app.gray1)
 			.overlay(
@@ -232,9 +221,9 @@ extension FactorsBuilderFeature {
 	}
 }
 
-//#Preview {
+// #Preview {
 //	VStack {
-//		
+//
 //		FactorsBuilderView(
 //            factors: .init(get: { [FactorSource.sample].map({ Factor(factorSource: $0) }).asIdentified() }, set: {
 //				print("Preview NOOP set factors sources to: \($0)")
@@ -264,5 +253,5 @@ extension FactorsBuilderFeature {
 //			}
 //		)
 //	}
-//}
-// 
+// }
+//

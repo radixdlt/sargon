@@ -5,16 +5,16 @@ public protocol BaseHDPathProtocol: BaseSargonModel, CustomStringConvertible, Ex
 public protocol BaseHDPathProtocol: BaseSargonModel, CustomStringConvertible {}
 #endif // DEBUG
 
+// MARK: - HDPathProtocol
 public protocol HDPathProtocol: BaseHDPathProtocol {
-    init(string: String) throws
-    func toString() -> String
+	init(string: String) throws
+	func toString() -> String
 }
 
 #if DEBUG
 extension HDPathProtocol {
-    public init(stringLiteral value: String) {
-        try! self.init(string: value)
-    }
+	public init(stringLiteral value: String) {
+		try! self.init(string: value)
+	}
 }
 #endif
-

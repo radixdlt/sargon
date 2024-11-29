@@ -1,18 +1,13 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-07.
-//
-
 import Foundation
-import Sargon
 import IdentifiedCollections
+import Sargon
 
+// MARK: - Role
 public enum Role: Sendable, Hashable {
 	case primary, recovery, confirmation
 }
 
+// MARK: - Factor
 public struct Factor: Hashable, Sendable, Identifiable {
 	public let id = UUID()
 	public var factorSource: FactorSource?
@@ -23,6 +18,7 @@ public struct Factor: Hashable, Sendable, Identifiable {
 
 public typealias Factors = IdentifiedArrayOf<Factor>
 
+// MARK: - FactorThreshold
 public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 	init(count: UInt8, thresholdFactorsCount: Int) {
 		let factorCount = UInt8(thresholdFactorsCount)
@@ -34,7 +30,7 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 			self = .threshold(count)
 		}
 	}
-	
+
 	public func isValid(thresholdFactorCount: Int) -> Bool {
 		switch self {
 		case .any: return true
@@ -47,7 +43,7 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 			return isValid
 		}
 	}
-	
+
 	public mutating func decrease() {
 		switch self {
 		case .any, .all: break
@@ -58,17 +54,16 @@ public enum FactorThreshold: Hashable, Sendable, CustomStringConvertible {
 		default: fatalError("not possible")
 		}
 	}
-	
+
 	case any
 	case all
 	case threshold(UInt8)
-	
+
 	public var description: String {
 		switch self {
-		case .any: return "Any"
-		case .all: return "All"
-		case let .threshold(threshold): return "\(threshold)"
+		case .any: "Any"
+		case .all: "All"
+		case let .threshold(threshold): "\(threshold)"
 		}
 	}
 }
-

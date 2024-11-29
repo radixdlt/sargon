@@ -1,13 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-06-07.
-//
-
 import Foundation
 
-
+// MARK: - LabelStyleFlip
 public struct LabelStyleFlip: LabelStyle {
 	let imageColor: Color
 	public func makeBody(configuration: Configuration) -> some View {
@@ -17,6 +10,7 @@ public struct LabelStyleFlip: LabelStyle {
 		}
 	}
 }
+
 extension LabelStyle where Self == LabelStyleFlip {
 	public static func flipped(imageColor: Color = .gray) -> Self { LabelStyleFlip(imageColor: imageColor) }
 }

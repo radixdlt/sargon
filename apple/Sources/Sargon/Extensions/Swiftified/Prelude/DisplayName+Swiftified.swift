@@ -1,9 +1,13 @@
 import Foundation
 import SargonUniFFI
 
+// MARK: - DisplayName + SargonModel
 extension DisplayName: SargonModel {}
+
+// MARK: - DisplayName + SargonStringCodable
 extension DisplayName: SargonStringCodable {}
 
+// MARK: - DisplayName + CustomStringConvertible
 extension DisplayName: CustomStringConvertible {
 	public var description: String {
 		value

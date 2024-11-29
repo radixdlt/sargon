@@ -1,52 +1,46 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-06-11.
-//
-
-import Foundation
 import ComposableArchitecture
+import Foundation
 
+// MARK: - HUDFeature
 @Reducer
 public struct HUDFeature {
-	
 	@Dependency(\.continuousClock) var clock
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		static let hiddenOffset: CGFloat = -128.0
 		static let autoDismissDelay: Double = 1.0
-		
+
 		let content: HUDMessage
 		var offset = Self.hiddenOffset
-		
 	}
-	
+
 	public enum Action: ViewAction, Sendable {
 		public enum ViewAction: Sendable {
 			case onAppear
 			case animationCompletion
 		}
+
 		public enum DelegateAction: Sendable {
 			case dismiss
 		}
+
 		public enum InternalAction: Sendable {
 			case autoDismiss
 		}
+
 		case view(ViewAction)
 		case delegate(DelegateAction)
 		case `internal`(InternalAction)
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
-				
 			case .internal(.autoDismiss):
 				state.offset = State.hiddenOffset
 				return .none
-				
+
 			case .view(.animationCompletion):
 				if state.offset == State.hiddenOffset {
 					/// Notify the delegate only after the animation did complete.
@@ -57,13 +51,13 @@ public struct HUDFeature {
 						await send(.internal(.autoDismiss), animation: .hudAnimation)
 					}
 				}
+
 			case .view(.onAppear):
 				state.offset = 0
 				return .none
-				
+
 			case .delegate:
 				return .none
-				
 			}
 		}
 	}
@@ -71,14 +65,14 @@ public struct HUDFeature {
 
 extension HUDFeature {
 	public typealias HostingFeature = Self
-	
+
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
-		
+
 		public var body: some SwiftUI.View {
 			VStack {
 				Group {
@@ -117,16 +111,16 @@ extension HUDFeature {
 					send(.animationCompletion)
 				}
 				Spacer()
-				
 			}
 		}
 	}
 }
 
+// MARK: - HitTargetSize
 public enum HitTargetSize: CGFloat {
 	/// 24
 	case smallest = 24
-	
+
 	public var frame: CGSize {
 		.init(width: rawValue, height: rawValue)
 	}
@@ -139,7 +133,7 @@ extension View {
 	}
 }
 
-// MARK: - SwiftUI.Animation + Sendable
+// MARK: - SwiftUI.Animation + @unchecked Sendable
 extension SwiftUI.Animation: @unchecked Sendable {}
 
 extension SwiftUI.Animation {
@@ -161,6 +155,7 @@ extension View {
 		)
 	}
 }
+
 // MARK: - OnAnimationCompletedViewModifier
 /// A view modifier allowing to observe the completion of a given value animation
 private struct OnAnimationCompletedViewModifier<Value: Sendable & VectorArithmetic>: Animatable, ViewModifier {
@@ -173,16 +168,16 @@ private struct OnAnimationCompletedViewModifier<Value: Sendable & VectorArithmet
 			}
 		}
 	}
-	
+
 	private let animatedValue: Value
 	private let completion: Completion
-	
+
 	init(animatedValue: Value, completion: @escaping Completion) {
 		self.animatedValue = animatedValue
 		self.animatableData = animatedValue
 		self.completion = completion
 	}
-	
+
 	func body(content: Content) -> some View {
 		content
 	}

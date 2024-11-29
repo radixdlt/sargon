@@ -1,10 +1,3 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-05-28.
-//
-
 import Foundation
 import SargonUniFFI
 
@@ -17,7 +10,7 @@ extension EmailAddress {
 
 #if DEBUG
 extension TrustedContactFactorSourceContact {
-	// FIXME replace with Sargon ones
+	// FIXME: replace with Sargon ones
 	public static let sample: Self = newTrustedContactFactorSourceContactSample()
 	public static let sampleOther: Self = newTrustedContactFactorSourceContactSampleOther()
 }

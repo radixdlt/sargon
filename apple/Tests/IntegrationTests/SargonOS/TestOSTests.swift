@@ -5,7 +5,6 @@ import SargonUniFFI
 import XCTest
 
 extension TestOS {
-	
 	public convenience init() async {
 		await self.init(
 			bios: BIOS(
@@ -31,15 +30,15 @@ extension TestOS {
 	}
 }
 
+// MARK: - TestOSTests
 final class TestOSTests: OSTest {
-
 	func test_create_single_account_many_times() async throws {
 		let bus = EventBus()
 		let drivers = Drivers.withEventBus(bus)
 		let sut = await TestOS(bios: .init(drivers: drivers))
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let n = 3
-		
+
 		let task = Task {
 			var values = Set<EventNotification>()
 			for await eventNotification in await bus.notifications().filter({ $0.event.addressOfNewAccount != nil }).prefix(n) {
@@ -47,48 +46,48 @@ final class TestOSTests: OSTest {
 			}
 			return Array(values).sorted().map(\.event)
 		}
-		
+
 		try await sut
 			.createAccount()
 			.createAccount(named: "Foo")
 			.createAccount()
-		
+
 		let events = await task.value
 		XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork.map(\.displayName), ["Unnamed 0", "Foo", "Unnamed 2"])
 		XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork.map(\.address), events.compactMap(\.addressOfNewAccount))
 	}
-	
+
 	func test_create_account_returned() async throws {
-        let sut = await TestOS()
-        try await sut.os.newWallet(shouldPreDeriveInstances: false)
+		let sut = await TestOS()
+		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		XCTAssertEqual(account.displayName, displayName)
-        XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork, [AccountForDisplay(account)])
+		XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork, [AccountForDisplay(account)])
 	}
-	
+
 	func test_create_account_returned_can_be_looked_up() async throws {
-        let sut = await TestOS.init()
+		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		let lookedUp = try sut.accountByAddress(account.address)
 		XCTAssertEqual(lookedUp, account)
 	}
-	
+
 	func test_lookup_throws_for_unknown_accounts() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		XCTAssertThrowsError(try sut.accountByAddress(.sample))
 	}
-	
+
 	func test_new_profile_has_preset_gateways() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let gateways = try sut.gateways
 		XCTAssertEqual(gateways, .preset)
 	}
-	
+
 	func test_if_replace_profile_throws() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
@@ -101,7 +100,7 @@ final class TestOSTests: OSTest {
 			/* We expected to throw */
 		}
 	}
-	
+
 	func test_we_can_mutate_profile_in_swift_and_save_then_profile_is_updated() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
@@ -109,19 +108,19 @@ final class TestOSTests: OSTest {
 		let creatingDevice = profile.header.creatingDevice
 		let newCreatingDevice = DeviceInfo.sampleOther
 		XCTAssertNotEqual(newCreatingDevice, creatingDevice)
-		profile.header.creatingDevice = newCreatingDevice // mutate profile 
+		profile.header.creatingDevice = newCreatingDevice // mutate profile
 		try await sut.os.setProfile(profile: profile)
 		XCTAssertEqual(try sut.os.profile().header.creatingDevice, newCreatingDevice) // assert change worked
 	}
-	
+
 	func test_batch_create_many_accounts() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let n: UInt16 = 4
 		try await sut.batchCreateAccounts(count: n, namePrefix: "Unnamed")
-		XCTAssertEqual(try sut.accountsOnCurrentNetwork.map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })
+		XCTAssertEqual(try sut.accountsOnCurrentNetwork.map(\.displayName.value), (0 ..< n).map { "Unnamed \($0)" })
 	}
-	
+
 	func test_log_at_each_level() async throws {
 		let _ = await TestOS()
 		logSystemDiagnosis()

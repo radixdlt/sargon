@@ -1,23 +1,20 @@
 import Foundation
 import SargonUniFFI
 
-extension AccountPath: SargonModel, DerivationPathProtocol {
- 
-}
+// MARK: - AccountPath + SargonModel, DerivationPathProtocol
+extension AccountPath: SargonModel, DerivationPathProtocol {}
 
 extension AccountPath {
-    public init(string: String) throws {
-        switch try DerivationPath(string: string) {
-        case let .account(value):
-            self = value
-        case .identity, .bip44Like:
+	public init(string: String) throws {
+		switch try DerivationPath(string: string) {
+		case let .account(value):
+			self = value
+		case .identity, .bip44Like:
 			throw SargonError.WrongEntityKind(expected: .account, found: .identity)
-        }
+		}
+	}
 
-    }
-    
-    public var asGeneral: DerivationPath {
-        .account(value: self)
-    }
+	public var asGeneral: DerivationPath {
+		.account(value: self)
+	}
 }
-

@@ -6,11 +6,11 @@ extension DisplayName {
 		self = try newDisplayName(name: name)
 	}
 
-    public init(jsonStringLiteral: String) throws {
-        self = try newDisplayNameFromJsonString(jsonString: jsonStringLiteral)
-    }
-    
-    public func jsonStringLiteral() -> String {
+	public init(jsonStringLiteral: String) throws {
+		self = try newDisplayNameFromJsonString(jsonString: jsonStringLiteral)
+	}
+
+	public func jsonStringLiteral() -> String {
 		displayNameToJsonString(displayName: self)
-    }
+	}
 }

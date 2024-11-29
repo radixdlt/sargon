@@ -10,7 +10,8 @@ final class TransactionIntentTests: Test<TransactionIntent> {
 	func test_hash() {
 		XCTAssertEqual(
 			SUT.sample.hash().description,
-			"txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz")
+			"txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz"
+		)
 	}
 
 	func test_compile() {

@@ -6,32 +6,30 @@ import XCTestDynamicOverlay
 #endif // DEBUG
 
 extension Decimal192 {
-	
 	public init(_ string: String) throws {
 		self = try newDecimalFromString(string: string)
 	}
-	
+
 	public init(_ float32: Float32) {
 		self = newDecimalFromF32(value: float32)
 	}
-    
-    public init(_ double: Double) throws {
-        self = try newDecimalFromF64(value: double)
-    }
-    
+
+	public init(_ double: Double) throws {
+		self = try newDecimalFromF64(value: double)
+	}
+
 	public init(_ value: Int64) {
 		self = newDecimalFromI64(value: value)
 	}
-	
+
 	public init(_ value: UInt64) {
 		self = newDecimalFromU64(value: value)
 	}
-	
+
 	/// Creates the Decimal `10^exponent`
 	public init(exponent: UInt8) {
 		self = newDecimalExponent(exponent: exponent)
 	}
-
 }
 
 #if DEBUG
@@ -40,39 +38,40 @@ extension Locale {
 }
 #endif // DEBUG
 
+// MARK: - Decimal192 + CustomStringConvertible
 extension Decimal192: CustomStringConvertible {
 	public var description: String {
-#if DEBUG
+		#if DEBUG
 		if !_XCTIsTesting {
 			formattedPlain()
 		} else {
 			formattedPlain(locale: .test, useGroupingSeparator: false)
 		}
-#else
+		#else
 		formattedPlain()
-#endif // DEBUG
+		#endif // DEBUG
 	}
 }
 
+// MARK: - Decimal192 + CustomDebugStringConvertible
 extension Decimal192: CustomDebugStringConvertible {
 	public var debugDescription: String {
-#if DEBUG
+		#if DEBUG
 		if !_XCTIsTesting {
 			formattedPlain()
 		} else {
 			formattedPlain(locale: .test, useGroupingSeparator: false)
 		}
-#else
+		#else
 		formattedPlain()
-#endif // DEBUG
+		#endif // DEBUG
 	}
 }
-
 
 extension Decimal192 {
 	public static let maxDivisibility: UInt8 = 18
-    
-    public static let temporaryStandardFee: Self = transactionFeePreset()
+
+	public static let temporaryStandardFee: Self = transactionFeePreset()
 }
 
 extension Decimal192 {
@@ -81,7 +80,7 @@ extension Decimal192 {
 		formattedString: String,
 		locale: Locale = .autoupdatingCurrent
 	) throws {
-		let localConfig: LocaleConfig = LocaleConfig(locale: locale)
+		let localConfig = LocaleConfig(locale: locale)
 		self = try newDecimalFromFormattedString(
 			formattedString: formattedString,
 			locale: localConfig
@@ -91,7 +90,6 @@ extension Decimal192 {
 
 // MARK: Formatting
 extension Decimal192 {
-
 	/// A human readable, locale respecting string, rounded to `totalPlaces` places, counting all digits
 	public func formatted(
 		locale: Locale = .autoupdatingCurrent,
@@ -121,7 +119,6 @@ extension Decimal192 {
 
 // MARK: Truncation and rounding
 extension Decimal192 {
-
 	private func rounded(decimalPlaces: UInt8, roundingMode: RoundingMode) -> Self {
 		try! decimalRound(
 			decimal: self,
@@ -147,7 +144,6 @@ extension Decimal192 {
 	public func ceil(decimalPlaces: UInt8) -> Self {
 		rounded(decimalPlaces: decimalPlaces, roundingMode: .awayFromZero)
 	}
-
 }
 
 extension Decimal192 {
@@ -158,18 +154,17 @@ extension Decimal192 {
 	public var isNegative: Bool {
 		decimalIsNegative(decimal: self)
 	}
-	
+
 	public var isPositive: Bool {
 		decimalIsPositive(decimal: self)
 	}
-	
+
 	public var isZero: Bool {
 		decimalIsZero(decimal: self)
 	}
 }
 
 extension Decimal192 {
-
 	public func lessThan(other: Self) -> Bool {
 		decimalLessThan(lhs: self, rhs: other)
 	}
@@ -188,31 +183,30 @@ extension Decimal192 {
 }
 
 extension Decimal192 {
-	
 	public static var zero: Self {
 		newDecimalFromU64(value: 0)
 	}
-	
+
 	public func add(rhs: Self) -> Self {
 		decimalAdd(lhs: self, rhs: rhs)
 	}
-	
+
 	public func sub(rhs: Self) -> Self {
 		decimalSub(lhs: self, rhs: rhs)
 	}
-	
+
 	public func mul(rhs: Self) -> Self {
 		decimalMul(lhs: self, rhs: rhs)
 	}
-	
+
 	public func div(rhs: Self) -> Self {
 		decimalDiv(lhs: self, rhs: rhs)
 	}
-	
+
 	public func abs() -> Self {
 		decimalAbs(decimal: self)
 	}
-	
+
 	public func negate() -> Self {
 		decimalNeg(decimal: self)
 	}
@@ -223,7 +217,7 @@ extension Decimal192 {
 	public static var max: Self {
 		decimalMax()
 	}
-	
+
 	/// Negative value
 	public static var min: Self {
 		decimalMin()

@@ -1,18 +1,12 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-02-15.
-//
-
+import ComposableArchitecture
 @_exported import KeychainAccess
 import Sargon
-import ComposableArchitecture
 
-
+// MARK: - Keychain + @unchecked Sendable
 extension Keychain: @unchecked Sendable {}
-extension Keychain: SecureStorageDriver {
 
+// MARK: - Keychain + SecureStorageDriver
+extension Keychain: SecureStorageDriver {
 	@Sendable
 	public func loadData(key: SecureStorageKey) throws -> Data? {
 		try getData(key.identifier)

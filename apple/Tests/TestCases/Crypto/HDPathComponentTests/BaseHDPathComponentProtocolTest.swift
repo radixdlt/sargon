@@ -1,16 +1,7 @@
-//
-//  BaseHDPathComponentProtocolTest.swift
-//  Sargon
-//
-//  Created by Alexander Cyon on 2024-10-25.
-//
-
-import XCTest
 import Sargon
-
+import XCTest
 
 class BaseHDPathComponentProtocolTest<SUT_: BaseHDPathComponentProtocol>: Test<SUT_> {
-	
 	func test_global_roundtrip_using_samples() throws {
 		func test(_ sample: SUT_) throws {
 			let global = sample.indexInGlobalKeySpace()

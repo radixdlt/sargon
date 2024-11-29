@@ -1,13 +1,12 @@
+import ComposableArchitecture
+import Foundation
 import Sargon
 import UniformTypeIdentifiers
-import Foundation
-import ComposableArchitecture
 
 extension UTType {
 	// FIXME: should we declare our own file format? For now we use require `.json` file extension.
 	public static let profile: Self = .json
 }
-
 
 extension String {
 	static let profileFileEncryptedPart = "encrypted"
@@ -16,44 +15,46 @@ extension String {
 	static let filenameProfileEncrypted: Self = "\(filenameProfileBase).\(profileFileEncryptedPart).json"
 }
 
+// MARK: - LackedPermissionToAccessSecurityScopedResource
 struct LackedPermissionToAccessSecurityScopedResource: Error {}
 
+// MARK: - SelectFileFeature
 @Reducer
 public struct SelectFileFeature {
-	
 	@CasePathable
 	public enum Action: ViewAction {
 		public enum DelegateAction {
 			case analyzedContentsOfFile(contents: Data, analysis: ProfileFileContents)
 		}
-		
+
 		@CasePathable
 		public enum ViewAction {
 			case openFileButtonTapped
 			case profileImportResult(Result<URL, NSError>)
 			case isPresentingFileImporterChanged(Bool)
 		}
+
 		case delegate(DelegateAction)
 		case view(ViewAction)
 	}
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public var isPresentingFileImporter = false
 		public init() {}
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			case .view(.openFileButtonTapped):
 				state.isPresentingFileImporter = true
 				return .none
-				
+
 			case let .view(.profileImportResult(.failure(error))):
 				log.error("Failed to read file, error: \(error)")
 				return .none
-				
+
 			case let .view(.profileImportResult(.success(profileURL))):
 				do {
 					guard profileURL.startAccessingSecurityScopedResource() else {
@@ -61,20 +62,19 @@ public struct SelectFileFeature {
 					}
 					defer { profileURL.stopAccessingSecurityScopedResource() }
 					let data = try Data(contentsOf: profileURL)
-					
+
 					let analyzed = Profile.analyzeContents(data: data)
 					return .send(.delegate(.analyzedContentsOfFile(contents: data, analysis: analyzed)))
-					
+
 				} catch {
 					log.error("Failed to import profile, error: \(error)")
 				}
 				return .none
-				
-				
+
 			case let .view(.isPresentingFileImporterChanged(isPresentingFileImporter)):
 				state.isPresentingFileImporter = isPresentingFileImporter
 				return .none
-				
+
 			case .delegate:
 				return .none
 			}
@@ -82,21 +82,20 @@ public struct SelectFileFeature {
 	}
 }
 
+// MARK: SelectFileFeature.View
 extension SelectFileFeature {
-	
 	@ViewAction(for: SelectFileFeature.self)
 	public struct View: SwiftUI.View {
-		
 		@Bindable public var store: StoreOf<SelectFileFeature>
-		
+
 		public init(store: StoreOf<SelectFileFeature>) {
 			self.store = store
 		}
-		
+
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("Select file")
-				
+
 				Button("Open file selector") {
 					send(.openFileButtonTapped)
 				}
@@ -109,5 +108,4 @@ extension SelectFileFeature {
 			.navigationTitle("Open Profile file")
 		}
 	}
-	
 }

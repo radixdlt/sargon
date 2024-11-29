@@ -1,35 +1,27 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-06-03.
-//
-
+import ComposableArchitecture
 import Foundation
 import Sargon
-import ComposableArchitecture
 
+// MARK: - ManageSecurityShieldsFeature
 @Reducer
 public struct ManageSecurityShieldsFeature {
-	
-  
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case newSecurityShield(NewSecurityShieldCoordinator)
 	}
-	
+
 	@ObservableState
 	public struct State {
 		@SharedReader(.shields) var shields
 		@SharedReader(.factorSources) var factorSources
 		@Presents var destination: Destination.State?
-		
+
 		public init(copyAndEdit preset: Shield? = nil) {
 			if let preset {
 				destination = .newSecurityShield(NewSecurityShieldCoordinator.State(copyAndEdit: preset))
 			}
 		}
-		
+
 		public var canAddSampleShields: Bool {
 			// FIXME: cleanup
 			var used: [FactorSource] = []
@@ -44,35 +36,39 @@ public struct ManageSecurityShieldsFeature {
 			return Set(factorSources.map(\.id)).isSuperset(of: usedIDs)
 		}
 	}
-	
+
 	public enum Action: ViewAction {
 		public enum InternalAction {
 			case newShield(preset: Shield?)
 		}
+
 		public enum ViewAction {
 			case shieldTapped(Shield)
 			case addNewButtonTapped
 			case addSampleShieldButtonTapped
 			case addSampleOtherShieldButtonTapped
 		}
+
 		case destination(PresentationAction<Destination.Action>)
 		public enum DelegateAction {
 			public enum Navigate {
 				case toDetailsForShield(Shield)
 			}
+
 			case navigate(Navigate)
 		}
+
 		case delegate(DelegateAction)
 		case view(ViewAction)
 		case `internal`(InternalAction)
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			case let .view(.shieldTapped(shield)):
 				return .send(.delegate(.navigate(.toDetailsForShield(shield))))
-				
+
 			case .view(.addSampleShieldButtonTapped):
 				return .send(.internal(.newShield(preset: Shield.sample)))
 
@@ -81,17 +77,18 @@ public struct ManageSecurityShieldsFeature {
 
 			case .view(.addNewButtonTapped):
 				return .send(.internal(.newShield(preset: nil)))
-				
+
 			case let .internal(.newShield(preset)):
 				state.destination = .newSecurityShield(NewSecurityShieldCoordinator.State(copyAndEdit: preset))
 				return .none
-				
+
 			case .destination(.presented(.newSecurityShield(.delegate(.done)))):
 				state.destination = nil
 				return .none
-				
+
 			case .delegate:
 				return .none
+
 			case .destination:
 				return .none
 			}
@@ -100,29 +97,26 @@ public struct ManageSecurityShieldsFeature {
 	}
 }
 
-
 extension ManageSecurityShieldsFeature {
-	
 	public typealias HostingFeature = ManageSecurityShieldsFeature
-	
+
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
 		@Bindable public var store: StoreOf<HostingFeature>
-		
+
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
+
 		public var body: some SwiftUI.View {
 			VStack {
-	
 				Text("Shields").font(.largeTitle)
-				
+
 				ScrollView {
-					
 					Text("Security shields are a combination of factors you can use to protect your accounts and personas.")
-					
+
 					Text("Here are your current security shields.")
-					
+
 					if store.shields.isEmpty {
 						Text("You have no shields")
 					} else {
@@ -135,9 +129,9 @@ extension ManageSecurityShieldsFeature {
 						}
 					}
 				}
-				
+
 				Spacer()
-				
+
 				Button("Add New") {
 					send(.addNewButtonTapped)
 				}
@@ -162,12 +156,12 @@ extension ManageSecurityShieldsFeature {
 				)
 			) { store in
 				NewSecurityShieldCoordinator.View(store: store)
-				
 			}
 		}
 	}
 }
 
+// MARK: - ShieldCardView
 public struct ShieldCardView: SwiftUI.View {
 	public let shield: Shield
 	public let action: () -> Void

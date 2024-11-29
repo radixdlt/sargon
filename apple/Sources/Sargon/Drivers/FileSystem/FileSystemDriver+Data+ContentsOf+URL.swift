@@ -1,24 +1,18 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-05-05.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - FileManager + @unchecked Sendable
 extension FileManager: @unchecked Sendable {}
 
 // Makes it possible to type `.shared` on an initalizer/func taking
 // `some FileSystemDriver` as parameter.
 extension FileSystemDriver where Self == FileSystem {
-	
 	/// Singleton `FileSystemDriver` of type `FileSystem`being an `actor`  which
 	/// uses a `FileManager` for File I/O CRUD operations.
 	public static var shared: Self { Self.shared }
 }
 
+// MARK: - FileSystem
 /// `FileSystemDriver` being an `actor`  which
 /// uses a `FileManager` for File I/O CRUD operations.
 public final actor FileSystem {
@@ -26,7 +20,7 @@ public final actor FileSystem {
 	public init(fileManager: FileManager = .default) {
 		self.fileManager = fileManager
 	}
-	
+
 	/// Singleton `FileSystemDriver` of type `FileSystem`being an `actor`  which
 	/// uses a `FileManager` for File I/O CRUD operations.
 	public static let shared = FileSystem(fileManager: .default)
@@ -44,28 +38,28 @@ extension FileSystem {
 		_ io: @Sendable (URL) throws -> T
 	) throws -> T {
 		let url = URL(file: path)
-#if os(macOS)
-		 guard url.startAccessingSecurityScopedResource() else {
-		 	throw CommonError.NotPermissionToAccessFile(path: path)
-		 }
-		 defer { url.stopAccessingSecurityScopedResource() }
-        #endif
+		#if os(macOS)
+		guard url.startAccessingSecurityScopedResource() else {
+			throw CommonError.NotPermissionToAccessFile(path: path)
+		}
+		defer { url.stopAccessingSecurityScopedResource() }
+		#endif
 		return try io(url)
 	}
 }
 
 extension FileSystem {
 	private static func appDirPathNotNecessarilyExisting(fileManager: FileManager) throws -> String {
-#if os(iOS)
+		#if os(iOS)
 		return try fileManager.urls(
 			for: .cachesDirectory,
 			in: .userDomainMask
 		).first!.path()
-#elseif os(macOS)
+		#elseif os(macOS)
 		URL.temporaryDirectory.path()
-#else
+		#else
 		fatalError("Unsupported OS")
-#endif
+		#endif
 	}
 }
 
@@ -80,9 +74,9 @@ extension FileSystem {
 }
 #endif
 
+// MARK: - FileSystem + FileSystemDriver
 extension FileSystem: FileSystemDriver {
-	
-    public func writableAppDirPath() async throws -> String {
+	public func writableAppDirPath() async throws -> String {
 		try with(path: Self.appDirPathNotNecessarilyExisting(fileManager: fileManager)) {
 			let directoryExists = fileManager.fileExists(atPath: $0.path())
 			if !directoryExists {
@@ -90,29 +84,29 @@ extension FileSystem: FileSystemDriver {
 			}
 			return $0.path()
 		}
-    }
-    
+	}
+
 	public func loadFromFile(path: String) async throws -> BagOfBytes? {
-        return try with(path: path) {
-            let fileExists = fileManager.fileExists(atPath: $0.path())
-            do {
-                return try Data(contentsOf: $0)
-            } catch {
-                if fileExists {
-                    throw error
-                } else {
-                    return nil
-                }
-            }
+		try with(path: path) {
+			let fileExists = fileManager.fileExists(atPath: $0.path())
+			do {
+				return try Data(contentsOf: $0)
+			} catch {
+				if fileExists {
+					throw error
+				} else {
+					return nil
+				}
+			}
 		}
 	}
-	
-    public func saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Bool) async throws {
-        try with(path: path) {
+
+	public func saveToFile(path: String, data: BagOfBytes, isAllowedToOverwrite: Bool) async throws {
+		try with(path: path) {
 			try data.write(to: $0, options: isAllowedToOverwrite ? [] : [.withoutOverwriting])
-        }
-    }
-	
+		}
+	}
+
 	public func deleteFile(path: String) async throws {
 		try with(path: path) {
 			try fileManager.removeItem(at: $0)
