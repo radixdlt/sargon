@@ -65,9 +65,9 @@ impl IsMaybeKeySpaceAware for FactorSource {
 }
 
 impl FactorSource {
-    fn map_get<'a, R, F>(&'a self, map: F) -> R
+    fn map_get<R, F>(&self, map: F) -> R
     where
-        F: Fn(&'a dyn BaseBaseIsFactorSource) -> R,
+        F: Fn(&dyn BaseBaseIsFactorSource) -> R,
     {
         match self {
             FactorSource::Device { ref value } => map(value),
@@ -80,9 +80,9 @@ impl FactorSource {
         }
     }
 
-    fn map_set<'a, F>(&'a mut self, mut map: F)
+    fn map_set<F>(&mut self, mut map: F)
     where
-        F: FnMut(&'a mut dyn BaseBaseIsFactorSource),
+        F: FnMut(&mut dyn BaseBaseIsFactorSource),
     {
         match self {
             FactorSource::Device { ref mut value } => map(value),
