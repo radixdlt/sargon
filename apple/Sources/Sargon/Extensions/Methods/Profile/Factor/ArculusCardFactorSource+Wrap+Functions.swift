@@ -22,8 +22,8 @@ extension ArculusCardFactorSource {
 	
 	public init(
 		mnemonicWithPassphrase mwp: MnemonicWithPassphrase,
-		name: String
+		label: String
 	) {
-		self.init(mnemonicWithPassphrase: mwp, hint: .init(name: name, model: .arculusColdStorageWallet))
+		self.init(mnemonicWithPassphrase: mwp, hint: .init(label: label, model: .arculusColdStorageWallet))
 	}
 }

@@ -224,7 +224,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
                 flags = emptyList()
             ),
             hint = ArculusCardHint(
-                name = "My Arculus",
+                label = "My Arculus",
                 model = ArculusCardModel.ARCULUS_COLD_STORAGE_WALLET
             )
         )
@@ -246,7 +246,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
                 flags = emptyList()
             ),
             hint = OffDeviceMnemonicHint(
-                displayName = DisplayName("My mnemonic stored somewhere")
+                label = DisplayName("My mnemonic stored somewhere")
             )
         )
     )

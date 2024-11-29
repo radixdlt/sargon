@@ -25,7 +25,7 @@ final class ArculusCardFactorSourceTests: SpecificFactorSourceTest<ArculusCardFa
 					mnemonic: .sampleArculus,
 					passphrase: ""
 				),
-				name: "Test"
+				label: "Test"
 			).id,
 			SUT.sample.id
 		)

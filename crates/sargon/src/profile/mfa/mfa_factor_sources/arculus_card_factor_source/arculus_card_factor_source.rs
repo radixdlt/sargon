@@ -110,7 +110,7 @@ impl BaseBaseIsFactorSource for ArculusCardFactorSource {
     }
 
     fn name(&self) -> String {
-        self.hint.name.clone()
+        self.hint.label.clone()
     }
 }
 

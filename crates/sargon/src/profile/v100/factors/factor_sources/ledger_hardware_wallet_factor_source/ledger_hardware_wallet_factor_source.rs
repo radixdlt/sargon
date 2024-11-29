@@ -100,7 +100,7 @@ impl BaseBaseIsFactorSource for LedgerHardwareWalletFactorSource {
     }
 
     fn name(&self) -> String {
-        self.hint.name.clone()
+        self.hint.label.clone()
     }
 }
 

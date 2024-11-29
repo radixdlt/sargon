@@ -10,19 +10,22 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
 )]
-#[display("{name} {model}")]
+#[display("{label} {model}")]
 pub struct LedgerHardwareWalletHint {
-    /// "Orange, scratched"
-    pub name: String,
+    /// A user-assigned name for the ledger, intended to help users
+    /// differentiate between multiple ledgers.
+    /// 
+    /// E.g. "Orange, scratched"
+    pub label: String,
 
     /// E.g. `nanoS+`
     pub model: LedgerHardwareWalletModel,
 }
 
 impl LedgerHardwareWalletHint {
-    pub fn new(name: &str, model: LedgerHardwareWalletModel) -> Self {
+    pub fn new(label: &str, model: LedgerHardwareWalletModel) -> Self {
         Self {
-            name: name.to_string(),
+            label: label.to_string(),
             model,
         }
     }
@@ -69,7 +72,7 @@ mod tests {
             &model,
             r#"
             {
-                "name": "Orange, scratched",
+                "label": "Orange, scratched",
                 "model": "nanoS+"
             }
             "#,

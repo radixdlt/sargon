@@ -110,7 +110,7 @@ impl BaseBaseIsFactorSource for OffDeviceMnemonicFactorSource {
     }
 
     fn name(&self) -> String {
-        self.hint.display_name.value.clone()
+        self.hint.label.value.clone()
     }
 }
 

@@ -842,8 +842,8 @@ mod tests {
             .unwrap();
 
         // ACT
-        let new_name = "new important name";
-        factor.hint.name = new_name.to_owned();
+        let new_label = "new important name";
+        factor.hint.label = new_label.to_owned();
         os.with_timeout(|x| x.update_factor_source(factor.clone().into()))
             .await
             .unwrap();
@@ -852,7 +852,7 @@ mod tests {
         assert!(os.profile().unwrap().factor_sources.into_iter().any(|f| {
             match f {
                 FactorSource::ArculusCard { value } => {
-                    value.hint.name == *new_name
+                    value.hint.label == *new_label
                 }
                 _ => false,
             }

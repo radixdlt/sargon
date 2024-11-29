@@ -3,8 +3,11 @@ use sargon::ArculusCardHint as InternalArculusCardHint;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ArculusCardHint {
+    /// A user-assigned name for the arculus card, intended to help users
+    /// differentiate between multiple arculus cards.
+    /// 
     /// E.g. "Black" or "Silver"
-    pub name: String,
+    pub label: String,
 
     pub model: ArculusCardModel,
 }

@@ -10,18 +10,21 @@ use crate::prelude::*;
     Hash,
     derive_more::Display,
 )]
-#[display("{name} {model}")]
+#[display("{label} {model}")]
 pub struct ArculusCardHint {
+    /// A user-assigned name for the arculus card, intended to help users
+    /// differentiate between multiple arculus cards.
+    /// 
     /// E.g. "Black" or "Silver"
-    pub name: String,
+    pub label: String,
 
     pub model: ArculusCardModel,
 }
 
 impl ArculusCardHint {
-    pub fn new(name: &str, model: ArculusCardModel) -> Self {
+    pub fn new(label: &str, model: ArculusCardModel) -> Self {
         Self {
-            name: name.to_string(),
+            label: label.to_string(),
             model,
         }
     }
@@ -62,7 +65,7 @@ mod tests {
             &model,
             r#"
             {
-                "name": "Silver",
+                "label": "Silver",
                 "model": "arculusColdStorageWallet"
             }
             "#,

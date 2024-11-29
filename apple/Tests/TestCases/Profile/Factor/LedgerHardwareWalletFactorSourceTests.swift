@@ -25,7 +25,7 @@ final class LedgerHardwareWalletFactorSourceTests: SpecificFactorSourceTest<Ledg
 					mnemonic: .sampleLedger,
 					passphrase: ""
 				),
-				hint: .init(name: "Test", model: .nanoS),
+				hint: .init(label: "Test", model: .nanoS),
 				common: .babylon()
 			).id,
 			SUT.sample.id
