@@ -9,12 +9,12 @@ impl SargonOS {
     pub async fn poll_pre_authorization_status(
         &self,
         intent_hash: SubintentHash,
-        expiration_timestamp: Timestamp,
+        expiration_timestamp: Instant,
     ) -> Result<PreAuthorizationStatus> {
         self.wrapped
             .poll_pre_authorization_status(
                 intent_hash.into_internal(),
-                expiration_timestamp,
+                expiration_timestamp.into_internal(),
             )
             .await
             .into_result()

@@ -55,11 +55,13 @@ impl From<Timestamp> for Instant {
 
 impl HasSampleValues for Instant {
     fn sample() -> Self {
-        Self::from(0)
+        // matches Timestamp::sample()
+        Self::from(1694448356)
     }
 
     fn sample_other() -> Self {
-        Self::from(1)
+        // matches Timestamp::sample_other()
+        Self::from(1703438036)
     }
 }
 

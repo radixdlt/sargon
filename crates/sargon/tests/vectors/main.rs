@@ -723,7 +723,7 @@ mod dapp_to_wallet_interaction_tests {
 #[cfg(test)]
 mod wallet_to_dapp_interaction_tests {
     use super::*;
-    use iso8601_timestamp::Timestamp;
+
     use serde_json::Value;
 
     #[test]
@@ -967,7 +967,7 @@ mod wallet_to_dapp_interaction_tests {
                 WalletToDappInteractionPreAuthorizationResponseItems {
                     response: WalletToDappInteractionSubintentResponseItem::new(
                         SignedSubintent::sample_other(),
-                        Timestamp::sample(),
+                        Instant::sample(),
                     ),
                 },
             );
