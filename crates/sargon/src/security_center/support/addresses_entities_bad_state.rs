@@ -25,7 +25,12 @@ impl AddressesOfEntitiesInBadState {
     }
 
     pub fn empty() -> Self {
-        Self::new(Accounts::new(), Accounts::new(), Personas::new(), Personas::new())
+        Self::new(
+            Accounts::new(),
+            Accounts::new(),
+            Personas::new(),
+            Personas::new(),
+        )
     }
 
     pub fn is_empty(&self) -> bool {
@@ -81,7 +86,12 @@ mod tests {
         let sut = SUT::empty();
         assert!(sut.is_empty());
 
-        let sut = SUT::new(Accounts::new(), Accounts::new(), Personas::new(), Personas::sample());
+        let sut = SUT::new(
+            Accounts::new(),
+            Accounts::new(),
+            Personas::new(),
+            Personas::sample(),
+        );
         assert!(sut.is_empty());
     }
 }

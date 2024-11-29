@@ -9,14 +9,21 @@ pub struct BackupResult {
     pub save_identifier: String,
 
     /// Whether this backup matches the one on Profile.
-    pub is_current: bool,
+    pub is_current: IsBackupResultCurrent,
 
     /// Whether this backup has failed.
-    pub is_failed: bool,
+    pub is_failed: IsBackupResultFailed,
 }
 
+decl_bool_type!(IsBackupResultCurrent, false);
+decl_bool_type!(IsBackupResultFailed, false);
+
 impl BackupResult {
-    pub fn new(save_identifier: String, is_current: bool, is_failed: bool) -> Self {
+    pub fn new(
+        save_identifier: String,
+        is_current: IsBackupResultCurrent,
+        is_failed: IsBackupResultFailed,
+    ) -> Self {
         Self {
             save_identifier,
             is_current,
@@ -27,19 +34,19 @@ impl BackupResult {
 
 impl HasSampleValues for BackupResult {
     fn sample() -> Self {
-        Self {
-            save_identifier: String::sample(),
-            is_current: true,
-            is_failed: false,
-        }
+        Self::new(
+            String::sample(),
+            IsBackupResultCurrent(true),
+            IsBackupResultFailed(false),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            save_identifier: String::sample_other(),
-            is_current: false,
-            is_failed: true,
-        }
+        Self::new(
+            String::sample_other(),
+            IsBackupResultCurrent(false),
+            IsBackupResultFailed(true),
+        )
     }
 }
 
