@@ -2,9 +2,8 @@ use crate::prelude::*;
 
 pub type MatrixOfFactorSourceIds = AbstractMatrixBuilt<FactorSourceID>;
 
-#[cfg(test)]
 impl MatrixOfFactorSourceIds {
-    pub(crate) fn with_roles_and_days(
+    pub(crate) fn _unvalidated_with_roles_and_days(
         primary: PrimaryRoleWithFactorSourceIds,
         recovery: RecoveryRoleWithFactorSourceIds,
         confirmation: ConfirmationRoleWithFactorSourceIds,
@@ -20,6 +19,36 @@ impl MatrixOfFactorSourceIds {
             confirmation_role: confirmation,
             number_of_days_until_auto_confirm,
         }
+    }
+
+    pub(crate) fn _unvalidated_with_roles(
+        primary: PrimaryRoleWithFactorSourceIds,
+        recovery: RecoveryRoleWithFactorSourceIds,
+        confirmation: ConfirmationRoleWithFactorSourceIds,
+    ) -> Self {
+        Self::_unvalidated_with_roles_and_days(
+            primary,
+            recovery,
+            confirmation,
+            Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+        )
+    }
+}
+
+#[cfg(test)]
+impl MatrixOfFactorSourceIds {
+    pub(crate) fn with_roles_and_days(
+        primary: PrimaryRoleWithFactorSourceIds,
+        recovery: RecoveryRoleWithFactorSourceIds,
+        confirmation: ConfirmationRoleWithFactorSourceIds,
+        number_of_days_until_auto_confirm: u16,
+    ) -> Self {
+        Self::_unvalidated_with_roles_and_days(
+            primary,
+            recovery,
+            confirmation,
+            number_of_days_until_auto_confirm,
+        )
     }
 
     pub(crate) fn with_roles(
@@ -39,7 +68,7 @@ impl MatrixOfFactorSourceIds {
 impl MatrixOfFactorSourceIds {
     fn sample_from_template(template: MatrixTemplate) -> Self {
         template
-            .materialize(*ALL_FACTOR_SOURCE_ID_SAMPLES_INC_NON_HD)
+            .materialize_ids(*ALL_FACTOR_SOURCE_ID_SAMPLES_INC_NON_HD)
             .unwrap()
     }
 

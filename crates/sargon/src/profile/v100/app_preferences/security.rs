@@ -171,7 +171,7 @@ mod tests {
 
         sut.security_structures_of_factor_source_ids =
             SecurityStructuresOfFactorSourceIDs::sample();
-
+        print_json(&sut);
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

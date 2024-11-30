@@ -121,42 +121,20 @@ impl Persona {
         veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
-        /*
         let role = make_role();
-
-        let threshold_factors = role
-            .threshold_factors
-            .iter()
-            .map(|hd| hd.factor_instance())
-            .collect::<Vec<FactorInstance>>();
-
-        let override_factors = role
-            .override_factors
-            .iter()
-            .map(|hd| hd.factor_instance())
-            .collect::<Vec<FactorInstance>>();
-
-        let matrix = MatrixOfFactorInstances::new(
-            PrimaryRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                role.threshold,
-                override_factors.clone(),
-            )
-            .unwrap(),
-            RecoveryRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                role.threshold,
-                override_factors.clone(),
-            )
-            .unwrap(),
-            ConfirmationRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                role.threshold,
-                override_factors.clone(),
-            )
-            .unwrap(),
-        )
-        .unwrap();
+        assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
+        let mut matrix = MatrixOfFactorInstances::sample();
+        matrix.primary_role = PrimaryRoleWithFactorInstances::with_factors(
+            role.get_threshold(),
+            role.get_threshold_factors()
+                .into_iter()
+                .map(FactorInstance::from)
+                .collect_vec(),
+            role.get_override_factors()
+                .into_iter()
+                .map(FactorInstance::from)
+                .collect_vec(),
+        );
         let address =
             IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);
         Self {
@@ -176,8 +154,6 @@ impl Persona {
             flags: Default::default(),
             persona_data: Default::default(),
         }
-        */
-        unimplemented!("migrate MFA-Role Rules")
     }
 
     pub fn sample_at(index: usize) -> Self {

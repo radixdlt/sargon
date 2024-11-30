@@ -58,9 +58,32 @@ impl From<SecurityStructureOfFactorSources>
     }
 }
 
+impl<const R: u8> From<AbstractRoleBuilderOrBuilt<R, FactorSource, ()>>
+    for AbstractRoleBuilderOrBuilt<R, FactorSourceID, ()>
+{
+    fn from(value: AbstractRoleBuilderOrBuilt<R, FactorSource, ()>) -> Self {
+        Self::with_factors(
+            value.get_threshold(),
+            value
+                .get_threshold_factors()
+                .into_iter()
+                .map(|f| f.factor_source_id()),
+            value
+                .get_override_factors()
+                .into_iter()
+                .map(|f| f.factor_source_id()),
+        )
+    }
+}
+
 impl From<MatrixOfFactorSources> for MatrixOfFactorSourceIDs {
     fn from(value: MatrixOfFactorSources) -> Self {
-        todo!()
+        Self::_unvalidated_with_roles_and_days(
+            PrimaryRoleWithFactorSourceIds::from(value.primary_role),
+            RecoveryRoleWithFactorSourceIds::from(value.recovery_role),
+            ConfirmationRoleWithFactorSourceIds::from(value.confirmation_role),
+            value.number_of_days_until_auto_confirm,
+        )
     }
 }
 

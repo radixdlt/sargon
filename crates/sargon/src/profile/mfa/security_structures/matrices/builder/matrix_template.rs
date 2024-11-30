@@ -67,9 +67,18 @@ impl FactorSourceIdAssigner {
 }
 
 impl MatrixTemplate {
+    pub fn materialize(
+        self,
+        factor_source_ids: impl IntoIterator<Item = FactorSource>,
+    ) -> Result<MatrixOfFactorSourceIds, CommonError> {
+        self.materialize_ids(
+            factor_source_ids.into_iter().map(|f| f.factor_source_id()),
+        )
+    }
+
     /// Tries to materialize a MatrixOfFactorSourceIds from a MatrixTemplate by
     /// assigning each template with a concrete FactorSourceID using the `factor_source_ids`.`
-    pub fn materialize(
+    pub fn materialize_ids(
         self,
         factor_source_ids: impl IntoIterator<Item = FactorSourceID>,
     ) -> Result<MatrixOfFactorSourceIds, CommonError> {
@@ -345,7 +354,7 @@ mod test_templates {
         expected: MatrixOfFactorSourceIds,
     ) {
         let m = template
-            .materialize(*ALL_FACTOR_SOURCE_ID_SAMPLES_INC_NON_HD)
+            .materialize_ids(*ALL_FACTOR_SOURCE_ID_SAMPLES_INC_NON_HD)
             .unwrap();
         pretty_assertions::assert_eq!(m, expected);
     }
