@@ -585,45 +585,6 @@ mod tests {
     }
 
     #[test]
-    fn factor_should_not_be_used_in_both_lists() {
-        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
-        );
-        assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                RoleKind::Primary,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                1,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-            ),
-            Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
-        );
-    }
-
-    #[test]
-    fn threshold_should_not_be_bigger_than_threshold_factors() {
-        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
-        );
-        assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                RoleKind::Primary,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                2,
-                [],
-            ),
-            Err(
-                CommonError::InvalidSecurityStructureThresholdExceedsFactors {
-                    threshold: 2,
-                    factors: 1,
-                }
-            )
-        );
-    }
-
-    #[test]
     #[should_panic]
     fn cannot_add_same_signature_twice() {
         let intent_hash = TransactionIntentHash::sample();

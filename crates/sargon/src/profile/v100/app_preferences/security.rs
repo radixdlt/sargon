@@ -171,11 +171,11 @@ mod tests {
 
         sut.security_structures_of_factor_source_ids =
             SecurityStructuresOfFactorSourceIDs::sample();
-        print_json(&sut);
+
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
-                        {
+            {
                 "isCloudProfileSyncEnabled": true,
                 "isDeveloperModeEnabled": false,
                 "isAdvancedLockEnabled": false,
@@ -187,9 +187,9 @@ mod tests {
                             "createdOn": "2023-09-11T16:05:56.000Z",
                             "lastUpdatedOn": "2023-09-11T16:05:56.000Z"
                         },
-                        "numberOfEpochsUntilAutoConfirmation": 4032,
                         "matrixOfFactors": {
                             "primaryRole": {
+                                "threshold": 2,
                                 "thresholdFactors": [
                                     {
                                         "discriminator": "fromHash",
@@ -201,48 +201,24 @@ mod tests {
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
-                                            "kind": "arculusCard",
-                                            "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "offDeviceMnemonic",
-                                            "body": "820122c9573768ab572b0c9fa492a45b7b451a2740291b3da908ad423d10e410"
-                                        }
-                                    }
-                                ],
-                                "threshold": 2,
-                                "overrideFactors": [
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
                                             "kind": "ledgerHQHardwareWallet",
                                             "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                                         }
                                     }
-                                ]
+                                ],
+                                "overrideFactors": []
                             },
                             "recoveryRole": {
-                                "thresholdFactors": [
+                                "threshold": 0,
+                                "thresholdFactors": [],
+                                "overrideFactors": [
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
-                                            "kind": "arculusCard",
-                                            "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
+                                            "kind": "device",
+                                            "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                                         }
                                     },
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "arculusCard",
-                                            "body": "3ac064d4b40f78effe7037a12f3287efc67aa87af7c6a083738eae05e28dadaf"
-                                        }
-                                    }
-                                ],
-                                "threshold": 2,
-                                "overrideFactors": [
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
@@ -253,25 +229,19 @@ mod tests {
                                 ]
                             },
                             "confirmationRole": {
-                                "thresholdFactors": [],
                                 "threshold": 0,
+                                "thresholdFactors": [],
                                 "overrideFactors": [
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
-                                            "kind": "securityQuestions",
-                                            "body": "aabc6041d95785ecfabe7d5ed5af259e20e4e3f5f95b16fdeca386bc75796b46"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "ledgerHQHardwareWallet",
-                                            "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                                            "kind": "password",
+                                            "body": "181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9"
                                         }
                                     }
                                 ]
-                            }
+                            },
+                            "numberOfDaysUntilAutoConfirm": 14
                         }
                     },
                     {
@@ -281,75 +251,37 @@ mod tests {
                             "createdOn": "2023-12-24T17:13:56.123Z",
                             "lastUpdatedOn": "2023-12-24T17:13:56.123Z"
                         },
-                        "numberOfEpochsUntilAutoConfirmation": 8064,
                         "matrixOfFactors": {
                             "primaryRole": {
+                                "threshold": 1,
                                 "thresholdFactors": [
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
                                             "kind": "device",
-                                            "body": "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "arculusCard",
-                                            "body": "3ac064d4b40f78effe7037a12f3287efc67aa87af7c6a083738eae05e28dadaf"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "offDeviceMnemonic",
-                                            "body": "5c308b9c3e41912d4af4c5ff088e84877aac5de01c95f32dedd280d55a6d8262"
+                                            "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                                         }
                                     }
                                 ],
-                                "threshold": 2,
-                                "overrideFactors": [
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "ledgerHQHardwareWallet",
-                                            "body": "52ef052a0642a94279b296d6b3b17dedc035a7ae37b76c1d60f11f2725100077"
-                                        }
-                                    }
-                                ]
+                                "overrideFactors": []
                             },
                             "recoveryRole": {
-                                "thresholdFactors": [
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "arculusCard",
-                                            "body": "3ac064d4b40f78effe7037a12f3287efc67aa87af7c6a083738eae05e28dadaf"
-                                        }
-                                    }
-                                ],
-                                "threshold": 1,
+                                "threshold": 0,
+                                "thresholdFactors": [],
                                 "overrideFactors": [
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
                                             "kind": "ledgerHQHardwareWallet",
-                                            "body": "52ef052a0642a94279b296d6b3b17dedc035a7ae37b76c1d60f11f2725100077"
+                                            "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                                         }
                                     }
                                 ]
                             },
                             "confirmationRole": {
-                                "thresholdFactors": [],
                                 "threshold": 0,
+                                "thresholdFactors": [],
                                 "overrideFactors": [
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "securityQuestions",
-                                            "body": "bb0ac72196f748bba4ddf9c6d87c4e3ea939750e3a207f312653aa25f3f9c060"
-                                        }
-                                    },
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
@@ -358,7 +290,8 @@ mod tests {
                                         }
                                     }
                                 ]
-                            }
+                            },
+                            "numberOfDaysUntilAutoConfirm": 14
                         }
                     }
                 ]

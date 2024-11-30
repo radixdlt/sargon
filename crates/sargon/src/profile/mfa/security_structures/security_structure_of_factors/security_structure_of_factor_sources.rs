@@ -66,11 +66,11 @@ impl<const R: u8> From<AbstractRoleBuilderOrBuilt<R, FactorSource, ()>>
             value.get_threshold(),
             value
                 .get_threshold_factors()
-                .into_iter()
+                .iter()
                 .map(|f| f.factor_source_id()),
             value
                 .get_override_factors()
-                .into_iter()
+                .iter()
                 .map(|f| f.factor_source_id()),
         )
     }
