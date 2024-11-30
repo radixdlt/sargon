@@ -121,6 +121,7 @@ impl Persona {
         veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
+        /*
         let role = make_role();
 
         let threshold_factors = role
@@ -175,6 +176,8 @@ impl Persona {
             flags: Default::default(),
             persona_data: Default::default(),
         }
+        */
+        unimplemented!("migrate MFA-Role Rules")
     }
 
     pub fn sample_at(index: usize) -> Self {

@@ -1489,16 +1489,13 @@ mod tests {
                                 .transaction_signing
                                 .factor_instance()])
                         }
-                        EntitySecurityState::Securified { value } => {
-                            let matrix = value
-                                .security_structure
-                                .matrix_of_factors
-                                .clone();
-                            let mut set = IndexSet::new();
-                            set.extend(matrix.primary_role.threshold_factors);
-                            set.extend(matrix.primary_role.override_factors);
-                            set
-                        }
+                        EntitySecurityState::Securified { value } => value
+                            .security_structure
+                            .matrix_of_factors
+                            .all_factors()
+                            .into_iter()
+                            .cloned()
+                            .collect::<IndexSet<_>>(),
                     }
                 }
             }

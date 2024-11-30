@@ -1,15 +1,13 @@
-mod decl_security_structure_of;
-mod factor_instance_level;
-mod factor_source_id_level;
-mod factor_source_level;
 mod has_role_kind;
-mod role_with_factors;
+mod matrices;
+mod roles;
+mod security_structure_id;
 mod security_structure_metadata;
+mod security_structure_of_factors;
 
-pub(crate) use decl_security_structure_of::*;
-pub use factor_instance_level::*;
-pub use factor_source_id_level::*;
-pub use factor_source_level::*;
 pub use has_role_kind::*;
-pub use role_with_factors::*;
+pub use matrices::*;
+pub use roles::*;
+pub use security_structure_id::*;
 pub use security_structure_metadata::*;
+pub use security_structure_of_factors::*;

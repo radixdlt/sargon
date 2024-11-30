@@ -1,11 +1,6 @@
 use crate::prelude::*;
 use sargon::SecurityStructureOfFactorInstances as InternalSecurityStructureOfFactorInstances;
 
-decl_matrix_of_factors!(
-    /// A matrix of FactorInstances
-    FactorInstance
-);
-
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureOfFactorInstances {
     /// The ID of the `SecurityStructureOfFactorSourceIDs` in

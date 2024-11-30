@@ -5,6 +5,8 @@
 #![allow(internal_features)]
 #![feature(iter_repeat_n)]
 #![feature(future_join)]
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
 
 mod core;
 mod factor_instances_provider;
@@ -33,10 +35,10 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
-
     pub use radix_rust::prelude::{
         indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
     };
+    pub(crate) use std::marker::PhantomData;
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;

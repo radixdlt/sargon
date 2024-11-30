@@ -79,11 +79,11 @@ impl<ID: SignableID> PetitionForEntity<ID> {
             payload_id,
             entity,
             PetitionForFactors::new_threshold(
-                role_with_factor_instances.threshold_factors,
-                role_with_factor_instances.threshold as i8,
+                role_with_factor_instances.get_threshold_factors(),
+                role_with_factor_instances.get_threshold() as i8,
             ),
             PetitionForFactors::new_override(
-                role_with_factor_instances.override_factors,
+                role_with_factor_instances.get_override_factors(),
             ),
         )
     }
