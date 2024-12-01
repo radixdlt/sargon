@@ -28,7 +28,7 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
         RoleKind::from_u8(R).expect("RoleKind should be valid")
     }
 
-    pub(crate) fn with_factors(
+    pub unsafe fn unbuilt_with_factors(
         threshold: u8,
         threshold_factors: impl IntoIterator<Item = F>,
         override_factors: impl IntoIterator<Item = F>,
@@ -64,6 +64,16 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
             threshold,
             threshold_factors,
             override_factors,
+        }
+    }
+
+    pub(crate) fn with_factors(
+        threshold: u8,
+        threshold_factors: impl IntoIterator<Item = F>,
+        override_factors: impl IntoIterator<Item = F>,
+    ) -> Self {
+        unsafe {
+            Self::unbuilt_with_factors(threshold, threshold_factors, override_factors)
         }
     }
 }

@@ -1,5 +1,19 @@
 use crate::prelude::*;
 
+use sargon::MatrixOfFactorSources as InternalMatrixOfFactorSources;
+use sargon::SecurityStructureOfFactorSources as InternalSecurityStructureOfFactorSources;
+
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+pub struct SecurityStructureOfFactorSources {
+    /// Metadata of this Security Structure, such as globally unique and
+    /// stable identifier, creation date and user chosen label (name).
+    pub metadata: SecurityStructureMetadata,
+
+    /// The structure of factors to use for certain roles, Primary, Recovery
+    /// and Confirmation role.
+    pub matrix_of_factors: MatrixOfFactorSources,
+}
+
 #[uniffi::export]
 pub fn new_security_structure_of_factor_sources_sample(
 ) -> SecurityStructureOfFactorSources {
@@ -10,20 +24,6 @@ pub fn new_security_structure_of_factor_sources_sample(
 pub fn new_security_structure_of_factor_sources_sample_other(
 ) -> SecurityStructureOfFactorSources {
     InternalSecurityStructureOfFactorSources::sample_other().into()
-}
-
-#[uniffi::export]
-pub fn new_security_structure_of_factor_sources_auto_in_days(
-    metadata: SecurityStructureMetadata,
-    number_of_days_until_auto_confirmation: u16,
-    matrix_of_factors: MatrixOfFactorSources,
-) -> SecurityStructureOfFactorSources {
-    InternalSecurityStructureOfFactorSources::new_with_days(
-        metadata.into_internal(),
-        number_of_days_until_auto_confirmation,
-        matrix_of_factors.into_internal(),
-    )
-    .into()
 }
 
 #[uniffi::export]

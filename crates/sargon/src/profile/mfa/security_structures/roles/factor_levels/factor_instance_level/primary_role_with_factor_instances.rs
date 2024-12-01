@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) type PrimaryRoleWithFactorInstances =
+pub type PrimaryRoleWithFactorInstances =
     RoleWithFactorInstances<{ ROLE_PRIMARY }>;
 
 impl HasSampleValues for PrimaryRoleWithFactorInstances {

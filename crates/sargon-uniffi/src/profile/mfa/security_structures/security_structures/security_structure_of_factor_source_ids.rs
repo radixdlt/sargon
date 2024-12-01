@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use sargon::SecurityStructureOfFactorSourceIDs as InternalSecurityStructureOfFactorSourceIDs;
+
 decl_vec_samples_for!(
     SecurityStructuresOfFactorSourceIDs,
     SecurityStructureOfFactorSourceIDs

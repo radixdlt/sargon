@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) type ConfirmationRoleWithFactorSources =
+pub type ConfirmationRoleWithFactorSources =
     RoleWithFactorSources<{ ROLE_CONFIRMATION }>;
 
 impl HasSampleValues for ConfirmationRoleWithFactorSources {

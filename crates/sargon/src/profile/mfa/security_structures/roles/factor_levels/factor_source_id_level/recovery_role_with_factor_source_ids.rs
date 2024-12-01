@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-pub type RecoveryRoleWithFactorSourceIds =
+pub type RecoveryRoleWithFactorSourceIDs =
     RoleWithFactorSourceIds<{ ROLE_RECOVERY }>;
+pub type RecoveryRoleWithFactorSourceIds = RecoveryRoleWithFactorSourceIDs;
 
 #[cfg(test)]
 mod tests {

@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-pub type PrimaryRoleWithFactorSourceIds =
+pub type PrimaryRoleWithFactorSourceIDs =
     RoleWithFactorSourceIds<{ ROLE_PRIMARY }>;
+pub type PrimaryRoleWithFactorSourceIds = PrimaryRoleWithFactorSourceIDs;
 
 impl PrimaryRoleWithFactorSourceIds {
     /// Config MFA 1.1

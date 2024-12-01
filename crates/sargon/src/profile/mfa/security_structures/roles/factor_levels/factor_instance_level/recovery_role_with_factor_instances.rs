@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) type RecoveryRoleWithFactorInstances =
+pub type RecoveryRoleWithFactorInstances =
     RoleWithFactorInstances<{ ROLE_RECOVERY }>;
 
 impl HasSampleValues for RecoveryRoleWithFactorInstances {

@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) type PrimaryRoleWithFactorSources =
-    RoleWithFactorSources<{ ROLE_PRIMARY }>;
+pub type PrimaryRoleWithFactorSources = RoleWithFactorSources<{ ROLE_PRIMARY }>;
 
 impl HasSampleValues for PrimaryRoleWithFactorSources {
     fn sample() -> Self {

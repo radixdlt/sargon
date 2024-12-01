@@ -17,9 +17,9 @@ pub struct FactorSourceTemplate {
 pub(crate) type RoleTemplate<const R: u8> =
     AbstractBuiltRoleWithFactor<R, FactorSourceTemplate>;
 
-pub(crate) type PrimaryRoleTemplate = RoleTemplate<{ ROLE_PRIMARY }>;
-pub(crate) type RecoveryRoleTemplate = RoleTemplate<{ ROLE_RECOVERY }>;
-pub(crate) type ConfirmationRoleTemplate = RoleTemplate<{ ROLE_CONFIRMATION }>;
+pub type PrimaryRoleTemplate = RoleTemplate<{ ROLE_PRIMARY }>;
+pub type RecoveryRoleTemplate = RoleTemplate<{ ROLE_RECOVERY }>;
+pub type ConfirmationRoleTemplate = RoleTemplate<{ ROLE_CONFIRMATION }>;
 
 impl PrimaryRoleTemplate {
     pub(crate) fn new(

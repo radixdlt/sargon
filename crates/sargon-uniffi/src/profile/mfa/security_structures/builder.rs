@@ -2,9 +2,12 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::sync::{Arc, RwLock};
+use std::{
+    borrow::Borrow,
+    sync::{Arc, RwLock},
+};
 
-use sargon::IndexSet;
+use sargon::{IndexSet, MatrixBuilder};
 
 use crate::prelude::*;
 
@@ -17,7 +20,7 @@ pub struct SecurityShieldBuilder {
 #[derive(Debug, PartialEq, Eq, Hash, uniffi::Object)]
 #[uniffi::export(Debug, Eq, Hash)]
 pub struct SecurityStructureOfFactorSourceIds {
-    pub wrapped: rules::SecurityStructureOfFactorSourceIds,
+    pub wrapped: sargon::SecurityStructureOfFactorSourceIds,
 }
 
 impl SecurityShieldBuilder {
@@ -41,11 +44,10 @@ impl SecurityShieldBuilder {
     ) -> Result<R, CommonError> {
         let guard = self.wrapped.write();
 
-        let mut binding =
-            guard.map_err(|_| CommonError::MatrixBuilderRwLockPoisoned)?;
+        let mut binding = guard.map_err(|_| CommonError::Unknown)?; // TODO: CommonError::MatrixBuilderRwLockPoisoned
 
         let Some(builder) = binding.as_mut() else {
-            return Err(CommonError::AlreadyBuilt);
+            return Err(CommonError::Unknown); // TODO: CommonError::AlreadyBuilt
         };
         with_non_consumed_builder(builder)
             .map_err(|e| Into::<CommonError>::into(e))
@@ -53,17 +55,17 @@ impl SecurityShieldBuilder {
 
     fn validation_for_addition_of_factor_source_by_calling(
         &self,
-        factor_sources: Vec<Arc<FactorSourceID>>,
+        factor_sources: Vec<FactorSourceID>,
         call: impl Fn(
             &MatrixBuilder,
             &IndexSet<sargon::FactorSourceID>,
         )
-            -> IndexSet<rules::FactorSourceInRoleBuilderValidationStatus>,
+            -> IndexSet<sargon::FactorSourceInRoleBuilderValidationStatus>,
     ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
         let input = &factor_sources
             .clone()
             .into_iter()
-            .map(|x| x.inner)
+            .map(Into::<sargon::FactorSourceID>::into)
             .collect::<IndexSet<_>>();
         self.with(|builder| {
             let xs = call(builder, input);
@@ -94,10 +96,13 @@ impl SecurityShieldBuilder {
     fn get_factors(
         &self,
         access: impl Fn(&MatrixBuilder) -> &Vec<sargon::FactorSourceID>,
-    ) -> Vec<Arc<FactorSourceID>> {
+    ) -> Vec<FactorSourceID> {
         self.get(|builder| {
             let factors = access(builder);
-            factors.iter().map(FactorSourceID::new).collect::<Vec<_>>()
+            factors
+                .iter()
+                .map(|x| crate::FactorSourceID::from(x.clone()))
+                .collect::<Vec<_>>()
         })
     }
 }
@@ -119,19 +124,19 @@ impl SecurityShieldBuilder {
         self.name.read().unwrap().clone()
     }
 
-    pub fn get_primary_threshold_factors(&self) -> Vec<Arc<FactorSourceID>> {
+    pub fn get_primary_threshold_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_threshold_factors())
     }
 
-    pub fn get_primary_override_factors(&self) -> Vec<Arc<FactorSourceID>> {
+    pub fn get_primary_override_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_override_factors())
     }
 
-    pub fn get_recovery_factors(&self) -> Vec<Arc<FactorSourceID>> {
+    pub fn get_recovery_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_recovery_factors())
     }
 
-    pub fn get_confirmation_factors(&self) -> Vec<Arc<FactorSourceID>> {
+    pub fn get_confirmation_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_confirmation_factors())
     }
 }
@@ -148,29 +153,33 @@ impl SecurityShieldBuilder {
     /// Adds the factor source to the primary role threshold list.
     pub fn add_factor_source_to_primary_threshold(
         &self,
-        factor_source_id: Arc<FactorSourceID>,
+        factor_source_id: FactorSourceID,
     ) -> Result<(), CommonError> {
         self.with(|builder| {
-            builder
-                .add_factor_source_to_primary_threshold(factor_source_id.inner)
+            builder.add_factor_source_to_primary_threshold(
+                factor_source_id.clone().into(),
+            )
         })
     }
 
     pub fn add_factor_source_to_primary_override(
         &self,
-        factor_source_id: Arc<FactorSourceID>,
+        factor_source_id: FactorSourceID,
     ) -> Result<(), CommonError> {
         self.with(|builder| {
-            builder
-                .add_factor_source_to_primary_override(factor_source_id.inner)
+            builder.add_factor_source_to_primary_override(
+                factor_source_id.clone().into(),
+            )
         })
     }
 
     pub fn remove_factor(
         &self,
-        factor_source_id: Arc<FactorSourceID>,
+        factor_source_id: FactorSourceID,
     ) -> Result<(), CommonError> {
-        self.with(|builder| builder.remove_factor(&factor_source_id.inner))
+        self.with(|builder| {
+            builder.remove_factor(&factor_source_id.clone().into())
+        })
     }
 
     pub fn set_threshold(&self, threshold: u8) -> Result<(), CommonError> {
@@ -188,21 +197,22 @@ impl SecurityShieldBuilder {
 
     pub fn add_factor_source_to_recovery_override(
         &self,
-        factor_source_id: Arc<FactorSourceID>,
+        factor_source_id: FactorSourceID,
     ) -> Result<(), CommonError> {
         self.with(|builder| {
-            builder
-                .add_factor_source_to_recovery_override(factor_source_id.inner)
+            builder.add_factor_source_to_recovery_override(
+                factor_source_id.clone().into(),
+            )
         })
     }
 
     pub fn add_factor_source_to_confirmation_override(
         &self,
-        factor_source_id: Arc<FactorSourceID>,
+        factor_source_id: FactorSourceID,
     ) -> Result<(), CommonError> {
         self.with(|builder| {
             builder.add_factor_source_to_confirmation_override(
-                factor_source_id.inner,
+                factor_source_id.clone().into(),
             )
         })
     }
@@ -213,7 +223,7 @@ impl SecurityShieldBuilder {
     ) -> Result<(), CommonError> {
         self.with(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
-                factor_source_kind.into(),
+                factor_source_kind.clone().into(),
             )
         })
     }
@@ -224,7 +234,7 @@ impl SecurityShieldBuilder {
     ) -> Result<(), CommonError> {
         self.with(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_recovery_override(
-                factor_source_kind.into(),
+                factor_source_kind.clone().into(),
             )
         })
     }
@@ -235,7 +245,7 @@ impl SecurityShieldBuilder {
     ) -> Result<(), CommonError> {
         self.with(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_primary_override(
-                factor_source_kind.into(),
+                factor_source_kind.clone().into(),
             )
         })
     }
@@ -246,14 +256,14 @@ impl SecurityShieldBuilder {
     ) -> Result<(), CommonError> {
         self.with(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
-                factor_source_kind.into(),
+                factor_source_kind.clone().into(),
             )
         })
     }
 
     pub fn validation_for_addition_of_factor_source_to_primary_threshold_for_each(
         &self,
-        factor_sources: Vec<Arc<FactorSourceID>>,
+        factor_sources: Vec<FactorSourceID>,
     ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
@@ -266,7 +276,7 @@ impl SecurityShieldBuilder {
 
     pub fn validation_for_addition_of_factor_source_to_primary_override_for_each(
         &self,
-        factor_sources: Vec<Arc<FactorSourceID>>,
+        factor_sources: Vec<FactorSourceID>,
     ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
@@ -278,7 +288,7 @@ impl SecurityShieldBuilder {
 
     pub fn validation_for_addition_of_factor_source_to_recovery_override_for_each(
         &self,
-        factor_sources: Vec<Arc<FactorSourceID>>,
+        factor_sources: Vec<FactorSourceID>,
     ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
@@ -291,7 +301,7 @@ impl SecurityShieldBuilder {
 
     pub fn validation_for_addition_of_factor_source_to_confirmation_override_for_each(
         &self,
-        factor_sources: Vec<Arc<FactorSourceID>>,
+        factor_sources: Vec<FactorSourceID>,
     ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
@@ -306,19 +316,16 @@ impl SecurityShieldBuilder {
     pub fn build(
         self: Arc<Self>,
     ) -> Result<SecurityStructureOfFactorSourceIds, CommonError> {
-        let mut binding = self
-            .wrapped
-            .write()
-            .map_err(|_| CommonError::MatrixBuilderRwLockPoisoned)?;
-        let builder = binding.take().ok_or(CommonError::AlreadyBuilt)?;
-        let wrapped_matrix = builder
-            .build()
-            .map_err(|e| CommonError::BuildError(format!("{:?}", e)))?;
+        let mut binding =
+            self.wrapped.write().map_err(|_| CommonError::Unknown)?; // TODO: CommonError::MatrixBuilderRwLockPoisoned
+        let builder = binding.take().ok_or(CommonError::Unknown)?; // TODO: CommonError::AlreadyBuilt
+        let wrapped_matrix =
+            builder.build().map_err(|e| CommonError::Unknown)?; // TODO: CommonError::BuildError(format!("{:?}", e)
 
         let name = self.get_name();
-        let display_name = sargon::DisplayName::new(name)
-            .map_err(|e| CommonError::Sargon(format!("{:?}", e)))?;
-        let wrapped_shield = rules::SecurityStructureOfFactorSourceIds::new(
+        let display_name =
+            sargon::DisplayName::new(name).map_err(|e| CommonError::Unknown)?; // TODO CommonError display..
+        let wrapped_shield = sargon::SecurityStructureOfFactorSourceIds::new(
             display_name,
             wrapped_matrix,
         );
@@ -327,6 +334,39 @@ impl SecurityShieldBuilder {
             wrapped: wrapped_shield,
         };
         Ok(shield)
+    }
+}
+
+impl FactorSourceID {
+    pub fn new(inner: impl Borrow<sargon::FactorSourceID>) -> Self {
+        Self::from(inner.borrow().clone())
+    }
+}
+
+#[cfg(test)]
+impl FactorSourceID {
+    pub fn sample_device() -> Self {
+        Self::new(sargon::FactorSourceID::sample_device())
+    }
+
+    pub fn sample_device_other() -> Self {
+        Self::new(sargon::FactorSourceID::sample_device_other())
+    }
+
+    pub fn sample_ledger() -> Self {
+        Self::new(sargon::FactorSourceID::sample_ledger())
+    }
+
+    pub fn sample_ledger_other() -> Self {
+        Self::new(sargon::FactorSourceID::sample_ledger_other())
+    }
+
+    pub fn sample_arculus() -> Self {
+        Self::new(sargon::FactorSourceID::sample_arculus())
+    }
+
+    pub fn sample_arculus_other() -> Self {
+        Self::new(sargon::FactorSourceID::sample_arculus_other())
     }
 }
 
@@ -515,7 +555,7 @@ mod tests {
                 .matrix_of_factors
                 .primary()
                 .get_override_factors(),
-            &vec![FactorSourceID::sample_arculus().inner]
+            &vec![FactorSourceID::sample_arculus().into()]
         );
         assert_eq!(
             shield
@@ -523,7 +563,7 @@ mod tests {
                 .matrix_of_factors
                 .recovery()
                 .get_override_factors(),
-            &vec![FactorSourceID::sample_ledger().inner]
+            &vec![FactorSourceID::sample_ledger().into()]
         );
         assert_eq!(
             shield
@@ -531,7 +571,7 @@ mod tests {
                 .matrix_of_factors
                 .confirmation()
                 .get_override_factors(),
-            &vec![FactorSourceID::sample_device().inner]
+            &vec![FactorSourceID::sample_device().into()]
         );
     }
 }
