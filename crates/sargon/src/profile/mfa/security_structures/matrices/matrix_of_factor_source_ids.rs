@@ -3,24 +3,6 @@ use crate::prelude::*;
 pub type MatrixOfFactorSourceIds = AbstractMatrixBuilt<FactorSourceID>;
 
 impl MatrixOfFactorSourceIds {
-    pub unsafe fn unbuilt_with_roles_and_days(
-        primary: PrimaryRoleWithFactorSourceIds,
-        recovery: RecoveryRoleWithFactorSourceIds,
-        confirmation: ConfirmationRoleWithFactorSourceIds,
-        number_of_days_until_auto_confirm: u16,
-    ) -> Self {
-        assert_eq!(primary.role(), RoleKind::Primary);
-        assert_eq!(recovery.role(), RoleKind::Recovery);
-        assert_eq!(confirmation.role(), RoleKind::Confirmation);
-        Self {
-            built: PhantomData,
-            primary_role: primary,
-            recovery_role: recovery,
-            confirmation_role: confirmation,
-            number_of_days_until_auto_confirm,
-        }
-    }
-
     pub(crate) fn _unvalidated_with_roles(
         primary: PrimaryRoleWithFactorSourceIds,
         recovery: RecoveryRoleWithFactorSourceIds,

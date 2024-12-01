@@ -101,7 +101,7 @@ impl SecurityShieldBuilder {
             let factors = access(builder);
             factors
                 .iter()
-                .map(|x| crate::FactorSourceID::from(x.clone()))
+                .map(|x| crate::FactorSourceID::from(*x))
                 .collect::<Vec<_>>()
         })
     }
@@ -339,7 +339,7 @@ impl SecurityShieldBuilder {
 
 impl FactorSourceID {
     pub fn new(inner: impl Borrow<sargon::FactorSourceID>) -> Self {
-        Self::from(inner.borrow().clone())
+        Self::from(*inner.borrow())
     }
 }
 

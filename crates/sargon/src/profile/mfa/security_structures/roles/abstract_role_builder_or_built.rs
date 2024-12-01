@@ -10,19 +10,19 @@ use crate::prelude::*;
 /// * PrimaryRoleBuilder (FactorSourceID)
 /// * RecoveryRoleBuilder (FactorSourceID)
 /// * ConfirmationRoleBuilder (FactorSourceID)
-/// 
+///
 /// # Built
-/// 
+///
 /// ## FactorSourceID
 /// * PrimaryRoleWithFactorSourceID
 /// * RecoveryRoleWithFactorSourceID
 /// * ConfirmationRoleWithFactorSourceID
-/// 
+///
 /// ## FactorSource
 /// * PrimaryRoleWithFactorSource
 /// * RecoveryRoleWithFactorSource
 /// * ConfirmationRoleWithFactorSource
-/// 
+///
 /// ## FactorInstance
 /// * PrimaryRoleWithFactorInstances
 /// * RecoveryRoleWithFactorInstances
@@ -60,6 +60,10 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
         RoleKind::from_u8(R).expect("RoleKind should be valid")
     }
 
+    /// # Safety
+    /// Rust memory safe, but marked "unsafe" since it might allow for instantiation
+    /// of unsafe - as in application **unsecure** - Role of Factors, which might
+    /// lead to increase risk for end user to loose funds.
     pub unsafe fn unbuilt_with_factors(
         threshold: u8,
         threshold_factors: impl IntoIterator<Item = F>,

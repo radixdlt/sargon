@@ -3,14 +3,14 @@ use sargon::{MatrixBuilderValidation, RoleBuilderValidation};
 use crate::prelude::*;
 
 impl From<MatrixBuilderValidation> for CommonError {
-    fn from(val: MatrixBuilderValidation) -> Self {
+    fn from(_value: MatrixBuilderValidation) -> Self {
         // CommonError::BuildError(format!("{:?}", val))
         CommonError::Unknown
     }
 }
 
 impl From<RoleBuilderValidation> for CommonError {
-    fn from(val: RoleBuilderValidation) -> Self {
+    fn from(_value: RoleBuilderValidation) -> Self {
         // CommonError::BuildError(format!("{:?}", val))
         CommonError::Unknown
     }

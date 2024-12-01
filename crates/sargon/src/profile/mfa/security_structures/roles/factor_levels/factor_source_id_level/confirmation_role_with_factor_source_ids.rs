@@ -2,7 +2,8 @@ use crate::prelude::*;
 
 pub type ConfirmationRoleWithFactorSourceIDs =
     RoleWithFactorSourceIds<{ ROLE_CONFIRMATION }>;
-pub type ConfirmationRoleWithFactorSourceIds = ConfirmationRoleWithFactorSourceIDs;
+pub type ConfirmationRoleWithFactorSourceIds =
+    ConfirmationRoleWithFactorSourceIDs;
 
 impl HasSampleValues for ConfirmationRoleWithFactorSourceIds {
     /// Config MFA 1.1

@@ -14,7 +14,6 @@ pub struct SecurityStructureOfFactorInstances {
     pub matrix_of_factors: MatrixOfFactorInstances,
 }
 
-
 use sargon::SecurityStructureOfFactorSourceIDs as InternalSecurityStructureOfFactorSourceIDs;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
@@ -25,5 +24,7 @@ pub struct SecurityStructureOfFactorSourceIDs {
 
     /// The structure of factors to use for certain roles, Primary, Recovery
     /// and Confirmation role.
-    pub matrix_of_factors: MatrixOfFactorSourceIds,
+    pub matrix_of_factors: MatrixOfFactorSourceIDs,
 }
+
+pub type MatrixOfFactorSourceIds = MatrixOfFactorSourceIDs;
