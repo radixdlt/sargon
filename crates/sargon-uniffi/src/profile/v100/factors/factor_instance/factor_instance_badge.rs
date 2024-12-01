@@ -13,3 +13,5 @@ pub enum FactorInstanceBadge {
         value: ResourceAddress,
     },
 }
+
+delegate_debug_into!(FactorInstanceBadge, InternalFactorInstanceBadge);

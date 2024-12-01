@@ -18,16 +18,21 @@ macro_rules! matrix_conversion {
 
     // Impl From<crate> -> Internal
     (to_internal: $internal_factor:ty => $uniffi:ident, $internal:ident) => {
+        impl $uniffi {
+            pub fn into_internal(&self) -> $internal {
+                unsafe {
+                    <$internal>::unbuilt_with_roles_and_days(
+                        self.primary_role.clone().into(),
+                        self.recovery_role.clone().into(),
+                        self.confirmation_role.clone().into(),
+                        self.number_of_days_until_auto_confirm,
+                    )
+                }
+            }
+        }
         impl From<$uniffi> for $internal {
             fn from(value: $uniffi) -> Self {
-                    unsafe {
-            Self::unbuilt_with_roles_and_days(
-                value.primary_role.into(),
-                value.recovery_role.into(),
-                value.confirmation_role.into(),
-                value.number_of_days_until_auto_confirm,
-            )
-        }
+               value.into_internal()
             }
         }
     };
@@ -46,7 +51,7 @@ macro_rules! matrix_conversion {
                 $internal_name::sample().into()
             }
             fn sample_other() -> Self {
-                $internal_name::sample().into()
+                $internal_name::sample_other().into()
             }
         }
 
@@ -74,6 +79,7 @@ macro_rules! matrix_conversion {
             }
 
             use sargon::$struct_name as [< Internal $struct_name>];
+            delegate_debug_into!($struct_name, [< Internal $struct_name>]);
             matrix_conversion!(
                 impl_from: [< Internal $factor_level>] => $struct_name => [< Internal $struct_name >]
             );

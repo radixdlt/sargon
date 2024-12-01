@@ -481,7 +481,7 @@ final class Decimal192Tests: Test<Decimal192> {
 		try largeDecimalsStrings.forEach(testLarge)
 
 		XCTAssertLessThan(SUT.min.asDouble, SUT.max.asDouble)
-		XCTAssertNoThrow(try SUT("12345678987654321.000000000000000001").asDouble)
+		XCTAssertNoThrow(SUT("12345678987654321.000000000000000001").asDouble)
 	}
 
 	private var smallDecimalStrings: [String] {

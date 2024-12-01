@@ -6,3 +6,4 @@ extension SecurityStructureMetadata {
 		self = newSecurityStructureMetadataNamed(name: name)
 	}
 }
+

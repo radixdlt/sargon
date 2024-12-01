@@ -61,15 +61,20 @@ macro_rules! role_conversion_inner {
 
     // Impl From<crate> -> Internal
     (to_internal: $internal_factor:ty => $uniffi:ident, $internal:ident) => {
-        impl From<$uniffi> for $internal {
-            fn from(value: $uniffi) -> Self {
+        impl $uniffi {
+            pub fn into_internal(&self) -> $internal {
                 unsafe {
-                    Self::unbuilt_with_factors(
-                        value.threshold,
-                        value.threshold_factors.into_iter().map(|x| Into::<$internal_factor>::into(x.clone())).collect::<Vec<_>>(),
-                        value.override_factors.into_iter().map(|x| Into::<$internal_factor>::into(x.clone())).collect::<Vec<_>>(),
+                    <$internal>::unbuilt_with_factors(
+                        self.threshold,
+                        self.threshold_factors.clone().into_iter().map(|x| Into::<$internal_factor>::into(x.clone())).collect::<Vec<_>>(),
+                        self.override_factors.clone().into_iter().map(|x| Into::<$internal_factor>::into(x.clone())).collect::<Vec<_>>(),
                     )
                 }
+            }
+        }
+        impl From<$uniffi> for $internal {
+            fn from(value: $uniffi) -> Self {
+                value.into_internal()
             }
         }
     };
@@ -89,7 +94,7 @@ macro_rules! role_conversion_inner {
                 $internal_name::sample().into()
             }
             fn sample_other() -> Self {
-                $internal_name::sample().into()
+                $internal_name::sample_other().into()
             }
         }
 
@@ -129,6 +134,7 @@ macro_rules! role_conversion_inner {
         }
         paste! {
             use sargon::$struct_name as [< Internal $struct_name>];
+            delegate_debug_into!($struct_name, [< Internal $struct_name>]);
             role_conversion_inner!(
                 impl_from: [< Internal $factor_level>] => $struct_name => [< Internal $struct_name >]
             );
