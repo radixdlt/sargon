@@ -1,5 +1,18 @@
 use crate::prelude::*;
 
+
+/// Either a matrix or a **builder of a matrix** with a Primary, Recovery and Confirmation
+/// role or **builder of roles**.
+/// This type is shared by:
+/// * MatrixBuilder (FactorSourceID)
+/// 
+/// # Built
+/// * MatrixOfFactorSources
+/// * MatrixOfFactorSourceIds
+/// * MatrixOfFactorInstances
+///
+/// For "built types" the `built` field is `PhantomData<()>`, for the `MatrixBuilder`
+/// it is `PhantomData<FactorSourceID>`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AbstractMatrixBuilderOrBuilt<F, T, U> {
@@ -15,6 +28,7 @@ pub struct AbstractMatrixBuilderOrBuilt<F, T, U> {
 
     pub(crate) number_of_days_until_auto_confirm: u16,
 }
+
 impl<F, T, U> AbstractMatrixBuilderOrBuilt<F, T, U> {
     pub const DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM: u16 = 14;
 }

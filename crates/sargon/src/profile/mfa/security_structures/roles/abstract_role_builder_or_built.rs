@@ -4,6 +4,29 @@ use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
+/// Either a role or a **builder of a role** with a threshold, threshold_factors and override_factors.
+/// This type is shared by:
+/// # Builder
+/// * PrimaryRoleBuilder (FactorSourceID)
+/// * RecoveryRoleBuilder (FactorSourceID)
+/// * ConfirmationRoleBuilder (FactorSourceID)
+/// 
+/// # Built
+/// 
+/// ## FactorSourceID
+/// * PrimaryRoleWithFactorSourceID
+/// * RecoveryRoleWithFactorSourceID
+/// * ConfirmationRoleWithFactorSourceID
+/// 
+/// ## FactorSource
+/// * PrimaryRoleWithFactorSource
+/// * RecoveryRoleWithFactorSource
+/// * ConfirmationRoleWithFactorSource
+/// 
+/// ## FactorInstance
+/// * PrimaryRoleWithFactorInstances
+/// * RecoveryRoleWithFactorInstances
+/// * ConfirmationRoleWithFactorInstances
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AbstractRoleBuilderOrBuilt<const R: u8, F, T> {
@@ -11,8 +34,17 @@ pub struct AbstractRoleBuilderOrBuilt<const R: u8, F, T> {
     #[doc(hidden)]
     built: PhantomData<T>,
 
+    /// How many threshold factors that must be used to perform some function with
+    /// this role.
     threshold: u8,
+
+    /// Factors which are used in combination with other factors, amounting to at
+    /// least `threshold` many factors to perform some function with this role.
     threshold_factors: Vec<F>,
+
+    /// Overriding / Super admin / "sudo" / God / factors, **ANY**
+    /// single of these factor which can perform the function of this role,
+    /// disregarding of `threshold`.
     override_factors: Vec<F>,
 }
 
@@ -73,12 +105,17 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
         override_factors: impl IntoIterator<Item = F>,
     ) -> Self {
         unsafe {
-            Self::unbuilt_with_factors(threshold, threshold_factors, override_factors)
+            Self::unbuilt_with_factors(
+                threshold,
+                threshold_factors,
+                override_factors,
+            )
         }
     }
 }
 
 impl<const R: u8, F, T> AbstractRoleBuilderOrBuilt<R, F, T> {
+    /// Threshold and Override factors mixed (threshold first).
     pub fn all_factors(&self) -> Vec<&F> {
         self.threshold_factors
             .iter()
@@ -86,14 +123,21 @@ impl<const R: u8, F, T> AbstractRoleBuilderOrBuilt<R, F, T> {
             .collect()
     }
 
+    /// Factors which are used in combination with other factors, amounting to at
+    /// least `threshold` many factors to perform some function with this role.
     pub fn get_threshold_factors(&self) -> &Vec<F> {
         &self.threshold_factors
     }
 
+    /// Overriding / Super admin / "sudo" / God / factors, **ANY**
+    /// single of these factor which can perform the function of this role,
+    /// disregarding of `threshold`.
     pub fn get_override_factors(&self) -> &Vec<F> {
         &self.override_factors
     }
 
+    /// How many threshold factors that must be used to perform some function with
+    /// this role.
     pub fn get_threshold(&self) -> u8 {
         self.threshold
     }
