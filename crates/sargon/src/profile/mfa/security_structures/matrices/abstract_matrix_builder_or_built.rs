@@ -1,11 +1,10 @@
 use crate::prelude::*;
 
-
 /// Either a matrix or a **builder of a matrix** with a Primary, Recovery and Confirmation
 /// role or **builder of roles**.
 /// This type is shared by:
 /// * MatrixBuilder (FactorSourceID)
-/// 
+///
 /// # Built
 /// * MatrixOfFactorSources
 /// * MatrixOfFactorSourceIds
@@ -26,7 +25,7 @@ pub struct AbstractMatrixBuilderOrBuilt<F, T, U> {
     pub(crate) confirmation_role:
         AbstractRoleBuilderOrBuilt<{ ROLE_CONFIRMATION }, F, U>,
 
-    pub(crate) number_of_days_until_auto_confirm: u16,
+    pub number_of_days_until_auto_confirm: u16,
 }
 
 impl<F, T, U> AbstractMatrixBuilderOrBuilt<F, T, U> {

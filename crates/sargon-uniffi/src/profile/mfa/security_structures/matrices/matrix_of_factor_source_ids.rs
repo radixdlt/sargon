@@ -82,7 +82,13 @@ pub struct MatrixOfFactorSourceIds {
 
 impl From<InternalMatrixOfFactorSourceIds> for MatrixOfFactorSourceIds {
     fn from(value: InternalMatrixOfFactorSourceIds) -> Self {
-        todo!()
+        Self {
+            primary_role: value.primary().clone().into(),
+            recovery_role: value.recovery().clone().into(),
+            confirmation_role: value.confirmation().clone().into(),
+            number_of_days_until_auto_confirm: value
+                .number_of_days_until_auto_confirm,
+        }
     }
 }
 impl From<MatrixOfFactorSourceIds> for InternalMatrixOfFactorSourceIds {
