@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub type MatrixOfFactorSourceIds = AbstractMatrixBuilt<FactorSourceID>;
 
 impl MatrixOfFactorSourceIds {
-    pub(crate) fn _unvalidated_with_roles_and_days(
+    pub unsafe fn unbuilt_with_roles_and_days(
         primary: PrimaryRoleWithFactorSourceIds,
         recovery: RecoveryRoleWithFactorSourceIds,
         confirmation: ConfirmationRoleWithFactorSourceIds,
@@ -26,12 +26,14 @@ impl MatrixOfFactorSourceIds {
         recovery: RecoveryRoleWithFactorSourceIds,
         confirmation: ConfirmationRoleWithFactorSourceIds,
     ) -> Self {
-        Self::_unvalidated_with_roles_and_days(
-            primary,
-            recovery,
-            confirmation,
-            Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
-        )
+        unsafe {
+            Self::unbuilt_with_roles_and_days(
+                primary,
+                recovery,
+                confirmation,
+                Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+            )
+        }
     }
 }
 
@@ -43,12 +45,14 @@ impl MatrixOfFactorSourceIds {
         confirmation: ConfirmationRoleWithFactorSourceIds,
         number_of_days_until_auto_confirm: u16,
     ) -> Self {
-        Self::_unvalidated_with_roles_and_days(
-            primary,
-            recovery,
-            confirmation,
-            number_of_days_until_auto_confirm,
-        )
+        unsafe {
+            Self::unbuilt_with_roles_and_days(
+                primary,
+                recovery,
+                confirmation,
+                number_of_days_until_auto_confirm,
+            )
+        }
     }
 
     pub(crate) fn with_roles(

@@ -87,6 +87,13 @@ impl From<InternalMatrixOfFactorSourceIds> for MatrixOfFactorSourceIds {
 }
 impl From<MatrixOfFactorSourceIds> for InternalMatrixOfFactorSourceIds {
     fn from(value: MatrixOfFactorSourceIds) -> Self {
-        todo!()
+        unsafe {
+            Self::unbuilt_with_roles_and_days(
+                value.primary_role.into(),
+                value.recovery_role.into(),
+                value.confirmation_role.into(),
+                value.number_of_days_until_auto_confirm,
+            )
+        }
     }
 }

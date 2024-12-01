@@ -78,12 +78,16 @@ impl<const R: u8> From<AbstractRoleBuilderOrBuilt<R, FactorSource, ()>>
 
 impl From<MatrixOfFactorSources> for MatrixOfFactorSourceIDs {
     fn from(value: MatrixOfFactorSources) -> Self {
-        Self::_unvalidated_with_roles_and_days(
-            PrimaryRoleWithFactorSourceIds::from(value.primary_role),
-            RecoveryRoleWithFactorSourceIds::from(value.recovery_role),
-            ConfirmationRoleWithFactorSourceIds::from(value.confirmation_role),
-            value.number_of_days_until_auto_confirm,
-        )
+        unsafe {
+            Self::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorSourceIds::from(value.primary_role),
+                RecoveryRoleWithFactorSourceIds::from(value.recovery_role),
+                ConfirmationRoleWithFactorSourceIds::from(
+                    value.confirmation_role,
+                ),
+                value.number_of_days_until_auto_confirm,
+            )
+        }
     }
 }
 

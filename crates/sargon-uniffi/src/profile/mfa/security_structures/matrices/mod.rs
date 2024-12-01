@@ -1,3 +1,6 @@
+#[macro_use]
+mod decl_matrix_macro;
+
 mod matrix_of_factor_instances;
 mod matrix_of_factor_source_ids;
 mod matrix_of_factor_sources;
