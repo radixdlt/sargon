@@ -2,17 +2,17 @@ use crate::prelude::*;
 
 impl From<BasicViolation> for CommonError {
     fn from(_value: BasicViolation) -> Self {
-        todo!()
+        CommonError::Unknown
     }
 }
 impl From<ForeverInvalidReason> for CommonError {
     fn from(_value: ForeverInvalidReason) -> Self {
-        todo!()
+        CommonError::Unknown
     }
 }
 impl From<NotYetValidReason> for CommonError {
     fn from(_value: NotYetValidReason) -> Self {
-        todo!()
+        CommonError::Unknown
     }
 }
 impl From<(RoleKind, RoleBuilderValidation)> for CommonError {
