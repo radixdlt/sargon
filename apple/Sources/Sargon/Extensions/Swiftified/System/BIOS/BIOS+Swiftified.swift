@@ -3,7 +3,7 @@ import SargonUniFFI
 
 public typealias BIOS = Bios
 
-// MARK: - BIOS + @unchecked Sendable
+// MARK: Sendable
 extension BIOS: @unchecked Sendable {}
 
 extension BIOS {

@@ -2,10 +2,10 @@ import SargonUniFFI
 
 public typealias AppearanceID = AppearanceId
 
-// MARK: - AppearanceID + SargonModel
+// MARK: SargonModel
 extension AppearanceID: SargonModel {}
 
-// MARK: - AppearanceID + Identifiable
+// MARK: Identifiable
 extension AppearanceID: Identifiable {
 	public typealias ID = UInt8
 	public var id: ID {
@@ -13,14 +13,14 @@ extension AppearanceID: Identifiable {
 	}
 }
 
-// MARK: - AppearanceID + CustomStringConvertible
+// MARK: CustomStringConvertible
 extension AppearanceID: CustomStringConvertible {
 	public var description: String {
 		value.description
 	}
 }
 
-// MARK: - AppearanceID + Codable
+// MARK: Codable
 extension AppearanceID: Codable {
 	public func encode(to encoder: Encoder) throws {
 		var container = encoder.singleValueContainer()

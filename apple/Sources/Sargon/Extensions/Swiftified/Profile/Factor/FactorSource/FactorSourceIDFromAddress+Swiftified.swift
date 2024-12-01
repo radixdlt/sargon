@@ -3,13 +3,13 @@ import SargonUniFFI
 
 public typealias FactorSourceIDFromAddress = FactorSourceIdFromAddress
 
-// MARK: - FactorSourceIDFromAddress + SargonModel
+// MARK: SargonModel
 extension FactorSourceIDFromAddress: SargonModel {}
 
-// MARK: - FactorSourceIDFromAddress + SargonObjectCodable
+// MARK: SargonObjectCodable
 extension FactorSourceIDFromAddress: SargonObjectCodable {}
 
-// MARK: - FactorSourceIDFromAddress + FactorSourceIDSpecificProtocol
+// MARK: FactorSourceIDSpecificProtocol
 extension FactorSourceIDFromAddress: FactorSourceIDSpecificProtocol {
 	public var asGeneral: FactorSourceID {
 		.address(value: self)

@@ -3,5 +3,5 @@ import SargonUniFFI
 
 public typealias BIP39Language = Bip39Language
 
-// MARK: - BIP39Language + SargonModel
+// MARK: SargonModel
 extension BIP39Language: SargonModel {}

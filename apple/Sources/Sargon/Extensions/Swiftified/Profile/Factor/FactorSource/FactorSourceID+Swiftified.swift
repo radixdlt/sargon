@@ -3,17 +3,17 @@ import SargonUniFFI
 
 public typealias FactorSourceID = FactorSourceId
 
-// MARK: - FactorSourceID + SargonModel
+// MARK: SargonModel
 extension FactorSourceID: SargonModel {}
 
-// MARK: - FactorSourceID + CustomStringConvertible
+// MARK: CustomStringConvertible
 extension FactorSourceID: CustomStringConvertible {
 	public var description: String {
 		toString()
 	}
 }
 
-// MARK: - FactorSourceID + FactorSourceIDProtocol
+// MARK: FactorSourceIDProtocol
 extension FactorSourceID: FactorSourceIDProtocol {
 	public var asGeneral: FactorSourceID {
 		self

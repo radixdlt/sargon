@@ -1,7 +1,7 @@
 import Foundation
 import SargonUniFFI
 
-// MARK: - FileManager + @unchecked Sendable
+// MARK: - FileManager + Sendable
 extension FileManager: @unchecked Sendable {}
 
 // Makes it possible to type `.shared` on an initalizer/func taking

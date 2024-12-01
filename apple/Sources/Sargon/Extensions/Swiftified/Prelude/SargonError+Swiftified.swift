@@ -3,24 +3,24 @@ import SargonUniFFI
 
 public typealias SargonError = CommonError
 
-// MARK: - SargonError + SargonModel
+// MARK: SargonModel
 extension SargonError: SargonModel {}
 
-// MARK: - SargonError + CustomDebugStringConvertible
+// MARK: CustomDebugStringConvertible
 extension SargonError: CustomDebugStringConvertible {
 	public var debugDescription: String {
 		"\(errorCode): \(errorMessage)"
 	}
 }
 
-// MARK: - SargonError + CustomStringConvertible
+// MARK: CustomStringConvertible
 extension SargonError: CustomStringConvertible {
 	public var description: String {
 		errorMessage
 	}
 }
 
-// MARK: - SargonError + LocalizedError
+// MARK: LocalizedError
 extension SargonError: LocalizedError {
 	public var errorDescription: String? {
 		let errorCodeFormatted = "Error code: \(errorCode)"

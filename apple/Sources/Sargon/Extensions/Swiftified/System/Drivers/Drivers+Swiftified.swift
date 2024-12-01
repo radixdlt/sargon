@@ -1,7 +1,7 @@
 import Foundation
 import SargonUniFFI
 
-// MARK: - Drivers + @unchecked Sendable
+// MARK: - Drivers + Sendable
 extension Drivers: @unchecked Sendable {}
 
 extension Drivers {

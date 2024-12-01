@@ -3,7 +3,7 @@ import SargonUniFFI
 
 public typealias BIP39WordCount = Bip39WordCount
 
-// MARK: - BIP39WordCount + SargonModel
+// MARK: SargonModel
 extension BIP39WordCount: SargonModel {
 	public static let sample: Self = .twentyFour
 	public static let sampleOther: Self = .twelve
@@ -15,7 +15,7 @@ extension BIP39WordCount {
 	}
 }
 
-// MARK: - BIP39WordCount + Identifiable
+// MARK: Identifiable
 extension BIP39WordCount: Identifiable {
 	public typealias ID = RawValue
 	public var id: ID {
@@ -23,7 +23,7 @@ extension BIP39WordCount: Identifiable {
 	}
 }
 
-// MARK: - BIP39WordCount + Comparable
+// MARK: Comparable
 extension BIP39WordCount: Comparable {
 	public static func < (lhs: Self, rhs: Self) -> Bool {
 		lhs.rawValue < rhs.rawValue

@@ -3,13 +3,13 @@ import SargonUniFFI
 
 public typealias P2PLink = P2pLink
 
-// MARK: - P2PLink + SargonModel
+// MARK: SargonModel
 extension P2PLink: SargonModel {}
 
-// MARK: - P2PLink + SargonObjectCodable
+// MARK: SargonObjectCodable
 extension P2PLink: SargonObjectCodable {}
 
-// MARK: - P2PLink + Identifiable
+// MARK: Identifiable
 extension P2PLink: Identifiable {
 	public typealias ID = PublicKeyHash
 }

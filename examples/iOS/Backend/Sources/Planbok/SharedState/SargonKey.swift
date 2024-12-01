@@ -2,10 +2,10 @@ import ComposableArchitecture
 import Foundation
 import Sargon
 
-// MARK: - PersistenceKeyDefault + @unchecked Sendable
+// MARK: - PersistenceKeyDefault + Sendable
 extension PersistenceKeyDefault: @unchecked Sendable where Base: Sendable {}
 
-// MARK: - KeyPath + @unchecked Sendable
+// MARK: - KeyPath + Sendable
 extension KeyPath: @unchecked Sendable where Root: Sendable, Value: Sendable {}
 
 // MARK: - SargonKey

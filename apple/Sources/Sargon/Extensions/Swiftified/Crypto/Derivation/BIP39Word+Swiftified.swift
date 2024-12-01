@@ -2,10 +2,10 @@ import SargonUniFFI
 
 public typealias BIP39Word = Bip39Word
 
-// MARK: - BIP39Word + SargonModel
+// MARK: SargonModel
 extension BIP39Word: SargonModel {}
 
-// MARK: - BIP39Word + Identifiable
+// MARK: Identifiable
 extension BIP39Word: Identifiable {
 	public typealias ID = U11
 
