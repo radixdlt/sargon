@@ -203,6 +203,7 @@ impl SecurityShieldBuilder {
             builder.add_factor_source_to_recovery_override(
                 factor_source_id.clone().into(),
             )
+            // .map_err(|e| Into::<CommonError>::into((RoleKind::Recovery, e)))
         })
     }
 
@@ -214,6 +215,7 @@ impl SecurityShieldBuilder {
             builder.add_factor_source_to_confirmation_override(
                 factor_source_id.clone().into(),
             )
+            // .map_err(|e| Into::<CommonError>::into((RoleKind::Confirmation, e)))
         })
     }
 
@@ -225,6 +227,7 @@ impl SecurityShieldBuilder {
             builder.validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
                 factor_source_kind.clone().into(),
             )
+            .map_err(|e| Into::<CommonError>::into((RoleKind::Confirmation, e)))
         })
     }
 
@@ -236,6 +239,7 @@ impl SecurityShieldBuilder {
             builder.validation_for_addition_of_factor_source_of_kind_to_recovery_override(
                 factor_source_kind.clone().into(),
             )
+            .map_err(|e| Into::<CommonError>::into((RoleKind::Recovery, e)))
         })
     }
 
@@ -247,6 +251,7 @@ impl SecurityShieldBuilder {
             builder.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 factor_source_kind.clone().into(),
             )
+            .map_err(|e| Into::<CommonError>::into((RoleKind::Primary, e)))
         })
     }
 
@@ -258,6 +263,7 @@ impl SecurityShieldBuilder {
             builder.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 factor_source_kind.clone().into(),
             )
+            .map_err(|e| Into::<CommonError>::into((RoleKind::Primary, e)))
         })
     }
 
