@@ -30,7 +30,7 @@ impl MatrixBuilder {
         }
     }
 
-    pub fn build(self) -> MatrixBuilderBuildResult {
+    pub fn build(&self) -> MatrixBuilderBuildResult {
         self.validate_combination()?;
 
         let primary = self
@@ -223,7 +223,68 @@ impl MatrixBuilder {
             .set_threshold(threshold)
             .into_matrix_err(RoleKind::Primary)
     }
+}
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ShieldBuilderNotYetValid {
+    SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
+
+    // =============
+    // *** ROLES ***
+    // =============
+    RoleMustHaveAtLeastOneFactor,
+
+    PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
+
+    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+
+    PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
+
+    ThresholdHigherThanThresholdFactorsLen,
+}
+pub trait IntoShieldBuilderNotYetValid {
+    fn into_shield_builder_not_yet_valid(
+        self,
+    ) -> Option<ShieldBuilderNotYetValid>;
+}
+
+// pub type MatrixBuilderMutateResult = Result<(), MatrixBuilderValidation>;
+impl IntoShieldBuilderNotYetValid for MatrixBuilderValidation {
+    fn into_shield_builder_not_yet_valid(
+        self,
+    ) -> Option<ShieldBuilderNotYetValid> {
+        match self {
+            Self::RoleInIsolation { role, violation } => {
+                match violation {
+                    RoleBuilderValidation::BasicViolation(_) | RoleBuilderValidation::ForeverInvalid(_) => None,
+                    RoleBuilderValidation::NotYetValid(not_yet) => {
+                        match not_yet {
+                            NotYetValidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => Some(ShieldBuilderNotYetValid::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor),
+                            NotYetValidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors => Some(ShieldBuilderNotYetValid::PrimaryRoleWithThresholdCannotBeZeroWithFactors),
+                            NotYetValidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne => Some(ShieldBuilderNotYetValid::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne),
+                            NotYetValidReason::RoleMustHaveAtLeastOneFactor => Some(ShieldBuilderNotYetValid::RoleMustHaveAtLeastOneFactor),
+                            NotYetValidReason::ThresholdHigherThanThresholdFactorsLen => Some(ShieldBuilderNotYetValid::ThresholdHigherThanThresholdFactorsLen),
+                        }
+                    }
+                }
+            }
+            Self::CombinationViolation(combo) => {
+                match combo {
+                    MatrixRolesInCombinationViolation::Basic(_) | MatrixRolesInCombinationViolation::ForeverInvalid(_)=> None,
+                    MatrixRolesInCombinationViolation::NotYetValid(
+                        not_yet,
+                    ) =>  {
+                        match not_yet {
+                            MatrixRolesInCombinationNotYetValid::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole => Some(ShieldBuilderNotYetValid::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole),
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl MatrixBuilder {
     pub fn get_threshold(&self) -> u8 {
         self.primary_role.get_threshold()
     }

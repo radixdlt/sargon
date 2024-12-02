@@ -1350,15 +1350,13 @@ mod shield_configs {
                 FactorSourceID::sample_ledger(),
             )
             .unwrap();
+            let build0 = sut.build(); // build err
+            assert!(build0.is_err());
             sut.set_threshold(2).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
                 FactorSourceID::sample_device(),
-            )
-            .unwrap();
-            sut.add_factor_source_to_recovery_override(
-                FactorSourceID::sample_ledger(),
             )
             .unwrap();
 
@@ -1368,9 +1366,20 @@ mod shield_configs {
             )
             .unwrap();
 
+            let built0 = sut.build().unwrap();
+
+            // Recovery - re
+            sut.add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .unwrap();
+
             // Build
             assert!(sut.validate().is_ok());
             let built = sut.build().unwrap();
+            let built2 = sut.build().unwrap();
+            assert_ne!(built0, built); // we changed recovery since!
+            assert_eq!(built2, built);
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(

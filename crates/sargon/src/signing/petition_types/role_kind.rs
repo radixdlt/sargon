@@ -3,7 +3,17 @@ use crate::prelude::*;
 /// A discriminator for `***RoleWithFactor***` types. Especially useful for
 /// `GeneralRoleWithHierarchicalDeterministicFactorInstances` which holds
 /// the role it is used for.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    Hash,
+    enum_iterator::Sequence,
+)]
 #[serde(rename_all = "camelCase")]
 pub enum RoleKind {
     /// The primary role of some matrix of factors
@@ -13,7 +23,11 @@ pub enum RoleKind {
     /// The confirmation role of some matrix of factors
     Confirmation,
 }
-
+impl RoleKind {
+    pub fn all() -> Vec<Self> {
+        enum_iterator::all::<Self>().collect()
+    }
+}
 impl HasSampleValues for RoleKind {
     fn sample() -> Self {
         RoleKind::Primary

@@ -13,7 +13,7 @@ use crate::prelude::*;
 
 #[derive(Debug, uniffi::Object)]
 pub struct SecurityShieldBuilder {
-    wrapped: RwLock<Option<MatrixBuilder>>,
+    wrapped: RwLock<MatrixBuilder>,
     name: RwLock<String>,
 }
 
@@ -24,33 +24,22 @@ pub struct SecurityStructureOfFactorSourceIds {
 }
 
 impl SecurityShieldBuilder {
-    fn get<R>(
-        &self,
-        with_non_consumed_builder: impl Fn(&MatrixBuilder) -> R,
-    ) -> R {
+    fn get<R>(&self, access: impl Fn(&MatrixBuilder) -> R) -> R {
         let binding = self.wrapped.read().unwrap();
-
-        let Some(builder) = binding.as_ref() else {
-            unreachable!("Already built, should not have happened.")
-        };
-        with_non_consumed_builder(builder)
+        access(&binding)
     }
 
     fn with<R, E: Into<CommonError>>(
         &self,
-        mut with_non_consumed_builder: impl FnMut(
-            &mut MatrixBuilder,
-        ) -> Result<R, E>,
+        mut write: impl FnMut(&mut MatrixBuilder) -> Result<R, E>,
     ) -> Result<R, CommonError> {
-        let guard = self.wrapped.write();
+        let mut binding = self.wrapped.write().expect("No poison");
+        write(&mut binding).map_err(|e| Into::<CommonError>::into(e))
+    }
 
-        let mut binding = guard.map_err(|_| CommonError::Unknown)?; // TODO: CommonError::MatrixBuilderRwLockPoisoned
-
-        let Some(builder) = binding.as_mut() else {
-            return Err(CommonError::Unknown); // TODO: CommonError::AlreadyBuilt
-        };
-        with_non_consumed_builder(builder)
-            .map_err(|e| Into::<CommonError>::into(e))
+    fn set<R>(&self, mut write: impl FnMut(&mut MatrixBuilder) -> R) -> R {
+        let mut binding = self.wrapped.write().expect("No poison");
+        write(&mut binding)
     }
 
     fn validation_for_addition_of_factor_source_by_calling(
@@ -87,7 +76,7 @@ impl SecurityShieldBuilder {
     #[uniffi::constructor]
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
-            wrapped: RwLock::new(Some(MatrixBuilder::new())),
+            wrapped: RwLock::new(MatrixBuilder::new()),
             name: RwLock::new("My Shield".to_owned()),
         })
     }
@@ -139,6 +128,26 @@ impl SecurityShieldBuilder {
 
     pub fn get_confirmation_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_confirmation_factors())
+    }
+}
+
+impl CommonError {
+    /// Checks if this CommonError (self) is a RoleBuilderValidation::NotYetValid violation, which
+    /// is in fact not a real error.
+    pub fn is_role_builder_not_yet_valid(&self) -> bool {
+        let internal = Into::<sargon::CommonError>::into(self.clone());
+        internal.is_role_builder_not_yet_valid()
+    }
+    /// Checks if this CommonError (self) is a Matrix::NotYetValid violation, which
+    /// is in fact not a real error.
+    pub fn is_matrix_builder_not_yet_valid(&self) -> bool {
+        let internal = Into::<sargon::CommonError>::into(self.clone());
+        internal.is_matrix_builder_not_yet_valid()
+    }
+
+    pub fn is_not_yet_ready_violation(&self) -> bool {
+        self.is_role_builder_not_yet_valid()
+            || self.is_matrix_builder_not_yet_valid()
     }
 }
 
@@ -325,11 +334,7 @@ impl SecurityShieldBuilder {
     pub fn build(
         self: Arc<Self>,
     ) -> Result<SecurityStructureOfFactorSourceIds, CommonError> {
-        let mut binding =
-            self.wrapped.write().map_err(|_| CommonError::Unknown)?; // TODO: CommonError::MatrixBuilderRwLockPoisoned
-        let builder = binding.take().ok_or(CommonError::Unknown)?; // TODO: CommonError::AlreadyBuilt
-        let wrapped_matrix =
-            builder.build().map_err(|e| CommonError::Unknown)?; // TODO: CommonError::BuildError(format!("{:?}", e)
+        let wrapped_matrix = self.with(|builder| builder.build())?;
 
         let name = self.get_name();
         let display_name =
@@ -344,6 +349,74 @@ impl SecurityShieldBuilder {
         };
         Ok(shield)
     }
+}
+
+/*
+
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    enum_iterator::Sequence,
+    thiserror::Error,
+)]
+pub enum MatrixRolesInCombinationNotYetValid {
+    #[error("The single factor used in the primary role must not be used in any other role")]
+    SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
+}
+
+
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    enum_iterator::Sequence,
+    thiserror::Error,
+)]
+pub enum NotYetValidReason {
+    #[error("Role must have at least one factor")]
+    RoleMustHaveAtLeastOneFactor,
+
+    #[error(
+        "Primary role with password in threshold list must have another factor"
+    )]
+    PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
+
+    #[error(
+        "Primary role with threshold factors cannot have a threshold of zero"
+    )]
+    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+
+    #[error("Primary role with password in threshold list must have threshold greater than one")]
+    PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
+
+    #[error("Threshold higher than threshold factors len")]
+    ThresholdHigherThanThresholdFactorsLen,
+}
+*/
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Enum)]
+pub enum ShieldBuilderNotYetValid {
+    SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
+
+    // =============
+    // *** ROLES ***
+    // =============
+    RoleMustHaveAtLeastOneFactor,
+
+    PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
+
+    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+
+    PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
+
+    ThresholdHigherThanThresholdFactorsLen,
 }
 
 impl FactorSourceID {

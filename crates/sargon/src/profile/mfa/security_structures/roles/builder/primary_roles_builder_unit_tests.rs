@@ -185,16 +185,21 @@ mod threshold_suite {
     fn remove_from_override_does_not_change_threshold() {
         let mut sut = make();
         sut.add_factor_source_to_threshold(sample()).unwrap();
+        let _ = sut.build(); // build should not mutate neither consume
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
         let fs = FactorSourceID::sample_arculus_other();
         sut.add_factor_source_to_override(fs).unwrap();
+        let _ = sut.build(); // build should not mutate neither consume
         sut.set_threshold(2).unwrap();
+        let _ = sut.build(); // build should not mutate neither consume
         assert_eq!(sut.get_threshold(), 2);
         sut.remove_factor_source(&fs).unwrap();
         assert_eq!(sut.get_threshold(), 2);
 
         let built = sut.build().unwrap();
+        let built2 = sut.build().unwrap();
         assert_eq!(built.get_threshold(), 2);
+        assert_eq!(built2, built); // can built many times
 
         assert_eq!(built.role(), RoleKind::Primary);
 
