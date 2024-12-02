@@ -61,7 +61,7 @@ impl SecurityShieldBuilder {
             &IndexSet<sargon::FactorSourceID>,
         )
             -> IndexSet<sargon::FactorSourceInRoleBuilderValidationStatus>,
-    ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
+    ) -> Vec<Arc<FactorSourceValidationStatus>> {
         let input = &factor_sources
             .clone()
             .into_iter()
@@ -78,6 +78,7 @@ impl SecurityShieldBuilder {
 
             Ok::<_, CommonError>(xs)
         })
+        .expect("Internal error - have you already called `build` on this builder? You should not continue using the builder after it has been built.")
     }
 }
 
@@ -203,7 +204,6 @@ impl SecurityShieldBuilder {
             builder.add_factor_source_to_recovery_override(
                 factor_source_id.clone().into(),
             )
-            // .map_err(|e| Into::<CommonError>::into((RoleKind::Recovery, e)))
         })
     }
 
@@ -215,7 +215,6 @@ impl SecurityShieldBuilder {
             builder.add_factor_source_to_confirmation_override(
                 factor_source_id.clone().into(),
             )
-            // .map_err(|e| Into::<CommonError>::into((RoleKind::Confirmation, e)))
         })
     }
 
@@ -270,7 +269,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_primary_threshold_for_each(
         &self,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
+    ) -> Vec<Arc<FactorSourceValidationStatus>> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -283,7 +282,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_primary_override_for_each(
         &self,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
+    ) -> Vec<Arc<FactorSourceValidationStatus>> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -295,7 +294,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_recovery_override_for_each(
         &self,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
+    ) -> Vec<Arc<FactorSourceValidationStatus>> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -308,7 +307,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_confirmation_override_for_each(
         &self,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Result<Vec<Arc<FactorSourceValidationStatus>>, CommonError> {
+    ) -> Vec<Arc<FactorSourceValidationStatus>> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -317,6 +316,10 @@ impl SecurityShieldBuilder {
                 )
             },
         )
+    }
+
+    pub fn validate(&self) -> Result<(), CommonError> {
+        self.with(|builder| builder.validate())
     }
 
     pub fn build(
@@ -553,7 +556,11 @@ mod tests {
         sut.remove_factor(FactorSourceID::sample_ledger_other())
             .unwrap();
 
-        let shield = sut.build().unwrap();
+        let v0 = sut.validate();
+        let v1 = sut.validate(); // can call validate many times!
+        assert_eq!(v0, v1);
+
+        let shield = sut.build().unwrap(); // can build only once! (but can build after `validate`)
         assert_eq!(shield.wrapped.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
             shield

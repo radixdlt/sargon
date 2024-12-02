@@ -7,6 +7,19 @@
 
 import SargonUniFFI
 
+extension FactorSourceValidationStatus {
+	public var factorSourceID: FactorSourceID {
+		factorSourceId()
+	}
+	
+	public var validationError: CommonError? {
+		self.validationErr()
+	}
+	
+	public var role: RoleKind {
+		role()
+	}
+}
 extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
 	
