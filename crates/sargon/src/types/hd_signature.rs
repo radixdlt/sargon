@@ -32,18 +32,7 @@ impl<ID: SignableID> HDSignature<ID> {
                 &Into::<Hash>::into(input.payload_id.clone()),
             )
         {
-            match input.owned_factor_instance.value.public_key.public_key {
-                PublicKey::Ed25519(_) => {
-                    Err(CommonError::SignaturePublicKeyCurveDiscrepancy {
-                        expected_curve: SLIP10Curve::Curve25519.to_string(),
-                    })
-                }
-                PublicKey::Secp256k1(_) => {
-                    Err(CommonError::SignaturePublicKeyCurveDiscrepancy {
-                        expected_curve: SLIP10Curve::Secp256k1.to_string(),
-                    })
-                }
-            }
+            Err(CommonError::InvalidSignatureForHash)
         } else {
             Ok(Self { input, signature })
         }
@@ -181,14 +170,12 @@ mod tests {
 
         assert_eq!(
             HDSignature::new(ed25519_based_input, secp256k1_signature),
-            Err(CommonError::SignaturePublicKeyCurveDiscrepancy {
-                expected_curve: SLIP10Curve::Curve25519.to_string()
-            })
+            Err(CommonError::InvalidSignatureForHash)
         );
     }
 
     #[test]
-    fn into_signature_with_public_key() {
+    fn into_signature_for_hash() {
         let sut = SUT::sample();
 
         let signature_with_public_key = SignatureWithPublicKey::from(&sut);

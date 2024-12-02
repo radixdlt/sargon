@@ -816,8 +816,8 @@ pub enum CommonError {
     #[error("Failed to encode transaction preview v2 - '{underlying}'")]
     FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
 
-    #[error("Invalid signature with public key. Expected curve of signature should be '{expected_curve}' curve.")]
-    SignaturePublicKeyCurveDiscrepancy { expected_curve: String } = 10230,
+    #[error("Could not validate signature for hash.")]
+    InvalidSignatureForHash = 10230,
 }
 
 impl CommonError {
