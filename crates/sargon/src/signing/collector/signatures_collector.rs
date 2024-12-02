@@ -646,7 +646,8 @@ mod tests {
                     let threshold = threshold.unwrap().clone();
                     assert_eq!(
                         actual_threshold
-                            .borrow()
+                            .read()
+                            .expect("PetitionForEntity lock was poisoned.")
                             .factor_instances()
                             .into_iter()
                             .map(|f| f.factor_source_id)
@@ -662,7 +663,8 @@ mod tests {
                     let override_ = override_.unwrap().clone();
                     assert_eq!(
                         actual_override
-                            .borrow()
+                            .read()
+                            .expect("PetitionForEntity lock was poisoned.")
                             .factor_instances()
                             .into_iter()
                             .map(|f| f.factor_source_id)
