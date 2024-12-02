@@ -13,8 +13,7 @@ use crate::prelude::*;
 
 #[derive(Debug, uniffi::Object)]
 pub struct SecurityShieldBuilder {
-    wrapped: RwLock<MatrixBuilder>,
-    name: RwLock<String>,
+    wrapped: RwLock<SecurityShieldBuilder>,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, uniffi::Object)]
@@ -312,7 +311,7 @@ impl SecurityShieldBuilder {
     }
 
     pub fn build(
-        self: Arc<Self>,
+        &self,
     ) -> Result<SecurityStructureOfFactorSourceIds, CommonError> {
         let wrapped_matrix = self.with(|builder| builder.build())?;
 

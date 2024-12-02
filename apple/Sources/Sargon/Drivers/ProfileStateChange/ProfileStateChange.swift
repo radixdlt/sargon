@@ -2,7 +2,7 @@ import SargonUniFFI
 
 public typealias ProfileStateChangeEventPublisher = EventPublisher<ProfileState>
 
-// MARK: ProfileStateChangeDriver
+// MARK: - ProfileStateChangeEventPublisher + ProfileStateChangeDriver
 extension ProfileStateChangeEventPublisher: ProfileStateChangeDriver {
 	public static let shared = ProfileStateChangeEventPublisher()
 

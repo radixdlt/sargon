@@ -2,10 +2,10 @@ import SargonUniFFI
 
 public typealias SLIP10Curve = Slip10Curve
 
-// MARK: SargonModel
+// MARK: - SLIP10Curve + SargonModel
 extension SLIP10Curve: SargonModel {}
 
-// MARK: Identifiable
+// MARK: - SLIP10Curve + Identifiable
 extension SLIP10Curve: Identifiable {
 	public typealias ID = String
 	public var id: ID {
@@ -13,7 +13,7 @@ extension SLIP10Curve: Identifiable {
 	}
 }
 
-// MARK: CustomStringConvertible
+// MARK: - SLIP10Curve + CustomStringConvertible
 extension SLIP10Curve: CustomStringConvertible {
 	public var description: String {
 		toString()
@@ -26,5 +26,5 @@ extension SLIP10Curve {
 	}
 }
 
-// MARK: SargonStringCodable
+// MARK: - SLIP10Curve + SargonStringCodable
 extension SLIP10Curve: SargonStringCodable {}

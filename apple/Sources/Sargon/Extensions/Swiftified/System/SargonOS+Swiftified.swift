@@ -3,5 +3,5 @@ import SargonUniFFI
 
 public typealias SargonOS = SargonOs
 
-// MARK: Sendable
+// MARK: - SargonOS + @unchecked Sendable
 extension SargonOS: @unchecked Sendable {}

@@ -100,7 +100,7 @@ extension LogLevel: CaseIterable {
 	public static let allCases: [Self] = rustLoggerGetAllLevels()
 }
 
-// MARK: - Logger + Sendable
+// MARK: - Logger + @unchecked Sendable
 extension Logger: @unchecked Sendable {}
 
 extension OSLogType {

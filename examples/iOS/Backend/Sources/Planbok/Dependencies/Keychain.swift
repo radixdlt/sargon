@@ -2,7 +2,7 @@ import ComposableArchitecture
 @_exported import KeychainAccess
 import Sargon
 
-// MARK: - Keychain + Sendable
+// MARK: - Keychain + @unchecked Sendable
 extension Keychain: @unchecked Sendable {}
 
 // MARK: - Keychain + SecureStorageDriver

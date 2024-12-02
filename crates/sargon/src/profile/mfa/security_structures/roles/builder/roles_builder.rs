@@ -358,7 +358,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         })
     }
 
-    #[allow(dead_code)]
     pub(crate) fn set_threshold(
         &mut self,
         threshold: u8,
@@ -512,7 +511,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         }
     }
 
-    #[allow(dead_code)]
     /// For each factor source in the given set, return a validation status
     /// for adding it to factor list of the given kind (`factor_list_kind`)
     pub(crate) fn validation_for_addition_of_factor_source_for_each(
@@ -592,8 +590,10 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
 
         if self.override_contains_factor_source(factor_source_id) {
             remove(self.mut_override_factors())
-        }
-        if self.threshold_contains_factor_source(factor_source_id) {
+        } else if self.threshold_contains_factor_source(factor_source_id) {
+            // We use `else if` to highlight the fact that a factor cannot
+            // ever be in both override and threshold list.
+
             remove(self.mut_threshold_factors());
             let threshold_factors_len =
                 self.get_threshold_factors().len() as u8;

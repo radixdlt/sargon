@@ -3,7 +3,7 @@ import SargonUniFFI
 
 public typealias NonFungibleLocalIDString = NonFungibleLocalIdString
 
-// MARK: SargonModel
+// MARK: - NonFungibleLocalIDString + SargonModel
 extension NonFungibleLocalIDString: SargonModel {}
 
 #if DEBUG

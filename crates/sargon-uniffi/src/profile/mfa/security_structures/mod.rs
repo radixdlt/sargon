@@ -1,4 +1,4 @@
-mod builder;
+mod security_shield_builder;
 mod error_conversion;
 mod matrices;
 mod models;

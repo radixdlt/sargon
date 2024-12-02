@@ -3,7 +3,7 @@ import SargonUniFFI
 
 public typealias BIP44LikePath = Bip44LikePath
 
-// MARK: SargonModel, DerivationPathProtocol
+// MARK: - BIP44LikePath + SargonModel, DerivationPathProtocol
 extension BIP44LikePath: SargonModel, DerivationPathProtocol {
 	public var asGeneral: DerivationPath {
 		.bip44Like(value: self)
@@ -14,7 +14,7 @@ extension BIP44LikePath: SargonModel, DerivationPathProtocol {
 	}
 }
 
-// MARK: CustomStringConvertible
+// MARK: - BIP44LikePath + CustomStringConvertible
 extension BIP44LikePath: CustomStringConvertible {
 	public var description: String {
 		toString()

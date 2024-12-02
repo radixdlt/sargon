@@ -133,7 +133,7 @@ extension View {
 	}
 }
 
-// MARK: - SwiftUI.Animation + Sendable
+// MARK: - SwiftUI.Animation + @unchecked Sendable
 extension SwiftUI.Animation: @unchecked Sendable {}
 
 extension SwiftUI.Animation {

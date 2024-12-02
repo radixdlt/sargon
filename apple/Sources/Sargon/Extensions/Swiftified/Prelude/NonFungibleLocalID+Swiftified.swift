@@ -3,10 +3,10 @@ import SargonUniFFI
 
 public typealias NonFungibleLocalID = NonFungibleLocalId
 
-// MARK: IdentifiableByStringProtocol
+// MARK: - NonFungibleLocalID + IdentifiableByStringProtocol
 extension NonFungibleLocalID: IdentifiableByStringProtocol {}
 
-// MARK: ExpressibleByIntegerLiteral
+// MARK: - NonFungibleLocalID + ExpressibleByIntegerLiteral
 extension NonFungibleLocalID: ExpressibleByIntegerLiteral {
 	public init(integerLiteral value: UInt64) {
 		self.init(integer: value)
