@@ -3,8 +3,7 @@
 
 use crate::prelude::*;
 
-/// A type impl PolyFactorKeyDerivationInteractor and MonoFactorKeyDerivationInteractor
-/// suitable for tests.
+/// A type impl KeyDerivationInteractor suitable for tests.
 ///
 /// Uses Sample values of MnemonicWithPassphrase for derivation, or looks up the mnemonic
 /// using a SecureStorageClient
@@ -49,13 +48,63 @@ impl TestDerivationInteractor {
 
         let cloned_client = self.secure_storage_client.clone();
 
-        __do_derive_serially_looking_up_with_secure_storage_and_extra(
+        Self::do_derive_serially_looking_up_with_secure_storage_and_extra(
             factor_source_id,
             derivation_paths,
             cloned_client,
             async move |id| {
                 id.maybe_sample_associated_mnemonic()
                     .ok_or(CommonError::Unknown)
+            },
+        )
+        .await
+    }
+
+    /// Derives FactorInstances for `request` using the `lookup_mnemonic` closure
+    async fn do_derive_serially_with_lookup_of_mnemonic<F>(
+        factor_source_id: FactorSourceIDFromHash,
+        derivation_paths: IndexSet<DerivationPath>,
+        lookup_mnemonic: F,
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
+    where
+        F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
+    {
+        let mnemonic = lookup_mnemonic(factor_source_id).await?;
+        let keys = mnemonic
+            ._derive_entity_creation_factor_instances(
+                factor_source_id,
+                derivation_paths,
+            )
+            .into_iter()
+            .map(HierarchicalDeterministicFactorInstance::from)
+            .collect::<IndexSet<_>>();
+        Ok(keys)
+    }
+
+    /// Uses `do_derive_serially_with_lookup_of_mnemonic` to derive keys, providing
+    /// an async closure which uses predefined samples or looks up the mnemonic using
+    /// the factor source id, apart from a secondary lookup, `lookup_mnemonic`, passed
+    /// as an argument, which could e.g. use secure storage client to try to load
+    /// the mnemonic
+    async fn do_derive_serially_looking_up_with_secure_storage_and_extra<F>(
+        factor_source_id: FactorSourceIDFromHash,
+        derivation_paths: IndexSet<DerivationPath>,
+        secure_storage: Arc<SecureStorageClient>,
+        lookup_mnemonic: F,
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
+    where
+        F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
+    {
+        let cloned_client = secure_storage.clone();
+        Self::do_derive_serially_with_lookup_of_mnemonic(
+            factor_source_id,
+            derivation_paths,
+            async move |id| {
+                if let Ok(m) = lookup_mnemonic(id).await {
+                    return Ok(m);
+                }
+                let cloned_cloned_client = cloned_client.clone();
+                cloned_cloned_client.load_mnemonic_with_passphrase(id).await
             },
         )
         .await
