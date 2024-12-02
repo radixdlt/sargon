@@ -20,13 +20,7 @@ extension SecurityShieldBuilder {
 	}
 	
 	public var threshold: UInt8 {
-		get {
-			getPrimaryThreshold()
-		}
-		set {
-			precondition(newValue <= primaryRoleThresholdFactors.count, "Threshold must not me greater than the number of threshold factors in the primary role.")
-			try! setThreshold(threshold: newValue)
-		}
+        getPrimaryThreshold()
 	}
 	
 	public var primaryRoleThresholdFactors: [Factor] {
