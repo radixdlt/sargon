@@ -1,28 +1,22 @@
-//
-//  SecurityShieldBuilder+Swiftiefied.swift
-//  Sargon
-//
-//  Created by Alexander Cyon on 2024-12-02.
-//
-
 import SargonUniFFI
 
 extension FactorSourceValidationStatus {
 	public var factorSourceID: FactorSourceID {
 		factorSourceId()
 	}
-	
+
 	public var validationError: CommonError? {
 		self.validationErr()
 	}
-	
+
 	public var role: RoleKind {
 		role()
 	}
 }
+
 extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
-	
+
 	/// Confirmation Role
 	public var numberOfDaysUntilAutoConfirm: UInt16 {
 		get { getNumberOfDaysUntilAutoConfirm() }
@@ -31,27 +25,27 @@ extension SecurityShieldBuilder {
 			try! setNumberOfDaysUntilAutoConfirm(numberOfDays: UInt16(newValue))
 		}
 	}
-	
+
 	public var threshold: UInt8 {
-        getPrimaryThreshold()
+		getPrimaryThreshold()
 	}
-	
+
 	public var primaryRoleThresholdFactors: [Factor] {
 		getPrimaryThresholdFactors()
 	}
-	
+
 	public var primaryRoleOverrideFactors: [Factor] {
 		getPrimaryOverrideFactors()
 	}
-	
+
 	public var recoveryRoleFactors: [Factor] {
 		getRecoveryFactors()
 	}
-	
+
 	public var confirmationRoleFactors: [Factor] {
 		getConfirmationFactors()
 	}
-	
+
 	/// Name of the shield
 	public var name: String {
 		get {
@@ -61,5 +55,4 @@ extension SecurityShieldBuilder {
 			setName(name: newValue)
 		}
 	}
-	
 }

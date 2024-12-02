@@ -366,7 +366,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         match self.role() {
             Primary => {
                 self.unchecked_set_threshold(threshold);
-                self.validate_threshold_for_primary()
+                self.validate()
             }
             Recovery => RoleBuilderMutateResult::basic_violation(
                 RecoveryCannotSetThreshold,
