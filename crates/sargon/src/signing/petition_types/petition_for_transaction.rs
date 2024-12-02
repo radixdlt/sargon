@@ -2,15 +2,30 @@ use crate::prelude::*;
 
 /// Petition of signatures for a transaction.
 /// Essentially a wrapper around `Iterator<Item = PetitionForEntity>`.
-#[derive(derive_more::Debug, PartialEq, Eq)]
+#[derive(derive_more::Debug)]
 #[debug("{}", self.debug_str())]
 pub(crate) struct PetitionForTransaction<S: Signable> {
     /// Transaction to sign
     pub(crate) signable: S,
 
     pub(crate) for_entities:
-        RefCell<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::ID>>>,
+        RwLock<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::ID>>>,
 }
+
+impl<S: Signable> PartialEq for PetitionForTransaction<S> {
+    fn eq(&self, other: &Self) -> bool {
+        self.signable == other.signable &&
+            self.for_entities
+                .read()
+                .expect("PetitionForTransaction lock was poisoned.")
+                .deref() == other.for_entities
+                .read()
+                .expect("PetitionForTransaction lock was poisoned.")
+                .deref()
+    }
+}
+
+impl<S: Signable> Eq for PetitionForTransaction<S> {}
 
 impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn new(
@@ -22,7 +37,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     ) -> Self {
         Self {
             signable,
-            for_entities: RefCell::new(for_entities),
+            for_entities: RwLock::new(for_entities),
         }
     }
 
@@ -40,7 +55,8 @@ impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn outcome(self) -> PetitionTransactionOutcome<S::ID> {
         let for_entities = self
             .for_entities
-            .into_inner()
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
             .values()
             .map(|x| x.to_owned())
             .collect_vec();
@@ -68,7 +84,11 @@ impl<S: Signable> PetitionForTransaction<S> {
     }
 
     pub(crate) fn has_tx_failed(&self) -> bool {
-        self.for_entities.borrow().values().any(|p| p.has_failed())
+        self.for_entities
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
+            .values()
+            .any(|p| p.has_failed())
     }
 
     pub(crate) fn all_relevant_factor_instances_of_source(
@@ -77,7 +97,8 @@ impl<S: Signable> PetitionForTransaction<S> {
     ) -> IndexSet<OwnedFactorInstance> {
         assert!(!self.has_tx_failed());
         self.for_entities
-            .borrow()
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
             .values()
             .filter(|&p| {
                 if p.has_failed() {
@@ -98,7 +119,9 @@ impl<S: Signable> PetitionForTransaction<S> {
     }
 
     pub(crate) fn add_signature(&self, signature: HDSignature<S::ID>) {
-        let for_entities = self.for_entities.borrow_mut();
+        let for_entities = self.for_entities
+            .write()
+            .expect("PetitionForTransaction lock was poisoned.");
         let for_entity = for_entities
             .get(&signature.owned_factor_instance().owner)
             .expect("Should not have added signature to irrelevant PetitionForTransaction, did you pass the wrong signature to the wrong PetitionForTransaction?");
@@ -106,7 +129,9 @@ impl<S: Signable> PetitionForTransaction<S> {
     }
 
     pub(crate) fn neglect_factor_source(&self, neglected: NeglectedFactor) {
-        let mut for_entities = self.for_entities.borrow_mut();
+        let mut for_entities = self.for_entities
+            .write()
+            .expect("PetitionForTransaction lock was poisoned.");
         for petition in for_entities.values_mut() {
             petition.neglect_if_referenced(neglected.clone())
         }
@@ -131,7 +156,8 @@ impl<S: Signable> PetitionForTransaction<S> {
         &self,
     ) -> Vec<PetitionForFactorsStatus> {
         self.for_entities
-            .borrow()
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
             .values()
             .map(|petition| petition.status())
             .collect()
@@ -147,7 +173,8 @@ impl<S: Signable> PetitionForTransaction<S> {
         }
         let entities = self
             .for_entities
-            .borrow()
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
             .iter()
             .filter_map(|(_, petition)| {
                 petition.invalid_transaction_if_neglected_factors(
@@ -171,7 +198,8 @@ impl<S: Signable> PetitionForTransaction<S> {
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> bool {
         self.for_entities
-            .borrow()
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
             .values()
             .filter(|&p| p.references_any_factor_source(&factor_source_ids))
             .cloned()
@@ -186,7 +214,8 @@ impl<S: Signable> PetitionForTransaction<S> {
     fn debug_str(&self) -> String {
         let entities = self
             .for_entities
-            .borrow()
+            .read()
+            .expect("PetitionForTransaction lock was poisoned.")
             .iter()
             .map(|p| format!("PetitionForEntity({:#?})", p.1))
             .join(", ");

@@ -28,7 +28,8 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
             .values()
             .flat_map(|p| {
                 p.for_entities
-                    .borrow()
+                    .read()
+                    .expect("PetitionForTransaction lock was poisoned.")
                     .values()
                     .flat_map(|p| p.all_factor_instances())
                     .collect::<Vec<_>>()

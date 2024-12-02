@@ -574,7 +574,10 @@ mod tests {
             let petitions_ref = petitions.txid_to_petition.borrow();
             let petition =
                 petitions_ref.get(&t3.transaction_intent_hash()).unwrap();
-            let for_entities = petition.for_entities.borrow().clone();
+            let for_entities = petition.for_entities
+                .read()
+                .expect("PetitionForTransaction lock was poisoned.")
+                .clone();
             let pet6 = for_entities.get(&a6.address.into()).unwrap();
 
             let paths6 = pet6
@@ -622,7 +625,8 @@ mod tests {
             assert_eq!(
                 petition
                     .for_entities
-                    .borrow()
+                    .read()
+                    .expect("PetitionForTransaction lock was poisoned.")
                     .keys()
                     .collect::<HashSet<_>>(),
                 addresses
@@ -630,17 +634,19 @@ mod tests {
 
             assert!(petition
                 .for_entities
-                .borrow()
+                .read()
+                .expect("PetitionForTransaction lock was poisoned.")
                 .iter()
                 .all(|(a, p)| { p.entity == *a }));
 
             assert!(petition
                 .for_entities
-                .borrow()
+                .read()
+                .expect("PetitionForTransaction lock was poisoned.")
                 .iter()
                 .all(|(_, p)| { p.payload_id == t.transaction_intent_hash() }));
 
-            for (k, v) in petition.for_entities.borrow().iter() {
+            for (k, v) in petition.for_entities.read().expect("PetitionForTransaction lock was poisoned.").iter() {
                 let threshold = threshold_factors.get(k);
                 if let Some(actual_threshold) = &v.threshold_factors {
                     let threshold = threshold.unwrap().clone();
