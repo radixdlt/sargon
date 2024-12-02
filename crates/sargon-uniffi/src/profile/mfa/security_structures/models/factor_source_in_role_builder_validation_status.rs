@@ -7,6 +7,28 @@ pub struct FactorSourceValidationStatus {
     pub validation: sargon::RoleBuilderMutateResult,
 }
 
+#[uniffi::export]
+impl FactorSourceValidationStatus {
+    pub fn validation_err(&self) -> Option<CommonError> {
+        if let Err(e) = self
+            .validation
+            .map_err(|e| Into::<CommonError>::into((self.role, e)))
+        {
+            return Some(e);
+        } else {
+            None
+        }
+    }
+
+    pub fn role(&self) -> RoleKind {
+        self.role
+    }
+
+    pub fn factor_source_id(&self) -> FactorSourceID {
+        self.factor_source_id.clone()
+    }
+}
+
 impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
     for FactorSourceValidationStatus
 {

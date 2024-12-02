@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::RoleKind as InternalRoleKind;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
+    Clone, Copy, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
 )]
 pub enum RoleKind {
     /// The primary role of some matrix of factors
