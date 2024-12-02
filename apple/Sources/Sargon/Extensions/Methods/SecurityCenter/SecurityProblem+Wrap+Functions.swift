@@ -6,3 +6,10 @@ extension SecurityProblem {
 		securityProblemKind(value: self)
 	}
 }
+
+// MARK: - SecurityProblem + Identifiable
+extension SecurityProblem: Identifiable {
+	public var id: UInt64 {
+		securityProblemId(value: self)
+	}
+}

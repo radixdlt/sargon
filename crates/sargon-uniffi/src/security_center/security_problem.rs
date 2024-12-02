@@ -39,3 +39,8 @@ pub enum SecurityProblem {
 pub fn security_problem_kind(value: &SecurityProblem) -> SecurityProblemKind {
     value.into_internal().kind().into()
 }
+
+#[uniffi::export]
+pub fn security_problem_id(value: &SecurityProblem) -> u64 {
+    value.into_internal().id()
+}

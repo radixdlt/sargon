@@ -37,10 +37,8 @@ pub enum SecurityProblem {
     },
 }
 
-impl Identifiable for SecurityProblem {
-    type ID = u64;
-
-    fn id(&self) -> Self::ID {
+impl SecurityProblem {
+    pub fn id(&self) -> u64 {
         match self {
             SecurityProblem::Problem3 { .. } => 3,
             SecurityProblem::Problem5 => 5,
