@@ -258,8 +258,7 @@ impl<T> IsValidOrCanBecomeValid for Result<T, RoleBuilderValidation> {
     fn is_valid_or_can_be(&self) -> bool {
         match self {
             Ok(_) => true,
-            Err(RoleBuilderValidation::BasicViolation(_)) => false,
-            Err(RoleBuilderValidation::ForeverInvalid(_)) => false,
+            Err(RoleBuilderValidation::BasicViolation(_)) | Err(RoleBuilderValidation::ForeverInvalid(_)) => false,
             Err(RoleBuilderValidation::NotYetValid(_)) => true,
         }
     }
@@ -380,6 +379,7 @@ impl SecurityShieldBuilder {
 
         let name = self.get_name();
         let display_name = DisplayName::new(name).map_err(|e| {
+            error!("Invalid DisplayName {:?}", e);
             SecurityShieldBuilderInvalidReason::ShieldNameInvalid
         })?;
 
@@ -522,6 +522,197 @@ mod tests {
                 .confirmation()
                 .get_override_factors(),
             &vec![FactorSourceID::sample_device().into()]
+        );
+    }
+
+    fn test_addition_of_factor_source_of_kind_to_primary(
+        list_kind: FactorListKind,
+        is_fully_valid: impl Fn(&SUT, FactorSourceKind) -> bool,
+        can_be: impl Fn(&SUT, FactorSourceKind) -> bool,
+        add: impl Fn(&SUT, FactorSourceID) -> &SUT,
+    ) {
+        let sut_owned = SUT::new();
+        let sut = &sut_owned;
+        assert!(can_be(sut, FactorSourceKind::Device));
+
+        if list_kind == FactorListKind::Threshold {
+            assert!(!is_fully_valid(sut, FactorSourceKind::Password)); // never alone
+            assert!(can_be(sut, FactorSourceKind::Password)); // lenient
+
+            // now lets adding a Device => subsequent calls to `is_fully_valid` will return false
+            add(sut, FactorSourceID::sample_device());
+            add(sut, FactorSourceID::sample_ledger());
+
+            sut.set_threshold(2);
+            assert!(is_fully_valid(sut, FactorSourceKind::Password)); // not alone any more!
+            assert!(can_be(sut, FactorSourceKind::Password));
+        } else {
+            // now lets adding a Device => subsequent calls to `is_fully_valid` will return false
+            add(sut, FactorSourceID::sample_device());
+        }
+
+        assert!(!is_fully_valid(sut, FactorSourceKind::Device));
+
+        // TODO: Unsure about this, we do not count current state and query "can I add (another) Device?" as something
+        // which can become valid. It would require deletion of current Device factor. Maybe we should change this?
+        // Not sure... lets keep it as is for now! And lets see how UI integration "feels".
+        assert!(!can_be(sut, FactorSourceKind::Device));
+
+        // make it valid again
+        sut.remove_factor(FactorSourceID::sample_device());
+
+        assert!(is_fully_valid(sut, FactorSourceKind::Device));
+        assert!(can_be(sut, FactorSourceKind::Device));
+    }
+
+    #[test]
+    fn test_addition_of_factor_source_of_kind_to_primary_threshold() {
+        test_addition_of_factor_source_of_kind_to_primary(
+            FactorListKind::Threshold,
+            SUT::addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid,
+            SUT::addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be,
+            SUT::add_factor_source_to_primary_threshold,
+        );
+    }
+
+    #[test]
+    fn test_addition_of_factor_source_of_kind_to_primary_override() {
+        test_addition_of_factor_source_of_kind_to_primary(
+            FactorListKind::Override,
+            SUT::addition_of_factor_source_of_kind_to_primary_override_is_fully_valid,
+            SUT::addition_of_factor_source_of_kind_to_primary_override_is_valid_or_can_be,
+            SUT::add_factor_source_to_primary_override,
+        );
+    }
+
+    #[test]
+    fn test_addition_of_factor_source_of_kind_to_recovery_is_fully_valid() {
+        let sut = SUT::new();
+
+        let result = sut
+            .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+                FactorSourceKind::Device,
+            );
+        assert!(result);
+
+        let result = sut
+            .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+                FactorSourceKind::Password,
+            );
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_addition_of_factor_source_of_kind_to_confirmation_is_fully_valid() {
+        let sut = SUT::new();
+
+        let result = sut
+            .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+                FactorSourceKind::Device,
+            );
+        assert!(result);
+
+        let result = sut
+            .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+                FactorSourceKind::TrustedContact,
+            );
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_validation_for_addition_of_factor_source_to_primary_threshold_for_each(
+    ) {
+        let sut = SUT::new();
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        let xs = sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
+            vec![
+                FactorSourceID::sample_device(),
+                FactorSourceID::sample_device_other(),
+            ],
+        );
+
+        pretty_assertions::assert_eq!(
+            xs.into_iter().collect::<Vec<_>>(),
+            vec![
+                FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                    RoleKind::Primary,
+                    FactorSourceID::sample_device(),
+                    ForeverInvalidReason::FactorSourceAlreadyPresent
+                ),
+                FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                    RoleKind::Primary,
+                    FactorSourceID::sample_device_other(),
+                    ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
+                ),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_validation_for_addition_of_factor_source_to_recovery_override_for_each() {
+        let sut = SUT::new();
+
+        let xs = sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(
+            vec![
+                FactorSourceID::sample_password(),
+                FactorSourceID::sample_password_other(),
+                FactorSourceID::sample_security_questions(),
+                FactorSourceID::sample_security_questions_other(),
+            ],
+        );
+        pretty_assertions::assert_eq!(
+            xs.into_iter().collect::<Vec<_>>(),
+            [
+                FactorSourceID::sample_password(),
+                FactorSourceID::sample_password_other(),
+                FactorSourceID::sample_security_questions(),
+                FactorSourceID::sample_security_questions_other(),
+            ]
+            .into_iter()
+            .map(
+                |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                    RoleKind::Recovery,
+                    fsid,
+                    if fsid.get_factor_source_kind() == FactorSourceKind::SecurityQuestions {
+                        ForeverInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
+                    } else {
+                        ForeverInvalidReason::RecoveryRolePasswordNotSupported
+                    }
+                )
+            )
+            .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn test_validation_for_addition_of_factor_source_to_confirmation_override_for_each() {
+        let sut = SUT::new();
+        let xs = sut
+            .validation_for_addition_of_factor_source_to_confirmation_override_for_each(
+                vec![
+                    FactorSourceID::sample_trusted_contact(),
+                    FactorSourceID::sample_trusted_contact_other(),
+                ],
+            );
+        pretty_assertions::assert_eq!(
+            xs.into_iter().collect::<Vec<_>>(),
+            [
+                FactorSourceID::sample_trusted_contact(),
+                FactorSourceID::sample_trusted_contact_other(),
+            ]
+            .into_iter()
+            .map(
+                |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                    RoleKind::Confirmation,
+                    fsid,
+                    ForeverInvalidReason::ConfirmationRoleTrustedContactNotSupported
+                )
+            )
+            .collect::<Vec<_>>()
         );
     }
 }
