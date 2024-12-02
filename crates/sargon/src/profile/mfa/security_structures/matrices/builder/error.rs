@@ -27,39 +27,10 @@ pub enum MatrixRolesInCombinationForeverInvalid {
     RecoveryAndConfirmationFactorsOverlap,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-    thiserror::Error,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]
 pub enum MatrixRolesInCombinationNotYetValid {
     #[error("The single factor used in the primary role must not be used in any other role")]
     SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
-}
-
-impl MatrixRolesInCombinationNotYetValid {
-    pub fn all() -> Vec<Self> {
-        enum_iterator::all::<Self>().collect()
-    }
-}
-
-impl CommonError {
-    /// Checks if this CommonError (self) is a MatrixBuilderValidation::MatrixRolesInCombinationNotYetValid violation, which
-    /// is in fact not a real error.
-    pub fn is_matrix_builder_not_yet_valid(&self) -> bool {
-        for not_yet_valid_reason in MatrixRolesInCombinationNotYetValid::all() {
-            let as_common_error = Self::from(not_yet_valid_reason);
-            if *self == as_common_error {
-                return true;
-            }
-        }
-        false
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]

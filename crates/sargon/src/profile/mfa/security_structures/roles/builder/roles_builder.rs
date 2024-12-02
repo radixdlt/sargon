@@ -61,16 +61,7 @@ pub enum BasicViolation {
     ConfirmationCannotSetThreshold,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-    thiserror::Error,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]
 pub enum NotYetValidReason {
     #[error("Role must have at least one factor")]
     RoleMustHaveAtLeastOneFactor,
@@ -90,27 +81,6 @@ pub enum NotYetValidReason {
 
     #[error("Threshold higher than threshold factors len")]
     ThresholdHigherThanThresholdFactorsLen,
-}
-impl NotYetValidReason {
-    pub fn all() -> Vec<Self> {
-        enum_iterator::all::<Self>().collect()
-    }
-}
-
-impl CommonError {
-    /// Checks if this CommonError (self) is a RoleBuilderValidation::NotYetValid violation, which
-    /// is in fact not a real error.
-    pub fn is_role_builder_not_yet_valid(&self) -> bool {
-        // for role in RoleKind::all() {
-        for not_yet_valid_reason in NotYetValidReason::all() {
-            let as_common_error = Self::from(not_yet_valid_reason);
-            if *self == as_common_error {
-                return true;
-            }
-        }
-        // }
-        false
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]
