@@ -130,7 +130,11 @@ impl<S: Signable> SignaturesCollector<S> {
         let when_some_transaction_is_invalid =
             finish_early_strategy.when_some_transaction_is_invalid.0;
 
-        let petitions_status = self.state.borrow().petitions.borrow().status();
+        let petitions_status = self.state.borrow()
+            .petitions
+            .read()
+            .expect("SignaturesCollectorState lock was poisoned.")
+            .status();
 
         if petitions_status.are_all_valid() {
             if when_all_transactions_are_valid == FinishEarly {
@@ -158,7 +162,9 @@ impl<S: Signable> SignaturesCollector<S> {
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> bool {
         let state = self.state.borrow();
-        let petitions = state.petitions.borrow();
+        let petitions = state.petitions
+            .read()
+            .expect("SignaturesCollectorState lock was poisoned.");
         petitions
             .should_neglect_factors_due_to_irrelevant(factor_sources_of_kind)
     }
@@ -268,7 +274,8 @@ impl<S: Signable> SignaturesCollector<S> {
         self.state
             .borrow()
             .petitions
-            .borrow()
+            .read()
+            .expect("SignaturesCollectorState lock was poisoned.")
             .input_for_interactor(factor_source_id)
     }
 
@@ -335,13 +342,16 @@ impl<S: Signable> SignaturesCollector<S> {
         self.state
             .borrow()
             .petitions
-            .borrow()
+            .read()
+            .expect("SignaturesCollectorState lock was poisoned.")
             .invalid_transactions_if_neglected_factors(factor_source_ids)
     }
 
     fn process_batch_response(&self, response: SignWithFactorsOutcome<S::ID>) {
         let state = self.state.borrow_mut();
-        let petitions = state.petitions.borrow_mut();
+        let petitions = state.petitions
+            .write()
+            .expect("SignaturesCollectorState lock was poisoned.");
         petitions.process_batch_response(response)
     }
 
@@ -349,14 +359,20 @@ impl<S: Signable> SignaturesCollector<S> {
         let expected_number_of_transactions;
         {
             let state = self.state.borrow_mut();
-            let petitions = state.petitions.borrow_mut();
+            let petitions = state.petitions
+                .write()
+                .expect("SignaturesCollectorState lock was poisoned.");
             expected_number_of_transactions = petitions
                 .txid_to_petition
                 .read()
                 .expect("Petitions lock is poisoned")
                 .len();
         }
-        let outcome = self.state.into_inner().petitions.into_inner().outcome();
+        let outcome = self.state.into_inner()
+            .petitions
+            .read()
+            .expect("SignaturesCollectorState lock was poisoned.")
+            .outcome();
         assert_eq!(
             outcome.failed_transactions().len()
                 + outcome.successful_transactions().len(),
@@ -380,7 +396,11 @@ mod tests {
     impl SignaturesCollector<TransactionIntent> {
         /// Used by tests
         pub(crate) fn petitions(self) -> Petitions<TransactionIntent> {
-            self.state.into_inner().petitions.into_inner()
+            self.state.into_inner()
+                .petitions
+                .read()
+                .expect("SignaturesCollectorState lock was poisoned.")
+                .clone()
         }
     }
 
