@@ -4,7 +4,7 @@ use sargon::TransactionIntent as InternalTransactionIntent;
 use sargon::Subintent as InternalSubintent;
 use sargon::SignedOutcome as InternalSignedOutcome;
 
-// #[uniffi::export]
+#[uniffi::export]
 impl SargonOS {
 
     pub async fn sign_transaction(
