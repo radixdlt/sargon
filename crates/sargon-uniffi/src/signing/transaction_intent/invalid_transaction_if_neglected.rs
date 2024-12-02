@@ -35,7 +35,7 @@ impl From<InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>>
             entities_which_would_fail_auth: value
                 .entities_which_would_fail_auth
                 .iter()
-                .map(|addr| addr.clone().into())
+                .map(|addr| (*addr).into())
                 .collect(),
         }
     }

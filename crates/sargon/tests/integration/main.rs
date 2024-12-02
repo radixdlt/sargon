@@ -304,14 +304,13 @@ mod integration_tests {
 
                 let signatures = transactions_to_sign
                     .iter()
-                    .map(|per_transaction| {
+                    .flat_map(|per_transaction| {
                         per_transaction
                             .signature_inputs()
                             .iter()
                             .map(|x| HDSignature::fake_sign_by_looking_up_mnemonic_amongst_samples(x.clone()))
                             .collect::<IndexSet<_>>()
                     })
-                    .flatten()
                     .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
 
                 SignWithFactorsOutcome::Signed {
@@ -335,7 +334,7 @@ mod integration_tests {
                     request.per_factor_source.iter()
                 {
                     let result = self
-                        .sign_mono(factor_source_id.clone(), &request, inputs)
+                        .sign_mono(*factor_source_id, &request, inputs)
                         .await;
 
                     match result {

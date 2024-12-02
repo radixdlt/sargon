@@ -303,7 +303,7 @@ impl<S: Signable> SignaturesCollector<S> {
 
         SignRequest::new(
             factor_source_kind,
-            IndexMap::just((factor_source_id.clone(), batch_signing_request)),
+            IndexMap::just((*factor_source_id, batch_signing_request)),
             invalid_transactions_if_neglected,
         )
     }

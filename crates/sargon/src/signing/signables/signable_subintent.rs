@@ -50,9 +50,9 @@ impl Signable for Subintent {
     }
 }
 
-impl Into<Subintent> for SignedSubintent {
-    fn into(self) -> Subintent {
-        self.subintent
+impl From<SignedSubintent> for Subintent {
+    fn from(val: SignedSubintent) -> Self {
+        val.subintent
     }
 }
 

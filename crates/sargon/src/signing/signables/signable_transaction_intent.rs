@@ -47,9 +47,9 @@ impl Signable for TransactionIntent {
     }
 }
 
-impl Into<TransactionIntent> for SignedIntent {
-    fn into(self) -> TransactionIntent {
-        self.intent
+impl From<SignedIntent> for TransactionIntent {
+    fn from(val: SignedIntent) -> Self {
+        val.intent
     }
 }
 

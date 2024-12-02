@@ -335,7 +335,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     pub(super) fn cloned(&self) -> Self {
         Self {
-            entity: self.entity.clone(),
+            entity: self.entity,
             payload_id: self.payload_id.clone(),
             threshold_factors: self.all_threshold_factors().map(RwLock::new),
             override_factors: self.all_override_factors().map(RwLock::new),

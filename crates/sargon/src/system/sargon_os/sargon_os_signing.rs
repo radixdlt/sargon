@@ -52,7 +52,7 @@ impl SargonOS {
             SigningFinishEarlyStrategy::default(),
             vec![signable.clone()],
             sign_interactor,
-            &profile,
+            profile,
             role_kind,
         )
         .inspect_err(|error| {
@@ -192,7 +192,7 @@ mod test {
         let secure_storage_driver = EphemeralSecureStorage::new();
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client.save_profile(profile).await.unwrap();
 
         let test_drivers = Drivers::with_secure_storage(secure_storage_driver);
         let clients = Clients::new(Bios::new(test_drivers));
