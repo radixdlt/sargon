@@ -12,6 +12,7 @@ pub struct Drivers {
     pub file_system: Arc<dyn FileSystemDriver>,
     pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
     pub profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+    pub arculus_csdk_driver: Arc<dyn ArculusCSDKDriver>,
 }
 
 #[uniffi::export]
@@ -28,6 +29,7 @@ impl Drivers {
         file_system: Arc<dyn FileSystemDriver>,
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
         profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+        arculus_csdk_driver: Arc<dyn ArculusCSDKDriver>,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
@@ -39,6 +41,7 @@ impl Drivers {
             file_system,
             unsafe_storage,
             profile_state_change_driver,
+            arculus_csdk_driver,
         })
     }
 }
@@ -73,6 +76,11 @@ impl From<Drivers> for InternalDrivers {
             profile_state_change_driver: Arc::new(
                 ProfileStateChangeDriverAdapter {
                     wrapped: val.profile_state_change_driver,
+                },
+            ),
+            arculus_csdk_driver: Arc::new(
+                ArculusCSDKDriverAdapter {
+                    wrapped: val.arculus_csdk_driver,
                 },
             ),
         }

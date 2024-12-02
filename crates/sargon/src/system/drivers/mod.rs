@@ -1,3 +1,4 @@
+mod arculus_csdk_driver;
 mod drivers;
 mod entropy_provider_driver;
 mod event_bus_driver;
@@ -9,6 +10,7 @@ mod profile_change_driver;
 mod secure_storage_driver;
 mod unsafe_storage_driver;
 
+pub use arculus_csdk_driver::*;
 pub use drivers::*;
 pub use entropy_provider_driver::*;
 pub use event_bus_driver::*;

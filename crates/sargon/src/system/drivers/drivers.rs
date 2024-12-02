@@ -11,6 +11,7 @@ pub struct Drivers {
     pub file_system: Arc<dyn FileSystemDriver>,
     pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
     pub profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+    pub arculus_csdk_driver: Arc<dyn ArculusCSDKDriver>,
 }
 
 impl Drivers {
@@ -25,6 +26,7 @@ impl Drivers {
         file_system: Arc<dyn FileSystemDriver>,
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
         profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+        arculus_csdk_driver: Arc<dyn ArculusCSDKDriver>,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
@@ -36,6 +38,7 @@ impl Drivers {
             file_system,
             unsafe_storage,
             profile_state_change_driver,
+            arculus_csdk_driver
         })
     }
 }
@@ -61,6 +64,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -75,6 +79,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -91,6 +96,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -107,6 +113,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -121,6 +128,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -135,6 +143,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -149,6 +158,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -165,6 +175,7 @@ impl Drivers {
             file_system,
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -181,6 +192,7 @@ impl Drivers {
             Self::file_system(),
             unsafe_storage,
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
         )
     }
 
@@ -197,6 +209,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             profile_state_change,
+            RustArculusCSDKDriver::new(),
         )
     }
 }
