@@ -107,4 +107,24 @@ mod test {
                 .collect_vec()
         );
     }
+
+    #[test]
+    fn from_signed_intent() {
+        let signed_intent = SignedIntent::sample();
+
+        assert_eq!(
+            <TransactionIntent as From::<SignedIntent>>::from(signed_intent),
+            TransactionIntent::sample_other()
+        )
+    }
+
+    #[test]
+    fn signed_subintent_into_signatures() {
+        let signed_intent = SignedIntent::sample();
+
+        assert_eq!(
+            signed_intent.clone().into_iter().collect_vec(),
+            signed_intent.intent_signatures.signatures.into_iter().map(|s| s.0).collect_vec()
+        )
+    }
 }

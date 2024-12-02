@@ -107,4 +107,24 @@ mod test {
                 .collect_vec()
         );
     }
+
+    #[test]
+    fn from_signed_subintent() {
+        let signed_subintent = SignedSubintent::sample();
+
+        assert_eq!(
+            <Subintent as From::<SignedSubintent>>::from(signed_subintent),
+            Subintent::sample()
+        )
+    }
+
+    #[test]
+    fn signed_subintent_into_signatures() {
+        let signed_subintent = SignedSubintent::sample();
+
+        assert_eq!(
+            signed_subintent.clone().into_iter().collect_vec(),
+            signed_subintent.subintent_signatures.signatures.into_iter().map(|s| s.0).collect_vec()
+        )
+    }
 }
