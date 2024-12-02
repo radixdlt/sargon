@@ -191,16 +191,17 @@ mod test {
         let clients = Clients::new(Bios::new(test_drivers));
         let interactor =
             Arc::new(TestHostInteractor::new_from_clients(&clients));
-        let sut = SUT::boot_with_clients_and_interactor(clients, interactor).await;
+        let sut =
+            SUT::boot_with_clients_and_interactor(clients, interactor).await;
 
-        let transaction = TransactionIntent::sample_entity_addresses_requiring_auth(
-            vec![AccountAddress::sample_mainnet()],
-            vec![]
-        );
+        let transaction =
+            TransactionIntent::sample_entity_addresses_requiring_auth(
+                vec![AccountAddress::sample_mainnet()],
+                vec![],
+            );
 
-        let outcome = sut
-            .sign_transaction(transaction, RoleKind::Primary)
-            .await;
+        let outcome =
+            sut.sign_transaction(transaction, RoleKind::Primary).await;
 
         assert_eq!(outcome, SignedOutcome::Rejected);
     }
@@ -212,7 +213,7 @@ mod test {
             &profile,
             Some(vec![profile.device_factor_sources().first().unwrap().id]),
         )
-            .await;
+        .await;
 
         let irrelevant_account = Account::sample_mainnet_third();
         let transaction = TransactionIntent::sample_entities_requiring_auth(
@@ -220,9 +221,8 @@ mod test {
             vec![],
         );
 
-        let outcome = sut
-            .sign_transaction(transaction, RoleKind::Primary)
-            .await;
+        let outcome =
+            sut.sign_transaction(transaction, RoleKind::Primary).await;
 
         assert_eq!(outcome, SignedOutcome::Rejected);
     }
