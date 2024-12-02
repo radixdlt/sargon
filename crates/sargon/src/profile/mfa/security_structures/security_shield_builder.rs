@@ -7,17 +7,20 @@ pub struct SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    pub fn new() -> Self {
+        let matrix_builder = MatrixBuilder::new();
+        let name = RwLock::new("My Shield".to_owned());
+        Self {
+            matrix_builder: RwLock::new(matrix_builder),
+            name,
+        }
+    }
+}
+
+impl SecurityShieldBuilder {
     fn get<R>(&self, access: impl Fn(&MatrixBuilder) -> R) -> R {
         let binding = self.matrix_builder.read().unwrap();
         access(&binding)
-    }
-
-    fn with<R, E: Into<CommonError>>(
-        &self,
-        mut write: impl FnMut(&mut MatrixBuilder) -> Result<R, E>,
-    ) -> Result<R, CommonError> {
-        let mut binding = self.matrix_builder.write().expect("No poison");
-        write(&mut binding).map_err(|e| Into::<CommonError>::into(e))
     }
 
     // Ignores error and returns a ref to self
@@ -36,17 +39,13 @@ impl SecurityShieldBuilder {
         )
             -> IndexSet<FactorSourceInRoleBuilderValidationStatus>,
     ) -> Vec<FactorSourceInRoleBuilderValidationStatus> {
-        // let input = &factor_sources
-        //     .clone()
-        //     .into_iter()
-        //     .map(Into::<FactorSourceID>::into)
-        //     .collect::<IndexSet<_>>();
-        // self.with(|builder| {
-        //     let xs = call(builder, input);
-        //     Ok::<_, CommonError>(xs)
-        // })
-        // .expect("No poison")
-        todo!()
+        let input = factor_sources
+            .iter()
+            .map(|x| x.clone().into())
+            .collect::<IndexSet<_>>();
+        self.get(|builder| call(builder, &input))
+            .into_iter()
+            .collect_vec()
     }
 }
 
@@ -102,8 +101,8 @@ impl SecurityShieldBuilder {
 // ===== MUTATION =====
 // ====================
 impl SecurityShieldBuilder {
-    pub fn set_name(&self, name: String) -> &Self {
-        *self.name.write().unwrap() = name;
+    pub fn set_name(&self, name: impl AsRef<str>) -> &Self {
+        *self.name.write().unwrap() = name.as_ref().to_owned();
         self
     }
 
@@ -130,11 +129,8 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn remove_factor(
-        &self,
-        factor_source_id: FactorSourceID,
-    ) -> Result<(), CommonError> {
-        self.with(|builder| {
+    pub fn remove_factor(&self, factor_source_id: FactorSourceID) -> &Self {
+        self.set(|builder| {
             builder.remove_factor(&factor_source_id.clone().into())
         })
     }
@@ -237,6 +233,22 @@ impl SecurityShieldBuilder {
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_primary_override(factor_source_kind).is_valid_or_can_be()
     }
+
+    /// Returns `true` for `Ok` and `Err(NotYetValid)`.
+    pub fn addition_of_factor_source_of_kind_to_recovery_is_valid_or_can_be(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self._validation_for_addition_of_factor_source_of_kind_to_recovery_override(factor_source_kind).is_valid_or_can_be()
+    }
+
+    /// Returns `true` for `Ok` and `Err(NotYetValid)`.
+    pub fn addition_of_factor_source_of_kind_to_confirmation_is_valid_or_can_be(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self._validation_for_addition_of_factor_source_of_kind_to_confirmation_override(factor_source_kind).is_valid_or_can_be()
+    }
 }
 
 pub trait IsValidOrCanBecomeValid {
@@ -269,6 +281,22 @@ impl SecurityShieldBuilder {
         self._validation_for_addition_of_factor_source_of_kind_to_primary_override(factor_source_kind)
         .is_ok()
     }
+
+    pub fn addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self._validation_for_addition_of_factor_source_of_kind_to_recovery_override(factor_source_kind)
+        .is_ok()
+    }
+
+    pub fn addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self._validation_for_addition_of_factor_source_of_kind_to_confirmation_override(factor_source_kind)
+        .is_ok()
+    }
 }
 
 impl SecurityShieldBuilder {
@@ -279,8 +307,7 @@ impl SecurityShieldBuilder {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
-                builder
-                    .validation_for_addition_of_factor_source_to_primary_threshold_for_each(input)
+                builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each(input)
             },
         )
     }
@@ -446,207 +473,55 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
 
-    //     #[test]
-    //     fn test() {
-    //         let sut = SUT::new();
+    #[test]
+    fn test() {
+        let sut = SUT::new();
 
-    //         assert_eq!(sut.get_name(), "My Shield");
-    //         sut.set_name("S.H.I.E.L.D.".to_owned());
+        let _ = sut
+            .set_name("S.H.I.E.L.D.")
+            // Primary
+            .set_number_of_days_until_auto_confirm(42)
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .set_threshold(1)
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus_other(),
+            )
+            // Recovery
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger_other(),
+            )
+            // Confirmation
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_device(),
+            )
+            .remove_factor(FactorSourceID::sample_arculus_other())
+            .remove_factor(FactorSourceID::sample_ledger_other());
 
-    //         assert_eq!(sut.get_number_of_days_until_auto_confirm(), 14);
-    //         sut.set_number_of_days_until_auto_confirm(u16::MAX).unwrap();
-    //         assert_eq!(sut.get_number_of_days_until_auto_confirm(), u16::MAX);
+        let shield = sut.build().unwrap();
 
-    //         // Primary
-    //         let sim_prim =
-    //             sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
-    //                 FactorSourceID::sample_arculus(),
-    //             ]);
-
-    //         let sim_prim_threshold = sut
-    //             .validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
-    //                 FactorSourceID::sample_arculus(),
-    //             ]);
-
-    //         let sim_kind_prim = sut
-    //             .validation_for_addition_of_factor_source_of_kind_to_primary_override(
-    //                 FactorSourceKind::Device,
-    //             );
-
-    //         let sim_kind_prim_threshold = sut
-    //             .validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
-    //                 FactorSourceKind::Device,
-    //             );
-
-    //         sut.add_factor_source_to_primary_threshold(
-    //             FactorSourceID::sample_device(),
-    //         )
-    //         .unwrap();
-    //         assert_eq!(
-    //             sut.get_primary_threshold_factors(),
-    //             vec![FactorSourceID::sample_device()]
-    //         );
-    //         _ = sut.set_threshold(1);
-    //         assert_eq!(sut.get_primary_threshold(), 1);
-    //         sut.add_factor_source_to_primary_override(
-    //             FactorSourceID::sample_arculus(),
-    //         )
-    //         .unwrap();
-    //         sut.add_factor_source_to_primary_override(
-    //             FactorSourceID::sample_arculus_other(),
-    //         )
-    //         .unwrap();
-
-    //         assert_eq!(
-    //             sut.get_primary_override_factors(),
-    //             vec![
-    //                 FactorSourceID::sample_arculus(),
-    //                 FactorSourceID::sample_arculus_other()
-    //             ]
-    //         );
-
-    //         // Recovery
-    //         let sim_rec =
-    //             sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
-    //                 FactorSourceID::sample_ledger(),
-    //             ]);
-
-    //         let sim_kind_rec = sut
-    //             .validation_for_addition_of_factor_source_of_kind_to_recovery_override(
-    //                 FactorSourceKind::ArculusCard,
-    //             );
-
-    //         sut.add_factor_source_to_recovery_override(
-    //             FactorSourceID::sample_ledger(),
-    //         )
-    //         .unwrap();
-    //         sut.add_factor_source_to_recovery_override(
-    //             FactorSourceID::sample_ledger_other(),
-    //         )
-    //         .unwrap();
-
-    //         assert_eq!(
-    //             sut.get_recovery_factors(),
-    //             vec![
-    //                 FactorSourceID::sample_ledger(),
-    //                 FactorSourceID::sample_ledger_other()
-    //             ]
-    //         );
-
-    //         // Confirmation
-    //         let sim_conf = sut
-    //             .validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
-    //                 FactorSourceID::sample_device(),
-    //             ]);
-
-    //         let sim_kind_conf = sut
-    //             .validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
-    //                 FactorSourceKind::ArculusCard,
-    //             );
-
-    //         sut.add_factor_source_to_confirmation_override(
-    //             FactorSourceID::sample_device(),
-    //         )
-    //         .unwrap();
-
-    //         assert_eq!(
-    //             sut.get_confirmation_factors(),
-    //             vec![FactorSourceID::sample_device(),]
-    //         );
-
-    //         assert_ne!(
-    //             sim_prim,
-    //             sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
-    //                 FactorSourceID::sample_arculus(),
-    //             ])
-    //         );
-
-    //         assert_ne!(
-    //             sim_prim_threshold,
-    //             sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
-    //                 FactorSourceID::sample_arculus()
-    //             ])
-    //         );
-
-    //         assert_ne!(
-    //             sim_rec,
-    //             sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
-    //                 FactorSourceID::sample_ledger(),
-    //             ])
-    //         );
-
-    //         assert_ne!(
-    //             sim_conf,
-    //             sut.validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
-    //                 FactorSourceID::sample_device(),
-    //             ])
-    //         );
-
-    //         assert_ne!(
-    //             sim_kind_prim,
-    //             sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
-    //                 FactorSourceKind::Device,
-    //             )
-    //         );
-
-    //         assert_ne!(
-    //             sim_kind_prim_threshold,
-    //             sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
-    //                 FactorSourceKind::Device,
-    //             )
-    //         );
-
-    //         assert_eq!(
-    //             sim_kind_rec,
-    //             sut.validation_for_addition_of_factor_source_of_kind_to_recovery_override(
-    //                 FactorSourceKind::ArculusCard,
-    //             )
-    //         );
-
-    //         assert_eq!(
-    //             sim_kind_conf,
-    //             sut.validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
-    //                 FactorSourceKind::ArculusCard,
-    //             )
-    //         );
-
-    //         sut.remove_factor(FactorSourceID::sample_arculus_other())
-    //             .unwrap();
-    //         sut.remove_factor(FactorSourceID::sample_ledger_other())
-    //             .unwrap();
-
-    //         let v0 = sut.validate();
-    //         let v1 = sut.validate(); // can call validate many times!
-    //         assert_eq!(v0, v1);
-
-    //         let shield = sut.build().unwrap(); // can build only once! (but can build after `validate`)
-    //         assert_eq!(
-    //             shield.matrix_builder.metadata.display_name.value,
-    //             "S.H.I.E.L.D."
-    //         );
-    //         assert_eq!(
-    //             shield
-    //                 .matrix_builder
-    //                 .matrix_of_factors
-    //                 .primary()
-    //                 .get_override_factors(),
-    //             &vec![FactorSourceID::sample_arculus().into()]
-    //         );
-    //         assert_eq!(
-    //             shield
-    //                 .matrix_builder
-    //                 .matrix_of_factors
-    //                 .recovery()
-    //                 .get_override_factors(),
-    //             &vec![FactorSourceID::sample_ledger().into()]
-    //         );
-    //         assert_eq!(
-    //             shield
-    //                 .matrix_builder
-    //                 .matrix_of_factors
-    //                 .confirmation()
-    //                 .get_override_factors(),
-    //             &vec![FactorSourceID::sample_device().into()]
-    //         );
-    //     }
+        assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
+        assert_eq!(
+            shield.matrix_of_factors.primary().get_override_factors(),
+            &vec![FactorSourceID::sample_arculus().into()]
+        );
+        assert_eq!(
+            shield.matrix_of_factors.recovery().get_override_factors(),
+            &vec![FactorSourceID::sample_ledger().into()]
+        );
+        assert_eq!(
+            shield
+                .matrix_of_factors
+                .confirmation()
+                .get_override_factors(),
+            &vec![FactorSourceID::sample_device().into()]
+        );
+    }
 }
