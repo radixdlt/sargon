@@ -24,7 +24,8 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
 
         let factor_instances = petitions
             .txid_to_petition
-            .borrow()
+            .read()
+            .expect("Petitions lock was poisoned.")
             .values()
             .flat_map(|p| {
                 p.for_entities

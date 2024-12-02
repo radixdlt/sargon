@@ -350,8 +350,11 @@ impl<S: Signable> SignaturesCollector<S> {
         {
             let state = self.state.borrow_mut();
             let petitions = state.petitions.borrow_mut();
-            expected_number_of_transactions =
-                petitions.txid_to_petition.borrow().len();
+            expected_number_of_transactions = petitions
+                .txid_to_petition
+                .read()
+                .expect("Petitions lock is poisoned")
+                .len();
         }
         let outcome = self.state.into_inner().petitions.into_inner().outcome();
         assert_eq!(
@@ -568,10 +571,12 @@ mod tests {
 
         let petitions = collector.petitions();
 
-        assert_eq!(petitions.txid_to_petition.borrow().len(), 4);
+        assert_eq!(petitions.txid_to_petition.read().expect("Petitions lock was poisoned").len(), 4);
 
         {
-            let petitions_ref = petitions.txid_to_petition.borrow();
+            let petitions_ref = petitions.txid_to_petition
+                .read()
+                .expect("Petitions lock was poisoned");
             let petition =
                 petitions_ref.get(&t3.transaction_intent_hash()).unwrap();
             let for_entities = petition.for_entities
@@ -610,7 +615,9 @@ mod tests {
             AddressOfAccountOrPersona,
             HashSet<FactorSourceIDFromHash>,
         >| {
-            let petitions_ref = petitions.txid_to_petition.borrow();
+            let petitions_ref = petitions.txid_to_petition
+                .read()
+                .expect("Petitions lock was poisoned");
             let petition =
                 petitions_ref.get(&t.transaction_intent_hash()).unwrap();
             assert_eq!(

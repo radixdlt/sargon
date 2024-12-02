@@ -12,6 +12,12 @@ pub(crate) struct PetitionForTransaction<S: Signable> {
         RwLock<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::ID>>>,
 }
 
+impl<S: Signable> Clone for PetitionForTransaction<S> {
+    fn clone(&self) -> Self {
+        self.cloned()
+    }
+}
+
 impl<S: Signable> PartialEq for PetitionForTransaction<S> {
     fn eq(&self, other: &Self) -> bool {
         self.signable == other.signable &&
@@ -221,6 +227,13 @@ impl<S: Signable> PetitionForTransaction<S> {
             .join(", ");
 
         format!("PetitionForTransaction(for_entities: [{}])", entities)
+    }
+
+    fn cloned(&self) -> Self {
+        Self {
+            signable: self.signable.clone(),
+            for_entities: RwLock::new(self.for_entities.read().expect("PetitionForTransaction lock was poisoned.").clone()),
+        }
     }
 }
 
