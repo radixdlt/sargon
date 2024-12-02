@@ -22,7 +22,7 @@ pub struct SignaturesCollector<S: Signable> {
 
     /// Mutable internal state of the collector which builds up the list
     /// of signatures from each used factor source.
-    state: RefCell<SignaturesCollectorState<S>>,
+    state: RwLock<SignaturesCollectorState<S>>,
 }
 
 // === PUBLIC ===
@@ -77,7 +77,7 @@ impl<S: Signable> SignaturesCollector<S> {
 
         Self {
             dependencies,
-            state: RefCell::new(state),
+            state: RwLock::new(state),
         }
     }
 
@@ -130,7 +130,9 @@ impl<S: Signable> SignaturesCollector<S> {
         let when_some_transaction_is_invalid =
             finish_early_strategy.when_some_transaction_is_invalid.0;
 
-        let petitions_status = self.state.borrow()
+        let petitions_status = self.state
+            .read()
+            .expect("SignaturesCollector lock was poisoned.")
             .petitions
             .read()
             .expect("SignaturesCollectorState lock was poisoned.")
@@ -161,7 +163,9 @@ impl<S: Signable> SignaturesCollector<S> {
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> bool {
-        let state = self.state.borrow();
+        let state = self.state
+            .read()
+            .expect("SignaturesCollector lock was poisoned.");
         let petitions = state.petitions
             .read()
             .expect("SignaturesCollectorState lock was poisoned.");
@@ -272,7 +276,8 @@ impl<S: Signable> SignaturesCollector<S> {
         factor_source_id: &FactorSourceIDFromHash,
     ) -> IndexSet<TransactionSignRequestInput<S>> {
         self.state
-            .borrow()
+            .read()
+            .expect("SignaturesCollector lock was poisoned.")
             .petitions
             .read()
             .expect("SignaturesCollectorState lock was poisoned.")
@@ -340,7 +345,8 @@ impl<S: Signable> SignaturesCollector<S> {
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.state
-            .borrow()
+            .read()
+            .expect("SignaturesCollector lock was poisoned.")
             .petitions
             .read()
             .expect("SignaturesCollectorState lock was poisoned.")
@@ -348,7 +354,9 @@ impl<S: Signable> SignaturesCollector<S> {
     }
 
     fn process_batch_response(&self, response: SignWithFactorsOutcome<S::ID>) {
-        let state = self.state.borrow_mut();
+        let state = self.state
+            .write()
+            .expect("SignaturesCollector lock was poisoned.");
         let petitions = state.petitions
             .write()
             .expect("SignaturesCollectorState lock was poisoned.");
@@ -358,7 +366,9 @@ impl<S: Signable> SignaturesCollector<S> {
     fn outcome(self) -> SignaturesOutcome<S::ID> {
         let expected_number_of_transactions;
         {
-            let state = self.state.borrow_mut();
+            let state = self.state
+                .write()
+                .expect("SignaturesCollector lock was poisoned.");
             let petitions = state.petitions
                 .write()
                 .expect("SignaturesCollectorState lock was poisoned.");
@@ -368,7 +378,9 @@ impl<S: Signable> SignaturesCollector<S> {
                 .expect("Petitions lock is poisoned")
                 .len();
         }
-        let outcome = self.state.into_inner()
+        let outcome = self.state
+            .read()
+            .expect("SignaturesCollector lock was poisoned.")
             .petitions
             .read()
             .expect("SignaturesCollectorState lock was poisoned.")
@@ -396,7 +408,9 @@ mod tests {
     impl SignaturesCollector<TransactionIntent> {
         /// Used by tests
         pub(crate) fn petitions(self) -> Petitions<TransactionIntent> {
-            self.state.into_inner()
+            self.state
+                .read()
+                .expect("SignaturesCollector lock was poisoned.")
                 .petitions
                 .read()
                 .expect("SignaturesCollectorState lock was poisoned.")
