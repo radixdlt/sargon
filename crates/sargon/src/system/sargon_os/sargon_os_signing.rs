@@ -186,7 +186,7 @@ mod test {
     }
 
     #[actix_rt::test]
-    async fn test_sign_fail_no_profile() {
+    async fn test_sign_fail_due_to_profile() {
         let test_drivers = Drivers::test();
         let clients = Clients::new(Bios::new(test_drivers));
         let interactor =
@@ -196,6 +196,28 @@ mod test {
         let transaction = TransactionIntent::sample_entity_addresses_requiring_auth(
             vec![AccountAddress::sample_mainnet()],
             vec![]
+        );
+
+        let outcome = sut
+            .sign_transaction(transaction, RoleKind::Primary)
+            .await;
+
+        assert_eq!(outcome, SignedOutcome::Rejected);
+    }
+
+    #[actix_rt::test]
+    async fn test_sign_fail_due_to_irrelevant_entity() {
+        let profile = Profile::sample();
+        let sut = boot_with_profile(
+            &profile,
+            Some(vec![profile.device_factor_sources().first().unwrap().id]),
+        )
+            .await;
+
+        let irrelevant_account = Account::sample_mainnet_third();
+        let transaction = TransactionIntent::sample_entities_requiring_auth(
+            vec![&irrelevant_account],
+            vec![],
         );
 
         let outcome = sut
