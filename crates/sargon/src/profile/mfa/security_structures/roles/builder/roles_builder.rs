@@ -224,9 +224,9 @@ pub enum Assert<const CHECK: bool> {}
 pub trait IsTrue {}
 impl IsTrue for Assert<true> {}
 
-impl<const R: u8> RoleBuilder<R>
+impl<const ROLE: u8> RoleBuilder<ROLE>
 where
-    Assert<{ R == ROLE_PRIMARY }>: IsTrue,
+    Assert<{ ROLE == ROLE_PRIMARY }>: IsTrue,
 {
     /// If Ok => self is mutated
     /// If Err(NotYetValid) => self is mutated
@@ -257,9 +257,9 @@ where
     }
 }
 
-impl<const R: u8> RoleBuilder<R>
+impl<const ROLE: u8> RoleBuilder<ROLE>
 where
-    Assert<{ R > ROLE_PRIMARY }>: IsTrue,
+    Assert<{ ROLE > ROLE_PRIMARY }>: IsTrue,
 {
     /// If Ok => self is mutated
     /// If Err(NotYetValid) => self is mutated
@@ -272,7 +272,7 @@ where
     }
 }
 
-impl<const R: u8> RoleBuilder<R> {
+impl<const ROLE: u8> RoleBuilder<ROLE> {
     /// If Ok => self is mutated
     /// If Err(NotYetValid) => self is mutated
     /// If Err(ForeverInvalid) => self is not mutated
@@ -345,10 +345,10 @@ impl<const R: u8> RoleBuilder<R> {
     }
 }
 
-impl<const R: u8> RoleBuilder<R> {
+impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn build(
         &self,
-    ) -> Result<RoleWithFactorSourceIds<R>, RoleBuilderValidation> {
+    ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
         self.validate().map(|_| {
             RoleWithFactorSourceIds::with_factors(
                 self.get_threshold(),
@@ -366,7 +366,7 @@ impl<const R: u8> RoleBuilder<R> {
         match self.role() {
             Primary => {
                 self.unchecked_set_threshold(threshold);
-                self.validate()
+                self.validate_threshold_for_primary()
             }
             Recovery => RoleBuilderMutateResult::basic_violation(
                 RecoveryCannotSetThreshold,
@@ -409,6 +409,32 @@ impl<const R: u8> RoleBuilder<R> {
             .any(|f| f.get_factor_source_kind() == factor_source_kind)
     }
 
+    pub(crate) fn check_threshold_for_primary(
+        &self,
+    ) -> Option<NotYetValidReason> {
+        if self.get_threshold_factors().len() < self.get_threshold() as usize {
+            return Some(
+                NotYetValidReason::ThresholdHigherThanThresholdFactorsLen,
+            );
+        }
+        if self.get_threshold() == 0 && !self.get_threshold_factors().is_empty()
+        {
+            return Some(
+                NotYetValidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+            );
+        }
+        None
+    }
+
+    pub(crate) fn validate_threshold_for_primary(
+        &self,
+    ) -> RoleBuilderMutateResult {
+        if let Some(not_yet_valid) = self.check_threshold_for_primary() {
+            return Err(RoleBuilderValidation::NotYetValid(not_yet_valid));
+        }
+        Ok(())
+    }
+
     /// Validates `self` by "replaying" the addition of each factor source in `self` to a
     /// "simulation" (clone). If the simulation is valid, then `self` is valid.
     pub(crate) fn validate(&self) -> RoleBuilderMutateResult {
@@ -439,20 +465,7 @@ impl<const R: u8> RoleBuilder<R> {
 
         // Validate threshold count
         if self.role() == RoleKind::Primary {
-            if self.get_threshold_factors().len()
-                < self.get_threshold() as usize
-            {
-                return RoleBuilderMutateResult::not_yet_valid(
-                    NotYetValidReason::ThresholdHigherThanThresholdFactorsLen,
-                );
-            }
-            if self.get_threshold() == 0
-                && !self.get_threshold_factors().is_empty()
-            {
-                return RoleBuilderMutateResult::not_yet_valid(
-                    NotYetValidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors,
-                );
-            }
+            self.validate_threshold_for_primary()?;
         } else if self.get_threshold() != 0 {
             match self.role() {
                 Primary => unreachable!(
@@ -679,7 +692,7 @@ impl<const R: u8> RoleBuilder<R> {
 // =======================
 // ======== RULES ========
 // =======================
-impl<const R: u8> RoleBuilder<R> {
+impl<const ROLE: u8> RoleBuilder<ROLE> {
     fn validation_for_addition_of_password_to_primary(
         &self,
         factor_list_kind: FactorListKind,
@@ -734,8 +747,8 @@ impl<const R: u8> RoleBuilder<R> {
 }
 
 #[cfg(test)]
-pub(crate) fn test_duplicates_not_allowed<const R: u8>(
-    sut: RoleBuilder<R>,
+pub(crate) fn test_duplicates_not_allowed<const ROLE: u8>(
+    sut: RoleBuilder<ROLE>,
     list: FactorListKind,
     factor_source_id: FactorSourceID,
 ) {

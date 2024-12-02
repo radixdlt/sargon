@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-pub(crate) type RoleWithFactorSources<const R: u8> =
-    AbstractBuiltRoleWithFactor<R, FactorSource>;
+pub(crate) type RoleWithFactorSources<const ROLE: u8> =
+    AbstractBuiltRoleWithFactor<ROLE, FactorSource>;
 
-impl<const R: u8> RoleWithFactorSources<R> {
+impl<const ROLE: u8> RoleWithFactorSources<ROLE> {
     pub fn new(
-        role_with_factor_source_ids: RoleWithFactorSourceIds<R>,
+        role_with_factor_source_ids: RoleWithFactorSourceIds<ROLE>,
         factor_sources: &FactorSources,
     ) -> Result<Self, CommonError> {
         let lookup_f =

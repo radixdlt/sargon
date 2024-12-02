@@ -8,13 +8,13 @@ use crate::prelude::*;
 /// materialization.
 pub type MatrixTemplate = AbstractMatrixBuilt<FactorSourceTemplate>;
 
-impl<const R: u8> AbstractBuiltRoleWithFactor<R, FactorSourceTemplate> {
+impl<const ROLE: u8> AbstractBuiltRoleWithFactor<ROLE, FactorSourceTemplate> {
     /// Tries to materialize a RoleWithFactorSourceIds from a RoleTemplate by
     /// assigning each template with a concrete FactorSourceID using the FactorSourceIdAssigner.
     pub(crate) fn assign(
         self,
         factor_source_id_assigner: &mut FactorSourceIdAssigner,
-    ) -> Result<RoleWithFactorSourceIds<R>, CommonError> {
+    ) -> Result<RoleWithFactorSourceIds<ROLE>, CommonError> {
         let mut fulfill =
             |xs: &Vec<FactorSourceTemplate>| -> Result<Vec<FactorSourceID>, CommonError> {
                 xs.iter()

@@ -131,26 +131,6 @@ impl SecurityShieldBuilder {
     }
 }
 
-impl CommonError {
-    /// Checks if this CommonError (self) is a RoleBuilderValidation::NotYetValid violation, which
-    /// is in fact not a real error.
-    pub fn is_role_builder_not_yet_valid(&self) -> bool {
-        let internal = Into::<sargon::CommonError>::into(self.clone());
-        internal.is_role_builder_not_yet_valid()
-    }
-    /// Checks if this CommonError (self) is a Matrix::NotYetValid violation, which
-    /// is in fact not a real error.
-    pub fn is_matrix_builder_not_yet_valid(&self) -> bool {
-        let internal = Into::<sargon::CommonError>::into(self.clone());
-        internal.is_matrix_builder_not_yet_valid()
-    }
-
-    pub fn is_not_yet_ready_violation(&self) -> bool {
-        self.is_role_builder_not_yet_valid()
-            || self.is_matrix_builder_not_yet_valid()
-    }
-}
-
 // ====================
 // ===== MUTATION =====
 // ====================
@@ -349,74 +329,6 @@ impl SecurityShieldBuilder {
         };
         Ok(shield)
     }
-}
-
-/*
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-    thiserror::Error,
-)]
-pub enum MatrixRolesInCombinationNotYetValid {
-    #[error("The single factor used in the primary role must not be used in any other role")]
-    SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
-}
-
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    enum_iterator::Sequence,
-    thiserror::Error,
-)]
-pub enum NotYetValidReason {
-    #[error("Role must have at least one factor")]
-    RoleMustHaveAtLeastOneFactor,
-
-    #[error(
-        "Primary role with password in threshold list must have another factor"
-    )]
-    PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
-
-    #[error(
-        "Primary role with threshold factors cannot have a threshold of zero"
-    )]
-    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
-
-    #[error("Primary role with password in threshold list must have threshold greater than one")]
-    PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
-
-    #[error("Threshold higher than threshold factors len")]
-    ThresholdHigherThanThresholdFactorsLen,
-}
-*/
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Enum)]
-pub enum ShieldBuilderNotYetValid {
-    SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
-
-    // =============
-    // *** ROLES ***
-    // =============
-    RoleMustHaveAtLeastOneFactor,
-
-    PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
-
-    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
-
-    PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
-
-    ThresholdHigherThanThresholdFactorsLen,
 }
 
 impl FactorSourceID {

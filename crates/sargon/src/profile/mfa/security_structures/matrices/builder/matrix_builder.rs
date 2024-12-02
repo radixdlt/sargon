@@ -6,13 +6,14 @@ pub type MatrixBuilderMutateResult = Result<(), MatrixBuilderValidation>;
 pub type MatrixBuilderBuildResult =
     Result<MatrixOfFactorSourceIds, MatrixBuilderValidation>;
 
+/// Marker to distinguish between built and builder.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Built;
 
 pub type MatrixBuilder = AbstractMatrixBuilderOrBuilt<
     FactorSourceID,
     MatrixOfFactorSourceIds,
-    Built, // this is HACKY
+    Built, // Marker to distinguish between built and builder.
 >;
 
 // ==================

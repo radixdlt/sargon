@@ -34,4 +34,3 @@ export_sample_config!(60);
 export_sample_config!(70);
 export_sample_config!(80);
 export_sample_config!(90);
-

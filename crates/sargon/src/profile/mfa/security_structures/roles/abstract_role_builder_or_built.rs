@@ -29,10 +29,10 @@ use crate::prelude::*;
 /// * ConfirmationRoleWithFactorInstances
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AbstractRoleBuilderOrBuilt<const R: u8, F, T> {
+pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, FACTOR, BUILT> {
     #[serde(skip)]
     #[doc(hidden)]
-    built: PhantomData<T>,
+    built: PhantomData<BUILT>,
 
     /// How many threshold factors that must be used to perform some function with
     /// this role.
@@ -40,24 +40,25 @@ pub struct AbstractRoleBuilderOrBuilt<const R: u8, F, T> {
 
     /// Factors which are used in combination with other factors, amounting to at
     /// least `threshold` many factors to perform some function with this role.
-    threshold_factors: Vec<F>,
+    threshold_factors: Vec<FACTOR>,
 
     /// Overriding / Super admin / "sudo" / God / factors, **ANY**
     /// single of these factor which can perform the function of this role,
     /// disregarding of `threshold`.
-    override_factors: Vec<F>,
+    override_factors: Vec<FACTOR>,
 }
 
-pub(crate) type AbstractBuiltRoleWithFactor<const R: u8, F> =
-    AbstractRoleBuilderOrBuilt<R, F, ()>;
-pub(crate) type RoleBuilder<const R: u8> =
-    AbstractRoleBuilderOrBuilt<R, FactorSourceID, Built>;
+pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
+    AbstractRoleBuilderOrBuilt<ROLE, FACTOR, ()>;
 
-impl<const R: u8, F: IsMaybeKeySpaceAware, T>
-    AbstractRoleBuilderOrBuilt<R, F, T>
+pub(crate) type RoleBuilder<const ROLE: u8> =
+    AbstractRoleBuilderOrBuilt<ROLE, FactorSourceID, Built>;
+
+impl<const ROLE: u8, FACTOR: IsMaybeKeySpaceAware, BUILT>
+    AbstractRoleBuilderOrBuilt<ROLE, FACTOR, BUILT>
 {
     pub fn role(&self) -> RoleKind {
-        RoleKind::from_u8(R).expect("RoleKind should be valid")
+        RoleKind::from_u8(ROLE).expect("RoleKind should be valid")
     }
 
     /// # Safety
@@ -66,11 +67,11 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
     /// lead to increase risk for end user to loose funds.
     pub unsafe fn unbuilt_with_factors(
         threshold: u8,
-        threshold_factors: impl IntoIterator<Item = F>,
-        override_factors: impl IntoIterator<Item = F>,
+        threshold_factors: impl IntoIterator<Item = FACTOR>,
+        override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
         let assert_is_securified =
-            |factors: &Vec<F>| -> Result<(), CommonError> {
+            |factors: &Vec<FACTOR>| -> Result<(), CommonError> {
                 let trait_objects: Vec<&dyn IsMaybeKeySpaceAware> = factors
                     .iter()
                     .map(|x| x as &dyn IsMaybeKeySpaceAware)
@@ -105,8 +106,8 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
 
     pub(crate) fn with_factors(
         threshold: u8,
-        threshold_factors: impl IntoIterator<Item = F>,
-        override_factors: impl IntoIterator<Item = F>,
+        threshold_factors: impl IntoIterator<Item = FACTOR>,
+        override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
         unsafe {
             Self::unbuilt_with_factors(
@@ -118,9 +119,11 @@ impl<const R: u8, F: IsMaybeKeySpaceAware, T>
     }
 }
 
-impl<const R: u8, F, T> AbstractRoleBuilderOrBuilt<R, F, T> {
+impl<const ROLE: u8, FACTOR, BUILT>
+    AbstractRoleBuilderOrBuilt<ROLE, FACTOR, BUILT>
+{
     /// Threshold and Override factors mixed (threshold first).
-    pub fn all_factors(&self) -> Vec<&F> {
+    pub fn all_factors(&self) -> Vec<&FACTOR> {
         self.threshold_factors
             .iter()
             .chain(self.override_factors.iter())
@@ -129,14 +132,14 @@ impl<const R: u8, F, T> AbstractRoleBuilderOrBuilt<R, F, T> {
 
     /// Factors which are used in combination with other factors, amounting to at
     /// least `threshold` many factors to perform some function with this role.
-    pub fn get_threshold_factors(&self) -> &Vec<F> {
+    pub fn get_threshold_factors(&self) -> &Vec<FACTOR> {
         &self.threshold_factors
     }
 
     /// Overriding / Super admin / "sudo" / God / factors, **ANY**
     /// single of these factor which can perform the function of this role,
     /// disregarding of `threshold`.
-    pub fn get_override_factors(&self) -> &Vec<F> {
+    pub fn get_override_factors(&self) -> &Vec<FACTOR> {
         &self.override_factors
     }
 
@@ -166,7 +169,7 @@ impl RoleFromDiscriminator for RoleKind {
     }
 }
 
-impl<const R: u8> RoleBuilder<R> {
+impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn new() -> Self {
         Self {
             built: PhantomData,

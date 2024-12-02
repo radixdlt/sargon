@@ -14,7 +14,7 @@ impl FactorSourceValidationStatus {
             .validation
             .map_err(|e| Into::<CommonError>::into((self.role, e)))
         {
-            return Some(e);
+            Some(e)
         } else {
             None
         }

@@ -1,10 +1,12 @@
 use crate::prelude::*;
 
-pub(crate) type RoleWithFactorInstances<const R: u8> =
-    AbstractBuiltRoleWithFactor<R, FactorInstance>;
+pub(crate) type RoleWithFactorInstances<const ROLE: u8> =
+    AbstractBuiltRoleWithFactor<ROLE, FactorInstance>;
 
-impl<const R: u8> RoleWithFactorSources<R> {
-    fn from<const F: u8>(other: &RoleWithFactorSources<F>) -> Self {
+impl<const ROLE: u8> RoleWithFactorSources<ROLE> {
+    fn from<const ROLE_FROM: u8>(
+        other: &RoleWithFactorSources<ROLE_FROM>,
+    ) -> Self {
         Self::with_factors(
             other.get_threshold(),
             other.get_threshold_factors().clone(),
@@ -14,8 +16,10 @@ impl<const R: u8> RoleWithFactorSources<R> {
 }
 
 impl MatrixOfFactorSources {
-    pub(crate) fn get_role<const R: u8>(&self) -> RoleWithFactorSources<R> {
-        match R {
+    pub(crate) fn get_role<const ROLE: u8>(
+        &self,
+    ) -> RoleWithFactorSources<ROLE> {
+        match ROLE {
             ROLE_PRIMARY => RoleWithFactorSources::from(&self.primary_role),
             ROLE_RECOVERY => RoleWithFactorSources::from(&self.recovery_role),
             ROLE_CONFIRMATION => {
@@ -26,14 +30,14 @@ impl MatrixOfFactorSources {
     }
 }
 
-impl<const R: u8> RoleWithFactorInstances<R> {
+impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
     pub(crate) fn fulfilling_role_of_factor_sources_with_factor_instances(
         consuming_instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
         matrix_of_factor_sources: &MatrixOfFactorSources,
     ) -> Result<Self, CommonError> {
-        let role_kind = RoleKind::from_u8(R).unwrap();
+        let role_kind = RoleKind::from_u8(ROLE).unwrap();
 
-        let role_of_sources = matrix_of_factor_sources.get_role::<R>();
+        let role_of_sources = matrix_of_factor_sources.get_role::<ROLE>();
         assert_eq!(role_of_sources.role(), role_kind);
         let threshold: u8 = role_of_sources.get_threshold();
 
