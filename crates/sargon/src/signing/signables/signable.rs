@@ -39,7 +39,10 @@ pub trait Signable:
         self.get_payload().into()
     }
 
-    fn signed(&self, intent_signatures: IntentSignatures) -> Result<Self::Signed>;
+    fn signed(
+        &self,
+        intent_signatures: IntentSignatures,
+    ) -> Result<Self::Signed>;
 
     /// Returns a sample `Signable` that its summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.

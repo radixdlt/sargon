@@ -17,11 +17,11 @@ impl Signable for Subintent {
         ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
     }
 
-    fn signed(&self, intent_signatures: IntentSignatures) -> Result<Self::Signed> {
-        SignedSubintent::new(
-            self.clone(),
-            intent_signatures
-        )
+    fn signed(
+        &self,
+        intent_signatures: IntentSignatures,
+    ) -> Result<Self::Signed> {
+        SignedSubintent::new(self.clone(), intent_signatures)
     }
 
     fn sample_entity_addresses_with_pub_key_hashes(
@@ -61,8 +61,7 @@ impl IntoIterator for SignedSubintent {
     type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
-        self
-            .subintent_signatures
+        self.subintent_signatures
             .signatures
             .into_iter()
             .map(|s| s.0)

@@ -37,14 +37,16 @@ impl SargonOS {
         sign_interactor: Arc<dyn SignInteractor<S>>,
         role_kind: RoleKind,
     ) -> SignedOutcome<S> {
-        let Some(profile) = &self.profile_state_holder
+        let Some(profile) = &self
+            .profile_state_holder
             .profile()
             .inspect_err(|error| {
                 error!("Could not initiate signing due to error: {error}")
             })
-            .ok() else {
-                return SignedOutcome::Rejected
-            };
+            .ok()
+        else {
+            return SignedOutcome::Rejected;
+        };
 
         let Some(signatures_collector) = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
@@ -52,10 +54,12 @@ impl SargonOS {
             sign_interactor,
             &profile,
             role_kind,
-        ).inspect_err(|error| {
+        )
+        .inspect_err(|error| {
             error!("Could not initiate signing due to error: {error}")
-        }).ok() else {
-            return SignedOutcome::Rejected
+        })
+        .ok() else {
+            return SignedOutcome::Rejected;
         };
 
         let outcome = signatures_collector.collect_signatures().await;
@@ -94,7 +98,7 @@ pub enum SignedOutcome<S: Signable> {
     Signed(S::Signed),
 
     /// The user has not provided all needed signatures, thus rejecting the signing process
-    Rejected
+    Rejected,
 }
 
 #[cfg(test)]
@@ -109,12 +113,13 @@ mod test {
         let profile = Profile::sample();
         let sut = boot_with_profile(&profile, None).await;
 
-        let (signable, entities) = get_signable_with_entities::<TransactionIntent>(&sut.profile().unwrap());
+        let (signable, entities) = get_signable_with_entities::<
+            TransactionIntent,
+        >(&sut.profile().unwrap());
 
-        let outcome = sut.sign_transaction(
-            signable.clone(),
-            RoleKind::Primary,
-        ).await;
+        let outcome = sut
+            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .await;
         let signed = outcome.as_signed().unwrap();
 
         assert_eq!(signable, signed.intent);
@@ -126,18 +131,20 @@ mod test {
         let profile = Profile::sample();
         let sut = boot_with_profile(&profile, None).await;
 
-        let (signable, entities) = get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
+        let (signable, entities) =
+            get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
-        let outcome = sut.sign_subintent(
-            signable.clone(),
-            RoleKind::Primary,
-        ).await;
+        let outcome = sut
+            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .await;
         let signed = outcome.as_signed().unwrap();
 
         assert_eq!(signable, signed.subintent);
-        assert_eq!(entities.len(), signed.subintent_signatures.signatures.len());
+        assert_eq!(
+            entities.len(),
+            signed.subintent_signatures.signatures.len()
+        );
     }
-
 
     #[actix_rt::test]
     async fn test_sign_transaction_intent_fail() {
@@ -145,16 +152,16 @@ mod test {
         let sut = boot_with_profile(
             &profile,
             Some(vec![profile.device_factor_sources().first().unwrap().id]),
-        ).await;
+        )
+        .await;
 
         let (signable, _) = get_signable_with_entities::<TransactionIntent>(
-            &sut.profile().unwrap()
+            &sut.profile().unwrap(),
         );
 
-        let outcome = sut.sign_transaction(
-            signable.clone(),
-            RoleKind::Primary,
-        ).await;
+        let outcome = sut
+            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .await;
 
         assert_eq!(outcome, SignedOutcome::Rejected);
     }
@@ -165,16 +172,15 @@ mod test {
         let sut = boot_with_profile(
             &profile,
             Some(vec![profile.device_factor_sources().first().unwrap().id]),
-        ).await;
+        )
+        .await;
 
-        let (signable, _) = get_signable_with_entities::<Subintent>(
-            &sut.profile().unwrap()
-        );
+        let (signable, _) =
+            get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
-        let outcome = sut.sign_subintent(
-            signable.clone(),
-            RoleKind::Primary,
-        ).await;
+        let outcome = sut
+            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .await;
 
         assert_eq!(outcome, SignedOutcome::Rejected);
     }
@@ -222,9 +228,12 @@ mod test {
             .iter()
             .map(|a| a.address)
             .collect_vec();
-        (S::sample_entity_addresses_requiring_auth(
-            accounts_addresses_involved.clone(),
-            [],
-        ), accounts_addresses_involved)
+        (
+            S::sample_entity_addresses_requiring_auth(
+                accounts_addresses_involved.clone(),
+                [],
+            ),
+            accounts_addresses_involved,
+        )
     }
 }

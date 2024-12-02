@@ -33,9 +33,17 @@ impl<S: Signable> Clone for Petitions<S> {
 
 impl<S: Signable> PartialEq for Petitions<S> {
     fn eq(&self, other: &Self) -> bool {
-        self.factor_source_to_signable_id == other.factor_source_to_signable_id &&
-            self.txid_to_petition.read().expect("Petitions lock was poisoned").deref() ==
-                other.txid_to_petition.read().expect("Petitions lock was poisoned").deref()
+        self.factor_source_to_signable_id == other.factor_source_to_signable_id
+            && self
+                .txid_to_petition
+                .read()
+                .expect("Petitions lock was poisoned")
+                .deref()
+                == other
+                    .txid_to_petition
+                    .read()
+                    .expect("Petitions lock was poisoned")
+                    .deref()
     }
 }
 
@@ -174,7 +182,8 @@ impl<S: Signable> Petitions<S> {
     }
 
     fn add_signature(&self, signature: &HDSignature<S::ID>) {
-        let binding = self.txid_to_petition
+        let binding = self
+            .txid_to_petition
             .read()
             .expect("Petitions lock was poisoned.");
         let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
@@ -233,11 +242,14 @@ impl<S: Signable> Petitions<S> {
 
     fn cloned(&self) -> Self {
         Self {
-            factor_source_to_signable_id: self.factor_source_to_signable_id.clone(),
-            txid_to_petition: RwLock::new(self.txid_to_petition
-                .read()
-                .expect("Petitions lock was poisoned.")
-                .clone()
+            factor_source_to_signable_id: self
+                .factor_source_to_signable_id
+                .clone(),
+            txid_to_petition: RwLock::new(
+                self.txid_to_petition
+                    .read()
+                    .expect("Petitions lock was poisoned.")
+                    .clone(),
             ),
         }
     }

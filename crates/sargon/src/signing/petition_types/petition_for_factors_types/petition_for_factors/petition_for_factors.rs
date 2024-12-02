@@ -13,31 +13,32 @@ pub(crate) struct PetitionForFactors<ID: SignableID> {
 }
 
 // TODO delete
-impl <ID: SignableID> Clone for PetitionForFactors<ID> {
+impl<ID: SignableID> Clone for PetitionForFactors<ID> {
     fn clone(&self) -> Self {
         self.cloned()
     }
 }
 
-impl <ID: SignableID> PartialEq for PetitionForFactors<ID> {
+impl<ID: SignableID> PartialEq for PetitionForFactors<ID> {
     fn eq(&self, other: &Self) -> bool {
-        self.factor_list_kind == other.factor_list_kind &&
-            self.input == other.input &&
-            self.state
-                .read()
-                .expect("PetitionForFactors lock was poisoned")
-                .deref() == other.state
+        self.factor_list_kind == other.factor_list_kind
+            && self.input == other.input
+            && self
+                .state
                 .read()
                 .expect("PetitionForFactors lock was poisoned")
                 .deref()
-
+                == other
+                    .state
+                    .read()
+                    .expect("PetitionForFactors lock was poisoned")
+                    .deref()
     }
 }
 
-impl <ID: SignableID> Eq for PetitionForFactors<ID> {}
+impl<ID: SignableID> Eq for PetitionForFactors<ID> {}
 
-
-impl <ID: SignableID> HasSampleValues for PetitionForFactors<ID> {
+impl<ID: SignableID> HasSampleValues for PetitionForFactors<ID> {
     fn sample() -> Self {
         Self::new(FactorListKind::Threshold, PetitionForFactorsInput::sample())
     }
@@ -50,7 +51,7 @@ impl <ID: SignableID> HasSampleValues for PetitionForFactors<ID> {
     }
 }
 
-impl <ID: SignableID> PetitionForFactors<ID> {
+impl<ID: SignableID> PetitionForFactors<ID> {
     pub(crate) fn new(
         factor_list_kind: FactorListKind,
         input: PetitionForFactorsInput,
@@ -69,11 +70,17 @@ impl <ID: SignableID> PetitionForFactors<ID> {
     }
 
     pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
-        self.state.read().expect("PetitionForFactors lock was poisoned").all_neglected()
+        self.state
+            .read()
+            .expect("PetitionForFactors lock was poisoned")
+            .all_neglected()
     }
 
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
-        self.state.read().expect("PetitionForFactors lock was poisoned").all_signatures()
+        self.state
+            .read()
+            .expect("PetitionForFactors lock was poisoned")
+            .all_signatures()
     }
 
     pub(crate) fn new_threshold(
@@ -170,7 +177,8 @@ impl <ID: SignableID> PetitionForFactors<ID> {
     /// # Panics
     /// Panics if this factor source has already been neglected or signed with.
     fn add_signature(&self, signature: &HDSignature<ID>) {
-        let state = self.state
+        let state = self
+            .state
             .write()
             .expect("PetitionForFactors lock was poisoned");
         state.add_signature(signature)
@@ -200,7 +208,10 @@ impl <ID: SignableID> PetitionForFactors<ID> {
     }
 
     fn state_snapshot(&self) -> PetitionForFactorsStateSnapshot<ID> {
-        self.state.read().expect("PetitionForFactors lock was poisoned").snapshot()
+        self.state
+            .read()
+            .expect("PetitionForFactors lock was poisoned")
+            .snapshot()
     }
 
     fn is_finished_successfully(&self) -> bool {
@@ -245,11 +256,10 @@ impl <ID: SignableID> PetitionForFactors<ID> {
                 self.state
                     .read()
                     .expect("PetitionForFactors lock was poisoned")
-                    .cloned()
+                    .cloned(),
             ),
         }
     }
-
 
     #[allow(unused)]
     pub(crate) fn debug_str(&self) -> String {

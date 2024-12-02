@@ -27,10 +27,10 @@ impl<ID: SignableID> Clone for PetitionForEntity<ID> {
 
 impl<ID: SignableID> PartialEq for PetitionForEntity<ID> {
     fn eq(&self, other: &Self) -> bool {
-        self.entity == other.entity &&
-            self.payload_id == other.payload_id &&
-            self.all_threshold_factors() == other.all_threshold_factors() &&
-            self.all_override_factors() == other.all_override_factors()
+        self.entity == other.entity
+            && self.payload_id == other.payload_id
+            && self.all_threshold_factors() == other.all_threshold_factors()
+            && self.all_override_factors() == other.all_override_factors()
     }
 }
 
@@ -318,15 +318,19 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 
     fn all_threshold_factors(&self) -> Option<PetitionForFactors<ID>> {
-        self.threshold_factors
-            .as_ref()
-            .map(|lock| lock.read().expect("PetitionForEntity lock was poisoned.").clone())
+        self.threshold_factors.as_ref().map(|lock| {
+            lock.read()
+                .expect("PetitionForEntity lock was poisoned.")
+                .clone()
+        })
     }
 
     fn all_override_factors(&self) -> Option<PetitionForFactors<ID>> {
-        self.override_factors
-            .as_ref()
-            .map(|lock| lock.read().expect("PetitionForEntity lock was poisoned.").clone())
+        self.override_factors.as_ref().map(|lock| {
+            lock.read()
+                .expect("PetitionForEntity lock was poisoned.")
+                .clone()
+        })
     }
 
     pub(super) fn cloned(&self) -> Self {
@@ -354,7 +358,13 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     ) -> U {
         let access_list_if_exists =
             |list: &Option<RwLock<PetitionForFactors<ID>>>| {
-                list.as_ref().map(|rwlock| access(&rwlock.read().expect("PetitionForEntity lock was poisoned.")))
+                list.as_ref().map(|rwlock| {
+                    access(
+                        &rwlock
+                            .read()
+                            .expect("PetitionForEntity lock was poisoned."),
+                    )
+                })
             };
         let t = access_list_if_exists(&self.threshold_factors);
         let o = access_list_if_exists(&self.override_factors);

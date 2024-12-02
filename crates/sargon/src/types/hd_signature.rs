@@ -23,19 +23,24 @@ impl<ID: SignableID> HDSignature<ID> {
         input: HDSignatureInput<ID>,
         signature: Signature,
     ) -> Result<Self> {
-        if !input.owned_factor_instance.value.public_key().is_valid_signature_for_hash(
-            signature,
-            &Into::<Hash>::into(input.payload_id.clone())
-        ) {
+        if !input
+            .owned_factor_instance
+            .value
+            .public_key()
+            .is_valid_signature_for_hash(
+                signature,
+                &Into::<Hash>::into(input.payload_id.clone()),
+            )
+        {
             match input.owned_factor_instance.value.public_key.public_key {
                 PublicKey::Ed25519(_) => {
                     Err(CommonError::SignaturePublicKeyCurveDiscrepancy {
-                        expected_curve: SLIP10Curve::Curve25519.to_string()
+                        expected_curve: SLIP10Curve::Curve25519.to_string(),
                     })
                 }
                 PublicKey::Secp256k1(_) => {
                     Err(CommonError::SignaturePublicKeyCurveDiscrepancy {
-                        expected_curve: SLIP10Curve::Secp256k1.to_string()
+                        expected_curve: SLIP10Curve::Secp256k1.to_string(),
                     })
                 }
             }
@@ -170,7 +175,8 @@ mod tests {
 
     #[test]
     fn new_fails_due_to_discrepancy_on_signature_curve() {
-        let ed25519_based_input = HDSignatureInput::<TransactionIntentHash>::sample();
+        let ed25519_based_input =
+            HDSignatureInput::<TransactionIntentHash>::sample();
         let secp256k1_signature = Signature::from(Secp256k1Signature::sample());
 
         assert_eq!(

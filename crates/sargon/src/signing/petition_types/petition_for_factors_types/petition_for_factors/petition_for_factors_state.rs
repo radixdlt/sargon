@@ -14,15 +14,14 @@ pub(crate) struct PetitionForFactorsState<ID: SignableID> {
     neglected: RwLock<PetitionForFactorsSubState<NeglectedFactorInstance>>,
 }
 
-impl <ID: SignableID> PartialEq for PetitionForFactorsState<ID> {
+impl<ID: SignableID> PartialEq for PetitionForFactorsState<ID> {
     fn eq(&self, other: &Self) -> bool {
-        self.all_signatures() == other.all_signatures() &&
-            self.all_neglected() == other.all_neglected()
+        self.all_signatures() == other.all_signatures()
+            && self.all_neglected() == other.all_neglected()
     }
 }
 
-impl <ID: SignableID> Eq for PetitionForFactorsState<ID> {}
-
+impl<ID: SignableID> Eq for PetitionForFactorsState<ID> {}
 
 impl<ID: SignableID> PetitionForFactorsState<ID> {
     /// Creates a new `PetitionForFactorsState`.
@@ -96,8 +95,18 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
 
     pub(super) fn cloned(&self) -> Self {
         Self {
-            signed: RwLock::new(self.signed.read().expect("PetitionForFactorsState lock was poisoned").cloned()),
-            neglected: RwLock::new(self.neglected.read().expect("PetitionForFactorsState lock was poisoned").cloned())
+            signed: RwLock::new(
+                self.signed
+                    .read()
+                    .expect("PetitionForFactorsState lock was poisoned")
+                    .cloned(),
+            ),
+            neglected: RwLock::new(
+                self.neglected
+                    .read()
+                    .expect("PetitionForFactorsState lock was poisoned")
+                    .cloned(),
+            ),
         }
     }
 

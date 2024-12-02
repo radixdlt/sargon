@@ -12,7 +12,9 @@ where
     factors: RwLock<IndexSet<F>>,
 }
 
-impl <F: FactorSourceReferencing + Debug> PartialEq for PetitionForFactorsSubState<F> {
+impl<F: FactorSourceReferencing + Debug> PartialEq
+    for PetitionForFactorsSubState<F>
+{
     fn eq(&self, other: &Self) -> bool {
         let self_state = self.snapshot();
         let other_state = other.snapshot();
@@ -21,7 +23,7 @@ impl <F: FactorSourceReferencing + Debug> PartialEq for PetitionForFactorsSubSta
     }
 }
 
-impl <F: FactorSourceReferencing + Debug> Eq for PetitionForFactorsSubState<F> {}
+impl<F: FactorSourceReferencing + Debug> Eq for PetitionForFactorsSubState<F> {}
 
 impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
     pub(super) fn new() -> Self {
@@ -38,8 +40,7 @@ impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
     }
 
     pub(super) fn snapshot(&self) -> IndexSet<F> {
-        self
-            .factors
+        self.factors
             .read()
             .expect("PetitionForFactorsSubState was poisoned")
             .clone()

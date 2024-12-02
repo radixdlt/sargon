@@ -16,11 +16,11 @@ impl Signable for TransactionIntent {
         ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
     }
 
-    fn signed(&self, intent_signatures: IntentSignatures) -> Result<Self::Signed> {
-        SignedIntent::new(
-            self.clone(),
-            intent_signatures,
-        )
+    fn signed(
+        &self,
+        intent_signatures: IntentSignatures,
+    ) -> Result<Self::Signed> {
+        SignedIntent::new(self.clone(), intent_signatures)
     }
 
     fn sample_entity_addresses_with_pub_key_hashes(
@@ -58,8 +58,7 @@ impl IntoIterator for SignedIntent {
     type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
-        self
-            .intent_signatures
+        self.intent_signatures
             .signatures
             .into_iter()
             .map(|s| s.0)

@@ -130,7 +130,8 @@ impl<S: Signable> SignaturesCollector<S> {
         let when_some_transaction_is_invalid =
             finish_early_strategy.when_some_transaction_is_invalid.0;
 
-        let petitions_status = self.state
+        let petitions_status = self
+            .state
             .read()
             .expect("SignaturesCollector lock was poisoned.")
             .petitions
@@ -163,10 +164,12 @@ impl<S: Signable> SignaturesCollector<S> {
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> bool {
-        let state = self.state
+        let state = self
+            .state
             .read()
             .expect("SignaturesCollector lock was poisoned.");
-        let petitions = state.petitions
+        let petitions = state
+            .petitions
             .read()
             .expect("SignaturesCollectorState lock was poisoned.");
         petitions
@@ -354,10 +357,12 @@ impl<S: Signable> SignaturesCollector<S> {
     }
 
     fn process_batch_response(&self, response: SignWithFactorsOutcome<S::ID>) {
-        let state = self.state
+        let state = self
+            .state
             .write()
             .expect("SignaturesCollector lock was poisoned.");
-        let petitions = state.petitions
+        let petitions = state
+            .petitions
             .write()
             .expect("SignaturesCollectorState lock was poisoned.");
         petitions.process_batch_response(response)
@@ -366,10 +371,12 @@ impl<S: Signable> SignaturesCollector<S> {
     fn outcome(self) -> SignaturesOutcome<S::ID> {
         let expected_number_of_transactions;
         {
-            let state = self.state
+            let state = self
+                .state
                 .write()
                 .expect("SignaturesCollector lock was poisoned.");
-            let petitions = state.petitions
+            let petitions = state
+                .petitions
                 .write()
                 .expect("SignaturesCollectorState lock was poisoned.");
             expected_number_of_transactions = petitions
@@ -378,7 +385,8 @@ impl<S: Signable> SignaturesCollector<S> {
                 .expect("Petitions lock is poisoned")
                 .len();
         }
-        let outcome = self.state
+        let outcome = self
+            .state
             .read()
             .expect("SignaturesCollector lock was poisoned.")
             .petitions
@@ -605,15 +613,24 @@ mod tests {
 
         let petitions = collector.petitions();
 
-        assert_eq!(petitions.txid_to_petition.read().expect("Petitions lock was poisoned").len(), 4);
+        assert_eq!(
+            petitions
+                .txid_to_petition
+                .read()
+                .expect("Petitions lock was poisoned")
+                .len(),
+            4
+        );
 
         {
-            let petitions_ref = petitions.txid_to_petition
+            let petitions_ref = petitions
+                .txid_to_petition
                 .read()
                 .expect("Petitions lock was poisoned");
             let petition =
                 petitions_ref.get(&t3.transaction_intent_hash()).unwrap();
-            let for_entities = petition.for_entities
+            let for_entities = petition
+                .for_entities
                 .read()
                 .expect("PetitionForTransaction lock was poisoned.")
                 .clone();
@@ -649,7 +666,8 @@ mod tests {
             AddressOfAccountOrPersona,
             HashSet<FactorSourceIDFromHash>,
         >| {
-            let petitions_ref = petitions.txid_to_petition
+            let petitions_ref = petitions
+                .txid_to_petition
                 .read()
                 .expect("Petitions lock was poisoned");
             let petition =
@@ -687,7 +705,12 @@ mod tests {
                 .iter()
                 .all(|(_, p)| { p.payload_id == t.transaction_intent_hash() }));
 
-            for (k, v) in petition.for_entities.read().expect("PetitionForTransaction lock was poisoned.").iter() {
+            for (k, v) in petition
+                .for_entities
+                .read()
+                .expect("PetitionForTransaction lock was poisoned.")
+                .iter()
+            {
                 let threshold = threshold_factors.get(k);
                 if let Some(actual_threshold) = &v.threshold_factors {
                     let threshold = threshold.unwrap().clone();

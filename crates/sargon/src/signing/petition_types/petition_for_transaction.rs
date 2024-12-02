@@ -20,14 +20,17 @@ impl<S: Signable> Clone for PetitionForTransaction<S> {
 
 impl<S: Signable> PartialEq for PetitionForTransaction<S> {
     fn eq(&self, other: &Self) -> bool {
-        self.signable == other.signable &&
-            self.for_entities
-                .read()
-                .expect("PetitionForTransaction lock was poisoned.")
-                .deref() == other.for_entities
+        self.signable == other.signable
+            && self
+                .for_entities
                 .read()
                 .expect("PetitionForTransaction lock was poisoned.")
                 .deref()
+                == other
+                    .for_entities
+                    .read()
+                    .expect("PetitionForTransaction lock was poisoned.")
+                    .deref()
     }
 }
 
@@ -125,7 +128,8 @@ impl<S: Signable> PetitionForTransaction<S> {
     }
 
     pub(crate) fn add_signature(&self, signature: HDSignature<S::ID>) {
-        let for_entities = self.for_entities
+        let for_entities = self
+            .for_entities
             .write()
             .expect("PetitionForTransaction lock was poisoned.");
         let for_entity = for_entities
@@ -135,7 +139,8 @@ impl<S: Signable> PetitionForTransaction<S> {
     }
 
     pub(crate) fn neglect_factor_source(&self, neglected: NeglectedFactor) {
-        let mut for_entities = self.for_entities
+        let mut for_entities = self
+            .for_entities
             .write()
             .expect("PetitionForTransaction lock was poisoned.");
         for petition in for_entities.values_mut() {
@@ -232,7 +237,12 @@ impl<S: Signable> PetitionForTransaction<S> {
     fn cloned(&self) -> Self {
         Self {
             signable: self.signable.clone(),
-            for_entities: RwLock::new(self.for_entities.read().expect("PetitionForTransaction lock was poisoned.").clone()),
+            for_entities: RwLock::new(
+                self.for_entities
+                    .read()
+                    .expect("PetitionForTransaction lock was poisoned.")
+                    .clone(),
+            ),
         }
     }
 }
