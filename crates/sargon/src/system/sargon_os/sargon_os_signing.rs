@@ -185,6 +185,26 @@ mod test {
         assert_eq!(outcome, SignedOutcome::Rejected);
     }
 
+    #[actix_rt::test]
+    async fn test_sign_fail_no_profile() {
+        let test_drivers = Drivers::test();
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactor =
+            Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let sut = SUT::boot_with_clients_and_interactor(clients, interactor).await;
+
+        let transaction = TransactionIntent::sample_entity_addresses_requiring_auth(
+            vec![AccountAddress::sample_mainnet()],
+            vec![]
+        );
+
+        let outcome = sut
+            .sign_transaction(transaction, RoleKind::Primary)
+            .await;
+
+        assert_eq!(outcome, SignedOutcome::Rejected);
+    }
+
     async fn boot_with_profile(
         profile: &Profile,
         maybe_failing_factor_sources: Option<Vec<FactorSourceIDFromHash>>,
