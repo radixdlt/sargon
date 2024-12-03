@@ -12,6 +12,12 @@ pub struct SecurityShieldBuilder {
     created_on: Timestamp,
 }
 
+impl Default for SecurityShieldBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SecurityShieldBuilder {
     pub fn new() -> Self {
         let matrix_builder = MatrixBuilder::new();
@@ -47,11 +53,8 @@ impl SecurityShieldBuilder {
         )
             -> IndexSet<FactorSourceInRoleBuilderValidationStatus>,
     ) -> Vec<FactorSourceInRoleBuilderValidationStatus> {
-        let input = factor_sources
-            .iter()
-            .map(|x| x.clone().into())
-            .collect::<IndexSet<_>>();
-        self.get(|builder| call(builder, &input))
+        let input = &factor_sources.into_iter().collect::<IndexSet<_>>();
+        self.get(|builder| call(builder, input))
             .into_iter()
             .collect_vec()
     }
@@ -64,10 +67,7 @@ impl SecurityShieldBuilder {
     ) -> Vec<FactorSourceID> {
         self.get(|builder| {
             let factors = access(builder);
-            factors
-                .iter()
-                .map(|x| crate::FactorSourceID::from(*x))
-                .collect::<Vec<_>>()
+            factors.to_vec()
         })
     }
 }
@@ -120,9 +120,12 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.add_factor_source_to_primary_threshold(
-                factor_source_id.clone().into(),
-            )
+            let res = builder
+                .add_factor_source_to_primary_threshold(factor_source_id);
+            debug!(
+                "Add FactorSource to PrimaryRole (threshold) result: {:?}",
+                res
+            );
         })
     }
 
@@ -131,15 +134,52 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.add_factor_source_to_primary_override(
-                factor_source_id.clone().into(),
-            )
+            let res =
+                builder.add_factor_source_to_primary_override(factor_source_id);
+            debug!(
+                "Add FactorSource to PrimaryRole (override) result: {:?}",
+                res
+            );
         })
     }
 
-    pub fn remove_factor(&self, factor_source_id: FactorSourceID) -> &Self {
+    /// Removes the factor from all relevant roles
+    pub fn remove_factor_from_all_roles(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor(&factor_source_id.clone().into())
+            builder.remove_factor_from_all_roles(&factor_source_id)
+        })
+    }
+
+    /// Removes factor **only** from the primary role.
+    pub fn remove_factor_from_primary(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) -> &Self {
+        self.set(|builder| {
+            builder.remove_factor_from_primary(&factor_source_id)
+        })
+    }
+
+    /// Removes factor **only** from the recovery role.
+    pub fn remove_factor_from_recovery(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) -> &Self {
+        self.set(|builder| {
+            builder.remove_factor_from_recovery(&factor_source_id)
+        })
+    }
+
+    /// Removes factor **only** from the confirmation role.
+    pub fn remove_factor_from_confirmation(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) -> &Self {
+        self.set(|builder| {
+            builder.remove_factor_from_confirmation(&factor_source_id)
         })
     }
 
@@ -161,9 +201,9 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.add_factor_source_to_recovery_override(
-                factor_source_id.clone().into(),
-            )
+            let res = builder
+                .add_factor_source_to_recovery_override(factor_source_id);
+            debug!("Add FactorSource to RecoveryRole result: {:?}", res);
         })
     }
 
@@ -172,9 +212,9 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.add_factor_source_to_confirmation_override(
-                factor_source_id.clone().into(),
-            )
+            let res = builder
+                .add_factor_source_to_confirmation_override(factor_source_id);
+            debug!("Add FactorSource to ConfirmationRole result: {:?}", res);
         })
     }
 }
@@ -363,6 +403,9 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     /// `None` means valid!
     pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
+        if !DisplayName::new(self.get_name()).is_ok() {
+            return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
+        }
         self.get(|builder| {
             let r = builder.validate();
             r.as_shield_validation()
@@ -417,7 +460,7 @@ mod tests {
 
     #[test]
     fn test() {
-        let sut = SUT::new();
+        let sut = SUT::default();
 
         let _ = sut
             .set_name("S.H.I.E.L.D.")
@@ -444,8 +487,8 @@ mod tests {
             .add_factor_source_to_confirmation_override(
                 FactorSourceID::sample_device(),
             )
-            .remove_factor(FactorSourceID::sample_arculus_other())
-            .remove_factor(FactorSourceID::sample_ledger_other());
+            .remove_factor_from_primary(FactorSourceID::sample_arculus_other())
+            .remove_factor_from_recovery(FactorSourceID::sample_ledger_other());
 
         let shield0 = sut.build().unwrap();
         let shield = sut.build().unwrap();
@@ -454,18 +497,18 @@ mod tests {
         assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
             shield.matrix_of_factors.primary().get_override_factors(),
-            &vec![FactorSourceID::sample_arculus().into()]
+            &vec![FactorSourceID::sample_arculus()]
         );
         assert_eq!(
             shield.matrix_of_factors.recovery().get_override_factors(),
-            &vec![FactorSourceID::sample_ledger().into()]
+            &vec![FactorSourceID::sample_ledger()]
         );
         assert_eq!(
             shield
                 .matrix_of_factors
                 .confirmation()
                 .get_override_factors(),
-            &vec![FactorSourceID::sample_device().into()]
+            &vec![FactorSourceID::sample_device()]
         );
     }
 
@@ -503,7 +546,7 @@ mod tests {
         assert!(!can_be(sut, FactorSourceKind::Device));
 
         // make it valid again
-        sut.remove_factor(FactorSourceID::sample_device());
+        sut.remove_factor_from_all_roles(FactorSourceID::sample_device());
 
         assert!(is_fully_valid(sut, FactorSourceKind::Device));
         assert!(can_be(sut, FactorSourceKind::Device));
@@ -659,6 +702,238 @@ mod tests {
                 )
             )
             .collect::<Vec<_>>()
+        );
+    }
+}
+
+#[cfg(test)]
+mod test_invalid {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityShieldBuilder;
+
+    #[test]
+    fn primary_role_must_have_at_least_one_factor() {
+        let sut = SUT::new();
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+        );
+    }
+
+    #[test]
+    fn primary_role_with_threshold_cannot_be_zero_with_factors() {
+        let sut = SUT::new();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors
+        );
+    }
+
+    #[test]
+    fn recovery_role_must_have_at_least_one_factor() {
+        let sut = SUT::new();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
+        );
+    }
+
+    #[test]
+    fn confirmation_role_must_have_at_least_one_factor() {
+        let sut = SUT::new();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
+        );
+    }
+
+    #[test]
+    fn valid_is_none() {
+        let sut = SUT::new();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+        assert!(sut.validate().is_none());
+    }
+
+    fn valid() -> SUT {
+        let sut = SUT::new();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+        sut
+    }
+
+    #[test]
+    fn shield_name_invalid_empty() {
+        let sut = valid();
+        sut.set_name("");
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+        );
+    }
+
+    #[test]
+    fn shield_name_truncated_if_too_long() {
+        let sut = valid();
+        sut.set_name(
+            "This shield name's too long and it is going to get truncated",
+        );
+        let shield = sut.build().unwrap();
+        assert_eq!(
+            shield.metadata.display_name.value,
+            "This shield name's too long an"
+        );
+    }
+
+    #[test]
+    fn number_of_auto_confirm_days_invalid() {
+        let sut = valid();
+        sut.set_number_of_days_until_auto_confirm(0);
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero
+        );
+    }
+
+    #[test]
+    fn recovery_and_confirmation_factors_overlap() {
+        let sut = SUT::new();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+
+        let same = FactorSourceID::sample_ledger();
+        sut.add_factor_source_to_recovery_override(same);
+        sut.add_factor_source_to_confirmation_override(
+            same, // same factor! not allowed
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::RecoveryAndConfirmationFactorsOverlap
+        );
+    }
+
+    #[test]
+    fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_recovery(
+    ) {
+        let sut = SUT::new();
+        let same = FactorSourceID::sample_ledger();
+        sut.add_factor_source_to_primary_override(same);
+
+        sut.add_factor_source_to_recovery_override(
+            same, // same factor! not allowed
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole
+        );
+    }
+
+    #[test]
+    fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_confirmation(
+    ) {
+        let sut = SUT::new();
+        let same = FactorSourceID::sample_ledger();
+        sut.add_factor_source_to_primary_override(same);
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_arculus(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            same, // same factor! not allowed
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole
+        );
+    }
+
+    #[test]
+    fn primary_role_with_password_in_threshold_list_must_threshold_greater_than_one(
+    ) {
+        let sut = SUT::new();
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+
+        sut.set_threshold(1);
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
+        );
+    }
+
+    #[test]
+    fn primary_role_with_password_in_threshold_list_must_have_another_factor() {
+        let sut = SUT::new();
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+
+        sut.set_threshold(1);
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
+
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+        );
+    }
+
+    #[test]
+    fn template() { // use this to create more tests...
+        let sut = valid();
+        sut.set_name("");
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::ShieldNameInvalid
         );
     }
 }

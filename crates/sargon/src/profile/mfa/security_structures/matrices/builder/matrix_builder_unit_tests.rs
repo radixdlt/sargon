@@ -382,7 +382,8 @@ mod remove {
     #[test]
     fn not_found() {
         let mut sut = make();
-        let res = sut.remove_factor(&FactorSourceID::sample_device());
+        let res =
+            sut.remove_factor_from_all_roles(&FactorSourceID::sample_device());
         assert_eq!(
             res,
             Err(MatrixBuilderValidation::CombinationViolation(
@@ -400,7 +401,8 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res = sut.remove_factor(&FactorSourceID::sample_device());
+        let res =
+            sut.remove_factor_from_all_roles(&FactorSourceID::sample_device());
         assert_eq!(res, Ok(()));
     }
 
@@ -411,7 +413,8 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res = sut.remove_factor(&FactorSourceID::sample_device());
+        let res =
+            sut.remove_factor_from_primary(&FactorSourceID::sample_device());
         assert_eq!(res, Ok(()));
     }
 
@@ -422,7 +425,8 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res = sut.remove_factor(&FactorSourceID::sample_device());
+        let res =
+            sut.remove_factor_from_recovery(&FactorSourceID::sample_device());
         assert_eq!(res, Ok(()));
     }
 
@@ -433,7 +437,8 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res = sut.remove_factor(&FactorSourceID::sample_device());
+        let res = sut
+            .remove_factor_from_confirmation(&FactorSourceID::sample_device());
         assert_eq!(res, Ok(()));
     }
 }

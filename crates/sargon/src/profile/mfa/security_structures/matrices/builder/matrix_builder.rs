@@ -242,46 +242,60 @@ impl MatrixBuilder {
         self.number_of_days_until_auto_confirm
     }
 
-    /// Removes `factor_source_id` from all three roles, if not found in any an error
-    /// is thrown.
-    ///
-    /// # Throws
-    /// If none of the three role builders contains the factor source id, `Err(BasicViolation::FactorSourceNotFound)` is thrown
-    pub fn remove_factor(
-        &mut self,
+    fn remove_factor_from_role<const ROLE: u8>(
+        role: &mut RoleBuilder<{ ROLE }>,
         factor_source_id: &FactorSourceID,
     ) -> MatrixBuilderMutateResult {
-        let mut found = false;
-        if self
-            .primary_role
-            .remove_factor_source(factor_source_id)
-            .is_ok()
-        {
-            found = true;
-        }
-        if self
-            .recovery_role
-            .remove_factor_source(factor_source_id)
-            .is_ok()
-        {
-            found = true;
-        }
-        if self
-            .confirmation_role
-            .remove_factor_source(factor_source_id)
-            .is_ok()
-        {
-            found = true;
-        }
-        if !found {
+        if role.remove_factor_source(factor_source_id).is_ok() {
+            Ok(())
+        } else {
             MatrixBuilderMutateResult::Err(MatrixBuilderValidation::CombinationViolation(
                 MatrixRolesInCombinationViolation::Basic(
                     MatrixRolesInCombinationBasicViolation::FactorSourceNotFoundInAnyRole,
                 ),
             ))
-        } else {
-            Ok(())
         }
+    }
+
+    pub fn remove_factor_from_primary(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+    ) -> MatrixBuilderMutateResult {
+        Self::remove_factor_from_role(&mut self.primary_role, factor_source_id)
+    }
+
+    pub fn remove_factor_from_recovery(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+    ) -> MatrixBuilderMutateResult {
+        Self::remove_factor_from_role(&mut self.recovery_role, factor_source_id)
+    }
+
+    pub fn remove_factor_from_confirmation(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+    ) -> MatrixBuilderMutateResult {
+        Self::remove_factor_from_role(
+            &mut self.confirmation_role,
+            factor_source_id,
+        )
+    }
+
+    /// Removes `factor_source_id` from all three roles, if not found in any an error
+    /// is thrown.
+    ///
+    /// # Throws
+    /// If none of the three role builders contains the factor source id, `Err(BasicViolation::FactorSourceNotFound)` is thrown
+    pub fn remove_factor_from_all_roles(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+    ) -> MatrixBuilderMutateResult {
+        let fsid = factor_source_id;
+        let r0 = self.remove_factor_from_primary(fsid);
+        let r1 = self.remove_factor_from_recovery(fsid);
+        let r2 = self.remove_factor_from_confirmation(fsid);
+
+        r0.or(r1).or(r2)
     }
 }
 
@@ -371,7 +385,6 @@ impl MatrixBuilder {
         // is already enforced by the RoleBuilder
 
         self.validate_number_of_days_until_auto_confirm()?;
-
         Ok(())
     }
 }

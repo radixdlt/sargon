@@ -459,7 +459,7 @@ mod password {
         fn alone_is_not_ok() {
             // Arrange
             let mut sut = make();
-
+            let _ = sut.set_threshold(1);
             // Act
             let res = sut.add_factor_source_to_threshold(sample());
 
@@ -467,6 +467,14 @@ mod password {
             assert_eq!(
                 res,
                 MutRes::not_yet_valid(
+                    NotYetValidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+                )
+            );
+
+            let validation = sut.validate();
+            assert_eq!(
+                validation,
+                Result::not_yet_valid(
                     NotYetValidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
                 )
             );

@@ -133,9 +133,39 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_name(&name));
     }
 
-    pub fn remove_factor(&self, factor_source_id: FactorSourceID) {
+    pub fn remove_factor_from_all_roles(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) {
         self.set(|builder| {
-            builder.remove_factor(factor_source_id.clone().into())
+            builder
+                .remove_factor_from_all_roles(factor_source_id.clone().into())
+        })
+    }
+
+    pub fn remove_factor_from_primary(&self, factor_source_id: FactorSourceID) {
+        self.set(|builder| {
+            builder.remove_factor_from_primary(factor_source_id.clone().into())
+        })
+    }
+
+    pub fn remove_factor_from_recovery(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) {
+        self.set(|builder| {
+            builder.remove_factor_from_recovery(factor_source_id.clone().into())
+        })
+    }
+
+    pub fn remove_factor_from_confirmation(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) {
+        self.set(|builder| {
+            builder.remove_factor_from_confirmation(
+                factor_source_id.clone().into(),
+            )
         })
     }
 
@@ -439,7 +469,7 @@ mod tests {
             sut.get_primary_threshold_factors(),
             vec![FactorSourceID::sample_device()]
         );
-        _ = sut.set_threshold(1);
+        sut.set_threshold(1);
         assert_eq!(sut.get_primary_threshold(), 1);
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_arculus(),
@@ -558,8 +588,24 @@ mod tests {
             )
         );
 
-        sut.remove_factor(FactorSourceID::sample_arculus_other());
-        sut.remove_factor(FactorSourceID::sample_ledger_other());
+        sut.remove_factor_from_all_roles(FactorSourceID::sample_arculus_other());
+        sut.remove_factor_from_all_roles(FactorSourceID::sample_ledger_other());
+
+        let f = FactorSourceID::sample_ledger_other();
+        let xs = sut.get_primary_override_factors();
+        sut.add_factor_source_to_primary_override(f.clone());
+        sut.remove_factor_from_primary(f.clone());
+        assert_eq!(xs, sut.get_primary_override_factors());
+
+        let xs = sut.get_recovery_factors();
+        sut.add_factor_source_to_recovery_override(f.clone());
+        sut.remove_factor_from_recovery(f.clone());
+        assert_eq!(xs, sut.get_recovery_factors());
+
+        let xs = sut.get_confirmation_factors();
+        sut.add_factor_source_to_confirmation_override(f.clone());
+        sut.remove_factor_from_confirmation(f.clone());
+        assert_eq!(xs, sut.get_confirmation_factors());
 
         let v0 = sut.validate();
         let v1 = sut.validate(); // can call validate many times!
@@ -572,15 +618,15 @@ mod tests {
         assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
             shield.matrix_of_factors.primary_role.override_factors,
-            vec![FactorSourceID::sample_arculus().into()]
+            vec![FactorSourceID::sample_arculus()]
         );
         assert_eq!(
             shield.matrix_of_factors.recovery_role.override_factors,
-            vec![FactorSourceID::sample_ledger().into()]
+            vec![FactorSourceID::sample_ledger()]
         );
         assert_eq!(
             shield.matrix_of_factors.confirmation_role.override_factors,
-            vec![FactorSourceID::sample_device().into()]
+            vec![FactorSourceID::sample_device()]
         );
     }
 }

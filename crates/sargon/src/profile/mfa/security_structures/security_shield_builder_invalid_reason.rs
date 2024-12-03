@@ -1,13 +1,14 @@
 use crate::prelude::*;
 
-
 pub trait AsShieldBuilderViolation {
     fn as_shield_validation(
         &self,
     ) -> Option<SecurityShieldBuilderInvalidReason>;
 }
 
-impl<T> AsShieldBuilderViolation for Result<T, MatrixBuilderValidation> {
+impl<T: std::fmt::Debug> AsShieldBuilderViolation
+    for Result<T, MatrixBuilderValidation>
+{
     fn as_shield_validation(
         &self,
     ) -> Option<SecurityShieldBuilderInvalidReason> {
@@ -50,9 +51,8 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationBasicViolation {
     ) -> Option<SecurityShieldBuilderInvalidReason> {
         use MatrixRolesInCombinationBasicViolation::*;
         match self {
-            FactorSourceNotFoundInAnyRole => {
-                Some(SecurityShieldBuilderInvalidReason::FactorSourceNotFoundInAnyRole)
-            }
+            FactorSourceNotFoundInAnyRole =>
+                unreachable!("Cannot happen since this error is not returned by 'validate'/'build'."),
             NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero => {
                 Some(SecurityShieldBuilderInvalidReason::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero)
             }
@@ -89,36 +89,16 @@ impl AsShieldBuilderViolation for (RoleKind, RoleBuilderValidation) {
     fn as_shield_validation(
         &self,
     ) -> Option<SecurityShieldBuilderInvalidReason> {
-        let (_, violation) = self;
+        let (role_kind, violation) = self;
         match violation {
-            RoleBuilderValidation::BasicViolation(basic) => {
-                basic.as_shield_validation()
-            }
+            RoleBuilderValidation::BasicViolation(basic) => unreachable!("Programmer error. Should have prevented this from happening: '{:?}'", basic),
             RoleBuilderValidation::ForeverInvalid(forever) => {
                 forever.as_shield_validation()
             }
             RoleBuilderValidation::NotYetValid(not_yet_valid) => {
-                not_yet_valid.as_shield_validation()
+                (*role_kind, *not_yet_valid).as_shield_validation()
             }
         }
-    }
-}
-
-impl AsShieldBuilderViolation for BasicViolation {
-    fn as_shield_validation(
-        &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
-        use BasicViolation::*;
-        let reason = match self {
-            FactorSourceNotFound => SecurityShieldBuilderInvalidReason::FactorSourceNotFound,
-            RecoveryCannotSetThreshold => {
-                SecurityShieldBuilderInvalidReason::RecoveryCannotSetThreshold
-            }
-            ConfirmationCannotSetThreshold => {
-                SecurityShieldBuilderInvalidReason::ConfirmationCannotSetThreshold
-            }
-        };
-        Some(reason)
     }
 }
 
@@ -161,13 +141,28 @@ impl AsShieldBuilderViolation for ForeverInvalidReason {
     }
 }
 
-impl AsShieldBuilderViolation for NotYetValidReason {
+impl SecurityShieldBuilderInvalidReason {
+    pub(crate) fn role_must_have_at_least_one_factor(
+        role_kind: &RoleKind,
+    ) -> Self {
+        match role_kind {
+            RoleKind::Primary => Self::PrimaryRoleMustHaveAtLeastOneFactor,
+            RoleKind::Recovery => Self::RecoveryRoleMustHaveAtLeastOneFactor,
+            RoleKind::Confirmation => {
+                Self::ConfirmationRoleMustHaveAtLeastOneFactor
+            }
+        }
+    }
+}
+
+impl AsShieldBuilderViolation for (RoleKind, NotYetValidReason) {
     fn as_shield_validation(
         &self,
     ) -> Option<SecurityShieldBuilderInvalidReason> {
+        let (role_kind, violation) = self;
         use NotYetValidReason::*;
-        let reason = match self {
-            RoleMustHaveAtLeastOneFactor => SecurityShieldBuilderInvalidReason::RoleMustHaveAtLeastOneFactor,
+        let reason = match violation {
+            RoleMustHaveAtLeastOneFactor => SecurityShieldBuilderInvalidReason::role_must_have_at_least_one_factor(role_kind),
             PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => {
                 SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
             }
@@ -190,9 +185,6 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error("Shield name is invalid")]
     ShieldNameInvalid,
 
-    #[error("The factor source was not found in any role")]
-    FactorSourceNotFoundInAnyRole,
-
     #[error("The number of days until auto confirm must be greater than zero")]
     NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero,
 
@@ -202,24 +194,17 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error("The single factor used in the primary role must not be used in any other role")]
     SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
 
-    // ==================
-    // BasicViolation
-    // ==================
-    /// e.g. tried to remove a factor source which was not found.
-    #[error("FactorSourceID not found")]
-    FactorSourceNotFound,
-
-    #[error("Recovery cannot set threshold")]
-    RecoveryCannotSetThreshold,
-
-    #[error("Confirmation cannot set threshold")]
-    ConfirmationCannotSetThreshold,
-
     // =========================
     // NotYetValidReason
     // =========================
-    #[error("Role must have at least one factor")]
-    RoleMustHaveAtLeastOneFactor,
+    #[error("PrimaryRole must have at least one factor")]
+    PrimaryRoleMustHaveAtLeastOneFactor,
+
+    #[error("RecoveryRole must have at least one factor")]
+    RecoveryRoleMustHaveAtLeastOneFactor,
+
+    #[error("ConfirmationRole must have at least one factor")]
+    ConfirmationRoleMustHaveAtLeastOneFactor,
 
     #[error(
         "Primary role with password in threshold list must have another factor"

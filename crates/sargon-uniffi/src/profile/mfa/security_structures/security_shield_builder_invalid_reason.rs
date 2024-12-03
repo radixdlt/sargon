@@ -9,6 +9,7 @@ use thiserror::Error as ThisError;
     Debug,
     PartialEq,
     Eq,
+    Hash,
     InternalConversion,
     ThisError,
     uniffi::Error,
@@ -16,9 +17,6 @@ use thiserror::Error as ThisError;
 pub enum SecurityShieldBuilderInvalidReason {
     #[error("Shield name is invalid")]
     ShieldNameInvalid,
-
-    #[error("The factor source was not found in any role")]
-    FactorSourceNotFoundInAnyRole,
 
     #[error("The number of days until auto confirm must be greater than zero")]
     NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero,
@@ -29,24 +27,17 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error("The single factor used in the primary role must not be used in any other role")]
     SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole,
 
-    // ==================
-    // BasicViolation
-    // ==================
-    /// e.g. tried to remove a factor source which was not found.
-    #[error("FactorSourceID not found")]
-    FactorSourceNotFound,
-
-    #[error("Recovery cannot set threshold")]
-    RecoveryCannotSetThreshold,
-
-    #[error("Confirmation cannot set threshold")]
-    ConfirmationCannotSetThreshold,
-
     // =========================
     // NotYetValidReason
     // =========================
-    #[error("Role must have at least one factor")]
-    RoleMustHaveAtLeastOneFactor,
+    #[error("PrimaryRole must have at least one factor")]
+    PrimaryRoleMustHaveAtLeastOneFactor,
+
+    #[error("RecoveryRole must have at least one factor")]
+    RecoveryRoleMustHaveAtLeastOneFactor,
+
+    #[error("ConfirmationRole must have at least one factor")]
+    ConfirmationRoleMustHaveAtLeastOneFactor,
 
     #[error(
         "Primary role with password in threshold list must have another factor"

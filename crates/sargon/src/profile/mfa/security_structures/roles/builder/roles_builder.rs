@@ -483,6 +483,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             }
         }
 
+        if self.threshold_contains_factor_source_of_kind(
+            FactorSourceKind::Password,
+        ) {
+            self.validation_for_addition_of_password_to_primary(Threshold)?;
+        }
+
         if self.all_factors().is_empty() {
             return RoleBuilderMutateResult::not_yet_valid(
                 RoleMustHaveAtLeastOneFactor,
