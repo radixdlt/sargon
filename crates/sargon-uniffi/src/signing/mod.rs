@@ -8,6 +8,7 @@ mod invalid_transaction_if_neglected;
 mod transaction_sign_request_input;
 mod sign_with_factors_outcome;
 mod signatures_per_fractor_source;
+mod sign_response;
 
 pub use neglected_factors::*;
 pub use role_kind::*;
