@@ -380,7 +380,7 @@ impl SecurityShieldBuilder {
         )
     }
 }
-    
+
 */
 #[uniffi::export]
 impl SecurityShieldBuilder {
