@@ -56,7 +56,7 @@ impl SecurityShieldBuilder {
             Vec<sargon::FactorSourceID>,
         )
             -> Vec<sargon::FactorSourceInRoleBuilderValidationStatus>,
-    ) -> Vec<Arc<FactorSourceValidationStatus>> {
+    ) -> Vec<FactorSourceValidationStatus> {
         let input = factor_sources
             .clone()
             .into_iter()
@@ -67,7 +67,6 @@ impl SecurityShieldBuilder {
             call(builder, input.clone())
                 .into_iter()
                 .map(Into::<FactorSourceValidationStatus>::into)
-                .map(Arc::new)
                 .collect()
         })
     }
@@ -331,7 +330,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_primary_threshold_for_each(
         self: Arc<Self>,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Vec<Arc<FactorSourceValidationStatus>> {
+    ) -> Vec<FactorSourceValidationStatus> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -344,7 +343,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_primary_override_for_each(
         self: Arc<Self>,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Vec<Arc<FactorSourceValidationStatus>> {
+    ) -> Vec<FactorSourceValidationStatus> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -356,7 +355,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_recovery_override_for_each(
         self: Arc<Self>,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Vec<Arc<FactorSourceValidationStatus>> {
+    ) -> Vec<FactorSourceValidationStatus> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
@@ -368,7 +367,7 @@ impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_confirmation_override_for_each(
         self: Arc<Self>,
         factor_sources: Vec<FactorSourceID>,
-    ) -> Vec<Arc<FactorSourceValidationStatus>> {
+    ) -> Vec<FactorSourceValidationStatus> {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {

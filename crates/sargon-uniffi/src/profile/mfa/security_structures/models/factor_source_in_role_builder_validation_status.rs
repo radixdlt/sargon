@@ -2,7 +2,7 @@ use sargon::AsShieldBuilderViolation;
 
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, uniffi::Object)]
+#[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct FactorSourceValidationStatus {
     pub role: RoleKind,
     pub factor_source_id: FactorSourceID,
@@ -11,26 +11,10 @@ pub struct FactorSourceValidationStatus {
 
 #[derive(Clone, Debug, PartialEq, uniffi::Enum)]
 pub enum FactorSourceValidationStatusReasonIfInvalid {
-    BasicViolation(String),
+    BasicViolation,
     NonBasic(SecurityShieldBuilderInvalidReason),
 }
 
-#[uniffi::export]
-impl FactorSourceValidationStatus {
-    // pub fn reason_if_invalid(
-    //     &self,
-    // ) -> Option<FactorSourceValidationStatusReasonIfInvalid> {
-    //     self.reason_if_invalid.clone()
-    // }
-
-    // pub fn role(&self) -> RoleKind {
-    //     self.role
-    // }
-
-    // pub fn factor_source_id(&self) -> FactorSourceID {
-    //     self.factor_source_id.clone()
-    // }
-}
 impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
     for FactorSourceValidationStatus
 {
@@ -40,10 +24,10 @@ impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
         > = {
             match val.validation {
                 Ok(_) => None,
-                Err(sargon::RoleBuilderValidation::BasicViolation(b)) => Some(
-                    FactorSourceValidationStatusReasonIfInvalid::BasicViolation(
-                        format!("{:?}", b),
-                    ),
+                Err(sargon::RoleBuilderValidation::BasicViolation(_)) => Some(
+                    FactorSourceValidationStatusReasonIfInvalid::BasicViolation, // FactorSourceValidationStatusReasonIfInvalid::BasicViolation(
+                                                                                 //     format!("{:?}", b),
+                                                                                 // ),
                 ),
                 Err(sargon::RoleBuilderValidation::ForeverInvalid(v)) => v
                     .as_shield_validation()
