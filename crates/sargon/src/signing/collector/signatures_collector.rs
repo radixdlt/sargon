@@ -133,10 +133,10 @@ impl<S: Signable> SignaturesCollector<S> {
         let petitions_status = self
             .state
             .read()
-            .expect("SignaturesCollector lock was poisoned.")
+            .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock was poisoned.")
+            .expect("SignaturesCollectorState lock should not have been poisoned.")
             .status();
 
         if petitions_status.are_all_valid() {
@@ -167,11 +167,11 @@ impl<S: Signable> SignaturesCollector<S> {
         let state = self
             .state
             .read()
-            .expect("SignaturesCollector lock was poisoned.");
+            .expect("SignaturesCollector lock should not have been poisoned.");
         let petitions = state
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock was poisoned.");
+            .expect("SignaturesCollectorState lock should not have been poisoned.");
         petitions
             .should_neglect_factors_due_to_irrelevant(factor_sources_of_kind)
     }
@@ -280,10 +280,10 @@ impl<S: Signable> SignaturesCollector<S> {
     ) -> IndexSet<TransactionSignRequestInput<S>> {
         self.state
             .read()
-            .expect("SignaturesCollector lock was poisoned.")
+            .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock was poisoned.")
+            .expect("SignaturesCollectorState lock should not have been poisoned.")
             .input_for_interactor(factor_source_id)
     }
 
@@ -349,10 +349,10 @@ impl<S: Signable> SignaturesCollector<S> {
     ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.state
             .read()
-            .expect("SignaturesCollector lock was poisoned.")
+            .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock was poisoned.")
+            .expect("SignaturesCollectorState lock should not have been poisoned.")
             .invalid_transactions_if_neglected_factors(factor_source_ids)
     }
 
@@ -360,11 +360,11 @@ impl<S: Signable> SignaturesCollector<S> {
         let state = self
             .state
             .write()
-            .expect("SignaturesCollector lock was poisoned.");
+            .expect("SignaturesCollector lock should not have been poisoned.");
         let petitions = state
             .petitions
             .write()
-            .expect("SignaturesCollectorState lock was poisoned.");
+            .expect("SignaturesCollectorState lock should not have been poisoned.");
         petitions.process_batch_response(response)
     }
 
@@ -374,11 +374,11 @@ impl<S: Signable> SignaturesCollector<S> {
             let state = self
                 .state
                 .write()
-                .expect("SignaturesCollector lock was poisoned.");
+                .expect("SignaturesCollector lock should not have been poisoned.");
             let petitions = state
                 .petitions
                 .write()
-                .expect("SignaturesCollectorState lock was poisoned.");
+                .expect("SignaturesCollectorState lock should not have been poisoned.");
             expected_number_of_transactions = petitions
                 .txid_to_petition
                 .read()
@@ -388,10 +388,10 @@ impl<S: Signable> SignaturesCollector<S> {
         let outcome = self
             .state
             .read()
-            .expect("SignaturesCollector lock was poisoned.")
+            .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock was poisoned.")
+            .expect("SignaturesCollectorState lock should not have been poisoned.")
             .outcome();
         assert_eq!(
             outcome.failed_transactions().len()
@@ -418,10 +418,10 @@ mod tests {
         pub(crate) fn petitions(self) -> Petitions<TransactionIntent> {
             self.state
                 .read()
-                .expect("SignaturesCollector lock was poisoned.")
+                .expect("SignaturesCollector lock should not have been poisoned.")
                 .petitions
                 .read()
-                .expect("SignaturesCollectorState lock was poisoned.")
+                .expect("SignaturesCollectorState lock should not have been poisoned.")
                 .clone()
         }
     }
@@ -617,7 +617,7 @@ mod tests {
             petitions
                 .txid_to_petition
                 .read()
-                .expect("Petitions lock was poisoned")
+                .expect("Petitions lock should not have been poisoned")
                 .len(),
             4
         );
@@ -626,13 +626,13 @@ mod tests {
             let petitions_ref = petitions
                 .txid_to_petition
                 .read()
-                .expect("Petitions lock was poisoned");
+                .expect("Petitions lock should not have been poisoned");
             let petition =
                 petitions_ref.get(&t3.transaction_intent_hash()).unwrap();
             let for_entities = petition
                 .for_entities
                 .read()
-                .expect("PetitionForTransaction lock was poisoned.")
+                .expect("PetitionForTransaction lock should not have been poisoned.")
                 .clone();
             let pet6 = for_entities.get(&a6.address.into()).unwrap();
 
@@ -669,7 +669,7 @@ mod tests {
             let petitions_ref = petitions
                 .txid_to_petition
                 .read()
-                .expect("Petitions lock was poisoned");
+                .expect("Petitions lock should not have been poisoned");
             let petition =
                 petitions_ref.get(&t.transaction_intent_hash()).unwrap();
             assert_eq!(
@@ -685,7 +685,7 @@ mod tests {
                 petition
                     .for_entities
                     .read()
-                    .expect("PetitionForTransaction lock was poisoned.")
+                    .expect("PetitionForTransaction lock should not have been poisoned.")
                     .keys()
                     .collect::<HashSet<_>>(),
                 addresses
@@ -694,21 +694,21 @@ mod tests {
             assert!(petition
                 .for_entities
                 .read()
-                .expect("PetitionForTransaction lock was poisoned.")
+                .expect("PetitionForTransaction lock should not have been poisoned.")
                 .iter()
                 .all(|(a, p)| { p.entity == *a }));
 
             assert!(petition
                 .for_entities
                 .read()
-                .expect("PetitionForTransaction lock was poisoned.")
+                .expect("PetitionForTransaction lock should not have been poisoned.")
                 .iter()
                 .all(|(_, p)| { p.payload_id == t.transaction_intent_hash() }));
 
             for (k, v) in petition
                 .for_entities
                 .read()
-                .expect("PetitionForTransaction lock was poisoned.")
+                .expect("PetitionForTransaction lock should not have been poisoned.")
                 .iter()
             {
                 let threshold = threshold_factors.get(k);
@@ -717,7 +717,7 @@ mod tests {
                     assert_eq!(
                         actual_threshold
                             .read()
-                            .expect("PetitionForEntity lock was poisoned.")
+                            .expect("PetitionForEntity lock should not have been poisoned.")
                             .factor_instances()
                             .into_iter()
                             .map(|f| f.factor_source_id)
@@ -734,7 +734,7 @@ mod tests {
                     assert_eq!(
                         actual_override
                             .read()
-                            .expect("PetitionForEntity lock was poisoned.")
+                            .expect("PetitionForEntity lock should not have been poisoned.")
                             .factor_instances()
                             .into_iter()
                             .map(|f| f.factor_source_id)

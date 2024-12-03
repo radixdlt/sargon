@@ -37,12 +37,12 @@ impl<S: Signable> PartialEq for Petitions<S> {
             && self
                 .txid_to_petition
                 .read()
-                .expect("Petitions lock was poisoned")
+                .expect("Petitions lock should not have been poisoned")
                 .deref()
                 == other
                     .txid_to_petition
                     .read()
-                    .expect("Petitions lock was poisoned")
+                    .expect("Petitions lock should not have been poisoned")
                     .deref()
     }
 }
@@ -67,7 +67,7 @@ impl<S: Signable> Petitions<S> {
         let txid_to_petition = self
             .txid_to_petition
             .read()
-            .expect("Petitions lock was poisoned.");
+            .expect("Petitions lock should not have been poisoned.");
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
         let mut neglected_factor_sources = IndexSet::<NeglectedFactor>::new();
@@ -107,7 +107,7 @@ impl<S: Signable> Petitions<S> {
                     .map(|intent_hash| {
                         let binding = self.txid_to_petition
                             .read()
-                            .expect("Petitions lock was poisoned.");
+                            .expect("Petitions lock should not have been poisoned.");
                         let value = binding.get(intent_hash).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
                         each(value)
                     })
@@ -185,7 +185,7 @@ impl<S: Signable> Petitions<S> {
         let binding = self
             .txid_to_petition
             .read()
-            .expect("Petitions lock was poisoned.");
+            .expect("Petitions lock should not have been poisoned.");
         let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
     }
@@ -234,7 +234,7 @@ impl<S: Signable> Petitions<S> {
     fn debug_str(&self) -> String {
         self.txid_to_petition
             .read()
-            .expect("Petitions lock was poisoned.")
+            .expect("Petitions lock should not have been poisoned.")
             .iter()
             .map(|p| format!("Petitions({:#?}: {:#?})", p.0, p.1))
             .join(" + ")
@@ -248,7 +248,7 @@ impl<S: Signable> Petitions<S> {
             txid_to_petition: RwLock::new(
                 self.txid_to_petition
                     .read()
-                    .expect("Petitions lock was poisoned.")
+                    .expect("Petitions lock should not have been poisoned.")
                     .clone(),
             ),
         }

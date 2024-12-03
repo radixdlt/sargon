@@ -36,7 +36,7 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.signed
             .read()
-            .expect("PetitionForFactorsState lock was poisoned")
+            .expect("PetitionForFactorsState lock should not have been poisoned")
             .snapshot()
     }
 
@@ -44,7 +44,7 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
         self.neglected
             .read()
-            .expect("PetitionForFactorsState lock was poisoned")
+            .expect("PetitionForFactorsState lock should not have been poisoned")
             .snapshot()
     }
 
@@ -72,7 +72,7 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
         }
         self.neglected
             .write()
-            .expect("PetitionForFactorsState lock was poisoned")
+            .expect("PetitionForFactorsState lock should not have been poisoned")
             .insert(neglected);
     }
 
@@ -82,7 +82,7 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
         self.assert_not_referencing_factor_source(signature.factor_source_id());
         self.signed
             .write()
-            .expect("PetitionForFactorsState lock was poisoned")
+            .expect("PetitionForFactorsState lock should not have been poisoned")
             .insert(signature)
     }
 
@@ -98,13 +98,13 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
             signed: RwLock::new(
                 self.signed
                     .read()
-                    .expect("PetitionForFactorsState lock was poisoned")
+                    .expect("PetitionForFactorsState lock should not have been poisoned")
                     .cloned(),
             ),
             neglected: RwLock::new(
                 self.neglected
                     .read()
-                    .expect("PetitionForFactorsState lock was poisoned")
+                    .expect("PetitionForFactorsState lock should not have been poisoned")
                     .cloned(),
             ),
         }
@@ -116,12 +116,12 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     ) -> bool {
         self.signed
             .read()
-            .expect("PetitionForFactorsState lock was poisoned")
+            .expect("PetitionForFactorsState lock should not have been poisoned")
             .references_factor_source_by_id(factor_source_id)
             || self
                 .neglected
                 .read()
-                .expect("PetitionForFactorsState lock was poisoned")
+                .expect("PetitionForFactorsState lock should not have been poisoned")
                 .references_factor_source_by_id(factor_source_id)
     }
 }

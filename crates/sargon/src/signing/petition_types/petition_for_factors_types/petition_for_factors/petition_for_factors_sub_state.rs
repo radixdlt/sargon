@@ -35,14 +35,14 @@ impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
     pub(super) fn insert(&self, factor: &F) {
         self.factors
             .write()
-            .expect("PetitionForFactorsSubState was poisoned")
+            .expect("PetitionForFactorsSubState should not have been poisoned")
             .insert(factor.clone());
     }
 
     pub(super) fn snapshot(&self) -> IndexSet<F> {
         self.factors
             .read()
-            .expect("PetitionForFactorsSubState was poisoned")
+            .expect("PetitionForFactorsSubState should not have been poisoned")
             .clone()
     }
 
@@ -52,7 +52,7 @@ impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
     ) -> bool {
         self.factors
             .read()
-            .expect("PetitionForFactorsSubState was poisoned")
+            .expect("PetitionForFactorsSubState should not have been poisoned")
             .iter()
             .any(|sf| sf.factor_source_id() == factor_source_id)
     }

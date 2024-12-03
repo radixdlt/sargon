@@ -320,7 +320,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     fn all_threshold_factors(&self) -> Option<PetitionForFactors<ID>> {
         self.threshold_factors.as_ref().map(|lock| {
             lock.read()
-                .expect("PetitionForEntity lock was poisoned.")
+                .expect("PetitionForEntity lock should not have been poisoned.")
                 .clone()
         })
     }
@@ -328,7 +328,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     fn all_override_factors(&self) -> Option<PetitionForFactors<ID>> {
         self.override_factors.as_ref().map(|lock| {
             lock.read()
-                .expect("PetitionForEntity lock was poisoned.")
+                .expect("PetitionForEntity lock should not have been poisoned.")
                 .clone()
         })
     }
@@ -362,7 +362,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                     access(
                         &rwlock
                             .read()
-                            .expect("PetitionForEntity lock was poisoned."),
+                            .expect("PetitionForEntity lock should not have been poisoned."),
                     )
                 })
             };

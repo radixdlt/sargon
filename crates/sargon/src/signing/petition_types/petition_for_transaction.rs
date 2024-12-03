@@ -24,12 +24,12 @@ impl<S: Signable> PartialEq for PetitionForTransaction<S> {
             && self
                 .for_entities
                 .read()
-                .expect("PetitionForTransaction lock was poisoned.")
+                .expect("PetitionForTransaction lock should not have been poisoned.")
                 .deref()
                 == other
                     .for_entities
                     .read()
-                    .expect("PetitionForTransaction lock was poisoned.")
+                    .expect("PetitionForTransaction lock should not have been poisoned.")
                     .deref()
     }
 }
@@ -65,7 +65,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         let for_entities = self
             .for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .values()
             .map(|x| x.to_owned())
             .collect_vec();
@@ -95,7 +95,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn has_tx_failed(&self) -> bool {
         self.for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .values()
             .any(|p| p.has_failed())
     }
@@ -107,7 +107,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         assert!(!self.has_tx_failed());
         self.for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .values()
             .filter(|&p| {
                 if p.has_failed() {
@@ -131,7 +131,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         let for_entities = self
             .for_entities
             .write()
-            .expect("PetitionForTransaction lock was poisoned.");
+            .expect("PetitionForTransaction lock should not have been poisoned.");
         let for_entity = for_entities
             .get(&signature.owned_factor_instance().owner)
             .expect("Should not have added signature to irrelevant PetitionForTransaction, did you pass the wrong signature to the wrong PetitionForTransaction?");
@@ -142,7 +142,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         let mut for_entities = self
             .for_entities
             .write()
-            .expect("PetitionForTransaction lock was poisoned.");
+            .expect("PetitionForTransaction lock should not have been poisoned.");
         for petition in for_entities.values_mut() {
             petition.neglect_if_referenced(neglected.clone())
         }
@@ -168,7 +168,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     ) -> Vec<PetitionForFactorsStatus> {
         self.for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .values()
             .map(|petition| petition.status())
             .collect()
@@ -185,7 +185,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         let entities = self
             .for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .iter()
             .filter_map(|(_, petition)| {
                 petition.invalid_transaction_if_neglected_factors(
@@ -210,7 +210,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     ) -> bool {
         self.for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .values()
             .filter(|&p| p.references_any_factor_source(&factor_source_ids))
             .cloned()
@@ -226,7 +226,7 @@ impl<S: Signable> PetitionForTransaction<S> {
         let entities = self
             .for_entities
             .read()
-            .expect("PetitionForTransaction lock was poisoned.")
+            .expect("PetitionForTransaction lock should not have been poisoned.")
             .iter()
             .map(|p| format!("PetitionForEntity({:#?})", p.1))
             .join(", ");
@@ -240,7 +240,7 @@ impl<S: Signable> PetitionForTransaction<S> {
             for_entities: RwLock::new(
                 self.for_entities
                     .read()
-                    .expect("PetitionForTransaction lock was poisoned.")
+                    .expect("PetitionForTransaction lock should not have been poisoned.")
                     .clone(),
             ),
         }

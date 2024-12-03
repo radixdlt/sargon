@@ -26,12 +26,12 @@ impl<ID: SignableID> PartialEq for PetitionForFactors<ID> {
             && self
                 .state
                 .read()
-                .expect("PetitionForFactors lock was poisoned")
+                .expect("PetitionForFactors lock should not have been poisoned")
                 .deref()
                 == other
                     .state
                     .read()
-                    .expect("PetitionForFactors lock was poisoned")
+                    .expect("PetitionForFactors lock should not have been poisoned")
                     .deref()
     }
 }
@@ -72,14 +72,14 @@ impl<ID: SignableID> PetitionForFactors<ID> {
     pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
         self.state
             .read()
-            .expect("PetitionForFactors lock was poisoned")
+            .expect("PetitionForFactors lock should not have been poisoned")
             .all_neglected()
     }
 
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.state
             .read()
-            .expect("PetitionForFactors lock was poisoned")
+            .expect("PetitionForFactors lock should not have been poisoned")
             .all_signatures()
     }
 
@@ -141,7 +141,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         );
         self.state
             .write()
-            .expect("PetitionForFactors lock was poisoned")
+            .expect("PetitionForFactors lock should not have been poisoned")
             .neglect(&NeglectedFactorInstance::new(
                 neglected.reason,
                 factor_instance.clone(),
@@ -180,7 +180,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         let state = self
             .state
             .write()
-            .expect("PetitionForFactors lock was poisoned");
+            .expect("PetitionForFactors lock should not have been poisoned");
         state.add_signature(signature)
     }
 
@@ -210,7 +210,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
     fn state_snapshot(&self) -> PetitionForFactorsStateSnapshot<ID> {
         self.state
             .read()
-            .expect("PetitionForFactors lock was poisoned")
+            .expect("PetitionForFactors lock should not have been poisoned")
             .snapshot()
     }
 
@@ -255,7 +255,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
             state: RwLock::new(
                 self.state
                     .read()
-                    .expect("PetitionForFactors lock was poisoned")
+                    .expect("PetitionForFactors lock should not have been poisoned")
                     .cloned(),
             ),
         }
