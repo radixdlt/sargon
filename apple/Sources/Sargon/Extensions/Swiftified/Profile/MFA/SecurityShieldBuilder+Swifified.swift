@@ -1,6 +1,6 @@
 import SargonUniFFI
 
-//extension FactorSourceValidationStatus {
+// extension FactorSourceValidationStatus {
 //	public var factorSourceID: FactorSourceID {
 //		factorSourceId()
 //	}
@@ -12,7 +12,7 @@ import SargonUniFFI
 //	public var role: RoleKind {
 //		role()
 //	}
-//}
+// }
 
 extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
