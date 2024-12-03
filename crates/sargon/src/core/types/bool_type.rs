@@ -38,6 +38,12 @@ macro_rules! decl_bool_type {
                 &self.0
             }
         }
+
+        impl From<bool> for $name {
+            fn from(value: bool) -> Self {
+                $name(value)
+            }
+        }
     };
 }
 
@@ -91,5 +97,14 @@ mod tests {
         assert!(!*example_false);
         example_false.0 = true;
         assert!(*example_false);
+    }
+
+    #[test]
+    fn from_into() {
+        let value = true;
+        assert!(ExampleTrue::from(value).0);
+
+        let value = false;
+        assert!(!ExampleTrue::from(value).0);
     }
 }

@@ -11,21 +11,21 @@ pub struct AddressesOfEntitiesInBadState {
 
 impl AddressesOfEntitiesInBadState {
     pub fn new(
-        accounts: Vec<AccountAddress>,
-        hidden_accounts: Vec<AccountAddress>,
-        personas: Vec<IdentityAddress>,
-        hidden_personas: Vec<IdentityAddress>,
+        accounts: impl IntoIterator<Item = AccountAddress>,
+        hidden_accounts: impl IntoIterator<Item = AccountAddress>,
+        personas: impl IntoIterator<Item = IdentityAddress>,
+        hidden_personas: impl IntoIterator<Item = IdentityAddress>,
     ) -> Self {
         Self {
-            accounts,
-            hidden_accounts,
-            personas,
-            hidden_personas,
+            accounts: Vec::from_iter(accounts),
+            hidden_accounts: Vec::from_iter(hidden_accounts),
+            personas: Vec::from_iter(personas),
+            hidden_personas: Vec::from_iter(hidden_personas),
         }
     }
 
     pub fn empty() -> Self {
-        Self::new(Vec::new(), Vec::new(), Vec::new(), Vec::new())
+        Self::new([], [], [], [])
     }
 
     pub fn is_empty(&self) -> bool {
@@ -81,7 +81,7 @@ mod tests {
         let sut = SUT::empty();
         assert!(sut.is_empty());
 
-        let sut = SUT::new(Vec::new(), Vec::new(), Vec::new(), Vec::sample());
+        let sut = SUT::new([], [], [], Vec::sample());
         assert!(sut.is_empty());
     }
 }

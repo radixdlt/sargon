@@ -49,9 +49,9 @@ impl From<InternalCheckSecurityProblemsInput> for CheckSecurityProblemsInput {
 impl From<CheckSecurityProblemsInput> for InternalCheckSecurityProblemsInput {
     fn from(input: CheckSecurityProblemsInput) -> Self {
         InternalCheckSecurityProblemsInput {
-            is_cloud_profile_sync_enabled: IsCloudProfileSyncEnabled(
-                input.is_cloud_profile_sync_enabled,
-            ),
+            is_cloud_profile_sync_enabled: input
+                .is_cloud_profile_sync_enabled
+                .into(),
             unrecoverable_entities: input.unrecoverable_entities.into(),
             without_control_entities: input.without_control_entities.into(),
             last_cloud_backup: input.last_cloud_backup.map(BackupResult::into),

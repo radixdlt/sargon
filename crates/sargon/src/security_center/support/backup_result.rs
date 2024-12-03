@@ -20,12 +20,12 @@ decl_bool_type!(IsBackupResultFailed, false);
 
 impl BackupResult {
     pub fn new(
-        save_identifier: String,
+        save_identifier: impl AsRef<str>,
         is_current: IsBackupResultCurrent,
         is_failed: IsBackupResultFailed,
     ) -> Self {
         Self {
-            save_identifier,
+            save_identifier: save_identifier.as_ref().to_owned(),
             is_current,
             is_failed,
         }
