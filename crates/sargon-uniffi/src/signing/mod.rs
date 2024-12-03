@@ -9,6 +9,7 @@ mod transaction_sign_request_input;
 mod sign_with_factors_outcome;
 mod signatures_per_fractor_source;
 mod sign_response;
+mod transactions_to_sign_per_factor_source;
 
 pub use neglected_factors::*;
 pub use role_kind::*;
@@ -21,3 +22,4 @@ pub use transaction_sign_request_input::*;
 pub use sign_with_factors_outcome::*;
 pub use signatures_per_fractor_source::*;
 pub use sign_response::*;
+pub use transactions_to_sign_per_factor_source::*;

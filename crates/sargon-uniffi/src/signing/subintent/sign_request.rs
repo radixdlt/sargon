@@ -10,10 +10,7 @@ pub struct SignRequestForSubintent {
 
     /// Per factor source, a set of transactions to sign, with
     /// multiple derivations paths.
-    pub per_factor_source: HashMap<
-        FactorSourceIDFromHash,
-        Vec<TransactionSignRequestInputOfSubintent>,
-    >,
+    pub per_factor_source: Vec<TransactionToSignPerFactorSourceOfSubintent>,
 
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
@@ -35,9 +32,9 @@ impl From<InternalSignRequestForSubintent> for SignRequestForSubintent {
                 .per_factor_source
                 .into_iter()
                 .map(|(id, transactions)| {
-                    (
+                    TransactionToSignPerFactorSourceOfSubintent::new(
                         id.into(),
-                        transactions.into_iter().map(|t| t.into()).collect(),
+                        transactions.into_iter().map(|t| t.into()).collect()
                     )
                 })
                 .collect(),
@@ -57,10 +54,10 @@ impl From<SignRequestForSubintent> for InternalSignRequestForSubintent {
             per_factor_source: value
                 .per_factor_source
                 .iter()
-                .map(|(id, transactions)| {
+                .map(|item| {
                     (
-                        id.into_internal(),
-                        transactions
+                        item.factor_source_id.into_internal(),
+                        item.transactions
                             .iter()
                             .map(|t| t.into_internal())
                             .collect(),
