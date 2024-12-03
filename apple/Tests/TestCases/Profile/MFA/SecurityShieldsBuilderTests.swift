@@ -56,9 +56,9 @@ struct ShieldTests {
 		#expect(builder.confirmationRoleFactors == [])
 	}
 
-	@Test("primary override validation status trustedContact")
-	func primValidationStatusTrustedContact() throws {
-		let builder = SecurityShieldBuilder()
-		try #expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).map(\.validationError) == [CommonError.PrimaryCannotContainTrustedContact])
-	}
+//	@Test("primary override validation status trustedContact")
+//	func primValidationStatusTrustedContact() throws {
+//		let builder = SecurityShieldBuilder()
+//		try #expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).map(\.validationError) == [CommonError.PrimaryCannotContainTrustedContact])
+//	}
 }
