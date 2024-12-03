@@ -928,7 +928,30 @@ mod test_invalid {
     }
 
     #[test]
-    fn template() { // use this to create more tests...
+    fn primary_role_with_password_in_override_does_not_get_added() {
+        let sut = SUT::new();
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_password(),
+        );
+        assert!(sut.get_primary_override_factors().is_empty()); // did not get added
+
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+        );
+    }
+
+    #[test]
+    fn template() {
+        // use this to create more tests...
         let sut = valid();
         sut.set_name("");
         assert_eq!(
