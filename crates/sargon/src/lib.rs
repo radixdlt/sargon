@@ -18,6 +18,7 @@ mod signing;
 mod system;
 mod types;
 mod wrapped_radix_engine_toolkit;
+mod arculus_card;
 
 pub mod prelude {
 
@@ -33,6 +34,7 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
+    pub use crate::arculus_card::*;
 
     pub use radix_rust::prelude::{
         indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
