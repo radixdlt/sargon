@@ -14,8 +14,7 @@ type InternalSignResponseForTransactionIntent =
 /// Radix network.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SignResponseForTransactionIntent {
-    pub signatures:
-        HashMap<FactorSourceIDFromHash, Vec<HDSignatureOfTransactionIntentHash>>,
+    pub per_factor_source: Vec<SignaturesPerFactorSourceOfTransactionIntentHash>,
 }
 
 impl SignResponseForTransactionIntent {
@@ -29,16 +28,15 @@ impl From<InternalSignResponseForTransactionIntent>
 {
     fn from(value: InternalSignResponseForTransactionIntent) -> Self {
         Self {
-            signatures: value
-                .signatures
+            per_factor_source: value.signatures
                 .into_iter()
-                .map(|(id, signatures)| {
-                    (
+                .map(|(id, hd_signatures)| {
+                    SignaturesPerFactorSourceOfTransactionIntentHash::new(
                         id.into(),
-                        signatures.into_iter().map(|s| s.into()).collect(),
+                        hd_signatures.into_iter().map(|s| s.into()).collect()
                     )
                 })
-                .collect(),
+                .collect()
         }
     }
 }
@@ -48,12 +46,12 @@ impl From<SignResponseForTransactionIntent>
 {
     fn from(value: SignResponseForTransactionIntent) -> Self {
         Self {
-            signatures: IndexMap::from_iter(value.signatures.into_iter().map(
-                |(id, signatures)| {
+            signatures: IndexMap::from_iter(value.per_factor_source.into_iter().map(
+                |item| {
                     (
-                        id.into_internal(),
+                        item.factor_source_id.into_internal(),
                         IndexSet::from_iter(
-                            signatures.into_iter().map(|s| s.into_internal()),
+                            item.hd_signatures.into_iter().map(|s| s.into_internal()),
                         ),
                     )
                 },

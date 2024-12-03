@@ -12,7 +12,7 @@ pub struct SignRequestForSubintent {
     /// multiple derivations paths.
     pub per_factor_source: HashMap<
         FactorSourceIDFromHash,
-        Vec<TransactionSignRequestInputForSubintent>,
+        Vec<TransactionSignRequestInputOfSubintent>,
     >,
 
     /// A collection of transactions which would be invalid if the user skips

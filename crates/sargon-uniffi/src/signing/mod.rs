@@ -5,6 +5,9 @@ mod transaction_intent;
 mod hd_signature;
 mod hd_signature_input;
 mod invalid_transaction_if_neglected;
+mod transaction_sign_request_input;
+mod sign_with_factors_outcome;
+mod signatures_per_fractor_source;
 
 pub use neglected_factors::*;
 pub use role_kind::*;
@@ -13,3 +16,6 @@ pub use transaction_intent::*;
 pub use hd_signature::*;
 pub use hd_signature_input::*;
 pub use invalid_transaction_if_neglected::*;
+pub use transaction_sign_request_input::*;
+pub use sign_with_factors_outcome::*;
+pub use signatures_per_fractor_source::*;
