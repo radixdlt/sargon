@@ -23,10 +23,11 @@ impl<ID: SignableID> HDSignature<ID> {
         input: HDSignatureInput<ID>,
         signature: SignatureWithPublicKey,
     ) -> Result<Self> {
-        if signature.public_key().curve() != input.owned_factor_instance.value.public_key().curve() {
-            return Err(CommonError::InvalidHDSignature)
+        if signature.public_key().curve()
+            != input.owned_factor_instance.value.public_key().curve()
+        {
+            return Err(CommonError::InvalidHDSignature);
         }
-
 
         if !input
             .owned_factor_instance

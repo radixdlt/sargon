@@ -2,6 +2,9 @@ use crate::prelude::*;
 use sargon::InvalidTransactionIfNeglected as InternalInvalidTransactionIfNeglected;
 use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
+type InternalInvalidTransactionIfNeglectedForTransactionIntent =
+    InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>;
+
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct InvalidTransactionIfNeglectedForTransactionIntent {
     /// The intent hash of the transaction which would be invalid if a
@@ -16,13 +19,12 @@ pub struct InvalidTransactionIfNeglectedForTransactionIntent {
 impl InvalidTransactionIfNeglectedForTransactionIntent {
     pub fn into_internal(
         &self,
-    ) -> InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>
-    {
+    ) -> InternalInvalidTransactionIfNeglectedForTransactionIntent {
         self.clone().into()
     }
 }
 
-impl From<InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>>
+impl From<InternalInvalidTransactionIfNeglectedForTransactionIntent>
     for InvalidTransactionIfNeglectedForTransactionIntent
 {
     fn from(
@@ -34,24 +36,22 @@ impl From<InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>>
             intent_hash: value.signable_id.into(),
             entities_which_would_fail_auth: value
                 .entities_which_would_fail_auth
-                .iter()
-                .map(|addr| (*addr).into())
-                .collect(),
+                .into_internal(),
         }
     }
 }
 
 impl From<InvalidTransactionIfNeglectedForTransactionIntent>
-    for InternalInvalidTransactionIfNeglected<InternalTransactionIntentHash>
+    for InternalInvalidTransactionIfNeglectedForTransactionIntent
 {
     fn from(value: InvalidTransactionIfNeglectedForTransactionIntent) -> Self {
         Self {
             signable_id: value.intent_hash.into_internal(),
             entities_which_would_fail_auth: value
                 .entities_which_would_fail_auth
-                .iter()
-                .map(|addr| addr.into_internal())
-                .collect(),
+                .into_internal(),
         }
     }
 }
+
+decl_conversion_tests_for!(InvalidTransactionIfNeglectedForTransactionIntent);

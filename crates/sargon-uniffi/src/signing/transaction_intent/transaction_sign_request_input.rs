@@ -70,3 +70,5 @@ pub fn new_transaction_sign_request_input_for_transaction_intent_sample_other(
     InternalTransactionSignRequestInputForTransactionIntent::sample_other()
         .into()
 }
+
+decl_conversion_tests_for!(TransactionSignRequestInputForTransactionIntent);

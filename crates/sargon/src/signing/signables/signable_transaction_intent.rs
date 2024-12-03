@@ -124,7 +124,12 @@ mod test {
 
         assert_eq!(
             signed_intent.clone().into_iter().collect_vec(),
-            signed_intent.intent_signatures.signatures.into_iter().map(|s| s.0).collect_vec()
+            signed_intent
+                .intent_signatures
+                .signatures
+                .into_iter()
+                .map(|s| s.0)
+                .collect_vec()
         )
     }
 }

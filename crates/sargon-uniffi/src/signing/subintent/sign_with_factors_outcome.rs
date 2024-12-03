@@ -1,8 +1,9 @@
 use crate::prelude::*;
+use sargon::SignWithFactorsOutcome as InternalSignWithFactorsOutcome;
 use sargon::SubintentHash as InternalSubintentHash;
 
 type InternalSignWithFactorsOutcomeForSubintent =
-    sargon::SignWithFactorsOutcome<InternalSubintentHash>;
+    InternalSignWithFactorsOutcome<InternalSubintentHash>;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum SignWithFactorsOutcomeForSubintent {
@@ -56,3 +57,5 @@ impl From<SignWithFactorsOutcomeForSubintent>
         }
     }
 }
+
+decl_conversion_tests_for!(SignWithFactorsOutcomeForSubintent);

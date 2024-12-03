@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignRequest<S: Signable> {
     pub factor_source_kind: FactorSourceKind,
 
@@ -58,6 +58,36 @@ impl<S: Signable> SignRequest<S> {
     #[allow(unused)]
     pub(crate) fn factor_source_kind(&self) -> FactorSourceKind {
         self.factor_source_kind
+    }
+}
+
+impl<S: Signable> HasSampleValues for SignRequest<S> {
+    fn sample() -> Self {
+        Self::new(
+            FactorSourceKind::sample(),
+            IndexMap::just((
+                FactorSourceIDFromHash::sample(),
+                IndexSet::from_iter(vec![
+                    TransactionSignRequestInput::sample(),
+                    TransactionSignRequestInput::sample_other(),
+                ]),
+            )),
+            IndexSet::new(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            FactorSourceKind::sample_other(),
+            IndexMap::just((
+                FactorSourceIDFromHash::sample(),
+                IndexSet::from_iter(vec![
+                    TransactionSignRequestInput::sample(),
+                    TransactionSignRequestInput::sample_other(),
+                ]),
+            )),
+            IndexSet::new(),
+        )
     }
 }
 

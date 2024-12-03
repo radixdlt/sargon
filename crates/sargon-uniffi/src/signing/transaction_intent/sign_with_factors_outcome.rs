@@ -60,3 +60,5 @@ impl From<SignWithFactorsOutcomeForTransactionIntent>
         }
     }
 }
+
+decl_conversion_tests_for!(SignWithFactorsOutcomeForTransactionIntent);

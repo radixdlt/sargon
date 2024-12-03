@@ -1,7 +1,8 @@
 use crate::prelude::*;
+use sargon::HDSignatureInput as InternalHDSignatureInput;
 use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 type InternalHDSignatureInputForTransactionIntent =
-    sargon::HDSignatureInput<InternalTransactionIntentHash>;
+    InternalHDSignatureInput<InternalTransactionIntentHash>;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HDSignatureInputForTransactionIntent {
@@ -43,3 +44,5 @@ impl From<HDSignatureInputForTransactionIntent>
         )
     }
 }
+
+decl_conversion_tests_for!(HDSignatureInputForTransactionIntent);

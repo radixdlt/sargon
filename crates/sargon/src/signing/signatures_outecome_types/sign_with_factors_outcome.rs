@@ -15,6 +15,16 @@ pub enum SignWithFactorsOutcome<ID: SignableID> {
     Neglected(NeglectedFactors),
 }
 
+impl<ID: SignableID> HasSampleValues for SignWithFactorsOutcome<ID> {
+    fn sample() -> Self {
+        Self::signed(SignResponse::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::user_skipped_factor(FactorSourceIDFromHash::sample_other())
+    }
+}
+
 impl<ID: SignableID> SignWithFactorsOutcome<ID> {
     #[allow(unused)]
     pub fn signed(produced_signatures: SignResponse<ID>) -> Self {

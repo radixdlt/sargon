@@ -1,7 +1,8 @@
 use crate::prelude::*;
+use sargon::HDSignatureInput as InternalHDSignatureInput;
 use sargon::SubintentHash as InternalSubintentHash;
 type InternalHDSignatureInputForSubintent =
-    sargon::HDSignatureInput<InternalSubintentHash>;
+    InternalHDSignatureInput<InternalSubintentHash>;
 
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HDSignatureInputForSubintent {
@@ -41,3 +42,5 @@ impl From<HDSignatureInputForSubintent>
         )
     }
 }
+
+decl_conversion_tests_for!(HDSignatureInputForSubintent);

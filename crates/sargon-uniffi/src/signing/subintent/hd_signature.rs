@@ -42,3 +42,5 @@ impl From<HdSignatureForSubintent> for InternalHdSignatureForSubintent {
         }
     }
 }
+
+decl_conversion_tests_for!(HdSignatureForSubintent);

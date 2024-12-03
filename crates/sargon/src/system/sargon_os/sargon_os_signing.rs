@@ -71,7 +71,7 @@ impl SargonOS {
                     .signatures_of_successful_transactions()
                     .iter()
                     .filter(|hd| hd.input.payload_id == payload_id)
-                    .map(|hd| { IntentSignature(hd.signature) }),
+                    .map(|hd| IntentSignature(hd.signature)),
             );
 
             signable.signed(

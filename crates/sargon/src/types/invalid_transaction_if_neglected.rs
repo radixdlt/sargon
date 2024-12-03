@@ -56,6 +56,19 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
     }
 }
 
+impl<ID: SignableID> HasSampleValues for InvalidTransactionIfNeglected<ID> {
+    fn sample() -> Self {
+        Self::new(ID::sample(), vec![AddressOfAccountOrPersona::sample()])
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            ID::sample_other(),
+            vec![AddressOfAccountOrPersona::sample_other()],
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

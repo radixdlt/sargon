@@ -2,6 +2,8 @@ use crate::prelude::*;
 use sargon::SignRequest as InternalSignRequest;
 use sargon::Subintent as InternalSubintent;
 
+type InternalSignRequestForSubintent = InternalSignRequest<InternalSubintent>;
+
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SignRequestForSubintent {
     pub factor_source_kind: FactorSourceKind,
@@ -20,13 +22,13 @@ pub struct SignRequestForSubintent {
 }
 
 impl SignRequestForSubintent {
-    pub fn into_internal(&self) -> InternalSignRequest<InternalSubintent> {
+    pub fn into_internal(&self) -> InternalSignRequestForSubintent {
         self.clone().into()
     }
 }
 
-impl From<InternalSignRequest<InternalSubintent>> for SignRequestForSubintent {
-    fn from(value: InternalSignRequest<InternalSubintent>) -> Self {
+impl From<InternalSignRequestForSubintent> for SignRequestForSubintent {
+    fn from(value: InternalSignRequestForSubintent) -> Self {
         Self {
             factor_source_kind: value.factor_source_kind.into(),
             per_factor_source: value
@@ -48,7 +50,7 @@ impl From<InternalSignRequest<InternalSubintent>> for SignRequestForSubintent {
     }
 }
 
-impl From<SignRequestForSubintent> for InternalSignRequest<InternalSubintent> {
+impl From<SignRequestForSubintent> for InternalSignRequestForSubintent {
     fn from(value: SignRequestForSubintent) -> Self {
         Self {
             factor_source_kind: value.factor_source_kind.into_internal(),
@@ -73,3 +75,5 @@ impl From<SignRequestForSubintent> for InternalSignRequest<InternalSubintent> {
         }
     }
 }
+
+decl_conversion_tests_for!(SignRequestForSubintent);

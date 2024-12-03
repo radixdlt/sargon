@@ -2,6 +2,9 @@ use crate::prelude::*;
 use sargon::SignRequest as InternalSignRequest;
 use sargon::TransactionIntent as InternalTransactionIntent;
 
+type InternalSignRequestForTransactionIntent =
+    InternalSignRequest<InternalTransactionIntent>;
+
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SignRequestForTransactionIntent {
     pub factor_source_kind: FactorSourceKind,
@@ -20,17 +23,15 @@ pub struct SignRequestForTransactionIntent {
 }
 
 impl SignRequestForTransactionIntent {
-    pub fn into_internal(
-        &self,
-    ) -> InternalSignRequest<InternalTransactionIntent> {
+    pub fn into_internal(&self) -> InternalSignRequestForTransactionIntent {
         self.clone().into()
     }
 }
 
-impl From<InternalSignRequest<InternalTransactionIntent>>
+impl From<InternalSignRequestForTransactionIntent>
     for SignRequestForTransactionIntent
 {
-    fn from(value: InternalSignRequest<InternalTransactionIntent>) -> Self {
+    fn from(value: InternalSignRequestForTransactionIntent) -> Self {
         Self {
             factor_source_kind: value.factor_source_kind.into(),
             per_factor_source: value
@@ -53,7 +54,7 @@ impl From<InternalSignRequest<InternalTransactionIntent>>
 }
 
 impl From<SignRequestForTransactionIntent>
-    for InternalSignRequest<InternalTransactionIntent>
+    for InternalSignRequestForTransactionIntent
 {
     fn from(value: SignRequestForTransactionIntent) -> Self {
         Self {
@@ -79,3 +80,5 @@ impl From<SignRequestForTransactionIntent>
         }
     }
 }
+
+decl_conversion_tests_for!(SignRequestForTransactionIntent);

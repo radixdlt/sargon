@@ -29,3 +29,31 @@ impl<ID: SignableID> SignResponse<ID> {
         )
     }
 }
+
+impl<ID: SignableID> HasSampleValues for SignResponse<ID> {
+    fn sample() -> Self {
+        let hd_signature = HDSignature::sample();
+        let factor_source_id = hd_signature
+            .input
+            .owned_factor_instance
+            .value
+            .factor_source_id;
+        Self::new(IndexMap::just((
+            factor_source_id,
+            IndexSet::just(hd_signature),
+        )))
+    }
+
+    fn sample_other() -> Self {
+        let hd_signature = HDSignature::sample_other();
+        let factor_source_id = hd_signature
+            .input
+            .owned_factor_instance
+            .value
+            .factor_source_id;
+        Self::new(IndexMap::just((
+            factor_source_id,
+            IndexSet::just(hd_signature),
+        )))
+    }
+}

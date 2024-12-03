@@ -2,6 +2,9 @@ use crate::prelude::*;
 use sargon::InvalidTransactionIfNeglected as InternalInvalidTransactionIfNeglected;
 use sargon::SubintentHash as InternalSubintentHash;
 
+type InternalInvalidTransactionIfNeglectedForSubintent =
+    InternalInvalidTransactionIfNeglected<InternalSubintentHash>;
+
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct InvalidTransactionIfNeglectedForSubintent {
     /// The subintent hash of the subintent which would be invalid if a
@@ -16,39 +19,35 @@ pub struct InvalidTransactionIfNeglectedForSubintent {
 impl InvalidTransactionIfNeglectedForSubintent {
     pub fn into_internal(
         &self,
-    ) -> InternalInvalidTransactionIfNeglected<InternalSubintentHash> {
+    ) -> InternalInvalidTransactionIfNeglectedForSubintent {
         self.clone().into()
     }
 }
 
-impl From<InternalInvalidTransactionIfNeglected<InternalSubintentHash>>
+impl From<InternalInvalidTransactionIfNeglectedForSubintent>
     for InvalidTransactionIfNeglectedForSubintent
 {
-    fn from(
-        value: InternalInvalidTransactionIfNeglected<InternalSubintentHash>,
-    ) -> Self {
+    fn from(value: InternalInvalidTransactionIfNeglectedForSubintent) -> Self {
         Self {
             subintent_hash: value.signable_id.into(),
             entities_which_would_fail_auth: value
                 .entities_which_would_fail_auth
-                .iter()
-                .map(|addr| (*addr).into())
-                .collect(),
+                .into_type(),
         }
     }
 }
 
 impl From<InvalidTransactionIfNeglectedForSubintent>
-    for InternalInvalidTransactionIfNeglected<InternalSubintentHash>
+    for InternalInvalidTransactionIfNeglectedForSubintent
 {
     fn from(value: InvalidTransactionIfNeglectedForSubintent) -> Self {
         Self {
             signable_id: value.subintent_hash.into_internal(),
             entities_which_would_fail_auth: value
                 .entities_which_would_fail_auth
-                .iter()
-                .map(|addr| addr.into_internal())
-                .collect(),
+                .into_internal(),
         }
     }
 }
+
+decl_conversion_tests_for!(InvalidTransactionIfNeglectedForSubintent);

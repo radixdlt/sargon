@@ -2,9 +2,11 @@ use crate::prelude::*;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 use sargon::IndexMap;
 use sargon::IndexSet;
+use sargon::SignResponse as InternalSignResponse;
 use sargon::SubintentHash as InternalSubintentHash;
 
-type InternalSignResponse = sargon::SignResponse<InternalSubintentHash>;
+type InternalSignResponseForSubintent =
+    InternalSignResponse<InternalSubintentHash>;
 
 /// The response of a batch signing request, either a PolyFactor or MonoFactor signing
 /// request, matters not, because the goal is to have signed all transactions with
@@ -17,13 +19,13 @@ pub struct SignResponseForSubintent {
 }
 
 impl SignResponseForSubintent {
-    pub fn into_internal(&self) -> InternalSignResponse {
+    pub fn into_internal(&self) -> InternalSignResponseForSubintent {
         self.clone().into()
     }
 }
 
-impl From<InternalSignResponse> for SignResponseForSubintent {
-    fn from(value: InternalSignResponse) -> Self {
+impl From<InternalSignResponseForSubintent> for SignResponseForSubintent {
+    fn from(value: InternalSignResponseForSubintent) -> Self {
         Self {
             signatures: value
                 .signatures
@@ -39,7 +41,7 @@ impl From<InternalSignResponse> for SignResponseForSubintent {
     }
 }
 
-impl From<SignResponseForSubintent> for InternalSignResponse {
+impl From<SignResponseForSubintent> for InternalSignResponseForSubintent {
     fn from(value: SignResponseForSubintent) -> Self {
         Self {
             signatures: IndexMap::from_iter(value.signatures.into_iter().map(
@@ -55,3 +57,5 @@ impl From<SignResponseForSubintent> for InternalSignResponse {
         }
     }
 }
+
+decl_conversion_tests_for!(SignResponseForSubintent);
