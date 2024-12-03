@@ -1,19 +1,5 @@
 import SargonUniFFI
 
-// extension FactorSourceValidationStatus {
-//	public var factorSourceID: FactorSourceID {
-//		factorSourceId()
-//	}
-//
-////	public var reasonIfInvalid: SecurityShieldBuilderInvalidReason? {
-////		self.reasonIfInvalid()
-////	}
-//
-//	public var role: RoleKind {
-//		role()
-//	}
-// }
-
 extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
 
@@ -27,7 +13,8 @@ extension SecurityShieldBuilder {
 	}
 
 	public var threshold: UInt8 {
-		getPrimaryThreshold()
+		get { getPrimaryThreshold() }
+		set { setThreshold(threshold: newValue) }
 	}
 
 	public var primaryRoleThresholdFactors: [Factor] {

@@ -11,7 +11,7 @@ pub struct FactorSourceValidationStatus {
 
 #[derive(Clone, Debug, PartialEq, uniffi::Enum)]
 pub enum FactorSourceValidationStatusReasonIfInvalid {
-    BasicViolation,
+    BasicViolation(String),
     NonBasic(SecurityShieldBuilderInvalidReason),
 }
 
@@ -24,10 +24,10 @@ impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
         > = {
             match val.validation {
                 Ok(_) => None,
-                Err(sargon::RoleBuilderValidation::BasicViolation(_)) => Some(
-                    FactorSourceValidationStatusReasonIfInvalid::BasicViolation, // FactorSourceValidationStatusReasonIfInvalid::BasicViolation(
-                                                                                 //     format!("{:?}", b),
-                                                                                 // ),
+                Err(sargon::RoleBuilderValidation::BasicViolation(b)) => Some(
+                    FactorSourceValidationStatusReasonIfInvalid::BasicViolation(
+                        format!("{:?}", b),
+                    ),
                 ),
                 Err(sargon::RoleBuilderValidation::ForeverInvalid(v)) => v
                     .as_shield_validation()

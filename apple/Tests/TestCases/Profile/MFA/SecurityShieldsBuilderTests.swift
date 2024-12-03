@@ -4,6 +4,7 @@ import Sargon
 import SargonUniFFI
 import Testing
 
+// MARK: - ShieldTests
 @Suite("ShieldBuilder")
 struct ShieldTests {
 	@Test("name")
@@ -14,23 +15,21 @@ struct ShieldTests {
 		#expect(builder.name == "S.H.I.E.L.D")
 	}
 
-//	@Test("threshold")
-//	func threshold() {
-//		let builder = SecurityShieldBuilder()
-//		#expect(builder.threshold == 0)
-//		#expect(throws: CommonError.RoleMustHaveAtLeastOneFactor) {
-//			try builder.setThreshold(threshold: 0)
-//		}
-//	}
-//
-//	@Test("days")
-//	func days() {
-//		let builder = SecurityShieldBuilder()
-//		#expect(builder.numberOfDaysUntilAutoConfirm == 14)
-//		#expect(throws: CommonError.NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero) {
-//			try builder.setNumberOfDaysUntilAutoConfirm(numberOfDays: 0)
-//		}
-//	}
+	@Test("threshold")
+	func threshold() {
+		let builder = SecurityShieldBuilder()
+		#expect(builder.threshold == 0)
+		builder.setThreshold(threshold: 42)
+		#expect(builder.threshold == 42)
+	}
+
+	@Test("days")
+	func days() {
+		let builder = SecurityShieldBuilder()
+		#expect(builder.numberOfDaysUntilAutoConfirm == 14)
+		builder.setNumberOfDaysUntilAutoConfirm(numberOfDays: 237)
+		#expect(builder.numberOfDaysUntilAutoConfirm == 237)
+	}
 
 	@Test("empty primary threshold")
 	func emptyThresholdFactors() {
@@ -56,9 +55,78 @@ struct ShieldTests {
 		#expect(builder.confirmationRoleFactors == [])
 	}
 
-//	@Test("primary override validation status trustedContact")
-//	func primValidationStatusTrustedContact() throws {
-//		let builder = SecurityShieldBuilder()
-//		try #expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).map(\.validationError) == [CommonError.PrimaryCannotContainTrustedContact])
-//	}
+	@Test("primary override validation status trustedContact")
+	func primValidationStatusTrustedContact() {
+		let builder = SecurityShieldBuilder()
+		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderInvalidReason.PrimaryCannotContainTrustedContact)])
+	}
+
+	@Test("Complete")
+	func complete() throws {
+		let builder = SecurityShieldBuilder()
+		builder.setName(name: "S.H.I.E.L.D.")
+		builder.numberOfDaysUntilAutoConfirm = 42
+
+		#expect(builder.validate() == .PrimaryRoleMustHaveAtLeastOneFactor)
+
+		// Primary
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
+		builder.threshold = 1
+		builder.addFactorSourceToPrimaryOverride(factorSourceId: .sampleArculus)
+		builder.addFactorSourceToPrimaryOverride(factorSourceId: .sampleArculusOther)
+
+		// Recovery
+		builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleLedger)
+		builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleLedgerOther)
+
+		// Confirmation
+		builder.addFactorSourceToConfirmationOverride(factorSourceId: .sampleDevice)
+
+		builder.removeFactorFromPrimary(factorSourceId: .sampleArculusOther)
+		builder.removeFactorFromRecovery(factorSourceId: .sampleLedgerOther)
+
+		// Validate
+		#expect(builder.validate() == nil)
+
+		// Build
+		let shield0 = try builder.build()
+		let shield = try builder.build()
+		#expect(shield0 == shield)
+
+		// Assert
+		#expect(shield.metadata.displayName == "S.H.I.E.L.D.")
+		#expect(shield.matrixOfFactors.primaryRole.overrideFactors == [.sampleArculus])
+		#expect(shield.matrixOfFactors.primaryRole.thresholdFactors == [.sampleDevice])
+
+		#expect(shield.matrixOfFactors.recoveryRole.overrideFactors == [.sampleLedger])
+		#expect(shield.matrixOfFactors.recoveryRole.thresholdFactors == [])
+
+		#expect(shield.matrixOfFactors.confirmationRole.overrideFactors == [.sampleDevice])
+		#expect(shield.matrixOfFactors.confirmationRole.thresholdFactors == [])
+	}
 }
+
+#if DEBUG
+extension FactorSourceID {
+	public static let sampleDevice = DeviceFactorSource.sample.asGeneral.id
+	public static let sampleDeviceOther = DeviceFactorSource.sampleOther.asGeneral.id
+
+	public static let sampleLedger = LedgerHardwareWalletFactorSource.sample.asGeneral.id
+	public static let sampleLedgerOther = LedgerHardwareWalletFactorSource.sampleOther.asGeneral.id
+
+	public static let sampleArculus = ArculusCardFactorSource.sample.asGeneral.id
+	public static let sampleArculusOther = ArculusCardFactorSource.sampleOther.asGeneral.id
+
+	public static let samplePassword = PasswordFactorSource.sample.asGeneral.id
+	public static let samplePasswordOther = PasswordFactorSource.sampleOther.asGeneral.id
+
+	public static let sampleOffDeviceMnemonic = OffDeviceMnemonicFactorSource.sample.asGeneral.id
+	public static let sampleOffDeviceMnemonicOther = OffDeviceMnemonicFactorSource.sampleOther.asGeneral.id
+
+	public static let sampleTrustedContact = TrustedContactFactorSource.sample.asGeneral.id
+	public static let sampleTrustedContactOther = TrustedContactFactorSource.sampleOther.asGeneral.id
+
+	public static let sampleSecurityQuestions = SecurityQuestionsNotProductionReadyFactorSource.sample.asGeneral.id
+	public static let sampleSecurityQuestionsOther = SecurityQuestionsNotProductionReadyFactorSource.sampleOther.asGeneral.id
+}
+#endif
