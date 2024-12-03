@@ -15,7 +15,7 @@ type InternalSignResponseForSubintent =
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SignResponseForSubintent {
     pub signatures:
-        HashMap<FactorSourceIDFromHash, Vec<HdSignatureForSubintent>>,
+        HashMap<FactorSourceIDFromHash, Vec<HDSignatureOfSubintentHash>>,
 }
 
 impl SignResponseForSubintent {
