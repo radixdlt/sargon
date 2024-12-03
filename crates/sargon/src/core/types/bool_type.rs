@@ -44,6 +44,12 @@ macro_rules! decl_bool_type {
                 $name(value)
             }
         }
+
+        impl From<$name> for bool {
+            fn from(value: $name) -> bool {
+                value.0
+            }
+        }
     };
 }
 

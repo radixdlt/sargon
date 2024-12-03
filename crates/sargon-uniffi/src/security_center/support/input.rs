@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::CheckSecurityProblemsInput as InternalCheckSecurityProblemsInput;
 use sargon::IsCloudProfileSyncEnabled;
 
-#[derive(Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record, InternalConversion)]
 pub struct CheckSecurityProblemsInput {
     /// Whether the cloud profile sync is enabled.
     pub is_cloud_profile_sync_enabled: bool,
@@ -20,44 +20,4 @@ pub struct CheckSecurityProblemsInput {
 
     /// Information about the latest backup made manually.
     pub last_manual_backup: Option<BackupResult>,
-}
-
-impl CheckSecurityProblemsInput {
-    pub fn into_internal(&self) -> InternalCheckSecurityProblemsInput {
-        self.clone().into()
-    }
-}
-
-impl From<InternalCheckSecurityProblemsInput> for CheckSecurityProblemsInput {
-    fn from(internal: InternalCheckSecurityProblemsInput) -> Self {
-        Self {
-            is_cloud_profile_sync_enabled: internal
-                .is_cloud_profile_sync_enabled
-                .0,
-            unrecoverable_entities: internal.unrecoverable_entities.into(),
-            without_control_entities: internal.without_control_entities.into(),
-            last_cloud_backup: internal
-                .last_cloud_backup
-                .map(BackupResult::from),
-            last_manual_backup: internal
-                .last_manual_backup
-                .map(BackupResult::from),
-        }
-    }
-}
-
-impl From<CheckSecurityProblemsInput> for InternalCheckSecurityProblemsInput {
-    fn from(input: CheckSecurityProblemsInput) -> Self {
-        InternalCheckSecurityProblemsInput {
-            is_cloud_profile_sync_enabled: input
-                .is_cloud_profile_sync_enabled
-                .into(),
-            unrecoverable_entities: input.unrecoverable_entities.into(),
-            without_control_entities: input.without_control_entities.into(),
-            last_cloud_backup: input.last_cloud_backup.map(BackupResult::into),
-            last_manual_backup: input
-                .last_manual_backup
-                .map(BackupResult::into),
-        }
-    }
 }
