@@ -12,10 +12,18 @@ pub(crate) struct PetitionForFactors<ID: SignableID> {
     state: RwLock<PetitionForFactorsState<ID>>,
 }
 
-// TODO delete
 impl<ID: SignableID> Clone for PetitionForFactors<ID> {
     fn clone(&self) -> Self {
-        self.cloned()
+        Self {
+            factor_list_kind: self.factor_list_kind,
+            input: self.input.clone(),
+            state: RwLock::new(
+                self.state
+                    .read()
+                    .expect("PetitionForFactors lock should not have been poisoned")
+                    .cloned(),
+            ),
+        }
     }
 }
 
@@ -246,19 +254,6 @@ impl<ID: SignableID> PetitionForFactors<ID> {
             return PetitionForFactorsStatus::Finished(finished_state);
         }
         PetitionForFactorsStatus::InProgress
-    }
-
-    pub(super) fn cloned(&self) -> Self {
-        Self {
-            factor_list_kind: self.factor_list_kind,
-            input: self.input.clone(),
-            state: RwLock::new(
-                self.state
-                    .read()
-                    .expect("PetitionForFactors lock should not have been poisoned")
-                    .cloned(),
-            ),
-        }
     }
 
     #[allow(unused)]

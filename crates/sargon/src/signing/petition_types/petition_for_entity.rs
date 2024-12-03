@@ -21,7 +21,12 @@ pub(crate) struct PetitionForEntity<ID: SignableID> {
 
 impl<ID: SignableID> Clone for PetitionForEntity<ID> {
     fn clone(&self) -> Self {
-        self.cloned()
+        Self {
+            entity: self.entity,
+            payload_id: self.payload_id.clone(),
+            threshold_factors: self.all_threshold_factors().map(RwLock::new),
+            override_factors: self.all_override_factors().map(RwLock::new),
+        }
     }
 }
 
@@ -331,15 +336,6 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                 .expect("PetitionForEntity lock should not have been poisoned.")
                 .clone()
         })
-    }
-
-    pub(super) fn cloned(&self) -> Self {
-        Self {
-            entity: self.entity,
-            payload_id: self.payload_id.clone(),
-            threshold_factors: self.all_threshold_factors().map(RwLock::new),
-            override_factors: self.all_override_factors().map(RwLock::new),
-        }
     }
 }
 

@@ -14,7 +14,15 @@ pub(crate) struct PetitionForTransaction<S: Signable> {
 
 impl<S: Signable> Clone for PetitionForTransaction<S> {
     fn clone(&self) -> Self {
-        self.cloned()
+        Self {
+            signable: self.signable.clone(),
+            for_entities: RwLock::new(
+                self.for_entities
+                    .read()
+                    .expect("PetitionForTransaction lock should not have been poisoned.")
+                    .clone(),
+            ),
+        }
     }
 }
 
@@ -233,18 +241,6 @@ impl<S: Signable> PetitionForTransaction<S> {
 
         format!("PetitionForTransaction(for_entities: [{}])", entities)
     }
-
-    fn cloned(&self) -> Self {
-        Self {
-            signable: self.signable.clone(),
-            for_entities: RwLock::new(
-                self.for_entities
-                    .read()
-                    .expect("PetitionForTransaction lock should not have been poisoned.")
-                    .clone(),
-            ),
-        }
-    }
 }
 
 impl<S: Signable> HasSampleValues for PetitionForTransaction<S> {
@@ -299,7 +295,6 @@ impl<S: Signable> HasSampleValues for PetitionForTransaction<S> {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

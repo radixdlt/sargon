@@ -27,7 +27,17 @@ pub(crate) struct Petitions<S: Signable> {
 
 impl<S: Signable> Clone for Petitions<S> {
     fn clone(&self) -> Self {
-        self.cloned()
+        Self {
+            factor_source_to_signable_id: self
+                .factor_source_to_signable_id
+                .clone(),
+            txid_to_petition: RwLock::new(
+                self.txid_to_petition
+                    .read()
+                    .expect("Petitions lock should not have been poisoned.")
+                    .clone(),
+            ),
+        }
     }
 }
 
@@ -238,20 +248,6 @@ impl<S: Signable> Petitions<S> {
             .iter()
             .map(|p| format!("Petitions({:#?}: {:#?})", p.0, p.1))
             .join(" + ")
-    }
-
-    fn cloned(&self) -> Self {
-        Self {
-            factor_source_to_signable_id: self
-                .factor_source_to_signable_id
-                .clone(),
-            txid_to_petition: RwLock::new(
-                self.txid_to_petition
-                    .read()
-                    .expect("Petitions lock should not have been poisoned.")
-                    .clone(),
-            ),
-        }
     }
 }
 
