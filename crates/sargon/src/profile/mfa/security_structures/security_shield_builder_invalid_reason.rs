@@ -180,7 +180,10 @@ impl AsShieldBuilderViolation for (RoleKind, NotYetValidReason) {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+// #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+
+#[repr(u32)]
+#[derive(Clone, Debug, thiserror::Error, PartialEq)]
 pub enum SecurityShieldBuilderInvalidReason {
     #[error("Shield name is invalid")]
     ShieldNameInvalid,
