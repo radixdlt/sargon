@@ -133,6 +133,22 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_name(&name));
     }
 
+    pub fn remove_factor(&self, factor_source_id: FactorSourceID) {
+        self.set(|builder| {
+            builder.remove_factor(factor_source_id.clone().into())
+        })
+    }
+
+    pub fn set_threshold(&self, threshold: u8) {
+        self.set(|builder| builder.set_threshold(threshold))
+    }
+
+    pub fn set_number_of_days_until_auto_confirm(&self, number_of_days: u16) {
+        self.set(|builder| {
+            builder.set_number_of_days_until_auto_confirm(number_of_days)
+        })
+    }
+
     /// Adds the factor source to the primary role threshold list.
     pub fn add_factor_source_to_primary_threshold(
         &self,
@@ -153,22 +169,6 @@ impl SecurityShieldBuilder {
             builder.add_factor_source_to_primary_override(
                 factor_source_id.clone().into(),
             )
-        })
-    }
-
-    pub fn remove_factor(&self, factor_source_id: FactorSourceID) {
-        self.set(|builder| {
-            builder.remove_factor(factor_source_id.clone().into())
-        })
-    }
-
-    pub fn set_threshold(&self, threshold: u8) {
-        self.set(|builder| builder.set_threshold(threshold))
-    }
-
-    pub fn set_number_of_days_until_auto_confirm(&self, number_of_days: u16) {
-        self.set(|builder| {
-            builder.set_number_of_days_until_auto_confirm(number_of_days)
         })
     }
 
@@ -197,51 +197,6 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn addition_of_factor_source_of_kind_to_confirmation_is_valid_or_can_be(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.get(|builder|
-            builder.addition_of_factor_source_of_kind_to_confirmation_is_valid_or_can_be(
-                factor_source_kind.clone().into(),
-            )
-        )
-    }
-
-    pub fn addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.get(|builder|
-            builder.addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
-                factor_source_kind.clone().into(),
-            )
-        )
-    }
-
-    pub fn addition_of_factor_source_of_kind_to_recovery_is_valid_or_can_be(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.get(|builder|
-            builder.addition_of_factor_source_of_kind_to_recovery_is_valid_or_can_be(
-                factor_source_kind.clone().into(),
-            )
-        )
-    }
-
-    pub fn addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.get(|builder| {
-            builder
-                .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
-                    factor_source_kind.clone().into(),
-                )
-        })
-    }
-
     pub fn addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -281,6 +236,51 @@ impl SecurityShieldBuilder {
     ) -> bool {
         self.get(|builder|
             builder.addition_of_factor_source_of_kind_to_primary_override_is_valid_or_can_be(
+                factor_source_kind.clone().into(),
+            )
+        )
+    }
+
+    pub fn addition_of_factor_source_of_kind_to_recovery_is_valid_or_can_be(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self.get(|builder|
+            builder.addition_of_factor_source_of_kind_to_recovery_is_valid_or_can_be(
+                factor_source_kind.clone().into(),
+            )
+        )
+    }
+
+    pub fn addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self.get(|builder| {
+            builder
+                .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+                    factor_source_kind.clone().into(),
+                )
+        })
+    }
+
+    pub fn addition_of_factor_source_of_kind_to_confirmation_is_valid_or_can_be(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self.get(|builder|
+            builder.addition_of_factor_source_of_kind_to_confirmation_is_valid_or_can_be(
+                factor_source_kind.clone().into(),
+            )
+        )
+    }
+
+    pub fn addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        self.get(|builder|
+            builder.addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
                 factor_source_kind.clone().into(),
             )
         )
@@ -423,7 +423,6 @@ mod tests {
         assert_eq!(sut.get_number_of_days_until_auto_confirm(), 14);
         sut.set_number_of_days_until_auto_confirm(u16::MAX);
         assert_eq!(sut.get_number_of_days_until_auto_confirm(), u16::MAX);
-        /*
         // Primary
         let sim_prim =
             sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
@@ -436,19 +435,18 @@ mod tests {
             ]);
 
         let sim_kind_prim = sut
-            .validation_for_addition_of_factor_source_of_kind_to_primary_override(
+            .addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
                 FactorSourceKind::Device,
             );
 
         let sim_kind_prim_threshold = sut
-            .validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
+            .addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
                 FactorSourceKind::Device,
             );
 
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
-        )
-        .unwrap();
+        );
         assert_eq!(
             sut.get_primary_threshold_factors(),
             vec![FactorSourceID::sample_device()]
@@ -457,12 +455,10 @@ mod tests {
         assert_eq!(sut.get_primary_threshold(), 1);
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_arculus(),
-        )
-        .unwrap();
+        );
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_arculus_other(),
-        )
-        .unwrap();
+        );
 
         assert_eq!(
             sut.get_primary_override_factors(),
@@ -479,18 +475,16 @@ mod tests {
             ]);
 
         let sim_kind_rec = sut
-            .validation_for_addition_of_factor_source_of_kind_to_recovery_override(
+            .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
                 FactorSourceKind::ArculusCard,
             );
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
-        )
-        .unwrap();
+        );
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger_other(),
-        )
-        .unwrap();
+        );
 
         assert_eq!(
             sut.get_recovery_factors(),
@@ -507,14 +501,13 @@ mod tests {
             ]);
 
         let sim_kind_conf = sut
-            .validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
+            .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
                 FactorSourceKind::ArculusCard,
             );
 
         sut.add_factor_source_to_confirmation_override(
             FactorSourceID::sample_device(),
-        )
-        .unwrap();
+        );
 
         assert_eq!(
             sut.get_confirmation_factors(),
@@ -551,67 +544,55 @@ mod tests {
 
         assert_ne!(
             sim_kind_prim,
-            sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
+            sut.addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
                 FactorSourceKind::Device,
             )
         );
 
         assert_ne!(
             sim_kind_prim_threshold,
-            sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
+            sut.addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
                 FactorSourceKind::Device,
             )
         );
 
         assert_eq!(
             sim_kind_rec,
-            sut.validation_for_addition_of_factor_source_of_kind_to_recovery_override(
+            sut.addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
                 FactorSourceKind::ArculusCard,
             )
         );
 
         assert_eq!(
             sim_kind_conf,
-            sut.validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
+            sut.addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
                 FactorSourceKind::ArculusCard,
             )
         );
 
-        sut.remove_factor(FactorSourceID::sample_arculus_other())
-            .unwrap();
-        sut.remove_factor(FactorSourceID::sample_ledger_other())
-            .unwrap();
+        sut.remove_factor(FactorSourceID::sample_arculus_other());
+        sut.remove_factor(FactorSourceID::sample_ledger_other());
 
         let v0 = sut.validate();
         let v1 = sut.validate(); // can call validate many times!
         assert_eq!(v0, v1);
 
-        let shield = sut.build().unwrap(); // can build only once! (but can build after `validate`)
-        assert_eq!(shield.wrapped.metadata.display_name.value, "S.H.I.E.L.D.");
+        let shield0 = sut.build().unwrap();
+        let shield = sut.build().unwrap(); // can call build many times!
+        assert_eq!(shield0, shield);
+
+        assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
-            shield
-                .wrapped
-                .matrix_of_factors
-                .primary()
-                .get_override_factors(),
-            &vec![FactorSourceID::sample_arculus().into()]
+            shield.matrix_of_factors.primary_role.override_factors,
+            vec![FactorSourceID::sample_arculus().into()]
         );
         assert_eq!(
-            shield
-                .wrapped
-                .matrix_of_factors
-                .recovery()
-                .get_override_factors(),
-            &vec![FactorSourceID::sample_ledger().into()]
+            shield.matrix_of_factors.recovery_role.override_factors,
+            vec![FactorSourceID::sample_ledger().into()]
         );
         assert_eq!(
-            shield
-                .wrapped
-                .matrix_of_factors
-                .confirmation()
-                .get_override_factors(),
-            &vec![FactorSourceID::sample_device().into()]
+            shield.matrix_of_factors.confirmation_role.override_factors,
+            vec![FactorSourceID::sample_device().into()]
         );
-         */
     }
 }

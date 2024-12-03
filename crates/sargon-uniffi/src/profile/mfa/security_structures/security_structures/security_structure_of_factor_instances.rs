@@ -27,4 +27,7 @@ pub struct SecurityStructureOfFactorSourceIDs {
     pub matrix_of_factors: MatrixOfFactorSourceIDs,
 }
 
+
+delegate_display_debug_into!(SecurityStructureOfFactorSourceIDs, InternalSecurityStructureOfFactorSourceIDs);
+
 pub type MatrixOfFactorSourceIds = MatrixOfFactorSourceIDs;
