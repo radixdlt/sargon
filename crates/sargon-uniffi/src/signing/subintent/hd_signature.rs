@@ -4,7 +4,7 @@ use sargon::SubintentHash as InternalSubintentHash;
 type InternalHdSignatureForSubintent =
     sargon::HDSignature<InternalSubintentHash>;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HdSignatureForSubintent {
     /// The input used to produce this `HdSignatureForSubintent`
     pub input: HDSignatureInputForSubintent,
@@ -18,29 +18,3 @@ pub struct HdSignatureForSubintent {
     /// was derived at `owned_hd_factor_instance.derivation_path`.
     pub signature: SignatureWithPublicKey,
 }
-
-impl HdSignatureForSubintent {
-    pub fn into_internal(&self) -> InternalHdSignatureForSubintent {
-        self.clone().into()
-    }
-}
-
-impl From<InternalHdSignatureForSubintent> for HdSignatureForSubintent {
-    fn from(value: InternalHdSignatureForSubintent) -> Self {
-        Self {
-            input: value.input.into(),
-            signature: value.signature.into(),
-        }
-    }
-}
-
-impl From<HdSignatureForSubintent> for InternalHdSignatureForSubintent {
-    fn from(value: HdSignatureForSubintent) -> Self {
-        Self {
-            input: value.input.into_internal(),
-            signature: value.signature.into_internal(),
-        }
-    }
-}
-
-decl_conversion_tests_for!(HdSignatureForSubintent);

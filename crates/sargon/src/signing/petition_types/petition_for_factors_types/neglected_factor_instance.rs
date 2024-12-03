@@ -67,6 +67,21 @@ pub(crate) type NeglectedFactor =
 pub type NeglectedFactors =
     AbstractNeglectedFactor<IndexSet<FactorSourceIDFromHash>>;
 
+impl HasSampleValues for NeglectedFactors {
+    fn sample() -> Self {
+        Self::new(
+            NeglectFactorReason::UserExplicitlySkipped,
+            IndexSet::just(FactorSourceIDFromHash::sample()),
+        )
+    }
+    fn sample_other() -> Self {
+        Self::new(
+            NeglectFactorReason::Failure,
+            IndexSet::just(FactorSourceIDFromHash::sample_other()),
+        )
+    }
+}
+
 /// A HierarchicalDeterministicFactorInstance which was rejected, with the reason why (skipped/failed)
 pub(crate) type NeglectedFactorInstance =
     AbstractNeglectedFactor<HierarchicalDeterministicFactorInstance>;

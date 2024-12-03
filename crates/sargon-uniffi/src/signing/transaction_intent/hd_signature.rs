@@ -5,7 +5,7 @@ use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 type InternalHdSignatureForTransactionIntent =
     InternalHDSignature<InternalTransactionIntentHash>;
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct HdSignatureForTransactionIntent {
     /// The input used to produce this `HdSignatureForTransactionIntent`
     pub input: HDSignatureInputForTransactionIntent,
@@ -19,33 +19,3 @@ pub struct HdSignatureForTransactionIntent {
     /// was derived at `owned_hd_factor_instance.derivation_path`.
     pub signature: SignatureWithPublicKey,
 }
-
-impl HdSignatureForTransactionIntent {
-    pub fn into_internal(&self) -> InternalHdSignatureForTransactionIntent {
-        self.clone().into()
-    }
-}
-
-impl From<InternalHdSignatureForTransactionIntent>
-    for HdSignatureForTransactionIntent
-{
-    fn from(value: InternalHdSignatureForTransactionIntent) -> Self {
-        Self {
-            input: value.input.into(),
-            signature: value.signature.into(),
-        }
-    }
-}
-
-impl From<HdSignatureForTransactionIntent>
-    for InternalHdSignatureForTransactionIntent
-{
-    fn from(value: HdSignatureForTransactionIntent) -> Self {
-        Self {
-            input: value.input.into_internal(),
-            signature: value.signature.into_internal(),
-        }
-    }
-}
-
-decl_conversion_tests_for!(HdSignatureForTransactionIntent);
