@@ -439,25 +439,25 @@ mod tests {
         sut.set_number_of_days_until_auto_confirm(u16::MAX);
         assert_eq!(sut.get_number_of_days_until_auto_confirm(), u16::MAX);
         // Primary
-        // let sim_prim =
-        //     sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
-        //         FactorSourceID::sample_arculus(),
-        //     ]);
+        let sim_prim =
+            sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
+                FactorSourceID::sample_arculus(),
+            ]);
 
-        // let sim_prim_threshold = sut
-        //     .validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
-        //         FactorSourceID::sample_arculus(),
-        //     ]);
+        let sim_prim_threshold = sut
+            .validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
+                FactorSourceID::sample_arculus(),
+            ]);
 
-        // let sim_kind_prim = sut
-        //     .addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
-        //         FactorSourceKind::Device,
-        //     );
+        let sim_kind_prim = sut
+            .addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
+                FactorSourceKind::Device,
+            );
 
-        // let sim_kind_prim_threshold = sut
-        //     .addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
-        //         FactorSourceKind::Device,
-        //     );
+        let sim_kind_prim_threshold = sut
+            .addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
+                FactorSourceKind::Device,
+            );
 
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
@@ -484,16 +484,16 @@ mod tests {
         );
 
         // Recovery
-        // let sim_rec =
-        //     sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
-        //         FactorSourceID::sample_ledger(),
-        //     ]);
+        let sim_rec =
+            sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
+                FactorSourceID::sample_ledger(),
+            ]);
 
-        // let sim_kind_rec = sut
-        //     .clone()
-        //     .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
-        //         FactorSourceKind::ArculusCard,
-        //     );
+        let sim_kind_rec = sut
+            .clone()
+            .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+                FactorSourceKind::ArculusCard,
+            );
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -511,16 +511,16 @@ mod tests {
         );
 
         // Confirmation
-        // let sim_conf = sut
-        //     .validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
-        //         FactorSourceID::sample_device(),
-        //     ]);
+        let sim_conf = sut
+            .validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
+                FactorSourceID::sample_device(),
+            ]);
 
-        // let sim_kind_conf = sut
-        //     .clone()
-        //     .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
-        //         FactorSourceKind::ArculusCard,
-        //     );
+        let sim_kind_conf = sut
+            .clone()
+            .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+                FactorSourceKind::ArculusCard,
+            );
 
         sut.add_factor_source_to_confirmation_override(
             FactorSourceID::sample_device(),
@@ -530,66 +530,63 @@ mod tests {
             sut.get_confirmation_factors(),
             vec![FactorSourceID::sample_device(),]
         );
-        /*
 
-        Reintroduce these asserts when we reintroduce the field `reason_if_invalid` inside `FactorSourceValidationStatus`
+        assert_ne!(
+            sim_prim,
+            sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
+                FactorSourceID::sample_arculus(),
+            ])
+        );
 
-                assert_ne!(
-                    sim_prim,
-                    sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
-                        FactorSourceID::sample_arculus(),
-                    ])
-                );
+        assert_ne!(
+            sim_prim_threshold,
+            sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
+                FactorSourceID::sample_arculus()
+            ])
+        );
 
-                assert_ne!(
-                    sim_prim_threshold,
-                    sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
-                        FactorSourceID::sample_arculus()
-                    ])
-                );
+        assert_ne!(
+            sim_rec,
+            sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
+                FactorSourceID::sample_ledger(),
+            ])
+        );
 
-                assert_ne!(
-                    sim_rec,
-                    sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
-                        FactorSourceID::sample_ledger(),
-                    ])
-                );
+        assert_ne!(
+            sim_conf,
+            sut.validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
+                FactorSourceID::sample_device(),
+            ])
+        );
 
-                assert_ne!(
-                    sim_conf,
-                    sut.validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
-                        FactorSourceID::sample_device(),
-                    ])
-                );
+        assert_ne!(
+            sim_kind_prim,
+            sut.addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
+                FactorSourceKind::Device,
+            )
+        );
 
-                assert_ne!(
-                    sim_kind_prim,
-                    sut.addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
-                        FactorSourceKind::Device,
-                    )
-                );
+        assert_ne!(
+            sim_kind_prim_threshold,
+            sut.addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
+                FactorSourceKind::Device,
+            )
+        );
 
-                assert_ne!(
-                    sim_kind_prim_threshold,
-                    sut.addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
-                        FactorSourceKind::Device,
-                    )
-                );
+        assert_eq!(
+            sim_kind_rec,
+            sut.addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+                FactorSourceKind::ArculusCard,
+            )
+        );
 
-                assert_eq!(
-                    sim_kind_rec,
-                    sut.addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
-                        FactorSourceKind::ArculusCard,
-                    )
-                );
+        assert_eq!(
+            sim_kind_conf,
+            sut.addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+                FactorSourceKind::ArculusCard,
+            )
+        );
 
-                assert_eq!(
-                    sim_kind_conf,
-                    sut.addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
-                        FactorSourceKind::ArculusCard,
-                    )
-                );
-         */
         sut.remove_factor_from_all_roles(
             FactorSourceID::sample_arculus_other(),
         );
