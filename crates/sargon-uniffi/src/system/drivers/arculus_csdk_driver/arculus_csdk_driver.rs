@@ -12,6 +12,14 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn create_wallet_seed_request(&self, wallet: ArculusWalletPointer, word_count: u8) -> Result<BagOfBytes>;
     fn create_wallet_seed_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
+    fn seed_phrase_from_mnemonic_sentence(&self, wallet: ArculusWalletPointer, mnemonic_sentence: BagOfBytes, mnemonic_sentence_len: u8, passphrase: Option<BagOfBytes>, passphrase_len: u8) -> Result<BagOfBytes>;
+
+    fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, word_count: u8) -> Result<BagOfBytes>;
+    fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
+
+    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes>;
+    fn finish_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
+
     fn reset_wallet_request(&self, wallet: ArculusWalletPointer,) -> Result<BagOfBytes>;
     fn reset_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
@@ -28,7 +36,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn verify_pin_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
     fn init_encrypted_session_request(&self, wallet: ArculusWalletPointer) -> Result<BagOfBytes>;
-    fn init_encrypted_session_response(&self, wallet: ArculusWalletPointer) -> Result<i32>;
+    fn init_encrypted_session_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
     fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: DerivationPath) -> Result<BagOfBytes>;
     fn get_public_key_by_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
@@ -117,8 +125,8 @@ impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
         self.wrapped.init_encrypted_session_request(wallet.into()).into_internal_result()
     }
 
-    fn init_encrypted_session_response(&self, wallet: InternalArculusWalletPointer) -> sargon::Result<i32> {
-        self.wrapped.init_encrypted_session_response(wallet.into()).into_internal_result()
+    fn init_encrypted_session_response(&self, wallet: InternalArculusWalletPointer, response: sargon::BagOfBytes) -> sargon::Result<i32> {
+        self.wrapped.init_encrypted_session_response(wallet.into(), response.into()).into_internal_result()
     }
 
     fn get_public_key_by_path_request(&self, wallet: InternalArculusWalletPointer, path: sargon::DerivationPath) -> sargon::Result<sargon::BagOfBytes> {
@@ -135,5 +143,25 @@ impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
 
     fn sign_hash_path_response(&self, wallet: InternalArculusWalletPointer, response: sargon::BagOfBytes) -> sargon::Result<sargon::BagOfBytes> {
         self.wrapped.sign_hash_path_response(wallet.into(), response.into()).into_internal_result()
+    }
+    
+    fn init_recover_wallet_request(&self, wallet: InternalArculusWalletPointer, word_count: u8) -> sargon::Result<sargon::BagOfBytes> {
+        self.wrapped.init_recover_wallet_request(wallet.into(), word_count).into_internal_result()
+    }
+    
+    fn init_recover_wallet_response(&self, wallet: InternalArculusWalletPointer, response: sargon::BagOfBytes) -> sargon::Result<sargon::BagOfBytes> {
+        self.wrapped.init_recover_wallet_response(wallet.into(), response.into()).into_internal_result()
+    }
+    
+    fn finish_recover_wallet_request(&self, wallet: InternalArculusWalletPointer, seed_length: u8) -> sargon::Result<sargon::BagOfBytes> {
+        self.wrapped.finish_recover_wallet_request(wallet.into(), seed_length).into_internal_result()
+    }
+    
+    fn finish_recover_wallet_response(&self, wallet: InternalArculusWalletPointer, response: sargon::BagOfBytes) -> sargon::Result<i32> {
+        self.wrapped.finish_recover_wallet_response(wallet.into(), response.into()).into_internal_result()
+    }
+    
+    fn seed_phrase_from_mnemonic_sentence(&self, wallet: InternalArculusWalletPointer, mnemonic_sentence: sargon::BagOfBytes, mnemonic_sentence_len: u8, passphrase: Option<sargon::BagOfBytes>, passphrase_len: u8) -> sargon::Result<sargon::BagOfBytes> {
+        self.wrapped.seed_phrase_from_mnemonic_sentence(wallet.into(), mnemonic_sentence.into(), mnemonic_sentence_len, passphrase.map(BagOfBytes::from), passphrase_len).into_internal_result()
     }
 }

@@ -48,8 +48,8 @@ extension Drivers {
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
 			profileStateChangeDriver: .shared,
-            arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
-            nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
+            arculusCsdkDriver: ArculusCSDKDriver(),
+            nfcTagDriver: NFCSessionClient()
 		)
 	}
 }

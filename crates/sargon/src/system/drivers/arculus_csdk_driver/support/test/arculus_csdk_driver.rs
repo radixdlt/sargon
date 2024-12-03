@@ -78,7 +78,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn init_encrypted_session_response(&self, wallet: ArculusWalletPointer) -> Result<i32> {
+    fn init_encrypted_session_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32> {
         todo!()
     }
 
@@ -95,6 +95,26 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
     }
 
     fn sign_hash_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes> {
+        todo!()
+    }
+    
+    fn seed_phrase_from_mnemonic_sentence(&self, wallet: ArculusWalletPointer, mnemonic_sentence: BagOfBytes, mnemonic_sentence_len: u8, passphrase: Option<BagOfBytes>, passphrase_len: u8) -> Result<BagOfBytes> {
+        todo!()
+    }
+    
+    fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes> {
+        todo!()
+    }
+    
+    fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes> {
+        todo!()
+    }
+    
+    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes> {
+        todo!()
+    }
+    
+    fn finish_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32> {
         todo!()
     }
 }

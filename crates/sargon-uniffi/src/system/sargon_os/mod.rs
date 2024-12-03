@@ -1,3 +1,4 @@
+mod arculus_card;
 mod delete_account;
 mod pre_authorization;
 mod profile_state_holder;
@@ -10,6 +11,7 @@ mod sargon_os_security_structures;
 mod sargon_os_sync_accounts;
 mod transactions;
 
+pub use arculus_card::*;
 pub use delete_account::*;
 pub use pre_authorization::*;
 pub use profile_state_holder::*;

@@ -1,3 +1,5 @@
+use std::future::Future;
+
 use radix_engine_interface::freeze_roles;
 
 pub use crate::prelude::*;
@@ -10,16 +12,15 @@ pub struct ArculusCSDKClient {
     pub driver: Arc<dyn ArculusCSDKDriver>,
 }
 
+#[derive(Debug)]
 pub struct ArculusWalletClient {
-    pointer: ArculusWalletPointer,
-    csdk_driver: Arc<dyn ArculusCSDKDriver>,
-    nfc_tag_driver: Arc<dyn NFCTagDriver>
+    pub(crate) csdk_driver: Arc<dyn ArculusCSDKDriver>,
+    pub(crate) nfc_tag_driver: Arc<dyn NFCTagDriver>
 }
 
 impl ArculusWalletClient {
     pub fn new(csdk_driver: Arc<dyn ArculusCSDKDriver>, nfc_tag_driver: Arc<dyn NFCTagDriver>) -> Self {
         Self {
-            pointer: csdk_driver.wallet_init(),
             csdk_driver,
             nfc_tag_driver,
         }
@@ -27,103 +28,74 @@ impl ArculusWalletClient {
 }
 
 impl ArculusWalletClient {
-    fn select_wallet_request(&self, aid: BagOfBytes) -> Result<BagOfBytes> {
-        self.csdk_driver.select_wallet_request(self.pointer.clone(), aid)
+    async fn start_arculus_wallet_session(&self) -> Result<ArculusWalletPointer> {
+        let aid: Vec<u8> = vec![0x41, 0x52, 0x43, 0x55, 0x4C, 0x55, 0x53, 0x01, 0x01, 0x57];
+        let wallet= self.csdk_driver.wallet_init();
+        self.select_card_io(wallet, aid.into()).await?;
+        self.init_encrypted_session_io(wallet).await?;
+
+        Ok(wallet)
     }
 
-    fn select_wallet_response(&self, respose: BagOfBytes) -> Result<i32> {
-        self.csdk_driver.select_wallet_response(self.pointer.clone(), respose)
-    }
+    async fn execute_card_operation<Response, Op, Fut>(&self, op: Op) -> Result<Response> 
+    where
+        Op: FnOnce(ArculusWalletPointer) -> Fut,
+        Fut: Future<Output = Result<Response>>,
+    {
+        self.nfc_tag_driver.start_session().await?;
+        let wallet = self.start_arculus_wallet_session().await?;
 
-    fn create_wallet_seed_request(&self, word_count: u8) -> Result<BagOfBytes> {
-        todo!()
-    }
+        let result = op(wallet.clone()).await;
 
-    fn create_wallet_seed_response(&self, response: BagOfBytes) -> Result<BagOfBytes> {
-        todo!()
-    }
+        self.nfc_tag_driver.end_session().await;
+        self.csdk_driver.wallet_free(wallet);
 
-    fn reset_wallet_request(&self,) -> Result<BagOfBytes> {
-        todo!()
-    }
-
-    fn reset_wallet_response(&self, response: BagOfBytes) -> Result<i32> {
-        todo!()
-    }
-
-    fn get_gguid_request(&self) -> Result<BagOfBytes> {
-        self.csdk_driver.get_gguid_request(self.pointer.clone())
-    }
-
-    fn get_gguid_response(&self, response: BagOfBytes) -> Result<BagOfBytes> {
-        self.csdk_driver.get_gguid_response(self.pointer.clone(), response)
-    }
-
-    fn get_firmware_version_request(&self) -> Result<BagOfBytes> {
-        self.csdk_driver.get_firmware_version_request(self.pointer.clone())
-    }
-
-    fn get_firmware_version_response(&self, response: BagOfBytes) -> Result<BagOfBytes> {
-        self.csdk_driver.get_firmware_version_response(self.pointer.clone(), response)
-    }
-
-    fn store_data_pin_request(&self, pin: String, pin_len: u8) -> Result<BagOfBytes> {
-        todo!()
-    }
-
-    fn store_data_pin_response(&self, response: BagOfBytes) -> Result<i32> {
-        todo!()
-    }
-
-    fn verify_pin_request(&self, pin: String, pin_len: u8) -> Result<BagOfBytes> {
-        todo!()
-    }
-
-    fn verify_pin_response(&self, response: BagOfBytes) -> Result<i32> {
-        todo!()
-    }
-
-    fn init_encrypted_session_request(&self) -> Result<BagOfBytes> {
-        self.csdk_driver.init_encrypted_session_request(self.pointer.clone())
-    }
-
-    fn init_encrypted_session_response(&self, response: BagOfBytes) -> Result<i32> {
-        todo!()
-    }
-
-    fn get_public_key_by_path_request(&self, path: DerivationPath) -> Result<BagOfBytes> {
-        todo!()
-    }
-
-    fn get_public_key_by_path_response(&self, response: BagOfBytes) -> Result<BagOfBytes> {
-        todo!()
-    }
-
-    fn sign_hash_path_request(&self, path: DerivationPath, hash: Hash) -> Result<BagOfBytes> {
-        todo!()
-    }
-
-    fn sign_hash_path_response(&self, response: BagOfBytes) -> Result<BagOfBytes> {
-        todo!()
+        result
     }
 }
 
+
 impl ArculusWalletClient {
     pub async fn read_card_firmware_version(&self) -> Result<String> {
-        self.nfc_tag_driver.start_session().await?;
+        let version: BagOfBytes = self.execute_card_operation(
+             |wallet| self.get_firmware_version_io(wallet)
+        ).await?;
 
-        let raw_response = self.do_card_io(self.select_wallet_request(BagOfBytes::sample_aced())?).await?;
-        let response = self.select_wallet_response(raw_response);
-        // parse status
-        let raw_encrypted_session_response = self.do_card_io(self.init_encrypted_session_request()?).await?;
-        let status_res = self.init_encrypted_session_response(raw_encrypted_session_response)?;
+        Ok(version.bytes.iter().map(|byte| byte.to_string()).collect::<Vec<String>>().join("."))
+    }
 
-        let firmware_raw_response = self.do_card_io(self.get_firmware_version_request()?).await?;
-        let firmware_response = self.get_firmware_version_response(firmware_raw_response)?;
+    pub async fn read_card_factor_source_id(&self) -> Result<FactorSourceIDFromHash> {
+        let gguid_raw = self.execute_card_operation(
+            |wallet| self.get_gguid_io(wallet)
+        ).await?;
 
-        self.nfc_tag_driver.end_session().await;
-        
-        Ok(firmware_response.to_hex())
+        let bytes = Exactly32Bytes::try_from(gguid_raw)?;
+
+        Ok(FactorSourceIDFromHash::new(FactorSourceKind::ArculusCard, bytes))
+    }
+
+    pub async fn create_wallet_seed(&self, pin: String, word_count: u8) -> Result<Mnemonic> {
+        self.execute_card_operation(|wallet| {
+           self._create_wallet_seed(wallet, pin, word_count)
+        }).await
+    }
+
+    async fn _create_wallet_seed(&self, wallet: ArculusWalletPointer, pin: String, word_count: u8) -> Result<Mnemonic> {
+        let pin_len = pin.len() as u8;
+
+        self.reset_wallet_io(wallet).await?;
+        self.store_pin_io(wallet, pin.clone(), pin_len).await?;
+        let words = self.create_wallet_seed_io(wallet, word_count).await?;
+        self.init_recover_wallet_io(wallet, word_count).await?;
+
+        let seed = self.csdk_driver.seed_phrase_from_mnemonic_sentence(wallet, words.clone(), word_count, None, 0)?;
+
+        self.finish_recover_wallet_io(wallet, seed, word_count).await?;
+        self.verify_pin_io(wallet, pin, pin_len).await?;
+
+        let phrase = String::from_utf8(words.to_vec()).unwrap();
+       
+        Mnemonic::from_phrase(&phrase)
     }
 }
 
@@ -143,8 +115,3 @@ impl ArculusWalletClient {
 //     }
 // }
 
-impl ArculusWalletClient {
-    async fn do_card_io(&self, command: BagOfBytes) -> Result<BagOfBytes> {
-        self.nfc_tag_driver.send_receive(command).await
-    }
-}
