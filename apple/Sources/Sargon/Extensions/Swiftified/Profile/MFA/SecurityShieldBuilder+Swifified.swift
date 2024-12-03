@@ -1,18 +1,18 @@
 import SargonUniFFI
 
-extension FactorSourceValidationStatus {
-	public var factorSourceID: FactorSourceID {
-		factorSourceId()
-	}
-
-//	public var reasonIfInvalid: SecurityShieldBuilderInvalidReason? {
-//		self.reasonIfInvalid()
+//extension FactorSourceValidationStatus {
+//	public var factorSourceID: FactorSourceID {
+//		factorSourceId()
 //	}
-
-	public var role: RoleKind {
-		role()
-	}
-}
+//
+////	public var reasonIfInvalid: SecurityShieldBuilderInvalidReason? {
+////		self.reasonIfInvalid()
+////	}
+//
+//	public var role: RoleKind {
+//		role()
+//	}
+//}
 
 extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
@@ -22,7 +22,7 @@ extension SecurityShieldBuilder {
 		get { getNumberOfDaysUntilAutoConfirm() }
 		set {
 			precondition(newValue > 0, "Number of days until auto confirm must be greater than zero.")
-			try! setNumberOfDaysUntilAutoConfirm(numberOfDays: UInt16(newValue))
+			setNumberOfDaysUntilAutoConfirm(numberOfDays: UInt16(newValue))
 		}
 	}
 

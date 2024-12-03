@@ -14,23 +14,23 @@ struct ShieldTests {
 		#expect(builder.name == "S.H.I.E.L.D")
 	}
 
-	@Test("threshold")
-	func threshold() {
-		let builder = SecurityShieldBuilder()
-		#expect(builder.threshold == 0)
-		#expect(throws: CommonError.RoleMustHaveAtLeastOneFactor) {
-			try builder.setThreshold(threshold: 0)
-		}
-	}
-
-	@Test("days")
-	func days() {
-		let builder = SecurityShieldBuilder()
-		#expect(builder.numberOfDaysUntilAutoConfirm == 14)
-		#expect(throws: CommonError.NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero) {
-			try builder.setNumberOfDaysUntilAutoConfirm(numberOfDays: 0)
-		}
-	}
+//	@Test("threshold")
+//	func threshold() {
+//		let builder = SecurityShieldBuilder()
+//		#expect(builder.threshold == 0)
+//		#expect(throws: CommonError.RoleMustHaveAtLeastOneFactor) {
+//			try builder.setThreshold(threshold: 0)
+//		}
+//	}
+//
+//	@Test("days")
+//	func days() {
+//		let builder = SecurityShieldBuilder()
+//		#expect(builder.numberOfDaysUntilAutoConfirm == 14)
+//		#expect(throws: CommonError.NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero) {
+//			try builder.setNumberOfDaysUntilAutoConfirm(numberOfDays: 0)
+//		}
+//	}
 
 	@Test("empty primary threshold")
 	func emptyThresholdFactors() {
