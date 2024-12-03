@@ -3,16 +3,21 @@ use sargon::SecurityShieldBuilderInvalidReason as InternalSecurityShieldBuilderI
 
 use thiserror::Error as ThisError;
 
+// #[derive(
+//     Clone,
+//     Copy,
+//     Debug,
+//     PartialEq,
+//     Eq,
+//     Hash,
+//     InternalConversion,
+//     ThisError,
+//     uniffi::Error,
+// )]
+
+#[repr(u32)]
 #[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    InternalConversion,
-    ThisError,
-    uniffi::Error,
+    Clone, Debug, ThisError, PartialEq, InternalConversion, uniffi::Error,
 )]
 pub enum SecurityShieldBuilderInvalidReason {
     #[error("Shield name is invalid")]
