@@ -6,28 +6,28 @@ import com.radixdlt.sargon.KeyDerivationRequest
 import com.radixdlt.sargon.KeyDerivationResponse
 import com.radixdlt.sargon.NeglectFactorReason
 import com.radixdlt.sargon.NeglectedFactors
-import com.radixdlt.sargon.SignRequestForSubintent
-import com.radixdlt.sargon.SignRequestForTransactionIntent
-import com.radixdlt.sargon.SignWithFactorsOutcomeForSubintent
-import com.radixdlt.sargon.SignWithFactorsOutcomeForTransactionIntent
+import com.radixdlt.sargon.SignRequestOfSubintent
+import com.radixdlt.sargon.SignRequestOfTransactionIntent
+import com.radixdlt.sargon.SignWithFactorsOutcomeOfSubintentHash
+import com.radixdlt.sargon.SignWithFactorsOutcomeOfTransactionIntentHash
 
 class FakeHostInteractor: HostInteractor {
     override suspend fun signTransactions(
-        request: SignRequestForTransactionIntent
-    ): SignWithFactorsOutcomeForTransactionIntent {
-        return SignWithFactorsOutcomeForTransactionIntent.Neglected(
+        request: SignRequestOfTransactionIntent
+    ): SignWithFactorsOutcomeOfTransactionIntentHash {
+        return SignWithFactorsOutcomeOfTransactionIntentHash.Neglected(
             v1 = NeglectedFactors(
                 reason = NeglectFactorReason.FAILURE,
-                factors = request.perFactorSource.keys.toList()
+                factors = request.perFactorSource.map { it.factorSourceId }
             )
         )
     }
 
-    override suspend fun signSubintents(request: SignRequestForSubintent): SignWithFactorsOutcomeForSubintent {
-        return SignWithFactorsOutcomeForSubintent.Neglected(
+    override suspend fun signSubintents(request: SignRequestOfSubintent): SignWithFactorsOutcomeOfSubintentHash {
+        return SignWithFactorsOutcomeOfSubintentHash.Neglected(
             v1 = NeglectedFactors(
                 reason = NeglectFactorReason.FAILURE,
-                factors = request.perFactorSource.keys.toList()
+                factors = request.perFactorSource.map { it.factorSourceId }
             )
         )
     }
