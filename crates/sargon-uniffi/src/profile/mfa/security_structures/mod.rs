@@ -1,7 +1,7 @@
 mod matrices;
 mod models;
 mod roles;
-// mod security_shield_builder;
+mod security_shield_builder;
 mod security_shield_builder_invalid_reason;
 mod security_structure_id;
 mod security_structure_metadata;
