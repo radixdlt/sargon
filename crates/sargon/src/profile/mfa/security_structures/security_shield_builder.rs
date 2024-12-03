@@ -68,7 +68,7 @@ impl SecurityShieldBuilder {
 // ==== GET / READ ====
 // ====================
 impl SecurityShieldBuilder {
-    pub fn get_primary_threshold(&self) -> u8 {
+    pub fn get_threshold(&self) -> u8 {
         self.get(|builder| builder.get_threshold())
     }
 
@@ -459,9 +459,11 @@ impl AsShieldBuilderViolation for (RoleKind, RoleBuilderValidation) {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum SecurityShieldBuilderInvalidReason {
+    #[error("Shield name is invalid")]
     ShieldNameInvalid,
+    #[error("Shield unknown error")]
     Unknown,
 }
 
