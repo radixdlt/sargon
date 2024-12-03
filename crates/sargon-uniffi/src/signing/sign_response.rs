@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use paste::paste;
 use sargon::IndexMap;
 use sargon::IndexSet;
-use paste::paste;
 
 macro_rules! decl_sign_response {
     ($signable_id:ty) => {

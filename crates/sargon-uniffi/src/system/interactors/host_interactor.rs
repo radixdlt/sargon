@@ -24,12 +24,12 @@ type InternalSignWithFactorsOutcomeForSubintent =
 pub trait HostInteractor: Send + Sync + std::fmt::Debug {
     async fn sign_transactions(
         &self,
-        request: SignRequestForTransactionIntent,
+        request: SignRequestOfTransactionIntent,
     ) -> SignWithFactorsOutcomeOfTransactionIntentHash;
 
     async fn sign_subintents(
         &self,
-        request: SignRequestForSubintent,
+        request: SignRequestOfSubintent,
     ) -> SignWithFactorsOutcomeOfSubintentHash;
 
     async fn derive_keys(

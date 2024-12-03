@@ -136,7 +136,9 @@ impl<S: Signable> SignaturesCollector<S> {
             .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock should not have been poisoned.")
+            .expect(
+                "SignaturesCollectorState lock should not have been poisoned.",
+            )
             .status();
 
         if petitions_status.are_all_valid() {
@@ -168,10 +170,9 @@ impl<S: Signable> SignaturesCollector<S> {
             .state
             .read()
             .expect("SignaturesCollector lock should not have been poisoned.");
-        let petitions = state
-            .petitions
-            .read()
-            .expect("SignaturesCollectorState lock should not have been poisoned.");
+        let petitions = state.petitions.read().expect(
+            "SignaturesCollectorState lock should not have been poisoned.",
+        );
         petitions
             .should_neglect_factors_due_to_irrelevant(factor_sources_of_kind)
     }
@@ -283,7 +284,9 @@ impl<S: Signable> SignaturesCollector<S> {
             .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock should not have been poisoned.")
+            .expect(
+                "SignaturesCollectorState lock should not have been poisoned.",
+            )
             .input_for_interactor(factor_source_id)
     }
 
@@ -352,7 +355,9 @@ impl<S: Signable> SignaturesCollector<S> {
             .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock should not have been poisoned.")
+            .expect(
+                "SignaturesCollectorState lock should not have been poisoned.",
+            )
             .invalid_transactions_if_neglected_factors(factor_source_ids)
     }
 
@@ -361,24 +366,21 @@ impl<S: Signable> SignaturesCollector<S> {
             .state
             .write()
             .expect("SignaturesCollector lock should not have been poisoned.");
-        let petitions = state
-            .petitions
-            .write()
-            .expect("SignaturesCollectorState lock should not have been poisoned.");
+        let petitions = state.petitions.write().expect(
+            "SignaturesCollectorState lock should not have been poisoned.",
+        );
         petitions.process_batch_response(response)
     }
 
     fn outcome(self) -> SignaturesOutcome<S::ID> {
         let expected_number_of_transactions;
         {
-            let state = self
-                .state
-                .write()
-                .expect("SignaturesCollector lock should not have been poisoned.");
-            let petitions = state
-                .petitions
-                .write()
-                .expect("SignaturesCollectorState lock should not have been poisoned.");
+            let state = self.state.write().expect(
+                "SignaturesCollector lock should not have been poisoned.",
+            );
+            let petitions = state.petitions.write().expect(
+                "SignaturesCollectorState lock should not have been poisoned.",
+            );
             expected_number_of_transactions = petitions
                 .txid_to_petition
                 .read()
@@ -391,7 +393,9 @@ impl<S: Signable> SignaturesCollector<S> {
             .expect("SignaturesCollector lock should not have been poisoned.")
             .petitions
             .read()
-            .expect("SignaturesCollectorState lock should not have been poisoned.")
+            .expect(
+                "SignaturesCollectorState lock should not have been poisoned.",
+            )
             .outcome();
         assert_eq!(
             outcome.failed_transactions().len()

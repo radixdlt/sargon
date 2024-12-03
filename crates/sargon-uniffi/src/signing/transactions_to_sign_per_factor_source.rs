@@ -5,17 +5,17 @@ use paste::paste;
 pub struct TransactionToSignPerFactorSource {
     pub factor_source_id: FactorSourceIDFromHash,
 
-    pub transactions: Vec<TransactionSignRequestInputOfSubintent>
+    pub transactions: Vec<TransactionSignRequestInputOfSubintent>,
 }
 
 impl TransactionToSignPerFactorSource {
     pub fn new(
         factor_source_id: FactorSourceIDFromHash,
-        transactions: Vec<TransactionSignRequestInputOfSubintent>
+        transactions: Vec<TransactionSignRequestInputOfSubintent>,
     ) -> Self {
         Self {
             factor_source_id,
-            transactions
+            transactions,
         }
     }
 }

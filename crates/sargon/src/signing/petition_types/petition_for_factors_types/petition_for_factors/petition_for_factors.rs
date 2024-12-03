@@ -20,7 +20,9 @@ impl<ID: SignableID> Clone for PetitionForFactors<ID> {
             state: RwLock::new(
                 self.state
                     .read()
-                    .expect("PetitionForFactors lock should not have been poisoned")
+                    .expect(
+                        "PetitionForFactors lock should not have been poisoned",
+                    )
                     .cloned(),
             ),
         }
@@ -39,7 +41,9 @@ impl<ID: SignableID> PartialEq for PetitionForFactors<ID> {
                 == other
                     .state
                     .read()
-                    .expect("PetitionForFactors lock should not have been poisoned")
+                    .expect(
+                        "PetitionForFactors lock should not have been poisoned",
+                    )
                     .deref()
     }
 }

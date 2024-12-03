@@ -36,7 +36,9 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.signed
             .read()
-            .expect("PetitionForFactorsState lock should not have been poisoned")
+            .expect(
+                "PetitionForFactorsState lock should not have been poisoned",
+            )
             .snapshot()
     }
 
@@ -44,7 +46,9 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
     pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
         self.neglected
             .read()
-            .expect("PetitionForFactorsState lock should not have been poisoned")
+            .expect(
+                "PetitionForFactorsState lock should not have been poisoned",
+            )
             .snapshot()
     }
 
@@ -72,7 +76,9 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
         }
         self.neglected
             .write()
-            .expect("PetitionForFactorsState lock should not have been poisoned")
+            .expect(
+                "PetitionForFactorsState lock should not have been poisoned",
+            )
             .insert(neglected);
     }
 
@@ -82,7 +88,9 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
         self.assert_not_referencing_factor_source(signature.factor_source_id());
         self.signed
             .write()
-            .expect("PetitionForFactorsState lock should not have been poisoned")
+            .expect(
+                "PetitionForFactorsState lock should not have been poisoned",
+            )
             .insert(signature)
     }
 

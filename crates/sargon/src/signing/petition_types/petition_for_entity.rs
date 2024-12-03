@@ -355,11 +355,9 @@ impl<ID: SignableID> PetitionForEntity<ID> {
         let access_list_if_exists =
             |list: &Option<RwLock<PetitionForFactors<ID>>>| {
                 list.as_ref().map(|rwlock| {
-                    access(
-                        &rwlock
-                            .read()
-                            .expect("PetitionForEntity lock should not have been poisoned."),
-                    )
+                    access(&rwlock.read().expect(
+                        "PetitionForEntity lock should not have been poisoned.",
+                    ))
                 })
             };
         let t = access_list_if_exists(&self.threshold_factors);
