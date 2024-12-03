@@ -403,7 +403,7 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     /// `None` means valid!
     pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
-        if !DisplayName::new(self.get_name()).is_ok() {
+        if DisplayName::new(self.get_name()).is_err() {
             return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
         }
         self.get(|builder| {

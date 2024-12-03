@@ -5,8 +5,8 @@ extension FactorSourceValidationStatus {
 		factorSourceId()
 	}
 
-	public var validationError: CommonError? {
-		self.validationErr()
+	public var reasonIfInvalid: SecurityShieldBuilderInvalidReason? {
+		self.reasonIfInvalid()
 	}
 
 	public var role: RoleKind {
