@@ -386,9 +386,7 @@ impl SecurityShieldBuilder {
     ) -> Option<SecurityShieldBuilderInvalidReason> {
         self.get(|builder| builder.validate().map(|x| x.into()))
     }
-}
-impl SecurityShieldBuilder {
-    /// TODO: SHOULD `uniffi::export` this!!!!!
+
     pub fn build(
         self: Arc<Self>,
     ) -> Result<
