@@ -15,7 +15,7 @@ type InternalSignResponseForTransactionIntent =
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct SignResponseForTransactionIntent {
     pub signatures:
-        HashMap<FactorSourceIDFromHash, Vec<HdSignatureForTransactionIntent>>,
+        HashMap<FactorSourceIDFromHash, Vec<HDSignatureOfTransactionIntentHash>>,
 }
 
 impl SignResponseForTransactionIntent {

@@ -19,7 +19,7 @@ pub struct SignRequestForTransactionIntent {
     /// A collection of transactions which would be invalid if the user skips
     /// signing with this factor source.
     pub invalid_transactions_if_neglected:
-        Vec<InvalidTransactionIfNeglectedForTransactionIntent>,
+        Vec<InvalidTransactionIfNeglectedOfTransactionIntentHash>,
 }
 
 impl SignRequestForTransactionIntent {
