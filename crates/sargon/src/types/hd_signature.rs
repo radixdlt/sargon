@@ -14,25 +14,30 @@ pub struct HDSignature<ID: SignableID> {
     /// instance.factor_s
     /// ource_id` and which
     /// was derived at `owned_hd_factor_instance.derivation_path`.
-    pub signature: Signature,
+    pub signature: SignatureWithPublicKey,
 }
 
 impl<ID: SignableID> HDSignature<ID> {
     /// Constructs a HDSignature from an already produced `Signature`.
     pub fn new(
         input: HDSignatureInput<ID>,
-        signature: Signature,
+        signature: SignatureWithPublicKey,
     ) -> Result<Self> {
+        if signature.public_key().curve() != input.owned_factor_instance.value.public_key().curve() {
+            return Err(CommonError::InvalidHDSignature)
+        }
+
+
         if !input
             .owned_factor_instance
             .value
             .public_key()
             .is_valid_signature_for_hash(
-                signature,
+                signature.signature(),
                 &Into::<Hash>::into(input.payload_id.clone()),
             )
         {
-            Err(CommonError::InvalidSignatureForHash)
+            Err(CommonError::InvalidHDSignature)
         } else {
             Ok(Self { input, signature })
         }
@@ -57,34 +62,6 @@ impl<ID: SignableID> HDSignature<ID> {
             .owned_factor_instance
             .factor_instance()
             .derivation_path()
-    }
-}
-
-impl<ID: SignableID> From<&HDSignature<ID>> for SignatureWithPublicKey {
-    fn from(value: &HDSignature<ID>) -> Self {
-        let sig = value.signature;
-        let pub_key = value
-            .owned_factor_instance()
-            .factor_instance()
-            .public_key
-            .clone();
-
-        match sig {
-            Signature::Secp256k1 { value } => {
-                let pub_key = pub_key.public_key
-                    .as_secp256k1()
-                    .cloned()
-                    .expect("Should never fail. The combination of signature and public key is validated at construction");
-                SignatureWithPublicKey::from((pub_key, value))
-            }
-            Signature::Ed25519 { value } => {
-                let pub_key = pub_key.public_key
-                    .as_ed25519()
-                    .cloned()
-                    .expect("Should never fail. The combination of signature and public key is validated at construction");
-                SignatureWithPublicKey::from((pub_key, value))
-            }
-        }
     }
 }
 
@@ -118,7 +95,7 @@ impl<ID: SignableID> HDSignature<ID> {
             &input.owned_factor_instance.value.public_key.derivation_path,
         );
 
-        HDSignature::new(input, signature.signature())
+        HDSignature::new(input, signature)
             .expect("Sign method should produce signatures using the correct curve from public keys")
     }
 }
@@ -166,27 +143,30 @@ mod tests {
     fn new_fails_due_to_discrepancy_on_signature_curve() {
         let ed25519_based_input =
             HDSignatureInput::<TransactionIntentHash>::sample();
-        let secp256k1_signature = Signature::from(Secp256k1Signature::sample());
+
+        let mnemonic = MnemonicWithPassphrase::sample_device_12_words();
+        let hash = Hash::sample();
+        let derivation_path = DerivationPath::from(BIP44LikePath::sample());
+        let secp256k1_signature = mnemonic.sign(&hash, &derivation_path);
 
         assert_eq!(
             HDSignature::new(ed25519_based_input, secp256k1_signature),
-            Err(CommonError::InvalidSignatureForHash)
+            Err(CommonError::InvalidHDSignature)
         );
     }
 
     #[test]
-    fn into_signature_for_hash() {
-        let sut = SUT::sample();
+    fn new_fails_due_to_hash_not_derived_by_input() {
+        let input = HDSignatureInput::<TransactionIntentHash>::sample();
 
-        let signature_with_public_key = SignatureWithPublicKey::from(&sut);
+        let mnemonic = MnemonicWithPassphrase::sample_device_12_words();
+        let hash = Hash::sample();
+        let derivation_path = DerivationPath::from(AccountPath::sample());
+        let signature_of_another_hash = mnemonic.sign(&hash, &derivation_path);
 
-        assert_eq!(signature_with_public_key.signature(), sut.signature);
         assert_eq!(
-            signature_with_public_key.public_key(),
-            sut.input
-                .owned_factor_instance
-                .factor_instance()
-                .public_key()
+            HDSignature::new(input, signature_of_another_hash),
+            Err(CommonError::InvalidHDSignature)
         );
     }
 }

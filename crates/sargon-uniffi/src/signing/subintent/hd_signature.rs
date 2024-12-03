@@ -16,7 +16,7 @@ pub struct HdSignatureForSubintent {
     /// instance.factor_s
     /// ource_id` and which
     /// was derived at `owned_hd_factor_instance.derivation_path`.
-    pub signature: Signature,
+    pub signature: SignatureWithPublicKey,
 }
 
 impl HdSignatureForSubintent {

@@ -819,8 +819,8 @@ pub enum CommonError {
     #[error("Failed to encode transaction preview v2 - '{underlying}'")]
     FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
 
-    #[error("Could not validate signature for hash.")]
-    InvalidSignatureForHash = 10230,
+    #[error("Could not validate signature for the given input.")]
+    InvalidHDSignature = 10230,
 }
 
 #[uniffi::export]
