@@ -365,8 +365,6 @@ impl SecurityShieldBuilder {
             },
         )
     }
-}
-/*
     pub fn validation_for_addition_of_factor_source_to_confirmation_override_for_each(
         self: Arc<Self>,
         factor_sources: Vec<FactorSourceID>,
@@ -382,7 +380,6 @@ impl SecurityShieldBuilder {
     }
 }
 
-*/
 #[uniffi::export]
 impl SecurityShieldBuilder {
     pub fn validate(
