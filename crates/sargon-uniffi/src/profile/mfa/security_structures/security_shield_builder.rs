@@ -97,9 +97,7 @@ impl SecurityShieldBuilder {
     pub fn get_primary_threshold(self: Arc<Self>) -> u8 {
         self.get(|builder| builder.get_threshold())
     }
-}
 
-/*
     pub fn get_number_of_days_until_auto_confirm(self: Arc<Self>) -> u16 {
         self.get(|builder| builder.get_number_of_days_until_auto_confirm())
     }
@@ -108,11 +106,15 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.get_name())
     }
 
-    pub fn get_primary_threshold_factors(self: Arc<Self>) -> Vec<FactorSourceID> {
+    pub fn get_primary_threshold_factors(
+        self: Arc<Self>,
+    ) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_threshold_factors())
     }
 
-    pub fn get_primary_override_factors(self: Arc<Self>) -> Vec<FactorSourceID> {
+    pub fn get_primary_override_factors(
+        self: Arc<Self>,
+    ) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_override_factors())
     }
 
@@ -144,7 +146,10 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn remove_factor_from_primary(self: Arc<Self>, factor_source_id: FactorSourceID) {
+    pub fn remove_factor_from_primary(
+        self: Arc<Self>,
+        factor_source_id: FactorSourceID,
+    ) {
         self.set(|builder| {
             builder.remove_factor_from_primary(factor_source_id.clone().into())
         })
@@ -174,7 +179,10 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold))
     }
 
-    pub fn set_number_of_days_until_auto_confirm(self: Arc<Self>, number_of_days: u16) {
+    pub fn set_number_of_days_until_auto_confirm(
+        self: Arc<Self>,
+        number_of_days: u16,
+    ) {
         self.set(|builder| {
             builder.set_number_of_days_until_auto_confirm(number_of_days)
         })
@@ -317,7 +325,7 @@ impl SecurityShieldBuilder {
         )
     }
 }
-
+/*
 #[uniffi::export]
 impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_primary_threshold_for_each(
@@ -372,13 +380,17 @@ impl SecurityShieldBuilder {
         )
     }
 }
-
+*/
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn validate(self: Arc<Self>) -> Option<SecurityShieldBuilderInvalidReason> {
+    pub fn validate(
+        self: Arc<Self>,
+    ) -> Option<SecurityShieldBuilderInvalidReason> {
         self.get(|builder| builder.validate().map(|x| x.into()))
     }
-
+}
+impl SecurityShieldBuilder {
+    /// TODO: SHOULD `uniffi::export` this!!!!!
     pub fn build(
         self: Arc<Self>,
     ) -> Result<
@@ -436,51 +448,54 @@ mod tests {
     fn test() {
         let sut = SUT::new();
 
-        assert_eq!(sut.get_name(), "My Shield");
-        sut.set_name("S.H.I.E.L.D.".to_owned());
+        assert_eq!(sut.clone().get_name(), "My Shield");
+        sut.clone().set_name("S.H.I.E.L.D.".to_owned());
 
-        assert_eq!(sut.get_number_of_days_until_auto_confirm(), 14);
-        sut.set_number_of_days_until_auto_confirm(u16::MAX);
-        assert_eq!(sut.get_number_of_days_until_auto_confirm(), u16::MAX);
+        assert_eq!(sut.clone().get_number_of_days_until_auto_confirm(), 14);
+        sut.clone().set_number_of_days_until_auto_confirm(u16::MAX);
+        assert_eq!(
+            sut.clone().get_number_of_days_until_auto_confirm(),
+            u16::MAX
+        );
         // Primary
-        let sim_prim =
-            sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
-                FactorSourceID::sample_arculus(),
-            ]);
+        // let sim_prim =
+        //     sut.clone().validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
+        //         FactorSourceID::sample_arculus(),
+        //     ]);
 
-        let sim_prim_threshold = sut
-            .validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
-                FactorSourceID::sample_arculus(),
-            ]);
+        // let sim_prim_threshold = sut.clone()
+        //     .validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
+        //         FactorSourceID::sample_arculus(),
+        //     ]);
 
-        let sim_kind_prim = sut
-            .addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
-                FactorSourceKind::Device,
-            );
+        // let sim_kind_prim = sut.clone()
+        //     .addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
+        //         FactorSourceKind::Device,
+        //     );
 
-        let sim_kind_prim_threshold = sut
-            .addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
-                FactorSourceKind::Device,
-            );
+        // let sim_kind_prim_threshold = sut.clone()
+        //     .addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
+        //         FactorSourceKind::Device,
+        //     );
 
-        sut.add_factor_source_to_primary_threshold(
+        sut.clone().add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
         );
         assert_eq!(
-            sut.get_primary_threshold_factors(),
+            sut.clone().get_primary_threshold_factors(),
             vec![FactorSourceID::sample_device()]
         );
-        sut.set_threshold(1);
-        assert_eq!(sut.get_primary_threshold(), 1);
-        sut.add_factor_source_to_primary_override(
+        sut.clone().set_threshold(1);
+        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        sut.clone().add_factor_source_to_primary_override(
             FactorSourceID::sample_arculus(),
         );
-        sut.add_factor_source_to_primary_override(
+        sut.clone().add_factor_source_to_primary_override(
             FactorSourceID::sample_arculus_other(),
         );
 
         assert_eq!(
-            sut.get_primary_override_factors(),
+            sut.clone().get_primary_override_factors(),
             vec![
                 FactorSourceID::sample_arculus(),
                 FactorSourceID::sample_arculus_other()
@@ -488,25 +503,26 @@ mod tests {
         );
 
         // Recovery
-        let sim_rec =
-            sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
-                FactorSourceID::sample_ledger(),
-            ]);
+        // let sim_rec =
+        //     sut.clone().validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
+        //         FactorSourceID::sample_ledger(),
+        //     ]);
 
-        let sim_kind_rec = sut
-            .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
-                FactorSourceKind::ArculusCard,
-            );
+        // let sim_kind_rec = sut
+        //     .clone()
+        //     .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+        //         FactorSourceKind::ArculusCard,
+        //     );
 
-        sut.add_factor_source_to_recovery_override(
+        sut.clone().add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
         );
-        sut.add_factor_source_to_recovery_override(
+        sut.clone().add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger_other(),
         );
 
         assert_eq!(
-            sut.get_recovery_factors(),
+            sut.clone().get_recovery_factors(),
             vec![
                 FactorSourceID::sample_ledger(),
                 FactorSourceID::sample_ledger_other()
@@ -514,22 +530,23 @@ mod tests {
         );
 
         // Confirmation
-        let sim_conf = sut
-            .validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
-                FactorSourceID::sample_device(),
-            ]);
+        // let sim_conf = sut.clone()
+        //     .validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
+        //         FactorSourceID::sample_device(),
+        //     ]);
 
-        let sim_kind_conf = sut
-            .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
-                FactorSourceKind::ArculusCard,
-            );
+        // let sim_kind_conf = sut
+        //     .clone()
+        //     .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+        //         FactorSourceKind::ArculusCard,
+        //     );
 
-        sut.add_factor_source_to_confirmation_override(
+        sut.clone().add_factor_source_to_confirmation_override(
             FactorSourceID::sample_device(),
         );
 
         assert_eq!(
-            sut.get_confirmation_factors(),
+            sut.clone().get_confirmation_factors(),
             vec![FactorSourceID::sample_device(),]
         );
         /*
@@ -538,85 +555,89 @@ mod tests {
 
                 assert_ne!(
                     sim_prim,
-                    sut.validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
+                    sut.clone().validation_for_addition_of_factor_source_to_primary_override_for_each(vec![
                         FactorSourceID::sample_arculus(),
                     ])
                 );
 
                 assert_ne!(
                     sim_prim_threshold,
-                    sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
+                    sut.clone().validation_for_addition_of_factor_source_to_primary_threshold_for_each(vec![
                         FactorSourceID::sample_arculus()
                     ])
                 );
 
                 assert_ne!(
                     sim_rec,
-                    sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
+                    sut.clone().validation_for_addition_of_factor_source_to_recovery_override_for_each(vec![
                         FactorSourceID::sample_ledger(),
                     ])
                 );
 
                 assert_ne!(
                     sim_conf,
-                    sut.validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
+                    sut.clone().validation_for_addition_of_factor_source_to_confirmation_override_for_each(vec![
                         FactorSourceID::sample_device(),
                     ])
                 );
 
                 assert_ne!(
                     sim_kind_prim,
-                    sut.addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
+                    sut.clone().addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
                         FactorSourceKind::Device,
                     )
                 );
 
                 assert_ne!(
                     sim_kind_prim_threshold,
-                    sut.addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
+                    sut.clone().addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
                         FactorSourceKind::Device,
                     )
                 );
 
                 assert_eq!(
                     sim_kind_rec,
-                    sut.addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
+                    sut.clone().addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
                         FactorSourceKind::ArculusCard,
                     )
                 );
 
                 assert_eq!(
                     sim_kind_conf,
-                    sut.addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
+                    sut.clone().addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
                         FactorSourceKind::ArculusCard,
                     )
                 );
          */
-        sut.remove_factor_from_all_roles(FactorSourceID::sample_arculus_other());
-        sut.remove_factor_from_all_roles(FactorSourceID::sample_ledger_other());
+        sut.clone().remove_factor_from_all_roles(
+            FactorSourceID::sample_arculus_other(),
+        );
+        sut.clone().remove_factor_from_all_roles(FactorSourceID::sample_ledger_other());
 
         let f = FactorSourceID::sample_ledger_other();
-        let xs = sut.get_primary_override_factors();
-        sut.add_factor_source_to_primary_override(f.clone());
-        sut.remove_factor_from_primary(f.clone());
-        assert_eq!(xs, sut.get_primary_override_factors());
+        let xs = sut.clone().get_primary_override_factors();
+        sut.clone().add_factor_source_to_primary_override(f.clone());
+        sut.clone().remove_factor_from_primary(f.clone());
+        assert_eq!(xs, sut.clone().get_primary_override_factors());
 
-        let xs = sut.get_recovery_factors();
-        sut.add_factor_source_to_recovery_override(f.clone());
-        sut.remove_factor_from_recovery(f.clone());
-        assert_eq!(xs, sut.get_recovery_factors());
+        let xs = sut.clone().get_recovery_factors();
+        sut.clone()
+            .add_factor_source_to_recovery_override(f.clone());
+        sut.clone().remove_factor_from_recovery(f.clone());
+        assert_eq!(xs, sut.clone().get_recovery_factors());
 
-        let xs = sut.get_confirmation_factors();
-        sut.add_factor_source_to_confirmation_override(f.clone());
-        sut.remove_factor_from_confirmation(f.clone());
-        assert_eq!(xs, sut.get_confirmation_factors());
+        let xs = sut.clone().get_confirmation_factors();
+        sut.clone()
+            .add_factor_source_to_confirmation_override(f.clone());
+        sut.clone().remove_factor_from_confirmation(f.clone());
+        assert_eq!(xs, sut.clone().get_confirmation_factors());
 
-        let v0 = sut.validate();
-        let v1 = sut.validate(); // can call validate many times!
+        let v0 = sut.clone().validate();
+        let v1 = sut.clone().validate(); // can call validate many times!
         assert_eq!(v0, v1);
 
-        let shield0 = sut.build().unwrap();
-        let shield = sut.build().unwrap(); // can call build many times!
+        let shield0 = sut.clone().build().unwrap();
+        let shield = sut.clone().build().unwrap(); // can call build many times!
         assert_eq!(shield0, shield);
 
         assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
@@ -634,5 +655,3 @@ mod tests {
         );
     }
 }
-
-*/
