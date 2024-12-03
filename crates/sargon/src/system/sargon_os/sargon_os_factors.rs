@@ -218,6 +218,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    #[cfg(test)] // only for test for now, need integration work in hosts before enabling this
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
@@ -293,12 +294,13 @@ impl SargonOS {
             new_factors_only.iter().any(|x| x.is_main_bdfs());
         let id_of_old_bdfs = self.bdfs()?.factor_source_id();
 
-        // Use FactorInstancesProvider to eagerly fill cache...
-
         for factor_source in new_factors_only.iter() {
             if !factor_source.factor_source_id().is_hash() {
                 continue;
             }
+            // Use FactorInstancesProvider to eagerly fill cache...
+            #[cfg(test)]
+            // only test for now, need to do more integration work in hosts before enabling this
             let _ = self
                 .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,

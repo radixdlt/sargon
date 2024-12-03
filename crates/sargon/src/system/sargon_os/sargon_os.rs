@@ -108,6 +108,10 @@ impl SargonOS {
         &self,
         should_pre_derive_instances: bool,
     ) -> Result<()> {
+        if should_pre_derive_instances {
+            #[cfg(not(test))]
+            warn!("Pre-deriving instances is not supported in production yet. Param `should_pre_derive_instances` ignored.");
+        }
         self.new_wallet_with_mnemonic(None, should_pre_derive_instances)
             .await
     }
@@ -133,6 +137,8 @@ impl SargonOS {
         }
 
         if should_pre_derive_instances {
+            #[cfg(test)]
+            // only tests for now, need more work in hosts before we can do this in prod
             self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 bdfs.clone().factor_source.into(),
             )
