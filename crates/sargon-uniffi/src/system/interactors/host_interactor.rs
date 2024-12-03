@@ -25,12 +25,12 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
     async fn sign_transactions(
         &self,
         request: SignRequestForTransactionIntent,
-    ) -> SignWithFactorsOutcomeForTransactionIntent;
+    ) -> SignWithFactorsOutcomeOfTransactionIntentHash;
 
     async fn sign_subintents(
         &self,
         request: SignRequestForSubintent,
-    ) -> SignWithFactorsOutcomeForSubintent;
+    ) -> SignWithFactorsOutcomeOfSubintentHash;
 
     async fn derive_keys(
         &self,

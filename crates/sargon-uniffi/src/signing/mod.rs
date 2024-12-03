@@ -20,3 +20,4 @@ pub use invalid_transaction_if_neglected::*;
 pub use transaction_sign_request_input::*;
 pub use sign_with_factors_outcome::*;
 pub use signatures_per_fractor_source::*;
+pub use sign_response::*;
