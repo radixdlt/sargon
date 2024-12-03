@@ -15,22 +15,22 @@ pub enum FactorSourceValidationStatusReasonIfInvalid {
     NonBasic(SecurityShieldBuilderInvalidReason),
 }
 
-// #[uniffi::export]
-// impl FactorSourceValidationStatus {
-//     pub fn reason_if_invalid(
-//         &self,
-//     ) -> Option<FactorSourceValidationStatusReasonIfInvalid> {
-//         self.reason_if_invalid.clone()
-//     }
+#[uniffi::export]
+impl FactorSourceValidationStatus {
+    // pub fn reason_if_invalid(
+    //     &self,
+    // ) -> Option<FactorSourceValidationStatusReasonIfInvalid> {
+    //     self.reason_if_invalid.clone()
+    // }
 
-//     pub fn role(&self) -> RoleKind {
-//         self.role
-//     }
+    // pub fn role(&self) -> RoleKind {
+    //     self.role
+    // }
 
-//     pub fn factor_source_id(&self) -> FactorSourceID {
-//         self.factor_source_id.clone()
-//     }
-// }
+    // pub fn factor_source_id(&self) -> FactorSourceID {
+    //     self.factor_source_id.clone()
+    // }
+}
 impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
     for FactorSourceValidationStatus
 {
