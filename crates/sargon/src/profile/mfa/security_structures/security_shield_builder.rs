@@ -4,6 +4,12 @@ use crate::prelude::*;
 pub struct SecurityShieldBuilder {
     matrix_builder: RwLock<MatrixBuilder>,
     name: RwLock<String>,
+    // We eagerly set this, and we use it inside the `build` method, ensuring
+    // that for the same *state* of `MatrixBuilder` we always have the same shield!
+    shield_id: SecurityStructureID,
+    // We eagerly set this, and we use it inside the `build` method, ensuring
+    // that for the same *state* of `MatrixBuilder` we always have the same shield!
+    created_on: Timestamp,
 }
 
 impl SecurityShieldBuilder {
@@ -13,6 +19,8 @@ impl SecurityShieldBuilder {
         Self {
             matrix_builder: RwLock::new(matrix_builder),
             name,
+            shield_id: SecurityStructureID::from(id()),
+            created_on: now(),
         }
     }
 }
@@ -258,7 +266,8 @@ impl<T> IsValidOrCanBecomeValid for Result<T, RoleBuilderValidation> {
     fn is_valid_or_can_be(&self) -> bool {
         match self {
             Ok(_) => true,
-            Err(RoleBuilderValidation::BasicViolation(_)) | Err(RoleBuilderValidation::ForeverInvalid(_)) => false,
+            Err(RoleBuilderValidation::BasicViolation(_))
+            | Err(RoleBuilderValidation::ForeverInvalid(_)) => false,
             Err(RoleBuilderValidation::NotYetValid(_)) => true,
         }
     }
@@ -383,7 +392,12 @@ impl SecurityShieldBuilder {
             SecurityShieldBuilderInvalidReason::ShieldNameInvalid
         })?;
 
-        let metadata = SecurityStructureMetadata::new(display_name);
+        let metadata = SecurityStructureMetadata::with_details(
+            self.shield_id,
+            display_name,
+            self.created_on,
+            self.created_on,
+        );
 
         let shield = SecurityStructureOfFactorSourceIds {
             matrix_of_factors,
@@ -507,7 +521,9 @@ mod tests {
             .remove_factor(FactorSourceID::sample_arculus_other())
             .remove_factor(FactorSourceID::sample_ledger_other());
 
+        let shield0 = sut.build().unwrap();
         let shield = sut.build().unwrap();
+        pretty_assertions::assert_eq!(shield0, shield);
 
         assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
@@ -655,7 +671,8 @@ mod tests {
     }
 
     #[test]
-    fn test_validation_for_addition_of_factor_source_to_recovery_override_for_each() {
+    fn test_validation_for_addition_of_factor_source_to_recovery_override_for_each(
+    ) {
         let sut = SUT::new();
 
         let xs = sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(
@@ -691,7 +708,8 @@ mod tests {
     }
 
     #[test]
-    fn test_validation_for_addition_of_factor_source_to_confirmation_override_for_each() {
+    fn test_validation_for_addition_of_factor_source_to_confirmation_override_for_each(
+    ) {
         let sut = SUT::new();
         let xs = sut
             .validation_for_addition_of_factor_source_to_confirmation_override_for_each(

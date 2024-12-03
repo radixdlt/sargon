@@ -9,7 +9,10 @@ pub struct SecurityStructureMetadata {
     pub last_updated_on: Timestamp,
 }
 
-delegate_display_debug_into!(SecurityStructureMetadata, InternalSecurityStructureMetadata);
+delegate_debug_into!(
+    SecurityStructureMetadata,
+    InternalSecurityStructureMetadata
+);
 
 #[uniffi::export]
 pub fn new_security_structure_metadata_sample() -> SecurityStructureMetadata {
