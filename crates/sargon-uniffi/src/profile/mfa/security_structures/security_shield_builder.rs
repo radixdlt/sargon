@@ -342,18 +342,6 @@ impl SecurityShieldBuilder {
     }
 }
 
-use sargon::SecurityShieldBuilderInvalidReason as InternalSecurityShieldBuilderInvalidReason;
-
-#[derive(Clone, Copy, PartialEq, Eq, InternalConversion, uniffi::Enum)]
-pub enum SecurityShieldBuilderInvalidReason {
-    ShieldNameInvalid,
-    Unknown,
-}
-delegate_display_debug_into!(
-    SecurityShieldBuilderInvalidReason,
-    InternalSecurityShieldBuilderInvalidReason
-);
-
 #[uniffi::export]
 impl SecurityShieldBuilder {
     pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
