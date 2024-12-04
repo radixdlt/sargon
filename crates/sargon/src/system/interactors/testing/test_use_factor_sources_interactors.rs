@@ -1,21 +1,12 @@
 use crate::prelude::*;
 
-pub struct TestHostInteractor {
+pub struct TestUseFactorSourcesInteractors {
     transaction_signing: Arc<dyn SignInteractor<TransactionIntent>>,
     subintent_signing: Arc<dyn SignInteractor<Subintent>>,
     key_derivation: Arc<dyn KeyDerivationInteractor>,
 }
 
-impl TestHostInteractor {
-    pub fn new_from_clients(clients: &Clients) -> Self {
-        Self::new_with_derivation_interactor(Arc::new(
-            TestDerivationInteractor::new(
-                false,
-                Arc::new(clients.secure_storage.clone()),
-            ),
-        ))
-    }
-
+impl TestUseFactorSourcesInteractors {
     pub fn new(
         transaction_signing: Arc<dyn SignInteractor<TransactionIntent>>,
         subintent_signing: Arc<dyn SignInteractor<Subintent>>,
@@ -27,26 +18,12 @@ impl TestHostInteractor {
             key_derivation,
         }
     }
-
-    pub fn new_with_derivation_interactor(
-        key_derivation: Arc<dyn KeyDerivationInteractor>,
-    ) -> Self {
-        Self::new(
-            Arc::new(TestSignInteractor::<TransactionIntent>::new(
-                SimulatedUser::prudent_no_fail(),
-            )),
-            Arc::new(TestSignInteractor::<Subintent>::new(
-                SimulatedUser::prudent_no_fail(),
-            )),
-            key_derivation,
-        )
-    }
 }
 
-impl HostInteractor for TestHostInteractor {}
+impl UseFactorSourcesInteractor for TestUseFactorSourcesInteractors {}
 
 #[async_trait::async_trait]
-impl SignInteractor<TransactionIntent> for TestHostInteractor {
+impl SignInteractor<TransactionIntent> for TestUseFactorSourcesInteractors {
     async fn sign(
         &self,
         request: SignRequest<TransactionIntent>,
@@ -56,7 +33,7 @@ impl SignInteractor<TransactionIntent> for TestHostInteractor {
 }
 
 #[async_trait::async_trait]
-impl SignInteractor<Subintent> for TestHostInteractor {
+impl SignInteractor<Subintent> for TestUseFactorSourcesInteractors {
     async fn sign(
         &self,
         request: SignRequest<Subintent>,
@@ -66,7 +43,7 @@ impl SignInteractor<Subintent> for TestHostInteractor {
 }
 
 #[async_trait::async_trait]
-impl KeyDerivationInteractor for TestHostInteractor {
+impl KeyDerivationInteractor for TestUseFactorSourcesInteractors {
     async fn derive(
         &self,
         request: KeyDerivationRequest,

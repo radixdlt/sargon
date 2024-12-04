@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::HostInteractor as InternalHostInteractor;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
@@ -9,6 +8,7 @@ use sargon::Subintent as InternalSubintent;
 use sargon::SubintentHash as InternalSubintentHash;
 use sargon::TransactionIntent as InternalTransactionIntent;
 use sargon::TransactionIntentHash as InternalTransactionIntentHash;
+use sargon::UseFactorSourcesInteractor as InternalUseFactorSourcesInteractor;
 
 type InternalSignRequestForTransactionIntent =
     sargon::SignRequest<InternalTransactionIntent>;
@@ -39,21 +39,21 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
 }
 
 #[derive(Debug)]
-pub struct HostInteractorAdapter {
+pub struct UseFactorSourcesInteractorAdapter {
     pub wrapped: Arc<dyn HostInteractor>,
 }
 
-impl HostInteractorAdapter {
+impl UseFactorSourcesInteractorAdapter {
     pub fn new(wrapped: Arc<dyn HostInteractor>) -> Self {
         Self { wrapped }
     }
 }
 
-impl InternalHostInteractor for HostInteractorAdapter {}
+impl InternalUseFactorSourcesInteractor for UseFactorSourcesInteractorAdapter {}
 
 #[async_trait::async_trait]
 impl InternalSignInteractor<InternalTransactionIntent>
-    for HostInteractorAdapter
+    for UseFactorSourcesInteractorAdapter
 {
     async fn sign(
         &self,
@@ -64,7 +64,9 @@ impl InternalSignInteractor<InternalTransactionIntent>
 }
 
 #[async_trait::async_trait]
-impl InternalSignInteractor<InternalSubintent> for HostInteractorAdapter {
+impl InternalSignInteractor<InternalSubintent>
+    for UseFactorSourcesInteractorAdapter
+{
     async fn sign(
         &self,
         request: InternalSignRequestForSubintent,
@@ -74,7 +76,7 @@ impl InternalSignInteractor<InternalSubintent> for HostInteractorAdapter {
 }
 
 #[async_trait::async_trait]
-impl InternalKeyDerivationInteractor for HostInteractorAdapter {
+impl InternalKeyDerivationInteractor for UseFactorSourcesInteractorAdapter {
     async fn derive(
         &self,
         request: InternalKeyDerivationRequest,

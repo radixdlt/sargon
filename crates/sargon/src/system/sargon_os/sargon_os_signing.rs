@@ -186,10 +186,9 @@ mod test {
     async fn test_sign_fail_due_to_profile() {
         let test_drivers = Drivers::test();
         let clients = Clients::new(Bios::new(test_drivers));
-        let interactor =
-            Arc::new(TestHostInteractor::new_from_clients(&clients));
+        let interactors = Interactors::new_from_clients(&clients);
         let sut =
-            SUT::boot_with_clients_and_interactor(clients, interactor).await;
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         let transaction =
             TransactionIntent::sample_entity_addresses_requiring_auth(
@@ -239,23 +238,25 @@ mod test {
             maybe_failing_factor_sources.unwrap_or_default(),
         );
 
-        let interactor = Arc::new(TestHostInteractor::new(
-            Arc::new(TestSignInteractor::<TransactionIntent>::new(
-                SimulatedUser::prudent_with_failures(
-                    simulated_failures.clone(),
-                ),
-            )),
-            Arc::new(TestSignInteractor::<Subintent>::new(
-                SimulatedUser::prudent_with_failures(
-                    simulated_failures.clone(),
-                ),
-            )),
-            Arc::new(TestDerivationInteractor::new(
-                false,
-                Arc::new(clients.secure_storage.clone()),
-            )),
-        ));
-        SUT::boot_with_clients_and_interactor(clients, interactor).await
+        let use_factor_sources_interactors =
+            Arc::new(TestUseFactorSourcesInteractors::new(
+                Arc::new(TestSignInteractor::<TransactionIntent>::new(
+                    SimulatedUser::prudent_with_failures(
+                        simulated_failures.clone(),
+                    ),
+                )),
+                Arc::new(TestSignInteractor::<Subintent>::new(
+                    SimulatedUser::prudent_with_failures(
+                        simulated_failures.clone(),
+                    ),
+                )),
+                Arc::new(TestDerivationInteractor::new(
+                    false,
+                    Arc::new(clients.secure_storage.clone()),
+                )),
+            ));
+        let interactors = Interactors::new(use_factor_sources_interactors);
+        SUT::boot_with_clients_and_interactor(clients, interactors).await
     }
 
     fn get_signable_with_entities<S: Signable>(

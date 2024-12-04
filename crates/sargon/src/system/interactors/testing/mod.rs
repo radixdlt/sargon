@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod test_host_interactor;
+mod test_use_factor_sources_interactors;
 
 #[cfg(test)]
-pub use test_host_interactor::*;
+pub use test_use_factor_sources_interactors::*;

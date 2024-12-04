@@ -1,9 +1,9 @@
 use std::sync::Once;
 
 use crate::prelude::*;
-use sargon::Bios as InternalBios;
-use sargon::HostInteractor as InternalHostInteractor;
 use sargon::SargonOS as InternalSargonOS;
+use sargon::UseFactorSourcesInteractor as InternalHostInteractor;
+use sargon::{Bios as InternalBios, Interactors};
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
 /// which holds an in-memory Profile and a collection of "clients" which are
@@ -25,7 +25,9 @@ impl SargonOS {
     ) -> Arc<Self> {
         let internal_sargon_os = InternalSargonOS::boot(
             Arc::new(bios.as_ref().clone().into()),
-            Arc::new(HostInteractorAdapter::new(interactor)),
+            Interactors::new(Arc::new(UseFactorSourcesInteractorAdapter::new(
+                interactor,
+            ))),
         )
         .await;
 
