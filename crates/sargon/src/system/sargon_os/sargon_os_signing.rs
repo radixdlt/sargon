@@ -84,7 +84,7 @@ impl SargonOS {
                 }
             }
             Err(error) => {
-                return SignedOutcome::preprocessing_error(error);
+                SignedOutcome::preprocessing_error(error)
             }
         }
     }
