@@ -9,7 +9,7 @@ impl SargonOS {
         self.clients.arculus_wallet_client.read_card_factor_source_id().await
     }
 
-    pub async fn create_wallet_seed(&self, pin: String, word_count: u8) -> Result<Mnemonic> {
+    pub async fn create_wallet_seed(&self, pin: String, word_count: i64) -> Result<Mnemonic> {
         self.clients.arculus_wallet_client.create_wallet_seed(pin, word_count).await
     }
 

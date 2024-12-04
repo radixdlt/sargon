@@ -22,15 +22,15 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn select_wallet_request(&self, wallet: ArculusWalletPointer, aid: BagOfBytes) -> Result<BagOfBytes>;
     fn select_wallet_response(&self, wallet: ArculusWalletPointer, respose: BagOfBytes) -> Result<i32>;
 
-    fn create_wallet_seed_request(&self, wallet: ArculusWalletPointer, word_count: u8) -> Result<BagOfBytes>;
+    fn create_wallet_seed_request(&self, wallet: ArculusWalletPointer, word_count: i64) -> Result<BagOfBytes>;
     fn create_wallet_seed_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
-    fn seed_phrase_from_mnemonic_sentence(&self, wallet: ArculusWalletPointer, mnemonic_sentence: BagOfBytes, mnemonic_sentence_len: u8, passphrase: Option<BagOfBytes>, passphrase_len: u8) -> Result<BagOfBytes>;
+    fn seed_phrase_from_mnemonic_sentence(&self, wallet: ArculusWalletPointer, mnemonic_sentence: BagOfBytes, mnemonic_sentence_len: i64, passphrase: Option<BagOfBytes>, passphrase_len: i64) -> Result<BagOfBytes>;
 
-    fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes>;
-    fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
+    fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: i64) -> Result<BagOfBytes>;
+    fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
-    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed: BagOfBytes, seed_length: u8) -> Result<BagOfBytes>;
+    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed: BagOfBytes, seed_length: i64) -> Result<BagOfBytes>;
     fn finish_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
     fn reset_wallet_request(&self, wallet: ArculusWalletPointer) -> Result<BagOfBytes>;
@@ -42,18 +42,18 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn get_firmware_version_request(&self, wallet: ArculusWalletPointer) -> Result<BagOfBytes>;
     fn get_firmware_version_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
-    fn store_data_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: u8) -> Result<BagOfBytes>;
+    fn store_data_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: i64) -> Result<BagOfBytes>;
     fn store_data_pin_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
-    fn verify_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: u8) -> Result<BagOfBytes>;
+    fn verify_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: i64) -> Result<BagOfBytes>;
     fn verify_pin_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
     fn init_encrypted_session_request(&self, wallet: ArculusWalletPointer) -> Result<BagOfBytes>;
     fn init_encrypted_session_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
-    fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: DerivationPath) -> Result<BagOfBytes>;
+    fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16) -> Result<BagOfBytes>;
     fn get_public_key_by_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
-    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: DerivationPath, hash: Hash) -> Result<BagOfBytes>;
+    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<BagOfBytes>;
     fn sign_hash_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 }

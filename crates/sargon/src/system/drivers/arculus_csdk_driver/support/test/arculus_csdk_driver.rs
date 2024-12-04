@@ -26,7 +26,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn create_wallet_seed_request(&self, wallet: ArculusWalletPointer, word_count: u8) -> Result<BagOfBytes> {
+    fn create_wallet_seed_request(&self, wallet: ArculusWalletPointer, word_count: i64) -> Result<BagOfBytes> {
         todo!()
     }
 
@@ -34,7 +34,27 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn reset_wallet_request(&self, wallet: ArculusWalletPointer,) -> Result<BagOfBytes> {
+    fn seed_phrase_from_mnemonic_sentence(&self, wallet: ArculusWalletPointer, mnemonic_sentence: BagOfBytes, mnemonic_sentence_len: i64, passphrase: Option<BagOfBytes>, passphrase_len: i64) -> Result<BagOfBytes> {
+        todo!()
+    }
+
+    fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: i64) -> Result<BagOfBytes> {
+        todo!()
+    }
+
+    fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32> {
+        todo!()
+    }
+
+    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed: BagOfBytes, seed_length: i64) -> Result<BagOfBytes> {
+        todo!()
+    }
+
+    fn finish_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32> {
+        todo!()
+    }
+
+    fn reset_wallet_request(&self, wallet: ArculusWalletPointer) -> Result<BagOfBytes> {
         todo!()
     }
 
@@ -58,7 +78,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn store_data_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: u8) -> Result<BagOfBytes> {
+    fn store_data_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: i64) -> Result<BagOfBytes> {
         todo!()
     }
 
@@ -66,7 +86,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn verify_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: u8) -> Result<BagOfBytes> {
+    fn verify_pin_request(&self, wallet: ArculusWalletPointer, pin: String, pin_len: i64) -> Result<BagOfBytes> {
         todo!()
     }
 
@@ -82,7 +102,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: DerivationPath) -> Result<BagOfBytes> {
+    fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16) -> Result<BagOfBytes> {
         todo!()
     }
 
@@ -90,31 +110,11 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: DerivationPath, hash: Hash) -> Result<BagOfBytes> {
+    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<BagOfBytes> {
         todo!()
     }
 
     fn sign_hash_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes> {
-        todo!()
-    }
-    
-    fn seed_phrase_from_mnemonic_sentence(&self, wallet: ArculusWalletPointer, mnemonic_sentence: BagOfBytes, mnemonic_sentence_len: u8, passphrase: Option<BagOfBytes>, passphrase_len: u8) -> Result<BagOfBytes> {
-        todo!()
-    }
-    
-    fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes> {
-        todo!()
-    }
-    
-    fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes> {
-        todo!()
-    }
-    
-    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed: BagOfBytes, seed_length: u8) -> Result<BagOfBytes> {
-        todo!()
-    }
-    
-    fn finish_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32> {
         todo!()
     }
 }
