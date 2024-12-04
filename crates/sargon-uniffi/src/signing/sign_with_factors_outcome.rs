@@ -13,9 +13,7 @@ macro_rules! decl_sign_with_factors_outcome {
         pub enum $struct_name {
             /// The user successfully signed with the factor source(s), the associated
             /// value contains the produces signatures and any relevant metadata.
-            Signed {
-                produced_signatures: $sign_response,
-            },
+            Signed { produced_signatures: $sign_response },
 
             /// The factor source got neglected, either due to user explicitly skipping
             /// or due to failure

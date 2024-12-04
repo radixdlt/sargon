@@ -9,7 +9,9 @@ macro_rules! decl_transaction_sign_request_input {
         /// A batch of keys (derivation paths) all being factor instances of a HDFactorSource
         /// with id `factor_source_id` to sign a single transaction with, which hash
         /// is `intent_hash`.
-        #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+        #[derive(
+            Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+        )]
         pub struct $struct_name {
             /// Payload to sign
             pub payload: $payload,

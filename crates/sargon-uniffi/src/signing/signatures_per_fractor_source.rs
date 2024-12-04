@@ -10,21 +10,19 @@ macro_rules! decl_signatures_per_factor_source {
         pub struct $struct_name {
             pub factor_source_id: FactorSourceIDFromHash,
 
-            pub hd_signatures: Vec<$item>
+            pub hd_signatures: Vec<$item>,
         }
 
         impl $struct_name {
-
             pub fn new(
                 factor_source_id: FactorSourceIDFromHash,
-                hd_signatures: Vec<$item>
+                hd_signatures: Vec<$item>,
             ) -> Self {
                 Self {
                     factor_source_id,
-                    hd_signatures
+                    hd_signatures,
                 }
             }
-
         }
     };
     ($signable_id:ty) => {

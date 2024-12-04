@@ -29,17 +29,17 @@ macro_rules! decl_transaction_to_sign_per_factor_source {
         pub struct $struct_name {
             pub factor_source_id: FactorSourceIDFromHash,
 
-            pub transactions: Vec<$per_transaction>
+            pub transactions: Vec<$per_transaction>,
         }
 
         impl $struct_name {
             pub fn new(
                 factor_source_id: FactorSourceIDFromHash,
-                transactions: Vec<$per_transaction>
+                transactions: Vec<$per_transaction>,
             ) -> Self {
                 Self {
                     factor_source_id,
-                    transactions
+                    transactions,
                 }
             }
         }

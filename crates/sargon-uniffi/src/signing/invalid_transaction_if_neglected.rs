@@ -9,7 +9,9 @@ macro_rules! decl_invalid_transaction_if_neglected {
         /// A list of entities which would fail in a transaction if we would
         /// neglect certain factor source, either by user explicitly skipping
         /// it or if implicitly neglected due to failure.
-        #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+        #[derive(
+            Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+        )]
         pub struct $struct_name {
             /// The intent hash of the transaction which would be invalid if a
             /// certain factor source would be neglected, either if user
