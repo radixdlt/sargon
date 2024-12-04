@@ -31,6 +31,7 @@ impl HasSampleValues for SignableManifestSummary {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl IntoIterator for SignableManifestSummary {
     type Item = SignatureWithPublicKey;
     type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
@@ -70,10 +71,12 @@ impl Signable for SignableManifestSummary {
         self.id
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn get_payload(&self) -> Self::Payload {
         panic!("Manifest summary cannot be actually signed")
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn signed(&self, _: IntentSignatures) -> Result<Self::Signed> {
         panic!("Manifest summary cannot be actually signed")
     }

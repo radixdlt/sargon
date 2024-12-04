@@ -6,13 +6,13 @@ use crate::prelude::*;
 #[debug("[{}]", self.snapshot().into_iter().map(|f| format!("{:?}", f)).join(", "))]
 pub(crate) struct PetitionForFactorsSubState<F>
 where
-    F: FactorSourceReferencing + Debug,
+    F: FactorSourceReferencing + Debug + HasSampleValues,
 {
     /// Factors that have signed or skipped
     factors: RwLock<IndexSet<F>>,
 }
 
-impl<F: FactorSourceReferencing + Debug> PartialEq
+impl<F: FactorSourceReferencing + Debug + HasSampleValues> PartialEq
     for PetitionForFactorsSubState<F>
 {
     fn eq(&self, other: &Self) -> bool {
@@ -23,9 +23,32 @@ impl<F: FactorSourceReferencing + Debug> PartialEq
     }
 }
 
-impl<F: FactorSourceReferencing + Debug> Eq for PetitionForFactorsSubState<F> {}
+impl<F: FactorSourceReferencing + Debug + HasSampleValues> Eq
+    for PetitionForFactorsSubState<F>
+{
+}
 
-impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
+impl<F: FactorSourceReferencing + Debug + HasSampleValues> HasSampleValues
+    for PetitionForFactorsSubState<F>
+{
+    fn sample() -> Self {
+        let state = PetitionForFactorsSubState::new();
+        let sample = F::sample();
+        state.insert(&sample);
+        state
+    }
+
+    fn sample_other() -> Self {
+        let state = PetitionForFactorsSubState::new();
+        let sample = F::sample_other();
+        state.insert(&sample);
+        state
+    }
+}
+
+impl<F: FactorSourceReferencing + Debug + HasSampleValues>
+    PetitionForFactorsSubState<F>
+{
     pub(super) fn new() -> Self {
         Self {
             factors: RwLock::new(IndexSet::new()),
@@ -61,5 +84,24 @@ impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
         Self {
             factors: RwLock::new(self.snapshot()),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForFactorsSubState<NeglectedFactorInstance>;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

@@ -21,7 +21,7 @@ impl<ID: SignableID> HasSampleValues for SignWithFactorsOutcome<ID> {
     }
 
     fn sample_other() -> Self {
-        Self::user_skipped_factor(FactorSourceIDFromHash::sample_other())
+        Self::Neglected(NeglectedFactors::sample_other())
     }
 }
 
@@ -69,5 +69,24 @@ impl<ID: SignableID> SignWithFactorsOutcome<ID> {
                 .map(|f| *f.factor_source_id().as_hash().unwrap()) // TODO ask that
                 .collect(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SignWithFactorsOutcome<TransactionIntentHash>;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
