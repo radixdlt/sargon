@@ -112,13 +112,14 @@ mod test {
     }
 
     #[actix_rt::test]
-    async fn test_sign_transaction_intent_rejected_due_to_all_factors_neglected() {
+    async fn test_sign_transaction_intent_rejected_due_to_all_factors_neglected(
+    ) {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
-            Some(SigningFailure::NeglectedFactorSources(
-                vec![profile.device_factor_sources().first().unwrap().id]
-            )),
+            Some(SigningFailure::NeglectedFactorSources(vec![
+                profile.device_factor_sources().first().unwrap().id,
+            ])),
         )
         .await;
 
@@ -134,19 +135,19 @@ mod test {
     }
 
     #[actix_rt::test]
-    async fn test_sign_transaction_subintent_rejected_due_to_all_factors_neglected() {
+    async fn test_sign_transaction_subintent_rejected_due_to_all_factors_neglected(
+    ) {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
-            Some(SigningFailure::NeglectedFactorSources(
-                vec![profile.device_factor_sources().first().unwrap().id]
-            )),
+            Some(SigningFailure::NeglectedFactorSources(vec![
+                profile.device_factor_sources().first().unwrap().id,
+            ])),
         )
-            .await;
+        .await;
 
-        let (signable, _) = get_signable_with_entities::<Subintent>(
-            &sut.profile().unwrap(),
-        );
+        let (signable, _) =
+            get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let outcome = sut
             .sign_subintent(signable.clone(), RoleKind::Primary)
@@ -183,14 +184,12 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_fail_due_to_user_rejecting() {
         let profile = Profile::sample();
-        let sut = boot_with_profile(
-            &profile,
-            Some(SigningFailure::UserRejected),
-        ).await;
+        let sut =
+            boot_with_profile(&profile, Some(SigningFailure::UserRejected))
+                .await;
 
-        let (signable, _) = get_signable_with_entities::<Subintent>(
-            &sut.profile().unwrap(),
-        );
+        let (signable, _) =
+            get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let outcome = sut
             .sign_subintent(signable.clone(), RoleKind::Primary)
@@ -204,9 +203,9 @@ mod test {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
-            Some(SigningFailure::NeglectedFactorSources(
-                vec![profile.device_factor_sources().first().unwrap().id]
-            )),
+            Some(SigningFailure::NeglectedFactorSources(vec![
+                profile.device_factor_sources().first().unwrap().id,
+            ])),
         )
         .await;
 
@@ -237,7 +236,9 @@ mod test {
         let use_factor_sources_interactors =
             Arc::new(TestUseFactorSourcesInteractors::new(
                 Arc::new(TestSignInteractor::<TransactionIntent>::new(
-                    get_simulated_user::<TransactionIntent>(&maybe_signing_failure),
+                    get_simulated_user::<TransactionIntent>(
+                        &maybe_signing_failure,
+                    ),
                 )),
                 Arc::new(TestSignInteractor::<Subintent>::new(
                     get_simulated_user::<Subintent>(&maybe_signing_failure),
@@ -255,21 +256,17 @@ mod test {
         maybe_signing_failure: &Option<SigningFailure>,
     ) -> SimulatedUser<S> {
         match maybe_signing_failure {
-            None => {
-                SimulatedUser::<S>::prudent_no_fail()
-            }
-            Some(failure) => {
-                match failure {
-                    SigningFailure::NeglectedFactorSources(factor_sources) => {
-                        SimulatedUser::<S>::prudent_with_failures(
-                            SimulatedFailures::with_simulated_failures(factor_sources.clone()),
-                        )
-                    }
-                    SigningFailure::UserRejected => {
-                        SimulatedUser::<S>::rejecting()
-                    }
+            None => SimulatedUser::<S>::prudent_no_fail(),
+            Some(failure) => match failure {
+                SigningFailure::NeglectedFactorSources(factor_sources) => {
+                    SimulatedUser::<S>::prudent_with_failures(
+                        SimulatedFailures::with_simulated_failures(
+                            factor_sources.clone(),
+                        ),
+                    )
                 }
-            }
+                SigningFailure::UserRejected => SimulatedUser::<S>::rejecting(),
+            },
         }
     }
 
@@ -293,6 +290,6 @@ mod test {
 
     enum SigningFailure {
         NeglectedFactorSources(Vec<FactorSourceIDFromHash>),
-        UserRejected
+        UserRejected,
     }
 }

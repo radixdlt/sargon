@@ -84,7 +84,7 @@ pub(crate) enum SimulatedUserMode {
     Lazy(Laziness),
 
     /// Emulation of a user that dismisses (rejects) the signing process all-together.
-    Rejecting
+    Rejecting,
 }
 
 impl SimulatedUserMode {
@@ -198,7 +198,7 @@ impl<S: Signable> SimulatedUser<S> {
                 Laziness::AlwaysSkip => false,
                 Laziness::SignMinimum => is_prudent(),
             },
-            SimulatedUserMode::Rejecting => false
+            SimulatedUserMode::Rejecting => false,
         }
     }
 }
