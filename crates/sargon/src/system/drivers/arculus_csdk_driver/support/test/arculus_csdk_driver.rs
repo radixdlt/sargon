@@ -110,7 +110,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
     
-    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes> {
+    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed: BagOfBytes, seed_length: u8) -> Result<BagOfBytes> {
         todo!()
     }
     

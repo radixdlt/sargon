@@ -1,5 +1,6 @@
 use std::future::Future;
 
+use crypto::keys::slip10::ed25519;
 use indexmap::IndexSet;
 use radix_engine_interface::freeze_roles;
 
@@ -88,9 +89,25 @@ impl ArculusWalletClient {
             self._derive_public_keys(wallet, paths)
         ).await
     }
+
+    pub async fn sign_hash(&self, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+        self.execute_card_operation(|wallet|
+            self._sign_hash(wallet, hash, derivation_path)
+        ).await
+    }
 }
 
 impl ArculusWalletClient {
+    pub async fn _sign_hash(&self, wallet: ArculusWalletPointer, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+        let signature_bytes = self.sign_hash_path_io(wallet, derivation_path.clone(), hash).await?;
+        let public_key_bytes = self.get_public_key_by_path_io(wallet, derivation_path).await?;
+
+        let ed25519_signature = Ed25519Signature::try_from(signature_bytes)?;
+        let public_key =  Ed25519PublicKey::try_from(public_key_bytes.bytes())?;
+
+        Ok(SignatureWithPublicKey::Ed25519 { public_key: public_key, signature: ed25519_signature })
+    }
+
     pub async fn _derive_public_keys(&self, wallet: ArculusWalletPointer, paths: IndexSet<DerivationPath>) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
         let mut keys = IndexSet::new();
 

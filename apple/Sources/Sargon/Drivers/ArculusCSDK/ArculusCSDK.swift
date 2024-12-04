@@ -43,7 +43,9 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func createWalletSeedRequest(wallet: SargonUniFFI.ArculusWalletPointer, wordCount: UInt8) throws -> Data {
-        fatalError()
+        try buildCommand { len in
+            ArculusCSDK.seedCreateWalletRequest(walletPointer: wallet.toOpaquePointer(), len: &len, nbrOfWords: wordCount)
+        }
     }
     
     func createWalletSeedResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {
@@ -118,6 +120,32 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     
     func signHashPathResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {
         fatalError()
+    }
+
+    func seedPhraseFromMnemonicSentence(
+        wallet: SargonUniFFI.ArculusWalletPointer,
+        mnemonicSentence: SargonUniFFI.BagOfBytes,
+        mnemonicSentenceLen: UInt8,
+        passphrase: SargonUniFFI.BagOfBytes?,
+        passphraseLen: UInt8
+    ) throws -> SargonUniFFI.BagOfBytes {
+        <#code#>
+    }
+
+    func initRecoverWalletRequest(wallet: SargonUniFFI.ArculusWalletPointer, wordCount: UInt8) throws -> SargonUniFFI.BagOfBytes {
+        <#code#>
+    }
+
+    func initRecoverWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: SargonUniFFI.BagOfBytes) throws -> SargonUniFFI.BagOfBytes {
+        <#code#>
+    }
+
+    func finishRecoverWalletRequest(wallet: SargonUniFFI.ArculusWalletPointer, seed: SargonUniFFI.BagOfBytes, seedLength: UInt8) throws -> SargonUniFFI.BagOfBytes {
+        <#code#>
+    }
+
+    func finishRecoverWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: SargonUniFFI.BagOfBytes) throws -> Int32 {
+        <#code#>
     }
 }
 

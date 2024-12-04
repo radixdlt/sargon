@@ -17,7 +17,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn init_recover_wallet_request(&self, wallet: ArculusWalletPointer, word_count: u8) -> Result<BagOfBytes>;
     fn init_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
-    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed_length: u8) -> Result<BagOfBytes>;
+    fn finish_recover_wallet_request(&self, wallet: ArculusWalletPointer, seed: BagOfBytes, seed_length: u8) -> Result<BagOfBytes>;
     fn finish_recover_wallet_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<i32>;
 
     fn reset_wallet_request(&self, wallet: ArculusWalletPointer,) -> Result<BagOfBytes>;
@@ -153,8 +153,8 @@ impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
         self.wrapped.init_recover_wallet_response(wallet.into(), response.into()).into_internal_result()
     }
     
-    fn finish_recover_wallet_request(&self, wallet: InternalArculusWalletPointer, seed_length: u8) -> sargon::Result<sargon::BagOfBytes> {
-        self.wrapped.finish_recover_wallet_request(wallet.into(), seed_length).into_internal_result()
+    fn finish_recover_wallet_request(&self, wallet: InternalArculusWalletPointer, seed: sargon::BagOfBytes, seed_length: u8) -> sargon::Result<sargon::BagOfBytes> {
+        self.wrapped.finish_recover_wallet_request(wallet.into(), seed.into(), seed_length).into_internal_result()
     }
     
     fn finish_recover_wallet_response(&self, wallet: InternalArculusWalletPointer, response: sargon::BagOfBytes) -> sargon::Result<i32> {
