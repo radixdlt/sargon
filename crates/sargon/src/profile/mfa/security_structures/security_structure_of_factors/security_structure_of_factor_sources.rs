@@ -58,10 +58,13 @@ impl From<SecurityStructureOfFactorSources>
     }
 }
 
-impl<const ROLE: u8> From<AbstractRoleBuilderOrBuilt<ROLE, FactorSource, ()>>
-    for AbstractRoleBuilderOrBuilt<ROLE, FactorSourceID, ()>
+impl<const ROLE: u8>
+    From<AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSource>>
+    for AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSourceID>
 {
-    fn from(value: AbstractRoleBuilderOrBuilt<ROLE, FactorSource, ()>) -> Self {
+    fn from(
+        value: AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSource>,
+    ) -> Self {
         Self::with_factors(
             value.get_threshold(),
             value

@@ -3,17 +3,20 @@
 use crate::prelude::*;
 
 pub type MatrixBuilderMutateResult = Result<(), MatrixBuilderValidation>;
+
 pub type MatrixBuilderBuildResult =
     Result<MatrixOfFactorSourceIds, MatrixBuilderValidation>;
 
-/// Marker to distinguish between built and builder.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Built;
-
+/// A builder of MatrixOfFactorSourceIds, consists of role builders:
+/// * PrimaryRoleBuilder
+/// * RecoveryRoleBuilder
+/// * ConfirmationRoleBuilder
+///
+/// And `number_of_days_until_auto_confirm`.
 pub type MatrixBuilder = AbstractMatrixBuilderOrBuilt<
+    IS_MATRIX_BUILDER,
+    IS_ROLE_BUILDER,
     FactorSourceID,
-    MatrixOfFactorSourceIds,
-    Built, // Marker to distinguish between built and builder.
 >;
 
 // ==================
@@ -22,7 +25,6 @@ pub type MatrixBuilder = AbstractMatrixBuilderOrBuilt<
 impl MatrixBuilder {
     pub fn new() -> Self {
         Self {
-            built: PhantomData,
             primary_role: PrimaryRoleBuilder::new(),
             recovery_role: RecoveryRoleBuilder::new(),
             confirmation_role: ConfirmationRoleBuilder::new(),
@@ -31,6 +33,9 @@ impl MatrixBuilder {
         }
     }
 
+    /// Validates each role in isolation and all roles in combination.
+    ///
+    /// If valid it returns a "built" `MatrixOfFactorSourceIds`.
     pub fn build(&self) -> MatrixBuilderBuildResult {
         self.validate_combination()?;
 
@@ -47,13 +52,17 @@ impl MatrixBuilder {
             .build()
             .into_matrix_err(RoleKind::Confirmation)?;
 
-        let built = MatrixOfFactorSourceIds {
-            built: PhantomData,
-            primary_role: primary,
-            recovery_role: recovery,
-            confirmation_role: confirmation,
-            number_of_days_until_auto_confirm: self
-                .number_of_days_until_auto_confirm,
+        let built = unsafe {
+            // Looks a bit odd, but yeah here is in fact the only place we
+            // do build! The ctor is named like that so that it is clear that
+            // when used elsewhere, it is not guaranteed to have been properly
+            // built.
+            MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
+                primary,
+                recovery,
+                confirmation,
+                self.number_of_days_until_auto_confirm,
+            )
         };
         Ok(built)
     }

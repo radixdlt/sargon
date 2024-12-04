@@ -25,14 +25,16 @@ impl MatrixOfFactorSources {
             unreachable!("Programmer error!")
         }
 
-        Ok(Self {
-            built: PhantomData,
-            primary_role,
-            recovery_role,
-            confirmation_role,
-            number_of_days_until_auto_confirm: matrix
-                .number_of_days_until_auto_confirm,
-        })
+        let built = unsafe {
+            Self::unbuilt_with_roles_and_days(
+                primary_role,
+                recovery_role,
+                confirmation_role,
+                matrix.number_of_days_until_auto_confirm,
+            )
+        };
+
+        Ok(built)
     }
 }
 

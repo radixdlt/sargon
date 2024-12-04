@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
-pub type MatrixOfFactorInstances =
-    AbstractMatrixBuilderOrBuilt<FactorInstance, (), ()>;
+pub type MatrixOfFactorInstances = AbstractMatrixBuilt<FactorInstance>;
 
 pub trait HasFactorInstances {
     fn unique_factor_instances(&self) -> IndexSet<FactorInstance>;
@@ -166,13 +165,13 @@ impl MatrixOfFactorInstances {
                 &matrix_of_factor_sources,
             )?;
 
-        let matrix = Self {
-            built: PhantomData,
-            primary_role,
-            recovery_role,
-            confirmation_role,
-            number_of_days_until_auto_confirm: matrix_of_factor_sources
-                .number_of_days_until_auto_confirm,
+        let matrix = unsafe {
+            Self::unbuilt_with_roles_and_days(
+                primary_role,
+                recovery_role,
+                confirmation_role,
+                matrix_of_factor_sources.number_of_days_until_auto_confirm,
+            )
         };
 
         // Now that we have assigned instances, **possibly the SAME INSTANCE to multiple roles**,

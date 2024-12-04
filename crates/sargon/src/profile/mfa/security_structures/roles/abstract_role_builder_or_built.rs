@@ -29,11 +29,7 @@ use crate::prelude::*;
 /// * ConfirmationRoleWithFactorInstances
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, FACTOR, BUILT> {
-    #[serde(skip)]
-    #[doc(hidden)]
-    built: PhantomData<BUILT>,
-
+pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     /// How many threshold factors that must be used to perform some function with
     /// this role.
     threshold: u8,
@@ -49,13 +45,13 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, FACTOR, BUILT> {
 }
 
 pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
-    AbstractRoleBuilderOrBuilt<ROLE, FACTOR, ()>;
+    AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FACTOR>;
 
 pub(crate) type RoleBuilder<const ROLE: u8> =
-    AbstractRoleBuilderOrBuilt<ROLE, FactorSourceID, Built>;
+    AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSourceID>;
 
-impl<const ROLE: u8, FACTOR: IsMaybeKeySpaceAware, BUILT>
-    AbstractRoleBuilderOrBuilt<ROLE, FACTOR, BUILT>
+impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE, MODE, FACTOR>
 {
     pub fn role(&self) -> RoleKind {
         RoleKind::from_u8(ROLE).expect("RoleKind should be valid")
@@ -97,7 +93,6 @@ impl<const ROLE: u8, FACTOR: IsMaybeKeySpaceAware, BUILT>
             .expect("Should not have allowed building of invalid Role");
 
         Self {
-            built: PhantomData,
             threshold,
             threshold_factors,
             override_factors,
@@ -119,8 +114,8 @@ impl<const ROLE: u8, FACTOR: IsMaybeKeySpaceAware, BUILT>
     }
 }
 
-impl<const ROLE: u8, FACTOR, BUILT>
-    AbstractRoleBuilderOrBuilt<ROLE, FACTOR, BUILT>
+impl<const ROLE: u8, const MODE: u8, FACTOR>
+    AbstractRoleBuilderOrBuilt<ROLE, MODE, FACTOR>
 {
     /// Threshold and Override factors mixed (threshold first).
     pub fn all_factors(&self) -> Vec<&FACTOR> {
@@ -172,7 +167,6 @@ impl RoleFromDiscriminator for RoleKind {
 impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn new() -> Self {
         Self {
-            built: PhantomData,
             threshold: 0,
             threshold_factors: Vec::new(),
             override_factors: Vec::new(),

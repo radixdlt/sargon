@@ -84,18 +84,25 @@ impl MatrixTemplate {
     ) -> Result<MatrixOfFactorSourceIds, CommonError> {
         let number_of_days_until_auto_confirm =
             self.number_of_days_until_auto_confirm;
+
         let mut assigner = FactorSourceIdAssigner::new(factor_source_ids);
+
         let primary_role = self.primary_role.assign(&mut assigner)?;
+
         let recovery_role = self.recovery_role.assign(&mut assigner)?;
+
         let confirmation_role = self.confirmation_role.assign(&mut assigner)?;
 
-        Ok(MatrixOfFactorSourceIds {
-            built: PhantomData,
-            primary_role,
-            recovery_role,
-            confirmation_role,
-            number_of_days_until_auto_confirm,
-        })
+        let matrix = unsafe {
+            MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
+                primary_role,
+                recovery_role,
+                confirmation_role,
+                number_of_days_until_auto_confirm,
+            )
+        };
+
+        Ok(matrix)
     }
 }
 
@@ -105,13 +112,8 @@ impl MatrixTemplate {
         recovery_role: RecoveryRoleTemplate,
         confirmation_role: ConfirmationRoleTemplate,
     ) -> Self {
-        Self {
-            built: PhantomData,
-            primary_role,
-            recovery_role,
-            confirmation_role,
-            number_of_days_until_auto_confirm:
-                MatrixOfFactorSourceIds::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+        unsafe {
+            Self::unbuilt_with_roles_and_days(primary_role, recovery_role, confirmation_role, MatrixOfFactorSourceIds::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM)
         }
     }
 
