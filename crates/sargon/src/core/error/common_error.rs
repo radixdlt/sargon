@@ -818,6 +818,9 @@ pub enum CommonError {
 
     #[error("Could not validate signature for the given input.")]
     InvalidHDSignature = 10230,
+
+    #[error("Signing was rejected by the user")]
+    SigningRejected = 10231,
 }
 
 impl CommonError {

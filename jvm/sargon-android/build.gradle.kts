@@ -309,8 +309,8 @@ afterEvaluate {
     tasks.getByName("buildCargoNdkDebug").finalizedBy(copyJniLibs)
     tasks.getByName("buildCargoNdkRelease").finalizedBy(copyJniLibs)
 
-    tasks.getByName("testDebugUnitTest").dependsOn("buildCargoDesktopDebug")
-    tasks.getByName("testReleaseUnitTest").dependsOn("buildCargoDesktopRelease")
+//    tasks.getByName("testDebugUnitTest").dependsOn("buildCargoDesktopDebug")
+//    tasks.getByName("testReleaseUnitTest").dependsOn("buildCargoDesktopRelease")
 
     tasks.register("buildForLocalDev") {
         group = "publishing"

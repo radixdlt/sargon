@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use sargon::SignedOutcome as InternalSignedOutcome;
-use sargon::SigningAbandonedReason as InternalSigningAbandonedReason;
 use sargon::Subintent as InternalSubintent;
 use sargon::TransactionIntent as InternalTransactionIntent;
 
@@ -10,21 +8,21 @@ impl SargonOS {
         &self,
         transaction_intent: TransactionIntent,
         role_kind: RoleKind,
-    ) -> SignedOutcomeOfTransactionIntent {
+    ) -> Result<SignedIntent> {
         self.wrapped
             .sign_transaction(transaction_intent.into(), role_kind.into())
             .await
-            .into()
+            .into_result()
     }
 
     pub async fn sign_subintent(
         &self,
         transaction_intent: Subintent,
         role_kind: RoleKind,
-    ) -> SignedOutcomeOfSubintent {
+    ) -> Result<SignedSubintent> {
         self.wrapped
             .sign_subintent(transaction_intent.into(), role_kind.into())
             .await
-            .into()
+            .into_result()
     }
 }
