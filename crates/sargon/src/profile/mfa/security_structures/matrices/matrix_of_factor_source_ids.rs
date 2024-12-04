@@ -58,70 +58,121 @@ impl MatrixOfFactorSourceIds {
             .unwrap()
     }
 
+    /// Config 1.1 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_11() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_1())
     }
 
+    /// Config 1.2 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_12() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_2())
     }
 
+    /// Config 1.3 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_13() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_3())
     }
 
+    /// Config 1.4 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_14() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_4())
     }
 
+    /// Config 1.5 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_15() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_5())
     }
 
+    /// Config 2.1 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_21() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_1())
     }
 
+    /// Config 2.2 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_22() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_2())
     }
 
+    /// Config 2.3 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_23() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_3())
     }
 
+    /// Config 2.4 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_24() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_4())
     }
 
+    /// Config 3.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_30() -> Self {
         Self::sample_from_template(MatrixTemplate::config_3_0())
     }
 
+    /// Config 4.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_40() -> Self {
         Self::sample_from_template(MatrixTemplate::config_4_0())
     }
 
+    /// Config 5.1 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_51() -> Self {
         Self::sample_from_template(MatrixTemplate::config_51())
     }
 
+    /// Config 5.2 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_52() -> Self {
         Self::sample_from_template(MatrixTemplate::config_52())
     }
 
+    /// Config 6.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_60() -> Self {
         Self::sample_from_template(MatrixTemplate::config_6_0())
     }
 
+    /// Config 7.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_70() -> Self {
         Self::sample_from_template(MatrixTemplate::config_7_0())
     }
 
+    /// Config 8.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_80() -> Self {
         Self::sample_from_template(MatrixTemplate::config_8_0())
     }
 
+    /// Config 9.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn sample_config_90() -> Self {
         Self::sample_from_template(MatrixTemplate::config_9_0())
     }

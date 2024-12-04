@@ -117,6 +117,9 @@ impl MatrixTemplate {
         }
     }
 
+    /// Config 1.1 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_1_1() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -131,6 +134,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 1.2 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_1_2() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -145,6 +151,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 1.3 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_1_3() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -159,6 +168,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 1.4 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_1_4() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::device()]),
@@ -167,6 +179,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 1.5 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_1_5() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::ledger()]),
@@ -175,6 +190,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 2.1 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_2_1() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -189,6 +207,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 2.2 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_2_2() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -203,6 +224,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 2.3 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_2_3() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::ledger()]),
@@ -211,6 +235,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 2.4 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_2_4() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::device()]),
@@ -221,6 +248,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 3 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_3_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -238,6 +268,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 4 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_4_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -256,6 +289,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 5.1 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_51() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -269,6 +305,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 5.2 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_52() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -288,6 +327,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 6.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_6_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::device()]),
@@ -300,6 +342,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 7.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_7_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -314,6 +359,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 8.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_8_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
@@ -330,6 +378,9 @@ impl MatrixTemplate {
         )
     }
 
+    /// Config 9.0 according to [this document][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
     pub fn config_9_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
