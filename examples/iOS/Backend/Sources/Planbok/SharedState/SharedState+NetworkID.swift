@@ -5,7 +5,7 @@ import Sargon
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static var network: Self {
-		sharedNetwork
+		.sharedNetwork
 	}
 }
 

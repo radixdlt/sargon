@@ -36,7 +36,7 @@ public struct NewOrImportProfileFeature {
 
 			case .view(.newProfileButtonTapped):
 				.run { send in
-					try await SargonOS.shared.newWallet()
+					try await SargonOS.shared.newWallet(shouldPreDeriveInstances: false)
 					await send(.delegate(.createdNewEmptyProfile))
 				} catch: { error, _ in
 					fatalError("Failed to create Profile, error: \(error)")

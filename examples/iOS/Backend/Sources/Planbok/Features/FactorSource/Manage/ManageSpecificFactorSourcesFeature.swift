@@ -19,7 +19,7 @@ public struct EditLabelOffDeviceMnemonicFactor {
 
 		public init(factorSource: OffDeviceMnemonicFactorSource) {
 			self.factorSource = factorSource
-			self.label = factorSource.hint.displayName.value
+			self.label = factorSource.hint.label.value
 		}
 	}
 
@@ -47,7 +47,7 @@ public struct EditLabelOffDeviceMnemonicFactor {
 
 				return .run { [factorSource = state.factorSource] _ in
 					var factorSource = factorSource
-					factorSource.hint.displayName = displayName
+					factorSource.hint.label = displayName
 					try await factorSourcesClient.updateFactorSource(factorSource.asGeneral)
 					await dismiss()
 				}

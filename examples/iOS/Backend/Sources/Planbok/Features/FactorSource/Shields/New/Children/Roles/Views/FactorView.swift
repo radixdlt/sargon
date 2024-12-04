@@ -85,6 +85,7 @@ extension FactorSourceKind {
 		case .trustedContact: "figure.child.and.lock"
 		case .securityQuestions: "person.crop.circle.badge.questionmark"
 		case .offDeviceMnemonic: "key"
+		case .password: "key"
 		}
 	}
 

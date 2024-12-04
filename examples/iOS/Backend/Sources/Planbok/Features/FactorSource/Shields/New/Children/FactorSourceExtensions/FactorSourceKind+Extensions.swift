@@ -84,7 +84,8 @@ extension FactorSourceKind {
 		case .ledgerHqHardwareWallet: "Ledger Hardware Wallet"
 		case .trustedContact: "Trusted Contact"
 		case .securityQuestions: "Security Questions"
-		case .offDeviceMnemonic: "Password"
+		case .offDeviceMnemonic: "Passphrase"
+		case .password: "Password"
 		}
 	}
 

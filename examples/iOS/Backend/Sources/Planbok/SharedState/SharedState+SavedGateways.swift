@@ -4,7 +4,7 @@ import Sargon
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static var savedGateways: Self {
-		sharedSavedGateways
+		.sharedSavedGateways
 	}
 }
 

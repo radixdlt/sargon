@@ -63,6 +63,10 @@ extension FactorSourcesClient: DependencyKey {
 					fatalError(
 						"Trusted Contact not supported yet"
 					)
+				case .password:
+					fatalError(
+						"Password not supported yet"
+					)
 				}
 
 			},

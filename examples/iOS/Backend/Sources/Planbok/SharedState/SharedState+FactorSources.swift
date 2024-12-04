@@ -30,7 +30,7 @@ public typealias SecurityQuestionsFactorSources = IdentifiedArrayOf<SecurityQues
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<FactorSources>> {
 	public static var factorSources: Self {
-		sharedFactorSources
+		.sharedFactorSources
 	}
 }
 
@@ -46,7 +46,7 @@ extension PersistenceKeyDefault<SargonKey<FactorSources>> {
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Shields>> {
 	public static var shields: Self {
-		sharedShields
+		.sharedShields
 	}
 }
 

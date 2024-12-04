@@ -59,7 +59,7 @@ extension OffDeviceMnemonicHint {
 		action: (() -> Void)? = nil
 	) -> some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Labeled("Label", displayName)
+			Labeled("Label", label.value)
 			if let action {
 				Button("Edit Label", action: action)
 			}
@@ -72,7 +72,7 @@ extension OffDeviceMnemonicHint {
 extension ArculusCardHint {
 	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Labeled("Arculus Name", name)
+			Labeled("Arculus Name", label)
 			Labeled("Arculus Model", String(describing: model))
 		}
 		.multilineTextAlignment(.leading)
@@ -83,7 +83,7 @@ extension ArculusCardHint {
 extension DeviceFactorSourceHint {
 	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Labeled("Device Name", name)
+			Labeled("Device Name", label)
 			Labeled("Device Model", model)
 			Labeled("#Mnemonic Words", mnemonicWordCount.rawValue)
 			if let systemVersion {
@@ -101,7 +101,7 @@ extension DeviceFactorSourceHint {
 extension LedgerHardwareWalletHint {
 	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Labeled("Ledger Name", name)
+			Labeled("Ledger Name", label)
 			Labeled("Ledger Model", model)
 		}
 		.multilineTextAlignment(.leading)

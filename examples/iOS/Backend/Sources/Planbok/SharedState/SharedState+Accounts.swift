@@ -4,7 +4,7 @@ import Sargon
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<AccountsForDisplay>> {
 	public static var accountsForDisplay: Self {
-		sharedAccountsForDisplay
+		.sharedAccountsForDisplay
 	}
 }
 

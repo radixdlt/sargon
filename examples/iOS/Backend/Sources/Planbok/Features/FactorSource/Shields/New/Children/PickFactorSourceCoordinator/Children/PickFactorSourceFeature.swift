@@ -69,12 +69,13 @@ public struct PickFactorSourceFeature {
 extension FactorSource {
 	public var displayLabel: String {
 		switch self {
-		case let .device(value): "\(value.hint.name) (\(value.hint.model))"
-		case let .ledger(value): "\(value.hint.name) (\(value.hint.model))"
-		case let .arculusCard(value): "\(value.hint.name) (\(value.hint.model))"
-		case let .offDeviceMnemonic(value): "\(value.hint.displayName)"
+		case let .device(value): "\(value.hint.label) (\(value.hint.model))"
+		case let .ledger(value): "\(value.hint.label) (\(value.hint.model))"
+		case let .arculusCard(value): "\(value.hint.label) (\(value.hint.model))"
+		case let .offDeviceMnemonic(value): "\(value.hint.label)"
 		case let .trustedContact(value): "\(value.contact.name) (\(value.contact.emailAddress.email))"
 		case let .securityQuestions(value): "Questions: \(value.sealedMnemonic.securityQuestions.map { q in q.id.description }.joined(separator: ", "))"
+		case let .password(value): value.hint.label
 		}
 	}
 }
