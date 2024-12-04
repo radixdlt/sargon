@@ -19,6 +19,47 @@ pub enum SigningAbandonedReason {
 }
 
 macro_rules! decl_signed_outcome {
+    (
+        struct_name: $struct_name:ident,
+        internal_struct_name: $internal_struct_name:ident,
+        signed: $signed:ident,
+    ) => {
+        /// Outcome of signing a transaction intent
+        #[derive(Clone, PartialEq, Eq, uniffi::Enum)]
+        pub enum $struct_name {
+            /// The user has provided all needed signatures, the transaction intent is considered signed
+            Signed($signed),
+
+            /// The signing process was abandoned
+            Abandoned(SigningAbandonedReason),
+        }
+
+        impl From<$internal_struct_name> for $struct_name {
+            fn from(value: $internal_struct_name) -> Self {
+                match value {
+                    $internal_struct_name::Signed(signed) => {
+                        $struct_name::Signed(signed.into())
+                    }
+                    $internal_struct_name::Abandoned(reason) => {
+                        $struct_name::Abandoned(reason.into())
+                    }
+                }
+            }
+        }
+
+        impl From<$struct_name> for $internal_struct_name {
+            fn from(value: $struct_name) -> Self {
+                match value {
+                    $struct_name::Signed(signed) => {
+                        Self::Signed(signed.into())
+                    }
+                    $struct_name::Abandoned(reason) => {
+                        Self::Abandoned(reason.into())
+                    }
+                }
+            }
+        }
+    };
     (signable: $signable:ty, signed: $signed:ty) => {
         paste! {
             use sargon::[< $signable >] as [< Internal $signable >];
@@ -26,41 +67,11 @@ macro_rules! decl_signed_outcome {
 
             type [< InternalSignedOutcomeOf $signable >] = sargon::SignedOutcome<[< Internal $signable >]>;
 
-            /// Outcome of signing a transaction intent
-            #[derive(Clone, PartialEq, Eq, uniffi::Enum)]
-            pub enum [< SignedOutcomeOf $signable >] {
-                /// The user has provided all needed signatures, the transaction intent is considered signed
-                Signed([< $signed >]),
-
-                /// The signing process was abandoned
-                Abandoned(SigningAbandonedReason),
-            }
-
-            impl From<[< InternalSignedOutcomeOf $signable >]> for [< SignedOutcomeOf $signable >] {
-                fn from(value: [< InternalSignedOutcomeOf $signable >]) -> Self {
-                    match value {
-                        [< InternalSignedOutcomeOf $signable >]::Signed(signed) => {
-                            [< SignedOutcomeOf $signable >]::Signed(signed.into())
-                        }
-                        [< InternalSignedOutcomeOf $signable >]::Abandoned(reason) => {
-                            [< SignedOutcomeOf $signable >]::Abandoned(reason.into())
-                        }
-                    }
-                }
-            }
-
-            impl From<[< SignedOutcomeOf $signable >]> for [< InternalSignedOutcomeOf $signable >] {
-                fn from(value: [< SignedOutcomeOf $signable >]) -> Self {
-                    match value {
-                        [< SignedOutcomeOf $signable >]::Signed(signed) => {
-                            Self::Signed(signed.into())
-                        }
-                        [< SignedOutcomeOf $signable >]::Abandoned(reason) => {
-                            Self::Abandoned(reason.into())
-                        }
-                    }
-                }
-            }
+            decl_signed_outcome!(
+                struct_name: [< SignedOutcomeOf $signable >],
+                internal_struct_name: [< InternalSignedOutcomeOf $signable >],
+                signed: [< $signed >],
+            );
         }
     };
 }
