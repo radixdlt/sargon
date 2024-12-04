@@ -151,7 +151,7 @@ impl MatrixBuilder {
             )
     }
 
-    pub fn validate_each_role_in_isolation(&self) -> MatrixBuilderMutateResult {
+    fn validate_each_role_in_isolation(&self) -> MatrixBuilderMutateResult {
         self.primary_role
             .validate()
             .into_matrix_err(RoleKind::Primary)?;

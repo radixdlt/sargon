@@ -59,47 +59,47 @@ impl MatrixOfFactorSourceIds {
     }
 
     pub fn sample_config_11() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_11())
+        Self::sample_from_template(MatrixTemplate::config_1_1())
     }
 
     pub fn sample_config_12() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_12())
+        Self::sample_from_template(MatrixTemplate::config_1_2())
     }
 
     pub fn sample_config_13() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_13())
+        Self::sample_from_template(MatrixTemplate::config_1_3())
     }
 
     pub fn sample_config_14() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_14())
+        Self::sample_from_template(MatrixTemplate::config_1_4())
     }
 
     pub fn sample_config_15() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_15())
+        Self::sample_from_template(MatrixTemplate::config_1_5())
     }
 
     pub fn sample_config_21() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_21())
+        Self::sample_from_template(MatrixTemplate::config_2_1())
     }
 
     pub fn sample_config_22() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_22())
+        Self::sample_from_template(MatrixTemplate::config_2_2())
     }
 
     pub fn sample_config_23() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_23())
+        Self::sample_from_template(MatrixTemplate::config_2_3())
     }
 
     pub fn sample_config_24() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_24())
+        Self::sample_from_template(MatrixTemplate::config_2_4())
     }
 
     pub fn sample_config_30() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_30())
+        Self::sample_from_template(MatrixTemplate::config_3_0())
     }
 
     pub fn sample_config_40() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_40())
+        Self::sample_from_template(MatrixTemplate::config_4_0())
     }
 
     pub fn sample_config_51() -> Self {
@@ -111,19 +111,19 @@ impl MatrixOfFactorSourceIds {
     }
 
     pub fn sample_config_60() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_60())
+        Self::sample_from_template(MatrixTemplate::config_6_0())
     }
 
     pub fn sample_config_70() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_70())
+        Self::sample_from_template(MatrixTemplate::config_7_0())
     }
 
     pub fn sample_config_80() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_80())
+        Self::sample_from_template(MatrixTemplate::config_8_0())
     }
 
     pub fn sample_config_90() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_90())
+        Self::sample_from_template(MatrixTemplate::config_9_0())
     }
 }
 

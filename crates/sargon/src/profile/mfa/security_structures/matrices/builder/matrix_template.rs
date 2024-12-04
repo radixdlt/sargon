@@ -117,7 +117,7 @@ impl MatrixTemplate {
         }
     }
 
-    pub fn config_11() -> Self {
+    pub fn config_1_1() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -131,7 +131,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_12() -> Self {
+    pub fn config_1_2() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::ledger(),
@@ -145,7 +145,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_13() -> Self {
+    pub fn config_1_3() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -159,7 +159,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_14() -> Self {
+    pub fn config_1_4() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::device()]),
             RecoveryRoleTemplate::new([FactorSourceTemplate::ledger()]),
@@ -167,7 +167,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_15() -> Self {
+    pub fn config_1_5() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::ledger()]),
             RecoveryRoleTemplate::new([FactorSourceTemplate::device()]),
@@ -175,7 +175,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_21() -> Self {
+    pub fn config_2_1() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -189,7 +189,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_22() -> Self {
+    pub fn config_2_2() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::ledger(),
@@ -203,7 +203,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_23() -> Self {
+    pub fn config_2_3() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::ledger()]),
             RecoveryRoleTemplate::new([FactorSourceTemplate::ledger_other()]),
@@ -211,7 +211,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_24() -> Self {
+    pub fn config_2_4() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::device()]),
             RecoveryRoleTemplate::new([FactorSourceTemplate::ledger()]),
@@ -221,7 +221,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_30() -> Self {
+    pub fn config_3_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -238,7 +238,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_40() -> Self {
+    pub fn config_4_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -288,7 +288,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_60() -> Self {
+    pub fn config_6_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([FactorSourceTemplate::device()]),
             RecoveryRoleTemplate::new(
@@ -300,7 +300,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_70() -> Self {
+    pub fn config_7_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -314,7 +314,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_80() -> Self {
+    pub fn config_8_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -330,7 +330,7 @@ impl MatrixTemplate {
         )
     }
 
-    pub fn config_90() -> Self {
+    pub fn config_9_0() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -364,7 +364,7 @@ mod test_templates {
     #[test]
     fn template_config_11() {
         test_template(
-            MatrixTemplate::config_11(),
+            MatrixTemplate::config_1_1(),
             MatrixOfFactorSourceIds::sample_config_11(),
         )
     }
@@ -372,7 +372,7 @@ mod test_templates {
     #[test]
     fn template_config_12() {
         test_template(
-            MatrixTemplate::config_12(),
+            MatrixTemplate::config_1_2(),
             MatrixOfFactorSourceIds::sample_config_12(),
         )
     }
@@ -380,7 +380,7 @@ mod test_templates {
     #[test]
     fn template_config_13() {
         test_template(
-            MatrixTemplate::config_13(),
+            MatrixTemplate::config_1_3(),
             MatrixOfFactorSourceIds::sample_config_13(),
         )
     }
@@ -388,7 +388,7 @@ mod test_templates {
     #[test]
     fn template_config_14() {
         test_template(
-            MatrixTemplate::config_14(),
+            MatrixTemplate::config_1_4(),
             MatrixOfFactorSourceIds::sample_config_14(),
         )
     }
@@ -396,7 +396,7 @@ mod test_templates {
     #[test]
     fn template_config_15() {
         test_template(
-            MatrixTemplate::config_15(),
+            MatrixTemplate::config_1_5(),
             MatrixOfFactorSourceIds::sample_config_15(),
         )
     }
@@ -404,7 +404,7 @@ mod test_templates {
     #[test]
     fn template_config_21() {
         test_template(
-            MatrixTemplate::config_21(),
+            MatrixTemplate::config_2_1(),
             MatrixOfFactorSourceIds::sample_config_21(),
         )
     }
@@ -412,7 +412,7 @@ mod test_templates {
     #[test]
     fn template_config_22() {
         test_template(
-            MatrixTemplate::config_22(),
+            MatrixTemplate::config_2_2(),
             MatrixOfFactorSourceIds::sample_config_22(),
         )
     }
@@ -420,7 +420,7 @@ mod test_templates {
     #[test]
     fn template_config_23() {
         test_template(
-            MatrixTemplate::config_23(),
+            MatrixTemplate::config_2_3(),
             MatrixOfFactorSourceIds::sample_config_23(),
         )
     }
@@ -428,7 +428,7 @@ mod test_templates {
     #[test]
     fn template_config_24() {
         test_template(
-            MatrixTemplate::config_24(),
+            MatrixTemplate::config_2_4(),
             MatrixOfFactorSourceIds::sample_config_24(),
         )
     }
@@ -436,7 +436,7 @@ mod test_templates {
     #[test]
     fn template_config_30() {
         test_template(
-            MatrixTemplate::config_30(),
+            MatrixTemplate::config_3_0(),
             MatrixOfFactorSourceIds::sample_config_30(),
         )
     }
@@ -444,7 +444,7 @@ mod test_templates {
     #[test]
     fn template_config_40() {
         test_template(
-            MatrixTemplate::config_40(),
+            MatrixTemplate::config_4_0(),
             MatrixOfFactorSourceIds::sample_config_40(),
         )
     }
@@ -468,7 +468,7 @@ mod test_templates {
     #[test]
     fn template_config_60() {
         test_template(
-            MatrixTemplate::config_60(),
+            MatrixTemplate::config_6_0(),
             MatrixOfFactorSourceIds::sample_config_60(),
         )
     }
@@ -476,7 +476,7 @@ mod test_templates {
     #[test]
     fn template_config_70() {
         test_template(
-            MatrixTemplate::config_70(),
+            MatrixTemplate::config_7_0(),
             MatrixOfFactorSourceIds::sample_config_70(),
         )
     }
@@ -484,7 +484,7 @@ mod test_templates {
     #[test]
     fn template_config_80() {
         test_template(
-            MatrixTemplate::config_80(),
+            MatrixTemplate::config_8_0(),
             MatrixOfFactorSourceIds::sample_config_80(),
         )
     }
@@ -492,7 +492,7 @@ mod test_templates {
     #[test]
     fn template_config_90() {
         test_template(
-            MatrixTemplate::config_90(),
+            MatrixTemplate::config_9_0(),
             MatrixOfFactorSourceIds::sample_config_90(),
         )
     }

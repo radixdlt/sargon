@@ -3,32 +3,7 @@ use crate::prelude::*;
 pub(crate) type RoleWithFactorInstances<const ROLE: u8> =
     AbstractBuiltRoleWithFactor<ROLE, FactorInstance>;
 
-impl<const ROLE: u8> RoleWithFactorSources<ROLE> {
-    fn from<const ROLE_FROM: u8>(
-        other: &RoleWithFactorSources<ROLE_FROM>,
-    ) -> Self {
-        Self::with_factors(
-            other.get_threshold(),
-            other.get_threshold_factors().clone(),
-            other.get_override_factors().clone(),
-        )
-    }
-}
 
-impl MatrixOfFactorSources {
-    pub(crate) fn get_role<const ROLE: u8>(
-        &self,
-    ) -> RoleWithFactorSources<ROLE> {
-        match ROLE {
-            ROLE_PRIMARY => RoleWithFactorSources::from(&self.primary_role),
-            ROLE_RECOVERY => RoleWithFactorSources::from(&self.recovery_role),
-            ROLE_CONFIRMATION => {
-                RoleWithFactorSources::from(&self.confirmation_role)
-            }
-            _ => panic!("unknown"),
-        }
-    }
-}
 
 impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
     pub(crate) fn fulfilling_role_of_factor_sources_with_factor_instances(

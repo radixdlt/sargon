@@ -296,7 +296,7 @@ mod tests {
             .await
             .unwrap();
         let factor_sources = &os.profile().unwrap().factor_sources;
-        let matrix_ids = MatrixTemplate::config_14()
+        let matrix_ids = MatrixTemplate::config_1_4()
             .materialize(factor_sources.items())
             .unwrap();
 

@@ -227,7 +227,7 @@ where
         self._add_factor_source_to_list(factor_source_id, Threshold)
     }
 
-    /// If we would add a factor of kind `factor_source_kind` to the list of kind `factor_list_kind`
+    /// If we would add a factor of kind `factor_source_kind` to the list of kind `Threshold`
     /// what would be the validation status?
     pub(crate) fn validation_for_addition_of_factor_source_of_kind_to_threshold(
         &self,
@@ -299,7 +299,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         validation
     }
 
-    /// If we would add a factor of kind `factor_source_kind` to the list of kind `factor_list_kind`
+    /// If we would add a factor of kind `factor_source_kind` to the list of kind `Override`
     /// what would be the validation status?
     pub(crate) fn validation_for_addition_of_factor_source_of_kind_to_override(
         &self,

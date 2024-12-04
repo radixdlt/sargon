@@ -1343,7 +1343,7 @@ mod shield_configs {
         use super::*;
 
         #[test]
-        fn config_11() {
+        fn config_1_1() {
             let mut sut = make();
 
             // Primary
@@ -1409,7 +1409,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_12() {
+        fn config_1_2() {
             let mut sut = make();
 
             // Primary
@@ -1469,7 +1469,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_13() {
+        fn config_1_3() {
             let mut sut = make();
 
             // Primary
@@ -1533,7 +1533,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_14() {
+        fn config_1_4() {
             let mut sut = make();
 
             // Primary
@@ -1582,7 +1582,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_15() {
+        fn config_1_5() {
             let mut sut = make();
 
             // Primary
@@ -1631,7 +1631,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_21() {
+        fn config_2_1() {
             let mut sut = make();
 
             // Primary
@@ -1692,7 +1692,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_22() {
+        fn config_2_2() {
             let mut sut = make();
 
             // Primary
@@ -1753,7 +1753,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_23() {
+        fn config_2_3() {
             let mut sut = make();
 
             // Primary
@@ -1802,7 +1802,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_24() {
+        fn config_2_4() {
             let mut sut = make();
 
             // Primary
@@ -1851,7 +1851,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_30() {
+        fn config_3_0() {
             let mut sut = make();
 
             // Primary
@@ -1917,7 +1917,7 @@ mod shield_configs {
         }
 
         #[test]
-        fn config_40() {
+        fn config_4_0() {
             let mut sut = make();
 
             // Primary
