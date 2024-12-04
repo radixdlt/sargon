@@ -6,9 +6,6 @@ pub(crate) struct TestSignInteractor<S: Signable> {
     pub(crate) simulated_user: SimulatedUser<S>,
 }
 
-unsafe impl<S: Signable> Sync for SignRequest<S> {}
-unsafe impl<S: Signable> Send for SignRequest<S> {}
-
 impl<S: Signable> TestSignInteractor<S> {
     pub(crate) fn new(simulated_user: SimulatedUser<S>) -> Self {
         Self { simulated_user }
