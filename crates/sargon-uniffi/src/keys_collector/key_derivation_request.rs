@@ -2,6 +2,7 @@ use crate::prelude::*;
 use sargon::indexmap::IndexMap;
 use sargon::{IndexSet, KeyDerivationRequest as InternalKeyDerivationRequest};
 
+/// A collection of derivation paths, on a per-factor-source basis.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct KeyDerivationRequest {
     pub per_factor_source: HashMap<FactorSourceIDFromHash, Vec<DerivationPath>>,
