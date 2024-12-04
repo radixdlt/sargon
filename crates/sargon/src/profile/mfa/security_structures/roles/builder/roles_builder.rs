@@ -100,17 +100,11 @@ pub enum ForeverInvalidReason {
     #[error("Primary role cannot contain Trusted Contact")]
     PrimaryCannotContainTrustedContact,
 
-    #[error("Recovery role threshold list not supported")]
-    RecoveryRoleThresholdFactorsNotSupported,
-
     #[error("Recovery role Security Questions not supported")]
     RecoveryRoleSecurityQuestionsNotSupported,
 
     #[error("Recovery role password not supported")]
     RecoveryRolePasswordNotSupported,
-
-    #[error("Confirmation role threshold list not supported")]
-    ConfirmationRoleThresholdFactorsNotSupported,
 
     #[error("Confirmation role cannot contain Trusted Contact")]
     ConfirmationRoleTrustedContactNotSupported,
@@ -143,17 +137,13 @@ impl<T> FromBasicViolation for std::result::Result<T, RoleBuilderValidation> {
     }
 }
 
-impl ForeverInvalidReason {
+impl BasicViolation {
     pub(crate) fn threshold_list_not_supported_for_role(
         role: RoleKind,
     ) -> Self {
         match role {
-            RoleKind::Recovery => {
-                Self::RecoveryRoleThresholdFactorsNotSupported
-            }
-            RoleKind::Confirmation => {
-                Self::ConfirmationRoleThresholdFactorsNotSupported
-            }
+            RoleKind::Recovery => Self::RecoveryCannotSetThreshold,
+            RoleKind::Confirmation => Self::ConfirmationCannotSetThreshold,
             RoleKind::Primary => {
                 unreachable!("Primary role DOES support threshold list. This is programmer error.")
             }
@@ -332,16 +322,17 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             }
             RoleKind::Recovery | RoleKind::Confirmation => match factor_list_kind {
                 Threshold => {
-                    return Result::forever_invalid(
-                        ForeverInvalidReason::threshold_list_not_supported_for_role(self.role()),
+                    return Result::basic_violation(
+                        BasicViolation::threshold_list_not_supported_for_role(self.role()),
                     )
                 }
-                Override => {}
+                Override => {
+                    self.validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
+                        factor_source_kind,
+                    )
+                }
             },
         }
-        self.validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
-            factor_source_kind,
-        )
     }
 }
 
@@ -825,9 +816,7 @@ mod tests {
         );
         assert_eq!(
             res,
-            Err(ForeverInvalid(
-                ForeverInvalidReason::RecoveryRoleThresholdFactorsNotSupported
-            ))
+            Err(BasicViolation(BasicViolation::RecoveryCannotSetThreshold))
         );
     }
 
@@ -840,8 +829,8 @@ mod tests {
         );
         assert_eq!(
             res,
-            Err(ForeverInvalid(
-                ForeverInvalidReason::ConfirmationRoleThresholdFactorsNotSupported
+            Err(BasicViolation(
+                BasicViolation::ConfirmationCannotSetThreshold
             ))
         );
     }
@@ -852,8 +841,8 @@ mod tests {
         let res = sut._validation_add(FactorSourceKind::Device, Threshold);
         assert_eq!(
             res,
-            RoleBuilderMutateResult::forever_invalid(
-                ForeverInvalidReason::threshold_list_not_supported_for_role(
+            RoleBuilderMutateResult::basic_violation(
+                BasicViolation::threshold_list_not_supported_for_role(
                     RoleKind::Recovery
                 )
             )
@@ -866,8 +855,8 @@ mod tests {
         let res = sut._validation_add(FactorSourceKind::Device, Threshold);
         assert_eq!(
             res,
-            RoleBuilderMutateResult::forever_invalid(
-                ForeverInvalidReason::threshold_list_not_supported_for_role(
+            RoleBuilderMutateResult::basic_violation(
+                BasicViolation::threshold_list_not_supported_for_role(
                     RoleKind::Confirmation
                 )
             )

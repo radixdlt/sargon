@@ -121,17 +121,11 @@ impl AsShieldBuilderViolation for ForeverInvalidReason {
             PrimaryCannotContainTrustedContact => {
                 SecurityShieldBuilderInvalidReason::PrimaryCannotContainTrustedContact
             }
-            RecoveryRoleThresholdFactorsNotSupported => {
-                SecurityShieldBuilderInvalidReason::RecoveryRoleThresholdFactorsNotSupported
-            }
             RecoveryRoleSecurityQuestionsNotSupported => {
                 SecurityShieldBuilderInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
             }
             RecoveryRolePasswordNotSupported => {
                 SecurityShieldBuilderInvalidReason::RecoveryRolePasswordNotSupported
-            }
-            ConfirmationRoleThresholdFactorsNotSupported => {
-                SecurityShieldBuilderInvalidReason::ConfirmationRoleThresholdFactorsNotSupported
             }
             ConfirmationRoleTrustedContactNotSupported => {
                 SecurityShieldBuilderInvalidReason::ConfirmationRoleTrustedContactNotSupported
@@ -243,17 +237,11 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error("Primary role cannot contain Trusted Contact")]
     PrimaryCannotContainTrustedContact,
 
-    #[error("Recovery role threshold list not supported")]
-    RecoveryRoleThresholdFactorsNotSupported,
-
     #[error("Recovery role Security Questions not supported")]
     RecoveryRoleSecurityQuestionsNotSupported,
 
     #[error("Recovery role password not supported")]
     RecoveryRolePasswordNotSupported,
-
-    #[error("Confirmation role threshold list not supported")]
-    ConfirmationRoleThresholdFactorsNotSupported,
 
     #[error("Confirmation role cannot contain Trusted Contact")]
     ConfirmationRoleTrustedContactNotSupported,
