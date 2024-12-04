@@ -56,7 +56,9 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for InvalidTransactionIfNeglected<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for InvalidTransactionIfNeglected<ID>
+{
     fn sample() -> Self {
         Self::new(ID::sample(), vec![AddressOfAccountOrPersona::sample()])
     }

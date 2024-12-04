@@ -119,7 +119,9 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for MaybeSignedTransactions<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for MaybeSignedTransactions<ID>
+{
     fn sample() -> Self {
         let tx_a = ID::sample();
 

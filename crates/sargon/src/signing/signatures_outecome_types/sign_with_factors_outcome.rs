@@ -15,7 +15,9 @@ pub enum SignWithFactorsOutcome<ID: SignableID> {
     Neglected(NeglectedFactors),
 }
 
-impl<ID: SignableID> HasSampleValues for SignWithFactorsOutcome<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for SignWithFactorsOutcome<ID>
+{
     fn sample() -> Self {
         Self::signed(SignResponse::sample())
     }

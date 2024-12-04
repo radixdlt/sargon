@@ -53,7 +53,11 @@ impl<S: Signable> TransactionSignRequestInput<S> {
     }
 }
 
-impl<S: Signable> HasSampleValues for TransactionSignRequestInput<S> {
+impl<S: Signable + HasSampleValues> HasSampleValues
+    for TransactionSignRequestInput<S>
+where
+    S::Payload: HasSampleValues,
+{
     fn sample() -> Self {
         let owned_factor_instance = OwnedFactorInstance::sample();
         let factor_source_id = &owned_factor_instance.factor_source_id();
