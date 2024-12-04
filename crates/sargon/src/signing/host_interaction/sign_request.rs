@@ -61,7 +61,11 @@ impl<S: Signable> SignRequest<S> {
     }
 }
 
-impl<S: Signable> HasSampleValues for SignRequest<S> {
+impl<S: Signable + HasSampleValues> HasSampleValues for SignRequest<S>
+where
+    S::Payload: HasSampleValues,
+    S::ID: HasSampleValues,
+{
     fn sample() -> Self {
         Self::new(
             FactorSourceKind::sample(),

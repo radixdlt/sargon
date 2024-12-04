@@ -30,7 +30,7 @@ impl<ID: SignableID> SignResponse<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for SignResponse<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues for SignResponse<ID> {
     fn sample() -> Self {
         let hd_signature = HDSignature::sample();
         let factor_source_id = hd_signature

@@ -429,7 +429,9 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for PetitionForEntity<ID>
+{
     fn sample() -> Self {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
