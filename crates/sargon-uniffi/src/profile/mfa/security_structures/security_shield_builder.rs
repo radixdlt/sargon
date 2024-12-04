@@ -225,9 +225,9 @@ impl SecurityShieldBuilder {
         })
     }
 
-    // pub fn reset_recovery_and_confirmation_role_state(&self) {
-    //     self.set(|builder| builder.reset_recovery_and_confirmation_role_state())
-    // }
+    pub fn reset_recovery_and_confirmation_role_state(&self) {
+        self.set(|builder| builder.reset_recovery_and_confirmation_role_state())
+    }
 }
 
 #[uniffi::export]
@@ -532,15 +532,15 @@ mod tests {
                 FactorSourceID::sample_ledger_other()
             ]
         );
-        // sut.reset_recovery_and_confirmation_role_state();
-        // assert_eq!(sut.get_recovery_factors(), vec![]);
+        sut.reset_recovery_and_confirmation_role_state();
+        assert_eq!(sut.get_recovery_factors(), vec![]);
 
-        // sut.add_factor_source_to_recovery_override(
-        //     FactorSourceID::sample_ledger(),
-        // );
-        // sut.add_factor_source_to_recovery_override(
-        //     FactorSourceID::sample_ledger_other(),
-        // );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger_other(),
+        );
 
         assert_eq!(
             sut.get_recovery_factors(),
