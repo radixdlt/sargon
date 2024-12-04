@@ -6,13 +6,13 @@ use crate::prelude::*;
 #[debug("[{}]", self.snapshot().into_iter().map(|f| format!("{:?}", f)).join(", "))]
 pub(crate) struct PetitionForFactorsSubState<F>
 where
-    F: FactorSourceReferencing + Debug + HasSampleValues,
+    F: FactorSourceReferencing + Debug,
 {
     /// Factors that have signed or skipped
     factors: RwLock<IndexSet<F>>,
 }
 
-impl<F: FactorSourceReferencing + Debug + HasSampleValues> PartialEq
+impl<F: FactorSourceReferencing + Debug> PartialEq
     for PetitionForFactorsSubState<F>
 {
     fn eq(&self, other: &Self) -> bool {
@@ -23,10 +23,7 @@ impl<F: FactorSourceReferencing + Debug + HasSampleValues> PartialEq
     }
 }
 
-impl<F: FactorSourceReferencing + Debug + HasSampleValues> Eq
-    for PetitionForFactorsSubState<F>
-{
-}
+impl<F: FactorSourceReferencing + Debug> Eq for PetitionForFactorsSubState<F> {}
 
 impl<F: FactorSourceReferencing + Debug + HasSampleValues> HasSampleValues
     for PetitionForFactorsSubState<F>
@@ -46,9 +43,7 @@ impl<F: FactorSourceReferencing + Debug + HasSampleValues> HasSampleValues
     }
 }
 
-impl<F: FactorSourceReferencing + Debug + HasSampleValues>
-    PetitionForFactorsSubState<F>
-{
+impl<F: FactorSourceReferencing + Debug> PetitionForFactorsSubState<F> {
     pub(super) fn new() -> Self {
         Self {
             factors: RwLock::new(IndexSet::new()),

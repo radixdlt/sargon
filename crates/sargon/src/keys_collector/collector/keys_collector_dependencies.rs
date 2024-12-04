@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub(crate) struct KeysCollectorDependencies {
-    /// The "interactor" used to sign with factor sources.
+    /// The "interactor" which we use to derive public keys from relevant factor sources
     pub(super) interactor: Arc<dyn KeyDerivationInteractor>,
 
     /// Factor sources grouped by kind, sorted according to "friction order",

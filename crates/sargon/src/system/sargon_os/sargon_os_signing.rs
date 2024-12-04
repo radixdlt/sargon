@@ -83,9 +83,7 @@ impl SargonOS {
                     SignedOutcome::rejected()
                 }
             }
-            Err(error) => {
-                SignedOutcome::preprocessing_error(error)
-            }
+            Err(error) => SignedOutcome::preprocessing_error(error),
         }
     }
 }

@@ -22,10 +22,12 @@ impl KeyDerivationPerFactorSource {
         factor_source_id: FactorSourceIDFromHash,
         factor_instances: Vec<HierarchicalDeterministicFactorInstance>,
     ) -> Self {
-        Self { factor_source_id, factor_instances }
+        Self {
+            factor_source_id,
+            factor_instances,
+        }
     }
 }
-
 
 impl KeyDerivationResponse {
     pub fn into_internal(&self) -> InternalKeyDerivationResponse {
@@ -42,7 +44,7 @@ impl From<InternalKeyDerivationResponse> for KeyDerivationResponse {
                 .map(|(k, v)| {
                     KeyDerivationPerFactorSource::new(
                         k.into(),
-                        v.into_iter().map(|d| d.into()).collect()
+                        v.into_iter().map(|d| d.into()).collect(),
                     )
                 })
                 .collect(),
@@ -57,7 +59,9 @@ impl From<KeyDerivationResponse> for InternalKeyDerivationResponse {
                 (
                     item.factor_source_id.into_internal(),
                     IndexSet::from_iter(
-                        item.factor_instances.into_iter().map(|d| d.into_internal()),
+                        item.factor_instances
+                            .into_iter()
+                            .map(|d| d.into_internal()),
                     ),
                 )
             }),
