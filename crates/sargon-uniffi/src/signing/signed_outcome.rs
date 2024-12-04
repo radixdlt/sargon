@@ -2,6 +2,7 @@ use crate::prelude::*;
 use paste::paste;
 use sargon::SigningAbandonedReason as InternalSigningAbandonedReason;
 
+/// The reasons signing a signable may be abandoned.
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum SigningAbandonedReason {
     /// The user rejected the signing process

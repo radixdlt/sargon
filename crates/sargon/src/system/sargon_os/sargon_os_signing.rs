@@ -122,6 +122,7 @@ impl<S: Signable> SignedOutcome<S> {
     }
 }
 
+/// The reasons signing a signable may be abandoned.
 #[derive(Clone, Debug, PartialEq, EnumAsInner)]
 pub enum SigningAbandonedReason {
     /// The user rejected the signing process
