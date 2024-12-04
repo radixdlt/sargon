@@ -45,45 +45,47 @@ impl SargonOS {
             })
             .ok()
         else {
-            return SignedOutcome::Rejected;
+            return SignedOutcome::profile_missing();
         };
 
-        let Some(signatures_collector) = SignaturesCollector::new(
+        let collector_result = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
             vec![signable.clone()],
             sign_interactor,
             profile,
             role_kind,
-        )
-        .inspect_err(|error| {
-            error!("Could not initiate signing due to error: {error}")
-        })
-        .ok() else {
-            return SignedOutcome::Rejected;
-        };
+        );
 
-        let outcome = signatures_collector.collect_signatures().await;
-        let payload_id = signable.get_id();
+        match collector_result {
+            Ok(collector) => {
+                let outcome = collector.collect_signatures().await;
+                let payload_id = signable.get_id();
 
-        if outcome.successful() {
-            let intent_signatures = IndexSet::<IntentSignature>::from_iter(
-                outcome
-                    .signatures_of_successful_transactions()
-                    .iter()
-                    .filter(|hd| hd.input.payload_id == payload_id)
-                    .map(|hd| IntentSignature(hd.signature)),
-            );
+                if outcome.successful() {
+                    let intent_signatures =
+                        IndexSet::<IntentSignature>::from_iter(
+                            outcome
+                                .signatures_of_successful_transactions()
+                                .iter()
+                                .filter(|hd| hd.input.payload_id == payload_id)
+                                .map(|hd| IntentSignature(hd.signature)),
+                        );
 
-            signable.signed(
-                IntentSignatures::new(intent_signatures)
-            ).map(|signed| {
-                SignedOutcome::Signed(signed)
-            }).unwrap_or_else(|error| {
-                error!("Could not construct intent signatures due to error: {error}");
-                SignedOutcome::Rejected
-            })
-        } else {
-            SignedOutcome::Rejected
+                    signable.signed(
+                        IntentSignatures::new(intent_signatures)
+                    ).map(|signed| {
+                        SignedOutcome::signed(signed)
+                    }).unwrap_or_else(|error| {
+                        error!("Could not construct intent signatures due to error: {error}");
+                        SignedOutcome::invalid_signatures()
+                    })
+                } else {
+                    SignedOutcome::rejected()
+                }
+            }
+            Err(error) => {
+                return SignedOutcome::preprocessing_error(error);
+            }
         }
     }
 }
@@ -94,8 +96,47 @@ pub enum SignedOutcome<S: Signable> {
     /// The user has provided all needed signatures, the signable is considered signed
     Signed(S::Signed),
 
-    /// The user has not provided all needed signatures, thus rejecting the signing process
+    /// The signing process was abandoned
+    Abandoned(SigningAbandonedReason),
+}
+
+impl<S: Signable> SignedOutcome<S> {
+    fn signed(signed: S::Signed) -> Self {
+        Self::Signed(signed)
+    }
+
+    fn profile_missing() -> Self {
+        Self::Abandoned(SigningAbandonedReason::ProfileMissing)
+    }
+
+    fn rejected() -> Self {
+        Self::Abandoned(SigningAbandonedReason::Rejected)
+    }
+
+    fn preprocessing_error(error: CommonError) -> Self {
+        Self::Abandoned(SigningAbandonedReason::PreprocessingError(
+            error.to_string(),
+        ))
+    }
+
+    fn invalid_signatures() -> Self {
+        Self::Abandoned(SigningAbandonedReason::InvalidSignatures)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, EnumAsInner)]
+pub enum SigningAbandonedReason {
+    /// The user rejected the signing process
     Rejected,
+
+    /// The signing process started with no profile present
+    ProfileMissing,
+
+    /// Preprocessing of signatures collector state failed.
+    PreprocessingError(String),
+
+    /// Could not validate signatures
+    InvalidSignatures,
 }
 
 #[cfg(test)]
@@ -144,7 +185,7 @@ mod test {
     }
 
     #[actix_rt::test]
-    async fn test_sign_transaction_intent_fail() {
+    async fn test_sign_transaction_intent_rejected() {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
@@ -160,11 +201,11 @@ mod test {
             .sign_transaction(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, SignedOutcome::Rejected);
+        assert_eq!(outcome, SignedOutcome::rejected());
     }
 
     #[actix_rt::test]
-    async fn test_sign_subintent_fail() {
+    async fn test_sign_subintent_rejected() {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
@@ -179,7 +220,7 @@ mod test {
             .sign_subintent(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, SignedOutcome::Rejected);
+        assert_eq!(outcome, SignedOutcome::rejected());
     }
 
     #[actix_rt::test]
@@ -199,7 +240,7 @@ mod test {
         let outcome =
             sut.sign_transaction(transaction, RoleKind::Primary).await;
 
-        assert_eq!(outcome, SignedOutcome::Rejected);
+        assert_eq!(outcome, SignedOutcome::profile_missing());
     }
 
     #[actix_rt::test]
@@ -219,8 +260,12 @@ mod test {
 
         let outcome =
             sut.sign_transaction(transaction, RoleKind::Primary).await;
+        println!("{:?}", outcome);
 
-        assert_eq!(outcome, SignedOutcome::Rejected);
+        assert_eq!(
+            outcome,
+            SignedOutcome::preprocessing_error(CommonError::UnknownAccount)
+        );
     }
 
     async fn boot_with_profile(

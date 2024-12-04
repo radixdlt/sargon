@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use sargon::SignedOutcome as InternalSignedOutcome;
+use sargon::SigningAbandonedReason as InternalSigningAbandonedReason;
 use sargon::Subintent as InternalSubintent;
 use sargon::TransactionIntent as InternalTransactionIntent;
-use sargon::{SignedOutcome, SignedTransaction};
 
 #[uniffi::export]
 impl SargonOS {
@@ -29,13 +29,28 @@ impl SargonOS {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+pub enum SigningAbandonedReason {
+    /// The user rejected the signing process
+    Rejected,
+
+    /// The signing process started with no profile present
+    ProfileMissing,
+
+    /// Preprocessing of signatures collector state failed.
+    PreprocessingError(String),
+
+    /// Could not validate signatures
+    InvalidSignatures,
+}
+
 /// Outcome of signing a transaction intent
 #[derive(Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum SignOutcomeTransactionIntent {
     /// The user has provided all needed signatures, the transaction intent is considered signed
     Signed(SignedIntent),
-    /// The user has not provided all needed signatures, thus rejecting the signing process
-    Rejected,
+    /// The signing process was abandoned
+    Abandoned(SigningAbandonedReason),
 }
 
 impl From<InternalSignedOutcome<InternalTransactionIntent>>
@@ -43,10 +58,12 @@ impl From<InternalSignedOutcome<InternalTransactionIntent>>
 {
     fn from(value: InternalSignedOutcome<InternalTransactionIntent>) -> Self {
         match value {
-            SignedOutcome::Signed(signed) => {
+            InternalSignedOutcome::Signed(signed) => {
                 SignOutcomeTransactionIntent::Signed(signed.into())
             }
-            SignedOutcome::Rejected => SignOutcomeTransactionIntent::Rejected,
+            InternalSignedOutcome::Abandoned(reason) => {
+                SignOutcomeTransactionIntent::Abandoned(reason.into())
+            }
         }
     }
 }
@@ -59,7 +76,9 @@ impl From<SignOutcomeTransactionIntent>
             SignOutcomeTransactionIntent::Signed(signed) => {
                 Self::Signed(signed.into())
             }
-            SignOutcomeTransactionIntent::Rejected => Self::Rejected,
+            SignOutcomeTransactionIntent::Abandoned(reason) => {
+                Self::Abandoned(reason.into())
+            }
         }
     }
 }
@@ -69,17 +88,19 @@ impl From<SignOutcomeTransactionIntent>
 pub enum SignOutcomeSubintent {
     /// The user has provided all needed signatures, the subintent is considered signed
     Signed(SignedSubintent),
-    /// The user has not provided all needed signatures, thus rejecting the signing process
-    Rejected,
+    /// The signing process was abandoned
+    Abandoned(SigningAbandonedReason),
 }
 
 impl From<InternalSignedOutcome<InternalSubintent>> for SignOutcomeSubintent {
     fn from(value: InternalSignedOutcome<InternalSubintent>) -> Self {
         match value {
-            SignedOutcome::Signed(signed) => {
+            InternalSignedOutcome::Signed(signed) => {
                 SignOutcomeSubintent::Signed(signed.into())
             }
-            SignedOutcome::Rejected => SignOutcomeSubintent::Rejected,
+            InternalSignedOutcome::Abandoned(reason) => {
+                SignOutcomeSubintent::Abandoned(reason.into())
+            }
         }
     }
 }
@@ -88,7 +109,9 @@ impl From<SignOutcomeSubintent> for InternalSignedOutcome<InternalSubintent> {
     fn from(value: SignOutcomeSubintent) -> Self {
         match value {
             SignOutcomeSubintent::Signed(signed) => Self::Signed(signed.into()),
-            SignOutcomeSubintent::Rejected => Self::Rejected,
+            SignOutcomeSubintent::Abandoned(reason) => {
+                Self::Abandoned(reason.into())
+            }
         }
     }
 }
