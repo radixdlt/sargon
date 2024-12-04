@@ -60,6 +60,34 @@ struct ShieldTests {
 		let builder = SecurityShieldBuilder()
 		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderInvalidReason.PrimaryCannotContainTrustedContact)])
 	}
+	
+	@Test("Auto lowering of threshold upon deletion")
+	func deleteFactorSourceFromPrimaryLowersThreshold() {
+		let builder = SecurityShieldBuilder()
+		let x: FactorSourceID = .sampleDevice
+		let y: FactorSourceID = .sampleLedger
+		let z: FactorSourceID = .sampleArculus
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: x)
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: y)
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: z)
+		builder.threshold = 3
+
+		builder.addFactorSourceToRecoveryOverride(factorSourceId: y)
+		#expect(builder.recoveryRoleFactors == [y])
+		
+		#expect(builder.threshold == 3)
+		
+		builder.removeFactorFromPrimary(factorSourceId: x)
+		#expect(builder.threshold == 2)
+		
+		builder.removeFactorFromAllRoles(factorSourceId: y)
+		#expect(builder.recoveryRoleFactors == []) // assert `y` is removed from Recovery and Primary
+		#expect(builder.threshold == 1)
+
+		builder.removeFactorFromPrimary(factorSourceId: z)
+		#expect(builder.threshold == 0)
+		#expect(builder.primaryRoleThresholdFactors == [])
+	}
 
 	@Test("Complete")
 	func complete() throws {

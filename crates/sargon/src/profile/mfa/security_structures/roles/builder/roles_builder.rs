@@ -218,8 +218,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE>
 where
     Assert<{ ROLE == ROLE_PRIMARY }>: IsTrue,
 {
-    /// If Ok => self is mutated
-    /// If Err(NotYetValid) => self is mutated
+    /// If Ok | Err(NotYetValid) => self is mutated
     /// If Err(ForeverInvalid) => self is not mutated
     pub(crate) fn add_factor_source_to_threshold(
         &mut self,
@@ -251,9 +250,10 @@ impl<const ROLE: u8> RoleBuilder<ROLE>
 where
     Assert<{ ROLE > ROLE_PRIMARY }>: IsTrue,
 {
-    /// If Ok => self is mutated
-    /// If Err(NotYetValid) => self is mutated
-    /// If Err(ForeverInvalid) => self is not mutated
+    /// ```ignore
+    /// Ok | Err(NotYetValid) => self is mutated
+    /// Err(ForeverInvalid) => self is NOT mutated
+    /// ```
     pub(crate) fn add_factor_source(
         &mut self,
         factor_source_id: FactorSourceID,
@@ -263,9 +263,10 @@ where
 }
 
 impl<const ROLE: u8> RoleBuilder<ROLE> {
-    /// If Ok => self is mutated
-    /// If Err(NotYetValid) => self is mutated
-    /// If Err(ForeverInvalid) => self is not mutated
+    /// ```ignore
+    /// Ok | Err(NotYetValid) => self is mutated
+    /// Err(ForeverInvalid) => self is NOT mutated
+    /// ```
     pub(crate) fn add_factor_source_to_override(
         &mut self,
         factor_source_id: FactorSourceID,
@@ -273,9 +274,10 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         self._add_factor_source_to_list(factor_source_id, Override)
     }
 
-    /// If Ok => self is mutated
-    /// If Err(NotYetValid) => self is mutated
-    /// If Err(ForeverInvalid) => self is not mutated
+    /// ```ignore
+    /// Ok | Err(NotYetValid) => self is mutated
+    /// Err(ForeverInvalid) => self is NOT mutated
+    /// ```
     fn _add_factor_source_to_list(
         &mut self,
         factor_source_id: FactorSourceID,
@@ -315,14 +317,14 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     ) -> RoleBuilderMutateResult {
         match self.role() {
             RoleKind::Primary => {
-                return self.validation_for_addition_of_factor_source_of_kind_to_list_for_primary(
+                self.validation_for_addition_of_factor_source_of_kind_to_list_for_primary(
                     factor_source_kind,
                     factor_list_kind,
                 )
             }
             RoleKind::Recovery | RoleKind::Confirmation => match factor_list_kind {
                 Threshold => {
-                    return Result::basic_violation(
+                    Result::basic_violation(
                         BasicViolation::threshold_list_not_supported_for_role(self.role()),
                     )
                 }
@@ -640,27 +642,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    fn validation_for_addition_of_factor_source_of_kind_to_override_for_confirmation(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> RoleBuilderMutateResult {
-        assert_eq!(self.role(), RoleKind::Confirmation);
-        match factor_source_kind {
-            FactorSourceKind::Device
-            | FactorSourceKind::LedgerHQHardwareWallet
-            | FactorSourceKind::ArculusCard
-            | FactorSourceKind::Password
-            | FactorSourceKind::OffDeviceMnemonic
-            | FactorSourceKind::SecurityQuestions => Ok(()),
-            FactorSourceKind::TrustedContact => {
-                RoleBuilderMutateResult::forever_invalid(
-                    ConfirmationRoleTrustedContactNotSupported,
-                )
-            }
-        }
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_recovery(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -684,6 +665,27 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             }
         }
     }
+
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn validation_for_addition_of_factor_source_of_kind_to_override_for_confirmation(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> RoleBuilderMutateResult {
+        assert_eq!(self.role(), RoleKind::Confirmation);
+        match factor_source_kind {
+            FactorSourceKind::Device
+            | FactorSourceKind::LedgerHQHardwareWallet
+            | FactorSourceKind::ArculusCard
+            | FactorSourceKind::Password
+            | FactorSourceKind::OffDeviceMnemonic
+            | FactorSourceKind::SecurityQuestions => Ok(()),
+            FactorSourceKind::TrustedContact => {
+                RoleBuilderMutateResult::forever_invalid(
+                    ConfirmationRoleTrustedContactNotSupported,
+                )
+            }
+        }
+    }
 }
 
 // =======================
@@ -695,31 +697,32 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         factor_list_kind: FactorListKind,
     ) -> RoleBuilderMutateResult {
         assert_eq!(self.role(), RoleKind::Primary);
+
+        if factor_list_kind != Threshold {
+            return RoleBuilderMutateResult::forever_invalid(
+                PrimaryCannotHavePasswordInOverrideList,
+            );
+        }
+
         let factor_source_kind = FactorSourceKind::Password;
-        match factor_list_kind {
-            Threshold => {
-                let is_alone = self
-                    .factor_sources_not_of_kind_to_list_of_kind(
-                        factor_source_kind,
-                        Threshold,
-                    )
-                    .is_empty();
-                if is_alone {
-                    return RoleBuilderMutateResult::not_yet_valid(
-                        PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
-                    );
-                }
-                if self.get_threshold() < 2 {
-                    return RoleBuilderMutateResult::not_yet_valid(
-                        PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
-                    );
-                }
-            }
-            Override => {
-                return RoleBuilderMutateResult::forever_invalid(
-                    PrimaryCannotHavePasswordInOverrideList,
-                );
-            }
+
+        let is_alone = self
+            .factor_sources_not_of_kind_to_list_of_kind(
+                factor_source_kind,
+                Threshold,
+            )
+            .is_empty();
+
+        if is_alone {
+            return RoleBuilderMutateResult::not_yet_valid(
+                PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor,
+            );
+        }
+
+        if self.get_threshold() < 2 {
+            return RoleBuilderMutateResult::not_yet_valid(
+                PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
+            );
         }
 
         Ok(())
