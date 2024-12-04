@@ -45,7 +45,7 @@ impl<S: Signable> SignaturesCollector<S> {
     }
 
     pub async fn collect_signatures(self) -> Result<SignaturesOutcome<S::ID>> {
-        let _ = self
+        self
             .sign_with_factors() // in decreasing "friction order"
             .await
             .inspect_err(|e| {
