@@ -220,6 +220,12 @@ impl SecurityShieldBuilder {
             debug!("Add FactorSource to ConfirmationRole result: {:?}", res);
         })
     }
+
+    pub fn reset_recovery_and_confirmation_role_state(&self) -> &Self {
+        self.set(|builder| {
+            builder.reset_recovery_and_confirmation_role_state();
+        })
+    }
 }
 
 impl SecurityShieldBuilder {

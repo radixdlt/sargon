@@ -183,6 +183,11 @@ impl MatrixBuilder {
             .into_matrix_err(RoleKind::Primary)
     }
 
+    pub fn reset_recovery_and_confirmation_role_state(&mut self) {
+        self.recovery_role.reset();
+        self.confirmation_role.reset();
+    }
+
     /// Adds the factor source to the primary role override list.
     pub fn add_factor_source_to_primary_override(
         &mut self,

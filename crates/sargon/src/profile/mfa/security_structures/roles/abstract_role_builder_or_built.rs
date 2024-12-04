@@ -44,6 +44,20 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     override_factors: Vec<FACTOR>,
 }
 
+impl<const ROLE: u8> RoleBuilder<ROLE>
+where
+    Assert<{ ROLE > ROLE_PRIMARY }>: IsTrue,
+{
+    /// Removes all override factors from this role
+    pub fn reset(&mut self) {
+        self.override_factors.clear();
+
+        // This is not necessary, but why not...
+        self.threshold_factors.clear();
+        self.threshold = 0;
+    }
+}
+
 pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
     AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FACTOR>;
 

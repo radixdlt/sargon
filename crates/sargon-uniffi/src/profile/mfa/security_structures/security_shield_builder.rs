@@ -224,6 +224,12 @@ impl SecurityShieldBuilder {
             )
         })
     }
+
+    pub fn reset_recovery_and_confirmation_role_state(&self) {
+        self.set(|builder| {
+            builder.reset_recovery_and_confirmation_role_state()
+        });
+    }
 }
 
 #[uniffi::export]
@@ -513,6 +519,23 @@ mod tests {
             .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
                 FactorSourceKind::ArculusCard,
             );
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+
+        assert_eq!(
+            sut.get_recovery_factors(),
+            vec![
+                FactorSourceID::sample_ledger(),
+                FactorSourceID::sample_ledger_other()
+            ]
+        );
+        sut.reset_recovery_and_confirmation_role_state();
+        assert_eq!(sut.get_recovery_factors(), vec![]);
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
