@@ -174,11 +174,12 @@ mod threshold_suite {
             FactorSourceID::sample_arculus_other(),
         )
         .unwrap();
-        sut.set_threshold(3).unwrap();
-        assert_eq!(sut.get_threshold(), 3);
+        sut.set_threshold(2).unwrap();
+        assert_eq!(sut.get_threshold(), 2);
         sut.remove_factor_source(&fs0).unwrap();
+        assert_eq!(sut.get_threshold(), 2); // assert that we DIDN'T lower the threshold, since we have 2 factors
         sut.remove_factor_source(&fs1).unwrap();
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold(), 1); // assert that we DID lower the threshold now that we have 1 factor
     }
 
     #[test]

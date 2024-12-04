@@ -93,7 +93,6 @@ mod device_in_isolation {
 
     #[test]
     fn two_of_same_kind_allowed() {
-        // TODO: Ask Matt
         // Arrange
         let mut sut = make();
 
@@ -142,7 +141,6 @@ mod ledger_in_isolation {
 
     #[test]
     fn two_of_same_kind_allowed() {
-        // TODO: Ask Matt
         // Arrange
         let mut sut = make();
 
@@ -189,7 +187,6 @@ mod arculus_in_isolation {
 
     #[test]
     fn two_of_same_kind_allowed() {
-        // TODO: Ask Matt
         // Arrange
         let mut sut = make();
 
@@ -236,7 +233,6 @@ mod off_device_mnemonic_in_isolation {
 
     #[test]
     fn two_of_same_kind_allowed() {
-        // TODO: Ask Matt
         // Arrange
         let mut sut = make();
 
@@ -330,7 +326,6 @@ mod password_in_isolation {
 
     #[test]
     fn two_of_same_kind_allowed() {
-        // TODO: Ask Matt
         // Arrange
         let mut sut = make();
 
