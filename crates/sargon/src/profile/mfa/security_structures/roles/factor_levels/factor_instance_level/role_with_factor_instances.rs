@@ -3,8 +3,6 @@ use crate::prelude::*;
 pub(crate) type RoleWithFactorInstances<const ROLE: u8> =
     AbstractBuiltRoleWithFactor<ROLE, FactorInstance>;
 
-
-
 impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
     pub(crate) fn fulfilling_role_of_factor_sources_with_factor_instances(
         consuming_instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
