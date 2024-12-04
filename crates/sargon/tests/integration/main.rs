@@ -326,7 +326,8 @@ mod integration_tests {
             async fn sign(
                 &self,
                 request: SignRequest<TransactionIntent>,
-            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+            ) -> Result<SignWithFactorsOutcome<TransactionIntentHash>>
+            {
                 let mut signatures =
                     IndexSet::<HDSignature<TransactionIntentHash>>::new();
 
@@ -350,17 +351,17 @@ mod integration_tests {
                             );
                         }
                         SignWithFactorsOutcome::Neglected(_) => {
-                            return SignWithFactorsOutcome::Neglected(
+                            return Ok(SignWithFactorsOutcome::Neglected(
                                 NeglectedFactors::new(
                                     NeglectFactorReason::UserExplicitlySkipped,
                                     request.factor_source_ids(),
                                 ),
-                            );
+                            ));
                         }
                     }
                 }
-                SignWithFactorsOutcome::signed(SignResponse::with_signatures(
-                    signatures,
+                Ok(SignWithFactorsOutcome::signed(
+                    SignResponse::with_signatures(signatures),
                 ))
             }
         }
@@ -471,7 +472,7 @@ mod integration_tests {
             )
             .unwrap();
 
-            let outcome = collector.collect_signatures().await;
+            let outcome = collector.collect_signatures().await.unwrap();
 
             assert!(outcome.successful());
             assert_eq!(

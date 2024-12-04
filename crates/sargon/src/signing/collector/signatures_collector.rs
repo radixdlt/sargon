@@ -44,13 +44,15 @@ impl<S: Signable> SignaturesCollector<S> {
         )
     }
 
-    pub async fn collect_signatures(self) -> SignaturesOutcome<S::ID> {
+    pub async fn collect_signatures(self) -> Result<SignaturesOutcome<S::ID>> {
         let _ = self
             .sign_with_factors() // in decreasing "friction order"
             .await
-            .inspect_err(|e| error!("Failed to use factor sources: {:#?}", e));
+            .inspect_err(|e| {
+                error!("Failed to use factor sources: {:#?}", e)
+            })?;
 
-        self.outcome()
+        Ok(self.outcome())
     }
 }
 
@@ -199,7 +201,7 @@ impl<S: Signable> SignaturesCollector<S> {
     async fn sign_with_factors_of_kind(
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
-    ) {
+    ) -> Result<()> {
         debug!(
             "Use(?) #{:?} factors of kind: {:?}",
             &factor_sources_of_kind.factor_sources().len(),
@@ -219,7 +221,7 @@ impl<S: Signable> SignaturesCollector<S> {
                 )
             }
             debug!("Dispatching poly request to interactor: {:?}", request);
-            let response = self.dependencies.interactor.sign(request).await;
+            let response = self.dependencies.interactor.sign(request).await?;
             debug!("Got response from poly interactor: {:?}", response);
             self.process_batch_response(response);
         } else {
@@ -245,7 +247,8 @@ impl<S: Signable> SignaturesCollector<S> {
 
                 debug!("Dispatching mono request to interactor: {:?}", request);
                 // Produce the results from the interactor
-                let response = self.dependencies.interactor.sign(request).await;
+                let response =
+                    self.dependencies.interactor.sign(request).await?;
                 debug!("Got response from mono interactor: {:?}", response);
 
                 // Report the results back to the collector
@@ -256,6 +259,7 @@ impl<S: Signable> SignaturesCollector<S> {
                 }
             }
         }
+        Ok(())
     }
 
     /// In decreasing "friction order"
@@ -269,7 +273,8 @@ impl<S: Signable> SignaturesCollector<S> {
             {
                 continue;
             }
-            self.sign_with_factors_of_kind(factor_sources_of_kind).await;
+            self.sign_with_factors_of_kind(factor_sources_of_kind)
+                .await?;
         }
         info!("FINISHED WITH ALL FACTORS");
         Ok(())
@@ -476,7 +481,7 @@ mod tests {
             RoleKind::Primary,
         )
         .unwrap();
-        let outcome = collector.collect_signatures().await;
+        let outcome = collector.collect_signatures().await.unwrap();
         assert!(outcome.successful())
     }
 
@@ -510,7 +515,7 @@ mod tests {
         )
         .unwrap();
 
-        let outcome = collector.collect_signatures().await;
+        let outcome = collector.collect_signatures().await.unwrap();
         assert!(!outcome.successful());
         assert_eq!(outcome.failed_transactions().len(), 1);
         assert_eq!(outcome.successful_transactions().len(), 1);
@@ -543,7 +548,7 @@ mod tests {
             )
             .unwrap();
 
-            let outcome = collector.collect_signatures().await;
+            let outcome = collector.collect_signatures().await.unwrap();
             assert!(outcome.successful());
             assert_eq!(
                 outcome.signatures_of_successful_transactions().len(),
@@ -893,7 +898,7 @@ mod tests {
             )
             .unwrap();
 
-            let outcome = collector.collect_signatures().await;
+            let outcome = collector.collect_signatures().await.unwrap();
             assert!(outcome.successful());
             assert!(outcome.failed_transactions().is_empty());
             assert_eq!(
@@ -1036,7 +1041,7 @@ mod tests {
             )
             .unwrap();
 
-            let outcome = collector.collect_signatures().await;
+            let outcome = collector.collect_signatures().await.unwrap();
 
             assert_eq!(
                 outcome.neglected_factor_sources().len(),
@@ -1130,7 +1135,7 @@ mod tests {
                 )
                 .unwrap();
 
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 assert_eq!(
                     outcome
@@ -1192,7 +1197,7 @@ mod tests {
                 )
                 .unwrap();
 
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 assert_eq!(
                     outcome
@@ -1279,7 +1284,7 @@ mod tests {
                 )
                 .unwrap();
 
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
 
                 let tuples = tuples.borrow().clone();
                 assert_eq!(
@@ -1448,7 +1453,7 @@ mod tests {
                     ])
                 ]);
 
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 2);
@@ -1492,7 +1497,7 @@ mod tests {
                     ]),
                 ]);
 
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 2);
@@ -1568,7 +1573,7 @@ mod tests {
                         sample_at::<E>(0),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1582,8 +1587,11 @@ mod tests {
                     sample.clone(),
                 ]);
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
-                let signature =
-                    &collector.collect_signatures().await.all_signatures()[0];
+                let signature = &collector
+                    .collect_signatures()
+                    .await
+                    .unwrap()
+                    .all_signatures()[0];
                 assert_eq!(
                     signature.payload_id(),
                     &tx.signable.transaction_intent_hash()
@@ -1618,8 +1626,11 @@ mod tests {
                     entity.clone(),
                 ]);
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
-                let signature =
-                    &collector.collect_signatures().await.all_signatures()[0];
+                let signature = &collector
+                    .collect_signatures()
+                    .await
+                    .unwrap()
+                    .all_signatures()[0];
                 assert_eq!(
                     signature.owned_factor_instance().owner,
                     entity.address()
@@ -1634,8 +1645,11 @@ mod tests {
                     entity.clone(),
                 ]);
                 let collector = SignaturesCollector::test_prudent([tx.clone()]);
-                let signature =
-                    &collector.collect_signatures().await.all_signatures()[0];
+                let signature = &collector
+                    .collect_signatures()
+                    .await
+                    .unwrap()
+                    .all_signatures()[0];
 
                 assert_eq!(
                     signature
@@ -1656,7 +1670,7 @@ mod tests {
                         sample_at::<E>(1),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1668,7 +1682,7 @@ mod tests {
                         sample_at::<E>(2),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1680,7 +1694,7 @@ mod tests {
                         sample_at::<E>(3),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1692,7 +1706,7 @@ mod tests {
                         sample_at::<E>(4),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 2);
@@ -1704,7 +1718,7 @@ mod tests {
                         sample_at::<E>(5),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1716,7 +1730,7 @@ mod tests {
                         sample_at::<E>(6),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1728,7 +1742,7 @@ mod tests {
                         sample_at::<E>(7),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
 
@@ -1744,7 +1758,7 @@ mod tests {
                             sample_at::<E>(0),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1759,7 +1773,7 @@ mod tests {
                             sample_at::<E>(1),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1774,7 +1788,7 @@ mod tests {
                             sample_at::<E>(2),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1787,7 +1801,7 @@ mod tests {
                             sample_at::<E>(3),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1800,7 +1814,7 @@ mod tests {
                             sample_at::<E>(4),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 2);
@@ -1813,7 +1827,7 @@ mod tests {
                             sample_at::<E>(5),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1826,7 +1840,7 @@ mod tests {
                             sample_at::<E>(6),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
 
@@ -1840,7 +1854,7 @@ mod tests {
                             sample_at::<E>(7),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
 
@@ -1857,7 +1871,7 @@ mod tests {
                             entity.clone(),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 1);
@@ -1897,7 +1911,7 @@ mod tests {
                             }),
                         ]),
                     ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert_eq!(signatures.len(), 2);
@@ -1916,7 +1930,7 @@ mod tests {
                         sample_at::<E>(0),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -1931,7 +1945,7 @@ mod tests {
                     ])],
                     SimulatedFailures::with_simulated_failures(failing.clone()),
                 );
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let neglected = outcome.ids_of_neglected_factor_sources();
                 assert_eq!(neglected, failing);
@@ -1945,7 +1959,7 @@ mod tests {
                         sample_at::<E>(1),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -1959,7 +1973,7 @@ mod tests {
                         sample_at::<E>(2),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -1971,7 +1985,7 @@ mod tests {
                         sample_at::<E>(3),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -1983,7 +1997,7 @@ mod tests {
                         sample_at::<E>(4),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -1995,7 +2009,7 @@ mod tests {
                         sample_at::<E>(5),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -2007,7 +2021,7 @@ mod tests {
                         sample_at::<E>(6),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -2019,7 +2033,7 @@ mod tests {
                         sample_at::<E>(7),
                     ]),
                 ]);
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
                 assert!(signatures.is_empty());
@@ -2034,7 +2048,7 @@ mod tests {
                         FactorSourceIDFromHash::sample_at(0),
                     ]),
                 );
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 assert_eq!(
                     outcome
@@ -2063,7 +2077,7 @@ mod tests {
                     RoleKind::Primary,
                 );
 
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 assert_eq!(
                     outcome
@@ -2088,7 +2102,7 @@ mod tests {
                         FactorSourceIDFromHash::sample_at(3),
                     ]),
                 );
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 assert_eq!(
                     outcome
@@ -2114,7 +2128,7 @@ mod tests {
                         FactorSourceIDFromHash::sample_at(3),
                     ]),
                 );
-                let outcome = collector.collect_signatures().await;
+                let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 assert_eq!(
                     outcome.ids_of_neglected_factor_sources(),

@@ -25,12 +25,12 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
     async fn sign_transactions(
         &self,
         request: SignRequestOfTransactionIntent,
-    ) -> SignWithFactorsOutcomeOfTransactionIntentHash;
+    ) -> Result<SignWithFactorsOutcomeOfTransactionIntentHash>;
 
     async fn sign_subintents(
         &self,
         request: SignRequestOfSubintent,
-    ) -> SignWithFactorsOutcomeOfSubintentHash;
+    ) -> Result<SignWithFactorsOutcomeOfSubintentHash>;
 
     async fn derive_keys(
         &self,
@@ -58,8 +58,12 @@ impl InternalSignInteractor<InternalTransactionIntent>
     async fn sign(
         &self,
         request: InternalSignRequestForTransactionIntent,
-    ) -> InternalSignWithFactorsOutcomeForTransactionIntent {
-        self.wrapped.sign_transactions(request.into()).await.into()
+    ) -> InternalResult<InternalSignWithFactorsOutcomeForTransactionIntent>
+    {
+        self.wrapped
+            .sign_transactions(request.into())
+            .await
+            .into_internal_result()
     }
 }
 
@@ -70,8 +74,11 @@ impl InternalSignInteractor<InternalSubintent>
     async fn sign(
         &self,
         request: InternalSignRequestForSubintent,
-    ) -> InternalSignWithFactorsOutcomeForSubintent {
-        self.wrapped.sign_subintents(request.into()).await.into()
+    ) -> InternalResult<InternalSignWithFactorsOutcomeForSubintent> {
+        self.wrapped
+            .sign_subintents(request.into())
+            .await
+            .into_internal_result()
     }
 }
 

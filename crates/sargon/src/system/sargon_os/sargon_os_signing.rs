@@ -47,7 +47,7 @@ impl SargonOS {
             role_kind,
         )?;
 
-        let outcome = collector.collect_signatures().await;
+        let outcome = collector.collect_signatures().await?;
         let payload_id = signable.get_id();
 
         if outcome.successful() {

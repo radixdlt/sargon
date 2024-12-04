@@ -10,5 +10,5 @@ pub trait SignInteractor<S: Signable>: Send + Sync {
     async fn sign(
         &self,
         request: SignRequest<S>,
-    ) -> SignWithFactorsOutcome<S::ID>;
+    ) -> Result<SignWithFactorsOutcome<S::ID>>;
 }

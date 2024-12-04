@@ -27,7 +27,7 @@ impl SignInteractor<TransactionIntent> for TestUseFactorSourcesInteractors {
     async fn sign(
         &self,
         request: SignRequest<TransactionIntent>,
-    ) -> SignWithFactorsOutcome<TransactionIntentHash> {
+    ) -> Result<SignWithFactorsOutcome<TransactionIntentHash>> {
         self.transaction_signing.sign(request).await
     }
 }
@@ -37,7 +37,7 @@ impl SignInteractor<Subintent> for TestUseFactorSourcesInteractors {
     async fn sign(
         &self,
         request: SignRequest<Subintent>,
-    ) -> SignWithFactorsOutcome<SubintentHash> {
+    ) -> Result<SignWithFactorsOutcome<SubintentHash>> {
         self.subintent_signing.sign(request).await
     }
 }

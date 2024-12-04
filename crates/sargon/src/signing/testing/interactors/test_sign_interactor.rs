@@ -23,7 +23,7 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
     async fn sign(
         &self,
         request: SignRequest<S>,
-    ) -> SignWithFactorsOutcome<S::ID> {
+    ) -> Result<SignWithFactorsOutcome<S::ID>> {
         self.simulated_user.spy_on_request_before_handled(
             request.factor_source_kind(),
             request.invalid_transactions_if_neglected.clone(),
@@ -35,7 +35,7 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
             .collect::<IndexSet<_>>();
 
         if self.should_simulate_failure(ids.clone()) {
-            return SignWithFactorsOutcome::failure_with_factors(ids);
+            return Ok(SignWithFactorsOutcome::failure_with_factors(ids));
         }
 
         match self
@@ -68,11 +68,11 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                         .collect(),
                 );
 
-                SignWithFactorsOutcome::signed(response)
+                Ok(SignWithFactorsOutcome::signed(response))
             }
 
             SigningUserInput::Skip => {
-                SignWithFactorsOutcome::user_skipped_factors(ids)
+                Ok(SignWithFactorsOutcome::user_skipped_factors(ids))
             }
         }
     }
