@@ -153,13 +153,10 @@ mod threshold_suite {
     fn remove_lowers_threshold_from_1_to_0() {
         let mut sut = make();
         let fs = sample();
-        sut.add_factor_source_to_threshold(fs).unwrap();
-        sut.set_threshold(1).unwrap();
+        assert_eq!(sut.get_threshold(), 0);
+        sut.add_factor_source_to_threshold(fs).unwrap(); // should automatically increase threshold to 1
         assert_eq!(sut.get_threshold(), 1);
-        assert_eq!(
-            sut.remove_factor_source(&fs),
-            Err(Validation::NotYetValid(RoleMustHaveAtLeastOneFactor))
-        );
+        sut.remove_factor_source(&fs).unwrap();
         assert_eq!(sut.get_threshold(), 0);
     }
 
@@ -668,13 +665,15 @@ mod ledger {
             let mut sut = make();
 
             // Act
-            sut.add_factor_source_to_threshold(sample()).unwrap();
+            sut.add_factor_source_to_threshold(sample()).unwrap(); // should automatically bump threshold to 1
+
+            let _ = sut.set_threshold(0);
 
             // Assert
             assert_eq!(
                 sut.build(),
                 Err(RoleBuilderValidation::NotYetValid(
-                    NotYetValidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors
+                    NotYetValidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
                 ))
             );
         }

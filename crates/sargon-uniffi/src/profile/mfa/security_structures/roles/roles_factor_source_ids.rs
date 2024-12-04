@@ -2,4 +2,7 @@ use crate::prelude::*;
 
 use super::decl_role_macro::role_conversion;
 
-role_conversion!(FactorSourceID);
+role_conversion!(
+    /// Role of FactorSourceIDs
+    FactorSourceID
+);

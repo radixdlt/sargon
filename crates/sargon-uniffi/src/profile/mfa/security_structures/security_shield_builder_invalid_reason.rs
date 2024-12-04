@@ -40,7 +40,7 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error(
         "Primary role with threshold factors cannot have a threshold of zero"
     )]
-    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+    PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero,
 
     #[error("Primary role with password in threshold list must have threshold greater than one")]
     PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,

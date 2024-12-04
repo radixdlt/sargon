@@ -171,6 +171,9 @@ impl MatrixBuilder {
     }
 
     /// Adds the factor source to the primary role threshold list.
+    ///
+    /// Also sets the threshold to 1 this is the first factor set and if
+    /// the threshold was 0.
     pub fn add_factor_source_to_primary_threshold(
         &mut self,
         factor_source_id: FactorSourceID,
@@ -303,7 +306,6 @@ impl MatrixBuilder {
         let r0 = self.remove_factor_from_primary(fsid);
         let r1 = self.remove_factor_from_recovery(fsid);
         let r2 = self.remove_factor_from_confirmation(fsid);
-
         r0.or(r1).or(r2)
     }
 }

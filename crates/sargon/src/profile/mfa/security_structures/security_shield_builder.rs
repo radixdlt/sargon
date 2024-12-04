@@ -115,6 +115,9 @@ impl SecurityShieldBuilder {
     }
 
     /// Adds the factor source to the primary role threshold list.
+    ///
+    /// Also sets the threshold to 1 this is the first factor set and if
+    /// the threshold was 0.
     pub fn add_factor_source_to_primary_threshold(
         &self,
         factor_source_id: FactorSourceID,
@@ -459,6 +462,16 @@ mod tests {
     type SUT = SecurityShieldBuilder;
 
     #[test]
+    fn add_factor_to_primary_threshold_does_not_change_already_set_threshold() {
+        let sut = SUT::new();
+        sut.set_threshold(42);
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+        assert_eq!(sut.get_threshold(), 42);
+    }
+
+    #[test]
     fn test() {
         let sut = SUT::default();
 
@@ -467,9 +480,9 @@ mod tests {
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
+                // also sets threshold -> 1
                 FactorSourceID::sample_device(),
             )
-            .set_threshold(1)
             .add_factor_source_to_primary_override(
                 FactorSourceID::sample_arculus(),
             )
@@ -499,6 +512,7 @@ mod tests {
             shield.matrix_of_factors.primary().get_override_factors(),
             &vec![FactorSourceID::sample_arculus()]
         );
+        assert_eq!(shield.matrix_of_factors.primary().get_threshold(), 1);
         assert_eq!(
             shield.matrix_of_factors.recovery().get_override_factors(),
             &vec![FactorSourceID::sample_ledger()]
@@ -726,11 +740,14 @@ mod test_invalid {
     fn primary_role_with_threshold_cannot_be_zero_with_factors() {
         let sut = SUT::new();
         sut.add_factor_source_to_primary_threshold(
+            // bumped threshold
             FactorSourceID::sample_device(),
         );
+        assert_eq!(sut.get_threshold(), 1);
+        sut.set_threshold(0);
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
         );
     }
 

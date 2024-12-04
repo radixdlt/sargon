@@ -89,8 +89,21 @@ struct ShieldTests {
 		#expect(builder.primaryRoleThresholdFactors == [])
 	}
 
-	@Test("Complete")
-	func complete() throws {
+	@Test("Validate")
+	func validate() throws {
+		let builder = SecurityShieldBuilder()
+		#expect(builder.validate() == .PrimaryRoleMustHaveAtLeastOneFactor)
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
+		#expect(builder.primaryRoleThresholdFactors == [.sampleDevice])
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDeviceOther)
+
+		#expect(builder.validate() == .RecoveryRoleMustHaveAtLeastOneFactor)
+		builder.removeFactorFromPrimary(factorSourceId: .sampleDeviceOther)
+	}
+
+	@Test("Build")
+	func build() throws {
 		let builder = SecurityShieldBuilder()
 		builder.setName(name: "S.H.I.E.L.D.")
 		builder.numberOfDaysUntilAutoConfirm = 42
@@ -98,8 +111,9 @@ struct ShieldTests {
 		#expect(builder.validate() == .PrimaryRoleMustHaveAtLeastOneFactor)
 
 		// Primary
-		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
-		builder.threshold = 1
+		#expect(builder.threshold == 0)
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice) // bumps threshold
+		#expect(builder.threshold == 1)
 		builder.addFactorSourceToPrimaryOverride(factorSourceId: .sampleArculus)
 		builder.addFactorSourceToPrimaryOverride(factorSourceId: .sampleArculusOther)
 

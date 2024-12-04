@@ -401,6 +401,10 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
+        assert_eq!(
+            sut.primary_role.get_threshold_factors(),
+            &[FactorSourceID::sample_device()]
+        );
         let res =
             sut.remove_factor_from_all_roles(&FactorSourceID::sample_device());
         assert_eq!(res, Ok(()));

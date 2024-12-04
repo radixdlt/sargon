@@ -67,8 +67,17 @@ macro_rules! matrix_conversion {
             }
         }
     };
-    (struct: $struct_name:ident, $factor_level:ty) => {
+    (
+        struct:
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name:ident, $factor_level:ty
+    ) => {
         paste! {
+            $(
+                #[doc = $expr]
+            )*
             #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
             pub struct $struct_name {
                 pub primary_role: [< PrimaryRoleWith $factor_level s >],
@@ -85,11 +94,20 @@ macro_rules! matrix_conversion {
             );
         }
     };
-    ($factor_level:ty) => {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $factor_level:ty
+    ) => {
         paste! {
             use sargon::$factor_level as [< Internal $factor_level>];
             matrix_conversion!(
-                struct: [< MatrixOf $factor_level s >],
+                struct:
+                $(
+                    #[doc = $expr]
+                )*
+                [< MatrixOf $factor_level s >],
                 $factor_level
             );
         }

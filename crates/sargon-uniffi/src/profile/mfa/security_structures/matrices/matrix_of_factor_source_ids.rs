@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 use super::decl_matrix_macro::matrix_conversion;
 
-matrix_conversion!(FactorSourceID);
+matrix_conversion!(
+    /// Matrix of `FactorSourceID`s containing the primary, recovery, and confirmation roles with `FactorSourceID`s
+    FactorSourceID
+);
 
 macro_rules! export_sample_config {
     ($config_ident:literal) => {

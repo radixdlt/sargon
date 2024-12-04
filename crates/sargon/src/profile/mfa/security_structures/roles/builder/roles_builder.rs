@@ -74,7 +74,7 @@ pub enum NotYetValidReason {
     #[error(
         "Primary role with threshold factors cannot have a threshold of zero"
     )]
-    PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+    PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero,
 
     #[error("Primary role with password in threshold list must have threshold greater than one")]
     PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
@@ -218,13 +218,25 @@ impl<const ROLE: u8> RoleBuilder<ROLE>
 where
     Assert<{ ROLE == ROLE_PRIMARY }>: IsTrue,
 {
+    /// ```ignore
     /// If Ok | Err(NotYetValid) => self is mutated
-    /// If Err(ForeverInvalid) => self is not mutated
+    /// If Err(ForeverInvalid) => self is NOT mutated
+    /// ```
+    ///
+    /// Also sets the threshold to 1 this is the first factor set and if
+    /// the threshold was 0.
     pub(crate) fn add_factor_source_to_threshold(
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> RoleBuilderMutateResult {
+        let should_set_threshold_to_one = self.get_threshold() == 0
+            && self.get_threshold_factors().is_empty();
         self._add_factor_source_to_list(factor_source_id, Threshold)
+            .inspect(|_| {
+                if should_set_threshold_to_one {
+                    let _ = self.set_threshold(1);
+                }
+            })
     }
 
     /// If we would add a factor of kind `factor_source_kind` to the list of kind `Threshold`
@@ -412,7 +424,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         if self.get_threshold() == 0 && !self.get_threshold_factors().is_empty()
         {
             return Some(
-                NotYetValidReason::PrimaryRoleWithThresholdCannotBeZeroWithFactors,
+                NotYetValidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero,
             );
         }
         None
@@ -579,6 +591,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                 FactorSourceNotFound,
             );
         }
+
         let remove = |xs: &mut Vec<FactorSourceID>| {
             let index = xs
                     .iter()
@@ -592,15 +605,16 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         } else if self.threshold_contains_factor_source(factor_source_id) {
             // We use `else if` to highlight the fact that a factor cannot
             // ever be in both override and threshold list.
-
             remove(self.mut_threshold_factors());
             let threshold_factors_len =
                 self.get_threshold_factors().len() as u8;
             if self.get_threshold() > threshold_factors_len {
-                self.set_threshold(threshold_factors_len)?;
+                // N.B. we don't use `set_threshold` since this might be a
+                // temporary invalid state, if e.g. primary role does not have
+                // any factors.
+                self.unchecked_set_threshold(threshold_factors_len);
             }
         }
-
         Ok(())
     }
 

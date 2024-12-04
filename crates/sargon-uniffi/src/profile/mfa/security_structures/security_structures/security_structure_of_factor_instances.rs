@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use sargon::SecurityStructureOfFactorInstances as InternalSecurityStructureOfFactorInstances;
 
+/// A MatrixOfFactorInstances and an ID which identifies it, this is
+/// the Profile data structure representation of the owner key hashes which
+/// have been uploaded as Scrypto AccessRules on the AccessController on-ledger.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureOfFactorInstances {
     /// The ID of the `SecurityStructureOfFactorSourceIDs` in
@@ -13,23 +16,3 @@ pub struct SecurityStructureOfFactorInstances {
     /// and Confirmation role.
     pub matrix_of_factors: MatrixOfFactorInstances,
 }
-
-use sargon::SecurityStructureOfFactorSourceIDs as InternalSecurityStructureOfFactorSourceIDs;
-
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
-pub struct SecurityStructureOfFactorSourceIDs {
-    /// Metadata of this Security Structure, such as globally unique and
-    /// stable identifier, creation date and user chosen label (name).
-    pub metadata: SecurityStructureMetadata,
-
-    /// The structure of factors to use for certain roles, Primary, Recovery
-    /// and Confirmation role.
-    pub matrix_of_factors: MatrixOfFactorSourceIDs,
-}
-
-delegate_debug_into!(
-    SecurityStructureOfFactorSourceIDs,
-    InternalSecurityStructureOfFactorSourceIDs
-);
-
-pub type MatrixOfFactorSourceIds = MatrixOfFactorSourceIDs;

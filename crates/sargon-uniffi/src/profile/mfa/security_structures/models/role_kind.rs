@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use sargon::RoleKind as InternalRoleKind;
 
+/// A discriminator of a role in a matrix of Factors.
 #[derive(
     Clone, Copy, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
 )]

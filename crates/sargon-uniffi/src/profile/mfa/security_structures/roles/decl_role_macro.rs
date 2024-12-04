@@ -25,13 +25,36 @@ use crate::prelude::*;
 // Furthermore it will generate `HasSampleValues` impl for each of the generated structs.
 // and also uniffi export them.
 macro_rules! role_conversion {
-    ($factor_level:ty) => {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $factor_level:ty
+    ) => {
         paste! {
             use sargon::$factor_level as [< Internal $factor_level>];
         }
-        role_conversion_inner!(for: Primary $factor_level);
-        role_conversion_inner!(for: Recovery $factor_level);
-        role_conversion_inner!(for: Confirmation $factor_level);
+        role_conversion_inner!(
+            for:
+            $(
+                #[doc = $expr]
+            )*
+            Primary $factor_level
+        );
+        role_conversion_inner!(
+            for:
+            $(
+                #[doc = $expr]
+            )*
+            Recovery $factor_level)
+        ;
+        role_conversion_inner!(
+            for:
+            $(
+                #[doc = $expr]
+            )*
+            Confirmation $factor_level
+        );
     };
 }
 
@@ -114,8 +137,16 @@ macro_rules! role_conversion_inner {
     // Declare the struct and impl `From<Internal>
     // and by recursively calling `role_conversion_inner` also impl
     // `From` conversions.
-    (struct: $struct_name:ident, $factor_level:ty) => {
-        /// A role with a threshold, threshold_factors and override_factors.
+    (
+        struct:
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name:ident, $factor_level:ty
+    ) => {
+        $(
+            #[doc = $expr]
+        )*
         #[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
         pub struct $struct_name {
 
@@ -140,10 +171,20 @@ macro_rules! role_conversion_inner {
             );
         }
     };
-    (for: $role:ident $factor_level:ty) => {
+    (
+        for:
+        $(
+            #[doc = $expr: expr]
+        )*
+        $role:ident $factor_level:ty
+    ) => {
         paste! {
             role_conversion_inner!(
-                struct: [< $role RoleWith $factor_level s >],
+                struct:
+                $(
+                    #[doc = $expr]
+                )*
+                [< $role RoleWith $factor_level s >],
                 $factor_level
             );
         }

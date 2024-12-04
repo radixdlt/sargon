@@ -178,6 +178,9 @@ impl SecurityShieldBuilder {
     }
 
     /// Adds the factor source to the primary role threshold list.
+    ///
+    /// Also sets the threshold to 1 this is the first factor set and if
+    /// the threshold was 0.
     pub fn add_factor_source_to_primary_threshold(
         &self,
         factor_source_id: FactorSourceID,
@@ -418,6 +421,14 @@ impl FactorSourceID {
     pub fn sample_arculus_other() -> Self {
         Self::new(sargon::FactorSourceID::sample_arculus_other())
     }
+
+    pub fn sample_password() -> Self {
+        Self::new(sargon::FactorSourceID::sample_password())
+    }
+
+    pub fn sample_password_other() -> Self {
+        Self::new(sargon::FactorSourceID::sample_password_other())
+    }
 }
 
 #[cfg(test)]
@@ -460,14 +471,22 @@ mod tests {
             );
 
         sut.add_factor_source_to_primary_threshold(
+            // should also bump threshold to 1
             FactorSourceID::sample_device(),
         );
+        assert_eq!(sut.get_primary_threshold(), 1);
+
+        sut.add_factor_source_to_primary_threshold(
+            // should NOT bump threshold
+            FactorSourceID::sample_password_other(),
+        );
+        assert_eq!(sut.get_primary_threshold(), 1);
+        sut.remove_factor_from_primary(FactorSourceID::sample_password_other());
+
         assert_eq!(
             sut.get_primary_threshold_factors(),
             vec![FactorSourceID::sample_device()]
         );
-        sut.set_threshold(1);
-        assert_eq!(sut.get_primary_threshold(), 1);
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_arculus(),
         );

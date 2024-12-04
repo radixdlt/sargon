@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 use super::decl_matrix_macro::matrix_conversion;
 
-matrix_conversion!(FactorSource);
+matrix_conversion!(
+    /// Matrix of `FactorSource`s containing the primary, recovery, and confirmation roles with `FactorSource`s
+    FactorSource
+);
 
 #[cfg(test)]
 mod tests {

@@ -2,6 +2,8 @@ use sargon::AsShieldBuilderViolation;
 
 use crate::prelude::*;
 
+/// The "validation result" of a `FactorSourceID` in a `Role`, if
+/// it we were to add it to a role list.
 #[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct FactorSourceValidationStatus {
     pub role: RoleKind,
@@ -9,6 +11,8 @@ pub struct FactorSourceValidationStatus {
     pub reason_if_invalid: Option<FactorSourceValidationStatusReasonIfInvalid>,
 }
 
+/// The reason why a `FactorSourceID` is invalid if it were
+/// to be added into a factor list for some role.
 #[derive(Clone, Debug, PartialEq, uniffi::Enum)]
 pub enum FactorSourceValidationStatusReasonIfInvalid {
     BasicViolation(String),
