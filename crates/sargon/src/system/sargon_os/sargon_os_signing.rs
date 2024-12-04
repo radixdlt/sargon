@@ -82,10 +82,10 @@ mod test {
             TransactionIntent,
         >(&sut.profile().unwrap());
 
-        let outcome = sut
+        let signed = sut
             .sign_transaction(signable.clone(), RoleKind::Primary)
-            .await;
-        let signed = outcome.unwrap();
+            .await
+            .unwrap();
 
         assert_eq!(signable, signed.intent);
         assert_eq!(entities.len(), signed.intent_signatures.signatures.len());
@@ -99,10 +99,10 @@ mod test {
         let (signable, entities) =
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
-        let outcome = sut
+        let signed = sut
             .sign_subintent(signable.clone(), RoleKind::Primary)
-            .await;
-        let signed = outcome.unwrap();
+            .await
+            .unwrap();
 
         assert_eq!(signable, signed.subintent);
         assert_eq!(
@@ -112,11 +112,13 @@ mod test {
     }
 
     #[actix_rt::test]
-    async fn test_sign_transaction_intent_rejected() {
+    async fn test_sign_transaction_intent_rejected_due_to_all_factors_neglected() {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
-            Some(vec![profile.device_factor_sources().first().unwrap().id]),
+            Some(SigningFailure::NeglectedFactorSources(
+                vec![profile.device_factor_sources().first().unwrap().id]
+            )),
         )
         .await;
 
@@ -132,16 +134,19 @@ mod test {
     }
 
     #[actix_rt::test]
-    async fn test_sign_subintent_rejected() {
+    async fn test_sign_transaction_subintent_rejected_due_to_all_factors_neglected() {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
-            Some(vec![profile.device_factor_sources().first().unwrap().id]),
+            Some(SigningFailure::NeglectedFactorSources(
+                vec![profile.device_factor_sources().first().unwrap().id]
+            )),
         )
-        .await;
+            .await;
 
-        let (signable, _) =
-            get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
+        let (signable, _) = get_signable_with_entities::<Subintent>(
+            &sut.profile().unwrap(),
+        );
 
         let outcome = sut
             .sign_subintent(signable.clone(), RoleKind::Primary)
@@ -176,11 +181,32 @@ mod test {
     }
 
     #[actix_rt::test]
+    async fn test_sign_fail_due_to_user_rejecting() {
+        let profile = Profile::sample();
+        let sut = boot_with_profile(
+            &profile,
+            Some(SigningFailure::UserRejected),
+        ).await;
+
+        let (signable, _) = get_signable_with_entities::<Subintent>(
+            &sut.profile().unwrap(),
+        );
+
+        let outcome = sut
+            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .await;
+
+        assert_eq!(outcome, Err(CommonError::SigningRejected));
+    }
+
+    #[actix_rt::test]
     async fn test_sign_fail_due_to_irrelevant_entity() {
         let profile = Profile::sample();
         let sut = boot_with_profile(
             &profile,
-            Some(vec![profile.device_factor_sources().first().unwrap().id]),
+            Some(SigningFailure::NeglectedFactorSources(
+                vec![profile.device_factor_sources().first().unwrap().id]
+            )),
         )
         .await;
 
@@ -198,7 +224,7 @@ mod test {
 
     async fn boot_with_profile(
         profile: &Profile,
-        maybe_failing_factor_sources: Option<Vec<FactorSourceIDFromHash>>,
+        maybe_signing_failure: Option<SigningFailure>,
     ) -> Arc<SUT> {
         let secure_storage_driver = EphemeralSecureStorage::new();
         let secure_storage_client =
@@ -207,21 +233,14 @@ mod test {
 
         let test_drivers = Drivers::with_secure_storage(secure_storage_driver);
         let clients = Clients::new(Bios::new(test_drivers));
-        let simulated_failures = SimulatedFailures::with_simulated_failures(
-            maybe_failing_factor_sources.unwrap_or_default(),
-        );
 
         let use_factor_sources_interactors =
             Arc::new(TestUseFactorSourcesInteractors::new(
                 Arc::new(TestSignInteractor::<TransactionIntent>::new(
-                    SimulatedUser::prudent_with_failures(
-                        simulated_failures.clone(),
-                    ),
+                    get_simulated_user::<TransactionIntent>(&maybe_signing_failure),
                 )),
                 Arc::new(TestSignInteractor::<Subintent>::new(
-                    SimulatedUser::prudent_with_failures(
-                        simulated_failures.clone(),
-                    ),
+                    get_simulated_user::<Subintent>(&maybe_signing_failure),
                 )),
                 Arc::new(TestDerivationInteractor::new(
                     false,
@@ -230,6 +249,28 @@ mod test {
             ));
         let interactors = Interactors::new(use_factor_sources_interactors);
         SUT::boot_with_clients_and_interactor(clients, interactors).await
+    }
+
+    fn get_simulated_user<S: Signable>(
+        maybe_signing_failure: &Option<SigningFailure>,
+    ) -> SimulatedUser<S> {
+        match maybe_signing_failure {
+            None => {
+                SimulatedUser::<S>::prudent_no_fail()
+            }
+            Some(failure) => {
+                match failure {
+                    SigningFailure::NeglectedFactorSources(factor_sources) => {
+                        SimulatedUser::<S>::prudent_with_failures(
+                            SimulatedFailures::with_simulated_failures(factor_sources.clone()),
+                        )
+                    }
+                    SigningFailure::UserRejected => {
+                        SimulatedUser::<S>::rejecting()
+                    }
+                }
+            }
+        }
     }
 
     fn get_signable_with_entities<S: Signable>(
@@ -248,5 +289,10 @@ mod test {
             ),
             accounts_addresses_involved,
         )
+    }
+
+    enum SigningFailure {
+        NeglectedFactorSources(Vec<FactorSourceIDFromHash>),
+        UserRejected
     }
 }

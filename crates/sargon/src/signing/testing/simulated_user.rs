@@ -6,6 +6,7 @@ use crate::prelude::*;
 pub(crate) enum SigningUserInput {
     Sign,
     Skip,
+    Reject,
 }
 
 #[derive(Clone, derive_more::Debug)]
@@ -81,6 +82,9 @@ pub(crate) enum SimulatedUserMode {
     /// Emulation of a "lazy" user, that skips signing with as many factor
     /// sources as possible.
     Lazy(Laziness),
+
+    /// Emulation of a user that dismisses (rejects) the signing process all-together.
+    Rejecting
 }
 
 impl SimulatedUserMode {
@@ -97,6 +101,10 @@ impl SimulatedUserMode {
 impl<S: Signable> SimulatedUser<S> {
     pub(crate) fn prudent_no_fail() -> Self {
         Self::new(SimulatedUserMode::Prudent, None)
+    }
+
+    pub(crate) fn rejecting() -> Self {
+        Self::new(SimulatedUserMode::Rejecting, None)
     }
 
     pub(crate) fn prudent_with_failures(
@@ -160,6 +168,8 @@ impl<S: Signable> SimulatedUser<S> {
 
         if self.be_prudent(|| !invalid_tx_if_skipped.is_empty()) {
             SigningUserInput::Sign
+        } else if self.mode == SimulatedUserMode::Rejecting {
+            SigningUserInput::Reject
         } else {
             SigningUserInput::Skip
         }
@@ -188,6 +198,7 @@ impl<S: Signable> SimulatedUser<S> {
                 Laziness::AlwaysSkip => false,
                 Laziness::SignMinimum => is_prudent(),
             },
+            SimulatedUserMode::Rejecting => false
         }
     }
 }
