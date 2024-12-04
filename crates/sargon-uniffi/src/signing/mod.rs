@@ -7,6 +7,7 @@ mod sign_request;
 mod sign_response;
 mod sign_with_factors_outcome;
 mod signatures_per_fractor_source;
+mod signed_outcome;
 mod transaction_sign_request_input;
 mod transactions_to_sign_per_factor_source;
 
@@ -19,5 +20,6 @@ pub use sign_request::*;
 pub use sign_response::*;
 pub use sign_with_factors_outcome::*;
 pub use signatures_per_fractor_source::*;
+pub use signed_outcome::*;
 pub use transaction_sign_request_input::*;
 pub use transactions_to_sign_per_factor_source::*;
