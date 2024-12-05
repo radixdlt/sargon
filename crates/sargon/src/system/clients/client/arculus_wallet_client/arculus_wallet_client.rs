@@ -158,8 +158,9 @@ impl ArculusWalletClient {
         self.verify_pin_io(wallet, pin, pin_len).await?;
 
         let phrase = String::from_utf8(words.to_vec()).unwrap();
+
        
-        Mnemonic::from_phrase(&phrase)
+        Mnemonic::from_phrase(&phrase.remove_last())
     }
 }
 

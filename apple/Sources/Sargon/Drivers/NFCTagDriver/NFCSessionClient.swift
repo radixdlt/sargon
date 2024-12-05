@@ -6,19 +6,16 @@ extension NFCTagReaderSession: @unchecked @retroactive Sendable {}
 
 public actor NFCSessionClient {
     let delegate: NFCTagReaderSessionAsyncDelegate
-    let session: NFCTagReaderSession
+    var session: NFCTagReaderSession?
     var isoTag: NFCISO7816Tag?
 
-    init(delegate: NFCTagReaderSessionAsyncDelegate, session: NFCTagReaderSession) {
+    init(delegate: NFCTagReaderSessionAsyncDelegate) {
         self.delegate = delegate
-        self.session = session
     }
 
     public init() {
         let delegate = NFCTagReaderSessionAsyncDelegate()
-        let session = NFCTagReaderSession(pollingOption: .iso14443, delegate: delegate, queue: .main)!
-        session.alertMessage = "Tap & hold your card to the back of your phone"
-        self.init(delegate: delegate, session: session)
+        self.init(delegate: delegate)
     }
 
     func setIsoTag(tag: NFCISO7816Tag?) async {
@@ -109,12 +106,15 @@ extension NFCSessionClient: SargonUniFFI.NfcTagDriver {
 
 extension NFCSessionClient {
     private func beginSession() async throws -> NFCISO7816Tag {
-        self.session.begin()
+        let session = NFCTagReaderSession(pollingOption: .iso14443, delegate: self.delegate, queue: .main)!
+        session.alertMessage = "Tap & hold your card to the back of your phone"
+        self.session = session
+        self.session!.begin()
         return try await connectTag()
     }
 
     private func renewSession() async throws -> NFCISO7816Tag {
-        self.session.restartPolling()
+        self.session!.restartPolling()
         return try await connectTag()
     }
 
@@ -133,7 +133,7 @@ extension NFCSessionClient {
                 fatalError()
             }
 
-            try await session.connect(to: cardTag)
+            try await session!.connect(to: cardTag)
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             return isoTag
         }
@@ -143,21 +143,10 @@ extension NFCSessionClient {
 
     private func invalidateSession(_ isComplete: Bool = false, error: String? = nil) {
         if let err = error {
-            session.invalidate(errorMessage: err)
+            session!.invalidate(errorMessage: err)
         } else {
-            session.invalidate()
+            session!.invalidate()
         }
-    }
-
-    private func executeOperation<Response: Sendable>(operation: (NFCISO7816Tag) async throws -> Response) async throws -> Response {
-        let tag = try await beginSession()
-        do {
-            let response = try await operation(tag)
-            session.invalidate()
-            return response
-        } catch {
-            session.invalidate(errorMessage: error.localizedDescription)
-            throw error
-        }
+        session = nil
     }
 }
