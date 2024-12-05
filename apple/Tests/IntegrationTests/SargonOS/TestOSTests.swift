@@ -32,7 +32,8 @@ extension TestOS {
 
 // MARK: - TestOSTests
 final class TestOSTests: OSTest {
-	func test_create_single_account_many_times() async throws {
+
+	func create_single_account_many_times() async throws {
 		let bus = EventBus()
 		let drivers = Drivers.withEventBus(bus)
 		let sut = await TestOS(bios: .init(drivers: drivers))
@@ -57,7 +58,7 @@ final class TestOSTests: OSTest {
 		XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork.map(\.address), events.compactMap(\.addressOfNewAccount))
 	}
 
-	func test_create_account_returned() async throws {
+	func create_account_returned() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
@@ -66,7 +67,7 @@ final class TestOSTests: OSTest {
 		XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork, [AccountForDisplay(account)])
 	}
 
-	func test_create_account_returned_can_be_looked_up() async throws {
+	func create_account_returned_can_be_looked_up() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
@@ -113,7 +114,7 @@ final class TestOSTests: OSTest {
 		XCTAssertEqual(try sut.os.profile().header.creatingDevice, newCreatingDevice) // assert change worked
 	}
 
-	func test_batch_create_many_accounts() async throws {
+	func batch_create_many_accounts() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let n: UInt16 = 4

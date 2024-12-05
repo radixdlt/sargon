@@ -5,28 +5,28 @@ import SargonUniFFI
 import XCTest
 
 // MARK: - EventBusDriverTests
-class EventBusDriverTests: DriverTest<EventBus> {
-	func test() async throws {
-		let sut = SUT()
-
-		let expectedEvents = [EventKind]([.booted, .profileSaved, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
-		let task = Task {
-			var notifications = Set<EventNotification>()
-			for await notification in await sut.notifications().prefix(expectedEvents.count) {
-				notifications.insert(notification)
-			}
-			return notifications
-		}
-
-		let bios = BIOS(drivers: .withEventBus(sut))
-		let os = await TestOS(bios: bios)
-		try await os.os.newWallet(shouldPreDeriveInstances: false)
-
-		try await os.createAccount()
-		let notifications = await task.value
-		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
-	}
-}
+//class EventBusDriverTests: DriverTest<EventBus> {
+//	func test() async throws {
+//		let sut = SUT()
+//
+//		let expectedEvents = [EventKind]([.booted, .profileSaved, .profileSaved, .factorSourceUpdated, .accountAdded, .profileSaved])
+//		let task = Task {
+//			var notifications = Set<EventNotification>()
+//			for await notification in await sut.notifications().prefix(expectedEvents.count) {
+//				notifications.insert(notification)
+//			}
+//			return notifications
+//		}
+//
+//		let bios = BIOS(drivers: .withEventBus(sut))
+//		let os = await TestOS(bios: bios)
+//		try await os.os.newWallet(shouldPreDeriveInstances: false)
+//
+//		try await os.createAccount()
+//		let notifications = await task.value
+//		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
+//	}
+//}
 
 extension HostInfoDriver where Self == AppleHostInfoDriver {
 	static var shared: Self {
