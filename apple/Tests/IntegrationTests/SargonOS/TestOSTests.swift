@@ -32,7 +32,6 @@ extension TestOS {
 
 // MARK: - TestOSTests
 final class TestOSTests: OSTest {
-
 	func create_single_account_many_times() async throws {
 		let bus = EventBus()
 		let drivers = Drivers.withEventBus(bus)

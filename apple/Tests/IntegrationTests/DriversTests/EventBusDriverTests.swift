@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 // MARK: - EventBusDriverTests
-//class EventBusDriverTests: DriverTest<EventBus> {
+// class EventBusDriverTests: DriverTest<EventBus> {
 //	func test() async throws {
 //		let sut = SUT()
 //
@@ -26,7 +26,7 @@ import XCTest
 //		let notifications = await task.value
 //		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set(expectedEvents))
 //	}
-//}
+// }
 
 extension HostInfoDriver where Self == AppleHostInfoDriver {
 	static var shared: Self {
