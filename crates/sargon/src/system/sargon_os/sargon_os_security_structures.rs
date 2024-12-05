@@ -100,6 +100,35 @@ impl SargonOS {
     }
 }
 
+impl SargonOS {
+    /// Returns the status of the prerequisites for building a Security Shield.
+    ///
+    /// According to [definition][doc], a Security Shield can be built if the user has, asides from
+    /// the Identity factor, "2 or more factors, one of which must be Hardware"
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Factor-Prerequisites
+    pub fn get_security_shield_prerequisites_status(
+        &self,
+    ) -> Result<SecurityShieldPrerequisitesStatus> {
+        let factor_sources = self.factor_sources()?;
+        let count_excluding_identity = factor_sources
+            .iter()
+            .filter(|f| f.category() != FactorSourceCategory::Identity)
+            .count();
+        let count_hardware = factor_sources
+            .iter()
+            .filter(|f| f.category() == FactorSourceCategory::Hardware)
+            .count();
+        if count_hardware < 1 {
+            Ok(SecurityShieldPrerequisitesStatus::HardwareRequired)
+        } else if count_excluding_identity < 2 {
+            Ok(SecurityShieldPrerequisitesStatus::AnyRequired)
+        } else {
+            Ok(SecurityShieldPrerequisitesStatus::Sufficient)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -315,5 +344,78 @@ mod tests {
             ]);
 
         assert_eq!(sources_by_id_lookup, structures);
+    }
+
+    #[actix_rt::test]
+    async fn security_shield_prerequisites_status_hardware_required() {
+        let os = SUT::fast_boot().await;
+
+        // Test the case where user doesn't have any factors
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::HardwareRequired);
+
+        // Test the case where the user has identity factor
+        os.add_factor_source(FactorSource::sample_device())
+            .await
+            .unwrap();
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::HardwareRequired);
+
+        // Test the case where the user also has other non-hardware factors
+        os.add_factor_source(FactorSource::sample_password())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_trusted_contact_frank())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_off_device())
+            .await
+            .unwrap();
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::HardwareRequired);
+    }
+
+    #[actix_rt::test]
+    async fn security_shield_prerequisites_status_any_required() {
+        let os = SUT::fast_boot().await;
+
+        // Test the case where user only has hardware factor
+        os.add_factor_source(FactorSource::sample_arculus())
+            .await
+            .unwrap();
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::AnyRequired);
+
+        // Test the case where the user also has identity factors
+        os.add_factor_source(FactorSource::sample_device())
+            .await
+            .unwrap();
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::AnyRequired);
+    }
+
+    #[actix_rt::test]
+    async fn security_shield_prerequisites_status_sufficient() {
+        // Test the case where user only has hardware factors
+        let os = SUT::fast_boot().await;
+        os.add_factor_source(FactorSource::sample_arculus())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_ledger())
+            .await
+            .unwrap();
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::Sufficient);
+
+        // Test the case where the user has 1 hardware factor and 1 non-hardware factor
+        let os = SUT::fast_boot().await;
+        os.add_factor_source(FactorSource::sample_ledger())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_password())
+            .await
+            .unwrap();
+        let result = os.get_security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::Sufficient);
     }
 }
