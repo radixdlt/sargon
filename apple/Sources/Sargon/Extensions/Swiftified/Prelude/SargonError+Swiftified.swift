@@ -9,14 +9,14 @@ extension SargonError: SargonModel {}
 // MARK: - SargonError + CustomDebugStringConvertible
 extension SargonError: CustomDebugStringConvertible {
 	public var debugDescription: String {
-        errorDescription()
+		errorDescription()
 	}
 }
 
 // MARK: - SargonError + CustomStringConvertible
 extension SargonError: CustomStringConvertible {
 	public var description: String {
-        errorDescription()
+		errorDescription()
 	}
 }
 
