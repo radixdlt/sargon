@@ -3,6 +3,9 @@ package com.radixdlt.sargon.os
 import app.cash.turbine.test
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Drivers
+import com.radixdlt.sargon.HostInteractor
+import com.radixdlt.sargon.HostInteractorImpl
+import com.radixdlt.sargon.NoPointer
 import com.radixdlt.sargon.SargonOs
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver

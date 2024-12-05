@@ -15,21 +15,11 @@ class FakeHostInteractor: HostInteractor {
     override suspend fun signTransactions(
         request: SignRequestOfTransactionIntent
     ): SignWithFactorsOutcomeOfTransactionIntentHash {
-        return SignWithFactorsOutcomeOfTransactionIntentHash.Neglected(
-            v1 = NeglectedFactors(
-                reason = NeglectFactorReason.FAILURE,
-                factors = request.perFactorSource.map { it.factorSourceId }
-            )
-        )
+        throw CommonException.SigningRejected()
     }
 
     override suspend fun signSubintents(request: SignRequestOfSubintent): SignWithFactorsOutcomeOfSubintentHash {
-        return SignWithFactorsOutcomeOfSubintentHash.Neglected(
-            v1 = NeglectedFactors(
-                reason = NeglectFactorReason.FAILURE,
-                factors = request.perFactorSource.map { it.factorSourceId }
-            )
-        )
+        throw CommonException.SigningRejected()
     }
 
     override suspend fun deriveKeys(request: KeyDerivationRequest): KeyDerivationResponse {
