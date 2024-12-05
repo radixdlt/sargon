@@ -1,4 +1,4 @@
-use crate::{decl_secret_bytes, prelude::*, UniffiCustomTypeConverter};
+use crate::{decl_secret_bytes, prelude::*};
 
 macro_rules! entropy_with_byte_counts {
     (
