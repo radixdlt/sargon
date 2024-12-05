@@ -1409,7 +1409,7 @@ mod shield_configs {
                     ],),
                 )
             );
-            assert_eq!(built, MatrixOfFactorSourceIds::sample_config_11());
+            assert_eq!(built, MatrixOfFactorSourceIds::sample_config_1_1());
         }
 
         #[test]
@@ -1532,7 +1532,7 @@ mod shield_configs {
             );
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_13()
+                MatrixOfFactorSourceIds::sample_config_1_3()
             )
         }
 
@@ -1581,7 +1581,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_14()
+                MatrixOfFactorSourceIds::sample_config_1_4()
             )
         }
 
@@ -1630,7 +1630,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_15()
+                MatrixOfFactorSourceIds::sample_config_1_5()
             )
         }
 
@@ -1691,7 +1691,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_21()
+                MatrixOfFactorSourceIds::sample_config_2_1()
             )
         }
 
@@ -1752,7 +1752,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_22()
+                MatrixOfFactorSourceIds::sample_config_2_2()
             )
         }
 
@@ -1801,7 +1801,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_23()
+                MatrixOfFactorSourceIds::sample_config_2_3()
             )
         }
 
@@ -1850,7 +1850,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_24()
+                MatrixOfFactorSourceIds::sample_config_2_4()
             )
         }
 
@@ -1916,7 +1916,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_30()
+                MatrixOfFactorSourceIds::sample_config_3_0()
             )
         }
 
@@ -1987,7 +1987,7 @@ mod shield_configs {
 
             pretty_assertions::assert_eq!(
                 built,
-                MatrixOfFactorSourceIds::sample_config_40()
+                MatrixOfFactorSourceIds::sample_config_4_0()
             )
         }
     }

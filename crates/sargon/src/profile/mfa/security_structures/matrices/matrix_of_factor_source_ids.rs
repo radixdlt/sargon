@@ -61,130 +61,130 @@ impl MatrixOfFactorSourceIds {
     /// Config 1.1 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_11() -> Self {
+    pub fn sample_config_1_1() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_1())
     }
 
     /// Config 1.2 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_12() -> Self {
+    pub fn sample_config_1_2() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_2())
     }
 
     /// Config 1.3 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_13() -> Self {
+    pub fn sample_config_1_3() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_3())
     }
 
     /// Config 1.4 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_14() -> Self {
+    pub fn sample_config_1_4() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_4())
     }
 
     /// Config 1.5 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_15() -> Self {
+    pub fn sample_config_1_5() -> Self {
         Self::sample_from_template(MatrixTemplate::config_1_5())
     }
 
     /// Config 2.1 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_21() -> Self {
+    pub fn sample_config_2_1() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_1())
     }
 
     /// Config 2.2 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_22() -> Self {
+    pub fn sample_config_2_2() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_2())
     }
 
     /// Config 2.3 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_23() -> Self {
+    pub fn sample_config_2_3() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_3())
     }
 
     /// Config 2.4 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_24() -> Self {
+    pub fn sample_config_2_4() -> Self {
         Self::sample_from_template(MatrixTemplate::config_2_4())
     }
 
     /// Config 3.0 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_30() -> Self {
+    pub fn sample_config_3_0() -> Self {
         Self::sample_from_template(MatrixTemplate::config_3_0())
     }
 
     /// Config 4.0 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_40() -> Self {
+    pub fn sample_config_4_0() -> Self {
         Self::sample_from_template(MatrixTemplate::config_4_0())
     }
 
     /// Config 5.1 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_51() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_51())
+    pub fn sample_config_5_1() -> Self {
+        Self::sample_from_template(MatrixTemplate::config_5_1())
     }
 
     /// Config 5.2 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_52() -> Self {
-        Self::sample_from_template(MatrixTemplate::config_52())
+    pub fn sample_config_5_2() -> Self {
+        Self::sample_from_template(MatrixTemplate::config_5_2())
     }
 
     /// Config 6.0 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_60() -> Self {
+    pub fn sample_config_6_0() -> Self {
         Self::sample_from_template(MatrixTemplate::config_6_0())
     }
 
     /// Config 7.0 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_70() -> Self {
+    pub fn sample_config_7_0() -> Self {
         Self::sample_from_template(MatrixTemplate::config_7_0())
     }
 
     /// Config 8.0 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_80() -> Self {
+    pub fn sample_config_8_0() -> Self {
         Self::sample_from_template(MatrixTemplate::config_8_0())
     }
 
     /// Config 9.0 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn sample_config_90() -> Self {
+    pub fn sample_config_9_0() -> Self {
         Self::sample_from_template(MatrixTemplate::config_9_0())
     }
 }
 
 impl HasSampleValues for MatrixOfFactorSourceIds {
     fn sample() -> Self {
-        Self::sample_config_11()
+        Self::sample_config_1_1()
     }
 
     fn sample_other() -> Self {
-        Self::sample_config_24()
+        Self::sample_config_2_4()
     }
 }
 
@@ -206,7 +206,7 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-        assert_ne!(SUT::sample(), SUT::sample_config_12());
+        assert_ne!(SUT::sample(), SUT::sample_config_1_2());
         assert_ne!(SUT::sample().primary(), SUT::sample_other().primary());
         assert_ne!(SUT::sample().recovery(), SUT::sample_other().recovery());
         assert_ne!(
@@ -219,41 +219,41 @@ mod tests {
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
-                SUT::sample_config_11(),
-                SUT::sample_config_12(),
-                SUT::sample_config_13(),
-                SUT::sample_config_14(),
-                SUT::sample_config_15(),
-                SUT::sample_config_21(),
-                SUT::sample_config_22(),
-                SUT::sample_config_23(),
-                SUT::sample_config_24(),
-                SUT::sample_config_30(),
-                SUT::sample_config_40(),
-                SUT::sample_config_51(),
-                SUT::sample_config_52(),
-                SUT::sample_config_60(),
-                SUT::sample_config_70(),
-                SUT::sample_config_80(),
-                SUT::sample_config_90(),
+                SUT::sample_config_1_1(),
+                SUT::sample_config_1_2(),
+                SUT::sample_config_1_3(),
+                SUT::sample_config_1_4(),
+                SUT::sample_config_1_5(),
+                SUT::sample_config_2_1(),
+                SUT::sample_config_2_2(),
+                SUT::sample_config_2_3(),
+                SUT::sample_config_2_4(),
+                SUT::sample_config_3_0(),
+                SUT::sample_config_4_0(),
+                SUT::sample_config_5_1(),
+                SUT::sample_config_5_2(),
+                SUT::sample_config_6_0(),
+                SUT::sample_config_7_0(),
+                SUT::sample_config_8_0(),
+                SUT::sample_config_9_0(),
                 // Duplicates should be removed
-                SUT::sample_config_11(),
-                SUT::sample_config_12(),
-                SUT::sample_config_13(),
-                SUT::sample_config_14(),
-                SUT::sample_config_15(),
-                SUT::sample_config_21(),
-                SUT::sample_config_22(),
-                SUT::sample_config_23(),
-                SUT::sample_config_24(),
-                SUT::sample_config_30(),
-                SUT::sample_config_40(),
-                SUT::sample_config_51(),
-                SUT::sample_config_52(),
-                SUT::sample_config_60(),
-                SUT::sample_config_70(),
-                SUT::sample_config_80(),
-                SUT::sample_config_90(),
+                SUT::sample_config_1_1(),
+                SUT::sample_config_1_2(),
+                SUT::sample_config_1_3(),
+                SUT::sample_config_1_4(),
+                SUT::sample_config_1_5(),
+                SUT::sample_config_2_1(),
+                SUT::sample_config_2_2(),
+                SUT::sample_config_2_3(),
+                SUT::sample_config_2_4(),
+                SUT::sample_config_3_0(),
+                SUT::sample_config_4_0(),
+                SUT::sample_config_5_1(),
+                SUT::sample_config_5_2(),
+                SUT::sample_config_6_0(),
+                SUT::sample_config_7_0(),
+                SUT::sample_config_8_0(),
+                SUT::sample_config_9_0(),
             ])
             .len(),
             17

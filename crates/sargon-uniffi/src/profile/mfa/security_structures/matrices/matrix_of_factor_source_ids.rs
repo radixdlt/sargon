@@ -20,20 +20,20 @@ macro_rules! export_sample_config {
 
 pub(crate) use export_sample_config;
 
-export_sample_config!(11);
-export_sample_config!(12);
-export_sample_config!(13);
-export_sample_config!(14);
-export_sample_config!(15);
-export_sample_config!(21);
-export_sample_config!(22);
-export_sample_config!(23);
-export_sample_config!(24);
-export_sample_config!(30);
-export_sample_config!(40);
-export_sample_config!(51);
-export_sample_config!(52);
-export_sample_config!(60);
-export_sample_config!(70);
-export_sample_config!(80);
-export_sample_config!(90);
+export_sample_config!(1_1);
+export_sample_config!(1_2);
+export_sample_config!(1_3);
+export_sample_config!(1_4);
+export_sample_config!(1_5);
+export_sample_config!(2_1);
+export_sample_config!(2_2);
+export_sample_config!(2_3);
+export_sample_config!(2_4);
+export_sample_config!(3_0);
+export_sample_config!(4_0);
+export_sample_config!(5_1);
+export_sample_config!(5_2);
+export_sample_config!(6_0);
+export_sample_config!(7_0);
+export_sample_config!(8_0);
+export_sample_config!(9_0);
