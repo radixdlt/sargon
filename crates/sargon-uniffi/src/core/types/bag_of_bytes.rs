@@ -62,19 +62,10 @@ impl BagOfBytes {
     }
 }
 
-impl crate::UniffiCustomTypeConverter for BagOfBytes {
-    type Builtin = Vec<i8>;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Ok(BagOfBytes { bytes: val })
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.bytes
-    }
-}
+uniffi::custom_type!(BagOfBytes, Vec<i8>, {
+    try_lift: |val| Ok(BagOfBytes { bytes: val }),
+    lower: |obj| obj.bytes,
+});
 
 impl From<InternalBagOfBytes> for BagOfBytes {
     fn from(value: InternalBagOfBytes) -> Self {

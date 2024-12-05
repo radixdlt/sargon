@@ -9,15 +9,13 @@ pub(crate) enum SigningUserInput {
     Reject,
 }
 
+pub type SpyOnRequest<ID> =
+    Arc<dyn Fn(FactorSourceKind, IndexSet<InvalidTransactionIfNeglected<ID>>)>;
+
 #[derive(Clone, derive_more::Debug)]
 #[debug("SimulatedUser(mode: {mode:?}, failures: {failures:?})")]
 pub(crate) struct SimulatedUser<S: Signable> {
-    spy_on_request: Arc<
-        dyn Fn(
-            FactorSourceKind,
-            IndexSet<InvalidTransactionIfNeglected<S::ID>>,
-        ),
-    >,
+    spy_on_request: SpyOnRequest<S::ID>,
     mode: SimulatedUserMode,
     /// `None` means never failures
     failures: Option<SimulatedFailures>,

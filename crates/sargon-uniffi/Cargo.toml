@@ -80,8 +80,8 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 # enum-as-inner = "0.6.0"
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+# uniffi = "0.28.3" + unreleased changes
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "2c003b16d1e70e1914b5d8ceb517eef3676cd187", features = [
   "cli",
 ] }
 
@@ -124,8 +124,8 @@ security-framework-sys = "=2.10.0"
 
 
 [dev-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+# uniffi = "0.28.3" + unreleased changes
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "2c003b16d1e70e1914b5d8ceb517eef3676cd187", features = [
   "bindgen-tests",
 ] }
 
@@ -133,8 +133,8 @@ uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2e
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
 
 [build-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+# uniffi = "0.28.3" + unreleased changes
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "2c003b16d1e70e1914b5d8ceb517eef3676cd187", features = [
   "build",
 ] }
 
