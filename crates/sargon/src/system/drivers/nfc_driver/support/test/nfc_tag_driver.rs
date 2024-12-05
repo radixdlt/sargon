@@ -22,4 +22,8 @@ impl NFCTagDriver for RustNFCTagDriver {
     async fn send_receive(&self, command: BagOfBytes) -> Result<BagOfBytes> {
         todo!()
     }
+
+    async fn send_receive_command_chain(&self, command: Vec<BagOfBytes>) -> Result<BagOfBytes> {
+        todo!()
+    }
 }

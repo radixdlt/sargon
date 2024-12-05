@@ -90,15 +90,16 @@ impl ArculusWalletClient {
         ).await
     }
 
-    pub async fn sign_hash(&self, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+    pub async fn sign_hash(&self, pin: String, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
         self.execute_card_operation(|wallet|
-            self._sign_hash(wallet, hash, derivation_path)
+            self._sign_hash(wallet, pin, hash, derivation_path)
         ).await
     }
 }
 
 impl ArculusWalletClient {
-    pub async fn _sign_hash(&self, wallet: ArculusWalletPointer, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+    pub async fn _sign_hash(&self, wallet: ArculusWalletPointer, pin: String, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+        self.verify_pin_io(wallet, pin.clone(), pin.len() as i64).await?;
         let signature_bytes = self.sign_hash_path_io(wallet, derivation_path.clone(), hash, CardCurve::Ed25519Curve, CardAlgorithm::Eddsa).await?;
         let public_key_bytes = self.get_public_key_by_path_io(wallet, derivation_path, CardCurve::Ed25519Curve).await?;
 

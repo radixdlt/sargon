@@ -41,7 +41,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16) -> Result<BagOfBytes>;
     fn get_public_key_by_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
-    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<BagOfBytes>;
+    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<Vec<BagOfBytes>>;
     fn sign_hash_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 }
 
@@ -163,7 +163,7 @@ impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
         self.wrapped.get_public_key_by_path_request(wallet.into(), path.into(), curve).into_internal_result()
     }
     
-    fn sign_hash_path_request(&self, wallet: InternalArculusWalletPointer, path: sargon::BagOfBytes, curve: u16, algorithm: u8, hash: sargon::BagOfBytes) -> sargon::Result<sargon::BagOfBytes> {
+    fn sign_hash_path_request(&self, wallet: InternalArculusWalletPointer, path: sargon::BagOfBytes, curve: u16, algorithm: u8, hash: sargon::BagOfBytes) -> sargon::Result<Vec<sargon::BagOfBytes>> {
         self.wrapped.sign_hash_path_request(wallet.into(), path.into(), curve, algorithm, hash.into()).into_internal_result()
     }
 }

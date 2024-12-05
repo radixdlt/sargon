@@ -28,7 +28,7 @@ impl SargonOS {
         .into_result()
     }
 
-    pub async fn sign_hash(&self, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
-        self.wrapped.sign_hash(hash.into_internal(), derivation_path.into_internal()).await.into_result()
+    pub async fn sign_hash(&self, pin: String, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+        self.wrapped.sign_hash(pin, hash.into_internal(), derivation_path.into_internal()).await.into_result()
     }
 }

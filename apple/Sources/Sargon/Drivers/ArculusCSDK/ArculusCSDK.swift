@@ -22,6 +22,44 @@ func cArrayToData<T>(val: T, len: size_t) throws -> Data {
     }
 }
 
+extension ArculusCSDKByteVector {
+    func data() throws -> UnsafeMutablePointer<UInt8> {
+        guard let vectorData = addr else {
+            fatalError()
+        }
+        return vectorData
+    }
+}
+
+extension ArculusCSDKAPDUSequence {
+    func apdu() throws -> UnsafeMutablePointer<ArculusCSDKByteVector> {
+        guard let apdu = apdu else {
+            fatalError()
+        }
+        return apdu
+    }
+}
+
+func cApduSequenceToData(buf: UnsafePointer<ArculusCSDKAPDUSequence>) throws -> [Data] {
+    // Need to loop through all the ByteVectors in APDUSequence
+    let apduSequence = buf.pointee
+    let count = apduSequence.count
+    let byteVectorArrayPtr = try apduSequence.apdu()
+    var dataArray = [Data](repeating: Data(), count: Int(count))
+    let byteVectorPointer = UnsafeMutablePointer<ArculusCSDKByteVector>(byteVectorArrayPtr)
+
+    for i in 0 ..< count {
+        let byteVector = byteVectorPointer[Int(i)]
+        // Access the fields of each ByteVector element
+        let vectorData = try byteVector.data()
+        let vectorLength = byteVector.count
+        let data = cBufToData(buf: vectorData, len: Int(vectorLength))
+        dataArray[Int(i)] = data
+    }
+    return dataArray
+}
+
+
 final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     func seedPhraseFromMnemonicSentence(wallet: SargonUniFFI.ArculusWalletPointer, mnemonicSentence: SargonUniFFI.BagOfBytes, mnemonicSentenceLen: Int64, passphrase: SargonUniFFI.BagOfBytes?, passphraseLen: Int64) throws -> SargonUniFFI.BagOfBytes {
         let sentence = try buildCommand { len in
@@ -164,12 +202,26 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
         return try cArrayToData(val: extendedKey.publicKey, len: extendedKey.pubKeyLe)
     }
     
-    func signHashPathRequest(wallet: SargonUniFFI.ArculusWalletPointer, path: Data, curve: UInt16, algorithm: UInt8, hash: Data) throws -> Data {
+    func signHashPathRequest(wallet: SargonUniFFI.ArculusWalletPointer, path: Data, curve: UInt16, algorithm: UInt8, hash: Data) throws -> [Data] {
         let path = path.toArray
+        let path2 = path
         let hash = hash.toArray
-        return try buildCommand { len in
-            ArculusCSDK.signHashRequest(walletPointer: wallet.toOpaquePointer(), bip_path: path, bip_path_length: path.count, curve: curve, algorithm: algorithm, hash: hash, hash_length: hash.count, len: &len)
+
+        var unsafePath = ArculusCSDKByteVector(count: UInt32(path2.count), addr: UnsafeMutablePointer<UInt8>.allocate(capacity: path2.count))
+        unsafePath.addr.update(from: path2, count: path2.count)
+
+        var hashData = ArculusCSDKByteVector(count: UInt32(hash.count), addr: UnsafeMutablePointer<UInt8>.allocate(capacity: hash.count))
+        hashData.addr.update(from: hash, count: hash.count)
+        
+        var requestApduPtrPtr: UnsafeMutablePointer<UnsafeMutablePointer<ArculusCSDKAPDUSequence>?>!
+        requestApduPtrPtr = UnsafeMutablePointer<UnsafeMutablePointer<ArculusCSDKAPDUSequence>?>.allocate(capacity: 1)
+
+        let status = try ArculusCSDK.signRequest(walletPointer: wallet.toOpaquePointer(), bipPath: &unsafePath, curve: curve, algorithm: algorithm, hash: &hashData, apdus: requestApduPtrPtr)
+
+        guard let pointer = requestApduPtrPtr.pointee else {
+            fatalError()
         }
+        return try cApduSequenceToData(buf: pointer)
     }
     
     func signHashPathResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {

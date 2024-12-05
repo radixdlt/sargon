@@ -37,72 +37,18 @@ extension NFCSessionClient: SargonUniFFI.NfcTagDriver {
     public func sendReceive(command: Data) async throws -> Data {
         try await self.isoTag!.sendCommand(data: command)
     }
-}
 
-//extension NFCSessionClient {
-//    public func getCardUUID() async throws -> Data {
-//        try await executeOperation(operation: cardService.getGGUID)
-//    }
-//
-//    public func getFirmwareVersion() async throws -> String {
-//        try await executeOperation(operation: cardService.getFirmwareVersion)
-//    }
-//
-//    public func resetWallet() async throws {
-//        try await executeOperation(operation: cardService.resetWallet)
-//    }
-//
-//    public func startCreateWalletSeed(pin: String, wordCount: Int) async throws -> [String] {
-//        try await executeOperation { tag in
-//            try await cardService.startCreateWalletSeed(tag: tag, pin: pin, wordCount: 24)
-//        }
-//    }
-//
-//    public func updatePin(oldPin: String, newPin: String) async throws {
-//        try await executeOperation { tag in
-//            try await cardService.updatePin(tag: tag, oldPin: oldPin, newPin: newPin)
-//        }
-//    }
-//
-//    public func verifyPin(pin: String) async throws -> (Bool, Int) {
-//        try await executeOperation { tag in
-//            try await cardService.verifyPin(tag: tag, pin: pin)
-//        }
-//    }
-//
-//    public func storePin(pin: String) async throws {
-//        try await executeOperation { tag in
-//            try await cardService.storePin(tag: tag, pin: pin)
-//        }
-//    }
-//
-//    public func getPublicKeyByPath(path: String, curve: CardCurve) async throws -> PublicKey {
-//        try await executeOperation { tag in
-//            try await cardService.getPubKeyByPath(tag: tag, path: path, curve: curve)
-//        }
-//    }
-//
-//    public func recoverWallet(pin: String, words: [String]) async throws {
-//        try await executeOperation { tag in
-//            try await cardService.restoreWalletSeed(tag: tag, pin: pin, words: words)
-//        }
-//    }
-//
-//    public func createWalletSeed(pin: String, wordCount: Int) async throws -> [String] {
-//        try await executeOperation { tag in
-//            let words = try await cardService.startCreateWalletSeed(tag: tag, pin: pin, wordCount: wordCount)
-//            let seed = try cardService.seedFromWords(words: words)
-//            try await cardService.finishCreateWalletSeed(tag: tag, pin: pin, seed: seed)
-//            return words
-//        }
-//    }
-//
-//    public func signHashPaths(pin: String, hash: Data, path: String) async throws -> (Data, PublicKey) {
-//        try await executeOperation { tag in
-//            try await cardService.signHashPath(tag: tag, pin: pin, path: path, curve: .ed25519Curve, algorithm: .eddsa, hash: hash)
-//        }
-//    }
-//}
+    public func sendReceiveCommandChain(commands: [Data]) async throws -> Data {
+        for (index, apdu) in commands.enumerated() {
+            let data = try await self.isoTag!.sendCommand(data: apdu)
+
+            if index == commands.count - 1 {
+                return data
+            }
+        }
+        fatalError()
+    }
+}
 
 extension NFCSessionClient {
     private func beginSession() async throws -> NFCISO7816Tag {

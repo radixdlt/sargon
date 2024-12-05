@@ -110,7 +110,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         todo!()
     }
 
-    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<BagOfBytes> {
+    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<Vec<BagOfBytes>> {
         todo!()
     }
 

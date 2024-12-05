@@ -5,13 +5,21 @@ pub struct ArculusWalletPointer {
     pub pointer: u64
 }
 
+impl ArculusWalletPointer {
+    pub fn new(pointer: u64) -> Self {
+        Self {
+            pointer
+        }
+    }
+}
+
 impl HasSampleValues for ArculusWalletPointer {
     fn sample() -> Self {
-        todo!()
+        ArculusWalletPointer::new(0)
     }
 
     fn sample_other() -> Self {
-        todo!()
+        ArculusWalletPointer::new(1)
     }
 }
 
@@ -54,6 +62,6 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     fn get_public_key_by_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16) -> Result<BagOfBytes>;
     fn get_public_key_by_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 
-    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<BagOfBytes>;
+    fn sign_hash_path_request(&self, wallet: ArculusWalletPointer, path: BagOfBytes, curve: u16, algorithm: u8, hash: BagOfBytes) -> Result<Vec<BagOfBytes>>;
     fn sign_hash_path_response(&self, wallet: ArculusWalletPointer, response: BagOfBytes) -> Result<BagOfBytes>;
 }

@@ -21,7 +21,7 @@ impl SargonOS {
         self.clients.arculus_wallet_client.derive_public_keys(paths).await
     }
 
-    pub async fn sign_hash(&self, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
-        self.clients.arculus_wallet_client.sign_hash(hash, derivation_path).await
+    pub async fn sign_hash(&self, pin: String, hash: Hash, derivation_path: DerivationPath) -> Result<SignatureWithPublicKey> {
+        self.clients.arculus_wallet_client.sign_hash(pin, hash, derivation_path).await
     }
 }

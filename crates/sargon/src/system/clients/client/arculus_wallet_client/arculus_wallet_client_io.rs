@@ -48,6 +48,18 @@ impl ArculusWalletClient {
 
         response_map(response)
     }
+
+    pub(crate) async fn do_chainned_card_io<Response, F>(
+        &self, 
+        commands: Vec<BagOfBytes>, 
+        response_map: F
+    ) -> Result<Response> 
+    where F: FnOnce(BagOfBytes) -> Result<Response>,
+    {
+        let response = self.nfc_tag_driver.send_receive_command_chain(commands).await?;
+
+        response_map(response)
+    }
 }
 
 impl ArculusWalletClient {
@@ -129,7 +141,7 @@ impl ArculusWalletClient {
     }
 
     pub(crate) async fn sign_hash_path_io(&self, wallet: ArculusWalletPointer, path: DerivationPath, hash: Hash, curve: CardCurve, algorithm: CardAlgorithm) -> Result<BagOfBytes> {
-        self.do_card_io(
+        self.do_chainned_card_io(
             self.csdk_driver.sign_hash_path_request(wallet, path.to_string().into_bytes().into(), curve.val(), algorithm.val(), hash.bytes().into())?,
             |response| self.csdk_driver.sign_hash_path_response(wallet, response)
         ).await

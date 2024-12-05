@@ -10,6 +10,7 @@ pub trait NFCTagDriver: Send + Sync + std::fmt::Debug {
     async fn end_session(&self);
 
     async fn send_receive(&self, command: BagOfBytes) -> Result<BagOfBytes>;
+    async fn send_receive_command_chain(&self, commands: Vec<BagOfBytes>) -> Result<BagOfBytes>;
 }
 
 #[derive(Debug)]
@@ -30,5 +31,9 @@ impl InternalNFCTagDriver for NFCTagDriverAdapter {
 
     async fn send_receive(&self, command: InternalBagOfBytes) -> InternalResult<InternalBagOfBytes> {
         self.wrapped.send_receive(command.into()).await.into_internal_result()
+    }
+
+    async fn send_receive_command_chain(&self, commands: Vec<InternalBagOfBytes>) -> InternalResult<InternalBagOfBytes> {
+        self.wrapped.send_receive_command_chain(commands.into_type()).await.into_internal_result()
     }
 }
