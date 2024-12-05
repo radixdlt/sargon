@@ -2235,6 +2235,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "preinterpret"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf4cb4d87d808156f56cf409c26dfc93d2cc9e37a6a407a5ebcaca0cf9850789"
+dependencies = [
+ "proc-macro2",
+ "syn 2.0.85",
+]
+
+[[package]]
 name = "pretty_assertions"
 version = "1.4.0"
 source = "git+https://github.com/rust-pretty-assertions/rust-pretty-assertions?rev=3f1ebc0cac5f88e875f036bf16636e15fa935c8d#3f1ebc0cac5f88e875f036bf16636e15fa935c8d"
@@ -2832,6 +2842,7 @@ dependencies = [
  "itertools 0.12.0",
  "log",
  "paste 1.0.14",
+ "preinterpret",
  "pretty_assertions",
  "pretty_env_logger",
  "radix-engine-toolkit",
