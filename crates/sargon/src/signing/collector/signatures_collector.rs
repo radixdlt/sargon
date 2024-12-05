@@ -45,8 +45,7 @@ impl<S: Signable> SignaturesCollector<S> {
     }
 
     pub async fn collect_signatures(self) -> Result<SignaturesOutcome<S::ID>> {
-        self
-            .sign_with_factors() // in decreasing "friction order"
+        self.sign_with_factors() // in decreasing "friction order"
             .await
             .inspect_err(|e| {
                 error!("Failed to use factor sources: {:#?}", e)
