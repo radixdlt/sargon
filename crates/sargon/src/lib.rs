@@ -5,6 +5,7 @@
 #![allow(internal_features)]
 #![feature(iter_repeat_n)]
 #![feature(future_join)]
+#![feature(trait_upcasting)]
 
 mod core;
 mod factor_instances_provider;

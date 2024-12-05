@@ -51,7 +51,9 @@ impl<ID: SignableID> PetitionForFactorsStateSnapshot<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for PetitionForFactorsStateSnapshot<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for PetitionForFactorsStateSnapshot<ID>
+{
     fn sample() -> Self {
         Self::new(
             IndexSet::from_iter([

@@ -4,10 +4,10 @@ use crate::prelude::*;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AbstractNeglectedFactor<T> {
     /// The reason why this factor was neglected.
-    pub(crate) reason: NeglectFactorReason,
+    pub reason: NeglectFactorReason,
 
     /// The neglected factor
-    pub(crate) content: T,
+    pub content: T,
 }
 
 impl<T> AbstractNeglectedFactor<T> {
@@ -66,6 +66,21 @@ pub(crate) type NeglectedFactor =
 /// IDs to some neglected factor source, with the reason why they were neglected (skipped/failed)
 pub type NeglectedFactors =
     AbstractNeglectedFactor<IndexSet<FactorSourceIDFromHash>>;
+
+impl HasSampleValues for NeglectedFactors {
+    fn sample() -> Self {
+        Self::new(
+            NeglectFactorReason::UserExplicitlySkipped,
+            IndexSet::just(FactorSourceIDFromHash::sample()),
+        )
+    }
+    fn sample_other() -> Self {
+        Self::new(
+            NeglectFactorReason::Failure,
+            IndexSet::just(FactorSourceIDFromHash::sample_other()),
+        )
+    }
+}
 
 /// A HierarchicalDeterministicFactorInstance which was rejected, with the reason why (skipped/failed)
 pub(crate) type NeglectedFactorInstance =

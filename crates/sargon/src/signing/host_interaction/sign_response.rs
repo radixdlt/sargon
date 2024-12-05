@@ -29,3 +29,50 @@ impl<ID: SignableID> SignResponse<ID> {
         )
     }
 }
+
+impl<ID: SignableID + HasSampleValues> HasSampleValues for SignResponse<ID> {
+    fn sample() -> Self {
+        let hd_signature = HDSignature::sample();
+        let factor_source_id = hd_signature
+            .input
+            .owned_factor_instance
+            .value
+            .factor_source_id;
+        Self::new(IndexMap::just((
+            factor_source_id,
+            IndexSet::just(hd_signature),
+        )))
+    }
+
+    fn sample_other() -> Self {
+        let hd_signature = HDSignature::sample_other();
+        let factor_source_id = hd_signature
+            .input
+            .owned_factor_instance
+            .value
+            .factor_source_id;
+        Self::new(IndexMap::just((
+            factor_source_id,
+            IndexSet::just(hd_signature),
+        )))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SignResponse<TransactionIntentHash>;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}

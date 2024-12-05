@@ -7,7 +7,7 @@ impl Profile {
         network_id: NetworkID,
         name: DisplayName,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(
         FactorSourceID,
         Persona,
@@ -25,7 +25,7 @@ impl Profile {
                 network_id,
                 1,
                 factor_instances_cache_client,
-                key_derivation_interactors,
+                key_derivation_interactor,
                 |_| name.clone(),
             )
             .await?;
@@ -49,7 +49,7 @@ impl Profile {
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         get_name: impl Fn(u32) -> DisplayName, // name of persona at index
     ) -> Result<(
         FactorSourceID,
@@ -62,7 +62,7 @@ impl Profile {
             network_id,
             count,
             factor_instances_cache_client,
-            key_derivation_interactors,
+            key_derivation_interactor,
             get_name,
         )
         .await

@@ -8,7 +8,7 @@ impl Profile {
         network_id: NetworkID,
         name: DisplayName,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(
         FactorSourceID,
         Account,
@@ -26,7 +26,7 @@ impl Profile {
                 network_id,
                 1,
                 factor_instances_cache_client,
-                key_derivation_interactors,
+                key_derivation_interactor,
                 |_| name.clone(),
             )
             .await?;
@@ -50,7 +50,7 @@ impl Profile {
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
     ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
         self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
@@ -58,7 +58,7 @@ impl Profile {
             network_id,
             count,
             factor_instances_cache_client,
-            key_derivation_interactors,
+            key_derivation_interactor,
             get_name,
         )
         .await
@@ -71,7 +71,7 @@ impl Profile {
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
     ) -> Result<(
         FactorSourceID,
@@ -91,7 +91,7 @@ impl Profile {
                 network_id,
                 count,
                 factor_instances_cache_client,
-                key_derivation_interactors,
+                key_derivation_interactor,
                 get_name,
             )
             .await?;
@@ -140,10 +140,10 @@ mod tests {
             .await
             .unwrap();
         let secure_storage_client = Arc::new(secure_storage_client);
-        let interactors =
-            Arc::new(TestDerivationInteractors::with_secure_storage(
-                secure_storage_client.clone(),
-            ));
+        let interactors = Arc::new(TestDerivationInteractor::new(
+            false,
+            secure_storage_client.clone(),
+        ));
 
         let (_, accounts, consumer) = sut
             .create_unsaved_accounts_with_factor_source(

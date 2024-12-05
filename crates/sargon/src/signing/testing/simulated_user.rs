@@ -6,15 +6,16 @@ use crate::prelude::*;
 pub(crate) enum SigningUserInput {
     Sign,
     Skip,
+    Reject,
 }
 
 #[derive(Clone, derive_more::Debug)]
 #[debug("SimulatedUser(mode: {mode:?}, failures: {failures:?})")]
-pub(crate) struct SimulatedUser {
+pub(crate) struct SimulatedUser<S: Signable> {
     spy_on_request: Arc<
         dyn Fn(
             FactorSourceKind,
-            IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
+            IndexSet<InvalidTransactionIfNeglected<S::ID>>,
         ),
     >,
     mode: SimulatedUserMode,
@@ -22,12 +23,10 @@ pub(crate) struct SimulatedUser {
     failures: Option<SimulatedFailures>,
 }
 
-impl SimulatedUser {
+impl<S: Signable> SimulatedUser<S> {
     pub(crate) fn with_spy(
-        spy_on_request: impl Fn(
-                FactorSourceKind,
-                IndexSet<InvalidTransactionIfNeglected<TransactionIntentHash>>,
-            ) + 'static,
+        spy_on_request: impl Fn(FactorSourceKind, IndexSet<InvalidTransactionIfNeglected<S::ID>>)
+            + 'static,
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
     ) -> Self {
@@ -83,6 +82,9 @@ pub(crate) enum SimulatedUserMode {
     /// Emulation of a "lazy" user, that skips signing with as many factor
     /// sources as possible.
     Lazy(Laziness),
+
+    /// Emulation of a user that dismisses (rejects) the signing process all-together.
+    Rejecting,
 }
 
 impl SimulatedUserMode {
@@ -96,9 +98,13 @@ impl SimulatedUserMode {
     }
 }
 
-impl SimulatedUser {
+impl<S: Signable> SimulatedUser<S> {
     pub(crate) fn prudent_no_fail() -> Self {
         Self::new(SimulatedUserMode::Prudent, None)
+    }
+
+    pub(crate) fn rejecting() -> Self {
+        Self::new(SimulatedUserMode::Rejecting, None)
     }
 
     pub(crate) fn prudent_with_failures(
@@ -123,8 +129,8 @@ impl SimulatedUser {
     }
 }
 
-unsafe impl Sync for SimulatedUser {}
-unsafe impl Send for SimulatedUser {}
+unsafe impl<S: Signable> Sync for SimulatedUser<S> {}
+unsafe impl<S: Signable> Send for SimulatedUser<S> {}
 
 /// A very lazy user that defers all boring work such as signing stuff for as long
 /// as possible. Ironically, this sometimes leads to user signing more than she
@@ -138,13 +144,11 @@ pub(crate) enum Laziness {
     AlwaysSkip,
 }
 
-impl SimulatedUser {
+impl<S: Signable> SimulatedUser<S> {
     pub(crate) fn spy_on_request_before_handled(
         &self,
         factor_source_kind: FactorSourceKind,
-        invalid_tx_if_skipped: IndexSet<
-            InvalidTransactionIfNeglected<TransactionIntentHash>,
-        >,
+        invalid_tx_if_skipped: IndexSet<InvalidTransactionIfNeglected<S::ID>>,
     ) {
         (self.spy_on_request)(
             factor_source_kind,
@@ -155,7 +159,7 @@ impl SimulatedUser {
     pub(crate) fn sign_or_skip(
         &self,
         invalid_tx_if_skipped: impl IntoIterator<
-            Item = InvalidTransactionIfNeglected<TransactionIntentHash>,
+            Item = InvalidTransactionIfNeglected<S::ID>,
         >,
     ) -> SigningUserInput {
         let invalid_tx_if_skipped = invalid_tx_if_skipped
@@ -164,6 +168,8 @@ impl SimulatedUser {
 
         if self.be_prudent(|| !invalid_tx_if_skipped.is_empty()) {
             SigningUserInput::Sign
+        } else if self.mode == SimulatedUserMode::Rejecting {
+            SigningUserInput::Reject
         } else {
             SigningUserInput::Skip
         }
@@ -192,6 +198,7 @@ impl SimulatedUser {
                 Laziness::AlwaysSkip => false,
                 Laziness::SignMinimum => is_prudent(),
             },
+            SimulatedUserMode::Rejecting => false,
         }
     }
 }

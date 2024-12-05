@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 pub(crate) struct KeysCollectorDependencies {
-    /// A collection of "interactors" used to sign with factor sources.
-    pub(super) interactors: Arc<dyn KeysDerivationInteractors>,
+    /// The "interactor" which we use to derive public keys from relevant factor sources
+    pub(super) interactor: Arc<dyn KeyDerivationInteractor>,
 
     /// Factor sources grouped by kind, sorted according to "friction order",
     /// that is, we want to control which FactorSourceKind users sign with
@@ -18,11 +18,11 @@ pub(crate) struct KeysCollectorDependencies {
 
 impl KeysCollectorDependencies {
     pub(crate) fn new(
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
     ) -> Self {
         Self {
-            interactors,
+            interactor,
             factors_of_kind,
         }
     }
