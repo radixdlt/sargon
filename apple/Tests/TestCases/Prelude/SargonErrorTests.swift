@@ -15,12 +15,12 @@ final class SargonErrorTests: Test<SargonError> {
 
 	func test_description() {
 		let sut = SUT.UnknownNetworkForId(badValue: 99)
-		XCTAssertEqual(sut.description, sut.errorMessage)
+		XCTAssertEqual(sut.description, "Error code: 10049\nError message: No network found with id: '99'")
 	}
 
 	func test_debug_description() {
 		let sut = SUT.UnknownNetworkForId(badValue: 99)
-		XCTAssertEqual(sut.debugDescription, "10049: No network found with id: '99'")
+		XCTAssertEqual(sut.debugDescription, "Error code: 10049\nError message: No network found with id: '99'")
 	}
 
 	func test_localized_description_for_sensitive_error() {

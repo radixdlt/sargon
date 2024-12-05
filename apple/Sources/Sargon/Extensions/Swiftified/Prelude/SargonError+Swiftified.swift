@@ -9,20 +9,19 @@ extension SargonError: SargonModel {}
 // MARK: - SargonError + CustomDebugStringConvertible
 extension SargonError: CustomDebugStringConvertible {
 	public var debugDescription: String {
-		"\(errorCode): \(errorMessage)"
+        errorDescription()
 	}
 }
 
 // MARK: - SargonError + CustomStringConvertible
 extension SargonError: CustomStringConvertible {
 	public var description: String {
-		errorMessage
+        errorDescription()
 	}
 }
 
-// MARK: - SargonError + LocalizedError
-extension SargonError: LocalizedError {
-	public var errorDescription: String? {
+extension SargonError {
+	public func errorDescription() -> String {
 		let errorCodeFormatted = "Error code: \(errorCode)"
 
 		var errorMessageFormatted: String?
