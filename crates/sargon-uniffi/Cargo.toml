@@ -81,7 +81,7 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
 # uniffi = PRE "0.29.X" + Alex Cyons unmerged JNA Kotlin binding fix
-uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "cd73c548429e786e4fe7b818514da1bc1ee6ff94", features = [
+uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b32103876112713cb5e8303b54647183", features = [
   "cli",
 ] }
 
@@ -128,7 +128,7 @@ security-framework-sys = "=2.10.0"
 
 [dev-dependencies]
 # uniffi = PRE "0.29.X" + Alex Cyons unmerged JNA Kotlin binding fix
-uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "cd73c548429e786e4fe7b818514da1bc1ee6ff94", features = [
+uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b32103876112713cb5e8303b54647183", features = [
   "bindgen-tests",
 ] }
 
@@ -137,7 +137,7 @@ actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d
 
 [build-dependencies]
 # uniffi = PRE "0.29.X" + Alex Cyons unmerged JNA Kotlin binding fix
-uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "cd73c548429e786e4fe7b818514da1bc1ee6ff94", features = [
+uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b32103876112713cb5e8303b54647183", features = [
   "build",
 ] }
 

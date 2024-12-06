@@ -3699,7 +3699,7 @@ checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 [[package]]
 name = "uniffi"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
@@ -3714,7 +3714,7 @@ dependencies = [
 [[package]]
 name = "uniffi_bindgen"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
@@ -3737,7 +3737,7 @@ dependencies = [
 [[package]]
 name = "uniffi_build"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
@@ -3747,7 +3747,7 @@ dependencies = [
 [[package]]
 name = "uniffi_checksum_derive"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "quote",
  "syn 2.0.85",
@@ -3756,7 +3756,7 @@ dependencies = [
 [[package]]
 name = "uniffi_core"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "bytes",
@@ -3768,7 +3768,7 @@ dependencies = [
 [[package]]
 name = "uniffi_macros"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "bincode",
  "camino 1.1.9",
@@ -3785,7 +3785,7 @@ dependencies = [
 [[package]]
 name = "uniffi_meta"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "bytes",
@@ -3796,7 +3796,7 @@ dependencies = [
 [[package]]
 name = "uniffi_testing"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
@@ -3808,7 +3808,7 @@ dependencies = [
 [[package]]
 name = "uniffi_udl"
 version = "0.28.3"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "anyhow",
  "textwrap",
@@ -4074,7 +4074,7 @@ dependencies = [
 [[package]]
 name = "weedle2"
 version = "5.0.0"
-source = "git+https://github.com/sajjon/uniffi-rs/?rev=cd73c548429e786e4fe7b818514da1bc1ee6ff94#cd73c548429e786e4fe7b818514da1bc1ee6ff94"
+source = "git+https://github.com/sajjon/uniffi-rs/?rev=fe40d992b32103876112713cb5e8303b54647183#fe40d992b32103876112713cb5e8303b54647183"
 dependencies = [
  "nom",
 ]
