@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Petition of signatures from an entity in a transaction.
 /// Essentially a wrapper around a tuple
 /// `{ threshold: PetitionForFactors, override: PetitionForFactors }`
-#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+#[derive(derive_more::Debug)]
 #[debug("{}", self.debug_str())]
 pub(crate) struct PetitionForEntity<ID: SignableID> {
     /// The owner of these factors
@@ -13,11 +13,33 @@ pub(crate) struct PetitionForEntity<ID: SignableID> {
     pub(crate) payload_id: ID,
 
     /// Petition with threshold factors
-    pub(crate) threshold_factors: Option<RefCell<PetitionForFactors<ID>>>,
+    pub(crate) threshold_factors: Option<RwLock<PetitionForFactors<ID>>>,
 
     /// Petition with override factors
-    pub(crate) override_factors: Option<RefCell<PetitionForFactors<ID>>>,
+    pub(crate) override_factors: Option<RwLock<PetitionForFactors<ID>>>,
 }
+
+impl<ID: SignableID> Clone for PetitionForEntity<ID> {
+    fn clone(&self) -> Self {
+        Self {
+            entity: self.entity,
+            payload_id: self.payload_id.clone(),
+            threshold_factors: self.all_threshold_factors().map(RwLock::new),
+            override_factors: self.all_override_factors().map(RwLock::new),
+        }
+    }
+}
+
+impl<ID: SignableID> PartialEq for PetitionForEntity<ID> {
+    fn eq(&self, other: &Self) -> bool {
+        self.entity == other.entity
+            && self.payload_id == other.payload_id
+            && self.all_threshold_factors() == other.all_threshold_factors()
+            && self.all_override_factors() == other.all_override_factors()
+    }
+}
+
+impl<ID: SignableID> Eq for PetitionForEntity<ID> {}
 
 impl<ID: SignableID> PetitionForEntity<ID> {
     pub(super) fn new(
@@ -34,8 +56,8 @@ impl<ID: SignableID> PetitionForEntity<ID> {
         Self {
             entity,
             payload_id,
-            threshold_factors: threshold_factors.map(RefCell::new),
-            override_factors: override_factors.map(RefCell::new),
+            threshold_factors: threshold_factors.map(RwLock::new),
+            override_factors: override_factors.map(RwLock::new),
         }
     }
 
@@ -79,11 +101,11 @@ impl<ID: SignableID> PetitionForEntity<ID> {
             payload_id,
             entity,
             PetitionForFactors::new_threshold(
-                role_with_factor_instances.threshold_factors,
-                role_with_factor_instances.threshold as i8,
+                role_with_factor_instances.get_threshold_factors(),
+                role_with_factor_instances.get_threshold() as i8,
             ),
             PetitionForFactors::new_override(
-                role_with_factor_instances.override_factors,
+                role_with_factor_instances.get_override_factors(),
             ),
         )
     }
@@ -299,6 +321,22 @@ impl<ID: SignableID> PetitionForEntity<ID> {
             },
         )
     }
+
+    fn all_threshold_factors(&self) -> Option<PetitionForFactors<ID>> {
+        self.threshold_factors.as_ref().map(|lock| {
+            lock.read()
+                .expect("PetitionForEntity lock should not have been poisoned.")
+                .clone()
+        })
+    }
+
+    fn all_override_factors(&self) -> Option<PetitionForFactors<ID>> {
+        self.override_factors.as_ref().map(|lock| {
+            lock.read()
+                .expect("PetitionForEntity lock should not have been poisoned.")
+                .clone()
+        })
+    }
 }
 
 // === Private ===
@@ -315,8 +353,12 @@ impl<ID: SignableID> PetitionForEntity<ID> {
         combine: impl Fn(Option<T>, Option<T>) -> U,
     ) -> U {
         let access_list_if_exists =
-            |list: &Option<RefCell<PetitionForFactors<ID>>>| {
-                list.as_ref().map(|refcell| access(&refcell.borrow()))
+            |list: &Option<RwLock<PetitionForFactors<ID>>>| {
+                list.as_ref().map(|rwlock| {
+                    access(&rwlock.read().expect(
+                        "PetitionForEntity lock should not have been poisoned.",
+                    ))
+                })
             };
         let t = access_list_if_exists(&self.threshold_factors);
         let o = access_list_if_exists(&self.override_factors);
@@ -346,15 +388,13 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     #[allow(unused)]
     fn debug_str(&self) -> String {
         let thres: String = self
-            .threshold_factors
-            .clone()
-            .map(|f| format!("threshold_factors {:#?}", f.borrow()))
+            .all_threshold_factors()
+            .map(|f| format!("threshold_factors {:#?}", f))
             .unwrap_or_default();
 
         let overr: String = self
-            .override_factors
-            .clone()
-            .map(|f| format!("override_factors {:#?}", f.borrow()))
+            .all_override_factors()
+            .map(|f| format!("override_factors {:#?}", f))
             .unwrap_or_default();
 
         format!(
@@ -389,7 +429,9 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for PetitionForEntity<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for PetitionForEntity<ID>
+{
     fn sample() -> Self {
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
@@ -582,45 +624,6 @@ mod tests {
     fn cannot_add_unrelated_signature() {
         let sut = SUT::sample();
         sut.add_signature(HDSignature::sample());
-    }
-
-    #[test]
-    fn factor_should_not_be_used_in_both_lists() {
-        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
-        );
-        assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                RoleKind::Primary,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                1,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-            ),
-            Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
-        );
-    }
-
-    #[test]
-    fn threshold_should_not_be_bigger_than_threshold_factors() {
-        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
-        );
-        assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                RoleKind::Primary,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                2,
-                [],
-            ),
-            Err(
-                CommonError::InvalidSecurityStructureThresholdExceedsFactors {
-                    threshold: 2,
-                    factors: 1,
-                }
-            )
-        );
     }
 
     #[test]

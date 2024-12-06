@@ -6,9 +6,8 @@ pub(super) struct SignaturesCollectorDependencies<S: Signable> {
     /// tests to set to `false` to see how the system behaves.
     pub(super) finish_early_strategy: SigningFinishEarlyStrategy,
 
-    /// A collection of "interactors" used to sign with factor sources.
-    pub(super) interactors: Arc<dyn SignInteractors<S>>,
-
+    /// The interactor that is used to sign with factor sources.
+    pub(super) interactor: Arc<dyn SignInteractor<S>>,
     /// Factor sources grouped by kind, sorted according to "friction order",
     /// that is, we want to control which FactorSourceKind users sign with
     /// first, second etc, e.g. typically we prompt user to sign with Ledgers
@@ -24,12 +23,12 @@ pub(super) struct SignaturesCollectorDependencies<S: Signable> {
 impl<S: Signable> SignaturesCollectorDependencies<S> {
     pub(crate) fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
-        interactors: Arc<dyn SignInteractors<S>>,
+        interactor: Arc<dyn SignInteractor<S>>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
     ) -> Self {
         Self {
             finish_early_strategy,
-            interactors,
+            interactor,
             factors_of_kind,
         }
     }

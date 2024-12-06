@@ -104,6 +104,20 @@ impl FactorSourceKind {
     }
 }
 
+impl FactorSourceKind {
+    pub fn category(&self) -> FactorSourceCategory {
+        use FactorSourceCategory::*;
+        match self {
+            Self::LedgerHQHardwareWallet | Self::ArculusCard => Hardware,
+            Self::Password
+            | Self::SecurityQuestions
+            | Self::OffDeviceMnemonic => Information,
+            Self::Device => Identity,
+            Self::TrustedContact => Contact,
+        }
+    }
+}
+
 impl HasSampleValues for FactorSourceKind {
     fn sample() -> Self {
         Self::Device
@@ -203,6 +217,29 @@ mod tests {
 
         assert_eq!(SUT::TrustedContact.discriminant(), "trustedContact");
         assert_eq!(SUT::Password.discriminant(), "password");
+    }
+
+    #[test]
+    fn category() {
+        assert_eq!(
+            SUT::LedgerHQHardwareWallet.category(),
+            FactorSourceCategory::Hardware
+        );
+        assert_eq!(SUT::ArculusCard.category(), FactorSourceCategory::Hardware);
+        assert_eq!(SUT::Password.category(), FactorSourceCategory::Information);
+        assert_eq!(
+            SUT::SecurityQuestions.category(),
+            FactorSourceCategory::Information
+        );
+        assert_eq!(
+            SUT::OffDeviceMnemonic.category(),
+            FactorSourceCategory::Information
+        );
+        assert_eq!(SUT::Device.category(), FactorSourceCategory::Identity);
+        assert_eq!(
+            SUT::TrustedContact.category(),
+            FactorSourceCategory::Contact
+        );
     }
 
     #[test]

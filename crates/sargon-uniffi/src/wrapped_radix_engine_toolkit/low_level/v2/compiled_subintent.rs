@@ -3,7 +3,7 @@ use base64::prelude::BASE64_STANDARD_NO_PAD;
 use base64::Engine;
 use sargon::CompiledSubintent as InternalCompiledSubintent;
 
-#[derive(Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct CompiledSubintent {
     /// A base-64 encoded version of the compiled subintent
     secret_magic: String,

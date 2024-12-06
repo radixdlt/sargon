@@ -36,7 +36,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
 	}
 
 	func test_manifest_summary() throws {
-		XCTAssertNoDifference(try SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
+		XCTAssertNoDifference(SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
 	}
 
 	func test_from_instructions_string_with_max_sbor_depth_is_ok() throws {

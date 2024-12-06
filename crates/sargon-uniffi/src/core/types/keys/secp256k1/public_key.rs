@@ -1,4 +1,4 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::prelude::*;
 use sargon::BagOfBytes as InternalBagOfBytes;
 use sargon::Secp256k1PublicKey as InternalSecp256k1PublicKey;
 

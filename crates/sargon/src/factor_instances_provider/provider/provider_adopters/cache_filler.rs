@@ -12,14 +12,14 @@ impl CacheFiller {
         profile: impl Into<Option<Arc<Profile>>>,
         factor_source: FactorSource,
         network_id: NetworkID, // typically mainnet
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<FactorInstancesProviderOutcomeForFactor> {
         let provider = FactorInstancesProvider::new(
             network_id,
             IndexSet::just(factor_source.clone()),
             profile,
             cache_client.clone(),
-            interactors,
+            interactor,
         );
         let quantities = IndexMap::kv(
             factor_source.id_from_hash(),

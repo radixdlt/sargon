@@ -227,7 +227,7 @@ impl SargonOS {
             panic!("Unsupported FactorSource which is not HD.")
         }
         let profile_snapshot = self.profile()?;
-        let keys_derivation_interactors = self.keys_derivation_interactors();
+        let keys_derivation_interactors = self.keys_derivation_interactor();
         let outcome = CacheFiller::for_new_factor_source(
             Arc::new(self.clients.factor_instances_cache.clone()),
             Arc::new(profile_snapshot),
@@ -757,11 +757,14 @@ mod tests {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let bios = Bios::new(drivers);
-
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT

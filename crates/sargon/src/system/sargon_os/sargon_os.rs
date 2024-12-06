@@ -27,27 +27,12 @@ impl Deref for SargonOS {
 }
 
 impl SargonOS {
-    pub async fn boot(bios: Arc<Bios>) -> Arc<Self> {
+    pub async fn boot(bios: Arc<Bios>, interactors: Interactors) -> Arc<Self> {
         let clients = Clients::new(bios);
-        let secure_storage = Arc::new(clients.secure_storage.clone());
-        let derivation_interactors: Arc<dyn KeysDerivationInteractors>;
-        #[cfg(test)]
-        {
-            derivation_interactors = Arc::new(
-                TestDerivationInteractors::with_secure_storage(secure_storage),
-            );
-        }
-        #[cfg(not(test))]
-        {
-            derivation_interactors =
-                Arc::new(NoUIInteractorForKeyDerivation::new(secure_storage));
-        }
-
-        let interactors = Interactors::new(derivation_interactors);
-        Self::boot_with_interactors(clients, interactors).await
+        Self::boot_with_clients_and_interactor(clients, interactors).await
     }
 
-    pub async fn boot_with_interactors(
+    pub(crate) async fn boot_with_clients_and_interactor(
         clients: Clients,
         interactors: Interactors,
     ) -> Arc<Self> {
@@ -268,10 +253,25 @@ impl SargonOS {
         Ok(())
     }
 
-    pub(crate) fn keys_derivation_interactors(
+    pub(crate) fn sign_transactions_interactor(
         &self,
-    ) -> Arc<dyn KeysDerivationInteractors> {
-        self.interactors.key_derivation.clone()
+    ) -> Arc<dyn SignInteractor<TransactionIntent>> {
+        self.interactors.use_factor_sources_interactor.clone()
+            as Arc<dyn SignInteractor<TransactionIntent>>
+    }
+
+    pub(crate) fn sign_subintents_interactor(
+        &self,
+    ) -> Arc<dyn SignInteractor<Subintent>> {
+        self.interactors.use_factor_sources_interactor.clone()
+            as Arc<dyn SignInteractor<Subintent>>
+    }
+
+    pub(crate) fn keys_derivation_interactor(
+        &self,
+    ) -> Arc<dyn KeyDerivationInteractor> {
+        self.interactors.use_factor_sources_interactor.clone()
+            as Arc<dyn KeyDerivationInteractor>
     }
 
     pub async fn resolve_host_id(&self) -> Result<HostId> {
@@ -380,25 +380,29 @@ impl SargonOS {
 
     pub async fn boot_test_with_bdfs_mnemonic_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
-        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
             Drivers::with_file_system(InMemoryFileSystemDriver::new());
         let bios = Bios::new(test_drivers);
-        let clients = Clients::new(bios);
+        let clients = Clients::new(bios.clone());
 
-        let derivation_interactor = derivation_interactor.into();
-        let derivation_interactors: Arc<dyn KeysDerivationInteractors> =
-            derivation_interactor.unwrap_or_else(|| {
-                Arc::new(TestDerivationInteractors::with_secure_storage(
+        let keys_derivation_interactor =
+            derivation_interactor.into().unwrap_or_else(|| {
+                Arc::new(TestDerivationInteractor::new(
+                    false,
                     Arc::new(clients.secure_storage.clone()),
                 ))
             });
 
-        let interactors = Interactors::new(derivation_interactors);
-
-        let os = Self::boot_with_interactors(clients, interactors).await;
+        let os = Self::boot_with_clients_and_interactor(
+            clients,
+            Interactors::new_with_derivation_interactor(
+                keys_derivation_interactor,
+            ),
+        )
+        .await;
         os.new_wallet_with_mnemonic(
             bdfs_mnemonic.into(),
             pre_derive_factor_instance_for_bdfs,
@@ -422,7 +426,7 @@ impl SargonOS {
 
     pub async fn fast_boot_bdfs_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
-        derivation_interactor: impl Into<Option<Arc<dyn KeysDerivationInteractors>>>,
+        derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactor(
@@ -455,7 +459,11 @@ impl SargonOS {
     ) -> Result<Arc<Self>> {
         let drivers = Drivers::with_networking(networking);
         let bios = Bios::new(drivers);
-        let os = Self::boot(bios).await;
+        let clients = Clients::new(bios);
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os =
+            Self::boot_with_clients_and_interactor(clients, interactors).await;
 
         let (mut profile, bdfs) = os.create_new_profile_with_bdfs(None).await?;
 
@@ -511,12 +519,15 @@ mod tests {
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
         let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let bios = Bios::new(drivers);
-
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
         // ACT
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
 
         // ASSERT
         let active_profile = os.profile();
@@ -527,9 +538,10 @@ mod tests {
     async fn test_boot_when_existing_profile_with_no_networks_profile_state_considered_none(
     ) {
         // ARRANGE
-        let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios.clone()).await;
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
         let (first_profile, first_bdfs) =
             os.create_new_profile_with_bdfs(None).await.unwrap();
 
@@ -548,7 +560,11 @@ mod tests {
             .unwrap();
 
         // ACT
-        let new_os = SUT::boot(bios.clone()).await;
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let new_os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         // ASSERT
         assert!(new_os.profile().is_err());
@@ -584,8 +600,10 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         os.new_wallet(false).await.unwrap();
 
@@ -625,8 +643,10 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         os.new_wallet_with_derived_bdfs(
             PrivateHierarchicalDeterministicFactorSource::sample(),
@@ -643,8 +663,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         os.new_wallet_with_derived_bdfs(
             PrivateHierarchicalDeterministicFactorSource::sample(),
@@ -662,8 +685,11 @@ mod tests {
     async fn test_new_wallet_through_derived_bdfs_with_accounts_derived_from_other_hd_factor_source(
     ) {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         let other_hd =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
@@ -692,8 +718,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_delete_wallet() {
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SUT::boot(bios).await;
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
         os.new_wallet(false).await.unwrap();
         let profile = os.profile().unwrap();
         let bdfs = profile.bdfs();

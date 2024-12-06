@@ -20,7 +20,7 @@ impl VirtualEntityCreatingInstanceProvider {
         profile: Option<Arc<Profile>>,
         factor_source: FactorSource,
         network_id: NetworkID,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
@@ -31,7 +31,7 @@ impl VirtualEntityCreatingInstanceProvider {
             profile,
             factor_source,
             network_id,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -51,7 +51,7 @@ impl VirtualEntityCreatingInstanceProvider {
         profile: Option<Arc<Profile>>,
         factor_source: FactorSource,
         network_id: NetworkID,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
@@ -62,7 +62,7 @@ impl VirtualEntityCreatingInstanceProvider {
             profile,
             factor_source,
             network_id,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -83,7 +83,7 @@ impl VirtualEntityCreatingInstanceProvider {
         profile: Option<Arc<Profile>>,
         factor_source: FactorSource,
         network_id: NetworkID,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
@@ -95,7 +95,7 @@ impl VirtualEntityCreatingInstanceProvider {
             profile,
             factor_source,
             network_id,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -119,7 +119,7 @@ impl VirtualEntityCreatingInstanceProvider {
         profile: impl Into<Option<Arc<Profile>>>,
         factor_source: FactorSource,
         network_id: NetworkID,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
@@ -129,7 +129,7 @@ impl VirtualEntityCreatingInstanceProvider {
             IndexSet::just(factor_source.clone()),
             profile,
             cache_client,
-            interactors,
+            interactor,
         );
         let (instances_in_cache_consumer, outcome) = provider
             .provide(QuantifiedDerivationPreset::new(
@@ -167,7 +167,7 @@ mod tests {
             None,
             bdfs.clone(),
             network,
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -266,7 +266,7 @@ mod tests {
             None,
             bdfs.clone(),
             network,
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -471,7 +471,7 @@ mod tests {
             None,
             bdfs.clone(),
             network,
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -559,7 +559,7 @@ mod tests {
             None,
             bdfs.clone(),
             network,
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -596,7 +596,7 @@ mod tests {
             None,
             bdfs.clone(),
             network,
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
