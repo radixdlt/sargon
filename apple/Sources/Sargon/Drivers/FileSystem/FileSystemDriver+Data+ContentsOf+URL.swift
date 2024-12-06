@@ -51,7 +51,7 @@ extension FileSystem {
 extension FileSystem {
 	private static func appDirPathNotNecessarilyExisting(fileManager: FileManager) throws -> String {
 		#if os(iOS)
-		return try fileManager.urls(
+		fileManager.urls(
 			for: .cachesDirectory,
 			in: .userDomainMask
 		).first!.path()
