@@ -1,11 +1,30 @@
 use crate::prelude::*;
-use sargon::indexmap::IndexMap;
+use sargon::IndexMap;
 use sargon::{IndexSet, KeyDerivationRequest as InternalKeyDerivationRequest};
 
 /// A collection of derivation paths, on a per-factor-source basis.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct KeyDerivationRequest {
-    pub per_factor_source: HashMap<FactorSourceIDFromHash, Vec<DerivationPath>>,
+    pub keys_collection_reason: KeysCollectionReason,
+    pub per_factor_source: Vec<KeyDerivationRequestPerFactorSource>,
+}
+
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
+pub struct KeyDerivationRequestPerFactorSource {
+    pub factor_source_id: FactorSourceIDFromHash,
+    pub derivation_paths: Vec<DerivationPath>,
+}
+
+impl KeyDerivationRequestPerFactorSource {
+    pub fn new(
+        factor_source_id: FactorSourceIDFromHash,
+        derivation_paths: Vec<DerivationPath>,
+    ) -> Self {
+        Self {
+            factor_source_id,
+            derivation_paths,
+        }
+    }
 }
 
 impl KeyDerivationRequest {
@@ -17,11 +36,15 @@ impl KeyDerivationRequest {
 impl From<InternalKeyDerivationRequest> for KeyDerivationRequest {
     fn from(value: InternalKeyDerivationRequest) -> Self {
         Self {
+            keys_collection_reason: value.keys_collection_reason.into(),
             per_factor_source: value
                 .per_factor_source
                 .into_iter()
                 .map(|(k, v)| {
-                    (k.into(), v.into_iter().map(|d| d.into()).collect())
+                    KeyDerivationRequestPerFactorSource::new(
+                        k.into(),
+                        v.into_iter().map(|d| d.into()).collect(),
+                    )
                 })
                 .collect(),
         }
@@ -30,15 +53,18 @@ impl From<InternalKeyDerivationRequest> for KeyDerivationRequest {
 
 impl From<KeyDerivationRequest> for InternalKeyDerivationRequest {
     fn from(value: KeyDerivationRequest) -> Self {
-        Self::new(IndexMap::from_iter(
-            value.per_factor_source.into_iter().map(|(k, v)| {
+        Self::new(
+            value.keys_collection_reason.into_internal(),
+            IndexMap::from_iter(value.per_factor_source.into_iter().map(|f| {
                 (
-                    k.into_internal(),
+                    f.factor_source_id.into_internal(),
                     IndexSet::from_iter(
-                        v.into_iter().map(|d| d.into_internal()),
+                        f.derivation_paths
+                            .into_iter()
+                            .map(|d| d.into_internal()),
                     ),
                 )
-            }),
-        ))
+            })),
+        )
     }
 }
