@@ -292,7 +292,7 @@ impl MatrixTemplate {
     /// Config 5.1 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn config_51() -> Self {
+    pub fn config_5_1() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -308,7 +308,7 @@ impl MatrixTemplate {
     /// Config 5.2 according to [this document][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Example-Security-Shield-Configurations
-    pub fn config_52() -> Self {
+    pub fn config_5_2() -> Self {
         Self::new(
             PrimaryRoleTemplate::new([
                 FactorSourceTemplate::device(),
@@ -413,138 +413,138 @@ mod test_templates {
     }
 
     #[test]
-    fn template_config_11() {
+    fn template_config_1_1() {
         test_template(
             MatrixTemplate::config_1_1(),
-            MatrixOfFactorSourceIds::sample_config_11(),
+            MatrixOfFactorSourceIds::sample_config_1_1(),
         )
     }
 
     #[test]
-    fn template_config_12() {
+    fn template_config_1_2() {
         test_template(
             MatrixTemplate::config_1_2(),
-            MatrixOfFactorSourceIds::sample_config_12(),
+            MatrixOfFactorSourceIds::sample_config_1_2(),
         )
     }
 
     #[test]
-    fn template_config_13() {
+    fn template_config_1_3() {
         test_template(
             MatrixTemplate::config_1_3(),
-            MatrixOfFactorSourceIds::sample_config_13(),
+            MatrixOfFactorSourceIds::sample_config_1_3(),
         )
     }
 
     #[test]
-    fn template_config_14() {
+    fn template_config_1_4() {
         test_template(
             MatrixTemplate::config_1_4(),
-            MatrixOfFactorSourceIds::sample_config_14(),
+            MatrixOfFactorSourceIds::sample_config_1_4(),
         )
     }
 
     #[test]
-    fn template_config_15() {
+    fn template_config_1_5() {
         test_template(
             MatrixTemplate::config_1_5(),
-            MatrixOfFactorSourceIds::sample_config_15(),
+            MatrixOfFactorSourceIds::sample_config_1_5(),
         )
     }
 
     #[test]
-    fn template_config_21() {
+    fn template_config_2_1() {
         test_template(
             MatrixTemplate::config_2_1(),
-            MatrixOfFactorSourceIds::sample_config_21(),
+            MatrixOfFactorSourceIds::sample_config_2_1(),
         )
     }
 
     #[test]
-    fn template_config_22() {
+    fn template_config_2_2() {
         test_template(
             MatrixTemplate::config_2_2(),
-            MatrixOfFactorSourceIds::sample_config_22(),
+            MatrixOfFactorSourceIds::sample_config_2_2(),
         )
     }
 
     #[test]
-    fn template_config_23() {
+    fn template_config_2_3() {
         test_template(
             MatrixTemplate::config_2_3(),
-            MatrixOfFactorSourceIds::sample_config_23(),
+            MatrixOfFactorSourceIds::sample_config_2_3(),
         )
     }
 
     #[test]
-    fn template_config_24() {
+    fn template_config_2_4() {
         test_template(
             MatrixTemplate::config_2_4(),
-            MatrixOfFactorSourceIds::sample_config_24(),
+            MatrixOfFactorSourceIds::sample_config_2_4(),
         )
     }
 
     #[test]
-    fn template_config_30() {
+    fn template_config_3_0() {
         test_template(
             MatrixTemplate::config_3_0(),
-            MatrixOfFactorSourceIds::sample_config_30(),
+            MatrixOfFactorSourceIds::sample_config_3_0(),
         )
     }
 
     #[test]
-    fn template_config_40() {
+    fn template_config_4_0() {
         test_template(
             MatrixTemplate::config_4_0(),
-            MatrixOfFactorSourceIds::sample_config_40(),
+            MatrixOfFactorSourceIds::sample_config_4_0(),
         )
     }
 
     #[test]
-    fn template_config_51() {
+    fn template_config_5_1() {
         test_template(
-            MatrixTemplate::config_51(),
-            MatrixOfFactorSourceIds::sample_config_51(),
+            MatrixTemplate::config_5_1(),
+            MatrixOfFactorSourceIds::sample_config_5_1(),
         )
     }
 
     #[test]
-    fn template_config_52() {
+    fn template_config_5_2() {
         test_template(
-            MatrixTemplate::config_52(),
-            MatrixOfFactorSourceIds::sample_config_52(),
+            MatrixTemplate::config_5_2(),
+            MatrixOfFactorSourceIds::sample_config_5_2(),
         )
     }
 
     #[test]
-    fn template_config_60() {
+    fn template_config_6_0() {
         test_template(
             MatrixTemplate::config_6_0(),
-            MatrixOfFactorSourceIds::sample_config_60(),
+            MatrixOfFactorSourceIds::sample_config_6_0(),
         )
     }
 
     #[test]
-    fn template_config_70() {
+    fn template_config_7_0() {
         test_template(
             MatrixTemplate::config_7_0(),
-            MatrixOfFactorSourceIds::sample_config_70(),
+            MatrixOfFactorSourceIds::sample_config_7_0(),
         )
     }
 
     #[test]
-    fn template_config_80() {
+    fn template_config_8_0() {
         test_template(
             MatrixTemplate::config_8_0(),
-            MatrixOfFactorSourceIds::sample_config_80(),
+            MatrixOfFactorSourceIds::sample_config_8_0(),
         )
     }
 
     #[test]
-    fn template_config_90() {
+    fn template_config_9_0() {
         test_template(
             MatrixTemplate::config_9_0(),
-            MatrixOfFactorSourceIds::sample_config_90(),
+            MatrixOfFactorSourceIds::sample_config_9_0(),
         )
     }
 }

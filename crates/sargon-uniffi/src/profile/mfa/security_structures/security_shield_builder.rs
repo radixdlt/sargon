@@ -179,7 +179,7 @@ impl SecurityShieldBuilder {
 
     /// Adds the factor source to the primary role threshold list.
     ///
-    /// Also sets the threshold to 1 this is the first factor set and if
+    /// Also sets the threshold to 1 if this is the first factor set and if
     /// the threshold was 0.
     pub fn add_factor_source_to_primary_threshold(
         &self,
