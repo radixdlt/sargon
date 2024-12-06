@@ -158,15 +158,7 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::<AccountAddress>::new(), // <---- EMPTY => should_panic
             Arc::new(TestDerivationInteractor::default()),
         )
@@ -180,19 +172,10 @@ mod tests {
         let fs = FactorSource::sample_at(0);
         let a = Account::sample();
         let cache_client = FactorInstancesCacheClient::in_memory();
-
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::just(Account::sample_other().address()), // <---- unknown => should_panic
             Arc::new(TestDerivationInteractor::default()),
         )
@@ -225,15 +208,7 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::from_iter([mainnet_account.address()]),
             Arc::new(TestDerivationInteractor::default()),
         )
@@ -279,15 +254,7 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::from_iter([
                 mainnet_account.address(),
                 stokenet_account.address(),
@@ -322,15 +289,19 @@ mod tests {
             .unwrap();
         assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        let matrix_0 = MatrixOfFactorSources::new(
-            PrimaryRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-            RecoveryRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-            ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-        )
-        .unwrap();
+        os.add_factor_source(FactorSource::sample_ledger())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_password())
+            .await
+            .unwrap();
+        let factor_sources = &os.profile().unwrap().factor_sources;
+        let matrix_ids = MatrixTemplate::config_1_4()
+            .materialize(factor_sources.items())
+            .unwrap();
+
+        let matrix_0 =
+            MatrixOfFactorSources::new(matrix_ids, factor_sources).unwrap();
 
         let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
         let profile = Arc::new(os.profile().unwrap());

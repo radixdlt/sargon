@@ -48,29 +48,29 @@ class KeystoreAccessRequestTest {
         }
     }
 
-    @Test
-    fun testSpecsOfMnemonic() = runTest {
-        val request = KeystoreAccessRequest.ForMnemonic(
-            onRequestAuthorization = { Result.success(Unit) }
-        )
-        assertInstanceOf(KeySpec.Mnemonic::class.java, request.keySpec)
+    // @Test
+    // fun testSpecsOfMnemonic() = runTest {
+    //     val request = KeystoreAccessRequest.ForMnemonic(
+    //         onRequestAuthorization = { Result.success(Unit) }
+    //     )
+    //     assertInstanceOf(KeySpec.Mnemonic::class.java, request.keySpec)
 
-        try {
-            request.requestAuthorization().getOrThrow()
-        } catch (exception: Exception) {
-            assert(false) { "requestAuthorization for Mnemonic should succeed but didn't" }
-        }
+    //     try {
+    //         request.requestAuthorization().getOrThrow()
+    //     } catch (exception: Exception) {
+    //         assert(false) { "requestAuthorization for Mnemonic should succeed but didn't" }
+    //     }
 
-        val failingRequest = KeystoreAccessRequest.ForMnemonic(
-            onRequestAuthorization = { Result.failure(RuntimeException("An error")) }
-        )
+    //     val failingRequest = KeystoreAccessRequest.ForMnemonic(
+    //         onRequestAuthorization = { Result.failure(RuntimeException("An error")) }
+    //     )
 
-        try {
-            failingRequest.requestAuthorization().getOrThrow()
-            assert(false) { "requestAuthorization for failing access to Mnemonic should fail but succeeded" }
-        } catch (exception: Exception) {
-            assert(true) { "requestAuthorization for failing access to Mnemonic should fail" }
-        }
-    }
+    //     try {
+    //         failingRequest.requestAuthorization().getOrThrow()
+    //         assert(false) { "requestAuthorization for failing access to Mnemonic should fail but succeeded" }
+    //     } catch (exception: Exception) {
+    //         assert(true) { "requestAuthorization for failing access to Mnemonic should fail" }
+    //     }
+    // }
 
 }

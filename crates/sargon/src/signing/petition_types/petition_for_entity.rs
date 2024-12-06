@@ -101,11 +101,11 @@ impl<ID: SignableID> PetitionForEntity<ID> {
             payload_id,
             entity,
             PetitionForFactors::new_threshold(
-                role_with_factor_instances.threshold_factors,
-                role_with_factor_instances.threshold as i8,
+                role_with_factor_instances.get_threshold_factors(),
+                role_with_factor_instances.get_threshold() as i8,
             ),
             PetitionForFactors::new_override(
-                role_with_factor_instances.override_factors,
+                role_with_factor_instances.get_override_factors(),
             ),
         )
     }
@@ -624,45 +624,6 @@ mod tests {
     fn cannot_add_unrelated_signature() {
         let sut = SUT::sample();
         sut.add_signature(HDSignature::sample());
-    }
-
-    #[test]
-    fn factor_should_not_be_used_in_both_lists() {
-        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
-        );
-        assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                RoleKind::Primary,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                1,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-            ),
-            Err(CommonError::InvalidSecurityStructureFactorInBothThresholdAndOverride)
-        );
-    }
-
-    #[test]
-    fn threshold_should_not_be_bigger_than_threshold_factors() {
-        let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
-        );
-        assert_eq!(
-            GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                RoleKind::Primary,
-                [FactorSourceIDFromHash::sample_at(0)].map(&fi),
-                2,
-                [],
-            ),
-            Err(
-                CommonError::InvalidSecurityStructureThresholdExceedsFactors {
-                    threshold: 2,
-                    factors: 1,
-                }
-            )
-        );
     }
 
     #[test]

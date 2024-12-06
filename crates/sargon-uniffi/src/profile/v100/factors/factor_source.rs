@@ -36,6 +36,8 @@ pub enum FactorSource {
     },
 }
 
+delegate_debug_into!(FactorSource, InternalFactorSource);
+
 #[uniffi::export]
 pub fn factor_source_to_string(factor_source: &FactorSource) -> String {
     factor_source.into_internal().to_string()

@@ -462,27 +462,27 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     assert_eq!(all_accounts.len(), 3 * n);
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
-            .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone()],
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             1,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
             [bdfs.clone()],
-            1,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
 
     let all_accounts = os
         .profile()
@@ -610,28 +610,31 @@ async fn test_assert_factor_instances_invalid() {
         .unwrap();
 
     let bdfs = FactorSource::from(os.bdfs().unwrap());
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
-            .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone()],
-            1,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone()],
-            1,
-        )
-        .unwrap(),
-    )
-    .unwrap();
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            1,
+            [bdfs.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
     let (security_structure_of_fis, _, _) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(IndexSet::from_iter([alice.address()]), shield_0.clone()).await.unwrap();
 
     let security_structure_of_fi =
@@ -949,30 +952,27 @@ async fn test_securified_accounts() {
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(password.clone()).await.unwrap();
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             2,
-        )
-        .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
             [bdfs.clone(), ledger.clone(), arculus.clone()],
-            2,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
             [bdfs.clone(), ledger.clone(), arculus.clone()],
-            2,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -987,13 +987,13 @@ async fn test_securified_accounts() {
         "should have used cache"
     );
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
 
     let alice_matrix = alice_sec.matrix_of_factors.clone();
-    assert_eq!(alice_matrix.primary_role.threshold, 2);
+    assert_eq!(alice_matrix.primary().get_threshold(), 2);
 
     assert_eq!(
         alice_matrix
@@ -1032,7 +1032,7 @@ async fn test_securified_accounts() {
     let bob_sec = security_structures_of_fis.get(&bob.address()).unwrap();
 
     let bob_matrix = bob_sec.matrix_of_factors.clone();
-    assert_eq!(bob_matrix.primary_role.threshold, 2);
+    assert_eq!(bob_matrix.primary().get_threshold(), 2);
 
     assert_eq!(
         bob_matrix
@@ -1086,21 +1086,27 @@ async fn test_securified_accounts() {
             "First account created with ledger, should have index 0, even though this ledger was used in the shield, since we are using two different KeySpaces for Securified and Unsecurified accounts."
         );
 
-    let matrix_1 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([password.clone()])
-            .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([password.clone()])
-            .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([password.clone()])
-            .unwrap(),
-    )
-    .unwrap();
+    let matrix_1 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            1,
+            [password.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [password.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [password.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_1 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 1").unwrap()),
-        14,
-        matrix_1,
-    );
+    let shield_1 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_1);
 
     let (security_structures_of_fis, instances_in_cache_consumer, _) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1110,13 +1116,13 @@ async fn test_securified_accounts() {
         .await
         .unwrap();
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     let carol_sec = security_structures_of_fis.get(&carol.address()).unwrap();
 
     let carol_matrix = carol_sec.matrix_of_factors.clone();
-    assert_eq!(carol_matrix.primary_role.get_override_factors().len(), 1);
+    assert_eq!(carol_matrix.primary_role.get_threshold_factors().len(), 1);
 
     assert_eq!(
         carol_matrix
@@ -1151,7 +1157,7 @@ async fn test_securified_accounts() {
     .await
     .unwrap();
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     assert!(
@@ -1212,28 +1218,30 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
     .await
     .unwrap();
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
-            .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone()],
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             1,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
             [bdfs.clone()],
-            1,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
-
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
     let profile = os.profile().unwrap();
     let all_accounts = profile
         .accounts_on_all_networks_including_hidden()
@@ -1357,31 +1365,30 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
 
     assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             2,
-        )
-        .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
             [bdfs.clone(), ledger.clone(), arculus.clone()],
-            2,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
             [bdfs.clone(), ledger.clone(), arculus.clone()],
-            2,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
-
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
     let all_accounts = os
         .profile()
         .unwrap()
@@ -1595,28 +1602,30 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 
     let (_, _) = os.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Persona".to_owned()).await.unwrap();
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only([bdfs.clone()], 1)
-            .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone()],
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             1,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
             [bdfs.clone()],
-            1,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
-
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
     let all_personas = os
         .profile()
         .unwrap()
@@ -1726,19 +1735,30 @@ async fn create_single_account() {
         "should have used cache"
     );
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([bdfs.clone()]).unwrap(),
-        RecoveryRoleWithFactorSources::override_only([bdfs.clone()]).unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
-            .unwrap(),
-    )
-    .unwrap();
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            1,
+            [bdfs.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1748,7 +1768,7 @@ async fn create_single_account() {
     .await
     .unwrap();
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     assert!(
@@ -1807,30 +1827,27 @@ async fn securified_personas() {
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(password.clone()).await.unwrap();
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only(
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             2,
-        )
-        .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
             [bdfs.clone(), ledger.clone(), arculus.clone()],
-            2,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
             [bdfs.clone(), ledger.clone(), arculus.clone()],
-            2,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1845,13 +1862,13 @@ async fn securified_personas() {
         "should have used cache"
     );
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     let batman_sec = security_structures_of_fis.get(&batman.address()).unwrap();
 
     let batman_matrix = batman_sec.matrix_of_factors.clone();
-    assert_eq!(batman_matrix.primary_role.threshold, 2);
+    assert_eq!(batman_matrix.primary().get_threshold(), 2);
 
     assert_eq!(
         batman_matrix
@@ -1891,7 +1908,7 @@ async fn securified_personas() {
         security_structures_of_fis.get(&satoshi.address()).unwrap();
 
     let satoshi_matrix = satoshi_sec.matrix_of_factors.clone();
-    assert_eq!(satoshi_matrix.primary_role.threshold, 2);
+    assert_eq!(satoshi_matrix.primary().get_threshold(), 2);
 
     assert_eq!(
         satoshi_matrix
@@ -1945,21 +1962,30 @@ async fn securified_personas() {
             "First persona created with ledger, should have index 0, even though this ledger was used in the shield, since we are using two different KeySpaces for Securified and Unsecurified personas."
         );
 
-    let matrix_1 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([password.clone()])
-            .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([password.clone()])
-            .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([password.clone()])
-            .unwrap(),
-    )
-    .unwrap();
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_1 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            1,
+            [password.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [password.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [password.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_1 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 1").unwrap()),
-        14,
-        matrix_1,
-    );
+    let shield_1 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_1);
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1969,7 +1995,7 @@ async fn securified_personas() {
         .await
         .unwrap();
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     assert!(
@@ -1980,7 +2006,7 @@ async fn securified_personas() {
     let hyde_sec = security_structures_of_fis.get(&hyde.address()).unwrap();
 
     let hyde_matrix = hyde_sec.matrix_of_factors.clone();
-    assert_eq!(hyde_matrix.primary_role.get_override_factors().len(), 1);
+    assert_eq!(hyde_matrix.primary_role.get_threshold_factors().len(), 1);
 
     assert_eq!(
         hyde_matrix
@@ -2062,12 +2088,12 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
     );
 
-    let fs_device = FactorSource::from(os.bdfs().unwrap());
-    let fs_arculus = FactorSource::sample_arculus();
-    let fs_ledger = FactorSource::sample_ledger();
+    let bdfs = FactorSource::from(os.bdfs().unwrap());
+    let arculus = FactorSource::sample_arculus();
+    let ledger = FactorSource::sample_ledger();
 
-    os.add_factor_source(fs_arculus.clone()).await.unwrap();
-    os.add_factor_source(fs_ledger.clone()).await.unwrap();
+    os.add_factor_source(arculus.clone()).await.unwrap();
+    os.add_factor_source(ledger.clone()).await.unwrap();
 
     let factor_source_count = os.profile().unwrap().factor_sources.len();
 
@@ -2099,22 +2125,30 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         .into_iter()
         .collect_vec();
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([fs_device.clone()])
-            .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([fs_device.clone()])
-            .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([fs_device.clone()])
-            .unwrap(),
-    )
-    .unwrap();
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            1,
+            [bdfs.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
-
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
     let (_, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
             unnamed_accounts
@@ -2146,7 +2180,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
     let next_index_veci = next_index_profile_assigner
         .next(
-            fs_device.id_from_hash(),
+            bdfs.id_from_hash(),
             DerivationPreset::AccountVeci
                 .index_agnostic_path_on_network(network),
         )
@@ -2162,7 +2196,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
     let next_index_mfa = next_index_profile_assigner
         .next(
-            fs_device.id_from_hash(),
+            bdfs.id_from_hash(),
             DerivationPreset::AccountMfa
                 .index_agnostic_path_on_network(network),
         )
@@ -2176,7 +2210,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
     let (alice, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
-            fs_device.clone(),
+            bdfs.clone(),
             network,
             "Alice",
         )
@@ -2250,18 +2284,18 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
 #[actix_rt::test]
 async fn securified_accounts_asymmetric_indices() {
-    let (os, fs_device) = SargonOS::with_bdfs().await;
+    let (os, bdfs) = SargonOS::with_bdfs().await;
     let cache = os.cache_snapshot().await;
     assert_eq!(
         cache.total_number_of_factor_instances(),
         DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
     );
 
-    let fs_arculus = FactorSource::sample_arculus();
-    let fs_ledger = FactorSource::sample_ledger();
+    let arculus = FactorSource::sample_arculus();
+    let ledger = FactorSource::sample_ledger();
 
-    os.add_factor_source(fs_arculus.clone()).await.unwrap();
-    os.add_factor_source(fs_ledger.clone()).await.unwrap();
+    os.add_factor_source(arculus.clone()).await.unwrap();
+    os.add_factor_source(ledger.clone()).await.unwrap();
 
     let number_of_factor_sources = os.profile().unwrap().factor_sources.len();
     assert_eq!(number_of_factor_sources, 3);
@@ -2282,7 +2316,7 @@ async fn securified_accounts_asymmetric_indices() {
 
     // first create CACHE_FILLING_QUANTITY many "unnamed" accounts
 
-    let (_, derivation_outcome) = os.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(fs_device.clone(), CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(bdfs.clone(), CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
     assert!(derivation_outcome.debug_was_derived.is_empty());
 
     let unnamed_accounts = os
@@ -2292,31 +2326,30 @@ async fn securified_accounts_asymmetric_indices() {
         .into_iter()
         .collect_vec();
 
-    let matrix_0 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::threshold_factors_only(
-            [fs_device.clone()],
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_0 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
             1,
-        )
-        .unwrap(),
-        RecoveryRoleWithFactorSources::threshold_factors_only(
-            [fs_device.clone()],
-            1,
-        )
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::threshold_factors_only(
-            [fs_device.clone()],
-            1,
-        )
-        .unwrap(),
-    )
-    .unwrap();
+            [bdfs.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_0 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 0").unwrap()),
-        14,
-        matrix_0,
-    );
-
+    let shield_0 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
     let (_, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
             unnamed_accounts
@@ -2336,7 +2369,7 @@ async fn securified_accounts_asymmetric_indices() {
 
     let (alice, derivation_outcome) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
-            fs_device.clone(),
+            bdfs.clone(),
             network,
             "Alice",
         )
@@ -2357,7 +2390,7 @@ async fn securified_accounts_asymmetric_indices() {
 
     let (bob, _) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
-            fs_device.clone(),
+            bdfs.clone(),
             network,
             "Bob",
         )
@@ -2366,7 +2399,7 @@ async fn securified_accounts_asymmetric_indices() {
 
     let (carol, _) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
-            fs_device.clone(),
+            bdfs.clone(),
             network,
             "Carol",
         )
@@ -2375,7 +2408,7 @@ async fn securified_accounts_asymmetric_indices() {
 
     let (diana, _) = os
         .create_and_save_new_account_with_factor_with_derivation_outcome(
-            fs_device.clone(),
+            bdfs.clone(),
             network,
             "Diana",
         )
@@ -2406,30 +2439,30 @@ async fn securified_accounts_asymmetric_indices() {
         4
     );
 
-    let matrix_1 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_arculus.clone(),
-        ])
-        .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_arculus.clone(),
-        ])
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_arculus.clone(),
-        ])
-        .unwrap(),
-    )
-    .unwrap();
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_1 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            2,
+            [bdfs.clone(), arculus.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), arculus.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), arculus.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_1 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 1").unwrap()),
-        14,
-        matrix_1,
-    );
+    let shield_1 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_1);
 
     let (securified_alice, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_account(alice.address(), &shield_1)
@@ -2457,12 +2490,12 @@ async fn securified_accounts_asymmetric_indices() {
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.id_from_hash(),
+                bdfs.id_from_hash(),
                 HDPathComponent::from_local_key_space(30, KeySpace::Securified)
                     .unwrap()
             ),
             (
-                fs_arculus.id_from_hash(),
+                arculus.id_from_hash(),
                 HDPathComponent::from_local_key_space(0, KeySpace::Securified)
                     .unwrap()
             ),
@@ -2471,30 +2504,30 @@ async fn securified_accounts_asymmetric_indices() {
         .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>()
     );
 
-    let matrix_2 = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_ledger.clone(),
-        ])
-        .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_ledger.clone(),
-        ])
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_ledger.clone(),
-        ])
-        .unwrap(),
-    )
-    .unwrap();
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_2 = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            2,
+            [bdfs.clone(), ledger.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
-    let shield_2 = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 2").unwrap()),
-        14,
-        matrix_2,
-    );
+    let shield_2 =
+        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_2);
 
     let (securified_bob, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_account(bob.address(), &shield_2)
@@ -2522,12 +2555,12 @@ async fn securified_accounts_asymmetric_indices() {
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.id_from_hash(),
+                bdfs.id_from_hash(),
                 HDPathComponent::from_local_key_space(31, KeySpace::Securified) // Alice used 30
                     .unwrap()
             ),
             (
-                fs_ledger.id_from_hash(),
+                ledger.id_from_hash(),
                 HDPathComponent::from_local_key_space(0, KeySpace::Securified)
                     .unwrap()
             ),
@@ -2561,12 +2594,12 @@ async fn securified_accounts_asymmetric_indices() {
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.id_from_hash(),
+                bdfs.id_from_hash(),
                 HDPathComponent::from_local_key_space(32, KeySpace::Securified) // Alice used 30, Bob used 31
                     .unwrap()
             ),
             (
-                fs_arculus.id_from_hash(),
+                arculus.id_from_hash(),
                 HDPathComponent::from_local_key_space(1, KeySpace::Securified) // Alice used 0
                     .unwrap()
             ),
@@ -2578,31 +2611,30 @@ async fn securified_accounts_asymmetric_indices() {
     // CLEAR CACHE
     os.clear_cache().await;
 
-    let matrix_3fa = MatrixOfFactorSources::new(
-        PrimaryRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_arculus.clone(),
-            fs_ledger.clone(),
-        ])
-        .unwrap(),
-        RecoveryRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_arculus.clone(),
-            fs_ledger.clone(),
-        ])
-        .unwrap(),
-        ConfirmationRoleWithFactorSources::override_only([
-            fs_device.clone(),
-            fs_arculus.clone(),
-            fs_ledger.clone(),
-        ])
-        .unwrap(),
-    )
-    .unwrap();
+    // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
+    // We are not testing valid matrices here... we are testing the factor
+    // instances provider...
+    let matrix_3fa = MatrixOfFactorSources {
+        primary_role: PrimaryRoleWithFactorSources::with_factors(
+            2,
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+            [],
+        ),
+        recovery_role: RecoveryRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+        ),
+        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
+            0,
+            [],
+            [bdfs.clone(), ledger.clone(), arculus.clone()],
+        ),
+        number_of_days_until_auto_confirm: 1,
+    };
 
     let shield_3fa = SecurityStructureOfFactorSources::new(
-        SecurityStructureMetadata::new(DisplayName::new("Shield 3fa").unwrap()),
-        14,
+        DisplayName::sample(),
         matrix_3fa,
     );
 
@@ -2632,7 +2664,7 @@ async fn securified_accounts_asymmetric_indices() {
             .collect::<IndexMap<FactorSourceIDFromHash, HDPathComponent>>(),
         [
             (
-                fs_device.id_from_hash(),
+                bdfs.id_from_hash(),
                 HDPathComponent::from_local_key_space(
                     diana_mfa_device,
                     KeySpace::Securified
@@ -2640,7 +2672,7 @@ async fn securified_accounts_asymmetric_indices() {
                 .unwrap()
             ),
             (
-                fs_arculus.id_from_hash(),
+                arculus.id_from_hash(),
                 HDPathComponent::from_local_key_space(
                     diana_mfa_arculus,
                     KeySpace::Securified
@@ -2648,7 +2680,7 @@ async fn securified_accounts_asymmetric_indices() {
                 .unwrap()
             ),
             (
-                fs_ledger.id_from_hash(),
+                ledger.id_from_hash(),
                 HDPathComponent::from_local_key_space(
                     diana_mfa_ledger,
                     KeySpace::Securified
@@ -2706,21 +2738,21 @@ async fn securified_accounts_asymmetric_indices() {
                 .collect::<IndexMap<_, _>>(),
             [
                 (
-                    fs_device.id_from_hash(),
+                    bdfs.id_from_hash(),
                     HDPathComponent::Securified(
                         SecurifiedU30::try_from(diana_mfa_device + offset)
                             .unwrap()
                     )
                 ),
                 (
-                    fs_arculus.id_from_hash(),
+                    arculus.id_from_hash(),
                     HDPathComponent::Securified(
                         SecurifiedU30::try_from(diana_mfa_arculus + offset)
                             .unwrap()
                     )
                 ),
                 (
-                    fs_ledger.id_from_hash(),
+                    ledger.id_from_hash(),
                     HDPathComponent::Securified(
                         SecurifiedU30::try_from(diana_mfa_ledger + offset)
                             .unwrap()

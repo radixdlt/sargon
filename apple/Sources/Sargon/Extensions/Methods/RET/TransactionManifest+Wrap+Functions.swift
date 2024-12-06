@@ -36,8 +36,6 @@ extension TransactionManifest {
 	}
 
 	public var summary: ManifestSummary {
-		get throws {
-			try transactionManifestSummary(manifest: self)
-		}
+		transactionManifestSummary(manifest: self)
 	}
 }
