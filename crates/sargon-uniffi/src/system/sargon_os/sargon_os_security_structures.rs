@@ -63,11 +63,11 @@ impl SargonOS {
     /// the Identity factor, "2 or more factors, one of which must be Hardware"
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Factor-Prerequisites
-    pub fn get_security_shield_prerequisites_status(
+    pub fn security_shield_prerequisites_status(
         &self,
     ) -> Result<SecurityShieldPrerequisitesStatus> {
         self.wrapped
-            .get_security_shield_prerequisites_status()
+            .security_shield_prerequisites_status()
             .into_result()
     }
 }
