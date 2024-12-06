@@ -146,6 +146,18 @@ mod tests {
         let result = SUT::check_security_problems(input);
         assert!(!result.contains(&SecurityProblem::Problem5));
 
+        // Test with cloud profile sync enabled and no backup, we have Problem5
+        let input = CheckSecurityProblemsInput::new(
+            IsCloudProfileSyncEnabled(true),
+            AddressesOfEntitiesInBadState::sample(),
+            AddressesOfEntitiesInBadState::sample(),
+            None,
+            BackupResult::sample(),
+        );
+
+        let result = SUT::check_security_problems(input);
+        assert!(result.contains(&SecurityProblem::Problem5));
+
         // Test with cloud profile sync enabled and failed backup, we have Problem5
         let input = CheckSecurityProblemsInput::new(
             IsCloudProfileSyncEnabled(true),
