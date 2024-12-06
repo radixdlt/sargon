@@ -47,8 +47,8 @@ pub enum FactorSourceKind {
     ///  * Mine
     ///  * Off device
     ///  * Hierarchical deterministic (IKM -> HKDF -> Mnemonic)
-    #[serde(rename = "passphrase")]
-    Passphrase,
+    #[serde(rename = "password")]
+    Password,
 
     /// An encrypted user owned mnemonic (*never* any BIP39 passphrase) which can
     /// be decrypted by answers to **security question**, which are personal questions
@@ -104,6 +104,20 @@ impl FactorSourceKind {
     }
 }
 
+impl FactorSourceKind {
+    pub fn category(&self) -> FactorSourceCategory {
+        use FactorSourceCategory::*;
+        match self {
+            Self::LedgerHQHardwareWallet | Self::ArculusCard => Hardware,
+            Self::Password
+            | Self::SecurityQuestions
+            | Self::OffDeviceMnemonic => Information,
+            Self::Device => Identity,
+            Self::TrustedContact => Contact,
+        }
+    }
+}
+
 impl HasSampleValues for FactorSourceKind {
     fn sample() -> Self {
         Self::Device
@@ -153,7 +167,7 @@ mod tests {
         eq(OffDeviceMnemonic, "offDeviceMnemonic");
         eq(TrustedContact, "trustedContact");
         eq(SecurityQuestions, "securityQuestions");
-        eq(Passphrase, "passphrase");
+        eq(Password, "password");
     }
 
     #[test]
@@ -202,7 +216,30 @@ mod tests {
         assert_eq!(SUT::OffDeviceMnemonic.discriminant(), "offDeviceMnemonic");
 
         assert_eq!(SUT::TrustedContact.discriminant(), "trustedContact");
-        assert_eq!(SUT::Passphrase.discriminant(), "passphrase");
+        assert_eq!(SUT::Password.discriminant(), "password");
+    }
+
+    #[test]
+    fn category() {
+        assert_eq!(
+            SUT::LedgerHQHardwareWallet.category(),
+            FactorSourceCategory::Hardware
+        );
+        assert_eq!(SUT::ArculusCard.category(), FactorSourceCategory::Hardware);
+        assert_eq!(SUT::Password.category(), FactorSourceCategory::Information);
+        assert_eq!(
+            SUT::SecurityQuestions.category(),
+            FactorSourceCategory::Information
+        );
+        assert_eq!(
+            SUT::OffDeviceMnemonic.category(),
+            FactorSourceCategory::Information
+        );
+        assert_eq!(SUT::Device.category(), FactorSourceCategory::Identity);
+        assert_eq!(
+            SUT::TrustedContact.category(),
+            FactorSourceCategory::Contact
+        );
     }
 
     #[test]
@@ -224,7 +261,7 @@ mod tests {
             format!("{}", SUT::TrustedContact.discriminant()),
             "trustedContact"
         );
-        assert_eq!(format!("{}", SUT::Passphrase.discriminant()), "passphrase");
+        assert_eq!(format!("{}", SUT::Password.discriminant()), "password");
     }
 
     #[test]
@@ -246,10 +283,7 @@ mod tests {
             &SUT::OffDeviceMnemonic,
             json!("offDeviceMnemonic"),
         );
-        assert_json_value_eq_after_roundtrip(
-            &SUT::Passphrase,
-            json!("passphrase"),
-        );
+        assert_json_value_eq_after_roundtrip(&SUT::Password, json!("password"));
         assert_json_roundtrip(&SUT::Device);
     }
 }

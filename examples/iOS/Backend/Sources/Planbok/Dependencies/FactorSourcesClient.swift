@@ -37,7 +37,7 @@ extension FactorSourcesClient: DependencyKey {
 					LedgerHardwareWalletFactorSource(
 						mnemonicWithPassphrase: mnemonicWithPassphrase,
 						hint: LedgerHardwareWalletHint(
-							name: "Unknown",
+							label: "Unknown",
 							model: .nanoSPlus
 						),
 						common: FactorSourceCommon.babylon()
@@ -47,13 +47,13 @@ extension FactorSourcesClient: DependencyKey {
 					OffDeviceMnemonicFactorSource(
 						mnemonicWithPassphrase: mnemonicWithPassphrase,
 						hint: .init(
-							displayName: "Unknown"
+							label: "Unknown"
 						)
 					).asGeneral
 				case .arculusCard:
 					ArculusCardFactorSource(
 						mnemonicWithPassphrase: mnemonicWithPassphrase,
-						name: "Unknown"
+						label: "Unknown"
 					).asGeneral
 				case .securityQuestions:
 					fatalError(

@@ -9,8 +9,8 @@ pub(crate) static ALL_FACTOR_SOURCE_ID_SAMPLES: Lazy<
         FactorSourceIDFromHash::sample_ledger_other(),
         FactorSourceIDFromHash::sample_arculus(),
         FactorSourceIDFromHash::sample_arculus_other(),
-        FactorSourceIDFromHash::sample_passphrase(),
-        FactorSourceIDFromHash::sample_passphrase_other(),
+        FactorSourceIDFromHash::sample_password(),
+        FactorSourceIDFromHash::sample_password_other(),
         FactorSourceIDFromHash::sample_off_device(),
         FactorSourceIDFromHash::sample_off_device_other(),
         FactorSourceIDFromHash::sample_security_questions(),
@@ -44,12 +44,12 @@ pub(crate) static MNEMONIC_BY_ID_MAP: Lazy<
             MnemonicWithPassphrase::sample_arculus_other(),
         ),
         (
-            FactorSourceIDFromHash::sample_passphrase(),
-            MnemonicWithPassphrase::sample_passphrase(),
+            FactorSourceIDFromHash::sample_password(),
+            MnemonicWithPassphrase::sample_password(),
         ),
         (
-            FactorSourceIDFromHash::sample_passphrase_other(),
-            MnemonicWithPassphrase::sample_passphrase_other(),
+            FactorSourceIDFromHash::sample_password_other(),
+            MnemonicWithPassphrase::sample_password_other(),
         ),
         (
             FactorSourceIDFromHash::sample_off_device(),

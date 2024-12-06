@@ -13,4 +13,8 @@ extension FactorSource {
 	public var supportsBabylon: Bool {
 		factorSourceSupportsBabylon(factorSource: self)
 	}
+
+	public var name: String {
+		factorSourceName(factorSource: self)
+	}
 }

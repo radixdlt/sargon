@@ -71,7 +71,7 @@ impl IsFactorSource for TrustedContactFactorSource {
         FactorSourceKind::TrustedContact
     }
 }
-impl BaseIsFactorSource for TrustedContactFactorSource {
+impl BaseBaseIsFactorSource for TrustedContactFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }
@@ -86,6 +86,10 @@ impl BaseIsFactorSource for TrustedContactFactorSource {
 
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
+    }
+
+    fn name(&self) -> String {
+        self.contact.name.value.clone()
     }
 }
 impl TrustedContactFactorSource {
@@ -207,5 +211,10 @@ mod tests {
                 bad_value: "device".to_owned()
             })
         );
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Spending Account");
     }
 }

@@ -7,3 +7,8 @@ pub enum FactorInstanceBadgeVirtualSource {
         value: HierarchicalDeterministicPublicKey,
     },
 }
+
+delegate_debug_into!(
+    FactorInstanceBadgeVirtualSource,
+    InternalFactorInstanceBadgeVirtualSource
+);

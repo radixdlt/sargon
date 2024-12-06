@@ -18,7 +18,7 @@ final class OffDeviceMnemonicFactorSourceTests: SpecificFactorSourceTest<OffDevi
 					mnemonic: .sampleOffDeviceMnemonic,
 					passphrase: ""
 				),
-				hint: .init(displayName: "Test")
+				hint: .init(label: "Test")
 			).id,
 			SUT.sample.id
 		)

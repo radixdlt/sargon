@@ -20,7 +20,7 @@ impl SecurifyEntityFactorInstancesProvider {
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
         Self::for_entity_mfa::<AccountAddress>(
@@ -28,7 +28,7 @@ impl SecurifyEntityFactorInstancesProvider {
             profile,
             matrix_of_factor_sources,
             account_addresses,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -49,7 +49,7 @@ impl SecurifyEntityFactorInstancesProvider {
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
         Self::for_entity_mfa::<IdentityAddress>(
@@ -57,7 +57,7 @@ impl SecurifyEntityFactorInstancesProvider {
             profile,
             matrix_of_factor_sources,
             persona_addresses,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -78,7 +78,7 @@ impl SecurifyEntityFactorInstancesProvider {
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         addresses_of_entities: IndexSet<A>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
         let factor_sources_to_use = matrix_of_factor_sources
@@ -126,7 +126,7 @@ impl SecurifyEntityFactorInstancesProvider {
             factor_sources_to_use,
             profile,
             cache_client,
-            interactors,
+            interactor,
         );
 
         let (instances_in_cache_consumer, outcome) = provider
@@ -158,17 +158,9 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::<AccountAddress>::new(), // <---- EMPTY => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -180,21 +172,12 @@ mod tests {
         let fs = FactorSource::sample_at(0);
         let a = Account::sample();
         let cache_client = FactorInstancesCacheClient::in_memory();
-
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::just(Account::sample_other().address()), // <---- unknown => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -225,17 +208,9 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::from_iter([mainnet_account.address()]),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -279,20 +254,12 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            MatrixOfFactorSources::sample(),
             IndexSet::from_iter([
                 mainnet_account.address(),
                 stokenet_account.address(),
             ]), // <---- wrong network => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -322,19 +289,23 @@ mod tests {
             .unwrap();
         assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        let matrix_0 = MatrixOfFactorSources::new(
-            PrimaryRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-            RecoveryRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-            ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-        )
-        .unwrap();
+        os.add_factor_source(FactorSource::sample_ledger())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_password())
+            .await
+            .unwrap();
+        let factor_sources = &os.profile().unwrap().factor_sources;
+        let matrix_ids = MatrixTemplate::config_1_4()
+            .materialize(factor_sources.items())
+            .unwrap();
+
+        let matrix_0 =
+            MatrixOfFactorSources::new(matrix_ids, factor_sources).unwrap();
 
         let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
         let profile = Arc::new(os.profile().unwrap());
-        let derivation_interactors = os.keys_derivation_interactors();
+        let derivation_interactors = os.keys_derivation_interactor();
 
         let (instances_in_cache_consumer, outcome) = SUT::for_account_mfa(
             cache_client.clone(),

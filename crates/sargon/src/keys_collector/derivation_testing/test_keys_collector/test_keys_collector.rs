@@ -15,7 +15,7 @@ impl KeysCollector {
             derivation_paths
                 .into_iter()
                 .collect::<IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>>(),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .unwrap()
     }

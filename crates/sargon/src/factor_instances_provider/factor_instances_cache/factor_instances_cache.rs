@@ -538,7 +538,7 @@ mod tests {
         let sut = SUT::default();
         assert!(sut
             .insert_all(&IndexMap::kv(
-                FactorSourceIDFromHash::sample_passphrase_other(),
+                FactorSourceIDFromHash::sample_password_other(),
                 FactorInstances::sample()
             ))
             .is_err())

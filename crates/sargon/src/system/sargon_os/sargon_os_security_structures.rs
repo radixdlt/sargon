@@ -100,6 +100,21 @@ impl SargonOS {
     }
 }
 
+impl SargonOS {
+    /// Returns the status of the prerequisites for building a Security Shield.
+    ///
+    /// According to [definition][doc], a Security Shield can be built if the user has, asides from
+    /// the Identity factor, "2 or more factors, one of which must be Hardware"
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Factor-Prerequisites
+    pub fn security_shield_prerequisites_status(
+        &self,
+    ) -> Result<SecurityShieldPrerequisitesStatus> {
+        self.profile_state_holder
+            .access_profile_with(|p| p.security_shield_prerequisites_status())
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -190,11 +205,15 @@ mod tests {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let bios = Bios::new(drivers);
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
 
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
 
         // ACT
         let structure = SecurityStructureOfFactorSources::sample();
@@ -217,11 +236,15 @@ mod tests {
         // ARRANGE
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let bios = Bios::new(drivers);
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
 
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
@@ -315,5 +338,12 @@ mod tests {
             ]);
 
         assert_eq!(sources_by_id_lookup, structures);
+    }
+
+    #[actix_rt::test]
+    async fn security_shield_prerequisites_status() {
+        let os = SUT::fast_boot().await;
+        let result = os.security_shield_prerequisites_status().unwrap();
+        assert_eq!(result, SecurityShieldPrerequisitesStatus::HardwareRequired);
     }
 }

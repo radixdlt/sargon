@@ -27,6 +27,9 @@ final class DriversTests: TestCase {
 	}
 
 	func test_bios_insecure() async throws {
-		let _ = await SargonOS.boot(bios: BIOS.insecure())
+		let _ = await SargonOS.boot(
+			bios: BIOS.insecure(),
+			interactor: ThrowingHostInteractor.shared
+		)
 	}
 }

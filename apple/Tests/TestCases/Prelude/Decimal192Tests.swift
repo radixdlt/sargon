@@ -223,7 +223,7 @@ final class Decimal192Tests: Test<Decimal192> {
 			// Every number multiplied by zero, is zero...
 			XCTAssertEqual(item * SUT.zero, SUT.zero)
 		}
-		// ... incliding `max` and `min`
+		// ... including `max` and `min`
 		XCTAssertEqual(SUT.max * 0, 0)
 		XCTAssertEqual(SUT.min * 0, 0)
 
@@ -239,7 +239,7 @@ final class Decimal192Tests: Test<Decimal192> {
 			// All numbers divided by themselves equals `one`...
 			XCTAssertEqual(item / item, SUT.one)
 		}
-		// ... incliding `max` and `min`
+		// ... including `max` and `min`
 		XCTAssertEqual(SUT.max / SUT.max, SUT.one)
 		XCTAssertEqual(SUT.min / SUT.min, SUT.one)
 	}
@@ -481,7 +481,7 @@ final class Decimal192Tests: Test<Decimal192> {
 		try largeDecimalsStrings.forEach(testLarge)
 
 		XCTAssertLessThan(SUT.min.asDouble, SUT.max.asDouble)
-		XCTAssertNoThrow(try SUT("12345678987654321.000000000000000001").asDouble)
+		XCTAssertNoThrow(SUT("12345678987654321.000000000000000001").asDouble)
 	}
 
 	private var smallDecimalStrings: [String] {

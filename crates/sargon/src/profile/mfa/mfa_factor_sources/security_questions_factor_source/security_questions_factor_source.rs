@@ -261,7 +261,7 @@ impl IsFactorSource for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
         FactorSourceKind::SecurityQuestions
     }
 }
-impl BaseIsFactorSource
+impl BaseBaseIsFactorSource
     for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
 {
     fn common_properties(&self) -> FactorSourceCommon {
@@ -278,6 +278,18 @@ impl BaseIsFactorSource
 
     fn set_common_properties(&mut self, updated: FactorSourceCommon) {
         self.common = updated
+    }
+
+    fn name(&self) -> String {
+        let ids = self
+            .sealed_mnemonic
+            .security_questions
+            .items()
+            .into_iter()
+            .map(|q| q.id())
+            .map(|id| format!("#{:?}", id))
+            .join(", ");
+        format!("Questions: {}", ids)
     }
 }
 
@@ -480,5 +492,10 @@ mod tests {
                 found: 4
             })
         );
+    }
+
+    #[test]
+    fn name() {
+        assert_eq!(SUT::sample().name(), "Questions: #0, #1, #2, #3, #4, #5");
     }
 }

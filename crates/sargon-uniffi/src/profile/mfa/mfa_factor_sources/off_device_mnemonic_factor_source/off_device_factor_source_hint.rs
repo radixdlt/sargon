@@ -5,5 +5,7 @@ use sargon::OffDeviceMnemonicHint as InternalOffDeviceMnemonicHint;
 /// it and another one.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct OffDeviceMnemonicHint {
-    pub display_name: DisplayName,
+    /// A user-assigned name for the passphrase, intended to help users
+    /// differentiate between multiple passphrases.
+    pub label: DisplayName,
 }

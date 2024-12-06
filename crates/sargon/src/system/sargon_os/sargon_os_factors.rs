@@ -218,6 +218,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    #[cfg(test)] // only for test for now, need integration work in hosts before enabling this
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
@@ -226,7 +227,7 @@ impl SargonOS {
             panic!("Unsupported FactorSource which is not HD.")
         }
         let profile_snapshot = self.profile()?;
-        let keys_derivation_interactors = self.keys_derivation_interactors();
+        let keys_derivation_interactors = self.keys_derivation_interactor();
         let outcome = CacheFiller::for_new_factor_source(
             Arc::new(self.clients.factor_instances_cache.clone()),
             Arc::new(profile_snapshot),
@@ -293,12 +294,13 @@ impl SargonOS {
             new_factors_only.iter().any(|x| x.is_main_bdfs());
         let id_of_old_bdfs = self.bdfs()?.factor_source_id();
 
-        // Use FactorInstancesProvider to eagerly fill cache...
-
         for factor_source in new_factors_only.iter() {
             if !factor_source.factor_source_id().is_hash() {
                 continue;
             }
+            // Use FactorInstancesProvider to eagerly fill cache...
+            #[cfg(test)]
+            // only test for now, need to do more integration work in hosts before enabling this
             let _ = self
                 .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,
@@ -755,11 +757,14 @@ mod tests {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let bios = Bios::new(drivers);
-
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         // ACT
@@ -842,8 +847,8 @@ mod tests {
             .unwrap();
 
         // ACT
-        let new_name = "new important name";
-        factor.hint.name = new_name.to_owned();
+        let new_label = "new important name";
+        factor.hint.label = new_label.to_owned();
         os.with_timeout(|x| x.update_factor_source(factor.clone().into()))
             .await
             .unwrap();
@@ -852,7 +857,7 @@ mod tests {
         assert!(os.profile().unwrap().factor_sources.into_iter().any(|f| {
             match f {
                 FactorSource::ArculusCard { value } => {
-                    value.hint.name == *new_name
+                    value.hint.label == *new_label
                 }
                 _ => false,
             }

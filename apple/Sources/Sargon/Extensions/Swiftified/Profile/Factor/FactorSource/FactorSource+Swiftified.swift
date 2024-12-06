@@ -21,7 +21,7 @@ extension FactorSource: Identifiable {
 		case let .ledger(value): value.id.asGeneral
 		case let .offDeviceMnemonic(value): value.id.asGeneral
 		case let .trustedContact(value): value.id.asGeneral
-		case let .passphrase(value): value.id.asGeneral
+		case let .password(value): value.id.asGeneral
 		}
 	}
 }
@@ -40,7 +40,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 		case let .arculusCard(value): value.factorSourceKind
 		case let .offDeviceMnemonic(value): value.factorSourceKind
 		case let .trustedContact(value): value.factorSourceKind
-		case let .passphrase(value): value.factorSourceKind
+		case let .password(value): value.factorSourceKind
 		}
 	}
 
@@ -53,7 +53,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 			case let .arculusCard(value): value.common
 			case let .offDeviceMnemonic(value): value.common
 			case let .trustedContact(value): value.common
-			case let .passphrase(value): value.common
+			case let .password(value): value.common
 			}
 		}
 		set {
@@ -76,9 +76,9 @@ extension FactorSource: BaseFactorSourceProtocol {
 			case var .trustedContact(source):
 				source.common = newValue
 				self = .trustedContact(value: source)
-			case var .passphrase(source):
+			case var .password(source):
 				source.common = newValue
-				self = .passphrase(value: source)
+				self = .password(value: source)
 			}
 		}
 	}
@@ -128,7 +128,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 		extract()
 	}
 
-	public var asPassphrase: PassphraseFactorSource? {
+	public var asPassword: PasswordFactorSource? {
 		extract()
 	}
 }

@@ -2,15 +2,53 @@ use super::*;
 use crate::prelude::*;
 
 /// Petition of signatures from a factors list of an entity in a transaction.
-#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+#[derive(derive_more::Debug)]
 #[debug("{}", self.debug_str())]
 pub(crate) struct PetitionForFactors<ID: SignableID> {
     pub(crate) factor_list_kind: FactorListKind,
 
     /// Factors to sign with and the required number of them.
     pub(crate) input: PetitionForFactorsInput,
-    state: RefCell<PetitionForFactorsState<ID>>,
+    state: RwLock<PetitionForFactorsState<ID>>,
 }
+
+impl<ID: SignableID> Clone for PetitionForFactors<ID> {
+    fn clone(&self) -> Self {
+        Self {
+            factor_list_kind: self.factor_list_kind,
+            input: self.input.clone(),
+            state: RwLock::new(
+                self.state
+                    .read()
+                    .expect(
+                        "PetitionForFactors lock should not have been poisoned",
+                    )
+                    .cloned(),
+            ),
+        }
+    }
+}
+
+impl<ID: SignableID> PartialEq for PetitionForFactors<ID> {
+    fn eq(&self, other: &Self) -> bool {
+        self.factor_list_kind == other.factor_list_kind
+            && self.input == other.input
+            && self
+                .state
+                .read()
+                .expect("PetitionForFactors lock should not have been poisoned")
+                .deref()
+                == other
+                    .state
+                    .read()
+                    .expect(
+                        "PetitionForFactors lock should not have been poisoned",
+                    )
+                    .deref()
+    }
+}
+
+impl<ID: SignableID> Eq for PetitionForFactors<ID> {}
 
 impl<ID: SignableID> HasSampleValues for PetitionForFactors<ID> {
     fn sample() -> Self {
@@ -33,7 +71,7 @@ impl<ID: SignableID> PetitionForFactors<ID> {
         Self {
             factor_list_kind,
             input,
-            state: RefCell::new(PetitionForFactorsState::new()),
+            state: RwLock::new(PetitionForFactorsState::new()),
         }
     }
 
@@ -44,11 +82,17 @@ impl<ID: SignableID> PetitionForFactors<ID> {
     }
 
     pub(crate) fn all_neglected(&self) -> IndexSet<NeglectedFactorInstance> {
-        self.state.borrow().all_neglected()
+        self.state
+            .read()
+            .expect("PetitionForFactors lock should not have been poisoned")
+            .all_neglected()
     }
 
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
-        self.state.borrow().all_signatures()
+        self.state
+            .read()
+            .expect("PetitionForFactors lock should not have been poisoned")
+            .all_signatures()
     }
 
     pub(crate) fn new_threshold(
@@ -108,7 +152,8 @@ impl<ID: SignableID> PetitionForFactors<ID> {
             &neglected.factor_source_id(),
         );
         self.state
-            .borrow_mut()
+            .write()
+            .expect("PetitionForFactors lock should not have been poisoned")
             .neglect(&NeglectedFactorInstance::new(
                 neglected.reason,
                 factor_instance.clone(),
@@ -144,7 +189,10 @@ impl<ID: SignableID> PetitionForFactors<ID> {
     /// # Panics
     /// Panics if this factor source has already been neglected or signed with.
     fn add_signature(&self, signature: &HDSignature<ID>) {
-        let state = self.state.borrow_mut();
+        let state = self
+            .state
+            .write()
+            .expect("PetitionForFactors lock should not have been poisoned");
         state.add_signature(signature)
     }
 
@@ -172,7 +220,10 @@ impl<ID: SignableID> PetitionForFactors<ID> {
     }
 
     fn state_snapshot(&self) -> PetitionForFactorsStateSnapshot<ID> {
-        self.state.borrow().snapshot()
+        self.state
+            .read()
+            .expect("PetitionForFactors lock should not have been poisoned")
+            .snapshot()
     }
 
     fn is_finished_successfully(&self) -> bool {
