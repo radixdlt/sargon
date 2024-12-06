@@ -24,11 +24,13 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
 
         let factor_instances = petitions
             .txid_to_petition
-            .borrow()
+            .read()
+            .expect("Petitions lock should not have been poisoned.")
             .values()
             .flat_map(|p| {
                 p.for_entities
-                    .borrow()
+                    .read()
+                    .expect("PetitionForTransaction lock should not have been poisoned.")
                     .values()
                     .flat_map(|p| p.all_factor_instances())
                     .collect::<Vec<_>>()

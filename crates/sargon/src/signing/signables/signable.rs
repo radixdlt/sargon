@@ -4,7 +4,7 @@ use std::hash::Hasher;
 /// Any type conforming to `Signable` can be used with `SignaturesCollector` and collect
 /// signatures from all involved entities according to their security structure.
 pub trait Signable:
-    std::hash::Hash + PartialEq + Eq + Clone + Debug + HasSampleValues
+    std::hash::Hash + PartialEq + Eq + Clone + Debug + Send + Sync
 {
     /// A stable identifier for this `Signable`.
     type ID: SignableID;
@@ -17,7 +17,13 @@ pub trait Signable:
         + std::hash::Hash
         + Into<Self::ID>
         + From<Self>
-        + HasSampleValues;
+        + Send
+        + Sync;
+
+    type Signed: Clone
+        + Debug
+        + Into<Self>
+        + IntoIterator<Item = SignatureWithPublicKey>;
 
     /// A function that extracts the involved entities that require signing.
     fn entities_requiring_signing(
@@ -33,6 +39,11 @@ pub trait Signable:
     fn get_id(&self) -> Self::ID {
         self.get_payload().into()
     }
+
+    fn signed(
+        &self,
+        intent_signatures: IntentSignatures,
+    ) -> Result<Self::Signed>;
 
     /// Returns a sample `Signable` that its summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
@@ -116,6 +127,6 @@ pub trait Signable:
 
 /// An identifier that is unique for each `Signable`
 pub trait SignableID:
-    Eq + StdHash + Clone + Debug + Into<Hash> + HasSampleValues
+    Eq + StdHash + Clone + Debug + Into<Hash> + Send + Sync
 {
 }

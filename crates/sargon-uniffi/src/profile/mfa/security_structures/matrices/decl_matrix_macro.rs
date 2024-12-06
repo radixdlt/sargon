@@ -4,9 +4,6 @@ use preinterpret::*;
 
 macro_rules! matrix_conversion {
     (
-        // $(
-        //     #[doc = $expr: expr]
-        // )*
         $(#[$attributes:meta])*
         $factor_level: ident
     ) => {
@@ -72,7 +69,7 @@ macro_rules! matrix_conversion {
                 }
             }
 
-            [!set! #fn_name_prefix = new_[!snake_case! #struct_name]]
+            [!set! #fn_name_prefix = new_[!snake! #struct_name]]
 
             #[uniffi::export]
             pub fn [!ident! #fn_name_prefix _sample ]() -> #struct_name {

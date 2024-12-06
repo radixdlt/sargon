@@ -14,16 +14,34 @@ pub struct HDSignature<ID: SignableID> {
     /// instance.factor_s
     /// ource_id` and which
     /// was derived at `owned_hd_factor_instance.derivation_path`.
-    pub signature: Signature,
+    pub signature: SignatureWithPublicKey,
 }
 
 impl<ID: SignableID> HDSignature<ID> {
     /// Constructs a HDSignature from an already produced `Signature`.
-    pub fn with_details(
+    pub fn new(
         input: HDSignatureInput<ID>,
-        signature: Signature,
-    ) -> Self {
-        Self { input, signature }
+        signature: SignatureWithPublicKey,
+    ) -> Result<Self> {
+        if signature.public_key().curve()
+            != input.owned_factor_instance.value.public_key().curve()
+        {
+            return Err(CommonError::InvalidHDSignature);
+        }
+
+        if !input
+            .owned_factor_instance
+            .value
+            .public_key()
+            .is_valid_signature_for_hash(
+                signature.signature(),
+                &Into::<Hash>::into(input.payload_id.clone()),
+            )
+        {
+            Err(CommonError::InvalidHDSignature)
+        } else {
+            Ok(Self { input, signature })
+        }
     }
 
     pub fn payload_id(&self) -> &ID {
@@ -48,7 +66,7 @@ impl<ID: SignableID> HDSignature<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for HDSignature<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues for HDSignature<ID> {
     fn sample() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(
             HDSignatureInput::<ID>::sample(),
@@ -78,7 +96,8 @@ impl<ID: SignableID> HDSignature<ID> {
             &input.owned_factor_instance.value.public_key.derivation_path,
         );
 
-        HDSignature::with_details(input, signature.signature())
+        HDSignature::new(input, signature)
+            .expect("Sign method should produce signatures using the correct curve from public keys")
     }
 }
 
@@ -118,6 +137,37 @@ mod tests {
             ])
             .len(),
             2
+        );
+    }
+
+    #[test]
+    fn new_fails_due_to_discrepancy_on_signature_curve() {
+        let ed25519_based_input =
+            HDSignatureInput::<TransactionIntentHash>::sample();
+
+        let mnemonic = MnemonicWithPassphrase::sample_device_12_words();
+        let hash = Hash::sample();
+        let derivation_path = DerivationPath::from(BIP44LikePath::sample());
+        let secp256k1_signature = mnemonic.sign(&hash, &derivation_path);
+
+        assert_eq!(
+            HDSignature::new(ed25519_based_input, secp256k1_signature),
+            Err(CommonError::InvalidHDSignature)
+        );
+    }
+
+    #[test]
+    fn new_fails_due_to_hash_not_derived_by_input() {
+        let input = HDSignatureInput::<TransactionIntentHash>::sample();
+
+        let mnemonic = MnemonicWithPassphrase::sample_device_12_words();
+        let hash = Hash::sample();
+        let derivation_path = DerivationPath::from(AccountPath::sample());
+        let signature_of_another_hash = mnemonic.sign(&hash, &derivation_path);
+
+        assert_eq!(
+            HDSignature::new(input, signature_of_another_hash),
+            Err(CommonError::InvalidHDSignature)
         );
     }
 }

@@ -549,8 +549,8 @@ async fn cache_is_unchanged_in_case_of_failure() {
         .await
         .unwrap();
 
-    let fail_interactor: Arc<dyn KeysDerivationInteractors> =
-        Arc::new(TestDerivationInteractors::fail()); // <--- FAIL
+    let fail_interactor: Arc<dyn KeyDerivationInteractor> =
+        Arc::new(TestDerivationInteractor::fail()); // <--- FAIL
 
     let os = SargonOS::fast_boot_bdfs_and_interactor(
         mnemonic_with_passphrase,

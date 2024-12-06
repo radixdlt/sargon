@@ -119,7 +119,9 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
     }
 }
 
-impl<ID: SignableID> HasSampleValues for MaybeSignedTransactions<ID> {
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for MaybeSignedTransactions<ID>
+{
     fn sample() -> Self {
         let tx_a = ID::sample();
 
@@ -327,11 +329,11 @@ mod tests {
         let input = HDSignatureInput::new(tx.clone(), factor_instance.clone());
         let sig_a = HDSignature {
             input: input.clone(),
-            signature: Signature::sample(),
+            signature: SignatureWithPublicKey::sample(),
         };
         let sig_b = HDSignature {
             input: input.clone(),
-            signature: Signature::sample_other(),
+            signature: SignatureWithPublicKey::sample_other(),
         };
         sut.add_signatures(tx, IndexSet::from_iter([sig_a, sig_b]));
     }

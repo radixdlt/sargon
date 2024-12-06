@@ -7,6 +7,7 @@
 #![feature(future_join)]
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
+#![feature(trait_upcasting)]
 
 mod core;
 mod factor_instances_provider;

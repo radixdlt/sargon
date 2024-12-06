@@ -20,7 +20,7 @@ impl Profile {
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactors: Arc<dyn KeysDerivationInteractors>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         get_name: impl Fn(u32) -> DisplayName, // name of entity at index
     ) -> Result<(
         FactorSourceID,
@@ -40,7 +40,7 @@ impl Profile {
                 Arc::new(self.clone()),
                 factor_source,
                 network_id,
-                key_derivation_interactors,
+                key_derivation_interactor,
             )
             .await?;
 

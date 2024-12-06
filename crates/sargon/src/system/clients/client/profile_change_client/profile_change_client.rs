@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProfileStateChangeClient {
     driver: Arc<dyn ProfileStateChangeDriver>,
 }

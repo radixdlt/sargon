@@ -20,7 +20,7 @@ impl SecurifyEntityFactorInstancesProvider {
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
         Self::for_entity_mfa::<AccountAddress>(
@@ -28,7 +28,7 @@ impl SecurifyEntityFactorInstancesProvider {
             profile,
             matrix_of_factor_sources,
             account_addresses,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -49,7 +49,7 @@ impl SecurifyEntityFactorInstancesProvider {
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
         Self::for_entity_mfa::<IdentityAddress>(
@@ -57,7 +57,7 @@ impl SecurifyEntityFactorInstancesProvider {
             profile,
             matrix_of_factor_sources,
             persona_addresses,
-            interactors,
+            interactor,
         )
         .await
     }
@@ -78,7 +78,7 @@ impl SecurifyEntityFactorInstancesProvider {
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
         addresses_of_entities: IndexSet<A>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
         let factor_sources_to_use = matrix_of_factor_sources
@@ -126,7 +126,7 @@ impl SecurifyEntityFactorInstancesProvider {
             factor_sources_to_use,
             profile,
             cache_client,
-            interactors,
+            interactor,
         );
 
         let (instances_in_cache_consumer, outcome) = provider
@@ -160,7 +160,7 @@ mod tests {
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
             MatrixOfFactorSources::sample(),
             IndexSet::<AccountAddress>::new(), // <---- EMPTY => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -177,7 +177,7 @@ mod tests {
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
             MatrixOfFactorSources::sample(),
             IndexSet::just(Account::sample_other().address()), // <---- unknown => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -210,7 +210,7 @@ mod tests {
             Arc::new(profile),
             MatrixOfFactorSources::sample(),
             IndexSet::from_iter([mainnet_account.address()]),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -259,7 +259,7 @@ mod tests {
                 mainnet_account.address(),
                 stokenet_account.address(),
             ]), // <---- wrong network => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -305,7 +305,7 @@ mod tests {
 
         let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
         let profile = Arc::new(os.profile().unwrap());
-        let derivation_interactors = os.keys_derivation_interactors();
+        let derivation_interactors = os.keys_derivation_interactor();
 
         let (instances_in_cache_consumer, outcome) = SUT::for_account_mfa(
             cache_client.clone(),

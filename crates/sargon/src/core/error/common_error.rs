@@ -815,6 +815,12 @@ pub enum CommonError {
 
     #[error("Failed to encode transaction preview v2 - '{underlying}'")]
     FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
+
+    #[error("Could not validate signature for the given input.")]
+    InvalidHDSignature = 10230,
+
+    #[error("Signing was rejected by the user")]
+    SigningRejected = 10231,
 }
 
 impl CommonError {

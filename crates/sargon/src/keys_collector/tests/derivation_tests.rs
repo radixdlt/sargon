@@ -126,7 +126,7 @@ mod key_derivation_tests {
                     Hardened::Securified(SecurifiedU30::ZERO),
                 ))),
             )),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         );
         assert!(matches!(
             res,
@@ -155,7 +155,7 @@ mod key_derivation_tests {
             [(factor_source.id_from_hash(), paths.clone())]
                 .into_iter()
                 .collect::<IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>>(),
-            Arc::new(TestDerivationInteractors::fail()),
+            Arc::new(TestDerivationInteractor::fail()),
         )
         .unwrap();
         let outcome = collector.collect_keys().await;
