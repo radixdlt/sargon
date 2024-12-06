@@ -14,16 +14,21 @@ pub(crate) struct KeysCollectorDependencies {
     /// computer and thus unable to make a connection between the Radix Wallet
     /// and a Ledger device.
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
+
+    /// The reason that the collection of keys was initiated
+    pub(super) collection_reason: KeysCollectionReason,
 }
 
 impl KeysCollectorDependencies {
     pub(crate) fn new(
         interactor: Arc<dyn KeyDerivationInteractor>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
+        collection_reason: KeysCollectionReason,
     ) -> Self {
         Self {
             interactor,
             factors_of_kind,
+            collection_reason,
         }
     }
 }
