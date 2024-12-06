@@ -7,4 +7,6 @@ pub enum SecurityProblemKind {
     SecurityFactors,
 
     ConfigurationBackup,
+
+    SecurityShields,
 }
