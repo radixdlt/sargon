@@ -11,6 +11,14 @@ coverage:
   precision: 1
   range: 97...98 # red -> yellow (the inside range) -> green
   status:
+    project:
+      default:
+        target: auto
+        threshold: 90%
+        base: auto
+        branches:
+          - main
+        only_pulls: false
     patch:
       default:
         target: auto
