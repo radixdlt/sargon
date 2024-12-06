@@ -337,26 +337,6 @@ impl SecurityShieldBuilder {
         )
     }
 
-    // HERE BE DRAGONS
-    // Because of `MethodTooLargeException`, see my issue on UniFFIs Github:
-    // https://github.com/mozilla/uniffi-rs/issues/2340
-    //
-    // We need to temporarily restrict number of methods. So we merge three together into one.
-    // Once we have fixed the issue we can go back to use the three methods below.
-    pub fn validation_for_addition_of_factor_source_to_override_for_role_for_each_factor(
-        &self,
-        role_kind: RoleKind,
-        factor_sources: Vec<FactorSourceID>,
-    ) -> Vec<FactorSourceValidationStatus> {
-        match role_kind {
-            RoleKind::Primary => self.validation_for_addition_of_factor_source_to_primary_override_for_each(factor_sources),
-            RoleKind::Recovery => self.validation_for_addition_of_factor_source_to_recovery_override_for_each(factor_sources),
-            RoleKind::Confirmation => self.validation_for_addition_of_factor_source_to_confirmation_override_for_each(factor_sources),
-        }
-    }
-}
-
-impl SecurityShieldBuilder {
     pub fn validation_for_addition_of_factor_source_to_primary_override_for_each(
         &self,
         factor_sources: Vec<FactorSourceID>,
@@ -593,8 +573,7 @@ mod tests {
 
         assert_ne!(
             sim_prim,
-            sut.validation_for_addition_of_factor_source_to_override_for_role_for_each_factor(
-                RoleKind::Primary,
+            sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
                 vec![
                 FactorSourceID::sample_arculus(),
             ])
@@ -610,8 +589,7 @@ mod tests {
 
         assert_ne!(
             sim_rec,
-            sut.validation_for_addition_of_factor_source_to_override_for_role_for_each_factor(
-                RoleKind::Recovery,
+            sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(
                 vec![
                     FactorSourceID::sample_ledger(),
                     ])
@@ -619,8 +597,7 @@ mod tests {
 
         assert_ne!(
                     sim_conf,
-                    sut.validation_for_addition_of_factor_source_to_override_for_role_for_each_factor(
-                RoleKind::Confirmation,
+                    sut.validation_for_addition_of_factor_source_to_confirmation_override_for_each(
                 vec![
                 FactorSourceID::sample_device(),
             ])
