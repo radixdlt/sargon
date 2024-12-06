@@ -6,6 +6,8 @@ pub enum SecurityProblemKind {
     SecurityFactors,
 
     ConfigurationBackup,
+
+    SecurityShields,
 }
 
 impl HasSampleValues for SecurityProblemKind {
