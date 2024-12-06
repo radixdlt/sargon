@@ -7,19 +7,19 @@ final class SecurityProblemTests: TestCase {
 
 	func testKind() throws {
 		var sut = SUT.problem3(addresses: .init(accounts: [], hiddenAccounts: [], personas: [], hiddenPersonas: []))
-		XCTAssertEqual(sut.kind, .configurationBackup)
+		XCTAssertEqual(sut.kind, .securityFactors)
 
 		sut = SUT.problem5
-		XCTAssertEqual(sut.kind, .securityFactors)
+		XCTAssertEqual(sut.kind, .configurationBackup)
 
 		sut = SUT.problem6
-		XCTAssertEqual(sut.kind, .securityFactors)
+		XCTAssertEqual(sut.kind, .configurationBackup)
 
 		sut = SUT.problem7
-		XCTAssertEqual(sut.kind, .securityFactors)
+		XCTAssertEqual(sut.kind, .configurationBackup)
 
 		sut = .problem9(addresses: .init(accounts: [], hiddenAccounts: [], personas: [], hiddenPersonas: []))
-		XCTAssertEqual(sut.kind, .configurationBackup)
+		XCTAssertEqual(sut.kind, .securityFactors)
 	}
 
 	func testId() throws {
