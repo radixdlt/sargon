@@ -8,16 +8,16 @@ use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
 /// a single `KeyDerivationPerFactorSource`.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct KeyDerivationResponse {
-    pub per_factor_source: Vec<KeyDerivationPerFactorSource>,
+    pub per_factor_source: Vec<KeyDerivationResponsePerFactorSource>,
 }
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
-pub struct KeyDerivationPerFactorSource {
+pub struct KeyDerivationResponsePerFactorSource {
     pub factor_source_id: FactorSourceIDFromHash,
     pub factor_instances: Vec<HierarchicalDeterministicFactorInstance>,
 }
 
-impl KeyDerivationPerFactorSource {
+impl KeyDerivationResponsePerFactorSource {
     pub fn new(
         factor_source_id: FactorSourceIDFromHash,
         factor_instances: Vec<HierarchicalDeterministicFactorInstance>,
@@ -42,7 +42,7 @@ impl From<InternalKeyDerivationResponse> for KeyDerivationResponse {
                 .per_factor_source
                 .into_iter()
                 .map(|(k, v)| {
-                    KeyDerivationPerFactorSource::new(
+                    KeyDerivationResponsePerFactorSource::new(
                         k.into(),
                         v.into_iter().map(|d| d.into()).collect(),
                     )
