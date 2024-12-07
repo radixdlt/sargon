@@ -4,6 +4,7 @@
 
 use std::{
     borrow::Borrow,
+    future::Future,
     sync::{Arc, RwLock},
 };
 
@@ -373,6 +374,50 @@ impl SecurityShieldBuilder {
                 )
             },
         )
+    }
+}
+
+// =====================
+// ==== AUTO BUILD =====
+// =====================
+#[uniffi::export(with_foreign)]
+#[async_trait::async_trait]
+pub trait PickFactors: Send + Sync {
+    async fn user_picked_factors(
+        &self,
+        possible: Vec<FactorSource>,
+    ) -> Vec<FactorSource>;
+}
+
+use sargon::FactorSource as InternalFactorSource;
+
+#[uniffi::export]
+impl SecurityShieldBuilder {
+    pub async fn auto_build(
+        &self,
+        all_factors: Vec<FactorSource>,
+        pick_primary_role_factors: Arc<dyn PickFactors>,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        let all_factors: Vec<sargon::FactorSource> =
+            all_factors.into_internal();
+        let shield: sargon::SecurityStructureOfFactorSourceIDs =
+            sargon::AutomaticShieldBuilder::build(
+                all_factors,
+                async |possible: Vec<sargon::FactorSource>| {
+                    let possible_mapped: Vec<crate::FactorSource> =
+                        possible.into_type();
+                    let picked: Vec<crate::FactorSource> =
+                        pick_primary_role_factors
+                            .user_picked_factors(possible_mapped)
+                            .await;
+
+                    picked.into_internal()
+                },
+            )
+            .await
+            .into_result()?;
+        let shield = SecurityStructureOfFactorSourceIDs::from(shield);
+        Ok(shield)
     }
 }
 
