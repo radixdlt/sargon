@@ -20,23 +20,22 @@ impl TestAuthenticationInteractor {
 impl AuthenticationSigningInteractor for TestAuthenticationInteractor {
     async fn sign(
         &self,
-        request: AuthenticationSigningInteractorRequest,
+        request: AuthenticationSigningRequest,
     ) -> Result<AuthenticationSigningResponse> {
         let id = request.input.owned_factor_instance.factor_source_id();
 
         let mnemonic_with_passphrase = id.sample_associated_mnemonic();
 
+        let challenge = request.input.rola_challenge()?;
         let signature = mnemonic_with_passphrase.sign(
-            &request.input.challenge.hash(),
+            &challenge.hash(),
             &request.input.owned_factor_instance.value.derivation_path(),
         );
 
         if self.should_fail {
-            Err(CommonError::Unknown)
+            Err(CommonError::SigningRejected)
         } else {
-            Ok(AuthenticationSigningResponse {
-                signature_with_public_key: signature,
-            })
+            AuthenticationSigningResponse::new(challenge, signature)
         }
     }
 }

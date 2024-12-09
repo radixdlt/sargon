@@ -5,7 +5,7 @@ const ROLA_PREFIX: u8 = 0x52;
 #[derive(Debug, Clone, PartialEq, derive_more::Display)]
 #[display("{}", self.payload.to_hex())]
 pub struct RolaChallenge {
-    payload: BagOfBytes,
+    pub payload: BagOfBytes,
 }
 
 impl RolaChallenge {

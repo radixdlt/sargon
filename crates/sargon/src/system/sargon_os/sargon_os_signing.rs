@@ -5,6 +5,25 @@ use std::ops::Index;
 // Sign Signables
 // ==================
 impl SargonOS {
+    pub async fn sign_auth(
+        &self,
+        address_of_entity: AddressOfAccountOrPersona,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
+        metadata: DappToWalletInteractionMetadata,
+    ) -> Result<WalletToDappInteractionAuthProof> {
+        let profile = &self.profile_state_holder.profile()?;
+
+        let auth_signer = AuthenticationSigner::new(
+            self.auth_signing_interactor(),
+            profile,
+            address_of_entity,
+            challenge_nonce,
+            metadata,
+        )?;
+
+        auth_signer.sign().await
+    }
+
     pub async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
@@ -72,6 +91,72 @@ mod test {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn test_sign_auth_success() {
+        let profile = Profile::sample();
+        let sut = boot_with_profile(&profile, None).await;
+
+        let all_accounts = profile.accounts_on_current_network().unwrap();
+        let account = all_accounts.first().unwrap();
+        let nonce = DappToWalletInteractionAuthChallengeNonce::sample();
+        let metadata = DappToWalletInteractionMetadata::new(
+            WalletInteractionVersion::current(),
+            NetworkID::Mainnet,
+            "https://example.com",
+            DappDefinitionAddress::sample(),
+        );
+
+        let expected_challenge =
+            RolaChallenge::from_request(nonce.clone(), metadata.clone())
+                .unwrap();
+
+        let signed = sut
+            .sign_auth(
+                AddressOfAccountOrPersona::Account(account.address),
+                nonce,
+                metadata,
+            )
+            .await
+            .unwrap();
+
+        let signature_with_public_key = SignatureWithPublicKey::from((
+            signed.public_key.as_ed25519().unwrap().clone(),
+            signed.signature.as_ed25519().unwrap().clone(),
+        ));
+
+        assert!(signature_with_public_key
+            .is_valid_for_hash(&expected_challenge.hash()))
+    }
+
+    #[actix_rt::test]
+    async fn test_sign_auth_failure() {
+        let profile = Profile::sample();
+
+        let sut =
+            boot_with_profile(&profile, Some(SigningFailure::UserRejected))
+                .await;
+
+        let all_accounts = profile.accounts_on_current_network().unwrap();
+        let account = all_accounts.first().unwrap();
+        let nonce = DappToWalletInteractionAuthChallengeNonce::sample();
+        let metadata = DappToWalletInteractionMetadata::new(
+            WalletInteractionVersion::current(),
+            NetworkID::Mainnet,
+            "https://example.com",
+            DappDefinitionAddress::sample(),
+        );
+
+        let result = sut
+            .sign_auth(
+                AddressOfAccountOrPersona::Account(account.address),
+                nonce,
+                metadata,
+            )
+            .await;
+
+        assert_eq!(result, Err(CommonError::SigningRejected))
+    }
 
     #[actix_rt::test]
     async fn test_sign_transaction_intent_success() {
@@ -247,6 +332,7 @@ mod test {
                     false,
                     Arc::new(clients.secure_storage.clone()),
                 )),
+                get_test_auth_interactor(&maybe_signing_failure),
             ));
         let interactors = Interactors::new(use_factor_sources_interactors);
         SUT::boot_with_clients_and_interactor(clients, interactors).await
@@ -267,6 +353,15 @@ mod test {
                 }
                 SigningFailure::UserRejected => SimulatedUser::<S>::rejecting(),
             },
+        }
+    }
+
+    fn get_test_auth_interactor(
+        maybe_signing_failure: &Option<SigningFailure>,
+    ) -> Arc<dyn AuthenticationSigningInteractor> {
+        match maybe_signing_failure {
+            None => Arc::new(TestAuthenticationInteractor::new_succeeding()),
+            Some(_) => Arc::new(TestAuthenticationInteractor::new_failing()),
         }
     }
 
