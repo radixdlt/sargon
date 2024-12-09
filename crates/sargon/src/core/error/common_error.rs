@@ -821,6 +821,9 @@ pub enum CommonError {
 
     #[error("Signing was rejected by the user")]
     SigningRejected = 10231,
+
+    #[error("Failed to automatically build shield, reason: '{underlying}'")]
+    AutomaticShieldBuildingFailure { underlying: String } = 10232,
 }
 
 impl CommonError {

@@ -386,7 +386,7 @@ pub trait PickFactors: Send + Sync {
     async fn user_picked_factors(
         &self,
         possible: Vec<FactorSource>,
-    ) -> Vec<FactorSource>;
+    ) -> Vec<FactorSourceID>;
 }
 
 use sargon::FactorSource as InternalFactorSource;
@@ -406,12 +406,12 @@ impl SecurityShieldBuilder {
                 async |possible: Vec<sargon::FactorSource>| {
                     let possible_mapped: Vec<crate::FactorSource> =
                         possible.into_type();
-                    let picked: Vec<crate::FactorSource> =
+                    let ids_of_picked: Vec<crate::FactorSourceID> =
                         pick_primary_role_factors
                             .user_picked_factors(possible_mapped)
                             .await;
 
-                    picked.into_internal()
+                            ids_of_picked.into_internal()
                 },
             )
             .await
