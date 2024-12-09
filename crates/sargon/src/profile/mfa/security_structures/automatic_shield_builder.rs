@@ -55,27 +55,48 @@ impl AutomaticShieldBuilder {
 }
 
 struct ShouldAddFactorToListEvaluation {
-    target_categories: IndexSet<FactorSourceCategory>,
-    allowed_kinds_per_category_specialization:
+    target_categories_with_kind_restrictions:
         IndexMap<FactorSourceCategory, IndexSet<FactorSourceKind>>,
     target_amount: Option<Amount>, // None means use ALL
 }
 impl ShouldAddFactorToListEvaluation {
+    fn target_categories(&self) -> IndexSet<FactorSourceCategory> {
+        self.target_categories_with_kind_restrictions
+            .keys()
+            .cloned()
+            .collect()
+    }
+
+    fn with(
+        target_categories_with_kind_restrictions: IndexMap<
+            FactorSourceCategory,
+            IndexSet<FactorSourceKind>,
+        >,
+        target_amount: impl Into<Option<Amount>>,
+    ) -> Self {
+        target_categories_with_kind_restrictions
+            .iter()
+            .for_each(|(k, v)| {
+                v.iter().for_each(|x| assert_eq!(x.category(), *k))
+            });
+
+        Self {
+            target_categories_with_kind_restrictions,
+            target_amount: target_amount.into(),
+        }
+    }
+
     fn new(
         target_categories: impl IntoIterator<Item = FactorSourceCategory>,
         target_amount: impl Into<Option<Amount>>,
-        allowed_kinds_per_category_specialization: impl Into<
-            Option<IndexMap<FactorSourceCategory, IndexSet<FactorSourceKind>>>,
-        >,
     ) -> Self {
-        Self {
-            target_categories: target_categories.into_iter().collect(),
-            target_amount: target_amount.into(),
-            allowed_kinds_per_category_specialization:
-                allowed_kinds_per_category_specialization
-                    .into()
-                    .unwrap_or_default(),
-        }
+        Self::with(
+            target_categories
+                .into_iter()
+                .map(|c| (c, IndexSet::new()))
+                .collect::<IndexMap<_, _>>(),
+            target_amount,
+        )
     }
 
     fn is_required(&self) -> bool {
@@ -102,7 +123,7 @@ impl ShouldAddFactorToListEvaluation {
         let Some(target_amount) = &self.target_amount else {
             return Some(usize::MAX); // Add "All"
         };
-        if self.target_categories.contains(&category) {
+        if self.target_categories().contains(&category) {
             target_amount.left_until_fulfilled(current_len_of_factor_list)
         } else {
             Some(0)
@@ -116,7 +137,7 @@ impl AutomaticShieldBuilder {
         to: &mut IndexSet<FactorSourceID>,
         eval: ShouldAddFactorToListEvaluation,
     ) -> Result<()> {
-        for category in eval.target_categories.iter() {
+        for category in eval.target_categories().iter() {
             let factors_of_category = self.factors_of_category(*category);
 
             let Some(q) =
@@ -269,7 +290,8 @@ impl AutomaticShieldBuilder {
     }
 
     fn _build_shield(&mut self) -> Result<SecurityStructureOfFactorSourceIDs> {
-        let (recovery_factors, confirmation_factors) = {
+        // Primary
+        {
             if self.picked_primary_role_factors.len() == 1 {
                 // if the user chose only 1 that factor cannot be used in the recovery or confirmation roles
                 self.remaining_available_factors
@@ -281,7 +303,9 @@ impl AutomaticShieldBuilder {
             );
             self.shield_builder
                 .set_threshold(self.picked_primary_role_factors.len() as u8);
+        }
 
+        let (recovery_factors, confirmation_factors) = {
             let mut recovery_factors = self
                 .factors_of_category(FactorSourceCategory::Contact)
                 .iter()
@@ -329,22 +353,24 @@ impl AutomaticShieldBuilder {
                 ),
             )?;
 
-            // Set all Biometrics/PIN factors to a role (they must be all in one role because they
-            // are unlocked by the same Biometrics/PIN check):
-
-            let mut target_list =
+            // "Set all Biometrics/PIN factors to a role (they must be all in one role because they
+            // are unlocked by the same Biometrics/PIN check)":
+            let target_list =
                 if recovery_factors.len() > confirmation_factors.len() {
-                    // If there are more RECOVERY factors than CONFIRM factors, add any (and all) Biometrics/PIN factors to CONFIRM
-                    &mut recovery_factors
-                } else {
-                    // Else, add any (and all) Biometrics/PIN factors to RECOVERY.
+                    // "If there are more RECOVERY factors than CONFIRM factors, add any (and all) Biometrics/PIN factors to CONFIRM"
                     &mut confirmation_factors
+                } else {
+                    // "Else, add any (and all) Biometrics/PIN factors to RECOVERY."
+                    &mut recovery_factors
                 };
 
             self.add_quantified_factors_of_categories_to_set_if_able(
-                &mut target_list,
-                ShouldAddFactorToListEvaluation::new(
-                    [FactorSourceCategory::Identity],
+                target_list,
+                ShouldAddFactorToListEvaluation::with(
+                    IndexMap::kv(
+                        FactorSourceCategory::Identity,
+                        IndexSet::just(FactorSourceKind::Device),
+                    ),
                     None,
                 ),
             )?;
