@@ -52,82 +52,199 @@ impl AutomaticShieldBuilder {
         assert!(was_inserted);
         self.consume(factor);
     }
+}
 
+struct ShouldAddFactorToListEvaluation {
+    target_categories: IndexSet<FactorSourceCategory>,
+    allowed_kinds_per_category_specialization:
+        IndexMap<FactorSourceCategory, IndexSet<FactorSourceKind>>,
+    target_amount: Option<Amount>, // None means use ALL
+}
+impl ShouldAddFactorToListEvaluation {
+    fn new(
+        target_categories: impl IntoIterator<Item = FactorSourceCategory>,
+        target_amount: impl Into<Option<Amount>>,
+        allowed_kinds_per_category_specialization: impl Into<
+            Option<IndexMap<FactorSourceCategory, IndexSet<FactorSourceKind>>>,
+        >,
+    ) -> Self {
+        Self {
+            target_categories: target_categories.into_iter().collect(),
+            target_amount: target_amount.into(),
+            allowed_kinds_per_category_specialization:
+                allowed_kinds_per_category_specialization
+                    .into()
+                    .unwrap_or_default(),
+        }
+    }
+
+    fn is_required(&self) -> bool {
+        let Some(target_amount) = &self.target_amount else {
+            return false;
+        };
+        target_amount.is_required
+    }
+
+    fn assert_fulfilled(&self, actual: usize) -> Result<()> {
+        let Some(target_amount) = &self.target_amount else {
+            return Ok(());
+        };
+        target_amount.assert_fulfilled(actual)
+    }
+
+    /// Nil means the requirement cannot be fulfilled by ADDING factors, since too
+    /// many are already present.
+    fn number_of_factors_of_category_to_add(
+        &self,
+        category: FactorSourceCategory,
+        current_len_of_factor_list: usize,
+    ) -> Option<usize> {
+        let Some(target_amount) = &self.target_amount else {
+            return Some(usize::MAX); // Add "All"
+        };
+        if self.target_categories.contains(&category) {
+            target_amount.left_until_fulfilled(current_len_of_factor_list)
+        } else {
+            Some(0)
+        }
+    }
+}
+
+impl AutomaticShieldBuilder {
     fn add_quantified_factors_of_categories_to_set_if_able(
         &mut self,
-        categories: &[FactorSourceCategory],
-        quantity_limit_per_category: Option<usize>,
         to: &mut IndexSet<FactorSourceID>,
+        eval: ShouldAddFactorToListEvaluation,
     ) -> Result<()> {
-        for category in categories.into_iter() {
+        for category in eval.target_categories.iter() {
             let factors_of_category = self.factors_of_category(*category);
 
-            let quantified_factors = if let Some(quantity_limit_per_category) =
-                quantity_limit_per_category
-            {
-                if factors_of_category.len() < quantity_limit_per_category {
-                    return Err(CommonError::AutomaticShieldBuildingFailure {
-                        underlying: format!(
-                            "Not enough factors of category {:?}",
-                            category
-                        ),
-                    });
-                }
+            let Some(q) =
+                eval.number_of_factors_of_category_to_add(*category, to.len())
+            else {
+                return Err(CommonError::AutomaticShieldBuildingFailure {
+                    underlying: format!(
+                        "Too many factors of category {:?}",
+                        category
+                    ),
+                });
+            };
 
-                Ok(factors_of_category
-                    .iter()
-                    .take(quantity_limit_per_category)
-                    .cloned()
-                    .collect::<IndexSet<_>>())
-            } else {
-                Ok(factors_of_category)
-            }?;
+            if q == 0 {
+                continue;
+            }
+
+            if factors_of_category.len() < q && eval.is_required() {
+                return Err(CommonError::AutomaticShieldBuildingFailure {
+                    underlying: format!(
+                        "Not enough factors of category {:?}",
+                        category
+                    ),
+                });
+            }
+
+            let quantified_factors = factors_of_category
+                .iter()
+                .take(q)
+                .cloned()
+                .collect::<IndexSet<_>>();
 
             quantified_factors.into_iter().for_each(|factor| {
                 self.consume_factor_and_add_to(factor.id(), to);
             });
         }
 
+        eval.assert_fulfilled(to.len())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Amount {
+    is_required: bool,
+    quantity: RequestedQuantity,
+}
+
+impl Amount {
+    fn new(is_required: bool, quantity: RequestedQuantity) -> Self {
+        Self {
+            is_required,
+            quantity,
+        }
+    }
+
+    /// `None` means the requirement cannot be fulfilled by ADDING factors, since too
+    /// many are already present.
+    fn left_until_fulfilled(&self, actual: usize) -> Option<usize> {
+        let left = self.quantity.left_until_fulfilled(actual);
+        if left < 0 {
+            None
+        } else {
+            Some(left as usize)
+        }
+    }
+
+    fn is_fulfilled(&self, actual: usize) -> bool {
+        if let Some(remaining) = self.left_until_fulfilled(actual) {
+            remaining == 0
+        } else {
+            false
+        }
+    }
+
+    fn assert_fulfilled(&self, actual: usize) -> Result<()> {
+        if !self.is_required {
+            return Ok(());
+        }
+        if !self.is_fulfilled(actual) {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: format!(
+                    "Quantity requirement not met: {:?} != {:?}",
+                    self, actual
+                ),
+            });
+        }
         Ok(())
     }
+}
 
-    fn add_quantified_custodian_and_hardware_factors_to_set_if_able(
-        &mut self,
-        quantity_limit_per_category: Option<usize>,
-        to: &mut IndexSet<FactorSourceID>,
-    ) -> Result<()> {
-        self.add_quantified_factors_of_categories_to_set_if_able(
-            &[
-                FactorSourceCategory::Custodian,
-                FactorSourceCategory::Hardware,
-            ],
-            quantity_limit_per_category,
-            to,
-        )
-    }
-
+impl AutomaticShieldBuilder {
     fn add_one_custodian_and_hardware_factor_to_set_if_able(
         &mut self,
         to: &mut IndexSet<FactorSourceID>,
+        target_amount: Amount,
     ) -> Result<()> {
-        self.add_quantified_custodian_and_hardware_factors_to_set_if_able(
-            Some(1),
+        self.add_quantified_factors_of_categories_to_set_if_able(
             to,
+            ShouldAddFactorToListEvaluation::new(
+                [
+                    FactorSourceCategory::Custodian,
+                    FactorSourceCategory::Hardware,
+                ],
+                target_amount,
+            ),
         )
     }
 
     fn assign_recovery_factors_to(
         &mut self,
         factors: &mut IndexSet<FactorSourceID>,
+        target_amount: Amount,
     ) -> Result<()> {
-        self.add_one_custodian_and_hardware_factor_to_set_if_able(factors)
+        self.add_one_custodian_and_hardware_factor_to_set_if_able(
+            factors,
+            target_amount,
+        )
     }
 
     fn assign_confirmation_factors_to(
         &mut self,
         factors: &mut IndexSet<FactorSourceID>,
+        target_amount: Amount,
     ) -> Result<()> {
-        self.add_one_custodian_and_hardware_factor_to_set_if_able(factors)
+        self.add_one_custodian_and_hardware_factor_to_set_if_able(
+            factors,
+            target_amount,
+        )
     }
 
     fn add_factors_to_role(
@@ -152,60 +269,88 @@ impl AutomaticShieldBuilder {
     }
 
     fn _build_shield(&mut self) -> Result<SecurityStructureOfFactorSourceIDs> {
-        if self.picked_primary_role_factors.len() == 1 {
-            // if the user chose only 1 that factor cannot be used in the recovery or confirmation roles
-            self.remaining_available_factors
-                .retain(|f| f.id() != self.picked_primary_role_factors[0]);
-        }
-        self.add_factors_to_role(
-            &self.picked_primary_role_factors,
-            RoleKind::Primary,
-        );
-        self.shield_builder
-            .set_threshold(self.picked_primary_role_factors.len() as u8);
+        let (recovery_factors, confirmation_factors) = {
+            if self.picked_primary_role_factors.len() == 1 {
+                // if the user chose only 1 that factor cannot be used in the recovery or confirmation roles
+                self.remaining_available_factors
+                    .retain(|f| f.id() != self.picked_primary_role_factors[0]);
+            }
+            self.add_factors_to_role(
+                &self.picked_primary_role_factors,
+                RoleKind::Primary,
+            );
+            self.shield_builder
+                .set_threshold(self.picked_primary_role_factors.len() as u8);
 
-        let mut recovery_factors = self
-            .factors_of_category(FactorSourceCategory::Contact)
-            .iter()
-            .map(|f| f.id())
-            .collect::<IndexSet<_>>();
+            let mut recovery_factors = self
+                .factors_of_category(FactorSourceCategory::Contact)
+                .iter()
+                .map(|f| f.id())
+                .collect::<IndexSet<_>>();
 
-        let mut confirmation_factors = self
-            .factors_of_category(FactorSourceCategory::Information)
-            .iter()
-            .map(|f| f.id())
-            .collect::<IndexSet<_>>();
+            let mut confirmation_factors = self
+                .factors_of_category(FactorSourceCategory::Information)
+                .iter()
+                .map(|f| f.id())
+                .collect::<IndexSet<_>>();
 
-        self.assign_recovery_factors_to(&mut recovery_factors)?;
-        self.assign_confirmation_factors_to(&mut confirmation_factors)?;
-        if recovery_factors.len() < 1 {
-            return Err(CommonError::AutomaticShieldBuildingFailure {
-                underlying: "No recovery factors available".to_string(),
-            });
-        }
-        if confirmation_factors.len() < 1 {
-            return Err(CommonError::AutomaticShieldBuildingFailure {
-                underlying: "No confirmation factors available".to_string(),
-            });
-        }
-        self.assign_recovery_factors_to(&mut recovery_factors)?;
-        self.assign_confirmation_factors_to(&mut confirmation_factors)?;
-        if recovery_factors.len() < 2 {
-            return Err(CommonError::AutomaticShieldBuildingFailure {
-                underlying: "Not enough recovery factors available".to_string(),
-            });
-        }
-        if confirmation_factors.len() < 2 {
-            return Err(CommonError::AutomaticShieldBuildingFailure {
-                underlying: "Not enough confirmation factors available"
-                    .to_string(),
-            });
-        }
+            self.assign_recovery_factors_to(
+                &mut recovery_factors,
+                Amount::new(true, RequestedQuantity::at_least(1)),
+            )?;
 
-        self.add_quantified_custodian_and_hardware_factors_to_set_if_able(
-            None,
-            &mut recovery_factors,
-        )?;
+            self.assign_confirmation_factors_to(
+                &mut confirmation_factors,
+                Amount::new(true, RequestedQuantity::at_least(1)),
+            )?;
+
+            // "Distribute to try to get up to 2 RECOVERY and then 2 CONFIRM factors if possible"
+            {
+                self.assign_recovery_factors_to(
+                    &mut recovery_factors,
+                    Amount::new(false, RequestedQuantity::exactly(2)),
+                )?;
+
+                self.assign_confirmation_factors_to(
+                    &mut confirmation_factors,
+                    Amount::new(false, RequestedQuantity::exactly(2)),
+                )?;
+            }
+
+            // "Add any (and all) remaining Hardware or Custodian factors in the list to RECOVERY."
+            self.add_quantified_factors_of_categories_to_set_if_able(
+                &mut recovery_factors,
+                ShouldAddFactorToListEvaluation::new(
+                    [
+                        FactorSourceCategory::Hardware,
+                        FactorSourceCategory::Custodian,
+                    ],
+                    None,
+                ),
+            )?;
+
+            // Set all Biometrics/PIN factors to a role (they must be all in one role because they
+            // are unlocked by the same Biometrics/PIN check):
+
+            let mut target_list =
+                if recovery_factors.len() > confirmation_factors.len() {
+                    // If there are more RECOVERY factors than CONFIRM factors, add any (and all) Biometrics/PIN factors to CONFIRM
+                    &mut recovery_factors
+                } else {
+                    // Else, add any (and all) Biometrics/PIN factors to RECOVERY.
+                    &mut confirmation_factors
+                };
+
+            self.add_quantified_factors_of_categories_to_set_if_able(
+                &mut target_list,
+                ShouldAddFactorToListEvaluation::new(
+                    [FactorSourceCategory::Identity],
+                    None,
+                ),
+            )?;
+
+            Ok((recovery_factors, confirmation_factors))
+        }?;
 
         self.add_factors_to_role(&recovery_factors, RoleKind::Recovery);
         self.add_factors_to_role(&confirmation_factors, RoleKind::Confirmation);
