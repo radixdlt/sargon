@@ -1,12 +1,12 @@
 use crate::prelude::*;
-use sargon::KeysCollectionReason as InternalKeysCollectionReason;
+use sargon::DerivationPurpose as InternalDerivationPurpose;
 
-/// The reason that `KeysCollector` interacted with the host in order to
-/// derive keys.
+/// The purpose that initiated an interaction with the host to derive keys.
+/// The orchestrator behind this operation is the `KeysCollector`.
 #[derive(
     Clone, Copy, Debug, PartialEq, Eq, InternalConversion, uniffi::Enum,
 )]
-pub enum KeysCollectionReason {
+pub enum DerivationPurpose {
     /// When the create account flow, initiates keys collection
     /// for account VECIs
     CreatingNewAccount,

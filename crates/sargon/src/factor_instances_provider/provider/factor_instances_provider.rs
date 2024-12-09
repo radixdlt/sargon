@@ -49,7 +49,7 @@ impl FactorInstancesProvider {
     pub async fn provide(
         self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
-        keys_collection_reason: KeysCollectionReason,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
@@ -57,7 +57,7 @@ impl FactorInstancesProvider {
         let mut _self = self;
 
         _self
-            ._provide(quantified_derivation_preset, keys_collection_reason)
+            ._provide(quantified_derivation_preset, derivation_purpose)
             .await
     }
 }
@@ -87,7 +87,7 @@ impl FactorInstancesProvider {
     async fn _provide(
         &mut self,
         quantified_derivation_preset: QuantifiedDerivationPreset,
-        keys_collection_reason: KeysCollectionReason,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
@@ -128,7 +128,7 @@ impl FactorInstancesProvider {
                     quantified_derivation_preset,
                     partial_instances,
                     quantities_to_derive,
-                    keys_collection_reason,
+                    derivation_purpose,
                 )
                 .await
             }
@@ -146,13 +146,13 @@ impl FactorInstancesProvider {
             FactorSourceIDFromHash,
             IndexMap<DerivationPreset, usize>,
         >,
-        keys_collection_reason: KeysCollectionReason,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
     )> {
         let pf_newly_derived = self
-            .derive_more(pf_pdp_qty_to_derive, keys_collection_reason)
+            .derive_more(pf_pdp_qty_to_derive, derivation_purpose)
             .await?;
 
         let Split {
@@ -265,7 +265,7 @@ impl FactorInstancesProvider {
             FactorSourceIDFromHash,
             IndexMap<DerivationPreset, usize>,
         >,
-        keys_collection_reason: KeysCollectionReason,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<IndexMap<FactorSourceIDFromHash, FactorInstances>> {
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
@@ -316,7 +316,7 @@ impl FactorInstancesProvider {
             factor_sources,
             pf_paths.clone(),
             interactor,
-            keys_collection_reason,
+            derivation_purpose,
         )?;
 
         let pf_derived = collector.collect_keys().await.factors_by_source;

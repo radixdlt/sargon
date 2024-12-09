@@ -31,7 +31,7 @@ impl CacheFiller {
         let derived = provider
             .derive_more(
                 quantities,
-                KeysCollectionReason::new_for_pre_derivation(),
+                DerivationPurpose::new_for_pre_derivation(),
             )
             .await?;
 

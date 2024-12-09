@@ -5,7 +5,7 @@ use sargon::{IndexSet, KeyDerivationRequest as InternalKeyDerivationRequest};
 /// A collection of derivation paths, on a per-factor-source basis.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct KeyDerivationRequest {
-    pub keys_collection_reason: KeysCollectionReason,
+    pub derivation_purpose: DerivationPurpose,
     pub per_factor_source: Vec<KeyDerivationRequestPerFactorSource>,
 }
 
@@ -36,7 +36,7 @@ impl KeyDerivationRequest {
 impl From<InternalKeyDerivationRequest> for KeyDerivationRequest {
     fn from(value: InternalKeyDerivationRequest) -> Self {
         Self {
-            keys_collection_reason: value.keys_collection_reason.into(),
+            derivation_purpose: value.derivation_purpose.into(),
             per_factor_source: value
                 .per_factor_source
                 .into_iter()
@@ -54,7 +54,7 @@ impl From<InternalKeyDerivationRequest> for KeyDerivationRequest {
 impl From<KeyDerivationRequest> for InternalKeyDerivationRequest {
     fn from(value: KeyDerivationRequest) -> Self {
         Self::new(
-            value.keys_collection_reason.into_internal(),
+            value.derivation_purpose.into_internal(),
             IndexMap::from_iter(value.per_factor_source.into_iter().map(|f| {
                 (
                     f.factor_source_id.into_internal(),

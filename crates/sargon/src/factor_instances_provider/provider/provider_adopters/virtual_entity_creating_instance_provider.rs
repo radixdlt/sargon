@@ -137,7 +137,7 @@ impl VirtualEntityCreatingInstanceProvider {
                     DerivationPreset::veci_entity_kind(entity_kind),
                     count,
                 ),
-                KeysCollectionReason::new_for_creating(entity_kind),
+                DerivationPurpose::new_for_creating(entity_kind),
             )
             .await?;
 

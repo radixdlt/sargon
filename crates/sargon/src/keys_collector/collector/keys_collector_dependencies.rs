@@ -16,14 +16,14 @@ pub(crate) struct KeysCollectorDependencies {
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
 
     /// The reason that the collection of keys was initiated
-    pub(super) collection_reason: KeysCollectionReason,
+    pub(super) collection_reason: DerivationPurpose,
 }
 
 impl KeysCollectorDependencies {
     pub(crate) fn new(
         interactor: Arc<dyn KeyDerivationInteractor>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
-        collection_reason: KeysCollectionReason,
+        collection_reason: DerivationPurpose,
     ) -> Self {
         Self {
             interactor,

@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-/// The reason that `KeysCollector` interacted with the host in order to
-/// derive keys.
+/// The purpose that initiated an interaction with the host to derive keys.
+/// The orchestrator behind this operation is the `KeysCollector`.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum KeysCollectionReason {
+pub enum DerivationPurpose {
     /// When the create account flow, initiates keys collection
     /// for account VECIs
     CreatingNewAccount,
@@ -25,7 +25,7 @@ pub enum KeysCollectionReason {
     PreDerivingKeys,
 }
 
-impl KeysCollectionReason {
+impl DerivationPurpose {
     pub fn new_for_creating(entity_kind: CAP26EntityKind) -> Self {
         match entity_kind {
             CAP26EntityKind::Account => Self::CreatingNewAccount,
@@ -50,7 +50,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = KeysCollectionReason;
+    type SUT = DerivationPurpose;
 
     #[test]
     fn test_for_creating_account() {

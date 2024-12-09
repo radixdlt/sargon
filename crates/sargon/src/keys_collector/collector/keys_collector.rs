@@ -25,7 +25,7 @@ impl KeysCollector {
             IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
         >,
         interactor: Arc<dyn KeyDerivationInteractor>,
-        keys_collection_reason: KeysCollectionReason,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<Self> {
         let derivation_paths = derivation_paths.into();
         let preprocessor = KeysCollectorPreprocessor::new(derivation_paths);
@@ -35,7 +35,7 @@ impl KeysCollector {
                 .collect::<IndexSet<_>>(),
             interactor,
             preprocessor,
-            keys_collection_reason,
+            derivation_purpose,
         )
     }
 
@@ -43,7 +43,7 @@ impl KeysCollector {
         all_factor_sources_in_profile: impl Into<IndexSet<FactorSource>>,
         interactor: Arc<dyn KeyDerivationInteractor>,
         preprocessor: KeysCollectorPreprocessor,
-        keys_collection_reason: KeysCollectionReason,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<Self> {
         debug!("Init KeysCollector");
         let all_factor_sources_in_profile =
@@ -55,7 +55,7 @@ impl KeysCollector {
                 dependencies: KeysCollectorDependencies::new(
                     interactor,
                     f,
-                    keys_collection_reason,
+                    derivation_purpose,
                 ),
                 state: RwLock::new(s),
             })
@@ -255,7 +255,7 @@ mod tests {
             [f0, f1, f2, f3],
             paths.clone(),
             Arc::new(TestDerivationInteractor::default()),
-            KeysCollectionReason::PreDerivingKeys,
+            DerivationPurpose::PreDerivingKeys,
         )
         .unwrap();
 

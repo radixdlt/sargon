@@ -135,7 +135,7 @@ impl SecurifyEntityFactorInstancesProvider {
                     DerivationPreset::mfa_entity_kind(entity_kind),
                     addresses_of_entities.len(),
                 ),
-                KeysCollectionReason::new_for_securifying(entity_kind),
+                DerivationPurpose::new_for_securifying(entity_kind),
             )
             .await?;
 
