@@ -1,3 +1,7 @@
+use radix_engine_interface::blueprints::access_controller::{
+    RecoveryProposal as ScryptoRecoveryProposal, RuleSet as ScryptoRuleSet,
+};
+
 use crate::prelude::*;
 
 impl<const ROLE: u8> From<RoleWithFactorInstances<ROLE>> for ScryptoAccessRule {
@@ -23,5 +27,47 @@ impl<const ROLE: u8> From<RoleWithFactorInstances<ROLE>> for ScryptoAccessRule {
                 )),
             ),
         ]))
+    }
+}
+
+impl From<MatrixOfFactorInstances> for ScryptoRuleSet {
+    fn from(
+        MatrixOfFactorInstances {
+            primary_role,
+            recovery_role,
+            confirmation_role,
+            ..
+        }: MatrixOfFactorInstances,
+    ) -> Self {
+        Self {
+            primary_role: primary_role.into(),
+            recovery_role: recovery_role.into(),
+            confirmation_role: confirmation_role.into(),
+        }
+    }
+}
+
+pub const MINUTES_PER_DAY: u32 = 24 * 60;
+
+impl From<SecurityStructureOfFactorInstances> for ScryptoRecoveryProposal {
+    fn from(value: SecurityStructureOfFactorInstances) -> Self {
+        let timed_recovery_delay_in_minutes =
+            value.timed_recovery_delay_in_minutes();
+        Self {
+            rule_set: value.matrix_of_factors.into(),
+            timed_recovery_delay_in_minutes: Some(
+                timed_recovery_delay_in_minutes,
+            ),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn number_of_minutes_per_day() {
+        assert_eq!(MINUTES_PER_DAY, 1440);
     }
 }

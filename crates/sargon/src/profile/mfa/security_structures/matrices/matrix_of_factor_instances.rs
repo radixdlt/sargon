@@ -2,6 +2,13 @@ use crate::prelude::*;
 
 pub type MatrixOfFactorInstances = AbstractMatrixBuilt<FactorInstance>;
 
+impl MatrixOfFactorInstances {
+    pub fn timed_recovery_delay_in_minutes(&self) -> u32 {
+        let timed_recovery_in_days =
+            self.number_of_days_until_auto_confirm as u32;
+        MINUTES_PER_DAY * timed_recovery_in_days
+    }
+}
 pub trait HasFactorInstances {
     fn unique_factor_instances(&self) -> IndexSet<FactorInstance>;
 }
@@ -212,6 +219,15 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn timed_recovery_delay_in_minutes() {
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.timed_recovery_delay_in_minutes(),
+            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM as u32 * 24 * 60
+        );
     }
 
     #[test]
