@@ -5,101 +5,134 @@ use crate::prelude::*;
 use super::security_shield_builder;
 
 pub struct AutomaticShieldBuilder {
-    remaining_available_factors: Vec<FactorSource>,
-    picked_primary_role_factors: Vec<FactorSourceID>,
+    remaining_available_factors: IndexSet<FactorSource>,
+    picked_primary_role_factors: IndexSet<FactorSourceID>,
     shield_builder: SecurityShieldBuilder,
 }
 
 impl AutomaticShieldBuilder {
     fn find_primary_role_candidates(
-        all: &[FactorSource],
+        all: &IndexSet<FactorSource>,
         shield_builder: &SecurityShieldBuilder,
-    ) -> Vec<FactorSource> {
-        let factor_source_ids = all.iter().map(|f| f.id()).collect_vec();
-        shield_builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each(factor_source_ids).into_iter().filter(|vs| match vs.validation {
+    ) -> IndexSet<FactorSource> {
+        let factor_source_ids =
+            all.iter().map(|f| f.id()).collect::<IndexSet<_>>();
+        shield_builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each(factor_source_ids.into_iter().collect_vec()).into_iter().filter(|vs| match vs.validation {
             Ok(_) => true,
             Err(RoleBuilderValidation::NotYetValid(_)) => true,
             Err(RoleBuilderValidation::BasicViolation(_)) |  Err(RoleBuilderValidation::ForeverInvalid(_)) => false,
         }).filter_map(|vs| all.iter().find(|f| f.id() == vs.factor_source_id))
         .cloned()
-        .collect_vec()
+        .collect::<IndexSet<_>>()
     }
 
     fn factors_of_category(
         &self,
         category: FactorSourceCategory,
-    ) -> Vec<FactorSource> {
+    ) -> IndexSet<FactorSource> {
         self.remaining_available_factors
             .iter()
             .filter(|f| f.category() == category)
             .sorted_by_key(|&f| f.common_properties().last_used_on)
             .cloned()
-            .collect_vec()
+            .collect::<IndexSet<_>>()
+    }
+
+    fn consume(&mut self, factor: FactorSourceID) {
+        self.remaining_available_factors
+            .retain(|f| f.id() != factor);
     }
 
     fn consume_factor_and_add_to(
         &mut self,
         factor: FactorSourceID,
-        add_to: &mut Vec<FactorSourceID>,
+        add_to: &mut IndexSet<FactorSourceID>,
     ) {
-        todo!()
+        let was_inserted = add_to.insert(factor);
+        assert!(was_inserted);
+        self.consume(factor);
     }
 
-    fn add_factors_of_categories_if_able(
+    fn add_quantified_factors_of_categories_to_set_if_able(
         &mut self,
         categories: &[FactorSourceCategory],
-        to: &mut Vec<FactorSourceID>,
-    ) {
-        categories.iter().for_each(|&category| {
-            if let Some(factor) =
-                self.factors_of_category(category).iter().next()
+        quantity_limit_per_category: Option<usize>,
+        to: &mut IndexSet<FactorSourceID>,
+    ) -> Result<()> {
+        for category in categories.into_iter() {
+            let factors_of_category = self.factors_of_category(*category);
+
+            let quantified_factors = if let Some(quantity_limit_per_category) =
+                quantity_limit_per_category
             {
+                if factors_of_category.len() < quantity_limit_per_category {
+                    return Err(CommonError::AutomaticShieldBuildingFailure {
+                        underlying: format!(
+                            "Not enough factors of category {:?}",
+                            category
+                        ),
+                    });
+                }
+
+                Ok(factors_of_category
+                    .iter()
+                    .take(quantity_limit_per_category)
+                    .cloned()
+                    .collect::<IndexSet<_>>())
+            } else {
+                Ok(factors_of_category)
+            }?;
+
+            quantified_factors.into_iter().for_each(|factor| {
                 self.consume_factor_and_add_to(factor.id(), to);
-            }
-        });
+            });
+        }
+
+        Ok(())
     }
 
-    fn add_custodian_and_hardware_factors_if_able(
+    fn add_quantified_custodian_and_hardware_factors_to_set_if_able(
         &mut self,
-        to: &mut Vec<FactorSourceID>,
-    ) {
-        self.add_factors_of_categories_if_able(
+        quantity_limit_per_category: Option<usize>,
+        to: &mut IndexSet<FactorSourceID>,
+    ) -> Result<()> {
+        self.add_quantified_factors_of_categories_to_set_if_able(
             &[
                 FactorSourceCategory::Custodian,
                 FactorSourceCategory::Hardware,
             ],
+            quantity_limit_per_category,
             to,
-        );
+        )
     }
 
-    fn recovery_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
-        let mut factors = self
-            .factors_of_category(FactorSourceCategory::Contact)
-            .iter()
-            .map(|f| f.id())
-            .collect_vec();
-
-        self.add_custodian_and_hardware_factors_if_able(&mut factors);
-
-        todo!()
-    }
-
-    fn confirmation_role_factors(
+    fn add_one_custodian_and_hardware_factor_to_set_if_able(
         &mut self,
-        recovery_factors: &[FactorSourceID],
-    ) -> Result<Vec<FactorSourceID>> {
-        let mut factors = self
-            .factors_of_category(FactorSourceCategory::Information)
-            .iter()
-            .map(|f| f.id())
-            .collect_vec();
+        to: &mut IndexSet<FactorSourceID>,
+    ) -> Result<()> {
+        self.add_quantified_custodian_and_hardware_factors_to_set_if_able(
+            Some(1),
+            to,
+        )
+    }
 
-        Ok(vec![])
+    fn assign_recovery_factors_to(
+        &mut self,
+        factors: &mut IndexSet<FactorSourceID>,
+    ) -> Result<()> {
+        self.add_one_custodian_and_hardware_factor_to_set_if_able(factors)
+    }
+
+    fn assign_confirmation_factors_to(
+        &mut self,
+        factors: &mut IndexSet<FactorSourceID>,
+    ) -> Result<()> {
+        self.add_one_custodian_and_hardware_factor_to_set_if_able(factors)
     }
 
     fn add_factors_to_role(
         &self,
-        factors: &Vec<FactorSourceID>,
+        factors: &IndexSet<FactorSourceID>,
         role: RoleKind,
     ) {
         factors.into_iter().for_each(|&f| match role {
@@ -131,16 +164,51 @@ impl AutomaticShieldBuilder {
         self.shield_builder
             .set_threshold(self.picked_primary_role_factors.len() as u8);
 
-        let recovery_factors = &self.recovery_role_factors()?;
-        let confirmation_factors = &self.confirmation_role_factors()?;
+        let mut recovery_factors = self
+            .factors_of_category(FactorSourceCategory::Contact)
+            .iter()
+            .map(|f| f.id())
+            .collect::<IndexSet<_>>();
 
-        loop {
-            let is_done = false;
-            
+        let mut confirmation_factors = self
+            .factors_of_category(FactorSourceCategory::Information)
+            .iter()
+            .map(|f| f.id())
+            .collect::<IndexSet<_>>();
+
+        self.assign_recovery_factors_to(&mut recovery_factors)?;
+        self.assign_confirmation_factors_to(&mut confirmation_factors)?;
+        if recovery_factors.len() < 1 {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "No recovery factors available".to_string(),
+            });
+        }
+        if confirmation_factors.len() < 1 {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "No confirmation factors available".to_string(),
+            });
+        }
+        self.assign_recovery_factors_to(&mut recovery_factors)?;
+        self.assign_confirmation_factors_to(&mut confirmation_factors)?;
+        if recovery_factors.len() < 2 {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "Not enough recovery factors available".to_string(),
+            });
+        }
+        if confirmation_factors.len() < 2 {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "Not enough confirmation factors available"
+                    .to_string(),
+            });
         }
 
-        self.add_factors_to_role(recovery_factors, RoleKind::Recovery);
-        self.add_factors_to_role(confirmation_factors, RoleKind::Confirmation);
+        self.add_quantified_custodian_and_hardware_factors_to_set_if_able(
+            None,
+            &mut recovery_factors,
+        )?;
+
+        self.add_factors_to_role(&recovery_factors, RoleKind::Recovery);
+        self.add_factors_to_role(&confirmation_factors, RoleKind::Confirmation);
 
         self.shield_builder.build().map_err(|e| {
             CommonError::AutomaticShieldBuildingFailure {
@@ -163,13 +231,13 @@ impl SecurityShieldBuilder {
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Factor-Prerequisites
     pub fn prerequisites_status(
-        factor_sources: &[FactorSource],
+        factor_source_ids: &IndexSet<FactorSourceID>,
     ) -> SecurityShieldPrerequisitesStatus {
-        let count_excluding_identity = factor_sources
+        let count_excluding_identity = factor_source_ids
             .iter()
             .filter(|f| f.category() != FactorSourceCategory::Identity)
             .count();
-        let count_hardware = factor_sources
+        let count_hardware = factor_source_ids
             .iter()
             .filter(|f| f.category() == FactorSourceCategory::Hardware)
             .count();
@@ -185,14 +253,16 @@ impl SecurityShieldBuilder {
 
 impl AutomaticShieldBuilder {
     pub async fn build<Fut>(
-        all_factors: Vec<FactorSource>,
-        pick_primary_role_factors: impl Fn(Vec<FactorSource>) -> Fut,
+        all_factors: IndexSet<FactorSource>,
+        pick_primary_role_factors: impl Fn(IndexSet<FactorSource>) -> Fut,
     ) -> Result<SecurityStructureOfFactorSourceIDs>
     where
-        Fut: Future<Output = Vec<FactorSourceID>>,
+        Fut: Future<Output = IndexSet<FactorSourceID>>,
     {
-        if !SecurityShieldBuilder::prerequisites_status(&all_factors)
-            .is_sufficient()
+        if !SecurityShieldBuilder::prerequisites_status(
+            &all_factors.iter().map(|f| f.id()).collect(),
+        )
+        .is_sufficient()
         {
             return Err(CommonError::AutomaticShieldBuildingFailure {
                 underlying: "Prerequisites not met".to_string(),

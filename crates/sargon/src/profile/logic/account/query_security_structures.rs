@@ -48,8 +48,12 @@ impl Profile {
     pub fn security_shield_prerequisites_status(
         &self,
     ) -> SecurityShieldPrerequisitesStatus {
-        let factor_sources = self.factor_sources.items();
-        SecurityShieldBuilder::prerequisites_status(&factor_sources)
+        let factor_source_ids = self
+            .factor_sources
+            .iter()
+            .map(|f| f.id())
+            .collect::<IndexSet<_>>();
+        SecurityShieldBuilder::prerequisites_status(&factor_source_ids)
     }
 }
 
