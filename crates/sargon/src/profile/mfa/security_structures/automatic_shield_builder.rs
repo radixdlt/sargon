@@ -143,12 +143,7 @@ impl AutomaticShieldBuilder {
             let Some(q) =
                 eval.number_of_factors_of_category_to_add(*category, to.len())
             else {
-                return Err(CommonError::AutomaticShieldBuildingFailure {
-                    underlying: format!(
-                        "Too many factors of category {:?}",
-                        category
-                    ),
-                });
+                continue;
             };
 
             if q == 0 {
@@ -229,7 +224,7 @@ impl Amount {
 }
 
 impl AutomaticShieldBuilder {
-    fn add_one_custodian_and_hardware_factor_to_set_if_able(
+    fn add_one_hardware_factor_to_set_if_able(
         &mut self,
         to: &mut IndexSet<FactorSourceID>,
         target_amount: Amount,
@@ -237,34 +232,9 @@ impl AutomaticShieldBuilder {
         self.add_quantified_factors_of_categories_to_set_if_able(
             to,
             ShouldAddFactorToListEvaluation::new(
-                [
-                    FactorSourceCategory::Custodian,
-                    FactorSourceCategory::Hardware,
-                ],
+                [FactorSourceCategory::Hardware],
                 target_amount,
             ),
-        )
-    }
-
-    fn assign_recovery_factors_to(
-        &mut self,
-        factors: &mut IndexSet<FactorSourceID>,
-        target_amount: Amount,
-    ) -> Result<()> {
-        self.add_one_custodian_and_hardware_factor_to_set_if_able(
-            factors,
-            target_amount,
-        )
-    }
-
-    fn assign_confirmation_factors_to(
-        &mut self,
-        factors: &mut IndexSet<FactorSourceID>,
-        target_amount: Amount,
-    ) -> Result<()> {
-        self.add_one_custodian_and_hardware_factor_to_set_if_able(
-            factors,
-            target_amount,
         )
     }
 
@@ -318,24 +288,40 @@ impl AutomaticShieldBuilder {
                 .map(|f| f.id())
                 .collect::<IndexSet<_>>();
 
-            self.assign_recovery_factors_to(
+            self.add_one_hardware_factor_to_set_if_able(
                 &mut recovery_factors,
                 Amount::new(true, RequestedQuantity::at_least(1)),
             )?;
 
-            self.assign_confirmation_factors_to(
+            self.add_quantified_factors_of_categories_to_set_if_able(
+                &mut recovery_factors,
+                ShouldAddFactorToListEvaluation::new(
+                    [FactorSourceCategory::Custodian],
+                    Amount::new(false, RequestedQuantity::at_least(1)),
+                ),
+            )?;
+
+            self.add_one_hardware_factor_to_set_if_able(
                 &mut confirmation_factors,
                 Amount::new(true, RequestedQuantity::at_least(1)),
             )?;
 
+            self.add_quantified_factors_of_categories_to_set_if_able(
+                &mut confirmation_factors,
+                ShouldAddFactorToListEvaluation::new(
+                    [FactorSourceCategory::Custodian],
+                    Amount::new(false, RequestedQuantity::at_least(1)),
+                ),
+            )?;
+
             // "Distribute to try to get up to 2 RECOVERY and then 2 CONFIRM factors if possible"
             {
-                self.assign_recovery_factors_to(
+                self.add_one_hardware_factor_to_set_if_able(
                     &mut recovery_factors,
                     Amount::new(false, RequestedQuantity::exactly(2)),
                 )?;
 
-                self.assign_confirmation_factors_to(
+                self.add_one_hardware_factor_to_set_if_able(
                     &mut confirmation_factors,
                     Amount::new(false, RequestedQuantity::exactly(2)),
                 )?;
@@ -451,5 +437,54 @@ impl AutomaticShieldBuilder {
             shield_builder: security_shield_builder,
         };
         auto_builder.build_shield()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AutomaticShieldBuilder;
+
+    impl SUT {
+        async fn test_with_factors(
+            all_factors: IndexSet<FactorSource>,
+            pick_primary_role_factors: impl Fn(
+                IndexSet<FactorSource>,
+            )
+                -> IndexSet<FactorSourceID>,
+        ) -> Result<SecurityStructureOfFactorSourceIDs> {
+            SUT::build(all_factors, |candidates| {
+                let picked = pick_primary_role_factors(candidates);
+                std::future::ready(picked)
+            })
+            .await
+        }
+        async fn test(
+            pick_primary_role_factors: impl Fn(
+                IndexSet<FactorSource>,
+            )
+                -> IndexSet<FactorSourceID>,
+        ) -> Result<SecurityStructureOfFactorSourceIDs> {
+            Self::test_with_factors(
+                FactorSource::sample_all()
+                    .iter()
+                    .cloned()
+                    .collect::<IndexSet<_>>(),
+                pick_primary_role_factors,
+            )
+            .await
+        }
+    }
+
+    #[actix_rt::test]
+    async fn successful() {
+        let built = SUT::test(|xs| {
+            IndexSet::just(xs.iter().map(|x| x.id()).next().unwrap())
+        })
+        .await
+        .unwrap();
+        assert_eq!(built.matrix_of_factors.primary_role.get_threshold(), 1);
     }
 }
