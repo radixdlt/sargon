@@ -29,37 +29,26 @@ impl AutomaticShieldBuilder {
         let contact_factors = self
             .remaining_available_factors
             .iter()
-            .filter(|f| {
-                f.get_factor_source_category()
-                    == FactorSourceCategory::Contact
-            })
+            .filter(|f| f.category() == FactorSourceCategory::Contact)
             // .sorted_by_key(|x| x.)
             .cloned()
             .collect_vec();
 
-            let hardware = self
+        let hardware = self
             .remaining_available_factors
             .iter()
-            .filter(|f| {
-                f.get_factor_source_category()
-                    == FactorSourceCategory::Hardware
-            })
+            .filter(|f| f.category() == FactorSourceCategory::Hardware)
             .cloned()
             .collect_vec();
 
         todo!()
-
-
     }
 
     fn confirmation_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
         let information_factors = self
             .remaining_available_factors
             .iter()
-            .filter(|f| {
-                f.get_factor_source_category()
-                    == FactorSourceCategory::Information
-            })
+            .filter(|f| f.category() == FactorSourceCategory::Information)
             .cloned()
             .collect_vec();
         Ok(vec![])
@@ -130,11 +119,11 @@ impl SecurityShieldBuilder {
     ) -> SecurityShieldPrerequisitesStatus {
         let count_excluding_identity = factor_sources
             .iter()
-            .filter(|f| f.get_factor_source_category() != FactorSourceCategory::Identity)
+            .filter(|f| f.category() != FactorSourceCategory::Identity)
             .count();
         let count_hardware = factor_sources
             .iter()
-            .filter(|f| f.get_factor_source_category() == FactorSourceCategory::Hardware)
+            .filter(|f| f.category() == FactorSourceCategory::Hardware)
             .count();
         if count_hardware < 1 {
             SecurityShieldPrerequisitesStatus::HardwareRequired
@@ -168,9 +157,7 @@ impl AutomaticShieldBuilder {
         );
         let picked = pick_primary_role_factors(candidates).await;
         let auto_builder = Self {
-            remaining_available_factors: all_factors
-                .into_iter()
-                .collect(),
+            remaining_available_factors: all_factors.into_iter().collect(),
             picked_primary_role_factors: picked,
             shield_builder: security_shield_builder,
         };
