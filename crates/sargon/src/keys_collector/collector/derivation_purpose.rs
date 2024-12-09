@@ -26,21 +26,23 @@ pub enum DerivationPurpose {
 }
 
 impl DerivationPurpose {
-    pub fn new_for_creating(entity_kind: CAP26EntityKind) -> Self {
+    pub fn creation_of_new_virtual_entity(
+        entity_kind: CAP26EntityKind,
+    ) -> Self {
         match entity_kind {
             CAP26EntityKind::Account => Self::CreatingNewAccount,
             CAP26EntityKind::Identity => Self::CreatingNewPersona,
         }
     }
 
-    pub fn new_for_securifying(entity_kind: CAP26EntityKind) -> Self {
+    pub fn for_securifying_or_updating(entity_kind: CAP26EntityKind) -> Self {
         match entity_kind {
             CAP26EntityKind::Account => Self::SecurifyingAccount,
             CAP26EntityKind::Identity => Self::SecurifyingPersona,
         }
     }
 
-    pub fn new_for_pre_derivation() -> Self {
+    pub fn pre_deriving_keys() -> Self {
         Self::PreDerivingKeys
     }
 }
@@ -55,7 +57,7 @@ mod tests {
     #[test]
     fn test_for_creating_account() {
         assert_eq!(
-            SUT::new_for_creating(CAP26EntityKind::Account),
+            SUT::creation_of_new_virtual_entity(CAP26EntityKind::Account),
             SUT::CreatingNewAccount
         )
     }
@@ -63,7 +65,7 @@ mod tests {
     #[test]
     fn test_for_creating_persona() {
         assert_eq!(
-            SUT::new_for_creating(CAP26EntityKind::Identity),
+            SUT::creation_of_new_virtual_entity(CAP26EntityKind::Identity),
             SUT::CreatingNewPersona
         )
     }
@@ -71,7 +73,7 @@ mod tests {
     #[test]
     fn test_for_securifying_account() {
         assert_eq!(
-            SUT::new_for_securifying(CAP26EntityKind::Account),
+            SUT::for_securifying_or_updating(CAP26EntityKind::Account),
             SUT::SecurifyingAccount
         )
     }
@@ -79,13 +81,13 @@ mod tests {
     #[test]
     fn test_for_securifying_persona() {
         assert_eq!(
-            SUT::new_for_securifying(CAP26EntityKind::Identity),
+            SUT::for_securifying_or_updating(CAP26EntityKind::Identity),
             SUT::SecurifyingPersona
         )
     }
 
     #[test]
     fn test_for_pre_deriving_keys() {
-        assert_eq!(SUT::new_for_pre_derivation(), SUT::PreDerivingKeys)
+        assert_eq!(SUT::pre_deriving_keys(), SUT::PreDerivingKeys)
     }
 }

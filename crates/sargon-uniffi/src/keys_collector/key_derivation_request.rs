@@ -5,6 +5,9 @@ use sargon::{IndexSet, KeyDerivationRequest as InternalKeyDerivationRequest};
 /// A collection of derivation paths, on a per-factor-source basis.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct KeyDerivationRequest {
+    /// We include this `DerivationPurpose` in dispatched use FactorSource requests to host so
+    /// that UI can display contextual information as to why the user is prompted to
+    /// authenticate FactorSource access.
     pub derivation_purpose: DerivationPurpose,
     pub per_factor_source: Vec<KeyDerivationRequestPerFactorSource>,
 }

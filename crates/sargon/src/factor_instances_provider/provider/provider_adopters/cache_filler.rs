@@ -29,10 +29,7 @@ impl CacheFiller {
                 .collect::<IndexMap<DerivationPreset, usize>>(),
         );
         let derived = provider
-            .derive_more(
-                quantities,
-                DerivationPurpose::new_for_pre_derivation(),
-            )
+            .derive_more(quantities, DerivationPurpose::pre_deriving_keys())
             .await?;
 
         cache_client.insert_all(&derived).await?;

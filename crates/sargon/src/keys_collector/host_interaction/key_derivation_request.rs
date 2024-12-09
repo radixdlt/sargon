@@ -3,6 +3,9 @@ use crate::prelude::*;
 /// A collection of derivation paths, on a per-factor-source basis.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KeyDerivationRequest {
+    /// We include this `DerivationPurpose` in dispatched use FactorSource requests to host so
+    /// that UI can display contextual information as to why the user is prompted to
+    /// authenticate FactorSource access.
     pub derivation_purpose: DerivationPurpose,
     pub per_factor_source:
         IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
