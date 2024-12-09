@@ -25,32 +25,31 @@ impl AutomaticShieldBuilder {
         .collect_vec()
     }
 
-    fn recovery_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
-        let contact_factors = self
-            .remaining_available_factors
+    fn factors_of_category(
+        &self,
+        category: FactorSourceCategory,
+    ) -> Vec<FactorSource> {
+        self.remaining_available_factors
             .iter()
-            .filter(|f| f.category() == FactorSourceCategory::Contact)
-            // .sorted_by_key(|x| x.)
+            .filter(|f| f.category() == category)
+            .sorted_by_key(|&f| f.common_properties().last_used_on)
             .cloned()
-            .collect_vec();
+            .collect_vec()
+    }
 
-        let hardware = self
-            .remaining_available_factors
-            .iter()
-            .filter(|f| f.category() == FactorSourceCategory::Hardware)
-            .cloned()
-            .collect_vec();
+    fn recovery_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
+        let contact_factors =
+            self.factors_of_category(FactorSourceCategory::Contact);
+        let hardware_factors =
+            self.factors_of_category(FactorSourceCategory::Hardware);
 
         todo!()
     }
 
     fn confirmation_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
-        let information_factors = self
-            .remaining_available_factors
-            .iter()
-            .filter(|f| f.category() == FactorSourceCategory::Information)
-            .cloned()
-            .collect_vec();
+        let information_factors =
+            self.factors_of_category(FactorSourceCategory::Information);
+
         Ok(vec![])
     }
 
