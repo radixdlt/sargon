@@ -25,6 +25,7 @@ impl KeysCollector {
             IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
         >,
         interactor: Arc<dyn KeyDerivationInteractor>,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<Self> {
         let derivation_paths = derivation_paths.into();
         let preprocessor = KeysCollectorPreprocessor::new(derivation_paths);
@@ -34,6 +35,7 @@ impl KeysCollector {
                 .collect::<IndexSet<_>>(),
             interactor,
             preprocessor,
+            derivation_purpose,
         )
     }
 
@@ -41,6 +43,7 @@ impl KeysCollector {
         all_factor_sources_in_profile: impl Into<IndexSet<FactorSource>>,
         interactor: Arc<dyn KeyDerivationInteractor>,
         preprocessor: KeysCollectorPreprocessor,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<Self> {
         debug!("Init KeysCollector");
         let all_factor_sources_in_profile =
@@ -49,7 +52,11 @@ impl KeysCollector {
         preprocessor
             .preprocess(all_factor_sources_in_profile)
             .map(|(s, f)| Self {
-                dependencies: KeysCollectorDependencies::new(interactor, f),
+                dependencies: KeysCollectorDependencies::new(
+                    interactor,
+                    f,
+                    derivation_purpose,
+                ),
                 state: RwLock::new(s),
             })
     }
@@ -146,6 +153,7 @@ impl KeysCollector {
                     Vec<(FactorSourceIDFromHash, IndexSet<DerivationPath>)>,
                 >>()?;
         Ok(KeyDerivationRequest::new(
+            self.dependencies.derivation_purpose.clone(),
             per_factor_source.into_iter().collect(),
         ))
     }
@@ -157,7 +165,11 @@ impl KeysCollector {
         let (id, derivation_paths) =
             self.input_for_interactor(factor_source_id)?;
 
-        Ok(KeyDerivationRequest::new_mono_factor(id, derivation_paths))
+        Ok(KeyDerivationRequest::new_mono_factor(
+            self.dependencies.derivation_purpose.clone(),
+            id,
+            derivation_paths,
+        ))
     }
 
     fn process_batch_response(
@@ -243,6 +255,7 @@ mod tests {
             [f0, f1, f2, f3],
             paths.clone(),
             Arc::new(TestDerivationInteractor::default()),
+            DerivationPurpose::PreDerivingKeys,
         )
         .unwrap();
 

@@ -1,6 +1,6 @@
 fail_fast: true
-default_install_hook_types: [pre-push]
-default_stages: [pre-push]
+default_install_hook_types: [pre-commit]
+default_stages: [pre-commit]
 repos:
   - repo: https://github.com/crate-ci/typos
     rev: v1.28.1
@@ -37,6 +37,7 @@ repos:
         pass_filenames: false
 
       - id: unit tests
+        stages: [pre-push]
         name: unit tests
         language: system
         types: [file, rust]
