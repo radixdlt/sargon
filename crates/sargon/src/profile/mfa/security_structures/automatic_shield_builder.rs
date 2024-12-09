@@ -37,18 +37,62 @@ impl AutomaticShieldBuilder {
             .collect_vec()
     }
 
+    fn consume_factor_and_add_to(
+        &mut self,
+        factor: FactorSourceID,
+        add_to: &mut Vec<FactorSourceID>,
+    ) {
+        todo!()
+    }
+
+    fn add_factors_of_categories_if_able(
+        &mut self,
+        categories: &[FactorSourceCategory],
+        to: &mut Vec<FactorSourceID>,
+    ) {
+        categories.iter().for_each(|&category| {
+            if let Some(factor) =
+                self.factors_of_category(category).iter().next()
+            {
+                self.consume_factor_and_add_to(factor.id(), to);
+            }
+        });
+    }
+
+    fn add_custodian_and_hardware_factors_if_able(
+        &mut self,
+        to: &mut Vec<FactorSourceID>,
+    ) {
+        self.add_factors_of_categories_if_able(
+            &[
+                FactorSourceCategory::Custodian,
+                FactorSourceCategory::Hardware,
+            ],
+            to,
+        );
+    }
+
     fn recovery_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
-        let contact_factors =
-            self.factors_of_category(FactorSourceCategory::Contact);
-        let hardware_factors =
-            self.factors_of_category(FactorSourceCategory::Hardware);
+        let mut factors = self
+            .factors_of_category(FactorSourceCategory::Contact)
+            .iter()
+            .map(|f| f.id())
+            .collect_vec();
+
+        self.add_custodian_and_hardware_factors_if_able(&mut factors);
 
         todo!()
     }
 
-    fn confirmation_role_factors(&mut self) -> Result<Vec<FactorSourceID>> {
-        let information_factors =
-            self.factors_of_category(FactorSourceCategory::Information);
+    fn confirmation_role_factors(
+        &mut self,
+        recovery_factors: &[FactorSourceID],
+    ) -> Result<Vec<FactorSourceID>> {
+        let mut factors = self
+            .factors_of_category(FactorSourceCategory::Information)
+            .iter()
+            .map(|f| f.id())
+            .collect_vec();
 
         Ok(vec![])
     }
@@ -88,9 +132,14 @@ impl AutomaticShieldBuilder {
             .set_threshold(self.picked_primary_role_factors.len() as u8);
 
         let recovery_factors = &self.recovery_role_factors()?;
-        self.add_factors_to_role(recovery_factors, RoleKind::Recovery);
-
         let confirmation_factors = &self.confirmation_role_factors()?;
+
+        loop {
+            let is_done = false;
+            
+        }
+
+        self.add_factors_to_role(recovery_factors, RoleKind::Recovery);
         self.add_factors_to_role(confirmation_factors, RoleKind::Confirmation);
 
         self.shield_builder.build().map_err(|e| {

@@ -12,6 +12,9 @@ pub enum FactorSourceCategory {
     /// Something I know.
     Information,
 
-    /// Someone I trust.
+    /// Some person I trust.
     Contact,
+
+    /// Some institution I trust.
+    Custodian,
 }
