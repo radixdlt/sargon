@@ -411,7 +411,7 @@ pub fn security_shield_builder_sort_factor_sources_for_selection(
 }
 
 #[uniffi::export]
-pub fn selected_factor_sources_status(
+pub fn security_shield_builder_selected_factor_sources_status(
     factor_sources: Vec<FactorSource>,
 ) -> SelectedFactorSourcesStatus {
     SelectedFactorSourcesStatus::from(

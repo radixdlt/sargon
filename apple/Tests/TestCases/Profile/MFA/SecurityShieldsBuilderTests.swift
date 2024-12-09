@@ -224,6 +224,17 @@ struct ShieldTests {
 		#expect(shield.matrixOfFactors.confirmationRole.overrideFactors == [.sampleDevice])
 		#expect(shield.matrixOfFactors.confirmationRole.thresholdFactors == [])
 	}
+
+	@Test("sort factor sources for selection")
+	func sortFactorSourcesForSelection() {
+		let factorSources = [FactorSource.sampleOther, .sample]
+		#expect(SecurityShieldBuilder.sortFactorSourcesForSelection(factorSources: factorSources) == [FactorSource.sample, .sampleOther])
+	}
+
+	@Test("selected factor sources status")
+	func selectedFactorSourcesStatus() {
+		#expect(SecurityShieldBuilder.selectedFactorSourcesStatus(factorSources: [FactorSource.sample]) == .suboptimal)
+	}
 }
 
 #if DEBUG
