@@ -108,7 +108,7 @@ mod test_auth_sign_request {
 
     #[test]
     fn inequality() {
-        assert_eq!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
 
@@ -127,6 +127,6 @@ mod test_auth_sign_response {
 
     #[test]
     fn inequality() {
-        assert_eq!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

@@ -26,18 +26,16 @@ impl AuthenticationSigningInteractor for TestAuthenticationInteractor {
 
         let mnemonic_with_passphrase = id.sample_associated_mnemonic();
 
+        let challenge = request.input.rola_challenge()?;
         let signature = mnemonic_with_passphrase.sign(
-            &request.input.challenge.hash(),
+            &challenge.hash(),
             &request.input.owned_factor_instance.value.derivation_path(),
         );
 
         if self.should_fail {
             Err(CommonError::SigningRejected)
         } else {
-            AuthenticationSigningResponse::new(
-                request.input.challenge,
-                signature,
-            )
+            AuthenticationSigningResponse::new(challenge, signature)
         }
     }
 }

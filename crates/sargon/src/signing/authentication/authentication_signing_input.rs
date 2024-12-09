@@ -7,18 +7,25 @@ pub struct AuthenticationSigningInput {
     /// with.
     pub owned_factor_instance: OwnedFactorInstance,
 
-    /// The challenge that will be signed by `owned_factor_instance`
-    pub challenge: RolaChallenge,
+    /// The challenge nonce that with some `metadata` values are generating the `RolaChallenge`
+    /// needed to be signed
+    pub challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
+
+    /// The metadata that together with the `challenge_nonce` are generating the `RolaChallenge`
+    /// needed to be signed
+    pub metadata: DappToWalletInteractionMetadata,
 }
 
 impl AuthenticationSigningInput {
     pub fn new(
         owned_factor_instance: OwnedFactorInstance,
-        challenge: RolaChallenge,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
+        metadata: DappToWalletInteractionMetadata,
     ) -> Self {
         Self {
             owned_factor_instance,
-            challenge,
+            challenge_nonce,
+            metadata,
         }
     }
 
@@ -28,6 +35,12 @@ impl AuthenticationSigningInput {
         challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
         metadata: DappToWalletInteractionMetadata,
     ) -> Result<Self> {
+        // First check the validity of the challenge
+        let _ = RolaChallenge::from_request(
+            challenge_nonce.clone(),
+            metadata.clone(),
+        )?;
+
         let security_state = match address_of_entity {
             AddressOfAccountOrPersona::Account(account_address) => profile
                 .account_by_address(account_address)
@@ -49,21 +62,31 @@ impl AuthenticationSigningInput {
         let owned_factor_instance =
             OwnedFactorInstance::new(address_of_entity, factor_instance);
 
-        let challenge = RolaChallenge::from_request(challenge_nonce, metadata)?;
+        Ok(Self::new(owned_factor_instance, challenge_nonce, metadata))
+    }
 
-        Ok(Self::new(owned_factor_instance, challenge))
+    pub fn rola_challenge(&self) -> Result<RolaChallenge> {
+        RolaChallenge::from_request(
+            self.challenge_nonce.clone(),
+            self.metadata.clone(),
+        )
     }
 }
 
 impl HasSampleValues for AuthenticationSigningInput {
     fn sample() -> Self {
-        Self::new(OwnedFactorInstance::sample(), RolaChallenge::sample())
+        Self::new(
+            OwnedFactorInstance::sample(),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        )
     }
 
     fn sample_other() -> Self {
         Self::new(
             OwnedFactorInstance::sample_other(),
-            RolaChallenge::sample_other(),
+            DappToWalletInteractionAuthChallengeNonce::sample_other(),
+            DappToWalletInteractionMetadata::sample_other(),
         )
     }
 }
@@ -83,7 +106,7 @@ mod test {
 
     #[test]
     fn inequality() {
-        assert_eq!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -117,7 +140,7 @@ mod test {
             "6fc75ec1d5c00941dc587c0a07409da1740c423c337c323ba7bdf68d61d4dd8e"
                 .parse::<Hash>()
                 .unwrap(),
-            sut.challenge.hash()
+            sut.rola_challenge().unwrap().hash()
         )
     }
 
@@ -152,7 +175,7 @@ mod test {
             "6fc75ec1d5c00941dc587c0a07409da1740c423c337c323ba7bdf68d61d4dd8e"
                 .parse::<Hash>()
                 .unwrap(),
-            sut.challenge.hash()
+            sut.rola_challenge().unwrap().hash()
         )
     }
 
