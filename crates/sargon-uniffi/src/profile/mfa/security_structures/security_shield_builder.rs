@@ -398,20 +398,29 @@ impl SecurityShieldBuilder {
         all_factors: Vec<FactorSource>,
         pick_primary_role_factors: Arc<dyn PickFactors>,
     ) -> Result<SecurityStructureOfFactorSourceIDs> {
-        let all_factors: Vec<sargon::FactorSource> =
-            all_factors.into_internal();
+        let all_factors = all_factors
+            .into_iter()
+            .map(|x| x.into_internal())
+            .collect::<IndexSet<sargon::FactorSource>>();
+
         let shield: sargon::SecurityStructureOfFactorSourceIDs =
             sargon::AutomaticShieldBuilder::build(
                 all_factors,
-                async |possible: Vec<sargon::FactorSource>| {
-                    let possible_mapped: Vec<crate::FactorSource> =
-                        possible.into_type();
+                async |possible: IndexSet<sargon::FactorSource>| {
+                    let possible_mapped = possible
+                        .into_iter()
+                        .map(crate::FactorSource::from)
+                        .collect_vec();
+
                     let ids_of_picked: Vec<crate::FactorSourceID> =
                         pick_primary_role_factors
                             .user_picked_factors(possible_mapped)
                             .await;
 
-                            ids_of_picked.into_internal()
+                    ids_of_picked
+                        .into_iter()
+                        .map(|x| x.into_internal())
+                        .collect::<IndexSet<sargon::FactorSourceID>>()
                 },
             )
             .await
