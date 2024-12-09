@@ -130,10 +130,13 @@ impl SecurifyEntityFactorInstancesProvider {
         );
 
         let (instances_in_cache_consumer, outcome) = provider
-            .provide(QuantifiedDerivationPreset::new(
-                DerivationPreset::mfa_entity_kind(entity_kind),
-                addresses_of_entities.len(),
-            ))
+            .provide(
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::mfa_entity_kind(entity_kind),
+                    addresses_of_entities.len(),
+                ),
+                DerivationPurpose::for_securifying_or_updating(entity_kind),
+            )
             .await?;
 
         Ok((instances_in_cache_consumer, outcome.into()))
