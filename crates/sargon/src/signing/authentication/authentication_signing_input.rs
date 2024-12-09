@@ -55,6 +55,19 @@ impl AuthenticationSigningInput {
     }
 }
 
+impl HasSampleValues for AuthenticationSigningInput {
+    fn sample() -> Self {
+        Self::new(OwnedFactorInstance::sample(), RolaChallenge::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            OwnedFactorInstance::sample_other(),
+            RolaChallenge::sample_other(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

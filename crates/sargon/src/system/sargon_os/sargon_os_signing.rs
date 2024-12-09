@@ -5,6 +5,25 @@ use std::ops::Index;
 // Sign Signables
 // ==================
 impl SargonOS {
+    pub async fn sign_auth(
+        &self,
+        address_of_entity: AddressOfAccountOrPersona,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
+        metadata: DappToWalletInteractionMetadata,
+    ) -> Result<WalletToDappInteractionAuthProof> {
+        let profile = &self.profile_state_holder.profile()?;
+
+        let auth_signer = AuthenticationSigner::new(
+            self.auth_signing_interactor(),
+            profile,
+            address_of_entity,
+            challenge_nonce,
+            metadata,
+        )?;
+
+        auth_signer.sign().await
+    }
+
     pub async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
@@ -247,6 +266,7 @@ mod test {
                     false,
                     Arc::new(clients.secure_storage.clone()),
                 )),
+                Arc::new(TestAuthenticationInteractor::new_succeeding()),
             ));
         let interactors = Interactors::new(use_factor_sources_interactors);
         SUT::boot_with_clients_and_interactor(clients, interactors).await

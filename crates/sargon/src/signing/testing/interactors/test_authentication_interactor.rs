@@ -20,7 +20,7 @@ impl TestAuthenticationInteractor {
 impl AuthenticationSigningInteractor for TestAuthenticationInteractor {
     async fn sign(
         &self,
-        request: AuthenticationSigningInteractorRequest,
+        request: AuthenticationSigningRequest,
     ) -> Result<AuthenticationSigningResponse> {
         let id = request.input.owned_factor_instance.factor_source_id();
 

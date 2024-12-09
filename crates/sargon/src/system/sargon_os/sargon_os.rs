@@ -274,6 +274,13 @@ impl SargonOS {
             as Arc<dyn KeyDerivationInteractor>
     }
 
+    pub(crate) fn auth_signing_interactor(
+        &self,
+    ) -> Arc<dyn AuthenticationSigningInteractor> {
+        self.interactors.use_factor_sources_interactor.clone()
+            as Arc<dyn AuthenticationSigningInteractor>
+    }
+
     pub async fn resolve_host_id(&self) -> Result<HostId> {
         self.host_id().await
     }

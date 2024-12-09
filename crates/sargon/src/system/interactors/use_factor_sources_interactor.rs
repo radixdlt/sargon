@@ -10,5 +10,6 @@ pub trait UseFactorSourcesInteractor:
     SignInteractor<TransactionIntent>
     + SignInteractor<Subintent>
     + KeyDerivationInteractor
+    + AuthenticationSigningInteractor
 {
 }
