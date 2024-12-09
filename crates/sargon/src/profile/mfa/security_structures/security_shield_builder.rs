@@ -463,7 +463,7 @@ impl SecurityShieldBuilder {
 // ==== STATIC ====
 // ================
 impl SecurityShieldBuilder {
-    pub fn sort_factor_sources_for_selection(
+    pub fn sorted_factor_sources_for_selection(
         factor_sources: Vec<FactorSource>,
     ) -> Vec<FactorSource> {
         let mut sorted = factor_sources;
@@ -751,7 +751,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sort_factor_sources_for_selection() {
+    fn test_sorted_factor_sources_for_selection() {
         let factor_sources = FactorSource::sample_values_all();
         let expected = vec![
             FactorSource::sample_device_babylon(),
@@ -775,7 +775,7 @@ mod tests {
             FactorSource::sample_security_questions_other(),
         ];
         assert_eq!(
-            SUT::sort_factor_sources_for_selection(factor_sources),
+            SUT::sorted_factor_sources_for_selection(factor_sources),
             expected
         )
     }

@@ -400,11 +400,11 @@ impl SecurityShieldBuilder {
 // ==== STATIC ====
 // ================
 #[uniffi::export]
-pub fn security_shield_builder_sort_factor_sources_for_selection(
+pub fn security_shield_builder_sorted_factor_sources_for_selection(
     factor_sources: Vec<FactorSource>,
 ) -> Vec<FactorSource> {
     let factors =
-        InternalSecurityShieldBuilder::sort_factor_sources_for_selection(
+        InternalSecurityShieldBuilder::sorted_factor_sources_for_selection(
             factor_sources.into_internal(),
         );
     factors.into_iter().map(FactorSource::from).collect()

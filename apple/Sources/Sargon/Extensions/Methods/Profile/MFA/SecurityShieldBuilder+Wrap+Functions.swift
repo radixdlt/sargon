@@ -2,8 +2,8 @@ import Foundation
 import SargonUniFFI
 
 extension SecurityShieldBuilder {
-	public static func sortFactorSourcesForSelection(factorSources: [FactorSource]) -> [FactorSource] {
-		securityShieldBuilderSortFactorSourcesForSelection(factorSources: factorSources)
+	public static func sortedFactorSourcesForSelection(factorSources: [FactorSource]) -> [FactorSource] {
+		securityShieldBuilderSortedFactorSourcesForSelection(factorSources: factorSources)
 	}
 
 	public static func selectedFactorSourcesStatus(factorSources: [FactorSource]) -> SelectedFactorSourcesStatus {
