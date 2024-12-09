@@ -7,6 +7,8 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use sargon::SecurityShieldBuilder as InternalSecurityShieldBuilder;
+use sargon::SelectedFactorSourcesStatus as InternalSelectedFactorSourcesStatus;
 use sargon::{IndexSet, MatrixBuilder};
 
 use crate::prelude::*;
@@ -392,6 +394,31 @@ impl SecurityShieldBuilder {
             .map(|shield| shield.into())
             .map_err(|x| x.into())
     }
+}
+
+// ================
+// ==== STATIC ====
+// ================
+#[uniffi::export]
+pub fn security_shield_builder_sort_factor_sources_for_selection(
+    factor_sources: Vec<FactorSource>,
+) -> Vec<FactorSource> {
+    let factors =
+        InternalSecurityShieldBuilder::sort_factor_sources_for_selection(
+            factor_sources.into_internal(),
+        );
+    factors.into_iter().map(FactorSource::from).collect()
+}
+
+#[uniffi::export]
+pub fn selected_factor_sources_status(
+    factor_sources: Vec<FactorSource>,
+) -> SelectedFactorSourcesStatus {
+    SelectedFactorSourcesStatus::from(
+        InternalSecurityShieldBuilder::selected_factor_sources_status(
+            factor_sources.into_internal(),
+        ),
+    )
 }
 
 impl FactorSourceID {

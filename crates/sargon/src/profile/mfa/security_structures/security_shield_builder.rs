@@ -459,6 +459,31 @@ impl SecurityShieldBuilder {
     }
 }
 
+// ================
+// ==== STATIC ====
+// ================
+impl SecurityShieldBuilder {
+    pub fn sort_factor_sources_for_selection(
+        factor_sources: Vec<FactorSource>,
+    ) -> Vec<FactorSource> {
+        let mut sorted = factor_sources;
+        sorted.sort_by_key(|fs| fs.factor_source_kind().display_order());
+        sorted
+    }
+
+    pub fn selected_factor_sources_status(
+        factor_sources: Vec<FactorSource>,
+    ) -> SelectedFactorSourcesStatus {
+        if factor_sources.is_empty() {
+            SelectedFactorSourcesStatus::Insufficient
+        } else if factor_sources.len() == 1 {
+            SelectedFactorSourcesStatus::Suboptimal
+        } else {
+            SelectedFactorSourcesStatus::Optimal
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -723,6 +748,62 @@ mod tests {
             )
             .collect::<Vec<_>>()
         );
+    }
+
+    #[test]
+    fn test_sort_factor_sources_for_selection() {
+        let factor_sources = FactorSource::sample_values_all();
+        let expected = vec![
+            FactorSource::sample_device_babylon(),
+            FactorSource::sample_device_babylon_other(),
+            FactorSource::sample_device_olympia(),
+            FactorSource::sample_arculus(),
+            FactorSource::sample_arculus_other(),
+            FactorSource::sample_ledger(),
+            FactorSource::sample_ledger_other(),
+            FactorSource::sample_password(),
+            FactorSource::sample_password_other(),
+            FactorSource::sample_off_device(),
+            FactorSource::sample_off_device_other(),
+            FactorSource::sample_trusted_contact_frank(),
+            FactorSource::sample_trusted_contact_grace(),
+            FactorSource::sample_trusted_contact_judy(),
+            FactorSource::sample_trusted_contact_oscar(),
+            FactorSource::sample_trusted_contact_trudy(),
+            FactorSource::sample_trusted_contact_radix(),
+            FactorSource::sample_security_questions(),
+            FactorSource::sample_security_questions_other(),
+        ];
+        assert_eq!(
+            SUT::sort_factor_sources_for_selection(factor_sources),
+            expected
+        )
+    }
+
+    #[test]
+    fn test_selected_factor_sources_status() {
+        // Insufficient
+        assert_eq!(
+            SUT::selected_factor_sources_status(Vec::new()),
+            SelectedFactorSourcesStatus::Insufficient
+        );
+
+        // Suboptimal
+        assert_eq!(
+            SUT::selected_factor_sources_status(vec![
+                FactorSource::sample_device()
+            ]),
+            SelectedFactorSourcesStatus::Suboptimal
+        );
+
+        // Optimal
+        assert_eq!(
+            SUT::selected_factor_sources_status(vec![
+                FactorSource::sample_device(),
+                FactorSource::sample_arculus()
+            ]),
+            SelectedFactorSourcesStatus::Optimal
+        )
     }
 }
 

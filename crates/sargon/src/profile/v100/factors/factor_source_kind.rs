@@ -118,6 +118,20 @@ impl FactorSourceKind {
     }
 }
 
+impl FactorSourceKind {
+    pub fn display_order(&self) -> u8 {
+        match self {
+            FactorSourceKind::Device => 0,
+            FactorSourceKind::ArculusCard => 1,
+            FactorSourceKind::LedgerHQHardwareWallet => 2,
+            FactorSourceKind::Password => 3,
+            FactorSourceKind::OffDeviceMnemonic => 4,
+            FactorSourceKind::TrustedContact => 5,
+            FactorSourceKind::SecurityQuestions => 6,
+        }
+    }
+}
+
 impl HasSampleValues for FactorSourceKind {
     fn sample() -> Self {
         Self::Device
@@ -240,6 +254,17 @@ mod tests {
             SUT::TrustedContact.category(),
             FactorSourceCategory::Contact
         );
+    }
+
+    #[test]
+    fn display_order() {
+        assert_eq!(SUT::Device.display_order(), 0);
+        assert_eq!(SUT::ArculusCard.display_order(), 1);
+        assert_eq!(SUT::LedgerHQHardwareWallet.display_order(), 2);
+        assert_eq!(SUT::Password.display_order(), 3);
+        assert_eq!(SUT::OffDeviceMnemonic.display_order(), 4);
+        assert_eq!(SUT::TrustedContact.display_order(), 5);
+        assert_eq!(SUT::SecurityQuestions.display_order(), 6);
     }
 
     #[test]
