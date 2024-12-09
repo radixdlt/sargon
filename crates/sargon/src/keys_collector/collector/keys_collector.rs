@@ -153,7 +153,7 @@ impl KeysCollector {
                     Vec<(FactorSourceIDFromHash, IndexSet<DerivationPath>)>,
                 >>()?;
         Ok(KeyDerivationRequest::new(
-            self.dependencies.collection_reason.clone(),
+            self.dependencies.derivation_purpose.clone(),
             per_factor_source.into_iter().collect(),
         ))
     }
@@ -166,7 +166,7 @@ impl KeysCollector {
             self.input_for_interactor(factor_source_id)?;
 
         Ok(KeyDerivationRequest::new_mono_factor(
-            self.dependencies.collection_reason.clone(),
+            self.dependencies.derivation_purpose.clone(),
             id,
             derivation_paths,
         ))
