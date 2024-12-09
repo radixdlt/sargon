@@ -32,11 +32,12 @@ impl AuthenticationSigningInteractor for TestAuthenticationInteractor {
         );
 
         if self.should_fail {
-            Err(CommonError::Unknown)
+            Err(CommonError::SigningRejected)
         } else {
-            Ok(AuthenticationSigningResponse {
-                signature_with_public_key: signature,
-            })
+            AuthenticationSigningResponse::new(
+                request.input.challenge,
+                signature,
+            )
         }
     }
 }

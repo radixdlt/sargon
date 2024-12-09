@@ -76,6 +76,17 @@ mod test {
     type SUT = AuthenticationSigningInput;
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_eq!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
     fn test_with_usecurified_account() {
         let expected_factor_instance =
             HierarchicalDeterministicFactorInstance::sample_fia0();
