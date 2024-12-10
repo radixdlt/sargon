@@ -31,6 +31,7 @@ impl Interactors {
                     SimulatedUser::prudent_no_fail(),
                 )),
                 keys_derivation_interactor,
+                Arc::new(TestAuthenticationInteractor::new_succeeding()),
             );
 
         Self::new(Arc::new(use_factor_sources_interactors))

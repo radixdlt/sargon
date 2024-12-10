@@ -819,11 +819,14 @@ pub enum CommonError {
     #[error("Could not validate signature for the given input.")]
     InvalidHDSignature = 10230,
 
+    #[error("Could not validate signature for the given rola challenge.")]
+    InvalidSignatureForRolaChallenge = 10231,
+
     #[error("Signing was rejected by the user")]
-    SigningRejected = 10231,
+    SigningRejected = 10232,
 
     #[error("Failed to automatically build shield, reason: '{underlying}'")]
-    AutomaticShieldBuildingFailure { underlying: String } = 10232,
+    AutomaticShieldBuildingFailure { underlying: String } = 10233,
 }
 
 impl CommonError {
