@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use sargon::AuthenticationSigningInteractor as InternalAuthenticationSigningInteractor;
+use sargon::AuthenticationSigningRequest as InternalAuthenticationSigningInteractorRequest;
+use sargon::AuthenticationSigningResponse as InternalAuthenticationSigningResponse;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
@@ -36,6 +39,11 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
         &self,
         request: KeyDerivationRequest,
     ) -> Result<KeyDerivationResponse>;
+
+    async fn sign_auth(
+        &self,
+        request: AuthenticationSigningRequest,
+    ) -> Result<AuthenticationSigningResponse>;
 }
 
 #[derive(Debug)]
@@ -90,6 +98,21 @@ impl InternalKeyDerivationInteractor for UseFactorSourcesInteractorAdapter {
     ) -> InternalResult<InternalKeyDerivationResponse> {
         self.wrapped
             .derive_keys(request.into())
+            .await
+            .into_internal_result()
+    }
+}
+
+#[async_trait::async_trait]
+impl InternalAuthenticationSigningInteractor
+    for UseFactorSourcesInteractorAdapter
+{
+    async fn sign(
+        &self,
+        request: InternalAuthenticationSigningInteractorRequest,
+    ) -> InternalResult<InternalAuthenticationSigningResponse> {
+        self.wrapped
+            .sign_auth(request.into())
             .await
             .into_internal_result()
     }
