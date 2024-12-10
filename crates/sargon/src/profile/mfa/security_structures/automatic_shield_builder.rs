@@ -507,6 +507,8 @@ impl AutomaticShieldBuilder {
 mod tests {
     use std::sync::Mutex;
 
+    use indexmap::IndexSet;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -615,5 +617,14 @@ mod tests {
             built.matrix_of_factors.primary_role.get_threshold_factors(),
             &factors.into_iter().collect_vec()
         );
+    }
+
+    #[actix_rt::test]
+    #[should_panic]
+    async fn selection_of_primary_invalid_only_one_password() {
+        let _ = SUT::test_valid(
+            |_| IndexSet::just(FactorSourceID::sample_password()), // invalid for primary
+        )
+        .await;
     }
 }
