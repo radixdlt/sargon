@@ -408,13 +408,69 @@ impl SecurityShieldBuilder {
     }
 }
 
+pub struct AutoShieldBuilderValidatorOfPickedPrimaryFactors {
+    #[allow(dead_code)]
+    #[doc(hidden)]
+    hidden: HiddenConstructor,
+}
+impl AutoShieldBuilderValidatorOfPickedPrimaryFactors {
+    fn new() -> Self {
+        Self {
+            hidden: HiddenConstructor,
+        }
+    }
+
+    pub fn validate_picked(
+        &self,
+        picked: IndexSet<FactorSourceID>,
+    ) -> Result<ValidatedPrimary> {
+        let ephemeral = SecurityShieldBuilder::new();
+        ephemeral.set_threshold(picked.len() as u8);
+        picked.iter().for_each(|f| {
+            ephemeral.add_factor_source_to_primary_threshold(*f);
+        });
+        if let Some(invalid_reason) = ephemeral.validate_primary_role() {
+            Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: format!(
+                    "Invalid picked for primary: {:?}",
+                    invalid_reason
+                ),
+            })
+        } else {
+            // valid!
+            let valid = unsafe { ValidatedPrimary::new(picked) };
+            Ok(valid)
+        }
+    }
+}
+
+pub struct ValidatedPrimary {
+    validated_picked: IndexSet<FactorSourceID>,
+}
+impl ValidatedPrimary {
+    /// # Safety
+    /// Rust memory safe, but marked "unsafe" since it might allow for specification
+    /// of unsafe - as in application **unsecure** - factors for PrimaryRole, which might
+    /// lead to increase risk for end user to loose funds.
+    pub unsafe fn new(validated_picked: IndexSet<FactorSourceID>) -> Self {
+        Self { validated_picked }
+    }
+
+    pub fn validated_picked(&self) -> IndexSet<FactorSourceID> {
+        self.validated_picked.clone()
+    }
+}
+
 impl AutomaticShieldBuilder {
     pub async fn build<Fut>(
         all_factors: IndexSet<FactorSource>,
-        pick_primary_role_factors: impl Fn(IndexSet<FactorSource>) -> Fut,
+        pick_primary_role_factors: impl Fn(
+            IndexSet<FactorSource>,
+            AutoShieldBuilderValidatorOfPickedPrimaryFactors,
+        ) -> Fut,
     ) -> Result<SecurityStructureOfFactorSourceIDs>
     where
-        Fut: Future<Output = IndexSet<FactorSourceID>>,
+        Fut: Future<Output = ValidatedPrimary>,
     {
         if !SecurityShieldBuilder::prerequisites_status(
             &all_factors.iter().map(|f| f.id()).collect(),
@@ -430,10 +486,17 @@ impl AutomaticShieldBuilder {
             &all_factors,
             &security_shield_builder,
         );
-        let picked = pick_primary_role_factors(candidates).await;
+        let validated_picked: IndexSet<FactorSourceID> =
+            pick_primary_role_factors(
+                candidates,
+                AutoShieldBuilderValidatorOfPickedPrimaryFactors::new(),
+            )
+            .await
+            .validated_picked;
+
         let auto_builder = Self {
             remaining_available_factors: all_factors.into_iter().collect(),
-            picked_primary_role_factors: picked,
+            picked_primary_role_factors: validated_picked,
             shield_builder: security_shield_builder,
         };
         auto_builder.build_shield()
@@ -442,42 +505,62 @@ impl AutomaticShieldBuilder {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Mutex;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = AutomaticShieldBuilder;
 
     impl SUT {
-        async fn test_with_factors(
-            all_factors: IndexSet<FactorSource>,
+        async fn test<Fut>(
+            // all_factors: IndexSet<FactorSource>,
             pick_primary_role_factors: impl Fn(
                 IndexSet<FactorSource>,
-            )
-                -> IndexSet<FactorSourceID>,
-        ) -> Result<SecurityStructureOfFactorSourceIDs> {
-            SUT::build(all_factors, |candidates| {
-                let picked = pick_primary_role_factors(candidates);
-                std::future::ready(picked)
-            })
-            .await
-        }
-        async fn test(
-            pick_primary_role_factors: impl Fn(
-                IndexSet<FactorSource>,
-            )
-                -> IndexSet<FactorSourceID>,
-        ) -> Result<SecurityStructureOfFactorSourceIDs> {
-            Self::test_with_factors(
-                FactorSource::sample_all()
-                    .iter()
-                    .cloned()
-                    .collect::<IndexSet<_>>(),
-                pick_primary_role_factors,
-            )
-            .await
+                AutoShieldBuilderValidatorOfPickedPrimaryFactors,
+            ) -> Fut,
+        ) -> Result<SecurityStructureOfFactorSourceIDs>
+        where
+            Fut: Future<Output = ValidatedPrimary>,
+        {
+            SUT::build(FactorSource::sample_all(), pick_primary_role_factors)
+                .await
         }
     }
 
+    #[actix_rt::test]
+    async fn primary_role_candidates() {
+        let shield_builder = SecurityShieldBuilder::new();
+
+        let expected =  shield_builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
+                FactorSource::sample_all().into_iter().map(|f| f.id()).collect_vec()
+            )
+            .into_iter()
+            .filter(|f| matches!(f.validation, Err(RoleBuilderValidation::NotYetValid(_))) || f.validation.is_ok())
+            .map(|vs| vs.factor_source_id)
+            .collect_vec();
+
+        let called = Arc::new(Mutex::new(false));
+
+        let _ = SUT::test(async |candidates, validator| {
+            *called.lock().unwrap() = true;
+            pretty_assertions::assert_eq!(
+                candidates.into_iter().map(|f| f.id()).collect_vec(),
+                expected
+            );
+            let validated = validator
+                .validate_picked(
+                    IndexSet::just(FactorSourceID::sample_device()),
+                )
+                .unwrap();
+            validated
+        })
+        .await
+        .unwrap();
+
+        assert!(*called.lock().unwrap());
+    }
+    /*
     #[actix_rt::test]
     async fn selection_of_primary_factor_first() {
         let built = SUT::test(|xs| {
@@ -508,4 +591,28 @@ mod tests {
                 .id()]
         );
     }
+
+    #[actix_rt::test]
+    async fn selection_of_primary_factor_last_then_first() {
+        let built = SUT::test(|xs| {
+            println!("\n\n🔮 candidates: {:?}\n\n", xs);
+            let candidates = xs.iter().map(|x| x.id()).collect_vec();
+            let picked = IndexSet::from_iter([
+                candidates.iter().last().unwrap().clone(),
+                candidates.first().unwrap().clone(),
+            ]);
+            println!("\n\n🔮 picked: {:?}\n\n", picked);
+            picked
+        })
+        .await
+        .unwrap();
+        pretty_assertions::assert_eq!(
+            built.matrix_of_factors.primary_role.get_threshold_factors(),
+            &vec![
+                FactorSourceID::sample_device_other(),
+                FactorSourceID::sample_device()
+            ]
+        );
+    }
+    */
 }
