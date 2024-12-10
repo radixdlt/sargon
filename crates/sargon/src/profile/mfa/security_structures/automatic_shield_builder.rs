@@ -479,12 +479,33 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn successful() {
+    async fn selection_of_primary_factor_first() {
         let built = SUT::test(|xs| {
             IndexSet::just(xs.iter().map(|x| x.id()).next().unwrap())
         })
         .await
         .unwrap();
-        assert_eq!(built.matrix_of_factors.primary_role.get_threshold(), 1);
+        assert_eq!(
+            built.matrix_of_factors.primary_role.get_threshold_factors(),
+            &vec![FactorSource::sample_all().first().unwrap().id()]
+        );
+    }
+
+    #[actix_rt::test]
+    async fn selection_of_primary_factor_last() {
+        let built = SUT::test(|xs| {
+            IndexSet::just(xs.iter().map(|x| x.id()).last().unwrap())
+        })
+        .await
+        .unwrap();
+        assert_eq!(
+            built.matrix_of_factors.primary_role.get_threshold_factors(),
+            &vec![FactorSource::sample_all()
+                .into_iter()
+                .filter(|f| f.category() == FactorSourceCategory::Identity)
+                .last()
+                .unwrap()
+                .id()]
+        );
     }
 }
