@@ -40,5 +40,5 @@ pub fn requested_quantity_is_fulfilled_by_ids(
 ) -> bool {
     requested_quantity
         .into_internal()
-        .is_fulfilled_by_ids(number_of_ids as usize)
+        .is_fulfilled_by_quantity(number_of_ids as usize)
 }

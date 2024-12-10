@@ -48,22 +48,12 @@ impl Profile {
     pub fn security_shield_prerequisites_status(
         &self,
     ) -> SecurityShieldPrerequisitesStatus {
-        let factor_sources = self.factor_sources.clone();
-        let count_excluding_identity = factor_sources
+        let factor_source_ids = self
+            .factor_sources
             .iter()
-            .filter(|f| f.category() != FactorSourceCategory::Identity)
-            .count();
-        let count_hardware = factor_sources
-            .iter()
-            .filter(|f| f.category() == FactorSourceCategory::Hardware)
-            .count();
-        if count_hardware < 1 {
-            SecurityShieldPrerequisitesStatus::HardwareRequired
-        } else if count_excluding_identity < 2 {
-            SecurityShieldPrerequisitesStatus::AnyRequired
-        } else {
-            SecurityShieldPrerequisitesStatus::Sufficient
-        }
+            .map(|f| f.id())
+            .collect::<IndexSet<_>>();
+        SecurityShieldBuilder::prerequisites_status(&factor_source_ids)
     }
 }
 

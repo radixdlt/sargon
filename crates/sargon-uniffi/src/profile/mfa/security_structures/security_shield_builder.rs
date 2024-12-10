@@ -4,6 +4,7 @@
 
 use std::{
     borrow::Borrow,
+    future::Future,
     sync::{Arc, RwLock},
 };
 
@@ -373,6 +374,106 @@ impl SecurityShieldBuilder {
                 )
             },
         )
+    }
+}
+
+#[derive(uniffi::Record)]
+pub struct ValidatedPrimary {
+    secret_magic: Vec<FactorSourceID>,
+}
+
+#[derive(uniffi::Object)]
+pub struct AutoShieldBuilderValidatorOfPickedPrimaryFactors {
+    wrapped: sargon::AutoShieldBuilderValidatorOfPickedPrimaryFactors,
+}
+
+#[uniffi::export]
+impl AutoShieldBuilderValidatorOfPickedPrimaryFactors {
+    pub fn validate_picked(
+        &self,
+        picked: Vec<FactorSourceID>,
+    ) -> Result<ValidatedPrimary> {
+        let valid = self
+            .wrapped
+            .validate_picked(picked.into_iter().map(|x| x.into()).collect())?;
+        Ok(ValidatedPrimary {
+            secret_magic: valid
+                .validated_picked()
+                .into_iter()
+                .map(|x| x.into())
+                .collect(),
+        })
+    }
+}
+
+impl From<ValidatedPrimary> for sargon::ValidatedPrimary {
+    fn from(val: ValidatedPrimary) -> Self {
+        let factors = val
+            .secret_magic
+            .into_iter()
+            .map(|x| x.into())
+            .collect::<IndexSet<sargon::FactorSourceID>>();
+        unsafe { sargon::ValidatedPrimary::new(factors) }
+    }
+}
+
+impl From<sargon::AutoShieldBuilderValidatorOfPickedPrimaryFactors>
+    for AutoShieldBuilderValidatorOfPickedPrimaryFactors
+{
+    fn from(
+        value: sargon::AutoShieldBuilderValidatorOfPickedPrimaryFactors,
+    ) -> Self {
+        Self { wrapped: value }
+    }
+}
+
+// =====================
+// ==== AUTO BUILD =====
+// =====================
+#[uniffi::export(with_foreign)]
+#[async_trait::async_trait]
+pub trait PickFactors: Send + Sync {
+    async fn user_picked_factors(
+        &self,
+        possible: Vec<FactorSource>,
+        validator: Arc<AutoShieldBuilderValidatorOfPickedPrimaryFactors>,
+    ) -> ValidatedPrimary;
+}
+
+use sargon::FactorSource as InternalFactorSource;
+
+#[uniffi::export]
+impl SecurityShieldBuilder {
+    pub async fn auto_build(
+        &self,
+        all_factors: Vec<FactorSource>,
+        pick_primary_role_factors: Arc<dyn PickFactors>,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        let all_factors = all_factors
+            .into_iter()
+            .map(|x| x.into_internal())
+            .collect::<IndexSet<sargon::FactorSource>>();
+
+        let shield: sargon::SecurityStructureOfFactorSourceIDs =
+            sargon::AutomaticShieldBuilder::build(
+                all_factors,
+                async |internal_possible: IndexSet<sargon::FactorSource>, internal_validator: sargon::AutoShieldBuilderValidatorOfPickedPrimaryFactors| {
+                    let possible = internal_possible
+                        .into_iter()
+                        .map(|x| crate::FactorSource::from(x.clone()))
+                        .collect_vec();
+
+                    let validator = AutoShieldBuilderValidatorOfPickedPrimaryFactors::from(internal_validator);
+
+                        pick_primary_role_factors
+                            .user_picked_factors(possible, Arc::new(validator))
+                            .await.into()
+                },
+            )
+            .await
+            .into_result()?;
+        let shield = SecurityStructureOfFactorSourceIDs::from(shield);
+        Ok(shield)
     }
 }
 

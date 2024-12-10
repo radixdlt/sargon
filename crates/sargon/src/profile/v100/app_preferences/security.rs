@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
-pub type SecurityStructureOfFactorSourceIDs =
-    SecurityStructureOfFactorSourceIds;
-
 decl_identified_vec_of!(
     /// A collection of [`SecurityStructureOfFactorSourceIDs`]
     SecurityStructuresOfFactorSourceIDs,

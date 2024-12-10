@@ -421,6 +421,19 @@ impl SecurityShieldBuilder {
         })
     }
 
+    /// Validates **just** the primary role **in isolation**.
+    pub fn validate_primary_role(
+        &self,
+    ) -> Option<SecurityShieldBuilderInvalidReason> {
+        self.get(|builder| {
+            builder
+                .primary_role
+                .validate()
+                .into_matrix_err(RoleKind::Primary)
+                .as_shield_validation()
+        })
+    }
+
     pub fn build(
         &self,
     ) -> Result<

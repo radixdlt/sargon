@@ -3,6 +3,9 @@ use crate::prelude::*;
 pub type SecurityStructureOfFactorSourceIds =
     AbstractSecurityStructure<FactorSourceID>;
 
+pub type SecurityStructureOfFactorSourceIDs =
+    SecurityStructureOfFactorSourceIds;
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityStructureOfFactorInstances {
