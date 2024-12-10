@@ -5,9 +5,6 @@ use crate::prelude::*;
 /// Reference for iOS: it is a combination of `BackupStatus` and `BackupResult` (all in one).
 #[derive(Debug, Clone, PartialEq)]
 pub struct BackupResult {
-    /// The identifier of the backup.
-    pub save_identifier: String,
-
     /// Whether this backup matches the one on Profile.
     pub is_current: IsBackupResultCurrent,
 
@@ -20,12 +17,10 @@ decl_bool_type!(IsBackupResultFailed, false);
 
 impl BackupResult {
     pub fn new(
-        save_identifier: impl AsRef<str>,
         is_current: IsBackupResultCurrent,
         is_failed: IsBackupResultFailed,
     ) -> Self {
         Self {
-            save_identifier: save_identifier.as_ref().to_owned(),
             is_current,
             is_failed,
         }
@@ -34,19 +29,11 @@ impl BackupResult {
 
 impl HasSampleValues for BackupResult {
     fn sample() -> Self {
-        Self::new(
-            String::sample(),
-            IsBackupResultCurrent(true),
-            IsBackupResultFailed(false),
-        )
+        Self::new(IsBackupResultCurrent(true), IsBackupResultFailed(false))
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            String::sample_other(),
-            IsBackupResultCurrent(false),
-            IsBackupResultFailed(true),
-        )
+        Self::new(IsBackupResultCurrent(false), IsBackupResultFailed(true))
     }
 }
 
