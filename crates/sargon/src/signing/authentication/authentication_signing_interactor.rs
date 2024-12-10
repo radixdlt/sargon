@@ -129,4 +129,16 @@ mod test_auth_sign_response {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_invalid_signature_for_rola_challenge() {
+        let challenge = RolaChallenge::sample();
+        let invalid_signature_with_public_key =
+            SignatureWithPublicKey::sample();
+
+        assert_eq!(
+            SUT::new(challenge, invalid_signature_with_public_key),
+            Err(CommonError::InvalidSignatureForRolaChallenge)
+        )
+    }
 }
