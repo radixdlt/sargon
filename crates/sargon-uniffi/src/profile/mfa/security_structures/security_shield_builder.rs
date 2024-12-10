@@ -406,9 +406,9 @@ impl AutoShieldBuilderValidatorOfPickedPrimaryFactors {
     }
 }
 
-impl Into<sargon::ValidatedPrimary> for ValidatedPrimary {
-    fn into(self) -> sargon::ValidatedPrimary {
-        let factors = self
+impl From<ValidatedPrimary> for sargon::ValidatedPrimary {
+    fn from(val: ValidatedPrimary) -> Self {
+        let factors = val
             .secret_magic
             .into_iter()
             .map(|x| x.into())

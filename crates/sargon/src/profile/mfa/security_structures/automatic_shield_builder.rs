@@ -513,8 +513,8 @@ mod tests {
     type SUT = AutomaticShieldBuilder;
 
     impl SUT {
-        async fn test<Fut>(
-            // all_factors: IndexSet<FactorSource>,
+        #[allow(dead_code)]
+        async fn test_non_validated<Fut>(
             pick_primary_role_factors: impl Fn(
                 IndexSet<FactorSource>,
                 AutoShieldBuilderValidatorOfPickedPrimaryFactors,
@@ -525,6 +525,22 @@ mod tests {
         {
             SUT::build(FactorSource::sample_all(), pick_primary_role_factors)
                 .await
+        }
+
+        async fn test_valid(
+            pick_primary_role_factors: impl Fn(
+                IndexSet<FactorSource>,
+            )
+                -> IndexSet<FactorSourceID>,
+        ) -> Result<SecurityStructureOfFactorSourceIDs> {
+            SUT::build(
+                FactorSource::sample_all(),
+                async |candidates, validator| {
+                    let picked = pick_primary_role_factors(candidates);
+                    validator.validate_picked(picked).unwrap()
+                },
+            )
+            .await
         }
     }
 
@@ -542,28 +558,24 @@ mod tests {
 
         let called = Arc::new(Mutex::new(false));
 
-        let _ = SUT::test(async |candidates, validator| {
+        let _ = SUT::test_valid(|candidates| {
             *called.lock().unwrap() = true;
             pretty_assertions::assert_eq!(
                 candidates.into_iter().map(|f| f.id()).collect_vec(),
                 expected
             );
-            let validated = validator
-                .validate_picked(
-                    IndexSet::just(FactorSourceID::sample_device()),
-                )
-                .unwrap();
-            validated
+
+            IndexSet::just(FactorSourceID::sample_device())
         })
         .await
         .unwrap();
 
         assert!(*called.lock().unwrap());
     }
-    /*
+
     #[actix_rt::test]
     async fn selection_of_primary_factor_first() {
-        let built = SUT::test(|xs| {
+        let built = SUT::test_valid(|xs| {
             IndexSet::just(xs.iter().map(|x| x.id()).next().unwrap())
         })
         .await
@@ -576,7 +588,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn selection_of_primary_factor_last() {
-        let built = SUT::test(|xs| {
+        let built = SUT::test_valid(|xs| {
             IndexSet::just(xs.iter().map(|x| x.id()).last().unwrap())
         })
         .await
@@ -593,26 +605,15 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn selection_of_primary_factor_last_then_first() {
-        let built = SUT::test(|xs| {
-            println!("\n\n🔮 candidates: {:?}\n\n", xs);
-            let candidates = xs.iter().map(|x| x.id()).collect_vec();
-            let picked = IndexSet::from_iter([
-                candidates.iter().last().unwrap().clone(),
-                candidates.first().unwrap().clone(),
-            ]);
-            println!("\n\n🔮 picked: {:?}\n\n", picked);
-            picked
-        })
-        .await
-        .unwrap();
+    async fn selection_of_primary_factor_two() {
+        let factors = IndexSet::from_iter([
+            FactorSourceID::sample_ledger(),
+            FactorSourceID::sample_device(),
+        ]);
+        let built = SUT::test_valid(|_| factors.clone()).await.unwrap();
         pretty_assertions::assert_eq!(
             built.matrix_of_factors.primary_role.get_threshold_factors(),
-            &vec![
-                FactorSourceID::sample_device_other(),
-                FactorSourceID::sample_device()
-            ]
+            &factors.into_iter().collect_vec()
         );
     }
-    */
 }

@@ -121,8 +121,8 @@ mod test {
             .unwrap();
 
         let signature_with_public_key = SignatureWithPublicKey::from((
-            signed.public_key.as_ed25519().unwrap().clone(),
-            signed.signature.as_ed25519().unwrap().clone(),
+            *signed.public_key.as_ed25519().unwrap(),
+            *signed.signature.as_ed25519().unwrap(),
         ));
 
         assert!(signature_with_public_key

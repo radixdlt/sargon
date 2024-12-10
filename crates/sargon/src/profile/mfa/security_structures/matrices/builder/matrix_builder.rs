@@ -164,8 +164,9 @@ impl MatrixBuilder {
         Ok(())
     }
 
-
-    pub fn validate_primary_role_in_isolation(&self) -> MatrixBuilderMutateResult {
+    pub fn validate_primary_role_in_isolation(
+        &self,
+    ) -> MatrixBuilderMutateResult {
         self.validate_each_role_in_isolation()?;
         self.validate_combination()?;
         Ok(())
