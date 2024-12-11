@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 impl SargonOS {
+    /// Returns the entities controlled by a given `FactorSource`, either on the current `Profile` or a specific one.
     pub async fn entities_controlled_by_factor_source(
         &self,
         factor_source: FactorSource,
@@ -56,6 +57,7 @@ impl SargonOS {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn create_entities_controlled_by_factor_source(
         &self,
         factor_source: FactorSource,
