@@ -112,12 +112,10 @@ mod tests {
     #[test]
     fn problem_5() {
         let failed_backup = BackupResult::new(
-            "f",
             IsBackupResultCurrent(true),
             IsBackupResultFailed(true),
         );
         let success_backup = BackupResult::new(
-            "s",
             IsBackupResultCurrent(true),
             IsBackupResultFailed(false),
         );
@@ -225,12 +223,10 @@ mod tests {
     #[test]
     fn problem_7() {
         let current_backup = BackupResult::new(
-            "c",
             IsBackupResultCurrent(true),
             IsBackupResultFailed(false),
         );
         let outdated_backup = BackupResult::new(
-            "o",
             IsBackupResultCurrent(false),
             IsBackupResultFailed(false),
         );

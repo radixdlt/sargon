@@ -172,31 +172,20 @@ impl GatewayClient {
         account_address: AccountAddress,
         ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountResourcePreference>> {
-        let result = self
-            .load_all_pages(
-                None,
-                ledger_state_selector,
-                |cursor, ledger_state_selector| {
-                    let request = AccountPageResourcePreferencesRequest::new(
-                        account_address,
-                        ledger_state_selector,
-                        cursor,
-                        GATEWAY_PAGE_REQUEST_LIMIT,
-                    );
-                    self.account_page_resource_preferences(request)
-                },
-            )
-            .await;
-        match result {
-            Ok(response) => Ok(response),
-            Err(CommonError::NetworkResponseBadCode { code: 404 }) => {
-                // The GW is currently returning a 404 when this endpoint is called with a virtual account.
-                // This is a temporary workaround until the GW is fixed.
-                // More info on thread: https://rdxworks.slack.com/archives/C06EBEA0SGY/p1731686360114749
-                Ok(vec![])
-            }
-            Err(e) => Err(e),
-        }
+        self.load_all_pages(
+            None,
+            ledger_state_selector,
+            |cursor, ledger_state_selector| {
+                let request = AccountPageResourcePreferencesRequest::new(
+                    account_address,
+                    ledger_state_selector,
+                    cursor,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
+                self.account_page_resource_preferences(request)
+            },
+        )
+        .await
     }
 
     /// Fetches all the account's authorized depositors.
@@ -205,31 +194,20 @@ impl GatewayClient {
         account_address: AccountAddress,
         ledger_state_selector: LedgerStateSelector,
     ) -> Result<Vec<AccountAuthorizedDepositor>> {
-        let result = self
-            .load_all_pages(
-                None,
-                ledger_state_selector,
-                |cursor, ledger_state_selector| {
-                    let request = AccountPageAuthorizedDepositorsRequest::new(
-                        account_address,
-                        ledger_state_selector,
-                        cursor,
-                        GATEWAY_PAGE_REQUEST_LIMIT,
-                    );
-                    self.account_page_authorized_depositors(request)
-                },
-            )
-            .await;
-        match result {
-            Ok(response) => Ok(response),
-            Err(CommonError::NetworkResponseBadCode { code: 404 }) => {
-                // The GW is currently returning a 404 when this endpoint is called with a virtual account.
-                // This is a temporary workaround until the GW is fixed.
-                // More info on thread: https://rdxworks.slack.com/archives/C06EBEA0SGY/p1731686360114749
-                Ok(vec![])
-            }
-            Err(e) => Err(e),
-        }
+        self.load_all_pages(
+            None,
+            ledger_state_selector,
+            |cursor, ledger_state_selector| {
+                let request = AccountPageAuthorizedDepositorsRequest::new(
+                    account_address,
+                    ledger_state_selector,
+                    cursor,
+                    GATEWAY_PAGE_REQUEST_LIMIT,
+                );
+                self.account_page_authorized_depositors(request)
+            },
+        )
+        .await
     }
 }
 

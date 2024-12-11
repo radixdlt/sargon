@@ -43,22 +43,3 @@ repos:
         types: [file, rust]
         entry: cargo test --lib
         pass_filenames: false
-
-  - repo: https://github.com/phylum-dev/phylum-ci
-    rev: main
-    hooks:
-      - id: phylum
-        stages: [pre-push]
-        # Optional: Specify the dependency file pattern for your repository
-        files: |
-            (?x)^(
-                Cargo\.lock|
-            )$
-        # Optional: Specify additional arguments to be passed to `phylum-ci`
-        args:
-          - -vv
-          - --depfile=Cargo.lock
-          - --audit
-          - --force-analysis
-          - --all-deps
-        verbose: true

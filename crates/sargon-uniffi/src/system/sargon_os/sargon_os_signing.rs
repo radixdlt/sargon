@@ -25,4 +25,20 @@ impl SargonOS {
             .await
             .into_result()
     }
+
+    pub async fn sign_auth(
+        &self,
+        address_of_entity: AddressOfAccountOrPersona,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
+        metadata: DappToWalletInteractionMetadata,
+    ) -> Result<WalletToDappInteractionAuthProof> {
+        self.wrapped
+            .sign_auth(
+                address_of_entity.into(),
+                challenge_nonce.into(),
+                metadata.into(),
+            )
+            .await
+            .into_result()
+    }
 }
