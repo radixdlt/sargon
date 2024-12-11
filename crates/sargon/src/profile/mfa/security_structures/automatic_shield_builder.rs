@@ -17,6 +17,24 @@ pub struct AutomaticShieldBuilder {
 
 use FactorSourceCategory::*;
 use RoleKind::*;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumAsInner)]
+enum Quantity {
+    All,
+    Fixed(usize),
+}
+impl Quantity {
+    fn one() -> Self {
+        Self::Fixed(1)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum FactorSelector {
+    Category(FactorSourceCategory),
+    Kind(FactorSourceKind),
+}
+
 impl AutomaticShieldBuilder {
     fn new(
         available_factors: IndexSet<FactorSource>,
@@ -627,7 +645,6 @@ mod tests {
             },
         )
         .await;
-
         let matrix = res.unwrap().matrix_of_factors;
 
         pretty_assertions::assert_eq!(
@@ -653,21 +670,4 @@ mod tests {
             ],)
         );
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumAsInner)]
-enum Quantity {
-    All,
-    Fixed(usize),
-}
-impl Quantity {
-    fn one() -> Self {
-        Self::Fixed(1)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum FactorSelector {
-    Category(FactorSourceCategory),
-    Kind(FactorSourceKind),
 }
