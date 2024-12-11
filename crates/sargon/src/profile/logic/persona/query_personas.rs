@@ -7,6 +7,10 @@ impl Personas {
             .filter(|p| !p.is_hidden())
             .collect()
     }
+
+    pub fn hidden(&self) -> Self {
+        self.clone().into_iter().filter(|p| p.is_hidden()).collect()
+    }
 }
 
 impl Profile {
@@ -31,6 +35,12 @@ impl Profile {
     /// on the network
     pub fn personas_on_current_network(&self) -> Result<Personas> {
         self.current_network().map(|n| n.personas.non_hidden())
+    }
+
+    /// Returns the hidden personas on the current network, empty if no hidden personas
+    /// on the network
+    pub fn hidden_personas_on_current_network(&self) -> Result<Personas> {
+        self.current_network().map(|n| n.personas.hidden())
     }
 
     /// Returns **ALL** personas - including hidden/deleted ones, on **ALL** networks.

@@ -85,6 +85,23 @@ impl HasSampleValues for EntitySecurityState {
     }
 }
 
+impl EntitySecurityState {
+    /// Returns whether the entity is controlled by the given factor source.
+    pub fn is_controlled_by_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> bool {
+        match self {
+            EntitySecurityState::Unsecured { value } => {
+                value.is_controlled_by_factor_source(factor_source)
+            }
+            EntitySecurityState::Securified { value } => {
+                value.is_controlled_by_factor_source(factor_source)
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

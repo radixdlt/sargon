@@ -7,6 +7,13 @@ impl Accounts {
             .filter(|p| !p.is_hidden() && !p.is_tombstoned())
             .collect()
     }
+
+    pub fn hidden(&self) -> Self {
+        self.clone()
+            .into_iter()
+            .filter(|p| p.is_hidden() && !p.is_tombstoned())
+            .collect()
+    }
 }
 
 #[cfg(test)]

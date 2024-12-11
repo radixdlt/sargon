@@ -205,6 +205,20 @@ impl SecureStorageClient {
             .await
     }
 
+    /// Checks if a MnemonicWithPassphrase exists for the given `DeviceFactorSource`
+    pub async fn contains_device_mnemonic(
+        &self,
+        device_factor_source: DeviceFactorSource,
+    ) -> Result<bool> {
+        self.driver
+            .contains_data_for_key(
+                SecureStorageKey::DeviceFactorSourceMnemonic {
+                    factor_source_id: device_factor_source.id,
+                },
+            )
+            .await
+    }
+
     pub async fn delete_profile(&self, id: ProfileID) -> Result<()> {
         warn!("Deleting profile with id: {}", id);
         self.driver

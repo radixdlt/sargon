@@ -65,6 +65,23 @@ impl SecuredEntityControl {
     }
 }
 
+impl SecuredEntityControl {
+    /// Returns whether the entity is controlled by the given factor source.
+    pub fn is_controlled_by_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> bool {
+        self.security_structure
+            .matrix_of_factors
+            .primary_role
+            .get_threshold_factors()
+            .iter()
+            .any(|factor| {
+                factor.factor_source_id == factor_source.factor_source_id()
+            })
+    }
+}
+
 impl HasSampleValues for SecuredEntityControl {
     fn sample() -> Self {
         Self::new(

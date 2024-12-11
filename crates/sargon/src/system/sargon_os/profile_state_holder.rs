@@ -61,10 +61,22 @@ impl ProfileStateHolder {
         self.try_access_profile_with(|p| p.accounts_on_current_network())
     }
 
+    /// Returns the hidden accounts on the current network, empty if no hidden accounts
+    /// on the network
+    pub fn hidden_accounts_on_current_network(&self) -> Result<Accounts> {
+        self.try_access_profile_with(|p| p.hidden_accounts_on_current_network())
+    }
+
     /// Returns the non-hidden personas on the current network, empty if no personas
     /// on the network
     pub fn personas_on_current_network(&self) -> Result<Personas> {
         self.try_access_profile_with(|p| p.personas_on_current_network())
+    }
+
+    /// Returns the hidden personas on the current network, empty if no hidden personas
+    /// on the network
+    pub fn hidden_personas_on_current_network(&self) -> Result<Personas> {
+        self.try_access_profile_with(|p| p.hidden_personas_on_current_network())
     }
 
     /// Returns all the SecurityStructuresOfFactorSources,
