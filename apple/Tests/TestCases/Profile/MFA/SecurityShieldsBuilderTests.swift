@@ -231,9 +231,15 @@ struct ShieldTests {
 		#expect(SecurityShieldBuilder.sortedFactorSourcesForSelection(factorSources: factorSources) == [FactorSource.sample, .sampleOther])
 	}
 
-	@Test("selected factor sources status")
-	func selectedFactorSourcesStatus() {
-		#expect(SecurityShieldBuilder.selectedFactorSourcesStatus(factorSources: [FactorSource.sample]) == .suboptimal)
+	@Test("selected factor sources for role status")
+	func selectedFactorSourcesForRoleStatus() {
+		let builder = SecurityShieldBuilder()
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .samplePassword)
+		builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleLedger)
+
+		#expect(builder.selectedFactorSourcesForRoleStatus(role: .primary) == .invalid)
+		#expect(builder.selectedFactorSourcesForRoleStatus(role: .recovery) == .optimal)
+		#expect(builder.selectedFactorSourcesForRoleStatus(role: .confirmation) == .insufficient)
 	}
 }
 

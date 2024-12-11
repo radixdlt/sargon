@@ -8,7 +8,7 @@ use std::{
 };
 
 use sargon::SecurityShieldBuilder as InternalSecurityShieldBuilder;
-use sargon::SelectedFactorSourcesStatus as InternalSelectedFactorSourcesStatus;
+use sargon::SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus;
 use sargon::{IndexSet, MatrixBuilder};
 
 use crate::prelude::*;
@@ -384,6 +384,28 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.validate().map(|x| x.into()))
     }
 
+    pub fn validate_role_in_isolation(
+        &self,
+        role: RoleKind,
+    ) -> Option<SecurityShieldBuilderInvalidReason> {
+        self.get(|builder| {
+            builder
+                .validate_role_in_isolation(role.into_internal())
+                .map(|x| x.into())
+        })
+    }
+
+    pub fn selected_factor_sources_for_role_status(
+        &self,
+        role: RoleKind,
+    ) -> SelectedFactorSourcesForRoleStatus {
+        self.get(|builder| {
+            builder
+                .selected_factor_sources_for_role_status(role.into_internal())
+                .into()
+        })
+    }
+
     pub fn build(
         &self,
     ) -> Result<
@@ -408,17 +430,6 @@ pub fn security_shield_builder_sorted_factor_sources_for_selection(
             factor_sources.into_internal(),
         );
     factors.into_iter().map(FactorSource::from).collect()
-}
-
-#[uniffi::export]
-pub fn security_shield_builder_selected_factor_sources_status(
-    factor_sources: Vec<FactorSource>,
-) -> SelectedFactorSourcesStatus {
-    SelectedFactorSourcesStatus::from(
-        InternalSecurityShieldBuilder::selected_factor_sources_status(
-            factor_sources.into_internal(),
-        ),
-    )
 }
 
 impl FactorSourceID {
