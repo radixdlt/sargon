@@ -224,6 +224,17 @@ struct ShieldTests {
 		#expect(shield.matrixOfFactors.confirmationRole.overrideFactors == [.sampleDevice])
 		#expect(shield.matrixOfFactors.confirmationRole.thresholdFactors == [])
 	}
+
+	@Test("selected factor sources for role status")
+	func selectedFactorSourcesForRoleStatus() {
+		let builder = SecurityShieldBuilder()
+		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .samplePassword)
+		builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleLedger)
+
+		#expect(builder.selectedFactorSourcesForRoleStatus(role: .primary) == .invalid)
+		#expect(builder.selectedFactorSourcesForRoleStatus(role: .recovery) == .optimal)
+		#expect(builder.selectedFactorSourcesForRoleStatus(role: .confirmation) == .insufficient)
+	}
 }
 
 #if DEBUG

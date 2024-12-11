@@ -7,6 +7,8 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use sargon::SecurityShieldBuilder as InternalSecurityShieldBuilder;
+use sargon::SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus;
 use sargon::{IndexSet, MatrixBuilder};
 
 use crate::prelude::*;
@@ -380,6 +382,41 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
         self.get(|builder| builder.validate().map(|x| x.into()))
+    }
+
+    pub fn validate_role_in_isolation(
+        &self,
+        role: RoleKind,
+    ) -> Option<SecurityShieldBuilderInvalidReason> {
+        self.get(|builder| {
+            builder
+                .validate_role_in_isolation(role.into_internal())
+                .map(|x| x.into())
+        })
+    }
+
+    pub fn selected_factor_sources_for_role_status(
+        &self,
+        role: RoleKind,
+    ) -> SelectedFactorSourcesForRoleStatus {
+        self.get(|builder| {
+            builder
+                .selected_factor_sources_for_role_status(role.into_internal())
+                .into()
+        })
+    }
+
+    pub fn sorted_factor_sources_for_primary_threshold_selection(
+        &self,
+        factor_sources: Vec<FactorSource>,
+    ) -> Vec<FactorSource> {
+        self.get(|builder| {
+            builder
+                .sorted_factor_sources_for_primary_threshold_selection(
+                    factor_sources.clone().into_internal(),
+                )
+                .into_type()
+        })
     }
 
     pub fn build(
