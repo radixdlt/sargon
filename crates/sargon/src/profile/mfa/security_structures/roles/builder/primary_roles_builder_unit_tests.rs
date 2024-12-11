@@ -219,7 +219,7 @@ mod threshold_suite {
         sut.set_threshold(1).unwrap();
 
         // Assert
-        let expected = RoleWithFactorSourceIds::primary_with_factors(
+        let expected = PrimaryRoleWithFactorSourceIds::with_factors(
             1,
             [sample_other()],
             [],
@@ -243,7 +243,7 @@ mod threshold_suite {
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
 
         // Assert
-        let expected = RoleWithFactorSourceIds::primary_with_factors(
+        let expected = PrimaryRoleWithFactorSourceIds::with_factors(
             1,
             [sample_other()],
             [],
@@ -269,7 +269,7 @@ mod threshold_suite {
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
 
         // Assert
-        let expected = RoleWithFactorSourceIds::primary_with_factors(
+        let expected = PrimaryRoleWithFactorSourceIds::with_factors(
             2,
             [sample(), sample_other()],
             [],
@@ -289,7 +289,7 @@ mod threshold_suite {
         assert_eq!(sut.set_threshold(2), Ok(()));
 
         // Assert
-        let expected = RoleWithFactorSourceIds::primary_with_factors(
+        let expected = PrimaryRoleWithFactorSourceIds::with_factors(
             2,
             [sample(), sample_other()],
             [],
@@ -317,7 +317,7 @@ mod threshold_suite {
         sut.add_factor_source_to_threshold(sample_third()).unwrap();
 
         // Assert
-        let expected = RoleWithFactorSourceIds::primary_with_factors(
+        let expected = PrimaryRoleWithFactorSourceIds::with_factors(
             3,
             [sample(), sample_other(), sample_third()],
             [],
@@ -335,7 +335,7 @@ mod threshold_suite {
         sut.set_threshold(1).unwrap();
 
         // Assert
-        let expected = RoleWithFactorSourceIds::primary_with_factors(
+        let expected = PrimaryRoleWithFactorSourceIds::with_factors(
             1,
             [sample_other()],
             [],
@@ -651,11 +651,8 @@ mod ledger {
             sut.set_threshold(1).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
-                1,
-                [sample()],
-                [],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors(1, [sample()], []);
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -689,7 +686,7 @@ mod ledger {
             sut.set_threshold(2).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
+            let expected = PrimaryRoleWithFactorSourceIds::with_factors(
                 2,
                 [sample(), sample_other()],
                 [],
@@ -718,11 +715,8 @@ mod ledger {
             sut.add_factor_source_to_override(sample()).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
-                0,
-                [],
-                [sample()],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors(0, [], [sample()]);
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -736,7 +730,7 @@ mod ledger {
             sut.add_factor_source_to_override(sample_other()).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
+            let expected = PrimaryRoleWithFactorSourceIds::with_factors(
                 0,
                 [],
                 [sample(), sample_other()],
@@ -786,11 +780,8 @@ mod arculus {
             sut.set_threshold(1).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
-                1,
-                [sample()],
-                [],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors(1, [sample()], []);
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -805,7 +796,7 @@ mod arculus {
             sut.set_threshold(1).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
+            let expected = PrimaryRoleWithFactorSourceIds::with_factors(
                 1,
                 [sample(), sample_other()],
                 [],
@@ -834,11 +825,8 @@ mod arculus {
             sut.add_factor_source_to_override(sample()).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
-                0,
-                [],
-                [sample()],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors(0, [], [sample()]);
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -852,7 +840,7 @@ mod arculus {
             sut.add_factor_source_to_override(sample_other()).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
+            let expected = PrimaryRoleWithFactorSourceIds::with_factors(
                 0,
                 [],
                 [sample(), sample_other()],
@@ -904,11 +892,8 @@ mod device_factor_source {
             sut.set_threshold(1).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
-                1,
-                [sample()],
-                [],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors(1, [sample()], []);
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -954,11 +939,8 @@ mod device_factor_source {
             sut.add_factor_source_to_override(sample()).unwrap();
 
             // Assert
-            let expected = RoleWithFactorSourceIds::primary_with_factors(
-                0,
-                [],
-                [sample()],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors(0, [], [sample()]);
             assert_eq!(sut.build().unwrap(), expected);
         }
     }
