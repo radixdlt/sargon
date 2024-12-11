@@ -160,14 +160,6 @@ impl AutomaticShieldBuilder {
         self.factor_for_role(role_kind).len() as u8
     }
 
-    fn assign_factors_of_category_to_primary(
-        &mut self,
-        category: FactorSourceCategory,
-        quantity_to_add: Quantity,
-    ) {
-        self.assign_factors_of_category(Primary, category, quantity_to_add);
-    }
-
     fn assign_factors_of_category_to_recovery(
         &mut self,
         category: FactorSourceCategory,
@@ -206,6 +198,9 @@ impl AutomaticShieldBuilder {
         })
     }
 
+    /// Automatic assignment of factors to roles according to [this heuristics][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Automatic-Security-Shield-Construction
     fn _build_shield(&mut self) -> Result<SecurityStructureOfFactorSourceIds> {
         // 📒 "If the user only chose 1 factor for PRIMARY, remove that factor from the list (it cannot be used elsewhere - otherwise it can)."
         {
@@ -233,18 +228,14 @@ impl AutomaticShieldBuilder {
             // 📒 "Add any Custodian.." 🙅‍♀️  Custodian FactorSources does not exist yet...
 
             // 📒 "Add any Hardware factors in the list, starting with the most recently used, to RECOVERY
-            // until there is at least 1 factor source in RECOVERY."
-            // ❓ SHOULD WE ALWAYS DO THIS? OR ONLY IF count_factors_for_role(Recovery) < 1?
+            // until there is at least _ factor source in RECOVERY."
             self.assign_one_hardware_factor(Recovery);
-            // ❓ WHAT TO DO IF THERE WAS NONE?
 
-            // 📒 "Add any Hardware (Ledger, Arculus, Yubikey) factors in the list, starting with the most recently used, to CONFIRMATION until there is at least 1 factor factors in CONFIRMATION."
-            // ❓ SHOULD WE ALWAYS DO THIS? OR ONLY IF count_factors_for_role(Confirmation) < 1?
+            // 📒 "Add any Hardware (Ledger, Arculus, Yubikey) factors in the list, starting with the most recently used, to CONFIRMATION until there is at least _ factor factors in CONFIRMATION."
             self.assign_one_hardware_factor(Confirmation);
-            // ❓ WHAT TO DO IF THERE WAS NONE?
         };
 
-        // 📒 "Distribute to try to get at least 1 RECOVERY and then 1 CONFIRMATION"
+        // 📒 "Distribute to try to get at least 1 RECOVERY and then 1 CONFIRMATION" [if possible]
         distribute_custodian_and_hardware_to_non_primary();
 
         // 📒 "Distribute to try to get up to 2 RECOVERY and then 2 CONFIRMATION factors if possible"
@@ -253,7 +244,10 @@ impl AutomaticShieldBuilder {
         // 📒 "Fill in any remaining other factors to increase reliability of being able to recover"
         {
             // 📒 "Add any (and all) remaining Hardware or Custodian factors in the list to RECOVERY."
-            self.assign_factors_of_category_to_primary(Hardware, Quantity::All);
+            self.assign_factors_of_category_to_recovery(
+                Hardware,
+                Quantity::All,
+            );
 
             // 📒 "Set all Biometrics/PIN factors to a role (they must be all in one role because they are unlocked by the same Biometrics/PIN check):"
             {
@@ -667,6 +661,49 @@ mod tests {
             matrix.confirmation(),
             &ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_device()
+            ],)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn one_device_factor_source_and_two_ledger_is_ok_when_primary_uses_all(
+    ) {
+        let factors = IndexSet::from_iter([
+            FactorSource::sample_device_babylon(),
+            FactorSource::sample_ledger(),
+            FactorSource::sample_ledger_other(),
+        ]);
+        let res = SUT::build(factors.clone(), |_, _| {
+            ready(unsafe {
+                ValidatedPrimary::new(
+                    factors.clone().into_iter().map(|f| f.id()).collect(),
+                )
+            })
+        })
+        .await;
+        let matrix = res.unwrap().matrix_of_factors;
+
+        pretty_assertions::assert_eq!(
+            matrix.primary(),
+            &PrimaryRoleWithFactorSourceIds::with_factors(
+                3,
+                factors.clone().into_iter().map(|f| f.id()),
+                []
+            )
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.recovery(),
+            &RecoveryRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_ledger(),
+                FactorSourceID::sample_device(),
+            ],)
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.confirmation(),
+            &ConfirmationRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_ledger_other(),
             ],)
         );
     }
