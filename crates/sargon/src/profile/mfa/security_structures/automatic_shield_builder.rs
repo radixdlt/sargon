@@ -5,16 +5,12 @@ use crate::prelude::*;
 use super::security_shield_builder;
 
 pub struct AutomaticShieldBuilder {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    hidden: HiddenConstructor,
     remaining_available_factors: IndexSet<FactorSource>,
-    primary: IndexSet<FactorSourceID>,
-    recovery: IndexSet<FactorSourceID>,
-    confirmation: IndexSet<FactorSourceID>,
-    shield_builder: SecurityShieldBuilder,
+
+    proto_matrix: ProtoMatrix,
 }
 
+use serde_json::value::Index;
 use FactorSourceCategory::*;
 use RoleKind::*;
 
@@ -35,46 +31,131 @@ enum FactorSelector {
     Kind(FactorSourceKind),
 }
 
-impl AutomaticShieldBuilder {
-    fn new(
-        available_factors: IndexSet<FactorSource>,
-        user_selected_primary: IndexSet<FactorSourceID>,
-    ) -> Self {
-        assert!(
-            user_selected_primary
-                .difference(
-                    &available_factors
-                        .iter()
-                        .map(|f| f.id())
-                        .collect::<IndexSet<_>>()
-                )
-                .collect::<IndexSet<_>>()
-                .is_empty(),
-            "All user_selected_primary must be in available_factors"
+impl SecurityShieldBuilder {
+    pub fn preselect_using_currently_selected_primary_factors(
+        &self,
+        all_factors_in_profile: IndexSet<FactorSource>,
+    ) -> Result<()> {
+        if !self.get_primary_override_factors().is_empty() {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "Primary override factors not allowed when preselecting factors for Recovery and Confirmation".to_string(),
+            });
+        }
+
+        let primary_factors = self
+            .get_primary_threshold_factors()
+            .into_iter()
+            .collect::<IndexSet<_>>();
+
+        if primary_factors
+            .intersection(
+                &all_factors_in_profile
+                    .iter()
+                    .map(|f| f.id())
+                    .collect::<IndexSet<_>>(),
+            )
+            .cloned()
+            .collect::<IndexSet<FactorSourceID>>()
+            != primary_factors
+        {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "Primary factors not in profile".to_string(),
+            });
+        }
+
+        if !Self::prerequisites_status(
+            &all_factors_in_profile.iter().map(|f| f.id()).collect(),
+        )
+        .is_sufficient()
+        {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: "Prerequisites not met".to_string(),
+            });
+        }
+
+        let mut auto_builder = AutomaticShieldBuilder::new(
+            all_factors_in_profile,
+            primary_factors,
         );
-        Self {
-            hidden: HiddenConstructor,
-            remaining_available_factors: available_factors,
-            primary: user_selected_primary,
-            recovery: IndexSet::new(),
-            confirmation: IndexSet::new(),
-            shield_builder: SecurityShieldBuilder::new(),
+
+        let proto_matrix = auto_builder.assign()?;
+
+        assert_eq!(
+            proto_matrix.primary.clone().into_iter().collect_vec(),
+            self.get_primary_threshold_factors(),
+            "Auto assignment should not have changed the primary factors"
+        );
+        self.set_state(proto_matrix);
+
+        if let Some(invalid_reason) = self.validate() {
+            Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: invalid_reason.to_string(),
+            })
+        } else {
+            Ok(())
         }
     }
 
-    fn find_primary_role_candidates(
-        all: &IndexSet<FactorSource>,
-    ) -> IndexSet<FactorSource> {
-        let ephemeral = SecurityShieldBuilder::new();
-        let factor_source_ids =
-            all.iter().map(|f| f.id()).collect::<IndexSet<_>>();
-        ephemeral.validation_for_addition_of_factor_source_to_primary_threshold_for_each(factor_source_ids.into_iter().collect_vec()).into_iter().filter(|vs| match vs.validation {
-            Ok(_) => true,
-            Err(RoleBuilderValidation::NotYetValid(_)) => true,
-            Err(RoleBuilderValidation::BasicViolation(_)) |  Err(RoleBuilderValidation::ForeverInvalid(_)) => false,
-        }).filter_map(|vs| all.iter().find(|f| f.id() == vs.factor_source_id))
-        .cloned()
-        .collect::<IndexSet<_>>()
+    fn set_state(&self, proto_matrix: ProtoMatrix) {
+        self.reset_factors_in_roles();
+        self.set_threshold(proto_matrix.primary.len() as u8);
+        proto_matrix.primary.into_iter().for_each(|f| {
+            self.add_factor_source_to_primary_threshold(f);
+        });
+        proto_matrix.recovery.into_iter().for_each(|f| {
+            self.add_factor_source_to_recovery_override(f);
+        });
+        proto_matrix.confirmation.into_iter().for_each(|f| {
+            self.add_factor_source_to_confirmation_override(f);
+        });
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ProtoMatrix {
+    primary: IndexSet<FactorSourceID>,
+    recovery: IndexSet<FactorSourceID>,
+    confirmation: IndexSet<FactorSourceID>,
+}
+impl ProtoMatrix {
+    fn new(primary: IndexSet<FactorSourceID>) -> Self {
+        Self {
+            primary,
+            recovery: IndexSet::new(),
+            confirmation: IndexSet::new(),
+        }
+    }
+
+    fn factors_for_role(&self, role: RoleKind) -> &IndexSet<FactorSourceID> {
+        match role {
+            Primary => &self.primary,
+            Recovery => &self.recovery,
+            Confirmation => &self.confirmation,
+        }
+    }
+
+    fn add_factors_for_role(
+        &mut self,
+        role: RoleKind,
+        factors: IndexSet<FactorSourceID>,
+    ) {
+        match role {
+            Primary => self.primary.extend(factors),
+            Recovery => self.recovery.extend(factors),
+            Confirmation => self.confirmation.extend(factors),
+        }
+    }
+}
+
+impl AutomaticShieldBuilder {
+    fn new(
+        available_factors: IndexSet<FactorSource>,
+        primary: IndexSet<FactorSourceID>,
+    ) -> Self {
+        Self {
+            remaining_available_factors: available_factors,
+            proto_matrix: ProtoMatrix::new(primary),
+        }
     }
 
     fn assign_factors_matching_selector(
@@ -102,24 +183,15 @@ impl AutomaticShieldBuilder {
                 .collect::<IndexSet<_>>();
         }
 
-        let target_factors = match target_role {
-            Primary => &mut self.primary,
-            Recovery => &mut self.recovery,
-            Confirmation => &mut self.confirmation,
-        };
-
         self.remaining_available_factors
             .retain(|f| !factors_to_add.contains(&f.id()));
 
-        target_factors.extend(factors_to_add);
+        self.proto_matrix
+            .add_factors_for_role(target_role, factors_to_add);
     }
 
-    fn factor_for_role(&self, role: RoleKind) -> &IndexSet<FactorSourceID> {
-        match role {
-            Primary => &self.primary,
-            Recovery => &self.recovery,
-            Confirmation => &self.confirmation,
-        }
+    fn factors_for_role(&self, role: RoleKind) -> &IndexSet<FactorSourceID> {
+        self.proto_matrix.factors_for_role(role)
     }
 
     fn assign_factors_of_category(
@@ -157,7 +229,7 @@ impl AutomaticShieldBuilder {
     }
 
     fn count_factors_for_role(&self, role_kind: RoleKind) -> u8 {
-        self.factor_for_role(role_kind).len() as u8
+        self.factors_for_role(role_kind).len() as u8
     }
 
     fn assign_factors_of_category_to_recovery(
@@ -175,37 +247,16 @@ impl AutomaticShieldBuilder {
     ) {
         self.assign_factors_of_category(Confirmation, category, quantity_to_add)
     }
-}
-
-impl AutomaticShieldBuilder {
-    fn _do_build_shield(&self) -> Result<SecurityStructureOfFactorSourceIds> {
-        let builder = &self.shield_builder;
-        builder.set_threshold(self.count_factors_for_role(Primary));
-        self.primary.iter().for_each(|&f| {
-            builder.add_factor_source_to_primary_threshold(f);
-        });
-        self.recovery.iter().for_each(|&f| {
-            builder.add_factor_source_to_recovery_override(f);
-        });
-        self.confirmation.iter().for_each(|&f| {
-            builder.add_factor_source_to_confirmation_override(f);
-        });
-
-        builder.build().map_err(|e| {
-            CommonError::AutomaticShieldBuildingFailure {
-                underlying: format!("{:?}", e),
-            }
-        })
-    }
 
     /// Automatic assignment of factors to roles according to [this heuristics][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Automatic-Security-Shield-Construction
-    fn _build_shield(&mut self) -> Result<SecurityStructureOfFactorSourceIds> {
+    fn assign(&mut self) -> Result<ProtoMatrix> {
         // 📒 "If the user only chose 1 factor for PRIMARY, remove that factor from the list (it cannot be used elsewhere - otherwise it can)."
         {
             if self.count_factors_for_role(Primary) == 1
-                && let Some(only_primary_factor) = self.primary.iter().next()
+                && let Some(only_primary_factor) =
+                    self.proto_matrix.primary.iter().next()
             {
                 self.remaining_available_factors
                     .retain(|f| f.id() != *only_primary_factor);
@@ -267,12 +318,7 @@ impl AutomaticShieldBuilder {
             }
         }
 
-        self._do_build_shield()
-    }
-
-    fn build_shield(self) -> Result<SecurityStructureOfFactorSourceIDs> {
-        let mut _self = self;
-        _self._build_shield()
+        Ok(self.proto_matrix.clone())
     }
 }
 
@@ -304,93 +350,6 @@ impl SecurityShieldBuilder {
     }
 }
 
-pub struct AutoShieldBuilderValidatorOfPickedPrimaryFactors {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    hidden: HiddenConstructor,
-}
-impl AutoShieldBuilderValidatorOfPickedPrimaryFactors {
-    fn new() -> Self {
-        Self {
-            hidden: HiddenConstructor,
-        }
-    }
-
-    pub fn validate_picked(
-        &self,
-        picked: IndexSet<FactorSourceID>,
-    ) -> Result<ValidatedPrimary> {
-        let ephemeral = SecurityShieldBuilder::new();
-        ephemeral.set_threshold(picked.len() as u8);
-        picked.iter().for_each(|f| {
-            ephemeral.add_factor_source_to_primary_threshold(*f);
-        });
-        if let Some(invalid_reason) = ephemeral.validate_primary_role() {
-            Err(CommonError::AutomaticShieldBuildingFailure {
-                underlying: format!(
-                    "Invalid picked for primary: {:?}",
-                    invalid_reason
-                ),
-            })
-        } else {
-            // valid!
-            let valid = unsafe { ValidatedPrimary::new(picked) };
-            Ok(valid)
-        }
-    }
-}
-
-pub struct ValidatedPrimary {
-    validated_picked: IndexSet<FactorSourceID>,
-}
-impl ValidatedPrimary {
-    /// # Safety
-    /// Rust memory safe, but marked "unsafe" since it might allow for specification
-    /// of unsafe - as in application **unsecure** - factors for PrimaryRole, which might
-    /// lead to increase risk for end user to loose funds.
-    pub unsafe fn new(validated_picked: IndexSet<FactorSourceID>) -> Self {
-        Self { validated_picked }
-    }
-
-    pub fn validated_picked(&self) -> IndexSet<FactorSourceID> {
-        self.validated_picked.clone()
-    }
-}
-
-impl AutomaticShieldBuilder {
-    pub async fn build<Fut>(
-        all_factors: IndexSet<FactorSource>,
-        pick_primary_role_factors: impl Fn(
-            IndexSet<FactorSource>,
-            AutoShieldBuilderValidatorOfPickedPrimaryFactors,
-        ) -> Fut,
-    ) -> Result<SecurityStructureOfFactorSourceIDs>
-    where
-        Fut: Future<Output = ValidatedPrimary>,
-    {
-        if !SecurityShieldBuilder::prerequisites_status(
-            &all_factors.iter().map(|f| f.id()).collect(),
-        )
-        .is_sufficient()
-        {
-            return Err(CommonError::AutomaticShieldBuildingFailure {
-                underlying: "Prerequisites not met".to_string(),
-            });
-        }
-        let candidates = Self::find_primary_role_candidates(&all_factors);
-        let validated_picked: IndexSet<FactorSourceID> =
-            pick_primary_role_factors(
-                candidates,
-                AutoShieldBuilderValidatorOfPickedPrimaryFactors::new(),
-            )
-            .await
-            .validated_picked;
-
-        let auto_builder = Self::new(all_factors, validated_picked);
-        auto_builder.build_shield()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::sync::Mutex;
@@ -404,134 +363,30 @@ mod tests {
     type SUT = AutomaticShieldBuilder;
 
     impl SUT {
-        #[allow(dead_code)]
-        async fn test_non_validated<Fut>(
-            pick_primary_role_factors: impl Fn(
-                IndexSet<FactorSource>,
-                AutoShieldBuilderValidatorOfPickedPrimaryFactors,
-            ) -> Fut,
-        ) -> Result<SecurityStructureOfFactorSourceIDs>
-        where
-            Fut: Future<Output = ValidatedPrimary>,
-        {
-            SUT::build(FactorSource::sample_all(), pick_primary_role_factors)
-                .await
-        }
-
-        async fn test_valid(
-            pick_primary_role_factors: impl Fn(
-                IndexSet<FactorSource>,
-            )
-                -> IndexSet<FactorSourceID>,
+        fn test(
+            all_factors_in_profile: IndexSet<FactorSource>,
+            pick_primary_role_factors: IndexSet<FactorSourceID>,
         ) -> Result<SecurityStructureOfFactorSourceIDs> {
-            SUT::build(
-                FactorSource::sample_all(),
-                async |candidates, validator| {
-                    let picked = pick_primary_role_factors(candidates);
-                    validator.validate_picked(picked).unwrap()
-                },
-            )
-            .await
+            let shield_builder = SecurityShieldBuilder::new();
+            shield_builder.set_threshold(pick_primary_role_factors.len() as u8);
+            pick_primary_role_factors.into_iter().for_each(|f| {
+                shield_builder.add_factor_source_to_primary_threshold(f);
+            });
+            shield_builder.preselect_using_currently_selected_primary_factors(
+                all_factors_in_profile,
+            )?;
+
+            shield_builder.build().map_err(|e| {
+                CommonError::AutomaticShieldBuildingFailure {
+                    underlying: format!("{:?}", e),
+                }
+            })
         }
     }
 
-    #[actix_rt::test]
-    async fn primary_role_candidates() {
-        let shield_builder = SecurityShieldBuilder::new();
-
-        let expected =  shield_builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
-                FactorSource::sample_all().into_iter().map(|f| f.id()).collect_vec()
-            )
-            .into_iter()
-            .filter(|f| matches!(f.validation, Err(RoleBuilderValidation::NotYetValid(_))) || f.validation.is_ok())
-            .map(|vs| vs.factor_source_id)
-            .collect_vec();
-
-        let called = Arc::new(Mutex::new(false));
-
-        let _ = SUT::test_valid(|candidates| {
-            *called.lock().unwrap() = true;
-            pretty_assertions::assert_eq!(
-                candidates.into_iter().map(|f| f.id()).collect_vec(),
-                expected
-            );
-
-            IndexSet::just(FactorSourceID::sample_device())
-        })
-        .await
-        .unwrap();
-
-        assert!(*called.lock().unwrap());
-    }
-
-    #[actix_rt::test]
-    async fn selection_of_primary_factor_first() {
-        let built = SUT::test_valid(|xs| {
-            IndexSet::just(xs.iter().map(|x| x.id()).next().unwrap())
-        })
-        .await
-        .unwrap();
-        assert_eq!(
-            built.matrix_of_factors.primary_role.get_threshold_factors(),
-            &vec![FactorSource::sample_all().first().unwrap().id()]
-        );
-    }
-
-    #[actix_rt::test]
-    async fn selection_of_primary_factor_last() {
-        let built = SUT::test_valid(|xs| {
-            IndexSet::just(xs.iter().map(|x| x.id()).last().unwrap())
-        })
-        .await
-        .unwrap();
-        assert_eq!(
-            built.matrix_of_factors.primary_role.get_threshold_factors(),
-            &vec![FactorSource::sample_all()
-                .into_iter()
-                .filter(|f| f.category() == FactorSourceCategory::Identity)
-                .last()
-                .unwrap()
-                .id()]
-        );
-    }
-
-    #[actix_rt::test]
-    async fn selection_of_primary_factor_two() {
-        let factors = IndexSet::from_iter([
-            FactorSourceID::sample_ledger(),
-            FactorSourceID::sample_device(),
-        ]);
-        let built = SUT::test_valid(|_| factors.clone()).await.unwrap();
-        pretty_assertions::assert_eq!(
-            built.matrix_of_factors.primary_role.get_threshold_factors(),
-            &factors.into_iter().collect_vec()
-        );
-    }
-
-    #[actix_rt::test]
-    #[should_panic]
-    async fn selection_of_primary_invalid_only_one_password() {
-        let _ = SUT::test_valid(
-            |_| IndexSet::just(FactorSourceID::sample_password()), // invalid for primary
-        )
-        .await;
-    }
-
-    #[actix_rt::test]
-    async fn empty_factors_is_err() {
-        let called = Arc::new(Mutex::new(false));
-
-        let res = SUT::build(IndexSet::new(), |_, _| {
-            *called.lock().unwrap() = true;
-            ready(unsafe {
-                ValidatedPrimary::new(IndexSet::just(
-                    FactorSourceID::sample_device(),
-                ))
-            })
-        })
-        .await;
-
-        assert!(!*called.lock().unwrap());
+    #[test]
+    fn empty_factors_is_err() {
+        let res = SUT::test(IndexSet::new(), IndexSet::new());
 
         assert!(matches!(
             res,
@@ -539,24 +394,12 @@ mod tests {
         ));
     }
 
-    #[actix_rt::test]
-    async fn one_factors_is_not_enough_is_err() {
-        let called = Arc::new(Mutex::new(false));
-
-        let res = SUT::build(
+    #[test]
+    fn one_factors_is_not_enough_is_err() {
+        let res = SUT::test(
             IndexSet::from_iter([FactorSource::sample_device()]),
-            |_, _| {
-                *called.lock().unwrap() = true;
-                ready(unsafe {
-                    ValidatedPrimary::new(IndexSet::just(
-                        FactorSourceID::sample_device(),
-                    ))
-                })
-            },
-        )
-        .await;
-
-        assert!(!*called.lock().unwrap());
+            IndexSet::just(FactorSourceID::sample_device()),
+        );
 
         assert!(matches!(
             res,
@@ -564,27 +407,15 @@ mod tests {
         ));
     }
 
-    #[actix_rt::test]
-    async fn two_factors_is_not_enough_is_err() {
-        let called = Arc::new(Mutex::new(false));
-
-        let res = SUT::build(
+    #[test]
+    fn two_factors_is_not_enough_is_err() {
+        let res = SUT::test(
             IndexSet::from_iter([
                 FactorSource::sample_device(),
                 FactorSource::sample_ledger(),
             ]),
-            |_, _| {
-                *called.lock().unwrap() = true;
-                ready(unsafe {
-                    ValidatedPrimary::new(IndexSet::just(
-                        FactorSourceID::sample_device(),
-                    ))
-                })
-            },
-        )
-        .await;
-
-        assert!(!*called.lock().unwrap());
+            IndexSet::just(FactorSourceID::sample_device()),
+        );
 
         assert!(matches!(
             res,
@@ -592,28 +423,16 @@ mod tests {
         ));
     }
 
-    #[actix_rt::test]
-    async fn two_device_factor_source_and_one_ledger_is_not_sufficient() {
-        let called = Arc::new(Mutex::new(false));
-
-        let res = SUT::build(
+    #[test]
+    fn two_device_factor_source_and_one_ledger_is_not_sufficient() {
+        let res = SUT::test(
             IndexSet::from_iter([
                 FactorSource::sample_device_babylon(),
                 FactorSource::sample_device_babylon_other(),
                 FactorSource::sample_ledger(),
             ]),
-            |_, _| {
-                *called.lock().unwrap() = true;
-                ready(unsafe {
-                    ValidatedPrimary::new(IndexSet::just(
-                        FactorSourceID::sample_device(),
-                    ))
-                })
-            },
-        )
-        .await;
-
-        assert!(!*called.lock().unwrap());
+            IndexSet::just(FactorSourceID::sample_device()),
+        );
 
         assert!(matches!(
             res,
@@ -621,24 +440,17 @@ mod tests {
         ));
     }
 
-    #[actix_rt::test]
-    async fn one_device_factor_source_and_two_ledger_is_ok_when_primary_uses_one_ledger(
+    #[test]
+    fn one_device_factor_source_and_two_ledger_is_ok_when_primary_uses_one_ledger(
     ) {
-        let res = SUT::build(
+        let res = SUT::test(
             IndexSet::from_iter([
                 FactorSource::sample_device_babylon(),
                 FactorSource::sample_ledger(),
                 FactorSource::sample_ledger_other(),
             ]),
-            |_, _| {
-                ready(unsafe {
-                    ValidatedPrimary::new(IndexSet::just(
-                        FactorSource::sample_ledger().id(),
-                    ))
-                })
-            },
-        )
-        .await;
+            IndexSet::just(FactorSource::sample_ledger().id()),
+        );
         let matrix = res.unwrap().matrix_of_factors;
 
         pretty_assertions::assert_eq!(
@@ -665,22 +477,19 @@ mod tests {
         );
     }
 
-    #[actix_rt::test]
-    async fn one_device_factor_source_and_two_ledger_is_ok_when_primary_uses_all(
-    ) {
+    #[test]
+    fn one_device_factor_source_and_two_ledger_is_ok_when_primary_uses_all() {
         let factors = IndexSet::from_iter([
             FactorSource::sample_device_babylon(),
             FactorSource::sample_ledger(),
             FactorSource::sample_ledger_other(),
         ]);
-        let res = SUT::build(factors.clone(), |_, _| {
-            ready(unsafe {
-                ValidatedPrimary::new(
-                    factors.clone().into_iter().map(|f| f.id()).collect(),
-                )
-            })
-        })
-        .await;
+
+        let res = SUT::test(
+            factors.clone(),
+            factors.clone().into_iter().map(|f| f.id()).collect(),
+        );
+
         let matrix = res.unwrap().matrix_of_factors;
 
         pretty_assertions::assert_eq!(

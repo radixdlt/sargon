@@ -226,6 +226,12 @@ impl SecurityShieldBuilder {
             builder.reset_recovery_and_confirmation_role_state();
         })
     }
+
+    pub(crate) fn reset_factors_in_roles(&self) -> &Self {
+        self.set(|builder| {
+            builder.reset_factors_in_roles();
+        })
+    }
 }
 
 impl SecurityShieldBuilder {

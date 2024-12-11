@@ -44,20 +44,6 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     override_factors: Vec<FACTOR>,
 }
 
-impl<const ROLE: u8> RoleBuilder<ROLE>
-where
-    Assert<{ ROLE > ROLE_PRIMARY }>: IsTrue,
-{
-    /// Removes all override factors from this role
-    pub fn reset(&mut self) {
-        self.override_factors.clear();
-
-        // This is not necessary, but why not...
-        self.threshold_factors.clear();
-        self.threshold = 0;
-    }
-}
-
 pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
     AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FACTOR>;
 
@@ -67,6 +53,13 @@ pub(crate) type RoleBuilder<const ROLE: u8> =
 impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE, MODE, FACTOR>
 {
+    /// Removes all factors from this role and set threshold to 0.
+    pub fn reset(&mut self) {
+        self.threshold_factors.clear();
+        self.threshold = 0;
+        self.override_factors.clear();
+    }
+
     pub fn role(&self) -> RoleKind {
         RoleKind::from_u8(ROLE).expect("RoleKind should be valid")
     }
