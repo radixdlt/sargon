@@ -406,6 +406,19 @@ impl SecurityShieldBuilder {
         })
     }
 
+    pub fn sorted_factor_sources_for_primary_threshold_selection(
+        &self,
+        factor_sources: Vec<FactorSource>,
+    ) -> Vec<FactorSource> {
+        self.get(|builder| {
+            builder
+                .sorted_factor_sources_for_primary_threshold_selection(
+                    factor_sources.clone().into_internal(),
+                )
+                .into_type()
+        })
+    }
+
     pub fn build(
         &self,
     ) -> Result<
@@ -416,20 +429,6 @@ impl SecurityShieldBuilder {
             .map(|shield| shield.into())
             .map_err(|x| x.into())
     }
-}
-
-// ================
-// ==== STATIC ====
-// ================
-#[uniffi::export]
-pub fn security_shield_builder_sorted_factor_sources_for_selection(
-    factor_sources: Vec<FactorSource>,
-) -> Vec<FactorSource> {
-    let factors =
-        InternalSecurityShieldBuilder::sorted_factor_sources_for_selection(
-            factor_sources.into_internal(),
-        );
-    factors.into_iter().map(FactorSource::from).collect()
 }
 
 impl FactorSourceID {

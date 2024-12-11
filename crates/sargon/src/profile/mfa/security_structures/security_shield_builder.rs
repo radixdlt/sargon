@@ -468,6 +468,22 @@ impl SecurityShieldBuilder {
         }
     }
 
+    pub fn sorted_factor_sources_for_primary_threshold_selection(
+        &self,
+        factor_sources: Vec<FactorSource>,
+    ) -> Vec<FactorSource> {
+        let mut factor_sources: Vec<FactorSource> = factor_sources
+            .into_iter()
+            .filter(|fs| self.addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be(fs.factor_source_kind()))
+            .collect();
+        factor_sources.sort_by_key(|fs| {
+            fs.factor_source_kind()
+                .display_order_for_primary_threshold_selection()
+        });
+
+        factor_sources
+    }
+
     pub fn build(
         &self,
     ) -> Result<
@@ -503,19 +519,6 @@ impl SecurityShieldBuilder {
             metadata,
         };
         Ok(shield)
-    }
-}
-
-// ================
-// ==== STATIC ====
-// ================
-impl SecurityShieldBuilder {
-    pub fn sorted_factor_sources_for_selection(
-        factor_sources: Vec<FactorSource>,
-    ) -> Vec<FactorSource> {
-        let mut sorted = factor_sources;
-        sorted.sort_by_key(|fs| fs.factor_source_kind().display_order());
-        sorted
     }
 }
 
@@ -786,7 +789,8 @@ mod tests {
     }
 
     #[test]
-    fn test_sorted_factor_sources_for_selection() {
+    fn test_sorted_factor_sources_for_primary_threshold_selection() {
+        let sut = SUT::new();
         let factor_sources = FactorSource::sample_values_all();
         let expected = vec![
             FactorSource::sample_device_babylon(),
@@ -800,17 +804,11 @@ mod tests {
             FactorSource::sample_password_other(),
             FactorSource::sample_off_device(),
             FactorSource::sample_off_device_other(),
-            FactorSource::sample_trusted_contact_frank(),
-            FactorSource::sample_trusted_contact_grace(),
-            FactorSource::sample_trusted_contact_judy(),
-            FactorSource::sample_trusted_contact_oscar(),
-            FactorSource::sample_trusted_contact_trudy(),
-            FactorSource::sample_trusted_contact_radix(),
-            FactorSource::sample_security_questions(),
-            FactorSource::sample_security_questions_other(),
         ];
         assert_eq!(
-            SUT::sorted_factor_sources_for_selection(factor_sources),
+            sut.sorted_factor_sources_for_primary_threshold_selection(
+                factor_sources
+            ),
             expected
         )
     }

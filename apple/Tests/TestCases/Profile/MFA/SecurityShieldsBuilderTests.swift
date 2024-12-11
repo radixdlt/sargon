@@ -225,12 +225,6 @@ struct ShieldTests {
 		#expect(shield.matrixOfFactors.confirmationRole.thresholdFactors == [])
 	}
 
-	@Test("sorted factor sources for selection")
-	func sortedFactorSourcesForSelection() {
-		let factorSources = [FactorSource.sampleOther, .sample]
-		#expect(SecurityShieldBuilder.sortedFactorSourcesForSelection(factorSources: factorSources) == [FactorSource.sample, .sampleOther])
-	}
-
 	@Test("selected factor sources for role status")
 	func selectedFactorSourcesForRoleStatus() {
 		let builder = SecurityShieldBuilder()
