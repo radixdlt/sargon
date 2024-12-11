@@ -32,10 +32,19 @@ enum FactorSelector {
 }
 
 impl SecurityShieldBuilder {
-    pub fn preselect_using_currently_selected_primary_factors(
+    pub fn auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
         &self,
         all_factors_in_profile: IndexSet<FactorSource>,
     ) -> Result<()> {
+        if let Some(invalid_reason) = self.validate_primary_role() {
+            return Err(CommonError::AutomaticShieldBuildingFailure {
+                underlying: format!(
+                    "Primary role is not valid: {:?}",
+                    invalid_reason
+                ),
+            });
+        }
+
         if !self.get_primary_override_factors().is_empty() {
             return Err(CommonError::AutomaticShieldBuildingFailure {
                 underlying: "Primary override factors not allowed when preselecting factors for Recovery and Confirmation".to_string(),
@@ -372,7 +381,7 @@ mod tests {
             pick_primary_role_factors.into_iter().for_each(|f| {
                 shield_builder.add_factor_source_to_primary_threshold(f);
             });
-            shield_builder.preselect_using_currently_selected_primary_factors(
+            shield_builder.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
                 all_factors_in_profile,
             )?;
 
