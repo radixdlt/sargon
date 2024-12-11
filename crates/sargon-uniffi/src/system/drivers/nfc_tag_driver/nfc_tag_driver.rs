@@ -18,7 +18,6 @@ pub struct NFCTagDriverAdapter {
     pub wrapped: Arc<dyn NFCTagDriver>
 }
 
-
 #[async_trait::async_trait]
 impl InternalNFCTagDriver for NFCTagDriverAdapter {
     async fn start_session(&self) -> InternalResult<()> {
