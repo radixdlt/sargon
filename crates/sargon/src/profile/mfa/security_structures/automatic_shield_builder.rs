@@ -507,6 +507,7 @@ impl AutomaticShieldBuilder {
 mod tests {
     use std::sync::Mutex;
 
+    use async_std::future::ready;
     use indexmap::IndexSet;
 
     use super::*;
@@ -627,4 +628,350 @@ mod tests {
         )
         .await;
     }
+
+    #[actix_rt::test]
+    async fn empty_factors_is_err() {
+        let called = Arc::new(Mutex::new(false));
+
+        let res = SUT::build(IndexSet::new(), |_, _| {
+            *called.lock().unwrap() = true;
+            ready(unsafe {
+                ValidatedPrimary::new(IndexSet::just(
+                    FactorSourceID::sample_device(),
+                ))
+            })
+        })
+        .await;
+
+        assert!(!*called.lock().unwrap());
+
+        assert!(matches!(
+            res,
+            Err(CommonError::AutomaticShieldBuildingFailure { .. })
+        ));
+    }
+
+    #[actix_rt::test]
+    async fn one_factors_is_not_enough_is_err() {
+        let called = Arc::new(Mutex::new(false));
+
+        let res = SUT::build(
+            IndexSet::from_iter([FactorSource::sample_device()]),
+            |_, _| {
+                *called.lock().unwrap() = true;
+                ready(unsafe {
+                    ValidatedPrimary::new(IndexSet::just(
+                        FactorSourceID::sample_device(),
+                    ))
+                })
+            },
+        )
+        .await;
+
+        assert!(!*called.lock().unwrap());
+
+        assert!(matches!(
+            res,
+            Err(CommonError::AutomaticShieldBuildingFailure { .. })
+        ));
+    }
+
+    #[actix_rt::test]
+    async fn two_factors_is_not_enough_is_err() {
+        let called = Arc::new(Mutex::new(false));
+
+        let res = SUT::build(
+            IndexSet::from_iter([
+                FactorSource::sample_device(),
+                FactorSource::sample_ledger(),
+            ]),
+            |_, _| {
+                *called.lock().unwrap() = true;
+                ready(unsafe {
+                    ValidatedPrimary::new(IndexSet::just(
+                        FactorSourceID::sample_device(),
+                    ))
+                })
+            },
+        )
+        .await;
+
+        assert!(!*called.lock().unwrap());
+
+        assert!(matches!(
+            res,
+            Err(CommonError::AutomaticShieldBuildingFailure { .. })
+        ));
+    }
+
+    #[actix_rt::test]
+    async fn two_device_factor_source_and_one_ledger_is_not_sufficient() {
+        let called = Arc::new(Mutex::new(false));
+
+        let res = SUT::build(
+            IndexSet::from_iter([
+                FactorSource::sample_device_babylon(),
+                FactorSource::sample_device_babylon_other(),
+                FactorSource::sample_ledger(),
+            ]),
+            |_, _| {
+                *called.lock().unwrap() = true;
+                ready(unsafe {
+                    ValidatedPrimary::new(IndexSet::just(
+                        FactorSourceID::sample_device(),
+                    ))
+                })
+            },
+        )
+        .await;
+
+        assert!(!*called.lock().unwrap());
+
+        assert!(matches!(
+            res,
+            Err(CommonError::AutomaticShieldBuildingFailure { .. })
+        ));
+    }
+
+    #[actix_rt::test]
+    async fn one_device_factor_source_and_two_ledger_is_not_ok_if_ledger_is_used_for_primary(
+    ) {
+        let res = SUT::build(
+            IndexSet::from_iter([
+                FactorSource::sample_device_babylon(),
+                FactorSource::sample_ledger(),
+                FactorSource::sample_ledger_other(),
+            ]),
+            |_, _| {
+                ready(unsafe {
+                    ValidatedPrimary::new(IndexSet::just(
+                        FactorSource::sample_ledger().id(),
+                    ))
+                })
+            },
+        )
+        .await;
+
+        println!("🔮 {:?}", res);
+        assert!(matches!(
+            res,
+            Err(CommonError::AutomaticShieldBuildingFailure { .. })
+        ));
+    }
 }
+
+/*
+enum Quantity {
+    All,
+    Fixed(u8)
+    pub fn one() -> Self {
+        Self::Fixed(1)
+    }
+}
+
+enum FactorSelector {
+    Category(FactorCategory),
+    Kind(FactorSourceKind)
+}
+
+pub struct AutoShieldBuilder {
+    shield_builder: SecurityShieldBuilder,
+    all_available_factors: IndexSet<FactorSource>
+}
+
+impl AutoShieldBuilder {
+
+    pub fn new(all_available_factors: IndexSet<FactorSource>, user_chosen) {
+        let candiates_for_primary_role = filter_out_valid_primary_role_factors_from(all_available_factors);
+        let user_chosen_primary_factors = wallet_ui.user_selects(candiates_for_primary_role).await;
+
+        // 📒 "If the user only chose 1 factor for ACCESS, remove that factor from the list (it cannot be used elsewhere - otherwise it can)."
+        if user_chosen_primary_factors.len() == 1 {
+            all_available_factors.remove_one(user_chosen_primary_factors.first())
+        }
+
+        shield_builder.set_threshold(user_chosen_primary_factors.len());
+    }
+
+    fn assign_factors_matching_selector(
+        &mut self,
+        to: &mut IndexSet<FactorSource>,
+        selector: FactorSelector,
+        quantity_to_add: Quantity
+    ) {
+        let all_filtered = self.all_available_factors.filter(selector)
+        let quantified_filtered = all_filtered.take(quantity);
+        target_factors.add_all(quantified_filtered)
+        self.all_available_factors.remove_all(quantified_filtered)
+    }
+
+
+    fn assign_factors_of_category(
+        &mut self,
+        to: &mut IndexSet<FactorSource>,
+        category: FactorCategory,
+        quantity_to_add: Quantity
+    ) {
+        self.assign_factors_matching_selector(
+            to: to,
+            selector: FactorSelector::Category(category),
+            quantity_to_add: quantity_to_add
+        )
+    }
+
+    fn assign_factors_of_kind(
+        &mut self,
+        to: &mut IndexSet<FactorSource>,
+        kind: FactorSourceKind,
+        quantity_to_add: Quantity
+    ) {
+        self.assign_factors_matching_selector(
+            to: to,
+            selector: FactorSelector::Kind(kind),
+            quantity_to_add: quantity_to_add
+        )
+    }
+
+
+    fn assign_one_hardware_factor(
+        &mut self,
+        to: &mut IndexSet<FactorSource>,
+    ) {
+        self.assign_factors_of_category(
+            to: to,
+            category: FactorCategory::Hardware,
+            quantity_to_add: Quantity::one()
+        )
+    }
+
+    fn assign_factors_of_category_to_primary(
+        &mut self,
+        category: FactorCategory,
+        quantity_to_add: Quantity
+    ) {
+        self.assign_factors_of_category(
+            to: primary,
+            category: category,
+            quantity_to_add: quantity_to_add
+        )
+        // For Primary role, dont forget to update threshold
+        shield_builder.set_threshold(primary.len());
+    }
+
+
+    fn assign_factors_of_category_to_recovery(
+        &mut self,
+        category: FactorCategory,
+        quantity_to_add: Quantity
+    ) {
+        self.assign_factors_of_category(
+            to: recovery,
+            category: category,
+            quantity_to_add: quantity_to_add
+        )
+    }
+
+
+    fn assign_factors_of_category_to_confirmation(
+        &mut self,
+        category: FactorCategory,
+        quantity_to_add: Quantity
+    ) {
+        self.assign_factors_of_category(
+            to: confirmation,
+            category: category,
+            quantity_to_add: quantity_to_add
+        )
+    }
+
+    pub fn auto_build_factors(&mut self) -> MatrixOfFactorSources {
+
+        let mut primary = self.user_chosen_primary_factors;
+        // Non user chosen factors, auto chosen by the heuristics laid out by Matt
+        // in: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields
+        let mut recovery: IndexSet<FactorSource>;
+        let mut confirmation: IndexSet<FactorSource>;
+
+
+        // 📒 "Drop in the somewhat “special-use” factors first"
+        {
+            // 📒	"Add all Contact factors in the list to START."
+            self.assign_factors_of_category_to_recovery(
+                category: FactorCategory::Contact,
+                quantity_to_add: Quantity::All
+            )
+
+            // 📒	"Add all Information factors in the list to CONFIRM."
+            self.assign_factors_of_category_to_confirmation(
+                category: FactorCategory::Information,
+                quantity_to_add: Quantity::All
+            )
+        }
+
+
+        // 📒 "Distribute to try to get at least 1 START and then 1 CONFIRM"
+        {
+            // 📒 "Add any Custodian.." 🙅‍♀️  Custodian FactorSources does not exist yet...
+
+            // 📒 "Add any Hardware factors in the list, starting with the most recently used, to START
+            // until there is at least 1 factor source in START."
+            self.assign_one_hardware_factor(
+                to: recovery
+            )
+            // ❓ WHAT TO DO IF THERE WAS NONE?
+
+
+            // 📒 "Add any Hardware (Ledger, Arculus, Yubikey) factors in the list, starting with the most recently used, to CONFIRM until there is at least 1 factor factors in CONFIRM."
+            self.assign_one_hardware_factor(
+                to: confirmation,
+            )
+            // ❓ WHAT TO DO IF THERE WAS NONE?
+        }
+
+
+
+        // 📒 "Distribute to try to get up to 2 START and then 2 CONFIRM factors if possible"
+        {
+            // 📒 "Add any Custodian.." 🙅‍♀️ Custodian FactorSources does not exist yet...
+
+            // 📒 "Add any Hardware (Ledger, Arculus, Yubikey) factors in the list, starting with the most recently used, to START until there are exactly 2 factors in START."
+            self.assign_one_hardware_factor(
+                to: recovery
+            )
+            // ❓ WHAT TO DO IF THERE WAS NONE?
+
+
+            // 📒 "Add any Hardware (Ledger, Arculus, Yubikey) factors in the list, starting with the most recently used, to CONFIRM until there are exactly 2 factors in CONFIRM."
+            self.assign_one_hardware_factor(
+                to: confirmation,
+            )
+            // ❓ WHAT TO DO IF THERE WAS NONE?
+        }
+
+        // 📒 "Fill in any remaining other factors to increase reliability of being able to recover"
+        {
+            // 📒 "Add any (and all) remaining Hardware or Custodian factors in the list to START."
+            self.assign_factors_of_category_to_primary(
+                category: FactorSourceKind::Hardware,
+                quantity: Quantity::All
+            )
+
+            // 📒 "Set all Biometrics/PIN factors to a role (they must be all in one role because they are unlocked by the same Biometrics/PIN check):"
+
+            let mut target_remaining_device_factors =  if recovery.len() > confirmation.len() {
+                // 📒 "If there are more START factors than CONFIRM factors, add any (and all) Biometrics/PIN factors to CONFIRM"
+                &mut confirmation
+            } else {
+                // 📒 "Else, add any (and all) Biometrics/PIN factors to START."
+                &mut recovery
+            };
+
+            self.assign_factors_of_kind(
+                to: target_remaining_device_factors,
+                kind: FactorSourceKind::Device,
+                quantity_to_add: Quantity::All
+            )
+        }
+    }
+}
+*/
