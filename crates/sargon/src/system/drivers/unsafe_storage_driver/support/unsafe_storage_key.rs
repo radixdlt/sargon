@@ -7,18 +7,13 @@ pub enum UnsafeStorageKey {
 
 impl UnsafeStorageKey {
     pub fn identifier(&self) -> String {
-        // format!(
-        //     "unsafe_storage_key_{}",
-        //     match self {
-        //         UnsafeStorageKey::FactorSourceUserHasWrittenDown =>
-        //             "factor_source_user_has_written_down".to_owned(),
-        //     }
-        // )
-        match self {
-            UnsafeStorageKey::FactorSourceUserHasWrittenDown => {
-                "mnemonicsUserClaimsToHaveBackedUp".to_owned()
+        format!(
+            "unsafe_storage_key_{}",
+            match self {
+                UnsafeStorageKey::FactorSourceUserHasWrittenDown =>
+                    "factor_source_user_has_written_down".to_owned(),
             }
-        }
+        )
     }
 }
 
@@ -26,11 +21,11 @@ impl UnsafeStorageKey {
 mod tests {
     use crate::prelude::*;
 
-    // #[test]
-    // fn identifier() {
-    //     assert_eq!(
-    //         UnsafeStorageKey::FactorSourceUserHasWrittenDown.identifier(),
-    //         "unsafe_storage_key_factor_source_user_has_written_down"
-    //     );
-    // }
+    #[test]
+    fn identifier() {
+        assert_eq!(
+            UnsafeStorageKey::FactorSourceUserHasWrittenDown.identifier(),
+            "unsafe_storage_key_factor_source_user_has_written_down"
+        );
+    }
 }
