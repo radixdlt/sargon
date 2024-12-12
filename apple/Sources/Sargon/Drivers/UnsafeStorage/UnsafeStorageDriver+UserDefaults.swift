@@ -12,6 +12,8 @@ extension UnsafeStorageDriver where Self == UnsafeStorage {
 	public static var shared: Self { Self.shared }
 }
 
+public typealias UnsafeStorageKeyMapping = [UnsafeStorageKey: String]
+
 // MARK: - UnsafeStorage
 /// An `UnsafeStorageDriver` implementation which
 /// wraps `UserDefaults`.
@@ -21,9 +23,9 @@ public final class UnsafeStorage: Sendable {
 
 	/// A dictionary containing the custom String value used for a given `UnsafeStorageKey`.
 	/// This is necessary since some UserDefaults were saved by the Host apps prior to Sargon.
-	fileprivate let keyMapping: [Key: String]
+	fileprivate let keyMapping: [UnsafeStorageKey: String]
 
-	public init(userDefaults: UserDefaults = .standard, keyMapping: [Key: String] = [:]) {
+	public init(userDefaults: UserDefaults = .standard, keyMapping: [UnsafeStorageKey: String] = [:]) {
 		self.userDefaults = userDefaults
 		self.keyMapping = keyMapping
 	}
@@ -36,7 +38,7 @@ public final class UnsafeStorage: Sendable {
 extension UnsafeStorageKey {
 	/// Translates this `UnsafeStorageKey` into a String
 	/// identifier which we can use with `UserDefaults`
-	var identifier: String {
+	public var identifier: String {
 		unsafeStorageKeyIdentifier(key: self)
 	}
 }

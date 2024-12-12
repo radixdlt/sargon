@@ -40,4 +40,16 @@ mod tests {
 
         assert_eq!(sut.visible(), SUT::just(Account::sample_mainnet_bob()))
     }
+
+    #[test]
+    fn hidden() {
+        let values = &[
+            Account::sample_mainnet_bob(),
+            Account::sample_mainnet_diana(), // This account is hidden
+            Account::sample_mainnet_erin(),  // This account is tombstoned
+        ];
+        let sut = SUT::from_iter(values.clone());
+
+        assert_eq!(sut.hidden(), SUT::just(Account::sample_mainnet_diana()))
+    }
 }

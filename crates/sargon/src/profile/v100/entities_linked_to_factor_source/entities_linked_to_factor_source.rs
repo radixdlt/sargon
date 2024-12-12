@@ -20,7 +20,7 @@ pub struct EntitiesLinkedToFactorSource {
 }
 
 impl EntitiesLinkedToFactorSource {
-    fn new(
+    pub fn new(
         accessibility: FactorSourceAccessibility,
         accounts: Accounts,
         hidden_accounts: Accounts,

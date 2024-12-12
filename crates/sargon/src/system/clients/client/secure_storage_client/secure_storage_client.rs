@@ -349,6 +349,34 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn contains_device_mnemonic() {
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
+        let factor_source_id = private.factor_source.id;
+        let (sut, _) = SecureStorageClient::ephemeral();
+
+        // It doesn't contain it yet
+        assert!(!sut
+            .contains_device_mnemonic(private.factor_source.clone())
+            .await
+            .unwrap());
+
+        // Save the mnemonic
+        assert!(sut
+            .save_mnemonic_with_passphrase(
+                &private.mnemonic_with_passphrase,
+                &factor_source_id.clone()
+            )
+            .await
+            .is_ok());
+
+        // Assert it contains it now
+        assert!(sut
+            .contains_device_mnemonic(private.factor_source)
+            .await
+            .unwrap());
+    }
+
+    #[actix_rt::test]
     async fn delete_mnemonic() {
         // ARRANGE
         let private =

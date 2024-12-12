@@ -149,6 +149,15 @@ mod tests {
     }
 
     #[test]
+    fn hidden_accounts_on_current_network() {
+        let sut = SUT::sample_other();
+        assert_eq!(
+            sut.hidden_accounts_on_current_network().unwrap(),
+            Accounts::just(Account::sample_stokenet_olivia()) // nadia is visible
+        );
+    }
+
+    #[test]
     fn test_accounts_for_display_on_current_network() {
         let sut = SUT::sample();
         assert_eq!(

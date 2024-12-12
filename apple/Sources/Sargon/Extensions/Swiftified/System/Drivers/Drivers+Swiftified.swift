@@ -8,13 +8,13 @@ extension Drivers {
 	public convenience init(
 		bundle: Bundle,
 		userDefaultsSuite: String,
-		userDefaultsKeyMapping: [UnsafeStorageKey: String],
+		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
 		secureStorageDriver: SecureStorageDriver
 	) {
 		self.init(
 			appVersion: (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "Unknown",
 			userDefaultsSuite: userDefaultsSuite,
-			userDefaultsKeyMapping: userDefaultsKeyMapping,
+			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver
 		)
 	}
@@ -22,7 +22,7 @@ extension Drivers {
 	public convenience init(
 		appVersion: String,
 		userDefaultsSuite: String,
-		userDefaultsKeyMapping: [UnsafeStorageKey: String],
+		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
 		secureStorageDriver: SecureStorageDriver
 	) {
 		self.init(
@@ -30,7 +30,7 @@ extension Drivers {
 			hostInfo: AppleHostInfoDriver(appVersion: appVersion),
 			unsafeStorage: UnsafeStorage(
 				userDefaults: .init(suiteName: userDefaultsSuite)!,
-				keyMapping: userDefaultsKeyMapping
+				keyMapping: unsafeStorageKeyMapping
 			)
 		)
 	}

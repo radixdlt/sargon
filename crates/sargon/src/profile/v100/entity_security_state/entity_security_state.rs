@@ -85,18 +85,14 @@ impl HasSampleValues for EntitySecurityState {
     }
 }
 
-impl EntitySecurityState {
-    /// Returns whether the entity is linked to the given factor source.
-    pub fn is_linked_to_factor_source(
-        &self,
-        factor_source: FactorSource,
-    ) -> bool {
+impl HasFactorInstances for EntitySecurityState {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
         match self {
             EntitySecurityState::Unsecured { value } => {
-                value.is_linked_to_factor_source(factor_source)
+                value.unique_factor_instances()
             }
             EntitySecurityState::Securified { value } => {
-                value.is_linked_to_factor_source(factor_source)
+                value.unique_factor_instances()
             }
         }
     }
@@ -329,6 +325,27 @@ mod tests {
               }
             }
             "#,
+        );
+    }
+
+    #[test]
+    fn unique_factor_instances() {
+        let unsecured = UnsecuredEntityControl::sample();
+        let sut = SUT::Unsecured {
+            value: unsecured.clone(),
+        };
+        assert_eq!(
+            sut.unique_factor_instances(),
+            unsecured.unique_factor_instances()
+        );
+
+        let secured = SecuredEntityControl::sample();
+        let sut = SUT::Securified {
+            value: secured.clone(),
+        };
+        assert_eq!(
+            sut.unique_factor_instances(),
+            secured.unique_factor_instances()
         );
     }
 }

@@ -79,22 +79,6 @@ impl UnsecuredEntityControl {
     }
 }
 
-impl UnsecuredEntityControl {
-    /// Returns whether the entity is linked to the given factor source.
-    pub fn is_linked_to_factor_source(
-        &self,
-        factor_source: FactorSource,
-    ) -> bool {
-        match factor_source.factor_source_id() {
-            // TODO: This is what it was currently done on iOS, confirm if it is correct to ignore authentication_signing
-            FactorSourceID::Hash { value } => {
-                value == self.transaction_signing.factor_source_id
-            }
-            FactorSourceID::Address { .. } => false,
-        }
-    }
-}
-
 impl HasSampleValues for UnsecuredEntityControl {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
