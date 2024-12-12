@@ -3,6 +3,6 @@ import SargonUniFFI
 
 extension SecurityProblemKind: CaseIterable {
 	public static var allCases: [SecurityProblemKind] {
-		[.configurationBackup, .securityFactors]
+		[.securityShields, .securityFactors, .configurationBackup]
 	}
 }

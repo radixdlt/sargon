@@ -118,6 +118,20 @@ impl FactorSourceKind {
     }
 }
 
+impl FactorSourceKind {
+    pub fn display_order_for_primary_threshold_selection(&self) -> u8 {
+        match self {
+            FactorSourceKind::Device => 0,
+            FactorSourceKind::ArculusCard => 1,
+            FactorSourceKind::LedgerHQHardwareWallet => 2,
+            FactorSourceKind::Password => 3,
+            FactorSourceKind::OffDeviceMnemonic => 4,
+            FactorSourceKind::TrustedContact => 5,
+            FactorSourceKind::SecurityQuestions => 6,
+        }
+    }
+}
+
 impl HasSampleValues for FactorSourceKind {
     fn sample() -> Self {
         Self::Device
@@ -239,6 +253,41 @@ mod tests {
         assert_eq!(
             SUT::TrustedContact.category(),
             FactorSourceCategory::Contact
+        );
+    }
+
+    #[test]
+    fn display_order_for_primary_threshold_selection() {
+        assert_eq!(
+            SUT::Device.display_order_for_primary_threshold_selection(),
+            0
+        );
+        assert_eq!(
+            SUT::ArculusCard.display_order_for_primary_threshold_selection(),
+            1
+        );
+        assert_eq!(
+            SUT::LedgerHQHardwareWallet
+                .display_order_for_primary_threshold_selection(),
+            2
+        );
+        assert_eq!(
+            SUT::Password.display_order_for_primary_threshold_selection(),
+            3
+        );
+        assert_eq!(
+            SUT::OffDeviceMnemonic
+                .display_order_for_primary_threshold_selection(),
+            4
+        );
+        assert_eq!(
+            SUT::TrustedContact.display_order_for_primary_threshold_selection(),
+            5
+        );
+        assert_eq!(
+            SUT::SecurityQuestions
+                .display_order_for_primary_threshold_selection(),
+            6
         );
     }
 
