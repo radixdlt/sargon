@@ -400,7 +400,10 @@ impl SecurityShieldBuilder {
             .map(|x| x.into_internal())
             .collect::<IndexSet<sargon::FactorSource>>();
 
-        self.set_ret(|builder| builder.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(all_factors.clone()))
+        self.set_ret(|builder| {
+            let _ = builder.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(all_factors.clone());
+            Ok(())
+        })
     }
 }
 

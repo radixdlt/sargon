@@ -5,6 +5,9 @@ use crate::prelude::*;
 use super::security_shield_builder;
 
 pub struct AutomaticShieldBuilder {
+    /// Only used for testing purposes, feel free to remove.
+    stats_for_testing: AutoBuildOutcomeForTesting,
+
     remaining_available_factors: IndexSet<FactorSource>,
 
     proto_matrix: ProtoMatrix,
@@ -14,6 +17,9 @@ use serde_json::value::Index;
 use FactorSourceCategory::*;
 use RoleKind::*;
 
+/// A tiny enum to make it possible to tell auto shield construction to
+/// either assign ALL FactorSource matching some `FactorSelector` or only   
+/// some fixed quantity (typically 1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumAsInner)]
 enum Quantity {
     All,
@@ -25,17 +31,52 @@ impl Quantity {
     }
 }
 
+/// A tiny enum to make it possible to filter FactorSources on either
+/// FactorSourceCategory or FactorSourceKind.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FactorSelector {
     Category(FactorSourceCategory),
     Kind(FactorSourceKind),
 }
 
+/// For testing purposes
+/// We do not support Custodian FactorSource yet, but I wanted to write the
+/// heuristics being future proof, so instead of actually assigning any Custodian
+/// (which does not exist), we record the calls to assign Custodian using this
+/// small struct, so that we can assert correctness of the heuristics.
+///
+/// When we do add Custodian FactorSource, we can remove this struct and just
+/// assert the actual assignment of Custodian factors...
+#[derive(Default)]
+pub struct AutoBuildOutcomeForTesting {
+    calls_to_assign_custodian: Vec<CallsToAssignCustodian>,
+}
+
+/// For testing purposes
+/// We do not support Custodian FactorSource yet, but I wanted to write the
+/// heuristics being future proof, so instead of actually assigning any Custodian
+/// (which does not exist), we record the calls to assign Custodian using this
+/// small struct, so that we can assert correctness of the heuristics.
+///
+/// When we do add Custodian FactorSource, we can remove this struct and just
+/// assert the actual assignment of Custodian factors...
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CallsToAssignCustodian {
+    /// The role.
+    role: RoleKind,
+    /// The number of factors in the role when `assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment` was called
+    number_of_factors_for_role: u8,
+    /// The value of `limit` parameter passed to `assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment`
+    limit: u8,
+}
+
 impl SecurityShieldBuilder {
     pub fn auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
         &self,
         all_factors_in_profile: IndexSet<FactorSource>,
-    ) -> Result<()> {
+    ) -> Result<AutoBuildOutcomeForTesting>
+/* Feel free to replace `AutoBuildOutcomeForTesting` return type if you need anything else, I had Unit, so might as well make testing easier by returning this type. */
+    {
         if let Some(invalid_reason) = self.validate_primary_role() {
             return Err(CommonError::AutomaticShieldBuildingFailure {
                 underlying: format!(
@@ -101,7 +142,7 @@ impl SecurityShieldBuilder {
                 underlying: invalid_reason.to_string(),
             })
         } else {
-            Ok(())
+            Ok(auto_builder.stats_for_testing)
         }
     }
 
@@ -162,6 +203,7 @@ impl AutomaticShieldBuilder {
         primary: IndexSet<FactorSourceID>,
     ) -> Self {
         Self {
+            stats_for_testing: AutoBuildOutcomeForTesting::default(),
             remaining_available_factors: available_factors,
             proto_matrix: ProtoMatrix::new(primary),
         }
@@ -257,6 +299,41 @@ impl AutomaticShieldBuilder {
         self.assign_factors_of_category(Confirmation, category, quantity_to_add)
     }
 
+    fn assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment(
+        &mut self,
+        limit: u8,
+        to: RoleKind,
+    ) {
+        let role = to;
+        if self.count_factors_for_role(role) < limit {
+            // self.assign_one_custodian_factor(role); // we do not support custodians yet!
+            self.stats_for_testing.calls_to_assign_custodian.push(
+                CallsToAssignCustodian {
+                    role,
+                    number_of_factors_for_role: self
+                        .count_factors_for_role(role),
+                    limit,
+                },
+            );
+        }
+        if self.count_factors_for_role(role) < limit {
+            self.assign_one_hardware_factor(role);
+        }
+    }
+
+    fn assign_custodian_and_hardware_to_non_primary_roles_if_less_than_limit_before_each_assignment(
+        &mut self,
+        limit: u8,
+    ) {
+        self.assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment(
+            limit, Recovery,
+        );
+        self.assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment(
+            limit,
+            Confirmation,
+        );
+    }
+
     /// Automatic assignment of factors to roles according to [this heuristics][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Automatic-Security-Shield-Construction
@@ -284,22 +361,13 @@ impl AutomaticShieldBuilder {
             );
         }
 
-        let mut distribute_custodian_and_hardware_to_non_primary = || {
-            // 📒 "Add any Custodian.." 🙅‍♀️  Custodian FactorSources does not exist yet...
+        // 📒 Assign Custodian/Hardware factors to RECOVERY & CONFIRMATION
+        // without exceeding limit of 1 factor in each role.
+        self.assign_custodian_and_hardware_to_non_primary_roles_if_less_than_limit_before_each_assignment(1);
 
-            // 📒 "Add any Hardware factors in the list, starting with the most recently used, to RECOVERY
-            // until there is at least _ factor source in RECOVERY."
-            self.assign_one_hardware_factor(Recovery);
-
-            // 📒 "Add any Hardware (Ledger, Arculus, Yubikey) factors in the list, starting with the most recently used, to CONFIRMATION until there is at least _ factor factors in CONFIRMATION."
-            self.assign_one_hardware_factor(Confirmation);
-        };
-
-        // 📒 "Distribute to try to get at least 1 RECOVERY and then 1 CONFIRMATION" [if possible]
-        distribute_custodian_and_hardware_to_non_primary();
-
-        // 📒 "Distribute to try to get up to 2 RECOVERY and then 2 CONFIRMATION factors if possible"
-        distribute_custodian_and_hardware_to_non_primary();
+        // 📒 Assign Custodian/Hardware factors to RECOVERY & CONFIRMATION
+        // without exceeding limit of 2 factor in each role.
+        self.assign_custodian_and_hardware_to_non_primary_roles_if_less_than_limit_before_each_assignment(2);
 
         // 📒 "Fill in any remaining other factors to increase reliability of being able to recover"
         {
@@ -375,21 +443,27 @@ mod tests {
         fn test(
             all_factors_in_profile: IndexSet<FactorSource>,
             pick_primary_role_factors: IndexSet<FactorSourceID>,
-        ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        ) -> Result<(
+            SecurityStructureOfFactorSourceIDs,
+            AutoBuildOutcomeForTesting,
+        )> {
             let shield_builder = SecurityShieldBuilder::new();
             shield_builder.set_threshold(pick_primary_role_factors.len() as u8);
             pick_primary_role_factors.into_iter().for_each(|f| {
                 shield_builder.add_factor_source_to_primary_threshold(f);
             });
-            shield_builder.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
+
+            let stats_for_testing = shield_builder.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
                 all_factors_in_profile,
             )?;
 
-            shield_builder.build().map_err(|e| {
+            let built = shield_builder.build().map_err(|e| {
                 CommonError::AutomaticShieldBuildingFailure {
                     underlying: format!("{:?}", e),
                 }
-            })
+            })?;
+
+            Ok((built, stats_for_testing))
         }
     }
 
@@ -460,7 +534,36 @@ mod tests {
             ]),
             IndexSet::just(FactorSource::sample_ledger().id()),
         );
-        let matrix = res.unwrap().matrix_of_factors;
+
+        let (shield, stats) = res.unwrap();
+
+        pretty_assertions::assert_eq!(
+            stats.calls_to_assign_custodian,
+            vec![
+                CallsToAssignCustodian {
+                    role: Recovery,
+                    number_of_factors_for_role: 0,
+                    limit: 1
+                },
+                CallsToAssignCustodian {
+                    role: Confirmation,
+                    number_of_factors_for_role: 0,
+                    limit: 1
+                },
+                CallsToAssignCustodian {
+                    role: Recovery,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+                CallsToAssignCustodian {
+                    role: Confirmation,
+                    number_of_factors_for_role: 0,
+                    limit: 2
+                },
+            ]
+        );
+
+        let matrix = shield.matrix_of_factors;
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
@@ -499,7 +602,35 @@ mod tests {
             factors.clone().into_iter().map(|f| f.id()).collect(),
         );
 
-        let matrix = res.unwrap().matrix_of_factors;
+        let (shield, stats) = res.unwrap();
+
+        pretty_assertions::assert_eq!(
+            stats.calls_to_assign_custodian,
+            vec![
+                CallsToAssignCustodian {
+                    role: Recovery,
+                    number_of_factors_for_role: 0,
+                    limit: 1
+                },
+                CallsToAssignCustodian {
+                    role: Confirmation,
+                    number_of_factors_for_role: 0,
+                    limit: 1
+                },
+                CallsToAssignCustodian {
+                    role: Recovery,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+                CallsToAssignCustodian {
+                    role: Confirmation,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+            ]
+        );
+
+        let matrix = shield.matrix_of_factors;
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
