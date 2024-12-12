@@ -9,6 +9,7 @@ impl KeysCollector {
         derivation_paths: impl IntoIterator<
             Item = (FactorSourceIDFromHash, IndexSet<DerivationPath>),
         >,
+        derivation_purpose: DerivationPurpose,
     ) -> Self {
         Self::new(
             all_factor_sources_in_profile,
@@ -16,6 +17,7 @@ impl KeysCollector {
                 .into_iter()
                 .collect::<IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>>(),
             Arc::new(TestDerivationInteractor::default()),
+            derivation_purpose
         )
         .unwrap()
     }
@@ -24,10 +26,12 @@ impl KeysCollector {
         derivation_paths: impl IntoIterator<
             Item = (FactorSourceIDFromHash, IndexSet<DerivationPath>),
         >,
+        derivation_purpose: DerivationPurpose,
     ) -> Self {
         Self::new_test_with_factor_sources(
             FactorSource::sample_all(),
             derivation_paths,
+            derivation_purpose,
         )
     }
 
@@ -48,6 +52,7 @@ impl KeysCollector {
         Self::new_test_with_factor_sources(
             [factor_source.clone()],
             [(factor_source.id_from_hash(), IndexSet::just(path))],
+            DerivationPurpose::PreDerivingKeys,
         )
     }
 }

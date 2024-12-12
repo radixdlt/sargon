@@ -132,10 +132,13 @@ impl VirtualEntityCreatingInstanceProvider {
             interactor,
         );
         let (instances_in_cache_consumer, outcome) = provider
-            .provide(QuantifiedDerivationPreset::new(
-                DerivationPreset::veci_entity_kind(entity_kind),
-                count,
-            ))
+            .provide(
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::veci_entity_kind(entity_kind),
+                    count,
+                ),
+                DerivationPurpose::creation_of_new_virtual_entity(entity_kind),
+            )
             .await?;
 
         let outcome = outcome

@@ -17,6 +17,7 @@ mod home_cards;
 mod keys_collector;
 mod profile;
 mod radix_connect;
+mod security_center;
 mod signing;
 mod system;
 mod types;
@@ -32,6 +33,7 @@ pub mod prelude {
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
+    pub use crate::security_center::*;
     pub use crate::signing::*;
     pub use crate::system::*;
     pub use crate::types::*;

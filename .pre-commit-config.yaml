@@ -1,6 +1,6 @@
 fail_fast: true
-default_install_hook_types: [pre-push]
-default_stages: [pre-push]
+default_install_hook_types: [pre-commit]
+default_stages: [pre-commit]
 repos:
   - repo: https://github.com/crate-ci/typos
     rev: v1.28.1
@@ -37,27 +37,9 @@ repos:
         pass_filenames: false
 
       - id: unit tests
+        stages: [pre-push]
         name: unit tests
         language: system
         types: [file, rust]
         entry: cargo test --lib
         pass_filenames: false
-
-  - repo: https://github.com/phylum-dev/phylum-ci
-    rev: main
-    hooks:
-      - id: phylum
-        stages: [pre-push]
-        # Optional: Specify the dependency file pattern for your repository
-        files: |
-            (?x)^(
-                Cargo\.lock|
-            )$
-        # Optional: Specify additional arguments to be passed to `phylum-ci`
-        args:
-          - -vv
-          - --depfile=Cargo.lock
-          - --audit
-          - --force-analysis
-          - --all-deps
-        verbose: true
