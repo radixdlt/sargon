@@ -345,12 +345,13 @@ impl SargonOS {
             Ok(Some(loaded_host_id)) => {
                 debug!("Found saved host id: {:?}", &loaded_host_id);
                 loaded_host_id
-            },
+            }
             Ok(None) => {
                 debug!("Found no saved host id, creating new.");
                 let new_host_id = HostId::generate_new();
                 debug!("Created new host id: {:?}", &new_host_id);
-                let save_result = secure_storage.save_host_id(&new_host_id).await;
+                let save_result =
+                    secure_storage.save_host_id(&new_host_id).await;
                 if let Err(error) = save_result {
                     debug!("Failed to save new host id {:?}", error);
                 } else {
@@ -763,10 +764,7 @@ mod tests {
     async fn test_resolve_host_id() {
         let os = SUT::fast_boot().await;
 
-        assert_eq!(
-            SargonOS::get_host_id(&os.clients).await,
-            os.host_id()
-        )
+        assert_eq!(SargonOS::get_host_id(&os.clients).await, os.host_id())
     }
 
     #[actix_rt::test]
