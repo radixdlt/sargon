@@ -21,10 +21,9 @@ impl SargonOS {
     /// header
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
         debug!("Claiming profile, id: {}", &profile.id());
-        let host_id = self.host_id().await?;
         let host_info = self.host_info().await;
         let claiming_device_info =
-            DeviceInfo::new_from_info(&host_id, &host_info);
+            DeviceInfo::new_from_info(&self.host_id, &host_info);
 
         Self::claim_provided_profile(profile, claiming_device_info);
         info!(
@@ -345,7 +344,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let host_id = os.host_id().await.unwrap();
+        let host_id = os.host_id;
         let host_info = os.host_info().await;
         assert_eq!(
             os.profile().unwrap().header.last_used_on_device,
