@@ -287,8 +287,8 @@ impl AutomaticShieldBuilder {
             }
 
             if !self.assign_factors_of_category(role, category, Quantity::One) {
-                // We did not manage to assign any hardware factor, meaning we
-                // it is meaningless to try to assign more factors of this category.
+                // We did not manage to assign any factor of this category, meaning we
+                // it is meaningless to try again.
                 return;
             }
         }

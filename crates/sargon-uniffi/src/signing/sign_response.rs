@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use paste::paste;
 use sargon::IndexMap;
-use sargon::IndexSet;
 
 macro_rules! decl_sign_response {
     (
@@ -47,9 +46,7 @@ macro_rules! decl_sign_response {
                         |item| {
                             (
                                 item.factor_source_id.into_internal(),
-                                sargon::IndexSet::from_iter(
-                                    item.hd_signatures.into_iter().map(|s| s.into_internal()),
-                                ),
+                                item.hd_signatures.into_internal()
                             )
                         },
                     )),

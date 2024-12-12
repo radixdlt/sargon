@@ -8,9 +8,10 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use sargon::SecurityShieldBuilder as InternalSecurityShieldBuilder;
-use sargon::SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus;
-use sargon::{IndexSet, MatrixBuilder};
+use sargon::{
+    SecurityShieldBuilder as InternalSecurityShieldBuilder,
+    SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus,
+};
 
 use crate::prelude::*;
 
@@ -49,16 +50,6 @@ impl SecurityShieldBuilder {
     ) {
         let mut binding = self.wrapped.write().expect("No poison");
         _ = write(&mut binding);
-    }
-
-    fn set_ret<R>(
-        &self,
-        mut write: impl FnMut(
-            &mut sargon::SecurityShieldBuilder,
-        ) -> sargon::Result<R>,
-    ) -> Result<R> {
-        let mut binding = self.wrapped.write().expect("No poison");
-        write(&mut binding).into_result()
     }
 
     fn validation_for_addition_of_factor_source_by_calling(
@@ -397,15 +388,12 @@ impl SecurityShieldBuilder {
         &self,
         all_factors: Vec<FactorSource>,
     ) -> Result<()> {
-        let all_factors = all_factors
-            .into_iter()
-            .map(|x| x.into_internal())
-            .collect::<IndexSet<sargon::FactorSource>>();
-
-        self.set_ret(|builder| {
-            let _ = builder.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(all_factors.clone());
-            Ok(())
-        })
+        let binding = self.wrapped.write().expect("No poison");
+        let _ = binding
+            .auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
+                all_factors.into_internal(),
+            );
+        Ok(())
     }
 }
 
