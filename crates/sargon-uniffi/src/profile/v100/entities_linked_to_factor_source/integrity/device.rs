@@ -1,9 +1,9 @@
 use crate::prelude::*;
-use sargon::DeviceFactorSourceAccessibility as InternalDeviceFactorSourceAccessibility;
+use sargon::DeviceFactorSourceIntegrity as InternalDeviceFactorSourceIntegrity;
 
-/// A struct representing the accessibility of a device factor source.
+/// A struct representing the integrity of a device factor source.
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
-pub struct DeviceFactorSourceAccessibility {
+pub struct DeviceFactorSourceIntegrity {
     /// The factor source that is linked to the entities.
     pub factor_source: DeviceFactorSource,
 

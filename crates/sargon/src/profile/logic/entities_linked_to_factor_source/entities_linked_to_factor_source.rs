@@ -5,7 +5,7 @@ impl Profile {
     pub fn entities_linked_to_factor_source(
         &self,
         factor_source: FactorSource,
-        integrity: FactorSourceAccessibility,
+        integrity: FactorSourceIntegrity,
     ) -> Result<EntitiesLinkedToFactorSource> {
         let accounts = self
             .accounts_on_current_network()?

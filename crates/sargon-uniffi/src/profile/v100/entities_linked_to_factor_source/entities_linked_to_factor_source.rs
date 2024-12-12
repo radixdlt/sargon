@@ -4,8 +4,8 @@ use sargon::EntitiesLinkedToFactorSource as InternalEntitiesLinkedToFactorSource
 /// This is the result of checking what entities are controlled by a given `FactorSource`.
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct EntitiesLinkedToFactorSource {
-    /// The accessibility of the factor source.
-    pub accessibility: FactorSourceAccessibility,
+    /// The integrity of the factor source.
+    pub integrity: FactorSourceIntegrity,
 
     /// The visible accounts linked to the factor source.
     pub accounts: Vec<Account>,

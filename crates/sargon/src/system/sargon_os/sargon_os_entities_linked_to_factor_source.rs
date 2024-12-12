@@ -27,7 +27,7 @@ impl SargonOS {
     async fn integrity(
         &self,
         factor_source: FactorSource,
-    ) -> Result<FactorSourceAccessibility> {
+    ) -> Result<FactorSourceIntegrity> {
         match factor_source {
             FactorSource::Device { value } => {
                 self.device_integrity(value).await
@@ -40,7 +40,7 @@ impl SargonOS {
     async fn device_integrity(
         &self,
         device_factor_source: DeviceFactorSource,
-    ) -> Result<FactorSourceAccessibility> {
+    ) -> Result<FactorSourceIntegrity> {
         let is_mnemeonic_present_in_keychain = self
             .clients
             .secure_storage
@@ -51,7 +51,7 @@ impl SargonOS {
             .unsafe_storage
             .check_if_mnemonic_is_backed_up(device_factor_source.clone())
             .await?;
-        let result = DeviceFactorSourceAccessibility::new(
+        let result = DeviceFactorSourceIntegrity::new(
             device_factor_source,
             is_mnemeonic_present_in_keychain,
             is_mnemonic_marked_as_backed_up,

@@ -3,8 +3,8 @@ use crate::prelude::*;
 /// This is the result of checking what entities are linked to a given `FactorSource`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct EntitiesLinkedToFactorSource {
-    /// The accessibility of the factor source.
-    pub accessibility: FactorSourceAccessibility,
+    /// The integrity of the factor source.
+    pub integrity: FactorSourceIntegrity,
 
     /// The visible accounts linked to the factor source.
     pub accounts: Accounts,
@@ -21,14 +21,14 @@ pub struct EntitiesLinkedToFactorSource {
 
 impl EntitiesLinkedToFactorSource {
     pub fn new(
-        accessibility: FactorSourceAccessibility,
+        integrity: FactorSourceIntegrity,
         accounts: Accounts,
         hidden_accounts: Accounts,
         personas: Personas,
         hidden_personas: Personas,
     ) -> Self {
         Self {
-            accessibility,
+            integrity,
             accounts,
             hidden_accounts,
             personas,
@@ -40,7 +40,7 @@ impl EntitiesLinkedToFactorSource {
 impl HasSampleValues for EntitiesLinkedToFactorSource {
     fn sample() -> Self {
         Self::new(
-            FactorSourceAccessibility::sample(),
+            FactorSourceIntegrity::sample(),
             Accounts::sample(),
             Accounts::new(),
             Personas::sample(),
@@ -50,7 +50,7 @@ impl HasSampleValues for EntitiesLinkedToFactorSource {
 
     fn sample_other() -> Self {
         Self::new(
-            FactorSourceAccessibility::sample_other(),
+            FactorSourceIntegrity::sample_other(),
             Accounts::sample_other(),
             Accounts::new(),
             Personas::sample_other(),

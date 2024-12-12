@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-/// A struct representing the accessibility of a device factor source.
+/// A struct representing the integrity of a device factor source.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct DeviceFactorSourceAccessibility {
+pub struct DeviceFactorSourceIntegrity {
     /// The factor source that is linked to the entities.
     pub factor_source: DeviceFactorSource,
 
@@ -13,7 +13,7 @@ pub struct DeviceFactorSourceAccessibility {
     pub is_mnemonic_marked_as_backed_up: bool,
 }
 
-impl DeviceFactorSourceAccessibility {
+impl DeviceFactorSourceIntegrity {
     pub fn new(
         factor_source: DeviceFactorSource,
         is_mnemonic_present_in_keychain: bool,
@@ -27,7 +27,7 @@ impl DeviceFactorSourceAccessibility {
     }
 }
 
-impl HasSampleValues for DeviceFactorSourceAccessibility {
+impl HasSampleValues for DeviceFactorSourceIntegrity {
     fn sample() -> Self {
         Self::new(DeviceFactorSource::sample(), true, true)
     }
