@@ -226,6 +226,12 @@ impl SecurityShieldBuilder {
             builder.reset_recovery_and_confirmation_role_state();
         })
     }
+
+    pub(crate) fn reset_factors_in_roles(&self) -> &Self {
+        self.set(|builder| {
+            builder.reset_factors_in_roles();
+        })
+    }
 }
 
 impl SecurityShieldBuilder {
@@ -419,6 +425,13 @@ impl SecurityShieldBuilder {
             let r = builder.validate();
             r.as_shield_validation()
         })
+    }
+
+    /// Validates **just** the primary role **in isolation**.
+    pub fn validate_primary_role(
+        &self,
+    ) -> Option<SecurityShieldBuilderInvalidReason> {
+        self.validate_role_in_isolation(RoleKind::Primary)
     }
 
     /// `None` means valid!
@@ -1095,6 +1108,31 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+        );
+    }
+
+    #[test]
+    fn two_different_password_only_not_valid_for_primary() {
+        let sut = SUT::new();
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+
+        sut.set_threshold(2);
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password_other(),
+        );
+
+        assert_eq!(
+            sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
         );
     }

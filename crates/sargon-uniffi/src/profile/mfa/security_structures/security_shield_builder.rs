@@ -4,12 +4,14 @@
 
 use std::{
     borrow::Borrow,
+    future::Future,
     sync::{Arc, RwLock},
 };
 
-use sargon::SecurityShieldBuilder as InternalSecurityShieldBuilder;
-use sargon::SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus;
-use sargon::{IndexSet, MatrixBuilder};
+use sargon::{
+    SecurityShieldBuilder as InternalSecurityShieldBuilder,
+    SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus,
+};
 
 use crate::prelude::*;
 
@@ -378,6 +380,23 @@ impl SecurityShieldBuilder {
     }
 }
 
+use sargon::FactorSource as InternalFactorSource;
+
+#[uniffi::export]
+impl SecurityShieldBuilder {
+    pub fn auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
+        &self,
+        all_factors: Vec<FactorSource>,
+    ) -> Result<()> {
+        let binding = self.wrapped.write().expect("No poison");
+        let _ = binding
+            .auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
+                all_factors.into_internal(),
+            );
+        Ok(())
+    }
+}
+
 #[uniffi::export]
 impl SecurityShieldBuilder {
     pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
@@ -455,6 +474,10 @@ impl FactorSourceID {
         Self::new(sargon::FactorSourceID::sample_ledger_other())
     }
 
+    pub fn sample_trusted_contact() -> Self {
+        Self::new(sargon::FactorSourceID::sample_trusted_contact())
+    }
+
     pub fn sample_arculus() -> Self {
         Self::new(sargon::FactorSourceID::sample_arculus())
     }
@@ -469,6 +492,48 @@ impl FactorSourceID {
 
     pub fn sample_password_other() -> Self {
         Self::new(sargon::FactorSourceID::sample_password_other())
+    }
+}
+
+impl FactorSource {
+    pub fn new(inner: impl Borrow<sargon::FactorSource>) -> Self {
+        Self::from(inner.borrow().clone())
+    }
+}
+
+#[cfg(test)]
+impl FactorSource {
+    pub fn id(&self) -> FactorSourceID {
+        use sargon::BaseBaseIsFactorSource;
+        self.clone().into_internal().factor_source_id().into()
+    }
+
+    pub fn sample_device() -> Self {
+        Self::new(sargon::FactorSource::sample_device())
+    }
+    pub fn sample_password() -> Self {
+        Self::new(sargon::FactorSource::sample_password())
+    }
+    pub fn sample_trusted_contact_frank() -> Self {
+        Self::new(sargon::FactorSource::sample_trusted_contact_frank())
+    }
+    pub fn sample_device_babylon() -> Self {
+        Self::new(sargon::FactorSource::sample_device_babylon())
+    }
+    pub fn sample_device_babylon_other() -> Self {
+        Self::new(sargon::FactorSource::sample_device_babylon_other())
+    }
+    pub fn sample_ledger() -> Self {
+        Self::new(sargon::FactorSource::sample_ledger())
+    }
+    pub fn sample_arculus() -> Self {
+        Self::new(sargon::FactorSource::sample_arculus())
+    }
+    pub fn sample_arculus_other() -> Self {
+        Self::new(sargon::FactorSource::sample_arculus_other())
+    }
+    pub fn sample_ledger_other() -> Self {
+        Self::new(sargon::FactorSource::sample_ledger_other())
     }
 }
 
@@ -711,6 +776,86 @@ mod tests {
         assert_eq!(
             shield.matrix_of_factors.confirmation_role.override_factors,
             vec![FactorSourceID::sample_device()]
+        );
+    }
+
+    #[test]
+    fn auto_assign() {
+        let sut = SUT::new();
+        let all_factors_in_profile = vec![
+            FactorSource::sample_password(),
+            FactorSource::sample_trusted_contact_frank(),
+            FactorSource::sample_device_babylon(),
+            FactorSource::sample_device_babylon_other(),
+            FactorSource::sample_ledger(),
+            FactorSource::sample_arculus(),
+            FactorSource::sample_arculus_other(),
+            FactorSource::sample_ledger_other(),
+        ];
+        let name = "Auto Built";
+        let days_to_auto_confirm = 237;
+        sut.set_name(name.to_owned());
+        sut.set_number_of_days_until_auto_confirm(days_to_auto_confirm);
+        sut.set_threshold(2);
+        sut.add_factor_source_to_primary_threshold(
+            FactorSource::sample_device_babylon().id(),
+        );
+        sut.add_factor_source_to_primary_threshold(
+            FactorSource::sample_ledger().id(),
+        );
+
+        sut.auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
+            all_factors_in_profile.clone(),
+        )
+        .unwrap();
+
+        let shield = sut.build().unwrap();
+
+        assert_eq!(shield.metadata.display_name.value, name.to_owned());
+        let matrix = shield.matrix_of_factors;
+        assert_eq!(
+            matrix.number_of_days_until_auto_confirm,
+            days_to_auto_confirm
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.primary_role,
+            PrimaryRoleWithFactorSourceIDs {
+                threshold: 2,
+                threshold_factors: vec![
+                    FactorSourceID::sample_device(),
+                    FactorSourceID::sample_ledger()
+                ],
+                override_factors: Vec::new()
+            }
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.recovery_role,
+            RecoveryRoleWithFactorSourceIDs {
+                threshold: 0,
+                threshold_factors: Vec::new(),
+                override_factors: vec![
+                    FactorSourceID::sample_trusted_contact(),
+                    FactorSourceID::sample_ledger(),
+                    FactorSourceID::sample_arculus_other(),
+                    FactorSourceID::sample_ledger_other(),
+                ]
+            }
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.confirmation_role,
+            ConfirmationRoleWithFactorSourceIDs {
+                threshold: 0,
+                threshold_factors: Vec::new(),
+                override_factors: vec![
+                    FactorSourceID::sample_password(),
+                    FactorSourceID::sample_arculus(),
+                    FactorSourceID::sample_device(),
+                    FactorSourceID::sample_device_other(),
+                ]
+            }
         );
     }
 }

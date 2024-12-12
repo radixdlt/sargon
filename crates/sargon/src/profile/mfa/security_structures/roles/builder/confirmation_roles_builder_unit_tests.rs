@@ -87,7 +87,7 @@ mod device_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([sample()])
+            ConfirmationRoleWithFactorSourceIds::override_only([sample()])
         );
     }
 
@@ -105,7 +105,7 @@ mod device_in_isolation {
         assert!(built.get_threshold_factors().is_empty());
         assert_eq!(
             built,
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -135,7 +135,7 @@ mod ledger_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([sample(),])
+            ConfirmationRoleWithFactorSourceIds::override_only([sample(),])
         );
     }
 
@@ -151,7 +151,7 @@ mod ledger_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -181,7 +181,7 @@ mod arculus_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([sample(),])
+            ConfirmationRoleWithFactorSourceIds::override_only([sample(),])
         );
     }
 
@@ -197,7 +197,7 @@ mod arculus_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -227,7 +227,7 @@ mod off_device_mnemonic_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([sample(),])
+            ConfirmationRoleWithFactorSourceIds::override_only([sample(),])
         );
     }
 
@@ -243,7 +243,7 @@ mod off_device_mnemonic_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -320,7 +320,7 @@ mod password_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([sample(),])
+            ConfirmationRoleWithFactorSourceIds::override_only([sample(),])
         );
     }
 
@@ -336,7 +336,7 @@ mod password_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])

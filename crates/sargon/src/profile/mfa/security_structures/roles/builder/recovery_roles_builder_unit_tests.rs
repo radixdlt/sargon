@@ -85,7 +85,7 @@ mod device_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([sample()])
+            RecoveryRoleWithFactorSourceIds::override_only([sample()])
         );
     }
 
@@ -101,7 +101,7 @@ mod device_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ],)
@@ -153,7 +153,7 @@ mod ledger_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([sample()],)
+            RecoveryRoleWithFactorSourceIds::override_only([sample()],)
         );
     }
 
@@ -169,7 +169,7 @@ mod ledger_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -199,7 +199,7 @@ mod arculus_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([sample(),])
+            RecoveryRoleWithFactorSourceIds::override_only([sample(),])
         );
     }
 
@@ -215,7 +215,7 @@ mod arculus_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -245,7 +245,7 @@ mod off_device_mnemonic_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([sample()])
+            RecoveryRoleWithFactorSourceIds::override_only([sample()])
         );
     }
 
@@ -261,7 +261,7 @@ mod off_device_mnemonic_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -291,7 +291,7 @@ mod trusted_contact_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([sample(),])
+            RecoveryRoleWithFactorSourceIds::override_only([sample(),])
         );
     }
 
@@ -307,7 +307,7 @@ mod trusted_contact_in_isolation {
         // Assert
         assert_eq!(
             sut.build().unwrap(),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 sample(),
                 sample_other()
             ])
@@ -412,7 +412,7 @@ mod security_questions_in_isolation {
         // so we can build and `sample` is not present in the built result.
         assert_eq!(
             sut.build(),
-            Ok(RoleWithFactorSourceIds::recovery_with_factors([
+            Ok(RecoveryRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_ledger(),
                 FactorSourceID::sample_arculus()
             ]))
