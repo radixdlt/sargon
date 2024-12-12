@@ -1113,6 +1113,31 @@ mod test_invalid {
     }
 
     #[test]
+    fn two_different_password_only_not_valid_for_primary() {
+        let sut = SUT::new();
+
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_arculus(),
+        );
+
+        sut.set_threshold(2);
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password_other(),
+        );
+
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+        );
+    }
+
+    #[test]
     fn primary_role_with_password_in_override_does_not_get_added() {
         let sut = SUT::new();
 
