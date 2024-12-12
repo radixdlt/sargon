@@ -1,85 +1,56 @@
-use std::future::Future;
-
 use crate::prelude::*;
 
-use super::security_shield_builder;
+use super::{
+    proto_matrix::ProtoMatrix, quantity::Quantity,
+    CallsToAssignUnsupportedFactor,
+};
 
-pub struct AutomaticShieldBuilder {
-    /// Only used for testing purposes, feel free to remove.
-    stats_for_testing: AutoBuildOutcomeForTesting,
-
-    remaining_available_factors: IndexSet<FactorSource>,
-
-    proto_matrix: ProtoMatrix,
-}
-
-use serde_json::value::Index;
 use FactorSourceCategory::*;
 use RoleKind::*;
 
-/// A tiny enum to make it possible to tell auto shield construction to
-/// either assign ALL FactorSource matching some `FactorSelector` or only   
-/// some fixed quantity (typically 1).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Quantity {
-    All,
-    One,
-}
-
-impl Quantity {
-    fn as_fixed(&self) -> Option<usize> {
+impl FactorSourceCategory {
+    fn is_supported(&self) -> bool {
         match self {
-            Quantity::All => None,
-            Quantity::One => Some(1),
+            Identity | Hardware | Contact | Information => true,
+            Custodian => false,
         }
     }
 }
 
-/// A tiny enum to make it possible to filter FactorSources on either
-/// FactorSourceCategory or FactorSourceKind.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum FactorSelector {
-    Category(FactorSourceCategory),
-    Kind(FactorSourceKind),
-}
-
-/// For testing purposes
-/// We do not support Custodian FactorSource yet, but I wanted to write the
-/// heuristics being future proof, so instead of actually assigning any Custodian
-/// (which does not exist), we record the calls to assign Custodian using this
-/// small struct, so that we can assert correctness of the heuristics.
+/// A crate internal helper builder which assigns factors to
+/// Recovery and Confirmation roles based on the heuristic
+/// laid out in ["Automatic Security Shield Construction" document][doc]
 ///
-/// When we do add Custodian FactorSource, we can remove this struct and just
-/// assert the actual assignment of Custodian factors...
-#[derive(Default)]
-pub struct AutoBuildOutcomeForTesting {
-    calls_to_assign_unsupported_factor: Vec<CallsToAssignUnsupportedFactor>,
-}
+/// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Automatic-Security-Shield-Construction
+pub(crate) struct AutomaticShieldBuilder {
+    /// Only used for testing purposes, feel free to remove.
+    stats_for_testing: AutoBuildOutcomeForTesting,
 
-/// For testing purposes
-/// We do not support Custodian FactorSource yet, but I wanted to write the
-/// heuristics being future proof, so instead of actually assigning any Custodian
-/// (which does not exist), we record the calls to assign Custodian using this
-/// small struct, so that we can assert correctness of the heuristics.
-///
-/// When we do add Custodian FactorSource, we can remove this struct and just
-/// assert the actual assignment of Custodian factors...
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CallsToAssignUnsupportedFactor {
-    /// The role.
-    role: RoleKind,
+    /// While we assign factors to Recovery and Confirmation roles, we remove
+    /// them from this set.
+    remaining_available_factors: IndexSet<FactorSource>,
 
-    /// FactorSelector
-    unsupported: FactorSelector,
-
-    /// The number of factors in the role when `assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment` was called
-    number_of_factors_for_role: u8,
-
-    /// The value of `limit` parameter passed to `assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment`
-    limit: u8,
+    /// The factors assigned to each role, including the factors originally
+    /// set for the primary role.
+    proto_matrix: ProtoMatrix,
 }
 
 impl SecurityShieldBuilder {
+    /// Assigns the factors to the Recovery and Confirmation roles according to the heuristic
+    /// laid out in ["Automatic Security Shield Construction" document][doc].
+    ///
+    /// The `all_factors_in_profile` should contain all factors that are available for the user,
+    /// i.e. from Profile, and SHOULD contain the factors that the user has preselected for the
+    /// Primary role.
+    ///
+    /// # Throws
+    /// Throws if the primary role is invalid.
+    /// Throws if the primary override factors are not empty.
+    /// Throws if the primary factors are not in the profile.
+    /// Throws if the prerequisites are not met.
+    /// Throws if the shield is invalid after auto assignment - which should not happen, can be considered programmer error!
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Automatic-Security-Shield-Construction
     pub fn auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
         &self,
         all_factors_in_profile: IndexSet<FactorSource>,
@@ -155,6 +126,7 @@ impl SecurityShieldBuilder {
         }
     }
 
+    /// Updates the Primary, Recovery and Confirmation roles with the factors of the given `ProtoMatrix`.
     fn set_state(&self, proto_matrix: ProtoMatrix) {
         self.reset_factors_in_roles();
         self.set_threshold(proto_matrix.primary.len() as u8);
@@ -167,51 +139,6 @@ impl SecurityShieldBuilder {
         proto_matrix.confirmation.into_iter().for_each(|f| {
             self.add_factor_source_to_confirmation_override(f);
         });
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct ProtoMatrix {
-    primary: IndexSet<FactorSourceID>,
-    recovery: IndexSet<FactorSourceID>,
-    confirmation: IndexSet<FactorSourceID>,
-}
-impl ProtoMatrix {
-    fn new(primary: IndexSet<FactorSourceID>) -> Self {
-        Self {
-            primary,
-            recovery: IndexSet::new(),
-            confirmation: IndexSet::new(),
-        }
-    }
-
-    fn factors_for_role(&self, role: RoleKind) -> &IndexSet<FactorSourceID> {
-        match role {
-            Primary => &self.primary,
-            Recovery => &self.recovery,
-            Confirmation => &self.confirmation,
-        }
-    }
-
-    fn add_factors_for_role(
-        &mut self,
-        role: RoleKind,
-        factors: IndexSet<FactorSourceID>,
-    ) {
-        match role {
-            Primary => self.primary.extend(factors),
-            Recovery => self.recovery.extend(factors),
-            Confirmation => self.confirmation.extend(factors),
-        }
-    }
-}
-
-impl FactorSourceCategory {
-    fn is_supported(&self) -> bool {
-        match self {
-            Identity | Hardware | Contact | Information => true,
-            Custodian => false,
-        }
     }
 }
 
@@ -364,6 +291,8 @@ impl AutomaticShieldBuilder {
         }
     }
 
+    /// Calls `assign_factor_of_category_to_role_while_meaningful_and_less_than_limit`
+    /// for both Custodian and Hardware categories.
     fn assign_custodian_and_hardware_to_role_while_meaningful_and_less_than_limit(
         &mut self,
         limit: u8,
@@ -382,6 +311,8 @@ impl AutomaticShieldBuilder {
         );
     }
 
+    /// Calls `assign_custodian_and_hardware_to_role_while_meaningful_and_less_than_limit`
+    /// for both Recovery and Confirmation roles.
     fn assign_custodian_and_hardware_to_non_primary_roles_while_less_than_limit_for_each_assignment(
         &mut self,
         limit: u8,
