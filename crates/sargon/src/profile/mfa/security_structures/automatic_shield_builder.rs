@@ -20,14 +20,18 @@ use RoleKind::*;
 /// A tiny enum to make it possible to tell auto shield construction to
 /// either assign ALL FactorSource matching some `FactorSelector` or only   
 /// some fixed quantity (typically 1).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumAsInner)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Quantity {
     All,
-    Fixed(usize),
+    One,
 }
+
 impl Quantity {
-    fn one() -> Self {
-        Self::Fixed(1)
+    fn as_fixed(&self) -> Option<usize> {
+        match self {
+            Quantity::All => None,
+            Quantity::One => Some(1),
+        }
     }
 }
 
@@ -49,7 +53,7 @@ enum FactorSelector {
 /// assert the actual assignment of Custodian factors...
 #[derive(Default)]
 pub struct AutoBuildOutcomeForTesting {
-    calls_to_assign_custodian: Vec<CallsToAssignCustodian>,
+    calls_to_assign_unsupported_factor: Vec<CallsToAssignUnsupportedFactor>,
 }
 
 /// For testing purposes
@@ -61,11 +65,16 @@ pub struct AutoBuildOutcomeForTesting {
 /// When we do add Custodian FactorSource, we can remove this struct and just
 /// assert the actual assignment of Custodian factors...
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CallsToAssignCustodian {
+pub struct CallsToAssignUnsupportedFactor {
     /// The role.
     role: RoleKind,
+
+    /// FactorSelector
+    unsupported: FactorSelector,
+
     /// The number of factors in the role when `assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment` was called
     number_of_factors_for_role: u8,
+
     /// The value of `limit` parameter passed to `assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment`
     limit: u8,
 }
@@ -197,6 +206,15 @@ impl ProtoMatrix {
     }
 }
 
+impl FactorSourceCategory {
+    fn is_supported(&self) -> bool {
+        match self {
+            Identity | Hardware | Contact | Information => true,
+            Custodian => false,
+        }
+    }
+}
+
 impl AutomaticShieldBuilder {
     fn new(
         available_factors: IndexSet<FactorSource>,
@@ -209,12 +227,15 @@ impl AutomaticShieldBuilder {
         }
     }
 
+    /// Returns `Some(n)` if any factor matching the selector was found where `n`
+    /// is `<= quantity_to_add` and `None` if no factors matching the selector was.
+    /// found. Guaranteed to never return `Some(0)`.
     fn assign_factors_matching_selector(
         &mut self,
         to: RoleKind,
         selector: FactorSelector,
         quantity_to_add: Quantity,
-    ) {
+    ) -> Option<usize> {
         let target_role = to;
 
         let mut factors_to_add = self
@@ -230,8 +251,13 @@ impl AutomaticShieldBuilder {
         if let Some(quantity) = quantity_to_add.as_fixed() {
             factors_to_add = factors_to_add
                 .into_iter()
-                .take(*quantity)
+                .take(quantity)
                 .collect::<IndexSet<_>>();
+        }
+
+        let number_of_factors_added = factors_to_add.len();
+        if number_of_factors_added == 0 {
+            return None;
         }
 
         self.remaining_available_factors
@@ -239,96 +265,131 @@ impl AutomaticShieldBuilder {
 
         self.proto_matrix
             .add_factors_for_role(target_role, factors_to_add);
+
+        Some(number_of_factors_added)
     }
 
     fn factors_for_role(&self, role: RoleKind) -> &IndexSet<FactorSourceID> {
         self.proto_matrix.factors_for_role(role)
     }
 
+    /// Returns `true` if any factor was assigned, `false` otherwise.
     fn assign_factors_of_category(
         &mut self,
         to: RoleKind,
         category: FactorSourceCategory,
         quantity_to_add: Quantity,
-    ) {
-        self.assign_factors_matching_selector(
+    ) -> bool {
+        match self.assign_factors_matching_selector(
             to,
             FactorSelector::Category(category),
             quantity_to_add,
-        )
+        ) {
+            Some(0) | None => false,
+            Some(_) => true,
+        }
     }
 
+    /// Returns `true` if any factor was assigned, `false` otherwise.
     fn assign_factors_of_kind(
         &mut self,
         to: RoleKind,
         kind: FactorSourceKind,
         quantity_to_add: Quantity,
-    ) {
-        self.assign_factors_matching_selector(
+    ) -> bool {
+        match self.assign_factors_matching_selector(
             to,
             FactorSelector::Kind(kind),
             quantity_to_add,
-        )
-    }
-
-    fn assign_one_hardware_factor(&mut self, to: RoleKind) {
-        self.assign_factors_of_category(
-            to,
-            FactorSourceCategory::Hardware,
-            Quantity::one(),
-        )
+        ) {
+            Some(0) | None => false,
+            Some(_) => true,
+        }
     }
 
     fn count_factors_for_role(&self, role_kind: RoleKind) -> u8 {
         self.factors_for_role(role_kind).len() as u8
     }
 
+    /// Returns `true` if any factor was assigned, `false` otherwise.
     fn assign_factors_of_category_to_recovery(
         &mut self,
         category: FactorSourceCategory,
         quantity_to_add: Quantity,
-    ) {
+    ) -> bool {
         self.assign_factors_of_category(Recovery, category, quantity_to_add)
     }
 
+    /// Returns `true` if any factor was assigned, `false` otherwise.
     fn assign_factors_of_category_to_confirmation(
         &mut self,
         category: FactorSourceCategory,
         quantity_to_add: Quantity,
-    ) {
+    ) -> bool {
         self.assign_factors_of_category(Confirmation, category, quantity_to_add)
     }
 
-    fn assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment(
+    fn assign_factor_of_category_to_role_while_meaningful_and_less_than_limit(
         &mut self,
+        category: FactorSourceCategory,
         limit: u8,
         to: RoleKind,
     ) {
         let role = to;
-        if self.count_factors_for_role(role) < limit {
-            // self.assign_one_custodian_factor(role); // we do not support custodians yet!
-            self.stats_for_testing.calls_to_assign_custodian.push(
-                CallsToAssignCustodian {
-                    role,
-                    number_of_factors_for_role: self
-                        .count_factors_for_role(role),
-                    limit,
-                },
-            );
-        }
-        if self.count_factors_for_role(role) < limit {
-            self.assign_one_hardware_factor(role);
+
+        loop {
+            if self.count_factors_for_role(role) >= limit {
+                // when `limit` reached, we stop.
+                return;
+            }
+
+            if !category.is_supported() {
+                self.stats_for_testing
+                    .calls_to_assign_unsupported_factor
+                    .push(CallsToAssignUnsupportedFactor {
+                        role,
+                        unsupported: FactorSelector::Category(category),
+                        number_of_factors_for_role: self
+                            .count_factors_for_role(role),
+                        limit,
+                    });
+                return;
+            }
+
+            if !self.assign_factors_of_category(role, category, Quantity::One) {
+                // We did not manage to assign any hardware factor, meaning we
+                // it is meaningless to try to assign more factors of this category.
+                return;
+            }
         }
     }
 
-    fn assign_custodian_and_hardware_to_non_primary_roles_if_less_than_limit_before_each_assignment(
+    fn assign_custodian_and_hardware_to_role_while_meaningful_and_less_than_limit(
+        &mut self,
+        limit: u8,
+        to: RoleKind,
+    ) {
+        self.assign_factor_of_category_to_role_while_meaningful_and_less_than_limit(
+            Custodian,
+            limit,
+            to,
+        );
+
+        self.assign_factor_of_category_to_role_while_meaningful_and_less_than_limit(
+            Hardware,
+            limit,
+            to,
+        );
+    }
+
+    fn assign_custodian_and_hardware_to_non_primary_roles_while_less_than_limit_for_each_assignment(
         &mut self,
         limit: u8,
     ) {
-        self.assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment(
+        self.assign_custodian_and_hardware_to_role_while_meaningful_and_less_than_limit(
             limit, Recovery,
         );
-        self.assign_custodian_and_hardware_to_role_if_less_than_limit_before_each_assignment(
+        self.assign_custodian_and_hardware_to_role_while_meaningful_and_less_than_limit(
             limit,
             Confirmation,
         );
@@ -351,7 +412,7 @@ impl AutomaticShieldBuilder {
 
         // 📒 "Drop in the somewhat “special-use” factors first"
         {
-            // 📒	"Add all Contact factors in the list to RECOVERY."
+            // 📒 "Add all Contact factors in the list to RECOVERY."
             self.assign_factors_of_category_to_recovery(Contact, Quantity::All);
 
             // 📒	"Add all Information factors in the list to CONFIRMATION."
@@ -363,11 +424,11 @@ impl AutomaticShieldBuilder {
 
         // 📒 Assign Custodian/Hardware factors to RECOVERY & CONFIRMATION
         // without exceeding limit of 1 factor in each role.
-        self.assign_custodian_and_hardware_to_non_primary_roles_if_less_than_limit_before_each_assignment(1);
+        self.assign_custodian_and_hardware_to_non_primary_roles_while_less_than_limit_for_each_assignment(1);
 
         // 📒 Assign Custodian/Hardware factors to RECOVERY & CONFIRMATION
         // without exceeding limit of 2 factor in each role.
-        self.assign_custodian_and_hardware_to_non_primary_roles_if_less_than_limit_before_each_assignment(2);
+        self.assign_custodian_and_hardware_to_non_primary_roles_while_less_than_limit_for_each_assignment(2);
 
         // 📒 "Fill in any remaining other factors to increase reliability of being able to recover"
         {
@@ -538,24 +599,28 @@ mod tests {
         let (shield, stats) = res.unwrap();
 
         pretty_assertions::assert_eq!(
-            stats.calls_to_assign_custodian,
+            stats.calls_to_assign_unsupported_factor,
             vec![
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Recovery,
                     number_of_factors_for_role: 0,
                     limit: 1
                 },
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Confirmation,
                     number_of_factors_for_role: 0,
                     limit: 1
                 },
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Recovery,
                     number_of_factors_for_role: 1,
                     limit: 2
                 },
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Confirmation,
                     number_of_factors_for_role: 0,
                     limit: 2
@@ -605,24 +670,28 @@ mod tests {
         let (shield, stats) = res.unwrap();
 
         pretty_assertions::assert_eq!(
-            stats.calls_to_assign_custodian,
+            stats.calls_to_assign_unsupported_factor,
             vec![
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Recovery,
                     number_of_factors_for_role: 0,
                     limit: 1
                 },
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Confirmation,
                     number_of_factors_for_role: 0,
                     limit: 1
                 },
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Recovery,
                     number_of_factors_for_role: 1,
                     limit: 2
                 },
-                CallsToAssignCustodian {
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
                     role: Confirmation,
                     number_of_factors_for_role: 1,
                     limit: 2
@@ -653,6 +722,263 @@ mod tests {
             matrix.confirmation(),
             &ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_ledger_other(),
+            ],)
+        );
+    }
+
+    #[test]
+    fn two_contacts() {
+        let res = SUT::test(
+            IndexSet::from_iter([
+                FactorSource::sample_trusted_contact_frank(),
+                FactorSource::sample_trusted_contact_grace(),
+                FactorSource::sample_device_babylon(),
+                FactorSource::sample_ledger(),
+                FactorSource::sample_ledger_other(),
+            ]),
+            IndexSet::just(FactorSource::sample_device_babylon().id()),
+        );
+
+        let (shield, stats) = res.unwrap();
+
+        pretty_assertions::assert_eq!(
+            stats.calls_to_assign_unsupported_factor,
+            vec![
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Confirmation,
+                    number_of_factors_for_role: 0,
+                    limit: 1
+                },
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Confirmation,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+            ]
+        );
+
+        let matrix = shield.matrix_of_factors;
+
+        pretty_assertions::assert_eq!(
+            matrix.primary(),
+            &PrimaryRoleWithFactorSourceIds::with_factors(
+                1,
+                [FactorSourceID::sample_device()],
+                []
+            )
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.recovery(),
+            &RecoveryRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_trusted_contact(),
+                FactorSourceID::sample_trusted_contact_other(),
+            ],)
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.confirmation(),
+            &ConfirmationRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_ledger(),
+                FactorSourceID::sample_ledger_other(),
+            ],)
+        );
+    }
+
+    #[test]
+    fn two_information() {
+        let res = SUT::test(
+            IndexSet::from_iter([
+                FactorSource::sample_password(),
+                FactorSource::sample_password_other(),
+                FactorSource::sample_device_babylon(),
+                FactorSource::sample_ledger(),
+                FactorSource::sample_ledger_other(),
+            ]),
+            IndexSet::just(FactorSource::sample_device_babylon().id()),
+        );
+
+        let (shield, stats) = res.unwrap();
+
+        pretty_assertions::assert_eq!(
+            stats.calls_to_assign_unsupported_factor,
+            vec![
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Recovery,
+                    number_of_factors_for_role: 0,
+                    limit: 1
+                },
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Recovery,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+            ]
+        );
+
+        let matrix = shield.matrix_of_factors;
+
+        pretty_assertions::assert_eq!(
+            matrix.primary(),
+            &PrimaryRoleWithFactorSourceIds::with_factors(
+                1,
+                [FactorSourceID::sample_device()],
+                []
+            )
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.recovery(),
+            &RecoveryRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_ledger(),
+                FactorSourceID::sample_ledger_other(),
+            ],)
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.confirmation(),
+            &ConfirmationRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_password(),
+                FactorSourceID::sample_password_other(),
+            ],)
+        );
+    }
+
+    #[test]
+    fn one_info_one_contact() {
+        let res = SUT::test(
+            IndexSet::from_iter([
+                FactorSource::sample_password(),
+                FactorSource::sample_trusted_contact_frank(),
+                FactorSource::sample_device_babylon(),
+                FactorSource::sample_ledger(),
+                FactorSource::sample_ledger_other(),
+            ]),
+            IndexSet::just(FactorSource::sample_device_babylon().id()),
+        );
+
+        let (shield, stats) = res.unwrap();
+
+        pretty_assertions::assert_eq!(
+            stats.calls_to_assign_unsupported_factor,
+            vec![
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Recovery,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Confirmation,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+            ]
+        );
+
+        let matrix = shield.matrix_of_factors;
+
+        pretty_assertions::assert_eq!(
+            matrix.primary(),
+            &PrimaryRoleWithFactorSourceIds::with_factors(
+                1,
+                [FactorSourceID::sample_device()],
+                []
+            )
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.recovery(),
+            &RecoveryRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_trusted_contact(),
+                FactorSourceID::sample_ledger(),
+            ],)
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.confirmation(),
+            &ConfirmationRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_password(),
+                FactorSourceID::sample_ledger_other(),
+            ],)
+        );
+    }
+
+    #[test]
+    fn arculus_and_ledger_mixed_with_one_info_and_one_contact() {
+        let res = SUT::test(
+            IndexSet::from_iter([
+                FactorSource::sample_password(),
+                FactorSource::sample_trusted_contact_frank(),
+                FactorSource::sample_device_babylon(),
+                FactorSource::sample_device_babylon_other(),
+                FactorSource::sample_ledger(),
+                FactorSource::sample_arculus(),
+                FactorSource::sample_arculus_other(),
+                FactorSource::sample_ledger_other(),
+            ]),
+            IndexSet::from_iter([
+                FactorSource::sample_device_babylon().id(),
+                FactorSource::sample_ledger().id(),
+            ]),
+        );
+
+        let (shield, stats) = res.unwrap();
+
+        pretty_assertions::assert_eq!(
+            stats.calls_to_assign_unsupported_factor,
+            vec![
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Recovery,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+                CallsToAssignUnsupportedFactor {
+                    unsupported: FactorSelector::Category(Custodian),
+                    role: Confirmation,
+                    number_of_factors_for_role: 1,
+                    limit: 2
+                },
+            ]
+        );
+
+        let matrix = shield.matrix_of_factors;
+
+        pretty_assertions::assert_eq!(
+            matrix.primary(),
+            &PrimaryRoleWithFactorSourceIds::with_factors(
+                2,
+                [
+                    FactorSourceID::sample_device(),
+                    FactorSourceID::sample_ledger()
+                ],
+                []
+            )
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.recovery(),
+            &RecoveryRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_trusted_contact(),
+                FactorSourceID::sample_ledger(),
+                FactorSourceID::sample_arculus_other(),
+                FactorSourceID::sample_ledger_other(),
+            ],)
+        );
+
+        pretty_assertions::assert_eq!(
+            matrix.confirmation(),
+            &ConfirmationRoleWithFactorSourceIds::override_only([
+                FactorSourceID::sample_password(),
+                FactorSourceID::sample_arculus(),
+                FactorSourceID::sample_device(),
+                FactorSourceID::sample_device_other(),
             ],)
         );
     }
