@@ -151,24 +151,37 @@ impl MatrixBuilder {
             )
     }
 
-    fn validate_each_role_in_isolation(&self) -> MatrixBuilderMutateResult {
+    pub fn validate_primary_role_in_isolation(
+        &self,
+    ) -> MatrixBuilderMutateResult {
         self.primary_role
             .validate()
             .into_matrix_err(RoleKind::Primary)?;
+        Ok(())
+    }
+
+    pub fn validate_recovery_role_in_isolation(
+        &self,
+    ) -> MatrixBuilderMutateResult {
         self.recovery_role
             .validate()
             .into_matrix_err(RoleKind::Recovery)?;
+        Ok(())
+    }
+
+    pub fn validate_confirmation_role_in_isolation(
+        &self,
+    ) -> MatrixBuilderMutateResult {
         self.confirmation_role
             .validate()
             .into_matrix_err(RoleKind::Confirmation)?;
         Ok(())
     }
 
-    pub fn validate_primary_role_in_isolation(
-        &self,
-    ) -> MatrixBuilderMutateResult {
-        self.validate_each_role_in_isolation()?;
-        self.validate_combination()?;
+    fn validate_each_role_in_isolation(&self) -> MatrixBuilderMutateResult {
+        self.validate_primary_role_in_isolation()?;
+        self.validate_recovery_role_in_isolation()?;
+        self.validate_confirmation_role_in_isolation()?;
         Ok(())
     }
 

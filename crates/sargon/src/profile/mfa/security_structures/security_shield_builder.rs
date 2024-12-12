@@ -431,13 +431,70 @@ impl SecurityShieldBuilder {
     pub fn validate_primary_role(
         &self,
     ) -> Option<SecurityShieldBuilderInvalidReason> {
+        self.validate_role_in_isolation(RoleKind::Primary)
+    }
+
+    /// `None` means valid!
+    pub fn validate_role_in_isolation(
+        &self,
+        role: RoleKind,
+    ) -> Option<SecurityShieldBuilderInvalidReason> {
         self.get(|builder| {
-            builder
-                .primary_role
-                .validate()
-                .into_matrix_err(RoleKind::Primary)
-                .as_shield_validation()
+            let validation = match role {
+                RoleKind::Primary => {
+                    builder.validate_primary_role_in_isolation()
+                }
+                RoleKind::Recovery => {
+                    builder.validate_recovery_role_in_isolation()
+                }
+                RoleKind::Confirmation => {
+                    builder.validate_confirmation_role_in_isolation()
+                }
+            };
+            validation.as_shield_validation()
         })
+    }
+
+    pub fn selected_factor_sources_for_role_status(
+        &self,
+        role: RoleKind,
+    ) -> SelectedFactorSourcesForRoleStatus {
+        // Validate the role in isolation
+        if let Some(reason) = self.validate_role_in_isolation(role) {
+            return match reason {
+                SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+                | SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
+                | SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor => {
+                    SelectedFactorSourcesForRoleStatus::Insufficient
+                }
+                _ => SelectedFactorSourcesForRoleStatus::Invalid,
+            };
+        }
+
+        // Check conditions for Primary role
+        let primary_factors_len =
+            self.get(|builder| builder.get_primary_threshold_factors().len());
+        if role == RoleKind::Primary && primary_factors_len < 2 {
+            SelectedFactorSourcesForRoleStatus::Suboptimal
+        } else {
+            SelectedFactorSourcesForRoleStatus::Optimal
+        }
+    }
+
+    pub fn sorted_factor_sources_for_primary_threshold_selection(
+        &self,
+        factor_sources: Vec<FactorSource>,
+    ) -> Vec<FactorSource> {
+        let mut factor_sources: Vec<FactorSource> = factor_sources
+            .into_iter()
+            .filter(|fs| self.addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be(fs.factor_source_kind()))
+            .collect();
+        factor_sources.sort_by_key(|fs| {
+            fs.factor_source_kind()
+                .display_order_for_primary_threshold_selection()
+        });
+
+        factor_sources
     }
 
     pub fn build(
@@ -743,6 +800,68 @@ mod tests {
             .collect::<Vec<_>>()
         );
     }
+
+    #[test]
+    fn test_sorted_factor_sources_for_primary_threshold_selection() {
+        let sut = SUT::new();
+        let factor_sources = FactorSource::sample_values_all();
+        let expected = vec![
+            FactorSource::sample_device_babylon(),
+            FactorSource::sample_device_babylon_other(),
+            FactorSource::sample_device_olympia(),
+            FactorSource::sample_arculus(),
+            FactorSource::sample_arculus_other(),
+            FactorSource::sample_ledger(),
+            FactorSource::sample_ledger_other(),
+            FactorSource::sample_password(),
+            FactorSource::sample_password_other(),
+            FactorSource::sample_off_device(),
+            FactorSource::sample_off_device_other(),
+        ];
+        assert_eq!(
+            sut.sorted_factor_sources_for_primary_threshold_selection(
+                factor_sources
+            ),
+            expected
+        )
+    }
+
+    #[test]
+    fn selected_factor_sources_for_role_status_is_optimal() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .set_threshold(2)
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            );
+        let status =
+            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+
+        pretty_assertions::assert_eq!(
+            status,
+            SelectedFactorSourcesForRoleStatus::Optimal
+        );
+    }
+
+    #[test]
+    fn selected_factor_sources_for_role_status_is_suboptimal() {
+        let sut = SUT::default();
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_ledger(),
+        );
+        let status =
+            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+
+        pretty_assertions::assert_eq!(
+            status,
+            SelectedFactorSourcesForRoleStatus::Suboptimal
+        );
+    }
 }
 
 #[cfg(test)]
@@ -757,6 +876,10 @@ mod test_invalid {
         let sut = SUT::new();
         assert_eq!(
             sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+        );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
         );
     }
@@ -774,6 +897,10 @@ mod test_invalid {
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
         );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
+        );
     }
 
     #[test]
@@ -784,6 +911,10 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
+        );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Recovery).unwrap(),
             SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
         );
     }
@@ -799,6 +930,10 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
+        );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Confirmation).unwrap(),
             SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
         );
     }
@@ -945,6 +1080,10 @@ mod test_invalid {
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
         );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
+        );
     }
 
     #[test]
@@ -965,6 +1104,10 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+        );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
         );
     }
@@ -989,6 +1132,10 @@ mod test_invalid {
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
         );
+        assert_eq!(
+            sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
+            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+        );
     }
 
     #[test]
@@ -999,6 +1146,34 @@ mod test_invalid {
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+        );
+    }
+
+    #[test]
+    fn selected_factor_sources_for_role_status_is_insufficient() {
+        let sut = SUT::default();
+        let status =
+            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+
+        pretty_assertions::assert_eq!(
+            status,
+            SelectedFactorSourcesForRoleStatus::Insufficient
+        );
+    }
+
+    #[test]
+    fn selected_factor_sources_for_role_status_is_invalid() {
+        let sut = SUT::default();
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
+        let status =
+            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+
+        pretty_assertions::assert_eq!(
+            status,
+            SelectedFactorSourcesForRoleStatus::Invalid
         );
     }
 }

@@ -8,6 +8,7 @@ mod security_shield_prerequisites_status;
 mod security_structure_id;
 mod security_structure_metadata;
 mod security_structure_of_factors;
+mod selected_factor_sources_status;
 
 pub use automatic_shield_builder::*;
 pub use has_role_kind::*;
@@ -19,3 +20,4 @@ pub use security_shield_prerequisites_status::*;
 pub use security_structure_id::*;
 pub use security_structure_metadata::*;
 pub use security_structure_of_factors::*;
+pub use selected_factor_sources_status::*;
