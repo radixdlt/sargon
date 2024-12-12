@@ -67,6 +67,9 @@ impl SecurityShieldBuilder {
         }
 
         if !self.get_primary_override_factors().is_empty() {
+            // Can we update this auto assign heuristics to allow primary override factors?
+            // If we would allow it, we would need to remove all those factors in override
+            // from `all_factors_in_profile`.
             return Err(CommonError::AutomaticShieldBuildingFailure {
                 underlying: "Primary override factors not allowed when preselecting factors for Recovery and Confirmation".to_string(),
             });
