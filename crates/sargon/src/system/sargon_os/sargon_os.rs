@@ -361,8 +361,8 @@ impl SargonOS {
             }
             Err(error) => {
                 debug!("Failed to load the host id {:?}", error);
-                let new_host_id = HostId::generate_new();
-                new_host_id
+                
+                HostId::generate_new()
             }
         }
     }
