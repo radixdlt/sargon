@@ -1,6 +1,5 @@
 mod account;
 mod create_entity;
-mod entities_linked_to_factor_source;
 mod gateway;
 mod persona;
 mod profile_header;

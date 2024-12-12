@@ -11,14 +11,14 @@ impl SargonOS {
         match profile_to_check {
             ProfileToCheck::Current => self
                 .profile()?
+                .current_network()?
                 .entities_linked_to_factor_source(factor_source, integrity),
             ProfileToCheck::Specific(specific_profile) => {
-                let mut profile = specific_profile.clone();
-                let _ = profile
-                    .app_preferences
-                    .gateways
-                    .change_current(Gateway::mainnet());
-                profile
+                let profile_network = specific_profile
+                    .networks
+                    .get_id(NetworkID::Mainnet)
+                    .ok_or(CommonError::Unknown)?;
+                profile_network
                     .entities_linked_to_factor_source(factor_source, integrity)
             }
         }
