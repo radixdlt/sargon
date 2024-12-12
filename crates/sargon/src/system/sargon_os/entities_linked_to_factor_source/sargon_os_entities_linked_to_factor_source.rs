@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 impl SargonOS {
-    /// Returns the entities controlled by a given `FactorSource`, either on the current `Profile` or a specific one.
-    pub async fn entities_controlled_by_factor_source(
+    /// Returns the entities linked to a given `FactorSource`, either on the current `Profile` or a specific one.
+    pub async fn entities_linked_to_factor_source(
         &self,
         factor_source: FactorSource,
         profile_to_check: ProfileToCheck,
-    ) -> Result<EntitiesControlledByFactorSource> {
+    ) -> Result<EntitiesLinkedToFactorSource> {
         let accessibility = self.accessibility(factor_source.clone()).await?;
         match profile_to_check {
             ProfileToCheck::Current => {
@@ -19,7 +19,7 @@ impl SargonOS {
                     .profile_state_holder
                     .hidden_personas_on_current_network()?;
 
-                Ok(self.create_entities_controlled_by_factor_source(
+                Ok(self.create_entities_linked_to_factor_source(
                     factor_source,
                     accessibility,
                     accounts,
@@ -38,7 +38,7 @@ impl SargonOS {
                 let personas = network.personas.non_hidden();
                 let hidden_personas = network.personas.hidden();
 
-                Ok(self.create_entities_controlled_by_factor_source(
+                Ok(self.create_entities_linked_to_factor_source(
                     factor_source,
                     accessibility,
                     accounts,
@@ -50,7 +50,7 @@ impl SargonOS {
         }
     }
 
-    fn create_entities_controlled_by_factor_source(
+    fn create_entities_linked_to_factor_source(
         &self,
         factor_source: FactorSource,
         accessibility: FactorSourceAccessibility,
@@ -58,36 +58,36 @@ impl SargonOS {
         hidden_accounts: Accounts,
         personas: Personas,
         hidden_personas: Personas,
-    ) -> EntitiesControlledByFactorSource {
+    ) -> EntitiesLinkedToFactorSource {
         let accounts = accounts
             .iter()
             .filter(|a| {
                 a.security_state
-                    .is_controlled_by_factor_source(factor_source.clone())
+                    .is_linked_to_factor_source(factor_source.clone())
             })
             .collect();
         let hidden_accounts = hidden_accounts
             .iter()
             .filter(|a| {
                 a.security_state
-                    .is_controlled_by_factor_source(factor_source.clone())
+                    .is_linked_to_factor_source(factor_source.clone())
             })
             .collect();
         let personas = personas
             .iter()
             .filter(|p| {
                 p.security_state
-                    .is_controlled_by_factor_source(factor_source.clone())
+                    .is_linked_to_factor_source(factor_source.clone())
             })
             .collect();
         let hidden_personas = hidden_personas
             .iter()
             .filter(|p| {
                 p.security_state
-                    .is_controlled_by_factor_source(factor_source.clone())
+                    .is_linked_to_factor_source(factor_source.clone())
             })
             .collect();
-        EntitiesControlledByFactorSource {
+        EntitiesLinkedToFactorSource {
             accessibility,
             accounts,
             hidden_accounts,

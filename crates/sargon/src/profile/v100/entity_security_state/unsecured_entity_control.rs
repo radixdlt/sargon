@@ -80,8 +80,8 @@ impl UnsecuredEntityControl {
 }
 
 impl UnsecuredEntityControl {
-    /// Returns whether the entity is controlled by the given factor source.
-    pub fn is_controlled_by_factor_source(
+    /// Returns whether the entity is linked to the given factor source.
+    pub fn is_linked_to_factor_source(
         &self,
         factor_source: FactorSource,
     ) -> bool {

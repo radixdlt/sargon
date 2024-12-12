@@ -4,7 +4,7 @@ use sargon::DeviceFactorSourceAccessibility as InternalDeviceFactorSourceAccessi
 /// A struct representing the accessibility of a device factor source.
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
 pub struct DeviceFactorSourceAccessibility {
-    /// The factor source that controls the entities.
+    /// The factor source that is linked to the entities.
     pub factor_source: DeviceFactorSource,
 
     /// Whether the mnemonic of the factor source is present in keychain.

@@ -1,25 +1,25 @@
 use crate::prelude::*;
 
-/// This is the result of checking what entities are controlled by a given `FactorSource`.
+/// This is the result of checking what entities are linked to a given `FactorSource`.
 #[derive(Clone, Debug, PartialEq)]
-pub struct EntitiesControlledByFactorSource {
+pub struct EntitiesLinkedToFactorSource {
     /// The accessibility of the factor source.
     pub accessibility: FactorSourceAccessibility,
 
-    /// The visible accounts controlled by the factor source.
+    /// The visible accounts linked to the factor source.
     pub accounts: Accounts,
 
-    /// The hidden accounts controlled by the factor source.
+    /// The hidden accounts linked to the factor source.
     pub hidden_accounts: Accounts,
 
-    /// The visible personas controlled by the factor source.
+    /// The visible personas linked to the factor source.
     pub personas: Personas,
 
-    /// The hidden personas controlled by the factor source.
+    /// The hidden personas linked to the factor source.
     pub hidden_personas: Personas,
 }
 
-impl EntitiesControlledByFactorSource {
+impl EntitiesLinkedToFactorSource {
     fn new(
         accessibility: FactorSourceAccessibility,
         accounts: Accounts,
@@ -37,7 +37,7 @@ impl EntitiesControlledByFactorSource {
     }
 }
 
-impl HasSampleValues for EntitiesControlledByFactorSource {
+impl HasSampleValues for EntitiesLinkedToFactorSource {
     fn sample() -> Self {
         Self::new(
             FactorSourceAccessibility::sample(),
