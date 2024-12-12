@@ -7,12 +7,7 @@ impl SargonOS {
         factor_source: FactorSource,
         profile_to_check: ProfileToCheck,
     ) -> Result<EntitiesControlledByFactorSource> {
-        let is_mnemonic_present_in_keychain = self
-            .is_mnemonic_present_in_keychain(factor_source.clone())
-            .await?;
-        let is_mnemonic_marked_as_backed_up = self
-            .is_mnemonic_marked_as_backed_up(factor_source.clone())
-            .await?;
+        let accessibility = self.accessibility(factor_source.clone()).await?;
         match profile_to_check {
             ProfileToCheck::Current => {
                 let accounts = self.accounts_on_current_network()?;
@@ -26,8 +21,7 @@ impl SargonOS {
 
                 Ok(self.create_entities_controlled_by_factor_source(
                     factor_source,
-                    is_mnemonic_present_in_keychain,
-                    is_mnemonic_marked_as_backed_up,
+                    accessibility,
                     accounts,
                     hidden_accounts,
                     personas,
@@ -46,8 +40,7 @@ impl SargonOS {
 
                 Ok(self.create_entities_controlled_by_factor_source(
                     factor_source,
-                    is_mnemonic_present_in_keychain,
-                    is_mnemonic_marked_as_backed_up,
+                    accessibility,
                     accounts,
                     hidden_accounts,
                     personas,
@@ -57,12 +50,10 @@ impl SargonOS {
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
     fn create_entities_controlled_by_factor_source(
         &self,
         factor_source: FactorSource,
-        is_mnemonic_present_in_keychain: bool,
-        is_mnemonic_marked_as_backed_up: bool,
+        accessibility: FactorSourceAccessibility,
         accounts: Accounts,
         hidden_accounts: Accounts,
         personas: Personas,
@@ -97,9 +88,7 @@ impl SargonOS {
             })
             .collect();
         EntitiesControlledByFactorSource {
-            factor_source,
-            is_mnemonic_present_in_keychain,
-            is_mnemonic_marked_as_backed_up,
+            accessibility,
             accounts,
             hidden_accounts,
             personas,
@@ -107,33 +96,38 @@ impl SargonOS {
         }
     }
 
-    async fn is_mnemonic_present_in_keychain(
+    async fn accessibility(
         &self,
         factor_source: FactorSource,
-    ) -> Result<bool> {
+    ) -> Result<FactorSourceAccessibility> {
         match factor_source {
             FactorSource::Device { value } => {
-                self.clients
-                    .secure_storage
-                    .contains_device_mnemonic(value)
-                    .await
+                self.device_accessibility(value).await
             }
+            FactorSource::Ledger { value } => Ok(value.into()),
             _ => Err(CommonError::Unknown),
         }
     }
 
-    async fn is_mnemonic_marked_as_backed_up(
+    async fn device_accessibility(
         &self,
-        factor_source: FactorSource,
-    ) -> Result<bool> {
-        match factor_source {
-            FactorSource::Device { value } => {
-                self.clients
-                    .unsafe_storage
-                    .check_if_mnemonic_is_backed_up(value)
-                    .await
-            }
-            _ => Err(CommonError::Unknown),
-        }
+        device_factor_source: DeviceFactorSource,
+    ) -> Result<FactorSourceAccessibility> {
+        let is_mnemeonic_present_in_keychain = self
+            .clients
+            .secure_storage
+            .contains_device_mnemonic(device_factor_source.clone())
+            .await?;
+        let is_mnemonic_marked_as_backed_up = self
+            .clients
+            .unsafe_storage
+            .check_if_mnemonic_is_backed_up(device_factor_source.clone())
+            .await?;
+        let result = DeviceFactorSourceAccessibility::new(
+            device_factor_source,
+            is_mnemeonic_present_in_keychain,
+            is_mnemonic_marked_as_backed_up,
+        );
+        Ok(result.into())
     }
 }

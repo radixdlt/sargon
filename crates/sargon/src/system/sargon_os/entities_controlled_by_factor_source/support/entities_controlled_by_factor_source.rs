@@ -1,16 +1,10 @@
 use crate::prelude::*;
 
 /// This is the result of checking what entities are controlled by a given `FactorSource`.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct EntitiesControlledByFactorSource {
-    /// The factor source that controls the entities.
-    pub factor_source: FactorSource,
-
-    /// Whether the mnemonic of the factor source is present in keychain.
-    pub is_mnemonic_present_in_keychain: bool,
-
-    /// Whether the mnemonic of the factor source is marked as backed up.
-    pub is_mnemonic_marked_as_backed_up: bool,
+    /// The accessibility of the factor source.
+    pub accessibility: FactorSourceAccessibility,
 
     /// The visible accounts controlled by the factor source.
     pub accounts: Accounts,
@@ -27,18 +21,14 @@ pub struct EntitiesControlledByFactorSource {
 
 impl EntitiesControlledByFactorSource {
     fn new(
-        factor_source: FactorSource,
-        is_mnemonic_present_in_keychain: bool,
-        is_mnemonic_marked_as_backed_up: bool,
+        accessibility: FactorSourceAccessibility,
         accounts: Accounts,
         hidden_accounts: Accounts,
         personas: Personas,
         hidden_personas: Personas,
     ) -> Self {
         Self {
-            factor_source,
-            is_mnemonic_present_in_keychain,
-            is_mnemonic_marked_as_backed_up,
+            accessibility,
             accounts,
             hidden_accounts,
             personas,
@@ -50,9 +40,7 @@ impl EntitiesControlledByFactorSource {
 impl HasSampleValues for EntitiesControlledByFactorSource {
     fn sample() -> Self {
         Self::new(
-            FactorSource::sample(),
-            true,
-            true,
+            FactorSourceAccessibility::sample(),
             Accounts::sample(),
             Accounts::new(),
             Personas::sample(),
@@ -62,9 +50,7 @@ impl HasSampleValues for EntitiesControlledByFactorSource {
 
     fn sample_other() -> Self {
         Self::new(
-            FactorSource::sample_other(),
-            true,
-            true,
+            FactorSourceAccessibility::sample_other(),
             Accounts::sample_other(),
             Accounts::new(),
             Personas::sample_other(),
