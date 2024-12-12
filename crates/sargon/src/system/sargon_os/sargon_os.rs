@@ -339,7 +339,6 @@ impl SargonOS {
         debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
         let stored_host_id = secure_storage.load_host_id().await;
-        let new_host_id = HostId::generate_new();
 
         match stored_host_id {
             Ok(Some(loaded_host_id)) => {
@@ -350,6 +349,7 @@ impl SargonOS {
                 debug!("Found no saved host id, creating new.");
                 let new_host_id = HostId::generate_new();
                 debug!("Created new host id: {:?}", &new_host_id);
+
                 let save_result =
                     secure_storage.save_host_id(&new_host_id).await;
                 if let Err(error) = save_result {
@@ -361,6 +361,7 @@ impl SargonOS {
             }
             Err(error) => {
                 debug!("Failed to load the host id {:?}", error);
+                let new_host_id = HostId::generate_new();
                 new_host_id
             }
         }

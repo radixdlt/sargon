@@ -75,7 +75,7 @@ impl SargonOS {
         self.wrapped.delete_wallet().await.into_result()
     }
 
-    pub fn resolve_host_id(&self) -> HostId {
+    pub fn host_id(&self) -> HostId {
         self.wrapped.host_id().into()
     }
 
