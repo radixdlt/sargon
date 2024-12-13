@@ -15,4 +15,16 @@ pub struct SecurityStructureOfFactorInstances {
     /// The structure of factors to use for certain roles, Primary, Recovery
     /// and Confirmation role.
     pub matrix_of_factors: MatrixOfFactorInstances,
+
+    /// The authentication signing factor instance which is used to sign
+    /// proof of ownership - aka "True Rola Key". User can select which FactorSource
+    /// to use during Shield Building, but typically most users will user the
+    /// DeviceFactorSource which is default. DerivationPath is in securified
+    /// KeySpace of course.
+    ///
+    /// Non-optional since we can replace it with a new one for entities
+    /// we have recovered during Onboarding Account Recovery Scan for securified
+    /// entities
+    pub authentication_signing_factor_instance:
+        HierarchicalDeterministicFactorInstance,
 }

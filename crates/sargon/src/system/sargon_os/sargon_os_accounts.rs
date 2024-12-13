@@ -858,8 +858,9 @@ impl SargonOS {
                )?;
                 SecurityStructureOfFactorInstances::new(
                     security_structure_id,
-                    matrix_of_factor_instances
-                )
+                    matrix_of_factor_instances,
+                    HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(entity_address.network_id(), CAP26KeyKind::AuthenticationSigning, A::entity_kind(), Hardened::Securified(SecurifiedU30::ZERO)),
+                )?
             };
             Ok((entity_address, security_structure_of_factor_instances))
         }).collect::<Result<IndexMap<A, SecurityStructureOfFactorInstances>>>()?;

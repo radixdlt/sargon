@@ -1,3 +1,5 @@
+use indexmap::IndexSet;
+
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -12,17 +14,79 @@ pub struct SecurityStructureOfFactorInstances {
     /// The structure of factors to use for certain roles, Primary, Recovery
     /// and Confirmation role.
     pub matrix_of_factors: MatrixOfFactorInstances,
+
+    /// The authentication signing factor instance which is used to sign
+    /// proof of ownership - aka "True Rola Key". User can select which FactorSource
+    /// to use during Shield Building, but typically most users will user the
+    /// DeviceFactorSource which is default. DerivationPath is in securified
+    /// KeySpace of course.
+    ///
+    /// Non-optional since we can replace it with a new one for entities
+    /// we have recovered during Onboarding Account Recovery Scan for securified
+    /// entities
+    pub authentication_signing_factor_instance:
+        HierarchicalDeterministicFactorInstance,
 }
 
 impl SecurityStructureOfFactorInstances {
     pub fn new(
         security_structure_id: SecurityStructureID,
         matrix_of_factors: MatrixOfFactorInstances,
-    ) -> Self {
-        Self {
+        authentication_signing: HierarchicalDeterministicFactorInstance,
+    ) -> Result<Self> {
+        let tx_signing_factors = matrix_of_factors
+            .unique_factor_instances()
+            .into_iter()
+            .flat_map(|f| f.try_as_hd_factor_instances().ok())
+            .collect::<IndexSet<_>>();
+
+        if tx_signing_factors.is_empty() {
+            return Err(CommonError::NoTransactionSigningFactorInstance);
+        }
+
+        if tx_signing_factors
+            .iter()
+            .any(|f| f.get_key_kind() != CAP26KeyKind::TransactionSigning)
+        {
+            return Err(
+                CommonError::WrongKeyKindOfTransactionSigningFactorInstance,
+            );
+        }
+
+        let tx_signing_factor = tx_signing_factors.iter().next().unwrap();
+
+        if tx_signing_factors
+            .iter()
+            .any(|f| f.get_entity_kind() != tx_signing_factor.get_entity_kind())
+        {
+            return Err(CommonError::WrongEntityKindOfInFactorInstancesPath);
+        }
+
+        if authentication_signing.get_key_kind()
+            != CAP26KeyKind::AuthenticationSigning
+        {
+            return Err(
+                CommonError::WrongKeyKindOfAuthenticationSigningFactorInstance,
+            );
+        }
+
+        if authentication_signing.get_entity_kind()
+            != tx_signing_factor.get_entity_kind()
+        {
+            return Err(CommonError::WrongEntityKindOfInFactorInstancesPath);
+        }
+
+        if !authentication_signing.is_securified() {
+            return Err(
+                CommonError::AuthenticationSigningFactorInstanceNotSecurified,
+            );
+        }
+
+        Ok(Self {
             security_structure_id,
             matrix_of_factors,
-        }
+            authentication_signing_factor_instance: authentication_signing,
+        })
     }
 }
 
@@ -41,18 +105,24 @@ impl Identifiable for SecurityStructureOfFactorInstances {
 }
 
 impl HasSampleValues for SecurityStructureOfFactorInstances {
+    /// Account
     fn sample() -> Self {
-        Self {
-            security_structure_id: SecurityStructureID::sample(),
-            matrix_of_factors: MatrixOfFactorInstances::sample(),
-        }
+        Self::new(
+            SecurityStructureID::sample(),
+            MatrixOfFactorInstances::sample(),
+            HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Mainnet, CAP26KeyKind::AuthenticationSigning, CAP26EntityKind::Account, Hardened::Securified(SecurifiedU30::ZERO))
+        )
+        .unwrap()
     }
 
+    /// Persona
     fn sample_other() -> Self {
-        Self {
-            security_structure_id: SecurityStructureID::sample_other(),
-            matrix_of_factors: MatrixOfFactorInstances::sample_other(),
-        }
+        Self::new(
+            SecurityStructureID::sample_other(),
+            MatrixOfFactorInstances::sample_other(),
+            HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Mainnet, CAP26KeyKind::AuthenticationSigning, CAP26EntityKind::Identity, Hardened::Securified(SecurifiedU30::ZERO))
+        )
+        .unwrap()
     }
 }
 
@@ -77,5 +147,323 @@ mod tests {
     fn timed_recovery_delay_in_minutes() {
         let sut = SUT::sample();
         assert_eq!(sut.timed_recovery_delay_in_minutes(), 20160);
+    }
+
+    #[test]
+    fn json_roundtrip_sample_other() {
+        let sut = SUT::sample_other();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+              "securityStructureId": "dededede-dede-dede-dede-dededededede",
+              "matrixOfFactors": {
+                "primaryRole": {
+                  "threshold": 1,
+                  "thresholdFactors": [
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "device",
+                          "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "a40a1850ade79f5b24956b4abdb94624ba8189f68ad39fd2bb92ecdc2cbe17d2"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/618H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "overrideFactors": []
+                },
+                "recoveryRole": {
+                  "threshold": 0,
+                  "thresholdFactors": [],
+                  "overrideFactors": [
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "ledgerHQHardwareWallet",
+                          "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "6f7ac7d9031e321d1762431941b672f164ebb5a6dd2ded9b0c8da2b278143c74"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/618H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "confirmationRole": {
+                  "threshold": 0,
+                  "thresholdFactors": [],
+                  "overrideFactors": [
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "ledgerHQHardwareWallet",
+                          "body": "52ef052a0642a94279b296d6b3b17dedc035a7ae37b76c1d60f11f2725100077"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "e867cd64b70cccad642f47ee4acff014b982870cf5218fbd56da79b0eb6e9fba"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/618H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "numberOfDaysUntilAutoConfirm": 14
+              },
+              "authenticationSigningFactorInstance": {
+                "factorSourceID": {
+                  "discriminator": "fromHash",
+                  "fromHash": {
+                    "kind": "device",
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                  }
+                },
+                "badge": {
+                  "discriminator": "virtualSource",
+                  "virtualSource": {
+                    "discriminator": "hierarchicalDeterministicPublicKey",
+                    "hierarchicalDeterministicPublicKey": {
+                      "publicKey": {
+                        "curve": "curve25519",
+                        "compressedData": "d2343d84e7970224ad4f605782f78b096b750f03990c927492ba5308258c689a"
+                      },
+                      "derivationPath": {
+                        "scheme": "cap26",
+                        "path": "m/44H/1022H/1H/618H/1678H/0S"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        "#,
+        );
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let sut = SUT::sample();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+              "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+              "matrixOfFactors": {
+                "primaryRole": {
+                  "threshold": 2,
+                  "thresholdFactors": [
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "device",
+                          "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "427969814e15d74c3ff4d9971465cb709d210c8a7627af9466bdaa67bd0929b7"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/525H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "ledgerHQHardwareWallet",
+                          "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "92cd6838cd4e7b0523ed93d498e093f71139ffd5d632578189b39a26005be56b"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/525H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "overrideFactors": []
+                },
+                "recoveryRole": {
+                  "threshold": 0,
+                  "thresholdFactors": [],
+                  "overrideFactors": [
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "device",
+                          "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "427969814e15d74c3ff4d9971465cb709d210c8a7627af9466bdaa67bd0929b7"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/525H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "ledgerHQHardwareWallet",
+                          "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "92cd6838cd4e7b0523ed93d498e093f71139ffd5d632578189b39a26005be56b"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/525H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "confirmationRole": {
+                  "threshold": 0,
+                  "thresholdFactors": [],
+                  "overrideFactors": [
+                    {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "password",
+                          "body": "181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "4af49eb56b1af579aaf03f1760ec526f56e2297651f7a067f4b362f685417a81"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/525H/1460H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "numberOfDaysUntilAutoConfirm": 14
+              },
+              "authenticationSigningFactorInstance": {
+                "factorSourceID": {
+                  "discriminator": "fromHash",
+                  "fromHash": {
+                    "kind": "device",
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                  }
+                },
+                "badge": {
+                  "discriminator": "virtualSource",
+                  "virtualSource": {
+                    "discriminator": "hierarchicalDeterministicPublicKey",
+                    "hierarchicalDeterministicPublicKey": {
+                      "publicKey": {
+                        "curve": "curve25519",
+                        "compressedData": "136b3a73595315517f921767bc49ae3ba43fc25d2e34e51fbff434a329176ee8"
+                      },
+                      "derivationPath": {
+                        "scheme": "cap26",
+                        "path": "m/44H/1022H/1H/525H/1678H/0S"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        "#,
+        );
     }
 }

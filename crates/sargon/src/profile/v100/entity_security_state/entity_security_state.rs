@@ -10,11 +10,14 @@ use crate::prelude::*;
 pub enum EntitySecurityState {
     /// The account is controlled by a single factor (private key)
     Unsecured {
+        /// The current state of the unsecured entity
         #[serde(rename = "unsecuredEntityControl")]
         value: UnsecuredEntityControl,
     },
+
     /// The account is controlled by multi-factor
     Securified {
+        /// The current state of the securified entity
         #[serde(rename = "securedEntityControl")]
         value: SecuredEntityControl,
     },
@@ -151,7 +154,7 @@ mod tests {
         let model = EntitySecurityState::Securified {
             value: secured_entity_control,
         };
-
+        print_json(&model);
         assert_eq_after_json_roundtrip(
             &model,
             r#"

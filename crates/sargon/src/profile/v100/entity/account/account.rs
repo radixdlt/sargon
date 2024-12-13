@@ -84,6 +84,11 @@ impl HasSecurityState for Account {
     }
 }
 
+impl IsSecurityStateAware for Account {
+    fn is_securified(&self) -> bool {
+        self.security_state().is_securified()
+    }
+}
 impl IsBaseEntity for Account {
     type Address = AccountAddress;
 

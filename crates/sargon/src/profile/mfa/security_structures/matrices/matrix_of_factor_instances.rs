@@ -105,12 +105,17 @@ impl MnemonicWithPassphrase {
 impl MatrixOfFactorInstances {
     fn sample_from_matrix_of_sources(
         matrix_of_sources: MatrixOfFactorSources,
+        entity_kind: CAP26EntityKind,
     ) -> Self {
         let mut consuming_instances =
             MnemonicWithPassphrase::derive_instances_for_factor_sources(
                 NetworkID::Mainnet,
                 1,
-                [DerivationPreset::AccountMfa],
+                [if entity_kind == CAP26EntityKind::Account {
+                    DerivationPreset::AccountMfa
+                } else {
+                    DerivationPreset::IdentityMfa
+                }],
                 matrix_of_sources.all_factors().into_iter().cloned(),
             );
 
@@ -123,13 +128,19 @@ impl MatrixOfFactorInstances {
 }
 
 impl HasSampleValues for MatrixOfFactorInstances {
+    /// Account
     fn sample() -> Self {
-        Self::sample_from_matrix_of_sources(MatrixOfFactorSources::sample())
+        Self::sample_from_matrix_of_sources(
+            MatrixOfFactorSources::sample(),
+            CAP26EntityKind::Account,
+        )
     }
 
+    /// Persona
     fn sample_other() -> Self {
         Self::sample_from_matrix_of_sources(
             MatrixOfFactorSources::sample_other(),
+            CAP26EntityKind::Identity,
         )
     }
 }

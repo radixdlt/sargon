@@ -93,6 +93,39 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
     ]
 });
 
+impl DerivationPath {
+    /// # Safety
+    /// Crashes for Bip44LikePath, this is only meant to be used for tests
+    /// to map between IdentityPath -> IdentityPath
+    unsafe fn as_persona(&self) -> Self {
+        match self {
+            Self::Account { value } => {
+                IdentityPath::new(value.network_id, value.key_kind, value.index)
+                    .into()
+            }
+            Self::Identity { value: _ } => self.clone(),
+            Self::Bip44Like { value: _ } => panic!("unsupported"),
+        }
+    }
+}
+
+impl HierarchicalDeterministicFactorInstance {
+    /// # Safety
+    /// Completely unsafe, this is an invalid FactorInstance! It hardcodes
+    /// the derivation path as a persona, resulting in an invalid (DerivationPath, PublicKey) pair.!
+    unsafe fn invalid_hard_coding_derivation_path_as_persona(&self) -> Self {
+        unsafe {
+            Self::new(
+                self.factor_source_id(),
+                HierarchicalDeterministicPublicKey::new(
+                    self.public_key(),
+                    self.derivation_path().as_persona(),
+                ),
+            )
+        }
+    }
+}
+
 impl Persona {
     pub fn sample_unsecurified_mainnet(
         name: impl AsRef<str>,
@@ -121,6 +154,7 @@ impl Persona {
         veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
+        assert_eq!(veci.get_entity_kind(), CAP26EntityKind::Identity);
         let role = make_role();
         assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
         let mut matrix = MatrixOfFactorInstances::sample();
@@ -135,8 +169,54 @@ impl Persona {
                 .map(FactorInstance::from)
                 .collect_vec(),
         );
+        unsafe {
+            matrix.recovery_role =
+                RecoveryRoleWithFactorInstances::with_factors(
+                    0,
+                    [],
+                    matrix
+                        .recovery()
+                        .get_override_factors()
+                        .into_iter()
+                        .filter_map(|f| f.try_as_hd_factor_instances().ok())
+                        .map(|f| {
+                            f.invalid_hard_coding_derivation_path_as_persona()
+                        })
+                        .map(FactorInstance::from)
+                        .collect_vec(),
+                );
+            matrix.confirmation_role =
+                ConfirmationRoleWithFactorInstances::with_factors(
+                    0,
+                    [],
+                    matrix
+                        .confirmation()
+                        .get_override_factors()
+                        .into_iter()
+                        .filter_map(|f| f.try_as_hd_factor_instances().ok())
+                        .map(|f| {
+                            f.invalid_hard_coding_derivation_path_as_persona()
+                        })
+                        .map(FactorInstance::from)
+                        .collect_vec(),
+                );
+        }
         let address =
             IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);
+
+        let security_structure_of_factor_instances =
+            SecurityStructureOfFactorInstances::new(
+                SecurityStructureID::sample(),
+                matrix,
+                HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+                    NetworkID::Mainnet,
+                    CAP26KeyKind::AuthenticationSigning,
+                    CAP26EntityKind::Identity,
+                    SecurifiedU30::ZERO,
+                ), // TODO: Remove hard coding?
+            )
+            .unwrap();
+
         Self {
             network_id: NetworkID::Mainnet,
             address,
@@ -144,10 +224,7 @@ impl Persona {
             security_state: SecuredEntityControl::new(
                 veci.clone(),
                 AccessControllerAddress::sample_from_identity_address(address),
-                SecurityStructureOfFactorInstances {
-                    security_structure_id: SecurityStructureID::sample(),
-                    matrix_of_factors: matrix,
-                },
+                security_structure_of_factor_instances,
             )
             .unwrap()
             .into(),

@@ -66,7 +66,11 @@ impl HasEntityKind for Persona {
         CAP26EntityKind::Identity
     }
 }
-
+impl IsSecurityStateAware for Persona {
+    fn is_securified(&self) -> bool {
+        self.security_state().is_securified()
+    }
+}
 impl HasSecurityState for Persona {
     fn security_state(&self) -> EntitySecurityState {
         self.security_state.clone()

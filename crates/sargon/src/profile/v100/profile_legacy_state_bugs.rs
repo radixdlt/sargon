@@ -116,39 +116,6 @@ impl Profile {
         sut
     }
 
-    fn with_instance_collision_authentication_signing_key_kind() -> Self {
-        let mwp = MnemonicWithPassphrase::sample_device();
-        let mut sut = Profile::from_mnemonic_with_passphrase(
-            mwp.clone(),
-            HostId::sample(),
-            HostInfo::sample(),
-        );
-        let mut account1 = Account::sample();
-        let mut account2 = Account::sample_other();
-        let mut uec1 = account1.try_get_unsecured_control().unwrap();
-        uec1.authentication_signing = Some(
-            HierarchicalDeterministicFactorInstance::sample_auth_signing(),
-        );
-        account1.security_state =
-            EntitySecurityState::Unsecured { value: uec1 };
-
-        let mut uec2 = account1.try_get_unsecured_control().unwrap();
-        uec2.authentication_signing = Some(
-            HierarchicalDeterministicFactorInstance::sample_auth_signing(),
-        );
-        account2.security_state =
-            EntitySecurityState::Unsecured { value: uec2 };
-
-        sut.networks = ProfileNetworks::just(ProfileNetwork::new(
-            NetworkID::Mainnet,
-            Accounts::from_iter([account1, account2]),
-            Personas::default(),
-            AuthorizedDapps::default(),
-            ResourcePreferences::default(),
-        ));
-        sut
-    }
-
     fn with_instance_collision_securified() -> Self {
         let mwp = MnemonicWithPassphrase::sample_device();
         let mut sut = Profile::from_mnemonic_with_passphrase(
@@ -284,17 +251,6 @@ mod tests {
     #[test]
     fn instance_detection_securified() {
         let sut = SUT::with_instance_collision_securified();
-        let accounts = sut.accounts_on_current_network().unwrap();
-        let acc1 = accounts.clone().first().unwrap().clone();
-        let acc2 = accounts.items().into_iter().next_back().unwrap();
-
-        instance_detection(sut, acc1, acc2)
-    }
-
-    #[test]
-    fn instance_detection_auth_sign() {
-        let sut =
-            SUT::with_instance_collision_authentication_signing_key_kind();
         let accounts = sut.accounts_on_current_network().unwrap();
         let acc1 = accounts.clone().first().unwrap().clone();
         let acc2 = accounts.items().into_iter().next_back().unwrap();

@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-pub trait HasSecurityState: HasFactorInstances {
+pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
     fn security_state(&self) -> EntitySecurityState;
+
     fn try_get_secured_control(&self) -> Result<SecuredEntityControl> {
         self.security_state()
             .as_securified()
