@@ -95,6 +95,19 @@ macro_rules! is_dynamic_resource_address {
     };
 }
 
+impl TryInto<ScryptoDynamicResourceAddress> for &Address {
+    type Error = crate::CommonError;
+
+    fn try_into(
+        self,
+    ) -> Result<ScryptoDynamicResourceAddress, Self::Error> {
+        match self {
+            Address::Account(value) => TryInto::<ScryptoDynamicResourceAddress>::try_into(value),
+            _ => todo!()
+        }
+    }
+}
+
 is_dynamic_component_address!(AccountAddress);
 is_dynamic_component_address!(AccessControllerAddress);
 is_dynamic_component_address!(ComponentAddress);
