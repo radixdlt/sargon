@@ -1,3 +1,4 @@
+mod automatic_shield_builder;
 mod has_role_kind;
 mod matrices;
 mod roles;
@@ -9,6 +10,7 @@ mod security_structure_metadata;
 mod security_structure_of_factors;
 mod selected_factor_sources_status;
 
+pub use automatic_shield_builder::*;
 pub use has_role_kind::*;
 pub use matrices::*;
 pub use roles::*;

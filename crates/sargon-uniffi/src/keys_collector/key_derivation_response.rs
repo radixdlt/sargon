@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use sargon::IndexMap;
-use sargon::IndexSet;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
 
 /// A collection of `HierarchicalDeterministicFactorInstance`s, on a
@@ -58,11 +57,7 @@ impl From<KeyDerivationResponse> for InternalKeyDerivationResponse {
             value.per_factor_source.into_iter().map(|item| {
                 (
                     item.factor_source_id.into_internal(),
-                    IndexSet::from_iter(
-                        item.factor_instances
-                            .into_iter()
-                            .map(|d| d.into_internal()),
-                    ),
+                    item.factor_instances.into_internal(),
                 )
             }),
         ))

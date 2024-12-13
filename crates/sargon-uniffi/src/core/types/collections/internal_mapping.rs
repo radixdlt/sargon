@@ -1,13 +1,15 @@
 use crate::prelude::*;
 
-use sargon::IdentifiedVecOf;
+use sargon::{IdentifiedVecOf, IndexSet};
 
-// From InternalType =================================================================================================
-
+// ==========================
+// === From InternalType ====
+// ==========================
 pub trait FromInternal<InternalType, Type> {
     fn into_type(self) -> Type;
 }
 
+// =====  Vec  ======
 impl<InternalElement, Element> FromInternal<Vec<InternalElement>, Vec<Element>>
     for Vec<InternalElement>
 where
@@ -18,6 +20,7 @@ where
     }
 }
 
+// === IdentifiedVec ====
 impl<InternalElement, Element>
     FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
     for IdentifiedVecOf<InternalElement>
@@ -30,12 +33,50 @@ where
     }
 }
 
-// Into InternalType =================================================================================================
+// ====  IndexSet  ======
+impl<InternalElement, Element>
+    FromInternal<IndexSet<InternalElement>, Vec<Element>>
+    for IndexSet<InternalElement>
+where
+    Element: From<InternalElement>,
+{
+    fn into_type(self) -> Vec<Element> {
+        self.into_iter().map(Element::from).collect()
+    }
+}
+
+// ==========================
+// === Into InternalType ====
+// ==========================
 
 pub trait IntoInternal<Type, InternalType> {
     fn into_internal(self) -> InternalType;
 }
 
+// =====    Vec  ========
+impl<InternalElement, Element> IntoInternal<Vec<Element>, Vec<InternalElement>>
+    for Vec<Element>
+where
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> Vec<InternalElement> {
+        self.into_iter().map(Into::into).collect()
+    }
+}
+
+// ====  IndexSet  ======
+impl<InternalElement, Element>
+    IntoInternal<Vec<Element>, IndexSet<InternalElement>> for Vec<Element>
+where
+    Element: Into<InternalElement>,
+    InternalElement: std::hash::Hash + Eq,
+{
+    fn into_internal(self) -> IndexSet<InternalElement> {
+        self.into_iter().map(Into::into).collect::<IndexSet<_>>()
+    }
+}
+
+// === IdentifiedVec ====
 impl<InternalElement, Element>
     IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
     for Vec<Element>
@@ -44,16 +85,6 @@ where
     Element: Into<InternalElement>,
 {
     fn into_internal(self) -> IdentifiedVecOf<InternalElement> {
-        self.into_iter().map(Into::into).collect()
-    }
-}
-
-impl<InternalElement, Element> IntoInternal<Vec<Element>, Vec<InternalElement>>
-    for Vec<Element>
-where
-    Element: Into<InternalElement>,
-{
-    fn into_internal(self) -> Vec<InternalElement> {
         self.into_iter().map(Into::into).collect()
     }
 }

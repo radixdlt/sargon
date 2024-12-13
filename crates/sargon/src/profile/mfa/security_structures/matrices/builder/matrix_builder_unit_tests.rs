@@ -125,15 +125,15 @@ fn set_number_of_days_42() {
     pretty_assertions::assert_eq!(
         built,
         MatrixOfFactorSourceIds::with_roles_and_days(
-            RoleWithFactorSourceIds::primary_with_factors(
+            PrimaryRoleWithFactorSourceIds::with_factors(
                 1,
                 [FactorSourceID::sample_device(),],
                 [],
             ),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_ledger(),
             ],),
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_password()
             ],),
             42,
@@ -172,15 +172,15 @@ fn set_number_of_days_if_not_set_uses_default() {
     pretty_assertions::assert_eq!(
         built,
         MatrixOfFactorSourceIds::with_roles_and_days(
-            RoleWithFactorSourceIds::primary_with_factors(
+            PrimaryRoleWithFactorSourceIds::with_factors(
                 1,
                 [FactorSourceID::sample_device(),],
                 [],
             ),
-            RoleWithFactorSourceIds::recovery_with_factors([
+            RecoveryRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_ledger(),
             ],),
-            RoleWithFactorSourceIds::confirmation_with_factors([
+            ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_password()
             ],),
             SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
@@ -221,7 +221,7 @@ fn single_factor_in_primary_threshold_cannot_be_in_recovery() {
     let built = sut.build().unwrap();
     pretty_assertions::assert_eq!(
         built.primary(),
-        &RoleWithFactorSourceIds::primary_with_factors(
+        &PrimaryRoleWithFactorSourceIds::with_factors(
             1,
             [
                 FactorSourceID::sample_ledger(),
@@ -232,14 +232,14 @@ fn single_factor_in_primary_threshold_cannot_be_in_recovery() {
     );
     pretty_assertions::assert_eq!(
         built.recovery(),
-        &RoleWithFactorSourceIds::recovery_with_factors([
+        &RecoveryRoleWithFactorSourceIds::override_only([
             FactorSourceID::sample_ledger()
         ]),
     );
 
     pretty_assertions::assert_eq!(
         built.confirmation(),
-        &RoleWithFactorSourceIds::confirmation_with_factors([
+        &ConfirmationRoleWithFactorSourceIds::override_only([
             FactorSourceID::sample_arculus_other()
         ])
     )
@@ -1392,7 +1392,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_device(),
@@ -1400,11 +1400,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device(),
                         FactorSourceID::sample_ledger(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_password()
                     ],),
                 )
@@ -1453,7 +1453,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_ledger(),
@@ -1461,11 +1461,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device(),
                         FactorSourceID::sample_ledger(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_password()
                     ],),
                 )
@@ -1513,7 +1513,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_device(),
@@ -1521,11 +1521,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device(),
                         FactorSourceID::sample_ledger()
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_password()
                     ],),
                 )
@@ -1565,15 +1565,15 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         1,
                         [FactorSourceID::sample_device(),],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger()
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_password()
                     ],),
                 )
@@ -1614,15 +1614,15 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         1,
                         [FactorSourceID::sample_ledger(),],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device()
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_password()
                     ],),
                 )
@@ -1671,7 +1671,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_device(),
@@ -1679,11 +1679,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger(),
                         FactorSourceID::sample_ledger_other(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device()
                     ],),
                 )
@@ -1732,7 +1732,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_ledger(),
@@ -1740,11 +1740,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger(),
                         FactorSourceID::sample_ledger_other(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device()
                     ],),
                 )
@@ -1785,15 +1785,15 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         1,
                         [FactorSourceID::sample_ledger(),],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger_other(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device()
                     ],),
                 )
@@ -1834,15 +1834,15 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         1,
                         [FactorSourceID::sample_device(),],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger_other()
                     ],),
                 )
@@ -1895,7 +1895,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_device(),
@@ -1903,11 +1903,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_ledger(),
                         FactorSourceID::sample_ledger_other(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device(),
                         FactorSourceID::sample_password()
                     ],),
@@ -1965,7 +1965,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    RoleWithFactorSourceIds::primary_with_factors(
+                    PrimaryRoleWithFactorSourceIds::with_factors(
                         2,
                         [
                             FactorSourceID::sample_device(),
@@ -1973,11 +1973,11 @@ mod shield_configs {
                         ],
                         [],
                     ),
-                    RoleWithFactorSourceIds::recovery_with_factors([
+                    RecoveryRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_device(),
                         FactorSourceID::sample_ledger(),
                     ],),
-                    RoleWithFactorSourceIds::confirmation_with_factors([
+                    ConfirmationRoleWithFactorSourceIds::override_only([
                         FactorSourceID::sample_password(),
                         FactorSourceID::sample_password_other(),
                         FactorSourceID::sample_off_device()

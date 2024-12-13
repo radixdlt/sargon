@@ -31,14 +31,7 @@ impl From<InternalNeglectedFactors> for NeglectedFactors {
 
 impl From<NeglectedFactors> for InternalNeglectedFactors {
     fn from(value: NeglectedFactors) -> Self {
-        Self::new(
-            value.reason.into_internal(),
-            value
-                .factors
-                .into_iter()
-                .map(|id| id.into_internal())
-                .collect::<sargon::IndexSet<_>>(),
-        )
+        Self::new(value.reason.into_internal(), value.factors.into_internal())
     }
 }
 
