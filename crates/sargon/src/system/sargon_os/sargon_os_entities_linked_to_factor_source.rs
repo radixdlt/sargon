@@ -232,18 +232,16 @@ mod tests {
     /// - 1 visible Account (sample_stokenet_nadia)
     /// - 1 hidden Account (sample_stokenet_olivia)
     /// - 1 visible Persona (sample_stokenet_leia_skywalker)
-    /// And the corresponding mocked secure/unsafe storages.
+    ///  And the corresponding mocked secure/unsafe storages.
     async fn boot_with_entities(
         device_mnemonic_in_keychain: bool,
         device_mnemonic_backed_up: bool,
     ) -> Arc<SargonOS> {
-        let secure_storage = MockSecureStorage::new(indexmap! {
-            device_secure_key() => device_mnemonic_in_keychain,
-        });
+        let secure_storage =
+            build_secure_storage(device_mnemonic_in_keychain).await;
         let unsafe_storage =
             build_unsafe_storage(device_mnemonic_backed_up).await;
-        let drivers =
-            Drivers::with_storages(Arc::new(secure_storage), unsafe_storage);
+        let drivers = Drivers::with_storages(secure_storage, unsafe_storage);
         let bios = Bios::new(drivers);
         let clients = Clients::new(bios);
         let interactors = Interactors::new_from_clients(&clients);
@@ -284,16 +282,28 @@ mod tests {
         }
     }
 
+    async fn build_secure_storage(
+        device_mnemonic_in_keychain: bool,
+    ) -> Arc<EphemeralSecureStorage> {
+        let secure_storage = EphemeralSecureStorage::new();
+        if device_mnemonic_in_keychain {
+            secure_storage
+                .save_data(device_secure_key(), BagOfBytes::from(vec![0x01]))
+                .await
+                .unwrap();
+        }
+        secure_storage
+    }
+
     async fn build_unsafe_storage(
         device_mnemonic_backed_up: bool,
     ) -> Arc<EphemeralUnsafeStorage> {
         let unsafe_storage = EphemeralUnsafeStorage::new();
-        let backed_up: Vec<FactorSourceIDFromHash>;
-        if device_mnemonic_backed_up {
-            backed_up = vec![FactorSource::sample_device().id_from_hash()];
+        let backed_up = if device_mnemonic_backed_up {
+            vec![FactorSource::sample_device().id_from_hash()]
         } else {
-            backed_up = vec![];
-        }
+            vec![]
+        };
         let json = serde_json::to_vec(&backed_up).unwrap();
         unsafe_storage
             .save_data(

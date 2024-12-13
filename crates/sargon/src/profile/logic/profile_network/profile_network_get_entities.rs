@@ -1,12 +1,20 @@
 use crate::prelude::*;
 
 impl ProfileNetwork {
+    pub fn accounts_non_hidden(&self) -> Accounts {
+        self.accounts.visible()
+    }
+
+    pub fn accounts_hidden(&self) -> Accounts {
+        self.accounts.hidden()
+    }
+
     pub fn personas_non_hidden(&self) -> Personas {
         self.personas.non_hidden()
     }
 
-    pub fn accounts_non_hidden(&self) -> Accounts {
-        self.accounts.visible()
+    pub fn personas_hidden(&self) -> Personas {
+        self.personas.hidden()
     }
 
     pub fn get_entities_erased(

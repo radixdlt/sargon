@@ -7,39 +7,33 @@ impl ProfileNetwork {
         factor_source: FactorSource,
         integrity: FactorSourceIntegrity,
     ) -> Result<EntitiesLinkedToFactorSource> {
+        fn filter(
+            e: &impl HasSecurityState,
+            factor_source: FactorSource,
+        ) -> bool {
+            e.security_state()
+                .is_linked_to_factor_source(factor_source.clone())
+        }
+
         let accounts = self
             .accounts_non_hidden()
             .iter()
-            .filter(|a| {
-                a.security_state
-                    .is_linked_to_factor_source(factor_source.clone())
-            })
+            .filter(|a| filter(a, factor_source.clone()))
             .collect::<Accounts>();
         let hidden_accounts = self
-            .accounts
-            .hidden()
+            .accounts_hidden()
             .iter()
-            .filter(|a| {
-                a.security_state
-                    .is_linked_to_factor_source(factor_source.clone())
-            })
+            .filter(|a| filter(a, factor_source.clone()))
             .collect::<Accounts>();
         let personas = self
             .personas_non_hidden()
             .iter()
-            .filter(|p| {
-                p.security_state
-                    .is_linked_to_factor_source(factor_source.clone())
-            })
+            .filter(|p| filter(p, factor_source.clone()))
             .collect::<Personas>();
         let hidden_personas = self
-            .personas
-            .hidden()
+            .personas_hidden()
             .iter()
-            .filter(|p| {
-                p.security_state
-                    .is_linked_to_factor_source(factor_source.clone())
-            })
+            .filter(|p| filter(p, factor_source.clone()))
             .collect::<Personas>();
 
         Ok(EntitiesLinkedToFactorSource::new(
