@@ -41,7 +41,7 @@ impl SargonOS {
         &self,
         device_factor_source: DeviceFactorSource,
     ) -> Result<FactorSourceIntegrity> {
-        let is_mnemeonic_present_in_keychain = self
+        let is_mnemonic_present_in_secure_storage = self
             .clients
             .secure_storage
             .contains_device_mnemonic(device_factor_source.clone())
@@ -53,7 +53,7 @@ impl SargonOS {
             .await?;
         let result = DeviceFactorSourceIntegrity::new(
             device_factor_source,
-            is_mnemeonic_present_in_keychain,
+            is_mnemonic_present_in_secure_storage,
             is_mnemonic_marked_as_backed_up,
         );
         Ok(result.into())
@@ -69,9 +69,9 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn current_profile__device_factor_source_present_in_keychain_and_backed_up(
+    async fn current_profile__device_factor_source_present_in_secure_storage_and_backed_up(
     ) {
-        // Verify the integrity and entities when the device mnemonic is present in the keychain and marked as backed up.
+        // Verify the integrity and entities when the device mnemonic is present in the secure storage and marked as backed up.
         let os = boot_with_entities(true, true).await;
         let factor_source = FactorSource::sample_device();
 
@@ -87,9 +87,9 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn current_profile__device_factor_source_present_in_keychain_but_not_backed_up(
+    async fn current_profile__device_factor_source_present_in_secure_storage_but_not_backed_up(
     ) {
-        // Verify the integrity and entities when the device mnemonic is present in the keychain but not marked as backed up.
+        // Verify the integrity and entities when the device mnemonic is present in secure storage but not marked as backed up.
         let os = boot_with_entities(true, false).await;
         let factor_source = FactorSource::sample_device();
 
@@ -105,9 +105,9 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn current_profile__device_factor_source_missing_in_keychain_and_not_backed_up(
+    async fn current_profile__device_factor_source_missing_in_secure_storage_and_not_backed_up(
     ) {
-        // Verify the integrity and entities when the device mnemonic is not present in the keychain and not marked as backed up.
+        // Verify the integrity and entities when the device mnemonic is not present in secure storage and not marked as backed up.
         let os = boot_with_entities(false, false).await;
         let factor_source = FactorSource::sample_device();
 
@@ -193,14 +193,14 @@ mod tests {
     /// Verifies the integrity corresponds to a DeviceFactorSourceIntegrity with the expected values
     fn verify_device_integrity(
         result: FactorSourceIntegrity,
-        is_mnemonic_present_in_keychain: bool,
+        is_mnemonic_present_in_secure_storage: bool,
         is_mnemonic_marked_as_backed_up: bool,
     ) {
         match result {
             FactorSourceIntegrity::Device(integrity) => {
                 assert_eq!(
-                    integrity.is_mnemonic_present_in_keychain,
-                    is_mnemonic_present_in_keychain
+                    integrity.is_mnemonic_present_in_secure_storage,
+                    is_mnemonic_present_in_secure_storage
                 );
                 assert_eq!(
                     integrity.is_mnemonic_marked_as_backed_up,
@@ -234,11 +234,11 @@ mod tests {
     /// - 1 visible Persona (sample_stokenet_leia_skywalker)
     ///  And the corresponding mocked secure/unsafe storages.
     async fn boot_with_entities(
-        device_mnemonic_in_keychain: bool,
+        device_mnemonic_in_secure_storage: bool,
         device_mnemonic_backed_up: bool,
     ) -> Arc<SargonOS> {
         let secure_storage =
-            build_secure_storage(device_mnemonic_in_keychain).await;
+            build_secure_storage(device_mnemonic_in_secure_storage).await;
         let unsafe_storage =
             build_unsafe_storage(device_mnemonic_backed_up).await;
         let drivers = Drivers::with_storages(secure_storage, unsafe_storage);
@@ -283,10 +283,10 @@ mod tests {
     }
 
     async fn build_secure_storage(
-        device_mnemonic_in_keychain: bool,
+        device_mnemonic_in_secure_storage: bool,
     ) -> Arc<EphemeralSecureStorage> {
         let secure_storage = EphemeralSecureStorage::new();
-        if device_mnemonic_in_keychain {
+        if device_mnemonic_in_secure_storage {
             secure_storage
                 .save_data(device_secure_key(), BagOfBytes::from(vec![0x01]))
                 .await

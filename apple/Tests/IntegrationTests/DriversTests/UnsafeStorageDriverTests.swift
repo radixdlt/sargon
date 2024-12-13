@@ -14,21 +14,21 @@ class UnsafeStorageDriverTests: DriverTest<UnsafeStorage> {
 		sut.deleteDataForKey(key: key)
 		XCTAssertNil(sut.loadData(key: key))
 	}
-	
+
 	func test_keyMapping() async throws {
 		// Set up SUT with keyMapping that uses custom key
 		let key = "custom_key"
 		let keyMapping: UnsafeStorageKeyMapping = [.factorSourceUserHasWrittenDown: key]
 		let data = Data([0x01])
 		let sut = SUT(keyMapping: keyMapping)
-												
+
 		// Make sure there is no value on UserDefault for custom key
 		UserDefaults.standard.removeObject(forKey: key)
 		XCTAssertNil(UserDefaults.standard.value(forKey: key))
-		
+
 		// Save the value via SUT
 		sut.saveData(key: .factorSourceUserHasWrittenDown, data: data)
-		
+
 		// Verify the data is saved on UserDefaults using custom key, and not with the one Sargon defines
 		XCTAssertEqual(sut.loadData(key: .factorSourceUserHasWrittenDown), data)
 		XCTAssertEqual(UserDefaults.standard.data(forKey: key), data)
