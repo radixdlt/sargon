@@ -95,19 +95,19 @@ macro_rules! is_dynamic_resource_address {
     };
 }
 
-impl TryInto<ScryptoDynamicResourceAddress> for &Address {
+impl TryInto<ScryptoDynamicGlobalAddress> for &AddressOfAccountOrPersona {
     type Error = crate::CommonError;
-
-    fn try_into(
-        self,
-    ) -> Result<ScryptoDynamicResourceAddress, Self::Error> {
+    fn try_into(self) -> Result<ScryptoDynamicGlobalAddress, Self::Error> {
         match self {
-            Address::Account(value) => TryInto::<ScryptoDynamicResourceAddress>::try_into(value),
-            _ => todo!()
+            AddressOfAccountOrPersona::Account(value) => {
+                TryInto::<ScryptoDynamicGlobalAddress>::try_into(value)
+            }
+            AddressOfAccountOrPersona::Identity(value) => {
+                TryInto::<ScryptoDynamicGlobalAddress>::try_into(value)
+            }
         }
     }
 }
-
 is_dynamic_component_address!(AccountAddress);
 is_dynamic_component_address!(AccessControllerAddress);
 is_dynamic_component_address!(ComponentAddress);

@@ -146,7 +146,8 @@ pub mod prelude {
             NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
             NonFungibleIdType as ScryptoNonFungibleIdType,
             UpperBound as ScryptoUpperBound,
-            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE, XRD,
+            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
+            IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE, XRD,
         },
         types::{
             ComponentAddress as ScryptoComponentAddress,
@@ -156,11 +157,18 @@ pub mod prelude {
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };
+
     pub(crate) use radix_engine_interface::blueprints::{
+        access_controller::{
+            RecoveryProposal as ScryptoRecoveryProposal,
+            RuleSet as ScryptoRuleSet,
+        },
         account::{
             DefaultDepositRule as ScryptoDefaultDepositRule,
             ResourcePreference as ScryptoResourcePreference,
+            ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,
         },
+        identity::IDENTITY_SECURIFY_IDENT as SCRYPTO_IDENTITY_SECURIFY_IDENT,
         resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
     };
     pub(crate) use radix_engine_interface::prelude::{

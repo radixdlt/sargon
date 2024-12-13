@@ -1,7 +1,3 @@
-use radix_engine_interface::blueprints::access_controller::{
-    RecoveryProposal as ScryptoRecoveryProposal, RuleSet as ScryptoRuleSet,
-};
-
 use crate::prelude::*;
 
 impl<const ROLE: u8> From<RoleWithFactorInstances<ROLE>> for ScryptoAccessRule {
