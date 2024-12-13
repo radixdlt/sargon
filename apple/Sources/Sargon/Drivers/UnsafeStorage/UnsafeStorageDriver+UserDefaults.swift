@@ -12,14 +12,22 @@ extension UnsafeStorageDriver where Self == UnsafeStorage {
 	public static var shared: Self { Self.shared }
 }
 
+public typealias UnsafeStorageKeyMapping = [UnsafeStorageKey: String]
+
 // MARK: - UnsafeStorage
 /// An `UnsafeStorageDriver` implementation which
 /// wraps `UserDefaults`.
 public final class UnsafeStorage: Sendable {
 	public typealias Key = UnsafeStorageKey
 	fileprivate let userDefaults: UserDefaults
-	public init(userDefaults: UserDefaults = .standard) {
+
+	/// A dictionary containing the custom String value used for a given `UnsafeStorageKey`.
+	/// This is necessary since some UserDefaults were saved by the Host apps prior to Sargon.
+	fileprivate let keyMapping: [UnsafeStorageKey: String]
+
+	public init(userDefaults: UserDefaults = .standard, keyMapping: [UnsafeStorageKey: String] = [:]) {
 		self.userDefaults = userDefaults
+		self.keyMapping = keyMapping
 	}
 
 	/// Singleton `UnsafeStorageDriver` of type `UnsafeStorage,
@@ -30,7 +38,7 @@ public final class UnsafeStorage: Sendable {
 extension UnsafeStorageKey {
 	/// Translates this `UnsafeStorageKey` into a String
 	/// identifier which we can use with `UserDefaults`
-	var identifier: String {
+	public var identifier: String {
 		unsafeStorageKeyIdentifier(key: self)
 	}
 }
@@ -38,14 +46,22 @@ extension UnsafeStorageKey {
 // MARK: - UnsafeStorage + UnsafeStorageDriver
 extension UnsafeStorage: UnsafeStorageDriver {
 	public func loadData(key: Key) -> Data? {
-		userDefaults.data(forKey: key.identifier)
+		userDefaults.data(forKey: identifier(for: key))
 	}
 
 	public func saveData(key: Key, data: Data) {
-		userDefaults.setValue(data, forKey: key.identifier)
+		userDefaults.setValue(data, forKey: identifier(for: key))
 	}
 
 	public func deleteDataForKey(key: Key) {
-		userDefaults.removeObject(forKey: key.identifier)
+		userDefaults.removeObject(forKey: identifier(for: key))
+	}
+
+	private func identifier(for key: Key) -> String {
+		if let mapped = keyMapping[key] {
+			mapped
+		} else {
+			key.identifier
+		}
 	}
 }

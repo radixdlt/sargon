@@ -10,6 +10,7 @@ extension Drivers {
 		Drivers(
 			appVersion: "0.0.1",
 			userDefaultsSuite: "works.rdx",
+			unsafeStorageKeyMapping: [:],
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 				keychainService: "test"
 			)

@@ -8,11 +8,12 @@ extension BIOS {
 	static func creatingShared(
 		bundle: Bundle = .main,
 		userDefaultsSuite: String = "test",
+		unsafeStorageKeyMapping: UnsafeStorageKeyMapping = [:],
 		secureStorageDriver: SecureStorageDriver = Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 			keychainService: "test"
 		)
 	) -> BIOS {
-		creatingShared(drivers: .init(bundle: bundle, userDefaultsSuite: userDefaultsSuite, secureStorageDriver: secureStorageDriver))
+		creatingShared(drivers: .init(bundle: bundle, userDefaultsSuite: userDefaultsSuite, unsafeStorageKeyMapping: unsafeStorageKeyMapping, secureStorageDriver: secureStorageDriver))
 	}
 }
 

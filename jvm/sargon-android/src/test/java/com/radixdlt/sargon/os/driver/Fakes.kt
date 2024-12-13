@@ -27,6 +27,10 @@ class FakeSecureStorageDriver: SecureStorageDriver {
     override suspend fun deleteDataForKey(key: SecureStorageKey) {
         storage.remove(key.identifier)
     }
+
+    override suspend fun containsDataForKey(key: SecureStorageKey): Boolean {
+        return storage.containsKey(key.identifier)
+    }
 }
 
 class FakeUnsafeStorageDriver: UnsafeStorageDriver {

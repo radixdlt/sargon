@@ -19,6 +19,11 @@ pub trait SecureStorageDriver: Send + Sync + std::fmt::Debug {
     ) -> Result<()>;
 
     async fn delete_data_for_key(&self, key: SecureStorageKey) -> Result<()>;
+
+    async fn contains_data_for_key(
+        &self,
+        key: SecureStorageKey,
+    ) -> Result<bool>;
 }
 
 #[derive(Debug)]
@@ -55,6 +60,16 @@ impl InternalSecureStorageDriver for SecureStorageDriverAdapter {
     ) -> InternalResult<()> {
         self.wrapped
             .delete_data_for_key(key.into())
+            .await
+            .into_internal_result()
+    }
+
+    async fn contains_data_for_key(
+        &self,
+        key: InternalSecureStorageKey,
+    ) -> InternalResult<bool> {
+        self.wrapped
+            .contains_data_for_key(key.into())
             .await
             .into_internal_result()
     }

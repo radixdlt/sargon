@@ -205,6 +205,20 @@ impl SecureStorageClient {
             .await
     }
 
+    /// Checks if a MnemonicWithPassphrase exists for the given `DeviceFactorSource`
+    pub async fn contains_device_mnemonic(
+        &self,
+        device_factor_source: DeviceFactorSource,
+    ) -> Result<bool> {
+        self.driver
+            .contains_data_for_key(
+                SecureStorageKey::DeviceFactorSourceMnemonic {
+                    factor_source_id: device_factor_source.id,
+                },
+            )
+            .await
+    }
+
     pub async fn delete_profile(&self, id: ProfileID) -> Result<()> {
         warn!("Deleting profile with id: {}", id);
         self.driver
@@ -332,6 +346,34 @@ mod tests {
             .map(|b| String::from_utf8(b.unwrap().to_vec()).unwrap())
             .unwrap()
             .contains("device"));
+    }
+
+    #[actix_rt::test]
+    async fn contains_device_mnemonic() {
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
+        let factor_source_id = private.factor_source.id;
+        let (sut, _) = SecureStorageClient::ephemeral();
+
+        // It doesn't contain it yet
+        assert!(!sut
+            .contains_device_mnemonic(private.factor_source.clone())
+            .await
+            .unwrap());
+
+        // Save the mnemonic
+        assert!(sut
+            .save_mnemonic_with_passphrase(
+                &private.mnemonic_with_passphrase,
+                &factor_source_id.clone()
+            )
+            .await
+            .is_ok());
+
+        // Assert it contains it now
+        assert!(sut
+            .contains_device_mnemonic(private.factor_source)
+            .await
+            .unwrap());
     }
 
     #[actix_rt::test]

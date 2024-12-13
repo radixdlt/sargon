@@ -25,4 +25,11 @@ impl SecureStorageDriver for AlwaysFailSecureStorage {
     async fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
         panic!("AlwaysFailStorage does not implement `delete_data_for_key");
     }
+
+    async fn contains_data_for_key(
+        &self,
+        _key: SecureStorageKey,
+    ) -> Result<bool> {
+        panic!("AlwaysFailStorage does not implement `contains_data_for_key");
+    }
 }
