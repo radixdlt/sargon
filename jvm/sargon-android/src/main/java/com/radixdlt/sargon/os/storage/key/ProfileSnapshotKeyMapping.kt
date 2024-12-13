@@ -9,6 +9,7 @@ import com.radixdlt.sargon.extensions.bagOfBytes
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
+import com.radixdlt.sargon.os.storage.keyExist
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.remove
 import com.radixdlt.sargon.os.storage.write
@@ -52,6 +53,9 @@ internal class ProfileSnapshotKeyMapping(
     }
 
     override suspend fun remove(): Result<Unit> = encryptedStorage.remove(preferenceKey)
+
+    override suspend fun keyExist(): Boolean = encryptedStorage.keyExist(preferenceKey)
+
 
     companion object {
         private const val KEY = "profile_preferences_key"

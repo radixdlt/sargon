@@ -11,6 +11,7 @@ import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.hostIdToJsonBytes
 import com.radixdlt.sargon.newHostIdFromJsonBytes
+import com.radixdlt.sargon.os.storage.keyExist
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.remove
 import com.radixdlt.sargon.os.storage.write
@@ -51,6 +52,8 @@ internal class HostIdKeyMapping(
         }
 
     override suspend fun remove(): Result<Unit> = deviceStorage.remove(preferencesKey)
+
+    override suspend fun keyExist(): Boolean = deviceStorage.keyExist(preferencesKey)
 
     companion object {
         private const val PREFERENCES_KEY = "key_device_info"

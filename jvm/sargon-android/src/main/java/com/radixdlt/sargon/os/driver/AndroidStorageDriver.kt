@@ -2,6 +2,7 @@ package com.radixdlt.sargon.os.driver
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.SecureStorageDriver
@@ -13,6 +14,8 @@ import com.radixdlt.sargon.os.storage.key.ByteArrayKeyMapping
 import com.radixdlt.sargon.os.storage.key.DeviceFactorSourceMnemonicKeyMapping
 import com.radixdlt.sargon.os.storage.key.HostIdKeyMapping
 import com.radixdlt.sargon.os.storage.key.ProfileSnapshotKeyMapping
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 internal class AndroidStorageDriver(
     private val biometricAuthorizationDriver: BiometricAuthorizationDriver,
@@ -38,6 +41,12 @@ internal class AndroidStorageDriver(
             .then { it.remove() }
             .reportSecureStorageWriteFailure(key = key)
     }
+
+    override suspend fun containsDataForKey(key: SecureStorageKey): Boolean = key
+        .mapping()
+        .getOrNull()
+        ?.keyExist()
+        ?: false
 
     override suspend fun loadData(key: UnsafeStorageKey): BagOfBytes? = key
         .mapping()
