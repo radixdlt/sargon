@@ -815,6 +815,9 @@ pub enum CommonError {
 
     #[error("Failed to encode transaction preview v2 - '{underlying}'")]
     FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
+
+    #[error("Unknown response status code: {status_code}")]
+    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10230,
 }
 
 impl CommonError {

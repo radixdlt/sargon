@@ -6,6 +6,7 @@
 #![feature(iter_repeat_n)]
 #![feature(future_join)]
 
+mod arculus_card;
 mod core;
 mod factor_instances_provider;
 mod gateway_api;
@@ -18,10 +19,10 @@ mod signing;
 mod system;
 mod types;
 mod wrapped_radix_engine_toolkit;
-mod arculus_card;
 
 pub mod prelude {
 
+    pub use crate::arculus_card::*;
     pub use crate::core::*;
     pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
@@ -34,7 +35,6 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
-    pub use crate::arculus_card::*;
 
     pub use radix_rust::prelude::{
         indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,

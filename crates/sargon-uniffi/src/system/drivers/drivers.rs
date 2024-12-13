@@ -81,16 +81,12 @@ impl From<Drivers> for InternalDrivers {
                     wrapped: val.profile_state_change_driver,
                 },
             ),
-            arculus_csdk_driver: Arc::new(
-                ArculusCSDKDriverAdapter {
-                    wrapped: val.arculus_csdk_driver,
-                },
-            ),
-            nfc_tag_driver: Arc::new(
-                NFCTagDriverAdapter {
-                    wrapped: val.nfc_tag_driver
-                }
-            ),
+            arculus_csdk_driver: Arc::new(ArculusCSDKDriverAdapter {
+                wrapped: val.arculus_csdk_driver,
+            }),
+            nfc_tag_driver: Arc::new(NFCTagDriverAdapter {
+                wrapped: val.nfc_tag_driver,
+            }),
         }
     }
 }

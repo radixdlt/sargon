@@ -31,7 +31,10 @@ impl Clients {
         );
         let factor_instances_cache =
             FactorInstancesCacheClient::new(file_system.clone());
-        let arculus_wallet_client = ArculusWalletClient::new(drivers.arculus_csdk_driver.clone(), drivers.nfc_tag_driver.clone());
+        let arculus_wallet_client = ArculusWalletClient::new(
+            drivers.arculus_csdk_driver.clone(),
+            drivers.nfc_tag_driver.clone(),
+        );
         Self {
             host,
             secure_storage,

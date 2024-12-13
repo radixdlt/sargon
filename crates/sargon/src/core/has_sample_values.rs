@@ -65,6 +65,16 @@ impl HasSampleValues for u16 {
     }
 }
 
+impl HasSampleValues for i32 {
+    fn sample() -> Self {
+        42
+    }
+
+    fn sample_other() -> Self {
+        43
+    }
+}
+
 impl HasSampleValues for Url {
     fn sample() -> Self {
         "http://example.com".parse().unwrap()
