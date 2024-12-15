@@ -14,32 +14,27 @@ pub struct WalletToDappInteractionAuthProof {
 impl WalletToDappInteractionAuthProof {
     pub fn new(
         public_key: impl Into<PublicKey>,
-        curve: SLIP10Curve,
         signature: impl Into<Signature>,
     ) -> Self {
+        let public_key = public_key.into();
+        let signature = signature.into();
+        let curve = public_key.curve();
+        assert_eq!(signature.curve(), curve, "Discrepancy between the curve of the public key and the curve of the signature.");
         Self {
-            public_key: public_key.into(),
+            public_key,
             curve,
-            signature: signature.into(),
+            signature,
         }
     }
 }
 
 impl HasSampleValues for WalletToDappInteractionAuthProof {
     fn sample() -> Self {
-        Self::new(
-            PublicKey::sample(),
-            SLIP10Curve::sample(),
-            Signature::sample(),
-        )
+        Self::new(PublicKey::sample(), Signature::sample())
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            PublicKey::sample_other(),
-            SLIP10Curve::sample_other(),
-            Signature::sample_other(),
-        )
+        Self::new(PublicKey::sample_other(), Signature::sample_other())
     }
 }
 
@@ -59,5 +54,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_if_curve_discrepancy() {
+        let _ = SUT::new(PublicKey::sample(), Signature::sample_other());
     }
 }

@@ -825,18 +825,21 @@ pub enum CommonError {
     #[error("Signing was rejected by the user")]
     SigningRejected = 10232,
 
+    #[error("Failed to automatically build shield, reason: '{underlying}'")]
+    AutomaticShieldBuildingFailure { underlying: String } = 10233,
+
     #[error("No Transaction Signing Factor")]
-    NoTransactionSigningFactorInstance = 10233,
+    NoTransactionSigningFactorInstance = 10234,
 
     #[error("Authentication Signing FactorInstance not securified")]
-    AuthenticationSigningFactorInstanceNotSecurified = 10234,
+    AuthenticationSigningFactorInstanceNotSecurified = 10235,
 
     #[error("SecurityEntityControl has no QueuedTransaction, unable to mark it as cancelled")]
-    SecurityEntityControlHasNoProvisionallyQueuedTransaction = 10235,
+    SecurityEntityControlHasNoProvisionallyQueuedTransaction = 10236,
 
     #[error("SecurityEntityControl has QueuedTransaction, unable override it, use `cancel_queued_transaction`")]
     SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction =
-        10236,
+        102367,
 }
 
 impl CommonError {

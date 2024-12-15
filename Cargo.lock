@@ -2907,7 +2907,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.1.82"
+version = "1.1.84"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -2962,7 +2962,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.1.82"
+version = "1.1.84"
 dependencies = [
  "actix-rt",
  "assert-json-diff",

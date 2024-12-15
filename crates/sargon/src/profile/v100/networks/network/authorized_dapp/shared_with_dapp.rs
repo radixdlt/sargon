@@ -42,7 +42,7 @@ macro_rules! declare_shared_with_dapp {
             ///
             /// # Panics
             /// Panics if `ids` does not fulfill `request`, for more information
-            /// see [`RequestedQuantity::is_fulfilled_by_ids`]
+            /// see [`RequestedQuantity::is_fulfilled_by_quantity`]
             pub fn new(
                 request: RequestedQuantity,
                 ids: impl IntoIterator<Item = $id>,
@@ -50,7 +50,7 @@ macro_rules! declare_shared_with_dapp {
                 let ids = IdentifiedVecOf::from_iter(ids.into_iter());
                 let len = ids.len();
                 assert!(
-                    request.is_fulfilled_by_ids(len),
+                    request.is_fulfilled_by_quantity(len),
                     "ids does not fulfill request, got: #{}, but requested: {}",
                     len,
                     request

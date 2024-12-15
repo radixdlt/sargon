@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use sargon::IndexMap;
-use sargon::{IndexSet, KeyDerivationRequest as InternalKeyDerivationRequest};
+use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 
 /// A collection of derivation paths, on a per-factor-source basis.
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
@@ -61,11 +61,7 @@ impl From<KeyDerivationRequest> for InternalKeyDerivationRequest {
             IndexMap::from_iter(value.per_factor_source.into_iter().map(|f| {
                 (
                     f.factor_source_id.into_internal(),
-                    IndexSet::from_iter(
-                        f.derivation_paths
-                            .into_iter()
-                            .map(|d| d.into_internal()),
-                    ),
+                    f.derivation_paths.into_internal(),
                 )
             })),
         )

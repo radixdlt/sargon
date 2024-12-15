@@ -177,7 +177,7 @@ impl Persona {
                     matrix
                         .recovery()
                         .get_override_factors()
-                        .into_iter()
+                        .iter()
                         .filter_map(|f| f.try_as_hd_factor_instances().ok())
                         .map(|f| {
                             f.invalid_hard_coding_derivation_path_as_persona()
@@ -192,7 +192,7 @@ impl Persona {
                     matrix
                         .confirmation()
                         .get_override_factors()
-                        .into_iter()
+                        .iter()
                         .filter_map(|f| f.try_as_hd_factor_instances().ok())
                         .map(|f| {
                             f.invalid_hard_coding_derivation_path_as_persona()

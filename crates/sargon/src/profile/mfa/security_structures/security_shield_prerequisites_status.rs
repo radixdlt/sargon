@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// An enum representing the status of the prerequisites for building a Security Shield.
 /// This is, whether the user has the necessary factor sources to build a Security Shield.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, EnumAsInner)]
 pub enum SecurityShieldPrerequisitesStatus {
     /// A Security Shield can be built with the current Factor Sources available.
     Sufficient,

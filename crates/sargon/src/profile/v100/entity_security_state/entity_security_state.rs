@@ -7,6 +7,7 @@ use crate::prelude::*;
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, EnumAsInner,
 )]
 #[serde(untagged, remote = "Self")]
+#[allow(clippy::large_enum_variant)]
 pub enum EntitySecurityState {
     /// The account is controlled by a single factor (private key)
     Unsecured {
@@ -154,14 +155,37 @@ mod tests {
         let model = EntitySecurityState::Securified {
             value: secured_entity_control,
         };
-        print_json(&model);
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-                        {
+            {
               "discriminator": "securified",
               "securedEntityControl": {
-                "veci": null,
+                "veci": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/1H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                },
                 "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
                 "securityStructure": {
                   "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
@@ -310,6 +334,158 @@ mod tests {
                       ]
                     },
                     "numberOfDaysUntilAutoConfirm": 14
+                  },
+                  "authenticationSigningFactorInstance": {
+                    "factorSourceID": {
+                      "discriminator": "fromHash",
+                      "fromHash": {
+                        "kind": "device",
+                        "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                      }
+                    },
+                    "badge": {
+                      "discriminator": "virtualSource",
+                      "virtualSource": {
+                        "discriminator": "hierarchicalDeterministicPublicKey",
+                        "hierarchicalDeterministicPublicKey": {
+                          "publicKey": {
+                            "curve": "curve25519",
+                            "compressedData": "136b3a73595315517f921767bc49ae3ba43fc25d2e34e51fbff434a329176ee8"
+                          },
+                          "derivationPath": {
+                            "scheme": "cap26",
+                            "path": "m/44H/1022H/1H/525H/1678H/0S"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "provisional": {
+                  "discriminator": "factorInstancesDerived",
+                  "value": {
+                    "securityStructureId": "dededede-dede-dede-dede-dededededede",
+                    "matrixOfFactors": {
+                      "primaryRole": {
+                        "threshold": 1,
+                        "thresholdFactors": [
+                          {
+                            "factorSourceID": {
+                              "discriminator": "fromHash",
+                              "fromHash": {
+                                "kind": "device",
+                                "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                              }
+                            },
+                            "badge": {
+                              "discriminator": "virtualSource",
+                              "virtualSource": {
+                                "discriminator": "hierarchicalDeterministicPublicKey",
+                                "hierarchicalDeterministicPublicKey": {
+                                  "publicKey": {
+                                    "curve": "curve25519",
+                                    "compressedData": "a40a1850ade79f5b24956b4abdb94624ba8189f68ad39fd2bb92ecdc2cbe17d2"
+                                  },
+                                  "derivationPath": {
+                                    "scheme": "cap26",
+                                    "path": "m/44H/1022H/1H/618H/1460H/0S"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "overrideFactors": []
+                      },
+                      "recoveryRole": {
+                        "threshold": 0,
+                        "thresholdFactors": [],
+                        "overrideFactors": [
+                          {
+                            "factorSourceID": {
+                              "discriminator": "fromHash",
+                              "fromHash": {
+                                "kind": "ledgerHQHardwareWallet",
+                                "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                              }
+                            },
+                            "badge": {
+                              "discriminator": "virtualSource",
+                              "virtualSource": {
+                                "discriminator": "hierarchicalDeterministicPublicKey",
+                                "hierarchicalDeterministicPublicKey": {
+                                  "publicKey": {
+                                    "curve": "curve25519",
+                                    "compressedData": "6f7ac7d9031e321d1762431941b672f164ebb5a6dd2ded9b0c8da2b278143c74"
+                                  },
+                                  "derivationPath": {
+                                    "scheme": "cap26",
+                                    "path": "m/44H/1022H/1H/618H/1460H/0S"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "confirmationRole": {
+                        "threshold": 0,
+                        "thresholdFactors": [],
+                        "overrideFactors": [
+                          {
+                            "factorSourceID": {
+                              "discriminator": "fromHash",
+                              "fromHash": {
+                                "kind": "ledgerHQHardwareWallet",
+                                "body": "52ef052a0642a94279b296d6b3b17dedc035a7ae37b76c1d60f11f2725100077"
+                              }
+                            },
+                            "badge": {
+                              "discriminator": "virtualSource",
+                              "virtualSource": {
+                                "discriminator": "hierarchicalDeterministicPublicKey",
+                                "hierarchicalDeterministicPublicKey": {
+                                  "publicKey": {
+                                    "curve": "curve25519",
+                                    "compressedData": "e867cd64b70cccad642f47ee4acff014b982870cf5218fbd56da79b0eb6e9fba"
+                                  },
+                                  "derivationPath": {
+                                    "scheme": "cap26",
+                                    "path": "m/44H/1022H/1H/618H/1460H/0S"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "numberOfDaysUntilAutoConfirm": 14
+                    },
+                    "authenticationSigningFactorInstance": {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "device",
+                          "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "d2343d84e7970224ad4f605782f78b096b750f03990c927492ba5308258c689a"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/618H/1678H/0S"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }

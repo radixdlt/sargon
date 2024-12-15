@@ -1894,17 +1894,27 @@ mod tests {
                 let collector =
                     SignaturesCollector::test_lazy_sign_minimum_no_failures([
                         SignableWithEntities::<TransactionIntent>::sample([
-                            sample_securified_mainnet::<E>("Alice", HierarchicalDeterministicFactorInstance::sample_fii10(), || {
-                                GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                            sample_securified_mainnet::<E>(
+                                "Alice",
+                                if E::entity_kind() == CAP26EntityKind::Identity
+                                {
+                                    HierarchicalDeterministicFactorInstance::sample_fii10()
+                                } else {
+                                    HierarchicalDeterministicFactorInstance::sample_fia10()
+                                },
+                                || {
+                                    GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
                                     RoleKind::Primary, [], 0,
                                     FactorSource::sample_all().into_iter().map(|f| {
-                                        HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                                            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
+                                        HierarchicalDeterministicFactorInstance::new_for_entity(
                                             *f.factor_source_id().as_hash().unwrap(),
+                                             E::entity_kind(),
+                                            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
                                         )
                                     }),
                                 ).unwrap()
-                            }),
+                                },
+                            ),
                         ]),
                     ]);
                 let outcome = collector.collect_signatures().await.unwrap();

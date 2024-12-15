@@ -33,6 +33,69 @@ pub struct SecuredEntityControl {
     pub provisional: Option<ProvisionalSecurifiedConfig>,
 }
 
+impl HasProvisionalSecurifiedConfig for SecuredEntityControl {
+    fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
+        self.provisional.clone()
+    }
+
+    fn set_provisional_unchecked(
+        &mut self,
+        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+    ) {
+        self.provisional = provisional.into();
+    }
+}
+
+pub trait HasProvisionalSecurifiedConfig {
+    fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig>;
+
+    /// # Throws
+    /// Throws if the provisional is already `Some(ProvisionalSecurifiedConfig::TransactionQueued)`,
+    /// you need to first cancel the transaction and then call the method `cancel_queued_transaction` on
+    /// this type
+    fn set_provisional(
+        &mut self,
+        provisional: Option<ProvisionalSecurifiedConfig>,
+    ) -> Result<()> {
+        if let Some(ProvisionalSecurifiedConfig::TransactionQueued {
+            value: _,
+        }) = self.get_provisional().as_ref()
+        {
+            Err(CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction)
+        } else {
+            self.set_provisional_unchecked_ok(provisional)
+        }
+    }
+    /// Call this once you have cancelled the queued transaction from the transaction queue,
+    /// this method will change the provisional state back to `Some(ProvisionalSecurifiedConfig::FactorInstancesDerived(_))`
+    fn cancel_queued_transaction(&mut self) -> Result<()> {
+        if let Some(ProvisionalSecurifiedConfig::TransactionQueued { value }) =
+            self.get_provisional().as_ref()
+        {
+            self.set_provisional_unchecked_ok(
+                ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                    value: value.factor_instances.clone(),
+                },
+            )
+        } else {
+            Err(CommonError::SecurityEntityControlHasNoProvisionallyQueuedTransaction)
+        }
+    }
+
+    fn set_provisional_unchecked_ok(
+        &mut self,
+        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+    ) -> Result<()> {
+        self.set_provisional_unchecked(provisional);
+        Ok(())
+    }
+
+    fn set_provisional_unchecked(
+        &mut self,
+        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+    );
+}
+
 impl HasFactorInstances for SecuredEntityControl {
     fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
         self.security_structure
@@ -64,48 +127,6 @@ impl SecuredEntityControl {
         })
     }
 
-    /// # Throws
-    /// Throws if the provisional is already `Some(ProvisionalSecurifiedConfig::TransactionQueued)`,
-    /// you need to first cancel the transaction and then call the method `cancel_queued_transaction` on
-    /// this type
-    pub fn set_provisional(
-        &mut self,
-        provisional: Option<ProvisionalSecurifiedConfig>,
-    ) -> Result<()> {
-        if let Some(ProvisionalSecurifiedConfig::TransactionQueued {
-            value: _,
-        }) = self.provisional.as_ref()
-        {
-            return Err(CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction);
-        } else {
-            return self.set_provisional_unchecked(provisional);
-        }
-    }
-
-    fn set_provisional_unchecked(
-        &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
-    ) -> Result<()> {
-        self.provisional = provisional.into();
-        Ok(())
-    }
-
-    /// Call this once you have cancelled the queued transaction from the transaction queue,
-    /// this method will change the provisional state back to `Some(ProvisionalSecurifiedConfig::FactorInstancesDerived(_))`
-    pub fn cancel_queued_transaction(&mut self) -> Result<()> {
-        if let Some(ProvisionalSecurifiedConfig::TransactionQueued { value }) =
-            self.provisional.as_ref()
-        {
-            self.set_provisional_unchecked(
-                ProvisionalSecurifiedConfig::FactorInstancesDerived {
-                    value: value.factor_instances.clone(),
-                },
-            )
-        } else {
-            Err(CommonError::SecurityEntityControlHasNoProvisionallyQueuedTransaction)
-        }
-    }
-
     pub fn authentication_signing_factor_instance(
         &self,
     ) -> HierarchicalDeterministicFactorInstance {
@@ -132,6 +153,7 @@ impl HasSampleValues for SecuredEntityControl {
         sample.provisional = Some(ProvisionalSecurifiedConfig::sample_other());
         sample
     }
+
     fn sample_other() -> Self {
         Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AccessControllerAddress::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
     }

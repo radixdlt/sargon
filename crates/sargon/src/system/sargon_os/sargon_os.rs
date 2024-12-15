@@ -14,6 +14,7 @@ pub struct SargonOS {
     pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
     pub(crate) interactors: Interactors,
+    pub(crate) host_id: HostId,
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -68,12 +69,14 @@ impl SargonOS {
             profile_state = ProfileState::None;
         }
 
+        let host_id = Self::get_host_id(&clients).await;
         let os = Arc::new(Self {
             clients,
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
             interactors,
+            host_id,
         });
         os.clients
             .profile_state_change
@@ -227,12 +230,11 @@ impl SargonOS {
             .save_private_hd_factor_source(&hd_factor_source)
             .await?;
 
-        let host_id = self.host_id().await?;
         let host_info = self.host_info().await;
 
         let profile = Profile::from_device_factor_source(
             hd_factor_source.factor_source,
-            host_id,
+            self.host_id,
             host_info,
             Some(accounts),
         );
@@ -281,8 +283,8 @@ impl SargonOS {
             as Arc<dyn AuthenticationSigningInteractor>
     }
 
-    pub async fn resolve_host_id(&self) -> Result<HostId> {
-        self.host_id().await
+    pub fn host_id(&self) -> HostId {
+        self.host_id
     }
 
     pub async fn resolve_host_info(&self) -> HostInfo {
@@ -297,7 +299,6 @@ impl SargonOS {
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
-        let host_id = self.host_id().await?;
         let host_info = self.host_info().await;
 
         let is_main = true;
@@ -325,7 +326,7 @@ impl SargonOS {
 
         debug!("Creating new Profile...");
         let profile = Profile::with(
-            Header::new(DeviceInfo::new_from_info(&host_id, &host_info)),
+            Header::new(DeviceInfo::new_from_info(&self.host_id, &host_info)),
             FactorSources::with_bdfs(private_bdfs.factor_source.clone()),
             AppPreferences::default(),
             ProfileNetworks::default(),
@@ -334,26 +335,34 @@ impl SargonOS {
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn host_id(&self) -> Result<HostId> {
-        Self::get_host_id(&self.clients).await
-    }
-
-    pub(crate) async fn get_host_id(clients: &Clients) -> Result<HostId> {
+    pub(crate) async fn get_host_id(clients: &Clients) -> HostId {
         debug!("Get Host ID");
         let secure_storage = &clients.secure_storage;
+        let stored_host_id = secure_storage.load_host_id().await;
 
-        match secure_storage.load_host_id().await? {
-            Some(loaded_host_id) => {
+        match stored_host_id {
+            Ok(Some(loaded_host_id)) => {
                 debug!("Found saved host id: {:?}", &loaded_host_id);
-                Ok(loaded_host_id)
+                loaded_host_id
             }
-            None => {
+            Ok(None) => {
                 debug!("Found no saved host id, creating new.");
                 let new_host_id = HostId::generate_new();
                 debug!("Created new host id: {:?}", &new_host_id);
-                secure_storage.save_host_id(&new_host_id).await?;
-                debug!("Saved new host id");
-                Ok(new_host_id)
+
+                let save_result =
+                    secure_storage.save_host_id(&new_host_id).await;
+                if let Err(error) = save_result {
+                    debug!("Failed to save new host id {:?}", error);
+                } else {
+                    debug!("Saved new host id");
+                }
+                new_host_id
+            }
+            Err(error) => {
+                debug!("Failed to load the host id {:?}", error);
+
+                HostId::generate_new()
             }
         }
     }
@@ -756,10 +765,7 @@ mod tests {
     async fn test_resolve_host_id() {
         let os = SUT::fast_boot().await;
 
-        assert_eq!(
-            os.resolve_host_id().await.unwrap(),
-            os.host_id().await.unwrap()
-        )
+        assert_eq!(SargonOS::get_host_id(&os.clients).await, os.host_id())
     }
 
     #[actix_rt::test]

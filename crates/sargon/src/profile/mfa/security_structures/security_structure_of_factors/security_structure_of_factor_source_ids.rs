@@ -3,6 +3,9 @@ use crate::prelude::*;
 pub type SecurityStructureOfFactorSourceIds =
     AbstractSecurityStructure<FactorSourceID>;
 
+pub type SecurityStructureOfFactorSourceIDs =
+    SecurityStructureOfFactorSourceIds;
+
 impl HasSampleValues for SecurityStructureOfFactorSourceIds {
     fn sample() -> Self {
         let metadata = SecurityStructureMetadata::sample();

@@ -63,7 +63,6 @@ mod test {
             result,
             WalletToDappInteractionAuthProof::new(
                 factor_instance.clone().public_key.public_key,
-                factor_instance.clone().public_key.public_key.curve(),
                 Signature::try_from(
                     BagOfBytes::from_hex(
                         "eaa9a0eb1c9061e1999afa309db7bc9eecd30ad008f09cbfb2c4cf202759e914f6dbe01f67a7b8b1f1149f02b0e2662982fff4c1a765ee0d4d77651f1b91100c"
@@ -98,7 +97,6 @@ mod test {
             result,
             WalletToDappInteractionAuthProof::new(
                 factor_instance.clone().public_key.public_key,
-                factor_instance.clone().public_key.public_key.curve(),
                 Signature::try_from(
                     BagOfBytes::from_hex(
                         "fb4f502e6a8bdbe3e66d365fe619270bafb9237e79a3c68dcf34448293f00840a0e5d48d1060eea49bf219cd3727c15cd6e305871956bc8d8ed8bcdc7fe97909"
@@ -132,20 +130,50 @@ mod test {
         assert!(result.is_err());
     }
 
-    #[test]
-    #[should_panic(
-        expected = "Authentication signing not yet implemented for securified entities."
-    )]
-    fn test_with_multi_factor() {
+    #[actix_rt::test]
+    async fn securified_account() {
         let factor_sources = FactorSource::sample_all();
 
         let securified_account = Account::sample_at(2);
-        _ = SUT::new(
+        let factor_instance = securified_account
+            .security_state()
+            .as_securified()
+            .unwrap()
+            .authentication_signing_factor_instance();
+        let sut = SUT::new(
+            Arc::new(TestAuthenticationInteractor::new_succeeding()),
+            &Profile::sample_from(factor_sources, [&securified_account], []),
+            AddressOfAccountOrPersona::from(securified_account.address),
+            DappToWalletInteractionAuthChallengeNonce::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        )
+        .unwrap();
+
+        let result = sut.sign().await.unwrap();
+
+        pretty_assertions::assert_eq!(
+            result,
+            WalletToDappInteractionAuthProof::new(
+                factor_instance.clone().public_key.public_key,
+                "9c0745dbfb85926a18936a3d7fde45b21fc9915f2361bde8f4149468f2cc857a6c8dca0bf202cd2d037eeb21ce57cbd5a52440bfdc73a8b5d70284f5cb64fc03".parse::<Signature>().unwrap()
+            )
+        );
+    }
+
+    #[actix_rt::test]
+    async fn securified_account_with_failing_interactor() {
+        let factor_sources = FactorSource::sample_all();
+
+        let securified_account = Account::sample_at(2);
+        let sut = SUT::new(
             Arc::new(TestAuthenticationInteractor::new_failing()),
             &Profile::sample_from(factor_sources, [&securified_account], []),
             AddressOfAccountOrPersona::from(securified_account.address),
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
         )
+        .unwrap();
+        let res = sut.sign().await;
+        assert!(res.is_err());
     }
 }

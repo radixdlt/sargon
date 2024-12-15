@@ -7,6 +7,7 @@ use crate::prelude::*;
     Deserialize,
     Debug,
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
@@ -44,17 +45,23 @@ impl RequestedQuantity {
         }
     }
 
-    /// Checks `len` can fulfill the [`RequestedQuantity`] (self), `len` is
-    /// considered to be fulfilling the requested quantity:
-    /// * if: quantifier == ::Exactly && len == quantity // ✅ fulfills
-    /// * else if: quantifier == ::AtLeast && len >= quantity // ✅ fulfills
-    /// * else false // ❌ does NOT fulfill
-    pub fn is_fulfilled_by_ids(&self, len: usize) -> bool {
-        let quantity = self.quantity as usize;
+    pub fn left_until_fulfilled(&self, actual: usize) -> i32 {
+        let actual = actual as i32;
+        let quantity = self.quantity as i32;
+        let diff = quantity - actual;
         match self.quantifier {
-            RequestedNumberQuantifier::Exactly => len == quantity,
-            RequestedNumberQuantifier::AtLeast => len >= quantity,
+            RequestedNumberQuantifier::Exactly => diff,
+            RequestedNumberQuantifier::AtLeast => diff.max(0),
         }
+    }
+
+    /// Checks `actual` can fulfill the [`RequestedQuantity`] (self), `actual` is
+    /// considered to be fulfilling the requested quantity:
+    /// * if: quantifier == ::Exactly && actual == quantity // ✅ fulfills
+    /// * else if: quantifier == ::AtLeast && actual >= quantity // ✅ fulfills
+    /// * else false // ❌ does NOT fulfill
+    pub fn is_fulfilled_by_quantity(&self, actual: usize) -> bool {
+        self.left_until_fulfilled(actual) == 0
     }
 
     pub fn exactly(quantity: u16) -> Self {
@@ -114,30 +121,43 @@ mod tests {
 
     #[test]
     fn at_least_fulfills_true() {
-        assert!(SUT::at_least(0).is_fulfilled_by_ids(0));
-        assert!(SUT::at_least(0).is_fulfilled_by_ids(1));
-        assert!(SUT::at_least(1).is_fulfilled_by_ids(1));
-        assert!(SUT::at_least(1).is_fulfilled_by_ids(2));
+        assert!(SUT::at_least(0).is_fulfilled_by_quantity(0));
+        assert!(SUT::at_least(0).is_fulfilled_by_quantity(1));
+        assert!(SUT::at_least(1).is_fulfilled_by_quantity(1));
+        assert!(SUT::at_least(1).is_fulfilled_by_quantity(2));
     }
 
     #[test]
     fn at_least_fulfills_false() {
-        assert!(!SUT::at_least(1).is_fulfilled_by_ids(0));
-        assert!(!SUT::at_least(10).is_fulfilled_by_ids(0));
-        assert!(!SUT::at_least(10).is_fulfilled_by_ids(9));
+        assert!(!SUT::at_least(1).is_fulfilled_by_quantity(0));
+        assert!(!SUT::at_least(10).is_fulfilled_by_quantity(0));
+        assert!(!SUT::at_least(10).is_fulfilled_by_quantity(9));
     }
 
     #[test]
     fn exactly_fulfills_true() {
-        assert!(SUT::exactly(1).is_fulfilled_by_ids(1));
-        assert!(SUT::exactly(10).is_fulfilled_by_ids(10));
+        assert!(SUT::exactly(1).is_fulfilled_by_quantity(1));
+        assert!(SUT::exactly(10).is_fulfilled_by_quantity(10));
     }
 
     #[test]
     fn exactly_fulfills_false() {
-        assert!(!SUT::exactly(1).is_fulfilled_by_ids(0));
-        assert!(!SUT::exactly(1).is_fulfilled_by_ids(2));
-        assert!(!SUT::exactly(10).is_fulfilled_by_ids(9));
-        assert!(!SUT::exactly(10).is_fulfilled_by_ids(11));
+        assert!(!SUT::exactly(1).is_fulfilled_by_quantity(0));
+        assert!(!SUT::exactly(1).is_fulfilled_by_quantity(2));
+        assert!(!SUT::exactly(10).is_fulfilled_by_quantity(9));
+        assert!(!SUT::exactly(10).is_fulfilled_by_quantity(11));
+    }
+
+    #[test]
+    fn left_until_fulfilled() {
+        assert_eq!(SUT::exactly(5).left_until_fulfilled(1), 4);
+        assert_eq!(SUT::exactly(9).left_until_fulfilled(3), 6);
+        assert_eq!(SUT::exactly(5).left_until_fulfilled(6), -1);
+        assert_eq!(SUT::exactly(9).left_until_fulfilled(17), -8);
+
+        assert_eq!(SUT::at_least(5).left_until_fulfilled(1), 4);
+        assert_eq!(SUT::at_least(9).left_until_fulfilled(2), 7);
+        assert_eq!(SUT::at_least(5).left_until_fulfilled(7), 0);
+        assert_eq!(SUT::at_least(13).left_until_fulfilled(18), 0);
     }
 }

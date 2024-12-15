@@ -34,6 +34,12 @@ pub enum FactorSourceID {
     },
 }
 
+impl FactorSourceID {
+    pub fn category(&self) -> FactorSourceCategory {
+        self.get_factor_source_kind().category()
+    }
+}
+
 /// A bit hacky... but used to make it possible for us to validate FactorSourceID
 /// in RoleWithFactor...
 impl IsMaybeKeySpaceAware for FactorSourceID {

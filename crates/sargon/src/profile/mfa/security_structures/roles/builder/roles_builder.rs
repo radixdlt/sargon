@@ -7,19 +7,8 @@ pub type RecoveryRoleBuilder = RoleBuilder<{ ROLE_RECOVERY }>;
 pub type ConfirmationRoleBuilder = RoleBuilder<{ ROLE_CONFIRMATION }>;
 
 #[cfg(test)]
-impl PrimaryRoleWithFactorSourceIds {
-    pub(crate) fn primary_with_factors(
-        threshold: u8,
-        threshold_factors: impl IntoIterator<Item = FactorSourceID>,
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
-    ) -> Self {
-        Self::with_factors(threshold, threshold_factors, override_factors)
-    }
-}
-
-#[cfg(test)]
 impl RecoveryRoleWithFactorSourceIds {
-    pub(crate) fn recovery_with_factors(
+    pub(crate) fn override_only(
         override_factors: impl IntoIterator<Item = FactorSourceID>,
     ) -> Self {
         Self::with_factors(0, vec![], override_factors)
@@ -28,7 +17,7 @@ impl RecoveryRoleWithFactorSourceIds {
 
 #[cfg(test)]
 impl ConfirmationRoleWithFactorSourceIds {
-    pub(crate) fn confirmation_with_factors(
+    pub(crate) fn override_only(
         override_factors: impl IntoIterator<Item = FactorSourceID>,
     ) -> Self {
         Self::with_factors(0, vec![], override_factors)
