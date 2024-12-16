@@ -44,7 +44,7 @@ pub trait HasFactorInstances {
         }
 
         let index_agnostic_path =
-            factors.iter().next().unwrap().derivation_path().agnostic();
+            factors.first().unwrap().derivation_path().agnostic();
 
         if factors
             .iter()
