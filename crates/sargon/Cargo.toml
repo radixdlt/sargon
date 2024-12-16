@@ -189,6 +189,8 @@ security-framework-sys = "=2.10.0"
 
 [dev-dependencies]
 
+mockall = "0.13.1"
+
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
 

@@ -1,6 +1,10 @@
 use crate::prelude::*;
 
+#[cfg(test)]
+use mockall::automock;
+
 /// Driver to interact with natice Arculus CSDK library
+#[cfg_attr(test, automock)]
 pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// Initialize Wallet "session" in the Arculus CSDK
     ///

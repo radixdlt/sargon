@@ -1,6 +1,10 @@
 use crate::prelude::*;
 
+#[cfg(test)]
+use mockall::automock;
+
 /// The `NFCTagDriver` trait defines the interface for a driver that can communicate with an NFC tag.
+#[cfg_attr(test, automock)]
 #[async_trait::async_trait]
 pub trait NFCTagDriver: Send + Sync + std::fmt::Debug {
     /// Starts a session with the NFC tag. The host will start the session and keep it in the active state until the session is ended.
