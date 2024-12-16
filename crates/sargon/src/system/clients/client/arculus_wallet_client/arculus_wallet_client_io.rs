@@ -300,6 +300,7 @@ impl ArculusWalletClient {
 #[cfg(test)]
 mod tests {
     use mockall::predicate::eq;
+    use mockall::Sequence;
 
     use super::*;
 
@@ -901,226 +902,343 @@ mod tests {
         pretty_assertions::assert_eq!(result, Ok(sign_hash_path_parsed))
     }
 
-    fn assert_wallet_selected(
+    struct ArculusWalletTestStub {
+        csdk_driver: MockArculusCSDKDriver,
+        nfc_tag_driver: MockNFCTagDriver,
         wallet_pointer: ArculusWalletPointer,
-        wallet_aid: BagOfBytes,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        csdk_driver
-            .expect_select_wallet_request()
-            .with(eq(wallet_pointer.clone()), eq(wallet_aid))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver
+        sequence: Sequence,
+    }
+
+    impl ArculusWalletTestStub {
+        fn new() -> Self {
+            Self {
+                csdk_driver: MockArculusCSDKDriver::new(),
+                nfc_tag_driver: MockNFCTagDriver::new(),
+                wallet_pointer: ArculusWalletPointer::sample(),
+                sequence: Sequence::new(),
+            }
+        }
+
+        fn select_wallet(
+            &mut self,
+            wallet_aid: BagOfBytes,
+        ) -> &mut Self {
+            let request = BagOfBytes::sample();
+            self.csdk_driver
+                .expect_select_wallet_request()
+                .with(eq(self.wallet_pointer.clone()), eq(wallet_aid))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request.clone());
+            self.csdk_driver
+                .expect_select_wallet_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+    
+        fn init_encrypted_session(
+            &mut self,
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_init_encrypted_session_request()
+                .with(eq(self.wallet_pointer.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_init_encrypted_session_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+    
+        fn start_nfc_session(&mut self) -> &mut Self {
+            self.nfc_tag_driver
+                .expect_start_session()
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(()));
+
+            self
+        }
+
+        fn end_nfc_session(&mut self) -> &mut Self {
+            self.nfc_tag_driver
+                .expect_end_session()
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(());
+
+            self
+        }
+
+        fn free_wallet(&mut self) -> &mut Self {
+            self.csdk_driver
+                .expect_wallet_free()
+                .with(eq(self.wallet_pointer.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(());
+
+            self
+        }
+    
+        fn initialize_csdk_wallet(
+            &mut self
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_wallet_init()
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(self.wallet_pointer.clone());
+
+            self
+        }
+    
+        fn initialize_session(
+            &mut self
+        ) -> &mut Self {
+            let aid: Vec<u8> =
+            vec![0x41, 0x52, 0x43, 0x55, 0x4C, 0x55, 0x53, 0x01, 0x01, 0x57];
+            self.start_nfc_session()
+            .initialize_csdk_wallet()
+            .select_wallet(aid.into())
+            .init_encrypted_session()
+        }
+
+        fn end_session(&mut self) -> &mut Self {
+            self.end_nfc_session()
+            .free_wallet()
+        }
+    
+        fn read_firmware_version(
+            &mut self
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_get_firmware_version_request()
+                .with(eq(self.wallet_pointer.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_get_firmware_version_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+
+            self
+        }
+    
+        fn reset_wallet(
+            &mut self,
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_reset_wallet_request()
+                .with(eq(self.wallet_pointer.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_reset_wallet_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+    
+        fn store_pin(
+            &mut self,
+            pin: String,
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_store_data_pin_request()
+                .with(eq(self.wallet_pointer.clone()), eq(pin.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_store_data_pin_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+
+        fn verify_pin(
+            &mut self,
+            pin: String,
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_verify_pin_request()
+                .with(eq(self.wallet_pointer.clone()), eq(pin.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_verify_pin_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+    
+        fn create_wallet_seed(
+            &mut self,
+            word_count: i64,
+            seed: BagOfBytes,
+        ) -> &mut Self {
+            let request = BagOfBytes::sample();
+            self.csdk_driver
+                .expect_create_wallet_seed_request()
+                .with(eq(self.wallet_pointer.clone()), eq(word_count))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_create_wallet_seed_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(seed));
+
+            self
+        }
+    
+        fn recover_wallet_seed(
+            &mut self,
+            seed: BagOfBytes
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_finish_recover_wallet_request()
+                .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_finish_recover_wallet_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+    
+        fn init_recover_wallet(
+            &mut self,
+            seed_words_count: i64,
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_init_recover_wallet_request()
+                .with(eq(self.wallet_pointer.clone()), eq(seed_words_count))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_init_recover_wallet_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+
+        fn finish_recover_wallet(
+            &mut self,
+            seed: BagOfBytes
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_finish_recover_wallet_request()
+                .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+            self.nfc_send_receive();
+            self.csdk_driver
+                .expect_finish_recover_wallet_response()
+                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(0));
+
+            self
+        }
+
+        fn seed_phrase_from_mnemonic_sentence(
+            &mut self,
+            mnemonic_sentence: BagOfBytes,
+        ) -> &mut Self {
+            self.csdk_driver
+                .expect_seed_phrase_from_mnemonic_sentence()
+                .with(eq(self.wallet_pointer.clone()), eq(mnemonic_sentence.clone()), eq(None))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(BagOfBytes::sample()));
+
+            self
+        }
+
+        fn nfc_send_receive(&mut self, request: BagOfBytes) {
+            self.nfc_tag_driver
             .expect_send_receive()
-            .with(eq(BagOfBytes::sample()))
+            .with(eq(request))
             .once()
+            .in_sequence(&mut self.sequence)
             .return_const(Ok(BagOfBytes::sample()));
-        csdk_driver
-            .expect_select_wallet_response()
-            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(0));
+        }
     }
-
-    fn assert_init_encrypted_session(
-        wallet_pointer: ArculusWalletPointer,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        csdk_driver
-            .expect_init_encrypted_session_request()
-            .with(eq(wallet_pointer.clone()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver
-            .expect_send_receive()
-            .with(eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        csdk_driver
-            .expect_init_encrypted_session_response()
-            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(0));
-    }
-
-    fn assert_nfc_session_started(nfc_tag_driver: &mut MockNFCTagDriver) {
-        nfc_tag_driver
-            .expect_start_session()
-            .once()
-            .return_const(Ok(()));
-    }
-
-    fn assert_csdk_wallet_initialized(
-        wallet_pointer: ArculusWalletPointer,
-        csdk_driver: &mut MockArculusCSDKDriver,
-    ) {
-        csdk_driver
-            .expect_wallet_init()
-            .once()
-            .return_const(wallet_pointer.clone());
-    }
-
-    fn assert_session_initialized(
-        wallet_pointer: ArculusWalletPointer,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        let aid: Vec<u8> =
-        vec![0x41, 0x52, 0x43, 0x55, 0x4C, 0x55, 0x53, 0x01, 0x01, 0x57];
-        assert_nfc_session_started(nfc_tag_driver);
-        assert_csdk_wallet_initialized(wallet_pointer.clone(), csdk_driver);
-        assert_wallet_selected(
-            wallet_pointer.clone(),
-            aid.into(),
-            csdk_driver,
-            nfc_tag_driver,
-        );
-        assert_init_encrypted_session(
-            wallet_pointer.clone(),
-            csdk_driver,
-            nfc_tag_driver,
-        );
-    }
-
-    fn assert_firmware_version_read(
-        wallet_pointer: ArculusWalletPointer,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        csdk_driver
-            .expect_get_firmware_version_request()
-            .with(eq(wallet_pointer.clone()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver
-            .expect_send_receive()
-            .with(eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        csdk_driver
-            .expect_get_firmware_version_response()
-            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-    }
-
-    fn assert_reset_wallet(
-        wallet_pointer: ArculusWalletPointer,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        csdk_driver
-            .expect_reset_wallet_request()
-            .with(eq(wallet_pointer.clone()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver
-            .expect_send_receive()
-            .with(eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        csdk_driver
-            .expect_reset_wallet_response()
-            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(0));
-    }
-
-    fn assert_store_pin(
-        wallet_pointer: ArculusWalletPointer,
-        pin: String,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        csdk_driver
-            .expect_store_data_pin_request()
-            .with(eq(wallet_pointer.clone()), eq(pin.clone()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver
-            .expect_send_receive()
-            .with(eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        csdk_driver
-            .expect_store_data_pin_response()
-            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(0));
-    }
-
-    fn assert_create_wallet_seed(
-        wallet_pointer: ArculusWalletPointer,
-        word_count: i64,
-        csdk_driver: &mut MockArculusCSDKDriver,
-        nfc_tag_driver: &mut MockNFCTagDriver,
-    ) {
-        csdk_driver
-            .expect_create_wallet_seed_request()
-            .with(eq(wallet_pointer.clone()), eq(word_count))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver
-            .expect_send_receive()
-            .with(eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-        csdk_driver
-            .expect_create_wallet_seed_response()
-            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
-            .once()
-            .return_const(Ok(BagOfBytes::sample()));
-    }
-
-
+    
     #[actix_rt::test]
     async fn create_wallet_seed() {
+        let pin = "1234".to_string();
         let wallet_pointer = ArculusWalletPointer::sample();
         let word_count = 24;
+        let seed = BagOfBytes::sample();
         let create_wallet_seed_request = BagOfBytes::sample();
         let create_wallet_seed_response = BagOfBytes::sample_other();
         let create_wallet_seed_parsed = BagOfBytes::sample_fade();
 
-        let mut csdk_driver = MockArculusCSDKDriver::new();
-        let mut nfc_tag_driver = MockNFCTagDriver::new();
+        let mut stub = ArculusWalletTestStub::new();
 
-        assert_session_initialized(
-            wallet_pointer.clone(),
-            &mut csdk_driver,
-            &mut nfc_tag_driver,
-        );
+        stub
+        .initialize_session()
+        .reset_wallet()
+        .store_pin(pin.clone())
+        .create_wallet_seed(word_count, seed.clone())
+        .init_recover_wallet(word_count)
+        .seed_phrase_from_mnemonic_sentence(seed.clone())
+        .finish_recover_wallet(seed.clone())
+        .verify_pin(pin.clone())
+        .end_session();
 
-        assert_reset_wallet(wallet_pointer, &mut csdk_driver, &mut nfc_tag_driver);
-        assert_store_pin(wallet_pointer, "1234".to_string(), &mut csdk_driver, &mut nfc_tag_driver);
-        assert_create_wallet_seed(wallet_pointer, 24, &mut csdk_driver, &mut nfc_tag_driver);
-
-        // csdk_driver
-        //     .expect_create_wallet_seed_request()
-        //     .with(eq(wallet_pointer.clone()), eq(word_count))
-        //     .once()
-        //     .return_const(Ok(create_wallet_seed_request.clone()));
-
-        // nfc_tag_driver
-        //     .expect_send_receive()
-        //     .with(eq(create_wallet_seed_request))
-        //     .once()
-        //     .return_const(Ok(create_wallet_seed_response.clone()));
-
-        // csdk_driver
-        //     .expect_create_wallet_seed_response()
-        //     .with(
-        //         eq(wallet_pointer.clone()),
-        //         eq(create_wallet_seed_response),
-        //     )
-        //     .once()
-        //     .return_const(Ok(create_wallet_seed_parsed.clone()));
-
+        
         let sut = ArculusWalletClient::new(
-            Arc::new(csdk_driver),
-            Arc::new(nfc_tag_driver),
+            Arc::new(stub.csdk_driver),
+            Arc::new(stub.nfc_tag_driver),
         );
 
         let result = sut.create_wallet_seed("1234".to_string(), 24).await;
