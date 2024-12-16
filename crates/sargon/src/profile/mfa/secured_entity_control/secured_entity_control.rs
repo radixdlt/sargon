@@ -115,10 +115,14 @@ pub trait HasProvisionalSecurifiedConfig {
 }
 
 impl HasFactorInstances for SecuredEntityControl {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+    fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_structure.unique_all_factor_instances()
+    }
+
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
         self.security_structure
             .matrix_of_factors
-            .unique_factor_instances()
+            .unique_tx_signing_factor_instances()
     }
 }
 

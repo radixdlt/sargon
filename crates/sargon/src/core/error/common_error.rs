@@ -843,6 +843,14 @@ pub enum CommonError {
     #[error("SecurityEntityControl has QueuedTransaction, unable override it, use `cancel_queued_transaction`")]
     SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction =
         10238,
+
+    #[error(
+        "Entity kind of FactorInstances does not match EntityKind of entity"
+    )]
+    SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind {
+        entity_kind_of_entity: CAP26EntityKind,
+        entity_kind_of_factor_instances: CAP26EntityKind,
+    } = 10239,
 }
 
 impl CommonError {

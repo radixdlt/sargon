@@ -1,8 +1,4 @@
-use radix_engine_interface::blueprints::{
-    access_controller::AccessControllerCreateManifestInput as ScryptoAccessControllerCreateManifestInput,
-    account::ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,
-    identity::IDENTITY_SECURIFY_IDENT as SCRYPTO_IDENTITY_SECURIFY_IDENT,
-};
+use radix_engine_interface::blueprints::access_controller::AccessControllerCreateManifestInput as ScryptoAccessControllerCreateManifestInput;
 
 use crate::prelude::*;
 
@@ -19,16 +15,19 @@ impl TransactionManifest {
             return Err(CommonError::Unknown);
         };
 
-        Ok(Self::_securify_unsecurified_entity(
+        Self::_securify_unsecurified_entity(
             Into::<AddressOfAccountOrPersona>::into(entity.address()),
             security_structure_of_factor_instances,
-        ))
+        )
     }
 
     fn _securify_unsecurified_entity(
         entity_address: AddressOfAccountOrPersona,
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
-    ) -> Self {
+    ) -> Result<Self> {
+        security_structure_of_factor_instances
+            .assert_has_entity_kind(entity_address.get_entity_kind())?;
+
         let (security_entity_identifier, owner_badge) =
             if entity_address.is_identity() {
                 (
@@ -90,6 +89,63 @@ impl TransactionManifest {
             );
         }
 
-        TransactionManifest::sargon_built(builder, entity_address.network_id())
+        let manifest = TransactionManifest::sargon_built(
+            builder,
+            entity_address.network_id(),
+        );
+
+        Ok(manifest)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_securify_unsecurified_account() {
+        let expected_manifest = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_access_controller_for_account.rtm"
+        ));
+        let manifest = TransactionManifest::securify_unsecurified_entity(
+            Account::sample(),
+            SecurityStructureOfFactorInstances::sample(),
+        )
+        .unwrap();
+        manifest_eq(manifest, expected_manifest);
+    }
+
+    #[test]
+    fn test_securify_unsecurified_persona() {
+        let expected_manifest = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_access_controller_for_persona.rtm"
+        ));
+        let manifest = TransactionManifest::securify_unsecurified_entity(
+            Persona::sample_other(),
+            SecurityStructureOfFactorInstances::sample_other(),
+        )
+        .unwrap();
+        manifest_eq(manifest, expected_manifest);
+    }
+
+    #[test]
+    fn test_mismatch_entity_kind_account_persona() {
+        let manifest = TransactionManifest::securify_unsecurified_entity(
+            Account::sample_other(),
+            SecurityStructureOfFactorInstances::sample_other(),
+        );
+        assert_eq!(manifest, Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: CAP26EntityKind::Account, entity_kind_of_factor_instances: CAP26EntityKind::Identity }));
+    }
+
+    #[test]
+    fn test_mismatch_entity_kind_persona_account() {
+        let manifest = TransactionManifest::securify_unsecurified_entity(
+            Persona::sample_other(),
+            SecurityStructureOfFactorInstances::sample(),
+        );
+        assert_eq!(manifest, Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: CAP26EntityKind::Identity, entity_kind_of_factor_instances: CAP26EntityKind::Account }));
     }
 }

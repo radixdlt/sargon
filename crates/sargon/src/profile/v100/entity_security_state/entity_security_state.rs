@@ -285,13 +285,23 @@ impl HasSampleValues for EntitySecurityState {
 }
 
 impl HasFactorInstances for EntitySecurityState {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
         match self {
             EntitySecurityState::Unsecured { value } => {
-                value.unique_factor_instances()
+                value.unique_tx_signing_factor_instances()
             }
             EntitySecurityState::Securified { value } => {
-                value.unique_factor_instances()
+                value.unique_tx_signing_factor_instances()
+            }
+        }
+    }
+    fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
+        match self {
+            EntitySecurityState::Unsecured { value } => {
+                value.unique_all_factor_instances()
+            }
+            EntitySecurityState::Securified { value } => {
+                value.unique_all_factor_instances()
             }
         }
     }
@@ -703,14 +713,14 @@ mod tests {
     }
 
     #[test]
-    fn unique_factor_instances() {
+    fn unique_tx_signing_factor_instances() {
         let unsecured = UnsecuredEntityControl::sample();
         let sut = SUT::Unsecured {
             value: unsecured.clone(),
         };
         assert_eq!(
-            sut.unique_factor_instances(),
-            unsecured.unique_factor_instances()
+            sut.unique_tx_signing_factor_instances(),
+            unsecured.unique_tx_signing_factor_instances()
         );
 
         let secured = SecuredEntityControl::sample();
@@ -718,8 +728,8 @@ mod tests {
             value: secured.clone(),
         };
         assert_eq!(
-            sut.unique_factor_instances(),
-            secured.unique_factor_instances()
+            sut.unique_tx_signing_factor_instances(),
+            secured.unique_tx_signing_factor_instances()
         );
     }
 }

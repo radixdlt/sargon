@@ -60,8 +60,8 @@ impl Profile {
             value: UnsecuredEntityControl::new(hd_fi, None).unwrap(),
         };
         assert_eq!(
-            account.unique_factor_instances(),
-            persona.unique_factor_instances()
+            account.unique_tx_signing_factor_instances(),
+            persona.unique_tx_signing_factor_instances()
         );
         sut.networks = ProfileNetworks::just(ProfileNetwork::new(
             NetworkID::Mainnet,
@@ -103,8 +103,8 @@ impl Profile {
         };
 
         assert_eq!(
-            account.unique_factor_instances(),
-            account2.unique_factor_instances()
+            account.unique_tx_signing_factor_instances(),
+            account2.unique_tx_signing_factor_instances()
         );
         sut.networks = ProfileNetworks::just(ProfileNetwork::new(
             NetworkID::Mainnet,
@@ -175,8 +175,8 @@ impl Profile {
         };
 
         assert_eq!(
-            persona1.unique_factor_instances(),
-            persona2.unique_factor_instances()
+            persona1.unique_tx_signing_factor_instances(),
+            persona2.unique_tx_signing_factor_instances()
         );
         sut.networks = ProfileNetworks::just(ProfileNetwork::new(
             NetworkID::Mainnet,
@@ -212,7 +212,7 @@ mod tests {
         let accounts = sut.accounts_on_current_network().unwrap();
         let acc = accounts.first().unwrap();
         let factor_instance = acc
-            .unique_factor_instances()
+            .unique_tx_signing_factor_instances()
             .into_iter()
             .next()
             .clone()
@@ -286,7 +286,7 @@ mod tests {
 
         let e1 = e1.into();
         let factor_instance = e1
-            .unique_factor_instances()
+            .unique_tx_signing_factor_instances()
             .into_iter()
             .next()
             .clone()

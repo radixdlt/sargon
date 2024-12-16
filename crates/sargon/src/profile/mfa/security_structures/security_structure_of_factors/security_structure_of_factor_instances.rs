@@ -28,39 +28,29 @@ pub struct SecurityStructureOfFactorInstances {
         HierarchicalDeterministicFactorInstance,
 }
 
+impl HasFactorInstances for SecurityStructureOfFactorInstances {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.matrix_of_factors.unique_tx_signing_factor_instances()
+    }
+
+    fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
+        let mut instances = self.unique_tx_signing_factor_instances();
+        instances
+            .insert(self.authentication_signing_factor_instance.clone().into());
+        instances
+    }
+}
+
 impl SecurityStructureOfFactorInstances {
     pub fn new(
         security_structure_id: SecurityStructureID,
         matrix_of_factors: MatrixOfFactorInstances,
         authentication_signing: HierarchicalDeterministicFactorInstance,
     ) -> Result<Self> {
-        let tx_signing_factors = matrix_of_factors
-            .unique_factor_instances()
-            .into_iter()
-            .flat_map(|f| f.try_as_hd_factor_instances().ok())
-            .collect::<IndexSet<_>>();
-
-        if tx_signing_factors.is_empty() {
-            return Err(CommonError::NoTransactionSigningFactorInstance);
-        }
-
-        if tx_signing_factors
-            .iter()
-            .any(|f| f.get_key_kind() != CAP26KeyKind::TransactionSigning)
-        {
-            return Err(
-                CommonError::WrongKeyKindOfTransactionSigningFactorInstance,
-            );
-        }
-
-        let tx_signing_factor = tx_signing_factors.iter().next().unwrap();
-
-        if tx_signing_factors
-            .iter()
-            .any(|f| f.get_entity_kind() != tx_signing_factor.get_entity_kind())
-        {
-            return Err(CommonError::WrongEntityKindOfInFactorInstancesPath);
-        }
+        let index_agnostic_path = matrix_of_factors
+            .index_agnostic_path_of_all_tx_signing_factor_instances()?;
+        let entity_kind = index_agnostic_path.entity_kind;
+        matrix_of_factors.assert_has_entity_kind(entity_kind)?;
 
         if authentication_signing.get_key_kind()
             != CAP26KeyKind::AuthenticationSigning
@@ -70,9 +60,7 @@ impl SecurityStructureOfFactorInstances {
             );
         }
 
-        if authentication_signing.get_entity_kind()
-            != tx_signing_factor.get_entity_kind()
-        {
+        if authentication_signing.get_entity_kind() != entity_kind {
             return Err(CommonError::WrongEntityKindOfInFactorInstancesPath);
         }
 

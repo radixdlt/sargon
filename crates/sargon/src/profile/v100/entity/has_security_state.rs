@@ -19,14 +19,7 @@ pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
 }
 
 impl<T: HasSecurityState> HasFactorInstances for T {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
-        match self.security_state() {
-            EntitySecurityState::Securified { value } => {
-                value.unique_factor_instances()
-            }
-            EntitySecurityState::Unsecured { value } => {
-                value.unique_factor_instances()
-            }
-        }
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_state().unique_tx_signing_factor_instances()
     }
 }

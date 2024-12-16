@@ -294,7 +294,7 @@ impl Profile {
             .items()
             .into_iter()
             .map(Into::<AccountOrPersona>::into)
-            .map(|e| (e.clone(), e.unique_factor_instances()))
+            .map(|e| (e.clone(), e.unique_tx_signing_factor_instances()))
             .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
 
         let Some(duplicate_instances) = self
@@ -331,7 +331,7 @@ impl Profile {
     ) -> IndexMap<AccountOrPersona, IndexSet<FactorInstance>> {
         self.all_entities_on_all_networks()
             .into_iter()
-            .map(|e| (e.clone(), e.unique_factor_instances()))
+            .map(|e| (e.clone(), e.unique_tx_signing_factor_instances()))
             .collect()
     }
 
