@@ -648,7 +648,9 @@ mod transaction_preview_analysis_tests {
         assert_eq!(
             result,
             Err(CommonError::ReservedInstructionsNotAllowedInManifest {
-                reserved_instructions: "AccountLockFee".to_string()
+                reserved_instructions:
+                    "AccountLockFeeAccountUpdateOwnerKeysMetadataField"
+                        .to_string()
             })
         )
     }
@@ -707,7 +709,7 @@ mod transaction_preview_analysis_tests {
             )
             .await;
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             result,
             Ok(TransactionToReview {
                 transaction_manifest: manifest,
@@ -717,7 +719,7 @@ mod transaction_preview_analysis_tests {
                     [acc],
                     [],
                     [],
-                    [ReservedInstruction::AccountLockFee],
+                    [ReservedInstruction::AccountLockFee, ReservedInstruction::AccountUpdateOwnerKeysMetadataField],
                     [],
                     [],
                     [],

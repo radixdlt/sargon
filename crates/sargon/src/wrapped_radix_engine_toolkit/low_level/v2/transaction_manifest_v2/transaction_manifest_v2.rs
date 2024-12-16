@@ -470,6 +470,7 @@ DROP_AUTH_ZONE_PROOFS;
                 [AccountAddress::sample()],
                 [],
                 Vec::<_>::sample(),
+                [RetManifestClass::Transfer, RetManifestClass::General],
             )
         );
     }
@@ -518,6 +519,7 @@ DROP_AUTH_ZONE_PROOFS;
                 [a],
                 [],
                 Vec::<_>::sample(),
+                [RetManifestClass::Transfer, RetManifestClass::General],
             )
         );
     }
