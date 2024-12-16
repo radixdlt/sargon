@@ -114,6 +114,10 @@ impl BaseBaseIsFactorSource for PasswordFactorSource {
     fn name(&self) -> String {
         self.hint.label.clone()
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.hint.label = updated;
+    }
 }
 
 #[cfg(test)]
@@ -196,6 +200,9 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(SUT::sample().name(), "Password 1");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.name(), "Password 1");
+        sut.set_name("Password 2".to_string());
+        assert_eq!(sut.name(), "Password 2");
     }
 }

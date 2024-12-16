@@ -19,6 +19,7 @@ pub trait BaseBaseIsFactorSource {
     }
 
     fn name(&self) -> String;
+    fn set_name(&mut self, updated: String);
 
     fn category(&self) -> FactorSourceCategory {
         self.factor_source_kind().category()

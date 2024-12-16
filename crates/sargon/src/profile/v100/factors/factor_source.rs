@@ -116,6 +116,10 @@ impl BaseBaseIsFactorSource for FactorSource {
     fn name(&self) -> String {
         self.map_get(|v| v.name())
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.map_set(|v| v.set_name(updated.clone()));
+    }
 }
 
 impl Identifiable for FactorSource {
@@ -396,6 +400,13 @@ mod tests {
             SUT::sample_other().name(),
             LedgerHardwareWalletFactorSource::sample().name()
         )
+    }
+
+    #[test]
+    fn set_name() {
+        let mut sut = SUT::sample();
+        sut.set_name("new name".to_string());
+        assert_eq!(sut.name(), "new name");
     }
 
     #[test]

@@ -27,6 +27,9 @@ final class FactorSourceTests: FactorSourceTest<FactorSource> {
 	}
 
 	func test_name() {
-		XCTAssertEqual(SUT.sample.name, "My Phone")
+		var sut = SUT.sample
+		XCTAssertEqual(sut.name, "My Phone")
+		sut.setName("Updated name")
+		XCTAssertEqual(sut.name, "Updated name")
 	}
 }

@@ -66,6 +66,10 @@ impl BaseBaseIsFactorSource for DeviceFactorSource {
     fn name(&self) -> String {
         self.hint.label.clone()
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.hint.label = updated;
+    }
 }
 
 impl DeviceFactorSource {
@@ -317,6 +321,9 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(SUT::sample().name(), "My Phone");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.name(), "My Phone");
+        sut.set_name("My Old Phone".to_string());
+        assert_eq!(sut.name(), "My Old Phone");
     }
 }

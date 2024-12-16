@@ -102,6 +102,10 @@ impl BaseBaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn name(&self) -> String {
         self.hint.label.clone()
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.hint.label = updated
+    }
 }
 
 #[cfg(test)]
@@ -185,6 +189,9 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(SUT::sample().name(), "Orange, scratched");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.name(), "Orange, scratched");
+        sut.set_name("Old cracked".to_string());
+        assert_eq!(sut.name(), "Old cracked");
     }
 }
