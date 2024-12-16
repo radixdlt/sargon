@@ -24,6 +24,148 @@ pub enum EntitySecurityState {
     },
 }
 
+impl HasProvisionalSecurifiedConfig for EntitySecurityState {
+    fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
+        match self {
+            Self::Unsecured { value } => value.get_provisional(),
+            Self::Securified { value } => value.get_provisional(),
+        }
+    }
+
+    fn set_provisional_unchecked(
+        &mut self,
+        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+    ) {
+        match self {
+            Self::Unsecured { value } => {
+                value.set_provisional_unchecked(provisional)
+            }
+            Self::Securified { value } => {
+                value.set_provisional_unchecked(provisional)
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod has_provisional_securified_config_tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = EntitySecurityState;
+
+    fn set_provisional_is_err_when_provisional_is_tx_queued(sut: SUT) {
+        let mut clone = sut.clone();
+        let mut test = |x: ProvisionalSecurifiedConfig| {
+            assert!(clone.set_provisional(x).is_err());
+        };
+
+        test(ProvisionalSecurifiedConfig::ShieldSelected {
+            value: SecurityStructureID::sample(),
+        });
+        test(ProvisionalSecurifiedConfig::FactorInstancesDerived {
+            value: SecurityStructureOfFactorInstances::sample(),
+        });
+        test(ProvisionalSecurifiedConfig::TransactionQueued {
+            value: ProvisionalSecurifiedTransactionQueued::sample_other(),
+        });
+
+        assert_eq!(clone, sut); //  unchanged
+    }
+
+    #[test]
+    fn set_provisional_is_err_when_provisional_is_tx_queued_unsecured() {
+        let mut sut = SUT::from(UnsecuredEntityControl::sample());
+        sut.set_provisional(ProvisionalSecurifiedConfig::TransactionQueued {
+            value: ProvisionalSecurifiedTransactionQueued::sample(),
+        })
+        .unwrap();
+        set_provisional_is_err_when_provisional_is_tx_queued(sut);
+    }
+
+    #[test]
+    fn set_provisional_is_err_when_provisional_is_tx_queued_secured() {
+        let mut sut = SUT::from(SecuredEntityControl::sample());
+        sut.set_provisional(ProvisionalSecurifiedConfig::TransactionQueued {
+            value: ProvisionalSecurifiedTransactionQueued::sample(),
+        })
+        .unwrap();
+        set_provisional_is_err_when_provisional_is_tx_queued(sut);
+    }
+
+    #[test]
+    fn cancel_works_unsecured() {
+        let mut sut = SUT::from(UnsecuredEntityControl::sample());
+        sut.set_provisional(ProvisionalSecurifiedConfig::TransactionQueued {
+            value: ProvisionalSecurifiedTransactionQueued::sample(),
+        })
+        .unwrap();
+        assert!(sut.cancel_queued_transaction().is_ok());
+
+        assert!(sut.get_provisional().is_none()); // assert is cancelled
+        let new_state = ProvisionalSecurifiedConfig::ShieldSelected {
+            value: SecurityStructureID::sample(),
+        };
+        sut.set_provisional(new_state.clone()).unwrap();
+        assert_eq!(sut.get_provisional().unwrap(), new_state); // assert is set
+    }
+
+    #[test]
+    fn cancel_works_secured() {
+        let mut sut = SUT::from(SecuredEntityControl::sample());
+        sut.set_provisional(ProvisionalSecurifiedConfig::TransactionQueued {
+            value: ProvisionalSecurifiedTransactionQueued::sample(),
+        })
+        .unwrap();
+        assert!(sut.cancel_queued_transaction().is_ok());
+
+        assert!(sut.get_provisional().is_none()); // assert is cancelled
+        let new_state = ProvisionalSecurifiedConfig::ShieldSelected {
+            value: SecurityStructureID::sample(),
+        };
+        sut.set_provisional(new_state.clone()).unwrap();
+        assert_eq!(sut.get_provisional().unwrap(), new_state); // assert is set
+    }
+
+    #[test]
+    fn cancel_when_no_tx_queued_is_err_unsecured() {
+        let test = |x: Option<ProvisionalSecurifiedConfig>| {
+            let mut sut = SUT::from(UnsecuredEntityControl::sample());
+            sut.set_provisional(x).unwrap();
+            let clone = sut.clone();
+            assert!(sut.cancel_queued_transaction().is_err());
+            assert_eq!(clone, sut) // unchanged
+        };
+
+        test(None);
+        test(Some(ProvisionalSecurifiedConfig::ShieldSelected {
+            value: SecurityStructureID::sample(),
+        }));
+        test(Some(ProvisionalSecurifiedConfig::FactorInstancesDerived {
+            value: SecurityStructureOfFactorInstances::sample(),
+        }));
+    }
+
+    #[test]
+    fn cancel_when_no_tx_queued_is_err_secured() {
+        let test = |x: Option<ProvisionalSecurifiedConfig>| {
+            let mut sut = SUT::from(SecuredEntityControl::sample());
+            sut.set_provisional(x).unwrap();
+            let clone = sut.clone();
+            assert!(sut.cancel_queued_transaction().is_err());
+            assert_eq!(clone, sut) // unchanged
+        };
+
+        test(None);
+        test(Some(ProvisionalSecurifiedConfig::ShieldSelected {
+            value: SecurityStructureID::sample(),
+        }));
+        test(Some(ProvisionalSecurifiedConfig::FactorInstancesDerived {
+            value: SecurityStructureOfFactorInstances::sample(),
+        }));
+    }
+}
+
 impl<'de> Deserialize<'de> for EntitySecurityState {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(

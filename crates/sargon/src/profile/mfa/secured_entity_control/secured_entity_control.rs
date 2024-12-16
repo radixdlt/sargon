@@ -55,8 +55,9 @@ pub trait HasProvisionalSecurifiedConfig {
     /// this type
     fn set_provisional(
         &mut self,
-        provisional: Option<ProvisionalSecurifiedConfig>,
+        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
     ) -> Result<()> {
+        let provisional = provisional.into();
         if let Some(ProvisionalSecurifiedConfig::TransactionQueued {
             value: _,
         }) = self.get_provisional().as_ref()

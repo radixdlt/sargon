@@ -16,6 +16,20 @@ pub struct UnsecuredEntityControl {
     pub provisional: Option<ProvisionalSecurifiedConfig>,
 }
 
+impl HasProvisionalSecurifiedConfig for UnsecuredEntityControl {
+    fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
+        self.provisional.clone()
+    }
+
+    fn set_provisional_unchecked(
+        &mut self,
+        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+    ) {
+        self.provisional = provisional.into();
+    }
+}
+
+
 impl HasFactorInstances for UnsecuredEntityControl {
     fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
         IndexSet::just(self.transaction_signing.factor_instance())
