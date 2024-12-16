@@ -7,11 +7,13 @@ extension BIOS {
 	public static func test(
 		bundle: Bundle = .main,
 		userDefaultsSuite: String = "Test",
+		unsafeStorageKeyMapping: UnsafeStorageKeyMapping = [:],
 		secureStorageDriver: SecureStorageDriver
 	) -> BIOS {
 		BIOS(
 			bundle: bundle,
 			userDefaultsSuite: userDefaultsSuite,
+			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver
 		)
 	}

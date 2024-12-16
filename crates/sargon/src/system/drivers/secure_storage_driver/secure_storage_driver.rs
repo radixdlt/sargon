@@ -14,4 +14,9 @@ pub trait SecureStorageDriver: Send + Sync + std::fmt::Debug {
     ) -> Result<()>;
 
     async fn delete_data_for_key(&self, key: SecureStorageKey) -> Result<()>;
+
+    async fn contains_data_for_key(
+        &self,
+        key: SecureStorageKey,
+    ) -> Result<bool>;
 }

@@ -18,10 +18,12 @@ import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.remove
 import com.radixdlt.sargon.os.storage.write
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 internal class DeviceFactorSourceMnemonicKeyMapping(
-    private val key: SecureStorageKey.DeviceFactorSourceMnemonic,
+    key: SecureStorageKey.DeviceFactorSourceMnemonic,
     private val encryptedStorage: DataStore<Preferences>,
     private val biometricAuthorizationDriver: BiometricAuthorizationDriver
 ): DatastoreKeyMapping {
@@ -55,4 +57,10 @@ internal class DeviceFactorSourceMnemonicKeyMapping(
     }
 
     override suspend fun remove(): Result<Unit> = encryptedStorage.remove(key = preferencesKey)
+
+    override suspend fun keyExist(): Boolean {
+        return encryptedStorage.data.map { preference ->
+            preference.contains(preferencesKey)
+        }.first()
+    }
 }

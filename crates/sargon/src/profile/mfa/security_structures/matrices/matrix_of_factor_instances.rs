@@ -11,6 +11,13 @@ impl MatrixOfFactorInstances {
 }
 pub trait HasFactorInstances {
     fn unique_factor_instances(&self) -> IndexSet<FactorInstance>;
+
+    /// Returns whether the entity is linked to the given factor source.
+    fn is_linked_to_factor_source(&self, factor_source: FactorSource) -> bool {
+        self.unique_factor_instances().iter().any(|factor| {
+            factor.factor_source_id == factor_source.factor_source_id()
+        })
+    }
 }
 
 pub trait HasFactorSourceKindObjectSafe {

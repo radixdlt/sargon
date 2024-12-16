@@ -10,11 +10,13 @@ extension BIOS {
 	public convenience init(
 		bundle: Bundle,
 		userDefaultsSuite: String,
+		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
 		secureStorageDriver: SecureStorageDriver
 	) {
 		let drivers = Drivers(
 			bundle: bundle,
 			userDefaultsSuite: userDefaultsSuite,
+			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver
 		)
 		// https://en.wikipedia.org/wiki/Power-on_self-test

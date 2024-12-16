@@ -25,5 +25,9 @@ extension Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage: SecureStorag
 	public func deleteDataForKey(key: SecureStorageKey) async throws {
 		dictionary.removeValue(forKey: key)
 	}
+
+	public func containsDataForKey(key: SecureStorageKey) async throws -> Bool {
+		dictionary.keys.contains(key)
+	}
 }
 #endif

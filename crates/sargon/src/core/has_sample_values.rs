@@ -88,6 +88,23 @@ where
     }
 }
 
+impl<T> HasSampleValues for IndexSet<T>
+where
+    T: HasSampleValues + Eq + std::hash::Hash,
+{
+    fn sample() -> Self {
+        let mut set = Self::new();
+        set.insert(T::sample());
+        set
+    }
+
+    fn sample_other() -> Self {
+        let mut set = Self::new();
+        set.insert(T::sample_other());
+        set
+    }
+}
+
 impl<T> HasSampleValues for Option<T>
 where
     T: HasSampleValues,

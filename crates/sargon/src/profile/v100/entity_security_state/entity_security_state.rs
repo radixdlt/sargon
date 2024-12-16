@@ -284,6 +284,19 @@ impl HasSampleValues for EntitySecurityState {
     }
 }
 
+impl HasFactorInstances for EntitySecurityState {
+    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+        match self {
+            EntitySecurityState::Unsecured { value } => {
+                value.unique_factor_instances()
+            }
+            EntitySecurityState::Securified { value } => {
+                value.unique_factor_instances()
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -686,6 +699,27 @@ mod tests {
               }
             }
             "#,
+        );
+    }
+
+    #[test]
+    fn unique_factor_instances() {
+        let unsecured = UnsecuredEntityControl::sample();
+        let sut = SUT::Unsecured {
+            value: unsecured.clone(),
+        };
+        assert_eq!(
+            sut.unique_factor_instances(),
+            unsecured.unique_factor_instances()
+        );
+
+        let secured = SecuredEntityControl::sample();
+        let sut = SUT::Securified {
+            value: secured.clone(),
+        };
+        assert_eq!(
+            sut.unique_factor_instances(),
+            secured.unique_factor_instances()
         );
     }
 }

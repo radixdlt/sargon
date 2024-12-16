@@ -10,6 +10,7 @@ import com.radixdlt.sargon.extensions.identifier
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.extensions.toByteArray
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
+import com.radixdlt.sargon.os.storage.keyExist
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.remove
 import com.radixdlt.sargon.os.storage.write
@@ -73,6 +74,11 @@ internal class ByteArrayKeyMapping private constructor(
     override suspend fun remove(): Result<Unit> = when (input) {
         is ByteArrayKeyMappingInput.Secure -> input.storage.remove(preferencesKey)
         is ByteArrayKeyMappingInput.Unsecure -> input.storage.remove(preferencesKey)
+    }
+
+    override suspend fun keyExist(): Boolean = when (input) {
+        is ByteArrayKeyMappingInput.Secure -> input.storage.keyExist(preferencesKey)
+        is ByteArrayKeyMappingInput.Unsecure -> input.storage.keyExist(preferencesKey)
     }
 
     private sealed interface ByteArrayKeyMappingInput {
