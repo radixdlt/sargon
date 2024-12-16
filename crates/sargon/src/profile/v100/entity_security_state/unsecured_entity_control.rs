@@ -29,7 +29,6 @@ impl HasProvisionalSecurifiedConfig for UnsecuredEntityControl {
     }
 }
 
-
 impl HasFactorInstances for UnsecuredEntityControl {
     fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
         IndexSet::just(self.transaction_signing.factor_instance())

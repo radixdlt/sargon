@@ -840,9 +840,12 @@ pub enum CommonError {
     #[error("SecurityEntityControl has no QueuedTransaction, unable to mark it as cancelled")]
     SecurityEntityControlHasNoProvisionallyQueuedTransaction = 10236,
 
+    #[error("SecurityEntityControl has derived instances, which would be lost if discarded. Implement a way to put them back in the cache.")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyDerivedInstances = 10237,
+
     #[error("SecurityEntityControl has QueuedTransaction, unable override it, use `cancel_queued_transaction`")]
     SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction =
-        10237,
+        10238,
 }
 
 #[uniffi::export]

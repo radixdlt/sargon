@@ -58,13 +58,30 @@ pub trait HasProvisionalSecurifiedConfig {
         provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
     ) -> Result<()> {
         let provisional = provisional.into();
-        if let Some(ProvisionalSecurifiedConfig::TransactionQueued {
-            value: _,
-        }) = self.get_provisional().as_ref()
-        {
-            Err(CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction)
-        } else {
-            self.set_provisional_unchecked_ok(provisional)
+        let maybe_existing = self.get_provisional();
+        let Some(existing) = maybe_existing.as_ref() else {
+            return self.set_provisional_unchecked_ok(provisional);
+        };
+        match existing {
+            ProvisionalSecurifiedConfig::FactorInstancesDerived { value: _ } => {
+                if let Some(new) = provisional.as_ref() {
+                    if new.is_transaction_queued() {
+                        // We allow `FactorInstancesDerived` -> `TransactionQueued` transition ofc...
+                        return self.set_provisional_unchecked_ok(provisional);
+                    }
+                }
+                // We have already consumed FactorInstances from the FactorInstancesCache.
+                // We currently do not have a way of putting these back. We don't want to 
+                // create gaps if we can. Wallet Features might change, to REQUIRE us to
+                // allow this, if so we can change this - allowing transition from 
+                // `FactorInstancesDerived` to Non-TransactionQueued state.
+                Err(
+                CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyDerivedInstances,
+            )},
+            ProvisionalSecurifiedConfig::TransactionQueued { value: _ } => {
+                Err(CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction)
+            }
+            _ => self.set_provisional_unchecked_ok(provisional),
         }
     }
     /// Call this once you have cancelled the queued transaction from the transaction queue,
